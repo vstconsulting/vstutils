@@ -1,0 +1,69 @@
+# set to local images because too long execution
+image: onegreyonewhite/tox:tox
+
+
+variables:
+  GET_SOURCES_ATTEMPTS: 3
+  ARTIFACT_DOWNLOAD_ATTEMPTS: 3
+  RESTORE_CACHE_ATTEMPTS: 3
+  DJANGO_LOG_LEVEL: 'CRITICAL'
+
+cache:
+  paths:
+    - .tox/
+
+
+stages:
+  - code_standarts
+  - test
+  - release
+
+
+.branch_tests_template: &branch_tests
+  stage: test
+  image: onegreyonewhite/tox:tox
+  variables:
+    TOX_ENVS: "flake,pylint,py27-django-install,py35-django-install,py36-django-install"
+  script:
+   - tox -e $TOX_ENVS
+   - coverage html
+  artifacts:
+    name: "coverage_branch(${CI_BUILD_REF_NAME})_${CI_BUILD_ID}"
+    expire_in: 1 hour
+    paths:
+    - htmlcov/
+    - dist/
+  retry: 2
+
+code_style:
+  <<: *branch_tests
+  stage: code_standarts
+  variables:
+    TOX_ENVS: "flake,pylint"
+
+
+py27-django111-coverage:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+
+py35-django111-coverage:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+
+py36-django111-coverage:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+
+
+release_pypi:
+  stage: release
+  only:
+   - tags
+  script:
+   - python2 setup.py sdist
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+  allow_failure: true
+  when: manual
