@@ -16,8 +16,8 @@ class VSTUtilsTEstCase(BaseTestCase):
         # API
         self.assertEqual(list(self.get_result('get', '/api/').keys()), ['v1'])
         self.assertEqual(
-            list(self.get_result('get', '/api/v1/').keys()),
-            list(settings.API[settings.VST_API_VERSION].keys())
+            list(self.get_result('get', '/api/v1/').keys()).sort(),
+            list(settings.API[settings.VST_API_VERSION].keys()).sort()
         )
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
