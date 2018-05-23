@@ -1,0 +1,12 @@
+*.pyc
+*.c
+__pycache__
+.tox
+.coverage
+coverage.xml
+htmlcov
+build
+*egg-info
+dist
+pylint_*
+.idea/*

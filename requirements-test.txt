@@ -1,0 +1,2 @@
+# Packages needed for test
+coverage<=4.3.4

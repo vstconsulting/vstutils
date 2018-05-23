@@ -1,0 +1,21 @@
+[run]
+omit =
+    .tox/*
+    */main/management/daemon.py
+    */*/migrations/*
+    */main/wsgi.py
+    */manage.py
+    *ihsctl
+    *setup.py
+    test.py
+    upload_big.py
+    vstutils/__init__.py
+    vstutils/__main__.py
+    vstutils/wsgi.py
+    vstutils/compile.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    nocv
+    noce

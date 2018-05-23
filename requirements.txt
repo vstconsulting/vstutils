@@ -1,0 +1,11 @@
+# Main packages
+configparser==3.5.0
+six
+
+# Django packages
+djangorestframework==3.8.2
+django-filter
+django-crispy-forms
+
+# Packaging
+cython>=0.25.2
