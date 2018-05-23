@@ -1,7 +1,8 @@
+# pylint: disable=django-not-available
 import os
 import sys
 
-default_settings = {
+_default_settings = {
     # vstutils settings for generate settings
     "VST_PROJECT": "vstutils",
     'VST_DEV_SETTINGS': 'settings.ini',
@@ -10,7 +11,7 @@ default_settings = {
 }
 
 
-def prepare_environment(default_settings=default_settings, **kwargs):
+def prepare_environment(default_settings=_default_settings, **kwargs):
     # pylint: disable=unused-argument
     '''
     Prepare ENV for web-application
@@ -37,6 +38,7 @@ def cmd_execution(*args, **kwargs):
 
 
 def get_celery_app(name, **kwargs):  # nocv
+    # pylint: disable=import-error
     '''
     Function to return celery-app. Works only if celery installed.
     :param name: Application name

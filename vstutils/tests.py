@@ -1,3 +1,4 @@
+# pylint: disable=unused-import
 from __future__ import unicode_literals
 import json  # noqa: F401
 import random
@@ -146,8 +147,8 @@ class BaseTestCase(TestCase):
             result = self.get_result("post", url, 201, data=json.dumps(dt))
             self.assertTrue(isinstance(result, dict))
             for field in fields:
-                s = "[~~ENCRYPTED~~]"
-                if field == "vars" and s in result['vars'].values():
+                st = "[~~ENCRYPTED~~]"
+                if field == "vars" and st in result['vars'].values():
                     pass  # nocv
                 else:
                     self.assertEqual(result[field], data[counter][field])

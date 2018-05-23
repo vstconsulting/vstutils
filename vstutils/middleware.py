@@ -11,6 +11,7 @@ class BaseMiddleware(object):
         super(BaseMiddleware, self).__init__()
 
     def handler(self, request, response):  # nocv
+        # pylint: disable=unused-argument
         return response
 
     def __call__(self, request):

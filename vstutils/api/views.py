@@ -1,3 +1,4 @@
+# pylint: disable=unused-argument
 from collections import OrderedDict
 import json
 from django.conf import settings

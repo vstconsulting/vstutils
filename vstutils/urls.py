@@ -3,9 +3,8 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf.urls.static import static
-
-from .gui import views
 from rest_framework import permissions
+from .gui import views
 from .api.routers import MainRouter
 
 # Main router for all APIs versions
@@ -28,7 +27,7 @@ urlpatterns = [
     url(r'^$', admin.site.urls),
 ]
 
-urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls)),]
+urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls)), ]
 if getattr(settings, "APACHE", False):  # nocv
     urlpatterns += static(settings.STATIC_URL,
                           document_root=settings.STATIC_ROOT)

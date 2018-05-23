@@ -7,7 +7,6 @@ from rest_framework import serializers, exceptions
 
 class UserSerializer(serializers.ModelSerializer):
 
-
     class UserExist(exceptions.ValidationError):
         status_code = 409
 
@@ -83,4 +82,3 @@ class OneUserSerializer(UserSerializer):
                   'url',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
-

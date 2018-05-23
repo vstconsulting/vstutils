@@ -1,16 +1,15 @@
+# pylint: disable=django-not-available
 import os
 
 from setuptools import find_packages, setup
 from setuptools.extension import Extension
 from setuptools.command.sdist import sdist as _sdist
 try:
-    from Cython.Distutils import build_ext as _build_ext
     from Cython.Build import cythonize
 except ImportError:
     has_cython = False
 else:
     has_cython = True
-
 
 
 def get_discription(file_path='README.rst'):
@@ -46,7 +45,6 @@ def make_extensions(extensions_list):
     if has_cython:
         return cythonize(ext_modules, nthreads=nthreads, force=True), extensions_dict
     return ext_modules, extensions_dict
-
 
 
 class _Compile(_sdist):

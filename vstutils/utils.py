@@ -1,3 +1,4 @@
+# pylint: disable=django-not-available
 def import_class(path):
     '''
     Get class from string-path

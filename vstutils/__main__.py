@@ -1,3 +1,4 @@
+# pylint: disable=django-not-available
 from vstutils.environment import cmd_execution, sys, os
 
 args = list(sys.argv)
