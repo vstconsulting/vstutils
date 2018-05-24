@@ -37,7 +37,7 @@ def cmd_execution(*args, **kwargs):
     execute_from_command_line(args or sys.argv)
 
 
-def get_celery_app(name, **kwargs):  # nocv
+def get_celery_app(name=None, **kwargs):  # nocv
     # pylint: disable=import-error
     '''
     Function to return celery-app. Works only if celery installed.
@@ -47,6 +47,7 @@ def get_celery_app(name, **kwargs):  # nocv
     '''
     from celery import Celery
     prepare_environment(**kwargs)
+    name = name or os.getenv("VST_PROJECT")
     celery_app = Celery(name)
     celery_app.config_from_object('django.conf:settings', namespace='CELERY')
     celery_app.autodiscover_tasks()

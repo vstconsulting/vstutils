@@ -10,6 +10,7 @@ from django.db.models.query import QuerySet
 from rest_framework.reverse import reverse
 from rest_framework import viewsets, views as rest_views, exceptions, status
 from rest_framework.response import Response as RestResponse
+from rest_framework.decorators import action
 
 _ResponseClass = namedtuple("ResponseData", [
     "data", "status"
@@ -135,6 +136,18 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         serializer = serializer_class(queryset, many=True, **kwargs)
         return RestResponse(serializer.data)
 
+    @action(methods=["post"], detail=False)
+    def filter(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        queryset = queryset.filter(**request.data.get("filter", {}))
+        queryset = queryset.exclude(**request.data.get("exclude", {}))
+
+        return self.get_paginated_route_response(
+            queryset=queryset,
+            serializer_class=self.get_serializer_class(),
+            context=self.get_serializer_context()
+        )
+
 
 class ModelViewSetSet(GenericViewSet, viewsets.ModelViewSet):
     pass
@@ -170,3 +183,14 @@ class ListNonModelViewSet(NonModelsViewSet,
             for method in self.methods
         }
         return Response(routes, 200).resp
+
+
+class ReadOnlyModelViewSet(GenericViewSet,
+                           viewsets.ReadOnlyModelViewSet):
+    pass
+
+
+class HistoryModelViewSet(GenericViewSet,
+                          viewsets.ReadOnlyModelViewSet,
+                          viewsets.mixins.DestroyModelMixin):
+    pass

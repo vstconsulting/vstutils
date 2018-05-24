@@ -113,6 +113,11 @@ class VSTUtilsTEstCase(BaseTestCase):
         self.assertCount(users_id, result['count'])
         result = self.get_result('get', '/api/v1/users/?username__not=USER')
         self.assertEqual(result['count'], 3)
+        filter_data = json.dumps(dict(exclude=dict(username__contains="USER")))
+        result = self.get_result(
+            'post', '/api/v1/users/filter/', code=200, data=filter_data
+        )
+        self.assertEqual(result['count'], 3)
 
     def test_bulk(self):
         self.get_model_filter(

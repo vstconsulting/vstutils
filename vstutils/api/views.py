@@ -4,7 +4,6 @@ import json
 from django.conf import settings
 from django.test import Client
 from django.db import transaction
-from rest_framework.decorators import action
 from . import base, serializers, permissions, filters
 
 
@@ -43,7 +42,7 @@ class UserViewSet(base.ModelViewSetSet):
 class SettingsViewSet(base.ListNonModelViewSet):
     base_name = "settings"
 
-    @action(methods=['get'], detail=False)
+    @base.action(methods=['get'], detail=False)
     def localization(self, request):
         return base.Response({
             "LANGUAGE_CODE": settings.LANGUAGE_CODE,
@@ -54,7 +53,7 @@ class SettingsViewSet(base.ListNonModelViewSet):
             "USE_TZ": settings.USE_TZ
         }, 200).resp
 
-    @action(methods=['get'], detail=False)
+    @base.action(methods=['get'], detail=False)
     def system(self, request):
         return base.Response({
             "PY": settings.PY_VER,
@@ -69,11 +68,23 @@ class BulkViewSet(base.rest_views.APIView):
 
     op_types = settings.BULK_OPERATION_TYPES
     type_to_bulk = {}
-    allowed_types = {
-        view: data.get('op_types', settings.BULK_OPERATION_TYPES.keys())
-        for view, data in settings.API[settings.VST_API_VERSION].items()
-        if data.get('type', None) != 'view'
-    }
+
+    @property
+    def allowed_types(self):
+        _allowed_types_default = {
+            view: data.get('op_types', settings.BULK_OPERATION_TYPES.keys())
+            for view, data in settings.API[settings.VST_API_VERSION].items()
+            if data.get('type', None) != 'view'
+        }
+        _allowed_types_typed = {
+            name: _allowed_types_default[view]
+            for name, view in self.type_to_bulk.items()
+            if _allowed_types_default.get(view, False)
+        }
+        allowed_types = OrderedDict()
+        allowed_types.update(_allowed_types_default)
+        allowed_types.update(_allowed_types_typed)
+        return allowed_types
 
     def _check_type(self, op_type, item):
         allowed_types = self.allowed_types.get(item, [])
