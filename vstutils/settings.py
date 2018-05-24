@@ -6,26 +6,31 @@ from configparser import ConfigParser, NoSectionError, NoOptionError
 from . import __version__ as VSTUTILS_VERSION
 
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
-ENV_NAME = VST_PROJECT.upper()
+VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
+ENV_NAME = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
 vst_project_module = __import__(VST_PROJECT)
-PROJECT_VERSION = getattr(vst_project_module, '__version__', VSTUTILS_VERSION)
+vst_lib_module = __import__(VST_PROJECT_LIB) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
+PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
+PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
 
 PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
-BASE_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
-__kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR)
+BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
+VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
+__kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR, PROG=VST_PROJECT_DIR)
+KWARGS = __kwargs
 
 DEV_SETTINGS_FILE = os.getenv("{}_DEV_SETTINGS_FILE".format(ENV_NAME),
                               os.path.join(BASE_DIR, os.getenv("VST_DEV_SETTINGS")))
 CONFIG_FILE = os.getenv(
     "{}_SETTINGS_FILE".format(ENV_NAME),
-    "/etc/{}/settings.ini".format(VST_PROJECT)
+    "/etc/{}/settings.ini".format(VST_PROJECT_LIB)
 )
 config = ConfigParser()
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
 
 SECRET_FILE = os.getenv(
-    "{}_SECRET_FILE".format(ENV_NAME), "/etc/{}/secret".format(VST_PROJECT)
+    "{}_SECRET_FILE".format(ENV_NAME), "/etc/{}/secret".format(VST_PROJECT_LIB)
 )
 SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
 try:
@@ -109,6 +114,9 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'api/templates'),
             os.path.join(BASE_DIR, 'gui/templates'),
             os.path.join(BASE_DIR, 'templates'),
+            os.path.join(VST_PROJECT_DIR, 'api/templates'),
+            os.path.join(VST_PROJECT_DIR, 'gui/templates'),
+            os.path.join(VST_PROJECT_DIR, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -117,6 +125,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'vstutils.gui.context.settings_constants',
+                'vstutils.gui.context.project_args',
             ],
         },
     },
@@ -127,7 +137,7 @@ WSGI_APPLICATION = "{}.application".format(WSGI)
 
 
 try:
-    __DB_SETTINGS = {k.upper():v.format(**__kwargs) for k,v in config.items('database')}
+    __DB_SETTINGS = {k.upper():v.format(**KWARGS) for k,v in config.items('database')}
     if not __DB_SETTINGS: raise NoSectionError('database')
 except NoSectionError:  # nocv
     __DB_SETTINGS = {
@@ -142,7 +152,7 @@ try:
         if k in int_values_types: #nocv
             __DB_OPTIONS[k] = int(float(v))
             continue
-        __DB_OPTIONS[k] = v.format(**__kwargs)  # nocv
+        __DB_OPTIONS[k] = v.format(**KWARGS)  # nocv
     if not __DB_OPTIONS: raise NoSectionError('database.options')
 except NoSectionError:  # nocv
     __DB_OPTIONS = {}
@@ -257,7 +267,7 @@ DOCS_ACCESS = 'public'
 DOC_URL = "/docs/"
 
 # Celery settings
-__broker_url = config.get("rpc", "connection", fallback="filesystem:///var/tmp").format(**__kwargs)
+__broker_url = config.get("rpc", "connection", fallback="filesystem:///var/tmp").format(**KWARGS)
 if __broker_url.startswith("filesystem://"):
     __broker_folder = __broker_url.split("://", 1)[1]
     CELERY_BROKER_URL = "filesystem://"
@@ -269,7 +279,7 @@ if __broker_url.startswith("filesystem://"):
 else:
     CELERY_BROKER_URL = __broker_url  # nocv
 
-CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tmp").format(**__kwargs)
+CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tmp").format(**KWARGS)
 CELERY_WORKER_CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
@@ -319,7 +329,7 @@ SILENCED_SYSTEM_CHECKS = ['fields.W342', 'urls.W001', '1_10.W001',
                           "fields.W340", "urls.W005"]
 
 try:
-    __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**__kwargs) for k, v in config.items('cache')}
+    __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('cache')}
     if not __CACHE_DEFAULT_SETTINGS: raise NoSectionError('cache')
 except NoSectionError:
     __CACHE_DEFAULT_SETTINGS = {
@@ -328,7 +338,7 @@ except NoSectionError:
     }
 
 try:
-    __CACHE_LOCKS_SETTINGS = {k.upper():v.format(**__kwargs) for k, v in config.items('locks')}
+    __CACHE_LOCKS_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('locks')}
     if not __CACHE_LOCKS_SETTINGS: raise NoSectionError('locks')
 except NoSectionError:
     __CACHE_LOCKS_SETTINGS = {

@@ -1,4 +1,3 @@
-from vstutils import __version__ as vstutils_version
 from vstutils.compile import load_requirements, make_setup, os, find_packages
 
 

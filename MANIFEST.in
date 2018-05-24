@@ -1,4 +1,4 @@
-include README.rst
+include README.rst LICENSE
 include vstutils/settings.ini
 include requirements.txt
 include requirements-git.txt
