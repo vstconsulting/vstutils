@@ -34,6 +34,8 @@ def cmd_execution(*args, **kwargs):
     '''
     from django.core.management import execute_from_command_line
     prepare_environment(**kwargs)
+    args = list(sys.argv)
+    args[0] = os.getenv("VST_CTL_SCRIPT", sys.argv[0])
     execute_from_command_line(args or sys.argv)
 
 
