@@ -12,6 +12,7 @@ vst_project_module = __import__(VST_PROJECT)
 vst_lib_module = __import__(VST_PROJECT_LIB) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
 PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
 PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
+PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME)
 
 PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
@@ -57,10 +58,10 @@ except ImportError:
     pass
 
 # :docs:
-has_docs = False
+HAS_DOCS = False
 try:
     import docs
-    has_docs = True  # nocv
+    HAS_DOCS = True  # nocv
 except ImportError:
     pass
 
@@ -80,7 +81,7 @@ INSTALLED_APPS += [
     'rest_framework.authtoken',
     'django_filters',
 ]
-INSTALLED_APPS += ['docs'] if has_docs else []
+INSTALLED_APPS += ['docs'] if HAS_DOCS else []
 
 try:
     import mod_wsgi
