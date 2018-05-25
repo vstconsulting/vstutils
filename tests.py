@@ -1,11 +1,90 @@
 from vstutils.tests import BaseTestCase, json, settings
 from vstutils.urls import router
 from vstutils.api.views import UserViewSet
+from vstutils import utils
+
+test_config = '''
+[main]
+test_key = test_value
+
+'''
 
 
-class VSTUtilsTEstCase(BaseTestCase):
+class VSTUtilsTestCase(BaseTestCase):
     def setUp(self):
-        super(VSTUtilsTEstCase, self).setUp()
+        super(VSTUtilsTestCase, self).setUp()
+
+    def test_paginator(self):
+        qs = self.get_model_filter('django.contrib.auth.models.User').order_by('email')
+        for _ in utils.Paginator(qs, chunk_size=1).items():
+            pass
+
+    def test_render_and_file(self):
+        config_dict = dict(config=dict(main=dict(test_key="test_value")))
+        ini = utils.get_render('configs/config.ini', config_dict)
+        with utils.tmp_file_context(ini, delete=False) as file:
+            file_name = file.name
+            file.write('\n')
+            with open(file_name, 'r') as tmp_file:
+                self.assertEqual(tmp_file.read(), test_config)
+        try:
+            self.assertFalse(utils.os.path.exists(file_name))
+        except AssertionError:
+            utils.os.remove(file_name)
+        try:
+            with utils.tmp_file(ini) as file:
+                file_name = file.name
+                file.write('\n')
+                with open(file_name, 'r') as tmp_file:
+                    self.assertEqual(tmp_file.read(), test_config)
+                raise Exception('Normal')
+        except AssertionError:
+            raise
+        except Exception:
+            pass
+
+    def test_kvexchanger(self):
+        utils.KVExchanger("somekey").send(True, 10)
+        utils.KVExchanger("somekey").prolong()
+        self.assertTrue(utils.KVExchanger("somekey").get())
+
+    def test_locks(self):
+        @utils.model_lock_decorator()
+        def method(pk):
+            # pylint: disable=unused-argument
+            pass
+
+        @utils.model_lock_decorator()
+        def method2(pk):
+            method(pk=pk)
+
+        method(pk=123)
+        method(pk=None)
+        with self.assertRaises(utils.Lock.AcquireLockException):
+            method2(pk=123)
+
+    def test_raise_context(self):
+        class SomeEx(KeyError):
+            pass
+
+        @utils.exception_with_traceback()
+        def ex_method(ex=Exception('Valid ex')):
+            raise ex
+
+        with self.assertRaises(SomeEx) as exc:
+            ex_method(SomeEx())
+
+        self.assertTrue(getattr(exc.exception, 'traceback', False))
+        with utils.raise_context(TypeError):
+            ex_method(SomeEx())
+
+        @utils.raise_context(SomeEx, exclude=Exception)
+        def ex_method(ex=Exception('Valid ex')):
+            raise ex
+
+        ex_method(SomeEx())
+        with self.assertRaises(Exception):
+            ex_method()
 
     def test_main_views(self):
         # Main

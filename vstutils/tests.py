@@ -67,17 +67,25 @@ class BaseTestCase(TestCase):
     def _logout(self, client):
         self.assertEqual(client.get(self.logout_url).status_code, 302)
 
+    def __get_rendered(self, response):
+        try:
+            rendered_content = (
+                    getattr(response, "rendered_content", False) or response.content
+            )
+            if getattr(rendered_content, 'decode', False):
+                rendered_content = str(rendered_content.decode('utf-8'))
+            try:
+                return json.loads(rendered_content)
+            except:
+                return str(rendered_content)
+        except ValueError:  # nocv
+            return None
+
     @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, *args, **kwargs)
         self.assertRCode(response, code)
-        try:
-            return json.loads(response.rendered_content.decode()) \
-                if (response.status_code != 404 and
-                    getattr(response, "rendered_content", False)) \
-                else str(response.content.decode('utf-8'))
-        except ValueError:  # nocv
-            return None
+        return self.__get_rendered(response)
 
     def assertCount(self, list, count):
         self.assertEqual(len(list), count)
@@ -91,10 +99,7 @@ class BaseTestCase(TestCase):
         '''
         err_msg = "{} != {}\n{}\n{}".format(
             resp.status_code, code,
-            resp.rendered_content.decode()
-            if (resp.status_code != 404 and
-                getattr(resp, "rendered_content", False))
-            else resp.content,
+            self.__get_rendered(resp),
             self.user
         )
         self.assertEqual(resp.status_code, code, err_msg)
