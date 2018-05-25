@@ -1,4 +1,4 @@
-# pylint: disable=django-not-available
+# pylint: disable=django-not-available,unused-import
 import os
 
 from setuptools import find_packages, setup
@@ -13,7 +13,7 @@ else:
 
 try:
     from sphinx.setup_command import BuildDoc
-    import sphinx
+    import sphinx  # noqa: F401
     has_sphinx = True
 except ImportError:
     has_sphinx = False

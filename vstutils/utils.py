@@ -1,4 +1,4 @@
-# pylint: disable=django-not-available
+# pylint: disable=django-not-available,invalid-name
 from __future__ import unicode_literals
 import os
 import sys
@@ -12,6 +12,7 @@ from django.template import loader
 from django.utils import translation
 from django.core.paginator import Paginator as BasePaginator
 from django.core.cache import caches, InvalidCacheBackendError
+from . import exceptions as ex
 
 
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
@@ -245,8 +246,6 @@ class model_lock_decorator(__LockAbstractDecorator):
         return super(model_lock_decorator, self).execute(func, *args, **kwargs)
 
 
-
-
 class assertRaises(object):
     '''
     Context for exclude rises
@@ -329,3 +328,158 @@ class Paginator(BasePaginator):
                 obj.paginator = self
                 obj.page = page
                 yield obj
+
+
+class ClassPropertyDescriptor(object):
+
+    def __init__(self, fget, fset=None):
+        self.fget = fget
+        self.fset = fset
+
+    def __get__(self, obj, klass=None):
+        if obj is not None:
+            return self.fget.__get__(obj, obj)()
+        if klass is None:
+            klass = type(obj)  # noce
+        return self.fget.__get__(obj, klass)()
+
+    def __set__(self, obj, value):  # noce
+        if not self.fset:
+            raise AttributeError("can't set attribute")
+        if obj is not None:
+            return self.fset.__get__(obj, obj)(value)
+        type_ = type(obj)
+        return self.fset.__get__(obj, type_)(value)
+
+    def setter(self, func):  # noce
+        if not isinstance(func, (classmethod, staticmethod)):
+            func = classmethod(func)
+        self.fset = func
+        return self
+
+
+def classproperty(func):
+    if not isinstance(func, (classmethod, staticmethod)):
+        func = classmethod(func)
+    return ClassPropertyDescriptor(func)
+
+
+class redirect_stdany(object):
+    '''
+    Context for redirect any output to own stream.
+
+    .. note::
+        - On context return stream object.
+        - On exit return old streams
+    '''
+    _streams = ["stdout", "stderr"]
+
+    def __init__(self, new_stream=six.StringIO(), streams=None):
+        '''
+        :param new_stream: -- stream where redirects all
+        :type new_stream: object
+        :param streams: -- names of streams like ``['stdout', 'stderr']``
+        :type streams: list
+        '''
+        self._streams = streams or self._streams
+        self.stream = new_stream
+        self._old_streams = {}
+
+    def __enter__(self):
+        for stream in self._streams:
+            self._old_streams[stream] = getattr(sys, stream)
+            setattr(sys, stream, self.stream)
+        return self.stream
+
+    def __exit__(self, exctype, excinst, exctb):
+        for stream in self._streams:
+            setattr(sys, stream, self._old_streams.pop(stream))
+
+
+class ModelHandlers(object):
+    '''
+    Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
+    All handlers backends get by first argument model object.
+
+    **Attributes**:
+
+    :param objects: -- dict of objects like: ``{<name>: <backend_class>}``
+    :type objects: dict
+    :param keys: -- names of supported backends
+    :type keys: list
+    :param values: -- supported backends classes
+    :type values: list
+
+    '''
+    def __init__(self, tp, err_message=None):
+        '''
+        :param tp: -- type name for backends.Like name in dict.
+        :type tp: str,unicode
+        '''
+        self.type = tp
+        self.err_message = err_message
+        self._list = getattr(settings, self.type, {})
+
+    @property
+    def objects(self):
+        return {name: self[name] for name in self.list()}
+
+    def __len__(self):  # pragma: no cover
+        return len(self.objects)
+
+    def __iter__(self):
+        return iter(self.items())
+
+    def __getitem__(self, name):
+        return self.backend(name)
+
+    def __call__(self, name, obj):
+        return self.get_object(name, obj)
+
+    def __dict__(self):  # pragma: no cover
+        return self.items()
+
+    def keys(self):
+        return dict(self.objects).keys()
+
+    def values(self):  # pragma: no cover
+        return dict(self).values()
+
+    def items(self):
+        return self.objects.items()
+
+    def list(self):
+        return self._list
+
+    def backend(self, name):
+        '''
+        Get backend class
+
+        :param name: -- name of backend type
+        :type name: str
+        :return: class of backend
+        :rtype: class,module,object
+        '''
+        try:
+            backend = self.list()[name].get('BACKEND', None)
+            if backend is None:
+                raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
+            return import_class(backend)
+        except KeyError or ImportError:
+            msg = "{} ({})".format(name, self.err_message) if self.err_message\
+                                                           else name
+            raise ex.UnknownTypeException(msg)
+
+    def opts(self, name):
+        return self.list().get(name, {}).get('OPTIONS', {})
+
+    def get_object(self, name, obj):
+        '''
+        :param name: -- string name of backend
+        :param name: str
+        :param obj: -- model object
+        :type obj: django.db.models.Model
+        :return: backend object
+        :rtype: object
+        '''
+        return self[name](obj, **self.opts(name))

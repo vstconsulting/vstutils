@@ -1,7 +1,8 @@
-from vstutils.tests import BaseTestCase, json, settings
+from vstutils.tests import BaseTestCase, json, settings, override_settings
 from vstutils.urls import router
 from vstutils.api.views import UserViewSet
 from vstutils import utils
+from vstutils.exceptions import UnknownTypeException
 
 test_config = '''
 [main]
@@ -9,10 +10,62 @@ test_key = test_value
 
 '''
 
+test_handler_structure = {
+    "User": {
+        "BACKEND": "django.contrib.auth.models.User",
+        'OPTIONS': {
+        }
+    }
+}
+
 
 class VSTUtilsTestCase(BaseTestCase):
     def setUp(self):
         super(VSTUtilsTestCase, self).setUp()
+
+    def test_model_handler(self):
+        test_handler_structure["User"]['OPTIONS'] = dict(username='test')
+        with override_settings(TEST_HANDLERS=test_handler_structure):
+            backend = test_handler_structure['User']['BACKEND']
+            handler = utils.ModelHandlers("TEST_HANDLERS")
+            self.assertIsInstance(
+                handler.backend('User')(), self.get_model_class(backend)
+            )
+            self.assertCount(handler.keys(), 1)
+            self.assertCount(handler.values(), 1)
+            self.assertEqual(list(handler.items())[0][0], "User")
+            self.assertEqual(list(handler.items())[0][1], self.get_model_class(backend))
+            obj = handler.get_object('User', self.user.id)
+            self.assertEqual(obj.username, "test")
+            self.assertEqual(obj.id, self.user.id)
+            with self.assertRaises(UnknownTypeException) as err:
+                handler.get_object('Unknown', self.user)
+            self.assertEqual(repr(err.exception), 'Unknown type Unknown.')
+            for key, value in handler:
+                self.assertEqual(key, 'User')
+                self.assertEqual(value, self.get_model_class(backend))
+            self.assertEqual(handler('User', self.user.id).id, self.user.id)
+
+    def test_class_property(self):
+        class TestClass(object):
+            val = ''
+            def __init__(self):
+                self.val = "init"
+
+            @utils.classproperty
+            def test(self):
+                return self.val
+
+            @test.setter
+            def test(self, value):
+                self.val = value
+
+        test_obj = TestClass()
+        self.assertEqual(TestClass.test, "")
+        self.assertEqual(test_obj.test, "init")
+        test_obj.test = 'test'
+        self.assertEqual(test_obj.val, 'test')
+
 
     def test_paginator(self):
         qs = self.get_model_filter('django.contrib.auth.models.User').order_by('email')
@@ -42,6 +95,13 @@ class VSTUtilsTestCase(BaseTestCase):
             raise
         except Exception:
             pass
+
+        with utils.tmp_file_context() as file:
+            with open(file.name, 'w') as output:
+                with utils.redirect_stdany(output):
+                    print("Test")
+            with open(file.name, 'r') as output:
+                self.assertEqual(output.read(), "Test\n")
 
     def test_kvexchanger(self):
         utils.KVExchanger("somekey").send(True, 10)

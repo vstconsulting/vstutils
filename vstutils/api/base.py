@@ -11,6 +11,7 @@ from rest_framework.reverse import reverse
 from rest_framework import viewsets, views as rest_views, exceptions, status
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import action
+from ..exceptions import VSTUtilsException
 
 _ResponseClass = namedtuple("ResponseData", [
     "data", "status"
@@ -36,8 +37,12 @@ def exception_handler(exc, context):
             errors = {'other_errors': list(exc)}
         else:
             errors = {'other_errors': str(exc)}
-        return RestResponse({"detail": errors},
-                            status=status.HTTP_400_BAD_REQUEST)
+        return RestResponse({"detail": errors}, status=status.HTTP_400_BAD_REQUEST)
+    elif isinstance(exc, VSTUtilsException):  # nocv
+        return RestResponse(
+            {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__},
+            status=exc.status
+        )
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
         return RestResponse({'detail': str(sys.exc_info()[1]),
                              'error_type': sys.exc_info()[0].__name__},
