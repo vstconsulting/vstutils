@@ -286,6 +286,7 @@ CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
+CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
 
 # Some hacks with logs
 
@@ -318,7 +319,7 @@ LOGGING = {
         },
     },
     'loggers': {
-        VST_PROJECT: {
+        VST_PROJECT_LIB: {
             'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': True,
