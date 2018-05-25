@@ -11,6 +11,13 @@ except ImportError:
 else:
     has_cython = True
 
+try:
+    from sphinx.setup_command import BuildDoc
+    import sphinx
+    has_sphinx = True
+except ImportError:
+    has_sphinx = False
+
 
 def get_discription(file_path='README.rst'):
     with open(file_path) as readme:
@@ -81,5 +88,7 @@ def make_setup(**opts):
     cmdclass = opts.get('cmdclass', dict())
     if 'compile' not in cmdclass:
         cmdclass.update({"compile": get_compile_command(ext_mod_dict)})
+    if has_sphinx and 'build_sphinx' not in cmdclass:
+        cmdclass['build_sphinx'] = BuildDoc
     opts['cmdclass'] = cmdclass
     setup(**opts)
