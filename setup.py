@@ -12,12 +12,14 @@ REQUIRES_git = load_requirements('requirements-git.txt')
 
 ext_list = [
     'vstutils.environment',
+    'vstutils.exceptions',
     'vstutils.middleware',
     'vstutils.tests',
     'vstutils.urls',
     'vstutils.utils',
     'vstutils.gui.views',
     'vstutils.api.base',
+    'vstutils.api.context',
     'vstutils.api.filters',
     'vstutils.api.permissions',
     'vstutils.api.routers',
