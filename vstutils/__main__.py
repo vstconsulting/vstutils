@@ -1,7 +1,6 @@
-# pylint: disable=django-not-available
-from vstutils.environment import cmd_execution, sys, os
+# pylint: disable=django-not-available,wrong-import-position
+import sys
+sys.path.append('./')
+from vstutils.environment import cmd_execution
 
-args = list(sys.argv)
-args[0] = os.getenv("VST_CTL_SCRIPT", sys.argv[0])
-
-cmd_execution(*args)
+cmd_execution()
