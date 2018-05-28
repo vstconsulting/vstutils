@@ -56,8 +56,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 has_django_celery_beat = False
 try:
     import django_celery_beat
-    has_django_celery_beat = True  # nocv
-except ImportError:
+    has_django_celery_beat = True
+except ImportError:  # nocv
     pass
 
 # :docs:
@@ -109,6 +109,18 @@ MIDDLEWARE = [
 ]
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE
+
+try:
+    import ldap
+    AUTHENTICATION_BACKENDS = [
+        'vstutils.auth.LdapBackend',
+        'django.contrib.auth.backends.ModelBackend',
+    ]
+    LDAP_SERVER = config.get("main", "ldap-server", fallback=None)
+    LDAP_DOMAIN = config.get("main", "ldap-default-domain", fallback='')
+except ImportError:  # nocv
+    pass
+
 ROOT_URLCONF = os.getenv('VST_ROOT_URLCONF', '{}.urls'.format(VST_PROJECT))
 
 TEMPLATES = [

@@ -93,12 +93,14 @@ class BulkViewSet(base.rest_views.APIView):
                 media_type=op_type
             )
 
-    def get_url(self, item, pk=None, data_type=None):
+    def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
             url += "{}/".format(pk)
         if data_type is not None:
             url += "{}/".format(data_type)
+        if filter_set is not None:
+            url += "?{}".format(filter_set)
         return "/{}/{}/{}/{}".format(
             settings.API_URL, self.api_version, self.type_to_bulk.get(item, item), url
         )
@@ -117,7 +119,8 @@ class BulkViewSet(base.rest_views.APIView):
         url = self.get_url(
             operation['item'],
             operation.get('pk', None),
-            operation.get('data_type', None)
+            operation.get('data_type', None),
+            operation.get('filters', None),
         )
         method = getattr(self.client, self.get_method_type(op_type, operation))
         return method(url, **kwargs)

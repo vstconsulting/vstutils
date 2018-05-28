@@ -2,8 +2,10 @@ include README.rst LICENSE
 include vstutils/settings.ini
 include requirements.txt
 include requirements-git.txt
-include requirements-tests.txt
+include requirements-test.txt
 include requirements-doc.txt
+include requirements-rpc.txt
+include requirements-ldap.txt
 recursive-include vstutils/*/templates *
 recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *

@@ -14,6 +14,7 @@ omit =
     vstutils/celery_beat_scheduler.py
     vstutils/wsgi.py
     vstutils/compile.py
+    vstutils/models.py
 
 [report]
 exclude_lines =
