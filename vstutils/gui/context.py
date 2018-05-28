@@ -18,5 +18,6 @@ def project_args(request):
     return {
         "host_url": host_url,
         ver_key: getattr(settings, 'PROJECT_VERSION', False),
+        "gui_version": getattr(settings, 'PROJECT_VERSION', ''),
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None)
     }

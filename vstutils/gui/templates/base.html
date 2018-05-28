@@ -14,18 +14,17 @@
     {% endblock %}
 
     {% block title %}<title>{{ project_gui_name }} | Log in</title>{% endblock %}
-
     {% block style %}
     <!-- Bootstrap 3.3.7 -->
-    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
+    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/dist/css/bootstrap.min.css' %}?v={{gui_version}}">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
+    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}">
     <!-- Ionicons -->
-    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
+    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'Ionicons/css/ionicons.min.css' %}?v={{gui_version}}">
     <!-- Theme style -->
-    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
+    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'admin-lte/dist/css/AdminLTE.min.css' %}?v={{gui_version}}">
     <!-- iCheck -->
-    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'iCheck/skins/flat/blue.css' %}?v={{gui_version}}">
+    <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'admin-lte/plugins/iCheck/flat/blue.css' %}?v={{gui_version}}">
     <!-- Google Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
     {% block custom_scheme %}
@@ -93,9 +92,9 @@
 <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'jquery/dist/jquery.min.js' %}?v={{gui_version}}"></script>
 <!--<script src="../../bower_components/jquery/dist/jquery.min.js"></script>-->
 <!-- Bootstrap 3.3.7 -->
-<script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+<script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/dist/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
 <!-- iCheck -->
-<script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'iCheck/icheck.min.js' %}?v={{gui_version}}"></script>
+<script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'admin-lte/plugins/iCheck/icheck.min.js' %}?v={{gui_version}}"></script>
 <!--<script src="../../plugins/iCheck/icheck.min.js"></script>-->
 <script>
   $(function () {
