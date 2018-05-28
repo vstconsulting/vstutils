@@ -6,4 +6,5 @@ include requirements-tests.txt
 include requirements-doc.txt
 recursive-include vstutils/*/templates *
 recursive-include vstutils/*/templates *
+recursive-include vstutils/templates *
 recursive-include vstutils/static *
