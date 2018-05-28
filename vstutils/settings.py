@@ -52,16 +52,16 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 has_django_celery_beat = False
 try:
     import django_celery_beat
-    has_django_celery_beat = True  # nocv
-except ImportError:
+    has_django_celery_beat = True
+except ImportError:  # nocv
     pass
 
 # :docs:
 has_docs = False
 try:
     import docs
-    has_docs = True  # nocv
-except ImportError:
+    has_docs = True
+except ImportError:  # nocv
     pass
 
 # Application definition

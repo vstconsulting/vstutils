@@ -11,6 +11,7 @@ ext_list = [
     'vstutils.tests',
     'vstutils.urls',
     'vstutils.utils',
+    'vstutils.models',
     'vstutils.gui.views',
     'vstutils.api.base',
     'vstutils.api.context',
@@ -31,6 +32,7 @@ make_setup(
     load_requirements('requirements.txt') + load_requirements('requirements-doc.txt'),
     extras_require={
         'rpc': load_requirements('requirements-rpc.txt'),
+        'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
