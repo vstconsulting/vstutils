@@ -1,8 +1,10 @@
 # pylint: disable=invalid-name
+import sys
 from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from rest_framework import permissions
 from .gui import views
 from .api.routers import MainRouter
@@ -28,8 +30,9 @@ urlpatterns = [
 ]
 
 urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls)), ]
-if getattr(settings, "APACHE", False):  # nocv
-    urlpatterns += static(settings.STATIC_URL,
-                          document_root=settings.STATIC_ROOT)
+if 'runserver' in sys.argv:
+    urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
+else:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if 'docs' in settings.INSTALLED_APPS:  # nocv
     urlpatterns += [url(r'^{}'.format(doc_url), include('docs.urls'))]

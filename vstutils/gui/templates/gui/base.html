@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+{% block head %}
+  <head>
+      {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+      {% endblock %}
+
+      {% block title %}<title>{% if name %}{{ name }} – {% endif %}Dashboard</title>{% endblock %}
+
+
+      {% block pmInlineScripts %}
+
+        <script type="text/javascript">
+
+            window.csrf_data = {
+                csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+                csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
+                token: "{{ csrf_token }}"
+            };
+
+            var hostname = '{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}';
+
+            var gui_logout_url = hostname + '{{logout_url}}';
+
+            var gui_version = '{{gui_version}}';
+
+            {% if user.is_authenticated %}
+                var my_user_id = '{{user.id}}'
+            {% else %}
+                var my_user_id = undefined
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                var is_authenticated = true
+            {% else %}
+                var is_authenticated = false
+            {% endif %}
+
+            {% if user.is_superuser %}
+                var is_superuser = true
+                var is_staff = true
+            {% else %}
+                {% if user.is_staff %}
+                    var is_superuser = true
+                    var is_staff = true
+                {% else %}
+                    var is_superuser = false
+                    var is_staff = false
+                {% endif %}
+            {% endif %}
+
+            window.pmStaticPath = "{% static '' %}";
+            window.isDebug = {% if debug %}true{% else %}false{% endif %}
+            window.timeZone = '{{timezone}}';
+
+        </script>
+
+      {% endblock %}
+
+
+      {% block style %}
+
+        {% block bootstrap_theme %}
+        {% endblock %}
+
+        {% block flavicon %}
+
+        <!--<link rel="shortcut icon" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />-->
+        {% endblock %}
+        <link href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}" rel="stylesheet" />
+
+
+
+        <!-- Bootstrap 3.3.6 -->
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
+        <!-- Ionicons -->
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
+        <!-- AdminLTE Skins. Choose a skin from the css/skins
+             folder instead of downloading all of them to reduce the load. -->
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}">
+
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}">
+
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/gui.css' %}?v={{gui_version}}">
+
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/ansi-colors.css' %}?v={{gui_version}}">
+
+        {% block custom_style %}
+        {% endblock %}
+      {% endblock %}
+
+      {% block commonScripts %}
+
+        <!-- jQuery 2.2.3 -->
+        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
+        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/libs/notify.js' %}?v={{gui_version}}"></script>
+        <!-- Bootstrap 3.3.6 -->
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+        <!-- FastClick -->
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"></script>
+        <!-- AdminLTE App -->
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/app.js' %}?v={{gui_version}}"></script>
+
+      {% endblock %}
+
+      {% block pmScripts %}{% endblock %}
+  </head>
+{% endblock %}
+
+{% block body %}
+    <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}">
+
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+    </div>
+
+    {% block navbar %}
+        <div class="wrapper" >
+            <header class="main-header">
+                <!-- Logo -->
+                {% block logo %}
+                <a href="/" class="logo">
+                    <span>{{ project_gui_name }}</span>
+                </a>
+                {% endblock %}
+                <!-- Header Navbar: style can be found in header.less -->
+                <nav class="navbar navbar-static-top">
+                    <!-- Sidebar toggle button-->
+                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                        <span class="sr-only">Toggle navigation</span>
+                    </a>
+
+                    <div class="navbar-custom-menu">
+                        <ul class="nav navbar-nav">
+                            {% include "gui/menu.html" %}
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="main-sidebar">
+                <!-- sidebar: style can be found in sidebar.less -->
+                <section class="sidebar">
+                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                    <ul class="sidebar-menu">
+                        {% block left_menu %}
+                            {% include "gui/left_menu.html" %}
+                        {% endblock %}
+                    </ul>
+                </section>
+                <!-- /.sidebar -->
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper" id='spajs-right-area'>
+                <!-- Main content -->
+                {% block content %}{% endblock %}
+            </div>
+
+            {% block footer %}
+            {% endblock %}
+    {% endblock %}
+    {% block script %}{% endblock %}
+    </body>
+{% endblock %}
+</html>

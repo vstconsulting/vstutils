@@ -8,4 +8,5 @@ include requirements-rpc.txt
 include requirements-ldap.txt
 recursive-include vstutils/*/templates *
 recursive-include vstutils/*/templates *
+recursive-include vstutils/templates *
 recursive-include vstutils/static *

@@ -3,8 +3,9 @@ import sys
 
 from configparser import ConfigParser, NoSectionError, NoOptionError
 
-from . import __version__ as VSTUTILS_VERSION
+from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
+VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
 ENV_NAME = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
@@ -12,12 +13,15 @@ vst_project_module = __import__(VST_PROJECT)
 vst_lib_module = __import__(VST_PROJECT_LIB) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
 PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
 PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
+PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME)
 
 PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
 BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
-__kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR, PROG=VST_PROJECT_DIR)
+__kwargs = dict(
+    HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR, PROG=VST_PROJECT_DIR, VST=VSTUTILS_DIR
+)
 KWARGS = __kwargs
 
 DEV_SETTINGS_FILE = os.getenv("{}_DEV_SETTINGS_FILE".format(ENV_NAME),
@@ -57,11 +61,11 @@ except ImportError:  # nocv
     pass
 
 # :docs:
-has_docs = False
+HAS_DOCS = False
 try:
     import docs
-    has_docs = True
-except ImportError:  # nocv
+    HAS_DOCS = True  # nocv
+except ImportError:
     pass
 
 # Application definition
@@ -80,7 +84,7 @@ INSTALLED_APPS += [
     'rest_framework.authtoken',
     'django_filters',
 ]
-INSTALLED_APPS += ['docs'] if has_docs else []
+INSTALLED_APPS += ['docs'] if HAS_DOCS else []
 
 try:
     import mod_wsgi
@@ -89,7 +93,7 @@ except ImportError:  # pragma: no cover
 else:
     INSTALLED_APPS += ['mod_wsgi.server',]  # pragma: no cover
 
-ADDONS = []
+ADDONS = ['vstutils', ]
 
 INSTALLED_APPS += ADDONS
 
@@ -123,12 +127,15 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'api/templates'),
-            os.path.join(BASE_DIR, 'gui/templates'),
-            os.path.join(BASE_DIR, 'templates'),
             os.path.join(VST_PROJECT_DIR, 'api/templates'),
             os.path.join(VST_PROJECT_DIR, 'gui/templates'),
             os.path.join(VST_PROJECT_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'api/templates'),
+            os.path.join(BASE_DIR, 'gui/templates'),
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(VSTUTILS_DIR, 'templates'),
+            os.path.join(VSTUTILS_DIR, 'api/templates'),
+            os.path.join(VSTUTILS_DIR, 'gui/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -264,13 +271,18 @@ USE_TZ = True
 
 STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(VST_PROJECT_DIR, 'static'),
+    os.path.join(VSTUTILS_DIR, 'static')
 ]
 
 STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
+
+if 'runserver' not in sys.argv:
+    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')
 
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional

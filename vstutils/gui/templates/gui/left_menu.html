@@ -1,0 +1,8 @@
+{% block sidebar_menu %}
+<li class="header">MAIN NAVIGATION</li>
+
+<li id="menu-home"><a href="/" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span"><i class="li-header-span-i">Home</i></span></a></li>
+{% if has_docs %}
+<li id="menu-docs"><a href={% block doc_link %}"docs/index"{% endblock %}><i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span></a></li>
+{% endif %}
+{% endblock %}
