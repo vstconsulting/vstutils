@@ -9,9 +9,11 @@ ext_list = [
     'vstutils.exceptions',
     'vstutils.middleware',
     'vstutils.tests',
+    'vstutils.auth',
     'vstutils.urls',
     'vstutils.utils',
     'vstutils.models',
+    'vstutils.ldap_utils',
     'vstutils.gui.views',
     'vstutils.api.base',
     'vstutils.api.context',
@@ -31,7 +33,9 @@ make_setup(
     ] +
     load_requirements('requirements.txt') + load_requirements('requirements-doc.txt'),
     extras_require={
+        'test': load_requirements('requirements-test.txt'),
         'rpc': load_requirements('requirements-rpc.txt'),
+        'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
     },
     dependency_links=[

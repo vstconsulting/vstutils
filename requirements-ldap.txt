@@ -1,0 +1,2 @@
+# Packages needed for ldap-auth
+python-ldap==3.0.0

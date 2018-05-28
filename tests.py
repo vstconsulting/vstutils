@@ -1,8 +1,15 @@
+try:
+    from mock import patch
+except ImportError:  # nocv
+    from unittest.mock import patch
+from fakeldap import MockLDAP
+from django.test import Client
 from vstutils.tests import BaseTestCase, json, settings, override_settings
 from vstutils.urls import router
 from vstutils.api.views import UserViewSet
 from vstutils import utils
 from vstutils.exceptions import UnknownTypeException
+from vstutils.ldap_utils import LDAP
 
 test_config = '''
 [main]
@@ -22,6 +29,61 @@ test_handler_structure = {
 class VSTUtilsTestCase(BaseTestCase):
     def setUp(self):
         super(VSTUtilsTestCase, self).setUp()
+
+    def _get_test_ldap(self, client, data):
+        self.client.post('/login/', data=data)
+        response = client.get('/api/v1/users/')
+        self.assertNotEqual(response.status_code, 200)
+        response = self.client.post("/logout/")
+        self.assertEqual(response.status_code, 302)
+
+    @patch('vstutils.ldap_utils.ldap.initialize')
+    def test_ldap_auth(self, ldap_obj):
+        User = self.get_model_class('django.contrib.auth.models.User')
+        User.objects.create(username='admin')
+        # Test on fakeldap
+        admin = "admin@test.lan"
+        admin_password = "ldaptest"
+        LDAP_obj = MockLDAP({
+            admin: {"userPassword": [admin_password], 'cn': [admin]},
+            'test': {"userPassword": [admin_password]}
+        })
+        data = dict(username=admin, password=admin_password)
+        client = Client()
+        ldap_obj.return_value = LDAP_obj
+        self._get_test_ldap(client, data)
+        data['username'] = 'test'
+        with override_settings(LDAP_DOMAIN='test.lan'):
+            self._get_test_ldap(client, data)
+        with override_settings(LDAP_DOMAIN='TEST'):
+            self._get_test_ldap(client, data)
+
+        # Unittest
+        ldap_obj.reset_mock()
+        admin_dict = {
+            "objectCategory": ['top', 'user'],
+            "userPassword": [admin_password],
+            'cn': [admin]
+        }
+        tree = {
+            admin: admin_dict,
+            "dc=test,dc=lan": {
+                'cn=admin,dc=test,dc=lan': admin_dict,
+                'cn=test,dc=test,dc=lan': {"objectCategory": ['person', 'user']},
+            }
+        }
+        LDAP_obj = MockLDAP(tree)
+        ldap_obj.return_value = LDAP_obj
+        ldap_backend = LDAP('ldap://10.10.10.22', admin, domain='test.lan')
+        self.assertFalse(ldap_backend.isAuth())
+        with self.assertRaises(LDAP.NotAuth):
+            ldap_backend.group_list()
+        ldap_backend.auth(admin, admin_password)
+        self.assertTrue(ldap_backend.isAuth())
+        self.assertEqual(
+            json.loads(ldap_backend.group_list())["dc=test,dc=lan"],
+            tree["dc=test,dc=lan"]
+        )
 
     def test_model_handler(self):
         test_handler_structure["User"]['OPTIONS'] = dict(username='test')
