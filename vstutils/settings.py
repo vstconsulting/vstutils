@@ -161,7 +161,7 @@ try:
 except NoSectionError:  # nocv
     __DB_SETTINGS = {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(VST_PROJECT_DIR, 'db.{}.sqlite3'.format(VST_PROJECT)),
+        'NAME': os.path.join(VST_PROJECT_DIR, 'db.{}.sqlite3'.format(VST_PROJECT_LIB)),
     }
 
 __DB_OPTIONS = { }
