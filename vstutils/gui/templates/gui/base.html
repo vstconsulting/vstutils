@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-
 <!DOCTYPE html>
 <html>
 {% block head %}
@@ -13,6 +12,7 @@
       {% endblock %}
 
       {% block title %}<title>{% if name %}{{ name }} – {% endif %}Dashboard</title>{% endblock %}
+
 
       {% block pmInlineScripts %}
 
@@ -27,6 +27,8 @@
             var hostname = '{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}';
 
             var gui_logout_url = hostname + '{{logout_url}}';
+
+            var gui_version = '{{gui_version}}';
 
             {% if user.is_authenticated %}
                 var my_user_id = '{{user.id}}'
@@ -61,6 +63,7 @@
 
       {% endblock %}
 
+
       {% block style %}
 
         {% block bootstrap_theme %}
@@ -70,27 +73,27 @@
 
         <!--<link rel="shortcut icon" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />-->
         {% endblock %}
-        <link href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'select2/dist/css/select2.min.css' %}?v={{gui_version}}" rel="stylesheet" />
+        <link href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}" rel="stylesheet" />
 
 
 
         <!-- Bootstrap 3.3.6 -->
-        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/dist/css/bootstrap.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
         <!-- Font Awesome -->
-        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
         <!-- Ionicons -->
-        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'Ionicons/css/ionicons.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
         <!-- Theme style -->
-        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'admin-lte/dist/css/AdminLTE.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
         <!-- AdminLTE Skins. Choose a skin from the css/skins
              folder instead of downloading all of them to reduce the load. -->
-        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'admin-lte/dist/css/skins/_all-skins.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}">
 
-        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'c3/c3.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}">
 
         <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/gui.css' %}?v={{gui_version}}">
 
-        <!--<link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/ansi-colors.css' %}?v={{gui_version}}">-->
+        <link rel="stylesheet" href="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'css/ansi-colors.css' %}?v={{gui_version}}">
 
         {% block custom_style %}
         {% endblock %}
@@ -99,12 +102,12 @@
       {% block commonScripts %}
 
         <!-- jQuery 2.2.3 -->
-        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'jquery/dist/jquery.min.js' %}?v={{gui_version}}"></script>
-        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'notifyjs/dist/notify.js' %}?v={{gui_version}}"></script>
+        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
+        <script src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/libs/notify.js' %}?v={{gui_version}}"></script>
         <!-- Bootstrap 3.3.6 -->
-        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/dist/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
         <!-- FastClick -->
-        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'fastclick/lib/fastclick.js' %}?v={{gui_version}}"></script>
+        <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"></script>
         <!-- AdminLTE App -->
         <script defer src="{% if request.is_secure %}https://{% else %}http://{% endif %}{{ request.get_host }}{{ object.get_absolute_url }}{% static 'js/app.js' %}?v={{gui_version}}"></script>
 
