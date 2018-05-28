@@ -64,8 +64,8 @@ except ImportError:  # nocv
 HAS_DOCS = False
 try:
     import docs
-    HAS_DOCS = True  # nocv
-except ImportError:
+    HAS_DOCS = True
+except ImportError:  # nocv
     pass
 
 # Application definition

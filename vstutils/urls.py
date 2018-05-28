@@ -30,7 +30,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls)), ]
-if 'runserver' in sys.argv:
+if 'runserver' in sys.argv:  # nocv
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 else:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

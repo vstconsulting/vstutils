@@ -40,7 +40,7 @@ class LDAP(object):
         '''
         from django.conf import settings
         self.settings = settings
-        self.logger = logging.getLogger("polemarch")
+        self.logger = logging.getLogger(settings.VST_PROJECT_LIB)
         self.connection_string = connection_string
         self.username = username
         self.password = password

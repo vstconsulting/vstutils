@@ -133,7 +133,7 @@ class tmp_file_context(object):
 class KVExchanger(object):
     '''
     Class for transmit data using key-value fast (cache-like) storage between
-    Polemarch's services. Uses same cache-backend as Lock.
+    services. Uses same cache-backend as Lock.
     '''
     TIMEOUT = 60
     PREFIX = "{}_exchange_".format(settings.VST_PROJECT_LIB)
