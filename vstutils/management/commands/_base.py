@@ -7,3 +7,8 @@ class BaseCommand(_BaseCommand):
 
     class CommandError(CommandError):
         pass
+
+    def _print(self, msg, style=None):
+        style = style or 'HTTP_INFO'
+        style = getattr(self.style, style, str)
+        self.stdout.write(style(msg))

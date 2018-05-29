@@ -27,17 +27,24 @@ class Command(BaseCommand):
             dest='config', help='Specifies the uwsgi script.',
         )
 
-    def handle(self, *uwsgi_args, **options):
-        cmd = [options['script'], '--enable-threads', '--master']
+    def handle(self, *uwsgi_args, **opts):
+        cmd = [opts['script'], '--enable-threads', '--master']
         cmd += ['--{}'.format(arg) for arg in uwsgi_args]
-        cmd += [
-            options['config'], '--static-map',
-            "/static={}/static".format(settings.VSTUTILS_DIR)
-        ]
+        if not os.path.exists(opts['config']):
+            raise self.CommandError("Doesn't exists: {}.".format(opts['config']))
+        cmd += [opts['config']]
+        cmd += ['--static-map', "/static={}/static".format(settings.VSTUTILS_DIR)]
+        if settings.VSTUTILS_DIR != settings.BASE_DIR:
+            cmd += ['--static-map', "/static={}/static".format(settings.BASE_DIR)]
+        if settings.VST_PROJECT_DIR != settings.BASE_DIR:
+            cmd += ['--static-map', "/static={}/static".format(settings.VST_PROJECT_DIR)]
         try:
-            print('Execute: ' + ' '.join(cmd))
+            self._print('Execute: ' + ' '.join(cmd))
             cmd_run(cmd)
+        except KeyboardInterrupt:
+            self._print('Exit by user...', 'WARNING')
         except CalledProcessError as err:
             raise self.CommandError(str(err))
-        except KeyboardInterrupt:
-            print('Exit by user...')
+        except BaseException as err:
+            self._print(str(err), 'ERROR')
+            raise
