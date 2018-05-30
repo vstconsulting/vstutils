@@ -146,6 +146,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'vstutils.gui.context.settings_constants',
                 'vstutils.gui.context.project_args',
+                'vstutils.gui.context.headers_context',
             ],
         },
     },

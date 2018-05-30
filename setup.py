@@ -1,8 +1,9 @@
-from vstutils.compile import load_requirements, make_setup, os, find_packages
-
+import os
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
+from vstutils.compile import load_requirements, make_setup, find_packages
 
 ext_list = [
     'vstutils.environment',
@@ -40,4 +41,9 @@ make_setup(
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
+    project_urls={
+        "Issue Tracker": "https://github.com/vstconsulting/vstutils/issues",
+        "Source Code": "https://github.com/vstconsulting/vstutils",
+        "Releases": "https://pypi.org/project/vstutils/#history",
+    },
 )
