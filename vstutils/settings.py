@@ -82,6 +82,7 @@ INSTALLED_APPS += [
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
+    # 'rest_framework_swagger',
     'django_filters',
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
@@ -245,6 +246,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.RestSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
 }
@@ -384,7 +386,7 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 VST_API_URL = os.getenv("VST_API_URL", "api")
 VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
-
+API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
 API = {
     VST_API_VERSION: {
         r'settings': {

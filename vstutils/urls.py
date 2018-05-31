@@ -10,7 +10,9 @@ from .gui import views
 from .api.routers import MainRouter
 
 # Main router for all APIs versions
-router = MainRouter(perms=(permissions.IsAuthenticated,))
+router = MainRouter(
+    perms=(permissions.IsAuthenticated,), create_schema=settings.API_CREATE_SCHEMA
+)
 router.generate_routers(settings.API)
 
 admin.site.site_header = 'Admin panel'
@@ -29,7 +31,7 @@ urlpatterns = [
     url(r'^$', admin.site.urls),
 ]
 
-urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls)), ]
+urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls))]
 if 'runserver' in sys.argv:  # nocv
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 else:

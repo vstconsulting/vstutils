@@ -3,12 +3,14 @@ import logging
 import traceback
 from collections import namedtuple
 import six
+import coreapi
 from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404
 from django.db.models.query import QuerySet
 from rest_framework.reverse import reverse
-from rest_framework import viewsets, views as rest_views, exceptions, status
+from rest_framework import viewsets as vsets, views as rvs, exceptions, status
+from rest_framework.schemas import AutoSchema
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import action
 from ..exceptions import VSTUtilsException
@@ -48,7 +50,7 @@ def exception_handler(exc, context):
                              'error_type': sys.exc_info()[0].__name__},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    default_response = rest_views.exception_handler(exc, context)
+    default_response = rvs.exception_handler(exc, context)
 
     if isinstance(exc, exceptions.NotAuthenticated):  # nocv
         default_response["X-Anonymous"] = "true"
@@ -74,7 +76,25 @@ class Response(_ResponseClass):
         return self._asdict()
 
 
-class QuerySetMixin(rest_views.APIView):
+class RestSchema(AutoSchema):
+    '''
+    API schema generator.
+    '''
+
+    def __init__(self, manual_fields=None):
+        super(RestSchema, self).__init__(manual_fields)
+        self._manual_fields += [
+            coreapi.Field(
+                'id',
+                location="path",
+            )
+        ]
+
+    def get_description(self, path, method):
+        return super(RestSchema, self).get_description(path, method)
+
+
+class QuerySetMixin(rvs.APIView):
     queryset = None
     model = None
 
@@ -108,13 +128,15 @@ class QuerySetMixin(rest_views.APIView):
         return self._base_get_queryset()
 
 
-class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
+class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     serializer_class_one = None
     model = None
 
     def get_serializer_class(self):
-        if self.kwargs.get("pk", False) or self.action in ["create"] or \
-                int(self.request.query_params.get("detail", u"0")):
+        if self.request and (
+                self.kwargs.get("pk", False) or self.action in ["create"] or
+                int(self.request.query_params.get("detail", u"0"))
+        ):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
@@ -143,6 +165,9 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
 
     @action(methods=["post"], detail=False)
     def filter(self, request):
+        '''
+        Return django-queryset filtered list. [experimental]
+        '''
         queryset = self.filter_queryset(self.get_queryset())
         queryset = queryset.filter(**request.data.get("filter", {}))
         queryset = queryset.exclude(**request.data.get("exclude", {}))
@@ -154,8 +179,45 @@ class GenericViewSet(QuerySetMixin, viewsets.GenericViewSet):
         )
 
 
-class ModelViewSetSet(GenericViewSet, viewsets.ModelViewSet):
-    pass
+class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
+    '''
+    API endpoint thats operates models objects.
+    '''
+
+    def create(self, request, *args, **kwargs):
+        '''
+        API endpoint to create instance.
+        '''
+
+        return super(ModelViewSetSet, self).create(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        '''
+        API endpoint to represent instance detailed data.
+        '''
+
+        return super(ModelViewSetSet, self).retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):  # nocv
+        '''
+        API endpoint to update all instance fields.
+        '''
+
+        return super(ModelViewSetSet, self).update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):  # nocv
+        '''
+        API endpoint to update part of all instance fields.
+        '''
+
+        return super(ModelViewSetSet, self).partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        '''
+        API endpoint to instance.
+        '''
+
+        return super(ModelViewSetSet, self).destroy(request, *args, **kwargs)
 
 
 class NonModelsViewSet(GenericViewSet):
@@ -165,8 +227,13 @@ class NonModelsViewSet(GenericViewSet):
         return QuerySet()  # nocv
 
 
-class ListNonModelViewSet(NonModelsViewSet,
-                          viewsets.mixins.ListModelMixin):
+class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
+    '''
+    API endpoint that returns list of submethods.
+
+    list:
+    Returns json with view submethods name and link.
+    '''
     # pylint: disable=abstract-method
     schema = None
 
@@ -190,12 +257,22 @@ class ListNonModelViewSet(NonModelsViewSet,
         return Response(routes, 200).resp
 
 
-class ReadOnlyModelViewSet(GenericViewSet,
-                           viewsets.ReadOnlyModelViewSet):
-    pass
+class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
+    '''
+    API endpoint with list of model objects for read only operations.
+
+    list:
+    Return list of all objects.
+    '''
 
 
-class HistoryModelViewSet(GenericViewSet,
-                          viewsets.ReadOnlyModelViewSet,
-                          viewsets.mixins.DestroyModelMixin):
-    pass
+class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
+    '''
+    API endpoint with list of historical model objects for read and remove operations.
+
+    destroy:
+    Remove object from DB.
+
+    list:
+    Return list of all objects.
+    '''

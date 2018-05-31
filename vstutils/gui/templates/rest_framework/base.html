@@ -25,6 +25,7 @@
     <script>
     $(document).ready(function() {
         $('form').ajaxForm();
+        $('.help-popover').popover({html: true, trigger:'hover'});
     });
     </script>
 {% endblock %}
@@ -34,14 +35,30 @@
     <!-- Main content -->
 
     <section class="content-header">
-        <h1>{% if name %}{{ name }}{% endif %}
+        {% comment "Old description" %}
+        <!--<h1>{% if name %}{{ name }}{% endif %}
             <small>
                 {% block description %}
                 {{ description }}
                 {% if not description %}{{ name }}{% endif %}
                 {% endblock %}
             </small>
+        </h1>-->
+        {% endcomment %}
+        <h1>
+            {% if name %}{{ name }}{% endif %}
+            {% block description %}
+                {% if not description == "<p></p>" %}
+                    <small>
+                        <a class="glyphicon glyphicon-question-sign help-popover"
+                           data-container="body" data-toggle="popover"
+                           data-placement="right" data-content="{{ description }}">
+                        </a>
+                    </small>
+                {% endif %}
+            {% endblock %}
         </h1>
+
         <ol class="breadcrumb">
             {% block breadcrumbs %}
             <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>

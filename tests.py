@@ -4,6 +4,8 @@ except ImportError:  # nocv
     from unittest.mock import patch
 from fakeldap import MockLDAP
 from django.test import Client
+from requests.auth import HTTPBasicAuth
+from rest_framework.test import CoreAPIClient
 from vstutils.tests import BaseTestCase, json, settings, override_settings
 from vstutils.urls import router
 from vstutils.api.views import UserViewSet
@@ -369,3 +371,15 @@ class VSTUtilsTestCase(BaseTestCase):
         self.get_result(
             "post", "/api/v1/_bulk/", 415, data=json.dumps(bulk_request_data)
         )
+
+    def test_coreapi(self):
+        client = CoreAPIClient()
+        client.session.auth = HTTPBasicAuth(
+            self.user.data['username'], self.user.data['password']
+        )
+        client.session.headers.update({'x-test': 'true'})
+        schema = client.get('http://testserver/api/v1/schema/')
+        result = client.action(schema, ['users', 'list'])
+        self.assertEqual(result['count'], 1)
+        result = client.action(schema, ['users', 'read'], dict(id=self.user.id))
+        self.assertEqual(result['username'], self.user.username)

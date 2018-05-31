@@ -1,6 +1,6 @@
 # Packages needed for delayed jobs.
 celery>4.0.3,<=4.1.0
-kombu==4.1.0
+kombu>=4.1.0,<=4.2.1
 django-celery-beat==1.1.1
 sqlalchemy
 python-memcached

@@ -32,14 +32,7 @@
 {% block content %}
    
         <section class="content-header">
-            <h1>{% if name %}{{ name }}{% endif %}
-                <small>
-                    {% block description %}
-                    {{ description }}
-                    {% if not description %}{{ name }}{% endif %}
-                    {% endblock %}
-                </small>
-            </h1>
+            <h1>{% if name %}{{ name }}{% endif %}{% block description %}{% block.super %}{% endblock %}</h1>
             <ol class="breadcrumb">
                 {% block breadcrumbs %} 
                 <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li> 
