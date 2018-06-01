@@ -38,6 +38,7 @@ make_setup(
         'rpc': load_requirements('requirements-rpc.txt'),
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
+        'coreapi': ['coreapi==2.3.3'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),

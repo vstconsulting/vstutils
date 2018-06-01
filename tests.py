@@ -1,3 +1,4 @@
+import coreapi
 try:
     from mock import patch
 except ImportError:  # nocv
@@ -381,5 +382,17 @@ class VSTUtilsTestCase(BaseTestCase):
         schema = client.get('http://testserver/api/v1/schema/')
         result = client.action(schema, ['users', 'list'])
         self.assertEqual(result['count'], 1)
-        result = client.action(schema, ['users', 'read'], dict(id=self.user.id))
-        self.assertEqual(result['username'], self.user.username)
+        create_data = dict(username='test', password='123')
+        result = client.action(schema, ['users', 'create'], create_data)
+        self.assertEqual(result['username'], create_data['username'])
+        self.assertFalse(result['is_staff'])
+        self.assertTrue(result['is_active'])
+        test_user = dict(result)
+        result = client.action(schema, ['users', 'read'], dict(id=test_user['id']))
+        self.assertEqual(result['username'], test_user['username'])
+        self.assertEqual(result['id'], test_user['id'])
+        self.assertFalse(result['is_staff'])
+        self.assertTrue(result['is_active'])
+        client.action(schema, ['users', 'delete'], dict(id=test_user['id']))
+        with self.assertRaises(coreapi.exceptions.ErrorMessage):
+            client.action(schema, ['users', 'read'], dict(id=test_user['id']))

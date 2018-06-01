@@ -1,9 +1,10 @@
 # pylint: disable=no-member,redefined-outer-name,unused-argument
+from warnings import warn
 from collections import OrderedDict
 
 from django.conf.urls import include, url
 
-from rest_framework import routers, permissions, schemas
+from rest_framework import routers, permissions
 
 from .base import Response
 from ..utils import import_class
@@ -88,10 +89,16 @@ class APIRouter(_AbstractRouter):
     def __init__(self, *args, **kwargs):
         super(APIRouter, self).__init__(*args, **kwargs)
         if self.create_schema:
-            name = 'schema'
+            self.__register_schema()
+
+    def __register_schema(self, name='schema'):
+        try:
             self.register_view('{}'.format(name), self._get_schema_view(), name)
+        except BaseException as exc:  # nocv
+            warn("Couldn't attach schema view: {}".format(exc))
 
     def _get_schema_view(self):
+        from rest_framework import schemas
         return schemas.get_schema_view(title=self.root_view_name)
 
     def get_api_root_view(self, *args, **kwargs):

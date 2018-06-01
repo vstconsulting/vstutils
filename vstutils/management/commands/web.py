@@ -33,11 +33,11 @@ class Command(BaseCommand):
         if not os.path.exists(opts['config']):
             raise self.CommandError("Doesn't exists: {}.".format(opts['config']))
         cmd += [opts['config']]
-        cmd += ['--static-map', "/static={}/static".format(settings.VSTUTILS_DIR)]
-        if settings.VSTUTILS_DIR != settings.BASE_DIR:
-            cmd += ['--static-map', "/static={}/static".format(settings.BASE_DIR)]
         if settings.VST_PROJECT_DIR != settings.BASE_DIR:
             cmd += ['--static-map', "/static={}/static".format(settings.VST_PROJECT_DIR)]
+        if settings.VSTUTILS_DIR != settings.BASE_DIR:
+            cmd += ['--static-map', "/static={}/static".format(settings.BASE_DIR)]
+        cmd += ['--static-map', "/static={}/static".format(settings.VSTUTILS_DIR)]
         try:
             self._print('Execute: ' + ' '.join(cmd))
             cmd_run(cmd)

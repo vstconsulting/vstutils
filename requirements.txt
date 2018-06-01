@@ -8,9 +8,5 @@ django-filter
 django-crispy-forms
 uWSGI==2.0.17
 
-# CoreAPI
-coreapi==2.3.3
-django-rest-swagger-2.2.0
-
 # Packaging
 cython>=0.25.2

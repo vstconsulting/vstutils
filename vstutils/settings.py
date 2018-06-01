@@ -1,5 +1,6 @@
 import os
 import sys
+from warnings import warn
 
 from configparser import ConfigParser, NoSectionError, NoOptionError
 
@@ -82,7 +83,6 @@ INSTALLED_APPS += [
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
-    # 'rest_framework_swagger',
     'django_filters',
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
@@ -386,7 +386,16 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 VST_API_URL = os.getenv("VST_API_URL", "api")
 VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
+HAS_COREAPI = False
 API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
+try:
+    import coreapi
+    HAS_COREAPI = True
+except ImportError:  # nocv
+    if API_CREATE_SCHEMA:
+        warn('CoreAPI will not enabled, because there is no "coreapi" package installed.')
+    API_CREATE_SCHEMA = False
+
 API = {
     VST_API_VERSION: {
         r'settings': {
