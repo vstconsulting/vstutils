@@ -3,11 +3,6 @@ import logging
 import traceback
 from collections import namedtuple
 import six
-try:
-    import coreapi
-    has_coreapi = True
-except ImportError:  # nocv
-    has_coreapi = False
 from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404
@@ -87,17 +82,6 @@ class RestSchema(AutoSchema):
 
     def __init__(self, manual_fields=None):
         super(RestSchema, self).__init__(manual_fields)
-        if has_coreapi:
-            self._get_default_fields()
-
-    def _get_default_fields(self):
-        self._manual_fields += [
-            coreapi.Field(
-                'id',
-                location="path",
-                description='Instance uniq identificator.'
-            )
-        ]
 
     def get_description(self, path, method):
         return super(RestSchema, self).get_description(path, method)

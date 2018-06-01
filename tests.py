@@ -387,12 +387,3 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result['username'], create_data['username'])
         self.assertFalse(result['is_staff'])
         self.assertTrue(result['is_active'])
-        test_user = dict(result)
-        result = client.action(schema, ['users', 'read'], dict(id=test_user['id']))
-        self.assertEqual(result['username'], test_user['username'])
-        self.assertEqual(result['id'], test_user['id'])
-        self.assertFalse(result['is_staff'])
-        self.assertTrue(result['is_active'])
-        client.action(schema, ['users', 'delete'], dict(id=test_user['id']))
-        with self.assertRaises(coreapi.exceptions.ErrorMessage):
-            client.action(schema, ['users', 'read'], dict(id=test_user['id']))

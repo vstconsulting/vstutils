@@ -5,7 +5,11 @@ from django.contrib.auth.models import User
 from rest_framework import serializers, exceptions
 
 
-class UserSerializer(serializers.ModelSerializer):
+class _VSTSerializer(serializers.ModelSerializer):
+    pass
+
+
+class UserSerializer(_VSTSerializer):
 
     class UserExist(exceptions.ValidationError):
         status_code = 409
