@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 from django.conf import settings
 from drf_yasg import openapi
 

@@ -94,6 +94,7 @@ class APIRouter(_AbstractRouter):
             self.__register_swagger()
 
     def __register_swagger(self):
+        # pylint: disable=import-error
         from drf_yasg.views import get_schema_view
         schema_view = get_schema_view(
             public=True, permission_classes=(permissions.AllowAny,),
