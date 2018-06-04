@@ -7,6 +7,3 @@ djangorestframework==3.8.2
 django-filter
 django-crispy-forms
 uWSGI==2.0.17
-
-# Packaging
-cython>=0.25.2
