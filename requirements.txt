@@ -2,7 +2,7 @@
 configparser==3.5.0
 six
 
-# Django packages
+# REST API packages
 djangorestframework==3.8.2
 django-filter
 django-crispy-forms

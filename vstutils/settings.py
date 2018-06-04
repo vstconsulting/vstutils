@@ -1,10 +1,12 @@
 import os
 import sys
+from warnings import warn
 
 from configparser import ConfigParser, NoSectionError, NoOptionError
 
-from . import __version__ as VSTUTILS_VERSION
+from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
+VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
 ENV_NAME = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
@@ -18,7 +20,9 @@ PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
 BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
-__kwargs = dict(HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR, PROG=VST_PROJECT_DIR)
+__kwargs = dict(
+    HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR, PROG=VST_PROJECT_DIR, VST=VSTUTILS_DIR
+)
 KWARGS = __kwargs
 
 DEV_SETTINGS_FILE = os.getenv("{}_DEV_SETTINGS_FILE".format(ENV_NAME),
@@ -53,16 +57,16 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 has_django_celery_beat = False
 try:
     import django_celery_beat
-    has_django_celery_beat = True  # nocv
-except ImportError:
+    has_django_celery_beat = True
+except ImportError:  # nocv
     pass
 
 # :docs:
 HAS_DOCS = False
 try:
     import docs
-    HAS_DOCS = True  # nocv
-except ImportError:
+    HAS_DOCS = True
+except ImportError:  # nocv
     pass
 
 # Application definition
@@ -83,6 +87,14 @@ INSTALLED_APPS += [
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
 
+
+try:
+    import drf_yasg
+    INSTALLED_APPS += ['drf_yasg']
+except:  # pragma: no cover
+    pass
+
+
 try:
     import mod_wsgi
 except ImportError:  # pragma: no cover
@@ -90,7 +102,7 @@ except ImportError:  # pragma: no cover
 else:
     INSTALLED_APPS += ['mod_wsgi.server',]  # pragma: no cover
 
-ADDONS = []
+ADDONS = ['vstutils', ]
 
 INSTALLED_APPS += ADDONS
 
@@ -106,18 +118,33 @@ MIDDLEWARE = [
 ]
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE
+
+try:
+    import ldap
+    AUTHENTICATION_BACKENDS = [
+        'vstutils.auth.LdapBackend',
+        'django.contrib.auth.backends.ModelBackend',
+    ]
+    LDAP_SERVER = config.get("main", "ldap-server", fallback=None)
+    LDAP_DOMAIN = config.get("main", "ldap-default-domain", fallback='')
+except ImportError:  # nocv
+    pass
+
 ROOT_URLCONF = os.getenv('VST_ROOT_URLCONF', '{}.urls'.format(VST_PROJECT))
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'api/templates'),
-            os.path.join(BASE_DIR, 'gui/templates'),
-            os.path.join(BASE_DIR, 'templates'),
             os.path.join(VST_PROJECT_DIR, 'api/templates'),
             os.path.join(VST_PROJECT_DIR, 'gui/templates'),
             os.path.join(VST_PROJECT_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'api/templates'),
+            os.path.join(BASE_DIR, 'gui/templates'),
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(VSTUTILS_DIR, 'templates'),
+            os.path.join(VSTUTILS_DIR, 'api/templates'),
+            os.path.join(VSTUTILS_DIR, 'gui/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -128,6 +155,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'vstutils.gui.context.settings_constants',
                 'vstutils.gui.context.project_args',
+                'vstutils.gui.context.headers_context',
             ],
         },
     },
@@ -143,7 +171,7 @@ try:
 except NoSectionError:  # nocv
     __DB_SETTINGS = {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.{}.sqlite3'.format(VST_PROJECT)),
+        'NAME': os.path.join(VST_PROJECT_DIR, 'db.{}.sqlite3'.format(VST_PROJECT_LIB)),
     }
 
 __DB_OPTIONS = { }
@@ -220,6 +248,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.MultiPartRenderer',
     ),
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
@@ -228,6 +257,15 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
+    'SCHEMA_COERCE_PATH_PK': False,
+    'SCHEMA_COERCE_METHOD_NAMES': {
+        'create': 'add',
+        'list': 'list',
+        'retrieve': 'get',
+        'update': 'update',
+        'partial_update': 'edit',
+        'destroy': 'remove',
+    }
 }
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -252,14 +290,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+if 'collectstatic' not in sys.argv:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+        os.path.join(VST_PROJECT_DIR, 'static'),
+        os.path.join(VSTUTILS_DIR, 'static')
+    ]
 
 STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
+
+if 'runserver' not in sys.argv:
+    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')
 
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
@@ -360,6 +404,28 @@ CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 VST_API_URL = os.getenv("VST_API_URL", "api")
 VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
+HAS_COREAPI = False
+API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
+SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback="{} API-{}".format(PROJECT_GUI_NAME, VST_API_VERSION))
+TERMS_URL = ''
+try:
+    CONTACT = { field: value for field, value in config.items('contact') if field in ['name', 'url', 'email']}
+except:
+    CONTACT = dict(name='System Administrator')
+
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
+}
+
+API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
+try:
+    import coreapi
+    HAS_COREAPI = True
+except ImportError:  # nocv
+    if API_CREATE_SCHEMA:
+        warn('CoreAPI will not enabled, because there is no "coreapi" package installed.')
+    API_CREATE_SCHEMA = False
 
 API = {
     VST_API_VERSION: {

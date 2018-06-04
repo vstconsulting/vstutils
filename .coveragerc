@@ -1,7 +1,7 @@
 [run]
 omit =
     .tox/*
-    */main/management/daemon.py
+    */management/*
     */*/migrations/*
     */main/wsgi.py
     */manage.py
@@ -14,6 +14,7 @@ omit =
     vstutils/celery_beat_scheduler.py
     vstutils/wsgi.py
     vstutils/compile.py
+    vstutils/models.py
 
 [report]
 exclude_lines =

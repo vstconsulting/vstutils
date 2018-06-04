@@ -1,7 +1,18 @@
-from vstutils.tests import BaseTestCase, json, settings
+import coreapi
+try:
+    from mock import patch
+except ImportError:  # nocv
+    from unittest.mock import patch
+from fakeldap import MockLDAP
+from django.test import Client
+from requests.auth import HTTPBasicAuth
+from rest_framework.test import CoreAPIClient
+from vstutils.tests import BaseTestCase, json, settings, override_settings
 from vstutils.urls import router
 from vstutils.api.views import UserViewSet
 from vstutils import utils
+from vstutils.exceptions import UnknownTypeException
+from vstutils.ldap_utils import LDAP
 
 test_config = '''
 [main]
@@ -9,10 +20,117 @@ test_key = test_value
 
 '''
 
+test_handler_structure = {
+    "User": {
+        "BACKEND": "django.contrib.auth.models.User",
+        'OPTIONS': {
+        }
+    }
+}
+
 
 class VSTUtilsTestCase(BaseTestCase):
     def setUp(self):
         super(VSTUtilsTestCase, self).setUp()
+
+    def _get_test_ldap(self, client, data):
+        self.client.post('/login/', data=data)
+        response = client.get('/api/v1/users/')
+        self.assertNotEqual(response.status_code, 200)
+        response = self.client.post("/logout/")
+        self.assertEqual(response.status_code, 302)
+
+    @patch('vstutils.ldap_utils.ldap.initialize')
+    def test_ldap_auth(self, ldap_obj):
+        User = self.get_model_class('django.contrib.auth.models.User')
+        User.objects.create(username='admin')
+        # Test on fakeldap
+        admin = "admin@test.lan"
+        admin_password = "ldaptest"
+        LDAP_obj = MockLDAP({
+            admin: {"userPassword": [admin_password], 'cn': [admin]},
+            'test': {"userPassword": [admin_password]}
+        })
+        data = dict(username=admin, password=admin_password)
+        client = Client()
+        ldap_obj.return_value = LDAP_obj
+        self._get_test_ldap(client, data)
+        data['username'] = 'test'
+        with override_settings(LDAP_DOMAIN='test.lan'):
+            self._get_test_ldap(client, data)
+        with override_settings(LDAP_DOMAIN='TEST'):
+            self._get_test_ldap(client, data)
+
+        # Unittest
+        ldap_obj.reset_mock()
+        admin_dict = {
+            "objectCategory": ['top', 'user'],
+            "userPassword": [admin_password],
+            'cn': [admin]
+        }
+        tree = {
+            admin: admin_dict,
+            "dc=test,dc=lan": {
+                'cn=admin,dc=test,dc=lan': admin_dict,
+                'cn=test,dc=test,dc=lan': {"objectCategory": ['person', 'user']},
+            }
+        }
+        LDAP_obj = MockLDAP(tree)
+        ldap_obj.return_value = LDAP_obj
+        ldap_backend = LDAP('ldap://10.10.10.22', admin, domain='test.lan')
+        self.assertFalse(ldap_backend.isAuth())
+        with self.assertRaises(LDAP.NotAuth):
+            ldap_backend.group_list()
+        ldap_backend.auth(admin, admin_password)
+        self.assertTrue(ldap_backend.isAuth())
+        self.assertEqual(
+            json.loads(ldap_backend.group_list())["dc=test,dc=lan"],
+            tree["dc=test,dc=lan"]
+        )
+
+    def test_model_handler(self):
+        test_handler_structure["User"]['OPTIONS'] = dict(username='test')
+        with override_settings(TEST_HANDLERS=test_handler_structure):
+            backend = test_handler_structure['User']['BACKEND']
+            handler = utils.ModelHandlers("TEST_HANDLERS")
+            self.assertIsInstance(
+                handler.backend('User')(), self.get_model_class(backend)
+            )
+            self.assertCount(handler.keys(), 1)
+            self.assertCount(handler.values(), 1)
+            self.assertEqual(list(handler.items())[0][0], "User")
+            self.assertEqual(list(handler.items())[0][1], self.get_model_class(backend))
+            obj = handler.get_object('User', self.user.id)
+            self.assertEqual(obj.username, "test")
+            self.assertEqual(obj.id, self.user.id)
+            with self.assertRaises(UnknownTypeException) as err:
+                handler.get_object('Unknown', self.user)
+            self.assertEqual(repr(err.exception), 'Unknown type Unknown.')
+            for key, value in handler:
+                self.assertEqual(key, 'User')
+                self.assertEqual(value, self.get_model_class(backend))
+            self.assertEqual(handler('User', self.user.id).id, self.user.id)
+
+    def test_class_property(self):
+        class TestClass(object):
+            val = ''
+            def __init__(self):
+                self.val = "init"
+
+            @utils.classproperty
+            def test(self):
+                return self.val
+
+            @test.setter
+            def test(self, value):
+                self.val = value
+
+        test_obj = TestClass()
+        self.assertEqual(TestClass.test, "")
+        self.assertEqual(test_obj.test, "init")
+        test_obj.test = 'test'
+        self.assertEqual(test_obj.val, 'test')
+
 
     def test_paginator(self):
         qs = self.get_model_filter('django.contrib.auth.models.User').order_by('email')
@@ -42,6 +160,13 @@ class VSTUtilsTestCase(BaseTestCase):
             raise
         except Exception:
             pass
+
+        with utils.tmp_file_context() as file:
+            with open(file.name, 'w') as output:
+                with utils.redirect_stdany(output):
+                    print("Test")
+            with open(file.name, 'r') as output:
+                self.assertEqual(output.read(), "Test\n")
 
     def test_kvexchanger(self):
         utils.KVExchanger("somekey").send(True, 10)
@@ -220,7 +345,11 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check update first_name by self
             {'type': 'set', 'item': 'users', 'pk': self.user.id, 'data': userself_data},
             # Check mods to view detail
-            {'type': 'mod', 'item': 'settings', "method": "get", 'data_type': "system"}
+            {'type': 'mod', 'item': 'settings', "method": "get", 'data_type': "system"},
+            # Check bulk-filters
+            {'type': 'get', 'item': 'users',
+             'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
+            },
         ]
         result = self.get_result(
             "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
@@ -233,6 +362,8 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[3]['data']['first_name'], userself_data['first_name'])
         self.assertEqual(result[4]['status'], 200)
         self.assertEqual(result[4]['data']['PY'], settings.PY_VER)
+        self.assertEqual(result[5]['status'], 200)
+        self.assertEqual(result[5]['data']['count'], len(users_id)-1)
 
         bulk_request_data = [
             # Check unsupported media type
@@ -241,3 +372,18 @@ class VSTUtilsTestCase(BaseTestCase):
         self.get_result(
             "post", "/api/v1/_bulk/", 415, data=json.dumps(bulk_request_data)
         )
+
+    def test_coreapi(self):
+        client = CoreAPIClient()
+        client.session.auth = HTTPBasicAuth(
+            self.user.data['username'], self.user.data['password']
+        )
+        client.session.headers.update({'x-test': 'true'})
+        schema = client.get('http://testserver/api/v1/schema/')
+        result = client.action(schema, ['users', 'list'])
+        self.assertEqual(result['count'], 1)
+        create_data = dict(username='test', password='123')
+        result = client.action(schema, ['users', 'add'], create_data)
+        self.assertEqual(result['username'], create_data['username'])
+        self.assertFalse(result['is_staff'])
+        self.assertTrue(result['is_active'])

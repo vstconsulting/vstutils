@@ -1,8 +1,8 @@
 # pylint: disable=no-member,redefined-outer-name,unused-argument
+from warnings import warn
 from collections import OrderedDict
 
 from django.conf.urls import include, url
-
 from rest_framework import routers, permissions
 
 from .base import Response
@@ -14,7 +14,23 @@ class _AbstractRouter(routers.DefaultRouter):
     def __init__(self, *args, **kwargs):
         self.custom_urls = list()
         self.permission_classes = kwargs.pop("perms", None)
+        self.create_schema = kwargs.pop('create_schema', False)
+        self.create_swagger = kwargs.pop('create_swagger', False)
         super(_AbstractRouter, self).__init__(*args, **kwargs)
+
+    def _get_custom_lists(self):
+        return self.custom_urls
+
+    def _get_views_custom_list(self, view_request, registers):
+        routers_list = OrderedDict()
+        fpath = view_request.get_full_path().split("?")
+        absolute_uri = view_request.build_absolute_uri(fpath[0])
+        for prefix, _, name in self._get_custom_lists():
+            path = absolute_uri + prefix
+            path += "?{}".format(fpath[1]) if len(fpath) > 1 else ""
+            routers_list[name] = path
+        routers_list.update(registers.data)
+        return routers_list
 
     def get_default_base_name(self, viewset):
         base_name = getattr(viewset, 'base_name', None)
@@ -22,7 +38,7 @@ class _AbstractRouter(routers.DefaultRouter):
             return base_name  # nocv
         queryset = getattr(viewset, 'queryset', None)
         model = getattr(viewset, 'model', None)
-        if queryset is None:
+        if queryset is None:  # nocv
             assert model is not None, \
                 '`base_name` argument not specified, and could ' \
                 'not automatically determine the name from the viewset, as ' \
@@ -30,11 +46,14 @@ class _AbstractRouter(routers.DefaultRouter):
             return model._meta.object_name.lower()
         # can't be tested because this initialization takes place before any
         # test code can be run
-        return super(_AbstractRouter,
-                     self).get_default_base_name(viewset)  # nocv
+        return super(_AbstractRouter, self).get_default_base_name(viewset)  # nocv
 
     def register_view(self, prefix, view, name=None):
-        name = name or view().get_view_name().lower()
+        if getattr(view, 'as_view', None):
+            name = name or view().get_view_name().lower()
+            self.custom_urls.append((prefix, view, name))
+            return
+        name = name or view.get_view_name().lower()
         self.custom_urls.append((prefix, view, name))
 
     def _unreg(self, prefix, objects_list):
@@ -65,7 +84,34 @@ class _AbstractRouter(routers.DefaultRouter):
 
 
 class APIRouter(_AbstractRouter):
-    root_view_name = 'api-v1'
+    root_view_name = 'v1'
+
+    def __init__(self, *args, **kwargs):
+        super(APIRouter, self).__init__(*args, **kwargs)
+        if self.create_schema:
+            self.__register_schema()
+        if self.create_swagger:
+            self.__register_swagger()
+
+    def __register_swagger(self):
+        # pylint: disable=import-error
+        from drf_yasg.views import get_schema_view
+        schema_view = get_schema_view(
+            public=True, permission_classes=(permissions.AllowAny,),
+        )
+        self.register_view(
+            'openapi', schema_view.with_ui('swagger', cache_timeout=120), name='openapi'
+        )
+
+    def __register_schema(self, name='schema'):
+        try:
+            self.register_view(r'{}'.format(name), self._get_schema_view(), name)
+        except BaseException as exc:  # nocv
+            warn("Couldn't attach schema view: {}".format(exc))
+
+    def _get_schema_view(self):
+        from rest_framework import schemas
+        return schemas.get_schema_view(title=self.root_view_name)
 
     def get_api_root_view(self, *args, **kwargs):
         api_root_dict = OrderedDict()
@@ -81,29 +127,28 @@ class APIRouter(_AbstractRouter):
 
             def get_view_name(self): return self.root_view_name
 
-            def get(self, request, *args, **kwargs):
-                registers = super(API, self).get(request, *args, **kwargs)
-                routers_list = OrderedDict()
-                for prefix, _, name in self.custom_urls:  # nocv
-                    fpath = request.get_full_path().split("?")
-                    path = request.build_absolute_uri(fpath[0]) + prefix
-                    if len(fpath) > 1:
-                        path += "?{}".format(fpath[1])
-                    routers_list[name] = path
-                routers_list.update(registers.data)
-                return Response(routers_list, 200).resp
+            def get(self_inner, request, *args, **kwargs):
+                # pylint: disable=no-self-argument,protected-access
+                data = self._get_views_custom_list(
+                    request, super(API, self_inner).get(request, *args, **kwargs)
+                )
+                return Response(data, 200).resp
 
         return API.as_view(api_root_dict=api_root_dict)
 
     def get_urls(self):
         urls = super(APIRouter, self).get_urls()
         for prefix, view, _ in self.custom_urls:  # nocv
-            urls.append(url("^{}/$".format(prefix), view.as_view()))
+            view = view.as_view() if getattr(view, 'as_view', None) else view
+            urls.append(url("^{}/$".format(prefix), view))
         return urls
 
 
 class MainRouter(_AbstractRouter):
     routers = []
+
+    def _get_custom_lists(self):
+        return super(MainRouter, self)._get_custom_lists() + self.routers
 
     def get_api_root_view(self, *args, **kwargs):
         api_root_dict = OrderedDict()
@@ -119,17 +164,12 @@ class MainRouter(_AbstractRouter):
 
             def get_view_name(self): return "API"
 
-            def get(self, request, *args, **kwargs):
-                registers = super(API, self).get(request, *args, **kwargs)
-                routers_list = OrderedDict()
-                for prefix, _, name in self.routers + self.custom_urls:
-                    fpath = request.get_full_path().split("?")
-                    path = request.build_absolute_uri(fpath[0]) + prefix
-                    if len(fpath) > 1:
-                        path += "?{}".format(fpath[1])  # nocv
-                    routers_list[name] = path
-                routers_list.update(registers.data)
-                return Response(routers_list, 200).resp
+            def get(self_inner, request, *args, **kwargs):
+                # pylint: disable=no-self-argument,protected-access
+                data = self._get_views_custom_list(
+                    request, super(API, self_inner).get(request, *args, **kwargs)
+                )
+                return Response(data, 200).resp
 
         return API.as_view(api_root_dict=api_root_dict)
 
@@ -144,15 +184,20 @@ class MainRouter(_AbstractRouter):
         urls = super(MainRouter, self).get_urls()
         for prefix, router, _ in self.routers:
             urls.append(url(prefix, include(router.urls)))
-        for prefix, view, _ in self.custom_urls:
+        for prefix, view, _ in self.custom_urls:  # nocv
             # can't be tested because this initialization takes place before
             # any test code can be run
-            urls.append(url(prefix, view.as_view()))  # nocv
+            view = view.as_view() if getattr(view, 'as_view', None) else view
+            urls.append(url("^{}/$".format(prefix), view))
         return urls
 
-    def generate_routers(self, api):
+    def generate_routers(self, api, create_schema=None, create_swagger=None):
         for version, views_list in api.items():
-            router = APIRouter(perms=(permissions.IsAuthenticated,))
+            router = APIRouter(
+                perms=(permissions.IsAuthenticated,),
+                create_schema=create_schema or self.create_schema,
+                create_swagger=create_swagger or self.create_swagger,
+            )
             router.root_view_name = version
             router.generate(views_list)
             self.register_router(version+'/', router)

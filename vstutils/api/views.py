@@ -8,6 +8,10 @@ from . import base, serializers, permissions, filters
 
 
 class UserViewSet(base.ModelViewSetSet):
+    '''
+    API endpoint that allows users to be viewed or edited.
+    '''
+
     model = serializers.User
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
@@ -40,29 +44,51 @@ class UserViewSet(base.ModelViewSetSet):
 
 
 class SettingsViewSet(base.ListNonModelViewSet):
+    '''
+    API endpoint thats returns application usefull settings.
+    '''
     base_name = "settings"
 
-    @base.action(methods=['get'], detail=False)
-    def localization(self, request):
-        return base.Response({
+    def _get_localization_settings(self):
+        return {
             "LANGUAGE_CODE": settings.LANGUAGE_CODE,
             "LANGUAGES": dict(settings.LANGUAGES),
             "USE_I18N": settings.USE_I18N,
             "USE_L10N": settings.USE_L10N,
             "TIME_ZONE": settings.TIME_ZONE,
             "USE_TZ": settings.USE_TZ
-        }, 200).resp
+        }
 
-    @base.action(methods=['get'], detail=False)
-    def system(self, request):
-        return base.Response({
+    def _get_system_settings(self):
+        return {
             "PY": settings.PY_VER,
             "VSTUTILS_VERSION": settings.VSTUTILS_VERSION,
             "{}_VERSION".format(settings.ENV_NAME): settings.PROJECT_VERSION
-        }, 200).resp
+        }
+
+    @base.action(methods=['get'], detail=False)
+    def localization(self, request):
+        '''
+        Return localization settings.
+        '''
+        return base.Response(self._get_localization_settings(), 200).resp
+
+    @base.action(methods=['get'], detail=False)
+    def system(self, request):
+        '''
+        Return system settings like interpreter or libs version.
+        '''
+        return base.Response(self._get_system_settings(), 200).resp
 
 
-class BulkViewSet(base.rest_views.APIView):
+class BulkViewSet(base.rvs.APIView):
+    '''
+    API endpoint for transactional operations with API methods.
+    Supports detail and list sub-actions.
+
+    get: Return allowed_types and operations_types
+    post: Return result of bulk-operations.
+    '''
     api_version = settings.VST_API_VERSION
     schema = None
 
@@ -93,12 +119,14 @@ class BulkViewSet(base.rest_views.APIView):
                 media_type=op_type
             )
 
-    def get_url(self, item, pk=None, data_type=None):
+    def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
             url += "{}/".format(pk)
         if data_type is not None:
             url += "{}/".format(data_type)
+        if filter_set is not None:
+            url += "?{}".format(filter_set)
         return "/{}/{}/{}/{}".format(
             settings.API_URL, self.api_version, self.type_to_bulk.get(item, item), url
         )
@@ -117,7 +145,8 @@ class BulkViewSet(base.rest_views.APIView):
         url = self.get_url(
             operation['item'],
             operation.get('pk', None),
-            operation.get('data_type', None)
+            operation.get('data_type', None),
+            operation.get('filters', None),
         )
         method = getattr(self.client, self.get_method_type(op_type, operation))
         return method(url, **kwargs)

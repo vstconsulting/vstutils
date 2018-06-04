@@ -1,3 +1,4 @@
+# pylint: disable=import-error
 from django_celery_beat.schedulers import DatabaseScheduler
 
 from .utils import Lock

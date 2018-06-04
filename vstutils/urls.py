@@ -10,8 +10,13 @@ from .gui import views
 from .api.routers import MainRouter
 
 # Main router for all APIs versions
-router = MainRouter(perms=(permissions.IsAuthenticated,))
+router = MainRouter(
+    perms=(permissions.IsAuthenticated,),
+    create_schema=settings.API_CREATE_SCHEMA,
+    create_swagger=settings.API_CREATE_SWAGGER
+)
 router.generate_routers(settings.API)
+
 
 admin.site.site_header = 'Admin panel'
 admin.site.site_title = settings.VST_PROJECT
@@ -29,8 +34,8 @@ urlpatterns = [
     url(r'^$', admin.site.urls),
 ]
 
-urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls)), ]
-if 'runserver' in sys.argv:
+urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls))]
+if 'runserver' in sys.argv:  # nocv
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 else:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

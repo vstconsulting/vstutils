@@ -6,7 +6,7 @@ import string
 import os  # noqa: F401
 import six
 from django.db import transaction
-from django.test import TestCase
+from django.test import TestCase, override_settings  # noqa: F401
 from django.conf import settings
 from django.contrib.auth.models import User
 from .utils import import_class

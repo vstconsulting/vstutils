@@ -1,2 +1,4 @@
 # Packages needed for test
-coverage<=4.3.4
+coverage<=4.5.1
+mock<=2.0.1
+fakeldap==0.6.1
