@@ -9,10 +9,10 @@ from django.http.response import Http404
 from django.db.models.query import QuerySet
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
-from rest_framework.schemas import AutoSchema
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import action
 from ..exceptions import VSTUtilsException
+from ..utils import classproperty
 
 _ResponseClass = namedtuple("ResponseData", [
     "data", "status"
@@ -75,21 +75,21 @@ class Response(_ResponseClass):
         return self._asdict()
 
 
-class RestSchema(AutoSchema):
-    '''
-    API schema generator.
-    '''
-
-    def __init__(self, manual_fields=None):
-        super(RestSchema, self).__init__(manual_fields)
-
-    def get_description(self, path, method):
-        return super(RestSchema, self).get_description(path, method)
-
-
 class QuerySetMixin(rvs.APIView):
-    queryset = None
+    _queryset = None
     model = None
+
+    @classproperty
+    def queryset(self):
+        # pylint: disable=method-hidden
+        if self._queryset is not None:
+            return getattr(self._queryset, 'cleared', self._queryset.all)()
+        qs = self.model.objects.all()
+        return getattr(qs, 'cleared', qs.all)()
+
+    @queryset.setter
+    def queryset(self, value):
+        self._queryset = value
 
     def _base_get_queryset(self):
         assert self.queryset is not None, (
@@ -108,7 +108,7 @@ class QuerySetMixin(rvs.APIView):
         return self.queryset
 
     def get_queryset(self):
-        if self.queryset is None:
+        if self.queryset is None:  # nocv
             assert self.model is not None, (
                 "'%s' should either include a `queryset` or `model` attribute,"
                 " or override the `get_queryset()` method."
@@ -122,6 +122,7 @@ class QuerySetMixin(rvs.APIView):
 
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
+    # lookup_field = 'id'
     serializer_class_one = None
     model = None
 
@@ -176,6 +177,8 @@ class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
     '''
     API endpoint thats operates models objects.
     '''
+
+    # lookup_field = 'id'
 
     def create(self, request, *args, **kwargs):
         '''

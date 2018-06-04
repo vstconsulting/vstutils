@@ -87,6 +87,14 @@ INSTALLED_APPS += [
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
 
+
+try:
+    import drf_yasg
+    INSTALLED_APPS += ['drf_yasg']
+except:  # pragma: no cover
+    pass
+
+
 try:
     import mod_wsgi
 except ImportError:  # pragma: no cover
@@ -240,15 +248,24 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.MultiPartRenderer',
     ),
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.RestSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
+    'SCHEMA_COERCE_PATH_PK': False,
+    'SCHEMA_COERCE_METHOD_NAMES': {
+        'create': 'add',
+        'list': 'list',
+        'retrieve': 'get',
+        'update': 'update',
+        'partial_update': 'edit',
+        'destroy': 'remove',
+    }
 }
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
@@ -273,11 +290,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    os.path.join(VST_PROJECT_DIR, 'static'),
-    os.path.join(VSTUTILS_DIR, 'static')
-]
+if 'collectstatic' not in sys.argv:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+        os.path.join(VST_PROJECT_DIR, 'static'),
+        os.path.join(VSTUTILS_DIR, 'static')
+    ]
 
 STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -387,6 +405,19 @@ VST_API_URL = os.getenv("VST_API_URL", "api")
 VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
 HAS_COREAPI = False
+API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
+SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback="{} API-{}".format(PROJECT_GUI_NAME, VST_API_VERSION))
+TERMS_URL = ''
+try:
+    CONTACT = { field: value for field, value in config.items('contact') if field in ['name', 'url', 'email']}
+except:
+    CONTACT = dict(name='System Administrator')
+
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
+}
+
 API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
 try:
     import coreapi

@@ -3,7 +3,6 @@ from warnings import warn
 from collections import OrderedDict
 
 from django.conf.urls import include, url
-
 from rest_framework import routers, permissions
 
 from .base import Response
@@ -16,6 +15,7 @@ class _AbstractRouter(routers.DefaultRouter):
         self.custom_urls = list()
         self.permission_classes = kwargs.pop("perms", None)
         self.create_schema = kwargs.pop('create_schema', False)
+        self.create_swagger = kwargs.pop('create_swagger', False)
         super(_AbstractRouter, self).__init__(*args, **kwargs)
 
     def _get_custom_lists(self):
@@ -38,7 +38,7 @@ class _AbstractRouter(routers.DefaultRouter):
             return base_name  # nocv
         queryset = getattr(viewset, 'queryset', None)
         model = getattr(viewset, 'model', None)
-        if queryset is None:
+        if queryset is None:  # nocv
             assert model is not None, \
                 '`base_name` argument not specified, and could ' \
                 'not automatically determine the name from the viewset, as ' \
@@ -84,16 +84,27 @@ class _AbstractRouter(routers.DefaultRouter):
 
 
 class APIRouter(_AbstractRouter):
-    root_view_name = 'api-v1'
+    root_view_name = 'v1'
 
     def __init__(self, *args, **kwargs):
         super(APIRouter, self).__init__(*args, **kwargs)
         if self.create_schema:
             self.__register_schema()
+        if self.create_swagger:
+            self.__register_swagger()
+
+    def __register_swagger(self):
+        from drf_yasg.views import get_schema_view
+        schema_view = get_schema_view(
+            public=True, permission_classes=(permissions.AllowAny,),
+        )
+        self.register_view(
+            'openapi', schema_view.with_ui('swagger', cache_timeout=120), name='openapi'
+        )
 
     def __register_schema(self, name='schema'):
         try:
-            self.register_view('{}'.format(name), self._get_schema_view(), name)
+            self.register_view(r'{}'.format(name), self._get_schema_view(), name)
         except BaseException as exc:  # nocv
             warn("Couldn't attach schema view: {}".format(exc))
 
@@ -179,11 +190,12 @@ class MainRouter(_AbstractRouter):
             urls.append(url("^{}/$".format(prefix), view))
         return urls
 
-    def generate_routers(self, api, create_schema=None):
+    def generate_routers(self, api, create_schema=None, create_swagger=None):
         for version, views_list in api.items():
             router = APIRouter(
                 perms=(permissions.IsAuthenticated,),
-                create_schema=create_schema or self.create_schema
+                create_schema=create_schema or self.create_schema,
+                create_swagger=create_swagger or self.create_swagger,
             )
             router.root_view_name = version
             router.generate(views_list)

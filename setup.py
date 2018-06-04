@@ -26,7 +26,7 @@ ext_list = [
 ]
 
 make_setup(
-    packages=find_packages(exclude='tests'),
+    packages=find_packages(exclude=['tests']+ext_list),
     ext_modules_list=ext_list,
     include_package_data=True,
     install_requires=[
@@ -38,7 +38,7 @@ make_setup(
         'rpc': load_requirements('requirements-rpc.txt'),
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
-        'coreapi': ['coreapi==2.3.3'],
+        'coreapi': ['coreapi==2.3.3', 'drf-yasg==1.8.0'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),

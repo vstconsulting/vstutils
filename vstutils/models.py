@@ -13,6 +13,12 @@ class BQuerySet(models.QuerySet):  # nocv
     def get_paginator(self, *args, **kwargs):
         return Paginator(self, *args, **kwargs)
 
+    def cleared(self):
+        return (
+            self.filter(hidden=False) if hasattr(self.model, "hidden")
+            else self
+        )
+
     def _find(self, field_name, tp_name, *args, **kwargs):
         field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
         if field is None:

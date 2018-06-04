@@ -10,7 +10,7 @@ class BaseView(TemplateView):
 
     @classmethod
     def as_view(cls, *args, **kwargs):
-        view = super(TemplateView, cls).as_view(*args, **kwargs)
+        view = super(BaseView, cls).as_view(*args, **kwargs)
         return cls.login_required and login_required(view) or view
 
 

@@ -383,7 +383,7 @@ class VSTUtilsTestCase(BaseTestCase):
         result = client.action(schema, ['users', 'list'])
         self.assertEqual(result['count'], 1)
         create_data = dict(username='test', password='123')
-        result = client.action(schema, ['users', 'create'], create_data)
+        result = client.action(schema, ['users', 'add'], create_data)
         self.assertEqual(result['username'], create_data['username'])
         self.assertFalse(result['is_staff'])
         self.assertTrue(result['is_active'])
