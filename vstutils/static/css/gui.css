@@ -21,7 +21,7 @@
 
 /**
  * http://codepen.io/thomasgrant/pen/DgEFd
- * Анимация на ожидание 
+ * Animation for waiting
  *
  * http://codepen.io/elbitapmoC/pen/ryVXNw
  * http://codepen.io/thomasgrant/pen/DgEFd
@@ -181,7 +181,7 @@
     }
 }
 
-/* CSS для анимации ожидания в стиле ios (http://codepen.io/anon/pen/MmQJbx) */
+/* CSS Animation for waiting in ios style (http://codepen.io/anon/pen/MmQJbx) */
 div.spinner {
     position: relative;
     width: 180px;
@@ -283,7 +283,7 @@ div.spinner div.bar12 {
 }
 
 
-/* CSS под конкретные платформы */
+/* CSS for platforms */
 .for-ios{
     display: none !important;
 }
@@ -299,6 +299,23 @@ div.spinner div.bar12 {
 .platform-android .for-android{
     display: block !important;
 }
+
+.for-web{
+    display: block !important;
+}
+
+.for-cordova{
+    display: none !important;
+}
+
+.platform-cordova .for-web{
+    display: none !important;
+}
+
+.platform-cordova .for-cordova{
+    display: block !important;
+}
+
 
 .borderless td, .borderless th {
     border: none;
@@ -444,77 +461,6 @@ table{
     overflow: hidden;
 }
 
-.history-status{
-    font-weight: bold;
-    vertical-align: middle;
-}
-
-.history-status-OFFLINE{
-    color: #9e9e9e;
-}
-
-.history-status-INTERRUPTED{
-    color: #9b97e4;
-}
-
-.history-status-RUN{
-    color: #0085ff;
-}
-
-.history-status-ERROR{
-
-}
-
-.history-status-DELAY{
-    color: #808419;
-}
-
-.history-status-OK{
-    color: #276900;
-}
-
-.project-status{
-    font-weight: bold;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.project-status-SYNC{
-    color: #f40;
-}
-
-.project-status-WAIT_SYNC{
-    color: #0085ff;
-}
-
-.project-status-OK{
-    color: #276900;
-}
-
-
-
-.stdout-line .S{color:red}/* Строки красные */
-.stdout-line .func{color:blue}/* Юзер-функции синие */
-.stdout-line .C{color:orange}/* Комменты оранжевые */
-.stdout-line .kwrd{font-weight:bold}/* Ключевые слова полужирные */
-.stdout-line .R{color:gray} /*Серые регвыражения */
-.stdout-line.fatal{
-    background: #ffe7e7;
-}
-
-.history-stdout{
-    overflow: auto;
-    max-height: calc(100vh - 338px);
-    min-height: 400px;
-    background: #fff;
-}
-
-@media (min-width: 767px) {
-    .history-stdout{
-        max-height: calc(100vh - 414px);
-    }
-}
-
 @media (min-width: 992px) {
     .h1-header{
         display: inline-table;
@@ -545,32 +491,6 @@ table{
     width: 100%;
 }
 
-
-.history-mode.history-fullsize .history-LeftInfo{
-    width: 100%;
-}
-
-.history-mode.history-fullsize .history-RightInfo{
-    display: none;
-}
-
-.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
-    display: block;
-}
-
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
-    display: none;
-}
-
-
-
-.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
-    display: none;
-}
-
-.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
-    display: block;
-}
 
 .top-line-btn{
     margin-bottom: 5px;
@@ -623,21 +543,8 @@ table{
 
 
 .bg-logo {
-    background-image: url(/static/img/logo/horizontal.png);
-    background-position: center center;
-    background-repeat: no-repeat;
-    -webkit-background-size:150px 40px;
-    -o-background-size: 150px 40px;
-    -moz-background-size:150px 40px;
-    background-size: 150px 40px;
     display: block;
-    width:150px;
-    height: 40px;
-    margin:0px;
-    margin-top: 5px;
-    float: left;
-
-
+    width:220px;
 }
 
 .bg-logo-min {
@@ -686,7 +593,7 @@ table{
     color: #C1801A;
 }
 
-/*стили для сайдбара */
+/* menu */
 .skin-black-light .sidebar-menu>li:hover>a, .skin-black-light .sidebar-menu>li.active>a {
     color: #000;
     background: #EEEEEE;
@@ -910,7 +817,7 @@ table{
     border-top-right-radius: 4px;
 }
 
-/* конец стилей для сайдбара */
+/* end styles for sidebar */
 
 .imported-subitems-table th, .imported-subitems-table td {
     word-wrap:break-word;
@@ -938,6 +845,32 @@ table{
 .start-time-td {
     width:160px;
 }
+
+
+.readme_content {
+    word-wrap: break-word;
+}
+
+.readme_content h1 {
+    font-size: 24px;
+}
+
+.readme_content h2 {
+    font-size: 20px;
+}
+
+.readme_content h3 {
+    font-size: 18px;
+}
+
+@media (min-width: 1200px) {
+    .readme_content img {
+        max-width: 60%;
+        width: auto;
+    }
+}
+
+
 
 
 @media (max-width: 1200px) {
@@ -976,6 +909,12 @@ table{
     }
 }
 
-.hide-in-web{ 
-    display: none;
+@media (max-width: 767px) {
+    .app-logo{
+        display: none !important;
+    }
+
+    .main-sidebar {
+        padding-top: 50px !important;
+    }
 }
