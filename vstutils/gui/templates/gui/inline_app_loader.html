@@ -332,16 +332,12 @@ function loadData(index)
         {
             console.log("load from server")
 
-            // Создаём объект запроса
             var request = new XMLHttpRequest();
 
-            // Задаём функцию, которая будет вызываться при изменении состояния готовности запроса
             request.onreadystatechange = function ()
             {
-                // Проверяем состояние готовности и статус запроса
                 if (request.readyState === 4 && request.status === 200)
                 {
-                    // Десериализуем полученную JSON строку в объект JavaScript
                     jsToLoad[index].response = request.responseText;
                     window.loadData_jsLoadingProgressStep++
                     setLoadingProgress((window.loadData_jsLoadingProgressStep/window.loadData_jsLoadingProgressSumSteps)*100)
@@ -351,13 +347,12 @@ function loadData(index)
                 }
             }
 
-            // Указываем тип запроса (GET) и адрес, к которому будет выполнятся запрос
             request.open("GET", jsToLoad[index].url);
 
             request.send();
-            // @todo добавить обработку ошибок загрузки
-            // @todo добавить кнопку отмены загрузки
-            // @todo добавить кнопку отмены открытия страницы загрузки
+            // @todo add error handling
+            // @todo add download cancel button
+            // @todo add a cancel button to open the download page
 
         }
     )
