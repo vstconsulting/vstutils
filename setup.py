@@ -17,6 +17,7 @@ except ImportError:
 
 ext_list = [
     'vstutils.exceptions',
+    'vstutils.environment',
     'vstutils.middleware',
     'vstutils.tests',
     'vstutils.auth',
@@ -36,7 +37,7 @@ ext_list = [
 ]
 
 kwargs = dict(
-    packages=find_packages(exclude=['tests']+ext_list),
+    packages=find_packages(exclude=['tests']),
     include_package_data=True,
     install_requires=[
         "django>=1.11,<2.0",
