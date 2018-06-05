@@ -1,7 +1,7 @@
 function loadQUnitTests()
 {
 
-    $('body').append('<script src=\'' + window.pmStaticPath + 'js/tests/qUnitTest.js\'></script>');
+    $('body').append('<script src=\'' + window.guiStaticPath + 'js/tests/qUnitTest.js\'></script>');
 
     var intervaId = setInterval(function()
     {
