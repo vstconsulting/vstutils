@@ -14,10 +14,8 @@ from vstutils import utils
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 
-test_config = '''
-[main]
+test_config = '''[main]
 test_key = test_value
-
 '''
 
 test_handler_structure = {
@@ -138,6 +136,10 @@ class VSTUtilsTestCase(BaseTestCase):
             pass
 
     def test_render_and_file(self):
+        err_ini = utils.get_render('configs/config.ini', dict(config=dict(test=[])))
+        for line in err_ini.split('\n'):
+            self.assertEqual(line[0], '#')
+        self.assertTrue('# Invalid config.' in err_ini, err_ini)
         config_dict = dict(config=dict(main=dict(test_key="test_value")))
         ini = utils.get_render('configs/config.ini', config_dict)
         with utils.tmp_file_context(ini, delete=False) as file:

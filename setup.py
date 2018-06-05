@@ -16,7 +16,6 @@ except ImportError:
 
 
 ext_list = [
-    'vstutils.environment',
     'vstutils.exceptions',
     'vstutils.middleware',
     'vstutils.tests',
@@ -25,6 +24,7 @@ ext_list = [
     'vstutils.utils',
     'vstutils.models',
     'vstutils.ldap_utils',
+    'vstutils.templatetags.vstconfigs',
     'vstutils.gui.views',
     'vstutils.gui.context',
     'vstutils.api.base',
@@ -48,6 +48,7 @@ kwargs = dict(
         'rpc': load_requirements('requirements-rpc.txt'),
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
+        'prod': load_requirements('requirements-prod.txt'),
         'coreapi': ['coreapi==2.3.3', 'drf-yasg==1.8.0'],
     },
     dependency_links=[
