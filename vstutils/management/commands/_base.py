@@ -56,6 +56,7 @@ class BaseCommand(_BaseCommand):
         ])
 
     def handle(self, *args, **options):
+        # pylint: disable=invalid-name
         LOG_LEVEL = settings.LOG_LEVEL
         if options.get('log-level', False):
             LOG_LEVEL = options.get('log-level', LOG_LEVEL)
