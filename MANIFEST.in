@@ -1,5 +1,5 @@
 include README.rst LICENSE
-include vstutils/settings.ini
+include vstutils/settings.ini vstutils/web.ini
 include setup.cfg
 include requirements.txt
 include requirements-git.txt

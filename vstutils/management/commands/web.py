@@ -15,7 +15,7 @@ class Command(BaseCommand):
         super(Command, self).add_arguments(parser)
         parser.add_argument(
             'args',
-            metavar='[uwsgi args]', nargs='*',
+            metavar='uwsgi_arg=value', nargs='*',
             help='Args "name=value" uwsgi server.',
         )
         parser.add_argument(
@@ -29,12 +29,18 @@ class Command(BaseCommand):
             dest='config', help='Specifies the uwsgi script.',
         )
 
+    def _get_uwsgi_arg(self, arg):
+        return arg if isinstance(arg, six.string_types) else None
+
+    def _get_uwsgi_args(self, *uwsgi_args):
+        return [self._get_uwsgi_arg(arg) for arg in uwsgi_args]
+
     def handle(self, *uwsgi_args, **opts):
         super(Command, self).handle(*uwsgi_args, **opts)
         cmd = [opts['script'], '--enable-threads', '--master']
         cmd += [
-            '--{}'.format(arg) for arg in uwsgi_args
-            if isinstance(arg, six.string_types)
+            '--{}'.format(arg) for arg in self._get_uwsgi_args(*uwsgi_args)
+            if arg is not None
         ]
         if not os.path.exists(opts['config']):
             raise self.CommandError("Doesn't exists: {}.".format(opts['config']))

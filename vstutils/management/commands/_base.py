@@ -23,6 +23,7 @@ class BaseCommand(_BaseCommand):
 
     def add_arguments(self, parser):
         super(BaseCommand, self).add_arguments(parser)
+        parser.fromfile_prefix_chars = '@'
         parser.add_argument(
             '-l', '--log-level',
             action='store',
