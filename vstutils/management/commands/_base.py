@@ -59,9 +59,8 @@ class BaseCommand(_BaseCommand):
         # pylint: disable=invalid-name
         LOG_LEVEL = settings.LOG_LEVEL
         if options.get('log-level', False):
-            LOG_LEVEL = options.get('log-level', LOG_LEVEL)
+            LOG_LEVEL = options.pop('log-level', LOG_LEVEL)
         logger.setLevel(LOG_LEVEL.upper())
         logger_lib.setLevel(LOG_LEVEL.upper())
         self.LOG_LEVEL = LOG_LEVEL.upper()
         os.environ.setdefault('DJANGO_LOG_LEVEL', self.LOG_LEVEL)
-        return super(BaseCommand, self).handle(*args, **options)

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import os
 import sys
 from subprocess import check_call as cmd_run, CalledProcessError
+import six
 from django.conf import settings
 from ._base import BaseCommand
 
@@ -11,6 +12,7 @@ class Command(BaseCommand):
     _uwsgi_default_path = "{}/uwsgi".format(os.path.dirname(sys.executable))
 
     def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
         parser.add_argument(
             'args',
             metavar='[uwsgi args]', nargs='*',
@@ -28,8 +30,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *uwsgi_args, **opts):
+        super(Command, self).handle(*uwsgi_args, **opts)
         cmd = [opts['script'], '--enable-threads', '--master']
-        cmd += ['--{}'.format(arg) for arg in uwsgi_args]
+        cmd += [
+            '--{}'.format(arg) for arg in uwsgi_args
+            if isinstance(arg, six.string_types)
+        ]
         if not os.path.exists(opts['config']):
             raise self.CommandError("Doesn't exists: {}.".format(opts['config']))
         cmd += [opts['config']]
