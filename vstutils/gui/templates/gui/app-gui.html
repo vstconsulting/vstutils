@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "gui/base.html" %}
 {% load staticfiles %}
 
 
@@ -44,11 +44,7 @@
                             <header class="main-header">
                                 {% block gui_logo %}
                                     <a href="/" class="logo app-logo">
-                                        <!-- mini logo for sidebar mini 50x50 pixels -->
-                                        <!-- <span class="logo-mini"><b>P</b></span> -->
                                         <span class="logo-mini"><span class="bg-logo-min" style="margin-left: 4px;"></span></span>
-                                        <!-- logo for regular state and mobile devices -->
-                                        <!-- <span class="logo-lg"><b>P</b>olemarch</span> -->
                                         <span class="logo-lg logo-span"><span class="bg-logo-min"></span> <span class="bg-logo"></span></span>
                                     </a>
                                 {% endblock %}
@@ -61,7 +57,7 @@
 
                                     <div class="navbar-custom-menu">
                                         <ul class="nav navbar-nav">
-                                            {% block gui/menu %}
+                                            {% block gui_menu %}
                                                 {% include "gui/menu.html" %}
                                             {% endblock %}
                                         </ul>
@@ -74,7 +70,7 @@
                                 <section class="sidebar">
                                     <!-- sidebar menu: : style can be found in sidebar.less -->
                                     <ul class="sidebar-menu tree" data-widget="tree">
-                                        {% block gui/left_menu %}
+                                        {% block gui_left_menu %}
                                             {% include "gui/left_menu.html" %}
                                         {% endblock %}
                                     </ul>
