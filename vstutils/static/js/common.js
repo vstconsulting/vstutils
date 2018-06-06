@@ -187,6 +187,11 @@ window.onresize=function ()
         }
     }
 }
+
+/*
+ * Функция была немного модифицирована.
+ * по идее, в таком виде нужна только для полемарча.
+ */
 function setActiveMenuLiBase()
 {
     if(/\?projects/.test(window.location.href) || /\?project/.test(window.location.href) ||
@@ -195,6 +200,7 @@ function setActiveMenuLiBase()
         $("#menu-projects").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-projects-projects").addClass("active-bold");
         $("#menu-projects").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-projects");
     }
     else if(/\?templates/.test(window.location.href) ||
         /\?template/.test(window.location.href))
@@ -202,6 +208,7 @@ function setActiveMenuLiBase()
         $("#menu-projects").addClass("pm-treeview-active active active-li");
         $("#menu-projects-templates").addClass("active-bold");
         $("#menu-projects").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-projects");
     }
     else if(/\?hosts/.test(window.location.href) || /\?host/.test(window.location.href) ||
         /\?new-host/.test(window.location.href))
@@ -209,6 +216,7 @@ function setActiveMenuLiBase()
         $("#menu-inventories").addClass("pm-treeview-active active active-li");
         $("#menu-inventories-hosts").addClass("active-bold");
         $("#menu-inventories").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-inventories");
     }
     else if(/\?new-group/.test(window.location.href) || /\?groups/.test(window.location.href) ||
         /\?group/.test(window.location.href))
@@ -216,6 +224,7 @@ function setActiveMenuLiBase()
         $("#menu-inventories").addClass("pm-treeview-active active active-li");
         $("#menu-inventories-groups").addClass("active-bold");
         $("#menu-inventories").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-inventories");
     }
     else if(/\?inventories/.test(window.location.href) || /\?inventory/.test(window.location.href) ||
         /\?new-inventory/.test(window.location.href))
@@ -223,6 +232,7 @@ function setActiveMenuLiBase()
         $("#menu-inventories").addClass("pm-treeview-active active active-li active-bold");
         $("#menu-inventories-inventories").addClass("active-bold");
         $("#menu-inventories").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-inventories");
     }
     else if(/\?history/.test(window.location.href)){
 
@@ -234,6 +244,7 @@ function setActiveMenuLiBase()
         $("#menu-system").addClass("pm-treeview-active active active-li");
         $("#menu-system-hooks").addClass("active-bold");
         $("#menu-system").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-system");
     }
     else if(/\?users/.test(window.location.href) || /\?user/.test(window.location.href) ||
         /\?new-user/.test(window.location.href) || /\?profile/.test(window.location.href))
@@ -241,6 +252,7 @@ function setActiveMenuLiBase()
         $("#menu-system").addClass("pm-treeview-active active active-li");
         $("#menu-system-users").addClass("active-bold");
         $("#menu-system").removeClass("pm-treeview");
+        openSubmenuFunc("#menu-system");
     }
     else
     {
@@ -248,6 +260,7 @@ function setActiveMenuLiBase()
     }
 }
 
+// по идее, в таком виде, нужно только для полемарча.
 function setActiveMenuLi()
 {
     if($('li').is('.pm-treeview-active'))
@@ -270,6 +283,14 @@ function setActiveMenuLi()
         $(g).removeClass("active-bold");
     }
 
+    if($('li').is('.open-pm-treeview-menu'))
+    {
+        var h=$(".open-pm-treeview-menu");
+        $(h).removeClass("open-pm-treeview-menu");
+        $($(".open-pm-treeview-button").children("i")).removeClass("fa-angle-down");
+        $($(".open-pm-treeview-button").children("i")).addClass("fa-angle-left");
+    }
+
     return setActiveMenuLiBase();
 }
 
@@ -281,24 +302,24 @@ function setActiveMenuLi()
  * при попытке навести курсор на него.
  */
 $(".sidebar-menu > li").mouseenter(function () {
-    var thisEl = this;
-    setTimeout(function () {
-        var pmTreeviewMenues = $(".pm-treeview-menu");
-        var bool = false;
-        for(var i=0; i<pmTreeviewMenues.length; i++)
-        {
-            if($(pmTreeviewMenues[i]).is(':hover'))
-            {
-                bool = true;
+    if(!($('body').hasClass('sidebar-open')))
+    {
+        var thisEl = this;
+        setTimeout(function () {
+            var pmTreeviewMenues = $(".pm-treeview-menu");
+            var bool = false;
+            for (var i = 0; i < pmTreeviewMenues.length; i++) {
+                if ($(pmTreeviewMenues[i]).is(':hover')) {
+                    bool = true;
+                }
             }
-        }
 
-        if(bool==false)
-        {
-            $(".hover-li").removeClass("hover-li");
-            $(thisEl).addClass("hover-li");
-        }
-    }, 200);
+            if (bool == false) {
+                $(".hover-li").removeClass("hover-li");
+                $(thisEl).addClass("hover-li");
+            }
+        }, 200);
+    }
 })
 
 /*
@@ -306,11 +327,93 @@ $(".sidebar-menu > li").mouseenter(function () {
  * как с меню убрали курсор.
  */
 $(".content-wrapper").hover(function () {
-    $(".hover-li").removeClass("hover-li");
+    if(!($('body').hasClass('sidebar-open')))
+    {
+        $('.hover-li').removeClass('hover-li');
+    }
 })
 
-$(".navbar").hover(function () {
-    $(".hover-li").removeClass("hover-li");
+$('.navbar').hover(function () {
+    if(!($('body').hasClass('sidebar-open')))
+    {
+        $('.hover-li').removeClass('hover-li');
+    }
+})
+
+/*обработчик на это событие есть еще и в файле app.js на 352 строке,
+  они идентичны, только здесь вызывается еще функция setActiveMenuLi,
+  которая определена в этом файле. Вызывать ее из app.js не охото, потому что
+  вдруг будет подключен только app.js в каком-либо проекте, без common.js
+  */
+$(".content-wrapper").click(function ()
+{
+    if (window.innerWidth < 767 && $("body").hasClass("sidebar-open")) {
+        setActiveMenuLi();
+        $("body").removeClass('sidebar-open');
+    }
+});
+
+/*обработчик на это событие есть еще и в файле app.js на 352 строке,
+  они идентичны, только здесь вызывается еще функция setActiveMenuLi,
+  которая определена в этом файле. Вызывать ее из app.js не охото, потому что
+  вдруг будет подключен только app.js в каком-либо проекте, без common.js
+  */
+$(".sidebar-menu li a").click(function ()
+{
+    if (window.innerWidth < 767 && $("body").hasClass("sidebar-open")) {
+        setActiveMenuLi();
+        $("body").removeClass('sidebar-open');
+    }
+});
+
+// по идее, в таком виде, нужно только для полемарча.
+$($(".sidebar-toggle")[0]).click(function ()
+{
+    if (window.innerWidth < 767) {
+        setActiveMenuLi();
+    }
+})
+
+/*
+* функция раскрывает вложенное подменю на устройствах с маленьким экраном.
+* Вызывается из setActiveMenuLiBase()
+* по идее, в таком виде, нужно только для полемарча.
+* */
+openSubmenuFunc = function (el_id)
+{
+    if(window.innerWidth<767)
+    {
+        $(".open-pm-treeview-menu").removeClass("open-pm-treeview-menu");
+        $($(".open-pm-treeview-button").children("i")).removeClass("fa-angle-down");
+        $($(".open-pm-treeview-button").children("i")).addClass("fa-angle-left");
+        $(el_id).addClass("open-pm-treeview-menu");
+        $($(el_id).children(".open-pm-treeview-button").children("i")).removeClass("fa-angle-left");
+        $($(el_id).children(".open-pm-treeview-button").children("i")).addClass("fa-angle-down");
+    }
+}
+
+/*
+* обработчик события - нажатия на иконку раскрытия подменю на устройствах с маленьким экраном.
+* по идее, в таком виде, нужно только для полемарча.
+* */
+$(".open-pm-treeview-button").click(function()
+{
+    if($($(this).parent()).hasClass("open-pm-treeview-menu"))
+    {
+        $($(this).parent()).removeClass("open-pm-treeview-menu");
+        $($(this).children("i")).removeClass("fa-angle-down");
+        $($(this).children("i")).addClass("fa-angle-left");
+    }
+    else
+    {
+        $(".open-pm-treeview-menu").removeClass("open-pm-treeview-menu");
+        $($(".open-pm-treeview-button").children("i")).removeClass("fa-angle-down");
+        $($(".open-pm-treeview-button").children("i")).addClass("fa-angle-left");
+        $($(this).parent()).addClass("open-pm-treeview-menu");
+        $($(this).children("i")).removeClass("fa-angle-left");
+        $($(this).children("i")).addClass("fa-angle-down");
+    }
+
 })
 
 tabSignal.connect("loading.completed", function()

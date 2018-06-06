@@ -356,6 +356,13 @@ function _init() {
                 }
             });
 
+            $(".sidebar-menu li a").click(function () {
+                //Enable hide menu when clicking on the menu elements on small screens
+                if (window.innerWidth <= (screenSizes.sm - 1) && $("body").hasClass("sidebar-open")) {
+                    $("body").removeClass('sidebar-open');
+                }
+            });
+
             //Enable expand on hover for sidebar mini
             if ($.AdminLTE.options.sidebarExpandOnHover
                 || ($('body').hasClass('fixed')
