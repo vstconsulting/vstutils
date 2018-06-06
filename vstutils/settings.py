@@ -224,12 +224,6 @@ AUTH_PASSWORD_VALIDATORS = [
             'min_length': 0,
         },
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
 ]
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
@@ -369,6 +363,11 @@ LOGGING = {
             'level': LOG_LEVEL,
             'propagate': True,
         },
+        VST_PROJECT: {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
     }
 }
 SILENCED_SYSTEM_CHECKS = ['fields.W342', 'urls.W001', '1_10.W001',
@@ -453,3 +452,4 @@ BULK_OPERATION_TYPES = {
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher',]

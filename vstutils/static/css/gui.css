@@ -461,6 +461,77 @@ table{
     overflow: hidden;
 }
 
+.history-status{
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.history-status-OFFLINE{
+    color: #9e9e9e;
+}
+
+.history-status-INTERRUPTED{
+    color: #9b97e4;
+}
+
+.history-status-RUN{
+    color: #0085ff;
+}
+
+.history-status-ERROR{
+
+}
+
+.history-status-DELAY{
+    color: #808419;
+}
+
+.history-status-OK{
+    color: #276900;
+}
+
+.project-status{
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.project-status-SYNC{
+    color: #f40;
+}
+
+.project-status-WAIT_SYNC{
+    color: #0085ff;
+}
+
+.project-status-OK{
+    color: #276900;
+}
+
+
+
+.stdout-line .S{color:red}/* Строки красные */
+.stdout-line .func{color:blue}/* Юзер-функции синие */
+.stdout-line .C{color:orange}/* Комменты оранжевые */
+.stdout-line .kwrd{font-weight:bold}/* Ключевые слова полужирные */
+.stdout-line .R{color:gray} /*Серые регвыражения */
+.stdout-line.fatal{
+    background: #ffe7e7;
+}
+
+.history-stdout{
+    overflow: auto;
+    max-height: calc(100vh - 338px);
+    min-height: 400px;
+    background: #fff;
+}
+
+@media (min-width: 767px) {
+    .history-stdout{
+        max-height: calc(100vh - 414px);
+    }
+}
+
 @media (min-width: 992px) {
     .h1-header{
         display: inline-table;
@@ -491,6 +562,32 @@ table{
     width: 100%;
 }
 
+
+.history-mode.history-fullsize .history-LeftInfo{
+    width: 100%;
+}
+
+.history-mode.history-fullsize .history-RightInfo{
+    display: none;
+}
+
+.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+    display: block;
+}
+
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-full{
+    display: none;
+}
+
+
+
+.history-mode .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+    display: none;
+}
+
+.history-mode.history-fullsize .history-LeftInfo .btn-history-resize .glyphicon-resize-small{
+    display: block;
+}
 
 .top-line-btn{
     margin-bottom: 5px;
@@ -594,6 +691,7 @@ table{
 }
 
 /* menu */
+/*styles for sidebar */
 .skin-black-light .sidebar-menu>li:hover>a, .skin-black-light .sidebar-menu>li.active>a {
     color: #000;
     background: #EEEEEE;
@@ -803,7 +901,8 @@ table{
 
 .sidebar-menu>.pm-treeview-active>.pm-treeview-menu>.group-header-copy,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview>.pm-treeview-menu>.group-header-copy,
-.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active>.pm-treeview-menu>.group-header-copy{
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active>.pm-treeview-menu>.group-header-copy,
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu .pm-treeview-menu>.group-header-copy {
     display: none;
 }
 
@@ -818,6 +917,57 @@ table{
 }
 
 /* end styles for sidebar */
+/* styles for sidebar on small screens*/
+
+.open-pm-treeview-button {
+    display: none;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-button {
+    display: block;
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    font-size: 18px;
+    padding:3px 12px;
+    border-radius: 2em;
+    color: #000;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .pm-treeview.hover-li .pm-treeview-menu {
+    display: none;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu .pm-treeview-menu {
+    display: block!important;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu a {
+    background-color: #eeeeee;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu .pm-treeview-menu>li>a {
+    padding: 12px 5px 12px 38px;
+    display: block;
+    background-color: #eeeeee;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu:not(.pm-treeview-active) .pm-treeview-menu>li>a {
+    padding-left: 43px;
+}
+
+.sidebar-mini.sidebar-open  .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu {
+    display: none;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu>li.active-li:not(.open-pm-treeview-menu)>a {
+    background-color: #E0E0E0!important;
+}
+/* end of styles for sidebar on small screens*/
+/* end of styles for sidebar */
 
 .imported-subitems-table th, .imported-subitems-table td {
     word-wrap:break-word;

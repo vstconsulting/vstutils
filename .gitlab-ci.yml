@@ -8,11 +8,6 @@ variables:
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
 
-cache:
-  paths:
-    - .tox/
-
-
 stages:
   - code_standarts
   - test
@@ -28,6 +23,7 @@ stages:
    - tox -e $TOX_ENVS
   retry: 2
 
+
 code_style:
   <<: *branch_tests
   stage: code_standarts
@@ -36,11 +32,6 @@ code_style:
 
 
 py27-django111-install:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
-
-py35-django111-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -56,7 +47,7 @@ release_pypi:
   only:
    - tags
   script:
+   - python2 -m pip install vstcompile
    - python2 setup.py compile
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
   allow_failure: true
-#   when: manual
