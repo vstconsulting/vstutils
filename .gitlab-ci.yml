@@ -21,6 +21,8 @@ stages:
     TOX_ENVS: "flake,pylint,py27-django-install,py35-django-install,py36-django-install"
   script:
    - tox -e $TOX_ENVS
+  except:
+    - tags
   retry: 2
 
 
