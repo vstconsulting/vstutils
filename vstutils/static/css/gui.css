@@ -690,7 +690,6 @@ table{
     color: #C1801A;
 }
 
-/* menu */
 /*styles for sidebar */
 .skin-black-light .sidebar-menu>li:hover>a, .skin-black-light .sidebar-menu>li.active>a {
     color: #000;
@@ -916,7 +915,6 @@ table{
     border-top-right-radius: 4px;
 }
 
-/* end styles for sidebar */
 /* styles for sidebar on small screens*/
 
 .open-pm-treeview-button {
