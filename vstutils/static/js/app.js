@@ -331,12 +331,12 @@ function _init() {
                     if ($("body").hasClass('sidebar-collapse'))
                     {
                         $("body").removeClass('sidebar-collapse').trigger('expanded.pushMenu');
-                        pmLocalSettings.set('hideMenu', false);
+                        guiLocalSettings.set('hideMenu', false);
                     }
                     else
                     {
                         $("body").addClass('sidebar-collapse').trigger('collapsed.pushMenu');
-                        pmLocalSettings.set('hideMenu', true);
+                        guiLocalSettings.set('hideMenu', true);
                     }
                 }
                 //Handle sidebar push menu for small screens

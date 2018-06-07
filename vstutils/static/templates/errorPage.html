@@ -1,0 +1,45 @@
+
+<script type="text/x-just" data-just="errorPage">
+    <!-- errorPage -->
+    <section class="content-header">
+        <h1> 
+            <span class="h1-header" ><i class="fa fa-warning text-yellow"></i> <%- error.title %></span>
+
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- window.hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
+            <li class="active"><i class="fa fa-warning text-yellow"></i> <%- error.title %> </li>
+        </ol>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-lg-12">
+                
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        
+                    </div>
+                    <div class="box-body"> 
+                        <p>
+                            Status: <%- error.status %>
+                        </p>
+                        <% if(error.error_data == undefined || error.status >= 500){ %>  
+                            Follow the link to create a bug report 
+                        <% } %>
+                        <% if(error.text){ %> 
+                            <%- error.text %> 
+                        <% } %> 
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+    <!-- /errorPage -->
+</script>
+ 

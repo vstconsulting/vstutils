@@ -1,2 +1,83 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load i18n %}
+
+{% block login_body %}
+    <div class="login-box-body">
+        <p class="login-box-msg">Sign in to start your session</p>
+
+        <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;">
+            {% csrf_token %}
+            <input type="text" name='{{ form.username.name }}' id="{{ form.username.name }}" value="admin" class="form-control" placeholder="Login" maxlength="254"  required autofocus>
+            <input type="password" name='{{ form.password.name }}' id="{{ form.password.name }}" value="admin"  class="form-control" placeholder="Password">
+
+            {% block button %}
+                <button type="submit">Sign In</button>
+            {% endblock %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            {% if form.errors %}
+                {% if form.non_field_errors %}
+                    <ul class='form-errors'>
+                        {% for error in form.non_field_errors %}
+                            <li style='color: red'>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endif %}
+        </form>
+        {% block alter_auth %}
+        {% endblock %}
+    </div>
+<script>
+
+window.hostname = "{{host_url}}"
+
+function appAjaxLogin()
+{
+    var fileds = document.querySelectorAll(".app-form-signin input")
+
+    var fd = new FormData();
+    data = {}
+    for(var i = 0; i < fileds.length; i++)
+    {
+        fd.append(fileds[i].getAttribute('name'), fileds[i].value);
+        data[fileds[i].getAttribute('name')] = fileds[i].value
+    }
+
+    var request = new XMLHttpRequest();
+
+    request.onreadystatechange = function()
+    {
+        if (request.readyState === 4 && request.status === 200)
+        {
+            if(request.responseText.indexOf("<!-- app-gui-page -->") != -1)
+            {
+                if(window.parent && window.parent.guiAppLogin && window.parent.guiAppLogin.onLogin )
+                {
+                    window.parent.pmAppLogin.onLogin(request.responseText)
+                }
+                else
+                {
+                    window.location.reload()
+                }
+            }
+            else
+            {
+                window.location.reload()
+            }
+        }
+    }
+
+    request.onerror =  function (data)
+    {
+        console.error(data)
+    };
+
+
+    request.open("POST", window.hostname+"/login/");
+    request.setRequestHeader("{{ csrf_header_name|default:'X-CSRFToken' }}", "{{ csrf_token }}")
+
+    request.send(fd);
+}
+</script>
+{% endblock %}

@@ -244,27 +244,35 @@ if(!window.spajs)
      * Ищет в адресе парамет spajs.opt.menu_url и на основе его значения открывает пункт меню.
      * @returns {boolean} Если параметр не найден или информации в нём содержится о не зарегистрированном menuId то вернёт false
      */
-    spajs.openMenuFromUrl = function(event_state)
-    {
-        var menuId;
+    spajs.openMenuFromUrl = function(event_state, opt)
+    { 
+        if(!opt)
+        {
+            opt = {}
+        }
         
         // Если menu_url не задан то используем первый знак вопроса в строке адреса
         if(window.location.href.indexOf("?") != -1)
         {
-            menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
+            opt.menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
         } 
         else
         {
             // Если menu_url не задан то используем window.location.hash
-            menuId = window.location.hash.slice(1)
+            opt.menuId = window.location.hash.slice(1)
         }
         
         if(spajs.opt.menu_url)
         {
-            menuId = spajs.getUrlParam(spajs.opt.menu_url, event_state)
+            opt.menuId = spajs.getUrlParam(spajs.opt.menu_url, event_state)
         } 
  
-        return spajs.openMenu(menuId, {}, true, event_state);
+         
+        opt.addUrlParams = {}
+        opt.notAddToHistory = true
+        opt.event_state = event_state
+ 
+        return spajs.open(opt) 
     }
 
     spajs.setUrlParam = function(params, title)
@@ -517,21 +525,24 @@ if(!window.spajs)
         }
         
         var def = new $.Deferred();
-        
-        $.when(def).fail(function(e)
+         
+        if(!opt.withoutFailPage)
         {
-            if(spajs.errorPage)
+            $.when(def).fail(function(e)
             {
-                spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, data, e)
-            }
-        })
+                if(spajs.errorPage)
+                {
+                    spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, data, e)
+                }
+            })
+        }
         
         if(!spajs.opt.addParamsToUrl && opt.event_state == undefined)
         {
             opt.event_state = {}
             opt.event_state.url = window.location.href;
         }
-
+ 
         var regExpRes = []
         var menuInfo = undefined;
         for(var i in spajs.opt.menu)
@@ -558,9 +569,14 @@ if(!window.spajs)
         //console.log("openMenu", menuId, menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
-            console.error("URL not registered", opt.menuId, opt)
+            
+            if(!opt.withoutFailPage)
+            {
+                console.error("URL not registered", opt.menuId, opt)
+            }
+            
             def.reject({detail:"Error URL not registered", status:404})
-            throw "URL not registered " + opt.menuId;
+            throw { text:"URL not registered " + opt.menuId, code:404};
             return def.promise();
         }
 

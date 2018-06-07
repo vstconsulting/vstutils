@@ -137,7 +137,7 @@ window.onresize=function ()
 {
     if(window.innerWidth>767)
     {
-        if(pmLocalSettings.get('hideMenu'))
+        if(guiLocalSettings.get('hideMenu'))
         {
             $("body").addClass('sidebar-collapse');
         }
@@ -153,3 +153,29 @@ window.onresize=function ()
         }
     }
 }
+
+var guiLocalSettings = {
+    __settings:{},
+    get:function(name){
+        return this.__settings[name];
+    },
+    set:function(name, value){
+        this.__settings[name] = value;
+        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+    }
+}
+
+
+if(window.localStorage['guiLocalSettings'])
+{
+    try{
+        guiLocalSettings.__settings = window.localStorage['guiLocalSettings'];
+        guiLocalSettings.__settings = JSON.parse(guiLocalSettings.__settings)
+
+    }catch (e)
+    {
+
+    }
+}
+

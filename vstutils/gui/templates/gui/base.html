@@ -3,174 +3,332 @@
 <!DOCTYPE html>
 <html>
 {% block head %}
-  <head>
-      {% block meta %}
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <meta name="robots" content="NONE,NOARCHIVE" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-      {% endblock %}
+    <head>
+        {% if user.is_authenticated %}
+            <!-- app-gui-page -->
+        {% endif %}
 
-      {% block title %}<title>{% if name %}{{ name }} – {% endif %}Dashboard</title>{% endblock %}
+        {% block meta %}
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+            <meta name="robots" content="NONE,NOARCHIVE" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        {% endblock %}
 
+        {% block title %}<title>{% if name %}{{ name }} – {% endif %}Dashboard</title>{% endblock %}
 
-      {% block pmInlineScripts %}
+        {% block gui_init_scripts %}
+            <script type="text/javascript">
+                window.csrf_data = {
+                    csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+                    csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
+                    token: "{{ csrf_token }}"
+                };
 
-        <script type="text/javascript">
+                var hostname = '{{host_url}}';
+                var server_status_types = '{{server_status_types|safe}}';
 
-            window.csrf_data = {
-                csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
-                csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
-                token: "{{ csrf_token }}"
-            };
+                var polemarch_version = '{{gui_version}}';
+                var gui_version = '{{gui_version}}';
 
-            var hostname = '{{host_url}}';
+                var gui_logout_url = hostname + '{{logout_url}}';
 
-            var gui_logout_url = hostname + '{{logout_url}}';
+                {% if user.is_authenticated %}
+                    var my_user_id = '{{user.id}}'
+                {% else %}
+                    var my_user_id = undefined
+                {% endif %}
 
-            var gui_version = '{{gui_version}}';
+                {% if user.is_authenticated %}
+                    var is_authenticated = true
+                {% else %}
+                    var is_authenticated = false
+                {% endif %}
 
-            {% if user.is_authenticated %}
-                var my_user_id = '{{user.id}}'
-            {% else %}
-                var my_user_id = undefined
-            {% endif %}
-
-            {% if user.is_authenticated %}
-                var is_authenticated = true
-            {% else %}
-                var is_authenticated = false
-            {% endif %}
-
-            {% if user.is_superuser %}
-                var is_superuser = true
-                var is_staff = true
-            {% else %}
-                {% if user.is_staff %}
+                {% if user.is_superuser %}
                     var is_superuser = true
                     var is_staff = true
                 {% else %}
-                    var is_superuser = false
-                    var is_staff = false
+                    {% if user.is_staff %}
+                        var is_superuser = true
+                        var is_staff = true
+                    {% else %}
+                        var is_superuser = false
+                        var is_staff = false
+                    {% endif %}
                 {% endif %}
-            {% endif %}
 
-            window.pmStaticPath = "{% static '' %}";
-            window.isDebug = {% if debug %}true{% else %}false{% endif %}
-            window.timeZone = '{{timezone}}';
-
-        </script>
-
-      {% endblock %}
-
-
-      {% block style %}
-
-        {% block bootstrap_theme %}
+                window.guiStaticPath = "{% static '' %}";
+                window.isDebug = {% if debug %}true{% else %}false{% endif %}
+                window.timeZone = '{{timezone}}'; 
+            </script>
         {% endblock %}
 
-        {% block flavicon %}
+        {% block style %}
+            {% block gui_init_inline_styles %}
+                <style>
+                    #LoadingProgressBar *::-webkit-scrollbar {
+                        width: 0px;
+                    }
 
-        <!--<link rel="shortcut icon" href="{{host_url}}{% static 'img/logo/favicon.ico' %}?v={{gui_version}}" />-->
+                    #LoadingProgressBar {
+                        background: #080E1C;
+                        width: 100%;
+                        height: 100%;
+                        position: fixed;
+                        top: 0px;
+                        left: 0px;
+                        z-index: 2000;
+                    }
+
+                    #LoadingProgressBar .loadWrapper {
+                        width: 200px;
+                        height: 7px;
+                        position: absolute;
+                        top: 130px;
+                        left: 50%;
+                        transform: translate(-50%,-50%);
+                        background: rgba(0,0,0,.4);
+                        border-radius: 7px;
+                    }
+
+                    #LoadingProgressBar .loadProgress {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        border-radius: 7px;
+                        background: #7F529C;
+                        height: 100%;
+                        width: 100%;
+                        transition: all 100ms ease-out;
+                    }
+
+                    #LoadingProgressBar .status {
+                        position: absolute;
+                        top: 110px;
+                        left: 50%;
+                        transform: translate(-50%, -45%);
+                        font-family: 'Ubuntu Mono', monospace;
+                        color: #fff;
+                    }
+
+                    #LoadingProgressBar .statusCont {
+                        font-family: 'Ubuntu Mono', monospace;
+                    }
+
+                    #LoadingProgressBar .titleP {
+                        position: absolute;
+                        top: 25px;
+                        left: 50%;
+                        transform: translate(-50%,25%);
+                        font-family: 'Ubuntu Mono', monospace;
+                        color: #7F529C;
+                        text-transform: uppercase;
+                    }
+                </style>
+            {% endblock %}
+
+            {% block bootstrap_theme %}
+            {% endblock %}
+
+            {% block flavicon %}{% endblock %}
+  
+            {% block custom_style %}
+            {% endblock %}
+
         {% endblock %}
-        <link href="{{host_url}}{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}" rel="stylesheet" />
+   
+        {% block resource_list %}
+            <script>
+                window.resourceList = [
+                    { prioritet:0, type:'js', name: "{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"},
+                    { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"}, 
+                    
+                    
+                    { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
+                    { prioritet:4, type:'js', name: "{% static 'js/libs/notify.js' %}?v={{gui_version}}"},
+                    { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
+                    { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
+                    
+                    { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
+                    { prioritet:7, type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"},
+                    
+                    
+                    { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
+                    { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
+                    { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
+                    
+                    { prioritet:11, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"}, 
+                    { prioritet:12, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
+                    { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
+                    { prioritet:100, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
+                    
+                    { prioritet:101, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
+                    { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+                    { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
+                    { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
+                    { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
+                    { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
+                    { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
+                    { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"}, 
 
-        <!-- Bootstrap 3.3.6 -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
-        <!-- Ionicons -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
-        <!-- Theme style -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
-        <!-- AdminLTE Skins. Choose a skin from the css/skins
-             folder instead of downloading all of them to reduce the load. -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}">
-
-        <link rel="stylesheet" href="{{host_url}}{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}">
-
-        <link rel="stylesheet" href="{{host_url}}{% static 'css/gui.css' %}?v={{gui_version}}">
-
-        <link rel="stylesheet" href="{{host_url}}{% static 'css/ansi-colors.css' %}?v={{gui_version}}">
-
-        {% block custom_style %}
+                ]
+            </script>
         {% endblock %}
-      {% endblock %}
+        
+        {% block commonScripts %}{% endblock %}
 
-      {% block commonScripts %}
-
-        <!-- jQuery 2.2.3 -->
-        <script src="{{host_url}}{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
-        <script src="{{host_url}}{% static 'js/libs/notify.js' %}?v={{gui_version}}"></script>
-        <!-- Bootstrap 3.3.6 -->
-        <script defer src="{{host_url}}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
-        <!-- FastClick -->
-        <script defer src="{{host_url}}{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"></script>
-        <!-- AdminLTE App -->
-        <script defer src="{{host_url}}{% static 'js/app.js' %}?v={{gui_version}}"></script>
-
-      {% endblock %}
-
-      {% block pmScripts %}{% endblock %}
-  </head>
+    </head>
 {% endblock %}
 
 {% block body %}
     <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}">
+        {% block gui_init_inline_body %}
+            <div id="LoadingProgressBar">
+                <!-- Title -->
+                <h1 class="titleP">
+                    {% block progressbar_title %}{{project_gui_name}}{% endblock %}
+                </h1>
 
-    <div id="loader-wrapper">
-        <div id="loader"></div>
-    </div>
+                <!-- Load Status -->
+                <div class="status">
+                    <div class="statusCont" id="LoadingProgressBarCount">
 
-    {% block navbar %}
-        <div class="wrapper" >
-            <header class="main-header">
-                <!-- Logo -->
-                {% block logo %}
-                <a href="/" class="logo">
-                    <span>{{ project_gui_name }}</span>
-                </a>
-                {% endblock %}
-                <!-- Header Navbar: style can be found in header.less -->
-                <nav class="navbar navbar-static-top">
-                    <!-- Sidebar toggle button-->
-                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-                        <span class="sr-only">Toggle navigation</span>
-                    </a>
-
-                    <div class="navbar-custom-menu">
-                        <ul class="nav navbar-nav">
-                            {% include "gui/menu.html" %}
-                        </ul>
                     </div>
-                </nav>
-            </header>
-            <!-- Left side column. contains the logo and sidebar -->
-            <aside class="main-sidebar">
-                <!-- sidebar: style can be found in sidebar.less -->
-                <section class="sidebar">
-                    <!-- sidebar menu: : style can be found in sidebar.less -->
-                    <ul class="sidebar-menu">
-                        {% block left_menu %}
-                            {% include "gui/left_menu.html" %}
-                        {% endblock %}
-                    </ul>
-                </section>
-                <!-- /.sidebar -->
-            </aside>
+                </div>
 
-            <!-- Content Wrapper. Contains page content -->
-            <div class="content-wrapper" id='spajs-right-area'>
-                <!-- Main content -->
-                {% block content %}{% endblock %}
+                <!-- Progress bar -->
+                <div class="loadWrapper">
+                    <div class="loadProgress"  id="LoadingProgressBarLine"></div>
+                </div>
             </div>
+        {% endblock %}
+ 
+        <div id="RealBody" style="display: none;">
+            {% block gui_body_template %}
+                <div class="hold-transition skin-black-light sidebar-mini " style="width: 100vw;    height: 100vh;">
+                    <div id="loader-wrapper">
+                        <div id="loader"></div>
+                    </div>
 
-            {% block footer %}
+                    {% block navbar %}
+                        <div class="wrapper" >
+                            <header class="main-header"> 
+                                {% block logo %}
+                                    <!-- Logo -->
+                                    <a href="/" class="logo">
+                                        <span>{{ project_gui_name }}</span>
+                                    </a>       
+                                {% endblock %}
+                                <!-- Header Navbar: style can be found in header.less -->
+                                <nav class="navbar navbar-static-top">
+                                    <!-- Sidebar toggle button-->
+                                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                                        <span class="sr-only">Toggle navigation</span>
+                                    </a>
+
+                                    <div class="navbar-custom-menu">
+                                        <ul class="nav navbar-nav">
+                                            {% block gui_menu %}
+                                                {% include "gui/menu.html" %}
+                                            {% endblock %}
+                                        </ul>
+                                    </div>
+                                </nav>
+                            </header>
+                            <!-- Left side column. contains the logo and sidebar -->
+                            <aside class="main-sidebar">
+                                <!-- sidebar: style can be found in sidebar.less -->
+                                <section class="sidebar">
+                                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                                    <ul class="sidebar-menu" data-widget="tree">
+                                        {% block left_menu %}
+                                            {% include "gui/left_menu.html" %}
+                                        {% endblock %}
+                                    </ul>
+                                </section>
+                                <!-- /.sidebar -->
+                            </aside>
+
+                            <!-- Content Wrapper. Contains page content -->
+                            <div class="content-wrapper" id='spajs-right-area'>
+                                <!-- Main content -->
+                                {% block content %}
+                                    <!-- errorPage -->
+                                    <section class="content-header">
+                                        <h1> 
+                                            <span class="h1-header" ><i class="fa fa-warning text-yellow"></i> Page not found</span>
+
+                                        </h1>
+                                        <ol class="breadcrumb">
+                                            <li><a href="<%- window.hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
+                                            <li class="active"><i class="fa fa-warning text-yellow"></i> Page not found </li>
+                                        </ol>
+                                    </section>
+
+                                    <section class="content">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <div class="row">
+                                            <section class="col-lg-12">
+                                                <div class="box box-info">
+                                                    <div class="box-header with-border">
+
+                                                    </div>
+                                                    <div class="box-body"> 
+                                                        <p>
+                                                            Status: 404
+                                                        </p> 
+                                                        Follow the link to create a bug report  
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </section>
+                                    <!-- /errorPage --> 
+                                {% endblock %}
+                            </div>
+
+                            {% block footer %}
+                                <footer class="main-footer">
+                                    <div class="pull-right hidden-xs">
+                                        <b>Version</b> {{gui_version}}
+                                    </div>
+
+                                    {% if debug %}
+                                        <div class="pull-right hidden-xs">
+                                            <b><a href="#"
+                                                  style="color:#ccc;"
+                                                  onclick="loadQUnitTests(); return false;" >Test qUnit</a></b>
+                                            &nbsp;&nbsp;&nbsp;
+                                        </div>
+                                    {% endif %}
+                                    <br>
+                                </footer>
+                            {% endblock %}
+                        </div>
+                    {% endblock %}
+                </div>
             {% endblock %}
-    {% endblock %}
-    {% block script %}{% endblock %}
+        </div>
+
+        <!-- /gui_body_template -->
+            
+        <!-- inline_app_loader -->
+        {% block inline_app_loader %} 
+            {% include "gui/inline_app_loader.html" %}
+        {% endblock %}
+        <!-- /inline_app_loader -->
+        
+        <!-- script -->
+        {% block script %}{% endblock %}
+        <!-- /script -->
     </body>
 {% endblock %}
 </html>
