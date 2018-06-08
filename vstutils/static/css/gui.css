@@ -711,7 +711,7 @@ table{
 .pm-treeview>.pm-treeview-menu{
     display: none;
 }
-
+ 
 .pm-treeview.hover-li .pm-treeview-menu {
     display: block;
     position: absolute;
@@ -1065,4 +1065,44 @@ table{
     .main-sidebar {
         padding-top: 50px !important;
     }
+}
+
+@media (max-width: 767px) {
+    
+    .main-header .logo{
+        display: none;
+    }
+    
+    .sidebar-menu ul.pm-treeview-menu{
+        /*position: relative;
+        display: block;*/
+        color: #f00;
+    }
+    
+    .sidebar-menu .pm-treeview.hover-li .pm-treeview-menu {
+        display: block !important;
+        margin: 0;
+        z-index: 2000;
+        padding: 0;
+        position: initial;
+    }
+    .sidebar-menu .pm-treeview.hover-li .pm-treeview-menu .group-header-copy {
+        display: none;  
+    }
+    
+    .sidebar-mini.sidebar-open .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu{
+        display: block;
+    }
+    
+    .sidebar-menu .pm-treeview-menu>li>a {
+        background-color: transparent;
+    }
+    
+    .sidebar-menu>li.pm-treeview-active>a, .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu {
+        border-left: 5px solid #00c0ef;
+    }
+}
+
+.pm-treeview.hover-li .open-pm-treeview-button i, .pm-treeview-active .open-pm-treeview-button i{
+    transform: rotate(4.7rad); 
 }
