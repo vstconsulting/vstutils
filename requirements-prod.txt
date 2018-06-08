@@ -1,4 +1,4 @@
 # Packages needed for delayed jobs.
-psycopg2
+psycopg2-binary
 PyMySQL
 python-memcached

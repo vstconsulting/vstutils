@@ -163,7 +163,9 @@ TEMPLATES = [
 
 WSGI = os.getenv('VST_WSGI', '{}.wsgi'.format(VST_PROJECT))
 WSGI_APPLICATION = "{}.application".format(WSGI)
-
+UWSGI_APPLICATION = '{module}:{app}'.format(
+    module='.'.join(WSGI_APPLICATION.split('.')[:-1]), app=WSGI_APPLICATION.split('.')[-1]
+)
 
 try:
     __DB_SETTINGS = {k.upper():v.format(**KWARGS) for k,v in config.items('database')}
