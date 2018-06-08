@@ -5,13 +5,16 @@
 {% block head %}
 <head> 
     {% block meta %}
-        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <!-- Tell the browser to be responsive to screen width -->
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     {% endblock %}
 
-    {% block title %}<title>{{project_gui_name}} | Log in</title>{% endblock %}
+
+    {% block title %}<title>{% if name %}{{ name }} – {% endif %}{{ project_gui_name }}</title>{% endblock %}
+
+    {% block gui_init_scripts %}{% endblock %}
 
     {% block style %}
         <!-- Bootstrap 3.3.7 -->
@@ -24,9 +27,24 @@
         <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
         <!-- Google Font -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
-        {% block custom_scheme %}
-        {% endblock %}
 
+            {% block gui_init_inline_styles %}
+            {% endblock %}
+
+            {% block bootstrap_theme %}
+            {% endblock %}
+
+            {% block flavicon %}{% endblock %}
+
+            {% block custom_style %}
+            {% endblock %}
+
+    {% endblock %}
+    {% block resource_list %}
+        <script>
+            window.resourceList = [
+            ]
+        </script>
     {% endblock %}
 
     {% block common_sciprt %}
@@ -80,7 +98,7 @@
             <script src="{{host_url}}{% static 'js/libs/notify.js' %}?v={{gui_version}}"></script>
             <!-- Bootstrap 3.3.7 -->
             <script defer src="{{host_url}}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
-        {% endblock %} 
+        {% endblock %}
     </body>
 {% endblock %}
 </html>

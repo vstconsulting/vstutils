@@ -1,186 +1,170 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-<!DOCTYPE html>
-<html>
-{% block head %}
-    <head>
+
+{% block gui_init_scripts %}
+    {% if user.is_authenticated %}
+        <!-- app-gui-page -->
+    {% endif %}
+
+    <script type="text/javascript">
+        window.csrf_data = {
+            csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+            csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
+            token: "{{ csrf_token }}"
+        };
+
+        var hostname = '{{host_url}}';
+        var server_status_types = '{{server_status_types|safe}}';
+
+        var polemarch_version = '{{gui_version}}';
+        var gui_version = '{{gui_version}}';
+
+        var gui_logout_url = hostname + '{{logout_url}}';
+
         {% if user.is_authenticated %}
-            <!-- app-gui-page -->
+            var my_user_id = '{{user.id}}'
+        {% else %}
+            var my_user_id = undefined
         {% endif %}
 
-        {% block meta %}
-            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-            <meta name="robots" content="NONE,NOARCHIVE" />
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-        {% endblock %}
+        {% if user.is_authenticated %}
+            var is_authenticated = true
+        {% else %}
+            var is_authenticated = false
+        {% endif %}
 
-        {% block title %}<title>{% if name %}{{ name }} – {% endif %}Dashboard</title>{% endblock %}
+        {% if user.is_superuser %}
+            var is_superuser = true
+            var is_staff = true
+        {% else %}
+            {% if user.is_staff %}
+                var is_superuser = true
+                var is_staff = true
+            {% else %}
+                var is_superuser = false
+                var is_staff = false
+            {% endif %}
+        {% endif %}
 
-        {% block gui_init_scripts %}
-            <script type="text/javascript">
-                window.csrf_data = {
-                    csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
-                    csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}",
-                    token: "{{ csrf_token }}"
-                };
-
-                var hostname = '{{host_url}}';
-                var server_status_types = '{{server_status_types|safe}}';
-
-                var polemarch_version = '{{gui_version}}';
-                var gui_version = '{{gui_version}}';
-
-                var gui_logout_url = hostname + '{{logout_url}}';
-
-                {% if user.is_authenticated %}
-                    var my_user_id = '{{user.id}}'
-                {% else %}
-                    var my_user_id = undefined
-                {% endif %}
-
-                {% if user.is_authenticated %}
-                    var is_authenticated = true
-                {% else %}
-                    var is_authenticated = false
-                {% endif %}
-
-                {% if user.is_superuser %}
-                    var is_superuser = true
-                    var is_staff = true
-                {% else %}
-                    {% if user.is_staff %}
-                        var is_superuser = true
-                        var is_staff = true
-                    {% else %}
-                        var is_superuser = false
-                        var is_staff = false
-                    {% endif %}
-                {% endif %}
-
-                window.guiStaticPath = "{% static '' %}";
-                window.isDebug = {% if debug %}true{% else %}false{% endif %}
-                window.timeZone = '{{timezone}}'; 
-            </script>
-        {% endblock %}
-
-        {% block style %}
-            {% block gui_init_inline_styles %}
-                <style>
-                    #LoadingProgressBar *::-webkit-scrollbar {
-                        width: 0px;
-                    }
-
-                    #LoadingProgressBar {
-                        background: #080E1C;
-                        width: 100%;
-                        height: 100%;
-                        position: fixed;
-                        top: 0px;
-                        left: 0px;
-                        z-index: 2000;
-                    }
-
-                    #LoadingProgressBar .loadWrapper {
-                        width: 200px;
-                        height: 7px;
-                        position: absolute;
-                        top: 130px;
-                        left: 50%;
-                        transform: translate(-50%,-50%);
-                        background: rgba(0,0,0,.4);
-                        border-radius: 7px;
-                    }
-
-                    #LoadingProgressBar .loadProgress {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        border-radius: 7px;
-                        background: #7F529C;
-                        height: 100%;
-                        width: 100%;
-                        transition: all 100ms ease-out;
-                    }
-
-                    #LoadingProgressBar .status {
-                        position: absolute;
-                        top: 110px;
-                        left: 50%;
-                        transform: translate(-50%, -45%);
-                        font-family: 'Ubuntu Mono', monospace;
-                        color: #fff;
-                    }
-
-                    #LoadingProgressBar .statusCont {
-                        font-family: 'Ubuntu Mono', monospace;
-                    }
-
-                    #LoadingProgressBar .titleP {
-                        position: absolute;
-                        top: 25px;
-                        left: 50%;
-                        transform: translate(-50%,25%);
-                        font-family: 'Ubuntu Mono', monospace;
-                        color: #7F529C;
-                        text-transform: uppercase;
-                    }
-                </style>
-            {% endblock %}
-
-            {% block bootstrap_theme %}
-            {% endblock %}
-
-            {% block flavicon %}{% endblock %}
-  
-            {% block custom_style %}
-            {% endblock %}
-
-        {% endblock %}
-   
-        {% block resource_list %}
-            <script>
-                window.resourceList = [
-                    { prioritet:0, type:'js', name: "{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"},
-                    { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"}, 
-                    
-                    
-                    { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
-
-                    { prioritet:4, type:'js', name: "{% static 'js/libs/notify.js' %}?v={{gui_version}}"},
-                    { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
-                    { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
-                    
-                    { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
-                    { prioritet:7, type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"},
-                    
-                    
-                    { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
-                    { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
-                    { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
-
-                    
-                    { prioritet:11, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"}, 
-                    { prioritet:12, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
-                    { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
-                    { prioritet:100, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
-
-                    { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
-                    { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
-                    { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
-                    { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
-                    { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
-                    { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
-                    { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"}, 
-
-                ]
-            </script>
-        {% endblock %}
-        
-        {% block commonScripts %}{% endblock %}
-
-    </head>
+        window.guiStaticPath = "{% static '' %}";
+        window.isDebug = {% if debug %}true{% else %}false{% endif %}
+        window.timeZone = '{{timezone}}';
+    </script>
 {% endblock %}
+
+{% block style %}
+    {% block gui_init_inline_styles %}
+        <style>
+            #LoadingProgressBar *::-webkit-scrollbar {
+                width: 0px;
+            }
+
+            #LoadingProgressBar {
+                background: #080E1C;
+                width: 100%;
+                height: 100%;
+                position: fixed;
+                top: 0px;
+                left: 0px;
+                z-index: 2000;
+            }
+
+            #LoadingProgressBar .loadWrapper {
+                width: 200px;
+                height: 7px;
+                position: absolute;
+                top: 130px;
+                left: 50%;
+                transform: translate(-50%,-50%);
+                background: rgba(0,0,0,.4);
+                border-radius: 7px;
+            }
+
+            #LoadingProgressBar .loadProgress {
+                position: absolute;
+                top: 0;
+                left: 0;
+                border-radius: 7px;
+                background: #7F529C;
+                height: 100%;
+                width: 100%;
+                transition: all 100ms ease-out;
+            }
+
+            #LoadingProgressBar .status {
+                position: absolute;
+                top: 110px;
+                left: 50%;
+                transform: translate(-50%, -45%);
+                font-family: 'Ubuntu Mono', monospace;
+                color: #fff;
+            }
+
+            #LoadingProgressBar .statusCont {
+                font-family: 'Ubuntu Mono', monospace;
+            }
+
+            #LoadingProgressBar .titleP {
+                position: absolute;
+                top: 25px;
+                left: 50%;
+                transform: translate(-50%,25%);
+                font-family: 'Ubuntu Mono', monospace;
+                color: #7F529C;
+                text-transform: uppercase;
+            }
+        </style>
+    {% endblock %}
+
+    {% block bootstrap_theme %}
+    {% endblock %}
+
+    {% block flavicon %}{% endblock %}
+
+    {% block custom_style %}
+    {% endblock %}
+
+{% endblock %}
+
+{% block resource_list %}
+    <script>
+        window.resourceList = [
+            { prioritet:0, type:'js', name: "{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"},
+            { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"},
+
+
+            { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
+
+            { prioritet:4, type:'js', name: "{% static 'js/libs/notify.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
+
+            { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"},
+
+
+            { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
+            { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
+            { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
+
+
+            { prioritet:11, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
+            { prioritet:12, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
+            { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
+            { prioritet:100, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
+
+            { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
+            { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
+            { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
+            { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
+            { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
+            { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
+
+        ]
+    </script>
+{% endblock %}
+
 
 {% block body %}
     <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}">
@@ -333,4 +317,3 @@
         <!-- /script -->
     </body>
 {% endblock %}
-</html>
