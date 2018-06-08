@@ -164,8 +164,7 @@
                     { prioritet:12, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
                     { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
                     { prioritet:100, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
-                    
-                    { prioritet:101, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
+
                     { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
                     { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
                     { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
@@ -297,6 +296,9 @@
 
                             {% block footer %}
                                 <footer class="main-footer">
+
+                                    {% block footer_buttons %}{% endblock %}
+
                                     <div class="pull-right hidden-xs">
                                         <b>Version</b> {{gui_version}}
                                     </div>
