@@ -21,7 +21,7 @@
 
 /**
  * http://codepen.io/thomasgrant/pen/DgEFd
- * Анимация на ожидание 
+ * Animation for waiting
  *
  * http://codepen.io/elbitapmoC/pen/ryVXNw
  * http://codepen.io/thomasgrant/pen/DgEFd
@@ -181,7 +181,7 @@
     }
 }
 
-/* CSS для анимации ожидания в стиле ios (http://codepen.io/anon/pen/MmQJbx) */
+/* CSS Animation for waiting in ios style (http://codepen.io/anon/pen/MmQJbx) */
 div.spinner {
     position: relative;
     width: 180px;
@@ -283,7 +283,7 @@ div.spinner div.bar12 {
 }
 
 
-/* CSS под конкретные платформы */
+/* CSS for platforms */
 .for-ios{
     display: none !important;
 }
@@ -299,6 +299,23 @@ div.spinner div.bar12 {
 .platform-android .for-android{
     display: block !important;
 }
+
+.for-web{
+    display: block !important;
+}
+
+.for-cordova{
+    display: none !important;
+}
+
+.platform-cordova .for-web{
+    display: none !important;
+}
+
+.platform-cordova .for-cordova{
+    display: block !important;
+}
+
 
 .borderless td, .borderless th {
     border: none;
@@ -623,21 +640,8 @@ table{
 
 
 .bg-logo {
-    background-image: url(/static/img/logo/horizontal.png);
-    background-position: center center;
-    background-repeat: no-repeat;
-    -webkit-background-size:150px 40px;
-    -o-background-size: 150px 40px;
-    -moz-background-size:150px 40px;
-    background-size: 150px 40px;
     display: block;
-    width:150px;
-    height: 40px;
-    margin:0px;
-    margin-top: 5px;
-    float: left;
-
-
+    width:220px;
 }
 
 .bg-logo-min {
@@ -686,7 +690,7 @@ table{
     color: #C1801A;
 }
 
-/*стили для сайдбара */
+/*styles for sidebar */
 .skin-black-light .sidebar-menu>li:hover>a, .skin-black-light .sidebar-menu>li.active>a {
     color: #000;
     background: #EEEEEE;
@@ -707,7 +711,7 @@ table{
 .pm-treeview>.pm-treeview-menu{
     display: none;
 }
-
+ 
 .pm-treeview.hover-li .pm-treeview-menu {
     display: block;
     position: absolute;
@@ -896,7 +900,8 @@ table{
 
 .sidebar-menu>.pm-treeview-active>.pm-treeview-menu>.group-header-copy,
 .sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview>.pm-treeview-menu>.group-header-copy,
-.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active>.pm-treeview-menu>.group-header-copy{
+.sidebar-mini.sidebar-collapse .sidebar-menu>.pm-treeview-active>.pm-treeview-menu>.group-header-copy,
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu .pm-treeview-menu>.group-header-copy {
     display: none;
 }
 
@@ -910,7 +915,57 @@ table{
     border-top-right-radius: 4px;
 }
 
-/* конец стилей для сайдбара */
+/* styles for sidebar on small screens*/
+
+.open-pm-treeview-button {
+    display: none;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-button {
+    display: block;
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    font-size: 18px;
+    padding:3px 12px;
+    border-radius: 2em;
+    color: #000;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .pm-treeview.hover-li .pm-treeview-menu {
+    display: none;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu .pm-treeview-menu {
+    display: block!important;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu a {
+    background-color: #eeeeee;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu .pm-treeview-menu>li>a {
+    padding: 12px 5px 12px 38px;
+    display: block;
+    background-color: #eeeeee;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu .open-pm-treeview-menu:not(.pm-treeview-active) .pm-treeview-menu>li>a {
+    padding-left: 43px;
+}
+
+.sidebar-mini.sidebar-open  .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu {
+    display: none;
+}
+
+.sidebar-mini.sidebar-open .sidebar-menu>li.active-li:not(.open-pm-treeview-menu)>a {
+    background-color: #E0E0E0!important;
+}
+/* end of styles for sidebar on small screens*/
+/* end of styles for sidebar */
 
 .imported-subitems-table th, .imported-subitems-table td {
     word-wrap:break-word;
@@ -938,6 +993,32 @@ table{
 .start-time-td {
     width:160px;
 }
+
+
+.readme_content {
+    word-wrap: break-word;
+}
+
+.readme_content h1 {
+    font-size: 24px;
+}
+
+.readme_content h2 {
+    font-size: 20px;
+}
+
+.readme_content h3 {
+    font-size: 18px;
+}
+
+@media (min-width: 1200px) {
+    .readme_content img {
+        max-width: 60%;
+        width: auto;
+    }
+}
+
+
 
 
 @media (max-width: 1200px) {
@@ -976,6 +1057,52 @@ table{
     }
 }
 
-.hide-in-web{ 
-    display: none;
+@media (max-width: 767px) {
+    .app-logo{
+        display: none !important;
+    }
+
+    .main-sidebar {
+        padding-top: 50px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    
+    .main-header .logo{
+        display: none;
+    }
+    
+    .sidebar-menu ul.pm-treeview-menu{
+        /*position: relative;
+        display: block;*/
+        color: #f00;
+    }
+    
+    .sidebar-menu .pm-treeview.hover-li .pm-treeview-menu {
+        display: block !important;
+        margin: 0;
+        z-index: 2000;
+        padding: 0;
+        position: initial;
+    }
+    .sidebar-menu .pm-treeview.hover-li .pm-treeview-menu .group-header-copy {
+        display: none;  
+    }
+    
+    .sidebar-mini.sidebar-open .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu{
+        display: block;
+    }
+    
+    .sidebar-menu .pm-treeview-menu>li>a {
+        background-color: transparent;
+    }
+    
+    .sidebar-menu>li.pm-treeview-active>a, .sidebar-menu>li.pm-treeview-active>.pm-treeview-menu {
+        border-left: 5px solid #00c0ef;
+    }
+}
+
+.pm-treeview.hover-li .open-pm-treeview-button i, .pm-treeview-active .open-pm-treeview-button i{
+    transform: rotate(4.7rad); 
 }

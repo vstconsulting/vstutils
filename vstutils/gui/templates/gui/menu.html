@@ -3,18 +3,22 @@
 {% load rest_framework %}
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 
-    {% if user.is_authenticated %}
-    <li><a href="/api/"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
-    {% endif %}
+{% if user.is_authenticated %}
+    <li class="for-web api-link" ><a href="/api/"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
+{% endif %}
 
-    {% if user.is_active and user.is_staff %}
+{% if user.is_active and user.is_staff %}
     <!--<li><a href="/admin/"><i class="glyphicon glyphicon-cog"></i> <span>{% trans 'Settings' %}</span></a></li>-->
-    {% endif %}
-    {% if user.is_authenticated %}
+{% endif %}
+
+{% if user.is_authenticated %}
     {% block profile_link %}
-    <li><a><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
+        <li><a href='#' ><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
     {% endblock %}
-    <li><a href='{{ logout_url|default:"/logout/" }}'><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
-    {% else %}
-    <li><a href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-log-out"></i> <span>Login</span></a></li>
-    {% endif %}
+
+    <li class="for-cordova"><a href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>
+    <li class="for-cordova"><a href="#" onclick="inAppLogout()"><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
+    <li class="for-web logout-link"><a href='{{ logout_url|default:"/logout/" }}'><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
+{% else %}
+    <li class="for-web login-link"><a href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-log-out"></i> <span>Login</span></a></li>
+{% endif %}

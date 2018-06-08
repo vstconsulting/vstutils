@@ -1,0 +1,423 @@
+<script type="text/javascript">
+function isCordova(){
+    if(window.cordova)
+    {
+        return true;
+    }
+    else if(window.parent && window.parent.cordova)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+window._guiFilesCache = function(opt)
+{
+    var indexedDB 	  = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
+    var baseName 	  = "filesCache"
+    var storeName 	  = "filesCacheStore"
+    var bdVersion 	  = 1
+    this.myDB             = undefined
+    this.noCache          = opt.noCache
+    this.useLocalStorage  = opt.useLocalStorage
+
+
+    var thisObj = this;
+    function connectDB()
+    {
+        return new Promise(function(resolve, reject)
+        {
+            if(thisObj.myDB)
+            {
+                resolve(thisObj.myDB);
+                return;
+            }
+
+            var request = indexedDB.open(baseName, bdVersion);
+            request.onerror = function(err)
+            {
+                console.error("connectDB", err);
+                reject(err)
+            }
+
+            request.onsuccess = function(event)
+            {
+                thisObj.myDB = event.target.result
+                resolve(event.target.result);
+            }
+
+            request.onupgradeneeded = function(e)
+            {
+                e.currentTarget.result.createObjectStore(storeName, { keyPath: "path", autoIncrement: true });
+                connectDB().then(resolve, reject)
+            }
+        })
+    }
+
+    this.getFile = function(file_url)
+    {
+        var thisObj = this
+        return new Promise(function(resolve, reject)
+        {
+            if(thisObj.noCache)
+            {
+                reject()
+            }
+
+            if(thisObj.useLocalStorage)
+            {
+                if(window.localStorage[file_url])
+                {
+                    try{
+                        resolve(JSON.parse(window.localStorage[file_url]))
+                    }catch (exception)
+                    {
+                        reject(exception)
+                    }
+
+                    return;
+                }
+
+                reject()
+                return;
+            }
+
+            connectDB().then(function(db)
+            {
+                var request = db.transaction([storeName], "readonly").objectStore(storeName).get(file_url);
+
+                request.onerror = function(err)
+                {
+                    console.error("getFile", err);
+                    reject(err)
+                }
+
+                request.onsuccess = function()
+                {
+                    if(!request.result)
+                    {
+                        reject()
+                        return;
+                    }
+
+                    resolve(request.result ? request.result : -1)
+                }
+            }, reject);
+        });
+    }
+
+    this.setFile = function(file_url, file_data)
+    {
+        var thisObj = this
+        if(thisObj.useLocalStorage)
+        {
+            window.localStorage[file_url] = JSON.stringify({path: file_url, data: file_data})
+            return;
+        }
+
+        connectDB().then(function(db)
+        {
+            var transaction = db.transaction([storeName],"readwrite");
+            transaction.oncomplete = function(event) {
+                console.log("setFile Success", event);
+            };
+
+            transaction.onerror = function(event) {
+                console.error("setFile Error", event);
+            };
+
+            var objectStore = transaction.objectStore(storeName);
+
+            objectStore.put({path: file_url, data: file_data});
+        });
+    }
+
+    this.deleteAllCache = function(url)
+    {
+        var delkeys = []
+        for (var i = 0; i < window.localStorage.length; i++)
+        {
+            var key = window.localStorage.key(i);
+            if(key.indexOf(url) == 0 || key.indexOf("http://"+url) == 0 || "https://"+key.indexOf(url) == 0 )
+            {
+                delkeys.push(key)
+            }
+        }
+
+        for(var i in delkeys)
+        {
+            window.localStorage.removeItem(delkeys[i])
+        }
+    }
+
+    this.delFile = function(file_url)
+    {
+        var thisObj = this
+        if(thisObj.useLocalStorage)
+        {
+            window.localStorage.removeItem(file_url)
+            return;
+        }
+
+        connectDB().then(function(db)
+        {
+            var transaction = db.transaction([storeName],"readwrite");
+            transaction.oncomplete = function(event) {
+                console.log("setFile Success", event);
+            };
+
+            transaction.onerror = function(event) {
+                console.error("setFile Error", event);
+            };
+
+            var objectStore = transaction.objectStore(storeName);
+
+            objectStore.delete(file_url);
+        });
+    }
+}
+
+if(!window.parent || !window.parent._guiFilesCache)
+{
+    window.guiFilesCache = new window._guiFilesCache({noCache:true, useLocalStorage:false})
+}
+else
+{
+   window.guiFilesCache = new window.parent._guiFilesCache({noCache:true, useLocalStorage:false})
+}
+
+var jsLoadingProgress = 0;
+var jsLoadingProgressStep = 0;
+var jsLoadingProgressSumSteps = 0;
+
+var jsToLoad = {}
+
+function addToPage(jsToLoad)
+{
+    indexs = []
+    for(var i in jsToLoad)
+    {
+        if(!indexs[jsToLoad[i].index])
+        {
+            indexs[jsToLoad[i].index] = []
+        }
+
+        indexs[jsToLoad[i].index].push(jsToLoad[i])
+    }
+
+    function compareNumeric(a, b) 
+    {
+        if (!a[0].prioritet && a[0].prioritet !== 0) a[0].prioritet = 999;
+        if (!b[0].prioritet && b[0].prioritet !== 0) b[0].prioritet = 999;
+        
+        if (a[0].prioritet > b[0].prioritet) return 1;
+        if (a[0].prioritet < b[0].prioritet) return -1;
+        return 0
+        
+        
+        if (a[0].index > b[0].index) return 1;
+        if (a[0].index < b[0].index) return -1;
+    }
+
+    indexs = indexs.sort(compareNumeric);
+
+
+    for(var i in indexs)
+    {
+        for(var j in indexs[i])
+        {
+            var val = indexs[i][j]
+ 
+            if(val.appended)
+            {
+                continue;
+            }
+
+            if(val.status!= 200)
+            {
+                return;
+            }
+
+            if(val.status == 200)
+            {
+                val.appended = true;
+                try{
+                    console.log("append", val);
+ 
+                    if(val.type =='tpl')
+                    {
+                        // Надеюсь что к моменту загрузки шаблона js с jquery уже загружены
+                        $("body").append(val.response)
+                    }
+                    else if(val.type =='js')
+                    {
+                        //eval(val.response)
+                        var link = document.createElement("script");
+                        link.setAttribute("type", "text/javascript");
+                        //link.setAttribute("href", file);
+                        link.innerHTML = val.response
+                        document.getElementsByTagName("head")[0].appendChild(link);
+                    }
+                    else if(val.type =='css' /*&& isCordova()*/)
+                    {
+                        var link = document.createElement("style");
+                        link.setAttribute("rel", "stylesheet");
+                        link.setAttribute("type", "text/css");
+                        link.setAttribute("media", "text/css");
+                        link.setAttribute("data-url", val.url);
+                        link.rel  = 'stylesheet';
+                        link.type = 'text/css';
+                        link.media = 'all';
+
+                        //if(isCordova())
+                        //{
+                            link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts")
+                        //}
+                        //else
+                        //{
+                        //    link.innerHTML = val.response
+                        //}
+
+                        //debugger;
+                        document.getElementsByTagName("body")[0].appendChild(link);
+                    }
+                    else if(val.type =='event')
+                    { 
+                        tabSignal.emit(val.name)
+                    }
+                }
+                catch (exception)
+                {
+                    console.error("exception", val.url, exception.stack, exception.stack)
+                    console.error(exception.stack)
+                    debugger;
+                }
+            }
+        }
+    }
+}
+
+function loadData(index)
+{
+    if(jsToLoad[index].type == 'event')
+    {
+        jsToLoad[index].status = 200
+        addToPage(jsToLoad)
+        return;
+    }
+
+    /*if(jsToLoad[index].type == 'css' && !isCordova())
+    {
+        var link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("type", "text/css");
+        link.setAttribute("href", jsToLoad[index].url);
+        document.getElementsByTagName("head")[0].appendChild(link);
+        jsToLoad[index].status = 200
+        return;
+    } */
+
+    if(!window.loadData_jsLoadingProgressSumSteps)
+    {
+        window.loadData_jsLoadingProgressSumSteps = 0;
+        window.loadData_jsLoadingProgressStep = 0;
+    }
+
+    window.loadData_jsLoadingProgressSumSteps++;
+
+    guiFilesCache.getFile(jsToLoad[index].url).then(
+        function(file)
+        {
+            console.log("use from cache")
+
+            // Десериализуем полученную JSON строку в объект JavaScript
+            jsToLoad[index].response = file.data;
+            window.loadData_jsLoadingProgressStep++
+            setLoadingProgress((window.loadData_jsLoadingProgressStep/window.loadData_jsLoadingProgressSumSteps)*100)
+            jsToLoad[index].status = 200
+            addToPage(jsToLoad)
+        },
+        function(err)
+        {
+            console.log("load from server")
+
+            var request = new XMLHttpRequest();
+
+            request.onreadystatechange = function ()
+            {
+                if (request.readyState === 4 && request.status === 200)
+                {
+                    jsToLoad[index].response = request.responseText;
+                    window.loadData_jsLoadingProgressStep++
+                    setLoadingProgress((window.loadData_jsLoadingProgressStep/window.loadData_jsLoadingProgressSumSteps)*100)
+                    jsToLoad[index].status = request.status
+                    addToPage(jsToLoad)
+                    guiFilesCache.setFile(jsToLoad[index].url, request.responseText)
+                }
+            }
+
+            request.open("GET", jsToLoad[index].url);
+
+            request.send();
+            // @todo add error handling
+            // @todo add download cancel button
+            // @todo add a cancel button to open the download page
+
+        }
+    )
+}
+
+function setLoadingProgress(width)
+{
+    var elem = document.getElementById("LoadingProgressBarLine");
+    if(!elem)
+    {
+        return;
+    }
+    
+    elem.style.width = Math.ceil(width) + '%';
+
+    var elem = document.getElementById("LoadingProgressBarCount");
+    if(!elem)
+    {
+        return;
+    }
+    
+    elem.style.width = Math.ceil(width) + '%';
+    elem.innerHTML = Math.ceil(width) * 1  + '%';
+}
+
+function hideLoadingProgress()
+{
+    $("#LoadingProgressBar").remove();
+    $("#RealBody").show();
+}
+
+var cRrrCalls = 0;
+function onReady()
+{
+    //debugger;
+    console.log("onReady")
+    setLoadingProgress(0)
+
+    var index = 0;
+    window.resourceList.push({prioritet:10000,  type:'event', name: "loading.completed"})
+    for(var i in window.resourceList)
+    {
+        index++;
+        window.resourceList[i].url = hostname + window.resourceList[i].name
+        window.resourceList[i].status = 0
+        window.resourceList[i].index = index
+
+        jsToLoad[window.resourceList[i].url] = window.resourceList[i]
+    }
+ 
+    for(var i in window.jsToLoad)
+    {
+        loadData(i)
+    }
+}
+ 
+onReady()
+</script>

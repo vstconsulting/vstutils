@@ -331,12 +331,12 @@ function _init() {
                     if ($("body").hasClass('sidebar-collapse'))
                     {
                         $("body").removeClass('sidebar-collapse').trigger('expanded.pushMenu');
-                        pmLocalSettings.set('hideMenu', false);
+                        guiLocalSettings.set('hideMenu', false);
                     }
                     else
                     {
                         $("body").addClass('sidebar-collapse').trigger('collapsed.pushMenu');
-                        pmLocalSettings.set('hideMenu', true);
+                        guiLocalSettings.set('hideMenu', true);
                     }
                 }
                 //Handle sidebar push menu for small screens
@@ -351,6 +351,13 @@ function _init() {
 
             $(".content-wrapper").click(function () {
                 //Enable hide menu when clicking on the content-wrapper on small screens
+                if (window.innerWidth <= (screenSizes.sm - 1) && $("body").hasClass("sidebar-open")) {
+                    $("body").removeClass('sidebar-open');
+                }
+            });
+
+            $(".sidebar-menu li a").click(function () {
+                //Enable hide menu when clicking on the menu elements on small screens
                 if (window.innerWidth <= (screenSizes.sm - 1) && $("body").hasClass("sidebar-open")) {
                     $("body").removeClass('sidebar-open');
                 }

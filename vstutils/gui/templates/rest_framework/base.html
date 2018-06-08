@@ -6,6 +6,14 @@
 {% block custom_style %} 
 {% endblock %}
 
+{% block commonScripts %}   
+    <!-- jQuery 2.2.3 -->
+    <script src="{{host_url}}{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
+
+    <!-- Bootstrap 3.3.6 -->
+    <script defer src="{{host_url}}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+{% endblock %}
+
 {% block bootstrap_theme %} 
     <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/prettify.css" %}"/>
     <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/default.css" %}"/>
