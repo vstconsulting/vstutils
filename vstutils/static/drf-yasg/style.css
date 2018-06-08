@@ -1,3 +1,4 @@
+
 html {
     box-sizing: border-box;
     overflow: -moz-scrollbars-vertical;
@@ -31,9 +32,6 @@ body.swagger-body {
     display: inline-block;
 }
 
-#django-session-auth .btn.authorize {
-    padding: 10px 23px;
-}
 
 #django-session-auth .btn.authorize a {
     color: #49cc90;
