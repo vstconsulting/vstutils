@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block login_body %}
-    <div class="login-box-body">
+     <div class="login-box-body">
         <p class="login-box-msg">Sign in to start your session</p>
 
         <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;">
@@ -37,7 +37,6 @@
         {% block alter_auth %}
         {% endblock %}
     </div>
-<script>
 {% endblock %}
 
 
