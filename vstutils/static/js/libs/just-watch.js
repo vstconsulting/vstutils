@@ -117,7 +117,7 @@ function mergeCopyM(obj){
         return obj.slice()
     }
     
-    if(typeof obj == "object" && obj != null)
+    if(typeof obj == "object" && obj !== null)
     {
         return $.extend(true, {}, obj)
     }
@@ -133,6 +133,11 @@ var justReactive = {
      */
     justStrip:function(html)
     {
+        if(typeof html == "number")
+        {
+            return html;
+        }
+            
         if(typeof html != "string" && (!html || !html.toString) )
         {
             return "";
@@ -202,7 +207,7 @@ var justReactive = {
             return;
         }
 
-        if(typeof obj[prop] != "object" || obj[prop] == null)
+        if(typeof obj[prop] != "object" || obj[prop] !== null)
         {
             // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
             obj[prop] = mergeCopyM(newval);
@@ -221,7 +226,7 @@ var justReactive = {
 
             for(var i in newval)
             {
-                if(typeof newval[i] == "object" && newval[i] != null)
+                if(typeof newval[i] == "object" && newval[i] !== null)
                 {
                     if(level < 100)
                     {
@@ -250,7 +255,7 @@ var justReactive = {
         {
             v1arr[i] = true;
 
-            if(typeof newval[i] == "object" && newval[i] != null)
+            if(typeof newval[i] == "object" && newval[i] !== null)
             {
                 if(level < 100)
                 {
@@ -528,7 +533,7 @@ var justReactive = {
                     }
                     else
                     {
-                        if(typeof val == "object" && val != null)
+                        if(typeof val == "object" && val !== null)
                         {
                             justReactive.megreFunc(newval, 'val', val);
                         }
@@ -698,7 +703,7 @@ var justReactive = {
                 { 
                     element.addEventListener('input', function()
                     {
-                        if(thisObj[opt.prop] != element.value)
+                        if(thisObj[opt.prop] !== element.value)
                         {
                             console.log("input", element.value);
                             thisObj[opt.prop] = element.value;
@@ -711,7 +716,7 @@ var justReactive = {
                     //console.log("observer", mutations);
                     mutations.forEach(function(mutation)
                     {
-                        if(mutation.type == "attributes" && mutation.attributeName == opt.attrName && thisObj[opt.prop] != mutation.target.getAttribute(opt.attrName))
+                        if(mutation.type == "attributes" && mutation.attributeName == opt.attrName && thisObj[opt.prop] !== mutation.target.getAttribute(opt.attrName))
                         {
                             //console.log("set new value");
                             thisObj[opt.prop] = mutation.target.getAttribute(opt.attrName);
@@ -869,7 +874,7 @@ Object.defineProperty(Object.prototype, "justDeepWatch", {
     {
         var deepWatch = function(obj, prop)
         {
-            if(typeof obj[prop] != "object" || obj[prop] == null)
+            if(typeof obj[prop] != "object" || obj[prop] === null)
             {
                 obj.justWatch(prop);
                 return;
@@ -877,7 +882,7 @@ Object.defineProperty(Object.prototype, "justDeepWatch", {
 
             for(var i in obj[prop])
             {
-                if(typeof obj[prop][i] == "object" && obj[prop][i] != null)
+                if(typeof obj[prop][i] == "object" && obj[prop][i] !== null)
                 {
                     deepWatch(obj[prop], i);
                     obj[prop].justWatch(i);
