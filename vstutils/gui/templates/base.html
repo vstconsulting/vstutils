@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load request_static %}
 {% load i18n %}
 <!DOCTYPE html>
 <html>
@@ -18,13 +18,13 @@
 
     {% block style %}
         <!-- Bootstrap 3.3.7 -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% static_path 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
         <!-- Font Awesome -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% static_path 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
         <!-- Ionicons -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% static_path 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
         <!-- Theme style -->
-        <link rel="stylesheet" href="{{host_url}}{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% static_path 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
         <!-- Google Font -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
@@ -94,10 +94,10 @@
 
         {% block script %}
             <!-- jQuery -->
-            <script src="{{host_url}}{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
-            <script src="{{host_url}}{% static 'js/libs/notify.js' %}?v={{gui_version}}"></script>
+            <script src="{% static_path 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
+            <script src="{% static_path 'js/libs/notify.js' %}?v={{gui_version}}"></script>
             <!-- Bootstrap 3.3.7 -->
-            <script defer src="{{host_url}}{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+            <script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
         {% endblock %}
     </body>
 {% endblock %}

@@ -14,12 +14,10 @@ class SingletonDatabaseScheduler(DatabaseScheduler):
             except Lock.AcquireLockException:
                 return 60.0
         self.scheduler_lock.prolong()
-        return super(SingletonDatabaseScheduler,
-                     self).tick(*args, **kwargs)
+        return super(SingletonDatabaseScheduler, self).tick(*args, **kwargs)
 
     def close(self):
         if self.scheduler_lock is not None:
             self.scheduler_lock.release()
 
-        return super(SingletonDatabaseScheduler,
-                     self).close()
+        return super(SingletonDatabaseScheduler, self).close()
