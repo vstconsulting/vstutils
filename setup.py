@@ -142,6 +142,7 @@ kwargs = dict(
     include_package_data=True,
     install_requires=[
         "django>=1.11,<2.0",
+        'cython>0.28,<1.0',
     ] +
     load_requirements('requirements.txt') + load_requirements('requirements-doc.txt'),
     extras_require={
