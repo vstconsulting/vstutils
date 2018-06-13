@@ -234,7 +234,7 @@ if(!window.spajs)
     spajs.openURL = function(url, title)
     {
         history.pushState({url:url}, title, url);
-        var res = spajs.openMenuFromUrl(url)
+        var res = spajs.openMenuFromUrl(url, {withoutFailPage: true})
         var state = res.state()
         return  state == "rejected"
     }
@@ -574,7 +574,8 @@ if(!window.spajs)
             {
                 console.error("URL not registered", opt.menuId, opt)
             }
-            
+
+            debugger;
             def.reject({detail:"Error URL not registered", status:404})
             throw { text:"URL not registered " + opt.menuId, code:404};
             return def.promise();
@@ -908,103 +909,109 @@ if(!window.spajs)
      */
     spajs.ajax.Call = function(opt)
     {
-         /*
-          * @note
-          * Во первых кеш должен протухать с какой то переодичностью
-          * Во вторых он должен учитывать данные авторизации
-          */
-       
-        if(opt.key === undefined)
-        {
-            opt.key = opt.type+"_"+opt.url+"_"+spajs.ajax.gethashCode(JSON.stringify(opt.data))
-        }
-        if(!spajs.isOnline() && spajs.ajax.ajaxCache[opt.key])
-        {
-            if(opt.error) // Отключил кеширование
+        try{
+             /*
+              * @note
+              * Во первых кеш должен протухать с какой то переодичностью
+              * Во вторых он должен учитывать данные авторизации
+              */
+
+            if(opt.key === undefined)
             {
-                opt.error();
+                opt.key = opt.type+"_"+opt.url+"_"+spajs.ajax.gethashCode(JSON.stringify(opt.data))
             }
-            //opt.success(spajs.ajax.ajaxCache[opt.key])
-            return {useCache:false, addToQueue:false, ignor:false, abort:function(){}};
-        }
-
-        if(!spajs.isOnline() && opt.reTryInOnline)
-        {
-            opt.abort = spajs.ajax.Abort;
-            opt.useCache = false;
-            opt.addToQueue = false;
-            opt.ignor = true;
-
-            spajs.ajax.ajaxQueue.push(opt)
-            return opt;
-        }
-
-        if(!spajs.isOnline())
-        {
-            if(opt.error)
+            if(!spajs.isOnline() && spajs.ajax.ajaxCache[opt.key])
             {
-                opt.error();
-            }
-            return {useCache:false, addToQueue:false, ignor:true, abort:function(){}};
-        }
-
-
-        var def = new $.Deferred();
-        var defpromise = def.promise()
-
-        var successCallBack = opt.success
-        var errorCallBack = opt.error
-
-        opt.success = function(data, status, xhr)
-        {
-            if(opt.useCache)
-            {
-                //spajs.ajax.ajaxCache[opt.key] = data  // Отключил кеширование
-            } 
-            if(successCallBack) successCallBack(data, status, xhr)
-            def.resolve(data, status, xhr)
-        }
-
-        opt.error = function(data, status, xhr)
-        {
-            var headers = data.getAllResponseHeaders()
-            if( data.status == 401 || ( data.status == 403 && headers.indexOf("x-anonymous:") != -1 ) )
-            {
-                window.location.reload() 
-            }
-            else if(errorCallBack)
-            {
-                errorCallBack(data, status, xhr) 
-                def.reject(data, status, xhr)
-            }
-            else
-            { 
-                def.reject(data, status, xhr)
-            }
-        }
-
-        if(!opt.beforeSend)
-        {
-            opt.beforeSend = function(xhr)
-            {
-                for(var i in spajs.ajax.headers)
+                if(opt.error) // Отключил кеширование
                 {
-                    xhr.setRequestHeader (i, spajs.ajax.headers[i]);
+                    opt.error();
+                }
+                //opt.success(spajs.ajax.ajaxCache[opt.key])
+                return {useCache:false, addToQueue:false, ignor:false, abort:function(){}};
+            }
+
+            if(!spajs.isOnline() && opt.reTryInOnline)
+            {
+                opt.abort = spajs.ajax.Abort;
+                opt.useCache = false;
+                opt.addToQueue = false;
+                opt.ignor = true;
+
+                spajs.ajax.ajaxQueue.push(opt)
+                return opt;
+            }
+
+            if(!spajs.isOnline())
+            {
+                if(opt.error)
+                {
+                    opt.error();
+                }
+                return {useCache:false, addToQueue:false, ignor:true, abort:function(){}};
+            }
+
+
+            var def = new $.Deferred();
+            var defpromise = def.promise()
+
+            var successCallBack = opt.success
+            var errorCallBack = opt.error
+
+            opt.success = function(data, status, xhr)
+            {
+                if(opt.useCache)
+                {
+                    //spajs.ajax.ajaxCache[opt.key] = data  // Отключил кеширование
+                }
+                if(successCallBack) successCallBack(data, status, xhr)
+                def.resolve(data, status, xhr)
+            }
+
+            opt.error = function(data, status, xhr)
+            {
+                var headers = data.getAllResponseHeaders()
+                if( data.status == 401 || ( data.status == 403 && headers.indexOf("x-anonymous:") != -1 ) )
+                {
+                    window.location.reload()
+                }
+                else if(errorCallBack)
+                {
+                    errorCallBack(data, status, xhr)
+                    def.reject(data, status, xhr)
+                }
+                else
+                {
+                    def.reject(data, status, xhr)
                 }
             }
-        }
 
-        var res = jQuery.ajax(opt);
-        res.useCache = false;
-        res.addToQueue = false;
-        res.ignor = false;
-        
-        defpromise.abort = function()
-        {
-            res.abort()
-        }
+            if(!opt.beforeSend)
+            {
+                opt.beforeSend = function(xhr)
+                {
+                    for(var i in spajs.ajax.headers)
+                    {
+                        xhr.setRequestHeader (i, spajs.ajax.headers[i]);
+                    }
+                }
+            }
 
-        return defpromise
+            var res = jQuery.ajax(opt);
+            res.useCache = false;
+            res.addToQueue = false;
+            res.ignor = false;
+
+            defpromise.abort = function()
+            {
+                res.abort()
+            }
+
+            return defpromise
+        }catch(e){
+            debugger;
+            console.error(e)
+            throw e
+        }
     }
 
     spajs.ajax.ajaxCallFromQueue = function()
