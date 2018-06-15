@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member,no-classmethod-decorator,protected-access
 from __future__ import unicode_literals
 import inspect
 import cython
