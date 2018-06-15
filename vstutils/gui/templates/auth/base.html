@@ -18,9 +18,19 @@
 
             {% block button %}
                 <div class="row">
-                    <div class="col-xs-4">
-                        <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
-                    </div>
+                    {% if metadata.HTTP_X_CORDOVA_APP %}
+                        <div class="col-xs-8">
+                            <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                        </div>
+
+                        <div class="col-xs-4 for-cordova">
+                            <button type="button" onclick="window.parent.inAppClose(); return false;" class="btn btn-default btn-block btn-flat">Cancel</button>
+                        </div>
+                    {% else %}
+                        <div class="col-xs-4">
+                            <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                        </div>
+                    {% endif %}
                 </div>
             {% endblock %}
             <input type="hidden" name="next" value="{{ next }}" />
