@@ -66,7 +66,7 @@ webGui.start = function(options)
         preventDefaultEvents: false
     });
 
-    if(window.cordova)
+    if(window.cordova || ( window.parent && window.parent.cordova))
     {
         $("body").addClass('platform-cordova')
     }

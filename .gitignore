@@ -1,5 +1,6 @@
 *.pyc
 *.c
+*.so
 __pycache__
 .tox
 .coverage
