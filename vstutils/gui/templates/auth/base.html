@@ -66,7 +66,7 @@ function appAjaxLogin()
             {
                 if(window.parent && window.parent.guiAppLogin && window.parent.guiAppLogin.onLogin )
                 {
-                    window.parent.pmAppLogin.onLogin(request.responseText)
+                    window.parent.guiAppLogin.onLogin(request.responseText)
                 }
                 else
                 {
@@ -74,8 +74,15 @@ function appAjaxLogin()
                 }
             }
             else
-            {
-                window.location.reload()
+            { 
+                if(window.parent && window.parent.guiAppLogin && window.parent.guiAppLogin.onLoginError )
+                {
+                    window.parent.guiAppLogin.onLoginError(request.responseText)
+                }
+                else
+                {
+                    window.location.reload()
+                }
             }
         }
     }
