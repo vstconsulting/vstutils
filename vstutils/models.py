@@ -45,6 +45,13 @@ class BQuerySet(models.QuerySet):  # nocv
             return getattr(self, tp_name)(**{field_name+"__in": field})
         return getattr(self, tp_name)(**{field_name: field})
 
+    def as_manager(cls):
+        manager = Manager.from_queryset(cls)()
+        manager._built_with_as_manager = True
+        return manager
+    as_manager.queryset_only = True
+    as_manager = classmethod(as_manager)
+
 
 class BaseManager(models.Manager):
     '''
