@@ -43,6 +43,12 @@ py36-django111-install:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
+test_proj:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+  allow_failure: true
+
 
 release_pypi:
   stage: release

@@ -138,7 +138,7 @@ ext_list = [
 ]
 
 kwargs = dict(
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests', 'test_proj']),
     ext_modules_list=ext_list,
     include_package_data=True,
     install_requires=[

@@ -4,6 +4,10 @@ html {
     -webkit-text-size-adjust:100%;
 }
 
+.skin-black-light .wrapper/*, .skin-black-light .main-sidebar, .skin-black-light .left-side */ {
+    background-color: #ecf0f5!important;
+}
+
 .swagger-ui {
     background-color: #ecf0f5;
 }
@@ -3013,6 +3017,10 @@ html {
     cursor:pointer;
 }
 
+.btn.focus, .btn:focus, .btn:hover {
+     color: #fff!important;
+}
+
 .swagger-ui .btn {
     font-size:14px;
     font-weight:400;
@@ -3664,8 +3672,8 @@ html {
 
 .swagger-ui .topbar {
     position: absolute;
-    top:90px;
-    z-index: 3000;
+    top:95px;
+    /*z-index: 1000;*/
     width: 100%;
 }
 
@@ -3792,7 +3800,7 @@ html {
     }
 
     .swagger-ui .topbar {
-        top:120px;
+        top:125px;
     }
 
     .swagger-ui .topbar a span {
@@ -3866,7 +3874,7 @@ html {
 
 @media (max-width: 400px) {
     .swagger-ui .topbar {
-        top: 140px;
+        top: 145px;
     }
 
     .swagger-ui .scheme-container {
@@ -4745,7 +4753,7 @@ to {
 }
 
 .swagger-ui .scheme-container {
-    margin-top: 56px;
+    margin-top: 55px;
 }
 
 .swagger-ui button.invalid,.swagger-ui select.invalid,.swagger-ui input[type=email].invalid,.swagger-ui input[type=file].invalid,.swagger-ui input[type=password].invalid,.swagger-ui input[type=search].invalid,.swagger-ui input[type=text].invalid {

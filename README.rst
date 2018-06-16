@@ -32,7 +32,7 @@ Quickstart
 
    .. sourcecode:: python
 
-      rom vstutils.environment import cmd_execution, sys
+      from vstutils.environment import cmd_execution, sys
       sys.path.append('./')
       import prj
 
@@ -41,6 +41,8 @@ Quickstart
 5. Run `python prj runserver 0.0.0.0:8081 --insecure`
 
 6. Enjoy!
+
+See example in `test_src/test_proj`.
 
 
 License

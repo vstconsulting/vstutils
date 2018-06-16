@@ -1,10 +1,28 @@
+# pylint: disable=no-member,no-classmethod-decorator,protected-access
 from __future__ import unicode_literals
-
+import inspect
+import cython
 from django.db import models
 from .utils import Paginator
 
 
+@cython.cfunc
+@cython.returns(cython.bint)
+def __cyfunc():
+    return 1
+
+
+CyFunctionType = type(__cyfunc)
+
+
+def iscyfunction(object):
+    return isinstance(object, CyFunctionType)
+
+
 class BQuerySet(models.QuerySet):  # nocv
+    '''
+    QuerySet class with basic operations.
+    '''
     use_for_related_fields = True
 
     def paged(self, *args, **kwargs):
@@ -27,10 +45,55 @@ class BQuerySet(models.QuerySet):  # nocv
             return getattr(self, tp_name)(**{field_name+"__in": field})
         return getattr(self, tp_name)(**{field_name: field})
 
+    def as_manager(cls):
+        manager = Manager.from_queryset(cls)()
+        manager._built_with_as_manager = True
+        return manager
+    as_manager.queryset_only = True
+    as_manager = classmethod(as_manager)
+
+
+class BaseManager(models.Manager):
+    '''
+    Base Manager class created from queryset
+    '''
+
+    @classmethod
+    def _get_queryset_methods(cls, queryset_class):
+        '''
+        Django overrloaded method for add cyfunction.
+        '''
+        def create_method(name, method):
+            def manager_method(self, *args, **kwargs):
+                return getattr(self.get_queryset(), name)(*args, **kwargs)
+
+            manager_method.__name__ = method.__name__
+            manager_method.__doc__ = method.__doc__
+            return manager_method
+
+        orig_method = models.Manager._get_queryset_methods
+        new_methods = orig_method(queryset_class)
+        for name, method in inspect.getmembers(queryset_class, predicate=iscyfunction):
+            # Only copy missing methods.
+            if hasattr(cls, name) or name in new_methods:
+                continue
+            queryset_only = getattr(method, 'queryset_only', None)
+            if queryset_only or (queryset_only is None and name.startswith('_')):
+                continue
+            # Copy the method onto the manager.
+            new_methods[name] = create_method(name, method)
+        return new_methods
+
+
+class Manager(BaseManager.from_queryset(BQuerySet)):
+    '''
+    Default VSTUtils manager
+    '''
+
 
 class BaseModel(models.Model):
     # pylint: disable=no-member
-    objects    = models.Manager.from_queryset(BQuerySet)
+    objects    = Manager()
 
     def __init__(self, *args, **kwargs):  # nocv
         super(BaseModel, self).__init__(*args, **kwargs)
