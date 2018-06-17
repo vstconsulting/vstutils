@@ -1,4 +1,3 @@
-import coreapi
 try:
     from mock import patch
 except ImportError:  # nocv
