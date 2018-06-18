@@ -34,7 +34,9 @@
             {% block bootstrap_theme %}
             {% endblock %}
 
-            {% block flavicon %}{% endblock %}
+            {% block flavicon %}
+                <link rel="shortcut icon" href="{% static_path '/' %}/img/logo/favicon.ico">
+            {% endblock %}
 
             {% block custom_style %}
             {% endblock %}

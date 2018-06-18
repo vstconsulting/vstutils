@@ -31,19 +31,26 @@ code_style:
   stage: code_standarts
   variables:
     TOX_ENVS: "flake,pylint"
+  allow_failure: true
 
 
-py27-django111-install:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
-
-py36-django111-install:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
+#py27-django111-install:
+#  <<: *branch_tests
+#  variables:
+#    TOX_ENVS: "$CI_BUILD_NAME"
+#
+#py36-django111-install:
+#  <<: *branch_tests
+#  variables:
+#    TOX_ENVS: "$CI_BUILD_NAME"
 
 test_proj:
+  <<: *branch_tests
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
+  allow_failure: true
+
+test_proj2:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
