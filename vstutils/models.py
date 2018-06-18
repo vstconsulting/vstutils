@@ -29,7 +29,7 @@ class BQuerySet(models.QuerySet):  # nocv
         return self.get_paginator(*args, **kwargs).items()
 
     def get_paginator(self, *args, **kwargs):
-        return Paginator(self, *args, **kwargs)
+        return Paginator(self.filter(), *args, **kwargs)
 
     def cleared(self):
         return (
@@ -46,7 +46,7 @@ class BQuerySet(models.QuerySet):  # nocv
         return getattr(self, tp_name)(**{field_name: field})
 
     def as_manager(cls):
-        manager = Manager.from_queryset(cls)()
+        manager = BaseManager.from_queryset(cls)()
         manager._built_with_as_manager = True
         return manager
     as_manager.queryset_only = True
