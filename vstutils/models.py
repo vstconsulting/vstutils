@@ -8,18 +8,18 @@ from .utils import Paginator
 
 @cython.cfunc
 @cython.returns(cython.bint)
-def __cyfunc():
+def __cyfunc():  # noprj
     return 1
 
 
 CyFunctionType = type(__cyfunc)
 
 
-def iscyfunction(object):
+def iscyfunction(object):  # noprj
     return isinstance(object, CyFunctionType)
 
 
-class BQuerySet(models.QuerySet):  # nocv
+class BQuerySet(models.QuerySet):  # noprj
     '''
     QuerySet class with basic operations.
     '''
@@ -53,7 +53,7 @@ class BQuerySet(models.QuerySet):  # nocv
     as_manager = classmethod(as_manager)
 
 
-class BaseManager(models.Manager):
+class BaseManager(models.Manager):  # noprj
     '''
     Base Manager class created from queryset
     '''
@@ -91,7 +91,7 @@ class Manager(BaseManager.from_queryset(BQuerySet)):
     '''
 
 
-class BaseModel(models.Model):
+class BaseModel(models.Model):  # noprj
     # pylint: disable=no-member
     objects    = Manager()
 
@@ -106,7 +106,7 @@ class BaseModel(models.Model):
         return self.__unicode__()
 
 
-class BModel(BaseModel):
+class BModel(BaseModel):  # noprj
     id         = models.AutoField(primary_key=True, max_length=20)
     hidden     = models.BooleanField(default=False)
 

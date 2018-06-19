@@ -1,3 +1,5 @@
+# pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
+import coreapi
 try:
     from mock import patch
 except ImportError:  # nocv
@@ -148,7 +150,7 @@ class VSTUtilsTestCase(BaseTestCase):
                 self.assertEqual(tmp_file.read(), test_config)
         try:
             self.assertFalse(utils.os.path.exists(file_name))
-        except AssertionError:
+        except AssertionError:  # nocv
             utils.os.remove(file_name)
         try:
             with utils.tmp_file(ini) as file:
@@ -157,7 +159,7 @@ class VSTUtilsTestCase(BaseTestCase):
                 with open(file_name, 'r') as tmp_file:
                     self.assertEqual(tmp_file.read(), test_config)
                 raise Exception('Normal')
-        except AssertionError:
+        except AssertionError:  # nocv
             raise
         except Exception:
             pass
