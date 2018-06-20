@@ -15,13 +15,14 @@ function isCordova(){
 window._guiFilesCache = function(opt)
 {
     var indexedDB 	  = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
-    var baseName 	  = "filesCache"
+
+    var hostId = "{{host_url}}".replace(/[^0-9A-z]/img, "_")
+
+    var baseName 	  = "filesCache_"+hostId
     var storeName 	  = "filesCacheStore"
     var bdVersion 	  = 1
     this.myDB             = undefined
     this.noCache          = opt.noCache
-    this.useLocalStorage  = opt.useLocalStorage
-
 
     var thisObj = this;
     function connectDB()
@@ -65,24 +66,6 @@ window._guiFilesCache = function(opt)
                 reject()
             }
 
-            if(thisObj.useLocalStorage)
-            {
-                if(window.localStorage[file_url])
-                {
-                    try{
-                        resolve(JSON.parse(window.localStorage[file_url]))
-                    }catch (exception)
-                    {
-                        reject(exception)
-                    }
-
-                    return;
-                }
-
-                reject()
-                return;
-            }
-
             connectDB().then(function(db)
             {
                 var request = db.transaction([storeName], "readonly").objectStore(storeName).get(file_url);
@@ -110,17 +93,12 @@ window._guiFilesCache = function(opt)
     this.setFile = function(file_url, file_data)
     {
         var thisObj = this
-        if(thisObj.useLocalStorage)
-        {
-            window.localStorage[file_url] = JSON.stringify({path: file_url, data: file_data})
-            return;
-        }
 
         connectDB().then(function(db)
         {
             var transaction = db.transaction([storeName],"readwrite");
             transaction.oncomplete = function(event) {
-                console.log("setFile Success", event);
+                //console.log("setFile Success", event);
             };
 
             transaction.onerror = function(event) {
@@ -133,38 +111,37 @@ window._guiFilesCache = function(opt)
         });
     }
 
-    this.deleteAllCache = function(url)
+    this.deleteAllCache = function()
     {
-        var delkeys = []
-        for (var i = 0; i < window.localStorage.length; i++)
-        {
-            var key = window.localStorage.key(i);
-            if(key.indexOf(url) == 0 || key.indexOf("http://"+url) == 0 || "https://"+key.indexOf(url) == 0 )
-            {
-                delkeys.push(key)
-            }
-        }
+        var DBDeleteRequest = window.indexedDB.deleteDatabase(baseName);
+        DBDeleteRequest.onerror = function(event) {
+            console.log("Error deleting database.", event);
+            setTimeout(function(){
+                if(isCordova())
+                {
+                    inAppClose()
+                }
+                
+                window.location.reload()
+            }, 500)
+        };
 
-        for(var i in delkeys)
-        {
-            window.localStorage.removeItem(delkeys[i])
-        }
+        DBDeleteRequest.onsuccess = DBDeleteRequest.onerror 
+        DBDeleteRequest.onblocked = DBDeleteRequest.onerror 
+        DBDeleteRequest.onupgradeneeded = DBDeleteRequest.onerror
+
+        return DBDeleteRequest
     }
 
     this.delFile = function(file_url)
     {
         var thisObj = this
-        if(thisObj.useLocalStorage)
-        {
-            window.localStorage.removeItem(file_url)
-            return;
-        }
 
         connectDB().then(function(db)
         {
             var transaction = db.transaction([storeName],"readwrite");
             transaction.oncomplete = function(event) {
-                console.log("setFile Success", event);
+                //console.log("setFile Success", event);
             };
 
             transaction.onerror = function(event) {
@@ -178,20 +155,56 @@ window._guiFilesCache = function(opt)
     }
 }
 
-if(!window.parent || !window.parent._guiFilesCache)
-{
-    window.guiFilesCache = new window._guiFilesCache({noCache:true, useLocalStorage:false})
-}
-else
-{
-   window.guiFilesCache = new window.parent._guiFilesCache({noCache:true, useLocalStorage:false})
-}
+window.guiFilesCache = new window._guiFilesCache({ noCache:notUseCache() == "true" })
 
 var jsLoadingProgress = 0;
 var jsLoadingProgressStep = 0;
 var jsLoadingProgressSumSteps = 0;
 
 var jsToLoad = {}
+
+function appendError(exception)
+{
+    console.error(exception)
+    //alert(exception)
+    //$("#LoadingProgressBar-errorLog").append(""+exception.message+"\n"+exception.stack+"\n\n\n");
+}
+
+/**
+ * loadTipe('js') 
+ * loadTipe('eval') 
+ * loadTipe('js-inline') 
+ * 
+ * @param {type} string 
+ * @returns {windowlocalStorage.loadTipe}
+ */
+function loadTipe(type)
+{
+    if(type !== undefined)
+    {
+        window.localStorage['loadTipe'] = type
+    }
+
+    return window.localStorage['loadTipe']
+}
+
+/**
+ * notUseCache('true') 
+ * notUseCache('false')
+ * 
+ * @param {type} string 
+ * @returns {windowlocalStorage.useCache}
+ */
+function notUseCache(type)
+{
+    if(type !== undefined)
+    {
+        window.localStorage['useCache'] = type
+    }
+
+    return window.localStorage['useCache']
+}
+
 
 function addToPage(jsToLoad)
 {
@@ -206,58 +219,119 @@ function addToPage(jsToLoad)
         indexs[jsToLoad[i].index].push(jsToLoad[i])
     }
 
-    function compareNumeric(a, b) 
+    function compareNumeric(a, b)
     {
         if (!a[0].prioritet && a[0].prioritet !== 0) a[0].prioritet = 999;
         if (!b[0].prioritet && b[0].prioritet !== 0) b[0].prioritet = 999;
-        
+
         if (a[0].prioritet > b[0].prioritet) return 1;
         if (a[0].prioritet < b[0].prioritet) return -1;
         return 0
-        
-        
+
+
         if (a[0].index > b[0].index) return 1;
         if (a[0].index < b[0].index) return -1;
     }
 
     indexs = indexs.sort(compareNumeric);
-
-
+    var last_val = undefined
     for(var i in indexs)
     {
         for(var j in indexs[i])
         {
             var val = indexs[i][j]
- 
+            
+
             if(val.appended)
             {
+                last_val = val;
                 continue;
             }
-
+            
             if(val.status!= 200)
             {
                 return;
             }
-
+            
+            if(val.appending === true && !val.appended)
+            {
+                setTimeout(function(){
+                    addToPage(jsToLoad)
+                }, 200)
+                return;
+            }
+            
+            if(last_val && !last_val.appended)
+            {
+                setTimeout(function(){
+                    addToPage(jsToLoad)
+                }, 200)
+                return;
+            }
+            
+            
             if(val.status == 200)
             {
-                val.appended = true;
+                if(val.appending === true && val.appended !== true)
+                {
+                    setTimeout(function(){
+                        addToPage(jsToLoad)
+                    }, 200)
+                    return;
+                }
+                
+                val.appending = true;
                 try{
-                    console.log("append", val);
- 
+                    //console.log("append", val);
+
                     if(val.type =='tpl')
                     {
                         // Надеюсь что к моменту загрузки шаблона js с jquery уже загружены
-                        $("body").append(val.response)
+                        try{
+                            $("body").append(val.response)
+                            val.appended = true;
+                        }catch (exception) {
+                            appendError(exception)
+                        }
                     }
                     else if(val.type =='js')
                     {
-                        //eval(val.response)
-                        var link = document.createElement("script");
-                        link.setAttribute("type", "text/javascript");
-                        //link.setAttribute("href", file);
-                        link.innerHTML = val.response
-                        document.getElementsByTagName("head")[0].appendChild(link);
+                        try{
+                            if(loadTipe() == 'js')
+                            {
+                                var link = document.createElement("script");
+                                link.setAttribute("type", "text/javascript");
+                                link.setAttribute("src", val.url);
+                                link.onload = function(){  
+                                    val.appended = true;
+                                    addToPage(jsToLoad)
+                                }
+
+                                //link.innerHTML = val.response
+                                document.getElementsByTagName("head")[0].appendChild(link);
+                                return;
+                            }
+                            /*else if(loadTipe() == 'eval')
+                            {
+                                eval(val.response)
+                                val.appended = true; 
+                            }*/
+                            else // if(loadTipe() == 'inline-js')
+                            {
+                                var link = document.createElement("script");
+                                link.setAttribute("type", "text/javascript");
+                                link.setAttribute("data-url", val.url);
+                                link.innerHTML = val.response
+                                 
+                                document.getElementsByTagName("head")[0].appendChild(link);
+                                val.appended = true;
+                            }
+
+                        }catch (exception) {
+                            console.error(exception)
+                            console.error(val)
+                            appendError(exception)
+                        }
                     }
                     else if(val.type =='css' /*&& isCordova()*/)
                     {
@@ -281,10 +355,16 @@ function addToPage(jsToLoad)
 
                         //debugger;
                         document.getElementsByTagName("body")[0].appendChild(link);
+                        val.appended = true;
                     }
                     else if(val.type =='event')
-                    { 
-                        tabSignal.emit(val.name)
+                    {
+                        try{
+                            tabSignal.emit(val.name)
+                            val.appended = true;
+                        }catch (exception) {
+                            appendError(exception)
+                        }
                     }
                 }
                 catch (exception)
@@ -325,7 +405,7 @@ function loadData(index)
     }
 
     window.loadData_jsLoadingProgressSumSteps++;
-
+ 
     guiFilesCache.getFile(jsToLoad[index].url).then(
         function(file)
         {
@@ -340,7 +420,7 @@ function loadData(index)
         },
         function(err)
         {
-            console.log("load from server")
+            //console.log("load from server") 
 
             var request = new XMLHttpRequest();
 
@@ -359,11 +439,7 @@ function loadData(index)
 
             request.open("GET", jsToLoad[index].url);
 
-            request.send();
-            // @todo add error handling
-            // @todo add download cancel button
-            // @todo add a cancel button to open the download page
-
+            request.send();  
         }
     )
 }
@@ -375,7 +451,7 @@ function setLoadingProgress(width)
     {
         return;
     }
-    
+
     elem.style.width = Math.ceil(width) + '%';
 
     var elem = document.getElementById("LoadingProgressBarCount");
@@ -383,15 +459,16 @@ function setLoadingProgress(width)
     {
         return;
     }
-    
+
     elem.style.width = Math.ceil(width) + '%';
     elem.innerHTML = Math.ceil(width) * 1  + '%';
 }
 
 function hideLoadingProgress()
 {
-    $("#LoadingProgressBar").remove();
+    //$("#LoadingProgressBar").remove();
     $("#RealBody").show();
+    $("#LoadingProgressBar").fadeOut('fast')
 }
 
 var cRrrCalls = 0;
@@ -412,12 +489,12 @@ function onReady()
 
         jsToLoad[window.resourceList[i].url] = window.resourceList[i]
     }
- 
+
     for(var i in window.jsToLoad)
     {
         loadData(i)
     }
 }
- 
+
 onReady()
 </script>
