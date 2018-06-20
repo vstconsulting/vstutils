@@ -1,6 +1,7 @@
 # pylint: disable=unused-argument
 from collections import OrderedDict
 import json
+import six
 from django.conf import settings
 from django.test import Client
 from django.db import transaction
@@ -119,14 +120,20 @@ class BulkViewSet(base.rvs.APIView):
                 media_type=op_type
             )
 
+    def _get_obj_with_extra(self, param):
+        if isinstance(param, (six.text_type, six.string_types)):
+            param = param.replace('<', '{').replace('>', '}')
+            return param.format(*self.results)
+        return param
+
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
-            url += "{}/".format(pk)
+            url += "{}/".format(self._get_obj_with_extra(pk))
         if data_type is not None:
             url += "{}/".format(data_type)
         if filter_set is not None:
-            url += "?{}".format(filter_set)
+            url += "?{}".format(self._get_obj_with_extra(filter_set))
         return "/{}/{}/{}/{}".format(
             settings.API_URL, self.api_version, self.type_to_bulk.get(item, item), url
         )
@@ -166,14 +173,14 @@ class BulkViewSet(base.rvs.APIView):
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         operations = request.data
-        results = []
+        self.results = []
         self.client = Client()
         self.client.force_login(request.user)
         for operation in operations:
             op_type = operation.get("type")
             self._check_type(op_type, operation.get("item", None))
-            results.append(self.perform(operation))
-        return base.Response(results, 200).resp
+            self.results.append(self.perform(operation))
+        return base.Response(self.results, 200).resp
 
     def get(self, request):
         response = {

@@ -328,7 +328,8 @@ class VSTUtilsTestCase(BaseTestCase):
 
     def test_bulk(self):
         self.get_model_filter(
-            'django.contrib.auth.models.User').exclude(pk=self.user.id).delete()
+            'django.contrib.auth.models.User'
+        ).exclude(pk=self.user.id).delete()
         self.details_test(
             '/api/v1/_bulk/', operations_types=list(settings.BULK_OPERATION_TYPES.keys())
         )
@@ -375,6 +376,24 @@ class VSTUtilsTestCase(BaseTestCase):
         self.get_result(
             "post", "/api/v1/_bulk/", 415, data=json.dumps(bulk_request_data)
         )
+        # Test linked bulks
+        self.get_model_filter(
+            'django.contrib.auth.models.User'
+        ).exclude(pk=self.user.id).delete()
+        bulk_request_data = [
+            # Check 201 and username
+            {'type': 'add', 'item': 'users', 'data': test_user},
+            # Get details from link
+            {'type': 'get', 'item': 'users', 'pk': "<0[data][id]>"},
+            {'type': 'get', 'item': 'users', 'filters': 'id=<1[data][id]>'}
+        ]
+        result = self.get_result(
+            "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
+        )
+        self.assertEqual(result[0]['status'], 201)
+        self.assertEqual(result[0]['data']['username'], test_user['username'])
+        self.assertEqual(result[1]['status'], 200)
+        self.assertEqual(result[1]['data']['username'], test_user['username'])
 
     def test_coreapi(self):
         client = CoreAPIClient()
