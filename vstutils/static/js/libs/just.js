@@ -235,14 +235,14 @@
                                     */
                                     var
 						lineNo = 1,
-						buffer = [ 'with (this.data) { with (this.customData) { this.buffer.push(\'' ],
+						buffer = [ "with (this.data) { \nwith (this.customData) { \nthis.buffer.push('" ],
 						matches = html.split(new RegExp(regExpEscape(options.open) + '((?:.|[\r\n])+?)(?:' + regExpEscape(options.close) + '|$)')),
 						length,	i, text, prefix, postfix, line, tmp, jsFromPos, state;
 
 					for (i = 0, length = matches.length; i < length; i++) {
 						text = matches[i];
 						if (i % 2 === 1) {
-							line = 'this.line=' + lineNo;
+							line = "\nthis.line=" + lineNo;
 							jsFromPos = 1;
 							state = STATE_RAW;
 							switch (text.charAt(0)) {
@@ -251,13 +251,22 @@
 								postfix = ')),\'';
 								state = STATE_PARTIAL;
 								break;
+							case '!':
+								prefix = '\',(' + line + ', this.extend(';
+								postfix = ')),\'';
+								state = STATE_EXTEND;
+								break;
+                                                        case '*':
+								prefix = '\',(' + line + ', this.child(\'';
+								postfix = '\')),\'';
+								break;
 							case '[':
 								prefix = '\');' + line + ';this.blockStart(\'';
 								postfix = '\');this.buffer.push(\'';
 								break;
 							case ']':
-								prefix = '\');' + line + ';this.blockEnd(';
-								postfix = ');this.buffer.push(\'';
+								prefix = '\');' + line + ';this.blockEnd(\'';
+								postfix = '\');this.buffer.push(\'';
 								break;
 							case '=':
 								prefix = '\',(' + line + ', ';
@@ -348,7 +357,7 @@
 						}
 						lineNo += text.split(/\n/).length - 1;
 					}
-					buffer.push('\'); } } return this.buffer;');
+					buffer.push("'); \n} \n} return this.buffer;");
 					return buffer = buffer.join('');
                                 },
 				parse = function (html) {
@@ -376,7 +385,8 @@
 					this.data = data;
 					this.customData = customData || {};
 					this.buffer = [];
-					this.tmpBuffer = undefined;
+					this.tmpBuffer = {};
+					this.tmpBufferNames = [];
 					this.watcher = undefined;
 					this.line = 1;
 					this.partials = [];
@@ -387,7 +397,9 @@
 					this.blocks = {};
 				};
 			Template.prototype.blockStart = function (name) {
-				this.tmpBuffer = this.buffer;
+                                this.tmpBufferNames.push(name)
+                                
+				this.tmpBuffer[name] = this.buffer;
 				if (!this.blocks[name]) { this.blocks[name] = []; }
 				if (!this.blocks[name].length) {
 					this.buffer = this.blocks[name];
@@ -396,8 +408,9 @@
 				}
 			};
 			Template.prototype.blockEnd = function () {
-				this.buffer = this.tmpBuffer;
-				delete (this.tmpBuffer);
+                                var name = this.tmpBufferNames.pop(name) 
+				this.buffer = this.tmpBuffer[name];
+				delete (this.tmpBuffer[name]);
 			};
 
                         // Включить результат рендера шаблона template с данными customData
@@ -411,6 +424,40 @@
 
 				var  page = new Template(template, customData, undefined);
 				return page.renderSync();
+			};
+                        
+                        Template.prototype.extend = function (template, customData) 
+                        {
+				var page = new Template(template, this.data, customData)
+                                var callback = this.callback;
+				page.blocks = this.blocks;
+				this.callback = function (error, data) {
+					if (error) {
+						page.childError = error;
+						if (page.childCallback) { page.childCallback(error); }
+					} else {
+						page.childData.push(data);
+						if (page.childCallback) { page.childCallback(); }
+					}
+				};
+				page.partials.push(function (callback) {
+					if (page.childError) {
+						callback(page.childError);
+					} else if (page.childData.length) {
+						callback();
+					} else {
+						page.childCallback = callback;
+					}
+				});
+				//callback(undefined, page.renderSync());
+				return page.renderSync();
+			};
+			Template.prototype.child = function (block) {
+				if (block && block.length) {
+					if (!this.blocks[block]) { this.blocks[block] = []; }
+					return this.blocks[block];
+				}
+				return this.childData;
 			};
                         
 			Template.prototype.renderSync = function () {
