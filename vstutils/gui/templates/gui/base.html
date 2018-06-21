@@ -147,11 +147,13 @@
     {% endblock %}
 
     {% block bootstrap_theme %}
+        {{ block.super }}
     {% endblock %}
 
-    {% block flavicon %}{% endblock %}
+    {% block flavicon %}{{ block.super }}{% endblock %}
 
     {% block custom_style %}
+        {{ block.super }}
     {% endblock %}
 
 {% endblock %}
@@ -358,7 +360,7 @@
         <!-- /inline_app_loader -->
         
         <!-- script -->
-        {% block script %}{% endblock %}
+        {% block script %}{{ block.super }}{% endblock %}
         <!-- /script -->
     </body>
 {% endblock %}
