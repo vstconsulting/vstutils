@@ -5,13 +5,13 @@
  * Copyright 2012, Vadim M. Baryshev <vadimbaryshev@gmail.com>
  * Licensed under the MIT license
  * https://github.com/baryshev/just/LICENSE
- *  
+ *
  * https://github.com/Levhav/just-template
  * Adding reactive to based on https://github.com/Levhav/justReactive to just template engine
  */
 (function () {
 	'use strict';
-         
+
         /**
          * Генерирует случайную строку
          * @private
@@ -25,10 +25,10 @@
                 s += str[Math.floor(Math.random()*(str.length-1))]
             }
             return s
-        } 
- 
+        }
+
         var __JUST_onInsertFunctions = {}
- 
+
         /**
          * При вставке этого html в дом дерево будет выполнена функция func
          * @param {type} html
@@ -50,8 +50,8 @@
                         + " } ";
             }
             else
-            { 
-                funcCall = "window.JUST.__JUST_onInsertFunctions['"+key+"'].func(window.JUST.__JUST_onInsertFunctions['"+key+"'].count);" 
+            {
+                funcCall = "window.JUST.__JUST_onInsertFunctions['"+key+"'].func(window.JUST.__JUST_onInsertFunctions['"+key+"'].count);"
                         + " window.JUST.__JUST_onInsertFunctions['"+key+"'].count+=1;"
             }
 
@@ -62,16 +62,16 @@
         var JustEvalJsPattern_pageUUID = getUUID("pageUUID");
 
 
-        var JustEvalJsPattern = function(text) 
+        var JustEvalJsPattern = function(text)
         {
             //console.log(text.replace(/^<=|=>$/g, ""))
             return "<="+window.JUST.JustEvalJsPattern_pageUUID+text.replace(/^<=js|js=>$/g, "")+window.JUST.JustEvalJsPattern_pageUUID+"=>"
         }
 
 
-        
+
 	var
-		JUST = function (newOptions) 
+		JUST = function (newOptions)
                 {
 			var
 				options = {
@@ -96,7 +96,7 @@
 				STATE_JS = 11,
 				cache = {},
                                 countUid = 0,
-                                 
+
 				regExpEscape = function (str) {
 					return String(str).replace(escapeExp, '\\$1');
 				},
@@ -106,19 +106,19 @@
                                      * Блок отслеживания
                                      * В конструкцию включается <~ polemarch.model.groups[item_id].groups > переменная которую надо отслеживать
                                      * При её изменении просто перерисовывается вложеный в блок кусочек шаблона
-                                     * 
-                                     * 
-                                        <~ polemarch.model.groups[item_id].groups > 
+                                     *
+                                     *
+                                        <~ polemarch.model.groups[item_id].groups >
                                             <% for(var i in polemarch.model.groups[item_id].groups){ %>
                                                 <div class="form-group col-lg-2">
                                                     <label class="control-label" >Group</label>
                                                     <%- polemarch.model.groups[item_id].groups[i].name %>
                                                 </div>
                                             <% } %>
-                                        <~>  
-                                     * 
+                                        <~>
+                                     *
                                      */
-                                    
+
                                     /* Поделить текст на ~ блоки
                                      *
                                      * Если блок открывающий то рекурсивно в глубину уходим
@@ -147,17 +147,17 @@
                                                 {
                                                     console.error("Invalid sub block definition", forCode)
                                                 }
- 
-                                                var forObject = forCode[0].trim()  
+
+                                                var forObject = forCode[0].trim()
 
                                                 if(forObject[forObject.length - 1] == ']')
-                                                { 
+                                                {
                                                     // Запись вида <~ polemarch.model.groups[item_id] >
-                                                    forObject = forObject.match(/^(.*)\[([^\]]+)\]$/) 
+                                                    forObject = forObject.match(/^(.*)\[([^\]]+)\]$/)
                                                 }
                                                 else if(forObject.indexOf(".") != -1)
                                                 {
-                                                    // Запись вида <~ polemarch.model.groups[item_id].groups > 
+                                                    // Запись вида <~ polemarch.model.groups[item_id].groups >
                                                     forObject = forObject.match(/^(.*)\.([^.]+)$/)
                                                     forObject[2] = "'"+forObject[2]+"'"
                                                 }
@@ -173,14 +173,14 @@
                                                 var body = startPart[lastStatus].substr(startPart[lastStatus].indexOf(">")+1)
 
                                                 countUid++;
-                                                var tplName = '_superId'+countUid 
+                                                var tplName = '_superId'+countUid
                                                 options.root[tplName] = body
                                                 // console.info(tplName, options.root[tplName])
 
                                                 // Для отслеживания элемента массива по индексу  <~ polemarch.model.groups[item_id] > надо писать без одинарных кавычек forObject[2]
                                                 //var res = html.replace("<"+startPart[lastStatus]+"<~>",
                                                 //                "<%= "+forObject[1]+".justTpl("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
-                                                                
+
                                                 var res = html.replace("<"+startPart[lastStatus]+"<~>",
                                                                 "<%= "+forObject[1]+".justTpl("+forObject[2]+", this.partialWatch, ['"+tplName+"', this.data]) %>"
                                                                 )
@@ -208,7 +208,7 @@
                                     return html
                                 },
 				parseToCode = function (html) {
- 
+
                                     html = reactiveReplace(html)
                                     html = html.replace(/<=js(.*?)js=>/g, JustEvalJsPattern)
                                     // console.log("restpl", html)
@@ -220,7 +220,7 @@
                                         myline = {line:[1, 2, 3]}
                                         $(".content").html(spajs.just.render('test2', myline))
                                     */
-                                    
+
                                     /*
                                         <!-- Подключаем шаблон для списка записей -->
                                         <script id="test-list" type="text/x-just" style="display: none;" data-just="test">
@@ -231,7 +231,7 @@
                                                     </div>
                                                 <~>
                                             BBB
-                                        </script> 
+                                        </script>
                                     */
                                     var
 						lineNo = 1,
@@ -276,7 +276,7 @@
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
 								state = STATE_TEXT;
-								break; 
+								break;
 							case '?':
 								prefix = '\');' + line + ';';
 								postfix = 'this.buffer.push(\'';
@@ -308,7 +308,7 @@
 								break;
 							case STATE_TEXT:
 								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
-								break; 
+								break;
 							case STATE_CONDITION:
 								tmp = text.substr(jsFromPos).replace(trimExp, '');
 								if (!tmp.length) {
@@ -369,7 +369,7 @@
                                                 return data;
                                         } else {
                                                 console.error('Failed to load template', file)
-                                                throw 'Failed to load template ' + file 
+                                                throw 'Failed to load template ' + file
                                         }
 				},
 				loadSync = function (file) {
@@ -398,7 +398,7 @@
 				};
 			Template.prototype.blockStart = function (name) {
                                 this.tmpBufferNames.push(name)
-                                
+
 				this.tmpBuffer[name] = this.buffer;
 				if (!this.blocks[name]) { this.blocks[name] = []; }
 				if (!this.blocks[name].length) {
@@ -408,7 +408,7 @@
 				}
 			};
 			Template.prototype.blockEnd = function () {
-                                var name = this.tmpBufferNames.pop(name) 
+                                var name = this.tmpBufferNames.pop(name)
 				this.buffer = this.tmpBuffer[name];
 				delete (this.tmpBuffer[name]);
 			};
@@ -425,8 +425,8 @@
 				var  page = new Template(template, customData, undefined);
 				return page.renderSync();
 			};
-                        
-                        Template.prototype.extend = function (template, customData) 
+
+                        Template.prototype.extend = function (template, customData)
                         {
 				var page = new Template(template, this.data, customData)
                                 var callback = this.callback;
@@ -459,10 +459,10 @@
 				}
 				return this.childData;
 			};
-                        
+
 			Template.prototype.renderSync = function () {
 				var that = this;
- 
+
 				var blank = loadSync(this.file)
                                 try {
                                         var buffer = blank.call(that);
@@ -479,7 +479,7 @@
                                             return html;
                                 } catch (e) {
                                         console.error(e.message + ' in ' + that.file + ' on line ' + that.line);
-                                        throw e.message + ' in ' + that.file + ' on line ' + that.line 
+                                        throw e.message + ' in ' + that.file + ' on line ' + that.line
                                         return;
                                 }
 			};
@@ -508,7 +508,7 @@
 			};
 			this.render = this.renderSync
 
-			this.isTplExists = function(name){ 
+			this.isTplExists = function(name){
                             return options.root[name] !== undefined
                         }
                         /**
@@ -517,7 +517,7 @@
                          * @param {type} func
                          * @returns {unresolved}
                          */
-			this.onInsert = onInsert 
+			this.onInsert = onInsert
 			this.configure(newOptions);
 		};
 
@@ -669,7 +669,7 @@ justCall_mapArr = []
 function justCall(obj)
 {
     var index = justCall_mapArr.length
-    justCall_mapArr.push(obj) 
+    justCall_mapArr.push(obj)
     return 'justCall_mapArr['+index+']'
 }
 
