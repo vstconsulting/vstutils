@@ -210,24 +210,22 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         serializer = self.get_route_serializer(serializer_class, instance)
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    def _add_or_create_nested(self, queryset, data):
+    def _add_or_create_nested(self, queryset, data, serializer_class):
+        serializer = self.get_route_serializer(serializer_class, data=data)
+        serializer.is_valid(raise_exception=True)
         if not self.nested_allow_append:
-            return queryset.create(**data)
+            obj = queryset.create(**serializer.validated_data)
+            return self.get_route_serializer(serializer_class, obj)
         try:
-            obj = queryset.model.objects.get(**data)
+            obj = queryset.model.objects.get(**{self.nested_arg: data[self.nested_arg]})
         except djexcs.ObjectDoesNotExist:
-            obj = queryset.create(**data)
+            obj = queryset.create(**serializer.validated_data)
         queryset.add(obj)
-        return obj
+        return self.get_route_serializer(serializer_class, obj)
 
     @transaction.atomic()
     def create_route_instance(self, queryset, request, serializer_class):
-        serializer = self.get_route_serializer(serializer_class, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer = self.get_route_serializer(
-            serializer_class,
-            self._add_or_create_nested(queryset, serializer.validated_data)
-        )
+        serializer = self._add_or_create_nested(queryset, request.data, serializer_class)
         return Response(serializer.data, status.HTTP_201_CREATED).resp
 
     @transaction.atomic()
@@ -274,7 +272,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             serializer_class_one = serializer_class
 
         if method == 'post':
-            return self.create_route_instance(manager, request, serializer_class_list)
+            return self.create_route_instance(manager, request, serializer_class_one)
         elif method == 'get' and not obj_id:
             return self.get_paginated_route_response(
                 manager, serializer_class_list, filter_classes

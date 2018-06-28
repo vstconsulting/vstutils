@@ -126,6 +126,15 @@ class BulkViewSet(base.rvs.APIView):
             return param.format(*self.results)
         return param
 
+    def _get_obj_with_extra_data(self, data):
+        if isinstance(data, (dict, OrderedDict)):
+            return json.dumps({k: self._get_obj_with_extra(v) for k,v in data.items()})
+        elif isinstance(data, (list, tuple)):
+            return json.dumps([self._get_obj_with_extra(v) for v in data])
+        elif isinstance(data, (six.string_types, six.text_type)):
+            return self._get_obj_with_extra(data)
+        return json.dumps(data)
+
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
@@ -148,7 +157,7 @@ class BulkViewSet(base.rvs.APIView):
         op_type = operation['type']
         data = operation.get('data', {})
         if data:
-            kwargs['data'] = json.dumps(data)
+            kwargs['data'] = self._get_obj_with_extra_data(data)
         url = self.get_url(
             operation['item'],
             operation.get('pk', None),
@@ -166,9 +175,13 @@ class BulkViewSet(base.rvs.APIView):
             data = json.loads(response.rendered_content.decode())
         else:
             data = dict(detail=str(response.content.decode('utf-8')))
-        return OrderedDict(
-            status=response.status_code, data=data, type=operation['type']
+        result = OrderedDict(
+            status=response.status_code, data=data,
+            type=operation['type'], item=operation['item']
         )
+        if result['type'] == 'mod':
+            result['subitem'] = operation.get('data_type', None)
+        return result
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
