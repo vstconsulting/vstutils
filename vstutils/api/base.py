@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404
 from django.db.models.query import QuerySet
+from django.db import transaction
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
@@ -88,13 +89,17 @@ def __get_nested_path(name, arg=None):
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
     methods = methods or ['get', 'post', 'put', 'patch', 'delete']
     path = __get_nested_path(name, arg)
+    allow_append = bool(kwargs.pop('allow_append', False))
 
     def decorator(func):
         def wrapper(view, request, *args, **kwargs):
+            view.nested_name = name
+            view.nested_parent_object = view.get_object()
+            view.nested_allow_append = allow_append
             view.nested_arg = arg
             view.nested_id = kwargs.get(view.nested_arg, None)
             view.nested_manager = getattr(
-                view.get_object(), manager_name or name, None
+                view.nested_parent_object, manager_name or name, None
             )
             return func(view, request, *args)
 
@@ -205,14 +210,27 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         serializer = self.get_route_serializer(serializer_class, instance)
         return Response(serializer.data, status.HTTP_200_OK).resp
 
+    def _add_or_create_nested(self, queryset, data):
+        if not self.nested_allow_append:
+            return queryset.create(**data)
+        try:
+            obj = queryset.model.objects.get(**data)
+        except djexcs.ObjectDoesNotExist:
+            obj = queryset.create(**data)
+        queryset.add(obj)
+        return obj
+
+    @transaction.atomic()
     def create_route_instance(self, queryset, request, serializer_class):
         serializer = self.get_route_serializer(serializer_class, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer = self.get_route_serializer(
-            serializer_class, queryset.create(**serializer.validated_data)
+            serializer_class,
+            self._add_or_create_nested(queryset, serializer.validated_data)
         )
         return Response(serializer.data, status.HTTP_201_CREATED).resp
 
+    @transaction.atomic()
     def update_route_instance(self, instance, request, serializer_class, partial=None):
         serializer = self.get_route_serializer(
             serializer_class, instance, data=request.data, partial=partial
@@ -227,11 +245,23 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    def delete_route_instance(self, instance):
-        instance.delete()
+    @transaction.atomic()
+    def delete_route_instance(self, manager, instance):
+        if self.nested_allow_append:
+            manager.remove(instance)
+        else:
+            instance.delete()
         return RestResponse(status=status.HTTP_204_NO_CONTENT)
 
+    def nested_allow_check(self):
+        '''
+        Just raise or pass
+        :return:
+        '''
+        pass
+
     def dispatch_route_instance(self, serializer_class, filter_classes, request, **kw):
+        self.nested_allow_check()
         obj_id = kw.get(getattr(self, 'nested_arg', 'id'), None)
         obj_id = obj_id or getattr(self, 'nested_id', obj_id)
         manager = kw.get('manager', None) or getattr(self, 'nested_manager', None)
@@ -262,7 +292,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 self.get_route_object(manager, obj_id), request, serializer_class_one, 1
             )
         elif method == 'delete' and obj_id:
-            return self.delete_route_instance(self.get_route_object(manager, obj_id))
+            return self.delete_route_instance(
+                manager, self.get_route_object(manager, obj_id)
+            )
 
         raise exceptions.NotFound()
 
