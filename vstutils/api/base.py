@@ -18,8 +18,7 @@ from ..utils import classproperty
 _ResponseClass = namedtuple("ResponseData", [
     "data", "status"
 ])
-
-
+default_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
 logger = logging.getLogger(settings.VST_PROJECT)
 
 
@@ -76,19 +75,24 @@ class Response(_ResponseClass):
         return self._asdict()
 
 
-def __get_nested_path(name, arg=None):
+def __get_nested_path(name, arg=None, arg_regexp='[0-9]'):
     path = name
     if not arg:
         return path
     path += '/?(?P<'
     path += arg
-    path += '>[0-9]*)/?'
+    path += '>'
+    path += arg_regexp
+    path += '*)'
     return path
 
 
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
-    methods = methods or ['get', 'post', 'put', 'patch', 'delete']
-    path = __get_nested_path(name, arg)
+    list_methods = ['get', 'head', 'options', 'post']
+    detail_methods = default_methods
+    methods = methods or detail_methods if arg else list_methods
+    arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
+    path = __get_nested_path(name, arg, arg_regexp)
     allow_append = bool(kwargs.pop('allow_append', False))
 
     def decorator(func):
@@ -200,7 +204,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = serializer_class(page, many=True, **kwargs)
+            serializer = self.get_route_serializer(
+                serializer_class, page, many=True, **kwargs
+            )
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_route_serializer(queryset, many=True, **kwargs)
