@@ -167,33 +167,63 @@ class BulkViewSet(base.rvs.APIView):
         method = getattr(self.client, self.get_method_type(op_type, operation))
         return method(url, **kwargs)
 
-    def perform(self, operation):
-        kwargs = dict()
-        kwargs["content_type"] = "application/json"
-        response = self.get_operation(operation, kwargs)
-        if response.status_code != 404 and getattr(response, "rendered_content", False):
-            data = json.loads(response.rendered_content.decode())
-        else:
-            data = dict(detail=str(response.content.decode('utf-8')))
+    def create_response(self, status, data, operation):
         result = OrderedDict(
-            status=response.status_code, data=data,
-            type=operation['type'], item=operation['item']
+            status=status, data=data,
+            type=operation.get('type', None), item=operation.get('item', None)
         )
         if result['type'] == 'mod':
             result['subitem'] = operation.get('data_type', None)
         return result
 
-    @transaction.atomic
-    def post(self, request, *args, **kwargs):
+    def _get_rendered(self, res):
+        if getattr(res, 'data', None):
+            return res.data
+        if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
+            return json.loads(res.rendered_content.decode())
+        else:
+            return dict(detail=str(res.content.decode('utf-8')))
+
+    def perform(self, operation):
+        kwargs = dict()
+        kwargs["content_type"] = "application/json"
+        response = self.get_operation(operation, kwargs)
+        return self.create_response(
+            response.status_code,
+            self._get_rendered(response),
+            operation
+        )
+
+    def operate_handler(self, operation, allow_fail=True):
+        try:
+            op_type = operation.get("type")
+            self._check_type(op_type, operation.get("item", None))
+            self.results.append(self.perform(operation))
+        except Exception as err:
+            if allow_fail:
+                raise
+            response = base.exception_handler(err, None)
+            self.results.append(self.create_response(
+                response.status_code,
+                self._get_rendered(response),
+                operation
+            ))
+
+    def operate(self, request, allow_fail=True):
         operations = request.data
         self.results = []
         self.client = Client()
         self.client.force_login(request.user)
         for operation in operations:
-            op_type = operation.get("type")
-            self._check_type(op_type, operation.get("item", None))
-            self.results.append(self.perform(operation))
+            self.operate_handler(operation, allow_fail)
         return base.Response(self.results, 200).resp
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        return self.operate(request)
+
+    def put(self, request, *args, **kwargs):
+        return self.operate(request, allow_fail=False)
 
     def get(self, request):
         response = {

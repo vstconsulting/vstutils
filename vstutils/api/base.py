@@ -75,7 +75,7 @@ class Response(_ResponseClass):
         return self._asdict()
 
 
-def __get_nested_path(name, arg=None, arg_regexp='[0-9]'):
+def __get_nested_path(name, arg=None, arg_regexp='[0-9]', empty_arg=True):
     path = name
     if not arg:
         return path
@@ -83,7 +83,8 @@ def __get_nested_path(name, arg=None, arg_regexp='[0-9]'):
     path += arg
     path += '>'
     path += arg_regexp
-    path += '*)'
+    path += '*' if empty_arg else "+"
+    path += ')'
     return path
 
 
@@ -103,6 +104,7 @@ def __get_from_view(view, name, arg=None, *args, **kw):
         )
     list_view.__name__ = '{}_list'.format(name)
     detail_view.__name__ = '{}_detail'.format(name)
+    kw['empty_arg'] = kw.pop('empty_arg', True)
     d_list = nested_action(name, serializer_class=serializer_class, *args, **kw)
     d_det = nested_action(name, arg, serializer_class=serializer_class_one, *args, **kw)
     if arg:
@@ -115,7 +117,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
     detail_methods = default_methods
     methods = methods or detail_methods if arg else list_methods
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
-    path = __get_nested_path(name, arg, arg_regexp)
+    path = __get_nested_path(name, arg, arg_regexp, kwargs.pop('empty_arg', True))
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
 
@@ -269,7 +271,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             return self.get_route_serializer(serializer_class, obj)
         try:
             obj = queryset.model.objects.get(
-                **{self.nested_arg: data.get(self.nested_arg, None)}
+                **{self.nested_arg: data.get(self.nested_arg, '0')}
             )
         except djexcs.ObjectDoesNotExist:
             obj = queryset.create(**serializer.validated_data)

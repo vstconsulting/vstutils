@@ -115,8 +115,12 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk(
                 'hosts', host_group_id, {}, 'hosts', 'get', filters='offset=10'
             ),
+            self.get_mod_bulk(
+                'hosts', host_group_id, {}, 'shost/<24[data][id]>', 'get'
+            ),
         ]
-        results = self.make_bulk(bulk_data)
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertCount(hg.hosts.all(), 0)
         self.assertEqual(results[0]['data']['count'], 1)
         self.assertEqual(results[1]['data']['count'], 1)
         self.assertEqual(results[2]['data']['id'], host_id)
@@ -135,3 +139,5 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[11]['status'], 204)
         self.assertTrue(Host.objects.filter(pk=results[10]['data']['id']).exists())
         self.assertEqual(results[12]['data']['results'], [])
+        self.assertEqual(results[13]['status'], 400)
+        self.assertEqual(results[13]['data']['error_type'], "IndexError")

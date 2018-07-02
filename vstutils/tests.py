@@ -228,7 +228,7 @@ class BaseTestCase(TestCase):
             pk=pk, data_type=mtype, method=method.upper(), **kwargs
         )
 
-    def make_bulk(self, data):
+    def make_bulk(self, data, method_type='post'):
         return self.get_result(
-            "post", self.get_url('_bulk'), 200, data=json.dumps(data)
+            method_type, self.get_url('_bulk'), 200, data=json.dumps(data)
         )
