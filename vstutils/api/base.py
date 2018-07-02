@@ -95,10 +95,12 @@ def __get_from_view(view, name, arg=None, *args, **kw):
     ) or serializer_class
     filter_class = getattr(view, 'filter_class', None)
     def list_view(view_obj, request, *args, **kwargs):
+        # pylint: disable=unused-argument
         return view_obj.dispatch_route_instance(
             (serializer_class, serializer_class_one), filter_class, request
         )
     def detail_view(view_obj, request, *args, **kwargs):
+        # pylint: disable=unused-argument
         return view_obj.dispatch_route_instance(
             (serializer_class, serializer_class_one), filter_class, request
         )
