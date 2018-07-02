@@ -87,6 +87,29 @@ def __get_nested_path(name, arg=None, arg_regexp='[0-9]'):
     return path
 
 
+def __get_from_view(view, name, arg=None, *args, **kw):
+    serializer_class = kw.pop('serializer_class', view.serializer_class)
+    serializer_class_one = kw.pop(
+        'serializer_class_one', getattr(view, 'serializer_class_one', None)
+    ) or serializer_class
+    filter_class = getattr(view, 'filter_class', None)
+    def list_view(view_obj, request, *args, **kwargs):
+        return view_obj.dispatch_route_instance(
+            (serializer_class, serializer_class_one), filter_class, request
+        )
+    def detail_view(view_obj, request, *args, **kwargs):
+        return view_obj.dispatch_route_instance(
+            (serializer_class, serializer_class_one), filter_class, request
+        )
+    list_view.__name__ = '{}_list'.format(name)
+    detail_view.__name__ = '{}_detail'.format(name)
+    d_list = nested_action(name, serializer_class=serializer_class, *args, **kw)
+    d_det = nested_action(name, arg, serializer_class=serializer_class_one, *args, **kw)
+    if arg:
+        return d_list(list_view), d_det(detail_view)
+    return d_list(list_view), None
+
+
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
     list_methods = ['get', 'head', 'options', 'post']
     detail_methods = default_methods
@@ -94,12 +117,17 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
     path = __get_nested_path(name, arg, arg_regexp)
     allow_append = bool(kwargs.pop('allow_append', False))
+    manager_name = manager_name or name
 
     def decorator(func):
         def wrapper(view, request, *args, **kwargs):
+            # Nested name
             view.nested_name = name
+            # Nested parent object
             view.nested_parent_object = view.get_object()
+            # Allow append to nested or only create
             view.nested_allow_append = allow_append
+            # ID name of nested object
             view.nested_arg = arg
             view.nested_id = kwargs.get(view.nested_arg, None)
             view.nested_manager = getattr(
@@ -113,6 +141,23 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         kwargs['url_path'] = path
         kwargs['url_name'] = name
         return action(*args, **kwargs)(wrapper)
+
+    return decorator
+
+
+def nested_view(name, *args, **kwargs):
+    view = kwargs.pop('view', None)
+    if view is None:
+        raise Exception(
+            'Argument "view" must be installed for `nested_view` decorator.'
+        )
+
+    def decorator(view_class):
+        sub_list, sub_detail = __get_from_view(view, name, *args, **kwargs)
+        if sub_detail:
+            setattr(view_class, '{}_detail'.format(name), sub_detail)
+        setattr(view_class, '{}_list'.format(name), sub_list)
+        return view_class
 
     return decorator
 
@@ -209,8 +254,8 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             )
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_route_serializer(queryset, many=True, **kwargs)
-        return RestResponse(serializer.data)
+        serializer = self.get_route_serializer(queryset, many=True, **kwargs)  # nocv
+        return RestResponse(serializer.data)  # nocv
 
     def get_route_instance(self, instance, serializer_class):
         serializer = self.get_route_serializer(serializer_class, instance)
@@ -223,7 +268,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             obj = queryset.create(**serializer.validated_data)
             return self.get_route_serializer(serializer_class, obj)
         try:
-            obj = queryset.model.objects.get(**{self.nested_arg: data[self.nested_arg]})
+            obj = queryset.model.objects.get(
+                **{self.nested_arg: data.get(self.nested_arg, None)}
+            )
         except djexcs.ObjectDoesNotExist:
             obj = queryset.create(**serializer.validated_data)
         queryset.add(obj)
@@ -236,6 +283,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     @transaction.atomic()
     def update_route_instance(self, instance, request, serializer_class, partial=None):
+        # pylint: disable=protected-access
         serializer = self.get_route_serializer(
             serializer_class, instance, data=request.data, partial=partial
         )
@@ -245,7 +293,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
             # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
+            instance._prefetched_objects_cache = {}  # nocv
 
         return Response(serializer.data, status.HTTP_200_OK).resp
 
@@ -267,13 +315,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     def dispatch_route_instance(self, serializer_class, filter_classes, request, **kw):
         self.nested_allow_check()
         obj_id = kw.get(getattr(self, 'nested_arg', 'id'), None)
-        obj_id = obj_id or getattr(self, 'nested_id', obj_id)
+        obj_id = obj_id or getattr(self, 'nested_id', None)
         manager = kw.get('manager', None) or getattr(self, 'nested_manager', None)
         method = request.method.lower()
         if isinstance(serializer_class, (list, tuple)):
             serializer_class_list = serializer_class[0]
             serializer_class_one = serializer_class[-1]
-        else:
+        else:  # nocv
             serializer_class_list = serializer_class
             serializer_class_one = serializer_class
 
@@ -300,7 +348,11 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 manager, self.get_route_object(manager, obj_id)
             )
 
-        raise exceptions.NotFound()
+        raise exceptions.NotFound()  # nocv
+
+    @classmethod
+    def get_extra_actions(cls):
+        return super(GenericViewSet, cls).get_extra_actions()
 
     @action(methods=["post"], detail=False)
     def filter(self, request):
@@ -315,6 +367,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             queryset=queryset,
             serializer_class=self.get_serializer_class()
         )
+
+    @classmethod
+    def as_view(cls, actions=None, **initkwargs):
+        return super(GenericViewSet, cls).as_view(actions, **initkwargs)
 
 
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):

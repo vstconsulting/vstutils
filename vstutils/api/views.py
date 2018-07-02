@@ -129,18 +129,18 @@ class BulkViewSet(base.rvs.APIView):
     def _get_obj_with_extra_data(self, data):
         if isinstance(data, (dict, OrderedDict)):
             return json.dumps({k: self._get_obj_with_extra(v) for k,v in data.items()})
-        elif isinstance(data, (list, tuple)):
+        elif isinstance(data, (list, tuple)):  # nocv
             return json.dumps([self._get_obj_with_extra(v) for v in data])
-        elif isinstance(data, (six.string_types, six.text_type)):
+        elif isinstance(data, (six.string_types, six.text_type)):  # nocv
             return self._get_obj_with_extra(data)
-        return json.dumps(data)
+        return json.dumps(data)  # nocv
 
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
             url += "{}/".format(self._get_obj_with_extra(pk))
         if data_type is not None:
-            url += "{}/".format(data_type)
+            url += "{}/".format(self._get_obj_with_extra(data_type))
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
         return "/{}/{}/{}/{}".format(
