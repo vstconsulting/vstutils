@@ -94,19 +94,23 @@ def __get_from_view(view, name, arg=None, *args, **kw):
         'serializer_class_one', getattr(view, 'serializer_class_one', None)
     ) or serializer_class
     filter_class = getattr(view, 'filter_class', None)
+
     def list_view(view_obj, request, *args, **kwargs):
         # pylint: disable=unused-argument
         return view_obj.dispatch_route_instance(
             (serializer_class, serializer_class_one), filter_class, request
         )
+
     def detail_view(view_obj, request, *args, **kwargs):
         # pylint: disable=unused-argument
         return view_obj.dispatch_route_instance(
             (serializer_class, serializer_class_one), filter_class, request
         )
+
     list_view.__name__ = '{}_list'.format(name)
     detail_view.__name__ = '{}_detail'.format(name)
-    kw['empty_arg'] = kw.pop('empty_arg', True)
+    kw['empty_arg'] = kw.pop('empty_arg', False)
+    kw['append_arg'] = arg
     d_list = nested_action(name, serializer_class=serializer_class, *args, **kw)
     d_det = nested_action(name, arg, serializer_class=serializer_class_one, *args, **kw)
     if arg:
@@ -116,10 +120,12 @@ def __get_from_view(view, name, arg=None, *args, **kw):
 
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
     list_methods = ['get', 'head', 'options', 'post']
-    detail_methods = default_methods
+    detail_methods = ['get', 'head', 'options', 'put', 'patch', 'delete']
     methods = methods or detail_methods if arg else list_methods
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
-    path = __get_nested_path(name, arg, arg_regexp, kwargs.pop('empty_arg', True))
+    empty_arg = kwargs.pop('empty_arg', True)
+    append_arg = kwargs.pop('append_arg', arg)
+    path = __get_nested_path(name, arg, arg_regexp, empty_arg)
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
 
@@ -133,6 +139,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
             view.nested_allow_append = allow_append
             # ID name of nested object
             view.nested_arg = arg
+            view.nested_append_arg = append_arg
             view.nested_id = kwargs.get(view.nested_arg, None)
             view.nested_manager = getattr(
                 view.nested_parent_object, manager_name or name, None
@@ -273,7 +280,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             return self.get_route_serializer(serializer_class, obj)
         try:
             obj = queryset.model.objects.get(
-                **{self.nested_arg: data.get(self.nested_arg, '0')}
+                **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
             )
         except djexcs.ObjectDoesNotExist:
             obj = queryset.create(**serializer.validated_data)
