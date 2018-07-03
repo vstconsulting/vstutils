@@ -41,6 +41,7 @@ class ProjectTestCase(BaseTestCase):
         results = self.make_bulk(bulk_data)
         for result in results:
             self.assertEqual(result['status'], 201, result)
+            del result
         self._check_subhost(results[0]['data']['id'], name='a')
         self._check_subhost(
             results[0]['data']['id'],
@@ -118,9 +119,16 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk(
                 'hosts', host_group_id, {}, 'shost/<24[data][id]>', 'get'
             ),
+            self.get_mod_bulk('hosts', host_group_id, {'name': 'some_other'}, 'shost'),
+            self.get_mod_bulk(
+                'hosts', host_group_id, {}, 'shost/<14[data][id]>/test', 'get'
+            ),
+            self.get_mod_bulk(
+                'hosts', host_group_id, {}, 'shost/<14[data][id]>/test2', 'get'
+            ),
         ]
         results = self.make_bulk(bulk_data, 'put')
-        self.assertCount(hg.hosts.all(), 0)
+        self.assertCount(hg.hosts.all(), 1)
         self.assertEqual(results[0]['data']['count'], 1)
         self.assertEqual(results[1]['data']['count'], 1)
         self.assertEqual(results[2]['data']['id'], host_id)
@@ -141,3 +149,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[12]['data']['results'], [])
         self.assertEqual(results[13]['status'], 400)
         self.assertEqual(results[13]['data']['error_type'], "IndexError")
+        self.assertEqual(results[15]['status'], 200)
+        self.assertEqual(results[15]['data']['detail'], "OK")
+        self.assertEqual(results[16]['status'], 201)
+        self.assertEqual(results[16]['data']['detail'], "OK")

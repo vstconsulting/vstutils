@@ -87,25 +87,50 @@ def __get_nested_path(name, arg=None, arg_regexp='[0-9]', empty_arg=True):
     path += ')'
     return path
 
+def __get_nested_subpath(*args, **kwargs):
+    sub_path = kwargs.pop('sub_path', None)
+    path = __get_nested_path(*args, **kwargs)
+    if sub_path:
+        path += '/'
+        path += sub_path
+    return path
+
+
+def __get_sub_view(sub, view, name, arg, methods=None, *args, **kwargs):
+
+    def subaction_view(view_obj, request, *_args, **_kwargs):
+        _kwargs['nested_sub'] = sub
+        return view_obj.dispatch_nested_view(view, request, *_args, **_kwargs)
+
+    subaction_view.__name__ = '{}_{}'.format(name, sub)
+    sub_view = getattr(view, sub)
+    if sub_view.kwargs.get('serializer_class', None):
+        kwargs['serializer_class'] = sub_view.kwargs.get('serializer_class')
+    kwargs['sub_opts'] = dict(sub_path=sub)
+    methods = sub_view.bind_to_methods or methods
+    decorator = nested_action(name, arg, methods=methods, *args, **kwargs)
+    return subaction_view.__name__, decorator(subaction_view)
+
+
+def __get_subs(subs, view, name, arg, *args, **kwargs):
+    result = dict()
+    for sub in subs:
+        key, value = __get_sub_view(sub, view, name, arg, *args, **kwargs)
+        result[key] = value
+    return result
+
 
 def __get_from_view(view, name, arg=None, *args, **kw):
     serializer_class = kw.pop('serializer_class', view.serializer_class)
     serializer_class_one = kw.pop(
         'serializer_class_one', getattr(view, 'serializer_class_one', None)
     ) or serializer_class
-    filter_class = getattr(view, 'filter_class', None)
 
     def list_view(view_obj, request, *args, **kwargs):
-        # pylint: disable=unused-argument
-        return view_obj.dispatch_route_instance(
-            (serializer_class, serializer_class_one), filter_class, request
-        )
+        return view_obj.dispatch_nested_view(view, request, *args, **kwargs)
 
     def detail_view(view_obj, request, *args, **kwargs):
-        # pylint: disable=unused-argument
-        return view_obj.dispatch_route_instance(
-            (serializer_class, serializer_class_one), filter_class, request
-        )
+        return view_obj.dispatch_nested_view(view, request, *args, **kwargs)
 
     list_view.__name__ = '{}_list'.format(name)
     detail_view.__name__ = '{}_detail'.format(name)
@@ -118,6 +143,28 @@ def __get_from_view(view, name, arg=None, *args, **kw):
     return d_list(list_view), None
 
 
+def nested_view(name, *args, **kwargs):
+    view = kwargs.pop('view', None)
+    subs = kwargs.pop('subs', {})
+    if view is None:
+        raise Exception(
+            'Argument "view" must be installed for `nested_view` decorator.'
+        )
+
+    def decorator(view_class):
+        sub_list, sub_detail = __get_from_view(view, name, *args, **kwargs)
+        if sub_detail:
+            setattr(view_class, '{}_detail'.format(name), sub_detail)
+        if subs:
+            subactions = __get_subs(subs, view, name, *args, **kwargs)
+            for sub_action_name, sub_action_view in subactions.items():
+                setattr(view_class, sub_action_name, sub_action_view)
+        setattr(view_class, '{}_list'.format(name), sub_list)
+        return view_class
+
+    return decorator
+
+
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
     list_methods = ['get', 'head', 'options', 'post']
     detail_methods = ['get', 'head', 'options', 'put', 'patch', 'delete']
@@ -125,7 +172,8 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
     empty_arg = kwargs.pop('empty_arg', True)
     append_arg = kwargs.pop('append_arg', arg)
-    path = __get_nested_path(name, arg, arg_regexp, empty_arg)
+    sub_options = kwargs.pop('sub_opts', dict())
+    path = __get_nested_subpath(name, arg, arg_regexp, empty_arg, **sub_options)
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
 
@@ -152,23 +200,6 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         kwargs['url_path'] = path
         kwargs['url_name'] = name
         return action(*args, **kwargs)(wrapper)
-
-    return decorator
-
-
-def nested_view(name, *args, **kwargs):
-    view = kwargs.pop('view', None)
-    if view is None:
-        raise Exception(
-            'Argument "view" must be installed for `nested_view` decorator.'
-        )
-
-    def decorator(view_class):
-        sub_list, sub_detail = __get_from_view(view, name, *args, **kwargs)
-        if sub_detail:
-            setattr(view_class, '{}_detail'.format(name), sub_detail)
-        setattr(view_class, '{}_list'.format(name), sub_list)
-        return view_class
 
     return decorator
 
@@ -272,12 +303,12 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         serializer = self.get_route_serializer(serializer_class, instance)
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    def _add_or_create_nested(self, queryset, data, serializer_class):
-        serializer = self.get_route_serializer(serializer_class, data=data)
+    def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
+        serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
         serializer.is_valid(raise_exception=True)
         if not self.nested_allow_append:
             obj = queryset.create(**serializer.validated_data)
-            return self.get_route_serializer(serializer_class, obj)
+            return self.get_route_serializer(serializer_class, obj, **kwargs)
         try:
             obj = queryset.model.objects.get(
                 **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
@@ -285,7 +316,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         except djexcs.ObjectDoesNotExist:
             obj = queryset.create(**serializer.validated_data)
         queryset.add(obj)
-        return self.get_route_serializer(serializer_class, obj)
+        return self.get_route_serializer(serializer_class, obj, **kwargs)
 
     @transaction.atomic()
     def create_route_instance(self, queryset, request, serializer_class):
@@ -331,7 +362,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         method = request.method.lower()
         if isinstance(serializer_class, (list, tuple)):
             serializer_class_list = serializer_class[0]
-            serializer_class_one = serializer_class[-1]
+            serializer_class_one = serializer_class[-1] or serializer_class_list
         else:  # nocv
             serializer_class_list = serializer_class
             serializer_class_one = serializer_class
@@ -360,6 +391,17 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             )
 
         raise exceptions.NotFound()  # nocv
+
+    def dispatch_nested_view(self, view, view_request, *args, **kw):
+        nested_sub = kw.get('nested_sub', None)
+        if nested_sub:
+            return getattr(view(pk=kw.get('pk')), nested_sub)(view_request)
+        serializer_class = view.serializer_class
+        serializer_class_one = getattr(view, 'serializer_class_one', serializer_class)
+        filter_class = getattr(view, 'filter_class', None)
+        return self.dispatch_route_instance(
+            (serializer_class, serializer_class_one), filter_class, view_request, **kw
+        )
 
     @classmethod
     def get_extra_actions(cls):
