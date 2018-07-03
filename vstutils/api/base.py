@@ -101,7 +101,7 @@ def __get_nested_subpath(*args, **kwargs):
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
     list_methods = ['get', 'head', 'options', 'post']
     detail_methods = ['get', 'head', 'options', 'put', 'patch', 'delete']
-    methods = methods or detail_methods if arg else list_methods
+    methods = methods or (detail_methods if arg else list_methods)
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
     empty_arg = kwargs.pop('empty_arg', True)
     append_arg = kwargs.pop('append_arg', arg)
@@ -131,7 +131,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         kwargs['methods'] = methods
         kwargs['detail'] = True
         kwargs['url_path'] = path
-        kwargs['url_name'] = name
+        kwargs['url_name'] = kwargs.pop('url_name', name)
         return action(*args, **kwargs)(wrapper)
 
     return decorator
@@ -215,11 +215,13 @@ class nested_view(object):  # pylint: disable=invalid-name
 
     def decorated_list(self):
         name, view = self.get_list_view()
-        return name, self.get_decorator()(view)
+        return name, self.get_decorator(url_name='{}-list'.format(self.name))(view)
 
     def decorated_detail(self):
         name, view = self.get_detail_view()
-        return name, self.get_decorator(True)(view) if self.arg else None
+        return name, self.get_decorator(
+            True, url_name='{}-detail'.format(self.name)
+        )(view)
 
     def _get_decorated_sub(self, sub):
         name, subaction_view = self.get_sub_view(sub)
@@ -228,7 +230,8 @@ class nested_view(object):  # pylint: disable=invalid-name
             detail=sub_view.detail,
             sub_opts=dict(sub_path=sub),
             methods=sub_view.bind_to_methods or self.methods,
-            serializer_class=sub_view.kwargs.get('serializer_class', self.serializer)
+            serializer_class=sub_view.kwargs.get('serializer_class', self.serializer),
+            url_name='{}-{}'.format(self.name, sub)
         )
         return name, decorator(subaction_view)
 
