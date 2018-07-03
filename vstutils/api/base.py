@@ -2,6 +2,8 @@ import sys
 import logging
 import traceback
 from collections import namedtuple
+from inspect import getmembers
+
 import six
 from django.conf import settings
 from django.core import exceptions as djexcs
@@ -96,75 +98,6 @@ def __get_nested_subpath(*args, **kwargs):
     return path
 
 
-def __get_sub_view(sub, view, name, arg, methods=None, *args, **kwargs):
-
-    def subaction_view(view_obj, request, *_args, **_kwargs):
-        _kwargs['nested_sub'] = sub
-        return view_obj.dispatch_nested_view(view, request, *_args, **_kwargs)
-
-    subaction_view.__name__ = '{}_{}'.format(name, sub)
-    sub_view = getattr(view, sub)
-    if sub_view.kwargs.get('serializer_class', None):
-        kwargs['serializer_class'] = sub_view.kwargs.get('serializer_class')
-    kwargs['sub_opts'] = dict(sub_path=sub)
-    methods = sub_view.bind_to_methods or methods
-    decorator = nested_action(name, arg, methods=methods, *args, **kwargs)
-    return subaction_view.__name__, decorator(subaction_view)
-
-
-def __get_subs(subs, view, name, arg, *args, **kwargs):
-    result = dict()
-    for sub in subs:
-        key, value = __get_sub_view(sub, view, name, arg, *args, **kwargs)
-        result[key] = value
-    return result
-
-
-def __get_from_view(view, name, arg=None, *args, **kw):
-    serializer_class = kw.pop('serializer_class', view.serializer_class)
-    serializer_class_one = kw.pop(
-        'serializer_class_one', getattr(view, 'serializer_class_one', None)
-    ) or serializer_class
-
-    def list_view(view_obj, request, *args, **kwargs):
-        return view_obj.dispatch_nested_view(view, request, *args, **kwargs)
-
-    def detail_view(view_obj, request, *args, **kwargs):
-        return view_obj.dispatch_nested_view(view, request, *args, **kwargs)
-
-    list_view.__name__ = '{}_list'.format(name)
-    detail_view.__name__ = '{}_detail'.format(name)
-    kw['empty_arg'] = kw.pop('empty_arg', False)
-    kw['append_arg'] = arg
-    d_list = nested_action(name, serializer_class=serializer_class, *args, **kw)
-    d_det = nested_action(name, arg, serializer_class=serializer_class_one, *args, **kw)
-    if arg:
-        return d_list(list_view), d_det(detail_view)
-    return d_list(list_view), None
-
-
-def nested_view(name, *args, **kwargs):
-    view = kwargs.pop('view', None)
-    subs = kwargs.pop('subs', {})
-    if view is None:
-        raise Exception(
-            'Argument "view" must be installed for `nested_view` decorator.'
-        )
-
-    def decorator(view_class):
-        sub_list, sub_detail = __get_from_view(view, name, *args, **kwargs)
-        if sub_detail:
-            setattr(view_class, '{}_detail'.format(name), sub_detail)
-        if subs:
-            subactions = __get_subs(subs, view, name, *args, **kwargs)
-            for sub_action_name, sub_action_view in subactions.items():
-                setattr(view_class, sub_action_name, sub_action_view)
-        setattr(view_class, '{}_list'.format(name), sub_list)
-        return view_class
-
-    return decorator
-
-
 def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwargs):
     list_methods = ['get', 'head', 'options', 'post']
     detail_methods = ['get', 'head', 'options', 'put', 'patch', 'delete']
@@ -202,6 +135,121 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         return action(*args, **kwargs)(wrapper)
 
     return decorator
+
+
+class nested_view(object):  # pylint: disable=invalid-name
+    filter_subs = ['filter',]
+    class NoView(VSTUtilsException):
+        msg = 'Argument "view" must be installed for `nested_view` decorator.'
+
+    def __init__(self, name, arg=None, methods=None, *args, **kwargs):
+        self.name = name
+        self.arg = arg
+        self.view = kwargs.pop('view', None)
+        self.allowed_subs = kwargs.pop('subs', [])
+        self._subs = self.get_subs()
+        if self.view is None:
+            raise self.NoView()
+        self.serializers = self.__get_serializers(kwargs)
+        self.methods = methods
+        self.args = args
+        self.kwargs = kwargs
+        self.kwargs['empty_arg'] = self.kwargs.pop('empty_arg', False)
+        self.kwargs['append_arg'] = self.arg
+
+    def __get_serializers(self, kwargs):
+        serializer_class = kwargs.pop('serializer_class', self.view.serializer_class)
+        serializer_class_one = kwargs.pop(
+            'serializer_class_one', getattr(self.view, 'serializer_class_one', None)
+        ) or serializer_class
+        return (serializer_class, serializer_class_one)
+
+    def _get_subs_from_view(self):
+        # pylint: disable=protected-access
+        return [
+            name for name, _ in getmembers(self.view, vsets._is_extra_action)
+            if name not in self.filter_subs
+        ]
+
+    def get_subs(self):
+        subs = self._get_subs_from_view()
+        if self.allowed_subs:
+            subs = [sub for sub in subs if sub in self.allowed_subs]
+        return subs
+
+    @property
+    def serializer(self):
+        return self.serializers[0]
+
+    @property
+    def serializer_one(self):
+        return self.serializers[-1]
+
+    def get_view(self, name, **options):
+        # pylint: disable=redefined-outer-name
+        def nested_view(view_obj, request, *args, **kwargs):
+            kwargs.update(options)
+            return view_obj.dispatch_nested_view(self.view, request, *args, **kwargs)
+
+        nested_view.__name__ = name
+        return name, nested_view
+
+    def get_list_view(self, **options):
+        return self.get_view('{}_list'.format(self.name), **options)
+
+    def get_detail_view(self, **options):
+        return self.get_view('{}_detail'.format(self.name), **options)
+
+    def get_sub_view(self, sub, **options):
+        return self.get_view('{}_{}'.format(self.name, sub), nested_sub=sub, **options)
+
+    def get_decorator(self, detail=False, **options):
+        args = [self.name]
+        args += [self.arg] if detail else []
+        args += self.args
+        kwargs = dict(self.kwargs)
+        kwargs['methods'] = self.methods
+        kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
+        kwargs.update(options)
+        return nested_action(*args, **kwargs)
+
+    def decorated_list(self):
+        name, view = self.get_list_view()
+        return name, self.get_decorator()(view)
+
+    def decorated_detail(self):
+        name, view = self.get_detail_view()
+        return name, self.get_decorator(True)(view) if self.arg else None
+
+    def _get_decorated_sub(self, sub):
+        name, subaction_view = self.get_sub_view(sub)
+        sub_view = getattr(self.view, sub)
+        decorator = self.get_decorator(
+            detail=sub_view.detail,
+            sub_opts=dict(sub_path=sub),
+            methods=sub_view.bind_to_methods or self.methods,
+            serializer_class=sub_view.kwargs.get('serializer_class', self.serializer)
+        )
+        return name, decorator(subaction_view)
+
+    def generate_decorated_subs(self):
+        for sub in self._subs:
+            yield self._get_decorated_sub(sub)
+
+    def setup(self, view_class):
+        if self.arg:
+            setattr(view_class, *self.decorated_detail())
+        if self.allowed_subs:
+            for sub_action_name, sub_action_view in self.generate_decorated_subs():
+                setattr(view_class, sub_action_name, sub_action_view)
+        setattr(view_class, *self.decorated_list())
+
+    def __call__(self, view_class):
+        return self.decorator(view_class)
+
+    def decorator(self, view_class):
+        self.setup(view_class)
+        return view_class
 
 
 class QuerySetMixin(rvs.APIView):
@@ -393,6 +441,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         raise exceptions.NotFound()  # nocv
 
     def dispatch_nested_view(self, view, view_request, *args, **kw):
+        # pylint: disable=unused-argument
         nested_sub = kw.get('nested_sub', None)
         if nested_sub:
             return getattr(view(pk=kw.get('pk')), nested_sub)(view_request)
@@ -406,20 +455,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     @classmethod
     def get_extra_actions(cls):
         return super(GenericViewSet, cls).get_extra_actions()
-
-    @action(methods=["post"], detail=False)
-    def filter(self, request):
-        '''
-        Return django-queryset filtered list. [experimental]
-        '''
-        queryset = self.filter_queryset(self.get_queryset())
-        queryset = queryset.filter(**request.data.get("filter", {}))
-        queryset = queryset.exclude(**request.data.get("exclude", {}))
-
-        return self.get_paginated_route_response(
-            queryset=queryset,
-            serializer_class=self.get_serializer_class()
-        )
 
     @classmethod
     def as_view(cls, actions=None, **initkwargs):

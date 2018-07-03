@@ -126,6 +126,9 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk(
                 'hosts', host_group_id, {}, 'shost/<14[data][id]>/test2', 'get'
             ),
+            self.get_mod_bulk(
+                'hosts', host_group_id, {}, 'shost/<14[data][id]>/test3', 'get'
+            ),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertCount(hg.hosts.all(), 1)
@@ -153,3 +156,4 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[15]['data']['detail'], "OK")
         self.assertEqual(results[16]['status'], 201)
         self.assertEqual(results[16]['data']['detail'], "OK")
+        self.assertEqual(results[17]['status'], 404)
