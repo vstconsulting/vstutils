@@ -189,7 +189,12 @@ class nested_view(object):  # pylint: disable=invalid-name
         # pylint: disable=redefined-outer-name
         def nested_view(view_obj, request, *args, **kwargs):
             kwargs.update(options)
-            return view_obj.dispatch_nested_view(self.view, request, *args, **kwargs)
+
+            class NestedView(self.view):
+                __doc__ = self.view.__doc__
+
+            NestedView.__name__ = self.view.__name__
+            return view_obj.dispatch_nested_view(NestedView, request, *args, **kwargs)
 
         nested_view.__name__ = name
         return name, nested_view
@@ -296,7 +301,8 @@ class QuerySetMixin(rvs.APIView):
             )
             qs = self.model.objects.all()
             self.queryset = getattr(qs, 'cleared', qs.all)()
-        if self.kwargs.get("pk", None) is None:
+        lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
+        if self.kwargs.get(lookup_field, None) is None:
             self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()
 
@@ -307,8 +313,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     model = None
 
     def get_serializer_class(self):
+        lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
         if self.request and (
-                self.kwargs.get("pk", False) or self.action in ["create"] or
+                self.kwargs.get(lookup_field, False) or self.action in ["create"] or
                 int(self.request.query_params.get("detail", u"0"))
         ):
             if self.serializer_class_one is not None:
@@ -443,11 +450,23 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
         raise exceptions.NotFound()  # nocv
 
+    def _get_nested_queryset(self, vself):
+        qs = self.nested_manager.all()
+        return getattr(vself.queryset, 'cleared', qs.all)()
+
     def dispatch_nested_view(self, view, view_request, *args, **kw):
         # pylint: disable=unused-argument
         nested_sub = kw.get('nested_sub', None)
         if nested_sub:
-            return getattr(view(pk=kw.get('pk')), nested_sub)(view_request)
+            kwargs = {self.nested_arg: self.nested_id}
+            view.get_queryset = lambda vself: self._get_nested_queryset(vself)
+            view.lookup_field = self.nested_arg
+            view.format_kwarg = None
+            view_obj = view()
+            view_obj.request = view_request
+            view_obj.kwargs = kwargs
+            view_obj.action = nested_sub
+            return getattr(view_obj, nested_sub)(view_request)
         serializer_class = view.serializer_class
         serializer_class_one = getattr(view, 'serializer_class_one', serializer_class)
         filter_class = getattr(view, 'filter_class', None)
