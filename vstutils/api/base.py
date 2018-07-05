@@ -153,6 +153,8 @@ class nested_view(object):  # pylint: disable=invalid-name
             raise self.NoView()
         self.serializers = self.__get_serializers(kwargs)
         self.methods = methods
+        if self.arg is None:
+            self.methods = methods or ['get']
         self.args = args
         self.kwargs = kwargs
         self.kwargs['empty_arg'] = self.kwargs.pop('empty_arg', False)
