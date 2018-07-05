@@ -104,9 +104,10 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
     methods = methods or (detail_methods if arg else list_methods)
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
     empty_arg = kwargs.pop('empty_arg', True)
+    request_arg = '{}_{}'.format(name, arg) if arg else None
     append_arg = kwargs.pop('append_arg', arg)
     sub_options = kwargs.pop('sub_opts', dict())
-    path = __get_nested_subpath(name, arg, arg_regexp, empty_arg, **sub_options)
+    path = __get_nested_subpath(name, request_arg, arg_regexp, empty_arg, **sub_options)
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
 
@@ -119,7 +120,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
             # Allow append to nested or only create
             view.nested_allow_append = allow_append
             # ID name of nested object
-            view.nested_arg = arg
+            view.nested_arg = request_arg
             view.nested_append_arg = append_arg
             view.nested_id = kwargs.get(view.nested_arg, None)
             view.nested_manager = getattr(
@@ -173,7 +174,9 @@ class nested_view(object):  # pylint: disable=invalid-name
 
     def get_subs(self):
         subs = self._get_subs_from_view()
-        if self.allowed_subs:
+        if self.allowed_subs is None:
+            return []
+        elif self.allowed_subs:
             subs = [sub for sub in subs if sub in self.allowed_subs]
         return subs
 
@@ -231,12 +234,13 @@ class nested_view(object):  # pylint: disable=invalid-name
     def _get_decorated_sub(self, sub):
         name, subaction_view = self.get_sub_view(sub)
         sub_view = getattr(self.view, sub)
+        sub_path = sub_view.url_path
         decorator = self.get_decorator(
             detail=sub_view.detail,
-            sub_opts=dict(sub_path=sub),
+            sub_opts=dict(sub_path=sub_path),
             methods=sub_view.bind_to_methods or self.methods,
             serializer_class=sub_view.kwargs.get('serializer_class', self.serializer),
-            url_name='{}-{}'.format(self.name, sub)
+            url_name='{}-{}'.format(self.name, sub_view.url_name)
         )
         return name, decorator(subaction_view)
 
@@ -247,7 +251,7 @@ class nested_view(object):  # pylint: disable=invalid-name
     def setup(self, view_class):
         if self.arg:
             setattr(view_class, *self.decorated_detail())
-        if self.allowed_subs:
+        if self._subs:
             for sub_action_name, sub_action_view in self.generate_decorated_subs():
                 setattr(view_class, sub_action_name, sub_action_view)
         setattr(view_class, *self.decorated_list())
@@ -323,7 +327,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         return super(GenericViewSet, self).get_serializer_class()
 
     def get_route_object(self, queryset, id):
-        find_kwargs = {getattr(self, 'nested_arg', 'id'): id}
+        find_kwargs = {getattr(self, 'nested_append_arg', 'id'): id}
         try:
             return queryset.all().get(**find_kwargs)
         except djexcs.ObjectDoesNotExist:
@@ -452,15 +456,15 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def _get_nested_queryset(self, vself):
         qs = self.nested_manager.all()
-        return getattr(vself.queryset, 'cleared', qs.all)()
+        return getattr(qs, 'cleared', qs.all)()
 
     def dispatch_nested_view(self, view, view_request, *args, **kw):
         # pylint: disable=unused-argument
         nested_sub = kw.get('nested_sub', None)
         if nested_sub:
-            kwargs = {self.nested_arg: self.nested_id}
+            kwargs = {self.nested_append_arg: self.nested_id}
             view.get_queryset = lambda vself: self._get_nested_queryset(vself)
-            view.lookup_field = self.nested_arg
+            view.lookup_field = self.nested_append_arg
             view.format_kwarg = None
             view_obj = view()
             view_obj.request = view_request
