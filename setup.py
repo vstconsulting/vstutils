@@ -100,12 +100,14 @@ def get_compile_command(extensions_dict=None):
 def make_setup(**opts):
     if 'packages' not in opts:
         opts['packages'] = find_packages()
-    ext_mod, ext_mod_dict = make_extensions(opts.pop('ext_modules_list', list()))
-    opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
+    ext_list = opts.pop('ext_modules_list', list())
+    if 'develop' not in sys.argv:
+        ext_mod, ext_mod_dict = make_extensions(ext_list)
+        opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
     cmdclass = opts.get('cmdclass', dict())
-    if 'compile' not in cmdclass:
+    if 'compile' not in cmdclass and 'develop' not in sys.argv:
         cmdclass.update({"compile": get_compile_command(ext_mod_dict)})
-    if has_cython:
+    if has_cython and 'develop' not in sys.argv:
         cmdclass.update({'build_ext': _build_ext})
     if has_sphinx and 'build_sphinx' not in cmdclass:
         cmdclass['build_sphinx'] = BuildDoc

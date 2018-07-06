@@ -9,6 +9,10 @@ from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.conf import settings
 from django.contrib.auth.models import User
+try:
+    from mock import patch
+except ImportError:  # nocv
+    from unittest.mock import patch
 from .utils import import_class
 
 
@@ -20,6 +24,22 @@ class BaseTestCase(TestCase):
         self.user = self._create_user()
         self.login_url = getattr(settings, 'LOGIN_URL', '/login/')
         self.logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')
+
+    def _settings(self, item, default=None):
+        return getattr(settings, item, default)
+
+    def get_url(self, item=None, pk=None, sub=None):
+        url = '/{}/{}/'.format(
+            self._settings('VST_API_URL'), self._settings('VST_API_VERSION')
+        )
+        url += "{}/".format(item) if item else ''
+        url += "{}/".format(pk) if pk else ''
+        url += '{}/'.format(sub) if sub else ''
+        return url
+
+    @classmethod
+    def patch(cls, *args, **kwargs):  # nocv
+        return patch(*args, **kwargs)
 
     def get_model_class(self, model):
         if isinstance(model, (six.text_type, six.string_types)):
@@ -198,3 +218,17 @@ class BaseTestCase(TestCase):
         self.assertTrue(isinstance(result, dict))
         for field, value in fields.items():
             self.assertEqual(result[field], value)
+
+    def get_bulk(self, item, data, type, **kwargs):
+        return dict(type=type, item=item, data=data, **kwargs)
+
+    def get_mod_bulk(self, item, pk, data, mtype, method="POST", **kwargs):
+        return self.get_bulk(
+            item, data, 'mod',
+            pk=pk, data_type=mtype, method=method.upper(), **kwargs
+        )
+
+    def make_bulk(self, data, method_type='post'):
+        return self.get_result(
+            method_type, self.get_url('_bulk'), 200, data=json.dumps(data)
+        )

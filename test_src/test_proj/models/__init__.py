@@ -1,1 +1,1 @@
-from .hosts import Host
+from .hosts import Host, HostGroup

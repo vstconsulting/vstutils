@@ -9,3 +9,12 @@ class HostQuerySet(BQuerySet):
 class Host(BModel):
     objects = Manager.from_queryset(HostQuerySet)()
     name = models.CharField(max_length=1024)
+
+
+class HostGroup(BModel):
+    objects = Manager.from_queryset(HostQuerySet)()
+    name = models.CharField(max_length=1024)
+    hosts = models.ManyToManyField(Host)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE,
+                               related_query_name='subgroups', related_name='subgroups',
+                               null=True, default=None, blank=True)

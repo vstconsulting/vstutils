@@ -126,12 +126,21 @@ class BulkViewSet(base.rvs.APIView):
             return param.format(*self.results)
         return param
 
+    def _get_obj_with_extra_data(self, data):
+        if isinstance(data, (dict, OrderedDict)):
+            return json.dumps({k: self._get_obj_with_extra(v) for k,v in data.items()})
+        elif isinstance(data, (list, tuple)):  # nocv
+            return json.dumps([self._get_obj_with_extra(v) for v in data])
+        elif isinstance(data, (six.string_types, six.text_type)):  # nocv
+            return self._get_obj_with_extra(data)
+        return json.dumps(data)  # nocv
+
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
             url += "{}/".format(self._get_obj_with_extra(pk))
         if data_type is not None:
-            url += "{}/".format(data_type)
+            url += "{}/".format(self._get_obj_with_extra(data_type))
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
         return "/{}/{}/{}/{}".format(
@@ -148,7 +157,7 @@ class BulkViewSet(base.rvs.APIView):
         op_type = operation['type']
         data = operation.get('data', {})
         if data:
-            kwargs['data'] = json.dumps(data)
+            kwargs['data'] = self._get_obj_with_extra_data(data)
         url = self.get_url(
             operation['item'],
             operation.get('pk', None),
@@ -158,29 +167,63 @@ class BulkViewSet(base.rvs.APIView):
         method = getattr(self.client, self.get_method_type(op_type, operation))
         return method(url, **kwargs)
 
+    def create_response(self, status, data, operation):
+        result = OrderedDict(
+            status=status, data=data,
+            type=operation.get('type', None), item=operation.get('item', None)
+        )
+        if result['type'] == 'mod':
+            result['subitem'] = operation.get('data_type', None)
+        return result
+
+    def _get_rendered(self, res):
+        if getattr(res, 'data', None):
+            return res.data
+        if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
+            return json.loads(res.rendered_content.decode())
+        else:
+            return dict(detail=str(res.content.decode('utf-8')))
+
     def perform(self, operation):
         kwargs = dict()
         kwargs["content_type"] = "application/json"
         response = self.get_operation(operation, kwargs)
-        if response.status_code != 404 and getattr(response, "rendered_content", False):
-            data = json.loads(response.rendered_content.decode())
-        else:
-            data = dict(detail=str(response.content.decode('utf-8')))
-        return OrderedDict(
-            status=response.status_code, data=data, type=operation['type']
+        return self.create_response(
+            response.status_code,
+            self._get_rendered(response),
+            operation
         )
 
-    @transaction.atomic
-    def post(self, request, *args, **kwargs):
+    def operate_handler(self, operation, allow_fail=True):
+        try:
+            op_type = operation.get("type")
+            self._check_type(op_type, operation.get("item", None))
+            self.results.append(self.perform(operation))
+        except Exception as err:
+            if allow_fail:
+                raise
+            response = base.exception_handler(err, None)
+            self.results.append(self.create_response(
+                response.status_code,
+                self._get_rendered(response),
+                operation
+            ))
+
+    def operate(self, request, allow_fail=True):
         operations = request.data
         self.results = []
         self.client = Client()
         self.client.force_login(request.user)
         for operation in operations:
-            op_type = operation.get("type")
-            self._check_type(op_type, operation.get("item", None))
-            self.results.append(self.perform(operation))
+            self.operate_handler(operation, allow_fail)
         return base.Response(self.results, 200).resp
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        return self.operate(request)
+
+    def put(self, request, *args, **kwargs):
+        return self.operate(request, allow_fail=False)
 
     def get(self, request):
         response = {
