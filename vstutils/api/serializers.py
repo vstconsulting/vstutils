@@ -46,7 +46,7 @@ class UserSerializer(VSTSerializer):
     def is_valid(self, raise_exception=False):
         if self.instance is None:
             try:
-                User.objects.get(username=self.initial_data['username'])
+                User.objects.get(username=self.initial_data.get('username', None))
                 raise self.UserExist({'username': ["Already exists."]})
             except User.DoesNotExist:
                 pass

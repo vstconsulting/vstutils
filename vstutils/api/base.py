@@ -369,8 +369,8 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
         serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
-        serializer.is_valid(raise_exception=True)
         if not self.nested_allow_append:
+            serializer.is_valid(raise_exception=True)
             obj = queryset.create(**serializer.validated_data)
             return self.get_route_serializer(serializer_class, obj, **kwargs)
         try:
@@ -378,6 +378,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
             )
         except djexcs.ObjectDoesNotExist:
+            serializer.is_valid(raise_exception=True)
             obj = queryset.create(**serializer.validated_data)
         queryset.add(obj)
         return self.get_route_serializer(serializer_class, obj, **kwargs)
