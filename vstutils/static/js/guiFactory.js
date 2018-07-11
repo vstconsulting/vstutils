@@ -5,10 +5,10 @@ function getMenuIdFromApiPath(path){
 
 
 function openApi_definitions(api)
-{ 
+{
     // Создали фабрику для всего
     for(var key in api.openapi.definitions)
-    { 
+    {
         if(/^One/.test(key))
         {
             // Не формируем фабрики для объектов One...
@@ -26,27 +26,28 @@ function openApi_definitions(api)
         }
 
         window["api"+key] = guiItemFactory(api, {
-            bulk_name:key.toLowerCase(), 
-            definition:list, 
+            bulk_name:key.toLowerCase(),
+            definition:list,
         }, {
-            bulk_name:key.toLowerCase(), 
-            definition:one, 
+            bulk_name:key.toLowerCase(),
+            definition:one,
         })
 
         // Событие в теле которого можно было бы переопределить поля фабрики сразу после её создания
         tabSignal.emit("openapi.factory."+key,  {factory: window["api"+key]});
-         
+
     }
 }
 
 tabSignal.connect("openapi.factory.Group", function(data)
 {
     data.factory.testData = "ABC";
-    
+
 })
 
+// [ci skip]
 tabSignal.connect("gui.new.group.list", function(data)
-{ 
+{
     data.model.buttons = [
         {
             class:'btn btn-primary',
@@ -55,7 +56,7 @@ tabSignal.connect("gui.new.group.list", function(data)
             link:function(){ return '/?new-'+this.model.page_name},
         },
     ]
-    
+
     data.model.title = "Groups"
     data.model.short_title = "Groups"
     data.model.fileds =[
@@ -64,7 +65,7 @@ tabSignal.connect("gui.new.group.list", function(data)
             name:'name',
         },
     ]
-    
+
     data.model.actions = [
         {
             function:function(item){ return 'spajs.showLoader('+this.model.className+'.deleteItem('+item.id+'));  return false;'},
@@ -99,25 +100,25 @@ tabSignal.connect("resource.loaded", function()
 {
     window.api = new guiApi()
     $.when(window.api.init()).done(function(){
-        
+
         // Событие в теле которого можно было бы переопределить ответ от open api
         tabSignal.emit("openapi.loaded",  {api: window.api});
- 
+
         openApi_definitions(window.api)
-        
+
         /**
          * Событие в теле которого можно было бы переопределить отдельные методы для классов апи
          * tabSignal.connect("openapi.definitions", function()
             {
                 // Переопределили метод render у фабрики хостов
-               window.apiHost.one.render = function(){ alert("?!")} 
+               window.apiHost.one.render = function(){ alert("?!")}
             })
          */
         tabSignal.emit("openapi.definitions",  {api: window.api});
-         
-         
-         
-         
+
+
+
+
         var paths = []
         window.gui_pages = []
         for(var i in window.api.openapi.paths)
@@ -184,10 +185,10 @@ tabSignal.connect("resource.loaded", function()
             // Создали страницу
             var page = new guiPage();
             page.registerURL([new RegExp(regexp)], getMenuIdFromApiPath(i));
-            
+
             // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
             var urlLevel = (regexp.match(/\//g) || []).length
-            
+
             // Определяем тип страницы из урла (список или один элемент)
             if(/\{[A-z_\-]+\}\/$/.test(i))
             {
@@ -196,7 +197,7 @@ tabSignal.connect("resource.loaded", function()
                 // Настроили страницу
                 page.blocks.push({
                     id:'itemList',
-                    level: urlLevel, 
+                    level: urlLevel,
                     prioritet:0,
                     render:function(pageMainBlockObject)
                     {
@@ -204,7 +205,7 @@ tabSignal.connect("resource.loaded", function()
                         {
                             debugger;
                             var objId = data.reg[data.reg.length - 1]
-                            
+
                             // Создали список хостов
                             var pageItem = new pageMainBlockObject.one()
 
@@ -232,7 +233,7 @@ tabSignal.connect("resource.loaded", function()
                 // Настроили страницу
                 page.blocks.push({
                     id:'itemList',
-                    level: urlLevel,  
+                    level: urlLevel,
                     prioritet:0,
                     render:function(pageMainBlockObject)
                     {
@@ -261,21 +262,20 @@ tabSignal.connect("resource.loaded", function()
                 //debugger;
                 //break;
             }
-             
+
             window.gui_pages.push(page)
         }
-        
+
         // Событие в теле которого можно было бы переопределить и дополнить список страниц
         tabSignal.emit("openapi.paths",  {api: window.api, paths:paths});
         console.table(paths);
-  
-  
-  
+
+
+
         tabSignal.emit("openapi.completed",  {api: window.api});
-        tabSignal.emit("loading.completed"); 
+        tabSignal.emit("loading.completed");
     })
 
 
 
 })
- 
