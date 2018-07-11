@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 import sys
 import logging
 import traceback
@@ -458,11 +459,12 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         raise exceptions.NotFound()  # nocv
 
     def _get_nested_queryset(self, vself):
+        # pylint: disable=unused-argument
         qs = self.nested_manager.all()
         return getattr(qs, 'cleared', qs.all)()
 
     def dispatch_nested_view(self, view, view_request, *args, **kw):
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument,unnecessary-lambda
         nested_sub = kw.get('nested_sub', None)
         if nested_sub:
             kwargs = {self.nested_append_arg: self.nested_id}
