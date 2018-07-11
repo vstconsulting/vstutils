@@ -321,10 +321,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        if self.request and (
-                self.kwargs.get(lookup_field, False) or self.action in ["create"] or
-                int(self.request.query_params.get("detail", u"0"))
-        ):
+        detail_actions = ['create', 'retrieve', 'update', 'partial_update']
+        lookup_field_data = self.kwargs.get(lookup_field, False)
+        if self.request and (lookup_field_data or self.action in detail_actions):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
