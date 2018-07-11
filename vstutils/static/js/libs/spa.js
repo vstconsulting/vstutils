@@ -455,8 +455,7 @@ if(!window.spajs)
     {
         if(!menu.id)
         {
-            console.error("Не задан menu.id", menu)
-            return;
+            menu.id = Math.random()
         }
         
         if(!menu.type)
@@ -575,7 +574,7 @@ if(!window.spajs)
                 console.error("URL not registered", opt.menuId, opt)
             }
 
-            debugger;
+            //debugger;
             def.reject({detail:"Error URL not registered", status:404})
             throw { text:"URL not registered " + opt.menuId, code:404};
             return def.promise();

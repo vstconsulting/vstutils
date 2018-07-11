@@ -58,7 +58,7 @@
             html += "<="+window.JUST.JustEvalJsPattern_pageUUID+" "+funcCall+" "+window.JUST.JustEvalJsPattern_pageUUID+"=>";
             return html;
         }
-
+ 
         var JustEvalJsPattern_pageUUID = getUUID("pageUUID");
 
 
