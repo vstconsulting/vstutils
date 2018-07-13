@@ -308,9 +308,7 @@ class QuerySetMixin(rvs.APIView):
             )
             qs = self.model.objects.all()
             self.queryset = getattr(qs, 'cleared', qs.all)()
-        lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        if self.kwargs.get(lookup_field, None) is None:
-            self.queryset = self.get_extra_queryset()
+        self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()
 
 

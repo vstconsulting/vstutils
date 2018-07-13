@@ -198,7 +198,10 @@ class BulkViewSet(base.rvs.APIView):
         try:
             op_type = operation.get("type")
             self._check_type(op_type, operation.get("item", None))
-            self.results.append(self.perform(operation))
+            result = self.perform(operation)
+            if allow_fail and result['status'] >= 300:
+                raise base.djexcs.ValidationError(result['data'])
+            self.results.append(result)
         except Exception as err:
             if allow_fail:
                 raise
