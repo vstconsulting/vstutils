@@ -11,7 +11,7 @@ function guiItemFactory(api, list, one)
          * @returns {guiItemFactory.guiForWebAnonym$5}
          */
         one:function(){
- 
+
             /**
              * @class guiApi
              */
@@ -60,14 +60,14 @@ function guiItemFactory(api, list, one)
                     tpl = 'entity_one'
                 }
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}}); 
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
- 
-            var res = $.extend(this, thisFactory.one); 
-            
+
+            var res = $.extend(this, thisFactory.one);
+
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
-             * 
+             *
                 tabSignal.connect("gui.new.group.list", function(data)
                 {
                     // Тут код который будет модифицировать создаваемый объект
@@ -79,7 +79,7 @@ function guiItemFactory(api, list, one)
                     ]
                 })
              */
-            tabSignal.emit("gui.new."+this.view.bulk_name+".list", res); 
+            tabSignal.emit("gui.new."+this.view.bulk_name+".list", res);
             return res;
         },
         /**
@@ -96,7 +96,7 @@ function guiItemFactory(api, list, one)
              * Используется в шаблоне страницы
              */
             this.model = list.model
-            
+
             this.model.selectedItems = {}
 
             /**
@@ -112,47 +112,62 @@ function guiItemFactory(api, list, one)
              * @param {string} ordering - сортировка по какому-то свойству объекта(id, name и т.д). Для обратной сортировки передавать "-id"
              * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
              */
-            this.search = function (query, limit, offset, ordering)
+            this.search = function (filters /*query, limit, offset, ordering*/)
             {
+                if (!filters)
+                {
+                    filters = {};
+                }
+
+                this.model.filters = filters
+
                 var thisObj = this;
-                if (!limit)
+                if (!filters.limit)
                 {
-                    limit = 999;
+                    filters.limit = 999;
                 }
 
-                if (!offset)
+                if (!filters.offset)
                 {
-                    offset = 0;
+                    filters.offset = 0;
                 }
 
-                if (!ordering)
+                if (!filters.ordering)
                 {
-                    ordering = "";
+                    filters.ordering = "";
                 }
 
                 var q = [];
 
-                q.push("limit=" + encodeURIComponent(limit))
-                q.push("offset=" + encodeURIComponent(offset))
-                q.push("ordering=" + encodeURIComponent(ordering))
+                q.push("limit=" + encodeURIComponent(filters.limit))
+                q.push("offset=" + encodeURIComponent(filters.offset))
+                q.push("ordering=" + encodeURIComponent(filters.ordering))
 
-                if(query)
+                if(filters.query)
                 {
-                    for (var i in query)
+                    for (var i in filters.query)
                     {
-                        if (Array.isArray(query[i]))
+                        if (Array.isArray(filters.query[i]))
                         {
-                            for (var j in query[i])
+                            for (var j in filters.query[i])
                             {
-                                query[i][j] = encodeURIComponent(query[i][j])
+                                filters.query[i][j] = encodeURIComponent(filters.query[i][j])
                             }
-                            q.push(encodeURIComponent(i) + "=" + query[i].join(","))
+                            q.push(encodeURIComponent(i) + "=" + filters.query[i].join(","))
                             continue;
                         }
-                        q.push(encodeURIComponent(i) + "=" + encodeURIComponent(query[i]))
+                        q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.query[i]))
                     }
                 }
-
+                
+                var a = {
+                    type: "mod",
+                    item: this.view.bulk_name,
+                    filters:q.join("&"),
+                    data_type:"group",
+                    method:"get"
+                }
+                
                 var def = api.query({
                     type: "get",
                     item: this.view.bulk_name,
@@ -164,6 +179,30 @@ function guiItemFactory(api, list, one)
                 })
 
                 return def;
+            }
+
+            /**
+             * Преобразует строку поиска в объект с параметрами для фильтрации
+             * @param {string} query строка запроса
+             * @param {string} defaultName имя параметра по умолчанию
+             * @returns {pmItems.searchStringToObject.search} объект для поиска
+             */
+            this.searchStringToObject = function (query, defaultName)
+            {
+                var search = {}
+                if (query == "")
+                {
+                    return search;
+                }
+
+                if (!defaultName)
+                {
+                    defaultName = 'name'
+                }
+
+                search[defaultName] = query;
+
+                return search;
             }
 
             /**
@@ -213,12 +252,12 @@ function guiItemFactory(api, list, one)
             {
                 return this.model.data.count / this.model.data.limit
             }
-  
-            var res = $.extend(this, thisFactory.list); 
-            
+
+            var res = $.extend(this, thisFactory.list);
+
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
-             * 
+             *
                 tabSignal.connect("gui.new.group.list", function(data)
                 {
                     // Тут код который будет модифицировать создаваемый объект
@@ -230,15 +269,54 @@ function guiItemFactory(api, list, one)
                     ]
                 })
              */
-            tabSignal.emit("gui.new."+this.view.bulk_name+".list", res); 
+            tabSignal.emit("gui.new."+this.view.bulk_name+".list", res);
             return res;
+        },
+
+        /**
+         * Выполняет переход на страницу с результатами поиска
+         * @param {string} query
+         * @returns {$.Deferred}
+         */
+        search:function(query, options)
+        {
+            if(options.parent_type === undefined && options.parent_item === undefined)
+            {
+                if (this.isEmptySearchQuery(query))
+                {
+                    return spajs.open({menuId: this.model.name, reopen: true});
+                }
+
+                return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
+            }
+            else
+            {
+                var link = window.location.href.split(/[&?]/g)[1];
+                var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
+                var link_parts = link.match(pattern);
+                var link_with_parents = "";
+                for(var i in link_parts)
+                {
+                    if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
+                    {
+                        link_with_parents += link_parts[i]+"/";
+                    }
+                }
+
+                if (this.isEmptySearchQuery(query))
+                {
+                    return spajs.open({menuId: link_with_parents + this.model.name, reopen: true});
+                }
+
+                return spajs.open({menuId: link_with_parents + this.model.name + "/search/" +
+                    this.searchObjectToString(trim(query)), reopen: true});
+            }
         }
-          
     }
-    
+
     /**
      * Представление полученное из апи
-     * 
+     *
      * Описание полей из апи
      * view = {
      *      bulk_name - имя в bulk запросе
@@ -246,10 +324,10 @@ function guiItemFactory(api, list, one)
      * }
      */
     thisFactory.list.view = list.view
-    
+
     /**
      * Представление полученное из апи
-     * 
+     *
      * Описание полей из апи
      * view = {
      *      bulk_name - имя в bulk запросе
@@ -257,7 +335,7 @@ function guiItemFactory(api, list, one)
      * }
      */
     thisFactory.one.view = one.view
-    
+
     return thisFactory;
 }
 
