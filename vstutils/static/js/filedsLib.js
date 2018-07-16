@@ -101,3 +101,4 @@ filedsLib.validator.notEmpty = function(value, name)
     $.notify("Invalid value in field `"+name+"` it mast be not empty", "error"); 
     return false; 
 }
+

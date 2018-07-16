@@ -179,15 +179,17 @@
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
+            { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
             { prioritet:11.1, type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}"},
             { prioritet:11.2, type:'js', name: "{% static 'js/guiPage.js' %}?v={{gui_version}}"},
             { prioritet:11.3, type:'js', name: "{% static 'js/guiItemFactory.js' %}?v={{gui_version}}"},
-            { prioritet:11.3, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.4, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
 
             { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
             { prioritet:300, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
             { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
 
             { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
             { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},

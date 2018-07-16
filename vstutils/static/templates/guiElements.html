@@ -1,0 +1,21 @@
+
+<!-- guiElements.button -->
+<script type="text/x-just" data-just="guiElements.button"> 
+   
+    <a 
+        class="<% if(typeof opt.class == 'function'){ %>
+                        <%- opt.class.apply(guiObj, [opt]) %>
+               <% }else{ %>
+                    <%- opt.class %>
+               <% } %>"
+        href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiObj, [opt]) %><% }else{ %><%- opt.link %><% } %>"
+        title="<%- opt.title || '' %>"
+        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiObj, [opt]) %><% }else{ %><%= opt.onclick %><% } %>" >
+            <% if(typeof opt.text == 'function'){ %>
+                <%= opt.text.apply(guiObj, [opt]) %>
+            <% }else{ %>
+                <%= opt.text %>
+            <% } %>
+    </a>
+</script>
+

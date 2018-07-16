@@ -111,14 +111,14 @@ function guiPage()
  */
 function compareBlocks(a, b)
 {
-    if (!a[0].prioritet && a[0].prioritet !== 0) a[0].prioritet = 999;
-    if (!b[0].prioritet && b[0].prioritet !== 0) b[0].prioritet = 999;
+    if (!a.prioritet && a.prioritet !== 0) a.prioritet = 999;
+    if (!b.prioritet && b.prioritet !== 0) b.prioritet = 999;
 
-    if (a[0].prioritet > b[0].prioritet) return 1;
-    if (a[0].prioritet < b[0].prioritet) return -1;
+    if (a.prioritet > b.prioritet) return 1;
+    if (a.prioritet < b.prioritet) return -1;
     return 0
 
 
-    if (a[0].index > b[0].index) return 1;
-    if (a[0].index < b[0].index) return -1;
+    if (a.index > b.index) return 1;
+    if (a.index < b.index) return -1;
 }

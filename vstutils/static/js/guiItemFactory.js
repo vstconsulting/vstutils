@@ -3,7 +3,7 @@
  * Фабрика классов объектов
  * @returns {Object}
  */
-function guiItemFactory(api, listView, oneView)
+function guiItemFactory(api, list, one)
 {
     var thisFactory = {
         /**
@@ -11,18 +11,14 @@ function guiItemFactory(api, listView, oneView)
          * @returns {guiItemFactory.guiForWebAnonym$5}
          */
         one:function(){
-
-            /**
-             * Описание полей из апи
-             */
-            this.view = oneView
-
+ 
             /**
              * @class guiApi
              */
             this.api = api
 
-            this.model = {}
+            this.model = one.model
+            this.model.selectedItems = {}
 
             this.load = function (item_id)
             {
@@ -38,7 +34,8 @@ function guiItemFactory(api, listView, oneView)
                     pk:item_id
                 })
                 $.when(def).done(function(data){
-                    thisObj.model = data
+                    thisObj.model.data = data.data
+                    thisObj.model.status = data.status
                 })
 
                 return def;
@@ -57,25 +54,31 @@ function guiItemFactory(api, listView, oneView)
             this.render = function ()
             {
                 var thisObj = this;
-                var def = new $.Deferred();
-                $.when(this.load()).done(function()
+                var tpl = thisObj.view.bulk_name + '_one'
+                if (!spajs.just.isTplExists(tpl))
                 {
-                    var tpl = thisObj.view.bulk_name + '_list'
-                    if (!spajs.just.isTplExists(tpl))
-                    {
-                        tpl = 'entity_list'
-                    }
+                    tpl = 'entity_one'
+                }
 
-                    def.resolve(spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}}));
-                }).fail(function(err)
-                {
-                    def.reject(err);
-                })
-
-                return def.promise();
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}}); 
             }
  
             var res = $.extend(this, thisFactory.one); 
+            
+            /**
+             * Перегрузить поля объекта создаваемого фабрикой можно таким образом
+             * 
+                tabSignal.connect("gui.new.group.list", function(data)
+                {
+                    // Тут код который будет модифицировать создаваемый объект
+                    data.model.fileds = [
+                        {
+                            title:'Name',
+                            name:'name',
+                        },
+                    ]
+                })
+             */
             tabSignal.emit("gui.new."+this.view.bulk_name+".list", res); 
             return res;
         },
@@ -85,17 +88,6 @@ function guiItemFactory(api, listView, oneView)
          */
         list:function()
         {
-            /**
-             * Представление полученное из апи
-             * 
-             * Описание полей из апи
-             * view = {
-             *      bulk_name - имя в bulk запросе
-             *      fileds - поля
-             * }
-             */
-            this.view = listView
-
             this.state = {
                 search_filters:{}
             }
@@ -103,12 +95,9 @@ function guiItemFactory(api, listView, oneView)
             /**
              * Используется в шаблоне страницы
              */
-            this.model = {
-                buttons:[],
-                fileds:[],
-                data:undefined, // Данные самого объекта
-                selectedItems:{}
-            }
+            this.model = list.model
+            
+            this.model.selectedItems = {}
 
             /**
              * @class guiApi
@@ -226,10 +215,48 @@ function guiItemFactory(api, listView, oneView)
             }
   
             var res = $.extend(this, thisFactory.list); 
+            
+            /**
+             * Перегрузить поля объекта создаваемого фабрикой можно таким образом
+             * 
+                tabSignal.connect("gui.new.group.list", function(data)
+                {
+                    // Тут код который будет модифицировать создаваемый объект
+                    data.model.fileds = [
+                        {
+                            title:'Name',
+                            name:'name',
+                        },
+                    ]
+                })
+             */
             tabSignal.emit("gui.new."+this.view.bulk_name+".list", res); 
             return res;
         }
+          
     }
+    
+    /**
+     * Представление полученное из апи
+     * 
+     * Описание полей из апи
+     * view = {
+     *      bulk_name - имя в bulk запросе
+     *      fileds - поля
+     * }
+     */
+    thisFactory.list.view = list.view
+    
+    /**
+     * Представление полученное из апи
+     * 
+     * Описание полей из апи
+     * view = {
+     *      bulk_name - имя в bulk запросе
+     *      fileds - поля
+     * }
+     */
+    thisFactory.one.view = one.view
     
     return thisFactory;
 }
