@@ -332,7 +332,7 @@ class VSTUtilsTestCase(BaseTestCase):
             dict(username="USER{}".format(i), password="123") for i in range(10)
         ]
         users_id = self.mass_create('/api/v1/users/', data, 'username')
-        test_user = dict(username='test_bulk_user', password='123')
+        test_user = dict(username=self.random_name(), password='123')
         userself_data = dict(first_name='me')
         bulk_request_data = [
             # Check code 204
@@ -350,8 +350,11 @@ class VSTUtilsTestCase(BaseTestCase):
              'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
             },
         ]
+        self.get_result(
+            "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
+        )
         result = self.get_result(
-            "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
+            "put", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
         )
         self.assertEqual(result[0]['status'], 204)
         self.assertEqual(result[1]['status'], 404)
