@@ -4,6 +4,7 @@ import json  # noqa: F401
 import random
 import string
 import os  # noqa: F401
+import uuid
 import six
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
@@ -27,6 +28,9 @@ class BaseTestCase(TestCase):
 
     def _settings(self, item, default=None):
         return getattr(settings, item, default)
+
+    def random_name(self):
+        return str(uuid.uuid1())
 
     def get_url(self, item=None, pk=None, sub=None):
         url = '/{}/{}/'.format(

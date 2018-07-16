@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 import sys
 import logging
 import traceback
@@ -307,9 +308,7 @@ class QuerySetMixin(rvs.APIView):
             )
             qs = self.model.objects.all()
             self.queryset = getattr(qs, 'cleared', qs.all)()
-        lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        if self.kwargs.get(lookup_field, None) is None:
-            self.queryset = self.get_extra_queryset()
+        self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()
 
 
@@ -320,10 +319,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        if self.request and (
-                self.kwargs.get(lookup_field, False) or self.action in ["create"] or
-                int(self.request.query_params.get("detail", u"0"))
-        ):
+        detail_actions = ['create', 'retrieve', 'update', 'partial_update']
+        lookup_field_data = self.kwargs.get(lookup_field, False)
+        if self.request and (lookup_field_data or self.action in detail_actions):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
@@ -369,8 +367,8 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
         serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
-        serializer.is_valid(raise_exception=True)
         if not self.nested_allow_append:
+            serializer.is_valid(raise_exception=True)
             obj = queryset.create(**serializer.validated_data)
             return self.get_route_serializer(serializer_class, obj, **kwargs)
         try:
@@ -378,6 +376,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
             )
         except djexcs.ObjectDoesNotExist:
+            serializer.is_valid(raise_exception=True)
             obj = queryset.create(**serializer.validated_data)
         queryset.add(obj)
         return self.get_route_serializer(serializer_class, obj, **kwargs)
@@ -457,11 +456,12 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         raise exceptions.NotFound()  # nocv
 
     def _get_nested_queryset(self, vself):
+        # pylint: disable=unused-argument
         qs = self.nested_manager.all()
         return getattr(qs, 'cleared', qs.all)()
 
     def dispatch_nested_view(self, view, view_request, *args, **kw):
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument,unnecessary-lambda
         nested_sub = kw.get('nested_sub', None)
         if nested_sub:
             kwargs = {self.nested_append_arg: self.nested_id}
