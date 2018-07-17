@@ -393,7 +393,7 @@ function openApi_paths(api)
                                 page_and_parents:res[0],    // страница+родители
                                 parents:res[1], 
                             }
-                             debugger;
+                            
                             if(obj.page_and_parents)
                             {
                                 var match = obj.page_and_parents.match(/([A-z]+)\/([0-9]+)\/([A-z]+)$/)
