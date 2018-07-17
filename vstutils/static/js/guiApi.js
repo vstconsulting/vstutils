@@ -56,7 +56,7 @@ function guiApi()
 
         spajs.ajax.Call({
             url: scheme+"://"+thisObj.openapi.host + thisObj.openapi.basePath+"/_bulk/",
-            type: "POST",
+            type: "PUT",
             contentType:'application/json',
             data: JSON.stringify(this_query_data.data),
             success: function(data)

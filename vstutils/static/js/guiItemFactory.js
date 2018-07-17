@@ -160,19 +160,27 @@ function guiItemFactory(api, list, one)
                     }
                 }
                 
-                var a = {
-                    type: "mod",
-                    item: this.view.bulk_name,
-                    filters:q.join("&"),
-                    data_type:"group",
-                    method:"get"
-                }
                 
-                var def = api.query({
-                    type: "get",
-                    item: this.view.bulk_name,
-                    filters:q.join("&")
-                })
+                var def = undefined;
+                if(filters.parent_id && filters.parent_type)
+                { 
+                    def = api.query({
+                        type: "mod",
+                        item: filters.parent_type,
+                        filters:q.join("&"),
+                        data_type:this.view.bulk_name,
+                        method:"get",
+                        pk:filters.parent_id
+                    })
+                }
+                else
+                { 
+                    def = api.query({
+                        type: "get",
+                        item: this.view.bulk_name,
+                        filters:q.join("&")
+                    })
+                }
 
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
@@ -280,6 +288,8 @@ function guiItemFactory(api, list, one)
          */
         search:function(query, options)
         {
+            spajs.urlInfo;
+            debugger;
             if(options.parent_type === undefined && options.parent_item === undefined)
             {
                 if (this.isEmptySearchQuery(query))

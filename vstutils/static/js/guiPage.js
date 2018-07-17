@@ -86,20 +86,37 @@ function guiPage()
      * @param {type} urlregexp
      * @returns {undefined}
      */
-    this.registerURL = function(urlregexp, menu_id)
+    this.registerURL = function(parse_url, menu_id)
     {
-        this.urlregexp = urlregexp;
-        spajs.addMenu({
-            id:menu_id,
-            urlregexp:urlregexp,
-            onOpen:function(holder, menuInfo, data)
-            {
-                return thisObj.render(holder, menuInfo, data);
-            },
-            /*onClose:function()
-            {
-            },*/
-        })
+        this.url_parser = parse_url;
+        if(typeof parse_url[0] == 'function')
+        {
+            spajs.addMenu({
+                id:menu_id,
+                url_parser:parse_url,
+                onOpen:function(holder, menuInfo, data)
+                {
+                    return thisObj.render(holder, menuInfo, data);
+                },
+                /*onClose:function()
+                {
+                },*/
+            })
+        }
+        else
+        {
+            spajs.addMenu({
+                id:menu_id,
+                urlregexp:parse_url,
+                onOpen:function(holder, menuInfo, data)
+                {
+                    return thisObj.render(holder, menuInfo, data);
+                },
+                /*onClose:function()
+                {
+                },*/
+            })
+        } 
     }
 }
 
