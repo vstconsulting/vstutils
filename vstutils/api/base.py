@@ -381,12 +381,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         queryset.add(obj)
         return self.get_route_serializer(serializer_class, obj, **kwargs)
 
-    @transaction.atomic()
     def create_route_instance(self, queryset, request, serializer_class):
         serializer = self._add_or_create_nested(queryset, request.data, serializer_class)
         return Response(serializer.data, status.HTTP_201_CREATED).resp
 
-    @transaction.atomic()
     def update_route_instance(self, instance, request, serializer_class, partial=None):
         # pylint: disable=protected-access
         serializer = self.get_route_serializer(
@@ -402,7 +400,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    @transaction.atomic()
     def delete_route_instance(self, manager, instance):
         if self.nested_allow_append:
             manager.remove(instance)
@@ -417,6 +414,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         '''
         pass
 
+    @transaction.atomic()
     def dispatch_route_instance(self, serializer_class, filter_classes, request, **kw):
         self.nested_allow_check()
         obj_id = kw.get(getattr(self, 'nested_arg', 'id'), None)
