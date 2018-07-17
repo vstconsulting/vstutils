@@ -14,7 +14,7 @@ class ProjectTestCase(BaseTestCase):
         Host.objects.all().delete()
         Host.objects.create(name='test_one')
         self.assertEqual(Host.objects.test_filter().count(), 1)
-        Host.objects.create(name='test_two', hidden=True)
+        Host.objects.create(name=self.random_name(), hidden=True)
         self.assertEqual(Host.objects.all().count(), 2)
         self.assertEqual(Host.objects.all().cleared().count(), 1)
 

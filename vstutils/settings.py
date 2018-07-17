@@ -247,10 +247,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.MultiPartRenderer',
     ),
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
-    'DEFAULT_FILTER_BACKENDS': (
+    'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
-    ),
+        'vstutils.api.filter_backends.HideHiddenFilterBackend',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
     'SCHEMA_COERCE_PATH_PK': False,

@@ -63,9 +63,6 @@ class BaseTestCase(TestCase):
         self.user = self._create_user(is_super_user)
         return old_user
 
-    def random_name(self, length=8):
-        return ''.join(random.sample(string.ascii_lowercase, length))
-
     def _create_user(self, is_super_user=True):
         username = self.random_name()
         email = username + '@gmail.com'
@@ -83,9 +80,7 @@ class BaseTestCase(TestCase):
 
     def _login(self):
         client = self.client
-        response = client.login(**{'username': self.user.data['username'],
-                                   'password': self.user.data['password']})
-        self.assertTrue(response)
+        client.force_login(self.user)
         return client
 
     def _logout(self, client):
