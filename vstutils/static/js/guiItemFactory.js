@@ -105,14 +105,10 @@ function guiItemFactory(api, list, one)
             this.api = api
 
             /**
-             * Функция поиска
-             * @param {string|object} query запрос
-             * @param {integer} limit
-             * @param {integer} offset
-             * @param {string} ordering - сортировка по какому-то свойству объекта(id, name и т.д). Для обратной сортировки передавать "-id"
+             * Функция поиска 
              * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
              */
-            this.search = function (filters /*query, limit, offset, ordering*/)
+            this.search = function (filters)
             {
                 if (!filters)
                 {
@@ -287,27 +283,6 @@ function guiItemFactory(api, list, one)
         },
 
         /**
-         * Выполняет переход на страницу с результатами поиска
-         * @param {string} query
-         * @returns {$.Deferred}
-         */
-        search:function(query)
-        {
-            if (this.isEmptySearchQuery(query))
-            {
-                alert("Не готово @todo ")
-                return spajs.open({menuId: this.model.name, reopen: true});
-            }
- 
-            if(!spajs.urlInfo || !spajs.urlInfo.data.reg.searchURL)
-            {
-                return;
-            }
-            
-            return spajs.openURL(spajs.urlInfo.data.reg.searchURL(this.searchObjectToString(trim(query))));  
-        },
-        
-        /**
          * Преобразует строку и объект поиска в строку для урла страницы поиска
          * @param {string} query строка запроса
          * @param {string} defaultName имя параметра по умолчанию
@@ -359,3 +334,20 @@ function guiItemFactory(api, list, one)
     return thisFactory;
 }
 
+
+/**
+ * Выполняет переход на страницу с результатами поиска
+ * Урл строит на основе того какая страница открыта.
+ * 
+ * @param {string} query
+ * @returns {$.Deferred}
+ */
+function goToSearch(obj, query)
+{
+    if (obj.isEmptySearchQuery(query))
+    { 
+        spajs.openURL(spajs.urlInfo.data.reg.baseURL());  
+    }
+
+    return spajs.openURL(spajs.urlInfo.data.reg.searchURL(obj.searchObjectToString(trim(query))));  
+}

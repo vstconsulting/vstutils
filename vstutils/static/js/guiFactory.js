@@ -345,6 +345,10 @@ function openApi_paths(api)
                             obj.searchURL = function(query){ 
                                 return "/?"+this.page_and_parents+"/search/"+query; 
                             }
+                            
+                            obj.baseURL = function(){ 
+                                return "/?"+this.page_and_parents; 
+                            }
                            
                             return obj
                         }
