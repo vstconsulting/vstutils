@@ -16,6 +16,8 @@ class VSTSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(VSTSerializer):
+    is_active = serializers.BooleanField(default=True)
+    is_staff = serializers.BooleanField(default=False)
 
     class UserExist(exceptions.ValidationError):
         status_code = 409
@@ -78,6 +80,7 @@ class UserSerializer(VSTSerializer):
 
 class OneUserSerializer(UserSerializer):
     password = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(required=False)
 
     class Meta:
         model = User
