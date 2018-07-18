@@ -2,6 +2,7 @@ from vstutils.api.serializers import VSTSerializer
 from vstutils.api.base import ModelViewSetSet, Response
 from vstutils.api.decorators import nested_view, action
 from vstutils.api.filters import filters
+from vstutils.api.fields import AutoCompletionField
 from .models import Host, HostGroup
 
 
@@ -25,6 +26,8 @@ class HostSerializer(VSTSerializer):
 
 
 class HostGroupSerializer(VSTSerializer):
+    parent = AutoCompletionField(autocomplete='Host', required=False)
+
     class Meta:
         model = HostGroup
         fields = (

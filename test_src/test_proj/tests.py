@@ -1,3 +1,6 @@
+import json
+import six
+from django.core.management import call_command
 from vstutils.unittests import BaseTestCase, VSTUtilsTestCase
 from .models import Host, HostGroup
 
@@ -161,3 +164,20 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[17]['status'], 404)
         self.assertEqual(results[18]['status'], 204)
         self.assertEqual(results[19]['status'], 201)
+
+    def test_coreapi_schema(self):
+        stdout = six.StringIO()
+        call_command('generate_swagger', format='json', stdout=stdout)
+        data = json.loads(stdout.getvalue())
+        self.assertEqual(
+            data['basePath'], '/{}/{}'.format(
+                self._settings('VST_API_URL'), self._settings('VST_API_VERSION')
+            )
+        )
+        self.assertEqual(data['swagger'], '2.0')
+        self.assertEqual(data['definitions']['User']['type'], 'object')
+        self.assertIn('username', data['definitions']['User']['required'])
+        self.assertIn('username', data['definitions']['User']['properties'])
+        self.assertIn('id', data['definitions']['User']['properties'])
+        self.assertIn('is_active', data['definitions']['User']['properties'])
+        self.assertIn('is_staff', data['definitions']['User']['properties'])

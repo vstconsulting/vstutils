@@ -418,6 +418,7 @@ except:
 
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.VSTAutoSchema'
 }
 
 API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
