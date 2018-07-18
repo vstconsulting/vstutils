@@ -247,7 +247,7 @@ function openApi_paths(api)
                 {
                     return function(menuInfo, data)
                     {
-                        var objId = data.reg[data.reg.length - 1]
+                        var objId = data.reg.id
                          
                         // Создали список хостов
                         var pageItem = new pageMainBlockObject.one()
@@ -270,7 +270,7 @@ function openApi_paths(api)
             var regexp_in_other = function(regexp)
                     {
                         return function(url)
-                        {
+                        { 
                             var res = guiTestUrl(regexp, url)
                             if(!res)
                             {
@@ -282,6 +282,7 @@ function openApi_paths(api)
                                 page_type:res[2],           // тип страницы в блоке
                                 page_and_parents:res[0],    // страница+родители
                                 parents:res[1], 
+                                id:res[3]
                             }
                             
                             if(obj.parents)
@@ -329,7 +330,7 @@ function openApi_paths(api)
                                 page_number_part:res[6],
                                 page_number:res[7],
                             }
-                             debugger;
+                             
                             if(res[1])
                             {
                                 var match = res[1].match(/([A-z]+)\/([0-9]+)\/([A-z]+)$/)
@@ -339,6 +340,10 @@ function openApi_paths(api)
                                     obj.parent_type = match[1]
                                     obj.parent_id = match[2]
                                 }
+                            }
+                           
+                            obj.searchURL = function(query){ 
+                                return "/?"+this.page_and_parents+"/search/"+query; 
                             }
                            
                             return obj

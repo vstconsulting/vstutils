@@ -145,6 +145,11 @@ function guiItemFactory(api, list, one)
 
                 if(filters.query)
                 {
+                    if(typeof filters.query == "string")
+                    {
+                        filters.query = this.searchStringToObject(filters.query)
+                    }
+                    
                     for (var i in filters.query)
                     {
                         if (Array.isArray(filters.query[i]))
@@ -286,41 +291,46 @@ function guiItemFactory(api, list, one)
          * @param {string} query
          * @returns {$.Deferred}
          */
-        search:function(query, options)
+        search:function(query)
         {
-            spajs.urlInfo;
-            debugger;
-            if(options.parent_type === undefined && options.parent_item === undefined)
+            if (this.isEmptySearchQuery(query))
             {
-                if (this.isEmptySearchQuery(query))
-                {
-                    return spajs.open({menuId: this.model.name, reopen: true});
-                }
-
-                return spajs.open({menuId: this.model.name + "/search/" + this.searchObjectToString(trim(query)), reopen: true});
+                alert("Не готово @todo ")
+                return spajs.open({menuId: this.model.name, reopen: true});
             }
-            else
+ 
+            if(!spajs.urlInfo || !spajs.urlInfo.data.reg.searchURL)
             {
-                var link = window.location.href.split(/[&?]/g)[1];
-                var pattern = /([A-z0-9_]+)\/([0-9]+)/g;
-                var link_parts = link.match(pattern);
-                var link_with_parents = "";
-                for(var i in link_parts)
-                {
-                    if(link_parts[i].split("/")[0] != 'page' && link_parts[i].split("/")[0] != 'search')
-                    {
-                        link_with_parents += link_parts[i]+"/";
-                    }
-                }
-
-                if (this.isEmptySearchQuery(query))
-                {
-                    return spajs.open({menuId: link_with_parents + this.model.name, reopen: true});
-                }
-
-                return spajs.open({menuId: link_with_parents + this.model.name + "/search/" +
-                    this.searchObjectToString(trim(query)), reopen: true});
+                return;
             }
+            
+            return spajs.openURL(spajs.urlInfo.data.reg.searchURL(this.searchObjectToString(trim(query))));  
+        },
+        
+        /**
+         * Преобразует строку и объект поиска в строку для урла страницы поиска
+         * @param {string} query строка запроса
+         * @param {string} defaultName имя параметра по умолчанию
+         * @returns {string} строка для параметра страницы поиска
+         */
+        searchObjectToString:function (query, defaultName)
+        {
+            return encodeURIComponent(query);
+        },
+
+        /**
+         * Если поисковый запрос пуст то вернёт true
+         * @param {type} query
+         * @returns {Boolean}
+         */
+        isEmptySearchQuery:function (query)
+        {
+            if (!query || !trim(query))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 

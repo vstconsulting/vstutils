@@ -552,7 +552,7 @@ if(!window.spajs)
                 for(var j in spajs.opt.menu[i].url_parser)
                 {
                     var parsed = spajs.opt.menu[i].url_parser[j](opt.menuId)
-                    if(parsed)
+                    if(parsed != false)
                     {
                         regExpRes = parsed
                         menuInfo = spajs.opt.menu[i]
