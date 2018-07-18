@@ -5,7 +5,7 @@ import six
 from django.conf import settings
 from django.test import Client
 from django.db import transaction
-from . import base, serializers, permissions, filters
+from . import base, serializers, permissions, filters, decorators as deco
 
 
 class UserViewSet(base.ModelViewSetSet):
@@ -67,14 +67,14 @@ class SettingsViewSet(base.ListNonModelViewSet):
             "{}_VERSION".format(settings.ENV_NAME): settings.PROJECT_VERSION
         }
 
-    @base.action(methods=['get'], detail=False)
+    @deco.action(methods=['get'], detail=False)
     def localization(self, request):
         '''
         Return localization settings.
         '''
         return base.Response(self._get_localization_settings(), 200).resp
 
-    @base.action(methods=['get'], detail=False)
+    @deco.action(methods=['get'], detail=False)
     def system(self, request):
         '''
         Return system settings like interpreter or libs version.

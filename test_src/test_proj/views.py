@@ -1,5 +1,6 @@
 from vstutils.api.serializers import VSTSerializer
-from vstutils.api.base import ModelViewSetSet, nested_view, action, Response
+from vstutils.api.base import ModelViewSetSet, Response
+from vstutils.api.decorators import nested_view, action
 from vstutils.api.filters import filters
 from .models import Host, HostGroup
 
