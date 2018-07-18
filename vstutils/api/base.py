@@ -1,3 +1,4 @@
+# pylint: disable=too-many-locals
 import sys
 import logging
 import traceback
@@ -126,6 +127,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
             view.nested_manager = getattr(
                 view.nested_parent_object, manager_name or name, None
             )
+            view.nested_view_object = None
             return func(view, request, *args)
 
         wrapper.__name__ = func.__name__
@@ -307,9 +309,7 @@ class QuerySetMixin(rvs.APIView):
             )
             qs = self.model.objects.all()
             self.queryset = getattr(qs, 'cleared', qs.all)()
-        lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        if self.kwargs.get(lookup_field, None) is None:
-            self.queryset = self.get_extra_queryset()
+        self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()
 
 
@@ -320,10 +320,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        if self.request and (
-                self.kwargs.get(lookup_field, False) or self.action in ["create"] or
-                int(self.request.query_params.get("detail", u"0"))
-        ):
+        detail_actions = ['create', 'retrieve', 'update', 'partial_update']
+        lookup_field_data = self.kwargs.get(lookup_field, False)
+        if self.request and (lookup_field_data or self.action in detail_actions):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
@@ -331,7 +330,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     def get_route_object(self, queryset, id):
         find_kwargs = {getattr(self, 'nested_append_arg', 'id'): id}
         try:
-            return queryset.all().get(**find_kwargs)
+            obj = queryset.all().get(**find_kwargs)
+            if self.nested_view_object is not None:
+                self.nested_view_object.action = 'create'
+                self.nested_view_object.check_object_permissions(self.request, obj)
+            return obj
+        except exceptions.PermissionDenied:  # nocv
+            raise
         except djexcs.ObjectDoesNotExist:
             raise exceptions.NotFound()
 
@@ -377,18 +382,21 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             obj = queryset.model.objects.get(
                 **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
             )
+            if self.nested_view_object is not None:
+                self.nested_view_object.action = 'create'
+                self.nested_view_object.check_object_permissions(self.request, obj)
+        except exceptions.PermissionDenied:  # nocv
+            raise
         except djexcs.ObjectDoesNotExist:
             serializer.is_valid(raise_exception=True)
             obj = queryset.create(**serializer.validated_data)
         queryset.add(obj)
         return self.get_route_serializer(serializer_class, obj, **kwargs)
 
-    @transaction.atomic()
     def create_route_instance(self, queryset, request, serializer_class):
         serializer = self._add_or_create_nested(queryset, request.data, serializer_class)
         return Response(serializer.data, status.HTTP_201_CREATED).resp
 
-    @transaction.atomic()
     def update_route_instance(self, instance, request, serializer_class, partial=None):
         # pylint: disable=protected-access
         serializer = self.get_route_serializer(
@@ -404,7 +412,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    @transaction.atomic()
     def delete_route_instance(self, manager, instance):
         if self.nested_allow_append:
             manager.remove(instance)
@@ -419,6 +426,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         '''
         pass
 
+    @transaction.atomic()
     def dispatch_route_instance(self, serializer_class, filter_classes, request, **kw):
         self.nested_allow_check()
         obj_id = kw.get(getattr(self, 'nested_arg', 'id'), None)
@@ -431,6 +439,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         else:  # nocv
             serializer_class_list = serializer_class
             serializer_class_one = serializer_class
+        permission_access = str()
+        if self.nested_view_object is not None:
+            permission_access = self.nested_view_object.check_permissions
+        permission_access(self.request)
 
         if method == 'post':
             return self.create_route_instance(manager, request, serializer_class_one)
@@ -458,20 +470,21 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         raise exceptions.NotFound()  # nocv
 
     def _get_nested_queryset(self, vself):
-        qs = self.nested_manager.all()
-        return getattr(qs, 'cleared', qs.all)()
+        # pylint: disable=unused-argument
+        return self.nested_manager.all()
 
     def dispatch_nested_view(self, view, view_request, *args, **kw):
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument,unnecessary-lambda
         nested_sub = kw.get('nested_sub', None)
+        kwargs = {self.nested_append_arg: self.nested_id}
+        view.get_queryset = lambda vself: self._get_nested_queryset(vself)
+        view.lookup_field = self.nested_append_arg
+        view.format_kwarg = None
+        view_obj = view()
+        view_obj.request = view_request
+        view_obj.kwargs = kwargs
+        self.nested_view_object = view_obj
         if nested_sub:
-            kwargs = {self.nested_append_arg: self.nested_id}
-            view.get_queryset = lambda vself: self._get_nested_queryset(vself)
-            view.lookup_field = self.nested_append_arg
-            view.format_kwarg = None
-            view_obj = view()
-            view_obj.request = view_request
-            view_obj.kwargs = kwargs
             view_obj.action = nested_sub
             return getattr(view_obj, nested_sub)(view_request)
         serializer_class = view.serializer_class

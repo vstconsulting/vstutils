@@ -14,7 +14,7 @@ class ProjectTestCase(BaseTestCase):
         Host.objects.all().delete()
         Host.objects.create(name='test_one')
         self.assertEqual(Host.objects.test_filter().count(), 1)
-        Host.objects.create(name='test_two', hidden=True)
+        Host.objects.create(name=self.random_name(), hidden=True)
         self.assertEqual(Host.objects.all().count(), 2)
         self.assertEqual(Host.objects.all().cleared().count(), 1)
 
@@ -129,6 +129,8 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk(
                 'hosts', host_group_id, {}, 'shost/<14[data][id]>/test3', 'get'
             ),
+            self.get_mod_bulk('hosts', host_group_id, {}, 'shost/<14[data][id]>', 'delete'),
+            self.get_mod_bulk('hosts', host_group_id, dict(id='<14[data][id]>'), 'shost'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertCount(hg.hosts.all(), 1)
@@ -157,3 +159,5 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[16]['status'], 201)
         self.assertEqual(results[16]['data']['detail'], "OK")
         self.assertEqual(results[17]['status'], 404)
+        self.assertEqual(results[18]['status'], 204)
+        self.assertEqual(results[19]['status'], 201)

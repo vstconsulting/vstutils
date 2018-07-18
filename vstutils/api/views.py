@@ -126,14 +126,21 @@ class BulkViewSet(base.rvs.APIView):
             return param.format(*self.results)
         return param
 
-    def _get_obj_with_extra_data(self, data):
+    def _json_dump(self, value, inner=False):
+        return json.dumps(value) if not inner else value
+
+    def _get_obj_with_extra_data(self, data, inner=False):
         if isinstance(data, (dict, OrderedDict)):
-            return json.dumps({k: self._get_obj_with_extra(v) for k,v in data.items()})
+            return self._json_dump({
+                k: self._get_obj_with_extra_data(v, True) for k,v in data.items()
+            }, inner)
         elif isinstance(data, (list, tuple)):  # nocv
-            return json.dumps([self._get_obj_with_extra(v) for v in data])
-        elif isinstance(data, (six.string_types, six.text_type)):  # nocv
+            return self._json_dump([
+                self._get_obj_with_extra_data(v, True) for v in data
+            ], inner)
+        elif isinstance(data, (six.string_types, six.text_type)):
             return self._get_obj_with_extra(data)
-        return json.dumps(data)  # nocv
+        return self._json_dump(data, inner)  # nocv
 
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
@@ -198,7 +205,10 @@ class BulkViewSet(base.rvs.APIView):
         try:
             op_type = operation.get("type")
             self._check_type(op_type, operation.get("item", None))
-            self.results.append(self.perform(operation))
+            result = self.perform(operation)
+            if allow_fail and result['status'] >= 300:
+                raise base.djexcs.ValidationError(result['data'])
+            self.results.append(result)
         except Exception as err:
             if allow_fail:
                 raise
@@ -215,10 +225,11 @@ class BulkViewSet(base.rvs.APIView):
         self.client = Client()
         self.client.force_login(request.user)
         for operation in operations:
-            self.operate_handler(operation, allow_fail)
+            with transaction.atomic():
+                self.operate_handler(operation, allow_fail)
         return base.Response(self.results, 200).resp
 
-    @transaction.atomic
+    @transaction.atomic()
     def post(self, request, *args, **kwargs):
         return self.operate(request)
 

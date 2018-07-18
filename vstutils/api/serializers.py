@@ -31,7 +31,7 @@ class UserSerializer(VSTSerializer):
 
     def create(self, data):
         if not self.context['request'].user.is_staff:
-            raise exceptions.PermissionDenied
+            raise exceptions.PermissionDenied  # nocv
         valid_fields = ['username', 'password', 'is_active', 'is_staff',
                         "email", "first_name", "last_name"]
         creditals = {d: data[d] for d in valid_fields

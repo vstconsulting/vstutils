@@ -6,7 +6,7 @@ from .models import Host, HostGroup
 
 class HostFilter(filters.FilterSet):
     class Meta:
-        model = HostGroup
+        model = Host
         fields = (
             'id',
             'name',
@@ -44,6 +44,7 @@ class HostViewSet(ModelViewSetSet):
 
     @action(detail=True, serializer_class=HostSerializer)
     def test2(self, request, *args, **kwargs):
+        self.get_object()
         return Response("OK", 201).resp
 
     @action(detail=True, serializer_class=HostSerializer)
@@ -55,7 +56,7 @@ class _HostGroupViewSet(ModelViewSetSet):
     model = HostGroup
     serializer_class = HostGroupSerializer
 
-@nested_view('subgroups', 'id', view=_HostGroupViewSet)
+@nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
 @nested_view('hosts', 'id', view=HostViewSet)
 @nested_view('subhosts', methods=["get"], manager_name='hosts', view=HostViewSet)
 @nested_view(
