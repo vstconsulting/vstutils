@@ -18,3 +18,11 @@ class HostGroup(BModel):
     parent = models.ForeignKey('self', on_delete=models.CASCADE,
                                related_query_name='subgroups', related_name='subgroups',
                                null=True, default=None, blank=True)
+
+    @property
+    def file(self):
+        return "Some value"
+
+    @property
+    def secret_file(self):
+        return "Some secret value"

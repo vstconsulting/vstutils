@@ -1,7 +1,6 @@
 from collections import OrderedDict
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors import SwaggerAutoSchema, swagger_settings
-from drf_yasg.utils import get_serializer_ref_name
 from drf_yasg import openapi
 from . import fields
 
@@ -27,6 +26,7 @@ basic_type_info[fields.AutoCompletionField] = dict(
 
 class VSTFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=invalid-name,unused-variable
         type_info = basic_type_info.get(field.__class__, None)
         if type_info is None:
             return NotHandled

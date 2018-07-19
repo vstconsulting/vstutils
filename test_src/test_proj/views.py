@@ -2,7 +2,7 @@ from vstutils.api.serializers import VSTSerializer
 from vstutils.api.base import ModelViewSetSet, Response
 from vstutils.api.decorators import nested_view, action
 from vstutils.api.filters import filters
-from vstutils.api.fields import AutoCompletionField
+from vstutils.api import fields
 from .models import Host, HostGroup
 
 
@@ -26,7 +26,9 @@ class HostSerializer(VSTSerializer):
 
 
 class HostGroupSerializer(VSTSerializer):
-    parent = AutoCompletionField(autocomplete='Host', required=False)
+    parent = fields.AutoCompletionField(autocomplete='Host', required=False)
+    secret_file = fields.SecretFileInString(read_only=True)
+    file = fields.FileInStringField(read_only=True)
 
     class Meta:
         model = HostGroup
@@ -34,6 +36,8 @@ class HostGroupSerializer(VSTSerializer):
             'id',
             'name',
             'parent',
+            'file',
+            'secret_file',
         )
 
 

@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 from collections import OrderedDict
 from inspect import getmembers
 from django.utils.decorators import method_decorator
