@@ -59,9 +59,12 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
     def get_response_schemas(self, response_serializers):
         responses = super(VSTAutoSchema, self).get_response_schemas(response_serializers)
+        for response in responses:
+            if not responses[response].description:
+                responses[response].description = 'Action accepted.'
         error_serializer = utils.force_serializer_instance(serializers.ErrorSerializer)
         responses[status.HTTP_400_BAD_REQUEST] = openapi.Response(
-            description='Validation error or some data error',
+            description='Validation error or some data error.',
             schema=self.serializer_to_schema(error_serializer),
         )
         responses[status.HTTP_404_NOT_FOUND] = openapi.Response(

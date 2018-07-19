@@ -102,6 +102,12 @@ class OneUserSerializer(UserSerializer):
 
 class DataSerializer(serializers.Serializer):
 
+    def create(self, validated_data):  # nocv
+        return validated_data
+
+    def update(self, instance, validated_data):  # nocv
+        return instance
+
     def to_internal_value(self, data):  # nocv
         return (
             data
