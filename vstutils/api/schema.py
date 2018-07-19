@@ -1,8 +1,9 @@
 from collections import OrderedDict
+from rest_framework import status
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors import SwaggerAutoSchema, swagger_settings
-from drf_yasg import openapi
-from . import fields
+from drf_yasg import openapi, utils
+from . import fields, serializers
 
 # Extra types
 
@@ -55,3 +56,24 @@ class VSTAutoSchema(SwaggerAutoSchema):
             previous = None if not len(new_operation_keys) else new_operation_keys[-1]
             new_operation_keys.append(key.replace('{}_'.format(previous), ''))
         return super(VSTAutoSchema, self).get_operation_id(tuple(new_operation_keys))
+
+    def get_response_schemas(self, response_serializers):
+        responses = super(VSTAutoSchema, self).get_response_schemas(response_serializers)
+        error_serializer = utils.force_serializer_instance(serializers.ErrorSerializer)
+        responses[status.HTTP_400_BAD_REQUEST] = openapi.Response(
+            description='Validation error or some data error',
+            schema=self.serializer_to_schema(error_serializer),
+        )
+        responses[status.HTTP_404_NOT_FOUND] = openapi.Response(
+            description='Not found error.',
+            schema=self.serializer_to_schema(error_serializer),
+        )
+        responses[status.HTTP_403_FORBIDDEN] = openapi.Response(
+            description='Permission denied error.',
+            schema=self.serializer_to_schema(error_serializer),
+        )
+        responses[status.HTTP_401_UNAUTHORIZED] = openapi.Response(
+            description='Unauthorized access error.',
+            schema=self.serializer_to_schema(error_serializer),
+        )
+        return responses
