@@ -48,3 +48,10 @@ class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
         VSTFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
+
+    def get_operation_id(self, operation_keys):
+        new_operation_keys = []
+        for key in operation_keys:
+            previous = None if not len(new_operation_keys) else new_operation_keys[-1]
+            new_operation_keys.append(key.replace('{}_'.format(previous), ''))
+        return super(VSTAutoSchema, self).get_operation_id(tuple(new_operation_keys))

@@ -137,8 +137,8 @@ class ProjectTestCase(BaseTestCase):
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertCount(hg.hosts.all(), 1)
-        self.assertEqual(results[0]['data']['count'], 1)
-        self.assertEqual(results[1]['data']['count'], 1)
+        self.assertEqual(results[0]['data']['count'], 1, results[0])
+        self.assertEqual(results[1]['data']['count'], 1, results[1])
         self.assertEqual(results[2]['data']['id'], host_id)
         self.assertEqual(results[2]['data']['name'], 'test1')
         self.assertEqual(results[3]['data']['id'], host_id)
