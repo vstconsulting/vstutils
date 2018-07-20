@@ -19,7 +19,8 @@ function guiItemFactory(api, list, one)
 
             this.model = one.model
             this.model.selectedItems = {}
-
+            this.model.guiFileds = {}
+            
             this.load = function (item_id)
             {
                 var thisObj = this;
@@ -40,18 +41,145 @@ function guiItemFactory(api, list, one)
 
                 return def;
             }
+            
+            this.init = function (item_data)
+            {
+                this.model.data = item_data
+                this.model.status = 200
+            }
 
             this.create = function (){ }
-            this.update = function (){ }
-            this.delete = function (){ }
+            this.update = function ()
+            {
+                var def = new $.Deferred();
+                var data = {}
+                
+                try{
+                    data = this.getValue()
+                    if (this.onBeforeSave)
+                    {
+                        data = this.onBeforeSave.apply(this, [data]);
+                        if (data == undefined || data == false)
+                        {
+                            def.reject()
+                            return def.promise();
+                        }
+                    }
+
+                    data = this.validateByModel(data)
+
+                    var thisObj = this; 
+                    $.when(api.query({
+                                        type: "set",
+                                        item: this.view.bulk_name,
+                                        data:data,
+                                        pk:this.model.data.id
+                                    })
+                        ).done(function (data)
+                        {
+                            $.notify("Changes in "+thisObj.view.bulk_name+" were successfully saved", "success"); 
+                            def.resolve(data)
+                        }).fail(function (e)
+                        {
+                            def.reject(e)
+                            polemarch.showErrors(e.responseJSON)
+                        }) 
+                }catch (e) { 
+                    polemarch.showErrors(e)
+                    def.reject()
+                    return def.promise();
+                }
+ 
+                return def.promise();
+            }
+            
+            /**
+             * Подготовливает данные к отправке в апи. Приводит их типы к типам модели
+             * Если данные не соответсвуют то выкинет исключение
+             * @param {Object} values
+             * @returns {Object}
+             */
+            this.validateByModel = function (values)
+            { 
+                for(var i in this.model.fileds)
+                { 
+                    var filed = this.model.fileds[i];
+                    if(values[filed.name] !== undefined)
+                    {
+                        if(filed.type == "string" || filed.type == "file")
+                        {
+                            values[filed.name] = values[filed.name].toString()
+                        }
+                        else if(filed.type == "number" || filed.type == "integer" )
+                        {
+                            values[filed.name] = values[filed.name]/1
+                        }
+                        else if(filed.type == "boolean" )
+                        {
+                            values[filed.name] = values[filed.name] == true
+                        }
+                        
+                        if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
+                        {
+                            throw {code:'validation', error:'Filed '+filed.name +" too long"}
+                        }
+                        
+                        if(filed.minLength && values[filed.name].toString().length < filed.minLength)
+                        {
+                            throw {code:'validation', error:'Filed '+filed.name +" too short"}
+                        } 
+                    }
+                }
+                 
+                return values;
+            }
+             
+            this.delete = function (){ 
+                
+                var def = new $.Deferred();
+                
+                try{
+                    
+                    if (this.onBeforeDelete)
+                    { 
+                        if (!this.onBeforeDelete.apply(this, []))
+                        {
+                            def.reject()
+                            return def.promise();
+                        }
+                    }
+ 
+                    var thisObj = this; 
+                    $.when(api.query({
+                                        type: "del",
+                                        item: this.view.bulk_name, 
+                                        pk:this.model.data.id
+                                    })
+                        ).done(function (data)
+                        {
+                            $.notify(""+thisObj.view.bulk_name+" were successfully deleted", "success"); 
+                            def.resolve(data)
+                        }).fail(function (e)
+                        {
+                            def.reject(e)
+                            polemarch.showErrors(e.responseJSON)
+                        }) 
+                }catch (e) { 
+                    polemarch.showErrors(e)
+                    def.reject()
+                    return def.promise();
+                }
+ 
+                return def.promise();
+            }
 
             this.copy   = function (){ }
 
             /**
-             * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
+             * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.render = function ()
+            this.renderAsPage = function ()
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_one'
@@ -63,6 +191,72 @@ function guiItemFactory(api, list, one)
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
+            this.render = function ()
+            {
+                var thisObj = this;
+                var tpl = thisObj.view.bulk_name + '_one_as_filed'
+                if (!spajs.just.isTplExists(tpl))
+                {
+                    tpl = 'entity_one_as_filed'
+                }
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+            }
+            
+            /**
+             * Отрисует поле при отрисовке объекта.
+             * @param {object} filed
+             * @returns {html}
+             */
+            this.renderFiled = function(filed)
+            {
+                if(!this.model.guiFileds[filed.name])
+                {
+                    if(filed.$ref)
+                    {
+                        var obj = getObjectBySchema(filed.$ref)
+                        if(obj)
+                        {
+                            obj = new obj.one()
+                            obj.init(this.model.data[filed.name])
+                            
+                            this.model.guiFileds[filed.name] = obj
+                        }
+                    }
+                    
+                    if(!this.model.guiFileds[filed.name])
+                    { 
+                        var type = filed.format
+
+                        if(!type)
+                        {
+                            type = filed.type
+                        }
+
+
+                        if(!window.guiElements[type])
+                        {
+                            type = "string"
+                        }
+
+                        this.model.guiFileds[filed.name] = new window.guiElements[type](filed, this.model.data[filed.name])
+                    }
+                }
+                
+                return this.model.guiFileds[filed.name].render() 
+            }
+            
+            this.getValue = function ()
+            {
+                var obj = {} 
+                for(var i in this.model.guiFileds)
+                {
+                    obj[i] = this.model.guiFileds[i].getValue();
+                }
+                
+                return obj;
+            }
+              
             var res = $.extend(this, thisFactory.one);
 
             /**
@@ -218,7 +412,7 @@ function guiItemFactory(api, list, one)
              * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.render = function ()
+            this.renderAsPage = function ()
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_list'
@@ -350,4 +544,19 @@ function goToSearch(obj, query)
     }
 
     return spajs.openURL(spajs.urlInfo.data.reg.searchURL(obj.searchObjectToString(trim(query))));  
+}
+
+function deleteAndGoUp(obj)
+{ 
+    var def = obj.delete();
+    $.when(def).done(function(){
+        spajs.openURL(spajs.urlInfo.data.reg.baseURL());  
+    }) 
+         
+    return def;  
+}
+
+function renderErrorAsPage(error)
+{       
+    return spajs.just.render('error_as_page', {error:error, opt: {}});
 }

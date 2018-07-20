@@ -2,20 +2,51 @@
 <!-- guiElements.button -->
 <script type="text/x-just" data-just="guiElements.button"> 
    
-    <a 
+    <button 
+        id="<%- guiElement.element_id %>"
+        type="button" 
         class="<% if(typeof opt.class == 'function'){ %>
-                        <%- opt.class.apply(guiObj, [opt]) %>
+                        <%- opt.class.apply(guiElement, [opt]) %>
                <% }else{ %>
                     <%- opt.class %>
                <% } %>"
-        href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiObj, [opt]) %><% }else{ %><%- opt.link %><% } %>"
+        
         title="<%- opt.title || '' %>"
-        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiObj, [opt]) %><% }else{ %><%= opt.onclick %><% } %>" >
+        >
             <% if(typeof opt.text == 'function'){ %>
-                <%= opt.text.apply(guiObj, [opt]) %>
+                <%= opt.text.apply(guiElement, [opt]) %>
+            <% }else{ %>
+                <%= opt.text %>
+            <% } %>
+    </button>
+</script>
+ 
+<!-- guiElements.link_button -->
+<script type="text/x-just" data-just="guiElements.link_button"> 
+   
+    <a 
+        class="<% if(typeof opt.class == 'function'){ %>
+                        <%- opt.class.apply(guiElement, [opt]) %>
+               <% }else{ %>
+                    <%- opt.class %>
+               <% } %>"
+        href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiElement, [opt]) %><% }else{ %><%- opt.link %><% } %>"
+        title="<%- opt.title || '' %>"
+        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiElement, [opt]) %><% }else{ %><%= opt.onclick %><% } %>" >
+            <% if(typeof opt.text == 'function'){ %>
+                <%= opt.text.apply(guiElement, [opt]) %>
             <% }else{ %>
                 <%= opt.text %>
             <% } %>
     </a>
+</script>
+
+<!-- guiElements.string -->
+<script type="text/x-just" data-just="guiElements.string">  
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label"><%- opt.title %></label>
+        <input type="text" class="form-control" placeholder="Enter project name" id="<%- guiElement.element_id %>" value="<%- value || '' %>">
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
 </script>
 

@@ -491,7 +491,7 @@
 					options[option] = newOptions[option] || options[option];
 				}
 			};
-			this.renderSync = function (template, data)
+			this.renderSync = function (template, data, onInsertFunc)
                         {
                             if(data === undefined)
                             {
@@ -504,6 +504,12 @@
                             {
                                 console.error("renderSync error", template, data)
                             }
+                            
+                            if(typeof onInsertFunc == 'function')
+                            {
+                                html = this.onInsert(html, onInsertFunc, false);
+                            }
+                            
                             return html;
 			};
 			this.render = this.renderSync

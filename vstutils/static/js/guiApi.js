@@ -8,8 +8,7 @@ function guiApi()
     var thisObj = this;
     this.init = function()
     {
-        var def = new $.Deferred();
-
+        var def = new $.Deferred(); 
         spajs.ajax.Call({
             url: hostname + "/api/v2/openapi/?format=openapi",
             type: "GET",
