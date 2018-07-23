@@ -14,7 +14,7 @@ vst_project_module = __import__(VST_PROJECT)
 vst_lib_module = __import__(VST_PROJECT_LIB) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
 PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
 PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
-PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME)
+PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
 
 PY_VER = sys.version_info[0]
 TMP_DIR = "/tmp"
@@ -408,16 +408,23 @@ VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
 HAS_COREAPI = False
 API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback="{} API-{}".format(PROJECT_GUI_NAME, VST_API_VERSION))
+SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback=PROJECT_GUI_NAME)
 TERMS_URL = ''
 try:
-    CONTACT = { field: value for field, value in config.items('contact') if field in ['name', 'url', 'email']}
+    CONTACT = { field: value for field, value in config.items('contact')}
 except:
     CONTACT = dict(name='System Administrator')
 
 
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.VSTAutoSchema',
+    'DEEP_LINKING': True,
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        },
+    },
 }
 
 API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
@@ -457,3 +464,6 @@ if "test" in sys.argv:
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher',]
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    CONTACT = dict(
+        some_extra_url='https://pypi.org/project/vstutils/', **CONTACT
+    )

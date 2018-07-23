@@ -1,0 +1,3 @@
+# Packages needed for coreapi support.
+coreapi==2.3.3
+drf-yasg==1.9.1

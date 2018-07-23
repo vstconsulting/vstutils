@@ -1,6 +1,9 @@
 # pylint: disable=no-member,unused-argument
 from __future__ import unicode_literals
 
+import json
+
+import six
 from django.contrib.auth.models import User
 from rest_framework import serializers, exceptions
 
@@ -95,3 +98,47 @@ class OneUserSerializer(UserSerializer):
                   'url',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
+
+
+class DataSerializer(serializers.Serializer):
+
+    def create(self, validated_data):  # nocv
+        return validated_data
+
+    def update(self, instance, validated_data):  # nocv
+        return instance
+
+    def to_internal_value(self, data):  # nocv
+        return (
+            data
+            if (
+                isinstance(data, (six.string_types, six.text_type)) or
+                isinstance(data, (dict, list))
+            )
+            else self.fail("Unknown type.")
+        )
+
+    def to_representation(self, value):  # nocv
+        return (
+            json.loads(value)
+            if not isinstance(value, (dict, list))
+            else value
+        )
+
+
+class ErrorSerializer(DataSerializer):
+    detail = serializers.CharField(required=True)
+
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value
+
+
+class ValidationErrorSerializer(ErrorSerializer):
+    detail = serializers.DictField(required=True)
+
+
+class OtherErrorsSerializer(ErrorSerializer):
+    error_type = serializers.CharField(required=False, allow_null=True)

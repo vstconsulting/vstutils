@@ -1,3 +1,6 @@
+import json
+import six
+from django.core.management import call_command
 from vstutils.unittests import BaseTestCase, VSTUtilsTestCase
 from .models import Host, HostGroup
 
@@ -134,8 +137,8 @@ class ProjectTestCase(BaseTestCase):
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertCount(hg.hosts.all(), 1)
-        self.assertEqual(results[0]['data']['count'], 1)
-        self.assertEqual(results[1]['data']['count'], 1)
+        self.assertEqual(results[0]['data']['count'], 1, results[0])
+        self.assertEqual(results[1]['data']['count'], 1, results[1])
         self.assertEqual(results[2]['data']['id'], host_id)
         self.assertEqual(results[2]['data']['name'], 'test1')
         self.assertEqual(results[3]['data']['id'], host_id)
@@ -161,3 +164,41 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[17]['status'], 404)
         self.assertEqual(results[18]['status'], 204)
         self.assertEqual(results[19]['status'], 201)
+
+    def test_coreapi_schema(self):
+        stdout = six.StringIO()
+        call_command('generate_swagger', format='json', stdout=stdout)
+        data = json.loads(stdout.getvalue())
+        # Check default settings
+        self.assertEqual(
+            data['basePath'], '/{}/{}'.format(
+                self._settings('VST_API_URL'), self._settings('VST_API_VERSION')
+            )
+        )
+        self.assertEqual(
+            data['info']['contact']['someExtraUrl'],
+            self._settings('CONTACT')['some_extra_url']
+        )
+        self.assertEqual(data['info']['title'], self._settings('PROJECT_GUI_NAME'))
+        self.assertEqual(data['info']['description'], self._settings('PROJECT_GUI_NAME'))
+        self.assertEqual(data['swagger'], '2.0')
+        # Check default values
+        api_model_user = data['definitions']['User']
+        self.assertEqual(api_model_user['type'], 'object')
+        self.assertIn('username', api_model_user['required'])
+        self.assertEqual(api_model_user['properties']['username']['type'], 'string')
+        self.assertEqual(api_model_user['properties']['id']['type'], 'integer')
+        self.assertEqual(api_model_user['properties']['id']['readOnly'], True)
+        self.assertEqual(api_model_user['properties']['is_active']['type'], 'boolean')
+        self.assertEqual(api_model_user['properties']['is_staff']['type'], 'boolean')
+        # Check autocomplete field
+        api_model_hostgroup = data['definitions']['HostGroup']
+        hostgroup_props = api_model_hostgroup['properties']
+        self.assertEqual(api_model_hostgroup['properties']['parent']['type'], 'string')
+        self.assertEqual(hostgroup_props['parent']['format'], 'autocomplete')
+        self.assertEqual(hostgroup_props['parent']['enum']['$ref'], '#/definitions/Host')
+        # Check file and secret_file fields
+        self.assertEqual(hostgroup_props['file']['type'], 'string')
+        self.assertEqual(hostgroup_props['file']['format'], 'file')
+        self.assertEqual(hostgroup_props['secret_file']['type'], 'string')
+        self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')

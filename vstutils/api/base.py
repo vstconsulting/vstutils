@@ -14,6 +14,9 @@ from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
+from .serializers import (
+    ErrorSerializer, ValidationErrorSerializer, OtherErrorsSerializer
+)
 
 _ResponseClass = namedtuple("ResponseData", [
     "data", "status"
@@ -25,12 +28,15 @@ logger = logging.getLogger(settings.VST_PROJECT)
 def exception_handler(exc, context):
     logger.info(traceback.format_exc())
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
+    serializer_class = ErrorSerializer
+    data = None
+    code = status.HTTP_400_BAD_REQUEST
     if isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
-        return RestResponse({"detail": str(exc)},
-                            status=status.HTTP_403_FORBIDDEN)
+        data = {"detail": str(exc)}
+        code = status.HTTP_403_FORBIDDEN
     elif isinstance(exc, Http404):
-        return RestResponse({"detail": getattr(exc, 'msg', str(exc))},
-                            status=status.HTTP_404_NOT_FOUND)
+        data = {"detail": getattr(exc, 'msg', str(exc))}
+        code = status.HTTP_404_NOT_FOUND
     elif isinstance(exc, djexcs.ValidationError):  # nocv
         if hasattr(exc, 'error_dict'):
             errors = dict(exc)
@@ -38,17 +44,26 @@ def exception_handler(exc, context):
             errors = {'other_errors': list(exc)}
         else:
             errors = {'other_errors': str(exc)}
-        return RestResponse({"detail": errors}, status=status.HTTP_400_BAD_REQUEST)
+        data = {"detail": errors}
+        serializer_class = ValidationErrorSerializer
     elif isinstance(exc, VSTUtilsException):  # nocv
-        return RestResponse(
-            {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__},
-            status=exc.status
-        )
+        data = {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__}
+        code = exc.status
+        serializer_class = OtherErrorsSerializer
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
-        return RestResponse({'detail': str(sys.exc_info()[1]),
-                             'error_type': sys.exc_info()[0].__name__},
-                            status=status.HTTP_400_BAD_REQUEST)
+        data = {
+            'detail': str(sys.exc_info()[1]), 'error_type': sys.exc_info()[0].__name__
+        }
+        serializer_class = OtherErrorsSerializer
 
+    if data is not None:
+        serializer = serializer_class(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except:  # nocv
+            pass
+        else:
+            return RestResponse(serializer.data, code)
     default_response = rvs.exception_handler(exc, context)
 
     if isinstance(exc, exceptions.NotAuthenticated):  # nocv

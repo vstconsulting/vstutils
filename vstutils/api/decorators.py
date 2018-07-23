@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 from collections import OrderedDict
 from inspect import getmembers
 from django.utils.decorators import method_decorator
@@ -178,7 +179,9 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def decorated_list(self):
         name, view = self.get_list_view()
-        return name, self.get_decorator(url_name='{}-list'.format(self.name))(view)
+        return name, self.get_decorator(
+            url_name='{}-list'.format(self.name), suffix='List'
+        )(view)
 
     def decorated_detail(self):
         name, view = self.get_detail_view()
