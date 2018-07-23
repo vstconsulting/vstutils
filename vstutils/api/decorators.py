@@ -42,6 +42,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
     _nested_args = kwargs.pop('_nested_args', OrderedDict())
+    _nested_filter_class = kwargs.pop('filter_class', None)
 
     def decorator(func):
         def wrapper(view, request, *args, **kwargs):
@@ -59,6 +60,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
                 view.nested_parent_object, manager_name or name, None
             )
             view.nested_view_object = None
+            view._nested_filter_class = _nested_filter_class
             return func(view, request, *args)
 
         wrapper.__name__ = func.__name__
@@ -69,6 +71,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         view = action(*args, **kwargs)(wrapper)
         view._nested_args = _nested_args
         view._nested_manager = manager_name or name
+        view._nested_filter_class = _nested_filter_class
         if arg:
             view._nested_args[name] = request_arg
         return view
@@ -156,6 +159,8 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             return view_obj.dispatch_nested_view(NestedView, request, *args, **kwargs)
 
         nested_view.__name__ = name
+        nested_view.__doc__ = self.view.__doc__
+        nested_view._nested_view = self.view
         return name, nested_view
 
     def get_list_view(self, **options):
@@ -174,6 +179,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         kwargs = dict(self.kwargs)
         kwargs['methods'] = self.methods
         kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
+        kwargs['filter_class'] = getattr(self.view, 'filter_class', [])
         kwargs.update(options)
         return nested_action(*args, **kwargs)
 

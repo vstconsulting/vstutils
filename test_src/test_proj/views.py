@@ -1,17 +1,25 @@
 from vstutils.api.serializers import VSTSerializer
 from vstutils.api.base import ModelViewSetSet, Response
 from vstutils.api.decorators import nested_view, action
-from vstutils.api.filters import filters
+from vstutils.api import filters
 from vstutils.api import fields
 from .models import Host, HostGroup
 
 
-class HostFilter(filters.FilterSet):
+class HostFilter(filters.DefaultIDFilter):
     class Meta:
         model = Host
         fields = (
             'id',
             'name',
+        )
+
+
+class HostGroupFilter(filters.DefaultIDFilter):
+    class Meta:
+        model = HostGroup
+        fields = (
+            'id',
         )
 
 
@@ -63,6 +71,7 @@ class HostViewSet(ModelViewSetSet):
 class _HostGroupViewSet(ModelViewSetSet):
     model = HostGroup
     serializer_class = HostGroupSerializer
+    filter_class = HostGroupFilter
 
 @nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
 @nested_view('hosts', 'id', view=HostViewSet)

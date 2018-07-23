@@ -26,7 +26,7 @@ logger = logging.getLogger(settings.VST_PROJECT)
 
 
 def exception_handler(exc, context):
-    logger.info(traceback.format_exc())
+    traceback_str = traceback.format_exc()
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
     serializer_class = ErrorSerializer
     data = None
@@ -34,9 +34,11 @@ def exception_handler(exc, context):
     if isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
         data = {"detail": str(exc)}
         code = status.HTTP_403_FORBIDDEN
+        logger.debug(traceback_str)
     elif isinstance(exc, Http404):
         data = {"detail": getattr(exc, 'msg', str(exc))}
         code = status.HTTP_404_NOT_FOUND
+        logger.debug(traceback_str)
     elif isinstance(exc, djexcs.ValidationError):  # nocv
         if hasattr(exc, 'error_dict'):
             errors = dict(exc)
@@ -46,15 +48,18 @@ def exception_handler(exc, context):
             errors = {'other_errors': str(exc)}
         data = {"detail": errors}
         serializer_class = ValidationErrorSerializer
+        logger.debug(traceback_str)
     elif isinstance(exc, VSTUtilsException):  # nocv
         data = {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__}
         code = exc.status
         serializer_class = OtherErrorsSerializer
+        logger.info(traceback_str)
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
         data = {
             'detail': str(sys.exc_info()[1]), 'error_type': sys.exc_info()[0].__name__
         }
         serializer_class = OtherErrorsSerializer
+        logger.debug(traceback_str)
 
     if data is not None:
         serializer = serializer_class(data=data)
@@ -64,6 +69,8 @@ def exception_handler(exc, context):
             pass
         else:
             return RestResponse(serializer.data, code)
+
+    logger.info(traceback_str)
     default_response = rvs.exception_handler(exc, context)
 
     if isinstance(exc, exceptions.NotAuthenticated):  # nocv

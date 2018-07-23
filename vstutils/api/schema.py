@@ -1,8 +1,10 @@
 from collections import OrderedDict
 from rest_framework import status
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
-from drf_yasg.inspectors import SwaggerAutoSchema, swagger_settings, field as field_insp
 from drf_yasg import openapi, utils, generators
+from drf_yasg.inspectors import (
+    SwaggerAutoSchema, swagger_settings, field as field_insp, CoreAPICompatInspector
+)
 from . import fields, serializers
 
 # Extra types
@@ -45,10 +47,34 @@ class VSTFieldInspector(FieldInspector):
         return SwaggerType(**kwargs)
 
 
+class NestedFilterInspector(CoreAPICompatInspector):
+    def get_filter_parameters(self, filter_backend):
+        subaction_list_actions = [
+            '{}_list'.format(name)
+            for name in getattr(self.view, '_nested_args', {}).keys()
+        ]
+        if self.view.action not in subaction_list_actions:
+            return NotHandled
+        if self.method != 'GET':
+            return NotHandled  # nocv
+        nested_view = getattr(self.view, self.view.action, None)
+        nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
+        filter_class = getattr(self.view, 'filter_class', None)
+        self.view.filter_class = nested_view_filter_class
+        result = super(NestedFilterInspector, self).get_filter_parameters(
+            filter_backend
+        )
+        self.view.filter_class = filter_class
+        return result
+
+
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
         VSTFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
+    filter_inspectors = [
+        NestedFilterInspector
+    ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     def get_operation_id(self, operation_keys):
         new_operation_keys = []
@@ -106,6 +132,13 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         })
         return type_info
 
+    def _get_manager_name(self, param, view_cls):
+        name, _ = self._get_subname(param['name'])
+        sub_view = getattr(view_cls, '{}_detail'.format(name), None)
+        if sub_view is None:
+            return None
+        return getattr(sub_view, '_nested_manager', None)
+
     def _update_param_model(self, param, model, model_field=None, **kw):
         type_info = self._get_model_type_info(param['name'], model, model_field, **kw)
         if type_info is None:
@@ -114,11 +147,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         return param
 
     def _update_param_view(self, param, model, view_cls):
-        name, _ = self._get_subname(param['name'])
-        sub_view = getattr(view_cls, '{}_detail'.format(name), None)
-        if sub_view is None:
-            return None
-        manager_name = getattr(sub_view, '_nested_manager', None)
+        manager_name = self._get_manager_name(param, view_cls)
         if manager_name is None:
             return None  # nocv
         return self._update_param_model(param, model, query_name=manager_name)
