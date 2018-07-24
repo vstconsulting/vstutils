@@ -39,7 +39,7 @@ class VSTFieldInspector(FieldInspector):
         )
         kwargs = dict(**type_info)
         if type_info.get('format', None) == FORMAT_AUTOCOMPLETE:
-            kwargs['enum'] = openapi.SchemaRef(
+            kwargs['additionalProperties'] = openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                 field.autocomplete, ignore_unresolved=True
             )
