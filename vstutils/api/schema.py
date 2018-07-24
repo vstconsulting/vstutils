@@ -162,3 +162,10 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             elif self._update_param_view(param, model, view_cls):
                 continue
         return parameters
+
+    def get_operation_keys(self, subpath, method, view):
+        keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
+        subpath_keys = [item for item in subpath.split('/') if item]
+        if keys[-1] == 'get' and subpath_keys[-1] == keys[-2]:
+            keys = keys[0:-1] + ['list']
+        return keys
