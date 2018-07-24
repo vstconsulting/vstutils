@@ -408,7 +408,7 @@ VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
 HAS_COREAPI = False
 API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback=PROJECT_GUI_NAME)
+SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback=vst_project_module.__doc__ or vst_lib_module.__doc__)
 TERMS_URL = ''
 try:
     CONTACT = { field: value for field, value in config.items('contact')}
@@ -424,7 +424,7 @@ SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'basic': {
             'type': 'basic'
-        },
+        }
     },
 }
 

@@ -41,7 +41,7 @@ class VSTFieldInspector(FieldInspector):
         if type_info.get('format', None) == FORMAT_AUTOCOMPLETE:
             kwargs['additionalProperties'] = openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                field.autocomplete, ignore_unresolved=True
+                field.autocomplete + '/properties/id', ignore_unresolved=True
             )
 
         return SwaggerType(**kwargs)
