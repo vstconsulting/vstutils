@@ -174,10 +174,11 @@ class BulkViewSet(base.rvs.APIView):
         method = getattr(self.client, self.get_method_type(op_type, operation))
         return method(url, **kwargs)
 
-    def create_response(self, status, data, operation):
+    def create_response(self, status, data, operation, **kwargs):
         result = OrderedDict(
             status=status, data=data,
-            type=operation.get('type', None), item=operation.get('item', None)
+            type=operation.get('type', None), item=operation.get('item', None),
+            additional_info=kwargs
         )
         if result['type'] == 'mod':
             result['subitem'] = operation.get('data_type', None)
@@ -213,10 +214,12 @@ class BulkViewSet(base.rvs.APIView):
             if allow_fail:
                 raise
             response = base.exception_handler(err, None)
+            kwargs= dict(error_type=err.__class__.__name__, message=str(err))
+            kwargs.update({'results': self.results} if isinstance(err, KeyError) else {})
             self.results.append(self.create_response(
                 response.status_code,
                 self._get_rendered(response),
-                operation
+                operation, **kwargs
             ))
 
     def operate(self, request, allow_fail=True):

@@ -1,7 +1,6 @@
 # pylint: disable=protected-access
 from collections import OrderedDict
 from inspect import getmembers
-from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework import viewsets as vsets
 from ..exceptions import VSTUtilsException
@@ -43,6 +42,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
     _nested_args = kwargs.pop('_nested_args', OrderedDict())
+    _nested_filter_class = kwargs.pop('filter_class', None)
 
     def decorator(func):
         def wrapper(view, request, *args, **kwargs):
@@ -60,6 +60,7 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
                 view.nested_parent_object, manager_name or name, None
             )
             view.nested_view_object = None
+            view._nested_filter_class = _nested_filter_class
             return func(view, request, *args)
 
         wrapper.__name__ = func.__name__
@@ -69,6 +70,8 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         kwargs['url_name'] = kwargs.pop('url_name', name)
         view = action(*args, **kwargs)(wrapper)
         view._nested_args = _nested_args
+        view._nested_manager = manager_name or name
+        view._nested_filter_class = _nested_filter_class
         if arg:
             view._nested_args[name] = request_arg
         return view
@@ -156,6 +159,8 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             return view_obj.dispatch_nested_view(NestedView, request, *args, **kwargs)
 
         nested_view.__name__ = name
+        nested_view.__doc__ = self.view.__doc__
+        nested_view._nested_view = self.view
         return name, nested_view
 
     def get_list_view(self, **options):
@@ -174,6 +179,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         kwargs = dict(self.kwargs)
         kwargs['methods'] = self.methods
         kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
+        kwargs['filter_class'] = getattr(self.view, 'filter_class', [])
         kwargs.update(options)
         return nested_action(*args, **kwargs)
 
@@ -216,51 +222,4 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             for sub_action_name, sub_action_view in self.generate_decorated_subs():
                 setattr(view_class, sub_action_name, sub_action_view)
         setattr(view_class, *self.decorated_list())
-        return nested_method_decorator(self.name, self.arg)(view_class)
-
-
-class nested_method_decorator(BaseClassDecorator):
-    # pylint: disable=invalid-name
-
-    def __init__(self, *args, **kwargs):
-        super(nested_method_decorator, self).__init__(*args, **kwargs)
-        try:
-            from drf_yasg.utils import swagger_auto_schema
-            from drf_yasg import openapi
-            self.openapi = openapi
-            self.swagger_auto_schema = swagger_auto_schema
-            self.api_decorator = self.get_swagger(self.request_arg, self.name)
-            self.has_openapi = True
-        except ImportError:  # nocv
-            self.has_openapi = False
-
-    def get_swagger(self, *manual_parameters):
-        return self.swagger_auto_schema(
-            manual_parameters=manual_parameters
-        )
-
-    def get_swagger_manual_parameters(self, view):
-        description = "A unique integer value identifying {}."
-        return [
-            self.openapi.Parameter(
-                request_arg, self.openapi.IN_PATH,
-                description=description.format(name),
-                type=self.openapi.TYPE_INTEGER, required=True
-            )
-            for name, request_arg in getattr(view, '_nested_args', dict()).items()
-        ]
-
-    def inner_methods_generator(self, view_class):
-        for name, view in getmembers(view_class, vsets._is_extra_action):
-            if getattr(view, '_nested_args', None) is not None:
-                yield name, view
-
-    def decorate_class(self, view_class):
-        for method_name, view in self.inner_methods_generator(view_class):
-            api_decorator = self.get_swagger(*self.get_swagger_manual_parameters(view))
-            decorator = method_decorator(name=method_name, decorator=api_decorator)
-            view_class = decorator(view_class)
         return view_class
-
-    def setup(self, view_class):
-        return self.decorate_class(view_class) if self.has_openapi else view_class
