@@ -1,4 +1,4 @@
-
+ 
 /**
  * Класс страницы
  * @returns {guiPage}
@@ -87,7 +87,7 @@ function guiPage()
      * @returns {undefined}
      */
     this.registerURL = function(parse_url, menu_id)
-    {
+    { 
         this.url_parser = parse_url;
         if(typeof parse_url[0] == 'function')
         {

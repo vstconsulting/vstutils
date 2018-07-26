@@ -70,6 +70,26 @@ guiElements.button = function(opt)
         });
     }
 }
+
+guiElements.enum = function(opt, value)
+{
+    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+    this.render = function()
+    {
+        if(!opt)
+        {
+            opt = {}
+        }
+        
+        return spajs.just.render("guiElements.enum", {opt:opt, guiElement:this, value:value});
+    }
+    
+    this.getValue = function()
+    {
+        return $("#"+this.element_id).val()
+    }
+}
+
 /**
  *
     TYPE_OBJECT = "object"  #:

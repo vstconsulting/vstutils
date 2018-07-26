@@ -295,7 +295,7 @@
 							case '~':
 								prefix = '\');' + line + ';';
 								postfix = 'this.buffer.push(\'';
-								state = STATE_SUBBLOK;
+                            					state = STATE_SUBBLOK;
 								break;
 							default:
 								prefix = '\');' + line + ';';
@@ -398,7 +398,7 @@
 				};
 			Template.prototype.blockStart = function (name) {
                                 this.tmpBufferNames.push(name)
-
+               
 				this.tmpBuffer[name] = this.buffer;
 				if (!this.blocks[name]) { this.blocks[name] = []; }
 				if (!this.blocks[name].length) {
@@ -509,7 +509,7 @@
                             {
                                 html = this.onInsert(html, onInsertFunc, false);
                             }
-                            
+                           
                             return html;
 			};
 			this.render = this.renderSync

@@ -50,3 +50,18 @@
     </div>
 </script>
 
+
+<!-- guiElements.enum -->
+<script type="text/x-just" data-just="guiElements.enum">  
+    <!-- guiElements.enum -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label"><%- opt.title %></label>
+        <select id="<%- guiElement.element_id %>"  class="form-control" >
+            <% for(var i in opt.enum){ %>
+                <option value='<%- opt.enum[i] %>' <% if(value == opt.enum[i]){%>selected<% } %> ><%- opt.enum[i] %></option>
+            <% } %>
+        </select> 
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
+
