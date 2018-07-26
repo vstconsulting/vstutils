@@ -901,6 +901,9 @@ tabSignal.connect("openapi.factory.OneOwner", function(obj)
 
 })
 
+/*
+ * Это исключение. Так как при парсинге урлов и описаний не верно выставился bulk_name у класса OneOwner
+ */
 tabSignal.connect("openapi.factory.Variable", function(obj)
 {
     window[obj.name].one.view.bulk_name = "variables";
