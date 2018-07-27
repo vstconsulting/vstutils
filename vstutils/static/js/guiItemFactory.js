@@ -134,6 +134,23 @@ basePageView.getValue = function ()
     return obj;
 }
 
+basePageItem = {}
+
+basePageItem.getBulkName = function ()
+{
+    var name = this.view.bulk_name;
+    var level = 100;
+    for(var i in this.view.urls)
+    {
+        if(level >= this.view.urls[i].level)
+        {
+            level = this.view.urls[i].level
+            name = this.view.urls[i].name
+        } 
+    }
+
+    return name;
+}
 
 /**
  * Фабрика классов объектов
@@ -144,9 +161,14 @@ function guiItemFactory(api, list, one)
     var thisFactory = {
         /**
          * Фабрика объектов сущьности
+         * @param {Object} init_options параметры инициализации
          * @returns {guiItemFactory.guiForWebAnonym$5}
+         * 
+         * @note init_options Могут по идее принимать определение параметров страницы из апи
+         * Тогда в объект законным образом попадёт bulk_name и параметры фильтрации
+         * 
          */
-        one:function(init_options){
+        one:function(page_options, object){
 
             /**
              * @class guiApi
@@ -154,22 +176,35 @@ function guiItemFactory(api, list, one)
             this.api = api
             
             this.model = one.model
+            this.model.pathInfo = undefined
              
             this.model.guiFileds = {}
             this.model.isSelected = {}
 
-            this.load = function (item_id)
-            {
+            this.load = function (filters)
+            { 
                 var thisObj = this;
-                if (!item_id)
+                var def = undefined;
+                
+                if(filters.parent_id && filters.parent_type)
                 {
-                    throw "Error in pmItems.loadItem with item_id = `" + item_id + "`"
+                    def = api.query({
+                        type: "mod",
+                        item: filters.parent_type, 
+                        data_type:this.getBulkName(),
+                        method:"get",
+                        pk:filters.parent_id
+                    })
                 }
-                var def = api.query({
-                    type: "get",
-                    item: this.view.bulk_name,
-                    pk:item_id
-                })
+                else
+                {
+                    def = api.query({
+                        type: "get",
+                        item: this.getBulkName(),
+                        pk:filters.id
+                    })
+                }
+ 
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                     thisObj.model.status = data.status
@@ -178,10 +213,11 @@ function guiItemFactory(api, list, one)
                 return def;
             }
 
-            this.init = function (item_data)
+            this.init = function (page_options, object)
             {
-                this.model.data = item_data
+                this.model.data = object
                 this.model.status = 200
+                this.model.pathInfo = page_options
             }
 
             this.create = function ()
@@ -227,7 +263,7 @@ function guiItemFactory(api, list, one)
 
                     var query = {
                                 type: method,
-                                item: this.view.bulk_name,
+                                item: this.getBulkName(),
                                 data:data,
                             }
                     if(method == 'set')
@@ -275,7 +311,7 @@ function guiItemFactory(api, list, one)
                     var thisObj = this;
                     $.when(api.query({
                                         type: "del",
-                                        item: this.view.bulk_name,
+                                        item: this.getBulkName(),
                                         pk:this.model.data.id
                                     })
                         ).done(function (data)
@@ -310,7 +346,7 @@ function guiItemFactory(api, list, one)
                 {
                     tpl = 'entity_one'
                 }
-
+               
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
@@ -348,7 +384,7 @@ function guiItemFactory(api, list, one)
             }
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
-            var res = $.extend(this, basePageView, thisFactory.one);
+            var res = $.extend(this, basePageItem, basePageView, thisFactory.one);
  
              
             res.parent = thisFactory
@@ -368,7 +404,7 @@ function guiItemFactory(api, list, one)
              */
             tabSignal.emit("gui.new."+this.view.bulk_name+".one", res);
 
-            res.init(init_options)
+            res.init(page_options, object)
 
             return res;
         },
@@ -376,7 +412,7 @@ function guiItemFactory(api, list, one)
          * Фабрика объектов списка сущьностей
          * @returns {guiItemFactory.guiForWebAnonym$6}
          */
-        list:function(init_options)
+        list:function(page_options, objects)
         {
             this.state = {
                 search_filters:{}
@@ -393,12 +429,14 @@ function guiItemFactory(api, list, one)
              * @class guiApi
              */
             this.api = api
+            this.model.pathInfo = undefined
 
-            this.init = function (item_data)
+            this.init = function (page_options, objects)
             {
-                this.model.data = item_data
+                this.model.data = objects
                 this.model.status = 200
-            }
+                this.model.pathInfo = page_options
+            } 
 
             /**
              * Функция поиска
@@ -456,8 +494,7 @@ function guiItemFactory(api, list, one)
                         q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.query[i]))
                     }
                 }
-
-
+             
                 var def = undefined;
                 if(filters.parent_id && filters.parent_type)
                 {
@@ -465,7 +502,7 @@ function guiItemFactory(api, list, one)
                         type: "mod",
                         item: filters.parent_type,
                         filters:q.join("&"),
-                        data_type:this.view.bulk_name,
+                        data_type:this.getBulkName(),
                         method:"get",
                         pk:filters.parent_id
                     })
@@ -474,7 +511,7 @@ function guiItemFactory(api, list, one)
                 {
                     def = api.query({
                         type: "get",
-                        item: this.view.bulk_name,
+                        item: this.getBulkName(),
                         filters:q.join("&")
                     })
                 }
@@ -501,6 +538,8 @@ function guiItemFactory(api, list, one)
              */
             this.searchStringToObject = function (query, defaultName)
             {
+                debugger;
+                //this.view.urls
                 var search = {}
                 if (query == "")
                 {
@@ -621,7 +660,7 @@ function guiItemFactory(api, list, one)
                 return this.model.data.count / limit
             }
 
-            var res = $.extend(this, thisFactory.list);
+            var res = $.extend(this, basePageItem, thisFactory.list);
 
             res.parent = thisFactory
             /**
@@ -640,7 +679,7 @@ function guiItemFactory(api, list, one)
              */
             tabSignal.emit("gui.new."+this.view.bulk_name+".list", res);
 
-            res.init(init_options)
+            res.init(page_options, objects)
 
             return res;
         },

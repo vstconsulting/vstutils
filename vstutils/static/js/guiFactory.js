@@ -4,18 +4,105 @@ function getMenuIdFromApiPath(path){
 }
 
 
+function openApi_newDefinition(api, name, definitionList, definitionOne)
+{
+    name = name.toLowerCase()
+    if(window["api"+name])
+    {
+        return window["api"+name];
+    }
+    
+    var one = definitionOne;
+    var list = definitionList;
+ 
+    console.log("Фабрика", name.replace(/^One/, ""));
+
+    if(!one)
+    {
+        one = list;
+    }
+
+    if(!list)
+    {
+        list = one;
+    }
+ 
+    var list_fileds = []
+    for(var i in list.properties)
+    {
+        if($.inArray(i, ['url', 'id']) != -1)
+        {
+            continue;
+        }
+
+        var val = list.properties[i]
+        val.name = i
+
+
+        list_fileds.push(val)
+    }
+
+    var one_fileds = []
+    for(var i in one.properties)
+    {
+        if($.inArray(i, ['url', 'id']) != -1)
+        {
+            continue;
+        }
+
+        var val = one.properties[i]
+        val.name = i
+
+
+        one_fileds.push(val)
+    }
+
+    window["api"+name] = guiItemFactory(api, {
+        view:{
+            bulk_name:name.toLowerCase().replace(/^One/i, ""),
+            definition:list,
+            class_name:"api"+name,
+            page_size:20,
+            urls:{},
+        },
+        model:{
+            fileds:list_fileds,
+            page_name:name.toLowerCase().replace(/^One/i, ""),
+        }
+    }, {
+        view:{
+            bulk_name:name.toLowerCase().replace(/^One/i, ""),
+            definition:one,
+            class_name:"api"+name,
+            urls:{},
+        },
+        model:{
+            fileds:one_fileds,
+            page_name:name.toLowerCase().replace(/^One/i, ""),
+        }
+    })
+
+    /**
+     *  Событие в теле которого можно было бы переопределить поля фабрики сразу после её создания
+     *
+     *  На пример такой код для объекта типа Group будет добавлять поле testData
+     *   tabSignal.connect("openapi.factory.Group", function(data)
+     *   {
+     *      data.testData = "ABC";
+     *   })
+     */
+    tabSignal.emit("openapi.factory."+name,  {obj:window["api"+name], name:"api"+name});
+    return window["api"+name]
+}
+
 function openApi_definitions(api)
 {
     // Создали фабрику для всего
     for(var key in api.openapi.definitions)
     {
+        
         var one;
         var list;
-
-        if(window["api"+key])
-        {
-            continue;
-        }
 
         if(/^One/.test(key))
         {
@@ -27,84 +114,8 @@ function openApi_definitions(api)
             one = api.openapi.definitions["One"+key]
             list = api.openapi.definitions[key]
         }
-
-
-        console.log("Фабрика", key.replace(/^One/, ""));
-
-        if(!one)
-        {
-            one = list;
-        }
-
-        if(!list)
-        {
-            list = one;
-        }
-
-
-        var list_fileds = []
-        for(var i in list.properties)
-        {
-            if($.inArray(i, ['url', 'id']) != -1)
-            {
-                continue;
-            }
-
-            var val = list.properties[i]
-            val.name = i
-
-
-            list_fileds.push(val)
-        }
-
-        var one_fileds = []
-        for(var i in one.properties)
-        {
-            if($.inArray(i, ['url', 'id']) != -1)
-            {
-                continue;
-            }
-
-            var val = one.properties[i]
-            val.name = i
-
-
-            one_fileds.push(val)
-        }
-
-        window["api"+key] = guiItemFactory(api, {
-            view:{
-                bulk_name:key.toLowerCase().replace(/^One/i, ""),
-                definition:list,
-                class_name:"api"+key,
-                page_size:20,
-            },
-            model:{
-                fileds:list_fileds,
-                page_name:key.toLowerCase().replace(/^One/i, ""),
-            }
-        }, {
-            view:{
-                bulk_name:key.toLowerCase().replace(/^One/i, ""),
-                definition:one,
-                class_name:"api"+key,
-            },
-            model:{
-                fileds:one_fileds,
-                page_name:key.toLowerCase().replace(/^One/i, ""),
-            }
-        })
-
-        /**
-         *  Событие в теле которого можно было бы переопределить поля фабрики сразу после её создания
-         *
-         *  На пример такой код для объекта типа Group будет добавлять поле testData
-         *   tabSignal.connect("openapi.factory.Group", function(data)
-         *   {
-         *      data.testData = "ABC";
-         *   })
-         */
-        tabSignal.emit("openapi.factory."+key,  {obj:window["api"+key], name:"api"+key});
+     
+        openApi_newDefinition(api, key, list, one)
     }
 }
 
@@ -142,6 +153,24 @@ function guiTestUrl(regexp, url)
 }
 
 /**
+ * По пути в апи определяет ключевое имя для регулярного выражения урла страницы
+ * @param {type} api_path
+ * @returns {getNameForUrlRegExp.url}
+ */
+function getNameForUrlRegExp(api_path)
+{ 
+    var url = api_path.replace(/\{[A-z]+\}\/$/, "").match(/\/([A-z0-9]+)\/$/)
+    if(url[1])
+    {
+        return url[1]
+    }
+    
+    console.error("Error in search page name in url `"+ api_path+"` ")
+    debugger;
+     
+    return url
+}
+/**
  * Ищет описание схемы в объекте рекурсивно
  * @param {object} obj
  * @returns {undefined|object}
@@ -158,7 +187,7 @@ function getObjectBySchema(obj)
         var name = obj.match(/\/([A-z0-9]+)$/)
         if(name && name[1])
         {
-            name = window["api" + name[1] ]
+            name = window["api" + name[1].toLowerCase() ]
             if(name)
             {
                 return name;
@@ -180,7 +209,7 @@ function getObjectBySchema(obj)
 
             if(name && name[1])
             {
-                name = window["api" + name[1] ]
+                name = window["api" + name[1].toLowerCase() ]
                 if(name)
                 {
                     return name;
@@ -205,7 +234,7 @@ function getObjectBySchema(obj)
  * Вернёт массив actions для пути base_path
  * @param {type} api апи
  * @param {type} base_path путь в апи
- * @returns {Array|openApi_actions_paths.res} экшены этого пути
+ * @returns {Array} экшены этого пути
  */
 function openApi_get_actions_paths(api, base_path)
 {
@@ -285,6 +314,14 @@ function openApi_get_actions_paths(api, base_path)
     return res;
 }
 
+/**
+ * Создаёт страницу экшена
+ * @param {Object} api
+ * @param {Object} api_path
+ * @param {Object} pageMainBlockObject
+ * @param {Object} action
+ * @returns {undefined}
+ */
 function openApi_add_one_action_page_path(api, api_path, pageMainBlockObject, action)
 {
     // Создали страницу
@@ -348,11 +385,19 @@ function openApi_add_one_action_page_path(api, api_path, pageMainBlockObject, ac
                     
                     return obj
                 }
-            }("^([A-z]+\\/[0-9]+\\/)*("+pageMainBlockObject.one.view.bulk_name+")\\/([0-9]+)\\/("+action.view.name+")$");
+            }("^([A-z]+\\/[0-9]+\\/)*("+getNameForUrlRegExp(api_path)+")\\/([0-9]+)\\/("+action.view.name+")$");
 
     page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
 }
 
+/**
+ * Создаёт страницу объекта
+ * @param {Object} api
+ * @param {Object} api_path
+ * @param {Object} pageMainBlockObject
+ * @param {Number} urlLevel
+ * @returns {undefined}
+ */
 function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 {
     // Создали страницу
@@ -383,22 +428,22 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 
         }
     }
-
+     
     // Настроили страницу
     page.blocks.push({
         id:'itemOne',
         prioritet:0,
-        render:function(pageMainBlockObject)
+        render:function(pageMainBlockObject, api_path_value)
         {
             return function(menuInfo, data)
             {
-                var objId = data.reg.id
-
+             
+                debugger;
                 // Создали список хостов
-                var pageItem = new pageMainBlockObject.one()
+                var pageItem = new pageMainBlockObject.one(api_path_value)
 
                 var def = new $.Deferred();
-                $.when(pageItem.load(objId)).done(function()
+                $.when(pageItem.load(data.reg)).done(function()
                 {
                     def.resolve(pageItem.renderAsPage())
                 }).fail(function(err)
@@ -408,8 +453,17 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 
                 return def.promise();
             }
-        }(pageMainBlockObject)
+        }(pageMainBlockObject, api.openapi.paths[api_path])
     })
+  
+    // Определяем тип страницы из урла (есть у него id в конце или нет) 
+    var page_url_regexp = "^([A-z]+\\/[0-9]+\\/)*"+getNameForUrlRegExp(api_path)+"\\/([0-9]+)$"
+    if(!/\{[A-z_\-]+\}\/$/.test(api_path))
+    {
+        // У него id в конце нет
+        // На пример что то такое "/group/{pk}/group/{group_id}/variables/"
+        page_url_regexp = "^([A-z]+\\/[0-9]+\\/)*"+getNameForUrlRegExp(api_path)+"$"
+    }
 
     // Страница элемента вложенного куда угодно
     var regexp_in_other = function(regexp)
@@ -452,11 +506,19 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 
                     return obj
                 }
-            }("^([A-z]+\\/[0-9]+\\/)*("+pageMainBlockObject.one.view.bulk_name+")\\/([0-9]+)$");
+            }(page_url_regexp);
 
     page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
 }
 
+/**
+ * Создаёт страницу списка и страницу с формой создания объекта
+ * @param {Object} api
+ * @param {Object} api_path
+ * @param {Object} pageMainBlockObject
+ * @param {Number} urlLevel
+ * @returns {undefined}
+ */
 function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel)
 {
     
@@ -508,7 +570,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                     return obj
                 }
-            }("^(([A-z]+\\/[0-9]+\\/)*("+pageMainBlockObject.one.view.bulk_name+"))(\\/search\\/([A-z0-9 %\-.:,=]+)){0,1}(\\/page\\/([0-9]+)){0,1}$"))
+            }("^(([A-z]+\\/[0-9]+\\/)*"+getNameForUrlRegExp(api_path)+")(\\/search\\/([A-z0-9 %\-.:,=]+)){0,1}(\\/page\\/([0-9]+)){0,1}$"))
 
     if(api_path == "/inventory/{pk}/variables/")
     {
@@ -601,7 +663,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                     return obj
                 }
-            }("^([A-z]+\\/[0-9]+\\/)*("+pageMainBlockObject.one.view.bulk_name+")\\/new$")
+            }("^([A-z]+\\/[0-9]+\\/)*"+getNameForUrlRegExp(api_path)+"\\/new$")
 
         // Создали страницу
         var page_new = new guiPage();
@@ -614,18 +676,18 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
         page_new.blocks.push({
             id:'newItem',
             prioritet:10,
-            render:function(pageNewObject)
+            render:function(pageNewObject, api_path_value)
             {
                 return function(menuInfo, data)
                 {
                     var def = new $.Deferred();
 
-                    var pageItem = new pageNewObject.one()
+                    var pageItem = new pageNewObject.one(api_path_value)
                     def.resolve(pageItem.renderAsNewPage())
 
                     return def.promise();
                 }
-            }(pageNewObject)
+            }(pageNewObject, api_path_value)
         })
     }
 
@@ -633,14 +695,14 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     page.blocks.push({
         id:'itemList',
         prioritet:10,
-        render:function(pageMainBlockObject)
+        render:function(pageMainBlockObject, api_path_value)
         {
             return function(menuInfo, data)
             {
                 var def = new $.Deferred();
 
                 // Создали список хостов
-                var pageItem = new pageMainBlockObject.list()
+                var pageItem = new pageMainBlockObject.list(api_path_value)
 
                 // Определили фильтр
                 var filters = {}
@@ -667,7 +729,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                 return def.promise();
             }
-        }(pageMainBlockObject)
+        }(pageMainBlockObject, api_path_value)
     })
 
     //debugger;
@@ -675,6 +737,14 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     page.registerURL(path_regexp, getMenuIdFromApiPath(api_path));
 }
 
+/**
+ * Вернёт фабрику объектов на основе пути в апи
+ * @param {Object} api
+ * @param {Object} api_path
+ * @param {Object} pageMainBlockObject
+ * @param {Number} urlLevel
+ * @returns {undefined}
+ */
 function openApi_getPageMainBlockType(api, api_path, urlLevel)
 {
     var api_path_value = api.openapi.paths[api_path]
@@ -688,77 +758,124 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
         return false;
     }
 
+    var operationId = undefined
+    if(!operationId && api_path_value.get && api_path_value.get.operationId)
+    {
+        operationId = api_path_value.get.operationId
+    }
+    if(!operationId && api_path_value.post && api_path_value.post.operationId)
+    {
+        operationId = api_path_value.post.operationId
+    }
+    if(!operationId && api_path_value.put && api_path_value.put.operationId)
+    {
+        operationId = api_path_value.put.operationId
+    }
+    if(!operationId && api_path_value.delete && api_path_value.delete.operationId)
+    {
+        operationId = api_path_value.delete.operationId
+    }
+
     // Получаем класс по имени
     // Сначала путём определения соответсвия имён урла и класса
-    var pageMainBlockObject= window["api" + pageMainBlockType[1][0].toUpperCase() + pageMainBlockType[1].substr(1) ]
-    if(!pageMainBlockObject)
+    var pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase()]
+    if(pageMainBlockObject)
+    {   
+        var new_bulk_name = api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+        if(/_get$/.test(operationId))
+        {  
+            pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api_path_value:api_path_value} 
+        }
+        if(/_list$/.test(operationId))
+        {
+            pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api_path_value:api_path_value}
+        }
+        
+        return pageMainBlockObject;
+    }
+
+    // Если не нашли на прямую то через соответсвие имени схемы в полях класса
+    try{
+        // Получаем класс по имени схемы из урла
+        pageMainBlockType = api_path_value.get.responses[200].schema.$ref.match(/\/([A-z0-9]+)$/)
+    }
+    catch (exception)
     {
-        // Если не нашли на прямую то через соответсвие имени схемы в полях класса
         try{
             // Получаем класс по имени схемы из урла
-            pageMainBlockType = api_path_value.get.responses[200].schema.$ref.match(/\/([A-z0-9]+)$/)
+            pageMainBlockType = api_path_value.get.responses[200].schema.properties.results.items.$ref.match(/\/([A-z0-9]+)$/)
         }
         catch (exception)
         {
-            try{
+            try
+            {
                 // Получаем класс по имени схемы из урла
-                pageMainBlockType = api_path_value.get.responses[200].schema.properties.results.items.$ref.match(/\/([A-z0-9]+)$/)
+                pageMainBlockType = api_path_value.post.responses[201].schema.$ref.match(/\/([A-z0-9]+)$/)
             }
             catch (exception)
             {
                 try
                 {
                     // Получаем класс по имени схемы из урла
-                    pageMainBlockType = api_path_value.post.responses[201].schema.$ref.match(/\/([A-z0-9]+)$/)
+                    pageMainBlockType = api_path_value.put.responses[201].schema.$ref.match(/\/([A-z0-9]+)$/)
                 }
                 catch (exception)
                 {
-                    try
-                    {
-                        // Получаем класс по имени схемы из урла
-                        pageMainBlockType = api_path_value.put.responses[201].schema.$ref.match(/\/([A-z0-9]+)$/)
-                    }
-                    catch (exception)
-                    {
-                        console.warn("Нет схемы у "+api_path)
-                        //debugger;
-                        return false;
-                    }
+                    console.warn("Нет схемы у "+api_path)
+                    //debugger;
+                    return false;
                 }
             }
         }
+    }
 
-        if(!pageMainBlockType || !pageMainBlockType[1])
+    if(!pageMainBlockType || !pageMainBlockType[1])
+    {
+        debugger;
+        return false;
+    }
+
+    pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase() ]
+    if(!pageMainBlockObject)
+    {
+        // Получаем класс по имени
+        pageMainBlockObject= window["api" + pageMainBlockType[1].replace(/^One/, "").toLowerCase() ]
+        if(!pageMainBlockObject)
         {
             debugger;
             return false;
         }
-
-        pageMainBlockObject= window["api" + pageMainBlockType[1] ]
-        if(!pageMainBlockObject)
-        {
-            // Получаем класс по имени
-            pageMainBlockObject= window["api" + pageMainBlockType[1].replace(/^One/, "") ]
-            if(!pageMainBlockObject)
-            {
-                debugger;
-                return false;
-            }
-        }
-
-        // Если нашли соответсвие по схеме отправляемых данных то выставим правильный bulk_name
-        if(urlLevel <= 2)
-        {
-            pageMainBlockObject.one.view.bulk_name = api_path.replace(/[\/]/img, "");
-            pageMainBlockObject.list.view.bulk_name = api_path.replace(/[\/]/img, "");
-        }
     }
 
+    // Если нашли соответсвие по схеме отправляемых данных то выставим правильный bulk_name 
+    var new_bulk_name = api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+    
+    if(pageMainBlockObject.one.view.bulk_name == "data")
+    {
+        console.log("create new bulk_name="+new_bulk_name[1]+" from "+pageMainBlockObject.one.view.bulk_name) 
+        pageMainBlockObject = openApi_newDefinition(api, new_bulk_name[1], {}, {}) 
+    }
+    else
+    {
+        console.log("add new bulk_name="+new_bulk_name[1]+" to "+pageMainBlockObject.one.view.bulk_name)  
+        window["api" + new_bulk_name[1] ] = pageMainBlockObject
+    }
+  
+    if(/_get$/.test(operationId))
+    {
+        pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api_path_value:api_path_value} 
+    }
+    if(/_list$/.test(operationId))
+    {
+        pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api_path_value:api_path_value}
+    }
+  
     return pageMainBlockObject;
 }
 
 function openApi_paths(api)
 {
+    // Строим страницы одного объекта и экшены объекта 
     for(var api_path in api.openapi.paths)
     {
         var api_path_value = api.openapi.paths[api_path]
@@ -774,6 +891,12 @@ function openApi_paths(api)
             continue;
         }
 
+        if(!/_get$/.test(api_path_value.get.operationId) )
+        {
+            // это не один элемент
+            continue;
+        }
+        
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length
 
@@ -781,20 +904,14 @@ function openApi_paths(api)
         if(pageMainBlockObject == false)
         {
             continue;
-        }
-
-        // Определяем тип страницы из урла (список или один элемент)
-        // Один элемент заканчивается на его идентификатор
-        if(!/\{[A-z_\-]+\}\/$/.test(api_path))
-        {
-            continue;
-        }
-
+        } 
+        
         // это один элемент
         openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
     }
     
     var listPath = []
+    // Строим страницы списка объектов и формы создания объектов
     for(var api_path in api.openapi.paths)
     {
         var api_path_value = api.openapi.paths[api_path]
@@ -809,6 +926,13 @@ function openApi_paths(api)
             // это экшен
             continue;
         }
+        
+        if(!/_list$/.test(api_path_value.get.operationId) )
+        {
+            // это не список
+            continue;
+        }
+        
 
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length
@@ -818,13 +942,7 @@ function openApi_paths(api)
         {
             continue;
         }
-
-        // Определяем тип страницы из урла (список или один элемент)
-        // Один элемент заканчивается на его идентификатор
-        if(/\{[A-z_\-]+\}\/$/.test(api_path))
-        {
-            continue;
-        }
+ 
         listPath.push(api_path)
         // это список
         openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel)
@@ -893,20 +1011,20 @@ tabSignal.connect("resource.loaded", function()
 
 /*
  * Это исключение. Так как при парсинге урлов и описаний не верно выставился bulk_name у класса OneOwner
- */
+ 
 tabSignal.connect("openapi.factory.OneOwner", function(obj)
 {
     window[obj.name].one.view.bulk_name = "user";
     window[obj.name].list.view.bulk_name = "user";
 
-})
+})*/
 
 /*
  * Это исключение. Так как при парсинге урлов и описаний не верно выставился bulk_name у класса OneOwner
- */
+ 
 tabSignal.connect("openapi.factory.Variable", function(obj)
 {
     window[obj.name].one.view.bulk_name = "variables";
     window[obj.name].list.view.bulk_name = "variables";
 
-})
+})*/
