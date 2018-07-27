@@ -147,14 +147,15 @@ kwargs = dict(
         "django>=1.11,<2.0",
         'cython>0.28,<1.0',
     ] +
-    load_requirements('requirements.txt') + load_requirements('requirements-doc.txt'),
+    load_requirements('requirements.txt')
+    + load_requirements('requirements-doc.txt')
+    + load_requirements('requirements-coreapi.txt'),
     extras_require={
         'test': load_requirements('requirements-test.txt'),
         'rpc': load_requirements('requirements-rpc.txt'),
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
-        'coreapi': load_requirements('requirements-coreapi.txt'),
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),

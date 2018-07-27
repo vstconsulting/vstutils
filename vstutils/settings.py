@@ -6,6 +6,8 @@ from configparser import ConfigParser, NoSectionError, NoOptionError
 
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
+# MAIN Variables
+##############################################################
 VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
@@ -25,6 +27,8 @@ __kwargs = dict(
 )
 KWARGS = __kwargs
 
+# Get settings from config
+##############################################################
 DEV_SETTINGS_FILE = os.getenv("{}_DEV_SETTINGS_FILE".format(ENV_NAME),
                               os.path.join(BASE_DIR, os.getenv("VST_DEV_SETTINGS")))
 CONFIG_FILE = os.getenv(
@@ -34,6 +38,7 @@ CONFIG_FILE = os.getenv(
 config = ConfigParser()
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
 
+# Secret file with key for hashing passwords
 SECRET_FILE = os.getenv(
     "{}_SECRET_FILE".format(ENV_NAME), "/etc/{}/secret".format(VST_PROJECT_LIB)
 )
@@ -44,6 +49,8 @@ try:
 except IOError:
     pass
 
+# Main settings
+##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', config.getboolean("main", "debug", fallback=False))
 
@@ -53,6 +60,7 @@ ALLOWED_HOSTS = [item for item in config.get("web",
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # Include some addons if packages exists in env
+##############################################################
 # :django_celery_beat:
 has_django_celery_beat = False
 try:
@@ -69,7 +77,8 @@ try:
 except ImportError:  # nocv
     pass
 
-# Application definition
+# Applications definition
+##############################################################
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -95,17 +104,12 @@ except:  # pragma: no cover
     pass
 
 
-try:
-    import mod_wsgi
-except ImportError:  # pragma: no cover
-    pass
-else:
-    INSTALLED_APPS += ['mod_wsgi.server',]  # pragma: no cover
-
 ADDONS = ['vstutils', ]
 
 INSTALLED_APPS += ADDONS
 
+# Additional middleware and auth
+##############################################################
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -130,8 +134,39 @@ try:
 except ImportError:  # nocv
     pass
 
+# Password validation
+# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 0,
+        },
+    },
+]
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+LOGIN_REDIRECT_URL = '/'
+
+
+# Main controller settings
+##############################################################
+# Module with urls
 ROOT_URLCONF = os.getenv('VST_ROOT_URLCONF', '{}.urls'.format(VST_PROJECT))
 
+# wsgi appilcation settings
+WSGI = os.getenv('VST_WSGI', '{}.wsgi'.format(VST_PROJECT))
+WSGI_APPLICATION = "{}.application".format(WSGI)
+UWSGI_APPLICATION = '{module}:{app}'.format(
+    module='.'.join(WSGI_APPLICATION.split('.')[:-1]), app=WSGI_APPLICATION.split('.')[-1]
+)
+
+
+# Templates settings
+##############################################################
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -161,12 +196,38 @@ TEMPLATES = [
     },
 ]
 
-WSGI = os.getenv('VST_WSGI', '{}.wsgi'.format(VST_PROJECT))
-WSGI_APPLICATION = "{}.application".format(WSGI)
-UWSGI_APPLICATION = '{module}:{app}'.format(
-    module='.'.join(WSGI_APPLICATION.split('.')[:-1]), app=WSGI_APPLICATION.split('.')[-1]
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.10/howto/static-files/
+##############################################################
+STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
+if 'collectstatic' not in sys.argv:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+        os.path.join(VST_PROJECT_DIR, 'static'),
+        os.path.join(VSTUTILS_DIR, 'static')
+    ]
+
+STATICFILES_FINDERS = (
+  'django.contrib.staticfiles.finders.FileSystemFinder',
+  'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
+if 'runserver' not in sys.argv:
+    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')
+
+
+# Documentation files
+# http://django-docs.readthedocs.io/en/latest/#docs-access-optional
+##############################################################
+DOCS_ROOT = os.path.join(BASE_DIR, 'doc/html')
+DOCS_ACCESS = 'public'
+DOC_URL = "/docs/"
+
+
+# Database settings.
+# Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+##############################################################
 try:
     __DB_SETTINGS = {k.upper():v.format(**KWARGS) for k,v in config.items('database')}
     if not __DB_SETTINGS: raise NoSectionError('database')
@@ -201,8 +262,37 @@ DATABASES = {
     'default': __DB_SETTINGS
 }
 
+# Cache settings.
+# Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#caches
+##############################################################
+try:
+    __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('cache')}
+    if not __CACHE_DEFAULT_SETTINGS: raise NoSectionError('cache')
+except NoSectionError:
+    __CACHE_DEFAULT_SETTINGS = {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/{}_django_cache{}'.format(VST_PROJECT, sys.version_info[0]),
+    }
+
+try:
+    __CACHE_LOCKS_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('locks')}
+    if not __CACHE_LOCKS_SETTINGS: raise NoSectionError('locks')
+except NoSectionError:
+    __CACHE_LOCKS_SETTINGS = {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/{}_django_locks{}'.format(VST_PROJECT, sys.version_info[0]),
+    }
+
+
+CACHES = {
+    'default': __CACHE_DEFAULT_SETTINGS,
+    "locks": __CACHE_LOCKS_SETTINGS
+}
+
+
 # E-Mail settings
 # https://docs.djangoproject.com/en/1.10/ref/settings/#email-host
+##############################################################
 try:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_PORT = config.getint("mail", "port", fallback=25)
@@ -213,28 +303,11 @@ try:
 except (NoSectionError, NoOptionError):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Password validation
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 0,
-        },
-    },
-]
-LOGIN_URL = '/login/'
-LOGOUT_URL = '/logout/'
-LOGIN_REDIRECT_URL = '/'
-
-
-PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
 
 # Rest Api settings
+# http://www.django-rest-framework.org/api-guide/settings/
+##############################################################
+PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -264,9 +337,69 @@ REST_FRAMEWORK = {
         'destroy': 'remove',
     }
 }
+
+# API settings
+##############################################################
+VST_API_URL = os.getenv("VST_API_URL", "api")
+VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
+API_URL = VST_API_URL
+HAS_COREAPI = False
+API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
+SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback=vst_project_module.__doc__ or vst_lib_module.__doc__)
+TERMS_URL = ''
+try:
+    CONTACT = { field: value for field, value in config.items('contact')}
+except:
+    CONTACT = dict(name='System Administrator')
+
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.VSTAutoSchema',
+    'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.VSTSchemaGenerator',
+    'DEEP_LINKING': True,
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic'
+        }
+    },
+}
+
+API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
+try:
+    import coreapi
+    HAS_COREAPI = True
+except ImportError:  # nocv
+    if API_CREATE_SCHEMA:
+        warn('CoreAPI will not enabled, because there is no "coreapi" package installed.')
+    API_CREATE_SCHEMA = False
+
+API = {
+    VST_API_VERSION: {
+        r'settings': {
+            'view': 'vstutils.api.views.SettingsViewSet', 'op_types': ['get', 'mod']
+        },
+        r'users': {
+            'view': 'vstutils.api.views.UserViewSet'
+        },
+        r'_bulk': {
+            'view': 'vstutils.api.views.BulkViewSet', 'type': 'view', "name": "_bulk"
+        },
+    }
+}
+
+BULK_OPERATION_TYPES = {
+    "get": "get",
+    "add": "post",
+    "set": "patch",
+    "del": "delete",
+    "mod": "get"
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
-
+##############################################################
 LANGUAGE_CODE = 'en'
 
 LANGUAGES = (
@@ -275,40 +408,14 @@ LANGUAGES = (
 )
 
 TIME_ZONE = config.get("main", "timezone", fallback="UTC")
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
-
-STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
-if 'collectstatic' not in sys.argv:
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-        os.path.join(VST_PROJECT_DIR, 'static'),
-        os.path.join(VSTUTILS_DIR, 'static')
-    ]
-
-STATICFILES_FINDERS = (
-  'django.contrib.staticfiles.finders.FileSystemFinder',
-  'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-)
-
-if 'runserver' not in sys.argv:
-    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')
-
-# Documentation files
-# http://django-docs.readthedocs.io/en/latest/#docs-access-optional
-DOCS_ROOT = os.path.join(BASE_DIR, 'doc/html')
-DOCS_ACCESS = 'public'
-DOC_URL = "/docs/"
-
-# Celery settings
+# Celery broker settings
+# Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
+##############################################################
 __broker_url = config.get("rpc", "connection", fallback="filesystem:///var/tmp").format(**KWARGS)
 if __broker_url.startswith("filesystem://"):
     __broker_folder = __broker_url.split("://", 1)[1]
@@ -330,11 +437,13 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
 CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
 
-# Some hacks with logs
+CREATE_INSTANCE_ATTEMPTS = config.getint("rpc", "create_instance_attempts", fallback=10)
+CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
 
-LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL',
-                      config.get("main", "log_level",
-                                 fallback="WARNING")).upper()
+
+# LOGGING settings
+##############################################################
+LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', config.get("main", "log_level", fallback="WARNING")).upper()
 LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
 LOG_DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
 
@@ -373,93 +482,30 @@ LOGGING = {
         },
     }
 }
-SILENCED_SYSTEM_CHECKS = ['fields.W342', 'urls.W001', '1_10.W001',
-                          "fields.W340", "urls.W005"]
-
-try:
-    __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('cache')}
-    if not __CACHE_DEFAULT_SETTINGS: raise NoSectionError('cache')
-except NoSectionError:
-    __CACHE_DEFAULT_SETTINGS = {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/{}_django_cache{}'.format(VST_PROJECT, sys.version_info[0]),
-    }
-
-try:
-    __CACHE_LOCKS_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('locks')}
-    if not __CACHE_LOCKS_SETTINGS: raise NoSectionError('locks')
-except NoSectionError:
-    __CACHE_LOCKS_SETTINGS = {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/{}_django_locks{}'.format(VST_PROJECT, sys.version_info[0]),
-    }
+SILENCED_SYSTEM_CHECKS = [
+    'fields.W342', 'urls.W001', '1_10.W001', "fields.W340", "urls.W005"
+]
 
 
-CACHES = {
-    'default': __CACHE_DEFAULT_SETTINGS,
-    "locks": __CACHE_LOCKS_SETTINGS
-}
+# View settings
+##############################################################
+ENABLE_ADMIN_PANEL = True
 
-CREATE_INSTANCE_ATTEMPTS = config.getint("rpc", "create_instance_attempts", fallback=10)
-CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
-
-VST_API_URL = os.getenv("VST_API_URL", "api")
-VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
-API_URL = VST_API_URL
-HAS_COREAPI = False
-API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback=PROJECT_GUI_NAME)
-TERMS_URL = ''
-try:
-    CONTACT = { field: value for field, value in config.items('contact')}
-except:
-    CONTACT = dict(name='System Administrator')
-
-
-SWAGGER_SETTINGS = {
-    'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.VSTAutoSchema',
-    'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.VSTSchemaGenerator',
-    'DEEP_LINKING': True,
-    'SECURITY_DEFINITIONS': {
-        'basic': {
-            'type': 'basic'
-        },
+VIEWS = {
+    "GUI": {
+        "BACKEND": 'vstutils.gui.views.GUIView'
+    },
+    "LOGIN": {
+        "BACKEND": 'vstutils.gui.views.Login'
+    },
+    "LOGOUT": {
+        "BACKEND": 'vstutils.gui.views.Logout'
     },
 }
 
-API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
-try:
-    import coreapi
-    HAS_COREAPI = True
-except ImportError:  # nocv
-    if API_CREATE_SCHEMA:
-        warn('CoreAPI will not enabled, because there is no "coreapi" package installed.')
-    API_CREATE_SCHEMA = False
 
-API = {
-    VST_API_VERSION: {
-        r'settings': {
-            'view': 'vstutils.api.views.SettingsViewSet', 'op_types': ['get', 'mod']
-        },
-        r'users': {
-            'view': 'vstutils.api.views.UserViewSet'
-        },
-        r'_bulk': {
-            'view': 'vstutils.api.views.BulkViewSet', 'type': 'view', "name": "_bulk"
-        },
-    }
-}
-
-BULK_OPERATION_TYPES = {
-    "get": "get",
-    "add": "post",
-    "set": "patch",
-    "del": "delete",
-    "mod": "get"
-}
-
-
+# Test settings for speedup tests
+##############################################################
 if "test" in sys.argv:
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'

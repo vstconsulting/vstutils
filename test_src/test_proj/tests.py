@@ -180,7 +180,6 @@ class ProjectTestCase(BaseTestCase):
             self._settings('CONTACT')['some_extra_url']
         )
         self.assertEqual(data['info']['title'], self._settings('PROJECT_GUI_NAME'))
-        self.assertEqual(data['info']['description'], self._settings('PROJECT_GUI_NAME'))
         self.assertEqual(data['swagger'], '2.0')
         # Check default values
         api_model_user = data['definitions']['User']
@@ -196,7 +195,10 @@ class ProjectTestCase(BaseTestCase):
         hostgroup_props = api_model_hostgroup['properties']
         self.assertEqual(api_model_hostgroup['properties']['parent']['type'], 'string')
         self.assertEqual(hostgroup_props['parent']['format'], 'autocomplete')
-        self.assertEqual(hostgroup_props['parent']['enum']['$ref'], '#/definitions/Host')
+        self.assertEqual(
+            hostgroup_props['parent']['additionalProperties']['$ref'],
+            '#/definitions/Host/properties/id'
+        )
         # Check file and secret_file fields
         self.assertEqual(hostgroup_props['file']['type'], 'string')
         self.assertEqual(hostgroup_props['file']['format'], 'file')
