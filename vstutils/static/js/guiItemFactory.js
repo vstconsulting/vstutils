@@ -138,18 +138,23 @@ basePageItem = {}
 
 basePageItem.getBulkName = function ()
 {
-    var name = this.view.bulk_name;
-    var level = 100;
-    for(var i in this.view.urls)
+    if(!this.model.pathInfo)
     {
-        if(level >= this.view.urls[i].level)
-        {
-            level = this.view.urls[i].level
-            name = this.view.urls[i].name
-        } 
+        return;
     }
-
-    return name;
+    
+    if(this.model.pathInfo.bulk_name)
+    {
+        return this.model.pathInfo.bulk_name
+    }
+    
+    if(this.model.pathInfo.api_path)
+    {
+        var name = this.model.pathInfo.api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+        this.model.pathInfo.bulk_name = name[1]
+    }
+     
+    return name[1];
 }
 
 /**
@@ -182,7 +187,7 @@ function guiItemFactory(api, list, one)
             this.model.isSelected = {}
 
             this.load = function (filters)
-            { 
+            {  
                 var thisObj = this;
                 var def = undefined;
                 
@@ -251,7 +256,7 @@ function guiItemFactory(api, list, one)
                     data = this.getValue()
                     if (this['onBefore'+method])
                     {
-                        data = this.this['onBefore'+method].apply(this, [data]);
+                        data = this['onBefore'+method].apply(this, [data]);
                         if (data == undefined || data == false)
                         {
                             def.reject()
@@ -266,6 +271,7 @@ function guiItemFactory(api, list, one)
                                 item: this.getBulkName(),
                                 data:data,
                             }
+                    debugger;
                     if(method == 'set')
                     {
                         query.pk = this.model.data.id
@@ -896,6 +902,7 @@ function deleteAndGoUp(obj)
 {
     var def = obj.delete();
     $.when(def).done(function(){
+        debugger;
         spajs.openURL(spajs.urlInfo.data.reg.baseURL());
     })
 
