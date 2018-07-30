@@ -57,6 +57,7 @@ basePageView.validateByModel = function (values)
  */
 basePageView.renderFiled = function(filed)
 {
+    debugger;
     if(!this.model.guiFileds[filed.name])
     {
         if(filed.schema && filed.schema.$ref)
@@ -136,6 +137,22 @@ basePageView.getValue = function ()
 
 basePageItem = {}
 
+basePageItem.getShortestBulkName = function ()
+{
+    var name = this.view.bulk_name;
+    var level = 100;
+    for(var i in this.view.urls)
+    {
+        if(level >= this.view.urls[i].level)
+        {
+            level = this.view.urls[i].level
+            name = this.view.urls[i].name
+        } 
+    }
+
+    return name;
+}
+
 basePageItem.getBulkName = function ()
 {
     if(!this.model.pathInfo)
@@ -153,7 +170,7 @@ basePageItem.getBulkName = function ()
         var name = this.model.pathInfo.api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
         this.model.pathInfo.bulk_name = name[1]
     }
-     
+    
     return name[1];
 }
 
@@ -191,25 +208,54 @@ function guiItemFactory(api, list, one)
                 var thisObj = this;
                 var def = undefined;
                 
-                if(filters.parent_id && filters.parent_type)
+                var query = undefined;
+                
+                if(this.model.pathInfo && this.model.pathInfo.get && this.model.pathInfo.get.operationId)
                 {
-                    def = api.query({
-                        type: "mod",
-                        item: filters.parent_type, 
-                        data_type:this.getBulkName(),
-                        method:"get",
-                        pk:filters.parent_id
-                    })
+                    var operations = this.model.pathInfo.get.operationId.split("_");
+                    if(operations.length >= 3)
+                    {
+                        query = {
+                            type: "mod",
+                            item: operations[0],
+                            data_type:this.model.pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
+                            method:"get"
+                        } 
+
+                        for(var i in this.model.pageInfo)
+                        {
+                            if(/^api_/.test(i))
+                            {
+                                query[i.replace(/api_/, "")] = this.model.pageInfo[i]
+                            }
+                        }
+                    } 
                 }
-                else
+                
+                if(!query)
                 {
-                    def = api.query({
-                        type: "get",
-                        item: this.getBulkName(),
-                        pk:filters.id
-                    })
+                    if(filters.parent_id && filters.parent_type)
+                    { 
+                        query = {
+                            type: "mod",
+                            item: filters.parent_type, 
+                            data_type:this.getBulkName(),
+                            method:"get",
+                            pk:filters.parent_id
+                        }
+                    }
+                    else
+                    {
+                        query = {
+                            type: "get",
+                            item: this.getBulkName(),
+                            pk:filters.id
+                        }
+                    }
                 }
- 
+                
+                def = api.query(query)
+                
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                     thisObj.model.status = data.status
@@ -222,7 +268,8 @@ function guiItemFactory(api, list, one)
             {
                 this.model.data = object
                 this.model.status = 200
-                this.model.pathInfo = page_options
+                this.model.pathInfo = page_options.api
+                this.model.pageInfo = page_options.url
             }
 
             this.create = function ()
@@ -265,18 +312,55 @@ function guiItemFactory(api, list, one)
                     }
 
                     data = this.validateByModel(data)
-
+                    
                     var query = {
                                 type: method,
                                 item: this.getBulkName(),
                                 data:data,
                             }
-                    debugger;
-                    if(method == 'set')
+                        
+                    if(this.model.pathInfo)
+                    {
+                        var operations = []
+                        var query_method = ""
+                        
+                        if(method == 'add' && this.model.pathInfo.post && this.model.pathInfo.post.operationId)
+                        {
+                            operations = this.model.pathInfo.post.operationId.split("_");
+                            query_method = "post"
+                        } 
+                        
+                        if(method == 'set' && this.model.pathInfo.put && this.model.pathInfo.put.operationId)
+                        {
+                            operations = this.model.pathInfo.put.operationId.split("_");
+                            query_method = "put"
+                        }
+                        
+                        if(method == 'set' && this.model.pathInfo.patch && this.model.pathInfo.patch.operationId)
+                        {
+                            operations = this.model.pathInfo.patch.operationId.split("_");
+                            query_method = "patch"
+                        }
+                        
+                        if(operations.length >= 3)
+                        {
+                            query = {
+                                type: "mod",
+                                item: operations[0],
+                                data_type:this.model.pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
+                                data:data,
+                                method:query_method
+                            } 
+                            
+                            query.pk = this.model.pageInfo['api_pk'] 
+                        }
+                    }
+                 
+                    if(!query.pk && method == 'set')
                     {
                         query.pk = this.model.data.id
                     }
-
+                   
                     $.when(api.query(query)).done(function (data)
                         {
                             def.resolve(data)
@@ -440,8 +524,9 @@ function guiItemFactory(api, list, one)
             this.init = function (page_options, objects)
             {
                 this.model.data = objects
-                this.model.status = 200
-                this.model.pathInfo = page_options
+                this.model.status = 200 
+                this.model.pathInfo = page_options.api
+                this.model.pageInfo = page_options.url
             } 
 
             /**
