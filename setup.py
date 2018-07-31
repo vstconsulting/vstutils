@@ -132,10 +132,15 @@ ext_list = [
     'vstutils.gui.views',
     'vstutils.gui.context',
     'vstutils.api.base',
+    'vstutils.api.decorators',
+    'vstutils.api.fields',
+    'vstutils.api.filter_backends',
     'vstutils.api.filters',
     'vstutils.api.permissions',
     'vstutils.api.routers',
+    'vstutils.api.schema',
     'vstutils.api.serializers',
+    'vstutils.api.swagger',
     'vstutils.api.views',
 ]
 
