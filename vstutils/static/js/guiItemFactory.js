@@ -1,6 +1,6 @@
 
 basePageView = {
-   
+
 }
 
 /**
@@ -57,7 +57,6 @@ basePageView.validateByModel = function (values)
  */
 basePageView.renderFiled = function(filed)
 {
-    debugger;
     if(!this.model.guiFileds[filed.name])
     {
         if(filed.schema && filed.schema.$ref)
@@ -65,13 +64,13 @@ basePageView.renderFiled = function(filed)
             var obj = getObjectBySchema(filed.schema.$ref)
             if(obj)
             {
-                obj = new obj.one()
                 var filed_value = undefined
                 if(this.model.data)
                 {
                     filed_value = this.model.data[filed.name]
                 }
-                obj.init(filed_value)
+
+                obj = new obj.one(undefined, filed_value)
 
                 this.model.guiFileds[filed.name] = obj
             }
@@ -81,13 +80,13 @@ basePageView.renderFiled = function(filed)
             var obj = getObjectBySchema(filed.$ref)
             if(obj)
             {
-                obj = new obj.one()
                 var filed_value = undefined
                 if(this.model.data)
                 {
                     filed_value = this.model.data[filed.name]
                 }
-                obj.init(filed_value)
+
+                obj = new obj.one(undefined, filed_value)
 
                 this.model.guiFileds[filed.name] = obj
             }
@@ -137,20 +136,20 @@ basePageView.getValue = function ()
 
 basePageItem = {}
 
-basePageItem.getShortestBulkName = function ()
+basePageItem.getShortestApiURL = function ()
 {
-    var name = this.view.bulk_name;
+    var url = undefined;
     var level = 100;
     for(var i in this.view.urls)
     {
         if(level >= this.view.urls[i].level)
         {
             level = this.view.urls[i].level
-            name = this.view.urls[i].name
-        } 
+            url = this.view.urls[i]
+        }
     }
 
-    return name;
+    return url;
 }
 
 basePageItem.getBulkName = function ()
@@ -159,18 +158,18 @@ basePageItem.getBulkName = function ()
     {
         return;
     }
-    
+
     if(this.model.pathInfo.bulk_name)
     {
         return this.model.pathInfo.bulk_name
     }
-    
+
     if(this.model.pathInfo.api_path)
     {
         var name = this.model.pathInfo.api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
         this.model.pathInfo.bulk_name = name[1]
     }
-    
+
     return name[1];
 }
 
@@ -185,10 +184,10 @@ function guiItemFactory(api, list, one)
          * Фабрика объектов сущьности
          * @param {Object} init_options параметры инициализации
          * @returns {guiItemFactory.guiForWebAnonym$5}
-         * 
+         *
          * @note init_options Могут по идее принимать определение параметров страницы из апи
          * Тогда в объект законным образом попадёт bulk_name и параметры фильтрации
-         * 
+         *
          */
         one:function(page_options, object){
 
@@ -196,20 +195,20 @@ function guiItemFactory(api, list, one)
              * @class guiApi
              */
             this.api = api
-            
+
             this.model = one.model
             this.model.pathInfo = undefined
-             
+
             this.model.guiFileds = {}
             this.model.isSelected = {}
 
             this.load = function (filters)
-            {  
+            {
                 var thisObj = this;
                 var def = undefined;
-                
+
                 var query = undefined;
-                
+
                 if(this.model.pathInfo && this.model.pathInfo.get && this.model.pathInfo.get.operationId)
                 {
                     var operations = this.model.pathInfo.get.operationId.split("_");
@@ -220,7 +219,7 @@ function guiItemFactory(api, list, one)
                             item: operations[0],
                             data_type:this.model.pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
                             method:"get"
-                        } 
+                        }
 
                         for(var i in this.model.pageInfo)
                         {
@@ -229,16 +228,16 @@ function guiItemFactory(api, list, one)
                                 query[i.replace(/api_/, "")] = this.model.pageInfo[i]
                             }
                         }
-                    } 
+                    }
                 }
-                
+
                 if(!query)
                 {
                     if(filters.parent_id && filters.parent_type)
-                    { 
+                    {
                         query = {
                             type: "mod",
-                            item: filters.parent_type, 
+                            item: filters.parent_type,
                             data_type:this.getBulkName(),
                             method:"get",
                             pk:filters.parent_id
@@ -249,13 +248,13 @@ function guiItemFactory(api, list, one)
                         query = {
                             type: "get",
                             item: this.getBulkName(),
-                            pk:filters.id
+                            pk:filters.api_pk
                         }
                     }
                 }
-                
+
                 def = api.query(query)
-                
+
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                     thisObj.model.status = data.status
@@ -266,10 +265,25 @@ function guiItemFactory(api, list, one)
 
             this.init = function (page_options, object)
             {
-                this.model.data = object
-                this.model.status = 200
-                this.model.pathInfo = page_options.api
-                this.model.pageInfo = page_options.url
+                if(!page_options)
+                {
+                    page_options = this.getShortestApiURL()
+                }
+
+                if(object)
+                {
+                    this.model.data = object
+                    this.model.status = 200
+                }
+
+                if(page_options)
+                {
+                    this.model.pathInfo = page_options.api
+                    this.model.pageInfo = page_options.url
+
+                    // Список Actions строить будем на основе данных api
+                    this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
+                }
             }
 
             this.create = function ()
@@ -312,36 +326,36 @@ function guiItemFactory(api, list, one)
                     }
 
                     data = this.validateByModel(data)
-                    
+
                     var query = {
                                 type: method,
                                 item: this.getBulkName(),
                                 data:data,
                             }
-                        
+
                     if(this.model.pathInfo)
                     {
                         var operations = []
                         var query_method = ""
-                        
+
                         if(method == 'add' && this.model.pathInfo.post && this.model.pathInfo.post.operationId)
                         {
                             operations = this.model.pathInfo.post.operationId.split("_");
                             query_method = "post"
-                        } 
-                        
+                        }
+
                         if(method == 'set' && this.model.pathInfo.put && this.model.pathInfo.put.operationId)
                         {
                             operations = this.model.pathInfo.put.operationId.split("_");
                             query_method = "put"
                         }
-                        
+
                         if(method == 'set' && this.model.pathInfo.patch && this.model.pathInfo.patch.operationId)
                         {
                             operations = this.model.pathInfo.patch.operationId.split("_");
                             query_method = "patch"
                         }
-                        
+
                         if(operations.length >= 3)
                         {
                             query = {
@@ -350,17 +364,17 @@ function guiItemFactory(api, list, one)
                                 data_type:this.model.pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
                                 data:data,
                                 method:query_method
-                            } 
-                            
-                            query.pk = this.model.pageInfo['api_pk'] 
+                            }
+
+                            query.pk = this.model.pageInfo['api_pk']
                         }
                     }
-                 
+
                     if(!query.pk && method == 'set')
                     {
                         query.pk = this.model.data.id
                     }
-                   
+                    debugger;
                     $.when(api.query(query)).done(function (data)
                         {
                             def.resolve(data)
@@ -436,7 +450,7 @@ function guiItemFactory(api, list, one)
                 {
                     tpl = 'entity_one'
                 }
-               
+
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
@@ -475,8 +489,8 @@ function guiItemFactory(api, list, one)
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
             var res = $.extend(this, basePageItem, basePageView, thisFactory.one);
- 
-             
+
+
             res.parent = thisFactory
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
@@ -520,14 +534,30 @@ function guiItemFactory(api, list, one)
              */
             this.api = api
             this.model.pathInfo = undefined
+            this.model.sublinks = {}
 
             this.init = function (page_options, objects)
             {
-                this.model.data = objects
-                this.model.status = 200 
-                this.model.pathInfo = page_options.api
-                this.model.pageInfo = page_options.url
-            } 
+                if(!page_options)
+                {
+                    page_options = this.getShortestApiURL()
+                }
+
+                if(objects)
+                {
+                    this.model.data = objects
+                    this.model.status = 200
+                }
+
+                if(page_options)
+                {
+                    this.model.pathInfo = page_options.api
+                    this.model.pageInfo = page_options.url
+
+                    // Список Actions строить будем на основе данных api
+                    this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 2);
+                }
+            }
 
             /**
              * Функция поиска
@@ -545,7 +575,7 @@ function guiItemFactory(api, list, one)
                 var thisObj = this;
                 if (!filters.limit)
                 {
-                    filters.limit = 999;
+                    filters.limit = 20;
                 }
 
                 if (!filters.offset)
@@ -555,7 +585,13 @@ function guiItemFactory(api, list, one)
 
                 if (!filters.ordering)
                 {
-                    filters.ordering = "";
+                    filters.ordering = "desc";
+                }
+
+                if (filters.page_number)
+                {
+                    filters.offset = filters.page_number/1*filters.limit;
+
                 }
 
                 var q = [];
@@ -585,37 +621,32 @@ function guiItemFactory(api, list, one)
                         q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.query[i]))
                     }
                 }
-             
-                var def = undefined;
+
+                var queryObj = {}
                 if(filters.parent_id && filters.parent_type)
                 {
-                    def = api.query({
+                    queryObj = {
                         type: "mod",
                         item: filters.parent_type,
                         filters:q.join("&"),
                         data_type:this.getBulkName(),
                         method:"get",
                         pk:filters.parent_id
-                    })
+                    }
                 }
                 else
                 {
-                    def = api.query({
+                    queryObj = {
                         type: "get",
                         item: this.getBulkName(),
                         filters:q.join("&")
-                    })
+                    }
                 }
 
+                var def = api.query(queryObj);
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                     thisObj.model.lines = []
-
-                    for(var i in thisObj.model.data.results)
-                    {
-                        thisObj.model.lines.push(new thisFactory.one(thisObj.model.data.results[i]))
-                    }
-
                 })
 
                 return def;
@@ -629,8 +660,6 @@ function guiItemFactory(api, list, one)
              */
             this.searchStringToObject = function (query, defaultName)
             {
-                debugger;
-                //this.view.urls
                 var search = {}
                 if (query == "")
                 {
@@ -659,10 +688,37 @@ function guiItemFactory(api, list, one)
                 {
                     tpl = 'entity_list'
                 }
+                thisPageObj = this
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+                var showAddToListForm = false
+                if(this.getShortestApiURL().level == 2 && 2 < this.model.pathInfo.api_path.match(/\//g).length)
+                {
+                    // Кротчайший урл равен 2 и при этом это список и текущий урл больше 2
+                    // значит нужно показать форму добавления объектов из общего списка в этот.
+                    showAddToListForm = true
+                    debugger;
+
+                }
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {showAddToListForm:showAddToListForm}});
             }
 
+            /**
+             * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
+             * @returns {string|promise}
+             */
+            this.renderAsAddSubItemsPage = function ()
+            {
+                var thisObj = this;
+                var tpl = thisObj.view.bulk_name + '_list_add_subitems'
+                if (!spajs.just.isTplExists(tpl))
+                {
+                    tpl = 'entity_list_add_subitems'
+                }
+                tpl = 'entity_list'
+                
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+            }
             this.delete = function (){ }
 
             ////////////////////////////////////////////////
@@ -817,12 +873,19 @@ function guiItemFactory(api, list, one)
     thisFactory.one.actions = {}
     thisFactory.list.actions = {}
 
+    thisFactory.one.sublinks = {}
+    thisFactory.list.sublinks = {}
+
     return thisFactory;
 }
 
-
-
-function guiActionFactory(api, parent, action)
+/**
+ * Класс работы с actions
+ * @param {type} api
+ * @param {type} action
+ * @returns {guiActionFactory.thisFactory}
+ */
+function guiActionFactory(api, action)
 {
     var parameters;
     if(action.action.post )
@@ -848,6 +911,15 @@ function guiActionFactory(api, parent, action)
         parameters = action.action.put.parameters
     }
 
+    if(action.action.patch )
+    {
+        if(parameters)
+        {
+            debugger;
+        }
+        parameters = action.action.patch.parameters
+    }
+
     var list_fileds = []
     for(var i in parameters)
     {
@@ -868,7 +940,7 @@ function guiActionFactory(api, parent, action)
         /**
          * @class guiApi
          */
-        this.model = {} 
+        this.model = {}
         this.model.fileds = list_fileds
         this.model.guiFileds = {}
 
@@ -879,13 +951,7 @@ function guiActionFactory(api, parent, action)
 
         this.renderAsPage = function ()
         {
-
-            var tpl = this.parent.one.view.bulk_name + '_action_'+this.model.name
-            if (!spajs.just.isTplExists(tpl))
-            {
-                tpl = 'action_page_'+this.model.name
-            }
-
+            var tpl = 'action_page_'+this.model.name
             if (!spajs.just.isTplExists(tpl))
             {
                 tpl = 'action_page'
@@ -893,7 +959,7 @@ function guiActionFactory(api, parent, action)
 
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
         }
-        
+
         var res = $.extend(this, basePageView, thisFactory);
 
         /*var res = mergeDeep({}, basePageView);
@@ -907,64 +973,55 @@ function guiActionFactory(api, parent, action)
 
     thisFactory.api = api
 
-    thisFactory.parent = parent
     thisFactory.view = action
-
-    thisFactory.renderAsLink = function (item)
-    {
-        var tpl = this.parent.one.view.bulk_name + '_action_as_link_'+this.view.name
-        if (!spajs.just.isTplExists(tpl))
-        {
-            tpl = 'action_as_link_'+this.view.name
-        }
-
-        if (!spajs.just.isTplExists(tpl))
-        {
-            tpl = 'action_as_link'
-        }
-
-        var query_type = false;
-        if(this.view.action.post )
-        {
-            query_type = "post"
-        }
-        if(this.view.action.delete )
-        {
-            query_type = "delete"
-        }
-        if(this.view.action.put )
-        {
-            query_type = "put"
-        }
-
-
-        var opt = {
-                title:this.view.action[query_type].description,
-                class:'',
-                link:"//"+window.location.host+"?"+spajs.urlInfo.data.reg.page_and_parents+"/"+item.id+"/" + this.view.name,
-        }
-
-        return spajs.just.render(tpl, {guiObj: this, opt: opt});
-    }
-
-    thisFactory.renderAsButton = function (item)
-    {
-        var tpl = this.parent.one.view.bulk_name + '_action_as_button_'+this.view.name
-        if (!spajs.just.isTplExists(tpl))
-        {
-            tpl = 'action_as_button_'+this.view.name
-        }
-
-        if (!spajs.just.isTplExists(tpl))
-        {
-            tpl = 'action_as_button'
-        }
-
-        return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
-    }
 
     return thisFactory;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Выполняет переход на страницу с результатами поиска
@@ -1008,4 +1065,8 @@ function createAndGoEdit(obj)
 function renderErrorAsPage(error)
 {
     return spajs.just.render('error_as_page', {error:error, opt: {}});
+}
+
+function isEmptyObject(obj){
+    return Object.keys(obj).length == 0
 }
