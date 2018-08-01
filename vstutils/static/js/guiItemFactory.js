@@ -715,7 +715,7 @@ function guiItemFactory(api, list, one)
                 {
                     tpl = 'entity_list_add_subitems'
                 }
-                tpl = 'entity_list'
+                //tpl = 'entity_list'
                 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
