@@ -566,9 +566,14 @@ function guiItemFactory(api, list, one)
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
                     
-                    // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из списка или нет.
+                    // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete"
+                    }
+                    
+                    // @todo надо решить каким то образом надо ли добавлять кнопку удаления объектов из списка или нет.
+                    this.model.multi_actions['remove'] = {
+                        name:"remove"
                     }
                     
                 }
