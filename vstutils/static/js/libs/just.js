@@ -41,7 +41,7 @@
             window.JUST.__JUST_onInsertFunctions[key] = {func:func, count:0};
 
             var funcCall = "";
-            if(once)
+            if(once || once === undefined)
             {
                 funcCall = " if(window.JUST.__JUST_onInsertFunctions['"+key+"'] !== undefined){"
                         + " window.JUST.__JUST_onInsertFunctions['"+key+"'].func(window.JUST.__JUST_onInsertFunctions['"+key+"'].count);"
@@ -464,7 +464,7 @@
 				var that = this;
 
 				var blank = loadSync(this.file)
-                                try {
+                               // try {
                                         var buffer = blank.call(that);
                                             for(var i = 0; i < that.partials.length; i++)
                                             {
@@ -477,11 +477,11 @@
                                                 html += (Array.isArray(buffer[i])) ? buffer[i].join('') : buffer[i];
                                             }
                                             return html;
-                                } catch (e) {
-                                        console.error(e.message + ' in ' + that.file + ' on line ' + that.line);
-                                        throw e.message + ' in ' + that.file + ' on line ' + that.line
-                                        return;
-                                }
+                               // } catch (e) {
+                                //        console.error(e.message + ' in ' + that.file + ' on line ' + that.line);
+                               //         throw e.message + ' in ' + that.file + ' on line ' + that.line
+                               //         return;
+                               // }
 			};
 
 			this.configure = function (newOptions) {
@@ -679,3 +679,16 @@ function justCall(obj)
     return 'justCall_mapArr['+index+']'
 }
 
+function justOn(event, action){
+    
+    let id = Math.floor(Math.random()*900000);
+     
+    return JUST.onInsert(" id='"+id+"' ", function(){
+        $("#"+id).on(event, action) 
+    }, true) 
+}
+
+
+JUST.onInsert("", alert, true)
+
+JUST.onInsert("", alert, true)

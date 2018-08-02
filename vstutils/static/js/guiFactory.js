@@ -11,10 +11,10 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     {
         return window["api"+name];
     }
-    
+
     var one = definitionOne;
     var list = definitionList;
- 
+
     console.log("Фабрика", name.replace(/^One/, ""));
 
     if(!one)
@@ -26,7 +26,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     {
         list = one;
     }
- 
+
     var list_fileds = []
     for(var i in list.properties)
     {
@@ -100,7 +100,7 @@ function openApi_definitions(api)
     // Создали фабрику для всего
     for(var key in api.openapi.definitions)
     {
-        
+
         var one;
         var list;
 
@@ -114,7 +114,7 @@ function openApi_definitions(api)
             one = api.openapi.definitions["One"+key]
             list = api.openapi.definitions[key]
         }
-     
+
         openApi_newDefinition(api, key, list, one)
     }
 }
@@ -158,9 +158,9 @@ function guiTestUrl(regexp, url)
  * @returns {getNameForUrlRegExp.url}
  */
 function getNameForUrlRegExp(api_path)
-{ 
-    var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
-    return url; 
+{
+    var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
+    return url;
 }
 
 /**
@@ -236,15 +236,13 @@ function openApi_get_internal_links(api, base_path, targetLevel)
         return []
     }
 
-    var base_operationId = api.openapi["paths"][base_path].get.operationId.replace(/_get$/, "");
-
     var res = []
     // Список Actions строить будем на основе данных об одной записи.
     for(var api_action_path in api.openapi.paths)
     {
         var api_path_value = api.openapi.paths[api_action_path]
-        
-      
+
+
         var count = 0;
         var base_url = ""
         for(var i=0; i< api_action_path.length && i< base_path.length; i++)
@@ -264,7 +262,7 @@ function openApi_get_internal_links(api, base_path, targetLevel)
         {
             continue;
         }
- 
+
         let dif = api_action_path.match(/\//g).length - base_path.match(/\//g).length;
         if(dif != targetLevel)
         {
@@ -277,15 +275,16 @@ function openApi_get_internal_links(api, base_path, targetLevel)
             //debugger;
             continue;
         }
-        
+
         res[name[1]] = {
             api_path:api_action_path,
-            name:name[1], 
-            api_path_value:api_path_value,  
-            isAction:api_action_path.get === undefined || !/_(get|list)$/.test(api_path_value.get.operationId)
-        } 
+            name:name[1],
+            api_path_value:api_path_value,
+            isAction:api_path_value.get === undefined || !/_(get|list)$/.test(api_path_value.get.operationId)
+        }
+
     }
-    
+
     return res;
 }
 
@@ -308,10 +307,10 @@ function openApi_add_one_action_page_path(api, api_path, action)
         render:function(action)
         {
             return function(menuInfo, data)
-            { 
+            {
                 // Создали список хостов
                 var pageAction = new action(data.reg)
-  
+
                 return pageAction.renderAsPage();
             }
         }(action)
@@ -320,6 +319,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
     // Страница элемента вложенного куда угодно
     var regexp_in_other = function(regexp)
             {
+                console.log(regexp)
                 return function(url)
                 {
                     var res = guiTestUrl(regexp, url)
@@ -328,23 +328,20 @@ function openApi_add_one_action_page_path(api, api_path, action)
                         return false;
                     }
 
-                    var obj = {
-                        url:res[0],                 // текущий урл в блоке
-                        page_type:res[2],           // тип страницы в блоке
-                        page_and_parents:res[0],    // страница+родители
-                        parents:res[1],
-                        id:res[3],
-                        action:res[4],
-                    }
+                    var obj = res.groups
+                    obj.url = res[0]                 // текущий урл в блоке
+                    obj.page_type = res[2]           // тип страницы в блоке
+                    obj.page_and_parents = res[0]    // страница+родители
 
-                    if(obj.parents)
+
+                    if(obj.page_and_parents)
                     {
-                        var match = obj.parents.match(/([A-z]+)\/([0-9]+)\/$/)
+                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)$/)
 
-                        if(match && match[1] && match[2] && match[2])
+                        if(match && match.groups)
                         {
-                            obj.parent_type = match[1]
-                            obj.parent_id = match[2]
+                            obj.parent_type = match.groups.parent_type
+                            obj.parent_id = match.groups.parent_id
                         }
                     }
 
@@ -356,11 +353,11 @@ function openApi_add_one_action_page_path(api, api_path, action)
 
                         return "/?"+this.page_type;
                     }
-                   
+
                     return obj
                 }
             }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+action.view.name+")$");
-     
+
     page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
 }
 
@@ -376,7 +373,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 {
     var api_path_value = api.openapi.paths[api_path]
     api_path_value.api_path = api_path
-    
+
     // Создали страницу
     var page = new guiPage();
 
@@ -387,7 +384,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
         render:function(pageMainBlockObject, api_path_value)
         {
             return function(menuInfo, data)
-            {  
+            {
                 // Создали список хостов
                 var pageItem = new pageMainBlockObject.one({api:api_path_value, url:data.reg})
 
@@ -404,10 +401,10 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
             }
         }(pageMainBlockObject, api_path_value)
     })
-  
-    // Определяем тип страницы из урла (есть у него id в конце или нет) 
+
+    // Определяем тип страницы из урла (есть у него id в конце или нет)
     var page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
-   
+
     // Страница элемента вложенного куда угодно
     var regexp_in_other = function(regexp)
             {
@@ -423,19 +420,19 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
                     obj.url = res[0]                 // текущий урл в блоке
                     obj.page_type = res[2]           // тип страницы в блоке
                     obj.page_and_parents = res[0]    // страница+родители
-                    
+
 
                     if(obj.page_and_parents)
                     {
                         var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)$/)
-                        
+
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
                             obj.parent_id = match.groups.parent_id
                         }
                     }
- 
+
                     if(obj.parents)
                     {
                         var match = obj.parents.match(/([A-z]+)\/([0-9]+)\/$/)
@@ -446,7 +443,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
                             obj.parent_id = match[2]
                         }
                     }
-           
+
                     obj.baseURL = function(){
                         if(this.parents)
                         {
@@ -473,7 +470,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
  */
 function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel)
 {
-    
+
     // Создали страницу
     var page = new guiPage();
 
@@ -482,7 +479,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     api_path_value.api_path = api_path
 
     path_regexp.push(function(regexp)
-            { 
+            {
                 return function(url)
                 {
                     var res = guiTestUrl(regexp, url)
@@ -490,9 +487,9 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     {
                         return false;
                     }
-                    
+
                     var obj = res.groups
-                     
+
                     obj.url = res[0]                 // текущий урл в блоке
                     obj.page_type = res[2]           // тип страницы в блоке
 
@@ -514,12 +511,12 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     obj.baseURL = function(){
                         return "/?"+this.page_and_parents;
                     }
- 
+
                     return obj
                 }
             }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"))
 
-   
+
     // Поля для поиска
     api_path_value.parameters
 
@@ -574,12 +571,12 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     obj.url = res[0]                 // текущий урл в блоке
                     obj.page_type = res[2]           // тип страницы в блоке
                     obj.page_and_parents = res[0]    // страница+родители
-                    
+
 
                     if(obj.page_and_parents)
                     {
                         var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)$/)
-                        
+
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
@@ -602,7 +599,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                         return url;
                     }
- 
+
                     return obj
                 }
             }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$")
@@ -634,11 +631,11 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     }
 
     // Страница добавления под элементов
-    if(true)
+    if(urlLevel > 2 && pageMainBlockObject.list.getShortestApiURL().level == 2)
     {
         // Страница нового объекта создаваться должна на основе схемы пост запроса а не на основе схемы списка объектов.
         // parameters[0].schema.$ref
-     
+
         // Значит добавим кнsопку создать объект
         page.blocks.push({
             id:'btn-add',
@@ -678,11 +675,11 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     obj.url = res[0]                 // текущий урл в блоке
                     obj.page_type = res[2]           // тип страницы в блоке
                     obj.page_and_parents = res[0]    // страница+родители
-                     
+
                     if(obj.page_and_parents)
                     {
                         var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)\/add$/)
-                        
+
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
@@ -705,7 +702,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                         return url;
                     }
- 
+
                     return obj
                 }
             }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add)(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
@@ -726,11 +723,11 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                     // Создали список хостов
                     var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg})
-                    
+
                     var filter = data.reg
                     filter.parent_id = undefined
                     filter.parent_type = undefined
-                     
+
                     $.when(pageItem.search(filter)).done(function()
                     {
                         def.resolve(pageItem.renderAsAddSubItemsPage())
@@ -744,7 +741,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
             }(pageMainBlockObject, api_path_value)
         })
     }
-    
+
     // Настроили страницу списка
     page.blocks.push({
         id:'itemList',
@@ -757,7 +754,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                 // Создали список хостов
                 var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg})
- 
+
                 //debugger;
                 $.when(pageItem.search(data.reg)).done(function()
                 {
@@ -779,6 +776,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
 /**
  * Вернёт фабрику объектов на основе пути в апи
+ * А ещё добавит в объект фабрики информацию по её урлам
  * @param {Object} api
  * @param {Object} api_path
  * @param {Object} pageMainBlockObject
@@ -820,17 +818,17 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
     // Сначала путём определения соответсвия имён урла и класса
     var pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase()]
     if(pageMainBlockObject)
-    {   
+    {
         var new_bulk_name = api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
         if(/_get$/.test(operationId))
-        {   
-            pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined} 
+        {
+            pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
         }
         if(/_list$/.test(operationId))
         {
             pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
-        } 
-        
+        }
+
         return pageMainBlockObject;
     }
 
@@ -887,35 +885,44 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
         }
     }
 
-    // Если нашли соответсвие по схеме отправляемых данных то выставим правильный bulk_name 
+    // Если нашли соответсвие по схеме отправляемых данных то выставим правильный bulk_name
     var new_bulk_name = api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-    
+
     if(pageMainBlockObject.one.view.bulk_name == "data")
     {
-        console.log("create new bulk_name="+new_bulk_name[1]+" from "+pageMainBlockObject.one.view.bulk_name) 
-        pageMainBlockObject = openApi_newDefinition(api, new_bulk_name[1], {}, {}) 
+        console.log("create new bulk_name="+new_bulk_name[1]+" from "+pageMainBlockObject.one.view.bulk_name)
+        pageMainBlockObject = openApi_newDefinition(api, new_bulk_name[1], {}, {})
     }
     else
     {
-        console.log("add new bulk_name="+new_bulk_name[1]+" to "+pageMainBlockObject.one.view.bulk_name)  
+        console.log("add new bulk_name="+new_bulk_name[1]+" to "+pageMainBlockObject.one.view.bulk_name)
         window["api" + new_bulk_name[1] ] = pageMainBlockObject
     }
-  
+
     if(/_get$/.test(operationId))
-    { 
-        pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined} 
+    {
+        pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
     }
     if(/_list$/.test(operationId))
     {
         pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
-    } 
-  
+    }
+
     return pageMainBlockObject;
 }
 
 function openApi_paths(api)
 {
-    // Строим страницы одного объекта и экшены объекта 
+    for(var api_path in api.openapi.paths)
+    {
+        // Добавит в объект фабрики объектов информацию по её урлам
+
+        // Уровень вложености меню
+        var urlLevel = (api_path.match(/\//g) || []).length
+        openApi_getPageMainBlockType(api, api_path, urlLevel)
+    }
+
+    // Строим страницы одного объекта и экшены объекта
     for(var api_path in api.openapi.paths)
     {
         var api_path_value = api.openapi.paths[api_path]
@@ -936,7 +943,7 @@ function openApi_paths(api)
             // это не один элемент
             continue;
         }
-        
+
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length
 
@@ -944,13 +951,13 @@ function openApi_paths(api)
         if(pageMainBlockObject == false)
         {
             continue;
-        } 
-        
+        }
+
         // это один элемент
         openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
     }
-    
-    
+
+
     // Строим страницы списка объектов и формы создания объектов
     for(var api_path in api.openapi.paths)
     {
@@ -966,13 +973,13 @@ function openApi_paths(api)
             // это экшен
             continue;
         }
-        
+
         if(!/_list$/.test(api_path_value.get.operationId) )
         {
             // это не список
             continue;
         }
-        
+
 
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length
@@ -982,11 +989,11 @@ function openApi_paths(api)
         {
             continue;
         }
- 
+
         // это список
         openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel)
     }
-    
+
     // Строим страницы экшенов
     for(var api_path in api.openapi.paths)
     {
@@ -998,29 +1005,29 @@ function openApi_paths(api)
         // В остальных случаях экшен
 
         if(api_path_value.get )
-        { 
+        {
             if(/_(get|list)$/.test(api_path_value.get.operationId))
             {
                 // это не экшен
                 continue;
             }
         }
-        
+
         var name = api_path.toLowerCase().match(/\/([A-z0-9]+)\/$/);
         if(!name)
         {
             continue;
         }
-         
+
         var action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
         openApi_add_one_action_page_path(api, api_path, action)
-    } 
+    }
 }
 
 
 function openApi_add_page_for_adding_subitems()
 {
-    
+
     var path_regexp = function(regexp)
         {
             return function(url)
@@ -1071,7 +1078,7 @@ function openApi_add_page_for_adding_subitems()
 
                 // Создали список хостов
                 var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg})
- 
+
                 //debugger;
                 $.when(pageItem.search(data.reg)).done(function()
                 {

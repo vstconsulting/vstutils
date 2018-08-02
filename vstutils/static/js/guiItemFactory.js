@@ -135,23 +135,7 @@ basePageView.getValue = function ()
 }
 
 basePageItem = {}
-
-basePageItem.getShortestApiURL = function ()
-{
-    var url = undefined;
-    var level = 100;
-    for(var i in this.view.urls)
-    {
-        if(level >= this.view.urls[i].level)
-        {
-            level = this.view.urls[i].level
-            url = this.view.urls[i]
-        }
-    }
-
-    return url;
-}
-
+  
 basePageItem.getBulkName = function ()
 {
     if(!this.model.pathInfo)
@@ -163,7 +147,7 @@ basePageItem.getBulkName = function ()
     {
         return this.model.pathInfo.bulk_name
     }
-
+    
     if(this.model.pathInfo.api_path)
     {
         var name = this.model.pathInfo.api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
@@ -275,14 +259,18 @@ function guiItemFactory(api, list, one)
                     this.model.data = object
                     this.model.status = 200
                 }
-
+                
                 if(page_options)
                 {
                     this.model.pathInfo = page_options.api
                     this.model.pageInfo = page_options.url
 
+                }
+                
+                if(this.model.pathInfo)
+                {
                     // Список Actions строить будем на основе данных api
-                    this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
+                    this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1); 
                 }
             }
 
@@ -535,6 +523,13 @@ function guiItemFactory(api, list, one)
             this.api = api
             this.model.pathInfo = undefined
             this.model.sublinks = {}
+            this.model.multi_actions = {}
+            
+            /**
+             * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
+             * Чтоб выделение одного списка не смешивалось с выделением другого списка
+             */
+            this.model.selectionTag = "";
 
             this.init = function (page_options, objects)
             {
@@ -553,10 +548,32 @@ function guiItemFactory(api, list, one)
                 {
                     this.model.pathInfo = page_options.api
                     this.model.pageInfo = page_options.url
-
+                }
+                
+                if(this.model.pathInfo)
+                {
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 2);
+                    this.model.selectionTag = this.model.pathInfo.api_path
+                    
+                    // Тут надо обработать sublinks так чтоб добавить методы удалить объект и отделить страницы от экшенов поддерживающих мультиоперации 
+                    for(var i in this.model.sublinks)
+                    {
+                        if(!this.model.sublinks[i].isAction)
+                        {
+                            continue;
+                        }
+                        this.model.multi_actions[i] = this.model.sublinks[i]
+                    }
+                    
+                    // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из списка или нет.
+                    this.model.multi_actions['delete'] = {
+                        name:"delete"
+                    }
+                    
                 }
+                
+                window.guiListSelections.intTag(this.model.selectionTag) 
             }
 
             /**
@@ -564,15 +581,29 @@ function guiItemFactory(api, list, one)
              * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
              */
             this.search = function (filters)
+            { 
+                var thisObj = this;
+                this.model.filters = filters
+                 
+                var def = this.load(filters)
+                $.when(def).done(function(data){
+                    thisObj.model.data = data.data 
+                })
+                
+                return def
+            }
+            
+            /**
+             * Функция загрузки данных 
+             * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
+             */
+            this.load = function (filters)
             {
                 if (!filters)
                 {
                     filters = {};
                 }
-
-                this.model.filters = filters
-
-                var thisObj = this;
+ 
                 if (!filters.limit)
                 {
                     filters.limit = 20;
@@ -589,9 +620,8 @@ function guiItemFactory(api, list, one)
                 }
 
                 if (filters.page_number)
-                {
-                    filters.offset = filters.page_number/1*filters.limit;
-
+                { 
+                    filters.offset = (filters.page_number-1)/1*filters.limit; 
                 }
 
                 var q = [];
@@ -643,13 +673,38 @@ function guiItemFactory(api, list, one)
                     }
                 }
 
-                var def = api.query(queryObj);
-                $.when(def).done(function(data){
-                    thisObj.model.data = data.data
-                    thisObj.model.lines = []
-                })
+                return api.query(queryObj);
+            }
 
-                return def;
+            this.toggleSelectEachItem = function (tag, mode)
+            {
+                if(!mode)
+                {
+                    window.guiListSelections.unSelectAll(tag)
+                    return false;
+                }
+                
+                let filters = this.model.filters
+                
+                filters.limit = 9999999
+                filters.offset = 0;
+                filters.page_number = 0;
+                
+                return $.when(this.load(filters)).done(function(data)
+                {
+                    if(!data || !data.data || !data.data.results)
+                    {
+                        return;
+                    }
+                    
+                    let ids = []
+                    for(let i in data.data.results)
+                    {
+                        ids.push(data.data.results[i].id)
+                    }
+                    
+                    window.guiListSelections.setSelection(tag, ids, mode); 
+                }).promise()
             }
 
             /**
@@ -695,9 +750,7 @@ function guiItemFactory(api, list, one)
                 {
                     // Кротчайший урл равен 2 и при этом это список и текущий урл больше 2
                     // значит нужно показать форму добавления объектов из общего списка в этот.
-                    showAddToListForm = true
-                    debugger;
-
+                    showAddToListForm = true 
                 }
 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {showAddToListForm:showAddToListForm}});
@@ -776,7 +829,7 @@ function guiItemFactory(api, list, one)
                     currentPage = Math.floor(list.offset / limit)
                 }
                 var url = window.location.href
-
+               
                 return  spajs.just.render('pagination', {
                     totalPage: totalPage,
                     currentPage: currentPage,
@@ -875,7 +928,26 @@ function guiItemFactory(api, list, one)
 
     thisFactory.one.sublinks = {}
     thisFactory.list.sublinks = {}
+    
+    var getShortestApiURL = function ()
+    {
+        var url = {};
+        var level = 100;
+        for(var i in this.view.urls)
+        {
+            if(level >= this.view.urls[i].level)
+            {
+                level = this.view.urls[i].level
+                url = this.view.urls[i]
+            }
+        }
 
+        return url;
+    }
+    
+    thisFactory.one.getShortestApiURL = getShortestApiURL
+    thisFactory.list.getShortestApiURL = getShortestApiURL
+    
     return thisFactory;
 }
 
@@ -961,13 +1033,7 @@ function guiActionFactory(api, action)
         }
 
         var res = $.extend(this, basePageView, thisFactory);
-
-        /*var res = mergeDeep({}, basePageView);
-        res = $.extend(res, thisFactory);
-        res = mergeDeep(res, this);*/
-
-        //res = mergeDeep({}, basePageView, thisFactory, this);
-
+ 
         return res;
     }
 
@@ -1061,6 +1127,23 @@ function createAndGoEdit(obj)
 
     return def;
 }
+
+function goToMultiAction(ids, action)
+{  
+    return spajs.openURL(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action);
+}
+
+function goToMultiActionFromElements(elements, action)
+{  
+    let ids = []
+    for (var i = 0; i < elements.length; i++)
+    {
+        ids.push($(elements[i]).attr('data-id'))
+    }
+        
+    return goToMultiAction(ids, action)
+}
+
 
 function renderErrorAsPage(error)
 {
