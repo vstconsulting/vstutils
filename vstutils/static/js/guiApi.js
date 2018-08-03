@@ -92,7 +92,18 @@ function guiApi()
         }
 
         var data_index = query_data.data.length
-        query_data.data.push(data)
+        
+        if($.isArray(data))
+        {
+            for(let i in data)
+            {
+                query_data.data.push(data[i])
+            } 
+        }
+        else
+        {
+            query_data.data.push(data)
+        }
 
         var promise = new $.Deferred();
 

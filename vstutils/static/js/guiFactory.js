@@ -329,19 +329,19 @@ function openApi_add_one_action_page_path(api, api_path, action)
                     }
 
                     var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_type = res[2]           // тип страницы в блоке
+                    obj.url = res[0]                 // текущий урл в блоке 
                     obj.page_and_parents = res[0]    // страница+родители
 
 
                     if(obj.page_and_parents)
                     {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)$/)
+                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
 
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
                             obj.parent_id = match.groups.parent_id
+                            obj.page_type = match.groups.page_type
                         }
                     }
 
@@ -353,7 +353,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
 
                         return "/?"+this.page_type;
                     }
-
+ 
                     return obj
                 }
             }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+action.view.name+")$");
@@ -417,22 +417,22 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
                     }
 
                     var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_type = res[2]           // тип страницы в блоке
+                    obj.url = res[0]                 // текущий урл в блоке 
                     obj.page_and_parents = res[0]    // страница+родители
 
 
                     if(obj.page_and_parents)
                     {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)$/)
+                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
 
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
                             obj.parent_id = match.groups.parent_id
+                            obj.page_type = match.groups.page_type
                         }
                     }
-
+                    /*
                     if(obj.parents)
                     {
                         var match = obj.parents.match(/([A-z]+)\/([0-9]+)\/$/)
@@ -442,7 +442,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
                             obj.parent_type = match[1]
                             obj.parent_id = match[2]
                         }
-                    }
+                    }*/
 
                     obj.baseURL = function(){
                         if(this.parents)
@@ -450,9 +450,9 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
                             return "/?"+this.parents;
                         }
 
-                        return "/?"+this.page_type;
+                        return "/?"+this.page_and_parents;
                     }
-
+ 
                     return obj
                 }
             }(page_url_regexp);
@@ -490,17 +490,17 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                     var obj = res.groups
 
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_type = res[2]           // тип страницы в блоке
-
-                    if(res[1])
+                    obj.url = res[0]                 // текущий урл в блоке 
+ 
+                    if(obj.page_and_parents)
                     {
-                        var match = res[1].match(/([A-z]+)\/([0-9]+)\/([A-z]+)$/)
+                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
 
-                        if(match && match[1] && match[2] && match[2])
+                        if(match && match.groups)
                         {
-                            obj.parent_type = match[1]
-                            obj.parent_id = match[2]
+                            obj.parent_type = match.groups.parent_type
+                            obj.parent_id = match.groups.parent_id
+                            obj.page_type = match.groups.page_type
                         }
                     }
 
@@ -511,7 +511,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     obj.baseURL = function(){
                         return "/?"+this.page_and_parents;
                     }
-
+ 
                     return obj
                 }
             }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"))
@@ -568,19 +568,19 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     }
 
                     var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_type = res[2]           // тип страницы в блоке
+                    obj.url = res[0]                 // текущий урл в блоке 
                     obj.page_and_parents = res[0]    // страница+родители
 
 
                     if(obj.page_and_parents)
                     {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)$/)
+                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
 
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
                             obj.parent_id = match.groups.parent_id
+                            obj.page_type = match.groups.page_type
                         }
                     }
 
@@ -670,42 +670,29 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     {
                         return false;
                     }
-
+                    
                     var obj = res.groups
                     obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_type = res[2]           // тип страницы в блоке
-                    obj.page_and_parents = res[0]    // страница+родители
-
+                    
                     if(obj.page_and_parents)
                     {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/([A-z]+)\/add$/)
+                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)\/add$/)
 
                         if(match && match.groups)
                         {
                             obj.parent_type = match.groups.parent_type
                             obj.parent_id = match.groups.parent_id
+                            obj.page_type = match.groups.page_type
                         }
                     }
-
-                    obj.baseURL = function(id){
-
-                        var url = "/?"+this.page_type
-                        if(this.parents)
-                        {
-                            url = "/?"+this.parents;
-                        }
-
-                        if(id)
-                        {
-                            url+= '/'+id
-                        }
-
-                        return url;
+ 
+                    obj.baseURL = function(id){ 
+                        return "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
                     }
-
+                     
                     return obj
                 }
-            }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add)(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
+            }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
 
         // Создали страницу
         var page_add = new guiPage();
@@ -722,9 +709,10 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     var def = new $.Deferred();
 
                     // Создали список хостов
-                    var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg})
+                    var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg, selectionTag:api_path_value.api_path+"add/"})
 
-                    var filter = data.reg
+                    var filter =  $.extend(true, data.reg) 
+                    
                     filter.parent_id = undefined
                     filter.parent_type = undefined
 
@@ -739,7 +727,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     return def.promise();
                 }
             }(pageMainBlockObject, api_path_value)
-        })
+        }) 
     }
 
     // Настроили страницу списка
@@ -1062,6 +1050,7 @@ function openApi_add_page_for_adding_subitems()
                     return "/?"+this.page_and_parents;
                 }
 
+                  
                 return obj
             }
         }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")

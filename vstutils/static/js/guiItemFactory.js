@@ -135,7 +135,7 @@ basePageView.getValue = function ()
 }
 
 basePageItem = {}
-  
+
 basePageItem.getBulkName = function ()
 {
     if(!this.model.pathInfo)
@@ -147,7 +147,7 @@ basePageItem.getBulkName = function ()
     {
         return this.model.pathInfo.bulk_name
     }
-    
+
     if(this.model.pathInfo.api_path)
     {
         var name = this.model.pathInfo.api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
@@ -259,18 +259,18 @@ function guiItemFactory(api, list, one)
                     this.model.data = object
                     this.model.status = 200
                 }
-                
+
                 if(page_options)
                 {
                     this.model.pathInfo = page_options.api
                     this.model.pageInfo = page_options.url
 
                 }
-                
+
                 if(this.model.pathInfo)
                 {
                     // Список Actions строить будем на основе данных api
-                    this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1); 
+                    this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
                 }
             }
 
@@ -524,7 +524,7 @@ function guiItemFactory(api, list, one)
             this.model.pathInfo = undefined
             this.model.sublinks = {}
             this.model.multi_actions = {}
-            
+
             /**
              * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
              * Чтоб выделение одного списка не смешивалось с выделением другого списка
@@ -533,6 +533,7 @@ function guiItemFactory(api, list, one)
 
             this.init = function (page_options, objects)
             {
+                let thisObj = this;
                 if(!page_options)
                 {
                     page_options = this.getShortestApiURL()
@@ -548,15 +549,23 @@ function guiItemFactory(api, list, one)
                 {
                     this.model.pathInfo = page_options.api
                     this.model.pageInfo = page_options.url
+
+                    if(page_options.selectionTag)
+                    {
+                        this.model.selectionTag = page_options.selectionTag
+                    }
                 }
-                
+
                 if(this.model.pathInfo)
                 {
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 2);
-                    this.model.selectionTag = this.model.pathInfo.api_path
-                    
-                    // Тут надо обработать sublinks так чтоб добавить методы удалить объект и отделить страницы от экшенов поддерживающих мультиоперации 
+
+                    if(!this.model.selectionTag)
+                    {
+                        this.model.selectionTag = this.model.pathInfo.api_path
+                    }
+                    // Тут надо обработать sublinks так чтоб добавить методы удалить объект и отделить страницы от экшенов поддерживающих мультиоперации
                     for(var i in this.model.sublinks)
                     {
                         if(!this.model.sublinks[i].isAction)
@@ -565,20 +574,82 @@ function guiItemFactory(api, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
-                    
+ 
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
-                        name:"delete"
+                        name:"delete",
+                        onClick:function()
+                        {  
+                            let ids = window.guiListSelections.getSelection(thisObj.model.selectionTag);
+                            window.guiListSelections.unSelectAll(thisObj.model.selectionTag);
+                            
+                            for(let i in ids)
+                            {
+                                $(".item-row.item-"+ids[i]).remove()
+                            }
+                            
+                            $.when(thisObj.deleteArray(ids)).done(function(d)
+                            {
+                                
+                            }).fail(function (e)
+                            { 
+                                polemarch.showErrors(e.responseJSON)
+                                debugger;
+                            })
+                            return false;
+                        }
                     }
-                    
+
                     // @todo надо решить каким то образом надо ли добавлять кнопку удаления объектов из списка или нет.
                     this.model.multi_actions['remove'] = {
-                        name:"remove"
+                        name:"remove",
+                        onClick:function()
+                        { 
+                            $.when(changeSubItemsInParent('DELETE', window.guiListSelections.getSelection(thisObj.model.selectionTag))).done(function()
+                            {
+                                debugger;
+                                spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
+                            }).fail(function (e)
+                            { 
+                                polemarch.showErrors(e.responseJSON)
+                                debugger;
+                            })
+                            return false;
+                        }
                     }
-                    
+
                 }
-                
-                window.guiListSelections.intTag(this.model.selectionTag) 
+
+                window.guiListSelections.intTag(this.model.selectionTag)
+            }
+
+            this.deleteArray = function (ids)
+            {
+                debugger;
+                var thisObj = this;
+                var def = new $.Deferred();
+
+                var q = []
+                for(let i in ids)
+                {
+                    q.push({
+                        type: "del",
+                        item: this.getBulkName(),
+                        pk:ids[i]
+                    })
+                }
+ 
+                $.when(api.query(q)).done(function(data)
+                {
+                    $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
+                    def.resolve(data)
+                }).fail(function (e)
+                {
+                    def.reject(e)
+                    polemarch.showErrors(e.responseJSON)
+                })
+ 
+                return def.promise();
             }
 
             /**
@@ -586,20 +657,20 @@ function guiItemFactory(api, list, one)
              * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
              */
             this.search = function (filters)
-            { 
+            {
                 var thisObj = this;
                 this.model.filters = filters
-                 
+
                 var def = this.load(filters)
                 $.when(def).done(function(data){
-                    thisObj.model.data = data.data 
+                    thisObj.model.data = data.data
                 })
-                
+
                 return def
             }
-            
+
             /**
-             * Функция загрузки данных 
+             * Функция загрузки данных
              * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
              */
             this.load = function (filters)
@@ -608,7 +679,7 @@ function guiItemFactory(api, list, one)
                 {
                     filters = {};
                 }
- 
+
                 if (!filters.limit)
                 {
                     filters.limit = 20;
@@ -625,8 +696,8 @@ function guiItemFactory(api, list, one)
                 }
 
                 if (filters.page_number)
-                { 
-                    filters.offset = (filters.page_number-1)/1*filters.limit; 
+                {
+                    filters.offset = (filters.page_number-1)/1*filters.limit;
                 }
 
                 var q = [];
@@ -688,27 +759,27 @@ function guiItemFactory(api, list, one)
                     window.guiListSelections.unSelectAll(tag)
                     return false;
                 }
-                
+
                 let filters = this.model.filters
-                
+
                 filters.limit = 9999999
                 filters.offset = 0;
                 filters.page_number = 0;
-                
+
                 return $.when(this.load(filters)).done(function(data)
                 {
                     if(!data || !data.data || !data.data.results)
                     {
                         return;
                     }
-                    
+
                     let ids = []
                     for(let i in data.data.results)
                     {
                         ids.push(data.data.results[i].id)
                     }
-                    
-                    window.guiListSelections.setSelection(tag, ids, mode); 
+
+                    window.guiListSelections.setSelection(tag, ids, mode);
                 }).promise()
             }
 
@@ -755,7 +826,7 @@ function guiItemFactory(api, list, one)
                 {
                     // Кротчайший урл равен 2 и при этом это список и текущий урл больше 2
                     // значит нужно показать форму добавления объектов из общего списка в этот.
-                    showAddToListForm = true 
+                    showAddToListForm = true
                 }
 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {showAddToListForm:showAddToListForm}});
@@ -774,7 +845,7 @@ function guiItemFactory(api, list, one)
                     tpl = 'entity_list_add_subitems'
                 }
                 //tpl = 'entity_list'
-                
+
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
             this.delete = function (){ }
@@ -834,7 +905,7 @@ function guiItemFactory(api, list, one)
                     currentPage = Math.floor(list.offset / limit)
                 }
                 var url = window.location.href
-               
+
                 return  spajs.just.render('pagination', {
                     totalPage: totalPage,
                     currentPage: currentPage,
@@ -933,7 +1004,7 @@ function guiItemFactory(api, list, one)
 
     thisFactory.one.sublinks = {}
     thisFactory.list.sublinks = {}
-    
+
     var getShortestApiURL = function ()
     {
         var url = {};
@@ -949,10 +1020,10 @@ function guiItemFactory(api, list, one)
 
         return url;
     }
-    
+
     thisFactory.one.getShortestApiURL = getShortestApiURL
     thisFactory.list.getShortestApiURL = getShortestApiURL
-    
+
     return thisFactory;
 }
 
@@ -1038,7 +1109,7 @@ function guiActionFactory(api, action)
         }
 
         var res = $.extend(this, basePageView, thisFactory);
- 
+
         return res;
     }
 
@@ -1134,19 +1205,115 @@ function createAndGoEdit(obj)
 }
 
 function goToMultiAction(ids, action)
-{  
+{
     return spajs.openURL(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action);
 }
 
 function goToMultiActionFromElements(elements, action)
-{  
+{
     let ids = []
     for (var i = 0; i < elements.length; i++)
     {
         ids.push($(elements[i]).attr('data-id'))
     }
-        
+
     return goToMultiAction(ids, action)
+}
+
+function addToParentsAndGoUp(item_ids)
+{ 
+    return $.when(changeSubItemsInParent('POST', item_ids)).done(function (data)
+    { 
+        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.baseURL());
+    }).fail(function (e)
+    { 
+        polemarch.showErrors(e.responseJSON)
+    }).promise(); 
+}
+
+/**
+ *
+ * @param {array} item_ids
+ * @returns {promise}
+ */
+function changeSubItemsInParent(action, item_ids)
+{
+    var def = new $.Deferred();
+    if(!item_ids || item_ids.length == 0)
+    {
+        def.resolve()
+        return def.promise();
+    }
+
+    let parent_id = spajs.urlInfo.data.reg.parent_id
+    let parent_type = spajs.urlInfo.data.reg.parent_type
+    let item_type = spajs.urlInfo.data.reg.page_type
+
+    var url = "/api/v2/" + parent_type +"/" + parent_id +"/" + item_type +"/"
+
+    var parent = window["api"+parent_type]
+    if(!parent)
+    {
+        console.error("Error parent object not found")
+        debugger;
+        def.resolve()
+        return def.promise();
+    }
+
+    if(!parent_id)
+    {
+        console.error("Error parent_id not found")
+        debugger;
+        def.resolve()
+        return def.promise();
+    }
+
+    var item = window["api"+item_type]
+    if(!item)
+    {
+        console.error("Error item_type not found")
+        debugger;
+        def.resolve()
+        return def.promise();
+    }
+
+    //  @todo отправка запроса чего то не работает. Надо сергея спросить.
+    let query = {
+        type: "mod",
+        item: parent_id,
+        data_type:item_type,
+        item:parent_type,
+        data:item_ids,
+        pk:parent_id,
+        method:action
+    }
+    return api.query(query)
+    
+        /*
+    spajs.ajax.Call({
+        url: url,
+        type: "POST",
+        contentType:'application/json',
+        data:JSON.stringify(item_ids),
+        success: function(data)
+        {
+            if(data.not_found > 0)
+            {
+                $.notify("Item not found", "error");
+                def.reject({text:"Item not found", status:404})
+                return;
+            }
+
+            $.notify("Save", "success");
+            def.resolve()
+        },
+        error:function(e)
+        {
+            polemarch.showErrors(e.responseJSON)
+            def.reject(e)
+        }
+    });*/
+    return def.promise();
 }
 
 
