@@ -585,13 +585,9 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     }
 
                     obj.baseURL = function(id){
-
-                        var url = "/?"+this.page_type
-                        if(this.parents)
-                        {
-                            url = "/?"+this.parents;
-                        }
-
+ 
+                        var url = "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
+                        
                         if(id)
                         {
                             url+= '/'+id

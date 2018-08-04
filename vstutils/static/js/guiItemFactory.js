@@ -668,6 +668,11 @@ function guiItemFactory(api, list, one)
 
                 return def
             }
+            
+            this.loadAllItems = function()
+            {
+                return this.search({limit:9999, offset:0});
+            }
 
             /**
              * Функция загрузки данных
@@ -1104,7 +1109,7 @@ function guiActionFactory(api, action)
             {
                 tpl = 'action_page'
             }
-
+            debugger;
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
         }
 
@@ -1232,7 +1237,7 @@ function addToParentsAndGoUp(item_ids)
 }
 
 /**
- *
+ * Для добавления и удаления подэлементов в списке
  * @param {array} item_ids
  * @returns {promise}
  */
@@ -1249,7 +1254,7 @@ function changeSubItemsInParent(action, item_ids)
     let parent_type = spajs.urlInfo.data.reg.parent_type
     let item_type = spajs.urlInfo.data.reg.page_type
 
-    var url = "/api/v2/" + parent_type +"/" + parent_id +"/" + item_type +"/"
+    //var url = "/api/v2/" + parent_type +"/" + parent_id +"/" + item_type +"/"
 
     var parent = window["api"+parent_type]
     if(!parent)
