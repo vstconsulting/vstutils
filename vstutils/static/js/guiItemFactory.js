@@ -443,7 +443,7 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_one'
                 }
-
+                debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
@@ -1156,8 +1156,19 @@ function guiActionFactory(api, action)
                     }
                 }
 
-                data = this.validateByModel(data)
-                data = data[0]
+                let value = this.validateByModel(data)
+                data = {}
+                
+                for(let i in value[0])
+                {
+                    if(value[0][i] && value[0][i] != "")
+                    {
+                        data[i] = value[0][i]
+                    }
+                } 
+                
+                
+                
                 if(!this.model.pathInfo)
                 {
                     console.error("pathInfo not define")
@@ -1204,31 +1215,59 @@ function guiActionFactory(api, action)
                         url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
                     }
                 }
-                 
-                spajs.ajax.Call({
-                    url: url,
-                    type:query_method,
-                    contentType:'application/json',
-                    data:JSON.stringify(data),
-                    success: function(data)
+                
+                // Модификация на то если у нас мультиоперация
+                var query = []
+                for(let i in this.model.pageInfo)
+                {
+                    if(/^api_/.test(i))
                     {
-                        if(data.not_found > 0)
+                        if(this.model.pageInfo[i].indexOf(",") != -1)
                         {
-                            $.notify("Item not found", "error");
-                            def.reject({text:"Item not found", status:404})
-                            return;
+                            let ids = this.model.pageInfo[i].split(",")
+                            for(let j in ids)
+                            {
+                                query.push(url.replace(this.model.pageInfo[i], ids[j])) 
+                            }
+                            
+                            continue;
                         }
-
-                        $.notify("Save", "success");
-                        def.resolve()
-                    },
-                    error:function(e)
-                    {
-                        polemarch.showErrors(e.responseJSON)
-                        def.reject(e)
                     }
-                });
+                }
+                
+                if(query.length == 0)
+                {
+                    // Модификация на то если у нас не мультиоперация
+                    query = [url]
+                }
                  
+                query.forEach(qurl =>{ 
+                    // @todo переделать на балк
+                    spajs.ajax.Call({
+                        url: qurl,
+                        type:query_method,
+                        contentType:'application/json',
+                        data:JSON.stringify(data),
+                        success: function(data)
+                        {
+                            if(data.not_found > 0)
+                            {
+                                $.notify("Item not found", "error");
+                                def.reject({text:"Item not found", status:404})
+                                return;
+                            }
+
+                            $.notify("Save", "success");
+                            def.resolve()
+                        },
+                        error:function(e)
+                        {
+                            polemarch.showErrors(e.responseJSON)
+                            def.reject(e)
+                        }
+                    });
+                })
+                
             }catch (e) {
                 polemarch.showErrors(e)
 

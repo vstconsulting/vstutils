@@ -106,25 +106,6 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     return window["api"+name]
 }
 
-// Исключения харкод для назвпний в апи
-tabSignal.connect("openapi.factory.owner", function(data)
-{
-    apiowner.view.defaultName = "username"
-})
-
-// Исключения харкод для назвпний в апи
-tabSignal.connect("openapi.factory.user", function(data)
-{
-    apiowner.view.defaultName = "username"
-})
-
-// Исключения харкод для назвпний в апи
-tabSignal.connect("openapi.factory.variables", function(data)
-{
-    apiowner.view.defaultName = "key"
-})
-
-
 function openApi_definitions(api)
 {
     // Создали фабрику для всего
