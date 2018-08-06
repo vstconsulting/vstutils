@@ -194,7 +194,7 @@ function guiItemFactory(api, both_view, list, one)
                 }
                 
                 var thisObj = this;
-                var def = undefined;
+                 
 
                 var query = undefined;
 
@@ -242,14 +242,20 @@ function guiItemFactory(api, both_view, list, one)
                     }
                 }
 
-                def = api.query(query)
+                var def = api.query(query)
+
+                var promise = new $.Deferred();
 
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                     thisObj.model.status = data.status
+                     
+                    promise.resolve(data) 
+                }).fail(function(e){ 
+                    promise.reject(e)
                 })
 
-                return def;
+                return promise.promise();
             }
 
             this.init = function (page_options, object)

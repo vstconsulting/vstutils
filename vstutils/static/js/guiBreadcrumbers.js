@@ -9,7 +9,7 @@ function renderBreadcrumbs(){
         tmp_obj.id = tmp.groups.id;
         result.push(tmp_obj);
     };
-    arr = []
+    let arr = []
     let element_name = []
     for (var i = 0; i < result.length; i++) {
         if (window["api" + result[i].type] == undefined)
@@ -22,9 +22,8 @@ function renderBreadcrumbs(){
     }
 
     return spajs.just.onInsert('<ol class="breadcrumb">\n</ol>', () => {
-        $.when.call(arr).done(function(){
-            //
-            debugger;
+        $.when.apply($, arr).done(function()
+        {
             var arr_obj = []
             for (var i = 0; i < element_name.length; i++) {
                 arr_obj.push({
