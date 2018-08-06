@@ -188,6 +188,11 @@ function guiItemFactory(api, list, one)
 
             this.load = function (filters)
             {
+                if(typeof filters !== "object")
+                {
+                    filters = {api_pk:filters}
+                }
+                
                 var thisObj = this;
                 var def = undefined;
 
@@ -1029,6 +1034,16 @@ function guiItemFactory(api, list, one)
     thisFactory.one.getShortestApiURL = getShortestApiURL
     thisFactory.list.getShortestApiURL = getShortestApiURL
 
+    thisFactory.getObjectNameFiled = function()
+    { 
+        if(this.view && this.view.defaultName)
+        {
+            return this.view.defaultName;
+        }
+        return "id";
+    }
+    
+    
     return thisFactory;
 }
 
@@ -1283,15 +1298,20 @@ function changeSubItemsInParent(action, item_ids)
     }
 
     //  @todo отправка запроса чего то не работает. Надо сергея спросить.
-    let query = {
-        type: "mod",
-        item: parent_id,
-        data_type:item_type,
-        item:parent_type,
-        data:item_ids,
-        pk:parent_id,
-        method:action
+    let query = []
+    for(let i in item_ids)
+    { 
+        query.push({
+            type: "mod",
+            item: parent_id,
+            data_type:item_type,
+            item:parent_type,
+            data:{id:item_ids[i]/1},
+            pk:parent_id,
+            method:action
+        })
     }
+     
     return api.query(query)
     
         /*

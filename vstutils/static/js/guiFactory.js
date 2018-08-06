@@ -56,6 +56,13 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
 
         one_fileds.push(val)
     }
+    
+    if(name == "project")
+    {
+        //...
+        one_fileds
+        debugger;
+    }
 
     window["api"+name] = guiItemFactory(api, {
         view:{
@@ -95,6 +102,13 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     return window["api"+name]
 }
 
+tabSignal.connect("openapi.factory.project", function(data)
+{
+    
+    // debugger;
+})
+     
+     
 function openApi_definitions(api)
 {
     // Создали фабрику для всего
