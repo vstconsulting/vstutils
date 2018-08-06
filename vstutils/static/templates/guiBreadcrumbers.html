@@ -1,0 +1,10 @@
+<script type="text/x-just" data-just="page_breadcrumb">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <% debugger; for(var i = 0; i < arr.length; i++){ %>
+                <li class="active"><a href="<%- arr[i].url %>" onclick="return spajs.openURL(this.href);" ><%- arr[i].name %></a></li>
+            <% } %>
+        </ol>
+    </section>
+</script>
