@@ -161,7 +161,7 @@ basePageItem.getBulkName = function ()
  * Фабрика классов объектов
  * @returns {Object}
  */
-function guiItemFactory(api, list, one)
+function guiItemFactory(api, both_view, list, one)
 {
     var thisFactory = {
         /**
@@ -476,7 +476,7 @@ function guiItemFactory(api, list, one)
                 {
                     tpl = 'entity_one_as_filed'
                 }
-
+                // debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
@@ -1014,7 +1014,8 @@ function guiItemFactory(api, list, one)
 
     thisFactory.one.sublinks = {}
     thisFactory.list.sublinks = {}
-
+    thisFactory.view = both_view
+    
     var getShortestApiURL = function ()
     {
         var url = {};
@@ -1034,6 +1035,10 @@ function guiItemFactory(api, list, one)
     thisFactory.one.getShortestApiURL = getShortestApiURL
     thisFactory.list.getShortestApiURL = getShortestApiURL
 
+    /**
+     * Вернёт имя поля которое выполняет роль поля name у этого объекта
+     * @returns {guiItemFactory.thisFactory.view.defaultName|String}
+     */
     thisFactory.getObjectNameFiled = function()
     { 
         if(this.view && this.view.defaultName)
@@ -1104,19 +1109,139 @@ function guiActionFactory(api, action)
     }
 
 
-    var thisFactory = function(){
+    var thisFactory = function(page_options){
         /**
          * @class guiApi
          */
         this.model = {}
         this.model.fileds = list_fileds
         this.model.guiFileds = {}
+        this.model.pathInfo = undefined
+
+        this.init = function (page_options)
+        { 
+            if(page_options)
+            {
+                this.model.pathInfo = page_options.api
+                this.model.pageInfo = page_options.url
+
+            }
+
+            if(this.model.pathInfo)
+            {
+                // Список Actions строить будем на основе данных api
+                this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
+            }
+        }
 
         this.exec = function ()
         {
-
+            return this.sendToApi("PUT");
         }
+ 
+        this.sendToApi = function (method)
+        {
+            var def = new $.Deferred();
+            var data = {}
 
+            try{
+                data = this.getValue()
+                if (this['onBefore'+method])
+                {
+                    data = this['onBefore'+method].apply(this, [data]);
+                    if (data == undefined || data == false)
+                    {
+                        def.reject()
+                        return def.promise();
+                    }
+                }
+
+                data = this.validateByModel(data)
+                data = data[0]
+                if(!this.model.pathInfo)
+                {
+                    console.error("pathInfo not define")
+                    $.notify("Error in code: pathInfo not define", "error");
+                    def.reject()
+                    return def.promise();
+                }
+                
+                var query_method = ""
+                var operationId = "";
+
+                if(this.model.pathInfo.post && this.model.pathInfo.post.operationId)
+                {
+                    operationId = this.model.pathInfo.post.operationId
+                    query_method = "post"
+                }
+
+                if(this.model.pathInfo.put && this.model.pathInfo.put.operationId)
+                {
+                    operationId = this.model.pathInfo.put.operationId
+                    query_method = "put"
+                }
+
+                if(this.model.pathInfo.patch && this.model.pathInfo.patch.operationId)
+                {
+                    operationId = this.model.pathInfo.patch.operationId
+                    query_method = "patch"
+                }
+
+                operationId = operationId.replace(/(set)_([A-z0-9]+)/g, "$1-$2")
+
+                var operations = []
+                operations = operationId.split("_");
+                for(let i in operations)
+                {
+                    operations[i] = operations[i].replace("-", "_")
+                }
+  
+                var url = hostname+"/api/v2"+this.model.pathInfo.api_path
+                for(let i in this.model.pageInfo)
+                {
+                    if(/^api_/.test(i))
+                    {
+                        url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
+                    }
+                }
+                 
+                spajs.ajax.Call({
+                    url: url,
+                    type:query_method,
+                    contentType:'application/json',
+                    data:JSON.stringify(data),
+                    success: function(data)
+                    {
+                        if(data.not_found > 0)
+                        {
+                            $.notify("Item not found", "error");
+                            def.reject({text:"Item not found", status:404})
+                            return;
+                        }
+
+                        $.notify("Save", "success");
+                        def.resolve()
+                    },
+                    error:function(e)
+                    {
+                        polemarch.showErrors(e.responseJSON)
+                        def.reject(e)
+                    }
+                });
+                 
+            }catch (e) {
+                polemarch.showErrors(e)
+
+                def.reject()
+                if(e.error != 'validation')
+                {
+                    throw e
+                }
+            }
+
+            return def.promise();
+        }
+ 
         this.renderAsPage = function ()
         {
             var tpl = 'action_page_'+this.model.name
@@ -1124,12 +1249,13 @@ function guiActionFactory(api, action)
             {
                 tpl = 'action_page'
             }
-            debugger;
+            // debugger;
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
         }
 
-        var res = $.extend(this, basePageView, thisFactory);
+        var res = $.extend(this, basePageView, basePageItem, thisFactory);
 
+        res.init(page_options)
         return res;
     }
 

@@ -56,15 +56,19 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
 
         one_fileds.push(val)
     }
-    
-    if(name == "project")
+
+   /* if(name == "project")
     {
         //...
         one_fileds
         debugger;
     }
-
+*/
     window["api"+name] = guiItemFactory(api, {
+        bulk_name:name.toLowerCase().replace(/^One/i, ""),
+        defaultName:"name"
+    },
+    {
         view:{
             bulk_name:name.toLowerCase().replace(/^One/i, ""),
             definition:list,
@@ -102,13 +106,25 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     return window["api"+name]
 }
 
-tabSignal.connect("openapi.factory.project", function(data)
+// Исключения харкод для назвпний в апи
+tabSignal.connect("openapi.factory.owner", function(data)
 {
-    
-    // debugger;
+    apiowner.view.defaultName = "username"
 })
-     
-     
+
+// Исключения харкод для назвпний в апи
+tabSignal.connect("openapi.factory.user", function(data)
+{
+    apiowner.view.defaultName = "username"
+})
+
+// Исключения харкод для назвпний в апи
+tabSignal.connect("openapi.factory.variables", function(data)
+{
+    apiowner.view.defaultName = "key"
+})
+
+
 function openApi_definitions(api)
 {
     // Создали фабрику для всего
@@ -311,6 +327,9 @@ function openApi_get_internal_links(api, base_path, targetLevel)
  */
 function openApi_add_one_action_page_path(api, api_path, action)
 {
+    var api_path_value = api.openapi.paths[api_path]
+    api_path_value.api_path = api_path
+
     // Создали страницу
     var page = new guiPage();
 
@@ -318,16 +337,16 @@ function openApi_add_one_action_page_path(api, api_path, action)
     page.blocks.push({
         id:'actionOne',
         prioritet:10,
-        render:function(action)
+        render:function(action, api_path_value)
         {
             return function(menuInfo, data)
             {
                 // Создали список хостов
-                var pageAction = new action(data.reg)
+                var pageAction = new action({api:api_path_value, url:data.reg})
 
                 return pageAction.renderAsPage();
             }
-        }(action)
+        }(action, api_path_value)
     })
 
     // Страница элемента вложенного куда угодно
@@ -343,7 +362,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
                     }
 
                     var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке 
+                    obj.url = res[0]                 // текущий урл в блоке
                     obj.page_and_parents = res[0]    // страница+родители
 
 
@@ -367,7 +386,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
 
                         return "/?"+this.page_type;
                     }
- 
+
                     return obj
                 }
             }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+action.view.name+")$");
@@ -431,7 +450,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
                     }
 
                     var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке 
+                    obj.url = res[0]                 // текущий урл в блоке
                     obj.page_and_parents = res[0]    // страница+родители
 
 
@@ -466,7 +485,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 
                         return "/?"+this.page_and_parents;
                     }
- 
+
                     return obj
                 }
             }(page_url_regexp);
@@ -504,8 +523,8 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
                     var obj = res.groups
 
-                    obj.url = res[0]                 // текущий урл в блоке 
- 
+                    obj.url = res[0]                 // текущий урл в блоке
+
                     if(obj.page_and_parents)
                     {
                         var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
@@ -525,7 +544,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     obj.baseURL = function(){
                         return "/?"+this.page_and_parents;
                     }
- 
+
                     return obj
                 }
             }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"))
@@ -582,7 +601,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     }
 
                     var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке 
+                    obj.url = res[0]                 // текущий урл в блоке
                     obj.page_and_parents = res[0]    // страница+родители
 
 
@@ -599,9 +618,9 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     }
 
                     obj.baseURL = function(id){
- 
+
                         var url = "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
-                        
+
                         if(id)
                         {
                             url+= '/'+id
@@ -680,10 +699,10 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     {
                         return false;
                     }
-                    
+
                     var obj = res.groups
                     obj.url = res[0]                 // текущий урл в блоке
-                    
+
                     if(obj.page_and_parents)
                     {
                         var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)\/add$/)
@@ -695,11 +714,11 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                             obj.page_type = match.groups.page_type
                         }
                     }
- 
-                    obj.baseURL = function(id){ 
+
+                    obj.baseURL = function(id){
                         return "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
                     }
-                     
+
                     return obj
                 }
             }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
@@ -721,8 +740,8 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     // Создали список хостов
                     var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg, selectionTag:api_path_value.api_path+"add/"})
 
-                    var filter =  $.extend(true, data.reg) 
-                    
+                    var filter =  $.extend(true, data.reg)
+
                     filter.parent_id = undefined
                     filter.parent_type = undefined
 
@@ -737,7 +756,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     return def.promise();
                 }
             }(pageMainBlockObject, api_path_value)
-        }) 
+        })
     }
 
     // Настроили страницу списка
@@ -1060,7 +1079,7 @@ function openApi_add_page_for_adding_subitems()
                     return "/?"+this.page_and_parents;
                 }
 
-                  
+
                 return obj
             }
         }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
