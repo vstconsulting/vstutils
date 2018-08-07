@@ -6,7 +6,7 @@ function getMenuIdFromApiPath(path){
 
 function openApi_newDefinition(api, name, definitionList, definitionOne)
 {
-    name = name.toLowerCase()
+    name = name.toLowerCase().replace(/^One/i, "")
     if(window["api"+name])
     {
         return window["api"+name];
@@ -15,7 +15,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     var one = definitionOne;
     var list = definitionList;
 
-    console.log("Фабрика", name.replace(/^One/, ""));
+    console.log("Фабрика", name.replace(/^One/i, ""));
 
     if(!one)
     {
@@ -64,7 +64,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
         debugger;
     }
 */
-    window["api"+name] = new guiItemFactory(api, {
+    window["api"+name] = guiItemFactory(api, {
         bulk_name:name.toLowerCase().replace(/^One/i, ""),
         defaultName:"name"
     },
@@ -118,7 +118,7 @@ function openApi_definitions(api)
         if(/^One/.test(key))
         {
             one = api.openapi.definitions[key]
-            list = api.openapi.definitions[key.replace(/^One/, "")]
+            list = api.openapi.definitions[key.replace(/^One/i, "")]
         }
         else
         {
@@ -191,10 +191,11 @@ function getObjectBySchema(obj)
         var name = obj.match(/\/([A-z0-9]+)$/)
         if(name && name[1])
         {
-            name = window["api" + name[1].toLowerCase() ]
-            if(name)
+            let apiname = "api" + name[1].toLowerCase().replace(/^One/i, "")
+            let api_obj = window[apiname]
+            if(api_obj)
             {
-                return name;
+                return api_obj;
             }
         }
         return undefined;
@@ -213,20 +214,21 @@ function getObjectBySchema(obj)
 
             if(name && name[1])
             {
-                name = window["api" + name[1].toLowerCase() ]
-                if(name)
+                let apiname = "api" + name[1].toLowerCase().replace(/^One/i, "")
+                let api_obj = window[apiname]
+                if(api_obj)
                 {
-                    return name;
+                    return api_obj;
                 }
             }
         }
 
         if(typeof obj[i] == 'object')
         {
-            name = getObjectBySchema(obj[i])
-            if(name)
+            let api_obj = getObjectBySchema(obj[i])
+            if(api_obj)
             {
-                return name;
+                return api_obj;
             }
         }
     }
@@ -536,108 +538,110 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
 
     // Проверяем есть ли возможность создавать объекты
     if(api_path_value.post)
-    {
+    { 
         // Страница нового объекта создаваться должна на основе схемы пост запроса а не на основе схемы списка объектов.
         // parameters[0].schema.$ref
-        var pageNewObject = getObjectBySchema(api_path_value.post)
+        let pageNewObject = getObjectBySchema(api_path_value.post)
+         
         if(!pageNewObject)
         {
             debugger;
             console.error("Not valid schema, @todo")
         }
-
-        // Значит добавим кнsопку создать объект
-        page.blocks.push({
-            id:'btn-create',
-            prioritet:9,
-            render:function(pageMainBlockObject)
-            {
-                return function(menuInfo, data)
+        else
+        {
+            // Значит добавим кнsопку создать объект
+            page.blocks.push({
+                id:'btn-create',
+                prioritet:9,
+                render:function(pageMainBlockObject)
                 {
-                    var link = window.hostname+"?"+data.reg.page_and_parents+"/new";
+                    return function(menuInfo, data)
+                    {
+                        let link = window.hostname+"?"+data.reg.page_and_parents+"/new";
 
-                    var btn = new guiElements.link_button({
-                        class:'btn btn-primary',
-                        link: link,
-                        title:'Create new '+pageMainBlockObject.one.view.bulk_name,
-                        text:'Create',
-                    })
+                        let btn = new guiElements.link_button({
+                            class:'btn btn-primary',
+                            link: link,
+                            title:'Create new '+pageMainBlockObject.one.view.bulk_name,
+                            text:'Create',
+                        })
 
-                    var def = new $.Deferred();
-                    def.resolve(btn.render())
-                    return def.promise();
-                }
-            }(pageMainBlockObject)
-        })
+                        let def = new $.Deferred();
+                        def.resolve(btn.render())
+                        return def.promise();
+                    }
+                }(pageMainBlockObject)
+            })
 
-        // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
-        var new_page_url = function(regexp)
-            {
-                return function(url)
+            // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
+            var new_page_url = function(regexp)
                 {
-                    var res = guiTestUrl(regexp, url)
-                    if(!res)
+                    return function(url)
                     {
-                        return false;
-                    }
-
-                    var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_and_parents = res[0]    // страница+родители
-
-
-                    if(obj.page_and_parents)
-                    {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
-
-                        if(match && match.groups)
+                        var res = guiTestUrl(regexp, url)
+                        if(!res)
                         {
-                            obj.parent_type = match.groups.parent_type
-                            obj.parent_id = match.groups.parent_id
-                            obj.page_type = match.groups.page_type
-                        }
-                    }
-
-                    obj.baseURL = function(id){
-
-                        var url = "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
-
-                        if(id)
-                        {
-                            url+= '/'+id
+                            return false;
                         }
 
-                        return url;
+                        var obj = res.groups
+                        obj.url = res[0]                 // текущий урл в блоке
+                        obj.page_and_parents = res[0]    // страница+родители
+
+
+                        if(obj.page_and_parents)
+                        {
+                            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
+
+                            if(match && match.groups)
+                            {
+                                obj.parent_type = match.groups.parent_type
+                                obj.parent_id = match.groups.parent_id
+                                obj.page_type = match.groups.page_type
+                            }
+                        }
+
+                        obj.baseURL = function(id){
+
+                            var url = "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
+
+                            if(id)
+                            {
+                                url+= '/'+id
+                            }
+
+                            return url;
+                        }
+
+                        return obj
                     }
+                }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$")
 
-                    return obj
-                }
-            }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$")
+            // Создали страницу
+            let page_new = new guiPage();
+            page_new.registerURL([new_page_url], getMenuIdFromApiPath(api_path+"_new"));
 
-        // Создали страницу
-        var page_new = new guiPage();
-        page_new.registerURL([new_page_url], getMenuIdFromApiPath(api_path+"_new"));
-
-
-        //    debugger;
-
-        // Настроили страницу нового элемента
-        page_new.blocks.push({
-            id:'newItem',
-            prioritet:10,
-            render:function(pageNewObject, api_path_value)
-            {
-                return function(menuInfo, data)
+ 
+            // Настроили страницу нового элемента
+            page_new.blocks.push({
+                id:'newItem',
+                prioritet:10,
+                render:function(pageNewObject, api_path_value)
                 {
-                    var def = new $.Deferred();
+                    return function(menuInfo, data)
+                    {
+                        let def = new $.Deferred();
+                       
+                        let pageItem = new pageNewObject.one({api:api_path_value, url:data.reg})
+                        def.resolve(pageItem.renderAsNewPage())
 
-                    var pageItem = new pageNewObject.one({api:api_path_value, url:data.reg})
-                    def.resolve(pageItem.renderAsNewPage())
-
-                    return def.promise();
-                }
-            }(pageNewObject, api_path_value)
-        })
+                        return def.promise();
+                    }
+                }(pageNewObject, api_path_value)
+            })
+        }
+        
     }
 
     // Страница добавления под элементов
@@ -811,20 +815,20 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
     {
         operationId = api_path_value.delete.operationId
     }
-
+ 
     // Получаем класс по имени
     // Сначала путём определения соответсвия имён урла и класса
-    var pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase()]
+    var pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase().replace(/^One/i, "")]
     if(pageMainBlockObject)
     {
         var new_bulk_name = api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
         if(/_get$/.test(operationId))
         {
-            pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
+            pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1].toLowerCase().replace(/^One/i, ""), level:urlLevel, api:api_path_value, url:undefined}
         }
         if(/_list$/.test(operationId))
         {
-            pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
+            pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1].toLowerCase().replace(/^One/i, ""), level:urlLevel, api:api_path_value, url:undefined}
         }
 
         return pageMainBlockObject;
@@ -871,16 +875,11 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
         return false;
     }
 
-    pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase() ]
+    pageMainBlockObject= window["api" + pageMainBlockType[1].toLowerCase().replace(/^One/i, "") ]
     if(!pageMainBlockObject)
-    {
-        // Получаем класс по имени
-        pageMainBlockObject= window["api" + pageMainBlockType[1].replace(/^One/, "").toLowerCase() ]
-        if(!pageMainBlockObject)
-        {
-            debugger;
-            return false;
-        }
+    { 
+        debugger;
+        return false; 
     }
 
     // Если нашли соответсвие по схеме отправляемых данных то выставим правильный bulk_name
@@ -894,16 +893,16 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
     else
     {
         console.log("add new bulk_name="+new_bulk_name[1]+" to "+pageMainBlockObject.one.view.bulk_name)
-        window["api" + new_bulk_name[1] ] = pageMainBlockObject
+        window["api" + new_bulk_name[1].toLowerCase().replace(/^One/i, "") ] = pageMainBlockObject
     }
 
     if(/_get$/.test(operationId))
     {
-        pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
+        pageMainBlockObject.one.view.urls[api_path] = {name:new_bulk_name[1].toLowerCase().replace(/^One/i, ""), level:urlLevel, api:api_path_value, url:undefined}
     }
     if(/_list$/.test(operationId))
     {
-        pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1], level:urlLevel, api:api_path_value, url:undefined}
+        pageMainBlockObject.list.view.urls[api_path] = {name:new_bulk_name[1].toLowerCase().replace(/^One/i, ""), level:urlLevel, api:api_path_value, url:undefined}
     }
 
     return pageMainBlockObject;
@@ -945,7 +944,7 @@ function openApi_paths(api)
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length
 
-        var pageMainBlockObject = openApi_getPageMainBlockType(api, api_path, urlLevel)
+        let pageMainBlockObject = openApi_getPageMainBlockType(api, api_path, urlLevel)
         if(pageMainBlockObject == false)
         {
             continue;
@@ -982,7 +981,7 @@ function openApi_paths(api)
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length
 
-        var pageMainBlockObject = openApi_getPageMainBlockType(api, api_path, urlLevel)
+        let pageMainBlockObject = openApi_getPageMainBlockType(api, api_path, urlLevel)
         if(pageMainBlockObject == false)
         {
             continue;
