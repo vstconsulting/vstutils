@@ -25,11 +25,22 @@ function renderBreadcrumbs(){
         $.when.apply($, arr).done(function()
         {
             var arr_obj = []
-            for (var i = 0; i < element_name.length; i++) {
-                arr_obj.push({
-                    url: element_name[i].model.data.url,
-                    name: element_name[i].model.data[window["api" + element_name[i].model.page_name].getObjectNameFiled()]
-                })
+            //var cur_url = hostname + "/?";
+            var cur_url = []
+            for (var i = 0; i < (element_name.length * 2); i++) {
+                if ((i % 2) == 1) {
+                    cur_url.push(element_name[Math.floor(i/2)].model.data.id)
+                    arr_obj.push({
+                        url: hostname + "/?" + cur_url.join("/"),
+                        name: element_name[Math.floor(i/2)].model.data[window["api" + element_name[Math.floor(i/2)].model.page_name].getObjectNameFiled()]
+                    })
+                } else {
+                    cur_url.push(element_name[Math.floor(i/2)].model.page_name)
+                    arr_obj.push({
+                        url: hostname + "/?" + cur_url.join("/"),
+                        name: element_name[Math.floor(i/2)].model.page_name
+                    })
+                }
             }
             html = spajs.just.render("page_breadcrumb", {arr: arr_obj})
             $(".breadcrumb").insertTpl(html)
