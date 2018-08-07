@@ -180,7 +180,7 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.api = api
 
-            this.model = one.model
+            this.model = $.extend({}, one.model)
             this.model.pathInfo = undefined
 
             this.model.guiFileds = {}
@@ -311,7 +311,8 @@ function guiItemFactory(api, both_view, list, one)
             {
                 var def = new $.Deferred();
                 var data = {}
-
+                method = method.toLowerCase()
+                
                 try{
                     data = this.getValue()
                     if (this['onBefore'+method])
@@ -448,8 +449,7 @@ function guiItemFactory(api, both_view, list, one)
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_one'
-                }
-                debugger;
+                } 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
@@ -482,7 +482,7 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_one_as_filed'
                 }
-                // debugger;
+                debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
@@ -524,7 +524,7 @@ function guiItemFactory(api, both_view, list, one)
             /**
              * Используется в шаблоне страницы
              */
-            this.model = list.model
+            this.model = $.extend({}, list.model)
 
             this.model.selectedItems = {}
 
@@ -834,18 +834,9 @@ function guiItemFactory(api, both_view, list, one)
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_list'
-                }
-                thisPageObj = this
-
-                var showAddToListForm = false
-                if(this.getShortestApiURL().level == 2 && 2 < this.model.pathInfo.api_path.match(/\//g).length)
-                {
-                    // Кротчайший урл равен 2 и при этом это список и текущий урл больше 2
-                    // значит нужно показать форму добавления объектов из общего списка в этот.
-                    showAddToListForm = true
-                }
-
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {showAddToListForm:showAddToListForm}});
+                }  
+                
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
             }
 
             /**

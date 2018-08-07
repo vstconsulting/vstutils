@@ -657,6 +657,7 @@ if(!window.spajs)
 
         spajs.urlInfo = {menuInfo:menuInfo, data:data}
         tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
+        tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
         var res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
         if(res)
         {

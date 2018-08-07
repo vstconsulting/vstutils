@@ -26,7 +26,11 @@ function guiPage()
      */
     var renderOneBlock = function(block, menuInfo, data)
     {
-        var res = block.item.render(menuInfo, data);
+        wait_result(block, block.item.render(menuInfo, data)); 
+    }
+    
+    var wait_result = function(block, res)
+    { 
         if(typeof res == "string")
         {
             $(block.id).insertTpl(res)
@@ -41,13 +45,13 @@ function guiPage()
 
         $.when(res).done(function(html)
         {
-            $(block.id).insertTpl(html)
+            wait_result(block, html)
         }).fail(function(error)
         {
             thisObj.renderFail(block, error)
         })
     }
-
+    
     /**
      * Отрисовывает страницу состоящею из отдельно загружающихся блоков
      * @returns {undefined}

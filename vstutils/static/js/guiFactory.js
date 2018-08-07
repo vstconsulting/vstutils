@@ -64,7 +64,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
         debugger;
     }
 */
-    window["api"+name] = guiItemFactory(api, {
+    window["api"+name] = new guiItemFactory(api, {
         bulk_name:name.toLowerCase().replace(/^One/i, ""),
         defaultName:"name"
     },
