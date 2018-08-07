@@ -167,5 +167,6 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
         subpath_keys = [item for item in subpath.split('/') if item]
         if keys[-1] == 'get' and subpath_keys[-1] == keys[-2]:
-            keys = keys[0:-1] + ['list']
+            if getattr(view, '_'.join([keys[-2], 'list']), None) is not None:
+                keys = keys[0:-1] + ['list']
         return keys
