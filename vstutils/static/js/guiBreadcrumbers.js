@@ -16,13 +16,14 @@ function renderBreadcrumbs(){
         {
             element_name.push(result[i].type)
         } else {
-            element_name.push(new window["api" + result[i].type].one())
-            arr.push(element_name[element_name.length - 1].load(result[i].id))
+            let obj  = new window["api" + result[i].type].one();
+            element_name.push(obj)
+            arr.push(obj.load(result[i].id))
         }
     }
 
     return spajs.just.onInsert('<ol class="breadcrumb">\n</ol>', () => {
-        $.when.apply($, arr).done(function()
+        $.when.apply($, arr).done(function(test)
         {
             var arr_obj = []
             //var cur_url = hostname + "/?";
