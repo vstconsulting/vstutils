@@ -482,8 +482,8 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_one_as_filed'
                 }
-                debugger;
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+                
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.model.fileds}});
             }
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
@@ -836,7 +836,7 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_list'
                 }  
                 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:thisObj.model.fileds}});
             }
 
             /**
@@ -853,7 +853,7 @@ function guiItemFactory(api, both_view, list, one)
                 }
                 //tpl = 'entity_list'
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:thisObj.model.fileds}});
             }
             this.delete = function (){ }
 
@@ -1286,7 +1286,7 @@ function guiActionFactory(api, action)
                 tpl = 'action_page'
             }
             // debugger;
-            return spajs.just.render(tpl, {query: "", guiObj: this, opt: {}});
+            return spajs.just.render(tpl, {query: "", guiObj: this, opt: {fileds:this.model.fileds}});
         }
 
         var res = $.extend(this, basePageView, basePageItem, thisFactory);
