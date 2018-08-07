@@ -136,6 +136,21 @@ basePageView.getValue = function ()
 
 basePageItem = {}
 
+/**
+ * Функция для удобства переопределения какие поля показывать для каких случаев
+ * @param {type} type
+ * @returns {guiItemFactory.model.fileds}
+ * @note На пример функция apihistory.list.getFiledsFor_renderAsPage будет примером переопределения
+ */
+basePageItem.getFileds = function (type)
+{
+    if(this['getFiledsFor_'+type])
+    {
+        return this['getFiledsFor_'+type]()
+    }
+    return this.model.fileds
+}
+
 basePageItem.getBulkName = function ()
 {
     if(!this.model.pathInfo)
@@ -192,9 +207,9 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     filters = {api_pk:filters}
                 }
-                
+
                 var thisObj = this;
-                 
+
 
                 var query = undefined;
 
@@ -249,9 +264,9 @@ function guiItemFactory(api, both_view, list, one)
                 $.when(def).done(function(data){
                     thisObj.model.data = data.data
                     thisObj.model.status = data.status
-                     
-                    promise.resolve(data) 
-                }).fail(function(e){ 
+
+                    promise.resolve(data)
+                }).fail(function(e){
                     promise.reject(e)
                 })
 
@@ -312,7 +327,7 @@ function guiItemFactory(api, both_view, list, one)
                 var def = new $.Deferred();
                 var data = {}
                 method = method.toLowerCase()
-                
+
                 try{
                     data = this.getValue()
                     if (this['onBefore'+method])
@@ -449,8 +464,8 @@ function guiItemFactory(api, both_view, list, one)
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_one'
-                } 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+                }
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsPage')}});
             }
 
             /**
@@ -466,7 +481,7 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_new'
                 }
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {}});
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsNewPage')}});
             }
 
             /**
@@ -482,8 +497,8 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_one_as_filed'
                 }
-                
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.model.fileds}});
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsAddSubItemsPage')}});
             }
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
@@ -585,25 +600,25 @@ function guiItemFactory(api, both_view, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
- 
+
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
                         onClick:function()
-                        {  
+                        {
                             let ids = window.guiListSelections.getSelection(thisObj.model.selectionTag);
                             window.guiListSelections.unSelectAll(thisObj.model.selectionTag);
-                            
+
                             for(let i in ids)
                             {
                                 $(".item-row.item-"+ids[i]).remove()
                             }
-                            
+
                             $.when(thisObj.deleteArray(ids)).done(function(d)
                             {
-                                
+
                             }).fail(function (e)
-                            { 
+                            {
                                 polemarch.showErrors(e.responseJSON)
                                 debugger;
                             })
@@ -615,13 +630,13 @@ function guiItemFactory(api, both_view, list, one)
                     this.model.multi_actions['remove'] = {
                         name:"remove",
                         onClick:function()
-                        { 
+                        {
                             $.when(changeSubItemsInParent('DELETE', window.guiListSelections.getSelection(thisObj.model.selectionTag))).done(function()
                             {
                                 debugger;
                                 spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
                             }).fail(function (e)
-                            { 
+                            {
                                 polemarch.showErrors(e.responseJSON)
                                 debugger;
                             })
@@ -649,7 +664,7 @@ function guiItemFactory(api, both_view, list, one)
                         pk:ids[i]
                     })
                 }
- 
+
                 $.when(api.query(q)).done(function(data)
                 {
                     $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
@@ -659,7 +674,7 @@ function guiItemFactory(api, both_view, list, one)
                     def.reject(e)
                     polemarch.showErrors(e.responseJSON)
                 })
- 
+
                 return def.promise();
             }
 
@@ -679,7 +694,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 return def
             }
-            
+
             this.loadAllItems = function()
             {
                 return this.search({limit:9999, offset:0});
@@ -834,9 +849,9 @@ function guiItemFactory(api, both_view, list, one)
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_list'
-                }  
-                
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:thisObj.model.fileds}});
+                }
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsPage')}});
             }
 
             /**
@@ -853,7 +868,7 @@ function guiItemFactory(api, both_view, list, one)
                 }
                 //tpl = 'entity_list'
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:thisObj.model.fileds}});
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsAddSubItemsPage')}});
             }
             this.delete = function (){ }
 
@@ -1012,8 +1027,8 @@ function guiItemFactory(api, both_view, list, one)
     thisFactory.one.sublinks = {}
     thisFactory.list.sublinks = {}
     thisFactory.view = both_view
-    
-    var getShortestApiURL = function ()
+
+    let getShortestApiURL = function ()
     {
         var url = {};
         var level = 100;
@@ -1028,7 +1043,6 @@ function guiItemFactory(api, both_view, list, one)
 
         return url;
     }
-
     thisFactory.one.getShortestApiURL = getShortestApiURL
     thisFactory.list.getShortestApiURL = getShortestApiURL
 
@@ -1037,15 +1051,15 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    { 
+    {
         if(this.view && this.view.defaultName)
         {
             return this.view.defaultName;
         }
         return "id";
     }
-    
-    
+
+
     return thisFactory;
 }
 
@@ -1116,7 +1130,7 @@ function guiActionFactory(api, action)
         this.model.pathInfo = undefined
 
         this.init = function (page_options)
-        { 
+        {
             if(page_options)
             {
                 this.model.pathInfo = page_options.api
@@ -1135,7 +1149,7 @@ function guiActionFactory(api, action)
         {
             return this.sendToApi("PUT");
         }
- 
+
         this.sendToApi = function (method)
         {
             var def = new $.Deferred();
@@ -1155,17 +1169,17 @@ function guiActionFactory(api, action)
 
                 let value = this.validateByModel(data)
                 data = {}
-                
+
                 for(let i in value[0])
                 {
                     if(value[0][i] && value[0][i] != "")
                     {
                         data[i] = value[0][i]
                     }
-                } 
-                
-                
-                
+                }
+
+
+
                 if(!this.model.pathInfo)
                 {
                     console.error("pathInfo not define")
@@ -1173,7 +1187,7 @@ function guiActionFactory(api, action)
                     def.reject()
                     return def.promise();
                 }
-                
+
                 var query_method = ""
                 var operationId = "";
 
@@ -1203,7 +1217,7 @@ function guiActionFactory(api, action)
                 {
                     operations[i] = operations[i].replace("-", "_")
                 }
-  
+
                 var url = hostname+"/api/v2"+this.model.pathInfo.api_path
                 for(let i in this.model.pageInfo)
                 {
@@ -1212,7 +1226,7 @@ function guiActionFactory(api, action)
                         url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
                     }
                 }
-                
+
                 // Модификация на то если у нас мультиоперация
                 var query = []
                 for(let i in this.model.pageInfo)
@@ -1224,21 +1238,21 @@ function guiActionFactory(api, action)
                             let ids = this.model.pageInfo[i].split(",")
                             for(let j in ids)
                             {
-                                query.push(url.replace(this.model.pageInfo[i], ids[j])) 
+                                query.push(url.replace(this.model.pageInfo[i], ids[j]))
                             }
-                            
+
                             continue;
                         }
                     }
                 }
-                
+
                 if(query.length == 0)
                 {
                     // Модификация на то если у нас не мультиоперация
                     query = [url]
                 }
-                 
-                query.forEach(qurl =>{ 
+
+                query.forEach(qurl =>{
                     // @todo переделать на балк
                     spajs.ajax.Call({
                         url: qurl,
@@ -1264,7 +1278,7 @@ function guiActionFactory(api, action)
                         }
                     });
                 })
-                
+
             }catch (e) {
                 polemarch.showErrors(e)
 
@@ -1277,7 +1291,7 @@ function guiActionFactory(api, action)
 
             return def.promise();
         }
- 
+
         this.renderAsPage = function ()
         {
             var tpl = 'action_page_'+this.model.name
@@ -1286,7 +1300,7 @@ function guiActionFactory(api, action)
                 tpl = 'action_page'
             }
             // debugger;
-            return spajs.just.render(tpl, {query: "", guiObj: this, opt: {fileds:this.model.fileds}});
+            return spajs.just.render(tpl, {query: "", guiObj: this, opt: {fileds:this.getFileds('renderAsAddSubItemsPage')}});
         }
 
         var res = $.extend(this, basePageView, basePageItem, thisFactory);
@@ -1403,14 +1417,14 @@ function goToMultiActionFromElements(elements, action)
 }
 
 function addToParentsAndGoUp(item_ids)
-{ 
+{
     return $.when(changeSubItemsInParent('POST', item_ids)).done(function (data)
-    { 
+    {
         spajs.openURL(window.hostname + spajs.urlInfo.data.reg.baseURL());
     }).fail(function (e)
-    { 
+    {
         polemarch.showErrors(e.responseJSON)
-    }).promise(); 
+    }).promise();
 }
 
 /**
@@ -1462,7 +1476,7 @@ function changeSubItemsInParent(action, item_ids)
     //  @todo отправка запроса чего то не работает. Надо сергея спросить.
     let query = []
     for(let i in item_ids)
-    { 
+    {
         query.push({
             type: "mod",
             item: parent_id,
@@ -1473,9 +1487,9 @@ function changeSubItemsInParent(action, item_ids)
             method:action
         })
     }
-     
+
     return api.query(query)
-    
+
         /*
     spajs.ajax.Call({
         url: url,
