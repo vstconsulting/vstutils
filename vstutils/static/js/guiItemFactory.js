@@ -145,7 +145,7 @@ basePageItem = {}
 basePageItem.getFileds = function (type)
 {
     if(this['getFiledsFor_'+type])
-    {
+    { 
         return this['getFiledsFor_'+type]()
     }
     return this.model.fileds
@@ -517,7 +517,7 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_new'
                 }
-
+                debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsNewPage')}});
             }
 
@@ -540,8 +540,7 @@ function guiItemFactory(api, both_view, list, one)
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
             var res = $.extend(this, basePageItem, basePageView, thisFactory.one);
-
-
+           
             res.parent = thisFactory
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
