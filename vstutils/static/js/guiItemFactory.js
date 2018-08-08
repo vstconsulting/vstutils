@@ -145,8 +145,7 @@ basePageItem = {}
 basePageItem.getFileds = function (type)
 {
     if(this['getFiledsFor_'+type])
-    {
-        debugger;
+    { 
         return this['getFiledsFor_'+type]()
     }
     return this.model.fileds
