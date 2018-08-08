@@ -17,7 +17,7 @@ var guiElements = {
  */
 guiElements.link_button = function(opt)
 {
-    this.render = function()
+    this.render = function(render_options = {})
     {
         if(!opt)
         {
@@ -29,7 +29,8 @@ guiElements.link_button = function(opt)
             opt.onclick = "return spajs.openURL(this.href);"
         }
 
-        return spajs.just.render("guiElements.link_button", {opt:opt, guiElement:this});
+        let options = $.extend({}, opt, render_options)
+        return spajs.just.render("guiElements.link_button", {opt:options, guiElement:this});
     }
 }
 
@@ -37,14 +38,21 @@ guiElements.link_button = function(opt)
 guiElements.string = function(opt, value)
 {
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function()
+    this.render = function(render_options = {})
     {
         if(!opt)
         {
             opt = {}
         }
 
-        return spajs.just.render("guiElements.string", {opt:opt, guiElement:this, value:value});
+        let options = $.extend({}, opt, render_options)
+         
+        if(options.hideReadOnly && opt.readOnly)
+        { 
+            return "";
+        }      
+        
+        return spajs.just.render("guiElements.string", {opt:options, guiElement:this, value:value});
     }
 
     this.getValue = function()
@@ -56,16 +64,17 @@ guiElements.string = function(opt, value)
 guiElements.button = function(opt)
 {
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function()
+    this.render = function(render_options = {})
     {
         if(!opt)
         {
             opt = {}
         }
 
+        let options = $.extend({}, opt, render_options)
         var thisObj = this;
 
-        return spajs.just.render("guiElements.button", {opt:opt, guiElement:this}, function(){
+        return spajs.just.render("guiElements.button", {opt:options, guiElement:this}, function(){
             $('#'+thisObj.element_id).on('click', false, opt.onclick)
         });
     }
@@ -74,14 +83,16 @@ guiElements.button = function(opt)
 guiElements.enum = function(opt, value)
 {
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function()
+    this.render = function(render_options = {})
     {
         if(!opt)
         {
             opt = {}
         }
         
-        return spajs.just.render("guiElements.enum", {opt:opt, guiElement:this, value:value});
+        let options = $.extend({}, opt, render_options)
+        
+        return spajs.just.render("guiElements.enum", {opt:options, guiElement:this, value:value});
     }
     
     this.getValue = function()

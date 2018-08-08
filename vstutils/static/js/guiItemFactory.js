@@ -55,7 +55,7 @@ basePageView.validateByModel = function (values)
  * @param {object} filed
  * @returns {html}
  */
-basePageView.renderFiled = function(filed)
+basePageView.renderFiled = function(filed, render_options)
 {
     if(!this.model.guiFileds[filed.name])
     {
@@ -120,7 +120,7 @@ basePageView.renderFiled = function(filed)
         }
     }
 
-    return this.model.guiFileds[filed.name].render()
+    return this.model.guiFileds[filed.name].render($.extend({}, render_options))
 }
 
 basePageView.getValue = function ()
@@ -145,7 +145,7 @@ basePageItem = {}
 basePageItem.getFileds = function (type)
 {
     if(this['getFiledsFor_'+type])
-    { 
+    {
         return this['getFiledsFor_'+type]()
     }
     return this.model.fileds
@@ -494,7 +494,7 @@ function guiItemFactory(api, both_view, list, one)
              * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.renderAsPage = function ()
+            this.renderAsPage = function (render_options = {})
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_one'
@@ -502,14 +502,17 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_one'
                 }
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsPage')}});
+                render_options.fileds = this.getFileds('renderAsPage')
+                render_options.sections = this.getSections('renderAsPage')
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
             }
 
             /**
              * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.renderAsNewPage = function ()
+            this.renderAsNewPage = function (render_options = {})
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_new'
@@ -517,8 +520,12 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_new'
                 }
-                debugger;
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsNewPage')}});
+
+                render_options.fileds = this.getFileds('renderAsNewPage')
+                render_options.sections = this.getSections('renderAsNewPage')
+                render_options.hideReadOnly = true
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
             }
 
             /**
@@ -526,7 +533,7 @@ function guiItemFactory(api, both_view, list, one)
              * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.render = function ()
+            this.render = function (render_options = {})
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_one_as_filed'
@@ -535,12 +542,20 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_one_as_filed'
                 }
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsAddSubItemsPage')}});
+                if(render_options.hideReadOnly)
+                {
+                    return "";
+                }
+
+                render_options.fileds = this.getFileds('renderAsAddSubItemsPage')
+                render_options.sections = this.getSections('renderAsAddSubItemsPage')
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
             }
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
             var res = $.extend(this, basePageItem, basePageView, thisFactory.one);
-           
+
             res.parent = thisFactory
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
@@ -878,7 +893,7 @@ function guiItemFactory(api, both_view, list, one)
              * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.renderAsPage = function ()
+            this.renderAsPage = function (render_options = {})
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_list'
@@ -887,14 +902,17 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_list'
                 }
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsPage')}});
+                render_options.fileds = this.getFileds('renderAsPage')
+                render_options.sections = this.getSections('renderAsPage')
+
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
             }
 
             /**
              * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
              * @returns {string|promise}
              */
-            this.renderAsAddSubItemsPage = function ()
+            this.renderAsAddSubItemsPage = function (render_options = {})
             {
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_list_add_subitems'
@@ -903,8 +921,10 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_list_add_subitems'
                 }
                 //tpl = 'entity_list'
+                render_options.fileds = this.getFileds('renderAsAddSubItemsPage')
+                render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: {fileds:this.getFileds('renderAsAddSubItemsPage')}});
+                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
             }
             this.delete = function (){ }
 
@@ -1081,6 +1101,44 @@ function guiItemFactory(api, both_view, list, one)
     }
     thisFactory.one.getShortestApiURL = getShortestApiURL
     thisFactory.list.getShortestApiURL = getShortestApiURL
+
+    /**
+     * Для добавления дополнительных блоков на страницу
+     * @param {type} type
+     * @param {type} section
+     * @returns {undefined}
+     */
+    let addSection = function (type, section)
+    {
+        if(!this.view['sections_for_'+type])
+        {
+            this.view['sections_for_'+type] = []
+        }
+
+        this.view['sections_for_'+type].push(section)
+    }
+
+    thisFactory.one.addSection = addSection
+    thisFactory.list.addSection = addSection
+
+    let getSections = function (type)
+    {
+        if(this.view['sections_for_'+type])
+        {
+            return this.view['sections_for_'+type]
+        }
+
+        if(this.view.sections)
+        {
+            return this.view.sections
+        }
+
+        return []
+    }
+    thisFactory.one.getSections = getSections
+    thisFactory.list.getSections = getSections
+
+
 
     /**
      * Вернёт имя поля которое выполняет роль поля name у этого объекта
@@ -1328,7 +1386,7 @@ function guiActionFactory(api, action)
             return def.promise();
         }
 
-        this.renderAsPage = function ()
+        this.renderAsPage = function (render_options = {})
         {
             var tpl = 'action_page_'+this.model.name
             if (!spajs.just.isTplExists(tpl))
@@ -1336,7 +1394,10 @@ function guiActionFactory(api, action)
                 tpl = 'action_page'
             }
             // debugger;
-            return spajs.just.render(tpl, {query: "", guiObj: this, opt: {fileds:this.getFileds('renderAsAddSubItemsPage')}});
+            render_options.fileds = this.getFileds('renderAsPage')
+            render_options.sections = this.getSections('renderAsPage') 
+
+            return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
         }
 
         var res = $.extend(this, basePageView, basePageItem, thisFactory);
@@ -1345,6 +1406,38 @@ function guiActionFactory(api, action)
         return res;
     }
 
+    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены
+    thisFactory.getSections = function (type)
+    {
+        if(this.view['sections_for_'+type])
+        {
+            return this.view['sections_for_'+type]
+        }
+
+        if(this.view.sections)
+        {
+            return this.view.sections
+        }
+
+        return []
+    }
+    
+    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены
+    thisFactory.getSections = function (type)
+    {
+        if(this.view['sections_for_'+type])
+        {
+            return this.view['sections_for_'+type]
+        }
+
+        if(this.view.sections)
+        {
+            return this.view.sections
+        }
+
+        return []
+    }
+    
     thisFactory.api = api
 
     thisFactory.view = action
