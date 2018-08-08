@@ -91,7 +91,7 @@ function guiApi()
             clearTimeout(query_data.timeOutId)
         }
 
-        var data_index = query_data.data.length
+        let data_index = query_data.data.length
         
         if($.isArray(data))
         {
@@ -109,10 +109,8 @@ function guiApi()
 
         query_data.timeOutId = setTimeout(real_query, 100, query_data)
 
-        $.when(query_data.def).done(function(data)
-        {
-
-            var val = data[data_index];
+        $.when(query_data.def).done(data => {
+            let val = data[data_index];
 
 
             if(val.status >= 200 && val.status < 400)

@@ -451,7 +451,44 @@ function guiItemFactory(api, both_view, list, one)
                 return def.promise();
             }
 
-            this.copy   = function (){ }
+            this.copy   = function ()
+            {
+                var def = new $.Deferred();
+                var thisObj = this;
+
+                $.when(this.load(this.model.data.id)).done(function ()
+                {
+                    var data = thisObj.model.items[item_id];
+                    delete data.id;
+                    data.name = "copy from " + data.name
+
+                    $.when(encryptedCopyModal.replace(data)).done(function (data)
+                    {
+                        spajs.ajax.Call({
+                            url: hostname + "/api/v2/" + thisObj.model.name + "/",
+                            type: "POST",
+                            contentType: 'application/json',
+                            data: JSON.stringify(data),
+                            success: function (data)
+                            {
+                                thisObj.model.items[data.id] = data
+                                def.resolve(data.id)
+                            },
+                            error: function (e)
+                            {
+                                def.reject(e)
+                            }
+                        });
+                    }).fail(function (e)
+                    {
+                        def.reject(e)
+                    })
+                }).fail(function () {
+                    def.reject(e)
+                })
+
+                return def.promise();
+            }
 
             /**
              * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
