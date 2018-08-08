@@ -1406,7 +1406,7 @@ function guiActionFactory(api, action)
         return res;
     }
 
-    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены
+    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены.
     thisFactory.getSections = function (type)
     {
         if(this.view['sections_for_'+type])
@@ -1422,7 +1422,7 @@ function guiActionFactory(api, action)
         return []
     }
     
-    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены
+    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены.
     thisFactory.getSections = function (type)
     {
         if(this.view['sections_for_'+type])
