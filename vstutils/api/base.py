@@ -2,7 +2,7 @@ import sys
 import logging
 import traceback
 from collections import namedtuple
-
+from copy import deepcopy
 import six
 from django.conf import settings
 from django.core import exceptions as djexcs
@@ -12,6 +12,7 @@ from django.db import transaction
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
+from rest_framework.decorators import action
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
 from .serializers import (
@@ -144,8 +145,12 @@ class QuerySetMixin(rvs.APIView):
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     # lookup_field = 'id'
-    serializer_class_one = None
+    _serializer_class_one = None
     model = None
+
+    @classproperty
+    def serializer_class_one(self):
+        return self._serializer_class_one or self.serializer_class
 
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
@@ -332,12 +337,40 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         return super(GenericViewSet, cls).as_view(actions, **initkwargs)
 
 
+class CopyMixin(GenericViewSet):
+    copy_prefix = 'copy-'
+    copy_field_name = 'name'
+    copy_related = []
+
+    def copy_instance(self, instance):
+        new_instance = deepcopy(instance)
+        new_instance.pk = None
+        name = getattr(instance, self.copy_field_name, None)
+        if isinstance(name, (six.string_types, six.text_type)):
+            name = '{}{}'.format(self.copy_prefix, name)
+        setattr(new_instance, self.copy_field_name, name)
+        new_instance.save()
+        for related_name in self.copy_related:
+            new_related_manager = getattr(new_instance, related_name, None)
+            if new_related_manager is not None:
+                new_related_manager.set(getattr(instance, related_name).all())
+        return new_instance
+
+    @action(methods=['post'], detail=True)
+    @transaction.atomic()
+    def copy(self, request, **kwargs):
+        # pylint: disable=unused-argument
+        instance = self.copy_instance(self.get_object())
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED).resp
+
+
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
     '''
     API endpoint thats operates models objects.
     '''
-
-    # lookup_field = 'id'
 
     def create(self, request, *args, **kwargs):
         '''
