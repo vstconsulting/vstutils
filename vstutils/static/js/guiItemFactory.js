@@ -428,11 +428,27 @@ function guiItemFactory(api, both_view, list, one)
                     }
 
                     var thisObj = this;
-                    $.when(api.query({
-                                        type: "del",
-                                        item: this.getBulkName(),
-                                        pk:this.model.data.id
-                                    })
+                    var current_url = thisObj.model.pageInfo.page_and_parents;
+                    var query ={};
+                    if ((current_url.match(/\//g) || []).length > 1) {
+                        var re = /(?<parent>\w+(?=\/))\/(?<pk>\d+(?=\/))\/(?<suburl>.*)/g;
+                        let result = re.exec(current_url)
+                        query = {
+                            type: "mod",
+                            item: result.groups.parent,
+                            data: {},
+                            pk: result.groups.pk,
+                            data_type: result.groups.suburl,
+                            method: "DELETE"
+                        }
+                    } else {
+                        query = {
+                            type: "del",
+                            item: this.getBulkName(),
+                            pk:this.model.data.id
+                        }
+                    }
+                    $.when(api.query(query)
                         ).done(function (data)
                         {
                             $.notify(""+thisObj.view.bulk_name+" were successfully deleted", "success");
@@ -458,20 +474,19 @@ function guiItemFactory(api, both_view, list, one)
 
                 $.when(this.load(this.model.data.id)).done(function ()
                 {
-                    var data = thisObj.model.items[item_id];
+                    var data = jQuery.extend(true, {}, thisObj.model.data);
                     delete data.id;
                     data.name = "copy from " + data.name
 
                     $.when(encryptedCopyModal.replace(data)).done(function (data)
                     {
                         spajs.ajax.Call({
-                            url: hostname + "/api/v2/" + thisObj.model.name + "/",
+                            url: hostname + "/api/v2/" + thisObj.model.page_name + "/",
                             type: "POST",
                             contentType: 'application/json',
                             data: JSON.stringify(data),
                             success: function (data)
                             {
-                                thisObj.model.items[data.id] = data
                                 def.resolve(data.id)
                             },
                             error: function (e)
@@ -1090,7 +1105,8 @@ function guiItemFactory(api, both_view, list, one)
     {
         if(this.view && this.view.defaultName)
         {
-            return this.view.defaultName;
+            var def_name = this.view.defaultName
+            return def_name;
         }
         return "id";
     }
@@ -1418,8 +1434,8 @@ function deleteAndGoUp(obj)
 {
     var def = obj.delete();
     $.when(def).done(function(){
-        debugger;
-        spajs.openURL(spajs.urlInfo.data.reg.baseURL());
+        var upper_url = spajs.urlInfo.data.reg.baseURL().replace(/\/\d+$/g, '');
+        spajs.openURL(upper_url);
     })
 
     return def;
@@ -1515,7 +1531,6 @@ function changeSubItemsInParent(action, item_ids)
     {
         query.push({
             type: "mod",
-            item: parent_id,
             data_type:item_type,
             item:parent_type,
             data:{id:item_ids[i]/1},

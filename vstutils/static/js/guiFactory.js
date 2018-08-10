@@ -66,7 +66,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
 */
     window["api"+name] = guiItemFactory(api, {
         bulk_name:name.toLowerCase().replace(/^One/i, ""),
-        defaultName:"name"
+       // defaultName:"name"
     },
     {
         view:{

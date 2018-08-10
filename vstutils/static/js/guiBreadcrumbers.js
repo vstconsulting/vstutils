@@ -26,14 +26,16 @@ function renderBreadcrumbs(){
         $.when.apply($, arr).done(function(test)
         {
             var arr_obj = []
-            //var cur_url = hostname + "/?";
             var cur_url = []
             for (var i = 0; i < (element_name.length * 2); i++) {
                 if ((i % 2) == 1) {
                     cur_url.push(element_name[Math.floor(i/2)].model.data.id)
+                    let element_data = element_name[Math.floor(i/2)].model.data
+                    let model_name = window["api" + element_name[Math.floor(i/2)].model.page_name]
+                    let cur_name = element_data[model_name.getObjectNameFiled()]
                     arr_obj.push({
                         url: hostname + "/?" + cur_url.join("/"),
-                        name: element_name[Math.floor(i/2)].model.data[window["api" + element_name[Math.floor(i/2)].model.page_name].getObjectNameFiled()]
+                        name: cur_name
                     })
                 } else {
                     cur_url.push(element_name[Math.floor(i/2)].model.page_name)
