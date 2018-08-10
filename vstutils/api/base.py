@@ -206,26 +206,56 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         serializer = self.get_route_serializer(serializer_class, instance)
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
-        serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
-        if not self.nested_allow_append:
-            serializer.is_valid(raise_exception=True)
-            obj = queryset.create(**serializer.validated_data)
-            return self.get_route_serializer(serializer_class, obj, **kwargs)
-        try:
-            obj = queryset.model.objects.get(
-                **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
-            )
-            if self.nested_view_object is not None:
-                self.nested_view_object.action = 'create'
+    def _check_permission_obj(self, objects):
+        if self.nested_view_object is not None:
+            self.nested_view_object.action = 'create'
+            for obj in objects:
                 self.nested_view_object.check_object_permissions(self.request, obj)
+
+    def _validate_nested(self, serializer_class, data, **kwargs):
+        serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
+        serializer.is_valid(raise_exception=True)
+        return serializer
+
+    def _add_or_create_nested_one(self, queryset, data, serializer_class, **kwargs):
+        filter_arg = kwargs.pop('filter_arg', self.nested_append_arg)
+        if not self.nested_allow_append:
+            obj = queryset.create(
+                **self._validate_nested(serializer_class, data, **kwargs).validated_data
+            )
+            return obj
+        try:
+            objects = queryset.model.objects.filter(
+                **{filter_arg: data.get(self.nested_append_arg, None)}
+            )
+            obj = objects.get()
+            self._check_permission_obj(objects)
         except exceptions.PermissionDenied:  # nocv
             raise
         except djexcs.ObjectDoesNotExist:
-            serializer.is_valid(raise_exception=True)
-            obj = queryset.create(**serializer.validated_data)
+            obj = queryset.create(
+                **self._validate_nested(serializer_class, data, **kwargs).validated_data
+            )
         queryset.add(obj)
-        return self.get_route_serializer(serializer_class, obj, **kwargs)
+        return obj
+
+    def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
+        many = isinstance(data, (list, tuple))
+        filter_arg = self.nested_append_arg
+        args = [serializer_class]
+        if many:
+            filter_arg += '__in'
+            objects = queryset.model.objects.filter(**{
+                filter_arg: [i.get(self.nested_append_arg) for i in data]
+            })
+            self._check_permission_obj(objects)
+            queryset.add(*objects)
+            args.append(objects)
+        else:
+            args.append(self._add_or_create_nested_one(
+                queryset, data, serializer_class, filter_arg=filter_arg, **kwargs
+            ))
+        return self.get_route_serializer(*args, many=many, **kwargs)
 
     def create_route_instance(self, queryset, request, serializer_class):
         serializer = self._add_or_create_nested(queryset, request.data, serializer_class)

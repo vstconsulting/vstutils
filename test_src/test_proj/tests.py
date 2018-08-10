@@ -71,6 +71,24 @@ class ProjectTestCase(BaseTestCase):
             name='ba'
         )
 
+    def test_insert_into(self):
+        size = 10
+        bulk_data = [
+            self.get_bulk('hosts', dict(name='main'), 'add'),
+        ]
+        bulk_data += [
+            self.get_bulk('subhosts', dict(name='slave-{}'.format(i)), 'add')
+            for i in range(size)
+        ]
+        bulk_data += [
+            self.get_mod_bulk('hosts', '<0[data][id]>', [
+                '<{}[data]>'.format(i+1) for i in range(size)
+            ], 'shost'),
+            self.get_mod_bulk('hosts', '<0[data][id]>', {}, 'shost', method='get'),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[-1]['data']['count'], size)
+
     def test_hierarchy(self):
         Host.objects.all().delete()
         HostGroup.objects.all().delete()

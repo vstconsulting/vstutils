@@ -2,10 +2,12 @@
 from __future__ import unicode_literals
 import os
 import sys
+import json
 import time
 import tempfile
 import logging
 import traceback
+import collections
 import six
 from django.conf import settings
 from django.template import loader
@@ -54,6 +56,17 @@ def get_render(name, data, trans='en'):
     result = config.render(data).replace('\r', '')
     translation.deactivate()
     return result
+
+
+class Dict(collections.OrderedDict):
+    def __repr__(self):  # nocv
+        return self.__str__()
+
+    def __str__(self):  # nocv
+        return self.__unicode__()
+
+    def __unicode__(self):  # nocv
+        return json.dumps(self)
 
 
 class tmp_file(object):
