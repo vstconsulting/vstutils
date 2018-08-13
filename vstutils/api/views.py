@@ -220,6 +220,7 @@ class BulkViewSet(base.rvs.APIView):
             if item == '__init__' and isinstance(data_type, (list, type)) and data_type:
                 operation['item'] = data_type[0]
                 operation['data_type'] = operation['data_type'][1:]
+                operation.pop('pk', None)
             self._check_type(op_type, operation.get("item", None))
             result = self.perform(operation)
             if allow_fail and result['status'] >= 300:
