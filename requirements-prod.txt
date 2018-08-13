@@ -1,3 +1,5 @@
 # Packages needed for delayed jobs.
 PyMySQL
 python-memcached
+# Advanced cache support
+django-redis==4.9.0

@@ -265,29 +265,43 @@ DATABASES = {
 # Cache settings.
 # Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#caches
 ##############################################################
-try:
-    __CACHE_DEFAULT_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('cache')}
-    if not __CACHE_DEFAULT_SETTINGS: raise NoSectionError('cache')
-except NoSectionError:
-    __CACHE_DEFAULT_SETTINGS = {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/{}_django_cache{}'.format(VST_PROJECT, sys.version_info[0]),
-    }
-
-try:
-    __CACHE_LOCKS_SETTINGS = {k.upper():v.format(**KWARGS) for k, v in config.items('locks')}
-    if not __CACHE_LOCKS_SETTINGS: raise NoSectionError('locks')
-except NoSectionError:
-    __CACHE_LOCKS_SETTINGS = {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/{}_django_locks{}'.format(VST_PROJECT, sys.version_info[0]),
-    }
-
+__CACHE_DEFAULT_SETTINGS = {
+    'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    'LOCATION': (
+        '/tmp/{}_django_cache{}'.format(VST_PROJECT, sys.version_info[0])
+    ),
+}
+def get_cache_settings(cache_name, excluded_args=None, default=None):
+    default = default or __CACHE_DEFAULT_SETTINGS
+    excluded_args = excluded_args or []
+    CACHE_DEFAULT_SETTINGS = {}
+    try:
+        CACHE_DEFAULT_SETTINGS = {
+            k.upper(): v.format(**KWARGS)
+            for k, v in config.items(cache_name)
+            if k not in excluded_args
+        }
+        if not CACHE_DEFAULT_SETTINGS:
+            raise NoSectionError(cache_name)
+    except NoSectionError:
+        CACHE_DEFAULT_SETTINGS = default
+    finally:
+        return CACHE_DEFAULT_SETTINGS
 
 CACHES = {
-    'default': __CACHE_DEFAULT_SETTINGS,
-    "locks": __CACHE_LOCKS_SETTINGS
+    'default': get_cache_settings('cache'),
+    "locks": get_cache_settings('locks'),
+    "session": get_cache_settings(
+        'session', 'timeout', default=get_cache_settings('cache')
+    ),
 }
+
+
+# Sessions settings
+# https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
+SESSION_COOKIE_AGE = config.getint("session", "timeout", fallback=1209600)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS = 'session'
 
 
 # E-Mail settings
@@ -514,3 +528,7 @@ if "test" in sys.argv:
     CONTACT = dict(
         some_extra_url='https://pypi.org/project/vstutils/', **CONTACT
     )
+    CACHES = {
+        name: {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
+        for name in CACHES
+    }
