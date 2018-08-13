@@ -154,6 +154,8 @@ class BulkViewSet(base.rvs.APIView):
         if pk is not None:
             url += "{}/".format(self._get_obj_with_extra(pk))
         if data_type is not None:
+            if isinstance(data_type, (list, tuple)):
+                data_type = '/'.join(data_type)
             url += "{}/".format(self._get_obj_with_extra(data_type))
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
@@ -212,6 +214,11 @@ class BulkViewSet(base.rvs.APIView):
     def operate_handler(self, operation, allow_fail=True):
         try:
             op_type = operation.get("type")
+            data_type = operation.get('data_type', None)
+            item = operation.get("item", None)
+            if item == '__init__' and isinstance(data_type, (list, type)) and data_type:
+                operation['item'] = data_type[0]
+                operation['data_type'] = operation['data_type'][1:]
             self._check_type(op_type, operation.get("item", None))
             result = self.perform(operation)
             if allow_fail and result['status'] >= 300:
