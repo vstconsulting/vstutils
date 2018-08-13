@@ -350,9 +350,9 @@ class VSTUtilsTestCase(BaseTestCase):
             {'type': 'get', 'item': 'users',
              'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
             },
-            # Check `__init__` mod
-            {'type': 'mod', 'item':"__init__", "method": "get",
-             'data_type': ["settings", "system"]}
+            # Check `__init__` mod as default
+            {"method": "get", 'data_type': ["settings", "system"]},
+            {"method": "get", 'data_type': ["users", self.user.id]},
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
@@ -372,6 +372,8 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[5]['data']['count'], len(users_id)-1)
         self.assertEqual(result[6]['status'], 200)
         self.assertEqual(result[6]['data']['PY'], settings.PY_VER)
+        self.assertEqual(result[7]['status'], 200)
+        self.assertEqual(result[7]['data']['id'], self.user.id)
 
         bulk_request_data = [
             # Check unsupported media type
