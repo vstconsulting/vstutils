@@ -11,6 +11,16 @@ class ProjectTestCase(BaseTestCase):
         self.predefined_hosts_cnt = 10
         for i in range(self.predefined_hosts_cnt):
             Host.objects.create(name='test_{}'.format(i))
+        self.objects_bulk_data = [
+            self.get_bulk('hosts', dict(name='a'), 'add'),
+            self.get_mod_bulk('hosts', '<0[data][id]>', dict(name='b'), 'subgroups'),
+            self.get_mod_bulk('hosts', '<1[data][id]>', dict(name='c'), 'subgroups'),
+            self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='d'), 'subgroups'),
+            self.get_mod_bulk('hosts', '<0[data][id]>', dict(name='aa'), 'hosts'),
+            self.get_mod_bulk('hosts', '<1[data][id]>', dict(name='ba'), 'hosts'),
+            self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='ca'), 'hosts'),
+            self.get_mod_bulk('hosts', '<3[data][id]>', dict(name='da'), 'hosts'),
+        ]
 
     def test_models(self):
         self.assertEqual(Host.objects.all().count(), self.predefined_hosts_cnt)
@@ -28,19 +38,61 @@ class ProjectTestCase(BaseTestCase):
         for key, value in kwargs.items():
             self.assertEqual(result.get(key, None), value, result)
 
+    def test_objects_copy(self):
+        Host.objects.all().delete()
+        HostGroup.objects.all().delete()
+        bulk_data = list(self.objects_bulk_data)
+        bulk_data.append(
+            self.get_mod_bulk('hosts', '<1[data][id]>', {'name': 'copied'}, 'copy')
+        )
+        bulk_data.append(
+            self.get_mod_bulk('hosts', '<1[data][id]>', {}, 'copy')
+        )
+        results = self.make_bulk(bulk_data)
+        self.assertNotEqual(results[-2]['data']['id'], results[1]['data']['id'])
+        self.assertEqual(results[-2]['data']['name'], 'copied')
+        self.assertNotEqual(results[-1]['data']['id'], results[1]['data']['id'])
+        self.assertEqual(
+            results[-1]['data']['name'], 'copy-{}'.format(results[1]['data']['name'])
+        )
+        self._check_subhost(
+            results[0]['data']['id'],
+            ('subgroups', results[-1]['data']['id']),
+            name='copy-b'
+        )
+        self._check_subhost(
+            results[0]['data']['id'],
+            ('subgroups', results[-2]['data']['id']),
+            name='copied'
+        )
+        self._check_subhost(
+            results[-1]['data']['id'],
+            ('hosts', results[5]['data']['id']),
+            name='ba'
+        )
+
+    def test_insert_into(self):
+        size = 10
+        bulk_data = [
+            self.get_bulk('hosts', dict(name='main'), 'add'),
+        ]
+        bulk_data += [
+            self.get_bulk('subhosts', dict(name='slave-{}'.format(i)), 'add')
+            for i in range(size)
+        ]
+        bulk_data += [
+            self.get_mod_bulk('hosts', '<0[data][id]>', [
+                '<{}[data]>'.format(i+1) for i in range(size)
+            ], 'shost'),
+            self.get_mod_bulk('hosts', '<0[data][id]>', {}, 'shost', method='get'),
+        ]
+        results = self.make_bulk(bulk_data)
+        self.assertEqual(results[-1]['data']['count'], size)
+
     def test_hierarchy(self):
         Host.objects.all().delete()
         HostGroup.objects.all().delete()
-        bulk_data = [
-            self.get_bulk('hosts', dict(name='a'), 'add'),
-            self.get_mod_bulk('hosts', '<0[data][id]>', dict(name='b'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<1[data][id]>', dict(name='c'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='d'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<0[data][id]>', dict(name='aa'), 'hosts'),
-            self.get_mod_bulk('hosts', '<1[data][id]>', dict(name='ba'), 'hosts'),
-            self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='ca'), 'hosts'),
-            self.get_mod_bulk('hosts', '<3[data][id]>', dict(name='da'), 'hosts'),
-        ]
+        bulk_data = list(self.objects_bulk_data)
         results = self.make_bulk(bulk_data)
         for result in results:
             self.assertEqual(result['status'], 201, result)

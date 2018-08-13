@@ -100,13 +100,17 @@ class OneUserSerializer(UserSerializer):
                             'date_joined',)
 
 
-class DataSerializer(serializers.Serializer):
+class EmptySerializer(serializers.Serializer):
 
     def create(self, validated_data):  # nocv
         return validated_data
 
     def update(self, instance, validated_data):  # nocv
         return instance
+
+
+
+class DataSerializer(EmptySerializer):
 
     def to_internal_value(self, data):  # nocv
         return (

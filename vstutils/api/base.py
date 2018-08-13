@@ -2,7 +2,7 @@ import sys
 import logging
 import traceback
 from collections import namedtuple
-
+from copy import deepcopy
 import six
 from django.conf import settings
 from django.core import exceptions as djexcs
@@ -12,6 +12,7 @@ from django.db import transaction
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
+from rest_framework.decorators import action
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
 from .serializers import (
@@ -144,8 +145,12 @@ class QuerySetMixin(rvs.APIView):
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     # lookup_field = 'id'
-    serializer_class_one = None
+    _serializer_class_one = None
     model = None
+
+    @classproperty
+    def serializer_class_one(self):
+        return self._serializer_class_one or self.serializer_class
 
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
@@ -201,26 +206,56 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         serializer = self.get_route_serializer(serializer_class, instance)
         return Response(serializer.data, status.HTTP_200_OK).resp
 
-    def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
-        serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
-        if not self.nested_allow_append:
-            serializer.is_valid(raise_exception=True)
-            obj = queryset.create(**serializer.validated_data)
-            return self.get_route_serializer(serializer_class, obj, **kwargs)
-        try:
-            obj = queryset.model.objects.get(
-                **{self.nested_append_arg: data.get(self.nested_append_arg, None)}
-            )
-            if self.nested_view_object is not None:
-                self.nested_view_object.action = 'create'
+    def _check_permission_obj(self, objects):
+        if self.nested_view_object is not None:
+            self.nested_view_object.action = 'create'
+            for obj in objects:
                 self.nested_view_object.check_object_permissions(self.request, obj)
+
+    def _validate_nested(self, serializer_class, data, **kwargs):
+        serializer = self.get_route_serializer(serializer_class, data=data, **kwargs)
+        serializer.is_valid(raise_exception=True)
+        return serializer
+
+    def _add_or_create_nested_one(self, queryset, data, serializer_class, **kwargs):
+        filter_arg = kwargs.pop('filter_arg', self.nested_append_arg)
+        if not self.nested_allow_append:
+            obj = queryset.create(
+                **self._validate_nested(serializer_class, data, **kwargs).validated_data
+            )
+            return obj
+        try:
+            objects = queryset.model.objects.filter(
+                **{filter_arg: data.get(self.nested_append_arg, None)}
+            )
+            obj = objects.get()
+            self._check_permission_obj(objects)
         except exceptions.PermissionDenied:  # nocv
             raise
         except djexcs.ObjectDoesNotExist:
-            serializer.is_valid(raise_exception=True)
-            obj = queryset.create(**serializer.validated_data)
+            obj = queryset.create(
+                **self._validate_nested(serializer_class, data, **kwargs).validated_data
+            )
         queryset.add(obj)
-        return self.get_route_serializer(serializer_class, obj, **kwargs)
+        return obj
+
+    def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
+        many = isinstance(data, (list, tuple))
+        filter_arg = self.nested_append_arg
+        args = [serializer_class]
+        if many:
+            filter_arg += '__in'
+            objects = queryset.model.objects.filter(**{
+                filter_arg: [i.get(self.nested_append_arg) for i in data]
+            })
+            self._check_permission_obj(objects)
+            queryset.add(*objects)
+            args.append(objects)
+        else:
+            args.append(self._add_or_create_nested_one(
+                queryset, data, serializer_class, filter_arg=filter_arg, **kwargs
+            ))
+        return self.get_route_serializer(*args, many=many, **kwargs)
 
     def create_route_instance(self, queryset, request, serializer_class):
         serializer = self._add_or_create_nested(queryset, request.data, serializer_class)
@@ -332,12 +367,40 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         return super(GenericViewSet, cls).as_view(actions, **initkwargs)
 
 
+class CopyMixin(GenericViewSet):
+    copy_prefix = 'copy-'
+    copy_field_name = 'name'
+    copy_related = []
+
+    def copy_instance(self, instance):
+        new_instance = deepcopy(instance)
+        new_instance.pk = None
+        name = getattr(instance, self.copy_field_name, None)
+        if isinstance(name, (six.string_types, six.text_type)):
+            name = '{}{}'.format(self.copy_prefix, name)
+        setattr(new_instance, self.copy_field_name, name)
+        new_instance.save()
+        for related_name in self.copy_related:
+            new_related_manager = getattr(new_instance, related_name, None)
+            if new_related_manager is not None:
+                new_related_manager.set(getattr(instance, related_name).all())
+        return new_instance
+
+    @action(methods=['post'], detail=True)
+    @transaction.atomic()
+    def copy(self, request, **kwargs):
+        # pylint: disable=unused-argument
+        instance = self.copy_instance(self.get_object())
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid()
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED).resp
+
+
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
     '''
     API endpoint thats operates models objects.
     '''
-
-    # lookup_field = 'id'
 
     def create(self, request, *args, **kwargs):
         '''

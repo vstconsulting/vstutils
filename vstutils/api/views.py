@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test import Client
 from django.db import transaction
 from . import base, serializers, permissions, filters, decorators as deco
+from ..utils import Dict
 
 
 class UserViewSet(base.ModelViewSetSet):
@@ -120,10 +121,16 @@ class BulkViewSet(base.rvs.APIView):
                 media_type=op_type
             )
 
+    def _load_param(self, param):
+        try:
+            return json.loads(param)
+        except:
+            return param
+
     def _get_obj_with_extra(self, param):
         if isinstance(param, (six.text_type, six.string_types)):
             param = param.replace('<', '{').replace('>', '}')
-            return param.format(*self.results)
+            return self._load_param(param.format(*self.results))
         return param
 
     def _json_dump(self, value, inner=False):
@@ -134,7 +141,7 @@ class BulkViewSet(base.rvs.APIView):
             return self._json_dump({
                 k: self._get_obj_with_extra_data(v, True) for k,v in data.items()
             }, inner)
-        elif isinstance(data, (list, tuple)):  # nocv
+        elif isinstance(data, (list, tuple)):
             return self._json_dump([
                 self._get_obj_with_extra_data(v, True) for v in data
             ], inner)
@@ -147,6 +154,8 @@ class BulkViewSet(base.rvs.APIView):
         if pk is not None:
             url += "{}/".format(self._get_obj_with_extra(pk))
         if data_type is not None:
+            if isinstance(data_type, (list, tuple)):
+                data_type = '/'.join([str(i) for i in data_type])
             url += "{}/".format(self._get_obj_with_extra(data_type))
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
@@ -175,7 +184,7 @@ class BulkViewSet(base.rvs.APIView):
         return method(url, **kwargs)
 
     def create_response(self, status, data, operation, **kwargs):
-        result = OrderedDict(
+        result = Dict(
             status=status, data=data,
             type=operation.get('type', None), item=operation.get('item', None),
             additional_info=kwargs
@@ -186,11 +195,11 @@ class BulkViewSet(base.rvs.APIView):
 
     def _get_rendered(self, res):
         if getattr(res, 'data', None):
-            return res.data
+            return Dict(res.data)
         if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
             return json.loads(res.rendered_content.decode())
         else:
-            return dict(detail=str(res.content.decode('utf-8')))
+            return Dict(dict(detail=str(res.content.decode('utf-8'))))
 
     def perform(self, operation):
         kwargs = dict()
@@ -204,7 +213,13 @@ class BulkViewSet(base.rvs.APIView):
 
     def operate_handler(self, operation, allow_fail=True):
         try:
-            op_type = operation.get("type")
+            op_type = operation.get("type", 'mod')
+            operation['type'] = op_type
+            data_type = operation.get('data_type', None)
+            item = operation.get("item", '__init__')
+            if item == '__init__' and isinstance(data_type, (list, type)) and data_type:
+                operation['item'] = data_type[0]
+                operation['data_type'] = operation['data_type'][1:]
             self._check_type(op_type, operation.get("item", None))
             result = self.perform(operation)
             if allow_fail and result['status'] >= 300:

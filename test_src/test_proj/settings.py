@@ -10,4 +10,8 @@ API[VST_API_VERSION][r'hosts'] = dict(
 )
 # ![test_settings]
 
+API[VST_API_VERSION][r'subhosts'] = dict(
+    view='test_proj.views.HostViewSet'
+)
+
 DEBUG = True

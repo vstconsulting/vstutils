@@ -1,5 +1,5 @@
 from vstutils.api.serializers import VSTSerializer
-from vstutils.api.base import ModelViewSetSet, Response
+from vstutils.api.base import ModelViewSetSet, Response, CopyMixin
 from vstutils.api.decorators import nested_view, action
 from vstutils.api import filters
 from vstutils.api import fields
@@ -71,6 +71,7 @@ class HostViewSet(ModelViewSetSet):
 class _HostGroupViewSet(ModelViewSetSet):
     model = HostGroup
     serializer_class = HostGroupSerializer
+    serializer_class_one = HostGroupSerializer
     filter_class = HostGroupFilter
 
 @nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
@@ -81,8 +82,9 @@ class _HostGroupViewSet(ModelViewSetSet):
     manager_name='hosts', subs=['test', 'test2'],
     view=HostViewSet, allow_append=True
 )
-class HostGroupViewSet(_HostGroupViewSet):
-    pass
+class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
+    serializer_class_one = HostGroupSerializer
+    copy_related = ['hosts', 'subgroups']
 
 
 try:
