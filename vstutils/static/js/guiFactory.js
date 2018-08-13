@@ -362,6 +362,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
                     }
 
                     obj.baseURL = function(){
+                        debugger;
                         if(this.parents)
                         {
                             return "/?"+this.parents;

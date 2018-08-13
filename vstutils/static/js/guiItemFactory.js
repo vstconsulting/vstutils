@@ -140,13 +140,13 @@ basePageItem = {}
  * Функция для удобства переопределения какие поля показывать для каких случаев
  * @param {type} type
  * @returns {guiItemFactory.model.fileds}
- * @note На пример функция apihistory.list.getFiledsFor_renderAsPage будет примером переопределения
+ * @note На пример функция apihistory.list.getFieldsFor_renderAsPage будет примером переопределения
  */
-basePageItem.getFileds = function (type)
+basePageItem.getFields = function (type)
 {
-    if(this['getFiledsFor_'+type])
+    if(this['getFieldsFor_'+type])
     {
-        return this['getFiledsFor_'+type]()
+        return this['getFieldsFor_'+type]()
     }
     return this.model.fileds
 }
@@ -517,7 +517,7 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     tpl = 'entity_one'
                 }
-                render_options.fileds = this.getFileds('renderAsPage')
+                render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
@@ -536,7 +536,7 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_new'
                 }
 
-                render_options.fileds = this.getFileds('renderAsNewPage')
+                render_options.fileds = this.getFields('renderAsNewPage')
                 render_options.sections = this.getSections('renderAsNewPage')
                 render_options.hideReadOnly = true
 
@@ -562,7 +562,7 @@ function guiItemFactory(api, both_view, list, one)
                     return "";
                 }
 
-                render_options.fileds = this.getFileds('renderAsAddSubItemsPage')
+                render_options.fileds = this.getFields('renderAsAddSubItemsPage')
                 render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
@@ -917,7 +917,7 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_list'
                 }
 
-                render_options.fileds = this.getFileds('renderAsPage')
+                render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
@@ -936,7 +936,7 @@ function guiItemFactory(api, both_view, list, one)
                     tpl = 'entity_list_add_subitems'
                 }
                 //tpl = 'entity_list'
-                render_options.fileds = this.getFileds('renderAsAddSubItemsPage')
+                render_options.fileds = this.getFields('renderAsAddSubItemsPage')
                 render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
                 return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
@@ -1410,7 +1410,7 @@ function guiActionFactory(api, action)
                 tpl = 'action_page'
             }
             // debugger;
-            render_options.fileds = this.getFileds('renderAsPage')
+            render_options.fileds = this.getFields('renderAsPage')
             render_options.sections = this.getSections('renderAsPage') 
 
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
