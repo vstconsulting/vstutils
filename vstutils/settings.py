@@ -2,8 +2,9 @@ import os
 import sys
 from warnings import warn
 
-from configparser import ConfigParser, NoSectionError, NoOptionError
-
+from configparser import ConfigParser
+import six
+import pytimeparse
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
@@ -18,12 +19,15 @@ PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
 PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
 PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
 
-PY_VER = sys.version_info[0]
+PY_VER = sys.version_info.major
 TMP_DIR = "/tmp"
 BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
 __kwargs = dict(
-    HOME=BASE_DIR, PY=PY_VER, TMP=TMP_DIR, PROG=VST_PROJECT_DIR, VST=VSTUTILS_DIR
+    PY=PY_VER, PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
+    TMP=TMP_DIR, HOME=BASE_DIR,
+    PROG=VST_PROJECT_DIR, LIB=BASE_DIR, VST=VSTUTILS_DIR,
+    PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB
 )
 KWARGS = __kwargs
 
@@ -37,6 +41,114 @@ CONFIG_FILE = os.getenv(
 )
 config = ConfigParser()
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
+
+
+class SectionConfig(object):
+    config = config
+    section = 'main'
+    subsections = []
+    section_defaults = {}
+    types_map = {}
+
+    def __init__(self, section=None, default=None):
+        self.section = section or self.section
+        self._subsections = self.get_subsections()
+        self.default = default
+
+    def get_subsections(self):
+        return {
+            sub: '{}.{}'.format(self.section, sub) for sub in self.subsections
+        }
+
+    def get_value_kwargs(self, **additional_kwargs):
+        kwargs = dict()
+        kwargs.update(KWARGS)
+        kwargs.update(additional_kwargs)
+        kwargs['__section'] = self.section
+        return kwargs
+
+    def opt_handler(self, option):
+        return option.upper()
+
+    def key_handler(self, key):
+        return key
+
+    def value_handler(self, value):
+        if isinstance(value, (six.string_types, six.text_type)):
+            return value.format(**self.get_value_kwargs())
+        else:
+            return value
+
+    def _get_from_section(self, section, option=None):
+        default_value = (
+            self.default or self.section_defaults.get(option if option else '.', {})
+        )
+        try:
+            return self.config[section, section] or default_value
+        except:
+            return default_value
+
+    def _get_section_data(self, section, option=None):
+        section_data = {}
+        for key, value in self._get_from_section(section, option).items():
+            key_name = key if not option else "{}.{}".format(option, key)
+            type_handler = self.types_map.get(key_name, str)
+            section_data[self.key_handler(key)] = type_handler(
+                self.value_handler(value)
+            )
+        return section_data
+
+    def _all(self):
+        self._current_section = self.section
+        settings = self._get_section_data(self.section)
+        for option, section in self._subsections.items():
+            self._current_section = option
+            settings[self.opt_handler(option)] = self._get_section_data(section, option)
+        return settings
+
+    def all(self):
+        settings = getattr(self, '__settings__', None)
+        if settings is None:
+            self.__settings__ = self._all()
+        return self.__settings__
+
+    def get(self, option, fallback=None):
+        return self.all().get(option, self.value_handler(fallback))
+
+    def getboolean(self, option, fallback=None):
+        return bool(self.get(option, fallback))
+
+    def getint(self, option, fallback=None):
+        value = self.get(option, str(fallback)).strip()
+        return self.int(value)
+
+    def getseconds(self, option, fallback=None):
+        return self.int_seconds(self.get(option, str(fallback)))
+
+    def getlist(self, option, fallback=None):
+        fallback = fallback or ''
+        return [item for item in self.get(option, fallback).split(",") if item != ""]
+
+    @classmethod
+    def int_seconds(cls, value):
+        value = pytimeparse.parse(str(value)) or value
+        return int(value)
+
+    @classmethod
+    def int(cls, value):
+        value = value.replace('K', '0' * 3)
+        value = value.replace('M', '0' * 6)
+        value = value.replace('G', '0' * 9)
+        return int(float(value))
+
+class BackendsSectionConfig(SectionConfig):
+
+    def key_handler(self, key):
+        return super(BackendsSectionConfig, self).key_handler(key).upper()
+
+
+main = SectionConfig('main')
+web = SectionConfig('web')
 
 # Secret file with key for hashing passwords
 SECRET_FILE = os.getenv(
@@ -52,11 +164,8 @@ except IOError:
 # Main settings
 ##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', config.getboolean("main", "debug", fallback=False))
-
-ALLOWED_HOSTS = [item for item in config.get("web",
-                                             "allowed_hosts",
-                                             fallback="*").split(",") if item != ""]
+DEBUG = os.getenv('DJANGO_DEBUG', main.getboolean("debug", False))
+ALLOWED_HOSTS = main.getlist("allowed_hosts")
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # Include some addons if packages exists in env
@@ -129,10 +238,18 @@ try:
         'vstutils.auth.LdapBackend',
         'django.contrib.auth.backends.ModelBackend',
     ]
-    LDAP_SERVER = config.get("main", "ldap-server", fallback=None)
-    LDAP_DOMAIN = config.get("main", "ldap-default-domain", fallback='')
+    LDAP_SERVER = main.get("ldap-server", fallback=None)
+    LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
 except ImportError:  # nocv
     pass
+
+
+# Sessions settings
+# https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
+SESSION_COOKIE_AGE = web.getseconds("session_timeout", fallback='2w')
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS = 'session'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -200,7 +317,7 @@ TEMPLATES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
-STATIC_URL = config.get("web", "static_files_url", fallback="/static/")
+STATIC_URL = web.get("static_files_url", fallback="/static/")
 if 'collectstatic' not in sys.argv:
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static'),
@@ -228,100 +345,91 @@ DOC_URL = "/docs/"
 # Database settings.
 # Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 ##############################################################
-try:
-    __DB_SETTINGS = {k.upper():v.format(**KWARGS) for k,v in config.items('database')}
-    if not __DB_SETTINGS: raise NoSectionError('database')
-except NoSectionError:  # nocv
-    __DB_SETTINGS = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(VST_PROJECT_DIR, 'db.{}.sqlite3'.format(VST_PROJECT_LIB)),
+class DBSectionConfig(BackendsSectionConfig):
+    section = 'database'
+    subsections = ['options', 'test']
+    section_defaults = {
+        '.': {
+            'engine': 'django.db.backends.sqlite3',
+            'name': '{PROG}/db.{PROG_NAME}.sqlite3'
+        },
+        'options': {
+            'timeout': 20
+        },
+        'test': {
+            'serialize': False
+        }
+    }
+    types_map = {
+        'conn_max_age': BackendsSectionConfig.int_seconds,
+        'options.timeout': BackendsSectionConfig.int_seconds,
+        'options.connect_timeout': BackendsSectionConfig.int_seconds,
+        'options.read_timeout': BackendsSectionConfig.int_seconds,
+        'options.write_timeout': BackendsSectionConfig.int_seconds,
+        'test.serialize': bool,
     }
 
-__DB_OPTIONS = { }
-try:
-    int_values_types = ["timeout", "connect_timeout", "read_timeout", "write_timeout"]
-    for k, v in config.items('database.options'):
-        if k in int_values_types: #nocv
-            __DB_OPTIONS[k] = int(float(v))
-            continue
-        __DB_OPTIONS[k] = v.format(**KWARGS)  # nocv
-    if not __DB_OPTIONS: raise NoSectionError('database.options')
-except NoSectionError:  # nocv
-    __DB_OPTIONS = {}
+    def key_handler(self, key):
+        if not (self._current_section == self.section or key == self._current_section):
+            return key  # nocv
+        return super(DBSectionConfig, self).key_handler(key)
 
-if __DB_SETTINGS['ENGINE'] == 'django.db.backends.mysql':  # nocv
+
+DATABASES = {
+    'default': DBSectionConfig().all()
+}
+if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.mysql':  # nocv
     import pymysql
     pymysql.install_as_MySQLdb()
 
-if __DB_SETTINGS['ENGINE'] == 'django.db.{}.sqlite3'.format(VST_PROJECT):
-    __DB_OPTIONS["timeout"] = __DB_OPTIONS.get("timeout", 20)  # nocv
-
-__DB_SETTINGS["OPTIONS"] = __DB_OPTIONS
-
-DATABASES = {
-    'default': __DB_SETTINGS
-}
 
 # Cache settings.
 # Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#caches
 ##############################################################
-__CACHE_DEFAULT_SETTINGS = {
-    'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-    'LOCATION': (
-        '/tmp/{}_django_cache{}'.format(VST_PROJECT, sys.version_info[0])
-    ),
-}
-def get_cache_settings(cache_name, excluded_args=None, default=None):
-    default = default or __CACHE_DEFAULT_SETTINGS
-    excluded_args = excluded_args or []
-    CACHE_DEFAULT_SETTINGS = {}
-    try:
-        CACHE_DEFAULT_SETTINGS = {
-            k.upper(): v.format(**KWARGS)
-            for k, v in config.items(cache_name)
-            if k not in excluded_args
+class CacheSectionConfig(BackendsSectionConfig):
+    section = 'cache'
+    subsections = ['options']
+    section_defaults = {
+        '.': {
+            "backend": 'django.core.cache.backends.filebased.FileBasedCache',
+            'location': '/tmp/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
+            'timeout': '10m'
         }
-        if not CACHE_DEFAULT_SETTINGS:
-            raise NoSectionError(cache_name)
-    except NoSectionError:
-        CACHE_DEFAULT_SETTINGS = default
-    finally:
-        return CACHE_DEFAULT_SETTINGS
+    }
+    types_map = {
+        'timeout': BackendsSectionConfig.int_seconds,
+    }
+
+
+default_cache = CacheSectionConfig('cache').all()
+session_cache = CacheSectionConfig('session', default=default_cache).all()
+session_cache['TIMEOUT'] = SESSION_COOKIE_AGE
 
 CACHES = {
-    'default': get_cache_settings('cache'),
-    "locks": get_cache_settings('locks'),
-    "session": get_cache_settings(
-        'session', 'timeout', default=get_cache_settings('cache')
-    ),
+    'default': default_cache,
+    "locks": CacheSectionConfig('locks').all(),
+    "session": session_cache,
 }
-
-
-# Sessions settings
-# https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
-SESSION_COOKIE_AGE = config.getint("session", "timeout", fallback=1209600)
-SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
-SESSION_CACHE_ALIAS = 'session'
 
 
 # E-Mail settings
 # https://docs.djangoproject.com/en/1.10/ref/settings/#email-host
 ##############################################################
-try:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_PORT = config.getint("mail", "port", fallback=25)
-    EMAIL_HOST_USER = config.get("mail", "user", fallback="")
-    EMAIL_HOST_PASSWORD = config.get("mail", "password", fallback="")
-    EMAIL_USE_TLS = config.getboolean("mail", "tls", fallback=False)
-    EMAIL_HOST = config.get("mail", "host")
-except (NoSectionError, NoOptionError):
+mail = SectionConfig('mail')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_PORT = mail.getint("port", fallback=25)
+EMAIL_HOST_USER = mail.get("user", fallback="")
+EMAIL_HOST_PASSWORD = mail.get("password", fallback="")
+EMAIL_USE_TLS = mail.getboolean("tls", fallback=False)
+EMAIL_HOST = mail.get("host", None)
+if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/
 ##############################################################
-PAGE_LIMIT = config.getint("web", "page_limit", fallback=1000)
+PAGE_LIMIT = web.getint("page_limit", fallback=1000)
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -340,7 +448,7 @@ REST_FRAMEWORK = {
         'vstutils.api.filter_backends.HideHiddenFilterBackend',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': config.getint("web", "rest_page_limit", fallback=PAGE_LIMIT),
+    'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
     'SCHEMA_COERCE_PATH_PK': False,
     'SCHEMA_COERCE_METHOD_NAMES': {
         'create': 'add',
@@ -358,13 +466,10 @@ VST_API_URL = os.getenv("VST_API_URL", "api")
 VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
 HAS_COREAPI = False
-API_CREATE_SWAGGER = config.getboolean('web', 'rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION = config.get('web', 'rest_swagger_description', fallback=vst_project_module.__doc__ or vst_lib_module.__doc__)
+API_CREATE_SWAGGER = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
+SWAGGER_API_DESCRIPTION = web.get('rest_swagger_description', fallback=vst_project_module.__doc__ or vst_lib_module.__doc__)
 TERMS_URL = ''
-try:
-    CONTACT = { field: value for field, value in config.items('contact')}
-except:
-    CONTACT = dict(name='System Administrator')
+CONTACT = SectionConfig('contact').all() or dict(name='System Administrator')
 
 
 SWAGGER_SETTINGS = {
@@ -379,7 +484,7 @@ SWAGGER_SETTINGS = {
     },
 }
 
-API_CREATE_SCHEMA = config.getboolean('web', 'rest_schema', fallback=True)
+API_CREATE_SCHEMA = web.getboolean('rest_schema', fallback=True)
 try:
     import coreapi
     HAS_COREAPI = True
@@ -421,7 +526,7 @@ LANGUAGES = (
   ('en', 'English'),
 )
 
-TIME_ZONE = config.get("main", "timezone", fallback="UTC")
+TIME_ZONE = main.get("timezone", fallback="UTC")
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -430,7 +535,8 @@ USE_TZ = True
 # Celery broker settings
 # Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
 ##############################################################
-__broker_url = config.get("rpc", "connection", fallback="filesystem:///var/tmp").format(**KWARGS)
+rpc = SectionConfig('rpc')
+__broker_url = rpc.get("connection", fallback="filesystem:///var/tmp")
 if __broker_url.startswith("filesystem://"):
     __broker_folder = __broker_url.split("://", 1)[1]
     CELERY_BROKER_URL = "filesystem://"
@@ -442,22 +548,22 @@ if __broker_url.startswith("filesystem://"):
 else:
     CELERY_BROKER_URL = __broker_url  # nocv
 
-CELERY_RESULT_BACKEND = config.get("rpc", "result_backend", fallback="file:///tmp").format(**KWARGS)
-CELERY_WORKER_CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
+CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback="file:///tmp")
+CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-CELERY_BROKER_HEARTBEAT = config.getint("rpc", "heartbeat", fallback=10)
+CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_EXPIRES = config.getint("rpc", "results_expiry_days", fallback=10)
+CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=10)
 CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
 
-CREATE_INSTANCE_ATTEMPTS = config.getint("rpc", "create_instance_attempts", fallback=10)
-CONCURRENCY = config.getint("rpc", "concurrency", fallback=4)
+CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
+CONCURRENCY = rpc.getint("concurrency", fallback=4)
 
 
 # LOGGING settings
 ##############################################################
-LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', config.get("main", "log_level", fallback="WARNING")).upper()
+LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', main.get("log_level", fallback="WARNING")).upper()
 LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
 LOG_DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
 
@@ -480,7 +586,7 @@ LOGGING = {
         'file': {
             'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
-            'filename': config.get("uwsgi", "log_file", fallback='/dev/null')
+            'filename': SectionConfig("uwsgi").get("log_file", fallback='/dev/null')
         },
     },
     'loggers': {
