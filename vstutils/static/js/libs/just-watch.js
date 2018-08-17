@@ -29,6 +29,15 @@ $.fn.insertTpl = function(tplText)
  
     this.each(function()
     {
+        var oldHtml = $(this).find( "[data-onunload]" );
+        for(var i = 0; i < oldHtml.length; i++)
+        {
+            eval(oldHtml[i].attr('data-onunload'))
+        }
+        
+        // Вызвать unload тут! 
+        // Будет удобно если можно в люборм месте определить функцию которая будет вызвана при затирании этого куска html кода
+        
         $(this).html(html)
     });
 
@@ -281,8 +290,19 @@ var justReactive = {
     },
     applyFunc:function(val, newval)
     {
-        //console.log("setter", newval);
-        for(var i in newval.just_ids)
+        console.log("setter", newval);
+        
+        // @todo Refactor
+        // Если элементы из just_ids хранить не в объекте замыканием а в глобальном массиве
+        // Тогда у объекта будет только номер события который ему соответсвует
+        // А значит его проще переносить при операциях на объекте так как это копирование строки а не рекурсивное копирование объекта
+        // Похоже будет ещё экономия памяти так как меньше замыканий.
+        // И легче вызвать apply для объекта.
+        
+        
+        
+        
+        for(var i in newval.just_ids) 
         {
             if(newval.just_ids[i].type == "watch")
             { 

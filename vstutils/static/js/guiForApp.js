@@ -26,7 +26,7 @@ function openURLInAppBrowser(url)
 {
     if(window.parent && window.parent.cordova && window.parent.cordova.InAppBrowser) 
     {
-        window.parent.cordova.InAppBrowser.open(this.href, '_blank', 'location=yes');
+        window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
         return false;
     }
     return true;
