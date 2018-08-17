@@ -84,7 +84,7 @@ class SectionConfig(object):
             self.default or self.section_defaults.get(option if option else '.', {})
         )
         try:
-            return self.config[section, section] or default_value
+            return self.config[section] or default_value
         except:
             return default_value
 
