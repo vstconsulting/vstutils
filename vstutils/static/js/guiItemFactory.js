@@ -56,8 +56,7 @@ basePageView.validateByModel = function (values)
  * @returns {html}
  */
 basePageView.renderFiled = function(filed, render_options)
-{
-    debugger;
+{ 
     if(!this.model.guiFileds[filed.name])
     {
         if(filed.schema && filed.schema.$ref)
@@ -142,12 +141,61 @@ basePageItem.getFields = function (type)
     }
     return this.model.fileds
 }
-
-basePageItem.getBulkName = function ()
+ 
+guiBaseItemFactory = {}
+ 
+guiBaseItemFactory.getShortestApiURL = function ()
 {
-    if(!this.model.pathInfo)
+    var url = {};
+    var level = 100;
+    for(var i in this.view.urls)
     {
-        return;
+        if(level >= this.view.urls[i].level)
+        {
+            level = this.view.urls[i].level
+            url = this.view.urls[i]
+        }
+    }
+
+    return url;
+}
+
+/**
+ * Для добавления дополнительных блоков на страницу
+ * @param {type} type
+ * @param {type} section
+ * @returns {undefined}
+ */
+guiBaseItemFactory.addSection = function (type, section)
+{
+    if(!this.view['sections_for_'+type])
+    {
+        this.view['sections_for_'+type] = []
+    }
+
+    this.view['sections_for_'+type].push(section)
+}
+
+guiBaseItemFactory.getSections = function (type)
+{
+    if(this.view['sections_for_'+type])
+    {
+        return this.view['sections_for_'+type]
+    }
+
+    if(this.view.sections)
+    {
+        return this.view.sections
+    }
+
+    return []
+}
+
+guiBaseItemFactory.getBulkName = function ()
+{ 
+    if(!this.model || !this.model.pathInfo)
+    {
+        return this.view.bulk_name;
     }
 
     if(this.model.pathInfo.bulk_name)
@@ -164,12 +212,15 @@ basePageItem.getBulkName = function ()
     return name[1];
 }
 
+guiBaseItemFactory.actions = {}
+guiBaseItemFactory.sublinks = {}
+    
 /**
  * Фабрика классов объектов
  * @returns {Object}
  */
 function guiItemFactory(api, both_view, list, one)
-{
+{ 
     var thisFactory = {
         /**
          * Фабрика объектов сущьности
@@ -298,7 +349,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    $.notify("Changes in "+thisObj.view.bulk_name+" were successfully created", "success");
+                    $.notify("Changes in "+thisObj.getBulkName()+" were successfully created", "success");
                 })
                 return res;
             }
@@ -309,7 +360,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("set")
                 $.when(res).done(function()
                 {
-                    $.notify("Changes in "+thisObj.view.bulk_name+" were successfully saved", "success");
+                    $.notify("Changes in "+thisObj.getBulkName()+" were successfully saved", "success");
                 })
                 return res;
             }
@@ -443,7 +494,7 @@ function guiItemFactory(api, both_view, list, one)
                     $.when(api.query(query)
                         ).done(function (data)
                         {
-                            $.notify(""+thisObj.view.bulk_name+" were successfully deleted", "success");
+                            $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
                             def.resolve(data)
                         }).fail(function (e)
                         {
@@ -504,7 +555,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsPage = function (render_options = {})
             {
                 var thisObj = this;
-                var tpl = thisObj.view.bulk_name + '_one'
+                var tpl = thisObj.getBulkName() + '_one'
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_one'
@@ -522,7 +573,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsNewPage = function (render_options = {})
             {
                 var thisObj = this;
-                var tpl = thisObj.view.bulk_name + '_new'
+                var tpl = thisObj.getBulkName() + '_new'
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_new'
@@ -541,10 +592,9 @@ function guiItemFactory(api, both_view, list, one)
              * @returns {string|promise}
              */
             this.render = function (render_options = {})
-            {
-                debugger;
+            { 
                 var thisObj = this;
-                var tpl = thisObj.view.bulk_name + '_one_as_filed'
+                var tpl = thisObj.getBulkName() + '_one_as_filed'
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_one_as_filed'
@@ -579,7 +629,7 @@ function guiItemFactory(api, both_view, list, one)
                     ]
                 })
              */
-            tabSignal.emit("gui.new."+this.view.bulk_name+".one", res);
+            tabSignal.emit("gui.new."+this.getBulkName()+".one", res);
 
             res.init(page_options, object)
 
@@ -904,7 +954,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsPage = function (render_options = {})
             {
                 var thisObj = this;
-                var tpl = thisObj.view.bulk_name + '_list'
+                var tpl = thisObj.getBulkName() + '_list'
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_list'
@@ -923,7 +973,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsAddSubItemsPage = function (render_options = {})
             {
                 var thisObj = this;
-                var tpl = thisObj.view.bulk_name + '_list_add_subitems'
+                var tpl = thisObj.getBulkName() + '_list_add_subitems'
                 if (!spajs.just.isTplExists(tpl))
                 {
                     tpl = 'entity_list_add_subitems'
@@ -1039,7 +1089,7 @@ function guiItemFactory(api, both_view, list, one)
                     ]
                 })
              */
-            tabSignal.emit("gui.new."+this.view.bulk_name+".list", res);
+            tabSignal.emit("gui.new."+this.getBulkName()+".list", res);
 
             res.init(page_options, objects)
 
@@ -1084,69 +1134,11 @@ function guiItemFactory(api, both_view, list, one)
      * Представление полученное из апи
      */
     thisFactory.one.view = one.view
-
-    thisFactory.one.actions = {}
-    thisFactory.list.actions = {}
-
-    thisFactory.one.sublinks = {}
-    thisFactory.list.sublinks = {}
+ 
     thisFactory.view = both_view
 
-    let getShortestApiURL = function ()
-    {
-        var url = {};
-        var level = 100;
-        for(var i in this.view.urls)
-        {
-            if(level >= this.view.urls[i].level)
-            {
-                level = this.view.urls[i].level
-                url = this.view.urls[i]
-            }
-        }
-
-        return url;
-    }
-    thisFactory.one.getShortestApiURL = getShortestApiURL
-    thisFactory.list.getShortestApiURL = getShortestApiURL
-
-    /**
-     * Для добавления дополнительных блоков на страницу
-     * @param {type} type
-     * @param {type} section
-     * @returns {undefined}
-     */
-    let addSection = function (type, section)
-    {
-        if(!this.view['sections_for_'+type])
-        {
-            this.view['sections_for_'+type] = []
-        }
-
-        this.view['sections_for_'+type].push(section)
-    }
-
-    thisFactory.one.addSection = addSection
-    thisFactory.list.addSection = addSection
-
-    let getSections = function (type)
-    {
-        if(this.view['sections_for_'+type])
-        {
-            return this.view['sections_for_'+type]
-        }
-
-        if(this.view.sections)
-        {
-            return this.view.sections
-        }
-
-        return []
-    }
-    thisFactory.one.getSections = getSections
-    thisFactory.list.getSections = getSections
-
-
+    thisFactory.one = $.extend(thisFactory.one, guiBaseItemFactory)
+    thisFactory.list = $.extend(thisFactory.list, guiBaseItemFactory)
 
     /**
      * Вернёт имя поля которое выполняет роль поля name у этого объекта
@@ -1161,8 +1153,7 @@ function guiItemFactory(api, both_view, list, one)
         }
         return "id";
     }
-
-
+ 
     return thisFactory;
 }
 
@@ -1409,7 +1400,7 @@ function guiActionFactory(api, action)
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
         }
 
-        var res = $.extend(this, basePageView, basePageItem, thisFactory);
+        var res = $.extend(this, basePageItem, basePageView, thisFactory);
 
         res.init(page_options)
         return res;

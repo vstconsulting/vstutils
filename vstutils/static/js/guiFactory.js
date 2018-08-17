@@ -564,7 +564,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                         let btn = new guiElements.link_button({
                             class:'btn btn-primary',
                             link: link,
-                            title:'Create new '+pageMainBlockObject.one.view.bulk_name,
+                            title:'Create new '+pageMainBlockObject.one.getBulkName(),
                             text:'Create',
                         })
 
@@ -664,8 +664,8 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     var btn = new guiElements.link_button({
                         class:'btn btn-primary',
                         link: link,
-                        title:'Add '+pageMainBlockObject.one.view.bulk_name,
-                        text:'Add '+pageMainBlockObject.one.view.bulk_name,
+                        title:'Add '+pageMainBlockObject.one.getBulkName(),
+                        text:'Add '+pageMainBlockObject.one.getBulkName(),
                     })
 
                     var def = new $.Deferred();
@@ -886,14 +886,14 @@ function openApi_getPageMainBlockType(api, api_path, urlLevel)
     // Если нашли соответсвие по схеме отправляемых данных то выставим правильный bulk_name
     var new_bulk_name = api_path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
 
-    if(pageMainBlockObject.one.view.bulk_name == "data")
+    if(pageMainBlockObject.one.getBulkName() == "data")
     {
-        console.log("create new bulk_name="+new_bulk_name[1]+" from "+pageMainBlockObject.one.view.bulk_name)
+        console.log("create new bulk_name="+new_bulk_name[1]+" from "+pageMainBlockObject.one.getBulkName())
         pageMainBlockObject = openApi_newDefinition(api, new_bulk_name[1], {}, {})
     }
     else
     {
-        console.log("add new bulk_name="+new_bulk_name[1]+" to "+pageMainBlockObject.one.view.bulk_name)
+        console.log("add new bulk_name="+new_bulk_name[1]+" to "+pageMainBlockObject.one.getBulkName())
         window["api" + new_bulk_name[1].toLowerCase().replace(/^One/i, "") ] = pageMainBlockObject
     }
 
