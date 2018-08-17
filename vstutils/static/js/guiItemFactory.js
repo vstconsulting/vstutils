@@ -57,40 +57,32 @@ basePageView.validateByModel = function (values)
  */
 basePageView.renderFiled = function(filed, render_options)
 {
+    debugger;
     if(!this.model.guiFileds[filed.name])
     {
         if(filed.schema && filed.schema.$ref)
         {
             var obj = getObjectBySchema(filed.schema.$ref)
-            if(obj)
-            {
-                var filed_value = undefined
-                if(this.model.data)
-                {
-                    filed_value = this.model.data[filed.name]
-                }
-
-                obj = new obj.one(undefined, filed_value)
-
-                this.model.guiFileds[filed.name] = obj
-            }
         }
         else if(filed.$ref)
         {
             var obj = getObjectBySchema(filed.$ref)
-            if(obj)
-            {
-                var filed_value = undefined
-                if(this.model.data)
-                {
-                    filed_value = this.model.data[filed.name]
-                }
 
-                obj = new obj.one(undefined, filed_value)
-
-                this.model.guiFileds[filed.name] = obj
-            }
         }
+
+        if(obj)
+        {
+            var filed_value = undefined
+            if(this.model.data)
+            {
+                filed_value = this.model.data[filed.name]
+            }
+
+            obj = new obj.one(undefined, filed_value)
+
+            this.model.guiFileds[filed.name] = obj
+        }
+
 
         if(!this.model.guiFileds[filed.name])
         {
@@ -550,6 +542,7 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.render = function (render_options = {})
             {
+                debugger;
                 var thisObj = this;
                 var tpl = thisObj.view.bulk_name + '_one_as_filed'
                 if (!spajs.just.isTplExists(tpl))
