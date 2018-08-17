@@ -1,0 +1,13 @@
+from vstutils.environment import prepare_environment, cmd_execution
+
+__version__ = '1.0.0'
+
+settings = {
+    "VST_PROJECT": '{{ project_name }}',
+    "VST_ROOT_URLCONF": 'vstutils.urls',
+    "VST_WSGI": 'vstutils.wsgi',
+    "VST_PROJECT_GUI_NAME": "{{ project_gui_name }}",
+    "DJANGO_SETTINGS_MODULE": '{{ project_name }}.settings',
+}
+
+prepare_environment(**settings)

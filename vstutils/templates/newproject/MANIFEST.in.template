@@ -1,0 +1,6 @@
+include README.rst LICENSE
+include setup.cfg
+include requirements.txt
+recursive-include {{project_name}}/*/templates *
+recursive-include {{project_name}}/templates *
+recursive-include {{project_name}}/static *

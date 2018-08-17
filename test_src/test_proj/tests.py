@@ -1,7 +1,7 @@
 import json
 import six
 from django.core.management import call_command
-from vstutils.unittests import BaseTestCase, VSTUtilsTestCase
+from vstutils.unittests import BaseTestCase, VSTUtilsTestCase, VSTUtilsCommandsTestCase
 from .models import Host, HostGroup
 
 
@@ -21,6 +21,11 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='ca'), 'hosts'),
             self.get_mod_bulk('hosts', '<3[data][id]>', dict(name='da'), 'hosts'),
         ]
+
+    def test_version(self):
+        with self.assertRaises(SystemExit):
+            call_command('web', '--version')
+
 
     def test_models(self):
         self.assertEqual(Host.objects.all().count(), self.predefined_hosts_cnt)
