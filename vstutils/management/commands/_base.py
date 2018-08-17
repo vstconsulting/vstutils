@@ -5,7 +5,6 @@ import sys
 import logging
 from collections import OrderedDict
 from django.core.management.base import BaseCommand as _BaseCommand, CommandError
-from django.utils.six.moves import input
 from django.conf import settings
 
 
@@ -66,6 +65,8 @@ class BaseCommand(_BaseCommand):
         ])
 
     def ask_user(self, message, default=None):
+        # pylint: disable=import-error
+        from django.utils.six.moves import input
         if getattr(self, 'interactive_mode', False):
             return input(message) or default
         return default

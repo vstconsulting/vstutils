@@ -40,7 +40,6 @@ class Command(BaseCommand):
             parser.add_argument(
                 '--{}'.format(name), dest=name, **data
             )
-        pass
 
     def get_path(self, *path):
         directory = os.path.expandvars('/'.join(path))

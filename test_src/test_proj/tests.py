@@ -22,11 +22,6 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk('hosts', '<3[data][id]>', dict(name='da'), 'hosts'),
         ]
 
-    def test_version(self):
-        with self.assertRaises(SystemExit):
-            call_command('web', '--version')
-
-
     def test_models(self):
         self.assertEqual(Host.objects.all().count(), self.predefined_hosts_cnt)
         Host.objects.all().delete()

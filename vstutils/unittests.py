@@ -49,7 +49,14 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
     def test_startproject(self):
         # Easy create
-        call_command('newproject', '--name', 'test_project', interactive=0, dir='/tmp')
+        out = six.StringIO()
+        call_command(
+            'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
+        )
+        self.assertIn(
+            'Project successfully created at {}.'.format(self.project_place),
+            out.getvalue()
+        )
         self.assertTrue(os.path.exists(self.project_place))
         self.assertTrue(os.path.isdir(self.project_place))
         self.assertTrue(os.path.exists(self.project_place + '/test_project'))
