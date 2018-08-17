@@ -1,6 +1,11 @@
 [run]
+source = vstutils
+parallel = True
+concurrency =
+    thread
+    multiprocessing
 omit =
-    .tox/*
+    *.tox/*
     */management/*
     */*/migrations/*
     */main/wsgi.py
@@ -16,8 +21,10 @@ omit =
     */vstutils/auth.py
     */vstutils/compile.py
     */vstutils/models.py
+    */test_proj/*
 
 [report]
+show_missing = True
 exclude_lines =
     pragma: no cover
     nocv
