@@ -1,11 +1,14 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
-import coreapi
+import os
+import shutil
+import six
 try:
     from mock import patch
 except ImportError:  # nocv
     from unittest.mock import patch
 from fakeldap import MockLDAP
 from django.test import Client
+from django.core.management import call_command
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 from vstutils.tests import BaseTestCase, json, settings, override_settings
@@ -26,6 +29,53 @@ test_handler_structure = {
         }
     }
 }
+
+class VSTUtilsCommandsTestCase(BaseTestCase):
+
+    def setUp(self):
+        super(VSTUtilsCommandsTestCase, self).setUp()
+        self.project_place = '/tmp/test_project'
+        self.remove_project_place(self.project_place)
+
+    def tearDown(self):
+        super(VSTUtilsCommandsTestCase, self).tearDown()
+        self.remove_project_place(self.project_place)
+
+    def remove_project_place(self, path):
+        try:
+            shutil.rmtree(path)
+        except OSError:
+            pass
+
+    def test_startproject(self):
+        # Easy create
+        out = six.StringIO()
+        call_command(
+            'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
+        )
+        self.assertIn(
+            'Project successfully created at {}.'.format(self.project_place),
+            out.getvalue()
+        )
+        self.assertTrue(os.path.exists(self.project_place))
+        self.assertTrue(os.path.isdir(self.project_place))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project'))
+        self.assertTrue(os.path.isdir(self.project_place + '/test_project'))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project/__init__.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test_project/__init__.py'))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project/__main__.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test_project/__main__.py'))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project/settings.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test_project/settings.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/setup.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/setup.cfg'))
+        self.assertTrue(os.path.isfile(self.project_place + '/requirements.txt'))
+        self.assertTrue(os.path.isfile(self.project_place + '/README.rst'))
+        self.assertTrue(os.path.isfile(self.project_place + '/MANIFEST.in'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test.py'))
+        self.remove_project_place(self.project_place)
+        with self.assertRaises(Exception):
+            call_command('newproject', '--name', 'test_project', dir=None, interactive=0)
 
 
 class VSTUtilsTestCase(BaseTestCase):

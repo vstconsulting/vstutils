@@ -1,7 +1,7 @@
 import json
 import six
 from django.core.management import call_command
-from vstutils.unittests import BaseTestCase, VSTUtilsTestCase
+from vstutils.unittests import BaseTestCase, VSTUtilsTestCase, VSTUtilsCommandsTestCase
 from .models import Host, HostGroup
 
 
