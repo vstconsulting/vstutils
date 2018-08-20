@@ -25,6 +25,16 @@ window._guiFilesCache = function(opt)
     this.noCache          = opt.noCache
 
     var thisObj = this;
+    
+    this.closeDB = function()
+    {
+        if(thisObj.myDB)
+        {
+            thisObj.myDB.close();
+            return;
+        } 
+    }
+    
     function connectDB()
     {
         return new Promise(function(resolve, reject)
@@ -112,7 +122,8 @@ window._guiFilesCache = function(opt)
     }
 
     this.deleteAllCache = function()
-    {
+    { 
+        this.closeDB();
         var DBDeleteRequest = window.indexedDB.deleteDatabase(baseName);
         DBDeleteRequest.onerror = function(event) {
             console.log("Error deleting database.", event);
@@ -464,11 +475,19 @@ function setLoadingProgress(width)
     elem.innerHTML = Math.ceil(width) * 1  + '%';
 }
 
+/**
+ * Hide progress bar page and close connection to indexeddb
+ * @returns {undefined}
+ */
 function hideLoadingProgress()
 {
     //$("#LoadingProgressBar").remove();
     $("#RealBody").show();
     $("#LoadingProgressBar").fadeOut('fast')
+    
+    setTimeout(function(){ 
+        window.guiFilesCache.closeDB();
+    }, 20000)
 }
 
 var cRrrCalls = 0;
