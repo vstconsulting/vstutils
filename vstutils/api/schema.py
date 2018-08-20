@@ -13,6 +13,7 @@ from . import fields, serializers
 FORMAT_FILE = openapi.TYPE_FILE
 FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
+FORMAT_HTML = 'html'
 
 # Base types
 basic_type_info = OrderedDict()
@@ -24,6 +25,9 @@ basic_type_info[fields.SecretFileInString] = dict(
 )
 basic_type_info[fields.AutoCompletionField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE
+)
+basic_type_info[fields.HtmlField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_HTML
 )
 
 
@@ -61,9 +65,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
         nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
         filter_class = getattr(self.view, 'filter_class', None)
         self.view.filter_class = nested_view_filter_class
-        result = super(NestedFilterInspector, self).get_filter_parameters(
-            filter_backend
-        )
+        result = super(NestedFilterInspector, self).get_filter_parameters(filter_backend)
         self.view.filter_class = filter_class
         return result
 

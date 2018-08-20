@@ -20,3 +20,9 @@ class AutoCompletionField(CharField):
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
         super(AutoCompletionField, self).__init__(**kwargs)
+
+
+class HtmlField(CharField):
+    '''
+    Field contained html-text and marked as format:html
+    '''
