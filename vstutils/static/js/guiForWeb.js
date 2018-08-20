@@ -10,7 +10,7 @@ if(window.moment && window.moment.tz)
 
 webGui.opt = {}
 webGui.opt.holder = undefined
-webGui.opt.host = "//"+window.location.host
+webGui.opt.host = window.hostname
 
 webGui.model = {}
 

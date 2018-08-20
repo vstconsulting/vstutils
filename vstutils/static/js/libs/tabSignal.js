@@ -60,6 +60,15 @@ tabSignal.connect = function(slot_name, signal_name, slot_function)
     return slot_name;
 }
 
+tabSignal.once = function(signal_name, slot_function)
+{
+    return tabSignal.connect(signal_name, function(param,signal_name, SignalNotFromThisTab, slot_name)
+    {
+        tabSignal.disconnect(slot_name, signal_name)
+        slot_function(param,signal_name, SignalNotFromThisTab, slot_name)
+    }) 
+}
+
 
 /**
  * Отписывает слот slot_name от сигнала signal_name
@@ -98,7 +107,7 @@ tabSignal.emit = function(signal_name, param, SignalNotFromThisTab)
         {
             if( obj.hasOwnProperty(slot) &&  obj[slot] !== undefined)
             {
-                obj[slot](param,signal_name, SignalNotFromThisTab === true)
+                obj[slot](param,signal_name, SignalNotFromThisTab === true, slot)
             }
         }
 
