@@ -1138,11 +1138,10 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    {
+    { 
         if(this.view && this.view.defaultName)
         {
-            var def_name = this.view.defaultName
-            return def_name;
+            return this.view.defaultName 
         }
         
         if(this.one && this.one.view  && this.one.view.definition  && this.one.view.definition.properties)

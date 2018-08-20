@@ -166,7 +166,7 @@ function guiTestUrl(regexp, url)
 
 function guiGetTestUrlFunctionfunction(regexp, api_path_value)
 {
-    console.log(regexp)
+    //console.log(regexp)
     return function(url)
     {
         var res = guiTestUrl(regexp, url)
@@ -178,9 +178,6 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         var obj = res.groups
         obj.url = res[0]                 // текущий урл в блоке
         obj.page_and_parents = res[0]    // страница+родители
-        obj.getApiPath = function (){
-            return api_path_value
-        }
 
         if(obj.page_and_parents)
         {
@@ -207,6 +204,10 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             return "/?"+this.page_type;
         }
 
+        obj.getApiPath = function (){
+            return {api:api_path_value, url:this}
+        }
+        
         return obj
     }
 }
