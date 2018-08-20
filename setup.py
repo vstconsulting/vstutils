@@ -164,6 +164,9 @@ kwargs = dict(
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
+    entry_points={
+        'console_scripts': ['vstutilsctl=vstutils.__main__:cmd_execution']
+    },
     project_urls={
         "Issue Tracker": "https://github.com/vstconsulting/vstutils/issues",
         "Source Code": "https://github.com/vstconsulting/vstutils",

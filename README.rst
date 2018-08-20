@@ -9,40 +9,21 @@ Quickstart
 
 1. Install package: `pip install vstutils`
 
-2. Create package 'prj' with minimal `__init__.py` and `__main__.py`
+2. Create package 'prj': `vstutilsctl newproject --name proj`
 
-3. Paste to `__init__.py`:
+3. Change directory to project and run `python prj runserver 0.0.0.0:8081 --insecure`
 
-   .. sourcecode:: python
-
-      from vstutils.environment import prepare_environment, cmd_execution
-
-      __version__ = '1.0.0'
-
-      settings = {
-          "VST_PROJECT": 'prj',
-          "VST_ROOT_URLCONF": 'vstutils.urls',
-          "VST_WSGI": 'vstutils.wsgi',
-          "VST_PROJECT_GUI_NAME": "Example Project"
-      }
-
-      prepare_environment(**settings)
-
-4. Paste to `__main__.py`:
-
-   .. sourcecode:: python
-
-      from vstutils.environment import cmd_execution, sys
-      sys.path.append('./')
-      import prj
-
-      cmd_execution()
-
-5. Run `python prj runserver 0.0.0.0:8081 --insecure`
-
-6. Enjoy!
+4. Enjoy!
 
 See example in `test_src/test_proj`.
+
+
+New project
+-----------
+
+*  New projects will be created with all needed for building dist.
+*  Destination where project will be created could be changed via --dir=[directory].
+*  Name which will be shown in GUI could be changed via --guiname=[GUI NAME].
 
 
 License
