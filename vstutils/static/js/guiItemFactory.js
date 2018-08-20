@@ -160,6 +160,23 @@ guiBaseItemFactory.getShortestApiURL = function ()
     return url;
 }
 
+ 
+guiBaseItemFactory.getTemplateName = function (type, default_name)
+{ 
+    var tpl = this.getBulkName() + '_'+type
+    if (!spajs.just.isTplExists(tpl))
+    {
+        if(default_name)
+        {
+            return default_name;
+        }
+        return 'entity_'+type
+    }
+     
+    return tpl;
+}
+
+
 /**
  * Для добавления дополнительных блоков на страницу
  * @param {type} type
@@ -553,17 +570,13 @@ function guiItemFactory(api, both_view, list, one)
              * @returns {string|promise}
              */
             this.renderAsPage = function (render_options = {})
-            {
-                var thisObj = this;
-                var tpl = thisObj.getBulkName() + '_one'
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'entity_one'
-                }
+            { 
+                let tpl = this.getTemplateName('one')
+                
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
+                return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
             /**
@@ -572,18 +585,13 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.renderAsNewPage = function (render_options = {})
             {
-                var thisObj = this;
-                var tpl = thisObj.getBulkName() + '_new'
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'entity_new'
-                }
-
+                let tpl = this.getTemplateName('new')
+                 
                 render_options.fileds = this.getFields('renderAsNewPage')
                 render_options.sections = this.getSections('renderAsNewPage')
                 render_options.hideReadOnly = true
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
+                return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
             /**
@@ -593,13 +601,8 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.render = function (render_options = {})
             { 
-                var thisObj = this;
-                var tpl = thisObj.getBulkName() + '_one_as_filed'
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'entity_one_as_filed'
-                }
-
+                let tpl = this.getTemplateName('one_as_filed')
+                  
                 if(render_options.hideReadOnly)
                 {
                     return "";
@@ -608,7 +611,7 @@ function guiItemFactory(api, both_view, list, one)
                 render_options.fileds = this.getFields('renderAsAddSubItemsPage')
                 render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
+                return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
             // Если окажется что extend копирует оригинал а не назначает по ссылке то можно будет заменить для экономии памяти.
@@ -953,17 +956,12 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.renderAsPage = function (render_options = {})
             {
-                var thisObj = this;
-                var tpl = thisObj.getBulkName() + '_list'
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'entity_list'
-                }
-
+                let tpl = this.getTemplateName('list')
+                   
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
+                return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
             /**
@@ -972,17 +970,12 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.renderAsAddSubItemsPage = function (render_options = {})
             {
-                var thisObj = this;
-                var tpl = thisObj.getBulkName() + '_list_add_subitems'
-                if (!spajs.just.isTplExists(tpl))
-                {
-                    tpl = 'entity_list_add_subitems'
-                }
-                //tpl = 'entity_list'
+                let tpl = this.getTemplateName('list_add_subitems')
+                    
                 render_options.fileds = this.getFields('renderAsAddSubItemsPage')
                 render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
-                return spajs.just.render(tpl, {query: "", guiObj: thisObj, opt: render_options});
+                return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
             this.delete = function (){ }
 
@@ -1151,6 +1144,23 @@ function guiItemFactory(api, both_view, list, one)
             var def_name = this.view.defaultName
             return def_name;
         }
+        
+        if(this.one && this.one.view  && this.one.view.definition  && this.one.view.definition.properties)
+        {
+            if(this.one.view.definition.properties.name)
+            {
+                return "name"
+            }
+            if(this.one.view.definition.properties.name)
+            {
+                return "username"
+            }
+            if(this.one.view.definition.properties.name)
+            {
+                return "key"
+            }
+        }
+        
         return "id";
     }
  
@@ -1388,12 +1398,8 @@ function guiActionFactory(api, action)
 
         this.renderAsPage = function (render_options = {})
         {
-            var tpl = 'action_page_'+this.model.name
-            if (!spajs.just.isTplExists(tpl))
-            {
-                tpl = 'action_page'
-            }
-            // debugger;
+            let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
+            
             render_options.fileds = this.getFields('renderAsPage')
             render_options.sections = this.getSections('renderAsPage') 
 
@@ -1405,42 +1411,11 @@ function guiActionFactory(api, action)
         res.init(page_options)
         return res;
     }
-
-    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены.
-    thisFactory.getSections = function (type)
-    {
-        if(this.view['sections_for_'+type])
-        {
-            return this.view['sections_for_'+type]
-        }
-
-        if(this.view.sections)
-        {
-            return this.view.sections
-        }
-
-        return []
-    }
-    
-    // @todo отрефакторить так чтоб не копировать код getSections дважды в объекты и в экшены.
-    thisFactory.getSections = function (type)
-    {
-        if(this.view['sections_for_'+type])
-        {
-            return this.view['sections_for_'+type]
-        }
-
-        if(this.view.sections)
-        {
-            return this.view.sections
-        }
-
-        return []
-    }
-    
+  
     thisFactory.api = api
 
     thisFactory.view = action
+    thisFactory = $.extend(thisFactory, guiBaseItemFactory)
 
     return thisFactory;
 }

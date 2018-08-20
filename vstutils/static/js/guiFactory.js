@@ -154,6 +154,7 @@ function getUrlInf(url_reg){
 
 function guiTestUrl(regexp, url)
 {
+    url = url.replace(/[/#]*$/, "")
     var reg_exp = new RegExp(regexp)
     if(!reg_exp.test(url))
     {
@@ -161,6 +162,53 @@ function guiTestUrl(regexp, url)
     }
 
     return reg_exp.exec(url)
+}
+
+function guiGetTestUrlFunctionfunction(regexp, api_path_value)
+{
+    console.log(regexp)
+    return function(url)
+    {
+        var res = guiTestUrl(regexp, url)
+        if(!res)
+        {
+            return false;
+        }
+
+        var obj = res.groups
+        obj.url = res[0]                 // текущий урл в блоке
+        obj.page_and_parents = res[0]    // страница+родители
+        obj.getApiPath = function (){
+            return api_path_value
+        }
+
+        if(obj.page_and_parents)
+        {
+            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
+
+            if(match && match.groups)
+            {
+                obj.parent_type = match.groups.parent_type
+                obj.parent_id = match.groups.parent_id
+                obj.page_type = match.groups.page_type
+            }
+        }
+
+        obj.searchURL = function(query){
+            return "/?"+this.page_and_parents+"/search/"+query;
+        }
+
+        obj.baseURL = function(){ 
+            if(this.parents)
+            {
+                return "/?"+this.parents;
+            }
+
+            return "/?"+this.page_type;
+        }
+
+        return obj
+    }
 }
 
 /**
@@ -333,47 +381,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
     })
 
     // Страница элемента вложенного куда угодно
-    var regexp_in_other = function(regexp)
-            {
-                console.log(regexp)
-                return function(url)
-                {
-                    var res = guiTestUrl(regexp, url)
-                    if(!res)
-                    {
-                        return false;
-                    }
-
-                    var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_and_parents = res[0]    // страница+родители
-
-
-                    if(obj.page_and_parents)
-                    {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
-
-                        if(match && match.groups)
-                        {
-                            obj.parent_type = match.groups.parent_type
-                            obj.parent_id = match.groups.parent_id
-                            obj.page_type = match.groups.page_type
-                        }
-                    }
-
-                    obj.baseURL = function(){
-                        debugger;
-                        if(this.parents)
-                        {
-                            return "/?"+this.parents;
-                        }
-
-                        return "/?"+this.page_type;
-                    }
-
-                    return obj
-                }
-            }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+action.view.name+")$");
+    var regexp_in_other = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+action.view.name+")$", api_path_value);
 
     page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
 }
@@ -423,56 +431,7 @@ function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
     var page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
 
     // Страница элемента вложенного куда угодно
-    var regexp_in_other = function(regexp)
-            {
-                return function(url)
-                {
-                    var res = guiTestUrl(regexp, url)
-                    if(!res)
-                    {
-                        return false;
-                    }
-
-                    var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-                    obj.page_and_parents = res[0]    // страница+родители
-
-
-                    if(obj.page_and_parents)
-                    {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
-
-                        if(match && match.groups)
-                        {
-                            obj.parent_type = match.groups.parent_type
-                            obj.parent_id = match.groups.parent_id
-                            obj.page_type = match.groups.page_type
-                        }
-                    }
-                    /*
-                    if(obj.parents)
-                    {
-                        var match = obj.parents.match(/([A-z]+)\/([0-9]+)\/$/)
-
-                        if(match && match[1] && match[2] && match[2])
-                        {
-                            obj.parent_type = match[1]
-                            obj.parent_id = match[2]
-                        }
-                    }*/
-
-                    obj.baseURL = function(){
-                        if(this.parents)
-                        {
-                            return "/?"+this.parents;
-                        }
-
-                        return "/?"+this.page_and_parents;
-                    }
-
-                    return obj
-                }
-            }(page_url_regexp);
+    var regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_path_value);
 
     page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
 }
@@ -495,43 +454,14 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     var api_path_value = api.openapi.paths[api_path]
     api_path_value.api_path = api_path
 
-    path_regexp.push(function(regexp)
-            {
-                return function(url)
-                {
-                    var res = guiTestUrl(regexp, url)
-                    if(!res)
-                    {
-                        return false;
-                    }
+    let pathregexp = "^"
+        +"(?<page_and_parents>"
+            +"(?<parents>[A-z]+\\/[0-9]+\\/)*"
+            +"(?<page>"+getNameForUrlRegExp(api_path)+"))"
+        +"(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}"
+        +"(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"
 
-                    var obj = res.groups
-
-                    obj.url = res[0]                 // текущий урл в блоке
-
-                    if(obj.page_and_parents)
-                    {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
-
-                        if(match && match.groups)
-                        {
-                            obj.parent_type = match.groups.parent_type
-                            obj.parent_id = match.groups.parent_id
-                            obj.page_type = match.groups.page_type
-                        }
-                    }
-
-                    obj.searchURL = function(query){
-                        return "/?"+this.page_and_parents+"/search/"+query;
-                    }
-
-                    obj.baseURL = function(){
-                        return "/?"+this.page_and_parents;
-                    }
-
-                    return obj
-                }
-            }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"))
+    path_regexp.push(guiGetTestUrlFunctionfunction(pathregexp, api_path_value))
 
 
     // Поля для поиска
@@ -576,48 +506,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
             })
 
             // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
-            var new_page_url = function(regexp)
-                {
-                    return function(url)
-                    {
-                        var res = guiTestUrl(regexp, url)
-                        if(!res)
-                        {
-                            return false;
-                        }
-
-                        var obj = res.groups
-                        obj.url = res[0]                 // текущий урл в блоке
-                        obj.page_and_parents = res[0]    // страница+родители
-
-
-                        if(obj.page_and_parents)
-                        {
-                            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
-
-                            if(match && match.groups)
-                            {
-                                obj.parent_type = match.groups.parent_type
-                                obj.parent_id = match.groups.parent_id
-                                obj.page_type = match.groups.page_type
-                            }
-                        }
-
-                        obj.baseURL = function(id){
-
-                            var url = "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
-
-                            if(id)
-                            {
-                                url+= '/'+id
-                            }
-
-                            return url;
-                        }
-
-                        return obj
-                    }
-                }("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$")
+            var new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_path_value)
 
             // Создали страницу
             let page_new = new guiPage();
@@ -676,38 +565,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
         })
 
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
-        var add_page_url = function(regexp)
-            {
-                return function(url)
-                {
-                    var res = guiTestUrl(regexp, url)
-                    if(!res)
-                    {
-                        return false;
-                    }
-
-                    var obj = res.groups
-                    obj.url = res[0]                 // текущий урл в блоке
-
-                    if(obj.page_and_parents)
-                    {
-                        var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)\/add$/)
-
-                        if(match && match.groups)
-                        {
-                            obj.parent_type = match.groups.parent_type
-                            obj.parent_id = match.groups.parent_id
-                            obj.page_type = match.groups.page_type
-                        }
-                    }
-
-                    obj.baseURL = function(id){
-                        return "/?"+this.page_and_parents.replace(/\/[^/]+$/, "")
-                    }
-
-                    return obj
-                }
-            }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
+        var add_page_url = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_path_value)
 
         // Создали страницу
         var page_add = new guiPage();
@@ -1026,44 +884,7 @@ function openApi_paths(api)
 function openApi_add_page_for_adding_subitems()
 {
 
-    var path_regexp = function(regexp)
-        {
-            return function(url)
-            {
-                var res = guiTestUrl(regexp, url)
-                if(!res)
-                {
-                    return false;
-                }
-
-                var obj = res.groups
-
-                obj.url = res[0]                 // текущий урл в блоке
-                obj.page_type = res[2]           // тип страницы в блоке
-
-                if(res[1])
-                {
-                    var match = res[1].match(/([A-z]+)\/([0-9]+)\/([A-z]+)$/)
-
-                    if(match && match[1] && match[2] && match[2])
-                    {
-                        obj.parent_type = match[1]
-                        obj.parent_id = match[2]
-                    }
-                }
-
-                obj.searchURL = function(query){
-                    return "/?"+this.page_and_parents+"/search/"+query;
-                }
-
-                obj.baseURL = function(){
-                    return "/?"+this.page_and_parents;
-                }
-
-
-                return obj
-            }
-        }("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$")
+    var path_regexp = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_path_value)
 
     // Настроили страницу списка
     page.blocks.push({

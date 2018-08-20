@@ -24,7 +24,7 @@ function renderBreadcrumbs(){
 
     return spajs.just.onInsert('<ol class="breadcrumb">\n</ol>', () => {
         $.when.apply($, arr).done(function(test)
-        {
+        { 
             var arr_obj = []
             var cur_url = []
             for (var i = 0; i < (element_name.length * 2); i++) {
