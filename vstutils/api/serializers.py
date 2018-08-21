@@ -130,6 +130,10 @@ class DataSerializer(EmptySerializer):
         )
 
 
+class JsonObjectSerializer(DataSerializer):
+    pass
+
+
 class ErrorSerializer(DataSerializer):
     detail = serializers.CharField(required=True)
 
