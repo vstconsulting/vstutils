@@ -41,11 +41,24 @@
     </a>
 </script>
 
+<script>
+    function set_api_options(options) {
+        let additional_options = "";
+        if (options.readOnly) { additional_options += "readonly disabled "}
+        if (options.minLength) { additional_options += "minlength='" + options.minLength + "' "}
+        if (options.maxLength) { additional_options += "maxlength='" + options.maxLength + "' "}
+        if (/^Required/.test(options.description)) { additional_options += "required "}
+        if (options.default) { additional_options += "placeholder='"+ options.default +"' "}
+        if (options.pattern) { additional_options += "pattern='"+ options.pattern +"' "}
+        return additional_options;
+    }
+</script>
+
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">   
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
         <label class="control-label"><%- opt.title %></label>
-        <input type="text" class="form-control" <% if (this.data.opt.readOnly){ %> readonly disabled <% } %> placeholder="Enter project name" id="<%- guiElement.element_id %>" value="<%- value || '' %>">
+        <input type="text" class="form-control" <%- set_api_options(opt) %> placeholder="Enter project name" id="<%- guiElement.element_id %>" value="<%- value || '' %>">
         <div class="help-block"><%- opt.description || '' %></div>
     </div>
 </script>
@@ -58,10 +71,70 @@
         <label class="control-label"><%- opt.title %></label>
         <select id="<%- guiElement.element_id %>"  class="form-control" >
             <% for(var i in opt.enum){ %>
-                <option value='<%- opt.enum[i] %>' <% if(value == opt.enum[i]){%>selected<% } %> ><%- opt.enum[i] %></option>
+                <option value='<%- opt.enum[i] %>' <% if(value == opt.enum[i]) { %>selected<% } %> ><%- opt.enum[i] %></option>
             <% } %>
         </select> 
         <div class="help-block"><%- opt.description || '' %></div>
     </div>
 </script>
 
+
+<!-- guiElements.boolean -->
+<script type="text/x-just" data-just="guiElements.boolean">
+    <!-- guiElements.boolean -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
+        <label class="control-label"><%- opt.title %></label>
+        <label class="control-label" ><%- opt.title %></label>
+        <div class="form-control selected"
+                onclick="$(this).toggleClass('selected');"
+                onselectstart="return false"
+                onmousedown="return false"
+                style="cursor: pointer;"
+                id="filed_<%- opt.name %>">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+            <div class="boolean-title" >Boolean value</div>
+        </div>
+        <div class="help-block"><%- opt.help || '' %></div>
+    </div>
+</script>
+
+<!-- guiElements.file -->
+<script type="text/x-just" data-just="guiElements.file">
+    <!-- guiElements.file -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label"><%- opt.title %></label>
+        <% debugger; %>
+        <span id="deleteFileId_<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' onclick="$("#loadFileId_<%- guiElement.element_id %>").find('input')[0].value='';$("#fileContent_<%- guiElement.element_id %>")[0].value='';" style='float: right; margin-left: 10px; margin-bottom:10px;'>
+            <span class='glyphicon glyphicon-remove'>
+            </span>
+        </span>
+
+        <span id="<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'>
+            <input type='file' class='input-file'>
+            <span class='glyphicon glyphicon-file'>
+            </span>
+        </span>
+            <textarea placeholder='Enter value' id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"></textarea>
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
+
+<script type="text/x-just" data-just=""guiElements.html_textarea">
+    <!-- guiElements.secret_file -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label"><%- opt.title %></label>
+        <code id="<%- guiElement.element_id %>" placeholder="<%= opt.default %>"value=<%= value || '' %> ></code>
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
+
+<!-- guiElements.textarea -->
+<script type="text/x-just" data-just="guiElements.textarea">
+    <!-- guiElements.textarea -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
+    <label class="control-label"><%- opt.title %></label>
+    <textarea rows="3" cols="50" class='form-control' style="resize:vertical;"></textarea>
+    <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
