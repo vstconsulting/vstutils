@@ -109,6 +109,26 @@ basePageView.renderFiled = function(filed, render_options)
             }
             this.model.guiFileds[filed.name] = new window.guiElements[type](filed, filed_value)
         }
+         
+        // Добавление связи с зависимыми полями
+        if(filed.dependsOn)
+        {
+            let thisFiled = this.model.guiFileds[filed.name]
+            if(thisFiled.updateOptions)
+            {
+                for(let i in filed.dependsOn)
+                {
+                    let parentFiled = this.model.guiFileds[filed.dependsOn[i]]
+                    if(parentFiled && parentFiled.onChange)
+                    {
+                        parentFiled.onChange(function(){
+                            thisFiled.updateOptions.call(arguments);
+                        })
+                    }
+                }
+            }
+        }
+        
     }
 
     return this.model.guiFileds[filed.name].render($.extend({}, render_options))

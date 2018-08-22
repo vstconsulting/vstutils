@@ -48,8 +48,7 @@ function renderBreadcrumbs(){
                 }
             }
             let html = spajs.just.render("page_breadcrumb", {arr: arr_obj})
-            $(".breadcrumb").insertTpl(html)
-            debugger;
+            $(".breadcrumb").insertTpl(html) 
         })
 
     })

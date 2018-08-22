@@ -38,7 +38,12 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
         var val = list.properties[i]
         val.name = i
 
-
+        val.required = false
+        if($.inArray(i, list.required) != -1)
+        {
+            val.required = true
+        }
+ 
         list_fileds.push(val)
     }
 
@@ -53,7 +58,12 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
         var val = one.properties[i]
         val.name = i
 
-
+        val.required = false
+        if($.inArray(i, one.required) != -1)
+        {
+            val.required = true
+        }
+  
         one_fileds.push(val)
     }
 
