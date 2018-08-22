@@ -334,7 +334,7 @@
 								if (!tmp[1].length) {
 									tmp = tmp[0];
 								} else {
-									tmp = tmp.join(',');
+									tmp = tmp.join('');
 								}
 								buffer.push(prefix, tmp, postfix);
 								tmp = undefined;

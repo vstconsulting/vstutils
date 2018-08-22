@@ -50,6 +50,17 @@ basePageView.validateByModel = function (values)
    return values;
 }
 
+basePageView.renderAllFileds = function(opt)
+{ 
+    let html = []
+    for(let i in opt.fileds)
+    { 
+        html.push(this.renderFiled(opt.fileds[i], opt))
+    }
+    
+    return html.join("")
+}
+
 /**
  * Отрисует поле при отрисовке объекта.
  * @param {object} filed
@@ -611,6 +622,7 @@ function guiItemFactory(api, both_view, list, one)
                 
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
+                if(!render_options.page_type) render_options.page_type = 'one'
 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
@@ -996,6 +1008,7 @@ function guiItemFactory(api, both_view, list, one)
                    
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
+                if(!render_options.page_type) render_options.page_type = 'list'
 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
@@ -1436,8 +1449,9 @@ function guiActionFactory(api, action)
             let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
             
             render_options.fileds = this.getFields('renderAsPage')
-            render_options.sections = this.getSections('renderAsPage') 
-
+            render_options.sections = this.getSections('renderAsPage')  
+            if(!render_options.page_type) render_options.page_type = 'action'
+                
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
         }
 

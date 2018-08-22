@@ -77,6 +77,9 @@ guiElements.string = function(opt, value)
      * Добавляет колбек на событие onChange чтоб зависимые поля могли вовремя перестроиться
      * @param {function} callback
      * @returns {undefined}
+     * 
+     * @example На пример так поле notes становится зависимым от поля name у проектов
+     *  window.api.openapi.definitions.OneProject.properties.notes.dependsOn = ['name']
      */
     this.onChange = function(callback)
     {
