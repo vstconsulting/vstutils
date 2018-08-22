@@ -114,12 +114,28 @@ basePageView.renderFiled = function(filed, render_options)
     return this.model.guiFileds[filed.name].render($.extend({}, render_options))
 }
 
+/**
+ * Получает значения всех полей из this.model.guiFileds
+ * 
+ * Если поле вернёт объект то этот объект будет смёржен с результирующим объектом,
+ * таким образом одно поле может вернуть более одного зщначения в модель
+ * 
+ * @returns {basePageView.getValue.obj}
+ */
 basePageView.getValue = function ()
 {
     var obj = {}
     for(var i in this.model.guiFileds)
     {
-        obj[i] = this.model.guiFileds[i].getValue();
+        let val = this.model.guiFileds[i].getValue();
+        if(typeof val == "object")
+        {
+            obj = mergeDeep(obj, val);
+        }
+        else 
+        {
+            obj[i] = val;
+        }
     }
 
     return obj;
