@@ -84,15 +84,14 @@
     <!-- guiElements.boolean -->
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 boolean-select">
         <label class="control-label"><%- opt.title %></label>
-        <label class="control-label" ><%- opt.title %></label>
-        <div class="form-control selected"
-                onclick="$(this).toggleClass('selected');"
+        <div class="form-control <% if (value) { %> selected <% } %>"
+                <% if (!opt.readOnly) { %> onclick="$(this).toggleClass('selected');" <% } %>
                 onselectstart="return false"
                 onmousedown="return false"
                 style="cursor: pointer;"
-                id="filed_<%- opt.name %>">
-            <div class="ico-on fa fa-toggle-on"></div>
-            <div class="ico-off fa  fa-toggle-off"></div>
+                id="<%- guiElement.element_id %>" >
+            <div class="ico-on fa fa-toggle-on" <% if (opt.readOnly) { %> style="cursor: not-allowed!important;" <% } %> ></div>
+            <div class="ico-off fa  fa-toggle-off" <% if (opt.readOnly) { %> style="cursor: not-allowed!important;" <% } %> ></div>
             <div class="boolean-title" >Boolean value</div>
         </div>
         <div class="help-block"><%- opt.help || '' %></div>

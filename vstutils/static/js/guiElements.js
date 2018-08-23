@@ -154,7 +154,7 @@ guiElements.boolean = function(opt, value)
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.render = function(render_options = {})
     {
-        debugger;
+        //debugger;
         if(!opt)
         {
             opt = {}
@@ -172,7 +172,8 @@ guiElements.boolean = function(opt, value)
 
     this.getValue = function()
     {
-        return $("#"+this.element_id).val()
+        //return $("#"+this.element_id).val()
+        return $("#"+this.element_id).hasClass('selected');
     }
 }
 

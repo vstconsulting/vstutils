@@ -68,6 +68,10 @@ basePageView.renderFiled = function(filed, render_options)
             var obj = getObjectBySchema(filed.$ref)
 
         }
+        else if(filed.items !== undefined && filed.items.$ref)
+        {
+            var obj = getObjectBySchema(filed.items.$ref)
+        }
 
         if(obj)
         {
@@ -365,7 +369,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    $.notify("Changes in "+thisObj.getBulkName()+" were successfully created", "success");
+                    $.notify("New entity in "+thisObj.getBulkName()+" was successfully created", "success");
                 })
                 return res;
             }
@@ -428,6 +432,14 @@ function guiItemFactory(api, both_view, list, one)
                         {
                             operations = this.model.pathInfo.patch.operationId.split("_");
                             query_method = "patch"
+                        }
+
+                        if(method == 'set' && this.model.pathInfo.post && this.model.pathInfo.post.operationId
+                           && this.model.pathInfo.patch === undefined
+                           && this.model.pathInfo.put === undefined)
+                        {
+                            operations = this.model.pathInfo.post.operationId.split("_");
+                            query_method = "post"
                         }
 
                         if(operations.length >= 3)
