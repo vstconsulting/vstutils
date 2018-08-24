@@ -58,7 +58,7 @@
             html += "<="+window.JUST.JustEvalJsPattern_pageUUID+" "+funcCall+" "+window.JUST.JustEvalJsPattern_pageUUID+"=>";
             return html;
         }
- 
+
         var JustEvalJsPattern_pageUUID = getUUID("pageUUID");
 
 
@@ -304,7 +304,7 @@
 							}
 							switch (state) {
 							case STATE_RAW:
-								buffer.push(prefix, text.substr(jsFromPos).replace(trimExp, ''), postfix);
+								buffer.push(prefix, 'JustWaitResults('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
 								break;
 							case STATE_TEXT:
 								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
@@ -398,7 +398,7 @@
 				};
 			Template.prototype.blockStart = function (name) {
                                 this.tmpBufferNames.push(name)
-               
+
 				this.tmpBuffer[name] = this.buffer;
 				if (!this.blocks[name]) { this.blocks[name] = []; }
 				if (!this.blocks[name].length) {
@@ -504,12 +504,12 @@
                             {
                                 console.error("renderSync error", template, data)
                             }
-                            
+
                             if(typeof onInsertFunc == 'function')
                             {
                                 html = this.onInsert(html, onInsertFunc, false);
                             }
-                           
+
                             return html;
 			};
 			this.render = this.renderSync
@@ -671,6 +671,29 @@ function JustEscapeHtml(text) {
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
+function JustWaitResults(data) {
+
+    if(typeof data == "object")
+    {
+        if(data.then)
+        {
+            let id = ""+Math.random()+""+Math.random()+""+Math.random()+""+Math.random()
+            id = id.replace(/0\./, "");
+
+            return JUST.onInsert('<div class="just just-wait-results just-loading" id="'+id+'" ></div>', function()
+            {
+                data.then((d) => {
+                    $("#"+id).insertTpl(d).removeCalss('just-loading').addCalss('just-loaded')
+                }, (e) => {
+                    $("#"+id).insertTpl(e).removeCalss('just-loading').addCalss('just-loaded')
+                })
+            }, true)
+        }
+    }
+
+    return data
+}
+
 justCall_mapArr = []
 function justCall(obj)
 {
@@ -680,12 +703,12 @@ function justCall(obj)
 }
 
 function justOn(event, action){
-    
+
     let id = Math.floor(Math.random()*900000);
-     
+
     return JUST.onInsert(" id='"+id+"' ", function(){
-        $("#"+id).on(event, action) 
-    }, true) 
+        $("#"+id).on(event, action)
+    }, true)
 }
 
 

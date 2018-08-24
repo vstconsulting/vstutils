@@ -496,7 +496,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
         }
         else
         {
-            // Значит добавим кнsопку создать объект
+            // Значит добавим кнsопку создать объект 
             page.blocks.push({
                 id:'btn-create',
                 prioritet:9,
@@ -592,8 +592,10 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
             prioritet:10,
             render:function(pageMainBlockObject, api_path_value)
             {
-                return function(menuInfo, data)
+                return function(menuInfo, data, thisGuiPage)
                 {
+                    // Тут this укажет на контекст guiPage
+                    
                     var def = new $.Deferred();
 
                     // Создали список хостов

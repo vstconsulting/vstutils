@@ -679,8 +679,8 @@ function guiItemFactory(api, both_view, list, one)
                     return "";
                 }
 
-                render_options.fileds = this.getFields('renderAsAddSubItemsPage')
-                render_options.sections = this.getSections('renderAsAddSubItemsPage')
+                render_options.fileds = this.getFields('render')
+                render_options.sections = this.getSections('render')
 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
