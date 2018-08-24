@@ -6,7 +6,8 @@ concurrency =
     multiprocessing
 omit =
     *.tox/*
-    */management/*
+    */management/commands/web.py
+    */management/commands/_base.py
     */*/migrations/*
     */main/wsgi.py
     */manage.py

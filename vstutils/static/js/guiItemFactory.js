@@ -51,23 +51,23 @@ basePageView.validateByModel = function (values)
 }
 
 basePageView.renderAllFileds = function(opt)
-{ 
+{
     let html = []
     for(let i in opt.fileds)
-    { 
+    {
         html.push(this.renderFiled(opt.fileds[i], opt))
     }
-    
+
     let id =  getNewId();
     return JUST.onInsert('<div class="fileds-block" id="'+id+'" >'+html.join("")+'</div>', () => {
-         
-        let fileds = $('#'+id+" .gui-not-required") 
+
+        let fileds = $('#'+id+" .gui-not-required")
         if(!this.view.hide_non_required || this.view.hide_non_required >= fileds.length)
         {
             return;
         }
-             
-        fileds.hide() 
+
+        fileds.hide()
         $('#'+id).appendTpl(spajs.just.render('show_not_required_fileds', {fileds:fileds, opt:opt}))
     })
 }
@@ -78,7 +78,7 @@ basePageView.renderAllFileds = function(opt)
  * @returns {html}
  */
 basePageView.renderFiled = function(filed, render_options)
-{ 
+{
     if(!this.model.guiFileds[filed.name])
     {
         if(filed.schema && filed.schema.$ref)
@@ -89,6 +89,10 @@ basePageView.renderFiled = function(filed, render_options)
         {
             var obj = getObjectBySchema(filed.$ref)
 
+        }
+        else if(filed.items !== undefined && filed.items.$ref)
+        {
+            var obj = getObjectBySchema(filed.items.$ref)
         }
 
         if(obj)
@@ -131,7 +135,7 @@ basePageView.renderFiled = function(filed, render_options)
             }
             this.model.guiFileds[filed.name] = new window.guiElements[type](filed, filed_value)
         }
-         
+
         // Добавление связи с зависимыми полями
         if(filed.dependsOn)
         {
@@ -150,7 +154,7 @@ basePageView.renderFiled = function(filed, render_options)
                 }
             }
         }
-        
+
     }
 
     return this.model.guiFileds[filed.name].render($.extend({}, render_options))
@@ -158,10 +162,10 @@ basePageView.renderFiled = function(filed, render_options)
 
 /**
  * Получает значения всех полей из this.model.guiFileds
- * 
+ *
  * Если поле вернёт объект то этот объект будет смёржен с результирующим объектом,
  * таким образом одно поле может вернуть более одного зщначения в модель
- * 
+ *
  * @returns {basePageView.getValue.obj}
  */
 basePageView.getValue = function ()
@@ -174,7 +178,7 @@ basePageView.getValue = function ()
         {
             obj = mergeDeep(obj, val);
         }
-        else 
+        else
         {
             obj[i] = val;
         }
@@ -218,9 +222,9 @@ guiBaseItemFactory.getShortestApiURL = function ()
     return url;
 }
 
- 
+
 guiBaseItemFactory.getTemplateName = function (type, default_name)
-{ 
+{
     var tpl = this.getBulkName() + '_'+type
     if (!spajs.just.isTplExists(tpl))
     {
@@ -230,7 +234,7 @@ guiBaseItemFactory.getTemplateName = function (type, default_name)
         }
         return 'entity_'+type
     }
-     
+
     return tpl;
 }
 
@@ -267,7 +271,7 @@ guiBaseItemFactory.getSections = function (type)
 }
 
 guiBaseItemFactory.getBulkName = function ()
-{ 
+{
     if(!this.model || !this.model.pathInfo)
     {
         return this.view.bulk_name;
@@ -289,13 +293,13 @@ guiBaseItemFactory.getBulkName = function ()
 
 guiBaseItemFactory.actions = {}
 guiBaseItemFactory.sublinks = {}
-    
+
 /**
  * Фабрика классов объектов
  * @returns {Object}
  */
 function guiItemFactory(api, both_view, list, one)
-{ 
+{
     var thisFactory = {
         /**
          * Фабрика объектов сущьности
@@ -424,7 +428,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    $.notify("Changes in "+thisObj.getBulkName()+" were successfully created", "success");
+                    $.notify("New entity in "+thisObj.getBulkName()+" was successfully created", "success");
                 })
                 return res;
             }
@@ -487,6 +491,14 @@ function guiItemFactory(api, both_view, list, one)
                         {
                             operations = this.model.pathInfo.patch.operationId.split("_");
                             query_method = "patch"
+                        }
+
+                        if(method == 'set' && this.model.pathInfo.post && this.model.pathInfo.post.operationId
+                           && this.model.pathInfo.patch === undefined
+                           && this.model.pathInfo.put === undefined)
+                        {
+                            operations = this.model.pathInfo.post.operationId.split("_");
+                            query_method = "post"
                         }
 
                         if(operations.length >= 3)
@@ -628,9 +640,9 @@ function guiItemFactory(api, both_view, list, one)
              * @returns {string|promise}
              */
             this.renderAsPage = function (render_options = {})
-            { 
+            {
                 let tpl = this.getTemplateName('one')
-                
+
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'one'
@@ -645,7 +657,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsNewPage = function (render_options = {})
             {
                 let tpl = this.getTemplateName('new')
-                 
+
                 render_options.fileds = this.getFields('renderAsNewPage')
                 render_options.sections = this.getSections('renderAsNewPage')
                 render_options.hideReadOnly = true
@@ -659,9 +671,9 @@ function guiItemFactory(api, both_view, list, one)
              * @returns {string|promise}
              */
             this.render = function (render_options = {})
-            { 
+            {
                 let tpl = this.getTemplateName('one_as_filed')
-                  
+
                 if(render_options.hideReadOnly)
                 {
                     return "";
@@ -1016,7 +1028,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsPage = function (render_options = {})
             {
                 let tpl = this.getTemplateName('list')
-                   
+
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'list'
@@ -1031,7 +1043,7 @@ function guiItemFactory(api, both_view, list, one)
             this.renderAsAddSubItemsPage = function (render_options = {})
             {
                 let tpl = this.getTemplateName('list_add_subitems')
-                    
+
                 render_options.fileds = this.getFields('renderAsAddSubItemsPage')
                 render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
@@ -1187,7 +1199,7 @@ function guiItemFactory(api, both_view, list, one)
      * Представление полученное из апи
      */
     thisFactory.one.view = one.view
- 
+
     thisFactory.view = both_view
 
     thisFactory.one = $.extend(thisFactory.one, guiBaseItemFactory)
@@ -1198,31 +1210,31 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    {  
+    {
         if(this.view && this.view.defaultName)
         {
-            return this.view.defaultName 
+            return this.view.defaultName
         }
-        
+
         if(this.list && this.list.view  && this.list.view.definition  && this.list.view.definition.properties)
         {
-            if(this.list.view.definition.properties.name)
+            if(this.one.view.definition.properties.name)
             {
                 return "name"
             }
-            if(this.list.view.definition.properties.username)
+            if(this.one.view.definition.properties.name)
             {
                 return "username"
             }
-            if(this.list.view.definition.properties.key)
+            if(this.one.view.definition.properties.name)
             {
                 return "key"
             }
         }
-        
+
         return "id";
     }
- 
+
     return thisFactory;
 }
 
@@ -1314,7 +1326,7 @@ function guiActionFactory(api, action)
         }
 
         this.sendToApi = function (method)
-        { 
+        {
             var def = new $.Deferred();
             var data = {}
 
@@ -1465,11 +1477,11 @@ function guiActionFactory(api, action)
         this.renderAsPage = function (render_options = {})
         {
             let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
-            
+
             render_options.fileds = this.getFields('renderAsPage')
-            render_options.sections = this.getSections('renderAsPage')  
+            render_options.sections = this.getSections('renderAsPage')
             if(!render_options.page_type) render_options.page_type = 'action'
-                
+
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
         }
 
@@ -1478,7 +1490,7 @@ function guiActionFactory(api, action)
         res.init(page_options)
         return res;
     }
-  
+
     thisFactory.api = api
 
     thisFactory.view = action

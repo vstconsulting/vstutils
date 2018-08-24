@@ -1,0 +1,5 @@
+from vstutils.environment import cmd_execution, sys
+sys.path.append('./')
+import {{project_name}}
+
+cmd_execution()

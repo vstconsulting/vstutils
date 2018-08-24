@@ -1,0 +1,24 @@
+[metadata]
+name = {{project_name}}
+version = attr: {{project_name}}.__version__
+# description =
+long_description = file: README.rst
+# license = Apache Software License
+keywords = web, app
+classifiers =
+    Environment :: Web Environment
+    Framework :: Django
+    Operating System :: OS Independent
+    Programming Language :: Cython
+    Programming Language :: Python
+    Programming Language :: Python :: 2
+    Programming Language :: Python :: 2.7
+    Programming Language :: Python :: 3
+    Programming Language :: Python :: 3.5
+    Programming Language :: Python :: 3.6
+    Topic :: Software Development :: Libraries
+    Topic :: Internet :: WWW/HTTP
+    Topic :: Internet :: WWW/HTTP :: Dynamic Content
+    Topic :: Utilities
+
+[aliases]

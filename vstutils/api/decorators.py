@@ -183,17 +183,38 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         kwargs.update(options)
         return nested_action(*args, **kwargs)
 
+    def _filter_methods(self, methods, detail=False):
+        allowed_methods = self.view.get_view_methods(detail)
+        return [method for method in methods if method in allowed_methods]
+
     def decorated_list(self):
         name, view = self.get_list_view()
-        return name, self.get_decorator(
-            url_name='{}-list'.format(self.name), suffix='List'
-        )(view)
+        kwargs = dict(url_name='{}-list'.format(self.name), suffix='List')
+        methods = self.methods or []
+        if not self.methods:
+            methods = []
+            if getattr(self.view, 'create', None) is not None:
+                methods += ['post']
+            if getattr(self.view, 'list', None) is not None:
+                methods += ['get']
+        kwargs['methods'] = self._filter_methods(methods)
+        return name, self.get_decorator(**kwargs)(view)
 
     def decorated_detail(self):
         name, view = self.get_detail_view()
-        return name, self.get_decorator(
-            True, url_name='{}-detail'.format(self.name)
-        )(view)
+        kwargs = dict(url_name='{}-detail'.format(self.name))
+        methods = self.methods or []
+        if not self.methods:
+            if getattr(self.view, 'retrieve', None) is not None:
+                methods += ['get']
+            if getattr(self.view, 'update', None) is not None:
+                methods += ['put']
+            if getattr(self.view, 'partial_update', None) is not None:
+                methods += ['patch']
+            if getattr(self.view, 'destroy', None) is not None:
+                methods += ['delete']
+        kwargs['methods'] = self._filter_methods(methods, detail=True)
+        return name, self.get_decorator(True, **kwargs)(view)
 
     def _get_decorated_sub(self, sub):
         name, subaction_view = self.get_sub_view(sub)

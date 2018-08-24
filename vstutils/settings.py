@@ -165,7 +165,7 @@ except IOError:
 ##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', main.getboolean("debug", False))
-ALLOWED_HOSTS = main.getlist("allowed_hosts")
+ALLOWED_HOSTS = main.getlist("allowed_hosts", '*')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # Include some addons if packages exists in env

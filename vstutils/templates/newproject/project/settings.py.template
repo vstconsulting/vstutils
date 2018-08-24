@@ -1,0 +1,5 @@
+from vstutils.settings import *
+
+INSTALLED_APPS += [
+    '{{project_name}}',
+]

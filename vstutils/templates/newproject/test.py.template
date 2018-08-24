@@ -1,0 +1,19 @@
+from vstutils.tests import BaseTestCase
+
+
+class {{project_name|title}}UnitTestCase(BaseTestCase):
+
+    def setUp(self):
+        super({{project_name|title}}UnitTestCase, self).setUp()
+
+    def tearDown(self):
+        super({{project_name|title}}UnitTestCase, self).tearDown()
+
+
+class {{project_name|title}}TestCase(BaseTestCase):
+
+    def setUp(self):
+        super({{project_name|title}}TestCase, self).setUp()
+
+    def tearDown(self):
+        super({{project_name|title}}TestCase, self).tearDown()

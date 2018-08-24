@@ -137,6 +137,108 @@ guiElements.enum = function(opt, value)
     }
 }
 
+guiElements.file = function(opt)
+{
+    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+
+    this.loadFile = function(event)
+    {
+        debugger;
+        console.log("loadFile", event.target.files)
+        for (var i = 0; i < event.target.files.length; i++)
+        {
+            if (event.target.files[i].size > 1024 * 1024 * 1)
+            {
+                $.notify("File too large", "error");
+                console.log("File too large " + event.target.files[i].size)
+                continue;
+            }
+
+            var reader = new FileReader();
+            debugger;
+            reader.onload = function (e)
+            {
+                debugger;
+                $('#fileContent_' + element)[0].setAttribute("value", e.target.result);
+                $(element).val(e.target.result)
+            }
+
+            reader.readAsText(event.target.files[i]);
+            return;
+        }
+    }
+
+    this.render = function(render_options = {})
+    {
+        if(!opt)
+        {
+            opt = {}
+        }
+
+        let options = $.extend({}, opt, render_options);
+
+        //return spajs.just.render("guiElements.file", {opt:options, guiElement:this});
+        return spajs.just.render("guiElements.file", {opt:options, guiElement:this},() => {
+            debugger;
+            $('#'+this.element_id).on('change', false, this.loadFile)
+        });
+    }
+}
+
+guiElements.boolean = function(opt, value)
+{
+    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+    this.render = function(render_options = {})
+    {
+        //debugger;
+        if(!opt)
+        {
+            opt = {}
+        }
+
+        let options = $.extend({}, opt, render_options)
+
+        if(options.hideReadOnly && opt.readOnly)
+        {
+            return "";
+        }
+
+        return spajs.just.render("guiElements.boolean", {opt:options, guiElement:this, value:value});
+    }
+
+    this.getValue = function()
+    {
+        //return $("#"+this.element_id).val()
+        return $("#"+this.element_id).hasClass('selected');
+    }
+}
+
+guiElements.textarea = function(opt)
+{
+    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+    this.render = function(render_options = {})
+    {
+        if(!opt)
+        {
+            opt = {}
+        }
+
+        let options = $.extend({}, opt, render_options)
+
+        if(options.hideReadOnly && opt.readOnly)
+        {
+            return "";
+        }
+
+        return spajs.just.render("guiElements.textarea", {opt:options, guiElement:this});
+    }
+
+    this.getValue = function()
+    {
+        return $("#"+this.element_id).val()
+    }
+}
+
 /**
  *
     TYPE_OBJECT = "object"  #:

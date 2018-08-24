@@ -118,59 +118,25 @@ def make_setup(**opts):
 # end block
 
 ext_list = [
-    'vstutils.exceptions',
-    'vstutils.environment',
-    'vstutils.middleware',
-    'vstutils.tests',
-    'vstutils.auth',
-    'vstutils.urls',
-    'vstutils.utils',
-    'vstutils.models',
-    'vstutils.ldap_utils',
-    'vstutils.templatetags.vstconfigs',
-    'vstutils.templatetags.request_static',
-    'vstutils.gui.views',
-    'vstutils.gui.context',
-    'vstutils.api.base',
-    'vstutils.api.decorators',
-    'vstutils.api.fields',
-    'vstutils.api.filter_backends',
-    'vstutils.api.filters',
-    'vstutils.api.permissions',
-    'vstutils.api.routers',
-    'vstutils.api.schema',
-    'vstutils.api.serializers',
-    'vstutils.api.swagger',
-    'vstutils.api.views',
+    # Modules that should be compiled to C extentions
+    # Allowed '*.py', '*.pyx' and '*.c' files.
+    # Path should formatted as import path. Example:
+    # '{{project_name}}.settings'
 ]
 
 kwargs = dict(
-    packages=find_packages(exclude=['tests', 'test_proj']),
+    packages=find_packages(exclude=['tests']),
     ext_modules_list=ext_list,
     include_package_data=True,
     install_requires=[
-        "django>=1.11,<2.0",
-        'cython>0.28,<1.0',
+        "vstutils=={{vstutils_version}}",
     ] +
-    load_requirements('requirements.txt')
-    + load_requirements('requirements-doc.txt')
-    + load_requirements('requirements-coreapi.txt'),
+    load_requirements('requirements.txt'),
     extras_require={
-        'test': load_requirements('requirements-test.txt'),
-        'rpc': load_requirements('requirements-rpc.txt'),
-        'ldap': load_requirements('requirements-ldap.txt'),
-        'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
-        'prod': load_requirements('requirements-prod.txt'),
     },
     dependency_links=[
-    ] + load_requirements('requirements-git.txt'),
-    entry_points={
-        'console_scripts': ['vstutilsctl=vstutils.__main__:cmd_execution']
-    },
+    ],
     project_urls={
-        "Issue Tracker": "https://github.com/vstconsulting/vstutils/issues",
-        "Source Code": "https://github.com/vstconsulting/vstutils",
-        "Releases": "https://pypi.org/project/vstutils/#history",
     },
 )
 

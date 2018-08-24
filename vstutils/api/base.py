@@ -359,6 +359,21 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         )
 
     @classmethod
+    def get_view_methods(cls, detail=False):
+        methods = []
+        if hasattr(cls, 'create') and not detail:
+            methods.append('post')
+        if hasattr(cls, 'list') or hasattr(cls, 'retrieve'):
+            methods.append('get')
+        if hasattr(cls, 'update') and detail:
+            methods.append('put')
+        if hasattr(cls, 'partial_update') and detail:
+            methods.append('patch')
+        if hasattr(cls, 'destroy') and detail:
+            methods.append('delete')
+        return methods
+
+    @classmethod
     def get_extra_actions(cls):
         return super(GenericViewSet, cls).get_extra_actions()
 
