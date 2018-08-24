@@ -1,8 +1,15 @@
+ 
+// Если количество не обязательных полей больше или равно чем hide_non_required то они будут спрятаны
+guiLocalSettings.setIfNotExists('hide_non_required', 4)
+
+
+// Количество элементов на странице 
+guiLocalSettings.setIfNotExists('page_size', 20)
+ 
 
 function getMenuIdFromApiPath(path){
     return path.replace(/[^A-z0-9\-]/img, "_")+Math.random()
 }
-
 
 function openApi_newDefinition(api, name, definitionList, definitionOne)
 {
@@ -75,27 +82,28 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     }
 */
     window["api"+name] = guiItemFactory(api, {
-        bulk_name:name.toLowerCase().replace(/^One/i, ""),
-       // defaultName:"name"
+        // both view
+        bulk_name:name.toLowerCase().replace(/^One/i, ""), 
     },
     {
-        view:{
-            bulk_name:name.toLowerCase().replace(/^One/i, ""),
+        view:{ // list view
+            urls:{},
             definition:list,
             class_name:"api"+name,
-            page_size:20,
-            urls:{},
+            page_size:guiLocalSettings.get('page_size'),
+            bulk_name:name.toLowerCase().replace(/^One/i, ""),
         },
         model:{
             fileds:list_fileds,
             page_name:name.toLowerCase().replace(/^One/i, ""),
         }
     }, {
-        view:{
-            bulk_name:name.toLowerCase().replace(/^One/i, ""),
+        view:{ // one view
+            urls:{},
             definition:one,
             class_name:"api"+name,
-            urls:{},
+            hide_non_required:guiLocalSettings.get('hide_non_required'),
+            bulk_name:name.toLowerCase().replace(/^One/i, ""),
         },
         model:{
             fileds:one_fileds,
@@ -188,16 +196,17 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         var obj = res.groups
         obj.url = res[0]                 // текущий урл в блоке
         obj.page_and_parents = res[0]    // страница+родители
-
+ 
         if(obj.page_and_parents)
         {
-            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
+            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
 
             if(match && match.groups)
             {
                 obj.parent_type = match.groups.parent_type
                 obj.parent_id = match.groups.parent_id
-                obj.page_type = match.groups.page_type
+                obj.page_type = match.groups.page_type.replace(/\/[A-z]+$/, "")
+                obj.page_name = match.groups.page_type 
             }
         }
 
@@ -205,13 +214,8 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             return "/?"+this.page_and_parents+"/search/"+query;
         }
 
-        obj.baseURL = function(){ 
-            if(this.parents)
-            {
-                return "/?"+this.parents;
-            }
-
-            return "/?"+this.page_type;
+        obj.baseURL = function(){  
+            return "/?"+this.page.replace(/\/[^/]+$/, "");
         }
 
         obj.getApiPath = function (){

@@ -35,7 +35,7 @@
          * @param {type} func
          * @returns {unresolved}
          */
-        var onInsert = function(html, func, once)
+        var onInsert = function(html, func, once = true)
         {
             var key = getUUID()
             window.JUST.__JUST_onInsertFunctions[key] = {func:func, count:0};

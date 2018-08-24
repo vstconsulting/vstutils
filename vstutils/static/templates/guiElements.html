@@ -44,7 +44,12 @@
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">   
     
-    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 gui-filed-<%- opt.name %> <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> ">
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 
+       gui-filed-<%- opt.name %> 
+       <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> "
+       data-title="<%- opt.title %>" 
+       id="gui<%- guiElement.element_id %>"
+       >
         <label class="control-label"><%- opt.title %></label>
         <input type="text" class="form-control" <% if (this.data.opt.readOnly){ %> readonly disabled <% } %> placeholder="Enter project name" id="<%- guiElement.element_id %>" value="<%- value || '' %>">
         <div class="help-block"><%- opt.description || '' %></div>
@@ -65,4 +70,3 @@
         <div class="help-block"><%- opt.description || '' %></div>
     </div>
 </script>
-

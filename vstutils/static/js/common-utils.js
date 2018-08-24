@@ -155,7 +155,8 @@ window.onresize=function ()
 }
 
 var guiLocalSettings = {
-    __settings:{},
+    __settings:{ 
+    },
     get:function(name){
         return this.__settings[name];
     },
@@ -163,9 +164,15 @@ var guiLocalSettings = {
         this.__settings[name] = value;
         window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
         tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+    },
+    setIfNotExists:function(name, value)
+    {
+        if(this.__settings[name] === undefined)
+        {
+            this.__settings[name] = value; 
+        }
     }
-}
-
+} 
 
 if(window.localStorage['guiLocalSettings'])
 {
@@ -179,3 +186,6 @@ if(window.localStorage['guiLocalSettings'])
     }
 }
 
+function getNewId(){
+    return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+}

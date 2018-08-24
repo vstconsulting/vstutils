@@ -58,7 +58,18 @@ basePageView.renderAllFileds = function(opt)
         html.push(this.renderFiled(opt.fileds[i], opt))
     }
     
-    return html.join("")
+    let id =  getNewId();
+    return JUST.onInsert('<div class="fileds-block" id="'+id+'" >'+html.join("")+'</div>', () => {
+         
+        let fileds = $('#'+id+" .gui-not-required") 
+        if(!this.view.hide_non_required || this.view.hide_non_required >= fileds.length)
+        {
+            return;
+        }
+             
+        fileds.hide() 
+        $('#'+id).appendTpl(spajs.just.render('show_not_required_fileds', {fileds:fileds, opt:opt}))
+    })
 }
 
 /**
@@ -1187,23 +1198,23 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    { 
+    {  
         if(this.view && this.view.defaultName)
         {
             return this.view.defaultName 
         }
         
-        if(this.one && this.one.view  && this.one.view.definition  && this.one.view.definition.properties)
+        if(this.list && this.list.view  && this.list.view.definition  && this.list.view.definition.properties)
         {
-            if(this.one.view.definition.properties.name)
+            if(this.list.view.definition.properties.name)
             {
                 return "name"
             }
-            if(this.one.view.definition.properties.name)
+            if(this.list.view.definition.properties.username)
             {
                 return "username"
             }
-            if(this.one.view.definition.properties.name)
+            if(this.list.view.definition.properties.key)
             {
                 return "key"
             }
@@ -1303,7 +1314,7 @@ function guiActionFactory(api, action)
         }
 
         this.sendToApi = function (method)
-        {
+        { 
             var def = new $.Deferred();
             var data = {}
 
@@ -1319,7 +1330,7 @@ function guiActionFactory(api, action)
                     }
                 }
 
-                let value = this.validateByModel(data)
+                /*let value = this.validateByModel(data)
                 data = {}
 
                 for(let i in value[0])
@@ -1328,9 +1339,16 @@ function guiActionFactory(api, action)
                     {
                         data[i] = value[0][i]
                     }
+                }*/
+                let tmp = {};
+                for(let i in data)
+                {
+                    if(data[i] && data[i] != "")
+                    {
+                        tmp[i] = data[i]
+                    }
                 }
-
-
+                data = tmp
 
                 if(!this.model.pathInfo)
                 {
