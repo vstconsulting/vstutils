@@ -18,7 +18,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     {
         return window["api"+name];
     }
-
+    
     var one = definitionOne;
     var list = definitionList;
 
@@ -496,30 +496,6 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
         }
         else
         {
-            // Значит добавим кнsопку создать объект 
-            /*page.blocks.push({
-                id:'btn-create',
-                prioritet:9,
-                render:function(pageMainBlockObject)
-                {
-                    return function(menuInfo, data)
-                    {
-                        let link = window.hostname+"?"+data.reg.page_and_parents+"/new";
-
-                        let btn = new guiElements.link_button({
-                            class:'btn btn-primary',
-                            link: link,
-                            title:'Create new '+pageMainBlockObject.one.getBulkName(),
-                            text:'Create',
-                        })
-
-                        let def = new $.Deferred();
-                        def.resolve(btn.render())
-                        return def.promise();
-                    }
-                }(pageMainBlockObject)
-            })*/
-            
             // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
             var new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_path_value)
 
@@ -552,30 +528,6 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     // Страница добавления под элементов
     if(urlLevel > 2 && pageMainBlockObject.list.getShortestApiURL().level == 2)
     {
-        // Значит добавим кнsопку создать объект
-        /*page.blocks.push({
-            id:'btn-add',
-            prioritet:10,
-            render:function(pageMainBlockObject)
-            {
-                return function(menuInfo, data)
-                {
-                    var link = window.hostname+"?"+data.reg.page_and_parents+"/add";
-
-                    var btn = new guiElements.link_button({
-                        class:'btn btn-primary',
-                        link: link,
-                        title:'Add '+pageMainBlockObject.one.getBulkName(),
-                        text:'Add '+pageMainBlockObject.one.getBulkName(),
-                    })
-
-                    var def = new $.Deferred();
-                    def.resolve(btn.render())
-                    return def.promise();
-                }
-            }(pageMainBlockObject)
-        })*/
-
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
         var add_page_url = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_path_value)
 

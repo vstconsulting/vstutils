@@ -292,12 +292,13 @@
                                                             <span class="caret"></span>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-right">
-                                                            <% for(var k in guiObj.model.sublinks){   %>
+                                                            <% for(var k in guiObj.model.sublinks){ %>
                                                                 <li>
                                                                     <a
                                                                         href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
-                                                                        onclick="return spajs.openURL(this.href);">
-                                                                            <%- k %> <%- guiObj.model.sublinks[k].description %>
+                                                                        onclick="return spajs.openURL(this.href);"
+                                                                        class="sublink-btn">
+                                                                            <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
                                                                     </a>
                                                                 </li>
                                                             <% } %>
@@ -543,14 +544,16 @@
     <!-- entity_one -->
     
     <%[ sublink_buttons %>
-        <% for(var k in guiObj.model.sublinks){   %>
+        <% for(var k in guiObj.model.sublinks){  %>
             <!-- /TODO оптимизировать обработку типа экшена -->
 
                 <% if  ((!guiObj.model.sublinks[k].isAction) || (guiObj.model.sublinks[k].isAction && (!guiObj.model.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
-                    <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
-                    onclick="return spajs.openURL(this.href);"
+                    <a
+                        href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
+                        onclick="return spajs.openURL(this.href);"
+                        class="btn btn-default sublink-btn"
                     >
-                    <%- k %> <%- guiObj.model.sublinks[k].description %>
+                    <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
                     <%= new guiElements.button({onclick:function(){ guiObj.sendToApi('PUT')}, class:'btn btn-primary', title:k, text:k}).render() %>

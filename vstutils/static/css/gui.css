@@ -1114,3 +1114,7 @@ table{
 .h1-header { 
     text-transform: capitalize;
 }
+
+.sublink-btn { 
+    text-transform: capitalize;
+}
