@@ -94,6 +94,7 @@
 				STATE_SUBBLOK = 9,
 				STATE_TEXT = 10,
 				STATE_JS = 11,
+				STATE_HTML = 12,
 				cache = {},
                                 countUid = 0,
 
@@ -271,6 +272,7 @@
 							case '=':
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
+								state = STATE_HTML;
 								break;
 							case '-':
 								prefix = '\',(' + line + ', ';
@@ -304,6 +306,9 @@
 							}
 							switch (state) {
 							case STATE_RAW:
+								buffer.push(prefix, text.substr(jsFromPos).replace(trimExp, ''), postfix);
+								break;
+							case STATE_HTML:
 								buffer.push(prefix, 'JustWaitResults('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
 								break;
 							case STATE_TEXT:
@@ -335,7 +340,8 @@
 									tmp = tmp[0];
 								} else {
 									tmp = tmp.join('');
-								}
+								} 
+                                                               
 								buffer.push(prefix, tmp, postfix);
 								tmp = undefined;
 								break;
@@ -400,11 +406,18 @@
                                 this.tmpBufferNames.push(name)
 
 				this.tmpBuffer[name] = this.buffer;
-				if (!this.blocks[name]) { this.blocks[name] = []; }
-				if (!this.blocks[name].length) {
-					this.buffer = this.blocks[name];
-				} else {
-					this.buffer = [];
+				if (!this.blocks[name]) 
+                                {
+                                    this.blocks[name] = []; 
+                                }
+                                
+				if (!this.blocks[name].length)
+                                {
+                                    this.buffer = this.blocks[name];
+				}
+                                else 
+                                {
+                                    this.buffer = [];
 				}
 			};
 			Template.prototype.blockEnd = function () {
@@ -459,6 +472,16 @@
 				}
 				return this.childData;
 			};
+                        
+                        function arrayRender(arr){
+                            let html = ''
+                            for(let i in arr)
+                            {
+                                html += (Array.isArray(arr[i])) ? arrayRender(arr[i]) : arr[i];
+                            }
+                            
+                            return html
+                        }
 
 			Template.prototype.renderSync = function () {
 				var that = this;
@@ -474,7 +497,7 @@
                                             var html = '', length, i;
                                             for (i = 0, length = buffer.length; i < length; i++)
                                             {
-                                                html += (Array.isArray(buffer[i])) ? buffer[i].join('') : buffer[i];
+                                                html += (Array.isArray(buffer[i])) ? arrayRender(buffer[i]) : buffer[i];
                                             }
                                             return html;
                                // } catch (e) {
@@ -677,15 +700,15 @@ function JustWaitResults(data) {
     {
         if(data.then)
         {
-            let id = ""+Math.random()+""+Math.random()+""+Math.random()+""+Math.random()
-            id = id.replace(/0\./, "");
+            let id = "just-"+Math.random()+""+Math.random()
+            id = id.replace(/0\./g, "");
 
             return JUST.onInsert('<div class="just just-wait-results just-loading" id="'+id+'" ></div>', function()
             {
                 data.then((d) => {
-                    $("#"+id).insertTpl(d).removeCalss('just-loading').addCalss('just-loaded')
+                    $("#"+id).replaceWithTpl(d) 
                 }, (e) => {
-                    $("#"+id).insertTpl(e).removeCalss('just-loading').addCalss('just-loaded')
+                    $("#"+id).replaceWithTpl(e)
                 })
             }, true)
         }
