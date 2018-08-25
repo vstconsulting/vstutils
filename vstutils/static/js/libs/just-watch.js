@@ -14,111 +14,56 @@ var __JustEvalJsPattern_reg_pageUUID = new RegExp("<="+window.JUST.JustEvalJsPat
  * После вставки переданого хтимл кода выполняет js код который был в блоках <js=   =js>
  * Например  строка "html  <js= console.log("test"); =js> html" будет вставлено "html html" и потом выполнено console.log("test");
  */
-$.fn.insertTpl = function(tplText)
+let _insertTpl = function(func)
 {
-    if(!tplText)
-    {
+    return function(tplText){
+
+        if(!tplText)
+        {
+            return this;
+        }
+
+        if(typeof tplText !== "string")
+        {
+            tplText = ""+tplText
+        }
+        var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+
+        this.each(function()
+        {
+            var oldHtml = $(this).find( "[data-onunload]" );
+            for(var i = 0; i < oldHtml.length; i++)
+            {
+                eval(oldHtml[i].attr('data-onunload'))
+            }
+
+            // Вызвать unload тут! 
+            // Будет удобно если можно в люборм месте определить функцию которая будет вызвана при затирании этого куска html кода
+
+            $(this)[func](html)
+        });
+
+        var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
+        for(var i in js)
+        {
+            if(js[i] && js[i].length > 8);
+            {
+                var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
+                //console.log(i, code)
+                eval(code);
+            }
+        }
+
         return this;
     }
-
-    if(typeof tplText !== "string")
-    {
-        tplText = ""+tplText
-    }
-    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
- 
-    this.each(function()
-    {
-        var oldHtml = $(this).find( "[data-onunload]" );
-        for(var i = 0; i < oldHtml.length; i++)
-        {
-            eval(oldHtml[i].attr('data-onunload'))
-        }
-        
-        // Вызвать unload тут! 
-        // Будет удобно если можно в люборм месте определить функцию которая будет вызвана при затирании этого куска html кода
-        
-        $(this).html(html)
-    });
-
-    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
-    for(var i in js)
-    {
-        if(js[i] && js[i].length > 8);
-        {
-            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
-            //console.log(i, code)
-            eval(code);
-        }
-    }
-
-    return this;
 };
 
-$.fn.appendTpl = function(tplText)
-{
-    if(!tplText)
-    {
-        return this;
-    }
-
-    if(typeof tplText !== "string")
-    {
-        tplText = ""+tplText
-    }
-    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+$.fn.insertTpl =  _insertTpl('html') 
+$.fn.appendTpl = _insertTpl('append')
+$.fn.prependTpl = _insertTpl('prepend')
+$.fn.replaceWithTpl = _insertTpl('replaceWith')
  
-    this.each(function()
-    {
-        $(this).append(html)
-    });
-
-    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
-    for(var i in js)
-    {
-        if(js[i] && js[i].length > 8);
-        {
-            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
-            //console.log(i, code)
-            eval(code);
-        }
-    }
-
-    return this;
-};
-
-$.fn.prependTpl = function(tplText)
-{
-    if(!tplText)
-    {
-        return this;
-    }
-
-    if(typeof tplText !== "string")
-    {
-        tplText = ""+tplText
-    }
-    var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
  
-    this.each(function()
-    {
-        $(this).prepend(html)
-    });
-
-    var js = tplText.match(window.__JustEvalJsPattern_reg_pageUUID)
-    for(var i in js)
-    {
-        if(js[i] && js[i].length > 8);
-        {
-            var code = js[i].substr(2 +window.JUST.JustEvalJsPattern_pageUUID.length, js[i].length - (4+window.JUST.JustEvalJsPattern_pageUUID.length*2))
-            //console.log(i, code)
-            eval(code);
-        }
-    }
-
-    return this;
-};
-
 function mergeCopyM(obj){
     
     if(Array.isArray(obj))
