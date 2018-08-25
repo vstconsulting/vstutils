@@ -293,6 +293,7 @@ guiBaseItemFactory.getBulkName = function ()
 
 guiBaseItemFactory.actions = {}
 guiBaseItemFactory.sublinks = {}
+guiBaseItemFactory.title = ''
 
 /**
  * Фабрика классов объектов
@@ -322,6 +323,7 @@ function guiItemFactory(api, both_view, list, one)
 
             this.model.guiFileds = {}
             this.model.isSelected = {}
+            this.model.buttons = []
 
             this.load = function (filters)
             {
@@ -419,6 +421,11 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
+                }
+                
+                if(!this.model.title)
+                {
+                    this.model.title = this.getBulkName();
                 }
             }
 
@@ -733,6 +740,7 @@ function guiItemFactory(api, both_view, list, one)
             this.model.pathInfo = undefined
             this.model.sublinks = {}
             this.model.multi_actions = {}
+            this.model.buttons = []
 
             /**
              * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
@@ -783,7 +791,33 @@ function guiItemFactory(api, both_view, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
+                
+                    if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
+                    {
+                        var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
 
+                        var btn = new guiElements.link_button({
+                            class:'btn btn-primary',
+                            link: link,
+                            title:'Add '+this.getBulkName(),
+                            text:'Add '+this.getBulkName(),
+                        })
+                        this.model.buttons.push(btn)
+                    }
+                    if(this.model.pathInfo.post && /_add$/.test(this.model.pathInfo.post.operationId))
+                    {
+                        let link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/new";
+
+                        let btn = new guiElements.link_button({
+                            class:'btn btn-primary',
+                            link: link,
+                            title:'Create new '+this.getBulkName(),
+                            text:'Create',
+                        })
+
+                        this.model.buttons.push(btn)
+                    }
+                    
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
@@ -827,8 +861,14 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
+                    
                 }
-
+                
+                if(!this.model.title)
+                {
+                    this.model.title = this.getBulkName();
+                }
+                
                 window.guiListSelections.intTag(this.model.selectionTag)
             }
 
@@ -1032,7 +1072,7 @@ function guiItemFactory(api, both_view, list, one)
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'list'
-
+ 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 

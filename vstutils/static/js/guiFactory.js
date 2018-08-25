@@ -497,7 +497,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
         else
         {
             // Значит добавим кнsопку создать объект 
-            page.blocks.push({
+            /*page.blocks.push({
                 id:'btn-create',
                 prioritet:9,
                 render:function(pageMainBlockObject)
@@ -518,8 +518,8 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                         return def.promise();
                     }
                 }(pageMainBlockObject)
-            })
-
+            })*/
+            
             // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
             var new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_path_value)
 
@@ -552,11 +552,8 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     // Страница добавления под элементов
     if(urlLevel > 2 && pageMainBlockObject.list.getShortestApiURL().level == 2)
     {
-        // Страница нового объекта создаваться должна на основе схемы пост запроса а не на основе схемы списка объектов.
-        // parameters[0].schema.$ref
-
         // Значит добавим кнsопку создать объект
-        page.blocks.push({
+        /*page.blocks.push({
             id:'btn-add',
             prioritet:10,
             render:function(pageMainBlockObject)
@@ -577,7 +574,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
                     return def.promise();
                 }
             }(pageMainBlockObject)
-        })
+        })*/
 
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
         var add_page_url = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_path_value)

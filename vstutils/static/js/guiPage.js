@@ -26,7 +26,7 @@ function guiPage()
      */
     var renderOneBlock = function(block, menuInfo, data)
     {
-        wait_result(block, block.item.render.applay(thisObj, [menuInfo, data, thisObj])); 
+        wait_result(block, block.item.render.apply(thisObj, [menuInfo, data, thisObj])); 
     }
     
     var wait_result = function(block, res)

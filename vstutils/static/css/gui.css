@@ -1110,3 +1110,7 @@ table{
 .pm-treeview.hover-li .open-pm-treeview-button i, .pm-treeview-active .open-pm-treeview-button i{
     transform: rotate(4.7rad); 
 }
+ 
+.h1-header { 
+    text-transform: capitalize;
+}
