@@ -2,6 +2,78 @@
 var guiElements = {
 }
 
+guiElements.base = function(opt, value)
+{
+    this.value = value
+    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+    this.onChange_calls = []
+
+    this._onRender = function()
+    {
+        $('#'+this.element_id).on('change', false, () => {
+            this._callAllonChangeCallback()
+        })
+
+        if(options.onclick)
+        {
+            $('#'+this.element_id).on('click', false, options.onclick)
+        }
+    }
+    
+    this.render = function(render_options = {})
+    {
+        let options = $.extend({}, opt, render_options)
+        if(options.hideReadOnly && options.readOnly)
+        {
+            return "";
+        }
+
+        return spajs.just.render("guiElements."+this.name , {opt:options, guiElement:this, value:this.value}, () => {
+            this._onRender(arguments)
+        });
+    }
+     
+    this.getValue = function()
+    {
+        return $("#"+this.element_id).val()
+    }
+
+    /**
+     * Добавляет колбек на событие onChange чтоб зависимые поля могли вовремя перестроиться
+     * @param {function} callback
+     * @returns {undefined}
+     *
+     * @example На пример так поле notes становится зависимым от поля name у проектов
+     *  window.api.openapi.definitions.OneProject.properties.notes.dependsOn = ['name']
+     */
+    this.onChange = function(callback)
+    {
+        this.onChange_calls.push(callback)
+    }
+
+    this._callAllonChangeCallback = function()
+    {
+        for(let i in this.onChange_calls)
+        {
+            this.onChange_calls[i]({
+                filed:this,
+                opt:opt,
+                value:this.getValue()
+            })
+        }
+    }
+    /**
+     * Вызывается для перестройки поля в тот момент когда поле от которого мы зависим поменяло значение
+     * @param {function} callback
+     * @returns {undefined}
+     */
+    this.updateOptions = function(arg)
+    {
+        console.log(arg)
+    }
+
+}
+
 /**
  *
  * @param {type} opt
@@ -15,131 +87,34 @@ var guiElements = {
  * text:''      - текст надписи
  * }
  */
-guiElements.link_button = function(opt)
+guiElements.link_button = function(opt = {})
 {
-    this.render = function(render_options = {})
-    {
-        if(!opt)
-        {
-            opt = {}
-        }
-
-        if(!opt.onclick)
-        {
-            opt.onclick = "return spajs.openURL(this.href);"
-        }
-
-        let options = $.extend({}, opt, render_options)
-        return spajs.just.render("guiElements.link_button", {opt:options, guiElement:this});
-    }
+    this.name = 'link_button'
+    guiElements.base.apply(this, arguments)  
+}
+ 
+guiElements.string = function()
+{
+    this.name = 'string'
+    guiElements.base.apply(this, arguments) 
 }
 
-
-guiElements.string = function(opt, value)
+guiElements.button = function()
 {
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function(render_options = {})
-    {
-        if(!opt)
-        {
-            opt = {}
-        }
-
-        let options = $.extend({}, opt, render_options)
-         
-        if(options.hideReadOnly && opt.readOnly)
-        { 
-            return "";
-        }      
-         
-        return spajs.just.render("guiElements.string", {opt:options, guiElement:this, value:value}, () => {
-            $('#'+this.element_id).on('change', false, () => {
-                for(let i in this.onChange_calls)
-                {
-                    this.onChange_calls[i]({
-                        filed:this,
-                        opt:opt, 
-                        value:this.getValue()
-                    })
-                }
-            })
-        });
-    }
-
-    this.getValue = function()
-    {
-        return $("#"+this.element_id).val()
-    }
-    
-    this.onChange_calls = []
-    
-    /**
-     * Добавляет колбек на событие onChange чтоб зависимые поля могли вовремя перестроиться
-     * @param {function} callback
-     * @returns {undefined}
-     * 
-     * @example На пример так поле notes становится зависимым от поля name у проектов
-     *  window.api.openapi.definitions.OneProject.properties.notes.dependsOn = ['name']
-     */
-    this.onChange = function(callback)
-    {
-        this.onChange_calls.push(callback)
-    }
-    
-    /**
-     * Вызывается для перестройки поля в тот момент когда поле от которого мы зависим поменяло значение
-     * @param {function} callback
-     * @returns {undefined}
-     */
-    this.updateOptions = function(arg)
-    {
-        console.log(arg)
-    }
+    this.name = 'button'
+    guiElements.base.apply(this, arguments) 
 }
 
-guiElements.button = function(opt)
+guiElements.enum = function(opt = {}, value)
 {
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function(render_options = {})
-    {
-        if(!opt)
-        {
-            opt = {}
-        }
-
-        let options = $.extend({}, opt, render_options)
-        var thisObj = this;
-
-        return spajs.just.render("guiElements.button", {opt:options, guiElement:this}, function(){
-            $('#'+thisObj.element_id).on('click', false, opt.onclick)
-        });
-    }
+    this.name = 'enum'
+    guiElements.base.apply(this, arguments) 
 }
 
-guiElements.enum = function(opt, value)
+guiElements.file = function(opt = {})
 {
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function(render_options = {})
-    {
-        if(!opt)
-        {
-            opt = {}
-        }
-        
-        let options = $.extend({}, opt, render_options)
-        
-        return spajs.just.render("guiElements.enum", {opt:options, guiElement:this, value:value});
-    }
-    
-    this.getValue = function()
-    {
-        return $("#"+this.element_id).val()
-    }
-}
-
-guiElements.file = function(opt)
-{
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+    this.name = 'file'
+    guiElements.base.apply(this, arguments) 
 
     this.loadFile = function(event)
     {
@@ -166,77 +141,55 @@ guiElements.file = function(opt)
             reader.readAsText(event.target.files[i]);
             return;
         }
-    }
-
-    this.render = function(render_options = {})
-    {
-        if(!opt)
-        {
-            opt = {}
-        }
-
-        let options = $.extend({}, opt, render_options);
-
-        //return spajs.just.render("guiElements.file", {opt:options, guiElement:this});
-        return spajs.just.render("guiElements.file", {opt:options, guiElement:this},() => {
-            debugger;
-            $('#'+this.element_id).on('change', false, this.loadFile)
-        });
-    }
+    } 
 }
 
-guiElements.boolean = function(opt, value)
+guiElements.boolean = function(opt = {}, value)
 {
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function(render_options = {})
-    {
-        //debugger;
-        if(!opt)
-        {
-            opt = {}
-        }
-
-        let options = $.extend({}, opt, render_options)
-
-        if(options.hideReadOnly && opt.readOnly)
-        {
-            return "";
-        }
-
-        return spajs.just.render("guiElements.boolean", {opt:options, guiElement:this, value:value});
-    }
-
+    this.name = 'boolean'
+    guiElements.base.apply(this, arguments) 
+ 
     this.getValue = function()
     {
-        //return $("#"+this.element_id).val()
         return $("#"+this.element_id).hasClass('selected');
     }
 }
 
-guiElements.textarea = function(opt)
+guiElements.textarea = function(opt = {})
 {
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-    this.render = function(render_options = {})
-    {
-        if(!opt)
-        {
-            opt = {}
-        }
+    this.name = 'textarea'
+    guiElements.base.apply(this, arguments)  
+}
 
-        let options = $.extend({}, opt, render_options)
 
-        if(options.hideReadOnly && opt.readOnly)
-        {
-            return "";
-        }
-
-        return spajs.just.render("guiElements.textarea", {opt:options, guiElement:this});
+function set_api_options(options) 
+{
+    let additional_options = "";
+    if (options.readOnly) {
+        additional_options += "readonly disabled "
     }
-
-    this.getValue = function()
-    {
-        return $("#"+this.element_id).val()
+    
+    if (options.minLength) {
+        additional_options += "minlength='" + options.minLength + "' "
     }
+    
+    if (options.maxLength) {
+        additional_options += "maxlength='" + options.maxLength + "' "
+    }
+    
+    if (/^Required/.test(options.description)) {
+        additional_options += "required "
+    }
+    
+    if (options.default) {
+        additional_options += "placeholder='" + options.default + "' "
+    }
+    
+    if (options.pattern) {
+        additional_options += "pattern='" + options.pattern + "' "
+    }
+    
+    return additional_options;
 }
 
 /**
