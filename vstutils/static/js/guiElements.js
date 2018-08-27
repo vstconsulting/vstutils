@@ -8,7 +8,7 @@ guiElements.base = function(opt, value)
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
-    this._onRender = function()
+    this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {
             this._callAllonChangeCallback()
@@ -29,7 +29,7 @@ guiElements.base = function(opt, value)
         }
 
         return spajs.just.render("guiElements."+this.name , {opt:options, guiElement:this, value:this.value}, () => {
-            this._onRender(arguments)
+            this._onRender(options)
         });
     }
      
