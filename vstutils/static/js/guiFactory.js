@@ -760,7 +760,12 @@ function openApi_paths(api)
             continue;
         }
 
-        if(!/_get$/.test(api_path_value.get.operationId) )
+        /*if(api_path_value.get.operationId == "inventory_all_groups_detail")
+        {
+            debugger;
+        }*/
+        
+        if(!/_(get|detail)$/.test(api_path_value.get.operationId) )
         {
             // это не один элемент
             continue;
@@ -801,7 +806,6 @@ function openApi_paths(api)
             // это не список
             continue;
         }
-
 
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length

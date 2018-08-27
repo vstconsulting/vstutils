@@ -291,6 +291,42 @@ guiBaseItemFactory.getBulkName = function ()
     return name[1];
 }
 
+/*
+ * Вернёт true если в апи на этом пити есть возможность отправить запросы создания или обновления
+ * @returns {Boolean}
+ */
+guiBaseItemFactory.canUpdate = function ()
+{
+    if(!this.model.pathInfo)
+    {
+        return false;
+    }
+
+    if(this.model.pathInfo.post
+        || this.model.pathInfo.put
+        || this.model.pathInfo.patch)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+guiBaseItemFactory.canDelete = function ()
+{
+    if(!this.model.pathInfo)
+    {
+        return false;
+    }
+
+    if(this.model.pathInfo.delete)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 guiBaseItemFactory.actions = {}
 guiBaseItemFactory.sublinks = {}
 guiBaseItemFactory.title = ''
@@ -450,7 +486,7 @@ function guiItemFactory(api, both_view, list, one)
                 })
                 return res;
             }
-
+ 
             this.sendToApi = function (method)
             {
                 var def = new $.Deferred();
@@ -793,16 +829,19 @@ function guiItemFactory(api, both_view, list, one)
                     }
                 
                     if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
-                    {
-                        var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
+                    { 
+                        if(this.canUpdate())
+                        {
+                            var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
 
-                        var btn = new guiElements.link_button({
-                            class:'btn btn-primary',
-                            link: link,
-                            title:'Add '+this.getBulkName(),
-                            text:'Add '+this.getBulkName(),
-                        })
-                        this.model.buttons.push(btn)
+                            var btn = new guiElements.link_button({
+                                class:'btn btn-primary',
+                                link: link,
+                                title:'Add '+this.getBulkName(),
+                                text:'Add '+this.getBulkName(),
+                            })
+                            this.model.buttons.push(btn)
+                        }
                     }
                     if(this.model.pathInfo.post && /_add$/.test(this.model.pathInfo.post.operationId))
                     {
