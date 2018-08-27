@@ -8,7 +8,7 @@ function guiApi()
     var thisObj = this;
     this.init = function()
     {
-        var def = new $.Deferred(); 
+        var def = new $.Deferred();
         spajs.ajax.Call({
             url: hostname + "/api/v2/openapi/?format=openapi",
             type: "GET",
@@ -91,17 +91,20 @@ function guiApi()
             clearTimeout(query_data.timeOutId)
         }
 
-        let data_index = query_data.data.length
-        
+        let data_index = undefined
+
         if($.isArray(data))
         {
+            data_index = []
             for(let i in data)
             {
+                data_index.push(query_data.data.length)
                 query_data.data.push(data[i])
-            } 
+            }
         }
         else
         {
+            data_index = query_data.data.length
             query_data.data.push(data)
         }
 
@@ -110,17 +113,54 @@ function guiApi()
         query_data.timeOutId = setTimeout(real_query, 100, query_data)
 
         $.when(query_data.def).done(data => {
-            let val = data[data_index];
 
-
-            if(val.status >= 200 && val.status < 400)
+            var val;
+            if($.isArray(data_index))
             {
-                promise.resolve(val)
+                val = []
+                for(var i in data_index)
+                {
+                    val.push(data[data_index[i]]);
+                }
             }
             else
             {
-                promise.reject(val)
+                val = data[data_index];
             }
+
+            if($.isArray(data_index))
+            {
+                let toReject = false;
+                for(var i in val)
+                {
+                    if(!(val[i].status >= 200 && val[i].status < 400))
+                    {
+                        toReject = true;
+                    }
+                }
+
+                if(toReject)
+                {
+                    promise.reject(val);
+                }
+                else
+                {
+                    promise.resolve(val);
+                }
+
+            }
+            else
+            {
+                if(val.status >= 200 && val.status < 400)
+                {
+                    promise.resolve(val);
+                }
+                else
+                {
+                    promise.reject(val);
+                }
+            }
+
 
         }).fail(function(error)
         {
@@ -133,4 +173,3 @@ function guiApi()
 
     return this;
 }
- 

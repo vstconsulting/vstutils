@@ -11,43 +11,43 @@ basePageView = {
  */
 basePageView.validateByModel = function (values)
 {
-   for(var i in this.model.fileds)
-   {
-       var filed = this.model.fileds[i];
-       if(values[filed.name] !== undefined)
-       {
-           if(filed.type == "string" || filed.type == "file")
-           {
-               values[filed.name] = values[filed.name].toString()
-           }
-           else if(filed.type == "number" || filed.type == "integer" )
-           {
-               values[filed.name] = values[filed.name]/1
-           }
-           else if(filed.type == "boolean" )
-           {
-               values[filed.name] = values[filed.name] == true
-           }
+    for(var i in this.model.fileds)
+    {
+        var filed = this.model.fileds[i];
+        if(values[filed.name] !== undefined)
+        {
+            if(filed.type == "string" || filed.type == "file")
+            {
+                values[filed.name] = values[filed.name].toString()
+            }
+            else if(filed.type == "number" || filed.type == "integer" )
+            {
+                values[filed.name] = values[filed.name]/1
+            }
+            else if(filed.type == "boolean" )
+            {
+                values[filed.name] = values[filed.name] == true
+            }
 
-           if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
-           {
-               throw {error:'validation', message:'Filed '+filed.name +" too long"}
-           }
+            if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
+            {
+                throw {error:'validation', message:'Filed '+filed.name +" too long"}
+            }
 
-           if(filed.minLength && values[filed.name].toString().length < filed.minLength)
-           {
+            if(filed.minLength && values[filed.name].toString().length < filed.minLength)
+            {
 
-               if(filed.minLength && values[filed.name].toString().length == 0)
-               {
-                   throw {error:'validation', message:'Filed '+filed.name +" empty"}
-               }
+                if(filed.minLength && values[filed.name].toString().length == 0)
+                {
+                    throw {error:'validation', message:'Filed '+filed.name +" empty"}
+                }
 
-               throw {error:'validation', message:'Filed '+filed.name +" too short"}
-           }
-       }
-   }
+                throw {error:'validation', message:'Filed '+filed.name +" too short"}
+            }
+        }
+    }
 
-   return values;
+    return values;
 }
 
 /**
@@ -144,9 +144,9 @@ basePageItem.getFields = function (type)
     }
     return this.model.fileds
 }
- 
+
 guiBaseItemFactory = {}
- 
+
 guiBaseItemFactory.getShortestApiURL = function ()
 {
     var url = {};
@@ -406,10 +406,10 @@ function guiItemFactory(api, both_view, list, one)
                     data = this.validateByModel(data)
 
                     var query = {
-                                type: method,
-                                item: this.getBulkName(),
-                                data:data,
-                            }
+                        type: method,
+                        item: this.getBulkName(),
+                        data:data,
+                    }
 
                     if(this.model.pathInfo)
                     {
@@ -435,8 +435,8 @@ function guiItemFactory(api, both_view, list, one)
                         }
 
                         if(method == 'set' && this.model.pathInfo.post && this.model.pathInfo.post.operationId
-                           && this.model.pathInfo.patch === undefined
-                           && this.model.pathInfo.put === undefined)
+                            && this.model.pathInfo.patch === undefined
+                            && this.model.pathInfo.put === undefined)
                         {
                             operations = this.model.pathInfo.post.operationId.split("_");
                             query_method = "post"
@@ -462,13 +462,13 @@ function guiItemFactory(api, both_view, list, one)
                     }
                     debugger;
                     $.when(api.query(query)).done(function (data)
-                        {
-                            def.resolve(data)
-                        }).fail(function (e)
-                        {
-                            def.reject(e)
-                            polemarch.showErrors(e.responseJSON)
-                        })
+                    {
+                        def.resolve(data)
+                    }).fail(function (e)
+                    {
+                        def.reject(e)
+                        polemarch.showErrors(e.responseJSON)
+                    })
 
                 }catch (e) {
                     polemarch.showErrors(e)
@@ -520,15 +520,15 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
                     $.when(api.query(query)
-                        ).done(function (data)
-                        {
-                            $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
-                            def.resolve(data)
-                        }).fail(function (e)
-                        {
-                            def.reject(e)
-                            polemarch.showErrors(e.responseJSON)
-                        })
+                    ).done(function (data)
+                    {
+                        $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
+                        def.resolve(data)
+                    }).fail(function (e)
+                    {
+                        def.reject(e)
+                        polemarch.showErrors(e.responseJSON)
+                    })
                 }catch (e) {
                     polemarch.showErrors(e)
                     def.reject()
@@ -632,16 +632,16 @@ function guiItemFactory(api, both_view, list, one)
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
              *
-                tabSignal.connect("gui.new.group.list", function(data)
-                {
-                    // Тут код который будет модифицировать создаваемый объект
-                    data.model.fileds = [
-                        {
-                            title:'Name',
-                            name:'name',
-                        },
-                    ]
-                })
+             tabSignal.connect("gui.new.group.list", function(data)
+             {
+                 // Тут код который будет модифицировать создаваемый объект
+                 data.model.fileds = [
+                     {
+                         title:'Name',
+                         name:'name',
+                     },
+                 ]
+             })
              */
             tabSignal.emit("gui.new."+this.getBulkName()+".one", res);
 
@@ -823,6 +823,96 @@ function guiItemFactory(api, both_view, list, one)
                 return this.search({limit:9999, offset:0});
             }
 
+            this.prefetch = function (data)
+            {
+                var prefetch_fields = {};
+                var prefetch_fields_ids = {};
+                var promise = new $.Deferred();
+                for(var i in this.model.fileds)
+                {
+                    if(this.model.fileds[i].prefetch)
+                    {
+                        prefetch_fields[this.model.fileds[i].name] = $.extend(true, {}, this.model.fileds[i].prefetch);
+                        prefetch_fields_ids[this.model.fileds[i].name] = [];
+                    }
+                }
+                if($.isEmptyObject(prefetch_fields))
+                {
+                    return promise.resolve(data);
+                }
+
+                var dataFromApi = data.data.results;
+                var bulkArr = [];
+                var queryObj = {};
+
+                for(var item in dataFromApi)
+                {
+                    for(var field in dataFromApi[item])
+                    {
+                        if(prefetch_fields[field])
+                        {
+                            if($.inArray(dataFromApi[item][field], prefetch_fields_ids[field]) == -1 && dataFromApi[item][field] != null )
+                            {
+                                prefetch_fields_ids[field].push(dataFromApi[item][field]);
+                            }
+                        }
+                    }
+                }
+
+                for(var field in prefetch_fields_ids)
+                {
+                    if(prefetch_fields_ids[field].length > 0)
+                    {
+                        var bulk_name = prefetch_fields[field].path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                        queryObj =
+                            {
+                                type: "mod",
+                                item: bulk_name[1],
+                                filters:"id="+prefetch_fields_ids[field].join(","),
+                                method:"get",
+                            }
+                        bulkArr.push(queryObj);
+                    }
+                }
+
+
+                $.when(api.query(bulkArr)).done(d => {
+
+                    var res = data.data.results;
+                    for(var i in res)
+                    {
+                        for(var field in res[i])
+                        {
+                            if(prefetch_fields[field])
+                            {
+                                var bulk_name = prefetch_fields[field].path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                                for(var j in d)
+                                {
+                                    if(d[j].item == bulk_name[1])
+                                    {
+                                        for(var k in d[j].data.results)
+                                        {
+                                            if(res[i][field] == d[j].data.results[k].id)
+                                            {
+                                                res[i][field+'_info'] = d[j].data.results[k];
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+                    promise.resolve(data);
+                }).fail(f => {
+                    promise.reject(f);
+                })
+
+                return promise.promise();
+
+            }
+
             /**
              * Функция загрузки данных
              * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
@@ -903,7 +993,19 @@ function guiItemFactory(api, both_view, list, one)
                     }
                 }
 
-                return api.query(queryObj);
+                var promise = new $.Deferred();
+
+                $.when(api.query(queryObj)).done(d => {
+
+                    $.when(this.prefetch(d)).always(a => {
+                        promise.resolve(a);
+                    });
+
+                }).fail(f => {
+                    promise.reject();
+                })
+
+                return promise.promise();
             }
 
             this.toggleSelectEachItem = function (tag, mode)
@@ -1082,16 +1184,16 @@ function guiItemFactory(api, both_view, list, one)
             /**
              * Перегрузить поля объекта создаваемого фабрикой можно таким образом
              *
-                tabSignal.connect("gui.new.group.list", function(data)
-                {
-                    // Тут код который будет модифицировать создаваемый объект
-                    data.model.fileds = [
-                        {
-                            title:'Name',
-                            name:'name',
-                        },
-                    ]
-                })
+             tabSignal.connect("gui.new.group.list", function(data)
+             {
+                 // Тут код который будет модифицировать создаваемый объект
+                 data.model.fileds = [
+                     {
+                         title:'Name',
+                         name:'name',
+                     },
+                 ]
+             })
              */
             tabSignal.emit("gui.new."+this.getBulkName()+".list", res);
 
@@ -1603,30 +1705,30 @@ function changeSubItemsInParent(action, item_ids)
 
     return api.query(query)
 
-        /*
-    spajs.ajax.Call({
-        url: url,
-        type: "POST",
-        contentType:'application/json',
-        data:JSON.stringify(item_ids),
-        success: function(data)
+    /*
+spajs.ajax.Call({
+    url: url,
+    type: "POST",
+    contentType:'application/json',
+    data:JSON.stringify(item_ids),
+    success: function(data)
+    {
+        if(data.not_found > 0)
         {
-            if(data.not_found > 0)
-            {
-                $.notify("Item not found", "error");
-                def.reject({text:"Item not found", status:404})
-                return;
-            }
-
-            $.notify("Save", "success");
-            def.resolve()
-        },
-        error:function(e)
-        {
-            polemarch.showErrors(e.responseJSON)
-            def.reject(e)
+            $.notify("Item not found", "error");
+            def.reject({text:"Item not found", status:404})
+            return;
         }
-    });*/
+
+        $.notify("Save", "success");
+        def.resolve()
+    },
+    error:function(e)
+    {
+        polemarch.showErrors(e.responseJSON)
+        def.reject(e)
+    }
+});*/
     return def.promise();
 }
 
