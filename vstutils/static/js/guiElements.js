@@ -19,7 +19,7 @@ guiElements.base = function(opt, value)
             $('#'+this.element_id).on('click', false, options.onclick)
         }
     }
-    
+
     this.render = function(render_options = {})
     {
         let options = $.extend({}, opt, render_options)
@@ -32,7 +32,7 @@ guiElements.base = function(opt, value)
             this._onRender(options)
         });
     }
-     
+
     this.getValue = function()
     {
         return $("#"+this.element_id).val()
@@ -90,31 +90,31 @@ guiElements.base = function(opt, value)
 guiElements.link_button = function(opt = {})
 {
     this.name = 'link_button'
-    guiElements.base.apply(this, arguments)  
+    guiElements.base.apply(this, arguments)
 }
- 
+
 guiElements.string = function()
 {
     this.name = 'string'
-    guiElements.base.apply(this, arguments) 
+    guiElements.base.apply(this, arguments)
 }
 
 guiElements.button = function()
 {
     this.name = 'button'
-    guiElements.base.apply(this, arguments) 
+    guiElements.base.apply(this, arguments)
 }
 
 guiElements.enum = function(opt = {}, value)
 {
     this.name = 'enum'
-    guiElements.base.apply(this, arguments) 
+    guiElements.base.apply(this, arguments)
 }
 
 guiElements.file = function(opt = {})
 {
     this.name = 'file'
-    guiElements.base.apply(this, arguments) 
+    guiElements.base.apply(this, arguments)
 
     this.loadFile = function(event)
     {
@@ -141,14 +141,14 @@ guiElements.file = function(opt = {})
             reader.readAsText(event.target.files[i]);
             return;
         }
-    } 
+    }
 }
 
 guiElements.boolean = function(opt = {}, value)
 {
     this.name = 'boolean'
-    guiElements.base.apply(this, arguments) 
- 
+    guiElements.base.apply(this, arguments)
+
     this.getValue = function()
     {
         return $("#"+this.element_id).hasClass('selected');
@@ -158,37 +158,163 @@ guiElements.boolean = function(opt = {}, value)
 guiElements.textarea = function(opt = {})
 {
     this.name = 'textarea'
-    guiElements.base.apply(this, arguments)  
+    guiElements.base.apply(this, arguments)
 }
 
 
-function set_api_options(options) 
+guiElements.autocomplete = function()
+{
+    this.name = 'autocomplete'
+    guiElements.base.apply(this, arguments)
+
+    this._onBaseRender = this._onRender
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options)
+
+        if(options.searchObj)
+        {
+            new autoComplete({
+                selector: '#'+this.element_id,
+                minChars: 0,
+                cache:false,
+                showByClick:true,
+                menuClass:'autocomplete autocomplete-'+this.element_id,
+                renderItem: function(item, search)
+                {
+                    return '<div class="autocomplete-suggestion" data-value="' + item.id + '" >' + item.name + '</div>';
+                },
+                onSelect: (event, term, item) =>
+                {
+                    var value = $(item).attr('data-value');
+                    $('#'+this.element_id).val(value);
+                    $('#'+this.element_id).attr({'data-hide':'hide'});
+                },
+                source: (original_term, response) =>
+                {
+                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    if(isHide == "hide")
+                    {
+                        $('#'+this.element_id).attr({'data-hide':'show'})
+                        return;
+                    }
+
+                    // На основе текста из original_term сложить возможные вариант подсказок в массив matches
+                    $.when(options.searchObj.search(original_term)).done((rawdata) => {
+
+                        if(!rawdata || !rawdata.data || !rawdata.data.results)
+                        {
+                            response([])
+                        }
+
+                        if(options.matcher)
+                        {
+                            response(options.matcher(rawdata))
+                            return;
+                        }
+
+                        response(rawdata.data.results)
+
+                    }).fail(() => {
+                        response([])
+                    })
+                }
+            });
+        }
+    }
+}
+
+guiElements.select2 = function()
+{
+    this.name = 'select2'
+    guiElements.base.apply(this, arguments)
+
+    this._onBaseRender = this._onRender
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options)
+
+        if(options.searchObj)
+        {
+            $('#'+this.element_id).select2({
+                width: '100%',
+                ajax: {
+                    transport: function (params, success, failure) {
+                        
+                        $.when(options.searchObj.search(options.filters)).done((rawdata) => {
+                            
+                            if(!rawdata || !rawdata.data || !rawdata.data.results)
+                            {
+                                failure([])
+                            }
+
+                            if(options.matcher)
+                            {
+                                success(options.matcher(rawdata))
+                                return;
+                            }
+                            
+                            /*
+                             * {
+                                "results": [
+                                  {
+                                    "id": 1,
+                                    "text": "Option 1"
+                                  },
+                                  {
+                                    "id": 2,
+                                    "text": "Option 2"
+                                  }
+                                ],
+                                "pagination": {
+                                  "more": true
+                                }
+                              }
+                             */ 
+                            let results = []
+                            for(let i in rawdata.data.results)
+                            {
+                                results.push({id:rawdata.data.results[i].id, text:rawdata.data.results[i].name})
+                            }
+                             
+                            success({results:results}) 
+                        }).fail(() => {
+                            failure([])
+                        })
+                    }
+                }
+            }); 
+        }
+    }
+}
+
+function set_api_options(options)
 {
     let additional_options = "";
     if (options.readOnly) {
         additional_options += "readonly disabled "
     }
-    
+
     if (options.minLength) {
         additional_options += "minlength='" + options.minLength + "' "
     }
-    
+
     if (options.maxLength) {
         additional_options += "maxlength='" + options.maxLength + "' "
     }
-    
+
     if (/^Required/.test(options.description)) {
         additional_options += "required "
     }
-    
+
     if (options.default) {
         additional_options += "placeholder='" + options.default + "' "
     }
-    
+
     if (options.pattern) {
         additional_options += "pattern='" + options.pattern + "' "
     }
-    
+
     return additional_options;
 }
 

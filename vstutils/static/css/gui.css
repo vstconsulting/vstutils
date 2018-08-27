@@ -347,12 +347,12 @@ div.spinner div.bar12 {
     color: #eee;
 }
 
-.boolean-select .selected .ico-on{
+.boolean-select.selected .ico-on{
     display: inline-block;
     cursor: pointer;
 }
 
-.boolean-select .selected .ico-off{
+.boolean-select.selected .ico-off{
     display: none;
     cursor: pointer;
 }

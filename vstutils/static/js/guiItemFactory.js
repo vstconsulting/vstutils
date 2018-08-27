@@ -189,6 +189,16 @@ basePageView.getValue = function ()
 
 basePageItem = {}
 
+basePageItem.getPageInfo = function ()
+{
+    if(this.model.pageInfo)
+    {
+        return this.model.pageInfo;
+    }
+    
+    return spajs.urlInfo.data.reg
+}
+
 /**
  * Функция для удобства переопределения какие поля показывать для каких случаев
  * @param {type} type
@@ -378,18 +388,19 @@ function guiItemFactory(api, both_view, list, one)
                     var operations = this.model.pathInfo.get.operationId.split("_");
                     if(operations.length >= 3)
                     {
+                        let pageInfo = this.getPageInfo()
                         query = {
                             type: "mod",
                             item: operations[0],
-                            data_type:this.model.pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
+                            data_type:pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
                             method:"get"
                         }
 
-                        for(var i in this.model.pageInfo)
+                        for(var i in pageInfo)
                         {
                             if(/^api_/.test(i))
                             {
-                                query[i.replace(/api_/, "")] = this.model.pageInfo[i]
+                                query[i.replace(/api_/, "")] = pageInfo[i]
                             }
                         }
                     }
@@ -462,7 +473,7 @@ function guiItemFactory(api, both_view, list, one)
                 if(!this.model.title)
                 {
                     this.model.title = this.getBulkName();
-                }
+                } 
             }
 
             this.create = function ()
@@ -546,15 +557,16 @@ function guiItemFactory(api, both_view, list, one)
 
                         if(operations.length >= 3)
                         {
+                            let pageInfo = this.getPageInfo()
                             query = {
                                 type: "mod",
                                 item: operations[0],
-                                data_type:this.model.pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
+                                data_type: pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
                                 data:data,
                                 method:query_method
                             }
 
-                            query.pk = this.model.pageInfo['api_pk']
+                            query.pk = pageInfo['api_pk']
                         }
                     }
 
@@ -600,8 +612,9 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
+                    let pageInfo = this.getPageInfo()
                     var thisObj = this;
-                    var current_url = thisObj.model.pageInfo.page_and_parents;
+                    var current_url = pageInfo.page_and_parents;
                     var query ={};
                     if ((current_url.match(/\//g) || []).length > 1) {
                         var re = /(?<parent>\w+(?=\/))\/(?<pk>\d+(?=\/))\/(?<suburl>.*)/g;
@@ -802,13 +815,18 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     this.model.pathInfo = page_options.api
                     this.model.pageInfo = page_options.url
-
+                     
                     if(page_options.selectionTag)
                     {
                         this.model.selectionTag = page_options.selectionTag
                     }
                 }
 
+                if(!this.model.title)
+                {
+                    this.model.title = this.getBulkName();
+                }
+                
                 if(this.model.pathInfo)
                 {
                     // Список Actions строить будем на основе данных api
@@ -827,36 +845,7 @@ function guiItemFactory(api, both_view, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
-                
-                    if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
-                    { 
-                        if(this.canUpdate())
-                        {
-                            var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
-
-                            var btn = new guiElements.link_button({
-                                class:'btn btn-primary',
-                                link: link,
-                                title:'Add '+this.getBulkName(),
-                                text:'Add '+this.getBulkName(),
-                            })
-                            this.model.buttons.push(btn)
-                        }
-                    }
-                    if(this.model.pathInfo.post && /_add$/.test(this.model.pathInfo.post.operationId))
-                    {
-                        let link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/new";
-
-                        let btn = new guiElements.link_button({
-                            class:'btn btn-primary',
-                            link: link,
-                            title:'Create new '+this.getBulkName(),
-                            text:'Create',
-                        })
-
-                        this.model.buttons.push(btn)
-                    }
-                    
+                 
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
@@ -903,14 +892,46 @@ function guiItemFactory(api, both_view, list, one)
                     
                 }
                 
-                if(!this.model.title)
-                {
-                    this.model.title = this.getBulkName();
-                }
-                
                 window.guiListSelections.intTag(this.model.selectionTag)
             }
 
+            this.getBtnNew = function ()
+            {
+                if(this.model.pathInfo.post && /_add$/.test(this.model.pathInfo.post.operationId))
+                {
+                    let link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/new";
+
+                    let btn = new guiElements.link_button({
+                        class:'btn btn-primary',
+                        link: link,
+                        title:'Create new '+this.getBulkName(),
+                        text:'Create',
+                    })
+
+                    return btn.render()
+                }
+                return "";
+            }
+            this.getBtnAdd = function ()
+            { 
+                if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
+                { 
+                    if(this.canUpdate())
+                    {
+                        var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
+
+                        var btn = new guiElements.link_button({
+                            class:'btn btn-primary',
+                            link: link,
+                            title:'Add '+this.getBulkName(),
+                            text:'Add '+this.getBulkName(),
+                        })
+                        return btn.render()
+                    }
+                }
+                return "";
+            }
+            
             this.deleteArray = function (ids)
             {
                 debugger;
