@@ -50,6 +50,28 @@ basePageView.validateByModel = function (values)
     return values;
 }
 
+basePageView.renderAllFileds = function(opt)
+{
+    let html = []
+    for(let i in opt.fileds)
+    {
+        html.push(this.renderFiled(opt.fileds[i], opt))
+    }
+
+    let id =  getNewId();
+    return JUST.onInsert('<div class="fileds-block" id="'+id+'" >'+html.join("")+'</div>', () => {
+
+        let fileds = $('#'+id+" .gui-not-required")
+        if(!this.view.hide_non_required || this.view.hide_non_required >= fileds.length)
+        {
+            return;
+        }
+
+        fileds.hide()
+        $('#'+id).appendTpl(spajs.just.render('show_not_required_fileds', {fileds:fileds, opt:opt}))
+    })
+}
+
 /**
  * Отрисует поле при отрисовке объекта.
  * @param {object} filed
@@ -86,6 +108,7 @@ basePageView.renderFiled = function(filed, render_options)
             this.model.guiFileds[filed.name] = obj
         }
 
+
         if(!this.model.guiFileds[filed.name])
         {
             var type = filed.format
@@ -112,17 +135,53 @@ basePageView.renderFiled = function(filed, render_options)
             }
             this.model.guiFileds[filed.name] = new window.guiElements[type](filed, filed_value)
         }
+
+        // Добавление связи с зависимыми полями
+        if(filed.dependsOn)
+        {
+            let thisFiled = this.model.guiFileds[filed.name]
+            if(thisFiled.updateOptions)
+            {
+                for(let i in filed.dependsOn)
+                {
+                    let parentFiled = this.model.guiFileds[filed.dependsOn[i]]
+                    if(parentFiled && parentFiled.onChange)
+                    {
+                        parentFiled.onChange(function(){
+                            thisFiled.updateOptions.call(arguments);
+                        })
+                    }
+                }
+            }
+        }
+
     }
 
     return this.model.guiFileds[filed.name].render($.extend({}, render_options))
 }
 
+/**
+ * Получает значения всех полей из this.model.guiFileds
+ *
+ * Если поле вернёт объект то этот объект будет смёржен с результирующим объектом,
+ * таким образом одно поле может вернуть более одного зщначения в модель
+ *
+ * @returns {basePageView.getValue.obj}
+ */
 basePageView.getValue = function ()
 {
     var obj = {}
     for(var i in this.model.guiFileds)
     {
-        obj[i] = this.model.guiFileds[i].getValue();
+        let val = this.model.guiFileds[i].getValue();
+        if(typeof val == "object")
+        {
+            obj = mergeDeep(obj, val);
+        }
+        else
+        {
+            obj[i] = val;
+        }
     }
 
     return obj;
@@ -232,8 +291,45 @@ guiBaseItemFactory.getBulkName = function ()
     return name[1];
 }
 
+/*
+ * Вернёт true если в апи на этом пити есть возможность отправить запросы создания или обновления
+ * @returns {Boolean}
+ */
+guiBaseItemFactory.canUpdate = function ()
+{
+    if(!this.model.pathInfo)
+    {
+        return false;
+    }
+
+    if(this.model.pathInfo.post
+        || this.model.pathInfo.put
+        || this.model.pathInfo.patch)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+guiBaseItemFactory.canDelete = function ()
+{
+    if(!this.model.pathInfo)
+    {
+        return false;
+    }
+
+    if(this.model.pathInfo.delete)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 guiBaseItemFactory.actions = {}
 guiBaseItemFactory.sublinks = {}
+guiBaseItemFactory.title = ''
 
 /**
  * Фабрика классов объектов
@@ -263,6 +359,7 @@ function guiItemFactory(api, both_view, list, one)
 
             this.model.guiFileds = {}
             this.model.isSelected = {}
+            this.model.buttons = []
 
             this.load = function (filters)
             {
@@ -361,6 +458,11 @@ function guiItemFactory(api, both_view, list, one)
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
                 }
+                
+                if(!this.model.title)
+                {
+                    this.model.title = this.getBulkName();
+                }
             }
 
             this.create = function ()
@@ -384,7 +486,7 @@ function guiItemFactory(api, both_view, list, one)
                 })
                 return res;
             }
-
+ 
             this.sendToApi = function (method)
             {
                 var def = new $.Deferred();
@@ -586,6 +688,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
+                if(!render_options.page_type) render_options.page_type = 'one'
 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
@@ -619,8 +722,8 @@ function guiItemFactory(api, both_view, list, one)
                     return "";
                 }
 
-                render_options.fileds = this.getFields('renderAsAddSubItemsPage')
-                render_options.sections = this.getSections('renderAsAddSubItemsPage')
+                render_options.fileds = this.getFields('render')
+                render_options.sections = this.getSections('render')
 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
@@ -673,6 +776,7 @@ function guiItemFactory(api, both_view, list, one)
             this.model.pathInfo = undefined
             this.model.sublinks = {}
             this.model.multi_actions = {}
+            this.model.buttons = []
 
             /**
              * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
@@ -723,7 +827,36 @@ function guiItemFactory(api, both_view, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
+                
+                    if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
+                    { 
+                        if(this.canUpdate())
+                        {
+                            var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
 
+                            var btn = new guiElements.link_button({
+                                class:'btn btn-primary',
+                                link: link,
+                                title:'Add '+this.getBulkName(),
+                                text:'Add '+this.getBulkName(),
+                            })
+                            this.model.buttons.push(btn)
+                        }
+                    }
+                    if(this.model.pathInfo.post && /_add$/.test(this.model.pathInfo.post.operationId))
+                    {
+                        let link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/new";
+
+                        let btn = new guiElements.link_button({
+                            class:'btn btn-primary',
+                            link: link,
+                            title:'Create new '+this.getBulkName(),
+                            text:'Create',
+                        })
+
+                        this.model.buttons.push(btn)
+                    }
+                    
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
@@ -767,8 +900,14 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
+                    
                 }
-
+                
+                if(!this.model.title)
+                {
+                    this.model.title = this.getBulkName();
+                }
+                
                 window.guiListSelections.intTag(this.model.selectionTag)
             }
 
@@ -1073,7 +1212,8 @@ function guiItemFactory(api, both_view, list, one)
 
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
-
+                if(!render_options.page_type) render_options.page_type = 'list'
+ 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
@@ -1257,7 +1397,7 @@ function guiItemFactory(api, both_view, list, one)
             return this.view.defaultName
         }
 
-        if(this.one && this.one.view  && this.one.view.definition  && this.one.view.definition.properties)
+        if(this.list && this.list.view  && this.list.view.definition  && this.list.view.definition.properties)
         {
             if(this.one.view.definition.properties.name)
             {
@@ -1383,7 +1523,7 @@ function guiActionFactory(api, action)
                     }
                 }
 
-                let value = this.validateByModel(data)
+                /*let value = this.validateByModel(data)
                 data = {}
 
                 for(let i in value[0])
@@ -1392,9 +1532,16 @@ function guiActionFactory(api, action)
                     {
                         data[i] = value[0][i]
                     }
+                }*/
+                let tmp = {};
+                for(let i in data)
+                {
+                    if(data[i] && data[i] != "")
+                    {
+                        tmp[i] = data[i]
+                    }
                 }
-
-
+                data = tmp
 
                 if(!this.model.pathInfo)
                 {
@@ -1514,6 +1661,7 @@ function guiActionFactory(api, action)
 
             render_options.fileds = this.getFields('renderAsPage')
             render_options.sections = this.getSections('renderAsPage')
+            if(!render_options.page_type) render_options.page_type = 'action'
 
             return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
         }

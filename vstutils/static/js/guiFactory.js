@@ -1,8 +1,15 @@
+ 
+// Если количество не обязательных полей больше или равно чем hide_non_required то они будут спрятаны
+guiLocalSettings.setIfNotExists('hide_non_required', 4)
+
+
+// Количество элементов на странице 
+guiLocalSettings.setIfNotExists('page_size', 20)
+ 
 
 function getMenuIdFromApiPath(path){
     return path.replace(/[^A-z0-9\-]/img, "_")+Math.random()
 }
-
 
 function openApi_newDefinition(api, name, definitionList, definitionOne)
 {
@@ -11,7 +18,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     {
         return window["api"+name];
     }
-
+    
     var one = definitionOne;
     var list = definitionList;
 
@@ -38,7 +45,12 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
         var val = list.properties[i]
         val.name = i
 
-
+        val.required = false
+        if($.inArray(i, list.required) != -1)
+        {
+            val.required = true
+        }
+ 
         list_fileds.push(val)
     }
 
@@ -53,7 +65,12 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
         var val = one.properties[i]
         val.name = i
 
-
+        val.required = false
+        if($.inArray(i, one.required) != -1)
+        {
+            val.required = true
+        }
+  
         one_fileds.push(val)
     }
 
@@ -65,27 +82,28 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     }
 */
     window["api"+name] = guiItemFactory(api, {
-        bulk_name:name.toLowerCase().replace(/^One/i, ""),
-       // defaultName:"name"
+        // both view
+        bulk_name:name.toLowerCase().replace(/^One/i, ""), 
     },
     {
-        view:{
-            bulk_name:name.toLowerCase().replace(/^One/i, ""),
+        view:{ // list view
+            urls:{},
             definition:list,
             class_name:"api"+name,
-            page_size:20,
-            urls:{},
+            page_size:guiLocalSettings.get('page_size'),
+            bulk_name:name.toLowerCase().replace(/^One/i, ""),
         },
         model:{
             fileds:list_fileds,
             page_name:name.toLowerCase().replace(/^One/i, ""),
         }
     }, {
-        view:{
-            bulk_name:name.toLowerCase().replace(/^One/i, ""),
+        view:{ // one view
+            urls:{},
             definition:one,
             class_name:"api"+name,
-            urls:{},
+            hide_non_required:guiLocalSettings.get('hide_non_required'),
+            bulk_name:name.toLowerCase().replace(/^One/i, ""),
         },
         model:{
             fileds:one_fileds,
@@ -178,16 +196,17 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         var obj = res.groups
         obj.url = res[0]                 // текущий урл в блоке
         obj.page_and_parents = res[0]    // страница+родители
-
+ 
         if(obj.page_and_parents)
         {
-            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z]+)$/)
+            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
 
             if(match && match.groups)
             {
                 obj.parent_type = match.groups.parent_type
                 obj.parent_id = match.groups.parent_id
-                obj.page_type = match.groups.page_type
+                obj.page_type = match.groups.page_type.replace(/\/[A-z]+$/, "")
+                obj.page_name = match.groups.page_type 
             }
         }
 
@@ -195,13 +214,8 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             return "/?"+this.page_and_parents+"/search/"+query;
         }
 
-        obj.baseURL = function(){ 
-            if(this.parents)
-            {
-                return "/?"+this.parents;
-            }
-
-            return "/?"+this.page_type;
+        obj.baseURL = function(){  
+            return "/?"+this.page.replace(/\/[^/]+$/, "");
         }
 
         obj.getApiPath = function (){
@@ -482,30 +496,6 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
         }
         else
         {
-            // Значит добавим кнsопку создать объект
-            page.blocks.push({
-                id:'btn-create',
-                prioritet:9,
-                render:function(pageMainBlockObject)
-                {
-                    return function(menuInfo, data)
-                    {
-                        let link = window.hostname+"?"+data.reg.page_and_parents+"/new";
-
-                        let btn = new guiElements.link_button({
-                            class:'btn btn-primary',
-                            link: link,
-                            title:'Create new '+pageMainBlockObject.one.getBulkName(),
-                            text:'Create',
-                        })
-
-                        let def = new $.Deferred();
-                        def.resolve(btn.render())
-                        return def.promise();
-                    }
-                }(pageMainBlockObject)
-            })
-
             // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
             var new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_path_value)
 
@@ -538,33 +528,6 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     // Страница добавления под элементов
     if(urlLevel > 2 && pageMainBlockObject.list.getShortestApiURL().level == 2)
     {
-        // Страница нового объекта создаваться должна на основе схемы пост запроса а не на основе схемы списка объектов.
-        // parameters[0].schema.$ref
-
-        // Значит добавим кнsопку создать объект
-        page.blocks.push({
-            id:'btn-add',
-            prioritet:10,
-            render:function(pageMainBlockObject)
-            {
-                return function(menuInfo, data)
-                {
-                    var link = window.hostname+"?"+data.reg.page_and_parents+"/add";
-
-                    var btn = new guiElements.link_button({
-                        class:'btn btn-primary',
-                        link: link,
-                        title:'Add '+pageMainBlockObject.one.getBulkName(),
-                        text:'Add '+pageMainBlockObject.one.getBulkName(),
-                    })
-
-                    var def = new $.Deferred();
-                    def.resolve(btn.render())
-                    return def.promise();
-                }
-            }(pageMainBlockObject)
-        })
-
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
         var add_page_url = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_path_value)
 
@@ -578,8 +541,10 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
             prioritet:10,
             render:function(pageMainBlockObject, api_path_value)
             {
-                return function(menuInfo, data)
+                return function(menuInfo, data, thisGuiPage)
                 {
+                    // Тут this укажет на контекст guiPage
+                    
                     var def = new $.Deferred();
 
                     // Создали список хостов
@@ -795,7 +760,12 @@ function openApi_paths(api)
             continue;
         }
 
-        if(!/_get$/.test(api_path_value.get.operationId) )
+        /*if(api_path_value.get.operationId == "inventory_all_groups_detail")
+        {
+            debugger;
+        }*/
+        
+        if(!/_(get|detail)$/.test(api_path_value.get.operationId) )
         {
             // это не один элемент
             continue;
@@ -836,7 +806,6 @@ function openApi_paths(api)
             // это не список
             continue;
         }
-
 
         // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         var urlLevel = (api_path.match(/\//g) || []).length

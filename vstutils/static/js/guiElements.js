@@ -51,13 +51,49 @@ guiElements.string = function(opt, value)
         { 
             return "";
         }      
-        
-        return spajs.just.render("guiElements.string", {opt:options, guiElement:this, value:value});
+         
+        return spajs.just.render("guiElements.string", {opt:options, guiElement:this, value:value}, () => {
+            $('#'+this.element_id).on('change', false, () => {
+                for(let i in this.onChange_calls)
+                {
+                    this.onChange_calls[i]({
+                        filed:this,
+                        opt:opt, 
+                        value:this.getValue()
+                    })
+                }
+            })
+        });
     }
 
     this.getValue = function()
     {
         return $("#"+this.element_id).val()
+    }
+    
+    this.onChange_calls = []
+    
+    /**
+     * Добавляет колбек на событие onChange чтоб зависимые поля могли вовремя перестроиться
+     * @param {function} callback
+     * @returns {undefined}
+     * 
+     * @example На пример так поле notes становится зависимым от поля name у проектов
+     *  window.api.openapi.definitions.OneProject.properties.notes.dependsOn = ['name']
+     */
+    this.onChange = function(callback)
+    {
+        this.onChange_calls.push(callback)
+    }
+    
+    /**
+     * Вызывается для перестройки поля в тот момент когда поле от которого мы зависим поменяло значение
+     * @param {function} callback
+     * @returns {undefined}
+     */
+    this.updateOptions = function(arg)
+    {
+        console.log(arg)
     }
 }
 

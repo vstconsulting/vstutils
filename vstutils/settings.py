@@ -125,9 +125,9 @@ class SectionConfig(object):
     def getseconds(self, option, fallback=None):
         return self.int_seconds(self.get(option, str(fallback)))
 
-    def getlist(self, option, fallback=None):
+    def getlist(self, option, fallback=None, separator=','):
         fallback = fallback or ''
-        return [item for item in self.get(option, fallback).split(",") if item != ""]
+        return [item for item in self.get(option, fallback).split(separator) if item]
 
     @classmethod
     def int_seconds(cls, value):

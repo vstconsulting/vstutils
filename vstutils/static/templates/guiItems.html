@@ -1,0 +1,653 @@
+
+<!--
+    <%[ blockBody %>
+        <p>This is block contentRT</p>
+    <%] %>
+
+    <%[ testB %> // Переопределение блока
+        <p>This is block testBAS</p>
+    <%] %>
+
+    <%* blockName %> // Вывод блока
+
+    <%! base_items_list %> // Наследование, писать последней строкой в шаблоне
+    <! - - Список сущностей - - >
+    <script type="text/x-just" data-just="base_items_list">
+        < ! - - base_items_list - - >
+    </script>
+-->
+
+<!-- Поле для выбора какие ещё поля показать в форме  -->
+<script type="text/x-just" data-just="show_not_required_fileds">
+    <!-- show_not_required_fileds -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label">Add filed</label>
+        <select class="form-control" onchange="$('#'+this.value).show(); this.options[this.selectedIndex].disabled = true;" >
+            <option disabled selected >Select filed</option>
+            <% for(var i = 0; i < fileds.length; i++){  %>
+                <option value="<%- $(fileds[i]).attr('id') %>" ><%- $(fileds[i]).attr('data-title') %></option>
+            <% } %>
+        </select>
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
+ 
+<!-- Постраничная навигация -->
+<script  type="text/x-just" style="display: none;" data-just="pagination">
+    <!-- pagination -->
+    <% if(totalPage > 1){ %>
+        <ul class="pagination no-margin pull-right">
+            <% if(totalPage < 21){ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                    <% } %>
+                <% } %>
+            <% }else{ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
+                            <% if( dotShow == false){ %>
+                                <% dotShow = true %>
+                                <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);">..</a></li>
+                            <% } %>
+                        <% }else{ %>
+                            <% dotShow = false %>
+                            <li><a href="<%- url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1) %>" onclick="return spajs.openURL(this.href);" ><%- i+1 %></a></li>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul>
+    <% } %>
+</script>
+
+<!--  Поле поиска -->
+<script  type="text/x-just" style="display: none;" data-just="search_filed">
+    <div class="input-group col-lg-2" style="float: right;">
+    <input
+        type="text"
+        id="search-query-input"
+        placeholder="Search by name"
+        class="form-control"
+        maxlength="255"
+        value="<% if(guiObj.model.filters.query){ %><%- guiObj.model.filters.query.name %><% } %>"
+        onkeyup="if(event.keyCode == 13) spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));"
+    >
+
+    <div class="input-group-addon" onclick="spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));">
+    <span class="glyphicon glyphicon-search" ></span>
+    </div>
+    </div>
+</script>
+
+
+<script type="text/x-just" data-just="page_breadcrumb">
+    <section class="content-header">
+        <h1>
+            page_breadcrumb
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="<%- polemarch.opt.host %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">page_breadcrumb</li>
+        </ol>
+    </section>
+</script>
+
+<!-- Страница экшена -->
+<script type="text/x-just" data-just="action_page">
+    <!-- action_page --> 
+    <section class="content">
+        <div class="row">
+            <section class="col-lg-12">
+                <%[ breadcrumb %>
+                    <%= renderBreadcrumbs() %>
+                <%] %>
+                <%* breadcrumb %>
+                <%[ buttons %>
+                    <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
+                <%] %>
+                <%* buttons %>
+
+            </section>
+        </div>
+
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        action page short_title<br>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <% for(var i in opt.fileds){ %>
+                                <!--<%= i %> = <%= JSON.stringify(opt.fileds[i]) %>  -->
+                                <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+    <!-- /action_page -->
+</script>
+
+ 
+<script type="text/x-just" data-just="action_as_link">
+    <!-- action_as_link --> 
+    <a href="<%- opt.link %>"
+        onclick="return spajs.openURL(this.href);"
+        class="<%- opt.class %>"
+    >
+        <%- opt.title %>
+    </a>
+</script>
+ 
+<script type="text/x-just" data-just="action_as_button">
+    <!-- action_as_button --> 
+    <a href="<%- opt.link %>"
+        onclick="return spajs.openURL(this.href);"
+        class="<%- opt.class %>"
+    >
+        <%- opt.title %>
+    </a>
+</script>
+ 
+<script type="text/x-just" data-just="items_empty_list">
+    <!-- items_empty_list --> 
+    <div style="text-align: center;" >No child elements, list is empty</div>
+</script>
+
+<script type="text/x-just" data-just="entity_base">
+        
+    <%[ breadcrumb %>
+        <%= renderBreadcrumbs() %>
+    <%] %>
+    
+    <%[ buttons %>
+        <% if(guiObj.model.buttons){ %>
+            <% for(var i in  guiObj.model.buttons){ %>
+                <%= guiObj.model.buttons[i].render() %>
+            <% } %>
+        <% } %>
+    <%] %>
+
+    <%[ page_header %>
+        <section class="content-header">
+            <h1>
+                <!--
+                <a href="//main.comet.su:8080/?projects" onclick="return spajs.openURL(this.href);" class="btn btn-default">
+                    <span class="glyphicon glyphicon-arrow-left"></span>
+                </a>
+                -->
+
+                <span class="h1-header"><%= guiObj.model.justText('title') %></span> 
+            </h1>
+            <%* breadcrumb %>
+        </section>
+    <%] %>
+    <%* page_header %>
+     
+    <%[ main_content %>
+        <section class="content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <%[ buttons_row %>
+                        <%* buttons %>
+                    <%] %>
+                    <%* buttons_row %>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <%[ main_content_row %>
+                     
+                <%] %>
+                <%* main_content_row %> 
+            </div>
+        </section>
+    <%] %>
+    <%* main_content %> 
+</script>  
+    
+<!-- Список сущностей -->
+<script type="text/x-just" data-just="entity_list">
+    <!-- entity_list -->
+    <%[ main_content_row %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <%[ search_form %>
+                        <%= spajs.just.render('search_filed', {guiObj: guiObj}) %>
+                    <%] %>
+                    <%* search_form %>
+
+                    <%[ pagination %>
+                        <% if(guiObj.getTotalPages()){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= guiObj.paginationHtml() %>
+                            </div>
+                        <% } %>
+                    <%] %>
+                    <%* pagination %>
+
+                </div>
+                <div class="box-body">
+                    <%  if (!guiObj.model.data.results.length){ %>
+                        <%[ empty_list %>
+                                <%= this.partial('items_empty_list', { }) %>
+                        <%] %>
+                        <%* empty_list %>
+                    <% } else{ %>
+                        <%[ data_list %>
+                            <table class="table table-bordered multiple-select">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- guiObj.model.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </th>
+                                        <% for(var j in opt.fileds){ %>
+                                            <th
+                                                <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                    <%- opt.fileds[j].title %>
+                                            </th>
+                                        <% } %>
+                                        <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                                            <th style="width: 95px;" >Actions</th>
+                                        <% } %>
+                                    </tr>
+                                    <% for(var i in guiObj.model.data.results){ %>
+                                        <tr
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(guiObj.model.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            data-id="<%- guiObj.model.data.results[i].id %>" >
+                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                                                <div class="ico-on fa fa-toggle-on"></div>
+                                                <div class="ico-off fa  fa-toggle-off"></div>
+                                            </td>
+                                            <% for(var j in opt.fileds){ %>
+                                                <td
+                                                    <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                    <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                >
+                                                    <% if(!opt.fileds[j].value){ %>
+                                                        <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                                            onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
+                                                    <% }else{ %>
+                                                        <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
+                                                    <% } %>
+                                                </td>
+                                            <% } %>
+                                            <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            Actions
+                                                            <span class="caret"></span>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-right">
+                                                            <% for(var k in guiObj.model.sublinks){ %>
+                                                                <li>
+                                                                    <a
+                                                                        href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
+                                                                        onclick="return spajs.openURL(this.href);"
+                                                                        class="sublink-btn">
+                                                                            <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
+                                                                    </a>
+                                                                </li>
+                                                            <% } %>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            <% } %>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        <%] %>
+                        <%* data_list %>
+                    <% } %>
+                </div>
+                <div class="box-footer clearfix">
+                    <%[ action_buttons %>
+                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= window.guiListSelections.selectedCount.justText(guiObj.model.selectionTag) %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <% for(var k in guiObj.model.multi_actions){   %>
+                                    <!--<li>
+                                        <a href="#"
+                                            onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteRows($('.multiple-select .item-row.selected'))); return false;" >Delete from this page</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" onclick="spajs.showLoader(<%- guiObj.model.className %>.deleteSelected()); return false;" >Delete all selected elements</a>
+                                    </li>-->
+                                    <% if(guiObj.model.multi_actions[k].onClick){ %>
+                                        <li>
+                                            <a
+                                                href="#"
+                                                 <%= justOn('click', guiObj.model.multi_actions[k].onClick) %>
+                                            >
+                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="#"
+                                                <%= justOn('click', guiObj.model.multi_actions[k].onClick) %>
+                                            >
+                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %> for all selected elements
+                                            </a>
+                                        </li>
+                                    <% }else{ %>
+                                        <li>
+                                            <a
+                                                href="#"
+                                                onclick="goToMultiAction(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
+                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="#"
+                                                onclick="goToMultiActionFromElements($('.multiple-select .item-row.selected'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
+                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %> for all selected elements
+                                            </a>
+                                        </li>
+                                    <% } %>
+                                    <li role="separator" class="divider"></li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    <%] %>
+                    <%* action_buttons %>
+
+                    <% if(!query){ %>
+                        <%[ select_buttons %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, true)); return false; }) %> >Select all</a>
+                                    </li>
+                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" >
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <%] %>
+                        <%* select_buttons %>
+                    <% } %>
+                    <%[ pagination %>
+                        <% if(guiObj.getTotalPages()){ %>
+                            <%= guiObj.paginationHtml(guiObj.model.data) %>
+                        <% } %>
+                    <%] %>
+                    <%* pagination %>
+                </div>
+            </div>
+        </section> 
+    <%] %> 
+    <%! entity_base %>
+</script>
+
+<script type="text/x-just" data-just="entity_list_add_subitems">
+    <!-- entity_list_add_subitems -->
+    
+    <%[ main_content_row %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <%[ search_form %>
+                        <%= spajs.just.render('search_filed', {guiObj: guiObj}) %>
+                    <%] %>
+                    <%* search_form %>
+
+                    <%[ pagination %>
+                        <% if(guiObj.getTotalPages()){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= guiObj.paginationHtml() %>
+                            </div>
+                        <% } %>
+                    <%] %>
+                    <%* pagination %>
+
+                </div>
+                <div class="box-body">
+                    <%  if (!guiObj.model.data.results.length){ %>
+                        <%[ empty_list %>
+                                <%= this.partial('items_empty_list', { }) %>
+                        <%] %>
+                        <%* empty_list %>
+                    <% } else{ %>
+                        <%[ data_list %>
+                            <table class="table table-bordered multiple-select">
+                                <tbody>
+                                    <tr>
+                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- guiObj.model.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                            <div class="ico-on fa fa-toggle-on"></div>
+                                            <div class="ico-off fa  fa-toggle-off"></div>
+                                        </th>
+                                        <% for(var j in opt.fileds){ %>
+                                            <th
+                                                <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                    <%- opt.fileds[j].title %>
+                                            </th>
+                                        <% } %>
+                                    </tr>
+                                    <% for(var i in guiObj.model.data.results){ %>
+                                        <tr
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(guiObj.model.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            data-id="<%- guiObj.model.data.results[i].id %>" >
+                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                                                <div class="ico-on fa fa-toggle-on"></div>
+                                                <div class="ico-off fa  fa-toggle-off"></div>
+                                            </td>
+                                            <% for(var j in opt.fileds){ %>
+                                                <td
+                                                    <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                    <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                >
+                                                    <% if(!opt.fileds[j].value){ %>
+                                                        <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                                            onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
+                                                    <% }else{ %>
+                                                        <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
+                                                    <% } %>
+                                                </td>
+                                            <% } %>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        <%] %>
+                        <%* data_list %>
+                    <% } %>
+                </div>
+                <div class="box-footer clearfix">
+                    <%[ action_buttons %>
+                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" role="group">
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions on <%= window.guiListSelections.selectedCount.justText(guiObj.model.selectionTag) %> items
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#"
+                                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>')); return false;" >Add selected</a>
+                                    </li>
+                            </ul>
+                        </div>
+                    <%] %>
+                    <%* action_buttons %>
+
+                    <% if(!query){ %>
+                        <%[ select_buttons %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, true)); return false; }) %> >Select all</a>
+                                    </li>
+                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" >
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <%] %>
+                        <%* select_buttons %>
+                    <% } %>
+                    <%[ pagination %>
+                        <% if(guiObj.getTotalPages()){ %>
+                            <%= guiObj.paginationHtml(guiObj.model.data) %>
+                        <% } %>
+                    <%] %>
+                    <%* pagination %>
+                </div>
+            </div>
+        </section> 
+    <%] %> 
+    <%! entity_base %>
+</script>
+
+<script type="text/x-just" data-just="entity_one">
+    <!-- entity_one -->
+    
+    <%[ sublink_buttons %>
+        <% for(var k in guiObj.model.sublinks){  %>
+            <!-- /TODO оптимизировать обработку типа экшена -->
+
+                <% if  ((!guiObj.model.sublinks[k].isAction) || (guiObj.model.sublinks[k].isAction && (!guiObj.model.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
+                    <a
+                        href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
+                        onclick="return spajs.openURL(this.href);"
+                        class="btn btn-default sublink-btn"
+                    >
+                    <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
+                    </a>
+                <% } else { %>
+                    <%= new guiElements.button({onclick:function(){ guiObj.sendToApi('PUT')}, class:'btn btn-primary', title:k, text:k}).render() %>
+                <% } %> 
+        <% } %>
+    <%] %>
+    
+    <%[ buttons_row %>
+        
+        <% if(guiObj.canUpdate()){ %>
+            <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+            <% if (guiObj.copy != undefined) {%>
+                <%= new guiElements.button({onclick:function(){guiObj.copy()}, class:'btn btn-primary btn-copy', title:'Copy', text:'Copy'}).render() %>
+            <% } %>
+        <% } %>
+        
+        <% if(guiObj.canDelete()){ %>
+            <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+        <% } %>
+        
+        <%* buttons %>
+        <%* sublink_buttons %>
+    <%] %>
+     
+    <%[ main_content_row %> 
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border"> 
+                    &nbsp;
+                </div>
+                <div class="box-body">
+                    <div class="row">
+
+                        <% for(var i in opt.fileds){ %>
+                            <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+                        <% } %>
+
+                        <% if(opt.sections){ %>
+                            <% for(var i in opt.sections){ %>
+                                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </section> 
+    <%] %>
+    <!-- /items_new_page -->
+
+    <%! entity_base %>
+</script>
+
+<script type="text/x-just" data-just="entity_new">
+    <!-- entity_new -->
+ 
+    <%[ buttons_row %>
+        
+        <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
+            
+        <%* buttons %>
+        <%* sublink_buttons %>
+    <%] %>
+    
+    <%! entity_one %>
+
+</script>
+
+
+<!-- Отрисует страницу ошибки загрузки данных -->
+<script type="text/x-just" data-just="error_as_page">
+    <!-- error_as_page -->
+    <section class="content">
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Error renderErrorAsPage<br>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <%- error.status %><br>
+                                <%- error.data.detail %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>
+
+
+<!-- Отрисует объект как поле в другом объекте -->
+<script type="text/x-just" data-just="entity_one_as_filed">
+    <!-- entity_one_as_filed -->
+
+    <% if(guiObj.model.data){ %>
+        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label"><%- guiObj.view.bulk_name %></label>
+            <div class="form-control disabled" disabled="" maxlength="255">
+                <a href="<%- hostname %>/?<%- guiObj.getBulkName() %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
+                    <%- guiObj.model.data[guiObj.parent.getObjectNameFiled()] || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
+                </a>
+            </div>
+            <div class="help-block"></div>
+        </div>
+    <% }else{ %>
+        <%= guiObj.renderAllFileds(opt) %>
+    <% } %>
+</script>
+

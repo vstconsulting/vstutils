@@ -35,7 +35,7 @@
          * @param {type} func
          * @returns {unresolved}
          */
-        var onInsert = function(html, func, once)
+        var onInsert = function(html, func, once = true)
         {
             var key = getUUID()
             window.JUST.__JUST_onInsertFunctions[key] = {func:func, count:0};
@@ -58,7 +58,7 @@
             html += "<="+window.JUST.JustEvalJsPattern_pageUUID+" "+funcCall+" "+window.JUST.JustEvalJsPattern_pageUUID+"=>";
             return html;
         }
- 
+
         var JustEvalJsPattern_pageUUID = getUUID("pageUUID");
 
 
@@ -94,6 +94,7 @@
 				STATE_SUBBLOK = 9,
 				STATE_TEXT = 10,
 				STATE_JS = 11,
+				STATE_HTML = 12,
 				cache = {},
                                 countUid = 0,
 
@@ -271,6 +272,7 @@
 							case '=':
 								prefix = '\',(' + line + ', ';
 								postfix = '),\'';
+								state = STATE_HTML;
 								break;
 							case '-':
 								prefix = '\',(' + line + ', ';
@@ -306,6 +308,9 @@
 							case STATE_RAW:
 								buffer.push(prefix, text.substr(jsFromPos).replace(trimExp, ''), postfix);
 								break;
+							case STATE_HTML:
+								buffer.push(prefix, 'JustWaitResults('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
+								break;
 							case STATE_TEXT:
 								buffer.push(prefix, 'JustEscapeHtml('+text.substr(jsFromPos).replace(trimExp, '')+')', postfix);
 								break;
@@ -334,8 +339,9 @@
 								if (!tmp[1].length) {
 									tmp = tmp[0];
 								} else {
-									tmp = tmp.join(',');
-								}
+									tmp = tmp.join('');
+								} 
+                                                               
 								buffer.push(prefix, tmp, postfix);
 								tmp = undefined;
 								break;
@@ -398,13 +404,20 @@
 				};
 			Template.prototype.blockStart = function (name) {
                                 this.tmpBufferNames.push(name)
-               
+
 				this.tmpBuffer[name] = this.buffer;
-				if (!this.blocks[name]) { this.blocks[name] = []; }
-				if (!this.blocks[name].length) {
-					this.buffer = this.blocks[name];
-				} else {
-					this.buffer = [];
+				if (!this.blocks[name]) 
+                                {
+                                    this.blocks[name] = []; 
+                                }
+                                
+				if (!this.blocks[name].length)
+                                {
+                                    this.buffer = this.blocks[name];
+				}
+                                else 
+                                {
+                                    this.buffer = [];
 				}
 			};
 			Template.prototype.blockEnd = function () {
@@ -459,6 +472,16 @@
 				}
 				return this.childData;
 			};
+                        
+                        function arrayRender(arr){
+                            let html = ''
+                            for(let i in arr)
+                            {
+                                html += (Array.isArray(arr[i])) ? arrayRender(arr[i]) : arr[i];
+                            }
+                            
+                            return html
+                        }
 
 			Template.prototype.renderSync = function () {
 				var that = this;
@@ -474,7 +497,7 @@
                                             var html = '', length, i;
                                             for (i = 0, length = buffer.length; i < length; i++)
                                             {
-                                                html += (Array.isArray(buffer[i])) ? buffer[i].join('') : buffer[i];
+                                                html += (Array.isArray(buffer[i])) ? arrayRender(buffer[i]) : buffer[i];
                                             }
                                             return html;
                                // } catch (e) {
@@ -504,12 +527,12 @@
                             {
                                 console.error("renderSync error", template, data)
                             }
-                            
+
                             if(typeof onInsertFunc == 'function')
                             {
                                 html = this.onInsert(html, onInsertFunc, false);
                             }
-                           
+
                             return html;
 			};
 			this.render = this.renderSync
@@ -671,6 +694,29 @@ function JustEscapeHtml(text) {
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
+function JustWaitResults(data) {
+
+    if(typeof data == "object")
+    {
+        if(data.then)
+        {
+            let id = "just-"+Math.random()+""+Math.random()
+            id = id.replace(/0\./g, "");
+
+            return JUST.onInsert('<div class="just just-wait-results just-loading" id="'+id+'" ></div>', function()
+            {
+                data.then((d) => {
+                    $("#"+id).replaceWithTpl(d) 
+                }, (e) => {
+                    $("#"+id).replaceWithTpl(e)
+                })
+            }, true)
+        }
+    }
+
+    return data
+}
+
 justCall_mapArr = []
 function justCall(obj)
 {
@@ -680,12 +726,12 @@ function justCall(obj)
 }
 
 function justOn(event, action){
-    
+
     let id = Math.floor(Math.random()*900000);
-     
+
     return JUST.onInsert(" id='"+id+"' ", function(){
-        $("#"+id).on(event, action) 
-    }, true) 
+        $("#"+id).on(event, action)
+    }, true)
 }
 
 

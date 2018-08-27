@@ -27,6 +27,7 @@ class TextareaField(CharField):
     Field contained multiline string
     '''
 
+
 class HtmlField(CharField):
     '''
     Field contained html-text and marked as format:html
