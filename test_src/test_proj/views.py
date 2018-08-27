@@ -82,6 +82,11 @@ class _HostGroupViewSet(ModelViewSetSet):
     manager_name='hosts', subs=['test', 'test2'],
     view=HostViewSet, allow_append=True
 )
+@nested_view(
+    'shost_all', 'id',
+    manager_name='hosts', subs=None,
+    view=HostViewSet, methods=['get']
+)
 class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
     serializer_class_one = HostGroupSerializer
     copy_related = ['hosts', 'subgroups']
