@@ -100,41 +100,28 @@
 
 <!-- Страница экшена -->
 <script type="text/x-just" data-just="action_page">
-    <!-- action_page --> 
-    <section class="content">
-        <div class="row">
-            <section class="col-lg-12">
-                <%[ breadcrumb %>
-                    <%= renderBreadcrumbs() %>
-                <%] %>
-                <%* breadcrumb %>
-                <%[ buttons %>
-                    <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
-                <%] %>
-                <%* buttons %>
+      
+    <%[ buttons_row %>
+        <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
+        <%* buttons %>
+    <%] %>
 
-            </section>
-        </div>
-
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
-                        action page short_title<br>
-                    </div>
-                    <div class="box-body">
-                        <div class="row">
-                            <% for(var i in opt.fileds){ %>
-                                <!--<%= i %> = <%= JSON.stringify(opt.fileds[i]) %>  -->
-                                <%= guiObj.renderFiled(opt.fileds[i], opt) %>
-                            <% } %>
-                        </div>
+    <%[ main_content_row %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border"> 
+                    &nbsp;
+                </div>
+                <div class="box-body">
+                    <div class="row"> 
+                        <%= guiObj.renderAllFileds(opt) %>  
                     </div>
                 </div>
-            </section>
-        </div>
-    </section>
-    <!-- /action_page -->
+            </div>
+        </section>  
+    <%] %>
+
+    <%! entity_base %>
 </script>
 
  
@@ -661,6 +648,7 @@
     <!-- entity_one_as_filed -->
 
     <% if(guiObj.model.data){ %>
+        <!-- has data -->
         <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
             <label class="control-label"><%- guiObj.view.bulk_name %></label>
             <div class="form-control disabled" disabled="" maxlength="255">
@@ -671,6 +659,7 @@
             <div class="help-block"></div>
         </div>
     <% }else{ %>
+        <!-- renderAllFileds -->
         <%= guiObj.renderAllFileds(opt) %>
     <% } %>
 </script>

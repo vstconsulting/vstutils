@@ -742,6 +742,8 @@ function openApi_paths(api)
         // Уровень вложености меню
         var urlLevel = (api_path.match(/\//g) || []).length
         openApi_getPageMainBlockType(api, api_path, urlLevel)
+        
+        api.openapi.paths[api_path].api_path = api_path
     }
 
     // Строим страницы одного объекта и экшены объекта
