@@ -217,6 +217,15 @@
     
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
+    
+    <%[ buttons_row %>
+        <%= guiObj.getBtnNew() %>
+        <%= guiObj.getBtnAdd() %>
+ 
+        <%* buttons %>
+        <%* sublink_buttons %>
+    <%] %>
+     
     <!-- entity_list -->
     <%[ main_content_row %>
         <section class="col-lg-12">
@@ -412,6 +421,14 @@
 <script type="text/x-just" data-just="entity_list_add_subitems">
     <!-- entity_list_add_subitems -->
     
+    <%[ buttons_row %>
+        <%= guiObj.getBtnNew() %>
+        <%= guiObj.getBtnAdd() %>
+ 
+        <%* buttons %>
+        <%* sublink_buttons %>
+    <%] %>
+     
     <%[ main_content_row %>
         <section class="col-lg-12">
             <div class="box box-info">
