@@ -458,7 +458,7 @@ function guiItemFactory(api, both_view, list, one)
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
                 }
-                
+
                 if(!this.model.title)
                 {
                     this.model.title = this.getBulkName();
@@ -486,7 +486,7 @@ function guiItemFactory(api, both_view, list, one)
                 })
                 return res;
             }
- 
+
             this.sendToApi = function (method)
             {
                 var def = new $.Deferred();
@@ -827,9 +827,9 @@ function guiItemFactory(api, both_view, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
-                
+
                     if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
-                    { 
+                    {
                         if(this.canUpdate())
                         {
                             var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
@@ -856,7 +856,7 @@ function guiItemFactory(api, both_view, list, one)
 
                         this.model.buttons.push(btn)
                     }
-                    
+
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
@@ -900,14 +900,14 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
-                    
+
                 }
-                
+
                 if(!this.model.title)
                 {
                     this.model.title = this.getBulkName();
                 }
-                
+
                 window.guiListSelections.intTag(this.model.selectionTag)
             }
 
@@ -967,82 +967,146 @@ function guiItemFactory(api, both_view, list, one)
                 var prefetch_fields = {};
                 var prefetch_fields_ids = {};
                 var promise = new $.Deferred();
+
+                //отбираем prefetch поля
                 for(var i in this.model.fileds)
                 {
                     if(this.model.fileds[i].prefetch)
                     {
                         prefetch_fields[this.model.fileds[i].name] = $.extend(true, {}, this.model.fileds[i].prefetch);
-                        prefetch_fields_ids[this.model.fileds[i].name] = [];
+                        prefetch_fields_ids[this.model.fileds[i].name] = {};
                     }
                 }
+
+                //если prefetch полей не оказалось, то функция завершает свое выполнение
                 if($.isEmptyObject(prefetch_fields))
                 {
                     return promise.resolve(data);
                 }
 
                 var dataFromApi = data.data.results;
-                var bulkArr = [];
-                var queryObj = {};
 
+                //отбираем id prefetch полей
                 for(var item in dataFromApi)
                 {
                     for(var field in dataFromApi[item])
                     {
                         if(prefetch_fields[field])
                         {
-                            if($.inArray(dataFromApi[item][field], prefetch_fields_ids[field]) == -1 && dataFromApi[item][field] != null )
+                            if(!prefetch_fields_ids.hasOwnProperty(field))
                             {
-                                prefetch_fields_ids[field].push(dataFromApi[item][field]);
+                                prefetch_fields_ids[field] = {};
+                            }
+
+                            let path = prefetch_fields[field].path(dataFromApi[item]);
+
+                            if(path)
+                            {
+                                if(!prefetch_fields_ids[field].hasOwnProperty(path))
+                                {
+                                    prefetch_fields_ids[field][path] = [];
+                                }
+
+                                if($.inArray(dataFromApi[item][field], prefetch_fields_ids[field][path]) == -1 && dataFromApi[item][field] != null )
+                                {
+                                    prefetch_fields_ids[field][path].push(dataFromApi[item][field]);
+                                }
                             }
                         }
                     }
                 }
 
+
+                var bulkArr = [];
+                var queryObj = {};
+
+                //формируем bulk запрос
                 for(var field in prefetch_fields_ids)
                 {
-                    if(prefetch_fields_ids[field].length > 0)
+                    for(var path in prefetch_fields_ids[field])
                     {
-                        var bulk_name = prefetch_fields[field].path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                        queryObj =
-                            {
+
+                        let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                        if(match != null)
+                        {
+                            queryObj = {
+                                type: "mod",
+                                item: match[1],
+                                pk: match[2],
+                                data_type: match[3],
+                                method: "get",
+                            }
+                        }
+                        else
+                        {
+                            let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                            queryObj = {
                                 type: "mod",
                                 item: bulk_name[1],
-                                filters:"id="+prefetch_fields_ids[field].join(","),
+                                filters:"id="+prefetch_fields_ids[field][path].join(","),
                                 method:"get",
                             }
+                        }
+
                         bulkArr.push(queryObj);
                     }
                 }
 
-
-                $.when(api.query(bulkArr)).done(d => {
-
-                    var res = data.data.results;
-                    for(var i in res)
+                //отправляем bulk запрос
+                $.when(api.query(bulkArr)).done(d =>
+                {
+                    for(var item in dataFromApi)
                     {
-                        for(var field in res[i])
+                        for(var field in dataFromApi[item])
                         {
                             if(prefetch_fields[field])
                             {
-                                var bulk_name = prefetch_fields[field].path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                                for(var j in d)
+                                let path = prefetch_fields[field].path(dataFromApi[item]);
+
+                                if(path)
                                 {
-                                    if(d[j].item == bulk_name[1])
+                                    let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                                    if(match != null)
                                     {
-                                        for(var k in d[j].data.results)
+                                        for(var j in d)
                                         {
-                                            if(res[i][field] == d[j].data.results[k].id)
+                                            if(d[j].item == match[1] && d[j].subitem == match[3])
                                             {
-                                                res[i][field+'_info'] = d[j].data.results[k];
+                                                let prefetch_data = d[j].data.results;
+                                                for(var k in prefetch_data)
+                                                {
+                                                    if($.inArray(prefetch_data[k].id, prefetch_fields_ids[field][path]) != -1)
+                                                    {
+                                                        dataFromApi[item][field+'_info'] = prefetch_data[k];
+                                                    }
+                                                }
                                             }
                                         }
+                                    }
+                                    else
+                                    {
+                                        let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                                        for(var j in d)
+                                        {
+                                            if(d[j].item == bulk_name[1])
+                                            {
+                                                let prefetch_data = d[j].data.results;
+                                                for(var k in prefetch_data)
+                                                {
+                                                    if(dataFromApi[item][field] == prefetch_data[k].id)
+                                                    {
+                                                        dataFromApi[item][field+'_info'] = prefetch_data[k];
+                                                    }
+                                                }
+                                            }
+                                        }
+
                                     }
                                 }
                             }
                         }
-
-
                     }
+
                     promise.resolve(data);
                 }).fail(f => {
                     promise.reject(f);
@@ -1213,7 +1277,7 @@ function guiItemFactory(api, both_view, list, one)
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'list'
- 
+
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
