@@ -103,7 +103,7 @@ basePageView.renderFiled = function(filed, render_options)
                 filed_value = this.model.data[filed.name]
             }
 
-            obj = new obj.one(undefined, filed_value)
+            obj = new obj.one(undefined, filed_value, this)
 
             this.model.guiFileds[filed.name] = obj
         }
@@ -133,7 +133,7 @@ basePageView.renderFiled = function(filed, render_options)
             {
                 filed_value = this.model.data[filed.name]
             }
-            this.model.guiFileds[filed.name] = new window.guiElements[type](filed, filed_value)
+            this.model.guiFileds[filed.name] = new window.guiElements[type](filed, filed_value, this)
         }
 
         // Добавление связи с зависимыми полями
@@ -350,14 +350,16 @@ function guiItemFactory(api, both_view, list, one)
     var thisFactory = {
         /**
          * Фабрика объектов сущьности
-         * @param {Object} init_options параметры инициализации
+         * @param {Object} page_options параметры инициализации
+         * @param {Object} object данные
+         * @param {Object} parent_object родительский объект
          * @returns {guiItemFactory.guiForWebAnonym$5}
          *
          * @note init_options Могут по идее принимать определение параметров страницы из апи
          * Тогда в объект законным образом попадёт bulk_name и параметры фильтрации
          *
          */
-        one:function(page_options, object){
+        one:function(page_options, object, parent_object){
 
             /**
              * @class guiApi
@@ -367,6 +369,7 @@ function guiItemFactory(api, both_view, list, one)
             this.model = $.extend({}, one.model)
             this.model.pathInfo = undefined
 
+            this.model.parent_object = parent_object
             this.model.guiFileds = {}
             this.model.isSelected = {}
             this.model.buttons = []
@@ -737,7 +740,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 render_options.fileds = this.getFields('render')
                 render_options.sections = this.getSections('render')
-
+                debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
@@ -769,7 +772,7 @@ function guiItemFactory(api, both_view, list, one)
          * Фабрика объектов списка сущьностей
          * @returns {guiItemFactory.guiForWebAnonym$6}
          */
-        list:function(page_options, objects)
+        list:function(page_options, objects, parent_object)
         {
             this.state = {
                 search_filters:{}
@@ -786,6 +789,7 @@ function guiItemFactory(api, both_view, list, one)
              * @class guiApi
              */
             this.api = api
+            this.model.parent_object = parent_object
             this.model.pathInfo = undefined
             this.model.sublinks = {}
             this.model.multi_actions = {}
@@ -893,6 +897,7 @@ function guiItemFactory(api, both_view, list, one)
                 }
                 
                 window.guiListSelections.intTag(this.model.selectionTag)
+              
             }
 
             this.getBtnNew = function ()
@@ -1412,7 +1417,7 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    {
+    { 
         if(this.view && this.view.defaultName)
         {
             return this.view.defaultName
@@ -1424,11 +1429,11 @@ function guiItemFactory(api, both_view, list, one)
             {
                 return "name"
             }
-            if(this.one.view.definition.properties.name)
+            if(this.one.view.definition.properties.username)
             {
                 return "username"
             }
-            if(this.one.view.definition.properties.name)
+            if(this.one.view.definition.properties.key)
             {
                 return "key"
             }

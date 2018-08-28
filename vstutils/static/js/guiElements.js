@@ -2,7 +2,7 @@
 var guiElements = {
 }
 
-guiElements.base = function(opt, value)
+guiElements.base = function(opt, value, parent_object)
 {
     this.value = value
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
@@ -223,37 +223,26 @@ guiElements.autocomplete = function()
         }
     }
 }
-
-guiElements.select2 = function()
+ 
+guiElements.select2 = function(filed, filed_value, parent_object)
 {
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
-
+   
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-
-        if(options.searchObj)
+       
+        if(options.search)
         {
             $('#'+this.element_id).select2({
                 width: '100%',
                 ajax: {
-                    transport: function (params, success, failure) {
-                        
-                        $.when(options.searchObj.search(options.filters)).done((rawdata) => {
-                            
-                            if(!rawdata || !rawdata.data || !rawdata.data.results)
-                            {
-                                failure([])
-                            }
-
-                            if(options.matcher)
-                            {
-                                success(options.matcher(rawdata))
-                                return;
-                            }
-                            
+                    transport: function (params, success, failure) 
+                    {
+                        $.when(options.search(params, filed, filed_value, parent_object)).done((results) => 
+                        { 
                             /*
                              * {
                                 "results": [
@@ -270,14 +259,8 @@ guiElements.select2 = function()
                                   "more": true
                                 }
                               }
-                             */ 
-                            let results = []
-                            for(let i in rawdata.data.results)
-                            {
-                                results.push({id:rawdata.data.results[i].id, text:rawdata.data.results[i].name})
-                            }
-                             
-                            success({results:results}) 
+                             */
+                            success(results) 
                         }).fail(() => {
                             failure([])
                         })
@@ -287,6 +270,7 @@ guiElements.select2 = function()
         }
     }
 }
+
 
 function set_api_options(options)
 {
