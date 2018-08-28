@@ -455,8 +455,7 @@ if(!window.spajs)
     {
         if(!menu.id)
         {
-            console.error("Не задан menu.id", menu)
-            return;
+            menu.id = Math.random()
         }
         
         if(!menu.type)
@@ -547,12 +546,21 @@ if(!window.spajs)
         var menuInfo = undefined;
         for(var i in spajs.opt.menu)
         {
-            if(!spajs.opt.menu[i].urlregexp && spajs.opt.menu[i].id == opt.menuId)
+            val = spajs.opt.menu[i]
+            if(spajs.opt.menu[i].url_parser != undefined)
             {
-                menuInfo = spajs.opt.menu[i]
-                break;
+                for(var j in spajs.opt.menu[i].url_parser)
+                {
+                    var parsed = spajs.opt.menu[i].url_parser[j](opt.menuId)
+                    if(parsed)
+                    {
+                        regExpRes = parsed
+                        menuInfo = spajs.opt.menu[i]
+                        break;
+                    }
+                }
             }
-            else if(spajs.opt.menu[i].urlregexp)
+            else if(spajs.opt.menu[i].urlregexp != undefined)
             {
                 for(var j in spajs.opt.menu[i].urlregexp)
                 {
@@ -563,6 +571,11 @@ if(!window.spajs)
                         break;
                     }
                 }
+            }
+            else if(spajs.opt.menu[i].id == opt.menuId)
+            {
+                menuInfo = spajs.opt.menu[i]
+                break;
             }
         }
 
@@ -575,7 +588,7 @@ if(!window.spajs)
                 console.error("URL not registered", opt.menuId, opt)
             }
 
-            debugger;
+            //debugger;
             def.reject({detail:"Error URL not registered", status:404})
             throw { text:"URL not registered " + opt.menuId, code:404};
             return def.promise();
@@ -642,7 +655,9 @@ if(!window.spajs)
         }
         $(spajs.opt.holder).addClass("spajs-active-"+menuInfo.id);
 
+        spajs.urlInfo = {menuInfo:menuInfo, data:data}
         tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
+        tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
         var res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
         if(res)
         {
@@ -684,7 +699,7 @@ if(!window.spajs)
         jQuery("#spajs-menu-"+menuInfo.id).addClass("active")
 
         spajs.currentOpenMenu = menuInfo;
-
+        
         if(opt.callback)
         {
             opt.callback();

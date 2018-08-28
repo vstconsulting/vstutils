@@ -347,12 +347,12 @@ div.spinner div.bar12 {
     color: #eee;
 }
 
-.boolean-select .selected .ico-on{
+.boolean-select.selected .ico-on{
     display: inline-block;
     cursor: pointer;
 }
 
-.boolean-select .selected .ico-off{
+.boolean-select.selected .ico-off{
     display: none;
     cursor: pointer;
 }
@@ -1109,4 +1109,12 @@ table{
 
 .pm-treeview.hover-li .open-pm-treeview-button i, .pm-treeview-active .open-pm-treeview-button i{
     transform: rotate(4.7rad); 
+}
+ 
+.h1-header { 
+    text-transform: capitalize;
+}
+
+.sublink-btn { 
+    text-transform: capitalize;
 }
