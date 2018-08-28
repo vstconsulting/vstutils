@@ -172,6 +172,9 @@ class KVExchanger(object):
         self.cache.delete(self.key)
         return value
 
+    def delete(self):
+        self.cache.delete(self.key)
+
 
 class Lock(KVExchanger):
     '''

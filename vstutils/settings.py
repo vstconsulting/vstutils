@@ -1,4 +1,5 @@
 import os
+import pwd
 import sys
 from warnings import warn
 
@@ -9,6 +10,7 @@ from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
 ##############################################################
+PYTHON_INTERPRETER = sys.executable or 'python'
 VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
@@ -25,7 +27,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
 __kwargs = dict(
     PY=PY_VER, PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
-    TMP=TMP_DIR, HOME=BASE_DIR,
+    INTERPRETER=PYTHON_INTERPRETER, TMP=TMP_DIR, HOME=BASE_DIR,
     PROG=VST_PROJECT_DIR, LIB=BASE_DIR, VST=VSTUTILS_DIR,
     PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB
 )
@@ -79,10 +81,13 @@ class SectionConfig(object):
         else:
             return value
 
-    def _get_from_section(self, section, option=None):
-        default_value = (
+    def get_default_data_from_section(self, option):
+        return (
             self.default or self.section_defaults.get(option if option else '.', {})
         )
+
+    def get_from_section(self, section, option=None):
+        default_value = self.get_default_data_from_section(option)
         try:
             return self.config[section] or default_value
         except:
@@ -90,7 +95,7 @@ class SectionConfig(object):
 
     def _get_section_data(self, section, option=None):
         section_data = {}
-        for key, value in self._get_from_section(section, option).items():
+        for key, value in self.get_from_section(section, option).items():
             key_name = key if not option else "{}.{}".format(option, key)
             type_handler = self.types_map.get(key_name, str)
             section_data[self.key_handler(key)] = type_handler(
@@ -116,7 +121,7 @@ class SectionConfig(object):
         return self.all().get(option, self.value_handler(fallback))
 
     def getboolean(self, option, fallback=None):
-        return bool(self.get(option, fallback))
+        return self.bool(self.get(option, fallback))
 
     def getint(self, option, fallback=None):
         value = self.get(option, str(fallback)).strip()
@@ -140,6 +145,14 @@ class SectionConfig(object):
         value = value.replace('M', '0' * 6)
         value = value.replace('G', '0' * 9)
         return int(float(value))
+
+    @classmethod
+    def bool(cls, value):
+        if not isinstance(value, bool):
+            value = value.replace('False', '')
+            value = value.replace('false', '')
+        return bool(value)
+
 
 class BackendsSectionConfig(SectionConfig):
 
@@ -357,7 +370,7 @@ class DBSectionConfig(BackendsSectionConfig):
             'timeout': 20
         },
         'test': {
-            'serialize': False
+            'serialize': 'false'
         }
     }
     types_map = {
@@ -366,7 +379,7 @@ class DBSectionConfig(BackendsSectionConfig):
         'options.connect_timeout': BackendsSectionConfig.int_seconds,
         'options.read_timeout': BackendsSectionConfig.int_seconds,
         'options.write_timeout': BackendsSectionConfig.int_seconds,
-        'test.serialize': bool,
+        'test.serialize': BackendsSectionConfig.bool,
     }
 
     def key_handler(self, key):
@@ -532,35 +545,6 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Celery broker settings
-# Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
-##############################################################
-rpc = SectionConfig('rpc')
-__broker_url = rpc.get("connection", fallback="filesystem:///var/tmp")
-if __broker_url.startswith("filesystem://"):
-    __broker_folder = __broker_url.split("://", 1)[1]
-    CELERY_BROKER_URL = "filesystem://"
-    CELERY_BROKER_TRANSPORT_OPTIONS = {
-        "data_folder_in": __broker_folder,
-        "data_folder_out": __broker_folder,
-        "data_folder_processed": __broker_folder,
-    }
-else:
-    CELERY_BROKER_URL = __broker_url  # nocv
-
-CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback="file:///tmp")
-CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
-CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=10)
-CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
-
-CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
-CONCURRENCY = rpc.getint("concurrency", fallback=4)
-
-
 # LOGGING settings
 ##############################################################
 LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', main.get("log_level", fallback="WARNING")).upper()
@@ -606,6 +590,69 @@ SILENCED_SYSTEM_CHECKS = [
     'fields.W342', 'urls.W001', '1_10.W001', "fields.W340", "urls.W005"
 ]
 
+
+# Celery broker settings
+# Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
+##############################################################
+rpc = SectionConfig('rpc')
+__broker_url = rpc.get("connection", fallback="filesystem:///var/tmp")
+if __broker_url.startswith("filesystem://"):
+    __broker_folder = __broker_url.split("://", 1)[1]
+    CELERY_BROKER_URL = "filesystem://"
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        "data_folder_in": __broker_folder,
+        "data_folder_out": __broker_folder,
+        "data_folder_processed": __broker_folder,
+    }
+else:
+    CELERY_BROKER_URL = __broker_url  # nocv
+
+CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback="file:///tmp")
+CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
+CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=10)
+CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
+
+CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
+CONCURRENCY = rpc.getint("concurrency", fallback=4)
+RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
+
+
+class WorkerSectionConfig(SectionConfig):
+    section = 'worker'
+    section_defaults = {
+        '.': {
+            'app': '{PROG_NAME}.wapp:app',
+            'loglevel': LOG_LEVEL,
+            'logfile': '/var/log/{PROG_NAME}/worker.log',
+            'pidfile': '/run/{PROG_NAME}_worker.pid',
+            'autoscale': '{},1'.format(CONCURRENCY),
+            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
+            'beat': True
+        }
+    }
+    types_map = {
+        'beat': SectionConfig.bool,
+        'events': SectionConfig.bool,
+        'task-events': SectionConfig.bool,
+        'without-gossip': SectionConfig.bool,
+        'without-mingle': SectionConfig.bool,
+        'without-heartbeat': SectionConfig.bool,
+        'purge': SectionConfig.bool,
+        'discard': SectionConfig.bool,
+    }
+
+    def get_from_section(self, section, option=None):
+        result = self.get_default_data_from_section(option)
+        data = super(WorkerSectionConfig, self).get_from_section(section, option)
+        result.update(data)
+        return result
+
+
+WORKER_OPTIONS = WorkerSectionConfig().all() if has_django_celery_beat else {}
 
 # View settings
 ##############################################################
