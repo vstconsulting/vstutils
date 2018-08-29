@@ -163,14 +163,17 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         nested_view._nested_view = self.view
         return name, nested_view
 
+    def get_view_type(self, type_name, **options):
+        return self.get_view('{}_{}'.format(self.name, type_name), **options)
+
     def get_list_view(self, **options):
-        return self.get_view('{}_list'.format(self.name), **options)
+        return self.get_view_type('list', **options)
 
     def get_detail_view(self, **options):
-        return self.get_view('{}_detail'.format(self.name), **options)
+        return self.get_view_type('detail', **options)
 
     def get_sub_view(self, sub, **options):
-        return self.get_view('{}_{}'.format(self.name, sub), nested_sub=sub, **options)
+        return self.get_view_type(sub, nested_sub=sub, **options)
 
     def get_decorator(self, detail=False, **options):
         args = [self.name]
@@ -198,7 +201,9 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             if getattr(self.view, 'list', None) is not None:
                 methods += ['get']
         kwargs['methods'] = self._filter_methods(methods)
-        return name, self.get_decorator(**kwargs)(view)
+        view = self.get_decorator(**kwargs)(view)
+        view._nested_view = self.view
+        return name, view
 
     def decorated_detail(self):
         name, view = self.get_detail_view()
@@ -214,7 +219,9 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             if getattr(self.view, 'destroy', None) is not None:
                 methods += ['delete']
         kwargs['methods'] = self._filter_methods(methods, detail=True)
-        return name, self.get_decorator(True, **kwargs)(view)
+        view = self.get_decorator(True, **kwargs)(view)
+        view._nested_view = self.view
+        return name, view
 
     def _get_decorated_sub(self, sub):
         name, subaction_view = self.get_sub_view(sub)

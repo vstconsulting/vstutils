@@ -51,6 +51,9 @@ class HostGroupSerializer(VSTSerializer):
 
 
 class HostViewSet(ModelViewSetSet):
+    '''
+    Hosts view
+    '''
     model = Host
     serializer_class = HostSerializer
     filter_class = HostFilter
@@ -70,6 +73,9 @@ class HostViewSet(ModelViewSetSet):
 
 
 class _HostGroupViewSet(ModelViewSetSet):
+    '''
+    Host group opertaions.
+    '''
     model = HostGroup
     serializer_class = HostGroupSerializer
     serializer_class_one = HostGroupSerializer

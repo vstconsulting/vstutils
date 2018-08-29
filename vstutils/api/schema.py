@@ -85,6 +85,11 @@ class VSTAutoSchema(SwaggerAutoSchema):
         NestedFilterInspector
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
+    def __init__(self, *args, **kwargs):
+        super(VSTAutoSchema, self).__init__(*args, **kwargs)
+        self._sch = args[0].schema
+        self._sch.view = args[0]
+
     def get_operation_id(self, operation_keys):
         new_operation_keys = []
         for key in operation_keys:
@@ -176,7 +181,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
         subpath_keys = [item for item in subpath.split('/') if item]
         if method.upper() == 'GET' and '_detail' in keys[-1]:
-            keys = keys[:-1] + ['_'.join(keys[-1].split('_')[:-1]) + 'get']
+            keys = keys[:-1] + ['_'.join(keys[-1].split('_')[:-1])] + ['get']
         if keys[-1] == 'get' and subpath_keys[-1] == keys[-2]:
             if getattr(view, '_'.join([keys[-2], 'list']), None) is not None:
                 keys = keys[0:-1] + ['list']
