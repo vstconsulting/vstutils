@@ -174,14 +174,14 @@ basePageView.getValue = function ()
     for(var i in this.model.guiFileds)
     {
         let val = this.model.guiFileds[i].getValue();
-        if(typeof val == "object")
+        /*if(typeof val == "object")
         {
             obj = mergeDeep(obj, val);
         }
         else
-        {
+        {*/
             obj[i] = val;
-        }
+        // }
     }
 
     return obj;
@@ -740,7 +740,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 render_options.fileds = this.getFields('render')
                 render_options.sections = this.getSections('render')
-                debugger;
+                //debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
