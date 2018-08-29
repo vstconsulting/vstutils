@@ -34,6 +34,7 @@ class HostSerializer(VSTSerializer):
 
 
 class HostGroupSerializer(VSTSerializer):
+    name = fields.AutoCompletionField(autocomplete=['Some', 'Another'])
     parent = fields.AutoCompletionField(autocomplete='Host', required=False)
     secret_file = fields.SecretFileInString(read_only=True)
     file = fields.FileInStringField(read_only=True)

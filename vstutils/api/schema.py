@@ -46,11 +46,14 @@ class VSTFieldInspector(FieldInspector):
             field, swagger_object_type, use_references, **kw
         )
         kwargs = dict(**type_info)
-        if type_info.get('format', None) == FORMAT_AUTOCOMPLETE:
-            kwargs['additionalProperties'] = openapi.SchemaRef(
-                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                field.autocomplete + '/properties/id', ignore_unresolved=True
-            )
+        if isinstance(field, fields.AutoCompletionField):
+            if isinstance(field.autocomplete, (list, tuple)):
+                kwargs['enum'] = list(field.autocomplete)
+            else:
+                kwargs['additionalProperties'] = openapi.SchemaRef(
+                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                    field.autocomplete + '/properties/id', ignore_unresolved=True
+                )
 
         return SwaggerType(**kwargs)
 
