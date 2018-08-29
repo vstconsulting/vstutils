@@ -124,8 +124,8 @@ guiElements.file = function(opt = {})
         {
             if (event.target.files[i].size > 1024 * 1024 * 1)
             {
-                $.notify("File too large", "error");
-                console.log("File too large " + event.target.files[i].size)
+                guiPopUp.error("File is too large")
+                console.log("File is too large " + event.target.files[i].size)
                 continue;
             }
 

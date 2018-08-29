@@ -472,7 +472,7 @@ function guiItemFactory(api, both_view, list, one)
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
                 }
-                
+
                 if(!this.model.title)
                 {
                     this.model.title = this.getBulkName();
@@ -485,7 +485,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    $.notify("New entity in "+thisObj.getBulkName()+" was successfully created", "success");
+                    guiPopUp.success("New object in "+thisObj.getBulkName()+" was successfully created");
                 })
                 return res;
             }
@@ -496,11 +496,11 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("set")
                 $.when(res).done(function()
                 {
-                    $.notify("Changes in "+thisObj.getBulkName()+" were successfully saved", "success");
+                    guiPopUp.success("Changes in "+thisObj.getBulkName()+" were successfully saved");
                 })
                 return res;
             }
- 
+
             this.sendToApi = function (method)
             {
                 var def = new $.Deferred();
@@ -640,7 +640,7 @@ function guiItemFactory(api, both_view, list, one)
                     $.when(api.query(query)
                     ).done(function (data)
                     {
-                        $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
+                        guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
                         def.resolve(data)
                     }).fail(function (e)
                     {
@@ -893,11 +893,11 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
-                    
+
                 }
 
                 window.guiListSelections.intTag(this.model.selectionTag)
-              
+
             }
 
             this.getBtnNew = function ()
@@ -955,7 +955,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 $.when(api.query(q)).done(function(data)
                 {
-                    $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
+                    guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
                     def.resolve(data)
                 }).fail(function (e)
                 {
@@ -1303,7 +1303,7 @@ function guiItemFactory(api, both_view, list, one)
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'list'
- 
+
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
@@ -1481,7 +1481,7 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    { 
+    {
         if(this.view && this.view.defaultName)
         {
             return this.view.defaultName
@@ -1636,7 +1636,7 @@ function guiActionFactory(api, action)
                 if(!this.model.pathInfo)
                 {
                     console.error("pathInfo not define")
-                    $.notify("Error in code: pathInfo not define", "error");
+                    guiPopUp.error("Error in code: pathInfo not define");
                     def.reject()
                     return def.promise();
                 }
@@ -1716,12 +1716,12 @@ function guiActionFactory(api, action)
                         {
                             if(data.not_found > 0)
                             {
-                                $.notify("Item not found", "error");
+                                guiPopUp.error("Item not found");
                                 def.reject({text:"Item not found", status:404})
                                 return;
                             }
 
-                            $.notify("Save", "success");
+                            guiPopUp.success("Save");
                             def.resolve()
                         },
                         error:function(e)
@@ -1953,12 +1953,12 @@ spajs.ajax.Call({
     {
         if(data.not_found > 0)
         {
-            $.notify("Item not found", "error");
+            guiPopUp.error("Item not found");
             def.reject({text:"Item not found", status:404})
             return;
         }
 
-        $.notify("Save", "success");
+        guiPopUp.success("Save");
         def.resolve()
     },
     error:function(e)
