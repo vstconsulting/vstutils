@@ -15,6 +15,7 @@ FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
+FORMAT_TEXTAREA = 'textarea'
 
 # Base types
 basic_type_info = OrderedDict()
@@ -32,6 +33,9 @@ basic_type_info[fields.HtmlField] = dict(
 )
 basic_type_info[serializers.JsonObjectSerializer] = dict(
     type=openapi.TYPE_OBJECT, format=FORMAT_JSON
+)
+basic_type_info[fields.TextareaField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
 )
 
 

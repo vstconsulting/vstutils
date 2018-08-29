@@ -9,6 +9,7 @@ guiPopUp = {
             title: title,
             message: message,
             maxWidth: 500,
+            position: "topRight",
         });
     },
 
@@ -17,6 +18,7 @@ guiPopUp = {
             title: title,
             message: message,
             maxWidth: 500,
+            position: "topRight",
         });
     },
 
@@ -25,6 +27,7 @@ guiPopUp = {
             title: title,
             message: message,
             maxWidth: 500,
+            position: "topRight",
         });
 
     },

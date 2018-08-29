@@ -31,7 +31,7 @@ basePageView.validateByModel = function (values)
 
             if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
             {
-                throw {error:'validation', message:'Filed '+filed.name +" too long"}
+                throw {error:'validation', message:'Field '+filed.name +" if too long"}
             }
 
             if(filed.minLength && values[filed.name].toString().length < filed.minLength)
@@ -39,10 +39,10 @@ basePageView.validateByModel = function (values)
 
                 if(filed.minLength && values[filed.name].toString().length == 0)
                 {
-                    throw {error:'validation', message:'Filed '+filed.name +" empty"}
+                    throw {error:'validation', message:'Field '+filed.name +" is empty"}
                 }
 
-                throw {error:'validation', message:'Filed '+filed.name +" too short"}
+                throw {error:'validation', message:'Field '+filed.name +" is too short"}
             }
         }
     }

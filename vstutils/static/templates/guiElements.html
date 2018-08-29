@@ -2,7 +2,12 @@
 <script type="text/x-just" data-just="guiElements.base">   
  
     <%[ element %>
-        <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 
+        <div class="form-group
+
+            <%[ wrapper_classes %>
+                col-lg-4 col-xs-12 col-sm-6 col-md-6
+            <%] %>
+            <%* wrapper_classes %>
 
             gui-element-<%- guiElement.name %>
             gui-filed-<%- opt.name %>
@@ -159,24 +164,29 @@
             <span class='glyphicon glyphicon-file'>
             </span>
         </span>
-        <textarea placeholder='Enter value' id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"></textarea>
+        <textarea placeholder='Enter value' <%- set_api_options(opt) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"></textarea>
     <%] %> 
     <%! guiElements.base %>  
-</script>
-
-<script type="text/x-just" data-just="guiElements.html_textarea">
-    <!-- guiElements.html_textarea -->
-    <%[ main_input %>
-        <code id="<%- guiElement.element_id %>" placeholder="<%= opt.default %>"value=<%= value || '' %> ></code>
-    <%] %> 
-    <%! guiElements.base %>   
 </script>
 
 <!-- guiElements.textarea -->
 <script type="text/x-just" data-just="guiElements.textarea">
     <!-- guiElements.textarea -->
     <%[ main_input %>
-        <textarea rows="3" cols="50" class='form-control' style="resize:vertical;"></textarea>
+        <textarea rows="3" cols="50" <%- set_api_options(opt) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %> 
     <%! guiElements.base %>   
+</script>
+
+<!-- guiElements.html -->
+<script type="text/x-just" data-just="guiElements.html">
+    <!-- guiElements.html -->
+    <%[ wrapper_classes %>
+       col-lg-12 col-xs-12 col-sm-12 col-md-12
+    <%] %>
+
+    <%[ main_input %>
+         <div class="html_content"> <%= value || '' %> </div>
+    <%] %>
+    <%! guiElements.base %>
 </script>
