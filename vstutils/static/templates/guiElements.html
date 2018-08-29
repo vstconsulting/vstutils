@@ -164,10 +164,10 @@
     <%! guiElements.base %>  
 </script>
 
-<script type="text/x-just" data-just="guiElements.html_textarea">
+<script type="text/x-just" data-just="guiElements.html">
     <!-- guiElements.html_textarea -->
     <%[ main_input %>
-        <code id="<%- guiElement.element_id %>" placeholder="<%= opt.default %>"value=<%= value || '' %> ></code>
+        <div "value=<%= value || opt.default || '' %> ></div>
     <%] %> 
     <%! guiElements.base %>   
 </script>
