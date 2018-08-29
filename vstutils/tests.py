@@ -103,13 +103,13 @@ class BaseTestCase(TestCase):
     @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, *args, **kwargs)
-        self.assertRCode(response, code)
+        self.assertRCode(response, code, url)
         return self.__get_rendered(response)
 
     def assertCount(self, list, count):
         self.assertEqual(len(list), count)
 
-    def assertRCode(self, resp, code=200):
+    def assertRCode(self, resp, code=200, *additional_info):
         '''
         Fail if response code is not equal. Message is response body.
         :param resp: - response object
@@ -121,6 +121,9 @@ class BaseTestCase(TestCase):
             self.__get_rendered(resp),
             self.user
         )
+        if additional_info:
+            err_msg += '\nAdditional info:\n'
+            err_msg += '\n'.join([str(i) for i in additional_info])
         self.assertEqual(resp.status_code, code, err_msg)
 
     def assertCheckDict(self, first, second, msg=None):

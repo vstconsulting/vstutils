@@ -34,6 +34,7 @@ class HostSerializer(VSTSerializer):
 
 
 class HostGroupSerializer(VSTSerializer):
+    name = fields.AutoCompletionField(autocomplete=['Some', 'Another'])
     parent = fields.AutoCompletionField(autocomplete='Host', required=False)
     secret_file = fields.SecretFileInString(read_only=True)
     file = fields.FileInStringField(read_only=True)
@@ -50,6 +51,9 @@ class HostGroupSerializer(VSTSerializer):
 
 
 class HostViewSet(ModelViewSetSet):
+    '''
+    Hosts view
+    '''
     model = Host
     serializer_class = HostSerializer
     filter_class = HostFilter
@@ -69,6 +73,9 @@ class HostViewSet(ModelViewSetSet):
 
 
 class _HostGroupViewSet(ModelViewSetSet):
+    '''
+    Host group opertaions.
+    '''
     model = HostGroup
     serializer_class = HostGroupSerializer
     serializer_class_one = HostGroupSerializer
