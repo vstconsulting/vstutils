@@ -17,6 +17,9 @@ class SecretFileInString(FileInStringField):
 
 
 class AutoCompletionField(CharField):
+    '''
+    Field with autocomplite from list of objects.
+    '''
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
         super(AutoCompletionField, self).__init__(**kwargs)

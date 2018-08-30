@@ -15,6 +15,7 @@ FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
+FORMAT_TEXTAREA = 'textarea'
 
 # Base types
 basic_type_info = OrderedDict()
@@ -33,6 +34,9 @@ basic_type_info[fields.HtmlField] = dict(
 basic_type_info[serializers.JsonObjectSerializer] = dict(
     type=openapi.TYPE_OBJECT, format=FORMAT_JSON
 )
+basic_type_info[fields.TextareaField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
+)
 
 
 class VSTFieldInspector(FieldInspector):
@@ -46,11 +50,14 @@ class VSTFieldInspector(FieldInspector):
             field, swagger_object_type, use_references, **kw
         )
         kwargs = dict(**type_info)
-        if type_info.get('format', None) == FORMAT_AUTOCOMPLETE:
-            kwargs['additionalProperties'] = openapi.SchemaRef(
-                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                field.autocomplete + '/properties/id', ignore_unresolved=True
-            )
+        if isinstance(field, fields.AutoCompletionField):
+            if isinstance(field.autocomplete, (list, tuple)):
+                kwargs['enum'] = list(field.autocomplete)
+            else:
+                kwargs['additionalProperties'] = openapi.SchemaRef(
+                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                    field.autocomplete + '/properties/id', ignore_unresolved=True
+                )
 
         return SwaggerType(**kwargs)
 
@@ -81,6 +88,11 @@ class VSTAutoSchema(SwaggerAutoSchema):
     filter_inspectors = [
         NestedFilterInspector
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
+
+    def __init__(self, *args, **kwargs):
+        super(VSTAutoSchema, self).__init__(*args, **kwargs)
+        self._sch = args[0].schema
+        self._sch.view = args[0]
 
     def get_operation_id(self, operation_keys):
         new_operation_keys = []
@@ -173,7 +185,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
         subpath_keys = [item for item in subpath.split('/') if item]
         if method.upper() == 'GET' and '_detail' in keys[-1]:
-            keys = keys[:-1] + ['_'.join(keys[-1].split('_')[:-1]) + 'get']
+            keys = keys[:-1] + ['_'.join(keys[-1].split('_')[:-1])] + ['get']
         if keys[-1] == 'get' and subpath_keys[-1] == keys[-2]:
             if getattr(view, '_'.join([keys[-2], 'list']), None) is not None:
                 keys = keys[0:-1] + ['list']

@@ -98,7 +98,7 @@ filedsLib.validator.notEmpty = function(value, name)
         return true;
     }
     
-    $.notify("Invalid value in field `"+name+"` it mast be not empty", "error"); 
+    guiPopUp.error("Invalid value in field `"+name+"` it mast be not empty");
     return false; 
 }
 

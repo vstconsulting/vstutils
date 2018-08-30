@@ -9,10 +9,13 @@ from django.core import exceptions as djexcs
 from django.http.response import Http404
 from django.db.models.query import QuerySet
 from django.db import transaction
+from django.utils.encoding import smart_text
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import action
+from rest_framework.utils import formatting
+from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
 from .serializers import (
@@ -98,7 +101,51 @@ class Response(_ResponseClass):
         return self._asdict()
 
 
+class AutoSchema(DRFAutoSchema):
+    def get_description(self, path, method):
+        # pylint: disable=simplifiable-if-statement
+        view = self.view
+
+        method_name = getattr(view, 'action', method.lower())
+        method_obj = getattr(view, method_name, None)
+        method_view = getattr(method_obj, '_nested_view', None) if method_obj else None
+
+        if not method_view:
+            return super(AutoSchema, self).get_description(path, method)
+
+        # TODO: get docstring from view by
+
+        split_path = [i for i in path.split('/') if i]
+        if '{' in split_path[-1]:
+            detail = True
+        else:
+            detail = False
+        if method == 'GET':
+            docstring = getattr(method_view, 'retrieve' if detail else 'list').__doc__
+        elif method == 'POST':
+            docstring = getattr(method_view, 'create').__doc__
+        elif method == 'PATCH':
+            docstring = getattr(method_view, 'partial_update').__doc__
+        elif method == 'PUT':
+            docstring = getattr(method_view, 'update').__doc__
+        elif method == 'DELETE':
+            docstring = getattr(method_view, 'destroy').__doc__
+        else:
+            docstring = ''
+
+        docstring = docstring or ''
+        if not docstring:
+            method_doc = method_view.__doc__ or ''
+            doc_lines = [i.strip() for i in method_doc.split('\n') if i.strip()] + ['']
+            docstring = doc_lines[0] if ':' not in doc_lines[0] else ''
+
+        return formatting.dedent(smart_text(docstring))
+
+
 class QuerySetMixin(rvs.APIView):
+    '''
+    Instance REST operations.
+    '''
     _queryset = None
     model = None
 
@@ -404,6 +451,9 @@ class CopyMixin(GenericViewSet):
     @action(methods=['post'], detail=True)
     @transaction.atomic()
     def copy(self, request, **kwargs):
+        '''
+        Copy instance with deps.
+        '''
         # pylint: disable=unused-argument
         instance = self.copy_instance(self.get_object())
         serializer = self.get_serializer(instance, data=request.data, partial=True)

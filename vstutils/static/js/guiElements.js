@@ -4,6 +4,7 @@ var guiElements = {
 
 guiElements.base = function(opt, value, parent_object)
 {
+    this.opt = opt
     this.value = value
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
@@ -35,7 +36,18 @@ guiElements.base = function(opt, value, parent_object)
 
     this.getValue = function()
     {
-        return $("#"+this.element_id).val()
+        let value = $("#"+this.element_id).val();
+        let default_value = this.opt.default;
+
+        if(!value && default_value)
+        {
+            return  default_value;
+        }
+        else
+        {
+            return value;
+        }
+
     }
 
     /**
@@ -124,8 +136,8 @@ guiElements.file = function(opt = {})
         {
             if (event.target.files[i].size > 1024 * 1024 * 1)
             {
-                $.notify("File too large", "error");
-                console.log("File too large " + event.target.files[i].size)
+                guiPopUp.error("File is too large")
+                console.log("File is too large " + event.target.files[i].size)
                 continue;
             }
 
@@ -168,7 +180,13 @@ guiElements.html = function(opt = {})
 
 guiElements.textarea = function(opt = {})
 {
-    this.name = 'textarea'
+    this.name = 'textarea';
+    guiElements.base.apply(this, arguments)
+}
+
+guiElements.html = function(opt = {})
+{
+    this.name = 'html';
     guiElements.base.apply(this, arguments)
 }
 
@@ -234,26 +252,26 @@ guiElements.autocomplete = function()
         }
     }
 }
- 
+
 guiElements.select2 = function(filed, filed_value, parent_object)
 {
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
-   
+
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-       
+
         if(options.search)
         {
             $('#'+this.element_id).select2({
                 width: '100%',
                 ajax: {
-                    transport: function (params, success, failure) 
+                    transport: function (params, success, failure)
                     {
-                        $.when(options.search(params, filed, filed_value, parent_object)).done((results) => 
-                        { 
+                        $.when(options.search(params, filed, filed_value, parent_object)).done((results) =>
+                        {
                             /*
                              * {
                                 "results": [
@@ -271,13 +289,13 @@ guiElements.select2 = function(filed, filed_value, parent_object)
                                 }
                               }
                              */
-                            success(results) 
+                            success(results)
                         }).fail(() => {
                             failure([])
                         })
                     }
                 }
-            }); 
+            });
         }
     }
 }
@@ -291,11 +309,11 @@ function set_api_options(options)
     }
 
     if (options.minLength) {
-        additional_options += "minlength='" + options.minLength + "' "
+        additional_options += "minlength=" + options.minLength + " "
     }
 
     if (options.maxLength) {
-        additional_options += "maxlength='" + options.maxLength + "' "
+        additional_options += "maxlength=" + options.maxLength + " "
     }
 
     if (/^Required/.test(options.description)) {
@@ -303,11 +321,11 @@ function set_api_options(options)
     }
 
     if (options.default) {
-        additional_options += "placeholder='" + options.default + "' "
+        additional_options += "placeholder=" + options.default + " "
     }
 
     if (options.pattern) {
-        additional_options += "pattern='" + options.pattern + "' "
+        additional_options += "pattern=" + options.pattern + " "
     }
 
     return additional_options;
@@ -315,34 +333,34 @@ function set_api_options(options)
 
 /**
  *
-    TYPE_OBJECT = "object"  #:
-    TYPE_STRING = "string"  #:
-    TYPE_NUMBER = "number"  #:
-    TYPE_INTEGER = "integer"  #:
-    TYPE_BOOLEAN = "boolean"  #:
-    TYPE_ARRAY = "array"  #:
-    TYPE_FILE = "file"  #:
+ TYPE_OBJECT = "object"  #:
+ TYPE_STRING = "string"  #:
+ TYPE_NUMBER = "number"  #:
+ TYPE_INTEGER = "integer"  #:
+ TYPE_BOOLEAN = "boolean"  #:
+ TYPE_ARRAY = "array"  #:
+ TYPE_FILE = "file"  #:
 
-    # officially supported by Swagger 2.0 spec
-    FORMAT_DATE = "date"  #:
-    FORMAT_DATETIME = "date-time"  #:
-    FORMAT_PASSWORD = "password"  #:
-    FORMAT_BINARY = "binary"  #:
-    FORMAT_BASE64 = "bytes"  #:
-    FORMAT_FLOAT = "float"  #:
-    FORMAT_DOUBLE = "double"  #:
-    FORMAT_INT32 = "int32"  #:
-    FORMAT_INT64 = "int64"  #:
+ # officially supported by Swagger 2.0 spec
+ FORMAT_DATE = "date"  #:
+ FORMAT_DATETIME = "date-time"  #:
+ FORMAT_PASSWORD = "password"  #:
+ FORMAT_BINARY = "binary"  #:
+ FORMAT_BASE64 = "bytes"  #:
+ FORMAT_FLOAT = "float"  #:
+ FORMAT_DOUBLE = "double"  #:
+ FORMAT_INT32 = "int32"  #:
+ FORMAT_INT64 = "int64"  #:
 
-    # defined in JSON-schema
-    FORMAT_EMAIL = "email"  #:
-    FORMAT_IPV4 = "ipv4"  #:
-    FORMAT_IPV6 = "ipv6"  #:
-    FORMAT_URI = "uri"  #:
+ # defined in JSON-schema
+ FORMAT_EMAIL = "email"  #:
+ FORMAT_IPV4 = "ipv4"  #:
+ FORMAT_IPV6 = "ipv6"  #:
+ FORMAT_URI = "uri"  #:
 
-    # pulled out of my ass
-    FORMAT_UUID = "uuid"  #:
-    FORMAT_SLUG = "slug"  #:
-    FORMAT_DECIMAL = "decimal"
+ # pulled out of my ass
+ FORMAT_UUID = "uuid"  #:
+ FORMAT_SLUG = "slug"  #:
+ FORMAT_DECIMAL = "decimal"
  *
  */

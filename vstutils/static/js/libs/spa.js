@@ -778,7 +778,7 @@ if(!window.spajs)
     {
         if(typeof data === "string")
         {
-            $.notify(data, "error");
+            guiPopUp.error(data);
             return;
         }
 
@@ -801,7 +801,7 @@ if(!window.spajs)
 
             if(typeof data[i] === "string")
             {
-                $.notify(data[i], "error");
+                guiPopUp.error(data[i]);
             }
             else if(typeof data[i] === "object")
             {
@@ -826,7 +826,7 @@ if(!window.spajs)
 
         if(data && data.status === 500)
         {
-            $.notify("Ошибка 500", "error");
+            guiPopUp.error("Error 500")
             return true;
         }
 
@@ -844,7 +844,7 @@ if(!window.spajs)
 
         if(data && data.error)
         {
-            $.notify(data.error, "error");
+            guiPopUp.error(data.error);
             return true;
         }
         return false;

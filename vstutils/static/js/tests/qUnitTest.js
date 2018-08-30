@@ -313,7 +313,7 @@ syncQUnit.nextTest = function(name, test)
 
     var test = syncQUnit.testsArray.shift()
 
-    $.notify("Test "+test.name+", "+syncQUnit.testsArray.length+" tests remain", "warn");
+    guiPopUp.warning("Test "+test.name+", "+syncQUnit.testsArray.length+" tests remain");
 
     QUnit.test(test.name, test.test);
     //syncQUnit.nextTest()

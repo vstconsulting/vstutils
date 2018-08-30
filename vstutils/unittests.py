@@ -222,9 +222,12 @@ class VSTUtilsTestCase(BaseTestCase):
                 self.assertEqual(output.read(), "Test\n")
 
     def test_kvexchanger(self):
-        utils.KVExchanger("somekey").send(True, 10)
-        utils.KVExchanger("somekey").prolong()
-        self.assertTrue(utils.KVExchanger("somekey").get())
+        exchenger = utils.KVExchanger("somekey")
+        exchenger.send(True, 10)
+        exchenger.prolong()
+        self.assertTrue(exchenger.get())
+        exchenger.delete()
+        self.assertTrue(not exchenger.get())
 
     def test_locks(self):
         @utils.model_lock_decorator()

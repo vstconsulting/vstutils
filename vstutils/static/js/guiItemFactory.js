@@ -31,7 +31,7 @@ basePageView.validateByModel = function (values)
 
             if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
             {
-                throw {error:'validation', message:'Filed '+filed.name +" too long"}
+                throw {error:'validation', message:'Filed '+filed.name +" is too long"}
             }
 
             if(filed.minLength && values[filed.name].toString().length < filed.minLength)
@@ -41,7 +41,7 @@ basePageView.validateByModel = function (values)
                 {
                     if(filed.required)
                     {
-                        throw {error:'validation', message:'Filed '+filed.name +" empty"}
+                        throw {error:'validation', message:'Filed '+filed.name +" is empty"}
                     }
                     else
                     {
@@ -50,7 +50,7 @@ basePageView.validateByModel = function (values)
                 }
                 else
                 {
-                    throw {error:'validation', message:'Filed '+filed.name +" too short"}
+                    throw {error:'validation', message:'Filed '+filed.name +" is too short"}
                 }
             }
         }
@@ -183,14 +183,14 @@ basePageView.getValue = function ()
     for(var i in this.model.guiFileds)
     {
         let val = this.model.guiFileds[i].getValue();
-        if(typeof val == "object")
+        /*if(typeof val == "object")
         {
             obj = mergeDeep(obj, val);
         }
         else
-        {
+        {*/
             obj[i] = val;
-        }
+        // }
     }
 
     return obj;
@@ -204,7 +204,7 @@ basePageItem.getPageInfo = function ()
     {
         return this.model.pageInfo;
     }
-    
+
     return spajs.urlInfo.data.reg
 }
 
@@ -481,11 +481,11 @@ function guiItemFactory(api, both_view, list, one)
                     // Список Actions строить будем на основе данных api
                     this.model.sublinks = openApi_get_internal_links(this.api, this.model.pathInfo.api_path, 1);
                 }
-                
+
                 if(!this.model.title)
                 {
                     this.model.title = this.getBulkName();
-                } 
+                }
             }
 
             this.create = function ()
@@ -494,7 +494,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    $.notify("New entity in "+thisObj.getBulkName()+" was successfully created", "success");
+                    guiPopUp.success("New object in "+thisObj.getBulkName()+" was successfully created");
                 })
                 return res;
             }
@@ -505,11 +505,11 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("set")
                 $.when(res).done(function()
                 {
-                    $.notify("Changes in "+thisObj.getBulkName()+" were successfully saved", "success");
+                    guiPopUp.success("Changes in "+thisObj.getBulkName()+" were successfully saved");
                 })
                 return res;
             }
- 
+
             this.sendToApi = function (method)
             {
                 var def = new $.Deferred();
@@ -586,7 +586,7 @@ function guiItemFactory(api, both_view, list, one)
                     {
                         query.pk = this.model.data.id
                     }
-                  
+                    debugger;
                     $.when(api.query(query)).done(function (data)
                     {
                         def.resolve(data)
@@ -649,7 +649,7 @@ function guiItemFactory(api, both_view, list, one)
                     $.when(api.query(query)
                     ).done(function (data)
                     {
-                        $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
+                        guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
                         def.resolve(data)
                     }).fail(function (e)
                     {
@@ -749,7 +749,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 render_options.fileds = this.getFields('render')
                 render_options.sections = this.getSections('render')
-               
+                //debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
@@ -828,7 +828,7 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     this.model.pathInfo = page_options.api
                     this.model.pageInfo = page_options.url
-                     
+
                     if(page_options.selectionTag)
                     {
                         this.model.selectionTag = page_options.selectionTag
@@ -839,7 +839,7 @@ function guiItemFactory(api, both_view, list, one)
                 {
                     this.model.title = this.getBulkName();
                 }
-                
+
                 if(this.model.pathInfo)
                 {
                     // Список Actions строить будем на основе данных api
@@ -858,7 +858,7 @@ function guiItemFactory(api, both_view, list, one)
                         }
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
-                 
+
                     // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
@@ -902,11 +902,11 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
-                    
+
                 }
-                
+
                 window.guiListSelections.intTag(this.model.selectionTag)
-              
+
             }
 
             this.getBtnNew = function ()
@@ -927,9 +927,9 @@ function guiItemFactory(api, both_view, list, one)
                 return "";
             }
             this.getBtnAdd = function ()
-            { 
+            {
                 if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
-                { 
+                {
                     if(this.canUpdate())
                     {
                         var link = window.hostname+"?"+this.model.pageInfo.page_and_parents+"/add";
@@ -945,7 +945,7 @@ function guiItemFactory(api, both_view, list, one)
                 }
                 return "";
             }
-            
+
             this.deleteArray = function (ids)
             {
                 debugger;
@@ -964,7 +964,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 $.when(api.query(q)).done(function(data)
                 {
-                    $.notify(""+thisObj.getBulkName()+" were successfully deleted", "success");
+                    guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
                     def.resolve(data)
                 }).fail(function (e)
                 {
@@ -1002,82 +1002,146 @@ function guiItemFactory(api, both_view, list, one)
                 var prefetch_fields = {};
                 var prefetch_fields_ids = {};
                 var promise = new $.Deferred();
+
+                //отбираем prefetch поля
                 for(var i in this.model.fileds)
                 {
                     if(this.model.fileds[i].prefetch)
                     {
                         prefetch_fields[this.model.fileds[i].name] = $.extend(true, {}, this.model.fileds[i].prefetch);
-                        prefetch_fields_ids[this.model.fileds[i].name] = [];
+                        prefetch_fields_ids[this.model.fileds[i].name] = {};
                     }
                 }
+
+                //если prefetch полей не оказалось, то функция завершает свое выполнение
                 if($.isEmptyObject(prefetch_fields))
                 {
                     return promise.resolve(data);
                 }
 
                 var dataFromApi = data.data.results;
-                var bulkArr = [];
-                var queryObj = {};
 
+                //отбираем id prefetch полей
                 for(var item in dataFromApi)
                 {
                     for(var field in dataFromApi[item])
                     {
                         if(prefetch_fields[field])
                         {
-                            if($.inArray(dataFromApi[item][field], prefetch_fields_ids[field]) == -1 && dataFromApi[item][field] != null )
+                            if(!prefetch_fields_ids.hasOwnProperty(field))
                             {
-                                prefetch_fields_ids[field].push(dataFromApi[item][field]);
+                                prefetch_fields_ids[field] = {};
+                            }
+
+                            let path = prefetch_fields[field].path(dataFromApi[item]);
+
+                            if(path)
+                            {
+                                if(!prefetch_fields_ids[field].hasOwnProperty(path))
+                                {
+                                    prefetch_fields_ids[field][path] = [];
+                                }
+
+                                if($.inArray(dataFromApi[item][field], prefetch_fields_ids[field][path]) == -1 && dataFromApi[item][field] != null )
+                                {
+                                    prefetch_fields_ids[field][path].push(dataFromApi[item][field]);
+                                }
                             }
                         }
                     }
                 }
 
+
+                var bulkArr = [];
+                var queryObj = {};
+
+                //формируем bulk запрос
                 for(var field in prefetch_fields_ids)
                 {
-                    if(prefetch_fields_ids[field].length > 0)
+                    for(var path in prefetch_fields_ids[field])
                     {
-                        var bulk_name = prefetch_fields[field].path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                        queryObj =
-                            {
+
+                        let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                        if(match != null)
+                        {
+                            queryObj = {
+                                type: "mod",
+                                item: match[1],
+                                pk: match[2],
+                                data_type: match[3],
+                                method: "get",
+                            }
+                        }
+                        else
+                        {
+                            let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                            queryObj = {
                                 type: "mod",
                                 item: bulk_name[1],
-                                filters:"id="+prefetch_fields_ids[field].join(","),
+                                filters:"id="+prefetch_fields_ids[field][path].join(","),
                                 method:"get",
                             }
+                        }
+
                         bulkArr.push(queryObj);
                     }
                 }
 
-
-                $.when(api.query(bulkArr)).done(d => {
-
-                    var res = data.data.results;
-                    for(var i in res)
+                //отправляем bulk запрос
+                $.when(api.query(bulkArr)).done(d =>
+                {
+                    for(var item in dataFromApi)
                     {
-                        for(var field in res[i])
+                        for(var field in dataFromApi[item])
                         {
                             if(prefetch_fields[field])
                             {
-                                var bulk_name = prefetch_fields[field].path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                                for(var j in d)
+                                let path = prefetch_fields[field].path(dataFromApi[item]);
+
+                                if(path)
                                 {
-                                    if(d[j].item == bulk_name[1])
+                                    let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                                    if(match != null)
                                     {
-                                        for(var k in d[j].data.results)
+                                        for(var j in d)
                                         {
-                                            if(res[i][field] == d[j].data.results[k].id)
+                                            if(d[j].item == match[1] && d[j].subitem == match[3])
                                             {
-                                                res[i][field+'_info'] = d[j].data.results[k];
+                                                let prefetch_data = d[j].data.results;
+                                                for(var k in prefetch_data)
+                                                {
+                                                    if($.inArray(prefetch_data[k].id, prefetch_fields_ids[field][path]) != -1)
+                                                    {
+                                                        dataFromApi[item][field+'_info'] = prefetch_data[k];
+                                                    }
+                                                }
                                             }
                                         }
+                                    }
+                                    else
+                                    {
+                                        let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                                        for(var j in d)
+                                        {
+                                            if(d[j].item == bulk_name[1])
+                                            {
+                                                let prefetch_data = d[j].data.results;
+                                                for(var k in prefetch_data)
+                                                {
+                                                    if(dataFromApi[item][field] == prefetch_data[k].id)
+                                                    {
+                                                        dataFromApi[item][field+'_info'] = prefetch_data[k];
+                                                    }
+                                                }
+                                            }
+                                        }
+
                                     }
                                 }
                             }
                         }
-
-
                     }
+
                     promise.resolve(data);
                 }).fail(f => {
                     promise.reject(f);
@@ -1248,7 +1312,7 @@ function guiItemFactory(api, both_view, list, one)
                 render_options.fileds = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'list'
- 
+
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
@@ -1426,7 +1490,7 @@ function guiItemFactory(api, both_view, list, one)
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
     thisFactory.getObjectNameFiled = function()
-    { 
+    {
         if(this.view && this.view.defaultName)
         {
             return this.view.defaultName
@@ -1581,7 +1645,7 @@ function guiActionFactory(api, action)
                 if(!this.model.pathInfo)
                 {
                     console.error("pathInfo not define")
-                    $.notify("Error in code: pathInfo not define", "error");
+                    guiPopUp.error("Error in code: pathInfo not define");
                     def.reject()
                     return def.promise();
                 }
@@ -1627,7 +1691,7 @@ function guiActionFactory(api, action)
                             url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
                         }
                     }
-                    
+
                     // Модификация на то если у нас мультиоперация
                     for(let i in this.model.pageInfo)
                     {
@@ -1646,7 +1710,7 @@ function guiActionFactory(api, action)
                         }
                     }
                 }
-                
+
                 if(query.length == 0)
                 {
                     // Модификация на то если у нас не мультиоперация
@@ -1664,12 +1728,12 @@ function guiActionFactory(api, action)
                         {
                             if(data.not_found > 0)
                             {
-                                $.notify("Item not found", "error");
+                                guiPopUp.error("Item not found");
                                 def.reject({text:"Item not found", status:404})
                                 return;
                             }
 
-                            $.notify("Save", "success");
+                            guiPopUp.success("Save");
                             def.resolve()
                         },
                         error:function(e)
