@@ -153,6 +153,16 @@ guiElements.enum = function(opt = {}, value)
 {
     this.name = 'enum'
     guiElements.base.apply(this, arguments)
+     
+    this._onBaseRender = this._onRender
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options)
+
+        $('#'+this.element_id).select2({
+            width: '100%', 
+        }); 
+    }
 }
 
 guiElements.file = function(opt = {})
