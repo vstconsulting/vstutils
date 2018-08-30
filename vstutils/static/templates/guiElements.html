@@ -169,15 +169,6 @@
     <%! guiElements.base %>  
 </script>
 
-<!-- guiElements.textarea -->
-<script type="text/x-just" data-just="guiElements.textarea">
-    <!-- guiElements.textarea -->
-    <%[ main_input %>
-        <textarea rows="3" cols="50" <%- set_api_options(opt) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
-    <%] %> 
-    <%! guiElements.base %>   
-</script>
-
 <!-- guiElements.html -->
 <script type="text/x-just" data-just="guiElements.html">
     <!-- guiElements.html -->
@@ -186,7 +177,16 @@
     <%] %>
 
     <%[ main_input %>
-         <div class="html_content"> <%= value || '' %> </div>
+         <div class="html_content"> <%= value || opt.default || '' %> </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.textarea -->
+<script type="text/x-just" data-just="guiElements.textarea">
+    <!-- guiElements.textarea -->
+    <%[ main_input %>
+        <textarea rows="3" cols="50" <%- set_api_options(opt) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
     <%! guiElements.base %>
 </script>

@@ -180,7 +180,7 @@ basePageView.getValue = function ()
         }
         else
         {*/
-            obj[i] = val;
+        obj[i] = val;
         // }
     }
 
@@ -850,46 +850,20 @@ function guiItemFactory(api, both_view, list, one)
                         this.model.multi_actions[i] = this.model.sublinks[i]
                     }
 
-                    // @todo тут надо решить каким то образом надо ли добавлять кнопку удаления объектов из базы
                     this.model.multi_actions['delete'] = {
                         name:"delete",
                         onClick:function()
                         {
-                            let ids = window.guiListSelections.getSelection(thisObj.model.selectionTag);
-                            window.guiListSelections.unSelectAll(thisObj.model.selectionTag);
-
-                            for(let i in ids)
+                            //@todo как и в this.getBtnAdd() подумать какой способ определения родительская ссылка или нет лучше
+                            if(thisObj.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length > 1)
                             {
-                                $(".item-row.item-"+ids[i]).remove()
+                                return questionDeleteOrRemove(thisObj);
+                            }
+                            else
+                            {
+                                return questionDeleteAllSelectedOrNot(thisObj);
                             }
 
-                            $.when(thisObj.deleteArray(ids)).done(function(d)
-                            {
-
-                            }).fail(function (e)
-                            {
-                                polemarch.showErrors(e.responseJSON)
-                                debugger;
-                            })
-                            return false;
-                        }
-                    }
-
-                    // @todo надо решить каким то образом надо ли добавлять кнопку удаления объектов из списка или нет.
-                    this.model.multi_actions['remove'] = {
-                        name:"remove",
-                        onClick:function()
-                        {
-                            $.when(changeSubItemsInParent('DELETE', window.guiListSelections.getSelection(thisObj.model.selectionTag))).done(function()
-                            {
-                                debugger;
-                                spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
-                            }).fail(function (e)
-                            {
-                                polemarch.showErrors(e.responseJSON)
-                                debugger;
-                            })
-                            return false;
                         }
                     }
 
@@ -919,7 +893,9 @@ function guiItemFactory(api, both_view, list, one)
             }
             this.getBtnAdd = function ()
             {
-                if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
+                //@todo подумать, какой из способов лучше
+                //if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
+                if(this.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length >= 2)
                 {
                     if(this.canUpdate())
                     {
@@ -1861,11 +1837,7 @@ function goToMultiAction(ids, action)
 
 function goToMultiActionFromElements(elements, action)
 {
-    let ids = []
-    for (var i = 0; i < elements.length; i++)
-    {
-        ids.push($(elements[i]).attr('data-id'))
-    }
+    let ids = window.guiListSelections.getSelectionFromCurrentPage(elements);
 
     return goToMultiAction(ids, action)
 }
@@ -1978,4 +1950,133 @@ function renderErrorAsPage(error)
 
 function isEmptyObject(obj){
     return Object.keys(obj).length == 0
+}
+
+function questionForAllSelectedOrNot(selection_tag, action_name){
+    var answer;
+    var question = "Apply action <b>'"+ action_name + "'</b> for elements only from this page or for all selected elements?";
+    var answer_buttons = ["For this page's selected", "For all selected"];
+    $.when(guiPopUp.question(question, answer_buttons)).done(function(data){
+        answer = data;
+        if($.inArray(answer, answer_buttons) != -1)
+        {
+            if(answer == answer_buttons[0])
+            {
+                goToMultiActionFromElements($('.multiple-select .item-row.selected'), action_name );
+            }
+            else
+            {
+                goToMultiAction(selection_tag, action_name);
+            }
+        }
+    });
+
+    return false;
+}
+
+function questionDeleteAllSelectedOrNot(thisObj) {
+    var answer;
+    var question = "Apply action <b> 'delete' </b> for elements only from this page or for all selected elements?";
+    var answer_buttons = ["For this page's selected", "For all selected"];
+
+    $.when(guiPopUp.question(question, answer_buttons)).done(function(data){
+        answer = data;
+        if($.inArray(answer, answer_buttons) != -1)
+        {
+            let ids;
+            let tag = thisObj.model.selectionTag;
+            if(answer == answer_buttons[0])
+            {
+                ids = window.guiListSelections.getSelectionFromCurrentPage($('.multiple-select .item-row.selected'));
+                deleteSelectedElements(thisObj, ids, tag);
+            }
+            else
+            {
+                ids = window.guiListSelections.getSelection(tag);
+                deleteSelectedElements(thisObj, ids, tag);
+            }
+        }
+    });
+
+    return false;
+}
+
+function questionDeleteOrRemove(thisObj){
+    var answer;
+    var question = "<b> Delete </b> selected elements at all or just <b> remove </b> them from this list?";
+    var answer_buttons = ["Delete this page's selected", "Delete all selected", "Remove this page's selected", "Remove all selected"];
+
+    $.when(guiPopUp.question(question, answer_buttons)).done(function(data){
+        answer = data;
+        if($.inArray(answer, answer_buttons) != -1)
+        {
+            let ids;
+            let tag = thisObj.model.selectionTag;
+            switch(answer)
+            {
+                case answer_buttons[0]:
+                    ids = window.guiListSelections.getSelectionFromCurrentPage($('.multiple-select .item-row.selected'));
+                    deleteSelectedElements(thisObj, ids, tag);
+                    break;
+                case answer_buttons[1]:
+                    ids = window.guiListSelections.getSelection(tag);
+                    deleteSelectedElements(thisObj, ids, tag);
+                    break;
+                case answer_buttons[2]:
+                    ids = window.guiListSelections.getSelectionFromCurrentPage($('.multiple-select .item-row.selected'));
+                    removeSelectedElements(ids, tag);
+                    break;
+                case answer_buttons[3]:
+                    ids = window.guiListSelections.getSelection(tag);
+                    removeSelectedElements(ids, tag);
+                    break;
+            }
+        }
+    });
+
+    return false;
+}
+
+/**
+ * Функция удаляет элементы, id которых перечислены в массиве ids
+ * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
+ */
+function deleteSelectedElements(thisObj, ids, tag){
+    window.guiListSelections.unSelectAll(tag);
+
+    for(let i in ids)
+    {
+        $(".item-row.item-"+ids[i]).remove()
+    }
+
+    $.when(thisObj.deleteArray(ids)).done(function(d)
+    {
+
+    }).fail(function (e)
+    {
+        polemarch.showErrors(e.responseJSON)
+        debugger;
+    })
+
+    return false;
+}
+
+
+/**
+ * Функция убирает из списка (но не удаляет совсем) элементы, id которых перечислены в массиве ids
+ * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
+ */
+function removeSelectedElements(ids, tag) {
+    $.when(changeSubItemsInParent('DELETE', ids)).done(function()
+    {
+        window.guiListSelections.unSelectAll(tag);
+        debugger;
+        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
+    }).fail(function (e)
+    {
+        polemarch.showErrors(e.responseJSON)
+        debugger;
+    })
+
+    return false;
 }

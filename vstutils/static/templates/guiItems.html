@@ -339,30 +339,15 @@
                                                 href="#"
                                                  <%= justOn('click', guiObj.model.multi_actions[k].onClick) %>
                                             >
-                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="#"
-                                                <%= justOn('click', guiObj.model.multi_actions[k].onClick) %>
-                                            >
-                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %> for all selected elements
+                                                    <%- k %> <% if(guiObj.model.multi_actions[k].description) { %> <%- guiObj.model.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
                                     <% }else{ %>
                                         <li>
                                             <a
                                                 href="#"
-                                                onclick="goToMultiAction(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
-                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="#"
-                                                onclick="goToMultiActionFromElements($('.multiple-select .item-row.selected'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
-                                                    <%- k %> <%- guiObj.model.multi_actions[k].description %> for all selected elements
+                                                onclick="questionForAllSelectedOrNot(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
+                                                    <%- k %> <% if(guiObj.model.multi_actions[k].description) { %> <%- guiObj.model.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
                                     <% } %>
@@ -662,5 +647,11 @@
         <!-- renderAllFileds -->
         <%= guiObj.renderAllFileds(opt) %>
     <% } %>
+</script>
+
+<script type="text/x-just" data-just="widgetsettings_one_as_filed">
+    <!-- entity_one_as_filed -->
+
+    todo
 </script>
 

@@ -184,15 +184,8 @@ guiElements.textarea = function(opt = {})
     guiElements.base.apply(this, arguments)
 }
 
-guiElements.html = function(opt = {})
-{
-    this.name = 'html';
-    guiElements.base.apply(this, arguments)
-}
-
-
 guiElements.autocomplete = function()
-{
+{   debugger;
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
@@ -254,7 +247,7 @@ guiElements.autocomplete = function()
 }
 
 guiElements.select2 = function(filed, filed_value, parent_object)
-{
+{   debugger;
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
 
