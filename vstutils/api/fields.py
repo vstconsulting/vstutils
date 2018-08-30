@@ -22,7 +22,21 @@ class AutoCompletionField(CharField):
     '''
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
+        self.autocomplete_property = None
+        if not isinstance(self.autocomplete, (list, tuple)):
+            self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
+            self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
         super(AutoCompletionField, self).__init__(**kwargs)
+
+
+class DependEnumField(CharField):
+    '''
+    Field based on another field.
+    '''
+    def __init__(self, **kwargs):
+        self.field = kwargs.pop('field')
+        self.choices = kwargs.pop('choices')
+        super(DependEnumField, self).__init__(**kwargs)
 
 
 class TextareaField(CharField):

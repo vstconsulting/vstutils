@@ -102,7 +102,7 @@ class Response(_ResponseClass):
 class AutoSchema(DRFAutoSchema):
 
     def get_description(self, path, method):
-        # pylint: disable=simplifiable-if-statement
+        # pylint: disable=simplifiable-if-statement,redefined-outer-name
         method_name = getattr(self.view, 'action', method.lower())
         method_obj = getattr(self.view, method_name, None)
         method_view = getattr(method_obj, '_nested_view', None) if method_obj else None
@@ -116,7 +116,7 @@ class AutoSchema(DRFAutoSchema):
         action = path.split('/')[-2]
         submethod = getattr(method_view, action, None)
         if submethod.__doc__:
-            return submethod.__doc__.strip()
+            return submethod.__doc__.strip()  # nocv
         if method == 'GET' and '{' not in path[:-1].split('/')[-1]:
             action = 'list'
         elif method == 'POST':
