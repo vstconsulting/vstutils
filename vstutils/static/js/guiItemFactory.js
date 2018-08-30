@@ -456,24 +456,27 @@ function guiItemFactory(api, both_view, list, one)
                 return promise.promise();
             }
 
-            this.init = function (page_options, object)
+            this.init = function (page_options = {}, object)
             {
-                if(!page_options)
-                {
-                    page_options = this.getShortestApiURL()
-                }
-
                 if(object)
                 {
                     this.model.data = object
                     this.model.status = 200
                 }
 
-                if(page_options)
-                {
+                if(!page_options.api)
+                {  
+                    this.model.pathInfo = this.getShortestApiURL().api
+                }
+                
+                if(page_options.api)
+                {  
                     this.model.pathInfo = page_options.api
-                    this.model.pageInfo = page_options.url
-
+                }
+                
+                if(page_options.url)
+                {
+                    this.model.pageInfo = page_options.url 
                 }
 
                 if(this.model.pathInfo)
