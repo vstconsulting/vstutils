@@ -38,6 +38,12 @@ class DependEnumField(CharField):
         self.choices = kwargs.pop('choices')
         super(DependEnumField, self).__init__(**kwargs)
 
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value
+
 
 class TextareaField(CharField):
     '''
