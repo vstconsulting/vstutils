@@ -167,6 +167,17 @@ guiElements.boolean = function(opt = {}, value)
     }
 }
 
+guiElements.html = function(opt = {})
+{
+    this.name = 'html'
+    guiElements.base.apply(this, arguments)
+    
+    this.getValue = function()
+    {
+        return undefined;
+    }
+}
+
 guiElements.textarea = function(opt = {})
 {
     this.name = 'textarea';
