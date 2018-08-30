@@ -41,8 +41,10 @@ guiElements.base = function(opt, value, parent_object)
         {
             return "";
         } 
+       
         return spajs.just.render("guiElements."+this.name , {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
+            this._callAllonChangeCallback()
         });
     }
 
@@ -77,12 +79,13 @@ guiElements.base = function(opt, value, parent_object)
 
     this._callAllonChangeCallback = function()
     {
+        let val = this.getValue()
         for(let i in this.onChange_calls)
         {
             this.onChange_calls[i]({
                 filed:this,
                 opt:opt,
-                value:this.getValue()
+                value:val
             })
         }
     }
@@ -185,7 +188,7 @@ guiElements.file = function(opt = {})
     }
 }
 
-guiElements.boolean = function(opt = {}, value)
+guiElements.boolean = function()
 {
     this.name = 'boolean'
     guiElements.base.apply(this, arguments)
@@ -338,7 +341,12 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     {
         opt.dynamic_type = 'string'
     }
-    this.realElement = new guiElements[opt.dynamic_type](opt, value, parent_object)
+   
+    if(!opt.dynamic_type)
+    {
+        opt.dynamic_type = 'string'
+    }
+    this.realElement = new guiElements[opt.dynamic_type]($.extend({}, opt, opt.override_opt), value, parent_object)
     
     let thisObj = this;
     let func = function(name)
@@ -359,7 +367,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         let lastValue = this.realElement.getValue()
          
         let options = $.extend({}, opt, override_opt)
-         
+        
         this.realElement = new guiElements[type](options, value, parent_object)
  
         this.realElement.setValue(lastValue) 
