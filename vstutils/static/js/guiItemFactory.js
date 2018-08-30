@@ -154,10 +154,10 @@ basePageView.renderFiled = function(filed, render_options)
                 for(let i in filed.dependsOn)
                 {
                     let parentFiled = this.model.guiFileds[filed.dependsOn[i]]
-                    if(parentFiled && parentFiled.onChange)
+                    if(parentFiled && parentFiled.addOnChangeCallBack)
                     {
-                        parentFiled.onChange(function(){
-                            thisFiled.updateOptions.call(arguments);
+                        parentFiled.addOnChangeCallBack(function(){
+                            thisFiled.updateOptions.apply(thisFiled, arguments);
                         })
                     }
                 }

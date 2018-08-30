@@ -37,6 +37,13 @@
     <%* element %>
 </script>
 
+<!-- guiElements.dynamic -->
+<script type="text/x-just" data-just="guiElements.dynamic">   
+    <div id="gui<%- guiElement.element_id %>" >
+    <%= guiElement.realElement.render(opt) %>
+    </div>
+</script>
+
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">    
     <%[ main_input %>
@@ -45,6 +52,13 @@
     <%! guiElements.base %>
 </script>
 
+<!-- guiElements.string -->
+<script type="text/x-just" data-just="guiElements.password">    
+    <%[ main_input %>
+        <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- value || '' %>">
+    <%] %> 
+    <%! guiElements.base %>
+</script>
 
 <!-- guiElements.button -->
 <script type="text/x-just" data-just="guiElements.button">  
@@ -164,13 +178,11 @@
             <span class='glyphicon glyphicon-file'>
             </span>
         </span>
-        <textarea placeholder='Enter value' <%- set_api_options(opt) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"></textarea>
+        <textarea placeholder='Enter value' <%- set_api_options(opt) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %> 
     <%! guiElements.base %>  
 </script>
-
-<script type="text/x-just" data-just="guiElements.html">
-    <!-- guiElements.html -->
+ 
 <!-- guiElements.textarea -->
 <script type="text/x-just" data-just="guiElements.textarea">
     <!-- guiElements.textarea -->

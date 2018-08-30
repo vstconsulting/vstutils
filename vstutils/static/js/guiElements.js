@@ -9,6 +9,11 @@ guiElements.base = function(opt, value, parent_object)
     this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
+    this.setValue = function(value)
+    {
+        this.value = value
+    }
+    
     this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {
@@ -21,16 +26,23 @@ guiElements.base = function(opt, value, parent_object)
         }
     }
 
-    this.render = function(render_options = {})
+    this.render = function(render_options)
     {
-        let options = $.extend({}, opt, render_options)
-        if(options.hideReadOnly && options.readOnly)
+        if(render_options !== undefined)
+        {
+            this.render_options = $.extend({}, opt, render_options)
+        }
+        else if(this.render_options === undefined)
+        {
+            this.render_options = $.extend({}, opt)
+        }
+        
+        if(this.render_options.hideReadOnly && this.render_options.readOnly)
         {
             return "";
-        }
-
-        return spajs.just.render("guiElements."+this.name , {opt:options, guiElement:this, value:this.value}, () => {
-            this._onRender(options)
+        } 
+        return spajs.just.render("guiElements."+this.name , {opt:this.render_options, guiElement:this, value:this.value}, () => {
+            this._onRender(this.render_options)
         });
     }
 
@@ -58,7 +70,7 @@ guiElements.base = function(opt, value, parent_object)
      * @example На пример так поле notes становится зависимым от поля name у проектов
      *  window.api.openapi.definitions.OneProject.properties.notes.dependsOn = ['name']
      */
-    this.onChange = function(callback)
+    this.addOnChangeCallBack = function(callback)
     {
         this.onChange_calls.push(callback)
     }
@@ -80,8 +92,19 @@ guiElements.base = function(opt, value, parent_object)
      * @returns {undefined}
      */
     this.updateOptions = function(arg)
-    {
-        console.log(arg)
+    { 
+        if(opt.onUpdateOptions)
+        {
+            if(typeof opt.onUpdateOptions != 'object')
+            {
+                opt.onUpdateOptions = [opt.onUpdateOptions]
+            }
+
+            for(let i in opt.onUpdateOptions)
+            { 
+                opt.onUpdateOptions[i](this, arg)
+            }
+        }
     }
 
 }
@@ -108,6 +131,12 @@ guiElements.link_button = function(opt = {})
 guiElements.string = function()
 {
     this.name = 'string'
+    guiElements.base.apply(this, arguments)
+}
+
+guiElements.password = function()
+{
+    this.name = 'password'
     guiElements.base.apply(this, arguments)
 }
 
@@ -171,7 +200,7 @@ guiElements.html = function(opt = {})
 {
     this.name = 'html'
     guiElements.base.apply(this, arguments)
-    
+
     this.getValue = function()
     {
         return undefined;
@@ -298,6 +327,45 @@ guiElements.select2 = function(filed, filed_value, parent_object)
             });
         }
     }
+}
+
+guiElements.dynamic = function(opt = {}, value, parent_object)
+{
+    this.name = 'dynamic'
+    guiElements.base.apply(this, arguments)
+     
+    if(!opt.dynamic_type)
+    {
+        opt.dynamic_type = 'string'
+    }
+    this.realElement = new guiElements[opt.dynamic_type](opt, value, parent_object)
+    
+    let thisObj = this;
+    let func = function(name)
+    {
+        return function(){ return thisObj.realElement[name].apply(thisObj.realElement, arguments)}
+    }
+    
+    this.getValue = func('getValue')
+ 
+    this.setType = function(type, override_opt)
+    {
+        if(!guiElements[type])
+        {
+            type = 'string'
+            console.error("Error: Set type guiElements."+type+" for dynamic filed")
+        }
+        
+        let lastValue = this.realElement.getValue()
+         
+        let options = $.extend({}, opt, override_opt)
+         
+        this.realElement = new guiElements[type](options, value, parent_object)
+ 
+        this.realElement.setValue(lastValue) 
+        $('#gui'+this.element_id).insertTpl(this.realElement.render())
+    }
+    
 }
 
 
