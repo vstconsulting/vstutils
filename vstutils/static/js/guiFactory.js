@@ -8,7 +8,7 @@ guiLocalSettings.setIfNotExists('page_size', 20)
  
 
 function getMenuIdFromApiPath(path){
-    return path.replace(/[^A-z0-9\-]/img, "_")+Math.random()
+    return path.replace(/[^A-z0-9\-]/img, "_")//+Math.random()
 }
 
 function openApi_newDefinition(api, name, definitionList, definitionOne)
@@ -306,7 +306,7 @@ function getObjectBySchema(obj)
  * @returns {Array} экшены этого пути
  */
 function openApi_get_internal_links(api, base_path, targetLevel)
-{
+{ 
     if(!api.openapi["paths"][base_path].get)
     {
         return []
@@ -373,8 +373,7 @@ function openApi_get_internal_links(api, base_path, targetLevel)
  */
 function openApi_add_one_action_page_path(api, api_path, action)
 {
-    var api_path_value = api.openapi.paths[api_path]
-    api_path_value.api_path = api_path
+    var api_path_value = api.openapi.paths[api_path] 
 
     // Создали страницу
     var page = new guiPage();
@@ -411,8 +410,7 @@ function openApi_add_one_action_page_path(api, api_path, action)
  */
 function openApi_add_one_page_path(api, api_path, pageMainBlockObject, urlLevel)
 {
-    var api_path_value = api.openapi.paths[api_path]
-    api_path_value.api_path = api_path
+    var api_path_value = api.openapi.paths[api_path] 
 
     // Создали страницу
     var page = new guiPage();
@@ -466,8 +464,7 @@ function openApi_add_list_page_path(api, api_path, pageMainBlockObject, urlLevel
     var page = new guiPage();
 
     var path_regexp = []
-    var api_path_value = api.openapi.paths[api_path]
-    api_path_value.api_path = api_path
+    var api_path_value = api.openapi.paths[api_path] 
 
     let pathregexp = "^"
         +"(?<page_and_parents>"

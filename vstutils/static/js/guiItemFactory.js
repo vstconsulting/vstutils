@@ -39,10 +39,19 @@ basePageView.validateByModel = function (values)
 
                 if(filed.minLength && values[filed.name].toString().length == 0)
                 {
-                    throw {error:'validation', message:'Filed '+filed.name +" empty"}
+                    if(filed.required)
+                    {
+                        throw {error:'validation', message:'Filed '+filed.name +" empty"}
+                    }
+                    else
+                    {
+                        delete values[filed.name]
+                    }
                 }
-
-                throw {error:'validation', message:'Filed '+filed.name +" too short"}
+                else
+                {
+                    throw {error:'validation', message:'Filed '+filed.name +" too short"}
+                }
             }
         }
     }
@@ -577,7 +586,7 @@ function guiItemFactory(api, both_view, list, one)
                     {
                         query.pk = this.model.data.id
                     }
-                    debugger;
+                  
                     $.when(api.query(query)).done(function (data)
                     {
                         def.resolve(data)
@@ -740,7 +749,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 render_options.fileds = this.getFields('render')
                 render_options.sections = this.getSections('render')
-                debugger;
+               
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
             }
 
@@ -1607,34 +1616,37 @@ function guiActionFactory(api, action)
                     operations[i] = operations[i].replace("-", "_")
                 }
 
-                var url = hostname+"/api/v2"+this.model.pathInfo.api_path
-                for(let i in this.model.pageInfo)
-                {
-                    if(/^api_/.test(i))
-                    {
-                        url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
-                    }
-                }
-
-                // Модификация на то если у нас мультиоперация
                 var query = []
-                for(let i in this.model.pageInfo)
+                var url = hostname+"/api/v2"+this.model.pathInfo.api_path
+                if(this.model.pageInfo)
                 {
-                    if(/^api_/.test(i))
+                    for(let i in this.model.pageInfo)
                     {
-                        if(this.model.pageInfo[i].indexOf(",") != -1)
+                        if(/^api_/.test(i))
                         {
-                            let ids = this.model.pageInfo[i].split(",")
-                            for(let j in ids)
+                            url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
+                        }
+                    }
+                    
+                    // Модификация на то если у нас мультиоперация
+                    for(let i in this.model.pageInfo)
+                    {
+                        if(/^api_/.test(i))
+                        {
+                            if(this.model.pageInfo[i].indexOf(",") != -1)
                             {
-                                query.push(url.replace(this.model.pageInfo[i], ids[j]))
-                            }
+                                let ids = this.model.pageInfo[i].split(",")
+                                for(let j in ids)
+                                {
+                                    query.push(url.replace(this.model.pageInfo[i], ids[j]))
+                                }
 
-                            continue;
+                                continue;
+                            }
                         }
                     }
                 }
-
+                
                 if(query.length == 0)
                 {
                     // Модификация на то если у нас не мультиоперация
