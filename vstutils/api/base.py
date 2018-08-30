@@ -107,11 +107,16 @@ class AutoSchema(DRFAutoSchema):
         method_obj = getattr(self.view, method_name, None)
         method_view = getattr(method_obj, '_nested_view', None) if method_obj else None
 
+        if method_obj.__doc__:
+            return method_obj.__doc__.strip()
         if not method_view:
             return super(AutoSchema, self).get_description(path, method)
 
         method_view_obj = method_view()
-        action = ''
+        action = path.split('/')[-2]
+        submethod = getattr(method_view, action, None)
+        if submethod.__doc__:
+            return submethod.__doc__.strip()
         if method == 'GET' and '{' not in path[:-1].split('/')[-1]:
             action = 'list'
         elif method == 'POST':
@@ -437,10 +442,10 @@ class CopyMixin(GenericViewSet):
     @action(methods=['post'], detail=True)
     @transaction.atomic()
     def copy(self, request, **kwargs):
+        # pylint: disable=unused-argument
         '''
         Copy instance with deps.
         '''
-        # pylint: disable=unused-argument
         instance = self.copy_instance(self.get_object())
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid()
@@ -449,43 +454,19 @@ class CopyMixin(GenericViewSet):
 
 
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
-    '''
-    API endpoint thats operates models objects.
-    '''
-
     def create(self, request, *args, **kwargs):
-        '''
-        API endpoint to create instance.
-        '''
-
         return super(ModelViewSetSet, self).create(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
-        '''
-        API endpoint to represent instance detailed data.
-        '''
-
         return super(ModelViewSetSet, self).retrieve(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):  # nocv
-        '''
-        API endpoint to update all instance fields.
-        '''
-
         return super(ModelViewSetSet, self).update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):  # nocv
-        '''
-        API endpoint to update part of all instance fields.
-        '''
-
         return super(ModelViewSetSet, self).partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        '''
-        API endpoint to instance.
-        '''
-
         return super(ModelViewSetSet, self).destroy(request, *args, **kwargs)
 
 
@@ -497,12 +478,6 @@ class NonModelsViewSet(GenericViewSet):
 
 
 class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
-    '''
-    API endpoint that returns list of submethods.
-
-    list:
-    Returns json with view submethods name and link.
-    '''
     # pylint: disable=abstract-method
     schema = None
 
@@ -527,21 +502,8 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
-    '''
-    API endpoint with list of model objects for read only operations.
-
-    list:
-    Return list of all objects.
-    '''
+    pass
 
 
 class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
-    '''
-    API endpoint with list of historical model objects for read and remove operations.
-
-    destroy:
-    Remove object from DB.
-
-    list:
-    Return list of all objects.
-    '''
+    pass
