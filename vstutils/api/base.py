@@ -9,12 +9,10 @@ from django.core import exceptions as djexcs
 from django.http.response import Http404
 from django.db.models.query import QuerySet
 from django.db import transaction
-from django.utils.encoding import smart_text
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
 from rest_framework.decorators import action
-from rest_framework.utils import formatting
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
@@ -102,44 +100,37 @@ class Response(_ResponseClass):
 
 
 class AutoSchema(DRFAutoSchema):
-    def get_description(self, path, method):
-        # pylint: disable=simplifiable-if-statement
-        view = self.view
 
-        method_name = getattr(view, 'action', method.lower())
-        method_obj = getattr(view, method_name, None)
+    def get_description(self, path, method):
+        # pylint: disable=simplifiable-if-statement,redefined-outer-name
+        method_name = getattr(self.view, 'action', method.lower())
+        method_obj = getattr(self.view, method_name, None)
         method_view = getattr(method_obj, '_nested_view', None) if method_obj else None
 
+        if method_obj.__doc__:
+            return method_obj.__doc__.strip()
         if not method_view:
             return super(AutoSchema, self).get_description(path, method)
 
-        # TODO: get docstring from view by
-
-        split_path = [i for i in path.split('/') if i]
-        if '{' in split_path[-1]:
-            detail = True
-        else:
-            detail = False
-        if method == 'GET':
-            docstring = getattr(method_view, 'retrieve' if detail else 'list').__doc__
+        method_view_obj = method_view()
+        action = path.split('/')[-2]
+        submethod = getattr(method_view, action, None)
+        if submethod.__doc__:
+            return submethod.__doc__.strip()  # nocv
+        if method == 'GET' and '{' not in path[:-1].split('/')[-1]:
+            action = 'list'
         elif method == 'POST':
-            docstring = getattr(method_view, 'create').__doc__
-        elif method == 'PATCH':
-            docstring = getattr(method_view, 'partial_update').__doc__
+            action = 'create'
+        elif method == 'GET':
+            action = 'retrieve'
         elif method == 'PUT':
-            docstring = getattr(method_view, 'update').__doc__
+            action = 'update'
+        elif method == 'PATCH':
+            action = 'partial_update'
         elif method == 'DELETE':
-            docstring = getattr(method_view, 'destroy').__doc__
-        else:
-            docstring = ''
-
-        docstring = docstring or ''
-        if not docstring:
-            method_doc = method_view.__doc__ or ''
-            doc_lines = [i.strip() for i in method_doc.split('\n') if i.strip()] + ['']
-            docstring = doc_lines[0] if ':' not in doc_lines[0] else ''
-
-        return formatting.dedent(smart_text(docstring))
+            action = 'destroy'
+        method_view_obj.action = action
+        return method_view_obj.schema.get_description(path, method)
 
 
 class QuerySetMixin(rvs.APIView):
@@ -451,10 +442,10 @@ class CopyMixin(GenericViewSet):
     @action(methods=['post'], detail=True)
     @transaction.atomic()
     def copy(self, request, **kwargs):
+        # pylint: disable=unused-argument
         '''
         Copy instance with deps.
         '''
-        # pylint: disable=unused-argument
         instance = self.copy_instance(self.get_object())
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid()
@@ -463,43 +454,19 @@ class CopyMixin(GenericViewSet):
 
 
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
-    '''
-    API endpoint thats operates models objects.
-    '''
-
     def create(self, request, *args, **kwargs):
-        '''
-        API endpoint to create instance.
-        '''
-
         return super(ModelViewSetSet, self).create(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
-        '''
-        API endpoint to represent instance detailed data.
-        '''
-
         return super(ModelViewSetSet, self).retrieve(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):  # nocv
-        '''
-        API endpoint to update all instance fields.
-        '''
-
         return super(ModelViewSetSet, self).update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):  # nocv
-        '''
-        API endpoint to update part of all instance fields.
-        '''
-
         return super(ModelViewSetSet, self).partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        '''
-        API endpoint to instance.
-        '''
-
         return super(ModelViewSetSet, self).destroy(request, *args, **kwargs)
 
 
@@ -511,12 +478,6 @@ class NonModelsViewSet(GenericViewSet):
 
 
 class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
-    '''
-    API endpoint that returns list of submethods.
-
-    list:
-    Returns json with view submethods name and link.
-    '''
     # pylint: disable=abstract-method
     schema = None
 
@@ -541,21 +502,8 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
-    '''
-    API endpoint with list of model objects for read only operations.
-
-    list:
-    Return list of all objects.
-    '''
+    pass
 
 
 class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
-    '''
-    API endpoint with list of historical model objects for read and remove operations.
-
-    destroy:
-    Remove object from DB.
-
-    list:
-    Return list of all objects.
-    '''
+    pass

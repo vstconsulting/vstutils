@@ -24,6 +24,8 @@ class HostGroupFilter(filters.DefaultIDFilter):
 
 
 class HostSerializer(VSTSerializer):
+    name = fields.DependEnumField(field='id', choices={ None: 'hello', 1: 'NOO!' })
+
     class Meta:
         model = Host
         fields = (

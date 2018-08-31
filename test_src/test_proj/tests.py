@@ -248,8 +248,14 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(api_model_hostgroup['properties']['parent']['type'], 'string')
         self.assertEqual(hostgroup_props['parent']['format'], 'autocomplete')
         self.assertEqual(
-            hostgroup_props['parent']['additionalProperties']['$ref'],
-            '#/definitions/Host/properties/id'
+            hostgroup_props['parent']['additionalProperties']['model']['$ref'],
+            '#/definitions/Host'
+        )
+        self.assertEqual(
+            hostgroup_props['parent']['additionalProperties']['value_field'], 'id'
+        )
+        self.assertEqual(
+            hostgroup_props['parent']['additionalProperties']['view_field'], 'name'
         )
         # Check file and secret_file fields
         self.assertEqual(hostgroup_props['file']['type'], 'string')
