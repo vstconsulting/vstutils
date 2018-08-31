@@ -146,6 +146,7 @@ basePageView.renderFiled = function(filed, render_options)
         }
 
         // Добавление связи с зависимыми полями
+        // if для хардкода на js
         if(filed.dependsOn)
         {
             let thisFiled = this.model.guiFileds[filed.name]
@@ -161,6 +162,20 @@ basePageView.renderFiled = function(filed, render_options)
                         })
                     }
                 }
+            }
+        }
+
+        // if для привязанных полей из api
+        if(filed.additionalProperties && filed.additionalProperties.field)
+        {
+            let thisField = this.model.guiFileds[filed.name];
+            let parentField = this.model.guiFileds[filed.additionalProperties.field];
+
+            if(parentField && parentField.addOnChangeCallBack)
+            {
+                parentField.addOnChangeCallBack(function() {
+                    thisField.updateOptions.apply(thisField, arguments);
+                })
             }
         }
 
@@ -465,18 +480,18 @@ function guiItemFactory(api, both_view, list, one)
                 }
 
                 if(!page_options.api)
-                {  
+                {
                     this.model.pathInfo = this.getShortestApiURL().api
                 }
-                
+
                 if(page_options.api)
-                {  
+                {
                     this.model.pathInfo = page_options.api
                 }
-                
+
                 if(page_options.url)
                 {
-                    this.model.pageInfo = page_options.url 
+                    this.model.pageInfo = page_options.url
                 }
 
                 if(this.model.pathInfo)
