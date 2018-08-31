@@ -273,7 +273,7 @@
                                                     <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
                                                     <% if(!opt.fileds[j].value){ %>
-                                                        <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                                        <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" >
                                                             <% if(opt.fileds[j].prefetch && guiObj.model.data.results[i][opt.fileds[j].name + '_info']) { %>
                                                                <%- guiObj.model.data.results[i][opt.fileds[j].name + '_info'].name ||
@@ -298,7 +298,7 @@
                                                             <% for(var k in guiObj.model.sublinks){ %>
                                                                 <li>
                                                                     <a
-                                                                        href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
+                                                                        href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
                                                                         onclick="return spajs.openURL(this.href);"
                                                                         class="sublink-btn">
                                                                             <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
@@ -393,10 +393,7 @@
 <script type="text/x-just" data-just="entity_list_add_subitems">
     <!-- entity_list_add_subitems -->
     
-    <%[ buttons_row %>
-        <%= guiObj.getBtnNew() %>
-        <%= guiObj.getBtnAdd() %>
- 
+    <%[ buttons_row %> 
         <%* buttons %>
         <%* sublink_buttons %>
     <%] %>
@@ -457,7 +454,7 @@
                                                     <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
                                                     <% if(!opt.fileds[j].value){ %>
-                                                        <a href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                                        <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
                                                     <% }else{ %>
                                                         <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
@@ -530,7 +527,7 @@
 
                 <% if  ((!guiObj.model.sublinks[k].isAction) || (guiObj.model.sublinks[k].isAction && (!guiObj.model.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
                     <a
-                        href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page_and_parents+'/'+ guiObj.model.sublinks[k].name %>"
+                        href="<%- window.hostname %><%- window.location.search+'/'+ guiObj.model.sublinks[k].name %>"
                         onclick="return spajs.openURL(this.href);"
                         class="btn btn-default sublink-btn"
                     >
@@ -546,9 +543,9 @@
         
         <% if(guiObj.canUpdate()){ %>
             <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
-            <% if (guiObj.copy != undefined) {%>
+            <!--<% if (guiObj.copy != undefined) {%>
                 <%= new guiElements.button({onclick:function(){guiObj.copy()}, class:'btn btn-primary btn-copy', title:'Copy', text:'Copy'}).render() %>
-            <% } %>
+            <% } %>-->
         <% } %>
         
         <% if(guiObj.canDelete()){ %>

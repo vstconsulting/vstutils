@@ -31,7 +31,7 @@ basePageView.validateByModel = function (values)
 
             if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
             {
-                throw {error:'validation', message:'Field '+filed.name +" if too long"}
+                throw {error:'validation', message:'Filed '+filed.name +" is too long"}
             }
 
             if(filed.minLength && values[filed.name].toString().length < filed.minLength)
@@ -39,10 +39,19 @@ basePageView.validateByModel = function (values)
 
                 if(filed.minLength && values[filed.name].toString().length == 0)
                 {
-                    throw {error:'validation', message:'Field '+filed.name +" is empty"}
+                    if(filed.required)
+                    {
+                        throw {error:'validation', message:'Filed '+filed.name +" is empty"}
+                    }
+                    else
+                    {
+                        delete values[filed.name]
+                    }
                 }
-
-                throw {error:'validation', message:'Field '+filed.name +" is too short"}
+                else
+                {
+                    throw {error:'validation', message:'Filed '+filed.name +" is too short"}
+                }
             }
         }
     }
@@ -145,10 +154,10 @@ basePageView.renderFiled = function(filed, render_options)
                 for(let i in filed.dependsOn)
                 {
                     let parentFiled = this.model.guiFileds[filed.dependsOn[i]]
-                    if(parentFiled && parentFiled.onChange)
+                    if(parentFiled && parentFiled.addOnChangeCallBack)
                     {
-                        parentFiled.onChange(function(){
-                            thisFiled.updateOptions.call(arguments);
+                        parentFiled.addOnChangeCallBack(function(){
+                            thisFiled.updateOptions.apply(thisFiled, arguments);
                         })
                     }
                 }
@@ -447,24 +456,27 @@ function guiItemFactory(api, both_view, list, one)
                 return promise.promise();
             }
 
-            this.init = function (page_options, object)
+            this.init = function (page_options = {}, object)
             {
-                if(!page_options)
-                {
-                    page_options = this.getShortestApiURL()
-                }
-
                 if(object)
                 {
                     this.model.data = object
                     this.model.status = 200
                 }
 
-                if(page_options)
-                {
+                if(!page_options.api)
+                {  
+                    this.model.pathInfo = this.getShortestApiURL().api
+                }
+                
+                if(page_options.api)
+                {  
                     this.model.pathInfo = page_options.api
-                    this.model.pageInfo = page_options.url
-
+                }
+                
+                if(page_options.url)
+                {
+                    this.model.pageInfo = page_options.url 
                 }
 
                 if(this.model.pathInfo)
@@ -1647,30 +1659,33 @@ function guiActionFactory(api, action)
                     operations[i] = operations[i].replace("-", "_")
                 }
 
-                var url = hostname+"/api/v2"+this.model.pathInfo.api_path
-                for(let i in this.model.pageInfo)
-                {
-                    if(/^api_/.test(i))
-                    {
-                        url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
-                    }
-                }
-
-                // Модификация на то если у нас мультиоперация
                 var query = []
-                for(let i in this.model.pageInfo)
+                var url = hostname+"/api/v2"+this.model.pathInfo.api_path
+                if(this.model.pageInfo)
                 {
-                    if(/^api_/.test(i))
+                    for(let i in this.model.pageInfo)
                     {
-                        if(this.model.pageInfo[i].indexOf(",") != -1)
+                        if(/^api_/.test(i))
                         {
-                            let ids = this.model.pageInfo[i].split(",")
-                            for(let j in ids)
-                            {
-                                query.push(url.replace(this.model.pageInfo[i], ids[j]))
-                            }
+                            url = url.replace("{"+i.replace("api_", "")+"}", this.model.pageInfo[i])
+                        }
+                    }
 
-                            continue;
+                    // Модификация на то если у нас мультиоперация
+                    for(let i in this.model.pageInfo)
+                    {
+                        if(/^api_/.test(i))
+                        {
+                            if(this.model.pageInfo[i].indexOf(",") != -1)
+                            {
+                                let ids = this.model.pageInfo[i].split(",")
+                                for(let j in ids)
+                                {
+                                    query.push(url.replace(this.model.pageInfo[i], ids[j]))
+                                }
+
+                                continue;
+                            }
                         }
                     }
                 }
@@ -1925,12 +1940,12 @@ spajs.ajax.Call({
     {
         if(data.not_found > 0)
         {
-            guiPopUp.error("Item not found");
+            $.notify("Item not found", "error");
             def.reject({text:"Item not found", status:404})
             return;
         }
 
-        guiPopUp.success("Save");
+        $.notify("Save", "success");
         def.resolve()
     },
     error:function(e)
