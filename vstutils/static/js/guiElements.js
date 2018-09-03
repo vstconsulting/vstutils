@@ -13,7 +13,7 @@ guiElements.base = function(opt, value, parent_object)
     {
         this.value = value
     }
-    
+
     this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {
@@ -36,12 +36,12 @@ guiElements.base = function(opt, value, parent_object)
         {
             this.render_options = $.extend({}, opt)
         }
-        
+
         if(this.render_options.hideReadOnly && this.render_options.readOnly)
         {
             return "";
-        } 
-       
+        }
+
         return spajs.just.render("guiElements."+this.name , {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
@@ -95,7 +95,7 @@ guiElements.base = function(opt, value, parent_object)
      * @returns {undefined}
      */
     this.updateOptions = function(arg)
-    { 
+    {
         if(opt.onUpdateOptions)
         {
             if(typeof opt.onUpdateOptions != 'object')
@@ -104,8 +104,78 @@ guiElements.base = function(opt, value, parent_object)
             }
 
             for(let i in opt.onUpdateOptions)
-            { 
+            {
                 opt.onUpdateOptions[i](this, arg)
+            }
+        }
+        else
+        {
+            // additionalProperties - приходит из api
+            if(opt.additionalProperties && opt.additionalProperties.choices)
+            {
+                var value = arg.value;
+                var choices = opt.additionalProperties.choices;
+                var new_type = "string";
+                var override_opt;
+
+                for(var i in choices)
+                {
+                    if(i == value)
+                    {
+                        if ($.isArray(choices[value]))
+                        {
+                            var boolean = false;
+                            for(var i in choices[value])
+                            {
+                                if(typeof(choices[value][i]) == 'boolean')
+                                {
+                                    boolean = true;
+                                }
+                            }
+
+                            if (boolean)
+                            {
+                                new_type = "boolean";
+                                if(choices[value].length == 1)
+                                {
+                                   var boolean_default = choices[value][0];
+                                }
+                            }
+                            else
+                            {
+                                new_type = "enum";
+                                override_opt = {enum: choices[value]};
+                            }
+                        }
+                    }
+                }
+
+                if(!guiElements[new_type])
+                {
+                    new_type = 'string'
+                }
+
+                var options = $.extend({}, opt, override_opt);
+
+                var new_el = new guiElements[new_type](options, this.value);
+
+                if(boolean_default)
+                {
+                   new_el.value =  boolean_default;
+                   options.readOnly = true;
+                }
+
+                $('#gui'+this.element_id).insertTpl(new_el.render());
+
+                var className = $('#gui'+this.element_id)[0].className;
+
+                $('#gui'+this.element_id).removeClass(className);
+
+                this.getValue = function () {
+
+                    return  new_el.getValue();
+                }
+
             }
         }
     }
@@ -153,15 +223,15 @@ guiElements.enum = function(opt = {}, value)
 {
     this.name = 'enum'
     guiElements.base.apply(this, arguments)
-     
+
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
         this._onBaseRender(options)
 
         $('#'+this.element_id).select2({
-            width: '100%', 
-        }); 
+            width: '100%',
+        });
     }
 }
 
@@ -225,13 +295,6 @@ guiElements.textarea = function(opt = {})
     this.name = 'textarea';
     guiElements.base.apply(this, arguments)
 }
-
-guiElements.html = function(opt = {})
-{
-    this.name = 'html';
-    guiElements.base.apply(this, arguments)
-}
-
 
 guiElements.autocomplete = function()
 {
@@ -346,26 +409,26 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 {
     this.name = 'dynamic'
     guiElements.base.apply(this, arguments)
-     
+
     if(!opt.dynamic_type)
     {
         opt.dynamic_type = 'string'
     }
-   
+
     if(!opt.dynamic_type)
     {
         opt.dynamic_type = 'string'
     }
     this.realElement = new guiElements[opt.dynamic_type]($.extend({}, opt, opt.override_opt), value, parent_object)
-    
+
     let thisObj = this;
     let func = function(name)
     {
         return function(){ return thisObj.realElement[name].apply(thisObj.realElement, arguments)}
     }
-    
+
     this.getValue = func('getValue')
- 
+
     this.setType = function(type, override_opt)
     {
         if(!guiElements[type])
@@ -373,17 +436,17 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
             type = 'string'
             console.error("Error: Set type guiElements."+type+" for dynamic filed")
         }
-        
+
         let lastValue = this.realElement.getValue()
-         
+
         let options = $.extend({}, opt, override_opt)
-        
+
         this.realElement = new guiElements[type](options, value, parent_object)
- 
-        this.realElement.setValue(lastValue) 
+
+        this.realElement.setValue(lastValue)
         $('#gui'+this.element_id).insertTpl(this.realElement.render())
     }
-    
+
 }
 
 

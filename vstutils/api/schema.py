@@ -15,7 +15,7 @@ FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
-FORMAT_TEXTAREA = 'textarea'
+FORMAT_DYN = 'dynamic'
 
 # Base types
 basic_type_info = OrderedDict()
@@ -25,17 +25,11 @@ basic_type_info[fields.FileInStringField] = dict(
 basic_type_info[fields.SecretFileInString] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_SECRET_FILE
 )
-basic_type_info[fields.AutoCompletionField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE
-)
 basic_type_info[fields.HtmlField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_HTML
 )
 basic_type_info[serializers.JsonObjectSerializer] = dict(
     type=openapi.TYPE_OBJECT, format=FORMAT_JSON
-)
-basic_type_info[fields.TextareaField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
 )
 
 
@@ -49,15 +43,48 @@ class VSTFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(**type_info)
-        if isinstance(field, fields.AutoCompletionField):
-            if isinstance(field.autocomplete, (list, tuple)):
-                kwargs['enum'] = list(field.autocomplete)
-            else:
-                kwargs['additionalProperties'] = openapi.SchemaRef(
+        return SwaggerType(**type_info)
+
+
+class AutoCompletionFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.AutoCompletionField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE)
+        if isinstance(field.autocomplete, (list, tuple)):
+            kwargs['enum'] = list(field.autocomplete)
+        else:
+            prop = dict(
+                model=openapi.SchemaRef(
                     self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                    field.autocomplete + '/properties/id', ignore_unresolved=True
-                )
+                    field.autocomplete, ignore_unresolved=True
+                ),
+                value_field=field.autocomplete_property,
+                view_field=field.autocomplete_represent
+            )
+            kwargs['additionalProperties'] = prop
+
+        return SwaggerType(**kwargs)
+
+
+class DependEnumFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.DependEnumField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_DYN)
+        kwargs['additionalProperties'] = dict(
+            field=field.field, choices=field.choices, types=field.types
+        )
 
         return SwaggerType(**kwargs)
 
@@ -83,7 +110,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
-        VSTFieldInspector,
+        DependEnumFieldInspector, AutoCompletionFieldInspector, VSTFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
     filter_inspectors = [
         NestedFilterInspector
