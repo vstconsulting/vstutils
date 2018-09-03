@@ -36,6 +36,7 @@ class DependEnumField(CharField):
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices')
+        self.types = kwargs.pop('types', dict())
         super(DependEnumField, self).__init__(**kwargs)
 
     def to_internal_value(self, data):
