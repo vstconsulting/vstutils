@@ -117,7 +117,6 @@ basePageView.renderFiled = function(filed, render_options)
             this.model.guiFileds[filed.name] = obj
         }
 
-
         if(!this.model.guiFileds[filed.name])
         {
             var type = filed.format
