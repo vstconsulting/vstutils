@@ -236,7 +236,7 @@ function saveReport()
 /**
  * В этом массиве должны быть qunit тесты для приложения
  */
-window.qunitTestsArray = []
+window.qunitTestsArray = {}
 
 /**
  * Вставляет Qunit и запускает выполнение тестов.
@@ -284,7 +284,7 @@ function injectQunit()
             }
         })
 
-        for(var i in window.qunitTestsArray)
+        for(let i in window.qunitTestsArray)
         {
             window.qunitTestsArray[i].test.call()
         }
@@ -328,8 +328,7 @@ syncQUnit.nextTest = function(name, test)
 /**
  * qunitAddTests_trim
  */
-window.qunitTestsArray.push({
-    step:100,
+window.qunitTestsArray['trim'] = {
     test:function()
     {
         syncQUnit.addTest('trim', function ( assert ) {
@@ -364,5 +363,5 @@ window.qunitTestsArray.push({
             }
             render(done);
         });
-    }})
- 
+    }
+}
