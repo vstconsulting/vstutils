@@ -2,7 +2,7 @@
 var guiElements = {
 }
 
-guiElements.base = function(opt, value, parent_object)
+guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value

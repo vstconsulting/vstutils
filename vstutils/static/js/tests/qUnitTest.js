@@ -200,7 +200,7 @@ var deepEqual = function (x, y)
 }
 
 
-function render(name, callback)
+function testdone(name, callback)
 {
     if(callback === undefined)
     {
@@ -280,7 +280,7 @@ function injectQunit()
             if(!syncQUnit.nextTest())
             {
                 saveReport()
-                render("ok-done", window.close)
+                testdone("ok-done", window.close)
             }
         })
 
@@ -343,7 +343,7 @@ window.qunitTestsArray['trim'] = {
             assert.equal(trim('    x  '), 'x', 'Табы');
             assert.equal(trim('    x   y  '), 'x   y', 'Табы и пробелы внутри строки не трогаем');
 
-            render(done);
+            testdone(done);
         });
 
         syncQUnit.addTest('trim', function ( assert ) {
@@ -361,7 +361,7 @@ window.qunitTestsArray['trim'] = {
             {
                 assert.equal(stripslashes(addslashes(stringArr[i])), stringArr[i], "i:"+stringArr[i]);
             }
-            render(done);
+            testdone(done);
         });
     }
 }
