@@ -15,28 +15,14 @@ basePageView.validateByModel = function (values)
     {
         var filed = this.model.fileds[i];
         if(values[filed.name] !== undefined)
-        {
-            if(filed.type == "string" || filed.type == "file")
-            {
-                values[filed.name] = values[filed.name].toString()
-            }
-            else if(filed.type == "number" || filed.type == "integer" )
-            {
-                values[filed.name] = values[filed.name]/1
-            }
-            else if(filed.type == "boolean" )
-            {
-                values[filed.name] = values[filed.name] == true
-            }
-
+        { 
             if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
             {
                 throw {error:'validation', message:'Filed '+filed.name +" is too long"}
             }
 
             if(filed.minLength && values[filed.name].toString().length < filed.minLength)
-            {
-
+            { 
                 if(filed.minLength && values[filed.name].toString().length == 0)
                 {
                     if(filed.required)
@@ -194,6 +180,7 @@ basePageView.renderFiled = function(filed, render_options)
 basePageView.getValue = function ()
 {
     var obj = {}
+    let count = 0;
     for(var i in this.model.guiFileds)
     {
         let val = this.model.guiFileds[i].getValue();
@@ -205,8 +192,14 @@ basePageView.getValue = function ()
         {*/
         obj[i] = val;
         // }
+        count++;
     }
-
+    
+    if(count == 1 && this.model.guiFileds[0] )
+    { 
+        obj = obj[0]
+    }
+    
     return obj;
 }
 
@@ -626,12 +619,11 @@ function guiItemFactory(api, both_view, list, one)
                 return def.promise();
             }
 
-            this.delete = function (){
-
+            this.delete = function ()
+            {
                 var def = new $.Deferred();
 
                 try{
-
                     if (this.onBeforeDelete)
                     {
                         if (!this.onBeforeDelete.apply(this, []))
@@ -645,7 +637,8 @@ function guiItemFactory(api, both_view, list, one)
                     var thisObj = this;
                     var current_url = pageInfo.page_and_parents;
                     var query ={};
-                    if ((current_url.match(/\//g) || []).length > 1) {
+                    if ((current_url.match(/\//g) || []).length > 1) 
+                    {
                         var re = /(?<parent>\w+(?=\/))\/(?<pk>\d+(?=\/))\/(?<suburl>.*)/g;
                         let result = re.exec(current_url)
                         query = {
@@ -656,15 +649,17 @@ function guiItemFactory(api, both_view, list, one)
                             data_type: result.groups.suburl,
                             method: "DELETE"
                         }
-                    } else {
+                    }
+                    else 
+                    {
                         query = {
                             type: "del",
                             item: this.getBulkName(),
                             pk:this.model.data.id
                         }
                     }
-                    $.when(api.query(query)
-                    ).done(function (data)
+                    
+                    $.when(api.query(query)).done(function (data)
                     {
                         guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
                         def.resolve(data)
@@ -1624,16 +1619,7 @@ function guiActionFactory(api, action)
                     {
                         data[i] = value[0][i]
                     }
-                }*/
-                let tmp = {};
-                for(let i in data)
-                {
-                    if(data[i] && data[i] != "")
-                    {
-                        tmp[i] = data[i]
-                    }
-                }
-                data = tmp
+                }*/ 
 
                 if(!this.model.pathInfo)
                 {
@@ -1674,7 +1660,7 @@ function guiActionFactory(api, action)
                 }
 
                 var query = []
-                var url = hostname+"/api/v2"+this.model.pathInfo.api_path
+                var url = this.model.pathInfo.api_path
                 if(this.model.pageInfo)
                 {
                     for(let i in this.model.pageInfo)
@@ -1703,38 +1689,38 @@ function guiActionFactory(api, action)
                         }
                     }
                 }
-
+                 
                 if(query.length == 0)
                 {
                     // Модификация на то если у нас не мультиоперация
                     query = [url]
                 }
 
-                query.forEach(qurl =>{
-                    // @todo переделать на балк
-                    spajs.ajax.Call({
-                        url: qurl,
-                        type:query_method,
-                        contentType:'application/json',
-                        data:JSON.stringify(data),
-                        success: function(data)
+                query.forEach(qurl => {
+                    
+                    qurl = qurl.replace(/^\/|\/$/g, "").split(/\//g)
+                    let q = {
+                        type:'mod',
+                        data_type:qurl,
+                        data:data,
+                        method:query_method
+                    }
+                    
+                    $.when(api.query(q)).done(data => 
+                    {
+                        if(data.not_found > 0)
                         {
-                            if(data.not_found > 0)
-                            {
-                                guiPopUp.error("Item not found");
-                                def.reject({text:"Item not found", status:404})
-                                return;
-                            }
-
-                            guiPopUp.success("Save");
-                            def.resolve()
-                        },
-                        error:function(e)
-                        {
-                            polemarch.showErrors(e.responseJSON)
-                            def.reject(e)
+                            guiPopUp.error("Item not found");
+                            def.reject({text:"Item not found", status:404})
+                            return;
                         }
-                    });
+
+                        guiPopUp.success("Save");
+                        def.resolve()
+                    }).fail(e => { 
+                        polemarch.showErrors(e.responseJSON)
+                        def.reject(e)
+                    }) 
                 })
 
             }catch (e) {

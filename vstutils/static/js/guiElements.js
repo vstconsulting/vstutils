@@ -2,7 +2,7 @@
 var guiElements = {
 }
 
-guiElements.base = function(opt, value, parent_object)
+guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value
@@ -14,6 +14,26 @@ guiElements.base = function(opt, value, parent_object)
         this.value = value
     }
 
+    this.reductionToType = function(value)
+    {
+        if(this.render_options.type == "string" || this.render_options.type == "file")
+        {
+            return value.toString()
+        }
+        
+        if(this.render_options.type == "number" || this.render_options.type == "integer" )
+        {
+            return value/1
+        }
+        
+        if(this.render_options.type == "boolean" )
+        {
+            return value == true
+        }
+
+        return value
+    }
+    
     this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {
@@ -55,11 +75,11 @@ guiElements.base = function(opt, value, parent_object)
 
         if(!value && default_value)
         {
-            return  default_value;
+            return  this.reductionToType(default_value);
         }
         else
         {
-            return value;
+            return this.reductionToType(value);
         }
 
     }
