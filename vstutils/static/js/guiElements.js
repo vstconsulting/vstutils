@@ -167,33 +167,11 @@ guiElements.enum = function(opt = {}, value)
 guiElements.file = function(opt = {})
 {
     this.name = 'file'
-    guiElements.base.apply(this, arguments)
+    guiElements.base.apply(this, arguments);
 
-    this.loadFile = function(event)
+    this.getValue = function ()
     {
-        debugger;
-        console.log("loadFile", event.target.files)
-        for (var i = 0; i < event.target.files.length; i++)
-        {
-            if (event.target.files[i].size > 1024 * 1024 * 1)
-            {
-                guiPopUp.error("File is too large")
-                console.log("File is too large " + event.target.files[i].size)
-                continue;
-            }
-
-            var reader = new FileReader();
-            debugger;
-            reader.onload = function (e)
-            {
-                debugger;
-                $('#fileContent_' + element)[0].setAttribute("value", e.target.result);
-                $(element).val(e.target.result)
-            }
-
-            reader.readAsText(event.target.files[i]);
-            return;
-        }
+        return $('#fileContent_' + this.element_id).val();
     }
 }
 

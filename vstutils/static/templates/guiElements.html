@@ -168,13 +168,13 @@
 <script type="text/x-just" data-just="guiElements.file">
     <!-- guiElements.file -->
     <%[ main_input %>
-        <span id="deleteFileId_<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' onclick="$("#loadFileId_<%- guiElement.element_id %>").find('input')[0].value='';$("#fileContent_<%- guiElement.element_id %>")[0].value='';" style='float: right; margin-left: 10px; margin-bottom:10px;'>
+        <span id="deleteFileId_<%- guiElement.element_id %>" onclick="$('#fileContent_<%- guiElement.element_id %>').val(''); $('#fileContent_<%- guiElement.element_id %>').attr('value', '');" class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'>
             <span class='glyphicon glyphicon-remove'>
             </span>
         </span>
 
         <span id="<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'>
-            <input type='file' class='input-file'>
+            <input type='file' class='input-file' onchange="readFileAndInsert(event, '#fileContent_<%- guiElement.element_id %>');">
             <span class='glyphicon glyphicon-file'>
             </span>
         </span>

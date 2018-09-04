@@ -133,6 +133,31 @@ function isEmptyObject(obj) {
     return true;
 }
 
+function readFileAndInsert(event, element) {
+    for (var i = 0; i < event.target.files.length; i++)
+    {
+        if (event.target.files[i].size > 1024 * 1024 * 1)
+        {
+            guiPopUp.error("File is too large")
+            console.log("File is too large " + event.target.files[i].size)
+            continue;
+        }
+
+        var reader = new FileReader();
+
+        reader.onload = function (e)
+        {
+            $(element).attr("value", e.target.result);
+            $(element).val(e.target.result);
+        }
+
+        reader.readAsText(event.target.files[i]);
+    }
+
+    return false;
+}
+
+
 window.onresize=function ()
 {
     if(window.innerWidth>767)
