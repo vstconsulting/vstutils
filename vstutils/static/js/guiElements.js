@@ -14,6 +14,26 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.value = value
     }
 
+    this.reductionToType = function(value)
+    {
+        if(this.render_options.type == "string" || this.render_options.type == "file")
+        {
+            return value.toString()
+        }
+        
+        if(this.render_options.type == "number" || this.render_options.type == "integer" )
+        {
+            return value/1
+        }
+        
+        if(this.render_options.type == "boolean" )
+        {
+            return value == true
+        }
+
+        return value
+    }
+    
     this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {
@@ -55,11 +75,11 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         if(!value && default_value)
         {
-            return  default_value;
+            return  this.reductionToType(default_value);
         }
         else
         {
-            return value;
+            return this.reductionToType(value);
         }
 
     }
@@ -108,78 +128,7 @@ guiElements.base = function(opt = {}, value, parent_object)
                 opt.onUpdateOptions[i](this, arg)
             }
         }
-        else
-        {
-            // additionalProperties - приходит из api
-            if(opt.additionalProperties && opt.additionalProperties.choices)
-            {
-                var value = arg.value;
-                var choices = opt.additionalProperties.choices;
-                var new_type = "string";
-                var override_opt;
-
-                for(var i in choices)
-                {
-                    if(i == value)
-                    {
-                        if ($.isArray(choices[value]))
-                        {
-                            var boolean = false;
-                            for(var i in choices[value])
-                            {
-                                if(typeof(choices[value][i]) == 'boolean')
-                                {
-                                    boolean = true;
-                                }
-                            }
-
-                            if (boolean)
-                            {
-                                new_type = "boolean";
-                                if(choices[value].length == 1)
-                                {
-                                   var boolean_default = choices[value][0];
-                                }
-                            }
-                            else
-                            {
-                                new_type = "enum";
-                                override_opt = {enum: choices[value]};
-                            }
-                        }
-                    }
-                }
-
-                if(!guiElements[new_type])
-                {
-                    new_type = 'string'
-                }
-
-                var options = $.extend({}, opt, override_opt);
-
-                var new_el = new guiElements[new_type](options, this.value);
-
-                if(boolean_default)
-                {
-                   new_el.value =  boolean_default;
-                   options.readOnly = true;
-                }
-
-                $('#gui'+this.element_id).insertTpl(new_el.render());
-
-                var className = $('#gui'+this.element_id)[0].className;
-
-                $('#gui'+this.element_id).removeClass(className);
-
-                this.getValue = function () {
-
-                    return  new_el.getValue();
-                }
-
-            }
-        }
     }
-
 }
 
 /**
@@ -410,16 +359,13 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     this.name = 'dynamic'
     guiElements.base.apply(this, arguments)
 
-    if(!opt.dynamic_type)
-    {
-        opt.dynamic_type = 'string'
-    }
 
     if(!opt.dynamic_type)
     {
         opt.dynamic_type = 'string'
     }
-    this.realElement = new guiElements[opt.dynamic_type]($.extend({}, opt, opt.override_opt), value, parent_object)
+
+    this.realElement = new guiElements[opt.dynamic_type]($.extend({}, opt, opt.override_opt), value, parent_object);
 
     let thisObj = this;
     let func = function(name)
@@ -437,15 +383,79 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
             console.error("Error: Set type guiElements."+type+" for dynamic filed")
         }
 
-        let lastValue = this.realElement.getValue()
+        let lastValue = this.realElement.getValue();
 
-        let options = $.extend({}, opt, override_opt)
+        let options = $.extend({}, opt, override_opt);
 
-        this.realElement = new guiElements[type](options, value, parent_object)
+        if(type == "boolean" && options.default !== undefined && options.readOnly)
+        {
+            lastValue = options.default;
+        }
 
-        this.realElement.setValue(lastValue)
-        $('#gui'+this.element_id).insertTpl(this.realElement.render())
+        this.realElement = new guiElements[type](options, value, parent_object);
+
+        this.realElement.setValue(lastValue);
+        $('#gui'+this.element_id).insertTpl(this.realElement.render());
     }
+
+    this.opt.onUpdateOptions = [];
+    this.opt.onUpdateOptions.push(function (filedObj, newValue) {
+
+        var new_type = "string";
+        var override_opt = {};
+        var value = newValue.value;
+
+        if(opt.additionalProperties && opt.additionalProperties.types)
+        {
+            var types = opt.additionalProperties.types;
+
+            if(types[value])
+            {
+                new_type = types[value];
+            }
+        }
+
+        if(opt.additionalProperties && opt.additionalProperties.choices)
+        {
+            var choices = opt.additionalProperties.choices;
+
+            for (var i in choices)
+            {
+                if (i == value)
+                {
+                    if ($.isArray(choices[value]))
+                    {
+                        var boolean = false;
+                        for (var i in choices[value])
+                        {
+                            if (typeof(choices[value][i]) == 'boolean')
+                            {
+                                boolean = true;
+                            }
+                        }
+
+                        if (boolean)
+                        {
+                            new_type = "boolean";
+                            if (choices[value].length == 1)
+                            {
+                                var boolean_default = choices[value][0];
+                                override_opt.default = boolean_default;
+                                override_opt.readOnly = true;
+                            }
+                        }
+                        else
+                        {
+                            new_type = "enum";
+                            override_opt = {enum: choices[value]};
+                        }
+                    }
+                }
+            }
+        }
+
+        thisObj.setType(new_type, override_opt);
+    });
 
 }
 

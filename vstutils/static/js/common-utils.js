@@ -1,6 +1,9 @@
 
 // Список файлов тестирующих ГУЙ
-window.guiTestsFiles = []
+if(!window.guiTestsFiles)
+{
+    window.guiTestsFiles = []
+}
 
 // Добавляем файл тестов к списку файлов для тестов гуя
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
