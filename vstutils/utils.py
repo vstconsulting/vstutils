@@ -435,6 +435,7 @@ class ModelHandlers(object):
         self.type = tp
         self.err_message = err_message
         self._list = getattr(settings, self.type, {})
+        self._loaded_backends = dict()
 
     @property
     def objects(self):
@@ -467,6 +468,12 @@ class ModelHandlers(object):
     def list(self):
         return self._list
 
+    def _get_baskend(self, backend):
+        if backend in self._loaded_backends:
+            return self._loaded_backends[backend]
+        self._loaded_backends[backend] = import_class(backend)
+        return self._loaded_backends[backend]
+
     def backend(self, name):
         '''
         Get backend class
@@ -480,7 +487,7 @@ class ModelHandlers(object):
             backend = self.list()[name].get('BACKEND', None)
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
-            return import_class(backend)
+            return self._get_baskend(backend)
         except KeyError or ImportError:
             msg = "{} ({})".format(name, self.err_message) if self.err_message\
                                                            else name
