@@ -2,49 +2,7 @@
 basePageView = {
 
 }
-
-/**
- * Подготовливает данные к отправке в апи. Приводит их типы к типам модели
- * Если данные не соответсвуют то выкинет исключение
- * @param {Object} values
- * @returns {Object}
- */
-basePageView.validateByModel = function (values)
-{
-    for(var i in this.model.fileds)
-    {
-        var filed = this.model.fileds[i];
-        if(values[filed.name] !== undefined)
-        { 
-            if(filed.maxLength && values[filed.name].toString().length > filed.maxLength)
-            {
-                throw {error:'validation', message:'Filed '+filed.name +" is too long"}
-            }
-
-            if(filed.minLength && values[filed.name].toString().length < filed.minLength)
-            { 
-                if(filed.minLength && values[filed.name].toString().length == 0)
-                {
-                    if(filed.required)
-                    {
-                        throw {error:'validation', message:'Filed '+filed.name +" is empty"}
-                    }
-                    else
-                    {
-                        delete values[filed.name]
-                    }
-                }
-                else
-                {
-                    throw {error:'validation', message:'Filed '+filed.name +" is too short"}
-                }
-            }
-        }
-    }
-
-    return values;
-}
-
+ 
 basePageView.renderAllFileds = function(opt)
 {
     let html = []
@@ -181,17 +139,14 @@ basePageView.getValue = function ()
 {
     var obj = {}
     let count = 0;
-    for(var i in this.model.guiFileds)
+    for(let i in this.model.guiFileds)
     {
-        let val = this.model.guiFileds[i].getValue();
-        /*if(typeof val == "object")
+        let val = this.model.guiFileds[i].getValidValue();
+        if(val !== undefined)
         {
-            obj = mergeDeep(obj, val);
+            obj[i] = val;
         }
-        else
-        {*/
-        obj[i] = val;
-        // }
+        
         count++;
     }
     
@@ -201,6 +156,11 @@ basePageView.getValue = function ()
     }
     
     return obj;
+}
+
+basePageView.getValidValue = function ()
+{ 
+    return this.getValue();
 }
 
 basePageItem = {}
@@ -538,7 +498,7 @@ function guiItemFactory(api, both_view, list, one)
                         }
                     }
 
-                    data = this.validateByModel(data)
+                    //data = this.validateByModel(data)
 
                     var query = {
                         type: method,
