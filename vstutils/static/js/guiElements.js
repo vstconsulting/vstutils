@@ -16,16 +16,22 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.reductionToType = function(value)
     {
+
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
+            if(!value)
+            {
+                return ""
+            }
+
             return value.toString()
         }
-        
+
         if(this.render_options.type == "number" || this.render_options.type == "integer" )
         {
             return value/1
         }
-        
+
         if(this.render_options.type == "boolean" )
         {
             return value == true
@@ -33,7 +39,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         return value
     }
-    
+
     this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {

@@ -169,7 +169,19 @@ function capitalizeString(string)
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
-function isEmptyObject(obj) {
+function sliceLongString(string="", valid_length=100)
+{
+    var str = string.slice(0, valid_length);
+    if(string.length > valid_length)
+    {
+        str += "...";
+    }
+
+    return str;
+}
+
+function isEmptyObject(obj)
+{
     for (var i in obj) {
         if (obj.hasOwnProperty(i)) {
             return false;
@@ -178,7 +190,8 @@ function isEmptyObject(obj) {
     return true;
 }
 
-function readFileAndInsert(event, element) {
+function readFileAndInsert(event, element)
+{
     for (var i = 0; i < event.target.files.length; i++)
     {
         if (event.target.files[i].size > 1024 * 1024 * 1)
