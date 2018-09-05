@@ -1588,12 +1588,12 @@ function guiActionFactory(api, action)
             }
         }
 
-        this.exec = function ()
+        this.exec = function (callback, error_callback)
         {
-            return this.sendToApi("PUT");
+            return this.sendToApi("PUT", callback, error_callback);
         }
 
-        this.sendToApi = function (method)
+        this.sendToApi = function (method, callback, error_callback)
         {
             var def = new $.Deferred();
             var data = {}
@@ -1708,6 +1708,14 @@ function guiActionFactory(api, action)
                     
                     $.when(api.query(q)).done(data => 
                     {
+                        if(callback)
+                        {
+                            if(callback(data) === false)
+                            {
+                                return;
+                            }
+                        }
+                        
                         if(data.not_found > 0)
                         {
                             guiPopUp.error("Item not found");
@@ -1718,6 +1726,14 @@ function guiActionFactory(api, action)
                         guiPopUp.success("Save");
                         def.resolve()
                     }).fail(e => { 
+                        if(callback)
+                        {
+                            if(error_callback(e) === false)
+                            {
+                                return;
+                            }
+                        }
+                        
                         polemarch.showErrors(e.responseJSON)
                         def.reject(e)
                     }) 
@@ -1735,7 +1751,7 @@ function guiActionFactory(api, action)
 
             return def.promise();
         }
-
+ 
         this.renderAsPage = function (render_options = {})
         {
             let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
@@ -1804,7 +1820,21 @@ function guiActionFactory(api, action)
 
 
 
-
+function emptyAction(action_info)
+{
+    let name = action_info.api_path.match(/\/([A-z0-9]+)\/$/); 
+    if(!name || !name[1])
+    {
+        return undefined
+    }
+ 
+    let actionCalass = guiActionFactory(window.api, {action:action_info.api_path_value, api_path:action_info.api_path, name:name[1]})
+    let action = new actionCalass({api:action_info.api_path_value, url:spajs.urlInfo.data.reg})
+    
+    return function(){
+        action.exec() 
+    }
+}
 
 /**
  * Выполняет переход на страницу с результатами поиска

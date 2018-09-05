@@ -351,12 +351,14 @@ function openApi_get_internal_links(api, base_path, targetLevel)
             //debugger;
             continue;
         }
-
+        
+        let isAction = api_path_value.get === undefined || !/_(get|list)$/.test(api_path_value.get.operationId)
+       
         res[name[1]] = {
             api_path:api_action_path,
             name:name[1],
             api_path_value:api_path_value,
-            isAction:api_path_value.get === undefined || !/_(get|list)$/.test(api_path_value.get.operationId)
+            isAction:isAction, 
         }
 
     }
@@ -844,7 +846,7 @@ function openApi_paths(api)
             continue;
         }
 
-        var action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
+        let action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
         openApi_add_one_action_page_path(api, api_path, action)
     }
 }
