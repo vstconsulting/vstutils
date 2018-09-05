@@ -11,7 +11,7 @@ Quickstart
 
 2. Create package 'prj': `vstutilsctl newproject --name proj`
 
-3. Change directory to project and run `python prj runserver 0.0.0.0:8081 --insecure`
+3. Change directory to project and run `python proj runserver 0.0.0.0:8081 --insecure`
 
 4. Enjoy!
 

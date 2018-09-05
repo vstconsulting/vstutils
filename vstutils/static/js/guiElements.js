@@ -16,16 +16,22 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.reductionToType = function(value)
     {
+
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
+            if(!value)
+            {
+                return ""
+            }
+
             return value.toString()
         }
-        
+
         if(this.render_options.type == "number" || this.render_options.type == "integer" )
         {
             return value/1
         }
-        
+
         if(this.render_options.type == "boolean" )
         {
             return value == true
@@ -33,7 +39,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         return value
     }
-    
+
     this._onRender = function(options)
     {
         $('#'+this.element_id).on('change', false, () => {
@@ -187,34 +193,18 @@ guiElements.enum = function(opt = {}, value)
 guiElements.file = function(opt = {})
 {
     this.name = 'file'
-    guiElements.base.apply(this, arguments)
+    guiElements.base.apply(this, arguments);
 
-    this.loadFile = function(event)
+    this.getValue = function ()
     {
-        debugger;
-        console.log("loadFile", event.target.files)
-        for (var i = 0; i < event.target.files.length; i++)
-        {
-            if (event.target.files[i].size > 1024 * 1024 * 1)
-            {
-                guiPopUp.error("File is too large")
-                console.log("File is too large " + event.target.files[i].size)
-                continue;
-            }
-
-            var reader = new FileReader();
-            debugger;
-            reader.onload = function (e)
-            {
-                debugger;
-                $('#fileContent_' + element)[0].setAttribute("value", e.target.result);
-                $(element).val(e.target.result)
-            }
-
-            reader.readAsText(event.target.files[i]);
-            return;
-        }
+        return $('#fileContent_' + this.element_id).val();
     }
+}
+
+guiElements.secretfile = function(opt = {})
+{
+    this.name = 'secretfile'
+    guiElements.file.apply(this, arguments);
 }
 
 guiElements.boolean = function()
@@ -250,6 +240,40 @@ guiElements.autocomplete = function()
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
+    this.getValue = function()
+    {
+        if (this.matches &&
+            this.opt.additionalProperties &&
+            this.opt.additionalProperties.view_field &&
+            this.opt.additionalProperties.value_field)
+        {
+            var value = $("#" + this.element_id).val();
+            var data_value = $("#" + this.element_id).attr('value');
+            var match = false;
+            for (var i in this.matches)
+            {
+                if (value == this.matches[i]['view_field'] &&
+                    data_value == this.matches[i]['value_field'])
+                {
+                    match = true;
+                }
+            }
+
+            if (match)
+            {
+                return data_value;
+            }
+            else
+            {
+                return value
+            }
+        }
+        else
+        {
+            return $("#" + this.element_id).val();
+        }
+    }
+
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
@@ -257,7 +281,7 @@ guiElements.autocomplete = function()
 
         if(options.searchObj)
         {
-            new autoComplete({
+            return new autoComplete({
                 selector: '#'+this.element_id,
                 minChars: 0,
                 cache:false,
@@ -270,7 +294,8 @@ guiElements.autocomplete = function()
                 onSelect: (event, term, item) =>
                 {
                     var value = $(item).attr('data-value');
-                    $('#'+this.element_id).val(value);
+                    $('#'+this.element_id).val($(item).text());
+                    $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
                 },
                 source: (original_term, response) =>
@@ -301,6 +326,140 @@ guiElements.autocomplete = function()
                     }).fail(() => {
                         response([])
                     })
+                }
+            });
+        }
+        else if(options.enum)
+        {
+            return new autoComplete({
+                selector: '#'+this.element_id,
+                minChars: 0,
+                cache:false,
+                showByClick:true,
+                menuClass:'autocomplete autocomplete-'+this.element_id,
+                renderItem: function(item, search)
+                {
+                    return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
+                },
+                onSelect: (event, term, item) =>
+                {
+                    var value = $(item).attr('data-value');
+                    $('#'+this.element_id).val($(item).text());
+                    $('#'+this.element_id).attr('value', value);
+                    $('#'+this.element_id).attr({'data-hide':'hide'});
+                },
+                source: (original_term, response) =>
+                {
+                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    if(isHide == "hide")
+                    {
+                        $('#'+this.element_id).attr({'data-hide':'show'})
+                        return;
+                    }
+
+                    var choices = options.enum;
+
+                    var matches = [];
+                    for(var i in choices)
+                    {
+                        if (choices[i].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                        {
+                            matches.push(choices[i]);
+                        }
+                    }
+                    response(matches);
+                }
+            });
+        }
+        else if(options.additionalProperties)
+        {
+            var obj;
+
+            if(options.additionalProperties.$ref)
+            {
+                obj = getObjectBySchema(options.additionalProperties.$ref);
+            }
+
+            if(options.additionalProperties.model && options.additionalProperties.model.$ref)
+            {
+                obj = getObjectBySchema(options.additionalProperties.model.$ref);
+            }
+
+            if(options.additionalProperties.value_field && options.additionalProperties.view_field)
+            {
+                var value_field = options.additionalProperties.value_field;
+                var view_field = options.additionalProperties.view_field;
+            }
+
+            return new autoComplete({
+                selector: '#'+this.element_id,
+                minChars: 0,
+                delay:500,
+                cache:false,
+                showByClick:true,
+                menuClass:'autocomplete autocomplete-'+this.element_id,
+                renderItem: function(item, search)
+                {
+                    if(value_field && view_field)
+                    {
+                        return '<div class="autocomplete-suggestion" data-value="' + item.value_field + '" >' + item.view_field + '</div>';
+                    }
+                    else
+                    {
+                        return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
+                    }
+                },
+                onSelect: (event, term, item) =>
+                {
+                    var value = $(item).attr('data-value');
+                    $('#'+this.element_id).val($(item).text());
+                    $('#'+this.element_id).attr('value', value);
+                    $('#'+this.element_id).attr({'data-hide':'hide'});
+                },
+                source: (original_term, response) =>
+                {
+                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    if(isHide == "hide")
+                    {
+                        $('#'+this.element_id).attr({'data-hide':'show'})
+                        return;
+                    }
+
+                    if(obj)
+                    {
+                        var list = new obj.list();
+                        var filters = spajs.urlInfo.data.reg;
+                        filters.limit = 9999;
+
+                        $.when(list.search(filters)).done((data) => {
+                            var res = data.data.results;
+                            var matches = [];
+                            for(var i in res)
+                            {
+                                if(value_field && view_field)
+                                {
+                                    if (res[i][view_field].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                                    {
+                                        matches.push({
+                                            value_field: res[i][value_field],
+                                            view_field: res[i][view_field],
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    if (res[i].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                                    {
+                                        matches.push(res[i]);
+                                    }
+                                }
+                            }
+                            this.matches = matches;
+                            response(matches)
+                        }).fail((e) => {
+                            response([]);
+                        });
+                    }
                 }
             });
         }
