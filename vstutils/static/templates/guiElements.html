@@ -168,7 +168,7 @@
 <script type="text/x-just" data-just="guiElements.file">
     <!-- guiElements.file -->
     <%[ main_input %>
-        <span id="deleteFileId_<%- guiElement.element_id %>" onclick="$('#fileContent_<%- guiElement.element_id %>').val(''); $('#fileContent_<%- guiElement.element_id %>').attr('value', '');" class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'>
+        <span id="deleteFileId_<%- guiElement.element_id %>" onclick="$('#fileContent_<%- guiElement.element_id %>').val('');" class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'>
             <span class='glyphicon glyphicon-remove'>
             </span>
         </span>
@@ -181,6 +181,13 @@
         <textarea placeholder='Enter value' <%- set_api_options(opt) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %> 
     <%! guiElements.base %>  
+</script>
+
+<!-- guiElements.secretfile -->
+<script type="text/x-just" data-just="guiElements.secretfile">
+    <!-- guiElements.secretfile -->
+
+    <%! guiElements.file %>
 </script>
 
 <!-- guiElements.textarea -->

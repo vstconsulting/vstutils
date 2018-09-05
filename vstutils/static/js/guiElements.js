@@ -201,6 +201,12 @@ guiElements.file = function(opt = {})
     }
 }
 
+guiElements.secretfile = function(opt = {})
+{
+    this.name = 'secretfile'
+    guiElements.file.apply(this, arguments);
+}
+
 guiElements.boolean = function()
 {
     this.name = 'boolean'

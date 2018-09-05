@@ -205,7 +205,6 @@ function readFileAndInsert(event, element)
 
         reader.onload = function (e)
         {
-            $(element).attr("value", e.target.result);
             $(element).val(e.target.result);
         }
 
