@@ -618,6 +618,495 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
 }
 
+guiElements.crontab = function (opt = {}, value)
+{
+    this.name = 'crontab'
+    guiElements.base.apply(this, arguments)
+
+    this.model = {}
+
+    this.model.MonthsNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    this.model.DaysOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    this.model.Months = {}
+    this.model.DayOfMonth = {}
+    this.model.DaysOfWeek = {}
+    this.model.Hours = {}
+    this.model.Minutes = {}
+
+    this.model.MonthsStr = "*"
+    this.model.DayOfMonthStr = "*"
+    this.model.DaysOfWeekStr = "*"
+    this.model.HoursStr = "*"
+    this.model.MinutesStr = "*"
+
+    this.value = value || "* * * * *";
+
+    this.render = function(render_options)
+    {
+        if(render_options !== undefined)
+        {
+            this.render_options = $.extend({}, opt, render_options)
+        }
+        else if(this.render_options === undefined)
+        {
+            this.render_options = $.extend({}, opt)
+        }
+
+        if(this.render_options.description === undefined)
+        {
+            this.render_options.description = "Time must be specified according to " + window.timeZone + " time zone";
+        }
+
+        this.parseCronString(this.value);
+        return spajs.just.render("guiElements."+this.name, {opt:this.render_options, guiElement: this, value: this.value }, () => {
+            this._onRender();
+            this._callAllonChangeCallback();
+        });
+    }
+
+    this._onRender = function ()
+    {
+        $("#"+this.element_id).on('change', false, () => {
+             this.parseCronString($("#"+this.element_id).val());
+        })
+
+        $("#"+this.element_id).on('paste', () => {
+
+            setTimeout(
+                () => {
+                    let val = $("#"+this.element_id).val();
+                    this.parseCronString(val);
+                },100)
+        })
+    }
+
+    this.parseCronString = function(string)
+    {
+        if(string !== undefined)
+        {
+            this.value = string
+        }
+
+        var string = trim(this.value).split(" ");
+        if(string.length != 5 || /[A-z]/.test(this.value))
+        {
+            this.value = "* * * * *";
+            string = trim(this.value).split(" ");
+
+        }
+
+        this.model.MinutesStr = string[0]
+        this.model.HoursStr = string[1]
+        this.model.DayOfMonthStr = string[2]
+        this.model.MonthsStr = string[3]
+        this.model.DaysOfWeekStr = string[4]
+
+
+        this.parseItem(this.model.Minutes, this.model.MinutesStr, 0, 59)
+        this.parseItem(this.model.Hours, this.model.HoursStr, 0, 23)
+        this.parseItem(this.model.DayOfMonth, this.model.DayOfMonthStr, 1, 31)
+        this.parseItem(this.model.Months, this.model.MonthsStr, 1, 12)
+        this.parseItem(this.model.DaysOfWeek, this.model.DaysOfWeekStr, 0, 6)
+
+    }
+
+    this.setDaysOfWeek = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 $3 $4 '+value);
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setMonths = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 $3 '+value+' $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setDayOfMonth = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 '+value+' $4 $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setHours = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 '+value+' $3 $4 $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setMinutes = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, value+' $2 $3 $4 $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    /**
+     * Парсит отдельный элемент в cron строке
+     * @param {type} resArr
+     * @param {type} str
+     * @param {type} minInt
+     * @param {type} maxInt
+     * @returns {Array}
+     */
+    this.parseItem = function(resArr, str, minInt, maxInt)
+    {
+        for(var i=minInt; i< maxInt; i++)
+        {
+            resArr[i] = false;
+        }
+
+        for(var i in resArr)
+        {
+            resArr[i] = false;
+        }
+
+        if(!str)
+        {
+            str = "*";
+        }
+
+        var Parts = str.split(",")
+        for(var i in Parts)
+        {
+            if(/^\*$/.test(Parts[i]))
+            {
+                if(minInt < maxInt)
+                {
+                    for(var j = minInt; j <= maxInt; j++)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^\*\/([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^\*\/([0-9]+)$/.exec(Parts[i])
+                if(minInt < maxInt && match[1]/1 >= 1)
+                {
+                    for(var j = minInt; j <= maxInt; j+= match[1]/1)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^([0-9]+)-([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^([0-9]+)-([0-9]+)$/.exec(Parts[i])
+                if(match[1]/1 > maxInt)
+                {
+                    match[1] = minInt
+                }
+                if(match[2]/1 > maxInt)
+                {
+                    match[2] = maxInt
+                }
+
+                if(match[1]/1 < match[2]/1)
+                {
+                    for(var j = match[1]/1; j <= match[2]/1; j++)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^([0-9]+)$/.test(Parts[i]))
+            {
+                if(Parts[i]/1 <= maxInt && Parts[i]/1 >= minInt)
+                {
+                    resArr[Parts[i]/1] = true
+                }
+            }
+            else if(/^([0-9]+)\/([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^([0-9]+)\/([0-9]+)$/.exec(Parts[i])
+                if(match[1]/1 > maxInt)
+                {
+                    match[1] = minInt
+                }
+                if(match[1]/1 < maxInt && match[2]/1 >= 1)
+                {
+                    for(var j = match[1]/1; j <= maxInt; j+=match[2]/1)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^([0-9]+)-([0-9]+)\/([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^([0-9]+)-([0-9]+)\/([0-9]+)$/.exec(Parts[i])
+                if(match[1]/1 > maxInt)
+                {
+                    match[1] = minInt
+                }
+                if(match[2]/1 > maxInt)
+                {
+                    match[2] = maxInt
+                }
+
+                if(match[1]/1 < match[2]/1 && match[3]/1 >= 1)
+                {
+                    for(var j = match[1]/1; j <= match[2]/1; j+=match[3]/1)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+        }
+
+
+
+        return resArr;
+    }
+
+    this.getValue = function()
+    {
+        this.setValue()
+        return this.value;
+    }
+
+    this.compileItem = function(resArr, minInt, maxInt)
+    {
+        var itemResults = []
+        itemResults.push(resArr.join(","))
+        if(!resArr || !resArr.length || resArr.length == maxInt - minInt + 1)
+        {
+            return "*";
+        }
+
+        if(resArr.length)
+        {
+            var division = [];
+            for(var j=2; j<maxInt/2; j++)
+            {
+                var isInner = false
+                for(var k in division)
+                {
+                    if(j % division[k] == 0)
+                    {
+                        isInner = true;
+                    }
+                }
+
+                if(isInner)
+                {
+                    continue;
+                }
+
+                var isOk = true
+                for(var i=minInt; i<maxInt; i+=j)
+                {
+                    if(resArr.indexOf(i) == -1)
+                    {
+                        isOk = false;
+                        break;
+                    }
+                }
+
+                if(isOk)
+                {
+                    division.push(j);
+                }
+            }
+
+            var exclude = []
+            var includeParts = []
+            for(var i in division)
+            {
+                for(var j=minInt; j<maxInt; j+=division[i])
+                {
+                    exclude.push(j)
+                }
+                includeParts.push("*/"+division[i])
+            }
+
+            var lastVal = -1;
+            var range = [];
+
+            for(var i in resArr)
+            {
+                if(exclude.indexOf(resArr[i]) != -1)
+                {
+                    continue;
+                }
+
+                if(lastVal + 1 == resArr[i] )
+                {
+                    range.push(resArr[i])
+                }
+                else
+                {
+                    if(range.length > 2)
+                    {
+                        includeParts.push(range[0] + "-" + range[range.length-1])
+                    }
+                    else if(range.length)
+                    {
+                        for(var l in range)
+                        {
+                            includeParts.push(range[l])
+                        }
+                    }
+                    range = [resArr[i]]
+                }
+
+                lastVal = resArr[i]
+            }
+
+            if(range.length > 2)
+            {
+                includeParts.push(range[0] + "-" + range[range.length-1])
+            }
+            else if(range.length)
+            {
+                for(var l in range)
+                {
+                    includeParts.push(range[l])
+                }
+            }
+            itemResults.push(includeParts.join(","))
+        }
+
+        if(resArr.length)
+        {
+            var lastVal = -1;
+            var includeParts = []
+            var range = []
+            for(var i in resArr)
+            {
+                if(lastVal + 1 == resArr[i] )
+                {
+                    range.push(resArr[i])
+                }
+                else
+                {
+                    if(range.length > 2)
+                    {
+                        includeParts.push(range[0] + "-" + range[range.length-1])
+                    }
+                    else if(range.length)
+                    {
+                        for(var l in range)
+                        {
+                            includeParts.push(range[l])
+                        }
+                    }
+                    range = [resArr[i]]
+                }
+
+                lastVal = resArr[i]
+            }
+
+            if(range.length > 2)
+            {
+                includeParts.push(range[0] + "-" + range[range.length-1])
+            }
+            else if(range.length)
+            {
+                for(var l in range)
+                {
+                    includeParts.push(range[l])
+                }
+            }
+
+            itemResults.push(includeParts.join(","))
+        }
+
+        var minLength = 99999;
+        var minLengthResult = "";
+        for(var i in itemResults)
+        {
+            if(itemResults[i].length < minLength )
+            {
+                minLength = itemResults[i].length
+                minLengthResult = itemResults[i]
+            }
+        }
+
+        return minLengthResult;
+    }
+
+    this.setValue = function()
+    {
+        //
+        // DaysOfWeek
+        //
+        var DaysOfWeek = []
+        for(var i in this.model.DaysOfWeek)
+        {
+            if(this.model.DaysOfWeek[i])
+            {
+                DaysOfWeek.push(i/1);
+            }
+        }
+        this.model.DaysOfWeekStr = this.compileItem(DaysOfWeek, 0, 6);
+
+        //
+        // Months
+        //
+        var Months = []
+        for(var i in this.model.Months)
+        {
+            if(this.model.Months[i])
+            {
+                Months.push(i/1);
+            }
+        }
+        this.model.MonthsStr = this.compileItem(Months, 1, 12);
+
+        //
+        // DayOfMonth
+        //
+        var DayOfMonth = []
+        for(var i in this.model.DayOfMonth)
+        {
+            if(this.model.DayOfMonth[i])
+            {
+                DayOfMonth.push(i/1);
+            }
+        }
+        this.model.DayOfMonthStr = this.compileItem(DayOfMonth, 1, 31);
+
+        //
+        // Hours
+        //
+        var Hours = []
+        for(var i in this.model.Hours)
+        {
+            if(this.model.Hours[i])
+            {
+                Hours.push(i/1);
+            }
+        }
+        this.model.HoursStr = this.compileItem(Hours, 0, 23);
+
+        //
+        // Minutes
+        //
+        var Minutes = []
+        for(var i in this.model.Minutes)
+        {
+            if(this.model.Minutes[i])
+            {
+                Minutes.push(i/1);
+            }
+        }
+        this.model.MinutesStr = this.compileItem(Minutes, 0, 59);
+
+        this.value =  this.model.MinutesStr
+            + " " + this.model.HoursStr
+            + " " + this.model.DayOfMonthStr
+            + " " + this.model.MonthsStr
+            + " " + this.model.DaysOfWeekStr;
+
+        $("#"+this.element_id).val(this.value)
+    }
+}
 
 function set_api_options(options)
 {
