@@ -171,6 +171,11 @@ function capitalizeString(string)
 
 function sliceLongString(string="", valid_length=100)
 {
+    if(!string || !string.slice)
+    {
+        return string;
+    }
+    
     var str = string.slice(0, valid_length);
     if(string.length > valid_length)
     {
