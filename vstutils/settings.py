@@ -4,8 +4,9 @@ import sys
 from warnings import warn
 
 from configparser import ConfigParser
-import six
-import pytimeparse
+import pyximport
+pyximport.install()
+from .section import Section
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
@@ -45,113 +46,10 @@ config = ConfigParser()
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
 
 
-class SectionConfig(object):
+class SectionConfig(Section):
     config = config
     section = 'main'
-    subsections = []
-    section_defaults = {}
-    types_map = {}
-
-    def __init__(self, section=None, default=None):
-        self.section = section or self.section
-        self._subsections = self.get_subsections()
-        self.default = default
-
-    def get_subsections(self):
-        return {
-            sub: '{}.{}'.format(self.section, sub) for sub in self.subsections
-        }
-
-    def get_value_kwargs(self, **additional_kwargs):
-        kwargs = dict()
-        kwargs.update(KWARGS)
-        kwargs.update(additional_kwargs)
-        kwargs['__section'] = self.section
-        return kwargs
-
-    def opt_handler(self, option):
-        return option.upper()
-
-    def key_handler(self, key):
-        return key
-
-    def value_handler(self, value):
-        if isinstance(value, (six.string_types, six.text_type)):
-            return value.format(**self.get_value_kwargs())
-        else:
-            return value
-
-    def get_default_data_from_section(self, option):
-        return (
-            self.default or self.section_defaults.get(option if option else '.', {})
-        )
-
-    def get_from_section(self, section, option=None):
-        default_value = self.get_default_data_from_section(option)
-        try:
-            return self.config[section] or default_value
-        except:
-            return default_value
-
-    def _get_section_data(self, section, option=None):
-        section_data = {}
-        for key, value in self.get_from_section(section, option).items():
-            key_name = key if not option else "{}.{}".format(option, key)
-            type_handler = self.types_map.get(key_name, str)
-            section_data[self.key_handler(key)] = type_handler(
-                self.value_handler(value)
-            )
-        return section_data
-
-    def _all(self):
-        self._current_section = self.section
-        settings = self._get_section_data(self.section)
-        for option, section in self._subsections.items():
-            self._current_section = option
-            settings[self.opt_handler(option)] = self._get_section_data(section, option)
-        return settings
-
-    def all(self):
-        settings = getattr(self, '__settings__', None)
-        if settings is None:
-            self.__settings__ = self._all()
-        return self.__settings__
-
-    def get(self, option, fallback=None):
-        return self.all().get(option, self.value_handler(fallback))
-
-    def getboolean(self, option, fallback=None):
-        return self.bool(self.get(option, fallback))
-
-    def getint(self, option, fallback=None):
-        value = self.get(option, str(fallback)).strip()
-        return self.int(value)
-
-    def getseconds(self, option, fallback=None):
-        return self.int_seconds(self.get(option, str(fallback)))
-
-    def getlist(self, option, fallback=None, separator=','):
-        fallback = fallback or ''
-        return [item for item in self.get(option, fallback).split(separator) if item]
-
-    @classmethod
-    def int_seconds(cls, value):
-        value = pytimeparse.parse(str(value)) or value
-        return int(value)
-
-    @classmethod
-    def int(cls, value):
-        value = value.replace('K', '0' * 3)
-        value = value.replace('M', '0' * 6)
-        value = value.replace('G', '0' * 9)
-        return int(float(value))
-
-    @classmethod
-    def bool(cls, value):
-        if not isinstance(value, bool):
-            value = value.replace('False', '')
-            value = value.replace('false', '')
-        return bool(value)
+    kwargs = KWARGS
 
 
 class BackendsSectionConfig(SectionConfig):
@@ -217,14 +115,7 @@ INSTALLED_APPS += [
     'django_filters',
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
-
-
-try:
-    import drf_yasg
-    INSTALLED_APPS += ['drf_yasg']
-except:  # pragma: no cover
-    pass
-
+INSTALLED_APPS += ['drf_yasg']
 
 ADDONS = ['vstutils', ]
 
