@@ -16,6 +16,8 @@ FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
 FORMAT_TEXTAREA = 'textarea'
+FORMAT_DYN = 'dynamic'
+
 
 # Base types
 basic_type_info = OrderedDict()
@@ -84,8 +86,10 @@ class DependEnumFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(type=openapi.TYPE_ARRAY)
-        kwargs['additionalProperties'] = dict(field=field.field, choices=field.choices)
+        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_DYN)
+        kwargs['additionalProperties'] = dict(
+            field=field.field, choices=field.choices, types=field.types
+        )
 
         return SwaggerType(**kwargs)
 

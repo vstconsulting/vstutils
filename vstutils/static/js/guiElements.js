@@ -2,7 +2,7 @@
 var guiElements = {
 }
 
-guiElements.base = function(opt, value, parent_object)
+guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value
@@ -12,6 +12,32 @@ guiElements.base = function(opt, value, parent_object)
     this.setValue = function(value)
     {
         this.value = value
+    }
+
+    this.reductionToType = function(value)
+    {
+
+        if(this.render_options.type == "string" || this.render_options.type == "file")
+        {
+            if(!value)
+            {
+                return ""
+            }
+
+            return value.toString()
+        }
+
+        if(this.render_options.type == "number" || this.render_options.type == "integer" )
+        {
+            return value/1
+        }
+
+        if(this.render_options.type == "boolean" )
+        {
+            return value == true
+        }
+
+        return value
     }
 
     this._onRender = function(options)
@@ -55,11 +81,11 @@ guiElements.base = function(opt, value, parent_object)
 
         if(!value && default_value)
         {
-            return  default_value;
+            return  this.reductionToType(default_value);
         }
         else
         {
-            return value;
+            return this.reductionToType(value);
         }
 
     }
@@ -108,78 +134,7 @@ guiElements.base = function(opt, value, parent_object)
                 opt.onUpdateOptions[i](this, arg)
             }
         }
-        else
-        {
-            // additionalProperties - приходит из api
-            if(opt.additionalProperties && opt.additionalProperties.choices)
-            {
-                var value = arg.value;
-                var choices = opt.additionalProperties.choices;
-                var new_type = "string";
-                var override_opt;
-
-                for(var i in choices)
-                {
-                    if(i == value)
-                    {
-                        if ($.isArray(choices[value]))
-                        {
-                            var boolean = false;
-                            for(var i in choices[value])
-                            {
-                                if(typeof(choices[value][i]) == 'boolean')
-                                {
-                                    boolean = true;
-                                }
-                            }
-
-                            if (boolean)
-                            {
-                                new_type = "boolean";
-                                if(choices[value].length == 1)
-                                {
-                                   var boolean_default = choices[value][0];
-                                }
-                            }
-                            else
-                            {
-                                new_type = "enum";
-                                override_opt = {enum: choices[value]};
-                            }
-                        }
-                    }
-                }
-
-                if(!guiElements[new_type])
-                {
-                    new_type = 'string'
-                }
-
-                var options = $.extend({}, opt, override_opt);
-
-                var new_el = new guiElements[new_type](options, this.value);
-
-                if(boolean_default)
-                {
-                   new_el.value =  boolean_default;
-                   options.readOnly = true;
-                }
-
-                $('#gui'+this.element_id).insertTpl(new_el.render());
-
-                var className = $('#gui'+this.element_id)[0].className;
-
-                $('#gui'+this.element_id).removeClass(className);
-
-                this.getValue = function () {
-
-                    return  new_el.getValue();
-                }
-
-            }
-        }
     }
-
 }
 
 /**
@@ -238,34 +193,18 @@ guiElements.enum = function(opt = {}, value)
 guiElements.file = function(opt = {})
 {
     this.name = 'file'
-    guiElements.base.apply(this, arguments)
+    guiElements.base.apply(this, arguments);
 
-    this.loadFile = function(event)
+    this.getValue = function ()
     {
-        debugger;
-        console.log("loadFile", event.target.files)
-        for (var i = 0; i < event.target.files.length; i++)
-        {
-            if (event.target.files[i].size > 1024 * 1024 * 1)
-            {
-                guiPopUp.error("File is too large")
-                console.log("File is too large " + event.target.files[i].size)
-                continue;
-            }
-
-            var reader = new FileReader();
-            debugger;
-            reader.onload = function (e)
-            {
-                debugger;
-                $('#fileContent_' + element)[0].setAttribute("value", e.target.result);
-                $(element).val(e.target.result)
-            }
-
-            reader.readAsText(event.target.files[i]);
-            return;
-        }
+        return $('#fileContent_' + this.element_id).val();
     }
+}
+
+guiElements.secretfile = function(opt = {})
+{
+    this.name = 'secretfile'
+    guiElements.file.apply(this, arguments);
 }
 
 guiElements.boolean = function()
@@ -301,6 +240,40 @@ guiElements.autocomplete = function()
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
+    this.getValue = function()
+    {
+        if (this.matches &&
+            this.opt.additionalProperties &&
+            this.opt.additionalProperties.view_field &&
+            this.opt.additionalProperties.value_field)
+        {
+            var value = $("#" + this.element_id).val();
+            var data_value = $("#" + this.element_id).attr('value');
+            var match = false;
+            for (var i in this.matches)
+            {
+                if (value == this.matches[i]['view_field'] &&
+                    data_value == this.matches[i]['value_field'])
+                {
+                    match = true;
+                }
+            }
+
+            if (match)
+            {
+                return data_value;
+            }
+            else
+            {
+                return value
+            }
+        }
+        else
+        {
+            return $("#" + this.element_id).val();
+        }
+    }
+
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
@@ -308,7 +281,7 @@ guiElements.autocomplete = function()
 
         if(options.searchObj)
         {
-            new autoComplete({
+            return new autoComplete({
                 selector: '#'+this.element_id,
                 minChars: 0,
                 cache:false,
@@ -321,7 +294,8 @@ guiElements.autocomplete = function()
                 onSelect: (event, term, item) =>
                 {
                     var value = $(item).attr('data-value');
-                    $('#'+this.element_id).val(value);
+                    $('#'+this.element_id).val($(item).text());
+                    $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
                 },
                 source: (original_term, response) =>
@@ -352,6 +326,140 @@ guiElements.autocomplete = function()
                     }).fail(() => {
                         response([])
                     })
+                }
+            });
+        }
+        else if(options.enum)
+        {
+            return new autoComplete({
+                selector: '#'+this.element_id,
+                minChars: 0,
+                cache:false,
+                showByClick:true,
+                menuClass:'autocomplete autocomplete-'+this.element_id,
+                renderItem: function(item, search)
+                {
+                    return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
+                },
+                onSelect: (event, term, item) =>
+                {
+                    var value = $(item).attr('data-value');
+                    $('#'+this.element_id).val($(item).text());
+                    $('#'+this.element_id).attr('value', value);
+                    $('#'+this.element_id).attr({'data-hide':'hide'});
+                },
+                source: (original_term, response) =>
+                {
+                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    if(isHide == "hide")
+                    {
+                        $('#'+this.element_id).attr({'data-hide':'show'})
+                        return;
+                    }
+
+                    var choices = options.enum;
+
+                    var matches = [];
+                    for(var i in choices)
+                    {
+                        if (choices[i].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                        {
+                            matches.push(choices[i]);
+                        }
+                    }
+                    response(matches);
+                }
+            });
+        }
+        else if(options.additionalProperties)
+        {
+            var obj;
+
+            if(options.additionalProperties.$ref)
+            {
+                obj = getObjectBySchema(options.additionalProperties.$ref);
+            }
+
+            if(options.additionalProperties.model && options.additionalProperties.model.$ref)
+            {
+                obj = getObjectBySchema(options.additionalProperties.model.$ref);
+            }
+
+            if(options.additionalProperties.value_field && options.additionalProperties.view_field)
+            {
+                var value_field = options.additionalProperties.value_field;
+                var view_field = options.additionalProperties.view_field;
+            }
+
+            return new autoComplete({
+                selector: '#'+this.element_id,
+                minChars: 0,
+                delay:500,
+                cache:false,
+                showByClick:true,
+                menuClass:'autocomplete autocomplete-'+this.element_id,
+                renderItem: function(item, search)
+                {
+                    if(value_field && view_field)
+                    {
+                        return '<div class="autocomplete-suggestion" data-value="' + item.value_field + '" >' + item.view_field + '</div>';
+                    }
+                    else
+                    {
+                        return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
+                    }
+                },
+                onSelect: (event, term, item) =>
+                {
+                    var value = $(item).attr('data-value');
+                    $('#'+this.element_id).val($(item).text());
+                    $('#'+this.element_id).attr('value', value);
+                    $('#'+this.element_id).attr({'data-hide':'hide'});
+                },
+                source: (original_term, response) =>
+                {
+                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    if(isHide == "hide")
+                    {
+                        $('#'+this.element_id).attr({'data-hide':'show'})
+                        return;
+                    }
+
+                    if(obj)
+                    {
+                        var list = new obj.list();
+                        var filters = spajs.urlInfo.data.reg;
+                        filters.limit = 9999;
+
+                        $.when(list.search(filters)).done((data) => {
+                            var res = data.data.results;
+                            var matches = [];
+                            for(var i in res)
+                            {
+                                if(value_field && view_field)
+                                {
+                                    if (res[i][view_field].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                                    {
+                                        matches.push({
+                                            value_field: res[i][value_field],
+                                            view_field: res[i][view_field],
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    if (res[i].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                                    {
+                                        matches.push(res[i]);
+                                    }
+                                }
+                            }
+                            this.matches = matches;
+                            response(matches)
+                        }).fail((e) => {
+                            response([]);
+                        });
+                    }
                 }
             });
         }
@@ -410,16 +518,13 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     this.name = 'dynamic'
     guiElements.base.apply(this, arguments)
 
-    if(!opt.dynamic_type)
-    {
-        opt.dynamic_type = 'string'
-    }
 
     if(!opt.dynamic_type)
     {
         opt.dynamic_type = 'string'
     }
-    this.realElement = new guiElements[opt.dynamic_type]($.extend({}, opt, opt.override_opt), value, parent_object)
+
+    this.realElement = new guiElements[opt.dynamic_type]($.extend({}, opt, opt.override_opt), value, parent_object);
 
     let thisObj = this;
     let func = function(name)
@@ -437,18 +542,571 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
             console.error("Error: Set type guiElements."+type+" for dynamic filed")
         }
 
-        let lastValue = this.realElement.getValue()
+        let lastValue = this.realElement.getValue();
 
-        let options = $.extend({}, opt, override_opt)
+        let options = $.extend({}, opt, override_opt);
 
-        this.realElement = new guiElements[type](options, value, parent_object)
+        if(type == "boolean" && options.default !== undefined && options.readOnly)
+        {
+            lastValue = options.default;
+        }
 
-        this.realElement.setValue(lastValue)
-        $('#gui'+this.element_id).insertTpl(this.realElement.render())
+        this.realElement = new guiElements[type](options, value, parent_object);
+
+        this.realElement.setValue(lastValue);
+        $('#gui'+this.element_id).insertTpl(this.realElement.render());
     }
+
+    this.opt.onUpdateOptions = [];
+    this.opt.onUpdateOptions.push(function (filedObj, newValue) {
+
+        var new_type = "string";
+        var override_opt = {};
+        var value = newValue.value;
+
+        if(opt.additionalProperties && opt.additionalProperties.types)
+        {
+            var types = opt.additionalProperties.types;
+
+            if(types[value])
+            {
+                new_type = types[value];
+            }
+        }
+
+        if(opt.additionalProperties && opt.additionalProperties.choices)
+        {
+            var choices = opt.additionalProperties.choices;
+
+            for (var i in choices)
+            {
+                if (i == value)
+                {
+                    if ($.isArray(choices[value]))
+                    {
+                        var boolean = false;
+                        for (var i in choices[value])
+                        {
+                            if (typeof(choices[value][i]) == 'boolean')
+                            {
+                                boolean = true;
+                            }
+                        }
+
+                        if (boolean)
+                        {
+                            new_type = "boolean";
+                            if (choices[value].length == 1)
+                            {
+                                var boolean_default = choices[value][0];
+                                override_opt.default = boolean_default;
+                                override_opt.readOnly = true;
+                            }
+                        }
+                        else
+                        {
+                            new_type = "enum";
+                            override_opt = {enum: choices[value]};
+                        }
+                    }
+                }
+            }
+        }
+
+        thisObj.setType(new_type, override_opt);
+    });
 
 }
 
+guiElements.crontab = function (opt = {}, value)
+{
+    this.name = 'crontab'
+    guiElements.base.apply(this, arguments)
+
+    this.model = {}
+
+    this.model.MonthsNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    this.model.DaysOfWeekNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+    this.model.Months = {}
+    this.model.DayOfMonth = {}
+    this.model.DaysOfWeek = {}
+    this.model.Hours = {}
+    this.model.Minutes = {}
+
+    this.model.MonthsStr = "*"
+    this.model.DayOfMonthStr = "*"
+    this.model.DaysOfWeekStr = "*"
+    this.model.HoursStr = "*"
+    this.model.MinutesStr = "*"
+
+    this.value = value || "* * * * *";
+
+    this.render = function(render_options)
+    {
+        if(render_options !== undefined)
+        {
+            this.render_options = $.extend({}, opt, render_options)
+        }
+        else if(this.render_options === undefined)
+        {
+            this.render_options = $.extend({}, opt)
+        }
+
+        if(this.render_options.description === undefined)
+        {
+            this.render_options.description = "Time must be specified according to " + window.timeZone + " time zone";
+        }
+
+        this.parseCronString(this.value);
+        return spajs.just.render("guiElements."+this.name, {opt:this.render_options, guiElement: this, value: this.value }, () => {
+            this._onRender();
+            this._callAllonChangeCallback();
+        });
+    }
+
+    this._onRender = function ()
+    {
+        $("#"+this.element_id).on('change', false, () => {
+             this.parseCronString($("#"+this.element_id).val());
+        })
+
+        $("#"+this.element_id).on('paste', () => {
+
+            setTimeout(
+                () => {
+                    let val = $("#"+this.element_id).val();
+                    this.parseCronString(val);
+                },100)
+        })
+    }
+
+    this.parseCronString = function(string)
+    {
+        if(string !== undefined)
+        {
+            this.value = string
+        }
+
+        var string = trim(this.value).split(" ");
+        if(string.length != 5 || /[A-z]/.test(this.value))
+        {
+            this.value = "* * * * *";
+            string = trim(this.value).split(" ");
+
+        }
+
+        this.model.MinutesStr = string[0]
+        this.model.HoursStr = string[1]
+        this.model.DayOfMonthStr = string[2]
+        this.model.MonthsStr = string[3]
+        this.model.DaysOfWeekStr = string[4]
+
+
+        this.parseItem(this.model.Minutes, this.model.MinutesStr, 0, 59)
+        this.parseItem(this.model.Hours, this.model.HoursStr, 0, 23)
+        this.parseItem(this.model.DayOfMonth, this.model.DayOfMonthStr, 1, 31)
+        this.parseItem(this.model.Months, this.model.MonthsStr, 1, 12)
+        this.parseItem(this.model.DaysOfWeek, this.model.DaysOfWeekStr, 0, 6)
+
+    }
+
+    this.setDaysOfWeek = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 $3 $4 '+value);
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setMonths = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 $3 '+value+' $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setDayOfMonth = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 $2 '+value+' $4 $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setHours = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, '$1 '+value+' $3 $4 $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    this.setMinutes = function(value)
+    {
+        this.value = this.value.replace(/^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+)/img, value+' $2 $3 $4 $5');
+        this.parseCronString();
+        this.setValue();
+    }
+
+    /**
+     * Парсит отдельный элемент в cron строке
+     * @param {type} resArr
+     * @param {type} str
+     * @param {type} minInt
+     * @param {type} maxInt
+     * @returns {Array}
+     */
+    this.parseItem = function(resArr, str, minInt, maxInt)
+    {
+        for(var i=minInt; i< maxInt; i++)
+        {
+            resArr[i] = false;
+        }
+
+        for(var i in resArr)
+        {
+            resArr[i] = false;
+        }
+
+        if(!str)
+        {
+            str = "*";
+        }
+
+        var Parts = str.split(",")
+        for(var i in Parts)
+        {
+            if(/^\*$/.test(Parts[i]))
+            {
+                if(minInt < maxInt)
+                {
+                    for(var j = minInt; j <= maxInt; j++)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^\*\/([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^\*\/([0-9]+)$/.exec(Parts[i])
+                if(minInt < maxInt && match[1]/1 >= 1)
+                {
+                    for(var j = minInt; j <= maxInt; j+= match[1]/1)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^([0-9]+)-([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^([0-9]+)-([0-9]+)$/.exec(Parts[i])
+                if(match[1]/1 > maxInt)
+                {
+                    match[1] = minInt
+                }
+                if(match[2]/1 > maxInt)
+                {
+                    match[2] = maxInt
+                }
+
+                if(match[1]/1 < match[2]/1)
+                {
+                    for(var j = match[1]/1; j <= match[2]/1; j++)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^([0-9]+)$/.test(Parts[i]))
+            {
+                if(Parts[i]/1 <= maxInt && Parts[i]/1 >= minInt)
+                {
+                    resArr[Parts[i]/1] = true
+                }
+            }
+            else if(/^([0-9]+)\/([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^([0-9]+)\/([0-9]+)$/.exec(Parts[i])
+                if(match[1]/1 > maxInt)
+                {
+                    match[1] = minInt
+                }
+                if(match[1]/1 < maxInt && match[2]/1 >= 1)
+                {
+                    for(var j = match[1]/1; j <= maxInt; j+=match[2]/1)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+            else if(/^([0-9]+)-([0-9]+)\/([0-9]+)$/.test(Parts[i]))
+            {
+                var match = /^([0-9]+)-([0-9]+)\/([0-9]+)$/.exec(Parts[i])
+                if(match[1]/1 > maxInt)
+                {
+                    match[1] = minInt
+                }
+                if(match[2]/1 > maxInt)
+                {
+                    match[2] = maxInt
+                }
+
+                if(match[1]/1 < match[2]/1 && match[3]/1 >= 1)
+                {
+                    for(var j = match[1]/1; j <= match[2]/1; j+=match[3]/1)
+                    {
+                        resArr[j] = true
+                    }
+                }
+            }
+        }
+
+
+
+        return resArr;
+    }
+
+    this.getValue = function()
+    {
+        this.setValue()
+        return this.value;
+    }
+
+    this.compileItem = function(resArr, minInt, maxInt)
+    {
+        var itemResults = []
+        itemResults.push(resArr.join(","))
+        if(!resArr || !resArr.length || resArr.length == maxInt - minInt + 1)
+        {
+            return "*";
+        }
+
+        if(resArr.length)
+        {
+            var division = [];
+            for(var j=2; j<maxInt/2; j++)
+            {
+                var isInner = false
+                for(var k in division)
+                {
+                    if(j % division[k] == 0)
+                    {
+                        isInner = true;
+                    }
+                }
+
+                if(isInner)
+                {
+                    continue;
+                }
+
+                var isOk = true
+                for(var i=minInt; i<maxInt; i+=j)
+                {
+                    if(resArr.indexOf(i) == -1)
+                    {
+                        isOk = false;
+                        break;
+                    }
+                }
+
+                if(isOk)
+                {
+                    division.push(j);
+                }
+            }
+
+            var exclude = []
+            var includeParts = []
+            for(var i in division)
+            {
+                for(var j=minInt; j<maxInt; j+=division[i])
+                {
+                    exclude.push(j)
+                }
+                includeParts.push("*/"+division[i])
+            }
+
+            var lastVal = -1;
+            var range = [];
+
+            for(var i in resArr)
+            {
+                if(exclude.indexOf(resArr[i]) != -1)
+                {
+                    continue;
+                }
+
+                if(lastVal + 1 == resArr[i] )
+                {
+                    range.push(resArr[i])
+                }
+                else
+                {
+                    if(range.length > 2)
+                    {
+                        includeParts.push(range[0] + "-" + range[range.length-1])
+                    }
+                    else if(range.length)
+                    {
+                        for(var l in range)
+                        {
+                            includeParts.push(range[l])
+                        }
+                    }
+                    range = [resArr[i]]
+                }
+
+                lastVal = resArr[i]
+            }
+
+            if(range.length > 2)
+            {
+                includeParts.push(range[0] + "-" + range[range.length-1])
+            }
+            else if(range.length)
+            {
+                for(var l in range)
+                {
+                    includeParts.push(range[l])
+                }
+            }
+            itemResults.push(includeParts.join(","))
+        }
+
+        if(resArr.length)
+        {
+            var lastVal = -1;
+            var includeParts = []
+            var range = []
+            for(var i in resArr)
+            {
+                if(lastVal + 1 == resArr[i] )
+                {
+                    range.push(resArr[i])
+                }
+                else
+                {
+                    if(range.length > 2)
+                    {
+                        includeParts.push(range[0] + "-" + range[range.length-1])
+                    }
+                    else if(range.length)
+                    {
+                        for(var l in range)
+                        {
+                            includeParts.push(range[l])
+                        }
+                    }
+                    range = [resArr[i]]
+                }
+
+                lastVal = resArr[i]
+            }
+
+            if(range.length > 2)
+            {
+                includeParts.push(range[0] + "-" + range[range.length-1])
+            }
+            else if(range.length)
+            {
+                for(var l in range)
+                {
+                    includeParts.push(range[l])
+                }
+            }
+
+            itemResults.push(includeParts.join(","))
+        }
+
+        var minLength = 99999;
+        var minLengthResult = "";
+        for(var i in itemResults)
+        {
+            if(itemResults[i].length < minLength )
+            {
+                minLength = itemResults[i].length
+                minLengthResult = itemResults[i]
+            }
+        }
+
+        return minLengthResult;
+    }
+
+    this.setValue = function()
+    {
+        //
+        // DaysOfWeek
+        //
+        var DaysOfWeek = []
+        for(var i in this.model.DaysOfWeek)
+        {
+            if(this.model.DaysOfWeek[i])
+            {
+                DaysOfWeek.push(i/1);
+            }
+        }
+        this.model.DaysOfWeekStr = this.compileItem(DaysOfWeek, 0, 6);
+
+        //
+        // Months
+        //
+        var Months = []
+        for(var i in this.model.Months)
+        {
+            if(this.model.Months[i])
+            {
+                Months.push(i/1);
+            }
+        }
+        this.model.MonthsStr = this.compileItem(Months, 1, 12);
+
+        //
+        // DayOfMonth
+        //
+        var DayOfMonth = []
+        for(var i in this.model.DayOfMonth)
+        {
+            if(this.model.DayOfMonth[i])
+            {
+                DayOfMonth.push(i/1);
+            }
+        }
+        this.model.DayOfMonthStr = this.compileItem(DayOfMonth, 1, 31);
+
+        //
+        // Hours
+        //
+        var Hours = []
+        for(var i in this.model.Hours)
+        {
+            if(this.model.Hours[i])
+            {
+                Hours.push(i/1);
+            }
+        }
+        this.model.HoursStr = this.compileItem(Hours, 0, 23);
+
+        //
+        // Minutes
+        //
+        var Minutes = []
+        for(var i in this.model.Minutes)
+        {
+            if(this.model.Minutes[i])
+            {
+                Minutes.push(i/1);
+            }
+        }
+        this.model.MinutesStr = this.compileItem(Minutes, 0, 59);
+
+        this.value =  this.model.MinutesStr
+            + " " + this.model.HoursStr
+            + " " + this.model.DayOfMonthStr
+            + " " + this.model.MonthsStr
+            + " " + this.model.DaysOfWeekStr;
+
+        $("#"+this.element_id).val(this.value)
+    }
+}
 
 function set_api_options(options)
 {

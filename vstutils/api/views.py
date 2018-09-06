@@ -194,8 +194,12 @@ class BulkViewSet(base.rvs.APIView):
         return result
 
     def _get_rendered(self, res):
-        if getattr(res, 'data', None):
-            return Dict(res.data)
+        data = getattr(res, 'data', {})
+        if data:
+            try:
+                return Dict(data)
+            except:  # nocv
+                pass
         if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
             return json.loads(res.rendered_content.decode())
         else:

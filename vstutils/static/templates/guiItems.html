@@ -275,11 +275,12 @@
                                                     <% if(!opt.fileds[j].value){ %>
                                                         <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" >
+                                                            <!-- если есть имя объекта, то выводим его имя, в противном случае, выводим его значение -->
                                                             <% if(opt.fileds[j].prefetch && guiObj.model.data.results[i][opt.fileds[j].name + '_info']) { %>
-                                                               <%- guiObj.model.data.results[i][opt.fileds[j].name + '_info'].name ||
-                                                                   guiObj.model.data.results[i][opt.fileds[j].name + '_info'].username %>
+                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fileds[j].name + '_info'].name) ||
+                                                                   sliceLongString(guiObj.model.data.results[i][opt.fileds[j].name + '_info'].username) %>
                                                             <% } else { %>
-                                                               <%- guiObj.model.data.results[i][opt.fileds[j].name] %>
+                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fileds[j].name]) %>
                                                             <% } %>
                                                         </a>
                                                     <% }else{ %>
@@ -644,11 +645,5 @@
         <!-- renderAllFileds -->
         <%= guiObj.renderAllFileds(opt) %>
     <% } %>
-</script>
-
-<script type="text/x-just" data-just="widgetsettings_one_as_filed">
-    <!-- entity_one_as_filed -->
-
-    todo
 </script>
 
