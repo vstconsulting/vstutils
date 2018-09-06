@@ -579,6 +579,7 @@ if(!window.spajs)
             }
         }
 
+        debugger;
         //console.log("openMenu", menuId, menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
