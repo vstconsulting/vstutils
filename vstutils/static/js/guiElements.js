@@ -89,13 +89,13 @@ guiElements.base = function(opt = {}, value, parent_object)
         }
 
     }
-    
+
     this.getValidValue = function()
     {
         let value = this.getValue()
-        
+
         let filed = this.render_options
-        
+
         let value_length = 0
         if(value)
         {
@@ -105,11 +105,11 @@ guiElements.base = function(opt = {}, value, parent_object)
         if(filed.maxLength && value_length > filed.maxLength)
         {
             debugger;
-            throw {error:'validation', message:'Filed '+filed.name +" is too long"} 
+            throw {error:'validation', message:'Filed '+filed.name +" is too long"}
         }
 
         if(filed.minLength)
-        {  
+        {
             if(value_length == 0)
             {
                 if(filed.required)
@@ -118,28 +118,28 @@ guiElements.base = function(opt = {}, value, parent_object)
                     throw {error:'validation', message:'Filed '+filed.name +" is empty"}
                 }
                 else
-                { 
+                {
                     return undefined
                 }
             }
-            
+
             if(value_length < filed.minLength)
             {
                 debugger;
-                throw {error:'validation', message:'Filed '+filed.name +" is too short"} 
+                throw {error:'validation', message:'Filed '+filed.name +" is too short"}
             }
         }
-        
+
         if((value === "" || value === undefined) && filed.required && !this.opt.default)
-        { 
+        {
             throw {error:'validation', message:'Filed '+filed.name +" is required"}
         }
-        
+
         if(value === "" && !this.opt.default)
         {
             return undefined
         }
-        
+
         return value;
     }
 
@@ -331,7 +331,7 @@ guiElements.autocomplete = function()
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-
+        // необходимо ли теперь оставлять ветку if(options.searchObj) для хардкода на js?
         if(options.searchObj)
         {
             return new autoComplete({
@@ -346,22 +346,24 @@ guiElements.autocomplete = function()
                 },
                 onSelect: (event, term, item) =>
                 {
-                    var value = $(item).attr('data-value');
+                    let value = $(item).attr('data-value');
                     $('#'+this.element_id).val($(item).text());
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
                 },
                 source: (original_term, response) =>
                 {
-                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    let search_str = trim(original_term);
+
+                    let isHide = $('#'+this.element_id).attr('data-hide')
                     if(isHide == "hide")
                     {
                         $('#'+this.element_id).attr({'data-hide':'show'})
                         return;
                     }
 
-                    // На основе текста из original_term сложить возможные вариант подсказок в массив matches
-                    $.when(options.searchObj.search(original_term)).done((rawdata) => {
+                    // На основе текста из search_str сложить возможные вариант подсказок в массив matches
+                    $.when(options.searchObj.search(search_str)).done((rawdata) => {
 
                         if(!rawdata || !rawdata.data || !rawdata.data.results)
                         {
@@ -396,26 +398,28 @@ guiElements.autocomplete = function()
                 },
                 onSelect: (event, term, item) =>
                 {
-                    var value = $(item).attr('data-value');
+                    let value = $(item).attr('data-value');
                     $('#'+this.element_id).val($(item).text());
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
                 },
                 source: (original_term, response) =>
                 {
-                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    let search_str = trim(original_term);
+
+                    let isHide = $('#'+this.element_id).attr('data-hide')
                     if(isHide == "hide")
                     {
                         $('#'+this.element_id).attr({'data-hide':'show'})
                         return;
                     }
 
-                    var choices = options.enum;
+                    let choices = options.enum;
 
-                    var matches = [];
-                    for(var i in choices)
+                    let matches = [];
+                    for(let i in choices)
                     {
-                        if (choices[i].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
+                        if (choices[i].toLowerCase().indexOf(search_str.toLowerCase()) != -1)
                         {
                             matches.push(choices[i]);
                         }
@@ -426,41 +430,21 @@ guiElements.autocomplete = function()
         }
         else if(options.additionalProperties)
         {
-            var obj;
-
-            if(options.additionalProperties.$ref)
-            {
-                obj = getObjectBySchema(options.additionalProperties.$ref);
-            }
-
-            if(options.additionalProperties.model && options.additionalProperties.model.$ref)
-            {
-                obj = getObjectBySchema(options.additionalProperties.model.$ref);
-            }
-
-            if(options.additionalProperties.value_field && options.additionalProperties.view_field)
-            {
-                var value_field = options.additionalProperties.value_field;
-                var view_field = options.additionalProperties.view_field;
-            }
+            let props = getInfoFromAdditionalProperties(options);
+            let obj = props['obj'];
+            let value_field = props['value_field'];
+            let view_field = props['view_field'];
 
             return new autoComplete({
                 selector: '#'+this.element_id,
                 minChars: 0,
-                delay:500,
+                delay:350,
                 cache:false,
                 showByClick:true,
                 menuClass:'autocomplete autocomplete-'+this.element_id,
                 renderItem: function(item, search)
                 {
-                    if(value_field && view_field)
-                    {
-                        return '<div class="autocomplete-suggestion" data-value="' + item.value_field + '" >' + item.view_field + '</div>';
-                    }
-                    else
-                    {
-                        return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
-                    }
+                    return '<div class="autocomplete-suggestion" data-value="' + item.value_field + '" >' + item.view_field + '</div>';
                 },
                 onSelect: (event, term, item) =>
                 {
@@ -471,7 +455,9 @@ guiElements.autocomplete = function()
                 },
                 source: (original_term, response) =>
                 {
-                    var isHide = $('#'+this.element_id).attr('data-hide')
+                    let search_str = trim(original_term);
+
+                    let isHide = $('#'+this.element_id).attr('data-hide')
                     if(isHide == "hide")
                     {
                         $('#'+this.element_id).attr({'data-hide':'show'})
@@ -480,35 +466,27 @@ guiElements.autocomplete = function()
 
                     if(obj)
                     {
-                        var list = new obj.list();
-                        var filters = spajs.urlInfo.data.reg;
-                        filters.limit = 9999;
+                        let list = new obj.list();
+
+                        let filters = getFiltersForAutocomplete(list, search_str, view_field);
 
                         $.when(list.search(filters)).done((data) => {
-                            var res = data.data.results;
-                            var matches = [];
-                            for(var i in res)
+
+                            let res = data.data.results;
+                            let matches = [];
+
+                            for(let i in res)
                             {
-                                if(value_field && view_field)
-                                {
-                                    if (res[i][view_field].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
-                                    {
-                                        matches.push({
-                                            value_field: res[i][value_field],
-                                            view_field: res[i][view_field],
-                                        });
-                                    }
-                                }
-                                else
-                                {
-                                    if (res[i].toLowerCase().indexOf(original_term.toLowerCase()) != -1)
-                                    {
-                                        matches.push(res[i]);
-                                    }
-                                }
+                                matches.push({
+                                    value_field: res[i][value_field],
+                                    view_field: res[i][view_field],
+                                });
                             }
+
                             this.matches = matches;
+
                             response(matches)
+
                         }).fail((e) => {
                             response([]);
                         });
@@ -528,7 +506,7 @@ guiElements.select2 = function(filed, filed_value, parent_object)
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-
+        // необходимо ли теперь оставлять ветку if(options.search) для хардкода на js?
         if(options.search)
         {
             $('#'+this.element_id).select2({
@@ -562,6 +540,49 @@ guiElements.select2 = function(filed, filed_value, parent_object)
                     }
                 }
             });
+        }
+        else if(options.additionalProperties)
+        {
+            let props = getInfoFromAdditionalProperties(options);
+            let obj = props['obj'];
+            let value_field = props['value_field'];
+            let view_field = props['view_field'];
+
+            if(obj)
+            {
+                let list = new obj.list();
+
+                $('#'+this.element_id).select2({
+                    width: '100%',
+                    ajax: {
+                        delay: 350,
+                        transport: function (params, success, failure)
+                        {
+                            let search_str = trim(params.data.term);
+
+                            let filters = getFiltersForAutocomplete(list, search_str, view_field);
+
+                            $.when(list.search(filters)).done((data) =>
+                            {
+                                let results =[];
+                                let api_data = data.data.results;
+                                for(let i in api_data)
+                                {
+                                    results.push(
+                                        {
+                                            id: api_data[i][value_field],
+                                            text: api_data[i][view_field]
+                                        }
+                                    )
+                                }
+                                success({results:results})
+                            }).fail(() => {
+                                failure([])
+                            })
+                        }
+                    }
+                });
+            }
         }
     }
 }
@@ -721,7 +742,7 @@ guiElements.crontab = function (opt = {}, value)
     this._onRender = function ()
     {
         $("#"+this.element_id).on('change', false, () => {
-             this.parseCronString($("#"+this.element_id).val());
+            this.parseCronString($("#"+this.element_id).val());
         })
 
         $("#"+this.element_id).on('paste', () => {
@@ -1189,6 +1210,57 @@ function set_api_options(options)
     }
 
     return additional_options;
+}
+
+function getInfoFromAdditionalProperties(options)
+{
+    let obj, value_field, view_field;
+
+    if(options.additionalProperties.$ref)
+    {
+        obj = getObjectBySchema(options.additionalProperties.$ref);
+    }
+
+    if(options.additionalProperties.model && options.additionalProperties.model.$ref)
+    {
+        obj = getObjectBySchema(options.additionalProperties.model.$ref);
+    }
+
+    if(options.additionalProperties.value_field && options.additionalProperties.view_field)
+    {
+        value_field = options.additionalProperties.value_field;
+        view_field = options.additionalProperties.view_field;
+    }
+
+    return {
+        obj: obj,
+        value_field: value_field,
+        view_field: view_field,
+    }
+}
+
+function getFiltersForAutocomplete(list, search_str, view_field)
+{
+    let filters = spajs.urlInfo.data.reg;
+    if(filters.parent_type && filters.parent_id)
+    {
+        let parent_model = api.openapi.definitions['One' + capitalizeString(filters.parent_type)];
+        if(parent_model && parent_model.properties[list.view.bulk_name])
+        {
+            filters = {};
+        }
+    }
+
+    filters['query'] = {};
+
+    if(search_str)
+    {
+        filters['query'][view_field] = search_str;
+    }
+
+    // filters.limit = 9999;
+
+    return filters;
 }
 
 /**
