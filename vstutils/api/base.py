@@ -16,6 +16,7 @@ from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
+from .filter_backends import HideHiddenFilterBackend
 from .serializers import (
     ErrorSerializer, ValidationErrorSerializer, OtherErrorsSerializer
 )
@@ -185,6 +186,14 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     # lookup_field = 'id'
     _serializer_class_one = None
     model = None
+
+    def filter_queryset(self, queryset):
+        if hasattr(self, 'nested_name'):
+            self.filter_backends = [
+                backend for backend in list(self.filter_backends)
+                if isinstance(backend, HideHiddenFilterBackend)
+            ]
+        return super(GenericViewSet, self).filter_queryset(queryset)
 
     @classproperty
     def serializer_class_one(self):
