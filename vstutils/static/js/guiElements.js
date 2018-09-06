@@ -89,6 +89,59 @@ guiElements.base = function(opt = {}, value, parent_object)
         }
 
     }
+    
+    this.getValidValue = function()
+    {
+        let value = this.getValue()
+        
+        let filed = this.render_options
+        
+        let value_length = 0
+        if(value)
+        {
+            value_length = value.toString().length
+        }
+
+        if(filed.maxLength && value_length > filed.maxLength)
+        {
+            debugger;
+            throw {error:'validation', message:'Filed '+filed.name +" is too long"} 
+        }
+
+        if(filed.minLength)
+        {  
+            if(value_length == 0)
+            {
+                if(filed.required)
+                {
+                    debugger;
+                    throw {error:'validation', message:'Filed '+filed.name +" is empty"}
+                }
+                else
+                { 
+                    return undefined
+                }
+            }
+            
+            if(value_length < filed.minLength)
+            {
+                debugger;
+                throw {error:'validation', message:'Filed '+filed.name +" is too short"} 
+            }
+        }
+        
+        if((value === "" || value === undefined) && filed.required && !this.opt.default)
+        { 
+            throw {error:'validation', message:'Filed '+filed.name +" is required"}
+        }
+        
+        if(value === "" && !this.opt.default)
+        {
+            return undefined
+        }
+        
+        return value;
+    }
 
     /**
      * Добавляет колбек на событие onChange чтоб зависимые поля могли вовремя перестроиться

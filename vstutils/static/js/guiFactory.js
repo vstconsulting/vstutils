@@ -773,7 +773,7 @@ function openApi_paths(api)
             // This action
             continue;
         }
-        
+
         if(!/_(get)$/.test(api_path_value.get.operationId) )
         {
             // This not single element
@@ -836,7 +836,7 @@ function openApi_paths(api)
             continue;
         }
 
-        var action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
+        let action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
         openApi_add_one_action_page_path(api, api_path, action)
     }
 }
@@ -905,7 +905,6 @@ tabSignal.connect("resource.loaded", function()
         openApi_paths(window.api);
 
         // Событие в теле которого можно было бы переопределить и дополнить список страниц
-        // Inside this event we can overload and complete page list
         tabSignal.emit("openapi.paths",  {api: window.api});
 
         tabSignal.emit("openapi.completed",  {api: window.api});

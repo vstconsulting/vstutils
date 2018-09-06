@@ -535,7 +535,7 @@
                     <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
-                    <%= new guiElements.button({onclick:function(){ guiObj.sendToApi('PUT')}, class:'btn btn-primary', title:k, text:k}).render() %>
+                    <%= new guiElements.button({onclick:emptyAction(guiObj.model.sublinks[k]), class:'btn btn-primary', title:k, text:k}).render() %>
                 <% } %> 
         <% } %>
     <%] %>
