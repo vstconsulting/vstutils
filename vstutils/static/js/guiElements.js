@@ -17,6 +17,16 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.reductionToType = function(value)
     {
 
+        if(this.render_options.type == "object")
+        {
+            if(!value)
+            {
+                return "{}"
+            }
+
+            return JSON.stringify(value)
+        }
+        
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
             if(!value)
@@ -214,7 +224,7 @@ guiElements.string = function()
     this.name = 'string'
     guiElements.base.apply(this, arguments)
 }
-
+ 
 guiElements.password = function()
 {
     this.name = 'password'

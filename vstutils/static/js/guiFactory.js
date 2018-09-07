@@ -20,7 +20,7 @@ function ifDataTypeDefinitions(filed, name)
         filed.format = name
         if(!filed.type)
         {
-            filed.type = "string";
+            filed.type = "object";
         }
         return filed
     }
