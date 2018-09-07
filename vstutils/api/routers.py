@@ -26,8 +26,9 @@ class _AbstractRouter(routers.DefaultRouter):
         fpath = view_request.get_full_path().split("?")
         absolute_uri = view_request.build_absolute_uri(fpath[0])
         for prefix, _, name in self._get_custom_lists():
-            path = absolute_uri + prefix
-            path += "?{}".format(fpath[1]) if len(fpath) > 1 else ""
+            path = ''.join([
+                absolute_uri, prefix, "?{}".format(fpath[1]) if len(fpath) > 1 else ""
+            ])
             routers_list[name] = path
         routers_list.update(registers.data)
         return routers_list
@@ -114,10 +115,9 @@ class APIRouter(_AbstractRouter):
         return schemas.get_schema_view(title=self.root_view_name)
 
     def get_api_root_view(self, *args, **kwargs):
-        api_root_dict = OrderedDict()
         list_name = self.routes[0].name
-        for prefix, _, basename in self.registry:
-            api_root_dict[prefix] = list_name.format(basename=basename)
+        mapping = ((reg[0], list_name.format(basename=reg[2])) for reg in self.registry)
+        api_root_dict = OrderedDict(mapping)
 
         class API(self.APIRootView):
             root_view_name = self.root_view_name
@@ -151,10 +151,9 @@ class MainRouter(_AbstractRouter):
         return super(MainRouter, self)._get_custom_lists() + self.routers
 
     def get_api_root_view(self, *args, **kwargs):
-        api_root_dict = OrderedDict()
         list_name = self.routes[0].name
-        for prefix, _, basename in self.registry:
-            api_root_dict[prefix] = list_name.format(basename=basename)  # nocv
+        mapping = ((reg[0], list_name.format(basename=reg[2])) for reg in self.registry)
+        api_root_dict = OrderedDict(mapping)
 
         class API(self.APIRootView):
             if self.permission_classes:
