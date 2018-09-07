@@ -2,7 +2,7 @@
 basePageView = {
 
 }
- 
+
 basePageView.renderAllFields = function(opt)
 {
     let html = []
@@ -146,20 +146,20 @@ basePageView.getValue = function ()
         {
             obj[i] = val;
         }
-        
+
         count++;
     }
-    
+
     if(count == 1 && this.model.guiFields[0] )
-    { 
+    {
         obj = obj[0]
     }
-    
+
     return obj;
 }
 
 basePageView.getValidValue = function ()
-{ 
+{
     return this.getValue();
 }
 
@@ -464,7 +464,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    guiPopUp.success("New object in "+thisObj.getBulkName()+" was successfully created");
+                    guiPopUp.success("New "+thisObj.getBulkName()+" was successfully created");
                 })
                 return res;
             }
@@ -597,7 +597,7 @@ function guiItemFactory(api, both_view, list, one)
                     var thisObj = this;
                     var current_url = pageInfo.page_and_parents;
                     var query ={};
-                    if ((current_url.match(/\//g) || []).length > 1) 
+                    if ((current_url.match(/\//g) || []).length > 1)
                     {
                         var re = /(?<parent>\w+(?=\/))\/(?<pk>\d+(?=\/))\/(?<suburl>.*)/g;
                         let result = re.exec(current_url)
@@ -610,7 +610,7 @@ function guiItemFactory(api, both_view, list, one)
                             method: "DELETE"
                         }
                     }
-                    else 
+                    else
                     {
                         query = {
                             type: "del",
@@ -618,10 +618,10 @@ function guiItemFactory(api, both_view, list, one)
                             pk:this.model.data.id
                         }
                     }
-                    
+
                     $.when(api.query(query)).done(function (data)
                     {
-                        guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
+                        guiPopUp.success(""+thisObj.getBulkName()+" was successfully deleted");
                         def.resolve(data)
                     }).fail(function (e)
                     {
@@ -909,7 +909,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 $.when(api.query(q)).done(function(data)
                 {
-                    guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
+                    guiPopUp.success("Objects of "+thisObj.getBulkName()+" type were successfully deleted");
                     def.resolve(data)
                 }).fail(function (e)
                 {
@@ -1576,7 +1576,7 @@ function guiActionFactory(api, action)
                     {
                         data[i] = value[0][i]
                     }
-                }*/ 
+                }*/
 
                 if(!this.model.pathInfo)
                 {
@@ -1646,7 +1646,7 @@ function guiActionFactory(api, action)
                         }
                     }
                 }
-                 
+
                 if(query.length == 0)
                 {
                     // Модификация на то если у нас не мультиоперация
@@ -1654,7 +1654,7 @@ function guiActionFactory(api, action)
                 }
 
                 query.forEach(qurl => {
-                    
+
                     qurl = qurl.replace(/^\/|\/$/g, "").split(/\//g)
                     let q = {
                         type:'mod',
@@ -1662,8 +1662,8 @@ function guiActionFactory(api, action)
                         data:data,
                         method:query_method
                     }
-                    
-                    $.when(api.query(q)).done(data => 
+
+                    $.when(api.query(q)).done(data =>
                     {
                         if(callback)
                         {
@@ -1672,7 +1672,7 @@ function guiActionFactory(api, action)
                                 return;
                             }
                         }
-                        
+
                         if(data.not_found > 0)
                         {
                             guiPopUp.error("Item not found");
@@ -1682,7 +1682,7 @@ function guiActionFactory(api, action)
 
                         guiPopUp.success("Save");
                         def.resolve()
-                    }).fail(e => { 
+                    }).fail(e => {
                         if(callback)
                         {
                             if(error_callback(e) === false)
@@ -1690,10 +1690,10 @@ function guiActionFactory(api, action)
                                 return;
                             }
                         }
-                        
+
                         polemarch.showErrors(e.responseJSON)
                         def.reject(e)
-                    }) 
+                    })
                 })
 
             }catch (e) {
@@ -1708,7 +1708,7 @@ function guiActionFactory(api, action)
 
             return def.promise();
         }
- 
+
         this.renderAsPage = function (render_options = {})
         {
             let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
@@ -1779,17 +1779,17 @@ function guiActionFactory(api, action)
 
 function emptyAction(action_info)
 {
-    let name = action_info.api_path.match(/\/([A-z0-9]+)\/$/); 
+    let name = action_info.api_path.match(/\/([A-z0-9]+)\/$/);
     if(!name || !name[1])
     {
         return undefined
     }
- 
+
     let actionCalass = guiActionFactory(window.api, {action:action_info.api_path_value, api_path:action_info.api_path, name:name[1]})
     let action = new actionCalass({api:action_info.api_path_value, url:spajs.urlInfo.data.reg})
-    
+
     return function(){
-        action.exec() 
+        action.exec()
     }
 }
 
@@ -1902,17 +1902,34 @@ function changeSubItemsInParent(action, item_ids)
     }
 
     //  @todo отправка запроса чего то не работает. Надо сергея спросить.
-    let query = []
+    let query = [];
+
     for(let i in item_ids)
     {
-        query.push({
-            type: "mod",
-            data_type:item_type,
-            item:parent_type,
-            data:{id:item_ids[i]/1},
-            pk:parent_id,
-            method:action
-        })
+        if(action == "DELETE")
+        {
+            let data_type = [parent_type, parent_id/1, item_type, item_ids[i]/1];
+            query.push({
+                type: "mod",
+                data_type: data_type,
+                method:action,
+            })
+        }
+        else
+        {
+            let data = {
+                id:item_ids[i]/1,
+            };
+            query.push({
+                type: "mod",
+                data_type:item_type,
+                item:parent_type,
+                data:data,
+                pk:parent_id,
+                method:action,
+            })
+        }
+
     }
 
     return api.query(query)
@@ -2072,8 +2089,11 @@ function removeSelectedElements(ids, tag) {
     $.when(changeSubItemsInParent('DELETE', ids)).done(function()
     {
         window.guiListSelections.unSelectAll(tag);
-        debugger;
-        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
+        for(let i in ids)
+        {
+            $(".item-row.item-"+ids[i]).remove();
+        }
+        guiPopUp.success("Selected elements were successfully removed from parent's list.");
     }).fail(function (e)
     {
         polemarch.showErrors(e.responseJSON)
