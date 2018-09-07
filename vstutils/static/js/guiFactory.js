@@ -36,6 +36,7 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
     }
 
     let list_fileds = []
+    // @TODO Think how merge next two cycle
     for(let i in list.properties)
     {
         if($.inArray(i, ['url', 'id']) != -1)
@@ -107,8 +108,8 @@ function openApi_newDefinition(api, name, definitionList, definitionOne)
 
     /**
      *  Событие в теле которого можно было бы переопределить поля фабрики сразу после её создания
-     *  Inside this event we can overload factory field immediately after create her
      *  На пример такой код для объекта типа Group будет добавлять поле testData
+     *  Inside this event we can overload factory field immediately after create her
      *  For example this code for object type Group we add only field testData
      *   tabSignal.connect("openapi.factory.Group", function(data)
      *   {
@@ -141,28 +142,6 @@ function openApi_definitions(api)
         }
 
         openApi_newDefinition(api, key, list, one)
-    }
-}
-
-function getUrlInf(url_reg){
-    if(!url_reg)
-    {
-        url_reg = spajs.urlInfo.data.reg
-    }
-
-            // Поиск и списки:
-            // При таком построении регулярок:
-            //  - параметры поиска в блоке 4
-            //  - тип страницы в блоке 3
-            //  - цепочка родителей в блоке 2
-            //  - страница+родители в блоке 1
-            //  - текущий урл в блоке 0
-
-    return {
-        url:url_reg[0],
-        search:url_reg[4],
-        page_type:url_reg[3],
-        page_and_parents:url_reg[1],
     }
 }
 
@@ -303,14 +282,14 @@ function openApi_get_internal_links(api, base_path, targetLevel)
 
     let res = [];
 
-    // UPDATED NEW Build list of `actions` based on data of one record
+    // NEW Build list of `actions` based on data of one record
     for(let api_action_path in api.openapi.paths)
     {
         let include_base_path = api_action_path.substr(0, base_path.length).includes(base_path)
         let curr_path_level = api_action_path.slice(base_path.length).split('/').length - 1;
         if (include_base_path && curr_path_level == targetLevel)
         {
-            let name = api_action_qpath.split('/').slice(-1)[1]
+            let name = api_action_path.split('/').slice(-1)[1]
             if (name){
                 res[name[1]] = {
                     api_path:api_action_path,
@@ -321,77 +300,6 @@ function openApi_get_internal_links(api, base_path, targetLevel)
             }
         }
     }
-    // // NEW Build list of `actions` based on data of one record
-    // let base_path_level = base_path.match(/\//g).length;
-    // let base_path_for_regexp = base_path.replace(/\//g,'\\/');
-    //
-    // for(let api_action_path in api.openapi.paths)
-    // {
-    //     let api_path_value = api.openapi.paths[api_action_path]
-    //     let re = new RegExp("^"+base_path_for_regexp);
-    //
-    //     if (re.exec(api_action_path) && targetLevel == api_action_path.match(/\//g).length - base_path_level)
-    //     {
-    //         let name = /\/([A-z0-9]+)\/$/.exec(api_action_path);
-    //         if (name){
-    //             res[name[1]] = {
-    //                 api_path:api_action_path,
-    //                 name:name[1],
-    //                 api_path_value:api_path_value,
-    //                 isAction:api_path_value.get === undefined || !/_(get|list)$/.test(api_path_value.get.operationId)
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // // Build list of `actions` based on data of one record
-    // for(let api_action_path in api.openapi.paths)
-    // {
-    //     let api_path_value = api.openapi.paths[api_action_path]
-    //
-    //
-    //     let count = 0;
-    //     let base_url = ""
-    //     for(let i=0; i< api_action_path.length && i< base_path.length; i++)
-    //     {
-    //         if(api_action_path[i] == base_path[i])
-    //         {
-    //             count++;
-    //             base_url+= api_action_path[i]
-    //         }
-    //         else
-    //         {
-    //             break;
-    //         }
-    //     }
-    //
-    //     if(count <  base_path.length)
-    //     {
-    //         continue;
-    //     } else {
-    //         base_url = api_action_path
-    //     }
-    //
-    //     let dif = api_action_path.match(/\//g).length - base_path.match(/\//g).length;
-    //     if(dif != targetLevel)
-    //     {
-    //         continue;
-    //     }
-    //
-    //     let name = api_action_path.match(/\/([A-z0-9]+)\/$/)
-    //     if(!name)
-    //     {
-    //         continue;
-    //     }
-    //
-    //     res[name[1]] = {
-    //         api_path:api_action_path,
-    //         name:name[1],
-    //         api_path_value:api_path_value,
-    //         isAction:api_path_value.get === undefined || !/_(get|list)$/.test(api_path_value.get.operationId)
-    //     }
-    //
-    // }
 
     return res;
 }
@@ -749,7 +657,6 @@ function openApi_getPageMainBlockType(api, api_path, request_type)
 
 function openApi_paths(api)
 {
-    //debugger;
     for(let api_path in api.openapi.paths)
     {
         // Add fabric object's objects information by url
@@ -802,7 +709,6 @@ function openApi_paths(api)
         }
 
         // Menu nesting level (if value equal 1 then show menu on left side)
-        //debugger;
         let pageMainBlockObject = openApi_getPageMainBlockType(api, api_path)
         if(pageMainBlockObject == false)
         {
@@ -841,44 +747,6 @@ function openApi_paths(api)
     }
 }
 
-
-/*function openApi_add_page_for_adding_subitems()
-{
-
-    var path_regexp = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_path_value)
-
-    // Настроили страницу списка
-    page.blocks.push({
-        id:'itemList',
-        prioritet:10,
-        render:function(pageMainBlockObject, api_path_value)
-        {
-            return function(menuInfo, data)
-            {
-                var def = new $.Deferred();
-
-                // Создали список хостов
-                var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg})
-
-                //debugger;
-                $.when(pageItem.search(data.reg)).done(function()
-                {
-                    def.resolve(pageItem.renderAsPage())
-                }).fail(function(err)
-                {
-                    def.reject(err);
-                })
-
-                return def.promise();
-            }
-        }(pageMainBlockObject, api_path_value)
-    })
-
-    //debugger;
-    //break;
-    page.registerURL(path_regexp, getMenuIdFromApiPath(api_path));
-}*/
-
 tabSignal.connect("resource.loaded", function()
 {
     window.api = new guiApi()
@@ -905,6 +773,7 @@ tabSignal.connect("resource.loaded", function()
         openApi_paths(window.api);
 
         // Событие в теле которого можно было бы переопределить и дополнить список страниц
+        // Inside this event we can overload and complete page list
         tabSignal.emit("openapi.paths",  {api: window.api});
 
         tabSignal.emit("openapi.completed",  {api: window.api});
