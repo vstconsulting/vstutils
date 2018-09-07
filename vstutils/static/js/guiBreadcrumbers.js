@@ -35,7 +35,7 @@ function renderBreadcrumbs(){
                 cur_url.push(element_name[Math.floor(i/2)].model.data.id)
                 let element_data = element_name[Math.floor(i/2)].model.data
                 let model_name = element_name[Math.floor(i/2)]
-                let cur_name = element_data[model_name.parent.getObjectNameFiled()]
+                let cur_name = element_data[model_name.parent.getObjectNameField()]
                 arr_obj.push({
                     url: hostname + "/?" + cur_url.join("/"),
                     name: cur_name

@@ -18,14 +18,14 @@
 -->
 
 <!-- Поле для выбора какие ещё поля показать в форме  -->
-<script type="text/x-just" data-just="show_not_required_fileds">
-    <!-- show_not_required_fileds -->
+<script type="text/x-just" data-just="show_not_required_fields">
+    <!-- show_not_required_fields -->
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-        <label class="control-label">Add filed</label>
+        <label class="control-label">Add field</label>
         <select class="form-control" onchange="$('#'+this.value).show(); this.options[this.selectedIndex].disabled = true;" >
-            <option disabled selected >Select filed</option>
-            <% for(var i = 0; i < fileds.length; i++){  %>
-                <option value="<%- $(fileds[i]).attr('id') %>" ><%- $(fileds[i]).attr('data-title') %></option>
+            <option disabled selected >Select field</option>
+            <% for(var i = 0; i < fields.length; i++){  %>
+                <option value="<%- $(fields[i]).attr('id') %>" ><%- $(fields[i]).attr('data-title') %></option>
             <% } %>
         </select>
         <div class="help-block"><%- opt.description || '' %></div>
@@ -67,7 +67,7 @@
 </script>
 
 <!--  Поле поиска -->
-<script  type="text/x-just" style="display: none;" data-just="search_filed">
+<script  type="text/x-just" style="display: none;" data-just="search_field">
     <div class="input-group col-lg-2" style="float: right;">
     <input
         type="text"
@@ -114,7 +114,7 @@
                 </div>
                 <div class="box-body">
                     <div class="row"> 
-                        <%= guiObj.renderAllFileds(opt) %>  
+                        <%= guiObj.renderAllFields(opt) %>  
                     </div>
                 </div>
             </div>
@@ -219,7 +219,7 @@
             <div class="box box-info">
                 <div class="box-header with-border">
                     <%[ search_form %>
-                        <%= spajs.just.render('search_filed', {guiObj: guiObj}) %>
+                        <%= spajs.just.render('search_field', {guiObj: guiObj}) %>
                     <%] %>
                     <%* search_form %>
 
@@ -248,11 +248,11 @@
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
-                                        <% for(var j in opt.fileds){ %>
+                                        <% for(var j in opt.fields){ %>
                                             <th
-                                                <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                                    <%- opt.fileds[j].title %>
+                                                <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                    <%- opt.fields[j].title %>
                                             </th>
                                         <% } %>
                                         <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
@@ -267,24 +267,24 @@
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
-                                            <% for(var j in opt.fileds){ %>
+                                            <% for(var j in opt.fields){ %>
                                                 <td
-                                                    <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                    <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                    <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
-                                                    <% if(!opt.fileds[j].value){ %>
+                                                    <% if(!opt.fields[j].value){ %>
                                                         <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" >
                                                             <!-- если есть имя объекта, то выводим его имя, в противном случае, выводим его значение -->
-                                                            <% if(opt.fileds[j].prefetch && guiObj.model.data.results[i][opt.fileds[j].name + '_info']) { %>
-                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fileds[j].name + '_info'].name) ||
-                                                                   sliceLongString(guiObj.model.data.results[i][opt.fileds[j].name + '_info'].username) %>
+                                                            <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
+                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
+                                                                   sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
                                                             <% } else { %>
-                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fileds[j].name]) %>
+                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name]) %>
                                                             <% } %>
                                                         </a>
                                                     <% }else{ %>
-                                                        <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
+                                                        <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
                                                     <% } %>
                                                 </td>
                                             <% } %>
@@ -404,7 +404,7 @@
             <div class="box box-info">
                 <div class="box-header with-border">
                     <%[ search_form %>
-                        <%= spajs.just.render('search_filed', {guiObj: guiObj}) %>
+                        <%= spajs.just.render('search_field', {guiObj: guiObj}) %>
                     <%] %>
                     <%* search_form %>
 
@@ -433,11 +433,11 @@
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
-                                        <% for(var j in opt.fileds){ %>
+                                        <% for(var j in opt.fields){ %>
                                             <th
-                                                <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                                    <%- opt.fileds[j].title %>
+                                                <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                    <%- opt.fields[j].title %>
                                             </th>
                                         <% } %>
                                     </tr>
@@ -449,16 +449,16 @@
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
-                                            <% for(var j in opt.fileds){ %>
+                                            <% for(var j in opt.fields){ %>
                                                 <td
-                                                    <% if(opt.fileds[j].style){ %><%= opt.fileds[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                    <% if(opt.fileds[j].class){ %><%= opt.fileds[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                    <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
-                                                    <% if(!opt.fileds[j].value){ %>
+                                                    <% if(!opt.fields[j].value){ %>
                                                         <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                                            onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fileds[j].name] %></a>
+                                                            onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fields[j].name] %></a>
                                                     <% }else{ %>
-                                                        <%= opt.fileds[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fileds[j].name, opt]) %>
+                                                        <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
                                                     <% } %>
                                                 </td>
                                             <% } %>
@@ -566,8 +566,8 @@
                 <div class="box-body">
                     <div class="row">
 
-                        <% for(var i in opt.fileds){ %>
-                            <%= guiObj.renderFiled(opt.fileds[i], opt) %>
+                        <% for(var i in opt.fields){ %>
+                            <%= guiObj.renderField(opt.fields[i], opt) %>
                         <% } %>
 
                         <% if(opt.sections){ %>
@@ -627,8 +627,8 @@
 
 
 <!-- Отрисует объект как поле в другом объекте -->
-<script type="text/x-just" data-just="entity_one_as_filed">
-    <!-- entity_one_as_filed -->
+<script type="text/x-just" data-just="entity_one_as_field">
+    <!-- entity_one_as_field -->
 
     <% if(guiObj.model.data){ %>
         <!-- has data -->
@@ -636,14 +636,14 @@
             <label class="control-label"><%- guiObj.view.bulk_name %></label>
             <div class="form-control disabled" disabled="" maxlength="255">
                 <a href="<%- hostname %>/?<%- guiObj.getBulkName() %>/<%- guiObj.model.data.id %>" onclick="return spajs.openURL(this.href);">
-                    <%- guiObj.model.data[guiObj.parent.getObjectNameFiled()] || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
+                    <%- guiObj.model.data[guiObj.parent.getObjectNameField()] || (guiObj.view.bulk_name + "/"+guiObj.model.data.id) %>
                 </a>
             </div>
             <div class="help-block"></div>
         </div>
     <% }else{ %>
-        <!-- renderAllFileds -->
-        <%= guiObj.renderAllFileds(opt) %>
+        <!-- renderAllFields -->
+        <%= guiObj.renderAllFields(opt) %>
     <% } %>
 </script>
 
