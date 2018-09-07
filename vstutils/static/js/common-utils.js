@@ -219,6 +219,16 @@ function readFileAndInsert(event, element)
     return false;
 }
 
+function addCssClassesToElement(element="", title="")
+{
+    element = element.replace(/\s+/g,'-');
+    title = title.replace(/\s+/g,'-');
+    let class_list = element + " ";
+    class_list += element + "-" + title;
+
+    return class_list.toLowerCase();
+}
+
 
 window.onresize=function ()
 {
