@@ -1,4 +1,4 @@
-from rest_framework.serializers import CharField
+from rest_framework.serializers import CharField, IntegerField
 
 
 class FileInStringField(CharField):
@@ -56,3 +56,14 @@ class HtmlField(CharField):
     '''
     Field contained html-text and marked as format:html
     '''
+
+
+class Select2Field(IntegerField):
+    '''
+    Field what means where we got list.
+    '''
+    def __init__(self, **kwargs):
+        self.select_model = kwargs.pop('select')
+        self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
+        self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
+        super(Select2Field, self).__init__(**kwargs)
