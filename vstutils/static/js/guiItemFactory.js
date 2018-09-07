@@ -835,8 +835,7 @@ function guiItemFactory(api, both_view, list, one)
                         name:"delete",
                         onClick:function()
                         {
-                            //@todo как и в this.getBtnAdd() подумать какой способ определения родительская ссылка или нет лучше
-                            if(thisObj.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length > 1)
+                            if(thisObj.getShortestApiURL().level == 2 && (thisObj.model.pathInfo.api_path.match(/\//g) || []).length > 2)
                             {
                                 return questionDeleteOrRemove(thisObj);
                             }
@@ -874,9 +873,7 @@ function guiItemFactory(api, both_view, list, one)
             }
             this.getBtnAdd = function ()
             {
-                //@todo подумать, какой из способов лучше
-                //if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
-                if(this.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length >= 2)
+                if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
                 {
                     if(this.canUpdate())
                     {

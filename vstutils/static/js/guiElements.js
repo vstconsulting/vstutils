@@ -26,7 +26,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             return JSON.stringify(value)
         }
-        
+
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
             if(!value)
@@ -224,7 +224,7 @@ guiElements.string = function()
     this.name = 'string'
     guiElements.base.apply(this, arguments)
 }
- 
+
 guiElements.password = function()
 {
     this.name = 'password'
@@ -605,9 +605,9 @@ guiElements.select2 = function(field, field_value, parent_object)
                 )
             }
 
-            $('#'+this.element_id).select2({
+            return $('#'+this.element_id).select2({
                 width: '100%',
-                data: data
+                data: data,
             });
         }
         /*
@@ -654,6 +654,13 @@ guiElements.select2 = function(field, field_value, parent_object)
                             })
                         }
                     }
+                });
+            }
+            else
+            {
+                return $('#'+this.element_id).select2({
+                    width: '100%',
+                    data: [],
                 });
             }
         }
