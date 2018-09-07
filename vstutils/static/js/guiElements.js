@@ -331,7 +331,18 @@ guiElements.autocomplete = function()
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-        // необходимо ли теперь оставлять ветку if(options.searchObj) для хардкода на js?
+
+        /*
+         * options.searchObj - object for JS hardcode, which aim is to redefine way of getting data for autocomplete.
+         *
+         * Example of hardcode:
+         * tabSignal.connect("openapi.factory.ansiblemodule", function(data)
+         * {
+         *      let inventory = apiansiblemodule.one.view.definition.properties.inventory;
+         *      inventory.type = "autocomplete"
+         *      inventory.searchObj = new apiinventory.list();
+         * });
+         */
         if(options.searchObj)
         {
             return new autoComplete({
@@ -362,7 +373,6 @@ guiElements.autocomplete = function()
                         return;
                     }
 
-                    // На основе текста из search_str сложить возможные вариант подсказок в массив matches
                     $.when(options.searchObj.search(search_str)).done((rawdata) => {
 
                         if(!rawdata || !rawdata.data || !rawdata.data.results)
@@ -384,6 +394,10 @@ guiElements.autocomplete = function()
                 }
             });
         }
+        /*
+         * options.enum - array, which comes from api.
+         * This array has data for autocomplete.
+         */
         else if(options.enum)
         {
             return new autoComplete({
@@ -428,6 +442,10 @@ guiElements.autocomplete = function()
                 }
             });
         }
+        /*
+         * options.additionalProperties - object, which comes from api.
+         * This object has info about model and fields, where data for autocomplete is stored.
+         */
         else if(options.additionalProperties)
         {
             let props = getInfoFromAdditionalProperties(options);
@@ -506,10 +524,29 @@ guiElements.select2 = function(filed, filed_value, parent_object)
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-        // необходимо ли теперь оставлять ветку if(options.search) для хардкода на js?
+
+        /*
+         * options.search - function for JS hardcode, which aim is to redefine way of getting data for select2.
+         * @param {object} params - argument from select2 transport function
+         * @param {object} filed - filed to which we want add select2
+         * @param {integer/string} filed_value - value of field
+         * @param {object} parent_object - object (one) - model of single object page
+         * @returns Deferred object
+         *
+         * Example of hardcode:
+         * tabSignal.connect("openapi.factory.ansiblemodule", function(data)
+         * {
+         *      let filed = apiansiblemodule.one.view.definition.properties.inventory;
+         *      filed.format = "select2"
+         *      filed.search = function(params, filed, filed_value, parent_object)
+         *      {
+         *          //some code here
+         *      }
+         * });
+         */
         if(options.search)
         {
-            $('#'+this.element_id).select2({
+            return $('#'+this.element_id).select2({
                 width: '100%',
                 ajax: {
                     transport: function (params, success, failure)
@@ -541,6 +578,32 @@ guiElements.select2 = function(filed, filed_value, parent_object)
                 }
             });
         }
+        /*
+         * options.enum - array, which comes from api.
+         * This array has data for select2.
+         */
+        else if(options.enum)
+        {
+            let data = [];
+            for(let i in options.enum)
+            {
+                data.push(
+                    {
+                        id: options.enum[i],
+                        text: options.enum[i],
+                    }
+                )
+            }
+
+            $('#'+this.element_id).select2({
+                width: '100%',
+                data: data
+            });
+        }
+        /*
+         * options.additionalProperties - object, which comes from api.
+         * This object has info about model and fields, where data for select2 is stored.
+         */
         else if(options.additionalProperties)
         {
             let props = getInfoFromAdditionalProperties(options);
