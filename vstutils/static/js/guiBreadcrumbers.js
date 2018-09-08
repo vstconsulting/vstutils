@@ -1,59 +1,32 @@
-function renderBreadcrumbs(){
-    let current_url = spajs.urlInfo.data.reg.page_and_parents
-    let re = /(?<type>[A-z0-9]+)\/(?<id>[0-9]+)/gm
-    let result = []
-    let tmp;
-    while ((tmp = re.exec(current_url)) != null){
-        let tmp_obj = {};
-        tmp_obj.type = tmp.groups.type;
-        tmp_obj.id = tmp.groups.id;
-        result.push(tmp_obj);
-    };
-    let arr = []
-    let element_name = []
-    for (var i = 0; i < result.length; i++) {
-        if (window["api" + result[i].type] == undefined)
+function renderBreadcrumbs()
+{ 
+    let current_url = window.location.search.replace("?", "");
+    
+    let urls = [];
+    let pages = current_url.split(/\//g);
+    let url = window.location.href.replace(current_url, "");
+    
+    let last_name = undefined
+    
+    for(let i in pages)
+    {
+        url+= pages[i]+"/"
+        let url_id = "url_breadcrumb_"+i
+        
+        if(last_name &&  window["api" + last_name] != undefined && /^[0-9]+$/.test(pages[i]) )
         {
-            element_name.push(result[i].type)
-        } else {
-            let obj  = new window["api" + result[i].type].one(spajs.urlInfo.data.reg.getApiPath());
-            element_name.push(obj)
-            arr.push(obj.load(result[i].id))
+            let obj  = new window["api" + last_name].one();
+            $.when(obj.load(pages[i]/1)).done(function(url_id, obj){
+                return function(){ 
+                    $("#"+url_id).html(obj.model.data[obj.parent.getObjectNameField()]);
+                }
+            }(url_id, obj)) 
         }
+        
+        urls.push("<a href='"+url.replace(/\/$/, "")+"' onclick='return spajs.openURL(this.href);' id='"+url_id+"' > "+pages[i]+"</a>");
+        
+        last_name = pages[i]
     }
-
-
-    var def = new $.Deferred();
-
-    $.when.apply($, arr).done(function()
-    { 
-
-        var arr_obj = []
-        var cur_url = []
-        for (var i = 0; i < (element_name.length * 2); i++) {
-            if ((i % 2) == 1) {
-                cur_url.push(element_name[Math.floor(i/2)].model.data.id)
-                let element_data = element_name[Math.floor(i/2)].model.data
-                let model_name = element_name[Math.floor(i/2)]
-                let cur_name = element_data[model_name.parent.getObjectNameField()]
-                arr_obj.push({
-                    url: hostname + "/?" + cur_url.join("/"),
-                    name: cur_name
-                })
-            } else {
-                cur_url.push(element_name[Math.floor(i/2)].model.page_name)
-                arr_obj.push({
-                    url: hostname + "/?" + cur_url.join("/"),
-                    name: element_name[Math.floor(i/2)].model.page_name
-                })
-            }
-        } 
-
-        def.resolve(spajs.just.render("page_breadcrumb", {arr: arr_obj}))
-    }).fail(() => {
-        def.reject()
-    })
-
-    return def.promise();
      
+    return spajs.just.render("page_breadcrumb", {urls: urls})
 }
