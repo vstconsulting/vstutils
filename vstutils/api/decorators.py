@@ -219,7 +219,12 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             url_name='{}-{}'.format(self.name, sub_view.url_name),
             _nested_args=getattr(sub_view, '_nested_args', OrderedDict())
         )
-        return name, decorator(subaction_view)
+        view = decorator(subaction_view)
+        existing_swagger_auto_schema = getattr(view, '_swagger_auto_schema', {})
+        view._swagger_auto_schema = getattr(
+            sub_view, '_swagger_auto_schema', existing_swagger_auto_schema
+        )
+        return name, view
 
     def generate_decorated_subs(self):
         for sub in self._subs:
