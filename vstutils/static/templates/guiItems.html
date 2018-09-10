@@ -251,13 +251,14 @@
                                         <% for(var j in opt.fields){ %>
                                             <th
                                                 <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } else { %> class='<%= addCssClassesToElement('column', opt.fields[j].title || opt.fields[j].name) %>' <% } %>  >
+                                                <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } else { %> class='<%= addCssClassesToElement('column', opt.fields[j].title || opt.fields[j].name, guiObj.view.bulk_name) %>' <% } %>  >
 
                                                     <%- opt.fields[j].title %>
                                             </th>
                                         <% } %>
                                         <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
-                                            <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions') %>">Actions</th>
+                                            <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.view.bulk_name) %>">Actions</th>
+                                            <% console.log(guiObj) %>
                                         <% } %>
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
@@ -271,7 +272,7 @@
                                             <% for(var j in opt.fields){ %>
                                                 <td
                                                     <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } else { %> class='<%= addCssClassesToElement('column', opt.fields[j].title || opt.fields[j].name) %>' <% } %>
+                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } else { %> class='<%= addCssClassesToElement('column', opt.fields[j].title || opt.fields[j].name, guiObj.view.bulk_name) %>' <% } %>
                                                 >
                                                     <% if(!opt.fields[j].value){ %>
                                                         <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
@@ -290,7 +291,7 @@
                                                 </td>
                                             <% } %>
                                             <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
-                                                <td class="<%- addCssClassesToElement('column', 'actions') %>">
+                                                <td class="<%- addCssClassesToElement('column', 'actions', guiObj.view.bulk_name) %>">
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             Actions
@@ -302,7 +303,7 @@
                                                                     <a
                                                                         href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
                                                                         onclick="return spajs.openURL(this.href);"
-                                                                        class="sublink-btn <%- addCssClassesToElement('table-btn', guiObj.model.sublinks[k].name.replace('_', ' ')) %>">
+                                                                        class="sublink-btn <%- addCssClassesToElement('table-btn', guiObj.model.sublinks[k].name.replace('_', ' '), guiObj.view.bulk_name) %>">
                                                                             <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
                                                                     </a>
                                                                 </li>

@@ -219,12 +219,24 @@ function readFileAndInsert(event, element)
     return false;
 }
 
-function addCssClassesToElement(element="", title="")
+function addCssClassesToElement(element="", title, type)
 {
     element = element.replace(/\s+/g,'-');
-    title = title.replace(/\s+/g,'-');
+
     let class_list = element + " ";
-    class_list += element + "-" + title;
+
+    if(title)
+    {
+        title = title.replace(/\s+/g,'-');
+        class_list += element + "-" + title + " ";
+    }
+
+
+    if(title && type)
+    {
+        class_list += element + "-" + type + " ";
+        class_list += element + "-" + type + "-" + title;
+    }
 
     return class_list.toLowerCase();
 }
