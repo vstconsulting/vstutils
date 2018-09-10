@@ -234,6 +234,7 @@ function addCssClassesToElement(element="", title, type)
 
     if(title && type)
     {
+        type = type.replace(/\s+/g,'-');
         class_list += element + "-" + type + " ";
         class_list += element + "-" + type + "-" + title;
     }
