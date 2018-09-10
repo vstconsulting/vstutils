@@ -1468,6 +1468,13 @@ function guiItemFactory(api, both_view, list, one)
  * @param {type} api
  * @param {type} action
  * @returns {guiActionFactory.thisFactory}
+ * 
+ * @todo Отрефакторить так как код туп:
+ *    let action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
+ *    var pageAction = new action({api:api_path_value, url:data.reg})
+ *    return pageAction.renderAsPage();
+ *    
+ *    Надо бы просто так, без лишних инструкций: var pageAction = new action({api:api_path_value, url:data.reg}) 
  */
 function guiActionFactory(api, action)
 {

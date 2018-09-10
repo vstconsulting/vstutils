@@ -10,12 +10,9 @@ def __get_nested_path(name, arg=None, arg_regexp='[0-9]', empty_arg=True):
     path = name
     if not arg:
         return path
-    path += '/?(?P<'
-    path += arg
-    path += '>'
-    path += arg_regexp
-    path += '*' if empty_arg else "+"
-    path += ')'
+    path = ''.join([
+        path, '/?(?P<', arg, '>', arg_regexp, '*' if empty_arg else "+", ')'
+    ])
     return path
 
 def __get_nested_subpath(*args, **kwargs):
@@ -126,17 +123,17 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def _get_subs_from_view(self):
         # pylint: disable=protected-access
-        return [
-            name for name, _ in getmembers(self.view, vsets._is_extra_action)
-            if name not in self.filter_subs
-        ]
+        extra_acts = map(lambda x: x[0], getmembers(self.view, vsets._is_extra_action))
+        filter_subs = self.filter_subs
+        return list(filter(lambda name: name not in filter_subs, extra_acts))
 
     def get_subs(self):
         subs = self._get_subs_from_view()
         if self.allowed_subs is None:
             return []
         elif self.allowed_subs:
-            subs = [sub for sub in subs if sub in self.allowed_subs]
+            allowed_subs = set(self.allowed_subs)
+            subs = allowed_subs.intersection(subs)
         return subs
 
     @property
@@ -187,41 +184,28 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return nested_action(*args, **kwargs)
 
     def _filter_methods(self, methods, detail=False):
-        allowed_methods = self.view.get_view_methods(detail)
-        return [method for method in methods if method in allowed_methods]
+        allowed_methods = set(self.view.get_view_methods(detail))
+        return allowed_methods.intersection(methods)
 
-    def decorated_list(self):
-        name, view = self.get_list_view()
-        kwargs = dict(url_name='{}-list'.format(self.name), suffix='List')
-        methods = self.methods or []
-        if not self.methods:
-            methods = []
-            if getattr(self.view, 'create', None) is not None:
-                methods += ['post']
-            if getattr(self.view, 'list', None) is not None:
-                methods += ['get']
-        kwargs['methods'] = self._filter_methods(methods)
+    def decorated(self, detail):
+        name, view = self.get_detail_view() if detail else self.get_list_view()
+        kwargs = dict(detail=detail)
+        kwargs['url_name'] = '{}-{}'.format(self.name, 'detail' if detail else 'list')
+        if not detail:
+            kwargs['suffix'] = 'List'
+        if self.methods:
+            kwargs['methods'] = self._filter_methods(self.methods, detail=detail)
+        else:
+            kwargs['methods'] = self.view.get_view_methods(detail)
         view = self.get_decorator(**kwargs)(view)
         view._nested_view = self.view
         return name, view
 
+    def decorated_list(self):
+        return self.decorated(detail=False)
+
     def decorated_detail(self):
-        name, view = self.get_detail_view()
-        kwargs = dict(url_name='{}-detail'.format(self.name))
-        methods = self.methods or []
-        if not self.methods:
-            if getattr(self.view, 'retrieve', None) is not None:
-                methods += ['get']
-            if getattr(self.view, 'update', None) is not None:
-                methods += ['put']
-            if getattr(self.view, 'partial_update', None) is not None:
-                methods += ['patch']
-            if getattr(self.view, 'destroy', None) is not None:
-                methods += ['delete']
-        kwargs['methods'] = self._filter_methods(methods, detail=True)
-        view = self.get_decorator(True, **kwargs)(view)
-        view._nested_view = self.view
-        return name, view
+        return self.decorated(detail=True)
 
     def _get_decorated_sub(self, sub):
         name, subaction_view = self.get_sub_view(sub)

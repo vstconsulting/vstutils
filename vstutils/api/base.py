@@ -189,10 +189,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def filter_queryset(self, queryset):
         if hasattr(self, 'nested_name'):
-            self.filter_backends = [
-                backend for backend in list(self.filter_backends)
-                if isinstance(backend, HideHiddenFilterBackend)
-            ]
+            self.filter_backends = filter(
+                lambda backend: isinstance(backend, HideHiddenFilterBackend),
+                self.filter_backends
+            )
         return super(GenericViewSet, self).filter_queryset(queryset)
 
     @classproperty
@@ -288,12 +288,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
         many = isinstance(data, (list, tuple))
-        filter_arg = self.nested_append_arg
+        nested_append_arg = self.nested_append_arg
+        filter_arg = nested_append_arg
         args = [serializer_class]
         if many:
             filter_arg += '__in'
             objects = queryset.model.objects.filter(**{
-                filter_arg: [i.get(self.nested_append_arg) for i in data]
+                filter_arg: map(lambda i: i.get(nested_append_arg), data)
             })
             self._check_permission_obj(objects)
             queryset.add(*objects)
@@ -407,6 +408,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     @classmethod
     def get_view_methods(cls, detail=False):
+        attr_name = ''.join(['__', 'detail' if detail else 'list', 'http_methods', '__'])
+        methods = getattr(cls, attr_name, None)
+        if methods is not None:
+            return methods
         methods = []
         if hasattr(cls, 'create') and not detail:
             methods.append('post')
@@ -418,6 +423,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             methods.append('patch')
         if hasattr(cls, 'destroy') and detail:
             methods.append('delete')
+        setattr(cls, attr_name, methods)
         return methods
 
     @classmethod
@@ -503,8 +509,7 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
     def list(self, request, *args, **kwargs):
         routes = {
-            method: reverse("{}-{}".format(self.base_name, method),
-                            request=request)
+            method: reverse("{}-{}".format(self.base_name, method), request=request)
             for method in self.methods
         }
         return Response(routes, status.HTTP_200_OK).resp
