@@ -578,8 +578,7 @@ if(!window.spajs)
                 break;
             }
         }
-
-        debugger;
+ 
         //console.log("openMenu", menuId, menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {

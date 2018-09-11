@@ -6,7 +6,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value
-    this.element_id = ("filed_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+    this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
     this.setValue = function(value)
@@ -26,7 +26,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             return JSON.stringify(value)
         }
-        
+
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
             if(!value)
@@ -104,7 +104,7 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         let value = this.getValue()
 
-        let filed = this.render_options
+        let field = this.render_options
 
         let value_length = 0
         if(value)
@@ -112,20 +112,20 @@ guiElements.base = function(opt = {}, value, parent_object)
             value_length = value.toString().length
         }
 
-        if(filed.maxLength && value_length > filed.maxLength)
+        if(field.maxLength && value_length > field.maxLength)
         {
             debugger;
-            throw {error:'validation', message:'Filed '+filed.name +" is too long"}
+            throw {error:'validation', message:'Field '+field.name +" is too long"}
         }
 
-        if(filed.minLength)
+        if(field.minLength)
         {
             if(value_length == 0)
             {
-                if(filed.required)
+                if(field.required)
                 {
                     debugger;
-                    throw {error:'validation', message:'Filed '+filed.name +" is empty"}
+                    throw {error:'validation', message:'Field '+field.name +" is empty"}
                 }
                 else
                 {
@@ -133,16 +133,16 @@ guiElements.base = function(opt = {}, value, parent_object)
                 }
             }
 
-            if(value_length < filed.minLength)
+            if(value_length < field.minLength)
             {
                 debugger;
-                throw {error:'validation', message:'Filed '+filed.name +" is too short"}
+                throw {error:'validation', message:'Field '+field.name +" is too short"}
             }
         }
 
-        if((value === "" || value === undefined) && filed.required && !this.opt.default)
+        if((value === "" || value === undefined) && field.required && !this.opt.default)
         {
-            throw {error:'validation', message:'Filed '+filed.name +" is required"}
+            throw {error:'validation', message:'Field '+field.name +" is required"}
         }
 
         if(value === "" && !this.opt.default)
@@ -172,7 +172,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         for(let i in this.onChange_calls)
         {
             this.onChange_calls[i]({
-                filed:this,
+                field:this,
                 opt:opt,
                 value:val
             })
@@ -224,7 +224,7 @@ guiElements.string = function()
     this.name = 'string'
     guiElements.base.apply(this, arguments)
 }
- 
+
 guiElements.password = function()
 {
     this.name = 'password'
@@ -525,7 +525,7 @@ guiElements.autocomplete = function()
     }
 }
 
-guiElements.select2 = function(filed, filed_value, parent_object)
+guiElements.select2 = function(field, field_value, parent_object)
 {
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
@@ -538,17 +538,17 @@ guiElements.select2 = function(filed, filed_value, parent_object)
         /*
          * options.search - function for JS hardcode, which aim is to redefine way of getting data for select2.
          * @param {object} params - argument from select2 transport function
-         * @param {object} filed - filed to which we want add select2
-         * @param {integer/string} filed_value - value of field
+         * @param {object} field - field to which we want add select2
+         * @param {integer/string} field_value - value of field
          * @param {object} parent_object - object (one) - model of single object page
          * @returns Deferred object
          *
          * Example of hardcode:
          * tabSignal.connect("openapi.factory.ansiblemodule", function(data)
          * {
-         *      let filed = apiansiblemodule.one.view.definition.properties.inventory;
-         *      filed.format = "select2"
-         *      filed.search = function(params, filed, filed_value, parent_object)
+         *      let field = apiansiblemodule.one.view.definition.properties.inventory;
+         *      field.format = "select2"
+         *      field.search = function(params, field, field_value, parent_object)
          *      {
          *          //some code here
          *      }
@@ -561,7 +561,7 @@ guiElements.select2 = function(filed, filed_value, parent_object)
                 ajax: {
                     transport: function (params, success, failure)
                     {
-                        $.when(options.search(params, filed, filed_value, parent_object)).done((results) =>
+                        $.when(options.search(params, field, field_value, parent_object)).done((results) =>
                         {
                             /*
                              * {
@@ -605,9 +605,9 @@ guiElements.select2 = function(filed, filed_value, parent_object)
                 )
             }
 
-            $('#'+this.element_id).select2({
+            return $('#'+this.element_id).select2({
                 width: '100%',
-                data: data
+                data: data,
             });
         }
         /*
@@ -656,6 +656,13 @@ guiElements.select2 = function(filed, filed_value, parent_object)
                     }
                 });
             }
+            else
+            {
+                return $('#'+this.element_id).select2({
+                    width: '100%',
+                    data: [],
+                });
+            }
         }
     }
 }
@@ -686,7 +693,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         if(!guiElements[type])
         {
             type = 'string'
-            console.error("Error: Set type guiElements."+type+" for dynamic filed")
+            console.error("Error: Set type guiElements."+type+" for dynamic field")
         }
 
         let lastValue = this.realElement.getValue();
@@ -705,7 +712,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     }
 
     this.opt.onUpdateOptions = [];
-    this.opt.onUpdateOptions.push(function (filedObj, newValue) {
+    this.opt.onUpdateOptions.push(function (fieldObj, newValue) {
 
         var new_type = "string";
         var override_opt = {};

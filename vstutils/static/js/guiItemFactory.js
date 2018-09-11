@@ -2,77 +2,77 @@
 basePageView = {
 
 }
- 
-basePageView.renderAllFileds = function(opt)
+
+basePageView.renderAllFields = function(opt)
 {
     let html = []
-    for(let i in opt.fileds)
+    for(let i in opt.fields)
     {
-        html.push(this.renderFiled(opt.fileds[i], opt))
+        html.push(this.renderField(opt.fields[i], opt))
     }
 
     let id =  getNewId();
-    return JUST.onInsert('<div class="fileds-block" id="'+id+'" >'+html.join("")+'</div>', () => {
+    return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
-        let fileds = $('#'+id+" .gui-not-required")
-        if(!this.view.hide_non_required || this.view.hide_non_required >= fileds.length)
+        let fields = $('#'+id+" .gui-not-required")
+        if(!this.view.hide_non_required || this.view.hide_non_required >= fields.length)
         {
             return;
         }
 
-        fileds.hide()
-        $('#'+id).appendTpl(spajs.just.render('show_not_required_fileds', {fileds:fileds, opt:opt}))
+        fields.hide()
+        $('#'+id).appendTpl(spajs.just.render('show_not_required_fields', {fields:fields, opt:opt}))
     })
 }
 
 /**
  * Отрисует поле при отрисовке объекта.
- * @param {object} filed
+ * @param {object} field
  * @returns {html}
  */
-basePageView.renderFiled = function(filed, render_options)
+basePageView.renderField = function(field, render_options)
 {
-    if(!this.model.guiFileds[filed.name])
+    if(!this.model.guiFields[field.name])
     {
-        if(filed.schema && filed.schema.$ref)
+        if(field.schema && field.schema.$ref)
         {
-            var obj = getObjectBySchema(filed.schema.$ref)
+            var obj = getObjectBySchema(field.schema.$ref)
         }
-        else if(filed.$ref)
+        else if(field.$ref)
         {
-            var obj = getObjectBySchema(filed.$ref)
+            var obj = getObjectBySchema(field.$ref)
 
         }
-        else if(filed.items !== undefined && filed.items.$ref)
+        else if(field.items !== undefined && field.items.$ref)
         {
-            var obj = getObjectBySchema(filed.items.$ref)
+            var obj = getObjectBySchema(field.items.$ref)
         }
 
         if(obj)
         {
-            var filed_value = undefined
+            var field_value = undefined
             if(this.model.data)
             {
-                filed_value = this.model.data[filed.name]
+                field_value = this.model.data[field.name]
             }
 
-            obj = new obj.one(undefined, filed_value, this)
+            obj = new obj.one(undefined, field_value, this)
 
-            this.model.guiFileds[filed.name] = obj
+            this.model.guiFields[field.name] = obj
         }
 
-        if(!this.model.guiFileds[filed.name])
+        if(!this.model.guiFields[field.name])
         {
-            var type = filed.format
+            var type = field.format
 
-            if(!type && filed.enum !== undefined)
+            if(!type && field.enum !== undefined)
             {
                 type = 'enum'
             }
 
             if(!type)
             {
-                type = filed.type
+                type = field.type
             }
 
             if(!window.guiElements[type])
@@ -80,28 +80,28 @@ basePageView.renderFiled = function(filed, render_options)
                 type = "string"
             }
 
-            var filed_value = undefined
+            var field_value = undefined
             if(this.model.data)
             {
-                filed_value = this.model.data[filed.name]
+                field_value = this.model.data[field.name]
             }
-            this.model.guiFileds[filed.name] = new window.guiElements[type](filed, filed_value, this)
+            this.model.guiFields[field.name] = new window.guiElements[type](field, field_value, this)
         }
 
         // Добавление связи с зависимыми полями
         // if для хардкода на js
-        if(filed.dependsOn)
+        if(field.dependsOn)
         {
-            let thisFiled = this.model.guiFileds[filed.name]
-            if(thisFiled.updateOptions)
+            let thisField = this.model.guiFields[field.name]
+            if(thisField.updateOptions)
             {
-                for(let i in filed.dependsOn)
+                for(let i in field.dependsOn)
                 {
-                    let parentFiled = this.model.guiFileds[filed.dependsOn[i]]
-                    if(parentFiled && parentFiled.addOnChangeCallBack)
+                    let parentField = this.model.guiFields[field.dependsOn[i]]
+                    if(parentField && parentField.addOnChangeCallBack)
                     {
-                        parentFiled.addOnChangeCallBack(function(){
-                            thisFiled.updateOptions.apply(thisFiled, arguments);
+                        parentField.addOnChangeCallBack(function(){
+                            thisField.updateOptions.apply(thisField, arguments);
                         })
                     }
                 }
@@ -109,10 +109,10 @@ basePageView.renderFiled = function(filed, render_options)
         }
 
         // if для привязанных полей из api
-        if(filed.additionalProperties && filed.additionalProperties.field)
+        if(field.additionalProperties && field.additionalProperties.field)
         {
-            let thisField = this.model.guiFileds[filed.name];
-            let parentField = this.model.guiFileds[filed.additionalProperties.field];
+            let thisField = this.model.guiFields[field.name];
+            let parentField = this.model.guiFields[field.additionalProperties.field];
 
             if(parentField && parentField.addOnChangeCallBack)
             {
@@ -124,11 +124,11 @@ basePageView.renderFiled = function(filed, render_options)
 
     }
 
-    return this.model.guiFileds[filed.name].render($.extend({}, render_options))
+    return this.model.guiFields[field.name].render($.extend({}, render_options))
 }
 
 /**
- * Получает значения всех полей из this.model.guiFileds
+ * Получает значения всех полей из this.model.guiFields
  *
  * Если поле вернёт объект то этот объект будет смёржен с результирующим объектом,
  * таким образом одно поле может вернуть более одного зщначения в модель
@@ -139,27 +139,27 @@ basePageView.getValue = function ()
 {
     var obj = {}
     let count = 0;
-    for(let i in this.model.guiFileds)
+    for(let i in this.model.guiFields)
     {
-        let val = this.model.guiFileds[i].getValidValue();
+        let val = this.model.guiFields[i].getValidValue();
         if(val !== undefined)
         {
             obj[i] = val;
         }
-        
+
         count++;
     }
-    
-    if(count == 1 && this.model.guiFileds[0] )
-    { 
+
+    if(count == 1 && this.model.guiFields[0] )
+    {
         obj = obj[0]
     }
-    
+
     return obj;
 }
 
 basePageView.getValidValue = function ()
-{ 
+{
     return this.getValue();
 }
 
@@ -178,7 +178,7 @@ basePageItem.getPageInfo = function ()
 /**
  * Функция для удобства переопределения какие поля показывать для каких случаев
  * @param {type} type
- * @returns {guiItemFactory.model.fileds}
+ * @returns {guiItemFactory.model.fields}
  * @note На пример функция apihistory.list.getFieldsFor_renderAsPage будет примером переопределения
  */
 basePageItem.getFields = function (type)
@@ -187,7 +187,7 @@ basePageItem.getFields = function (type)
     {
         return this['getFieldsFor_'+type]()
     }
-    return this.model.fileds
+    return this.model.fields
 }
 
 guiBaseItemFactory = {}
@@ -346,7 +346,7 @@ function guiItemFactory(api, both_view, list, one)
             this.model.pathInfo = undefined
 
             this.model.parent_object = parent_object
-            this.model.guiFileds = {}
+            this.model.guiFields = {}
             this.model.isSelected = {}
             this.model.buttons = []
 
@@ -464,7 +464,7 @@ function guiItemFactory(api, both_view, list, one)
                 var res = this.sendToApi("add")
                 $.when(res).done(function()
                 {
-                    guiPopUp.success("New object in "+thisObj.getBulkName()+" was successfully created");
+                    guiPopUp.success("New "+thisObj.getBulkName()+" was successfully created");
                 })
                 return res;
             }
@@ -597,7 +597,7 @@ function guiItemFactory(api, both_view, list, one)
                     var thisObj = this;
                     var current_url = pageInfo.page_and_parents;
                     var query ={};
-                    if ((current_url.match(/\//g) || []).length > 1) 
+                    if ((current_url.match(/\//g) || []).length > 1)
                     {
                         var re = /(?<parent>\w+(?=\/))\/(?<pk>\d+(?=\/))\/(?<suburl>.*)/g;
                         let result = re.exec(current_url)
@@ -610,7 +610,7 @@ function guiItemFactory(api, both_view, list, one)
                             method: "DELETE"
                         }
                     }
-                    else 
+                    else
                     {
                         query = {
                             type: "del",
@@ -618,10 +618,10 @@ function guiItemFactory(api, both_view, list, one)
                             pk:this.model.data.id
                         }
                     }
-                    
+
                     $.when(api.query(query)).done(function (data)
                     {
-                        guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
+                        guiPopUp.success(""+thisObj.getBulkName()+" was successfully deleted");
                         def.resolve(data)
                     }).fail(function (e)
                     {
@@ -683,7 +683,7 @@ function guiItemFactory(api, both_view, list, one)
             {
                 let tpl = this.getTemplateName('one')
 
-                render_options.fileds = this.getFields('renderAsPage')
+                render_options.fields = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'one'
 
@@ -698,7 +698,7 @@ function guiItemFactory(api, both_view, list, one)
             {
                 let tpl = this.getTemplateName('new')
 
-                render_options.fileds = this.getFields('renderAsNewPage')
+                render_options.fields = this.getFields('renderAsNewPage')
                 render_options.sections = this.getSections('renderAsNewPage')
                 render_options.hideReadOnly = true
 
@@ -712,14 +712,14 @@ function guiItemFactory(api, both_view, list, one)
              */
             this.render = function (render_options = {})
             {
-                let tpl = this.getTemplateName('one_as_filed')
+                let tpl = this.getTemplateName('one_as_field')
 
                 if(render_options.hideReadOnly)
                 {
                     return "";
                 }
 
-                render_options.fileds = this.getFields('render')
+                render_options.fields = this.getFields('render')
                 render_options.sections = this.getSections('render')
                 //debugger;
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
@@ -735,7 +735,7 @@ function guiItemFactory(api, both_view, list, one)
              tabSignal.connect("gui.new.group.list", function(data)
              {
                  // Тут код который будет модифицировать создаваемый объект
-                 data.model.fileds = [
+                 data.model.fields = [
                      {
                          title:'Name',
                          name:'name',
@@ -835,8 +835,7 @@ function guiItemFactory(api, both_view, list, one)
                         name:"delete",
                         onClick:function()
                         {
-                            //@todo как и в this.getBtnAdd() подумать какой способ определения родительская ссылка или нет лучше
-                            if(thisObj.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length > 1)
+                            if(thisObj.getShortestApiURL().level == 2 && (thisObj.model.pathInfo.api_path.match(/\//g) || []).length > 2)
                             {
                                 return questionDeleteOrRemove(thisObj);
                             }
@@ -874,9 +873,7 @@ function guiItemFactory(api, both_view, list, one)
             }
             this.getBtnAdd = function ()
             {
-                //@todo подумать, какой из способов лучше
-                //if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
-                if(this.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length >= 2)
+                if(this.getShortestApiURL().level == 2 && (this.model.pathInfo.api_path.match(/\//g) || []).length > 2)
                 {
                     if(this.canUpdate())
                     {
@@ -912,7 +909,7 @@ function guiItemFactory(api, both_view, list, one)
 
                 $.when(api.query(q)).done(function(data)
                 {
-                    guiPopUp.success(""+thisObj.getBulkName()+" were successfully deleted");
+                    guiPopUp.success("Objects of "+thisObj.getBulkName()+" type were successfully deleted");
                     def.resolve(data)
                 }).fail(function (e)
                 {
@@ -952,12 +949,12 @@ function guiItemFactory(api, both_view, list, one)
                 var promise = new $.Deferred();
 
                 //отбираем prefetch поля
-                for(var i in this.model.fileds)
+                for(var i in this.model.fields)
                 {
-                    if(this.model.fileds[i].prefetch)
+                    if(this.model.fields[i].prefetch)
                     {
-                        prefetch_fields[this.model.fileds[i].name] = $.extend(true, {}, this.model.fileds[i].prefetch);
-                        prefetch_fields_ids[this.model.fileds[i].name] = {};
+                        prefetch_fields[this.model.fields[i].name] = $.extend(true, {}, this.model.fields[i].prefetch);
+                        prefetch_fields_ids[this.model.fields[i].name] = {};
                     }
                 }
 
@@ -1257,7 +1254,7 @@ function guiItemFactory(api, both_view, list, one)
             {
                 let tpl = this.getTemplateName('list')
 
-                render_options.fileds = this.getFields('renderAsPage')
+                render_options.fields = this.getFields('renderAsPage')
                 render_options.sections = this.getSections('renderAsPage')
                 if(!render_options.page_type) render_options.page_type = 'list'
 
@@ -1272,7 +1269,7 @@ function guiItemFactory(api, both_view, list, one)
             {
                 let tpl = this.getTemplateName('list_add_subitems')
 
-                render_options.fileds = this.getFields('renderAsAddSubItemsPage')
+                render_options.fields = this.getFields('renderAsAddSubItemsPage')
                 render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
                 return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
@@ -1374,7 +1371,7 @@ function guiItemFactory(api, both_view, list, one)
              tabSignal.connect("gui.new.group.list", function(data)
              {
                  // Тут код который будет модифицировать создаваемый объект
-                 data.model.fileds = [
+                 data.model.fields = [
                      {
                          title:'Name',
                          name:'name',
@@ -1437,7 +1434,7 @@ function guiItemFactory(api, both_view, list, one)
      * Вернёт имя поля которое выполняет роль поля name у этого объекта
      * @returns {guiItemFactory.thisFactory.view.defaultName|String}
      */
-    thisFactory.getObjectNameFiled = function()
+    thisFactory.getObjectNameField = function()
     {
         if(this.view && this.view.defaultName)
         {
@@ -1471,6 +1468,13 @@ function guiItemFactory(api, both_view, list, one)
  * @param {type} api
  * @param {type} action
  * @returns {guiActionFactory.thisFactory}
+ * 
+ * @todo Отрефакторить так как код туп:
+ *    let action = guiActionFactory(api, {action:api_path_value, api_path:api_path, name:name[1]})
+ *    var pageAction = new action({api:api_path_value, url:data.reg})
+ *    return pageAction.renderAsPage();
+ *    
+ *    Надо бы просто так, без лишних инструкций: var pageAction = new action({api:api_path_value, url:data.reg}) 
  */
 function guiActionFactory(api, action)
 {
@@ -1507,7 +1511,7 @@ function guiActionFactory(api, action)
         parameters = action.action.patch.parameters
     }
 
-    var list_fileds = []
+    var list_fields = []
     for(var i in parameters)
     {
         if($.inArray(i, ['url', 'id']) != -1)
@@ -1519,7 +1523,7 @@ function guiActionFactory(api, action)
         val.name = i
 
 
-        list_fileds.push(val)
+        list_fields.push(val)
     }
 
 
@@ -1528,8 +1532,8 @@ function guiActionFactory(api, action)
          * @class guiApi
          */
         this.model = {}
-        this.model.fileds = list_fileds
-        this.model.guiFileds = {}
+        this.model.fields = list_fields
+        this.model.guiFields = {}
         this.model.pathInfo = undefined
 
         this.init = function (page_options)
@@ -1579,7 +1583,7 @@ function guiActionFactory(api, action)
                     {
                         data[i] = value[0][i]
                     }
-                }*/ 
+                }*/
 
                 if(!this.model.pathInfo)
                 {
@@ -1649,7 +1653,7 @@ function guiActionFactory(api, action)
                         }
                     }
                 }
-                 
+
                 if(query.length == 0)
                 {
                     // Модификация на то если у нас не мультиоперация
@@ -1657,7 +1661,7 @@ function guiActionFactory(api, action)
                 }
 
                 query.forEach(qurl => {
-                    
+
                     qurl = qurl.replace(/^\/|\/$/g, "").split(/\//g)
                     let q = {
                         type:'mod',
@@ -1665,8 +1669,8 @@ function guiActionFactory(api, action)
                         data:data,
                         method:query_method
                     }
-                    
-                    $.when(api.query(q)).done(data => 
+
+                    $.when(api.query(q)).done(data =>
                     {
                         if(callback)
                         {
@@ -1675,7 +1679,7 @@ function guiActionFactory(api, action)
                                 return;
                             }
                         }
-                        
+
                         if(data.not_found > 0)
                         {
                             guiPopUp.error("Item not found");
@@ -1685,7 +1689,7 @@ function guiActionFactory(api, action)
 
                         guiPopUp.success("Save");
                         def.resolve()
-                    }).fail(e => { 
+                    }).fail(e => {
                         if(callback)
                         {
                             if(error_callback(e) === false)
@@ -1693,10 +1697,10 @@ function guiActionFactory(api, action)
                                 return;
                             }
                         }
-                        
+
                         polemarch.showErrors(e.responseJSON)
                         def.reject(e)
-                    }) 
+                    })
                 })
 
             }catch (e) {
@@ -1711,12 +1715,12 @@ function guiActionFactory(api, action)
 
             return def.promise();
         }
- 
+
         this.renderAsPage = function (render_options = {})
         {
             let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
 
-            render_options.fileds = this.getFields('renderAsPage')
+            render_options.fields = this.getFields('renderAsPage')
             render_options.sections = this.getSections('renderAsPage')
             if(!render_options.page_type) render_options.page_type = 'action'
 
@@ -1782,17 +1786,17 @@ function guiActionFactory(api, action)
 
 function emptyAction(action_info)
 {
-    let name = action_info.api_path.match(/\/([A-z0-9]+)\/$/); 
+    let name = action_info.api_path.match(/\/([A-z0-9]+)\/$/);
     if(!name || !name[1])
     {
         return undefined
     }
- 
+
     let actionCalass = guiActionFactory(window.api, {action:action_info.api_path_value, api_path:action_info.api_path, name:name[1]})
     let action = new actionCalass({api:action_info.api_path_value, url:spajs.urlInfo.data.reg})
-    
+
     return function(){
-        action.exec() 
+        action.exec()
     }
 }
 
@@ -1905,17 +1909,34 @@ function changeSubItemsInParent(action, item_ids)
     }
 
     //  @todo отправка запроса чего то не работает. Надо сергея спросить.
-    let query = []
+    let query = [];
+
     for(let i in item_ids)
     {
-        query.push({
-            type: "mod",
-            data_type:item_type,
-            item:parent_type,
-            data:{id:item_ids[i]/1},
-            pk:parent_id,
-            method:action
-        })
+        if(action == "DELETE")
+        {
+            let data_type = [parent_type, parent_id/1, item_type, item_ids[i]/1];
+            query.push({
+                type: "mod",
+                data_type: data_type,
+                method:action,
+            })
+        }
+        else
+        {
+            let data = {
+                id:item_ids[i]/1,
+            };
+            query.push({
+                type: "mod",
+                data_type:item_type,
+                item:parent_type,
+                data:data,
+                pk:parent_id,
+                method:action,
+            })
+        }
+
     }
 
     return api.query(query)
@@ -2075,8 +2096,11 @@ function removeSelectedElements(ids, tag) {
     $.when(changeSubItemsInParent('DELETE', ids)).done(function()
     {
         window.guiListSelections.unSelectAll(tag);
-        debugger;
-        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
+        for(let i in ids)
+        {
+            $(".item-row.item-"+ids[i]).remove();
+        }
+        guiPopUp.success("Selected elements were successfully removed from parent's list.");
     }).fail(function (e)
     {
         polemarch.showErrors(e.responseJSON)

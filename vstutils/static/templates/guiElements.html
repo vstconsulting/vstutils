@@ -10,7 +10,7 @@
             <%* wrapper_classes %>
 
             gui-element-<%- guiElement.name %>
-            gui-filed-<%- opt.name %>
+            gui-field-<%- opt.name %>
             
             <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> "
 
@@ -71,7 +71,8 @@
                     <%- opt.class.apply(guiElement, [opt]) %>
                 <% }else{ %>
                     <%- opt.class %>
-                <% } %>"
+                <% } %>
+                <%- addCssClassesToElement('btn', opt.title) %>"
 
         title="<%- opt.title || '' %>"
         >
@@ -91,7 +92,8 @@
                <% }else{ %>
                     <%- opt.class %>
                <% } %>
-               gui-element-<%- guiElement.name %> "
+               gui-element-<%- guiElement.name %>
+               <%- addCssClassesToElement('btn', opt.title) %>"
         href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiElement, [opt]) %><% }else{ %><%- opt.link %><% } %>"
         title="<%- opt.title || '' %>"
         onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiElement, [opt]) %><% }else{ %>return spajs.openURL(this.href);<% } %>" >
