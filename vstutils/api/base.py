@@ -186,13 +186,14 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     # lookup_field = 'id'
     _serializer_class_one = None
     model = None
+    action_serializers = {}
 
     def filter_queryset(self, queryset):
         if hasattr(self, 'nested_name'):
-            self.filter_backends = [
-                backend for backend in list(self.filter_backends)
-                if isinstance(backend, HideHiddenFilterBackend)
-            ]
+            self.filter_backends = filter(
+                lambda backend: isinstance(backend, HideHiddenFilterBackend),
+                self.filter_backends
+            )
         return super(GenericViewSet, self).filter_queryset(queryset)
 
     @classproperty
@@ -203,6 +204,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
         detail_actions = ['create', 'retrieve', 'update', 'partial_update']
         lookup_field_data = self.kwargs.get(lookup_field, False)
+        action_name = getattr(self, 'action', None)
+        serializer_class = self.action_serializers.get(action_name, None)
+        if serializer_class:
+            return serializer_class
         if self.request and (lookup_field_data or self.action in detail_actions):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
@@ -288,12 +293,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def _add_or_create_nested(self, queryset, data, serializer_class, **kwargs):
         many = isinstance(data, (list, tuple))
-        filter_arg = self.nested_append_arg
+        nested_append_arg = self.nested_append_arg
+        filter_arg = nested_append_arg
         args = [serializer_class]
         if many:
             filter_arg += '__in'
             objects = queryset.model.objects.filter(**{
-                filter_arg: [i.get(self.nested_append_arg) for i in data]
+                filter_arg: map(lambda i: i.get(nested_append_arg), data)
             })
             self._check_permission_obj(objects)
             queryset.add(*objects)
@@ -398,15 +404,42 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         if nested_sub:
             view_obj.action = nested_sub
             return getattr(view_obj, nested_sub)(view_request)
-        serializer_class = view.serializer_class
-        serializer_class_one = getattr(view, 'serializer_class_one', serializer_class)
+        method = view_request.method.lower()
+        if method == 'post':
+            action_name = 'create'
+        elif method == 'get' and not self.nested_id:
+            action_name = 'list'
+        elif method == 'get' and self.nested_id:
+            action_name = 'retrieve'
+        elif method == 'put':
+            action_name = 'update'
+        elif method == 'patch':
+            action_name = 'partial_update'
+        elif method == 'delete':
+            action_name = 'destroy'
+        else:  # nocv
+            action_name = None
+        view_obj.action = action_name
+        serializer = view_obj.get_serializer_class()
+        if serializer:
+            serializers = (serializer, serializer)
+        else:  # nocv
+            serializer_class = view.serializer_class
+            serializer_class_one = getattr(
+                view, 'serializer_class_one', serializer_class
+            )
+            serializers = (serializer_class, serializer_class_one)
         filter_class = getattr(view, 'filter_class', None)
         return self.dispatch_route_instance(
-            (serializer_class, serializer_class_one), filter_class, view_request, **kw
+            serializers, filter_class, view_request, **kw
         )
 
     @classmethod
     def get_view_methods(cls, detail=False):
+        attr_name = ''.join(['__', 'detail' if detail else 'list', 'http_methods', '__'])
+        methods = getattr(cls, attr_name, None)
+        if methods is not None:
+            return methods
         methods = []
         if hasattr(cls, 'create') and not detail:
             methods.append('post')
@@ -418,6 +451,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             methods.append('patch')
         if hasattr(cls, 'destroy') and detail:
             methods.append('delete')
+        setattr(cls, attr_name, methods)
         return methods
 
     @classmethod
@@ -503,8 +537,7 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
     def list(self, request, *args, **kwargs):
         routes = {
-            method: reverse("{}-{}".format(self.base_name, method),
-                            request=request)
+            method: reverse("{}-{}".format(self.base_name, method), request=request)
             for method in self.methods
         }
         return Response(routes, status.HTTP_200_OK).resp
