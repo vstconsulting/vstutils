@@ -186,6 +186,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     # lookup_field = 'id'
     _serializer_class_one = None
     model = None
+    action_serializers = {}
 
     def filter_queryset(self, queryset):
         if hasattr(self, 'nested_name'):
@@ -203,6 +204,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
         detail_actions = ['create', 'retrieve', 'update', 'partial_update']
         lookup_field_data = self.kwargs.get(lookup_field, False)
+        action_name = getattr(self, 'action', None)
+        serializer_class = self.action_serializers.get(action_name, None)
+        if serializer_class:
+            return serializer_class
         if self.request and (lookup_field_data or self.action in detail_actions):
             if self.serializer_class_one is not None:
                 return self.serializer_class_one
@@ -399,11 +404,34 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         if nested_sub:
             view_obj.action = nested_sub
             return getattr(view_obj, nested_sub)(view_request)
-        serializer_class = view.serializer_class
-        serializer_class_one = getattr(view, 'serializer_class_one', serializer_class)
+        method = view_request.method.lower()
+        if method == 'post':
+            action_name = 'create'
+        elif method == 'get' and not self.nested_id:
+            action_name = 'list'
+        elif method == 'get' and self.nested_id:
+            action_name = 'retrieve'
+        elif method == 'put':
+            action_name = 'update'
+        elif method == 'patch':
+            action_name = 'partial_update'
+        elif method == 'delete':
+            action_name = 'destroy'
+        else:  # nocv
+            action_name = None
+        view_obj.action = action_name
+        serializer = view_obj.get_serializer_class()
+        if serializer:
+            serializers = (serializer, serializer)
+        else:  # nocv
+            serializer_class = view.serializer_class
+            serializer_class_one = getattr(
+                view, 'serializer_class_one', serializer_class
+            )
+            serializers = (serializer_class, serializer_class_one)
         filter_class = getattr(view, 'filter_class', None)
         return self.dispatch_route_instance(
-            (serializer_class, serializer_class_one), filter_class, view_request, **kw
+            serializers, filter_class, view_request, **kw
         )
 
     @classmethod
