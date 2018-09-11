@@ -213,50 +213,50 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
 
-    def get_route_object(self, queryset, id):
-        find_kwargs = {getattr(self, 'nested_append_arg', 'id'): id}
-        try:
-            obj = queryset.all().get(**find_kwargs)
-            if self.nested_view_object is not None:
-                self.nested_view_object.action = 'create'
-                self.nested_view_object.check_object_permissions(self.request, obj)
-            return obj
-        except exceptions.PermissionDenied:  # nocv
-            raise
-        except djexcs.ObjectDoesNotExist:
-            raise exceptions.NotFound()
+    # def get_route_object(self, queryset, id):
+    #     find_kwargs = {getattr(self, 'nested_append_arg', 'id'): id}
+    #     try:
+    #         obj = queryset.all().get(**find_kwargs)
+    #         if self.nested_view_object is not None:
+    #             self.nested_view_object.action = 'create'
+    #             self.nested_view_object.check_object_permissions(self.request, obj)
+    #         return obj
+    #     except exceptions.PermissionDenied:  # nocv
+    #         raise
+    #     except djexcs.ObjectDoesNotExist:  # nocv
+    #         raise exceptions.NotFound()
 
-    def filter_route_queryset(self, queryset, filter_classes=None):
-        if filter_classes is not None:
-            if not isinstance(filter_classes, (list, tuple)):
-                filter_classes = [filter_classes]
-            for filter_class in list(filter_classes):
-                queryset = filter_class(
-                    self.request.query_params, queryset=queryset, request=self.request
-                ).qs
-        return queryset
+    # def filter_route_queryset(self, queryset, filter_classes=None):
+    #     if filter_classes is not None:
+    #         if not isinstance(filter_classes, (list, tuple)):
+    #             filter_classes = [filter_classes]
+    #         for filter_class in list(filter_classes):
+    #             queryset = filter_class(
+    #                 self.request.query_params, queryset=queryset, request=self.request
+    #             ).qs
+    #     return queryset
 
     def get_route_serializer(self, serializer_class, *args, **kwargs):
         kwargs['context'] = kwargs.get('context', self.get_serializer_context())
         return serializer_class(*args, **kwargs)
 
-    def get_paginated_route_response(self, queryset, serializer_class,
-                                     filter_classes=None, **kwargs):
-        queryset = self.filter_route_queryset(queryset.all(), filter_classes)
+    # def get_paginated_route_response(self, queryset, serializer_class,
+    #                                  filter_classes=None, **kwargs):
+    #     queryset = self.filter_route_queryset(queryset.all(), filter_classes)
+    #
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_route_serializer(
+    #             serializer_class, page, many=True, **kwargs
+    #         )
+    #         return self.get_paginated_response(serializer.data)
+    #
+    #     serializer = self.get_route_serializer(queryset, many=True, **kwargs)  # nocv
+    #     return RestResponse(serializer.data)  # nocv
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_route_serializer(
-                serializer_class, page, many=True, **kwargs
-            )
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_route_serializer(queryset, many=True, **kwargs)  # nocv
-        return RestResponse(serializer.data)  # nocv
-
-    def get_route_instance(self, instance, serializer_class):
-        serializer = self.get_route_serializer(serializer_class, instance)
-        return Response(serializer.data, status.HTTP_200_OK).resp
+    # def get_route_instance(self, instance, serializer_class):
+    #     serializer = self.get_route_serializer(serializer_class, instance)
+    #     return Response(serializer.data, status.HTTP_200_OK).resp
 
     def _check_permission_obj(self, objects):
         if self.nested_view_object is not None:
@@ -314,27 +314,27 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         serializer = self._add_or_create_nested(queryset, request.data, serializer_class)
         return Response(serializer.data, status.HTTP_201_CREATED).resp
 
-    def update_route_instance(self, instance, request, serializer_class, partial=None):
-        # pylint: disable=protected-access
-        serializer = self.get_route_serializer(
-            serializer_class, instance, data=request.data, partial=partial
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    # def update_route_instance(self, instance, request, serializer_class, partial=None):
+    #     # pylint: disable=protected-access
+    #     serializer = self.get_route_serializer(
+    #         serializer_class, instance, data=request.data, partial=partial
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #
+    #     if getattr(instance, '_prefetched_objects_cache', None):
+    #         # If 'prefetch_related' has been applied to a queryset, we need to
+    #         # forcibly invalidate the prefetch cache on the instance.
+    #         instance._prefetched_objects_cache = {}  # nocv
+    #
+    #     return Response(serializer.data, status.HTTP_200_OK).resp
 
-        if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}  # nocv
-
-        return Response(serializer.data, status.HTTP_200_OK).resp
-
-    def delete_route_instance(self, manager, instance):
-        if self.nested_allow_append:
-            manager.remove(instance)
-        else:
-            instance.delete()
-        return RestResponse(status=status.HTTP_204_NO_CONTENT)
+    # def delete_route_instance(self, manager, instance):
+    #     if self.nested_allow_append:
+    #         manager.remove(instance)
+    #     else:
+    #         instance.delete()
+    #     return RestResponse(status=status.HTTP_204_NO_CONTENT)
 
     def nested_allow_check(self):
         '''
@@ -345,6 +345,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     @transaction.atomic()
     def dispatch_route_instance(self, serializer_class, filter_classes, request, **kw):
+        # pylint: disable=unused-argument
         self.nested_allow_check()
         obj_id = kw.get(getattr(self, 'nested_arg', 'id'), None)
         obj_id = obj_id or getattr(self, 'nested_id', None)
@@ -363,76 +364,32 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
         if method == 'post':
             return self.create_route_instance(manager, request, serializer_class_one)
-        elif method == 'get' and not obj_id:
-            return self.get_paginated_route_response(
-                manager, serializer_class_list, filter_classes
-            )
-        elif method == 'get' and obj_id:
-            return self.get_route_instance(
-                self.get_route_object(manager, obj_id), serializer_class_one
-            )
-        elif method == 'put' and obj_id:
-            return self.update_route_instance(
-                self.get_route_object(manager, obj_id), request, serializer_class_one
-            )
-        elif method == 'patch' and obj_id:
-            return self.update_route_instance(
-                self.get_route_object(manager, obj_id), request, serializer_class_one, 1
-            )
-        elif method == 'delete' and obj_id:
-            return self.delete_route_instance(
-                manager, self.get_route_object(manager, obj_id)
-            )
+        # elif method == 'get' and not obj_id:
+        #     return self.get_paginated_route_response(
+        #         manager, serializer_class_list, filter_classes
+        #     )
+        # elif method == 'get' and obj_id:
+        #     return self.get_route_instance(
+        #         self.get_route_object(manager, obj_id), serializer_class_one
+        #     )
+        # elif method == 'put' and obj_id:
+        #     return self.update_route_instance(
+        #         self.get_route_object(manager, obj_id), request, serializer_class_one
+        #     )
+        # elif method == 'patch' and obj_id:
+        #     return self.update_route_instance(
+        #         self.get_route_object(manager, obj_id), request, serializer_class_one, 1
+        #     )
+        # elif method == 'delete' and obj_id:
+        #     return self.delete_route_instance(
+        #         manager, self.get_route_object(manager, obj_id)
+        #     )
 
         raise exceptions.NotFound()  # nocv
 
-    def _get_nested_queryset(self, vself):
-        # pylint: disable=unused-argument
-        return self.nested_manager.all()
-
-    def dispatch_nested_view(self, view, view_request, *args, **kw):
-        # pylint: disable=unused-argument,unnecessary-lambda
-        nested_sub = kw.get('nested_sub', None)
-        kwargs = {self.nested_append_arg: self.nested_id}
-        view.get_queryset = lambda vself: self._get_nested_queryset(vself)
-        view.lookup_field = self.nested_append_arg
-        view.format_kwarg = None
-        view_obj = view()
-        view_obj.request = view_request
-        view_obj.kwargs = kwargs
-        self.nested_view_object = view_obj
-        if nested_sub:
-            view_obj.action = nested_sub
-            return getattr(view_obj, nested_sub)(view_request)
-        method = view_request.method.lower()
-        if method == 'post':
-            action_name = 'create'
-        elif method == 'get' and not self.nested_id:
-            action_name = 'list'
-        elif method == 'get' and self.nested_id:
-            action_name = 'retrieve'
-        elif method == 'put':
-            action_name = 'update'
-        elif method == 'patch':
-            action_name = 'partial_update'
-        elif method == 'delete':
-            action_name = 'destroy'
-        else:  # nocv
-            action_name = None
-        view_obj.action = action_name
-        serializer = view_obj.get_serializer_class()
-        if serializer:
-            serializers = (serializer, serializer)
-        else:  # nocv
-            serializer_class = view.serializer_class
-            serializer_class_one = getattr(
-                view, 'serializer_class_one', serializer_class
-            )
-            serializers = (serializer_class, serializer_class_one)
-        filter_class = getattr(view, 'filter_class', None)
-        return self.dispatch_route_instance(
-            serializers, filter_class, view_request, **kw
-        )
+    # def _get_nested_queryset(self, vself):
+    #     # pylint: disable=unused-argument
+    #     return self.nested_manager.all()
 
     @classmethod
     def get_view_methods(cls, detail=False):
