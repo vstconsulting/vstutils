@@ -100,6 +100,10 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     }
 
+    /**
+     * Вернёт значение только правильное, если оно не правильное то будет исключение
+     * @returns {undefined|Number|String|Boolean|guiElements.base.getValidValue.value}
+     */
     this.getValidValue = function()
     {
         let value = this.getValue()
@@ -407,6 +411,7 @@ guiElements.autocomplete = function()
         /*
          * options.enum - array, which comes from api.
          * This array has data for autocomplete.
+         * @note для поля типа enum есть тип enum, зачем здесь этот код?
          */
         else if(options.enum)
         {
@@ -591,6 +596,7 @@ guiElements.select2 = function(field, field_value, parent_object)
         /*
          * options.enum - array, which comes from api.
          * This array has data for select2.
+         * @note для поля типа enum есть тип enum, зачем здесь этот код?
          */
         else if(options.enum)
         {

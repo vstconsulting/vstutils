@@ -76,10 +76,10 @@
         class="form-control"
         maxlength="255"
         value="<% if(guiObj.model.filters.query){ %><%- guiObj.model.filters.query.name %><% } %>"
-        onkeyup="if(event.keyCode == 13) spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));"
+        onkeyup="if(event.keyCode == 13) spajs.showLoader(goToSearch(<%- guiObj.api.bulk_name %>, $('#search-query-input').val()));"
     >
 
-    <div class="input-group-addon" onclick="spajs.showLoader(goToSearch(<%- guiObj.view.class_name %>, $('#search-query-input').val()));">
+    <div class="input-group-addon" onclick="spajs.showLoader(goToSearch(<%- guiObj.api.bulk_name %>, $('#search-query-input').val()));">
     <span class="glyphicon glyphicon-search" ></span>
     </div>
     </div>
@@ -255,7 +255,7 @@
                                                     <%- opt.fields[j].title %>
                                             </th>
                                         <% } %>
-                                        <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                                        <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
                                             <th style="width: 95px;" >Actions</th>
                                         <% } %>
                                     </tr>
@@ -273,7 +273,7 @@
                                                     <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
                                                     <% if(!opt.fields[j].value){ %>
-                                                        <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                                        <a href="<%- window.hostname %><%- opt.base_path + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" >
                                                             <!-- если есть имя объекта, то выводим его имя, в противном случае, выводим его значение -->
                                                             <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
@@ -288,7 +288,7 @@
                                                     <% } %>
                                                 </td>
                                             <% } %>
-                                            <% if(!isEmptyObject(guiObj.model.sublinks)){ %>
+                                            <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
                                                 <td>
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -296,13 +296,13 @@
                                                             <span class="caret"></span>
                                                         </button>
                                                         <ul class="dropdown-menu dropdown-menu-right">
-                                                            <% for(var k in guiObj.model.sublinks){ %>
+                                                            <% for(var k in guiObj.api.sublinks_l2){ %>
                                                                 <li>
                                                                     <a
-                                                                        href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.model.sublinks[k].name %>"
+                                                                        href="<%- window.hostname %><%- opt.base_path + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.api.sublinks_l2[k].name %>"
                                                                         onclick="return spajs.openURL(this.href);"
                                                                         class="sublink-btn">
-                                                                            <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
+                                                                            <%- guiObj.api.sublinks_l2[k].name.replace('_', ' ') %>
                                                                     </a>
                                                                 </li>
                                                             <% } %>
@@ -455,7 +455,7 @@
                                                     <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
                                                     <% if(!opt.fields[j].value){ %>
-                                                        <a href="<%- window.hostname %><%- window.location.search + '/' + guiObj.model.data.results[i].id %>" class="item-name"
+                                                        <a href="<%- window.hostname %><%- opt.base_path + '/' + guiObj.model.data.results[i].id %>" class="item-name"
                                                             onclick="return spajs.openURL(this.href);" ><%- guiObj.model.data.results[i][opt.fields[j].name] %></a>
                                                     <% }else{ %>
                                                         <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
@@ -523,33 +523,33 @@
     <!-- entity_one -->
     
     <%[ sublink_buttons %>
-        <% for(var k in guiObj.model.sublinks){  %>
+        <% for(var k in guiObj.api.sublinks){  %>
             <!-- /TODO оптимизировать обработку типа экшена -->
 
-                <% if  ((!guiObj.model.sublinks[k].isAction) || (guiObj.model.sublinks[k].isAction && (!guiObj.model.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
+                <% if  ((!guiObj.api.sublinks[k].isAction) || (guiObj.api.sublinks[k].isAction && (!guiObj.api.sublinks[k].api_path_value.post.parameters.some(elem => elem.schema.$ref == "#/definitions/Empty")))) { %>
                     <a
-                        href="<%- window.hostname %><%- window.location.search+'/'+ guiObj.model.sublinks[k].name %>"
+                        href="<%- window.hostname %><%- opt.base_path+'/'+ guiObj.api.sublinks[k].name %>"
                         onclick="return spajs.openURL(this.href);"
                         class="btn btn-default sublink-btn"
                     >
-                    <%- guiObj.model.sublinks[k].name.replace('_', ' ') %>
+                    <%- guiObj.api.sublinks[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(guiObj.model.sublinks[k]), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.sublinks[k]), class:'btn btn-primary', title:k, text:k}).render() %>
                 <% } %> 
         <% } %>
     <%] %>
     
     <%[ buttons_row %>
         
-        <% if(guiObj.canUpdate()){ %>
+        <% if(guiObj.canEdit){ %>
             <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
             <!--<% if (guiObj.copy != undefined) {%>
                 <%= new guiElements.button({onclick:function(){guiObj.copy()}, class:'btn btn-primary btn-copy', title:'Copy', text:'Copy'}).render() %>
             <% } %>-->
         <% } %>
         
-        <% if(guiObj.canDelete()){ %>
+        <% if(guiObj.canDelete){ %>
             <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
         <% } %>
         
