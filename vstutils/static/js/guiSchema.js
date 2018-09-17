@@ -84,6 +84,7 @@ function openApi_guiSchema(api)
             },
             buttons:[], // массив кнопок
             short_name:undefined,
+            hide_non_required:guiLocalSettings.get('hide_non_required'),
             extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")]
               
         }
@@ -114,8 +115,11 @@ function openApi_guiSchema(api)
             val.canAdd = false
             val.canRemove = false
             if(path_schema['/'+key+'/'] && val.level > 2)
-            {
-                val.canAdd = val.api.post != undefined
+            { 
+                if(val.api.post != undefined)
+                {
+                    val.canAdd = path_schema['/'+key+'/']
+                }
                 val.canRemove = val.api.post != undefined
             }
             val.canCreate = val.api.post != undefined
@@ -141,15 +145,16 @@ function openApi_guiSchema(api)
             }
         }
         else
-        {
-            for(let query_type in ['post', 'put', 'delete', 'patch'])
+        { 
+            let query_types =  ['post', 'put', 'delete', 'patch']
+            for(let q in query_types)
             {
-                if(val.api[query_type])
+                if(val.api[query_types[q]])
                 {
                     val.schema = {
-                        fields:val.api[query_type].fields,
-                        filters:val.api[query_type].filters,
-                        query_type:query_type
+                        fields:val.api[query_types[q]].fields,
+                        filters:val.api[query_types[q]].filters,
+                        query_type:query_types[q]
                     }
                     break;
                 }
@@ -242,7 +247,7 @@ function getObjectBySchema(obj)
 {
     let name = getObjectNameBySchema(obj);
     if(!name)
-    {
+    { 
         return undefined
     }
 
@@ -250,6 +255,7 @@ function getObjectBySchema(obj)
     let api_obj = window[apiname]
     if(api_obj)
     {
+        debugger;
         return api_obj;
     }
 }

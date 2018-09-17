@@ -4,12 +4,12 @@ guiLocalSettings.setIfNotExists('hide_non_required', 4)
 
 // Количество элементов на странице
 guiLocalSettings.setIfNotExists('page_size', 20)
- 
+
 
 function getMenuIdFromApiPath(path){
     return path.replace(/[^A-z0-9\-]/img, "_")//+Math.random()
 }
- 
+
 function guiTestUrl(regexp, url)
 {
     url = url.replace(/[/#]*$/, "")
@@ -86,7 +86,7 @@ function getNameForUrlRegExp(api_path)
  * @deprecated Надо бы объеденить и унифицировать код так чтоб он был един ещё и для openApi_add_one_page_path
  */
 function openApi_add_one_action_page_path(api_obj)
-{ 
+{
     let api_path = api_obj.path
 
     // Создали страницу
@@ -99,10 +99,10 @@ function openApi_add_one_action_page_path(api_obj)
         render: function(menuInfo, data)
         {
             // Создали список хостов
-            var pageItem = guiObjectFactory(api_obj) 
+            var pageItem = new guiObjectFactory(api_obj)
 
             return pageItem.renderAsPage();
-        } 
+        }
     })
 
     // Страница элемента вложенного куда угодно
@@ -120,7 +120,7 @@ function openApi_add_one_action_page_path(api_obj)
  * @returns {undefined}
  */
 function openApi_add_one_page_path(api_obj)
-{ 
+{
     // Создали страницу
     var page = new guiPage();
     let api_path = api_obj.path
@@ -130,8 +130,8 @@ function openApi_add_one_page_path(api_obj)
         id:'itemOne',
         prioritet:0,
         render: function(menuInfo, data)
-        { 
-            var pageItem = guiObjectFactory(api_obj)
+        {
+            var pageItem = new guiObjectFactory(api_obj)
 
             var def = new $.Deferred();
             $.when(pageItem.load(data.reg)).done(function()
@@ -143,7 +143,7 @@ function openApi_add_one_page_path(api_obj)
             })
 
             return def.promise();
-        } 
+        }
     })
 
     // Определяем тип страницы из урла (есть у него id в конце или нет)
@@ -168,7 +168,7 @@ function openApi_add_list_page_path(api_obj)
     // Создали страницу
     let page = new guiPage();
 
-    let path_regexp = [] 
+    let path_regexp = []
     let api_path = api_obj.path
 
     let pathregexp = "^"
@@ -179,9 +179,9 @@ function openApi_add_list_page_path(api_obj)
         +"(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"
 
     path_regexp.push(guiGetTestUrlFunctionfunction(pathregexp, api_obj))
- 
+
     // Проверяем есть ли возможность создавать объекты
-    
+
     if(api_obj.page && api_obj.canCreate)
     {
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
@@ -198,7 +198,7 @@ function openApi_add_list_page_path(api_obj)
             prioritet:10,
             render: function(menuInfo, data)
             {
-                var pageItem = guiObjectFactory(api_obj.page)
+                var pageItem = new guiObjectFactory(api_obj.page)
                 return pageItem.renderAsNewPage()
             }
         })
@@ -222,8 +222,7 @@ function openApi_add_list_page_path(api_obj)
             render:function(menuInfo, data, thisGuiPage)
             {
                 var def = new $.Deferred();
-
-                var pageItem = guiObjectFactory(api_obj.page)
+                var pageItem = new guiObjectFactory(api_obj.canAdd)
                 //var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg, selectionTag:api_path_value.api_path+"add/"})
 
                 var filter =  $.extend(true, data.reg)
@@ -253,7 +252,7 @@ function openApi_add_list_page_path(api_obj)
             var def = new $.Deferred();
 
             // Создали список хостов
-            var pageItem = guiObjectFactory(api_obj)
+            var pageItem = new guiObjectFactory(api_obj)
 
             //debugger;
             $.when(pageItem.search(data.reg)).done(function()
@@ -281,7 +280,7 @@ tabSignal.connect("resource.loaded", function()
 
         window.guiSchema = openApi_guiSchema(window.api.openapi)
         openApi_guiPagesBySchema(window.guiSchema)
- 
+
         // Событие в теле которого можно было бы переопределить и дополнить список страниц
         tabSignal.emit("openapi.paths",  {api: window.api});
 

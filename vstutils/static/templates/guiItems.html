@@ -206,8 +206,14 @@
 <script type="text/x-just" data-just="entity_list">
     
     <%[ buttons_row %>
-        <%= guiObj.getBtnNew() %>
-        <%= guiObj.getBtnAdd() %>
+       
+        <% if(guiObj.api.page && guiObj.api.canCreate){ %>
+            <a href="<%- getUrlBasePath() %>/new" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a> 
+        <% } %>
+        
+        <% if(guiObj.api.canAdd){ %>
+            <a href="<%- getUrlBasePath() %>/add" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a> 
+        <% } %>
  
         <%* buttons %>
         <%* sublink_buttons %>
@@ -244,7 +250,7 @@
                             <table class="table table-bordered multiple-select">
                                 <tbody>
                                     <tr>
-                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- guiObj.model.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
@@ -261,9 +267,9 @@
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
                                         <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(guiObj.model.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
                                             data-id="<%- guiObj.model.data.results[i].id %>" >
-                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
@@ -320,9 +326,9 @@
                 </div>
                 <div class="box-footer clearfix">
                     <%[ action_buttons %>
-                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" role="group">
+                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= window.guiListSelections.selectedCount.justText(guiObj.model.selectionTag) %> items
+                                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
@@ -347,7 +353,7 @@
                                         <li>
                                             <a
                                                 href="#"
-                                                onclick="questionForAllSelectedOrNot(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
+                                                onclick="questionForAllSelectedOrNot(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- guiObj.model.multi_actions[k].name %>'); return false;">
                                                     <%- k %> <% if(guiObj.model.multi_actions[k].description) { %> <%- guiObj.model.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
@@ -368,10 +374,10 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, true)); return false; }) %> >Select all</a>
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                                     </li>
-                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" >
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                                     </li>
                                 </ul>
                             </div>
@@ -394,9 +400,9 @@
 <script type="text/x-just" data-just="entity_list_add_subitems">
     <!-- entity_list_add_subitems -->
     
-    <%[ buttons_row %> 
-        <%* buttons %>
-        <%* sublink_buttons %>
+    <%[ buttons_row %>
+        <a href="#" class="btn btn-primary"
+            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>')); return false;" >Add selected</a>
     <%] %>
      
     <%[ main_content_row %>
@@ -429,7 +435,7 @@
                             <table class="table table-bordered multiple-select">
                                 <tbody>
                                     <tr>
-                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- guiObj.model.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                             <div class="ico-on fa fa-toggle-on"></div>
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
@@ -443,9 +449,9 @@
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
                                         <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(guiObj.model.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
                                             data-id="<%- guiObj.model.data.results[i].id %>" >
-                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- guiObj.model.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
@@ -472,15 +478,15 @@
                 </div>
                 <div class="box-footer clearfix">
                     <%[ action_buttons %>
-                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" role="group">
+                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= window.guiListSelections.selectedCount.justText(guiObj.model.selectionTag) %> items
+                                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                     <li>
                                         <a href="#"
-                                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- guiObj.model.selectionTag %>')); return false;" >Add selected</a>
+                                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>')); return false;" >Add selected</a>
                                     </li>
                             </ul>
                         </div>
@@ -496,10 +502,10 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, true)); return false; }) %> >Select all</a>
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                                     </li>
-                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(guiObj.model.selectionTag, 'hide') %>" >
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(guiObj.model.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                                     </li>
                                 </ul>
                             </div>
@@ -542,15 +548,12 @@
     
     <%[ buttons_row %>
         
-        <% if(guiObj.canEdit){ %>
+        <% if(guiObj.api.canEdit){ %>
             <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
-            <!--<% if (guiObj.copy != undefined) {%>
-                <%= new guiElements.button({onclick:function(){guiObj.copy()}, class:'btn btn-primary btn-copy', title:'Copy', text:'Copy'}).render() %>
-            <% } %>-->
         <% } %>
         
-        <% if(guiObj.canDelete){ %>
-            <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete this '+guiObj.view.bulk_name, text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+        <% if(guiObj.api.canDelete){ %>
+            <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
         <% } %>
         
         <%* buttons %>
@@ -592,8 +595,7 @@
         
         <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
             
-        <%* buttons %>
-        <%* sublink_buttons %>
+        <%* buttons %> 
     <%] %>
     
     <%! entity_one %>

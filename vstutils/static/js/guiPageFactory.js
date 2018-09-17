@@ -11,7 +11,7 @@ var gui_page_object = {
 
 
         var query = undefined;
-
+         
         if(this.model.pathInfo && this.model.pathInfo.get && this.model.pathInfo.get.operationId)
         {
             var operations = this.model.pathInfo.get.operationId.split("_");
@@ -278,7 +278,7 @@ var gui_page_object = {
         //render_options.sections = this.getSections('renderAsPage')
         if(!render_options.page_type) render_options.page_type = 'one'
 
-        render_options.base_path = getUrlBasePath()
+        render_options.base_path = getUrlBasePath() 
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -291,7 +291,7 @@ var gui_page_object = {
         let tpl = this.getTemplateName('new')
 
         render_options.fields = this.api.schema.fields
-        render_options.sections = this.getSections('renderAsNewPage')
+        //render_options.sections = this.getSections('renderAsNewPage')
         render_options.hideReadOnly = true
 
         render_options.base_path = getUrlBasePath()
@@ -307,13 +307,14 @@ var gui_page_object = {
     {
         let tpl = this.getTemplateName('one_as_field')
 
+        debugger;
         if(render_options.hideReadOnly)
         {
             return "";
         }
 
         render_options.fields = this.api.schema.fields
-        render_options.sections = this.getSections('render')
+        //render_options.sections = this.getSections('render')
         //debugger;
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },

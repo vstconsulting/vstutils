@@ -67,53 +67,9 @@ var gui_list_object = {
             }*/
 
 
-        }
-
-        window.guiListSelections.intTag(this.model.selectionTag)
-
+        } 
     },
-
-    /** 
-     * @deprecated Кнопка должна объявляться декларативно
-     */
-    getBtnNew : function ()
-    {
-        if(this.api.page && this.api.page.canCreate)
-        {
-            let link = getUrlBasePath()+"/new";
-
-            let btn = new guiElements.link_button({
-                class:'btn btn-primary',
-                link: link,
-                title:'Create new '+this.name,
-                text:'Create',
-            })
-
-            return btn.render()
-        }
-        return "";
-    },
-
-    /** 
-     * @deprecated Кнопка должна объявляться декларативно
-     */
-    getBtnAdd : function ()
-    {
-        if(this.api.canAdd)
-        { 
-            var link = getUrlBasePath()+"/add";
-
-            var btn = new guiElements.link_button({
-                class:'btn btn-primary',
-                link: link,
-                title:'Add '+this.name,
-                text:'Add '+this.name,
-            })
-            return btn.render() 
-        }
-        return "";
-    },
-
+  
     deleteArray : function (ids)
     {
         debugger;
@@ -483,6 +439,9 @@ var gui_list_object = {
         //render_options.sections = this.getSections('renderAsPage')
         if(!render_options.page_type) render_options.page_type = 'list'
 
+        render_options.selectionTag =  this.model.selectionTag
+        window.guiListSelections.intTag(render_options.selectionTag)
+ 
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -498,6 +457,10 @@ var gui_list_object = {
         render_options.base_path = getUrlBasePath()
         //render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
+        render_options.selectionTag =  this.model.selectionTag+"_add"
+        window.guiListSelections.intTag(render_options.selectionTag)
+        
+        
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },

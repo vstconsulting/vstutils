@@ -1,17 +1,6 @@
    
 var gui_base_object = {
-    /**
-     * Используется в шаблоне страницы
-     */
-    model : {
-        selectedItems : {},
-        /**
-         * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
-         * Чтоб выделение одного списка не смешивалось с выделением другого списка
-         */
-        selectionTag:"",
-        guiFields:{}
-    },
+   
     getTemplateName : function (type, default_name)
     {
         var tpl = this.bulk_name + '_'+type
@@ -39,7 +28,7 @@ var gui_base_object = {
         return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
             let fields = $('#'+id+" .gui-not-required")
-            if(!this.view.hide_non_required || this.view.hide_non_required >= fields.length)
+            if(!this.api.hide_non_required || this.api.hide_non_required >= fields.length)
             {
                 return;
             }
@@ -163,7 +152,7 @@ var gui_base_object = {
         for(let i in this.model.guiFields)
         {
             let val = this.model.guiFields[i].getValidValue();
-            if(val !== undefined)
+            if(val !== undefined && val !== null && !(typeof val == "number" && isNaN(val)) )
             {
                 obj[i] = val;
             }
@@ -187,12 +176,32 @@ var gui_base_object = {
         return this.getValue();
     },
 
+    init : function ()
+    {  
+    },
 }
  
+/**
+ * На основе описания апи пути формирует объект страницы.
+ * @param {type} api_object
+ * @returns {guiObjectFactory.res}
+ */
 function guiObjectFactory(api_object)
 {
+     /**
+     * Используется в шаблоне страницы
+     */
+    this.model = {
+        selectedItems : {},
+        /**
+         * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
+         * Чтоб выделение одного списка не смешивалось с выделением другого списка
+         */
+        selectionTag:"",
+        guiFields:{}
+    }
     
-    let arr = [{}, window.gui_base_object]
+    let arr = [this, window.gui_base_object]
     if(window["gui_"+api_object.type+"_object"])
     {
         arr.push(window["gui_"+api_object.type+"_object"])
@@ -210,10 +219,10 @@ function guiObjectFactory(api_object)
     }
     
     arr.push({api:api_object}) 
-    let res = $.extend.apply($, arr) 
-    res.init.apply(res, arguments) 
     
-    return res;
+    $.extend.apply($, arr) 
+    this.init.apply(this, arguments) 
+     
 }
  
 
@@ -352,18 +361,7 @@ function changeSubItemsInParent(action, item_ids)
     let parent_id = spajs.urlInfo.data.reg.parent_id
     let parent_type = spajs.urlInfo.data.reg.parent_type
     let item_type = spajs.urlInfo.data.reg.page_type
-
-    //var url = "/api/v2/" + parent_type +"/" + parent_id +"/" + item_type +"/"
-
-    var parent = window["api"+parent_type]
-    if(!parent)
-    {
-        console.error("Error parent object not found")
-        debugger;
-        def.resolve()
-        return def.promise();
-    }
-
+ 
     if(!parent_id)
     {
         console.error("Error parent_id not found")
@@ -371,16 +369,7 @@ function changeSubItemsInParent(action, item_ids)
         def.resolve()
         return def.promise();
     }
-
-    var item = window["api"+item_type]
-    if(!item)
-    {
-        console.error("Error item_type not found")
-        debugger;
-        def.resolve()
-        return def.promise();
-    }
-
+ 
     //  @todo отправка запроса чего то не работает. Надо сергея спросить.
     let query = []
     for(let i in item_ids)
