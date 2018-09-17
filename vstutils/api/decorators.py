@@ -265,15 +265,15 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def get_view(self, name, **options):
         # pylint: disable=redefined-outer-name
+        mixin_class = NestedViewMixin
+        if getattr(self.view, 'create', None) is not None:
+            if self.kwargs.get('allow_append', False):
+                mixin_class = NestedWithAppendMixin
+            else:
+                mixin_class = NestedWithoutAppendMixin
+
         def nested_view(view_obj, request, *args, **kwargs):
             kwargs.update(options)
-
-            mixin_class = NestedViewMixin
-            if getattr(view_obj, 'create', None) is not None:
-                if view_obj.nested_allow_append:
-                    mixin_class = NestedWithAppendMixin
-                else:
-                    mixin_class = NestedWithoutAppendMixin
 
             class NestedView(mixin_class, self.view):
                 __doc__ = self.view.__doc__
