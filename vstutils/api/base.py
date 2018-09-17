@@ -16,7 +16,6 @@ from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
-from .filter_backends import HideHiddenFilterBackend
 from .serializers import (
     ErrorSerializer, ValidationErrorSerializer, OtherErrorsSerializer
 )
@@ -191,8 +190,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     def filter_queryset(self, queryset):
         if hasattr(self, 'nested_name'):
             self.filter_backends = filter(
-                lambda backend: isinstance(backend, HideHiddenFilterBackend),
-                self.filter_backends
+                lambda backend: getattr(backend, 'required', False), self.filter_backends
             )
         return super(GenericViewSet, self).filter_queryset(queryset)
 

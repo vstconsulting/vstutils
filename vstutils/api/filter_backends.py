@@ -1,5 +1,10 @@
 # Call standart filtering
-class HideHiddenFilterBackend(object):
+class VSTFilterBackend(object):
+    required = False
+
+
+class HideHiddenFilterBackend(VSTFilterBackend):
+    required = True
 
     def filter_queryset(self, request, queryset, view):
         # pylint: disable=unused-argument
