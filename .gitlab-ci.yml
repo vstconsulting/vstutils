@@ -1,5 +1,5 @@
 # set to local images because too long execution
-image: onegreyonewhite/tox:python
+image: onegreyonewhite/tox:tox
 
 
 variables:
@@ -16,7 +16,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: onegreyonewhite/tox:python
+  image: onegreyonewhite/tox:tox
   variables:
     TOX_ENVS: "flake,pylint,py27-django-install,py35-django-install,py36-django-install"
   script:
