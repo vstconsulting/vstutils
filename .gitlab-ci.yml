@@ -16,7 +16,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: onegreyonewhite/tox:tox
+  image: onegreyonewhite/tox:python
   variables:
     TOX_ENVS: "flake,pylint,py27-django-install,py35-django-install,py36-django-install"
   script:
