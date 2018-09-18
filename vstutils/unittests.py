@@ -406,6 +406,7 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["users", self.user.id]},
+            {"method": "get", 'data_type': ["users"]},
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
@@ -427,6 +428,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[6]['data']['PY'], settings.PY_VER)
         self.assertEqual(result[7]['status'], 200)
         self.assertEqual(result[7]['data']['id'], self.user.id)
+        self.assertEqual(result[8]['status'], 200)
 
         bulk_request_data = [
             # Check unsupported media type
