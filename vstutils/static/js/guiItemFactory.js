@@ -16,6 +16,11 @@ var gui_base_object = {
         return tpl;
     },
     
+    getTitle : function()
+    {
+        return this.api.bulk_name
+    },
+    
     renderAllFields : function(opt)
     {
         let html = []
@@ -265,7 +270,7 @@ var gui_base_object = {
                 // Модификация на то если у нас не мультиоперация
                 query = [url]
             }
-
+          
             query.forEach(qurl => {
 
                 qurl = qurl.replace(/^\/|\/$/g, "").split(/\//g)
@@ -293,7 +298,7 @@ var gui_base_object = {
                         return;
                     }
  
-                    def.resolve()
+                    def.resolve(data)
                 }).fail(e => { 
                     if(callback)
                     {
@@ -598,7 +603,8 @@ function questionDeleteAllSelectedOrNot(thisObj) {
     return false;
 }
 
-function questionDeleteOrRemove(thisObj){
+function questionDeleteOrRemove(thisObj)
+{
     var answer;
     var question = "<b> Delete </b> selected elements at all or just <b> remove </b> them from this list?";
     var answer_buttons = ["Delete this page's selected", "Delete all selected", "Remove this page's selected", "Remove all selected"];
@@ -664,6 +670,10 @@ function deleteSelectedElements(thisObj, ids, tag){
  * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
  */
 function removeSelectedElements(ids, tag) {
+    
+        debugger;
+        alert("Не доделал.")
+        
     $.when(changeSubItemsInParent('DELETE', ids)).done(function()
     {
         window.guiListSelections.unSelectAll(tag);

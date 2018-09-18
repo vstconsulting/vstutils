@@ -15,13 +15,28 @@ function openApi_guiPrepareFields(api, properties)
                 continue;
             }
             fields[i] =  $.extend({}, def_obj);
+             
             fields[i].readOnly = true
+
             let format = def_name.replace("#/", "").split(/\//)
             fields[i].format = "api"+format[1]
+            fields[i].definition_ref = def_name
         }
     }
-
+     
    return fields
+}
+
+function openApi_guiRemoveReadOnlyMark(properties)
+{
+    for(let i in properties)
+    {
+        if(properties[i].definition_ref)
+        {
+            properties[i].readOnly = false
+        }
+    } 
+    return properties
 }
 
 // Заменит ссылки на Definitions на списки полей из Definitions
@@ -111,7 +126,7 @@ function openApi_guiSchema(api)
             short_name:undefined,
             hide_non_required:guiLocalSettings.get('hide_non_required'),
             extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],
-            methodEdit:undefined,
+            methodEdit:undefined, 
         }
 
         if(type != 'action')
@@ -167,7 +182,7 @@ function openApi_guiSchema(api)
                 val.methodEdit = 'put'
             }
             val.canEdit = val.methodEdit != undefined;
-        }
+        } 
     }
 
     // Проставит свойство schema
@@ -181,7 +196,8 @@ function openApi_guiSchema(api)
             val.schema.list = {
                 fields:openApi_guiPrepareFields(api, val.api.get.fields),
                 filters:val.api.get.filters,
-                query_type:'get'
+                query_type:'get',
+                operationId:val.api.get.operationId
             }
 
             if(val.api.post)
@@ -189,7 +205,8 @@ function openApi_guiSchema(api)
                 val.schema.new = {
                     fields:openApi_guiPrepareFields(api, val.api.post.fields),
                     filters:val.api.post.filters,
-                    query_type:'post'
+                    query_type:'post',
+                    operationId:val.api.post.operationId
                 }
             }
         }
@@ -198,7 +215,8 @@ function openApi_guiSchema(api)
             val.schema.get = {
                 fields:openApi_guiPrepareFields(api, val.api.get.fields),
                 filters:val.api.get.filters,
-                query_type:'get'
+                query_type:'get',
+                operationId:val.api.get.operationId
             }
 
             if(val.api.put)
@@ -206,7 +224,8 @@ function openApi_guiSchema(api)
                 val.schema.edit = {
                     fields:openApi_guiPrepareFields(api, val.api.put.fields),
                     filters:val.api.put.filters,
-                    query_type:'put'
+                    query_type:'put',
+                    operationId:val.api.put.operationId
                 }
             }
 
@@ -215,7 +234,8 @@ function openApi_guiSchema(api)
                 val.schema.edit = {
                     fields:openApi_guiPrepareFields(api, val.api.patch.fields),
                     filters:val.api.patch.filters,
-                    query_type:'patch'
+                    query_type:'patch',
+                    operationId:val.api.patch.operationId
                 }
             }
         }
@@ -227,10 +247,12 @@ function openApi_guiSchema(api)
                 if(val.api[query_types[q]])
                 {
                     val.schema.exec = {
-                        fields:openApi_guiPrepareFields(api, val.api[query_types[q]].fields),
+                        fields:openApi_guiRemoveReadOnlyMark(openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true)),
                         filters:val.api[query_types[q]].filters,
-                        query_type:query_types[q]
+                        query_type:query_types[q],
+                        operationId:val.api[query_types[q]].operationId
                     }
+                    val.methodExec = query_types[q]
                     break;
                 }
             }
@@ -276,6 +298,37 @@ function openApi_guiSchema(api)
             }
 
             val.actions[subobj.name] = subobj
+        }
+        
+        val.multi_actions = [] 
+        for(let subaction in  val.sublinks_l2)
+        {
+            let subobj = val.sublinks_l2[subaction]
+            if(subobj.type != 'action')
+            { 
+                continue;
+            }
+
+            val.multi_actions[subobj.name] = subobj
+        }
+        
+        if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
+        {
+            val.multi_actions['delete'] = {
+                name:"delete",
+                onClick:function()
+                {  
+                    if(this.api.canRemove)
+                    {
+                        return questionDeleteOrRemove(this);
+                    }
+                    else
+                    {
+                        return questionDeleteAllSelectedOrNot(this);
+                    }
+
+                }
+            }
         }
     }
 
