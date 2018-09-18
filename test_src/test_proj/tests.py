@@ -22,6 +22,39 @@ class ProjectTestCase(BaseTestCase):
             self.get_mod_bulk('hosts', '<3[data][id]>', dict(name='da'), 'hosts'),
         ]
 
+    def test_deep_host_create(self):
+        bulk_data = [
+            self.get_bulk('deephosts', dict(name='level1'), 'add'),
+            self.get_mod_bulk(
+                'deephosts', '<0[data][id]>', dict(name='level2'), 'subsubhosts'
+            ),
+            self.get_mod_bulk(
+                'deephosts', '<0[data][id]>', dict(name='level3'),
+                'subsubhosts/<1[data][id]>/subdeephosts'
+            ),
+            self.get_mod_bulk(
+                'deephosts', '<0[data][id]>', dict(name='level4'),
+                'subsubhosts/<1[data][id]>/subdeephosts/<2[data][id]>/shost'
+            ),
+            self.get_mod_bulk(
+                'deephosts', '<0[data][id]>', {},
+                'subsubhosts/<1[data][id]>/subdeephosts/<2[data][id]>/hosts/<3[data][id]>',
+                method='get'
+            ),
+            self.get_mod_bulk(
+                'deephosts', '<0[data][id]>', {},
+                'subsubhosts/<1[data][id]>/subdeephosts/<2[data][id]>/hosts',
+                method='get'
+            ),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        for result in results[:-2]:
+            self.assertEqual(result['status'], 201)
+        self.assertEqual(results[-2]['status'], 200)
+        self.assertEqual(results[-2]['data']['name'], 'level4')
+        self.assertEqual(results[-1]['status'], 200)
+        self.assertEqual(results[-1]['data']['count'], 1)
+
     def test_models(self):
         self.assertEqual(Host.objects.all().count(), self.predefined_hosts_cnt)
         Host.objects.all().delete()
