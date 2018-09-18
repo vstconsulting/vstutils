@@ -425,6 +425,17 @@ var gui_list_object = {
         return search;
     },
 
+    create : function ()
+    {
+        var thisObj = this;
+        var res = this.sendToApi(this.api.methodAdd)
+        $.when(res).done(function()
+        {
+            guiPopUp.success("New object in "+thisObj.api.bulk_name+" was successfully created");
+        })
+        return res;
+    },
+
     /**
      * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
      * @returns {string|promise}
@@ -433,7 +444,7 @@ var gui_list_object = {
     {
         let tpl = this.getTemplateName('list')
 
-        render_options.fields = this.api.schema.fields
+        render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
         
         //render_options.sections = this.getSections('renderAsPage')
@@ -446,6 +457,22 @@ var gui_list_object = {
     },
 
     /**
+     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
+     * @returns {string|promise}
+     */
+    renderAsNewPage : function (render_options = {})
+    {
+        let tpl = this.getTemplateName('new')
+
+        render_options.fields = this.api.schema.new.fields
+        //render_options.sections = this.getSections('renderAsNewPage')
+        render_options.hideReadOnly = true
+       
+        render_options.base_path = getUrlBasePath()
+        return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+    },
+
+    /**
      * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
      * @returns {string|promise}
      */
@@ -453,7 +480,7 @@ var gui_list_object = {
     {
         let tpl = this.getTemplateName('list_add_subitems')
 
-        render_options.fields = this.api.schema.fields
+        render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
         //render_options.sections = this.getSections('renderAsAddSubItemsPage')
 

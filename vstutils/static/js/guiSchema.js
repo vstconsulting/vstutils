@@ -1,4 +1,29 @@
 
+// Заменит ссылки на Definitions на объекты в списке полей
+function openApi_guiPrepareFields(api, properties)
+{
+    let fields = $.extend({}, properties)
+    for(let i in fields)
+    {
+        let def_name = getObjectNameBySchema(fields[i])
+        if(def_name)
+        {
+            let def_obj = getObjectDefinitionByName(api, def_name)
+            if(!def_obj)
+            {
+                console.error("can not found definition for object "+def_name)
+                continue;
+            }
+            fields[i] =  $.extend({}, def_obj);
+            fields[i].readOnly = true
+            let format = def_name.replace("#/", "").split(/\//)
+            fields[i].format = "api"+format[1]
+        }
+    }
+
+   return fields
+}
+
 // Заменит ссылки на Definitions на списки полей из Definitions
 function openApi_guiQuerySchema(api, query_schema)
 {
@@ -20,13 +45,13 @@ function openApi_guiQuerySchema(api, query_schema)
         return query_schema;
     }
 
-    query_schema.fields = $.extend({}, def_obj.properties)
+    query_schema.fields = openApi_guiPrepareFields(api, def_obj.properties)
 
     for(let i in query_schema.fields)
     {
         query_schema.fields[i].name = i
     }
-    
+
     return query_schema;
 }
 
@@ -85,10 +110,10 @@ function openApi_guiSchema(api)
             buttons:[], // массив кнопок
             short_name:undefined,
             hide_non_required:guiLocalSettings.get('hide_non_required'),
-            extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")]
-              
+            extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],
+            methodEdit:undefined,
         }
-        
+
         if(type != 'action')
         {
             let short_key = i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "")
@@ -112,13 +137,15 @@ function openApi_guiSchema(api)
 
         if(val.type == 'list')
         {
+            val.methodAdd = 'post'
             val.canAdd = false
             val.canRemove = false
             if(path_schema['/'+key+'/'] && val.level > 2)
-            { 
+            {
                 if(val.api.post != undefined)
                 {
-                    val.canAdd = path_schema['/'+key+'/']
+                    val.canAdd = true
+                    val.shortestURL = path_schema['/'+key+'/']
                 }
                 val.canRemove = val.api.post != undefined
             }
@@ -127,7 +154,19 @@ function openApi_guiSchema(api)
         else if(val.type == 'page')
         {
             val.canDelete = val.api.delete != undefined
-            val.canEdit = ( val.api.patch != undefined || val.api.put != undefined )
+            val.methodDelete = 'delete'
+
+
+            if( val.api.patch != undefined)
+            {
+                val.methodEdit = 'patch'
+            }
+
+            if( val.api.put != undefined)
+            {
+                val.methodEdit = 'put'
+            }
+            val.canEdit = val.methodEdit != undefined;
         }
     }
 
@@ -135,24 +174,60 @@ function openApi_guiSchema(api)
     for(let path in path_schema)
     {
         let val =  path_schema[path]
+        val.schema = {}
 
-        if(val.type == 'list' || val.type == 'page')
+        if(val.type == 'list')
         {
-            val.schema = {
-                fields:val.api.get.fields,
+            val.schema.list = {
+                fields:openApi_guiPrepareFields(api, val.api.get.fields),
                 filters:val.api.get.filters,
                 query_type:'get'
             }
+
+            if(val.api.post)
+            {
+                val.schema.new = {
+                    fields:openApi_guiPrepareFields(api, val.api.post.fields),
+                    filters:val.api.post.filters,
+                    query_type:'post'
+                }
+            }
+        }
+        else if(val.type == 'page')
+        {
+            val.schema.get = {
+                fields:openApi_guiPrepareFields(api, val.api.get.fields),
+                filters:val.api.get.filters,
+                query_type:'get'
+            }
+
+            if(val.api.put)
+            {
+                val.schema.edit = {
+                    fields:openApi_guiPrepareFields(api, val.api.put.fields),
+                    filters:val.api.put.filters,
+                    query_type:'put'
+                }
+            }
+
+            if(val.api.patch)
+            {
+                val.schema.edit = {
+                    fields:openApi_guiPrepareFields(api, val.api.patch.fields),
+                    filters:val.api.patch.filters,
+                    query_type:'patch'
+                }
+            }
         }
         else
-        { 
+        {
             let query_types =  ['post', 'put', 'delete', 'patch']
             for(let q in query_types)
             {
                 if(val.api[query_types[q]])
                 {
-                    val.schema = {
-                        fields:val.api[query_types[q]].fields,
+                    val.schema.exec = {
+                        fields:openApi_guiPrepareFields(api, val.api[query_types[q]].fields),
                         filters:val.api[query_types[q]].filters,
                         query_type:query_types[q]
                     }
@@ -188,7 +263,7 @@ function openApi_guiSchema(api)
 
         val.sublinks = openApi_get_internal_links(path_schema, path, 1)
         val.sublinks_l2 = openApi_get_internal_links(path_schema, path, 2)
-        
+
         val.actions = {}
         val.links = {}
         for(let subpage in  val.sublinks)
@@ -223,7 +298,7 @@ function openApi_guiPagesBySchema(schema)
             openApi_add_one_page_path(val)
         }
         if(val.type == 'action')
-        { 
+        {
             openApi_add_one_action_page_path(val)
         }
     }
@@ -247,7 +322,7 @@ function getObjectBySchema(obj)
 {
     let name = getObjectNameBySchema(obj);
     if(!name)
-    { 
+    {
         return undefined
     }
 

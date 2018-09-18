@@ -182,7 +182,7 @@ function openApi_add_list_page_path(api_obj)
 
     // Проверяем есть ли возможность создавать объекты
 
-    if(api_obj.page && api_obj.canCreate)
+    if(api_obj.canCreate)
     {
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
         var new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_obj)
@@ -198,7 +198,7 @@ function openApi_add_list_page_path(api_obj)
             prioritet:10,
             render: function(menuInfo, data)
             {
-                var pageItem = new guiObjectFactory(api_obj.page)
+                var pageItem = new guiObjectFactory(api_obj)
                 return pageItem.renderAsNewPage()
             }
         })
@@ -222,7 +222,7 @@ function openApi_add_list_page_path(api_obj)
             render:function(menuInfo, data, thisGuiPage)
             {
                 var def = new $.Deferred();
-                var pageItem = new guiObjectFactory(api_obj.canAdd)
+                var pageItem = new guiObjectFactory(api_obj.shortestURL)
                 //var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg, selectionTag:api_path_value.api_path+"add/"})
 
                 var filter =  $.extend(true, data.reg)
@@ -279,6 +279,9 @@ tabSignal.connect("resource.loaded", function()
         tabSignal.emit("openapi.loaded",  {api: window.api});
 
         window.guiSchema = openApi_guiSchema(window.api.openapi)
+        
+        tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
+        
         openApi_guiPagesBySchema(window.guiSchema)
 
         // Событие в теле которого можно было бы переопределить и дополнить список страниц

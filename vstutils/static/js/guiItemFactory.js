@@ -145,13 +145,18 @@ var gui_base_object = {
      *
      * @returns {basePageView.getValue.obj}
      */
-    getValue : function ()
+    getValue : function (hideReadOnly)
     {
         var obj = {}
         let count = 0;
         for(let i in this.model.guiFields)
         {
-            let val = this.model.guiFields[i].getValidValue();
+            if(this.model.guiFields[i].opt.readOnly && hideReadOnly)
+            {
+                continue;
+            } 
+            
+            let val = this.model.guiFields[i].getValidValue(hideReadOnly);
             if(val !== undefined && val !== null && !(typeof val == "number" && isNaN(val)) )
             {
                 obj[i] = val;
@@ -171,14 +176,150 @@ var gui_base_object = {
     /**
      * Вернёт значение только правильное, если оно не правильное то должно выкинуть исключение 
      */
-    getValidValue : function ()
+    getValidValue : function (hideReadOnly)
     { 
-        return this.getValue();
+        if(hideReadOnly)
+        {
+            return undefined
+        }
+        return this.getValue.call(arguments);
     },
 
-    init : function ()
-    {  
+    base_init : function (api_object, url_vars = undefined)
+    {
+        this.url_vars = spajs.urlInfo.data.reg
+        if(url_vars)
+        {
+            this.url_vars = url_vars
+        } 
     },
+    init : function ()
+    {
+        this.base_init.apply(this, arguments)
+    },
+    
+    sendToApi : function (method, callback, error_callback)
+    {
+        var def = new $.Deferred();
+        var data = {}
+
+        try{
+            data = this.getValue(true)
+            if (this['onBefore'+method])
+            {
+                data = this['onBefore'+method].apply(this, [data]);
+                if (data == undefined || data == false)
+                {
+                    def.reject()
+                    return def.promise();
+                }
+            }
+            
+            if(!this.api.api[method] || !this.api.api[method].operationId)
+            {
+                throw "!this.api[method].operationId"
+            }
+             
+            let operationId = this.api.api[method].operationId.replace(/(set)_([A-z0-9]+)/g, "$1-$2")
+
+            var operations = []
+            operations = operationId.split("_");
+            for(let i in operations)
+            {
+                operations[i] = operations[i].replace("-", "_")
+            }
+
+            var query = []
+            var url = this.api.path
+            if(this.url_vars)
+            {
+                for(let i in this.url_vars)
+                {
+                    if(/^api_/.test(i))
+                    {
+                        url = url.replace("{"+i.replace("api_", "")+"}", this.url_vars[i])
+                    }
+                }
+
+                // Модификация на то если у нас мультиоперация
+                for(let i in this.url_vars)
+                {
+                    if(/^api_/.test(i))
+                    {
+                        if(this.url_vars[i].indexOf(",") != -1)
+                        {
+                            let ids = this.url_vars[i].split(",")
+                            for(let j in ids)
+                            {
+                                query.push(url.replace(this.url_vars[i], ids[j]))
+                            }
+
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            if(query.length == 0)
+            {
+                // Модификация на то если у нас не мультиоперация
+                query = [url]
+            }
+
+            query.forEach(qurl => {
+
+                qurl = qurl.replace(/^\/|\/$/g, "").split(/\//g)
+                let q = {
+                    //type:'mod',
+                    data_type:qurl,
+                    data:data,
+                    method:method
+                }
+               
+                $.when(api.query(q)).done(data => 
+                {
+                    if(callback)
+                    {
+                        if(callback(data) === false)
+                        {
+                            return;
+                        }
+                    }
+
+                    if(data.not_found > 0)
+                    {
+                        guiPopUp.error("Item not found");
+                        def.reject({text:"Item not found", status:404})
+                        return;
+                    }
+ 
+                    def.resolve()
+                }).fail(e => { 
+                    if(callback)
+                    {
+                        if(error_callback(e) === false)
+                        {
+                            return;
+                        }
+                    }
+
+                    polemarch.showErrors(e.responseJSON)
+                    def.reject(e)
+                }) 
+            })
+
+        }catch (e) {
+            polemarch.showErrors(e)
+
+            def.reject()
+            if(e.error != 'validation')
+            {
+                throw e
+            }
+        }
+
+        return def.promise();
+    }, 
 }
  
 /**
