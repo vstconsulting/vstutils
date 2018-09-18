@@ -81,9 +81,9 @@ def get_action_name(master_view, method):
     method = method.lower()
     if method == 'post':
         action_name = 'create'
-    elif method == 'get' and not master_view.nested_id:
+    elif method == 'get' and not master_view.nested_detail:
         action_name = 'list'
-    elif method == 'get' and master_view.nested_id:
+    elif method == 'get' and master_view.nested_detail:
         action_name = 'retrieve'
     elif method == 'put':
         action_name = 'update'
@@ -130,7 +130,7 @@ class NestedViewMixin(object):
             kwargs.update({
                 self.master_view.nested_append_arg: self.master_view.nested_id
             })
-        return getattr(self, self.action)(self.request)
+        return getattr(self, self.action)(self.request, **kwargs)
 
 
 class NestedWithoutAppendMixin(NestedViewMixin):
@@ -192,6 +192,7 @@ def nested_view_function(master_view, view, view_request, *args, **kw):
     view_obj.request = view_request
     view_obj.kwargs = kwargs
     master_view.nested_view_object = view_obj
+    master_view.nested_detail = view.nested_detail
     return view_obj.dispatch_route(nested_sub)
 
 
@@ -272,12 +273,21 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             else:
                 mixin_class = NestedWithoutAppendMixin
 
+        tp = name.split('_')[-1]
+        if tp == 'detail':
+            detail = True
+        elif tp == 'list':
+            detail = False
+        else:
+            detail = getattr(self.view, options['nested_sub']).detail
+
         def nested_view(view_obj, request, *args, **kwargs):
             kwargs.update(options)
 
             class NestedView(mixin_class, self.view):
                 __doc__ = self.view.__doc__
                 master_view = view_obj
+                nested_detail = detail
                 nested_allow_append = view_obj.nested_allow_append
                 lookup_field = view_obj.nested_append_arg
                 format_kwarg = None
