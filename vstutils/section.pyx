@@ -1,4 +1,3 @@
-from cpython.list cimport PyList_Insert
 from cpython.dict cimport (
     PyDict_New, PyDict_Copy, PyDict_Items,
     PyDict_Update, PyDict_SetItemString, PyDict_SetItem
@@ -115,19 +114,13 @@ cdef class Section:
     def getseconds(self, option, fallback=None):
         return self.int_seconds(self.get(option, str(fallback)))
 
-    cdef list _get_list(self, str option, str fallback, str separator=','):
-        fallback = fallback
-        list_str = self.get(option, fallback).split(separator)
-        cdef list ret = <list>list()
-        for i in xrange(len(list_str)):
-            item = list_str[i]
-            if item:
-                PyList_Insert(ret, i, item)
-        return ret
-
     def getlist(self, option, fallback=None, separator=','):
         fallback = fallback or ''
-        return self._get_list(option, fallback, separator)
+        return self.comma_list(self.get(option, fallback), separator)
+
+    @classmethod
+    def comma_list(cls, value, separator=','):
+        return filter(bool, value.split(separator))
 
     @classmethod
     def int_seconds(cls, value):

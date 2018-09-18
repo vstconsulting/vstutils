@@ -34,6 +34,9 @@ class HostSerializer(VSTSerializer):
         )
 
 
+class CreateHostSerializer(HostSerializer):
+    name = fields.CharField(required=True)
+
 
 class HostGroupSerializer(VSTSerializer):
     name = fields.AutoCompletionField(autocomplete=['Some', 'Another'])
@@ -58,6 +61,9 @@ class HostViewSet(ModelViewSetSet):
     '''
     model = Host
     serializer_class = HostSerializer
+    action_serializers = {
+        'create': CreateHostSerializer
+    }
     filter_class = HostFilter
 
     @action(detail=True)
