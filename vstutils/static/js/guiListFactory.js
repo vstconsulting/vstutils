@@ -5,6 +5,7 @@ var gui_list_object = {
     }, 
     init : function (page_options, objects)
     {
+        this.base_init.apply(this, arguments)
         let thisObj = this;
         if(!page_options)
         {
@@ -46,36 +47,19 @@ var gui_list_object = {
                 {
                     continue;
                 }
-                this.model.multi_actions[i] = this.model.sublinks[i]
-            }
-
-            /*this.model.multi_actions['delete'] = {
-                name:"delete",
-                onClick:function()
-                {
-                    //@todo как и в this.getBtnAdd() подумать какой способ определения родительская ссылка или нет лучше
-                    if(thisObj.getShortestApiURL().level == 2 && (window.location.search.match(/\//g) || []).length > 1)
-                    {
-                        return questionDeleteOrRemove(thisObj);
-                    }
-                    else
-                    {
-                        return questionDeleteAllSelectedOrNot(thisObj);
-                    }
-
-                }
-            }*/
-
-
+                this.api.multi_actions[i] = this.model.sublinks[i]
+            } 
         } 
     },
   
     deleteArray : function (ids)
     {
         debugger;
+        alert("Не доделал.")
+        
         var thisObj = this;
         var def = new $.Deferred();
-
+ 
         var q = []
         for(let i in ids)
         {

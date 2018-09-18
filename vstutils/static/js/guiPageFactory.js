@@ -8,56 +8,25 @@ var gui_page_object = {
         }
 
         var thisObj = this;
-
-
-        var query = undefined;
-         
-        if(this.model.pathInfo && this.model.pathInfo.get && this.model.pathInfo.get.operationId)
+        var url = this.api.path
+        if(this.url_vars)
         {
-            var operations = this.model.pathInfo.get.operationId.split("_");
-            if(operations.length >= 3)
+            for(let i in this.url_vars)
             {
-                let pageInfo = this.getPageInfo()
-                query = {
-                    type: "mod",
-                    item: operations[0],
-                    data_type:pageInfo.page.replace(/^[A-z]+\/[0-9]+\//, ""),
-                    method:"get"
-                }
-
-                for(var i in pageInfo)
+                if(/^api_/.test(i))
                 {
-                    if(/^api_/.test(i))
-                    {
-                        query[i.replace(/api_/, "")] = pageInfo[i]
-                    }
+                    url = url.replace("{"+i.replace("api_", "")+"}", this.url_vars[i])
                 }
-            }
+            } 
         }
-
-        if(!query)
-        {
-            if(filters.parent_id && filters.parent_type)
-            {
-                query = {
-                    type: "mod",
-                    item: filters.parent_type,
-                    data_type:this.api.bulk_name,
-                    method:"get",
-                    pk:filters.parent_id
-                }
-            }
-            else
-            {
-                query = {
-                    type: "get",
-                    item: this.api.bulk_name,
-                    pk:filters.api_pk
-                }
-            }
+          
+        let q = {
+            //type:'mod',
+            data_type:url.replace(/^\/|\/$/g, "").split(/\//g), 
+            method:'get'
         }
-
-        var def = api.query(query)
+ 
+        var def = api.query(q)
 
         var promise = new $.Deferred();
 
@@ -97,6 +66,7 @@ var gui_page_object = {
   
     delete : function ()
     { 
+        debugger;
         var thisObj = this;
         var res = this.sendToApi(this.api.methodDelete)
         $.when(res).done(function()
