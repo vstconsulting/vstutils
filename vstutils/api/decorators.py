@@ -46,17 +46,12 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         def wrapper(view, request, *args, **kwargs):
             # Nested name
             view.nested_name = name
-            # Nested parent object
-            view.nested_parent_object = view.get_object()
             # Allow append to nested or only create
             view.nested_allow_append = allow_append
             # ID name of nested object
             view.nested_arg = request_arg
             view.nested_append_arg = append_arg
             view.nested_id = kwargs.get(view.nested_arg, None)
-            view.nested_manager = getattr(
-                view.nested_parent_object, manager_name or name, None
-            )
             view.nested_view_object = None
             view._nested_filter_class = _nested_filter_class
             return func(view, request, *args)
@@ -104,7 +99,7 @@ class NestedViewMixin(object):
             self.check_object_permissions(self.request, obj)
 
     def get_queryset(self):
-        return self.master_view.nested_manager.all()
+        return self.nested_manager.all()
 
     def get_nested_action_name(self):
         return get_action_name(self.master_view, self.request.method)
@@ -115,11 +110,11 @@ class NestedViewMixin(object):
 
     def perform_destroy(self, instance):
         if self.master_view.nested_allow_append:
-            self.master_view.nested_manager.remove(instance)
+            self.nested_manager.remove(instance)
         else:
             instance.delete()
 
-    @transaction.atomic
+    @transaction.atomic()
     def dispatch_route(self, nested_sub=None):
         kwargs = dict()
         if nested_sub:
@@ -128,7 +123,7 @@ class NestedViewMixin(object):
             self.action = self.get_nested_action_name()
         if self.action != 'list':
             kwargs.update({
-                self.master_view.nested_append_arg: self.master_view.nested_id
+                self.nested_append_arg: self.nested_id
             })
         return getattr(self, self.action)(self.request, **kwargs)
 
@@ -148,7 +143,7 @@ class NestedWithoutAppendMixin(NestedViewMixin):
         for data in request_data:
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
-            obj = self.master_view.nested_manager.create(**serializer.validated_data)
+            obj = self.nested_manager.create(**serializer.validated_data)
             id_list.append(getattr(obj, nested_append_arg))
 
         return id_list
@@ -173,7 +168,7 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
             filter_arg: map(lambda i: i.get(nested_append_arg), request_data)
         })
         self._check_permission_obj(objects)
-        self.master_view.nested_manager.add(*objects)
+        self.nested_manager.add(*objects)
         id_list = list(objects.values_list(nested_append_arg, flat=True))
         not_created = filter(
             lambda data: data.get(nested_append_arg, None) not in id_list, request_data
@@ -187,10 +182,9 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
 def nested_view_function(master_view, view, view_request, *args, **kw):
     # pylint: disable=unused-argument,unnecessary-lambda
     nested_sub = kw.get('nested_sub', None)
-    kwargs = {master_view.nested_append_arg: master_view.nested_id}
     view_obj = view()
     view_obj.request = view_request
-    view_obj.kwargs = kwargs
+    view_obj.kwargs = view_request.parser_context['kwargs']
     master_view.nested_view_object = view_obj
     master_view.nested_detail = view.nested_detail
     return view_obj.dispatch_route(nested_sub)
@@ -281,18 +275,36 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         else:
             detail = getattr(self.view, options['nested_sub']).detail
 
+        manager_name = self.kwargs.get('manager_name', self.name)
+
         def nested_view(view_obj, request, *args, **kwargs):
             kwargs.update(options)
+            view_obj.nested_parent_object = view_obj.get_object()
+            nested_allow_append = view_obj.nested_allow_append
+            nested_append_arg = view_obj.nested_append_arg
+            nested_request_arg = view_obj.nested_arg
+            nested_parent_object = view_obj.nested_parent_object
+            if nested_append_arg:
+                nested_id = getattr(nested_parent_object, nested_append_arg, None)
+            else:
+                nested_id = None
+            nested_manager = getattr(nested_parent_object, manager_name)
 
             class NestedView(mixin_class, self.view):
                 __doc__ = self.view.__doc__
                 master_view = view_obj
-                nested_detail = detail
-                nested_allow_append = view_obj.nested_allow_append
-                lookup_field = view_obj.nested_append_arg
+                lookup_field = nested_append_arg
+                lookup_url_kwarg = nested_request_arg
                 format_kwarg = None
 
             NestedView.__name__ = self.view.__name__
+            NestedView.nested_detail = detail
+            NestedView.nested_allow_append = nested_allow_append
+            NestedView.nested_append_arg = nested_append_arg
+            NestedView.nested_request_arg = nested_request_arg
+            NestedView.nested_parent_object = nested_parent_object
+            NestedView.nested_id = nested_id
+            NestedView.nested_manager = nested_manager
 
             getattr(view_obj, 'nested_allow_check', lambda *args, **kwargs: None)()
             return nested_view_function(view_obj, NestedView, request, *args, **kwargs)

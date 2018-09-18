@@ -107,6 +107,16 @@ class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
     copy_related = ['hosts', 'subgroups']
 
 
+@nested_view('subdeephosts', 'id', manager_name='subgroups', view=HostGroupViewSet)
+class _DeepHostGroupViewSet(_HostGroupViewSet, CopyMixin):
+    pass
+
+
+@nested_view('subsubhosts', 'id', manager_name='subgroups', view=_DeepHostGroupViewSet)
+class DeepHostGroupViewSet(_DeepHostGroupViewSet):
+    pass
+
+
 try:
     @nested_view('subgroups', 'id')
     class ErrorView(_HostGroupViewSet):
