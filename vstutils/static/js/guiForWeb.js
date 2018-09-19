@@ -88,8 +88,7 @@ webGui.start = function(options)
         }
         
         console.error("spajs.openMenuFromUrl exception", exception.stack)
-        debugger;
-        //spajs.openURL("");
+        debugger; 
     }
 }
 
