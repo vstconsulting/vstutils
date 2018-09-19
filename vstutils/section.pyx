@@ -120,7 +120,7 @@ cdef class Section:
 
     @classmethod
     def comma_list(cls, value, separator=','):
-        return filter(bool, value.split(separator))
+        return tuple(filter(bool, value.split(separator)))
 
     @classmethod
     def int_seconds(cls, value):

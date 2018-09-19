@@ -96,8 +96,11 @@ class BulkViewSet(base.rvs.APIView):
         "SERVER_NAME",
         "SERVER_PORT",
         "SERVER_PROTOCOL",
+        "SERVER_SOFTWARE",
         "REMOTE_ADDR",
         "HTTP_X_FORWARDED_PROTOCOL",
+        "HTTP_HOST",
+        "HTTP_USER_AGENT",
     ]
     api_version = settings.VST_API_VERSION
     schema = None

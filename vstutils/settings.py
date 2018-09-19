@@ -354,6 +354,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
     'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
+    'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
     'SCHEMA_COERCE_PATH_PK': False,
     'SCHEMA_COERCE_METHOD_NAMES': {
         'create': 'add',
