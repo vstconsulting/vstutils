@@ -91,6 +91,14 @@ class BulkViewSet(base.rvs.APIView):
     get: Return allowed_types and operations_types
     post: Return result of bulk-operations.
     '''
+    client_environ_keys_copy = [
+        "SCRIPT_NAME",
+        "SERVER_NAME",
+        "SERVER_PORT",
+        "SERVER_PROTOCOL",
+        "REMOTE_ADDR",
+        "HTTP_X_FORWARDED_PROTOCOL",
+    ]
     api_version = settings.VST_API_VERSION
     schema = None
 
@@ -129,8 +137,10 @@ class BulkViewSet(base.rvs.APIView):
 
     def _get_obj_with_extra(self, param):
         if isinstance(param, (six.text_type, six.string_types)):
-            param = param.replace('<', '{').replace('>', '}')
-            return self._load_param(param.format(*self.results))
+            if not ('{' in param and '}' in param):
+                param = param.replace('<', '{').replace('>', '}')
+                param = param.format(*self.results)
+            return self._load_param(param)
         return param
 
     def _json_dump(self, value, inner=False):
@@ -181,7 +191,7 @@ class BulkViewSet(base.rvs.APIView):
             operation.get('filters', None),
         )
         method = getattr(self.client, self.get_method_type(op_type, operation))
-        return method(url, **kwargs)
+        return method(url, secure=self.is_secure, **kwargs), url
 
     def create_response(self, status, data, operation, **kwargs):
         result = Dict(
@@ -208,11 +218,11 @@ class BulkViewSet(base.rvs.APIView):
     def perform(self, operation):
         kwargs = dict()
         kwargs["content_type"] = "application/json"
-        response = self.get_operation(operation, kwargs)
+        response, url = self.get_operation(operation, kwargs)
         return self.create_response(
             response.status_code,
             self._get_rendered(response),
-            operation
+            operation, url=url
         )
 
     def operate_handler(self, operation, allow_fail=True):
@@ -242,10 +252,23 @@ class BulkViewSet(base.rvs.APIView):
                 operation, **kwargs
             ))
 
+    def original_environ_data(self, *args):
+        # pylint: disable=protected-access
+        orig_environ = self.request._request.environ
+        get_environ = orig_environ.get
+        kwargs = dict()
+        for env_var in tuple(self.client_environ_keys_copy) + args:
+            value = get_environ(env_var, None)
+            if value:
+                kwargs[env_var] = str(value)
+        return kwargs
+
     def operate(self, request, allow_fail=True):
+        # pylint: disable=protected-access
+        self.is_secure = request._request.is_secure()
         operations = request.data
         self.results = []
-        self.client = Client()
+        self.client = Client(**self.original_environ_data())
         self.client.force_login(request.user)
         for operation in operations:
             with transaction.atomic():
