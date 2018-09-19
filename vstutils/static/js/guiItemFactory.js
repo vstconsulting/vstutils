@@ -308,7 +308,7 @@ var gui_base_object = {
                         }
                     }
 
-                    webGui.showErrors(e.responseJSON)
+                    webGui.showErrors(e)
                     def.reject(e)
                 }) 
             })
@@ -484,7 +484,7 @@ function addToParentsAndGoUp(item_ids)
         spajs.openURL(window.hostname + spajs.urlInfo.data.reg.baseURL());
     }).fail(function (e)
     {
-        webGui.showErrors(e.responseJSON)
+        webGui.showErrors(e)
     }).promise();
 }
 
@@ -655,7 +655,7 @@ function deleteSelectedElements(thisObj, ids, tag){
 
     }).fail(function (e)
     {
-        webGui.showErrors(e.responseJSON)
+        webGui.showErrors(e)
         debugger;
     })
 
@@ -679,7 +679,7 @@ function removeSelectedElements(ids, tag) {
         spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
     }).fail(function (e)
     {
-        webGui.showErrors(e.responseJSON)
+        webGui.showErrors(e)
         debugger;
     })
 
