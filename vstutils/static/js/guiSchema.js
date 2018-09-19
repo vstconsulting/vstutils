@@ -1,25 +1,30 @@
 
 // Заменит ссылки на Definitions на объекты в списке полей
-function openApi_guiPrepareFields(api, properties)
+function openApi_guiPrepareFields(api, properties, parent_name)
 {
-    let fields = $.extend({}, properties)
+    let fields = mergeDeep({}, properties)
     for(let i in fields)
     {
         let def_name = getObjectNameBySchema(fields[i])
         if(def_name)
-        {
-            let def_obj = getObjectDefinitionByName(api, def_name)
+        { 
+            let def_obj = getObjectDefinitionByName(api, def_name, parent_name+"_"+i)
             if(!def_obj)
             {
                 console.error("can not found definition for object "+def_name)
                 continue;
             }
-            fields[i] =  $.extend({}, def_obj);
+            fields[i] =  mergeDeep({}, def_obj);
              
             fields[i].readOnly = true
 
             let format = def_name.replace("#/", "").split(/\//)
-            fields[i].format = "api"+format[1]
+            
+            if(format[1] != "Data")
+            {
+                fields[i].format = "api"+format[1]
+            }
+            
             fields[i].definition_ref = def_name 
         }
     }
@@ -40,32 +45,52 @@ function openApi_guiRemoveReadOnlyMark(properties)
 }
 
 // Заменит ссылки на Definitions на списки полей из Definitions
-function openApi_guiQuerySchema(api, query_schema)
+function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
 {
-    if(query_schema && query_schema.parameters)
+    if(!QuerySchema)
     {
-        query_schema.filters = query_schema.parameters
-        delete query_schema.parameters;
+        return undefined
+    }
+    
+    let def_name = undefined
+    let query_schema = mergeDeep({}, QuerySchema) 
+    if(type == 'get')
+    {
+        if(query_schema.parameters)
+        {
+            query_schema.filters = query_schema.parameters 
+        }
+
+        def_name = getObjectNameBySchema(query_schema)
+    }
+    else
+    {
+        if(query_schema.parameters)
+        {
+            query_schema.fields = query_schema.parameters
+        }
+
+        def_name = getObjectNameBySchema(query_schema.fields)
     }
 
-    let def_name = getObjectNameBySchema(query_schema)
+    delete query_schema.parameters;
     if(!def_name)
     {
         return query_schema;
     }
-
+   
     let def_obj = getObjectDefinitionByName(api, def_name)
     if(!def_obj)
     {
         return query_schema;
     }
-    
-    query_schema.fields = openApi_guiPrepareFields(api, def_obj.properties)
+
+    query_schema.fields = openApi_guiPrepareFields(api, def_obj.properties, parent_name)
 
     for(let i in query_schema.fields)
     {
         query_schema.fields[i].name = i
-    }
+    } 
 
     return query_schema;
 }
@@ -108,7 +133,7 @@ function openApi_guiSchema(api)
 
         let name = i.replace(/\/{[A-z]+}/g, "").split(/\//g)
         name = name[name.length - 2]
-
+         
         path_schema[i] = {
             level:urlLevel,
             path:i,
@@ -116,11 +141,11 @@ function openApi_guiSchema(api)
             name:name,
             bulk_name:name,
             api:{
-                get:openApi_guiQuerySchema(api, val.get),
-                patch:openApi_guiQuerySchema(api, val.patch),
-                put:openApi_guiQuerySchema(api, val.put),
-                post:openApi_guiQuerySchema(api, val.post),
-                delete:openApi_guiQuerySchema(api, val.delete),
+                get:    openApi_guiQuerySchema(api, val.get, 'get', name),
+                patch:  openApi_guiQuerySchema(api, val.patch, 'patch', name),
+                put:    openApi_guiQuerySchema(api, val.put, 'put', name),
+                post:   openApi_guiQuerySchema(api, val.post, 'post', name),
+                delete: openApi_guiQuerySchema(api, val.delete, 'delete', name),
             },
             buttons:[], // массив кнопок
             short_name:undefined,
@@ -254,20 +279,11 @@ function openApi_guiSchema(api)
                         operationId:val.api[query_types[q]].operationId
                     }
                     val.methodExec = query_types[q]
-                    
-                    
-                    
-                    if(val.name == 'sync') val.isEmptyAction = true 
-                    for(let elem in fields)
-                    { 
-                        if(fields[elem].schema && fields[elem].schema.$ref == "#/definitions/Empty")
-                        {
-                           
-                            val.isEmptyAction = true
-                            break;
-                        } 
+                     
+                    if(Object.keys(fields).length == 0) { 
+                        val.isEmptyAction = true; 
                     }
-                    
+                 
                     break;
                 }
             }
@@ -375,41 +391,32 @@ function openApi_guiPagesBySchema(schema)
 }
 
 // Вернёт объект из definitions по его ссылке
-function getObjectDefinitionByName(api, name)
+function getObjectDefinitionByName(api, name, parent_name)
 {
     if(!name || !name.replace)
     {
         return;
     }
-    
+   
     // "#/definitions/Group"
     // @todo надо чтоб он правильно извлекал путь а не расчитывал на то что оно всегда в definitions будет
     let path = name.replace("#/", "").split(/\//)
     let definition = path[path.length - 1]
      
-    if(definition == "Empty")
+    if(definition == "Data")
     {
-        debugger;
+        if(parent_name)
+        { 
+            return {
+                properties:{},
+                format:"api_"+parent_name,
+                type:"object",
+            }
+        }
     }
-    return api.definitions[definition]
+    return mergeDeep({}, api.definitions[definition])
 }
-
-function getObjectBySchema(obj)
-{
-    let name = getObjectNameBySchema(obj);
-    if(!name)
-    {
-        return undefined
-    }
-
-    let apiname = "api" + name.toLowerCase().replace(/^One/i, "")
-    let api_obj = window[apiname]
-    if(api_obj)
-    {
-        debugger;
-        return api_obj;
-    }
-}
+ 
 /**
  * Ищет описание схемы в объекте рекурсивно
  * @param {object} obj

@@ -502,7 +502,7 @@ if(!window.spajs)
             opt.event_state.url = window.location.href;
         }
         
-        console.table(spajs.opt.menu)
+        //console.table(spajs.opt.menu)
         
         var regExpRes = []
         var menuInfo = undefined;
@@ -510,7 +510,7 @@ if(!window.spajs)
         for(var i in spajs.opt.menu)
         {
             let val = spajs.opt.menu[i]
-            console.log(val.priority, val.debug)
+            //console.log(val.priority, val.debug)
             if(val.url_parser != undefined)
             {
                 for(var j in val.url_parser)
