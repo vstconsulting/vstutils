@@ -347,8 +347,7 @@ function guiObjectFactory(api_object)
         /**
          * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
          * Чтоб выделение одного списка не смешивалось с выделением другого списка
-         */
-        selectionTag:"",
+         */ 
         guiFields:{}
     }
     
@@ -584,7 +583,7 @@ function questionDeleteAllSelectedOrNot(thisObj) {
         if($.inArray(answer, answer_buttons) != -1)
         {
             let ids;
-            let tag = thisObj.model.selectionTag;
+            let tag = thisObj.api.selectionTag;
             if(answer == answer_buttons[0])
             {
                 ids = window.guiListSelections.getSelectionFromCurrentPage($('.multiple-select .item-row.selected'));
@@ -612,7 +611,7 @@ function questionDeleteOrRemove(thisObj)
         if($.inArray(answer, answer_buttons) != -1)
         {
             let ids;
-            let tag = thisObj.model.selectionTag;
+            let tag = thisObj.api.selectionTag;
             switch(answer)
             {
                 case answer_buttons[0]:

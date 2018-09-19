@@ -13,14 +13,6 @@ var gui_list_object = {
             this.model.status = 200
         }
 
-        if(page_options)
-        { 
-            if(page_options.selectionTag)
-            {
-                this.model.selectionTag = page_options.selectionTag
-            }
-        }
-
         if(!this.model.title)
         {
             this.model.title = this.name
@@ -409,7 +401,7 @@ var gui_list_object = {
         //render_options.sections = this.getSections('renderAsPage')
         if(!render_options.page_type) render_options.page_type = 'list'
 
-        render_options.selectionTag =  this.model.selectionTag
+        render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
  
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
@@ -443,7 +435,7 @@ var gui_list_object = {
         render_options.base_path = getUrlBasePath()
         //render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
-        render_options.selectionTag =  this.model.selectionTag+"_add"
+        render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.intTag(render_options.selectionTag)
         
         

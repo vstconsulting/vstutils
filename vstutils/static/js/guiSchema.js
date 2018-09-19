@@ -152,6 +152,7 @@ function openApi_guiSchema(api)
             hide_non_required:guiLocalSettings.get('hide_non_required'),
             extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],
             methodEdit:undefined, 
+            selectionTag:i.replace(/[^A-z0-9\-]/img, "_"),
         }
 
         if(type != 'action')
