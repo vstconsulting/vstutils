@@ -34,6 +34,9 @@ class HostSerializer(VSTSerializer):
         )
 
 
+class CreateHostSerializer(HostSerializer):
+    name = fields.CharField(required=True)
+
 
 class HostGroupSerializer(VSTSerializer):
     name = fields.AutoCompletionField(autocomplete=['Some', 'Another'])
@@ -58,6 +61,9 @@ class HostViewSet(ModelViewSetSet):
     '''
     model = Host
     serializer_class = HostSerializer
+    action_serializers = {
+        'create': CreateHostSerializer
+    }
     filter_class = HostFilter
 
     @action(detail=True)
@@ -99,6 +105,16 @@ class _HostGroupViewSet(ModelViewSetSet):
 class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
     serializer_class_one = HostGroupSerializer
     copy_related = ['hosts', 'subgroups']
+
+
+@nested_view('subdeephosts', 'id', manager_name='subgroups', view=HostGroupViewSet)
+class _DeepHostGroupViewSet(_HostGroupViewSet, CopyMixin):
+    pass
+
+
+@nested_view('subsubhosts', 'id', manager_name='subgroups', view=_DeepHostGroupViewSet)
+class DeepHostGroupViewSet(_DeepHostGroupViewSet):
+    pass
 
 
 try:

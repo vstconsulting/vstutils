@@ -30,3 +30,8 @@ function renderBreadcrumbs()
      
     return spajs.just.render("page_breadcrumb", {urls: urls})
 }
+
+function getUpLink()
+{   
+    return window.location.href.replace(/\/[^\/]+$/, "").replace(/([0-9]+),[,0-9]+/g, "$1");
+}

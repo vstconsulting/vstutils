@@ -156,7 +156,7 @@ class BulkViewSet(base.rvs.APIView):
         if data_type is not None:
             if isinstance(data_type, (list, tuple)):
                 data_type = '/'.join([str(i) for i in data_type])
-            url += "{}/".format(self._get_obj_with_extra(data_type))
+            url += "{}/".format(self._get_obj_with_extra(data_type)) if data_type else ''
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
         return "/{}/{}/{}/{}".format(
