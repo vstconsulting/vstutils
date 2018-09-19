@@ -20,6 +20,7 @@ api_info_dict = OrderedDict(
     contact=openapi.Contact(**settings.CONTACT),
     **{
         'x-versions': x_versions,
+        'x-links': settings.OPENAPI_EXTRA_LINKS,
     }
 )
 
