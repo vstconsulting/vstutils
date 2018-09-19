@@ -85,7 +85,15 @@ var gui_page_object = {
     {
         let tpl = this.getTemplateName('one')
 
-        render_options.fields = this.api.schema.edit.fields
+        render_options.fields = []
+        if(this.api.schema.edit)
+        {
+            render_options.fields = this.api.schema.edit.fields
+        }
+        else if(this.api.schema.get)
+        {
+            render_options.fields = this.api.schema.get.fields
+        }
         //render_options.sections = this.getSections('renderAsPage')
         if(!render_options.page_type) render_options.page_type = 'one'
 

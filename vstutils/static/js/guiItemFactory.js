@@ -334,6 +334,11 @@ var gui_base_object = {
  */
 function guiObjectFactory(api_object)
 {
+    if(typeof api_object == "string")
+    {
+        api_object = window.guiSchema.path[api_object]
+    }
+    
      /**
      * Используется в шаблоне страницы
      */
@@ -413,18 +418,11 @@ function guiObjectFactory(api_object)
 
 
 function emptyAction(action_info)
-{
-    let name = action_info.api_path.match(/\/([A-z0-9]+)\/$/); 
-    if(!name || !name[1])
-    {
-        return undefined
-    }
- 
-    let actionCalass = guiActionFactory(window.api, {action:action_info.api_path_value, api_path:action_info.api_path, name:name[1]})
-    let action = new actionCalass({api:action_info.api_path_value, url:spajs.urlInfo.data.reg})
+{ 
+    var pageItem = new guiObjectFactory(action_info)
     
     return function(){
-        action.exec() 
+        pageItem.exec() 
     }
 }
 

@@ -16,7 +16,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.reductionToType = function(value)
     {
-
+        
         if(this.render_options.type == "object")
         {
             if(!value)
@@ -33,7 +33,7 @@ guiElements.base = function(opt = {}, value, parent_object)
             {
                 return ""
             }
-
+            
             return value.toString()
         }
 
@@ -671,6 +671,53 @@ guiElements.select2 = function(field, field_value, parent_object)
                 });
             }
         }
+    }
+}
+
+guiElements.apiOwner = function(field, field_value, parent_object)
+{
+    this.name = 'apiOwner'
+    guiElements.base.apply(this, arguments)
+
+    this._onBaseRender = this._onRender
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options) 
+        
+        if(!options.readOnly)
+        {
+            $('#'+this.element_id).select2({
+                width: '100%',
+                ajax: {
+                    transport: function (params, success, failure)
+                    {
+                        var users = new guiObjectFactory("/user/")
+
+                        $.when(users.search(params, field, field_value, parent_object)).done((results) =>
+                        {
+                            let select2 = {
+                                results:[]
+                            }
+                            results.data.results.forEach(res =>{
+                                select2.results.push({
+                                    id:res.id, 
+                                    text:res.username
+                                })
+                            })
+
+                            success(select2)
+                        }).fail(() => {
+                            failure([])
+                        })
+                    }
+                }
+            }); 
+        }
+    }
+    
+    this.reductionToType = function(value)
+    { 
+        return value/1
     }
 }
 

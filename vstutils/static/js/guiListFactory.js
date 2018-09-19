@@ -106,18 +106,18 @@ var gui_list_object = {
     },
 
     prefetch : function (data)
-    {
+    { 
         var prefetch_fields = {};
         var prefetch_fields_ids = {};
         var promise = new $.Deferred();
 
         //отбираем prefetch поля
-        for(var i in this.model.fields)
+        for(var i in this.api.schema.list.fields)
         {
-            if(this.model.fields[i].prefetch)
+            if(this.api.schema.list.fields[i].prefetch)
             {
-                prefetch_fields[this.model.fields[i].name] = $.extend(true, {}, this.model.fields[i].prefetch);
-                prefetch_fields_ids[this.model.fields[i].name] = {};
+                prefetch_fields[this.api.schema.list.fields[i].name] = $.extend(true, {}, this.api.schema.list.fields[i].prefetch);
+                prefetch_fields_ids[this.api.schema.list.fields[i].name] = {};
             }
         }
 

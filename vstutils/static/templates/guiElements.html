@@ -47,7 +47,7 @@
 
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">    
-    <!-- guiElements.string -->
+    <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <%[ main_input %>
         <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
     <%] %> 
@@ -128,6 +128,25 @@
     <!-- guiElements.select2 -->
     <%[ main_input %>
         <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select> 
+    <%] %> 
+    <%! guiElements.base %> 
+</script>
+
+<!-- guiElements.apiOwner -->
+<script type="text/x-just" data-just="guiElements.apiOwner">  
+    <!-- guiElements.apiOwner -->  
+    <%[ main_input %>
+        <% if (!opt.readOnly) { %>
+            <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select>
+        <% }else{ %>
+            <input 
+                    type="text" 
+                    class="form-control" 
+                    <%- set_api_options(opt) %>
+                    id="<%- guiElement.element_id %>"
+                    value="<% if(value && typeof value == 'object'){ %><%- value.username %><% }else{ %><%- JSON.stringify(value) %><% } %>"
+            >
+        <% } %>
     <%] %> 
     <%! guiElements.base %> 
 </script>
