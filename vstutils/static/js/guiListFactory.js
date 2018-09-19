@@ -6,12 +6,7 @@ var gui_list_object = {
     init : function (page_options, objects)
     {
         this.base_init.apply(this, arguments)
-        let thisObj = this;
-        if(!page_options)
-        {
-            page_options = this.getShortestApiURL()
-        }
-
+        
         if(objects)
         {
             this.model.data = objects
@@ -19,10 +14,7 @@ var gui_list_object = {
         }
 
         if(page_options)
-        {
-            this.model.pathInfo = page_options.api
-            this.model.pageInfo = page_options.url
-
+        { 
             if(page_options.selectionTag)
             {
                 this.model.selectionTag = page_options.selectionTag
@@ -32,23 +24,6 @@ var gui_list_object = {
         if(!this.model.title)
         {
             this.model.title = this.name
-        }
-
-        if(this.model.pathInfo)
-        { 
-            if(!this.model.selectionTag)
-            {
-                this.model.selectionTag = this.model.pathInfo.api_path
-            }
-            // Тут надо обработать sublinks так чтоб добавить методы удалить объект и отделить страницы от экшенов поддерживающих мультиоперации
-            for(var i in this.model.sublinks)
-            {
-                if(!this.model.sublinks[i].isAction)
-                {
-                    continue;
-                }
-                this.api.multi_actions[i] = this.model.sublinks[i]
-            } 
         } 
     },
   
@@ -77,7 +52,7 @@ var gui_list_object = {
         }).fail(function (e)
         {
             def.reject(e)
-            polemarch.showErrors(e.responseJSON)
+            webGui.showErrors(e.responseJSON)
         })
 
         return def.promise();
