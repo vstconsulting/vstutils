@@ -20,7 +20,7 @@ function openApi_guiPrepareFields(api, properties)
 
             let format = def_name.replace("#/", "").split(/\//)
             fields[i].format = "api"+format[1]
-            fields[i].definition_ref = def_name
+            fields[i].definition_ref = def_name 
         }
     }
      
@@ -59,7 +59,7 @@ function openApi_guiQuerySchema(api, query_schema)
     {
         return query_schema;
     }
-
+    
     query_schema.fields = openApi_guiPrepareFields(api, def_obj.properties)
 
     for(let i in query_schema.fields)
@@ -246,13 +246,28 @@ function openApi_guiSchema(api)
             {
                 if(val.api[query_types[q]])
                 {
+                    let fields = openApi_guiRemoveReadOnlyMark(openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true))
                     val.schema.exec = {
-                        fields:openApi_guiRemoveReadOnlyMark(openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true)),
+                        fields:fields,
                         filters:val.api[query_types[q]].filters,
                         query_type:query_types[q],
                         operationId:val.api[query_types[q]].operationId
                     }
                     val.methodExec = query_types[q]
+                    
+                    
+                    
+                    if(val.name == 'sync') val.isEmptyAction = true 
+                    for(let elem in fields)
+                    { 
+                        if(fields[elem].schema && fields[elem].schema.$ref == "#/definitions/Empty")
+                        {
+                           
+                            val.isEmptyAction = true
+                            break;
+                        } 
+                    }
+                    
                     break;
                 }
             }
@@ -297,8 +312,10 @@ function openApi_guiSchema(api)
                 continue;
             }
 
-            val.actions[subobj.name] = subobj
+            val.actions[subobj.name] = subobj 
+            
         }
+       
         
         val.multi_actions = [] 
         for(let subaction in  val.sublinks_l2)
@@ -364,11 +381,17 @@ function getObjectDefinitionByName(api, name)
     {
         return;
     }
-
+    
     // "#/definitions/Group"
     // @todo надо чтоб он правильно извлекал путь а не расчитывал на то что оно всегда в definitions будет
     let path = name.replace("#/", "").split(/\//)
-    return api.definitions[path[path.length - 1]]
+    let definition = path[path.length - 1]
+     
+    if(definition == "Empty")
+    {
+        debugger;
+    }
+    return api.definitions[definition]
 }
 
 function getObjectBySchema(obj)

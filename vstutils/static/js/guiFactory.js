@@ -22,9 +22,11 @@ function guiTestUrl(regexp, url)
     return reg_exp.exec(url)
 }
 
+all_regexp = []
 function guiGetTestUrlFunctionfunction(regexp, api_path_value)
 {
-    //console.log(regexp)
+    all_regexp.push({path:api_path_value.path , regexp:regexp})
+    
     return function(url)
     {
         var res = guiTestUrl(regexp, url)
@@ -108,7 +110,7 @@ function openApi_add_one_action_page_path(api_obj)
     // Страница элемента вложенного куда угодно
     var regexp_in_other = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+api_obj.name+")$", api_obj);
 
-    page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
+    page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path), api_obj.level, api_obj.path);
 }
 
 /**
@@ -152,7 +154,7 @@ function openApi_add_one_page_path(api_obj)
     // Страница элемента вложенного куда угодно
     var regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
 
-    page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path));
+    page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path), api_obj.level, api_obj.path);
 }
 
 /**
@@ -179,7 +181,7 @@ function openApi_add_list_page_path(api_obj)
         +"(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"
 
     path_regexp.push(guiGetTestUrlFunctionfunction(pathregexp, api_obj))
-
+ //   console.log("", pathregexp)
     // Проверяем есть ли возможность создавать объекты
 
     if(api_obj.canCreate)
@@ -189,7 +191,7 @@ function openApi_add_list_page_path(api_obj)
 
         // Создали страницу
         let page_new = new guiPage();
-        page_new.registerURL([new_page_url], getMenuIdFromApiPath(api_path+"_new"));
+        page_new.registerURL([new_page_url], getMenuIdFromApiPath(api_path+"_new"), api_obj.level, api_obj.path);
 
 
         // Настроили страницу нового элемента
@@ -213,7 +215,7 @@ function openApi_add_list_page_path(api_obj)
 
         // Создали страницу
         var page_add = new guiPage();
-        page_add.registerURL([add_page_url], getMenuIdFromApiPath(api_path+"_add"));
+        page_add.registerURL([add_page_url], getMenuIdFromApiPath(api_path+"_add"), api_obj.level, api_obj.path);
 
         // Настроили страницу добавления существующего элемента
         page_add.blocks.push({
@@ -267,7 +269,7 @@ function openApi_add_list_page_path(api_obj)
         }
     })
 
-    page.registerURL(path_regexp, getMenuIdFromApiPath(api_path));
+    page.registerURL(path_regexp, getMenuIdFromApiPath(api_path), api_obj.level, api_obj.path);
 }
 
 tabSignal.connect("resource.loaded", function()
@@ -286,7 +288,9 @@ tabSignal.connect("resource.loaded", function()
 
         // Событие в теле которого можно было бы переопределить и дополнить список страниц
         tabSignal.emit("openapi.paths",  {api: window.api});
-
+        
+        
+        
         tabSignal.emit("openapi.completed",  {api: window.api});
         tabSignal.emit("loading.completed");
     })
