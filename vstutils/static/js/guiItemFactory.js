@@ -308,13 +308,13 @@ var gui_base_object = {
                         }
                     }
 
-                    polemarch.showErrors(e.responseJSON)
+                    webGui.showErrors(e.responseJSON)
                     def.reject(e)
                 }) 
             })
 
         }catch (e) {
-            polemarch.showErrors(e)
+            webGui.showErrors(e)
 
             def.reject()
             if(e.error != 'validation')
@@ -484,7 +484,7 @@ function addToParentsAndGoUp(item_ids)
         spajs.openURL(window.hostname + spajs.urlInfo.data.reg.baseURL());
     }).fail(function (e)
     {
-        polemarch.showErrors(e.responseJSON)
+        webGui.showErrors(e.responseJSON)
     }).promise();
 }
 
@@ -655,7 +655,7 @@ function deleteSelectedElements(thisObj, ids, tag){
 
     }).fail(function (e)
     {
-        polemarch.showErrors(e.responseJSON)
+        webGui.showErrors(e.responseJSON)
         debugger;
     })
 
@@ -679,7 +679,7 @@ function removeSelectedElements(ids, tag) {
         spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
     }).fail(function (e)
     {
-        polemarch.showErrors(e.responseJSON)
+        webGui.showErrors(e.responseJSON)
         debugger;
     })
 

@@ -1,16 +1,6 @@
 
 var gui_action_object = { 
-    init : function (page_options)
-    {
-        this.base_init.apply(this, arguments)
-        if(page_options)
-        {
-            this.model.pathInfo = page_options.api
-            this.model.pageInfo = page_options.url
-
-        } 
-    },
-
+    
     exec : function (callback, error_callback)
     {
         var thisObj = this;
