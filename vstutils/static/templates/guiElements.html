@@ -14,7 +14,7 @@
             
             <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> "
 
-            data-title="<%- opt.title %>"
+            data-title="<%- opt.title || capitalizeString(opt.name) %>"
             id="gui<%- guiElement.element_id %>"
         >
            

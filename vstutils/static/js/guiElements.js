@@ -15,13 +15,13 @@ guiElements.base = function(opt = {}, value, parent_object)
     }
 
     this.reductionToType = function(value)
-    {
-        
+    { 
         if(this.render_options.type == "object")
         {
+            return value
             if(!value)
             {
-                return "{}"
+                return undefined
             }
 
             return JSON.stringify(value)
@@ -89,15 +89,14 @@ guiElements.base = function(opt = {}, value, parent_object)
         let value = $("#"+this.element_id).val();
         let default_value = this.opt.default;
 
-        if(!value && default_value)
+        if(value == default_value)
         {
-            return  this.reductionToType(default_value);
+            return  null
         }
         else
         {
             return this.reductionToType(value);
-        }
-
+        } 
     }
 
     /**
@@ -264,7 +263,17 @@ guiElements.file = function(opt = {})
 
     this.getValue = function ()
     {
-        return $('#fileContent_' + this.element_id).val();
+        let value = $('#fileContent_' + this.element_id).val();
+        let default_value = this.opt.default;
+
+        if(value == default_value)
+        {
+            return  null
+        }
+        else
+        {
+            return this.reductionToType(value);
+        }  
     }
 }
 
@@ -281,7 +290,17 @@ guiElements.boolean = function()
 
     this.getValue = function()
     {
-        return $("#"+this.element_id).hasClass('selected');
+        let value = $("#"+this.element_id).hasClass('selected');
+        let default_value = this.opt.default;
+
+        if(value == default_value)
+        {
+            return  null
+        }
+        else
+        {
+            return this.reductionToType(value);
+        }   
     }
 }
 
