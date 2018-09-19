@@ -339,7 +339,7 @@ function guiObjectFactory(api_object)
         api_object = window.guiSchema.path[api_object]
     }
 
-     /**
+    /**
      * Используется в шаблоне страницы
      */
     this.model = {
@@ -420,7 +420,7 @@ function guiObjectFactory(api_object)
 function emptyAction(action_info)
 {
     var pageItem = new guiObjectFactory(action_info)
-    
+
     return function(){
         pageItem.exec()
     }
@@ -514,18 +514,30 @@ function changeSubItemsInParent(action, item_ids)
         return def.promise();
     }
 
-    //  @todo отправка запроса чего то не работает. Надо сергея спросить.
     let query = []
-    for(let i in item_ids)
-    {
-        query.push({
-            type: "mod",
-            data_type:item_type,
-            item:parent_type,
-            data:{id:item_ids[i]/1},
-            pk:parent_id,
-            method:action
-        })
+    for(let i in item_ids) {
+
+        if (action == "DELETE") {
+            let data_type = [parent_type, parent_id / 1, item_type, item_ids[i] / 1];
+            query.push({
+                type: "mod",
+                data_type: data_type,
+                method: action,
+            })
+        }
+        else {
+            let data = {
+                id: item_ids[i] / 1,
+            };
+            query.push({
+                type: "mod",
+                data_type: item_type,
+                item: parent_type,
+                data: data,
+                pk: parent_id,
+                method: action,
+            })
+        }
     }
 
     return api.query(query)
@@ -667,16 +679,17 @@ function deleteSelectedElements(thisObj, ids, tag){
  * Функция убирает из списка (но не удаляет совсем) элементы, id которых перечислены в массиве ids
  * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
  */
-function removeSelectedElements(ids, tag) {
-
-        debugger;
-        alert("Не доделал.")
-
+function removeSelectedElements(ids, tag)
+{
     $.when(changeSubItemsInParent('DELETE', ids)).done(function()
     {
         window.guiListSelections.unSelectAll(tag);
-        debugger;
-        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
+        for(let i in ids)
+        {
+            $(".item-row.item-"+ids[i]).remove();
+        }
+        guiPopUp.success("Selected elements were successfully removed from parent's list.");
+
     }).fail(function (e)
     {
         polemarch.showErrors(e.responseJSON)
