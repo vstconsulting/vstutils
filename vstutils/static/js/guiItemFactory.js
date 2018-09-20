@@ -51,34 +51,7 @@ var gui_base_object = {
     renderField : function(field, render_options)
     {
         if(!this.model.guiFields[field.name])
-        {
-            if(field.schema && field.schema.$ref)
-            {
-                var obj = getObjectBySchema(field.schema.$ref)
-            }
-            else if(field.$ref)
-            {
-                var obj = getObjectBySchema(field.$ref)
-
-            }
-            else if(field.items !== undefined && field.items.$ref)
-            {
-                var obj = getObjectBySchema(field.items.$ref)
-            }
-
-            if(obj)
-            {
-                var field_value = undefined
-                if(this.model.data)
-                {
-                    field_value = this.model.data[field.name]
-                }
-
-                obj = new obj.one(undefined, field_value, this)
-
-                this.model.guiFields[field.name] = obj
-            }
-
+        { 
             if(!this.model.guiFields[field.name])
             {
                 var type = field.format

@@ -483,10 +483,18 @@ guiElements.autocomplete = function()
         else if(options.additionalProperties)
         {
             let props = getInfoFromAdditionalProperties(options);
-            let obj = props['obj'];
+            
             let value_field = props['value_field'];
             let view_field = props['view_field'];
 
+            
+            let list = undefined;
+            
+            if(props['obj'])
+            {
+                list = new guiObjectFactory(props['obj']);
+            }
+            
             return new autoComplete({
                 selector: '#'+this.element_id,
                 minChars: 0,
@@ -516,13 +524,11 @@ guiElements.autocomplete = function()
                         return;
                     }
 
-                    if(obj)
-                    {
-                        let list = new obj.list();
+                    if(list)
+                    { 
+                        //let filters = getFiltersForAutocomplete(list, search_str, view_field);
 
-                        let filters = getFiltersForAutocomplete(list, search_str, view_field);
-
-                        $.when(list.search(filters)).done((data) => {
+                        $.when(list.search(spajs.urlInfo.data.reg)).done((data) => {
 
                             let res = data.data.results;
                             let matches = [];
@@ -605,7 +611,8 @@ guiElements.select2 = function(field, field_value, parent_object)
                               }
                              */
                             success(results)
-                        }).fail(() => {
+                        }).fail((e) => {
+                            debugger;
                             failure([])
                         })
                     }
@@ -640,17 +647,16 @@ guiElements.select2 = function(field, field_value, parent_object)
          * This object has info about model and fields, where data for select2 is stored.
          */
         else if(options.additionalProperties)
-        {
-            debugger;
+        { 
             let props = getInfoFromAdditionalProperties(options);
-            let obj = props['obj'];
+          
             let value_field = props['value_field'];
             let view_field = props['view_field'];
 
-            if(obj)
+            if(props['obj'])
             {
-                let list = new obj.list();
-
+                let list = new guiObjectFactory(props['obj']);
+               
                 $('#'+this.element_id).select2({
                     width: '100%',
                     ajax: {
@@ -659,9 +665,9 @@ guiElements.select2 = function(field, field_value, parent_object)
                         {
                             let search_str = trim(params.data.term);
 
-                            let filters = getFiltersForAutocomplete(list, search_str, view_field);
+                            //let filters = getFiltersForAutocomplete(list, search_str, view_field);
 
-                            $.when(list.search(filters)).done((data) =>
+                            $.when(list.search(spajs.urlInfo.data.reg)).done((data) =>
                             {
                                 let results =[];
                                 let api_data = data.data.results;
@@ -675,7 +681,8 @@ guiElements.select2 = function(field, field_value, parent_object)
                                     )
                                 }
                                 success({results:results})
-                            }).fail(() => {
+                            }).fail((e) => {
+                                debugger;
                                 failure([])
                             })
                         }
@@ -1362,16 +1369,8 @@ function getInfoFromAdditionalProperties(options)
 {
     let obj, value_field, view_field;
 
-    if(options.additionalProperties.$ref)
-    {
-        obj = getObjectBySchema(options.additionalProperties.$ref);
-    }
-
-    if(options.additionalProperties.model && options.additionalProperties.model.$ref)
-    {
-        obj = getObjectBySchema(options.additionalProperties.model.$ref);
-    }
-
+    obj = options.additionalProperties.list_obj
+    
     if(options.additionalProperties.value_field && options.additionalProperties.view_field)
     {
         value_field = options.additionalProperties.value_field;
