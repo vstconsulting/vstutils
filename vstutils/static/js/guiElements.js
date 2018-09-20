@@ -16,12 +16,24 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.reductionToType = function(value)
     { 
+        let res = value
+        
+        if(value === undefined && this.opt.default && this.opt.required)
+        {
+            return this.opt.default
+        }
+            
+        if(value === undefined)
+        {
+            return undefined
+        }
+        
         if(this.render_options.type == "object")
         {
-            return value
+            res = value
             if(!value)
             {
-                return undefined
+                res = undefined
             }
 
             return JSON.stringify(value)
@@ -31,23 +43,35 @@ guiElements.base = function(opt = {}, value, parent_object)
         {
             if(!value)
             {
-                return ""
+                res = ""
             }
             
-            return value.toString()
+            res = value.toString()
         }
 
         if(this.render_options.type == "number" || this.render_options.type == "integer" )
         {
-            return value/1
+            if(value == "")
+            {
+                res = undefined;
+            }
+            else
+            {
+                res = value/1
+            }
         }
 
         if(this.render_options.type == "boolean" )
         {
-            return value == true
+            res = value == true
         }
-
-        return value
+        
+        if((res === undefined || res === "") && this.opt.default && this.opt.required)
+        {
+            res = this.opt.default
+        }
+            
+        return res
     }
 
     this._onRender = function(options)
@@ -86,17 +110,13 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.getValue = function()
     {
-        let value = $("#"+this.element_id).val();
-        let default_value = this.opt.default;
-
-        if(value == default_value)
+        if($('#gui'+this.element_id).hasClass('hide'))
         {
-            return  null
+            return this.reductionToType(); 
         }
-        else
-        {
-            return this.reductionToType(value);
-        } 
+        
+        let value = $("#"+this.element_id).val(); 
+        return this.reductionToType(value); 
     }
 
     /**
@@ -266,14 +286,7 @@ guiElements.file = function(opt = {})
         let value = $('#fileContent_' + this.element_id).val();
         let default_value = this.opt.default;
 
-        if(value == default_value)
-        {
-            return  null
-        }
-        else
-        {
-            return this.reductionToType(value);
-        }  
+        return this.reductionToType(value); 
     }
 }
 
@@ -290,17 +303,13 @@ guiElements.boolean = function()
 
     this.getValue = function()
     {
-        let value = $("#"+this.element_id).hasClass('selected');
-        let default_value = this.opt.default;
-
-        if(value == default_value)
+        if($('#gui'+this.element_id).hasClass('hide'))
         {
-            return  null
+            return this.reductionToType(); 
         }
-        else
-        {
-            return this.reductionToType(value);
-        }   
+        
+        let value = $("#"+this.element_id).hasClass('selected'); 
+        return this.reductionToType(value); 
     }
 }
 
@@ -347,16 +356,16 @@ guiElements.autocomplete = function()
 
             if (match)
             {
-                return data_value;
+                return this.reductionToType(data_value);
             }
             else
             {
-                return value
+                return this.reductionToType(value)
             }
         }
         else
         {
-            return $("#" + this.element_id).val();
+            return this.reductionToType($("#" + this.element_id).val());
         }
     }
 
@@ -1068,7 +1077,7 @@ guiElements.crontab = function (opt = {}, value)
     this.getValue = function()
     {
         this.setValue()
-        return this.value;
+        return this.reductionToType(this.value);
     }
 
     this.compileItem = function(resArr, minInt, maxInt)

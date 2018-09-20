@@ -22,7 +22,7 @@
     <!-- show_not_required_fields -->
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
         <label class="control-label">Add field</label>
-        <select class="form-control" onchange="$('#'+this.value).show(); this.options[this.selectedIndex].disabled = true;" >
+        <select class="form-control" onchange="$('#'+this.value).removeClass('hide'); this.options[this.selectedIndex].disabled = true;" >
             <option disabled selected >Select field</option>
             <% for(var i = 0; i < fields.length; i++){  %>
                 <option value="<%- $(fields[i]).attr('id') %>" ><%- $(fields[i]).attr('data-title') %></option>
