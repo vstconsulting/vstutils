@@ -5,6 +5,12 @@ function openApi_guiPrepareFields(api, properties, parent_name)
     let fields = mergeDeep({}, properties)
     for(let i in fields)
     {
+        if(fields[i].additionalProperties && fields[i].additionalProperties.model && fields[i].additionalProperties.model.$ref)
+        {
+            // Это для автокомплита поле а не ссылка куда попало.
+            continue;
+        }
+        
         let def_name = getObjectNameBySchema(fields[i])
         if(def_name)
         { 
@@ -15,17 +21,91 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 continue;
             }
             fields[i] =  mergeDeep({}, def_obj);
-             
+
             fields[i].readOnly = true
 
             let format = def_name.replace("#/", "").split(/\//)
-            
+
             if(format[1] != "Data")
             {
                 fields[i].format = "api"+format[1]
             }
-            
+
             fields[i].definition_ref = def_name 
+        } 
+    }
+     
+   return fields
+}
+
+
+// Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
+function openApi_findParentByDefinition(api_obj, definition)
+{  
+    if(api_obj.type == 'list' && api_obj.api.get)
+    {
+        let schema = getObjectNameBySchema(api_obj.api.get)
+        if(schema == definition)
+        {
+            return api_obj;
+        }
+    }
+    
+    if(api_obj.parent)
+    {
+        return openApi_findParentByDefinition(api_obj.parent, definition);
+    }
+    
+    
+    return false
+}
+
+
+// Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
+function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
+{ 
+    for(let i in fields)
+    {
+        if(!fields[i].additionalProperties || !fields[i].additionalProperties.model || !fields[i].additionalProperties.model.$ref)
+        {
+            continue;
+        }
+
+        let definition = fields[i].additionalProperties.model.$ref
+         
+        for(let l in api_obj.parent.sublinks)
+        {
+            let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition)
+            if(list_obj)
+            {
+                fields[i].additionalProperties.list_obj = list_obj 
+                break;
+            }
+        }
+       
+        if(fields[i].additionalProperties.list_obj)
+        {
+            continue;
+        }
+       
+        let definition_obj = openApi_findParentByDefinition(api_obj, definition)
+        if(!definition_obj)
+        {
+            for(let j in path_schema)
+            {
+                let val = path_schema[j]
+                if(val.level > 2)
+                {
+                    continue;
+                }
+                
+                let list_obj = openApi_findParentByDefinition(val, definition);
+                if(list_obj)
+                {
+                    fields[i].additionalProperties.list_obj = list_obj
+                    break;
+                }
+            }
         }
     }
      
@@ -290,7 +370,7 @@ function openApi_guiSchema(api)
             }
         }
     }
-
+    
     // Свяжет страницы списков и страницы объектов
     for(let path in path_schema)
     {
@@ -322,7 +402,7 @@ function openApi_guiSchema(api)
         val.links = {}
         for(let subpage in  val.sublinks)
         {
-            let subobj = val.sublinks[subpage]
+            let subobj = val.sublinks[subpage] 
             if(subobj.type != 'action')
             {
                 val.links[subobj.name] = subobj
@@ -364,6 +444,21 @@ function openApi_guiSchema(api)
                 }
             }
         }
+    }
+ 
+    for(let path in path_schema)
+    {  
+        openApi_set_parents_links(path_schema, path, path_schema[path]) 
+    }
+    
+    // Проставит свойство schema
+    for(let path in path_schema)
+    { 
+        let val = path_schema[path]
+        for(let schema in path_schema[path].schema)
+        {
+            val.schema[schema].fields = openApi_guiPrepareAdditionalProperties(path_schema, val, val.schema[schema].fields)
+        } 
     }
 
     return {path:path_schema, object:short_schema};
@@ -479,30 +574,15 @@ function getObjectNameBySchema(obj)
 function openApi_get_internal_links(paths, base_path, targetLevel)
 {
     var res = []
+    
     // Список Actions строить будем на основе данных об одной записи.
     for(var api_action_path in paths)
     {
         var api_path_value = paths[api_action_path]
-
-
-        var count = 0;
-        var base_url = ""
-        for(var i=0; i< api_action_path.length && i< base_path.length; i++)
+  
+        if(api_action_path.indexOf(base_path) != 0)
         {
-            if(api_action_path[i] == base_path[i])
-            {
-                count++;
-                base_url+= api_action_path[i]
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        if(count <  base_path.length)
-        {
-            continue;
+            continue; 
         }
 
         let dif = api_action_path.match(/\//g).length - base_path.match(/\//g).length;
@@ -522,6 +602,28 @@ function openApi_get_internal_links(paths, base_path, targetLevel)
     }
 
     return res;
+}
+
+function openApi_set_parents_links(paths, base_path, parent_obj)
+{ 
+    for(var api_action_path in paths)
+    {
+        var api_path_value = paths[api_action_path]
+  
+        if(api_action_path.indexOf(base_path) != 0)
+        {
+            continue; 
+        }
+
+        let dif = api_action_path.match(/\//g).length - base_path.match(/\//g).length;
+        if(dif != 1)
+        {
+            continue;
+        }
+ 
+        api_path_value.parent = parent_obj
+    } 
+ 
 }
 
 // * @deprecated
