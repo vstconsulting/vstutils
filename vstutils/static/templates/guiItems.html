@@ -345,7 +345,7 @@
                                          <li>
                                             <a
                                                 href="#"
-                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].name %>', <% if(guiObj.api.multi_actions[k].isEmptyAction) { %> true <% } else { %> false <% } %>); return false;">
+                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;">
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
