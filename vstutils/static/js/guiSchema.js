@@ -175,12 +175,31 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
     return query_schema;
 }
 
+function openApi_guiSchemaSetRequiredFlags(api)
+{
+    for(let i in api.definitions)
+    {
+        let definition = api.definitions[i]
+        if(definition.required)
+        {
+            for(let j in definition.required)
+            { 
+                definition.properties[definition.required[j]].required = true
+            }
+        }
+    }
+    
+    return api
+}
+
 // Сгенерирует схему на основе апи
 function openApi_guiSchema(api)
 {
     let path_schema = {}
     let short_schema = {}
-
+    
+    api = openApi_guiSchemaSetRequiredFlags(api)
+    
     // Проставит типы страниц ('page' или 'list'  или 'action')
     for(let i in api.paths)
     {
