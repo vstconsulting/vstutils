@@ -21,9 +21,6 @@ var gui_list_object = {
   
     deleteArray : function (ids)
     {
-        debugger;
-        alert("Не доделал.")
-        
         var thisObj = this;
         var def = new $.Deferred();
  
@@ -31,15 +28,16 @@ var gui_list_object = {
         for(let i in ids)
         {
             q.push({
-                type: "del",
-                item: this.bulk_name,
+                type:"del",
+                item: thisObj.api.bulk_name,
                 pk:ids[i]
             })
         }
 
+
         $.when(api.query(q)).done(function(data)
         {
-            guiPopUp.success(""+thisObj.bulk_name+" were successfully deleted");
+            guiPopUp.success("Objects of '"+thisObj.api.bulk_name+"' type were successfully deleted");
             def.resolve(data)
         }).fail(function (e)
         {

@@ -7,7 +7,7 @@ var gui_action_object = {
         var res = this.sendToApi(this.api.methodExec, callback, error_callback)
         $.when(res).done(function()
         {
-            guiPopUp.success("Action "+thisObj.api.bulk_name+" were called successfully");
+            guiPopUp.success("Action "+thisObj.api.bulk_name+" was called successfully");
         })
         return res; 
     },

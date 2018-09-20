@@ -343,6 +343,11 @@ function openApi_guiSchema(api)
                 query_type:'get',
                 operationId:val.api.get.operationId
             }
+            
+            for(let f in val.schema.get.fields)
+            {
+                val.schema.get.fields[f].readOnly = true
+            }
 
             if(val.api.put)
             {
@@ -381,7 +386,7 @@ function openApi_guiSchema(api)
                     val.methodExec = query_types[q]
                      
                     if(Object.keys(fields).length == 0) { 
-                        val.isEmptyAction = true; 
+                        val.isEmptyAction = true;
                     }
                  
                     break;

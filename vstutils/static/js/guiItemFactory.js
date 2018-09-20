@@ -1,6 +1,6 @@
-   
+
 var gui_base_object = {
-   
+
     getTemplateName : function (type, default_name)
     {
         var tpl = this.bulk_name + '_'+type
@@ -15,12 +15,12 @@ var gui_base_object = {
 
         return tpl;
     },
-    
+
     getTitle : function()
     {
         return this.api.bulk_name
     },
-    
+
     renderAllFields : function(opt)
     {
         let html = []
@@ -133,8 +133,8 @@ var gui_base_object = {
             if(this.model.guiFields[i].opt.readOnly && hideReadOnly)
             {
                 continue;
-            } 
-            
+            }
+
             let val = this.model.guiFields[i].getValidValue(hideReadOnly);
             if(val !== undefined && val !== null && !(typeof val == "number" && isNaN(val)) )
             {
@@ -145,7 +145,7 @@ var gui_base_object = {
         }
 
         if(count == 1 && this.model.guiFields[0] )
-        { 
+        {
             obj = obj[0]
         }
 
@@ -153,10 +153,10 @@ var gui_base_object = {
     },
 
     /**
-     * Вернёт значение только правильное, если оно не правильное то должно выкинуть исключение 
+     * Вернёт значение только правильное, если оно не правильное то должно выкинуть исключение
      */
     getValidValue : function (hideReadOnly)
-    { 
+    {
         if(hideReadOnly)
         {
             return undefined
@@ -170,13 +170,13 @@ var gui_base_object = {
         if(url_vars)
         {
             this.url_vars = url_vars
-        } 
+        }
     },
     init : function ()
     {
         this.base_init.apply(this, arguments)
     },
-    
+
     sendToApi : function (method, callback, error_callback)
     {
         var def = new $.Deferred();
@@ -193,12 +193,12 @@ var gui_base_object = {
                     return def.promise();
                 }
             }
-            
+
             if(!this.api.api[method] || !this.api.api[method].operationId)
             {
                 throw "!this.api[method].operationId"
             }
-             
+
             let operationId = this.api.api[method].operationId.replace(/(set)_([A-z0-9]+)/g, "$1-$2")
 
             var operations = []
@@ -244,7 +244,7 @@ var gui_base_object = {
                 // Модификация на то если у нас не мультиоперация
                 query = [url]
             }
-          
+
             query.forEach(qurl => {
 
                 qurl = qurl.replace(/^\/|\/$/g, "").split(/\//g)
@@ -254,8 +254,8 @@ var gui_base_object = {
                     data:data,
                     method:method
                 }
-               
-                $.when(api.query(q)).done(data => 
+
+                $.when(api.query(q)).done(data =>
                 {
                     if(callback)
                     {
@@ -271,9 +271,9 @@ var gui_base_object = {
                         def.reject({text:"Item not found", status:404})
                         return;
                     }
- 
+
                     def.resolve(data)
-                }).fail(e => { 
+                }).fail(e => {
                     if(callback)
                     {
                         if(error_callback(e) === false)
@@ -284,7 +284,7 @@ var gui_base_object = {
 
                     webGui.showErrors(e)
                     def.reject(e)
-                }) 
+                })
             })
 
         }catch (e) {
@@ -298,9 +298,9 @@ var gui_base_object = {
         }
 
         return def.promise();
-    }, 
+    },
 }
- 
+
 /**
  * На основе описания апи пути формирует объект страницы.
  * @param {type} api_object
@@ -312,8 +312,8 @@ function guiObjectFactory(api_object)
     {
         api_object = window.guiSchema.path[api_object]
     }
-    
-     /**
+
+    /**
      * Используется в шаблоне страницы
      */
     this.model = {
@@ -321,16 +321,16 @@ function guiObjectFactory(api_object)
         /**
          * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
          * Чтоб выделение одного списка не смешивалось с выделением другого списка
-         */ 
+         */
         guiFields:{}
     }
-    
+
     let arr = [this, window.gui_base_object]
     if(window["gui_"+api_object.type+"_object"])
     {
         arr.push(window["gui_"+api_object.type+"_object"])
     }
-    
+
     if(api_object.extension_class_names)
     {
         for(let i in api_object.extension_class_names)
@@ -339,63 +339,53 @@ function guiObjectFactory(api_object)
             {
                 arr.push(window[api_object.extension_class_name[i]])
             }
-        } 
+        }
     }
-    
-    arr.push({api:api_object}) 
-    
-    $.extend.apply($, arr) 
-    this.init.apply(this, arguments) 
-     
+
+    arr.push({api:api_object})
+
+    $.extend.apply($, arr)
+    this.init.apply(this, arguments)
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function emptyAction(action_info)
-{ 
-    var pageItem = new guiObjectFactory(action_info)
-    
+{
+    var pageItem = new guiObjectFactory(action_info) 
     return function(){
-        pageItem.exec() 
+        pageItem.exec()
     }
 }
 
@@ -438,16 +428,25 @@ function createAndGoEdit(obj)
     return def;
 }
 
-function goToMultiAction(ids, action)
+function goToMultiAction(ids, action, selection_tag)
 {
-    return spajs.openURL(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action);
+    if(action && action.isEmptyAction)
+    {
+        let pageItem = new guiObjectFactory(action, {api_pk: ids.join(",")});
+        pageItem.exec();
+
+        window.guiListSelections.unSelectAll(selection_tag);
+        return false;
+    }
+
+    return spajs.openURL(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action.name);
 }
 
-function goToMultiActionFromElements(elements, action)
+function goToMultiActionFromElements(elements, action, selection_tag)
 {
     let ids = window.guiListSelections.getSelectionFromCurrentPage(elements);
 
-    return goToMultiAction(ids, action)
+    return goToMultiAction(ids, action, selection_tag)
 }
 
 function addToParentsAndGoUp(item_ids)
@@ -478,7 +477,7 @@ function changeSubItemsInParent(action, item_ids)
     let parent_id = spajs.urlInfo.data.reg.parent_id
     let parent_type = spajs.urlInfo.data.reg.parent_type
     let item_type = spajs.urlInfo.data.reg.page_type
- 
+
     if(!parent_id)
     {
         console.error("Error parent_id not found")
@@ -486,22 +485,34 @@ function changeSubItemsInParent(action, item_ids)
         def.resolve()
         return def.promise();
     }
- 
-    //  @todo отправка запроса чего то не работает. Надо сергея спросить.
+
     let query = []
-    for(let i in item_ids)
-    {
-        query.push({
-            type: "mod",
-            data_type:item_type,
-            item:parent_type,
-            data:{id:item_ids[i]/1},
-            pk:parent_id,
-            method:action
-        })
+    for(let i in item_ids) {
+
+        if (action == "DELETE") {
+            let data_type = [parent_type, parent_id / 1, item_type, item_ids[i] / 1];
+            query.push({
+                type: "mod",
+                data_type: data_type,
+                method: action,
+            })
+        }
+        else {
+            let data = {
+                id: item_ids[i] / 1,
+            };
+            query.push({
+                type: "mod",
+                data_type: item_type,
+                item: parent_type,
+                data: data,
+                pk: parent_id,
+                method: action,
+            })
+        }
     }
 
-    return api.query(query) 
+    return api.query(query)
 }
 
 
@@ -521,28 +532,32 @@ function isEmptyObject(obj)
     {
         return true;
     }
-    
+
     return Object.keys(obj).length == 0
 }
 
-function questionForAllSelectedOrNot(selection_tag, action_name){
+function questionForAllSelectedOrNot(selection_tag, path){
     var answer;
-    var question = "Apply action <b>'"+ action_name + "'</b> for elements only from this page or for all selected elements?";
-    var answer_buttons = ["For this page's selected", "For all selected"];
-    $.when(guiPopUp.question(question, answer_buttons)).done(function(data){
-        answer = data;
-        if($.inArray(answer, answer_buttons) != -1)
-        {
-            if(answer == answer_buttons[0])
+    var action = guiSchema.path[path];
+    if(action)
+    {
+        var question = "Apply action <b>'"+ action.name + "'</b> for elements only from this page or for all selected elements?";
+        var answer_buttons = ["For this page's selected", "For all selected"];
+        $.when(guiPopUp.question(question, answer_buttons)).done(function(data){
+            answer = data;
+            if($.inArray(answer, answer_buttons) != -1)
             {
-                goToMultiActionFromElements($('.multiple-select .item-row.selected'), action_name );
+                if(answer == answer_buttons[0])
+                {
+                    goToMultiActionFromElements($('.multiple-select .item-row.selected'), action, selection_tag);
+                }
+                else
+                {
+                    goToMultiAction(window.guiListSelections.getSelection(selection_tag), action, selection_tag);
+                }
             }
-            else
-            {
-                goToMultiAction(selection_tag, action_name);
-            }
-        }
-    });
+        });
+    }
 
     return false;
 }
@@ -640,16 +655,17 @@ function deleteSelectedElements(thisObj, ids, tag){
  * Функция убирает из списка (но не удаляет совсем) элементы, id которых перечислены в массиве ids
  * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
  */
-function removeSelectedElements(ids, tag) {
-    
-        debugger;
-        alert("Не доделал.")
-        
+function removeSelectedElements(ids, tag)
+{
     $.when(changeSubItemsInParent('DELETE', ids)).done(function()
     {
         window.guiListSelections.unSelectAll(tag);
-        debugger;
-        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.page_and_parents);
+        for(let i in ids)
+        {
+            $(".item-row.item-"+ids[i]).remove();
+        }
+        guiPopUp.success("Selected elements were successfully removed from parent's list.");
+
     }).fail(function (e)
     {
         webGui.showErrors(e)

@@ -167,12 +167,12 @@
     <%[ page_header %>
         <section class="content-header">
             <h1>
-                
+
                 <a href="<%- getUpLink() %>" onclick="return spajs.openURL(this.href);" class="btn btn-default">
                     <span class="glyphicon glyphicon-arrow-left"></span>
                 </a>
-                  
-                <span class="h1-header"><%= guiObj.getTitle('title') %></span> 
+
+                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
             </h1>
             <%* breadcrumb %>
         </section>
@@ -205,13 +205,13 @@
 <script type="text/x-just" data-just="entity_list">
     
     <%[ buttons_row %>
-       
+
         <% if(guiObj.api.canCreate){ %>
-            <a href="<%- getUrlBasePath() %>/new" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a> 
+            <a href="<%- getUrlBasePath() %>/new" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a>
         <% } %>
-        
+
         <% if(guiObj.api.canAdd){%>
-            <a href="<%- getUrlBasePath() %>/add" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a> 
+            <a href="<%- getUrlBasePath() %>/add" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
         <% } %>
  
         <%* buttons %>
@@ -331,7 +331,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <% for(var k in guiObj.api.multi_actions){   %> 
+                                <% for(var k in guiObj.api.multi_actions){   %>
                                     <% if(guiObj.api.multi_actions[k].onClick){ %>
                                         <li>
                                             <a
@@ -342,10 +342,10 @@
                                             </a>
                                         </li>
                                     <% }else{ %>
-                                        <li>
+                                         <li>
                                             <a
                                                 href="#"
-                                                onclick="questionForAllSelectedOrNot(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- guiObj.api.multi_actions[k].name %>'); return false;">
+                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;">
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
@@ -521,17 +521,17 @@
     <!-- entity_one -->
     
     <%[ sublink_buttons %>
-        <% for(var k in guiObj.api.links){  %> 
+        <% for(var k in guiObj.api.links){  %>
             <a
                 href="<%- window.hostname %><%- opt.base_path+'/'+ guiObj.api.links[k].name %>"
                 onclick="return spajs.openURL(this.href);"
                 class="btn btn-default sublink-btn"
             >
                 <%- guiObj.api.links[k].name.replace('_', ' ') %>
-            </a> 
+            </a>
         <% } %>
-        
-        <% for(var k in guiObj.api.actions){  %> 
+
+        <% for(var k in guiObj.api.actions){  %>
                 <% if  (!guiObj.api.actions[k].isEmptyAction) { %>
                     <a
                         href="<%- window.hostname %><%- opt.base_path+'/'+ guiObj.api.actions[k].name %>"
@@ -595,7 +595,7 @@
         
         <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
             
-        <%* buttons %> 
+        <%* buttons %>
     <%] %>
     
     <%! entity_one %>
