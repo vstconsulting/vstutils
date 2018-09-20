@@ -141,7 +141,7 @@ class MainRouter(_AbstractRouter):
             public=True, permission_classes=(permissions.AllowAny,),
         )
         self.register_view(
-            'openapi', schema_view.with_ui('swagger', cache_timeout=120), name='openapi'
+            'openapi', schema_view.with_ui('swagger', cache_timeout=5), name='openapi'
         )
 
     def _get_custom_lists(self):
