@@ -364,7 +364,6 @@ guiElements.autocomplete = function()
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-
         /*
          * options.searchObj - object for JS hardcode, which aim is to redefine way of getting data for autocomplete.
          *
@@ -431,7 +430,7 @@ guiElements.autocomplete = function()
          * options.enum - array, which comes from api.
          * This array has data for autocomplete.
          * @note для поля типа enum есть тип enum, зачем здесь этот код?
-         */
+        
         else if(options.enum)
         {
             return new autoComplete({
@@ -475,13 +474,13 @@ guiElements.autocomplete = function()
                     response(matches);
                 }
             });
-        }
+        } */
         /*
          * options.additionalProperties - object, which comes from api.
          * This object has info about model and fields, where data for autocomplete is stored.
          */
         else if(options.additionalProperties)
-        {
+        { 
             let props = getInfoFromAdditionalProperties(options);
             
             let value_field = props['value_field'];
@@ -526,9 +525,9 @@ guiElements.autocomplete = function()
 
                     if(list)
                     { 
-                        //let filters = getFiltersForAutocomplete(list, search_str, view_field);
+                        let filters = getFiltersForAutocomplete(list, search_str, view_field);
 
-                        $.when(list.search(spajs.urlInfo.data.reg)).done((data) => {
+                        $.when(list.search(filters)).done((data) => {
 
                             let res = data.data.results;
                             let matches = [];
@@ -563,8 +562,7 @@ guiElements.select2 = function(field, field_value, parent_object)
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
-        this._onBaseRender(options)
-
+        this._onBaseRender(options) 
         /*
          * options.search - function for JS hardcode, which aim is to redefine way of getting data for select2.
          * @param {object} params - argument from select2 transport function
@@ -620,29 +618,6 @@ guiElements.select2 = function(field, field_value, parent_object)
             });
         }
         /*
-         * options.enum - array, which comes from api.
-         * This array has data for select2.
-         * @note для поля типа enum есть тип enum, зачем здесь этот код?
-        else if(options.enum)
-        {
-            let data = [];
-            for(let i in options.enum)
-            {
-                data.push(
-                    {
-                        id: options.enum[i],
-                        text: options.enum[i],
-                    }
-                )
-            }
-
-            $('#'+this.element_id).select2({
-                width: '100%',
-                data: data
-            });
-        }
-         */
-        /*
          * options.additionalProperties - object, which comes from api.
          * This object has info about model and fields, where data for select2 is stored.
          */
@@ -665,9 +640,8 @@ guiElements.select2 = function(field, field_value, parent_object)
                         {
                             let search_str = trim(params.data.term);
 
-                            //let filters = getFiltersForAutocomplete(list, search_str, view_field);
-
-                            $.when(list.search(spajs.urlInfo.data.reg)).done((data) =>
+                            let filters = getFiltersForAutocomplete(list, search_str, view_field); 
+                            $.when(list.search(filters)).done((data) =>
                             {
                                 let results =[];
                                 let api_data = data.data.results;
@@ -1386,25 +1360,19 @@ function getInfoFromAdditionalProperties(options)
 
 function getFiltersForAutocomplete(list, search_str, view_field)
 {
-    let filters = spajs.urlInfo.data.reg;
-    if(filters.parent_type && filters.parent_id)
-    {
-        let parent_model = api.openapi.definitions['One' + capitalizeString(filters.parent_type)];
-        if(parent_model && parent_model.properties[list.view.bulk_name])
-        {
-            filters = {};
+    let filters = {
+        limit:9999,
+        offset:0,
+        query:{
+            
         }
-    }
-
-    filters['query'] = {};
-
+    };
+      
     if(search_str)
     {
         filters['query'][view_field] = search_str;
     }
-
-    // filters.limit = 9999;
-
+ 
     return filters;
 }
 
