@@ -38,7 +38,8 @@ var gui_base_object = {
                 return;
             }
 
-            fields.hide()
+            //fields.hide()
+            fields.addClass("hide")
             $('#'+id).appendTpl(spajs.just.render('show_not_required_fields', {fields:fields, opt:opt}))
         })
     },
