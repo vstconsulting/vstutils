@@ -354,6 +354,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
     'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
+    'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
     'SCHEMA_COERCE_PATH_PK': False,
     'SCHEMA_COERCE_METHOD_NAMES': {
         'create': 'add',
@@ -376,6 +377,12 @@ SWAGGER_API_DESCRIPTION = web.get('rest_swagger_description', fallback=vst_proje
 TERMS_URL = ''
 CONTACT = SectionConfig('contact').all() or dict(name='System Administrator')
 
+OPENAPI_EXTRA_LINKS = {
+    'vstutils': {
+        'url': 'https://github.com/vstconsulting/vstutils.git',
+        'name': 'VST Utils sources'
+    }
+}
 
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
@@ -389,14 +396,8 @@ SWAGGER_SETTINGS = {
     },
 }
 
-API_CREATE_SCHEMA = web.getboolean('rest_schema', fallback=True)
-try:
-    import coreapi
-    HAS_COREAPI = True
-except ImportError:  # nocv
-    if API_CREATE_SCHEMA:
-        warn('CoreAPI will not enabled, because there is no "coreapi" package installed.')
-    API_CREATE_SCHEMA = False
+# Hardcoded because GUI based on OpenAPI
+API_CREATE_SCHEMA = True
 
 API = {
     VST_API_VERSION: {

@@ -274,7 +274,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.get_result('post', '/login/', 200)
         self.get_result('get', '/login/', 302)
         # API
-        self.assertEqual(list(self.get_result('get', '/api/').keys()), ['v1'])
+        self.assertEqual(list(self.get_result('get', '/api/').keys()), ['openapi', 'v1'])
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(settings.API[settings.VST_API_VERSION].keys()).sort()

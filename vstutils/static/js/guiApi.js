@@ -10,7 +10,7 @@ function guiApi()
     {
         var def = new $.Deferred();
         spajs.ajax.Call({
-            url: hostname + "/api/v2/openapi/?format=openapi",
+            url: hostname + "/api/openapi/?format=openapi",
             type: "GET",
             contentType:'application/json',
             data: "",

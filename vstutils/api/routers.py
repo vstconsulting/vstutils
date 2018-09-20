@@ -15,7 +15,6 @@ class _AbstractRouter(routers.DefaultRouter):
         self.custom_urls = list()
         self.permission_classes = kwargs.pop("perms", None)
         self.create_schema = kwargs.pop('create_schema', False)
-        self.create_swagger = kwargs.pop('create_swagger', False)
         super(_AbstractRouter, self).__init__(*args, **kwargs)
 
     def _get_custom_lists(self):
@@ -91,18 +90,6 @@ class APIRouter(_AbstractRouter):
         super(APIRouter, self).__init__(*args, **kwargs)
         if self.create_schema:
             self.__register_schema()
-        if self.create_swagger:
-            self.__register_swagger()
-
-    def __register_swagger(self):
-        # pylint: disable=import-error
-        from drf_yasg.views import get_schema_view
-        schema_view = get_schema_view(
-            public=True, permission_classes=(permissions.AllowAny,),
-        )
-        self.register_view(
-            'openapi', schema_view.with_ui('swagger', cache_timeout=120), name='openapi'
-        )
 
     def __register_schema(self, name='schema'):
         try:
@@ -146,6 +133,16 @@ class APIRouter(_AbstractRouter):
 
 class MainRouter(_AbstractRouter):
     routers = []
+
+    def __register_openapi(self):
+        # pylint: disable=import-error
+        from drf_yasg.views import get_schema_view
+        schema_view = get_schema_view(
+            public=True, permission_classes=(permissions.AllowAny,),
+        )
+        self.register_view(
+            'openapi', schema_view.with_ui('swagger', cache_timeout=120), name='openapi'
+        )
 
     def _get_custom_lists(self):
         return super(MainRouter, self)._get_custom_lists() + self.routers
@@ -195,8 +192,9 @@ class MainRouter(_AbstractRouter):
             router = APIRouter(
                 perms=(permissions.IsAuthenticated,),
                 create_schema=create_schema or self.create_schema,
-                create_swagger=create_swagger or self.create_swagger,
             )
             router.root_view_name = version
             router.generate(views_list)
             self.register_router(version+'/', router)
+
+        self.__register_openapi()
