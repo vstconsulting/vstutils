@@ -342,10 +342,10 @@
                                             </a>
                                         </li>
                                     <% }else{ %>
-                                        <li>
+                                         <li>
                                             <a
                                                 href="#"
-                                                onclick="questionForAllSelectedOrNot(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- guiObj.api.multi_actions[k].name %>'); return false;">
+                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].name %>', <% if(guiObj.api.multi_actions[k].isEmptyAction) { %> true <% } else { %> false <% } %>); return false;">
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>

@@ -347,7 +347,7 @@ function guiObjectFactory(api_object)
         /**
          * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
          * Чтоб выделение одного списка не смешивалось с выделением другого списка
-         */ 
+         */
         guiFields:{}
     }
 
@@ -374,13 +374,6 @@ function guiObjectFactory(api_object)
     this.init.apply(this, arguments)
 
 }
-
-
-
-
-
-
-
 
 
 
@@ -464,16 +457,43 @@ function createAndGoEdit(obj)
     return def;
 }
 
-function goToMultiAction(ids, action)
+function goToMultiAction(ids, action, empty_action, tag)
 {
+    if(empty_action)
+    {
+        let item_type = spajs.urlInfo.data.reg.page;
+        let query = [];
+        let def = new $.Deferred();
+        for(let i in ids)
+        {
+            query.push(
+                {
+                    data_type: [item_type, ids[i], action],
+                    method: 'post',
+                }
+            )
+        }
+        $.when(api.query(query)).done(d => {
+            window.guiListSelections.unSelectAll(tag);
+            guiPopUp.success("Action '" + action + "' was successfully called for selected elements");
+            def.resolve(d);
+        }).fail(e => {
+            webGui.showErrors(e)
+            def.reject(e);
+            debugger;
+        })
+
+        return def.promise();
+    }
+
     return spajs.openURL(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action);
 }
 
-function goToMultiActionFromElements(elements, action)
+function goToMultiActionFromElements(elements, action, empty_action, tag)
 {
     let ids = window.guiListSelections.getSelectionFromCurrentPage(elements);
 
-    return goToMultiAction(ids, action)
+    return goToMultiAction(ids, action, empty_action, tag)
 }
 
 function addToParentsAndGoUp(item_ids)
@@ -563,7 +583,7 @@ function isEmptyObject(obj)
     return Object.keys(obj).length == 0
 }
 
-function questionForAllSelectedOrNot(selection_tag, action_name){
+function questionForAllSelectedOrNot(selection_tag, action_name, empty_action){
     var answer;
     var question = "Apply action <b>'"+ action_name + "'</b> for elements only from this page or for all selected elements?";
     var answer_buttons = ["For this page's selected", "For all selected"];
@@ -573,11 +593,11 @@ function questionForAllSelectedOrNot(selection_tag, action_name){
         {
             if(answer == answer_buttons[0])
             {
-                goToMultiActionFromElements($('.multiple-select .item-row.selected'), action_name );
+                goToMultiActionFromElements($('.multiple-select .item-row.selected'), action_name, empty_action, selection_tag );
             }
             else
             {
-                goToMultiAction(selection_tag, action_name);
+                goToMultiAction(window.guiListSelections.getSelection(selection_tag), action_name, empty_action, selection_tag);
             }
         }
     });

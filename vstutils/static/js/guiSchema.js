@@ -282,7 +282,7 @@ function openApi_guiSchema(api)
                     val.methodExec = query_types[q]
                      
                     if(Object.keys(fields).length == 0) { 
-                        val.isEmptyAction = true; 
+                        val.isEmptyAction = true;
                     }
                  
                     break;
