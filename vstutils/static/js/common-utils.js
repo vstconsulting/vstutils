@@ -1,16 +1,56 @@
+
+// Список файлов тестирующих ГУЙ
+if(!window.guiTestsFiles)
+{
+    window.guiTestsFiles = []
+}
+
+// Добавляем файл тестов к списку файлов для тестов гуя
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
+//window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/dashboard.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
+
+
+
+// Запускает тесты гуя
 function loadQUnitTests()
 {
+    loadAllUnitTests(window.guiTestsFiles)
+}
 
-    $('body').append('<script src=\'' + hostname + window.guiStaticPath + 'js/tests/qUnitTest.js\'></script>');
-
-    var intervaId = setInterval(function()
+// Загружает и запускает тесты гуя в строгом порядке.
+function loadAllUnitTests(urls)
+{
+    let promises = []
+    for(let i in urls)
     {
-        if(window.injectQunit !== undefined)
+        let def = new $.Deferred();
+        promises.push(def.promise());
+
+        var link = document.createElement("script");
+        link.setAttribute("type", "text/javascript");
+        link.setAttribute("src", urls[i]+'?r='+Math.random());
+
+        link.onload = function(def){
+            return function(){
+                def.resolve();
+            }
+        }(def)
+        document.getElementsByTagName("head")[0].appendChild(link);
+        
+        break;
+    }
+
+    $.when.apply($, promises).done(() => {
+        //injectQunit()
+        
+        if(urls.length == 1)
         {
-            clearInterval(intervaId)
-            injectQunit()
+            return injectQunit()
         }
-    }, 1000)
+        urls.splice(0, 1)
+        loadAllUnitTests(urls)
+    })
 }
 
 
@@ -109,7 +149,7 @@ function toIdString(str)
 
 function hidemodal()
 {
-    var def= new $.Deferred();
+    var def = new $.Deferred();
     $(".modal.fade.in").on('hidden.bs.modal', function (e) {
         def.resolve();
     })
@@ -121,10 +161,32 @@ function hidemodal()
 
 function capitalizeString(string)
 {
+    if(!string)
+    {
+        return "";
+    }
+    
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
-function isEmptyObject(obj) {
+function sliceLongString(string="", valid_length=100)
+{
+    if(!string || !string.slice)
+    {
+        return string;
+    }
+    
+    var str = string.slice(0, valid_length);
+    if(string.length > valid_length)
+    {
+        str += "...";
+    }
+
+    return str;
+}
+
+function isEmptyObject(obj)
+{
     for (var i in obj) {
         if (obj.hasOwnProperty(i)) {
             return false;
@@ -132,6 +194,31 @@ function isEmptyObject(obj) {
     }
     return true;
 }
+
+function readFileAndInsert(event, element)
+{
+    for (var i = 0; i < event.target.files.length; i++)
+    {
+        if (event.target.files[i].size > 1024 * 1024 * 1)
+        {
+            guiPopUp.error("File is too large")
+            console.log("File is too large " + event.target.files[i].size)
+            continue;
+        }
+
+        var reader = new FileReader();
+
+        reader.onload = function (e)
+        {
+            $(element).val(e.target.result);
+        }
+
+        reader.readAsText(event.target.files[i]);
+    }
+
+    return false;
+}
+
 
 window.onresize=function ()
 {
@@ -155,7 +242,7 @@ window.onresize=function ()
 }
 
 var guiLocalSettings = {
-    __settings:{ 
+    __settings:{
     },
     get:function(name){
         return this.__settings[name];
@@ -169,10 +256,10 @@ var guiLocalSettings = {
     {
         if(this.__settings[name] === undefined)
         {
-            this.__settings[name] = value; 
+            this.__settings[name] = value;
         }
     }
-} 
+}
 
 if(window.localStorage['guiLocalSettings'])
 {

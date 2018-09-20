@@ -15,7 +15,10 @@ FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
+FORMAT_TEXTAREA = 'textarea'
 FORMAT_DYN = 'dynamic'
+FORMAT_SELECT2 = 'select2'
+
 
 # Base types
 basic_type_info = OrderedDict()
@@ -30,6 +33,9 @@ basic_type_info[fields.HtmlField] = dict(
 )
 basic_type_info[serializers.JsonObjectSerializer] = dict(
     type=openapi.TYPE_OBJECT, format=FORMAT_JSON
+)
+basic_type_info[fields.TextareaField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
 )
 
 
@@ -89,6 +95,28 @@ class DependEnumFieldInspector(FieldInspector):
         return SwaggerType(**kwargs)
 
 
+class Select2FieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.Select2Field):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_INTEGER, format=FORMAT_SELECT2)
+        kwargs['additionalProperties'] = dict(
+            model = openapi.SchemaRef(
+                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                field.select_model, ignore_unresolved=True
+            ),
+            value_field = field.autocomplete_property,
+            view_field = field.autocomplete_represent
+        )
+
+        return SwaggerType(**kwargs)
+
+
 class NestedFilterInspector(CoreAPICompatInspector):
     def get_filter_parameters(self, filter_backend):
         subaction_list_actions = [
@@ -110,11 +138,12 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
-        DependEnumFieldInspector, AutoCompletionFieldInspector, VSTFieldInspector,
-    ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
+                           Select2FieldInspector, DependEnumFieldInspector,
+                           AutoCompletionFieldInspector, VSTFieldInspector,
+                       ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
     filter_inspectors = [
-        NestedFilterInspector
-    ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
+                            NestedFilterInspector
+                        ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     def __init__(self, *args, **kwargs):
         super(VSTAutoSchema, self).__init__(*args, **kwargs)

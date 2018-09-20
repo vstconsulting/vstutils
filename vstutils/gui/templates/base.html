@@ -25,6 +25,8 @@
         <link rel="stylesheet" href="{% static_path 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
         <!-- Theme style -->
         <link rel="stylesheet" href="{% static_path 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
+        <!-- iziToast -->
+        <link rel="stylesheet" href="{% static_path 'css/iziToast.min.css' %}?v={{gui_version}}">
         <!-- Google Font -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
@@ -97,7 +99,7 @@
         {% block script %}
             <!-- jQuery -->
             <script src="{% static_path 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
-            <script src="{% static_path 'js/libs/notify.js' %}?v={{gui_version}}"></script>
+            <script src="{% static_path 'js/libs/iziToast.min.js' %}?v={{gui_version}}"></script>
             <!-- Bootstrap 3.3.7 -->
             <script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
         {% endblock %}

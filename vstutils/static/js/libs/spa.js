@@ -371,36 +371,7 @@ if(!window.spajs)
 
         return res
     }
-
-    /**
-     * Сортирует меню.
-     * @param element targetBlock блок содержащий сортеруемые элементы (так как меню несколько)
-     * @private
-     */
-    spajs.sortMenu = function(targetBlock)
-    {
-        var sortmenu = targetBlock.children();
-
-        sortmenu.sort(function(a, b)
-        {
-            a = parseInt($(a).attr("data-index"));
-            if(isNaN(a))
-            {
-                return 1;
-            }
-
-            b = parseInt($(b).attr("data-index"));
-            if(isNaN(b))
-            {
-                return -1;
-            }
-
-            return b-a;
-        });
-
-        sortmenu.detach().appendTo(targetBlock);
-    }
-
+ 
     /**
      * Добавляет произвольный пункт меню
      * @param {object} menu Описание пункта меню
@@ -462,8 +433,6 @@ if(!window.spajs)
         {
             menu.type = "custom"
         }
-
-        var targetBlock = $("#left_sidebar")
  
         for(var i in spajs.opt.menu)
         {
@@ -481,21 +450,12 @@ if(!window.spajs)
         }
 
         spajs.opt.menu.push(menu)
-
-        if(menu.type == "custom")
-        {
-            targetBlock.append('<div data-index="'+menu.priority+'" >'+menu.menuHtml+'</div>');
-        }
-        else if(menu.type == "hidden")
-        {
-            // Невидимый пункт меню.
-        }
-        
-        spajs.sortMenu(targetBlock)
-        if(menu.onInsert)
-        {
-            menu.onInsert($("#spajs-menu-"+menu.id))
-        }
+  
+        spajs.opt.menu = spajs.opt.menu.sort((a, b)=>
+        { 
+            return b.priority - a.priority
+        });
+       
     }
   
     spajs.currentOpenMenu = undefined
@@ -541,45 +501,54 @@ if(!window.spajs)
             opt.event_state = {}
             opt.event_state.url = window.location.href;
         }
- 
+        
+        //console.table(spajs.opt.menu)
+        
         var regExpRes = []
         var menuInfo = undefined;
+        
         for(var i in spajs.opt.menu)
         {
-            val = spajs.opt.menu[i]
-            if(spajs.opt.menu[i].url_parser != undefined)
+            let val = spajs.opt.menu[i]
+            //console.log(val.priority, val.debug)
+            if(val.url_parser != undefined)
             {
-                for(var j in spajs.opt.menu[i].url_parser)
+                for(var j in val.url_parser)
                 {
-                    var parsed = spajs.opt.menu[i].url_parser[j](opt.menuId)
+                    var parsed = val.url_parser[j](opt.menuId)
                     if(parsed)
                     {
                         regExpRes = parsed
-                        menuInfo = spajs.opt.menu[i]
+                        menuInfo = val
                         break;
                     }
                 }
             }
-            else if(spajs.opt.menu[i].urlregexp != undefined)
+            else if(val.urlregexp != undefined)
             {
-                for(var j in spajs.opt.menu[i].urlregexp)
+                for(var j in val.urlregexp)
                 {
-                    if(spajs.opt.menu[i].urlregexp[j].test(opt.menuId))
+                    if(val.urlregexp[j].test(opt.menuId))
                     {
-                        regExpRes = spajs.opt.menu[i].urlregexp[j].exec(opt.menuId)
-                        menuInfo = spajs.opt.menu[i]
+                        regExpRes = val.urlregexp[j].exec(opt.menuId)
+                        menuInfo = val
                         break;
                     }
                 }
             }
-            else if(spajs.opt.menu[i].id == opt.menuId)
+            else if(val.id == opt.menuId)
             {
-                menuInfo = spajs.opt.menu[i]
+                menuInfo = val
+                break;
+            }
+            
+            if(menuInfo)
+            {
                 break;
             }
         }
-
-        //console.log("openMenu", menuId, menuInfo)
+ 
+        console.log("openMenu", menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
             
@@ -778,7 +747,7 @@ if(!window.spajs)
     {
         if(typeof data === "string")
         {
-            $.notify(data, "error");
+            guiPopUp.error(data);
             return;
         }
 
@@ -801,7 +770,7 @@ if(!window.spajs)
 
             if(typeof data[i] === "string")
             {
-                $.notify(data[i], "error");
+                guiPopUp.error(data[i]);
             }
             else if(typeof data[i] === "object")
             {
@@ -826,7 +795,7 @@ if(!window.spajs)
 
         if(data && data.status === 500)
         {
-            $.notify("Ошибка 500", "error");
+            guiPopUp.error("Error 500")
             return true;
         }
 
@@ -844,7 +813,7 @@ if(!window.spajs)
 
         if(data && data.error)
         {
-            $.notify(data.error, "error");
+            guiPopUp.error(data.error);
             return true;
         }
         return false;

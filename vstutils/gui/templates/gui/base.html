@@ -15,8 +15,7 @@
 
         var hostname = '{{host_url}}';
         var server_status_types = '{{server_status_types|safe}}';
-
-        var polemarch_version = '{{gui_version}}';
+ 
         var gui_version = '{{gui_version}}';
 
         var gui_logout_url = hostname + '{{logout_url}}';
@@ -167,7 +166,7 @@
 
             { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
-            { prioritet:4, type:'js', name: "{% static 'js/libs/notify.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
 
@@ -180,12 +179,17 @@
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
  
             { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
+            { prioritet:10.1,   type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiBreadcrumbers.js' %}?v={{gui_version}}"},
             { prioritet:11.1, type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}"},
             { prioritet:11.2, type:'js', name: "{% static 'js/guiPage.js' %}?v={{gui_version}}"},
             { prioritet:11.3, type:'js', name: "{% static 'js/guiItemFactory.js' %}?v={{gui_version}}"},
-            { prioritet:11.4, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiPageFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiListFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiActionFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.4, type:'js', name: "{% static 'js/guiSchema.js' %}?v={{gui_version}}"},
+            { prioritet:11.5, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
 
             { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
             { prioritet:300, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
@@ -195,7 +199,8 @@
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
 
-            { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:101, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
             { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
             { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
             { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},

@@ -200,7 +200,7 @@ var deepEqual = function (x, y)
 }
 
 
-function render(name, callback)
+function testdone(name, callback)
 {
     if(callback === undefined)
     {
@@ -236,7 +236,7 @@ function saveReport()
 /**
  * В этом массиве должны быть qunit тесты для приложения
  */
-window.qunitTestsArray = []
+window.qunitTestsArray = {}
 
 /**
  * Вставляет Qunit и запускает выполнение тестов.
@@ -280,11 +280,11 @@ function injectQunit()
             if(!syncQUnit.nextTest())
             {
                 saveReport()
-                render("ok-done", window.close)
+                testdone("ok-done", window.close)
             }
         })
 
-        for(var i in window.qunitTestsArray)
+        for(let i in window.qunitTestsArray)
         {
             window.qunitTestsArray[i].test.call()
         }
@@ -313,7 +313,7 @@ syncQUnit.nextTest = function(name, test)
 
     var test = syncQUnit.testsArray.shift()
 
-    $.notify("Test "+test.name+", "+syncQUnit.testsArray.length+" tests remain", "warn");
+    guiPopUp.warning("Test "+test.name+", "+syncQUnit.testsArray.length+" tests remain");
 
     QUnit.test(test.name, test.test);
     //syncQUnit.nextTest()
@@ -328,8 +328,7 @@ syncQUnit.nextTest = function(name, test)
 /**
  * qunitAddTests_trim
  */
-window.qunitTestsArray.push({
-    step:100,
+window.qunitTestsArray['trim'] = {
     test:function()
     {
         syncQUnit.addTest('trim', function ( assert ) {
@@ -344,7 +343,7 @@ window.qunitTestsArray.push({
             assert.equal(trim('    x  '), 'x', 'Табы');
             assert.equal(trim('    x   y  '), 'x   y', 'Табы и пробелы внутри строки не трогаем');
 
-            render(done);
+            testdone(done);
         });
 
         syncQUnit.addTest('trim', function ( assert ) {
@@ -362,7 +361,7 @@ window.qunitTestsArray.push({
             {
                 assert.equal(stripslashes(addslashes(stringArr[i])), stringArr[i], "i:"+stringArr[i]);
             }
-            render(done);
+            testdone(done);
         });
-    }})
- 
+    }
+}

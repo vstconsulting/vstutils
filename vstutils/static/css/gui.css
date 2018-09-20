@@ -1118,3 +1118,9 @@ table{
 .sublink-btn { 
     text-transform: capitalize;
 }
+
+.gui-element-html .html_content {
+    border: 1px solid #d2d6de;
+    padding: 10px;
+    min-height: 34px;
+}
