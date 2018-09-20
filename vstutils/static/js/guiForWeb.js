@@ -88,51 +88,15 @@ webGui.start = function(options)
         }
         
         console.error("spajs.openMenuFromUrl exception", exception.stack)
-        debugger;
-        //spajs.openURL("");
+        debugger; 
     }
 }
 
 webGui.showErrors = function(res)
-{ 
-    if(!res)
+{
+    for(let i in res)
     {
-        return true;
-    }
-
-    if(res.responseJSON)
-    {
-        res = res.responseJSON
-    }
-
-    if(res && res.info && res.info.message)
-    {
-        console.error('showErrors:' + res.info.message)
-        guiPopUp.error(res.info.message);
-        return res.info.message;
-    }
-    else if(res && res.message)
-    {
-        console.error('showErrors:' + res.message)
-        guiPopUp.error(res.message);
-        return res.message;
-    }
-
-    if(typeof res === "string")
-    {
-        console.error('showErrors:' + res)
-        guiPopUp.error(res)
-        return res;
-    }
-
-    for(var i in res)
-    {
-        if(i == "error_type")
-        {
-            continue;
-        }
-
-        if(typeof res[i] === "string")
+        if(i == "detail")
         {
             console.error('showErrors:' + res[i])
             guiPopUp.error(res[i])
@@ -140,7 +104,12 @@ webGui.showErrors = function(res)
         }
         else if(typeof res[i] === "object")
         {
-            return webGui.showErrors(res[i])
+            let error = webGui.showErrors(res[i])
+            if (error)
+            {
+                return error;
+            }
+
         }
     }
 }
