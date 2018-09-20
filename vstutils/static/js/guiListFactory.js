@@ -262,7 +262,7 @@ var gui_list_object = {
         q.push("limit=" + encodeURIComponent(filters.limit))
         q.push("offset=" + encodeURIComponent(filters.offset))
         q.push("ordering=" + encodeURIComponent(filters.ordering))
-
+      
         if(filters.query)
         {
             if(typeof filters.query == "string")
@@ -284,28 +284,27 @@ var gui_list_object = {
                 q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.query[i]))
             }
         }
-
-        var queryObj = {}
-        if(filters.parent_id && filters.parent_type)
+        
+        let url = this.api.path 
+        if(this.url_vars)
         {
-            queryObj = {
-                type: "mod",
-                item: filters.parent_type,
-                filters:q.join("&"),
-                data_type:this.api.bulk_name,
-                method:"get",
-                pk:filters.parent_id
-            }
+            for(let i in this.url_vars)
+            {
+                if(/^api_/.test(i))
+                {
+                    url = url.replace("{"+i.replace("api_", "")+"}", this.url_vars[i])
+                }
+            } 
         }
-        else
-        {
-            queryObj = {
-                type: "get",
-                item: this.api.bulk_name,
-                filters:q.join("&")
-            }
+        
+        url = url.replace(/^\/|\/$/g, "").split(/\//g)
+        let queryObj = {
+            //type:'mod',
+            data_type:url,
+            filters:q.join("&"),
+            method:'get'
         }
-
+              
         var promise = new $.Deferred();
        
         $.when(api.query(queryObj)).done(d => {
