@@ -380,13 +380,10 @@ function guiObjectFactory(api_object)
 
 
 
-
-
-
+ 
 function emptyAction(action_info)
 {
-    var pageItem = new guiObjectFactory(action_info)
-
+    var pageItem = new guiObjectFactory(action_info) 
     return function(){
         pageItem.exec()
     }
