@@ -343,6 +343,11 @@ function openApi_guiSchema(api)
                 query_type:'get',
                 operationId:val.api.get.operationId
             }
+            
+            for(let f in val.schema.get.fields)
+            {
+                val.schema.get.fields[f].readOnly = true
+            }
 
             if(val.api.put)
             {
