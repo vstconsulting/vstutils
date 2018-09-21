@@ -54,6 +54,22 @@
     <%! guiElements.base %>
 </script>
 
+
+<!-- guiElements.prefetch -->
+<script type="text/x-just" data-just="guiElements.prefetch">
+    <!-- guiElements.prefetch -->
+
+    <%[ main_input %>
+      <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
+        <a href="<%- window.hostname %>/?<%- opt[opt.name + '_info']['prefetch_path'] %>/<%- value %>"
+           class="item-name" onclick="return spajs.openURL(this.href);">
+            <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
+        </a>
+      </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
 <!-- guiElements.password -->
 <script type="text/x-just" data-just="guiElements.password">
     <!-- guiElements.password -->

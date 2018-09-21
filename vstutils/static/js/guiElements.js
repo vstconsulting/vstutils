@@ -102,6 +102,8 @@ guiElements.base = function(opt = {}, value, parent_object)
             return "";
         }
 
+        // debugger;
+
         return spajs.just.render("guiElements."+this.name , {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
@@ -180,9 +182,6 @@ guiElements.base = function(opt = {}, value, parent_object)
      * Добавляет колбек на событие onChange чтоб зависимые поля могли вовремя перестроиться
      * @param {function} callback
      * @returns {undefined}
-     *
-     * @example На пример так поле notes становится зависимым от поля name у проектов
-     *  window.api.openapi.definitions.OneProject.properties.notes.dependsOn = ['name']
      */
     this.addOnChangeCallBack = function(callback)
     {
@@ -328,6 +327,17 @@ guiElements.textarea = function(opt = {})
 {
     this.name = 'textarea';
     guiElements.base.apply(this, arguments)
+}
+
+guiElements.prefetch = function (opt = {}, value)
+{
+    this.name = 'prefetch';
+    guiElements.base.apply(this, arguments)
+
+    this.getValue = function()
+    {
+        return $("#"+this.element_id).attr('attr-value');
+    }
 }
 
 guiElements.autocomplete = function()
