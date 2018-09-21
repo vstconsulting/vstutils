@@ -81,12 +81,7 @@ var gui_list_object = {
 
         return def
     },
-
-    loadAllItems : function()
-    {
-        return this.search({limit:9999, offset:0});
-    },
-
+ 
     prefetch : function (data)
     {
         var prefetch_fields = {};

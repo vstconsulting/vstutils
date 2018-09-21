@@ -15,7 +15,7 @@
 
         var hostname = '{{host_url}}';
         var server_status_types = '{{server_status_types|safe}}';
- 
+
         var gui_version = '{{gui_version}}';
 
         var gui_logout_url = hostname + '{{logout_url}}';
@@ -111,8 +111,8 @@
                 font-family: 'Ubuntu Mono', monospace;
                 color: #3F51B5;
                 text-transform: uppercase;
-                
-                
+
+
                 font-size: 36px;
                 margin-top: 20px;
                 margin-bottom: 10px;
@@ -121,7 +121,7 @@
                 margin: .67em 0;
                 box-sizing: border-box;
             }
-            
+
             .loadInfoWrapper a{
                 position: absolute;
                 border-radius: 7px;
@@ -138,9 +138,9 @@
                 font-weight: 400;
                 font-size: 14px;
             }
-            
-            .loadInfoWrapper a:hover{ 
-                background-color: #d0d0d0; 
+
+            .loadInfoWrapper a:hover{
+                background-color: #d0d0d0;
             }
         </style>
     {% endblock %}
@@ -160,7 +160,7 @@
 {% block resource_list %}
     <script>
         window.resourceList = [
-            { prioritet:0, type:'js', name: "{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"},
+            { prioritet:0, type:'js', name: "{% static 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"},
             { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"},
 
 
@@ -177,7 +177,7 @@
             { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
- 
+
             { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
             { prioritet:10.1,   type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
@@ -192,10 +192,10 @@
             { prioritet:11.5, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
 
             { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
-            { prioritet:300, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
-            { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
-            { prioritet:300, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
-            { prioritet:300, type:'tpl', name: "{% static '/' %}templates/guiBreadcrumbers.html?v={{gui_version}}"},
+            { prioritet:300, type:'js',  name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
+            { prioritet:100, type:'tpl', name: "{% static 'templates/errorPage.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiDashboard.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiBreadcrumbers.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
 
@@ -211,7 +211,7 @@
         ]
     </script>
 {% endblock %}
- 
+
 {% block body %}
     <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}">
         {% block gui_init_inline_body %}
@@ -232,17 +232,17 @@
                 <div class="loadWrapper">
                     <div class="loadProgress"  id="LoadingProgressBarLine"></div>
                 </div>
-                 
+
                 <div class="loadInfoWrapper">
-                    <a href="#" onclick="window.guiFilesCache.deleteAllCache(); return false;">Reload all cache</a> 
+                    <a href="#" onclick="window.guiFilesCache.deleteAllCache(); return false;">Reload all cache</a>
                 </div>
-                
+
                 <div id="LoadingProgressBar-errorLog">
-                     
+
                 </div>
             </div>
         {% endblock %}
- 
+
         <div id="RealBody" style="display: none;">
             {% block gui_body_template %}
                 <div class="hold-transition skin-black-light sidebar-mini " style="width: 100vw;    height: 100vh;">
@@ -252,12 +252,12 @@
 
                     {% block navbar %}
                         <div class="wrapper" >
-                            <header class="main-header"> 
+                            <header class="main-header">
                                 {% block logo %}
                                     <!-- Logo -->
                                     <a href="/" class="logo">
                                         <span>{{ project_gui_name }}</span>
-                                    </a>       
+                                    </a>
                                 {% endblock %}
                                 <!-- Header Navbar: style can be found in header.less -->
                                 <nav class="navbar navbar-static-top">
@@ -295,12 +295,12 @@
                                 {% block content %}
                                     <!-- errorPage -->
                                     <section class="content-header">
-                                        <h1> 
+                                        <h1>
                                             <span class="h1-header" ><i class="fa fa-warning text-yellow"></i> Page not found</span>
 
                                         </h1>
                                         <ol class="breadcrumb">
-                                            <li><a href="<%- window.hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
+                                            <li><a href="<%- window.hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
                                             <li class="active"><i class="fa fa-warning text-yellow"></i> Page not found </li>
                                         </ol>
                                     </section>
@@ -318,17 +318,17 @@
                                                     <div class="box-header with-border">
 
                                                     </div>
-                                                    <div class="box-body"> 
+                                                    <div class="box-body">
                                                         <p>
                                                             Status: 404
-                                                        </p> 
-                                                        Follow the link to create a bug report  
+                                                        </p>
+                                                        Follow the link to create a bug report
                                                     </div>
                                                 </div>
                                             </section>
                                         </div>
                                     </section>
-                                    <!-- /errorPage --> 
+                                    <!-- /errorPage -->
                                 {% endblock %}
                             </div>
 
@@ -349,9 +349,9 @@
                                             &nbsp;&nbsp;&nbsp;
                                         </div>
                                     {% endif %}
-                                    <div class="pull-right">  
-                                        <a  
-                                                href="#" 
+                                    <div class="pull-right">
+                                        <a
+                                                href="#"
                                                 onclick="window.guiFilesCache.deleteAllCache(); return false;"
                                                 style="color:#ccc;"
                                                 >Reload cache</a>
@@ -367,13 +367,13 @@
         </div>
 
         <!-- /gui_body_template -->
-            
+
         <!-- inline_app_loader -->
-        {% block inline_app_loader %} 
+        {% block inline_app_loader %}
             {% include "gui/inline_app_loader.html" %}
         {% endblock %}
         <!-- /inline_app_loader -->
-        
+
         <!-- script -->
         {% block script %}{{ block.super }}{% endblock %}
         <!-- /script -->
