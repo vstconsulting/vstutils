@@ -617,17 +617,16 @@ function questionDeleteOrRemove(thisObj)
  * Функция удаляет элементы, id которых перечислены в массиве ids
  * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
  */
-function deleteSelectedElements(thisObj, ids, tag){
-    window.guiListSelections.unSelectAll(tag);
-
-    for(let i in ids)
-    {
-        $(".item-row.item-"+ids[i]).remove()
-    }
-
+function deleteSelectedElements(thisObj, ids, tag)
+{
     $.when(thisObj.deleteArray(ids)).done(function(d)
     {
+        window.guiListSelections.unSelectAll(tag);
 
+        for(let i in ids)
+        {
+            $(".item-row.item-"+ids[i]).remove()
+        }
     }).fail(function (e)
     {
         webGui.showErrors(e)

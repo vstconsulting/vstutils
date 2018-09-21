@@ -23,17 +23,34 @@ var gui_list_object = {
     {
         var thisObj = this;
         var def = new $.Deferred();
-
         var q = []
-        for(let i in ids)
-        {
-            q.push({
-                type:"del",
-                item: thisObj.api.bulk_name,
-                pk:ids[i]
-            })
-        }
 
+        if(guiSchema.object[thisObj.api.name])
+        {
+            for(let i in ids)
+            {
+                q.push({
+                    type:"del",
+                    item: thisObj.api.bulk_name,
+                    pk:ids[i]
+                })
+            }
+        }
+        else
+        {
+            let parent_type = spajs.urlInfo.data.reg.parent_type;
+            let parent_id = spajs.urlInfo.data.reg.parent_id;
+            let page_type = spajs.urlInfo.data.reg.page_type;
+            for(let i in ids)
+            {
+                q.push({
+                    type:"mod",
+                    method:"delete",
+                    data_type:[parent_type, parent_id, page_type, ids[i]],
+                })
+            }
+
+        }
 
         $.when(api.query(q)).done(function(data)
         {
