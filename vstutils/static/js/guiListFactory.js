@@ -2,11 +2,11 @@
 var gui_list_object = {
     state : {
         search_filters:{}
-    }, 
+    },
     init : function (page_options, objects)
     {
         this.base_init.apply(this, arguments)
-        
+
         if(objects)
         {
             this.model.data = objects
@@ -16,24 +16,41 @@ var gui_list_object = {
         if(!this.model.title)
         {
             this.model.title = this.name
-        } 
+        }
     },
-  
+
     deleteArray : function (ids)
     {
         var thisObj = this;
         var def = new $.Deferred();
- 
         var q = []
-        for(let i in ids)
-        {
-            q.push({
-                type:"del",
-                item: thisObj.api.bulk_name,
-                pk:ids[i]
-            })
-        }
 
+        if(guiSchema.object[thisObj.api.name])
+        {
+            for(let i in ids)
+            {
+                q.push({
+                    type:"del",
+                    item: thisObj.api.bulk_name,
+                    pk:ids[i]
+                })
+            }
+        }
+        else
+        {
+            let parent_type = spajs.urlInfo.data.reg.parent_type;
+            let parent_id = spajs.urlInfo.data.reg.parent_id;
+            let page_type = spajs.urlInfo.data.reg.page_type;
+            for(let i in ids)
+            {
+                q.push({
+                    type:"mod",
+                    method:"delete",
+                    data_type:[parent_type, parent_id, page_type, ids[i]],
+                })
+            }
+
+        }
 
         $.when(api.query(q)).done(function(data)
         {
@@ -66,7 +83,7 @@ var gui_list_object = {
     },
  
     prefetch : function (data)
-    { 
+    {
         var prefetch_fields = {};
         var prefetch_fields_ids = {};
         var promise = new $.Deferred();
@@ -134,9 +151,9 @@ var gui_list_object = {
                 {
                     queryObj = {
                         type: "mod",
-                        item: match[1],
-                        pk: match[2],
-                        data_type: match[3],
+                        item: match[1].replace(/^\/|\/$/g, ''),
+                        pk: match[2].replace(/^\/|\/$/g, ''),
+                        data_type: match[3].replace(/^\/|\/$/g, ''),
                         method: "get",
                     }
                 }
@@ -173,7 +190,7 @@ var gui_list_object = {
                             {
                                 for(var j in d)
                                 {
-                                    if(d[j].item == match[1] && d[j].subitem == match[3])
+                                    if(d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
                                     {
                                         let prefetch_data = d[j].data.results;
                                         for(var k in prefetch_data)
@@ -255,7 +272,7 @@ var gui_list_object = {
         q.push("limit=" + encodeURIComponent(filters.limit))
         q.push("offset=" + encodeURIComponent(filters.offset))
         q.push("ordering=" + encodeURIComponent(filters.ordering))
-      
+
         if(filters.query)
         {
             if(typeof filters.query == "string")
@@ -277,8 +294,8 @@ var gui_list_object = {
                 q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.query[i]))
             }
         }
-        
-        let url = this.api.path 
+
+        let url = this.api.path
         if(this.url_vars)
         {
             for(let i in this.url_vars)
@@ -287,9 +304,9 @@ var gui_list_object = {
                 {
                     url = url.replace("{"+i.replace("api_", "")+"}", this.url_vars[i])
                 }
-            } 
+            }
         }
-        
+
         url = url.replace(/^\/|\/$/g, "").split(/\//g)
         let queryObj = {
             //type:'mod',
@@ -297,9 +314,9 @@ var gui_list_object = {
             filters:q.join("&"),
             method:'get'
         }
-              
+
         var promise = new $.Deferred();
-       
+
         $.when(api.query(queryObj)).done(d => {
 
             $.when(this.prefetch(d)).always(a => {
@@ -389,13 +406,13 @@ var gui_list_object = {
 
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
-        
+
         //render_options.sections = this.getSections('renderAsPage')
         if(!render_options.page_type) render_options.page_type = 'list'
 
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
- 
+
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -410,7 +427,7 @@ var gui_list_object = {
         render_options.fields = this.api.schema.new.fields
         //render_options.sections = this.getSections('renderAsNewPage')
         render_options.hideReadOnly = true
-       
+
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
@@ -429,12 +446,12 @@ var gui_list_object = {
 
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.intTag(render_options.selectionTag)
-        
-        
+
+
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
-    
+
     ////////////////////////////////////////////////
     // pagination
     ////////////////////////////////////////////////
