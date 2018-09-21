@@ -579,6 +579,12 @@ guiElements.autocomplete = function()
     }
 }
 
+guiElements.redirect = function(field, field_value, parent_object)
+{
+    this.name = 'redirect'
+    guiElements.base.apply(this, arguments)
+}
+
 guiElements.select2 = function(field, field_value, parent_object)
 {
     this.name = 'select2'

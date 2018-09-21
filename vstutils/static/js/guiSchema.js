@@ -5,12 +5,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
     let fields = mergeDeep({}, properties)
     for(let i in fields)
     {
-        /*if(fields[i].additionalProperties && fields[i].additionalProperties.model && fields[i].additionalProperties.model.$ref)
-        {
-            // This is not link to nothing, tis for autocomplete field
-            // Это для автокомплита поле а не ссылка куда попало.
-            continue;
-        }*/
+
         let field = fields[i]
 
         let def_name = getObjectNameBySchema(field, 1)

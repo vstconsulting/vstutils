@@ -275,8 +275,8 @@ function openApi_add_list_page_path(api_obj)
 tabSignal.connect("resource.loaded", function()
 {
     window.api = new guiApi()
-    $.when(window.api.init()).done(function(){
-
+    $.when(window.api.init()).done(function()
+    { 
         // Событие в теле которого можно было бы переопределить ответ от open api
         tabSignal.emit("openapi.loaded",  {api: window.api});
 
