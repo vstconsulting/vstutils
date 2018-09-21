@@ -37,13 +37,13 @@ function loadAllUnitTests(urls)
             }
         }(def)
         document.getElementsByTagName("head")[0].appendChild(link);
-
+        
         break;
     }
 
     $.when.apply($, promises).done(() => {
         //injectQunit()
-
+        
         if(urls.length == 1)
         {
             return injectQunit()
@@ -165,7 +165,7 @@ function capitalizeString(string)
     {
         return "";
     }
-
+    
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
@@ -175,7 +175,7 @@ function sliceLongString(string="", valid_length=100)
     {
         return string;
     }
-
+    
     var str = string.slice(0, valid_length);
     if(string.length > valid_length)
     {
@@ -240,26 +240,6 @@ function addCssClassesToElement(element="", title, type)
     }
 
     return class_list.toLowerCase();
-}
-
-function turnTableTrIntoLink(event)
-{
-    if(!(event.target.classList.contains('light-tr-none') ||
-            event.target.classList.contains('ico-on') ||
-            event.target.classList.contains('ico-off'))
-    )
-    {
-        let href;
-        if(event.target.hasAttribute('href'))
-        {
-            href =  event.target.getAttribute('href');
-        }
-        else
-        {
-            href =  event.currentTarget.getAttribute('data-href');
-        }
-        spajs.openURL(href);
-    }
 }
 
 

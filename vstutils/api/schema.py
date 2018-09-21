@@ -95,7 +95,7 @@ class DependEnumFieldInspector(FieldInspector):
         return SwaggerType(**kwargs)
 
 
-class Select2FieldInspector(FieldInspector):  # nocv
+class Select2FieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
         if not isinstance(field, fields.Select2Field):

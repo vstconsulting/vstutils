@@ -7,7 +7,6 @@ variables:
   ARTIFACT_DOWNLOAD_ATTEMPTS: 3
   RESTORE_CACHE_ATTEMPTS: 3
   DJANGO_LOG_LEVEL: 'CRITICAL'
-  TOX_ARGS: "--workdir /cache/.tox_vstutils_${CI_BUILD_REF_NAME}"
 
 stages:
   - code_standarts
@@ -21,7 +20,7 @@ stages:
   variables:
     TOX_ENVS: "flake,pylint,py27-django-install,py35-django-install,py36-django-install"
   script:
-   - tox -e $TOX_ENVS $TOX_ARGS
+   - tox -e $TOX_ENVS
   except:
     - tags
   retry: 2
