@@ -1370,7 +1370,7 @@ function getInfoFromAdditionalProperties(options)
 function getFiltersForAutocomplete(list, search_str, view_field)
 {
     let filters = {
-        limit:9999,
+        limit:20,
         offset:0,
         query:{
             
