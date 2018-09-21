@@ -57,6 +57,11 @@ var gui_base_object = {
             {
                 var type = field.format
 
+                if(type == 'date-time')
+                {
+                    type = 'date_time'
+                }
+
                 if(!type && field.enum !== undefined)
                 {
                     type = 'enum'

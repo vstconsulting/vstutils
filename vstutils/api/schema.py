@@ -18,6 +18,7 @@ FORMAT_JSON = 'json'
 FORMAT_TEXTAREA = 'textarea'
 FORMAT_DYN = 'dynamic'
 FORMAT_SELECT2 = 'select2'
+FORMAT_UPTIME = "uptime"
 
 
 # Base types
@@ -36,6 +37,9 @@ basic_type_info[serializers.JsonObjectSerializer] = dict(
 )
 basic_type_info[fields.TextareaField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
+)
+basic_type_info[fields.UptimeField] = dict(
+    type=openapi.TYPE_INTEGER, format=FORMAT_UPTIME
 )
 
 
