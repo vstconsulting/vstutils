@@ -5,44 +5,64 @@ function openApi_guiPrepareFields(api, properties, parent_name)
     let fields = mergeDeep({}, properties)
     for(let i in fields)
     {
-        if(fields[i].additionalProperties && fields[i].additionalProperties.model && fields[i].additionalProperties.model.$ref)
+        /*if(fields[i].additionalProperties && fields[i].additionalProperties.model && fields[i].additionalProperties.model.$ref)
         {
             // This is not link to nothing, tis for autocomplete field
             // Это для автокомплита поле а не ссылка куда попало.
             continue;
-        }
-        
-        let def_name = getObjectNameBySchema(fields[i])
+        }*/
+        let field = fields[i]
+
+        let def_name = getObjectNameBySchema(field, 1)
         if(def_name)
-        { 
+        {
             let def_obj = getObjectDefinitionByName(api, def_name, parent_name+"_"+i)
             if(!def_obj)
             {
                 console.error("could not find definition for " + def_name + " object")
                 continue;
             }
-            fields[i] =  mergeDeep({}, def_obj);
+            field =  mergeDeep({}, def_obj);
 
-            fields[i].readOnly = true
+            field.readOnly = true
 
             let format = def_name.replace("#/", "").split(/\//)
 
             if(format[1] != "Data")
             {
-                fields[i].format = "api"+format[1]
+                field.format = "api"+format[1]
             }
 
-            fields[i].definition_ref = def_name 
-        } 
+            field.definition_ref = def_name
+            field.definition_link = openApi_findParentByDefinition(def_obj, def_name)
+
+        }
+
+        let fieldObj;
+        if(window.guiElements && field.format && window.guiElements[field.format])
+        {
+            fieldObj = new window.guiElements[field.format](field)
+        }
+        else if(window.guiElements && field.type && window.guiElements[field.type])
+        {
+            fieldObj = new window.guiElements[field.type](field)
+        }
+
+        if(fieldObj && fieldObj.prepareProperties)
+        {
+            field = fieldObj.prepareProperties(field)
+        }
+
+        fields[i] = field
     }
-     
+
    return fields
 }
 
 // Replace link from `additionalProperties` to api link for autocomplete work
 // Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
 function openApi_findParentByDefinition(api_obj, definition)
-{  
+{
     if(api_obj.type == 'list' && api_obj.api.get)
     {
         let schema = getObjectNameBySchema(api_obj.api.get)
@@ -51,13 +71,13 @@ function openApi_findParentByDefinition(api_obj, definition)
             return api_obj;
         }
     }
-    
+
     if(api_obj.parent)
     {
         return openApi_findParentByDefinition(api_obj.parent, definition);
     }
-    
-    
+
+
     return false
 }
 
@@ -65,7 +85,7 @@ function openApi_findParentByDefinition(api_obj, definition)
 // Replace link from `additionalProperties` to api link for autocomplete work
 // Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
 function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
-{ 
+{
     for(let i in fields)
     {
         if(!fields[i].additionalProperties || !fields[i].additionalProperties.model || !fields[i].additionalProperties.model.$ref)
@@ -74,22 +94,22 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
         }
 
         let definition = fields[i].additionalProperties.model.$ref
-         
+
         for(let l in api_obj.parent.sublinks)
         {
             let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition)
             if(list_obj)
             {
-                fields[i].additionalProperties.list_obj = list_obj 
+                fields[i].additionalProperties.list_obj = list_obj
                 break;
             }
         }
-       
+
         if(fields[i].additionalProperties.list_obj)
         {
             continue;
         }
-       
+
         let definition_obj = openApi_findParentByDefinition(api_obj, definition)
         if(!definition_obj)
         {
@@ -100,7 +120,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                 {
                     continue;
                 }
-                
+
                 let list_obj = openApi_findParentByDefinition(val, definition);
                 if(list_obj)
                 {
@@ -110,7 +130,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
             }
         }
     }
-     
+
    return fields
 }
 
@@ -122,7 +142,7 @@ function openApi_guiRemoveReadOnlyMark(properties)
         {
             properties[i].readOnly = false
         }
-    } 
+    }
     return properties
 }
 
@@ -134,14 +154,14 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
     {
         return undefined
     }
-    
+
     let def_name = undefined
-    let query_schema = mergeDeep({}, QuerySchema) 
+    let query_schema = mergeDeep({}, QuerySchema)
     if(type == 'get')
     {
         if(query_schema.parameters)
         {
-            query_schema.filters = query_schema.parameters 
+            query_schema.filters = query_schema.parameters
         }
 
         def_name = getObjectNameBySchema(query_schema)
@@ -161,7 +181,7 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
     {
         return query_schema;
     }
-   
+
     let def_obj = getObjectDefinitionByName(api, def_name)
     if(!def_obj)
     {
@@ -173,7 +193,7 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
     for(let i in query_schema.fields)
     {
         query_schema.fields[i].name = i
-    } 
+    }
 
     return query_schema;
 }
@@ -186,12 +206,12 @@ function openApi_guiSchemaSetRequiredFlags(api)
         if(definition.required)
         {
             for(let j in definition.required)
-            { 
+            {
                 definition.properties[definition.required[j]].required = true
             }
         }
     }
-    
+
     return api
 }
 
@@ -201,7 +221,7 @@ function openApi_guiSchema(api)
 {
     let path_schema = {}
     let short_schema = {}
-    
+
     api = openApi_guiSchemaSetRequiredFlags(api)
 
     // Set page type ('page', 'list' or 'action'
@@ -237,7 +257,7 @@ function openApi_guiSchema(api)
 
         let name = i.replace(/\/{[A-z]+}/g, "").split(/\//g)
         name = name[name.length - 2]
-         
+
         path_schema[i] = {
             level:urlLevel,
             path:i,
@@ -255,7 +275,7 @@ function openApi_guiSchema(api)
             short_name:undefined,
             hide_non_required:guiLocalSettings.get('hide_non_required'),
             extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],
-            methodEdit:undefined, 
+            methodEdit:undefined,
             selectionTag:i.replace(/[^A-z0-9\-]/img, "_"),
         }
 
@@ -313,7 +333,7 @@ function openApi_guiSchema(api)
                 val.methodEdit = 'put'
             }
             val.canEdit = val.methodEdit != undefined;
-        } 
+        }
     }
 
     // Set `schema` property
@@ -350,7 +370,7 @@ function openApi_guiSchema(api)
                 query_type:'get',
                 operationId:val.api.get.operationId
             }
-            
+
             for(let f in val.schema.get.fields)
             {
                 val.schema.get.fields[f].readOnly = true
@@ -391,11 +411,11 @@ function openApi_guiSchema(api)
                         operationId:val.api[query_types[q]].operationId
                     }
                     val.methodExec = query_types[q]
-                     
-                    if(Object.keys(fields).length == 0) { 
+
+                    if(Object.keys(fields).length == 0) {
                         val.isEmptyAction = true;
                     }
-                 
+
                     break;
                 }
             }
@@ -435,36 +455,36 @@ function openApi_guiSchema(api)
         val.links = {}
         for(let subpage in  val.sublinks)
         {
-            let subobj = val.sublinks[subpage] 
+            let subobj = val.sublinks[subpage]
             if(subobj.type != 'action')
             {
                 val.links[subobj.name] = subobj
                 continue;
             }
 
-            val.actions[subobj.name] = subobj 
-            
+            val.actions[subobj.name] = subobj
+
         }
-       
-        
-        val.multi_actions = [] 
+
+
+        val.multi_actions = []
         for(let subaction in  val.sublinks_l2)
         {
             let subobj = val.sublinks_l2[subaction]
             if(subobj.type != 'action')
-            { 
+            {
                 continue;
             }
 
             val.multi_actions[subobj.name] = subobj
         }
-        
+
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
         {
             val.multi_actions['delete'] = {
                 name:"delete",
                 onClick:function()
-                {  
+                {
                     if(this.api.canRemove)
                     {
                         return questionDeleteOrRemove(this);
@@ -478,21 +498,21 @@ function openApi_guiSchema(api)
             }
         }
     }
- 
+
     for(let path in path_schema)
-    {  
-        openApi_set_parents_links(path_schema, path, path_schema[path]) 
+    {
+        openApi_set_parents_links(path_schema, path, path_schema[path])
     }
 
     // Set `schema` property
     // Проставит свойство schema
     for(let path in path_schema)
-    { 
+    {
         let val = path_schema[path]
         for(let schema in path_schema[path].schema)
         {
             val.schema[schema].fields = openApi_guiPrepareAdditionalProperties(path_schema, val, val.schema[schema].fields)
-        } 
+        }
     }
 
     return {path:path_schema, object:short_schema};
@@ -528,17 +548,17 @@ function getObjectDefinitionByName(api, name, parent_name)
     {
         return;
     }
-   
+
     // "#/definitions/Group"
     // @todo надо чтоб он правильно извлекал путь а не расчитывал на то что оно всегда в definitions будет
     // need correctly get path, `definition` cann't always have path
     let path = name.replace("#/", "").split(/\//)
     let definition = path[path.length - 1]
-     
+
     if(definition == "Data")
     {
         if(parent_name)
-        { 
+        {
             return {
                 properties:{},
                 format:"api_"+parent_name,
@@ -548,16 +568,21 @@ function getObjectDefinitionByName(api, name, parent_name)
     }
     return mergeDeep({}, api.definitions[definition])
 }
- 
+
 /**
  * Ищет описание схемы в объекте рекурсивно
  * Recursive search `schema` description
  * @param {object} obj
  * @returns {undefined|object}
  */
-function getObjectNameBySchema(obj)
+function getObjectNameBySchema(obj, max_level = 0, level = 0)
 {
     if(!obj)
+    {
+        return undefined;
+    }
+
+    if(max_level && max_level <= level)
     {
         return undefined;
     }
@@ -591,7 +616,7 @@ function getObjectNameBySchema(obj)
 
         if(typeof obj[i] == 'object')
         {
-            let api_obj = getObjectNameBySchema(obj[i])
+            let api_obj = getObjectNameBySchema(obj[i], max_level, level+1)
             if(api_obj)
             {
                 return api_obj;
@@ -618,10 +643,10 @@ function openApi_get_internal_links(paths, base_path, targetLevel)
     for(var api_action_path in paths)
     {
         var api_path_value = paths[api_action_path]
-  
+
         if(api_action_path.indexOf(base_path) != 0)
         {
-            continue; 
+            continue;
         }
 
         let dif = api_action_path.match(/\//g).length - base_path.match(/\//g).length;
@@ -643,14 +668,14 @@ function openApi_get_internal_links(paths, base_path, targetLevel)
 }
 
 function openApi_set_parents_links(paths, base_path, parent_obj)
-{ 
+{
     for(var api_action_path in paths)
     {
         var api_path_value = paths[api_action_path]
-  
+
         if(api_action_path.indexOf(base_path) != 0)
         {
-            continue; 
+            continue;
         }
 
         let dif = api_action_path.match(/\//g).length - base_path.match(/\//g).length;
@@ -658,8 +683,8 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
         {
             continue;
         }
- 
+
         api_path_value.parent = parent_obj
-    } 
- 
+    }
+
 }

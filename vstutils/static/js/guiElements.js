@@ -8,7 +8,13 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.value = value
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
-
+ 
+    /*this.prepareProperties = function(value)
+    { 
+        return value
+    }
+    */
+   
     this.setValue = function(value)
     {
         this.value = value
