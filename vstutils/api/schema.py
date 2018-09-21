@@ -39,6 +39,22 @@ basic_type_info[fields.TextareaField] = dict(
 )
 
 
+def field_have_redirect(field, **kwargs):
+    if not getattr(field, 'redirect', False):
+        return kwargs
+
+    if kwargs.get('additionalProperties', None) is None:
+        kwargs['additionalProperties'] = dict()
+    kwargs['additionalProperties']['redirect'] = True
+
+    return kwargs
+
+
+def field_extra_handler(field, **kwargs):
+    kwargs = field_have_redirect(field, **kwargs)
+    return kwargs
+
+
 class VSTFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=invalid-name,unused-variable
@@ -49,7 +65,7 @@ class VSTFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        return SwaggerType(**type_info)
+        return SwaggerType(**field_extra_handler(field, **type_info))
 
 
 class AutoCompletionFieldInspector(FieldInspector):
@@ -75,7 +91,7 @@ class AutoCompletionFieldInspector(FieldInspector):
             )
             kwargs['additionalProperties'] = prop
 
-        return SwaggerType(**kwargs)
+        return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
 class DependEnumFieldInspector(FieldInspector):
@@ -92,10 +108,10 @@ class DependEnumFieldInspector(FieldInspector):
             field=field.field, choices=field.choices, types=field.types
         )
 
-        return SwaggerType(**kwargs)
+        return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
-class Select2FieldInspector(FieldInspector):
+class Select2FieldInspector(FieldInspector):  # nocv
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
         if not isinstance(field, fields.Select2Field):
@@ -110,11 +126,25 @@ class Select2FieldInspector(FieldInspector):
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                 field.select_model, ignore_unresolved=True
             ),
-            value_field = field.autocomplete_property,
-            view_field = field.autocomplete_represent
+            value_field=field.autocomplete_property,
+            view_field=field.autocomplete_represent
         )
 
-        return SwaggerType(**kwargs)
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class RedirecFieldInspector(FieldInspector): # nocv
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not getattr(field, 'redirect', False):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = field_insp.get_basic_type_info(field) or dict(type=openapi.TYPE_INTEGER)
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
 class NestedFilterInspector(CoreAPICompatInspector):
@@ -140,6 +170,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
                            Select2FieldInspector, DependEnumFieldInspector,
                            AutoCompletionFieldInspector, VSTFieldInspector,
+                           RedirecFieldInspector,
                        ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
     filter_inspectors = [
                             NestedFilterInspector
