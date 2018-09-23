@@ -20,7 +20,6 @@ def project_args(request):
         ver_key: getattr(settings, 'PROJECT_VERSION', False),
         "gui_version": getattr(settings, 'PROJECT_VERSION', ''),
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
-        "openapi_url": '/{}/openapi/'.format(settings.VST_API_URL),
         "api_url": '{}/{}/{}/'.format(
             host_url, settings.VST_API_URL, settings.VST_API_VERSION
         ),
