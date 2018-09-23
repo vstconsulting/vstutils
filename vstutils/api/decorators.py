@@ -351,9 +351,9 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             kwargs['methods'] = self._filter_methods(self.methods, detail=detail)
         else:
             kwargs['methods'] = self.view.get_view_methods(detail)
-        view = self.get_decorator(**kwargs)(view)
-        view._nested_view = self.view
-        return name, view
+        view_class = self.get_decorator(**kwargs)(view)
+        view_class._nested_view = self.view
+        return name, view_class
 
     def decorated_list(self):
         return self.decorated(detail=False)

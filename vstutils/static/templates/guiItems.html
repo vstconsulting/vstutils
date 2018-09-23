@@ -167,12 +167,12 @@
     <%[ page_header %>
         <section class="content-header">
             <h1>
-                
+
                 <a href="<%- getUpLink() %>" onclick="return spajs.openURL(this.href);" class="btn btn-default">
                     <span class="glyphicon glyphicon-arrow-left"></span>
                 </a>
-                  
-                <span class="h1-header"><%= guiObj.getTitle('title') %></span> 
+
+                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
             </h1>
             <%* breadcrumb %>
         </section>
@@ -205,13 +205,13 @@
 <script type="text/x-just" data-just="entity_list">
     
     <%[ buttons_row %>
-       
+
         <% if(guiObj.api.canCreate){ %>
-            <a href="<%- getUrlBasePath() %>/new" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a> 
+            <a href="<%- getUrlBasePath() %>/new" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a>
         <% } %>
-        
+
         <% if(guiObj.api.canAdd){%>
-            <a href="<%- getUrlBasePath() %>/add" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a> 
+            <a href="<%- getUrlBasePath() %>/add" class="btn btn-primary" onclick="return spajs.openURL(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
         <% } %>
  
         <%* buttons %>
@@ -266,9 +266,12 @@
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
                                         <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
-                                            data-id="<%- guiObj.model.data.results[i].id %>" >
-                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %> light-tr  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            data-id="<%- guiObj.model.data.results[i].id %>"
+                                            data-href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page + '/' + guiObj.model.data.results[i].id %>"
+                                            onclick="turnTableTrIntoLink(event)"
+                                            >
+                                            <td class="light-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
@@ -278,16 +281,17 @@
                                                     <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
                                                 >
                                                     <% if(!opt.fields[j].value){ %>
-                                                        <a href="<%- window.hostname %><%- opt.base_path + '/' + guiObj.model.data.results[i].id %>" class="item-name"
-                                                            onclick="return spajs.openURL(this.href);" >
                                                             <!-- если есть имя объекта, то выводим его имя, в противном случае, выводим его значение -->
                                                             <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
-                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
-                                                                   sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
+                                                                <a href="<%- window.hostname %>/?<%- opt.fields[j].prefetch.path(guiObj.model.data.results[i]).replace(/^\/|\/$/g, '') + '/' + guiObj.model.data.results[i][opt.fields[j].name] %>" class="item-name"
+                                                                   onclick="return false;" >
+                                                                   <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
+                                                                       sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
+                                                                </a>
                                                             <% } else { %>
                                                                <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name]) %>
                                                             <% } %>
-                                                        </a>
+
                                                     <% }else{ %>
                                                         <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
                                                     <% } %>
@@ -331,7 +335,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <% for(var k in guiObj.api.multi_actions){   %> 
+                                <% for(var k in guiObj.api.multi_actions){   %>
                                     <% if(guiObj.api.multi_actions[k].onClick){ %>
                                         <li>
                                             <a
@@ -342,10 +346,10 @@
                                             </a>
                                         </li>
                                     <% }else{ %>
-                                        <li>
+                                         <li>
                                             <a
                                                 href="#"
-                                                onclick="questionForAllSelectedOrNot(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- guiObj.api.multi_actions[k].name %>'); return false;">
+                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;">
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
@@ -521,17 +525,17 @@
     <!-- entity_one -->
     
     <%[ sublink_buttons %>
-        <% for(var k in guiObj.api.links){  %> 
+        <% for(var k in guiObj.api.links){  %>
             <a
                 href="<%- window.hostname %><%- opt.base_path+'/'+ guiObj.api.links[k].name %>"
                 onclick="return spajs.openURL(this.href);"
                 class="btn btn-default sublink-btn"
             >
                 <%- guiObj.api.links[k].name.replace('_', ' ') %>
-            </a> 
+            </a>
         <% } %>
-        
-        <% for(var k in guiObj.api.actions){  %> 
+
+        <% for(var k in guiObj.api.actions){  %>
                 <% if  (!guiObj.api.actions[k].isEmptyAction) { %>
                     <a
                         href="<%- window.hostname %><%- opt.base_path+'/'+ guiObj.api.actions[k].name %>"
@@ -595,7 +599,7 @@
         
         <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
             
-        <%* buttons %> 
+        <%* buttons %>
     <%] %>
     
     <%! entity_one %>
