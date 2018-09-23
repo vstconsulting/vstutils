@@ -83,47 +83,52 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
 {
     for(let i in fields)
     {
-        if(!fields[i].additionalProperties || !fields[i].additionalProperties.model || !fields[i].additionalProperties.model.$ref)
+        if(!fields[i].gui_links)
         {
             continue;
         }
+        
+        for(let l in fields[i].gui_links)
+        { 
+            let link_type = fields[i].gui_links[l]
+            
+            let definition = link_type.$ref
 
-        let definition = fields[i].additionalProperties.model.$ref
-
-        for(let l in api_obj.parent.sublinks)
-        {
-            let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition)
-            if(list_obj)
+            for(let l in api_obj.parent.sublinks)
             {
-                fields[i].additionalProperties.list_obj = list_obj
-                break;
-            }
-        }
-
-        if(fields[i].additionalProperties.list_obj)
-        {
-            continue;
-        }
-
-        let definition_obj = openApi_findParentByDefinition(api_obj, definition)
-        if(!definition_obj)
-        {
-            for(let j in path_schema)
-            {
-                let val = path_schema[j]
-                if(val.level > 2)
-                {
-                    continue;
-                }
-
-                let list_obj = openApi_findParentByDefinition(val, definition);
+                let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition)
                 if(list_obj)
                 {
-                    fields[i].additionalProperties.list_obj = list_obj
+                    fields[i][link_type.prop_name][link_type.list_name] = list_obj
                     break;
                 }
             }
-        }
+
+            if(fields[i][link_type.prop_name][link_type.list_name])
+            {
+                continue;
+            }
+
+            let definition_obj = openApi_findParentByDefinition(api_obj, definition)
+            if(!definition_obj)
+            {
+                for(let j in path_schema)
+                {
+                    let val = path_schema[j]
+                    if(val.level > 2)
+                    {
+                        continue;
+                    }
+
+                    let list_obj = openApi_findParentByDefinition(val, definition);
+                    if(list_obj)
+                    {
+                        fields[i][link_type.prop_name][link_type.list_name] = list_obj
+                        break;
+                    }
+                }
+            }
+        } 
     }
 
    return fields
