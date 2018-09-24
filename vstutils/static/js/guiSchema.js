@@ -589,6 +589,13 @@ function openApi_guiSchema(api)
         }
     }
 
+    for(let path in path_schema)
+    {
+        let val = path_schema[path]
+        tabSignal.emit("openapi.schema.name."+val.name,  {path:path, value:val});
+        tabSignal.emit("openapi.schema.type."+val.type,  {path:path, value:val}); 
+    }
+
     return {path:path_schema, object:short_schema};
 }
 
