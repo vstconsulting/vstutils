@@ -183,12 +183,12 @@
 <script type="text/x-just" data-just="guiElements.apiObject">
     <!-- guiElements.apiObject -->
     <%[ main_input %>
-        <div 
+        <div
             class="form-control"
             <%- set_api_options(opt) %>
-            id="<%- guiElement.element_id %>" 
+            id="<%- guiElement.element_id %>"
         >
-            <a href="<%- guiElement.getLink() %>" ><%- guiElement.getName() %></a>
+            <a href="<%- guiElement.getLink() %>" onclick="return spajs.openURL(this.href);" ><%- guiElement.getName() %></a>
         </div>
     <%] %>
     <%! guiElements.base %>

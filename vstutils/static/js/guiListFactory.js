@@ -3,20 +3,15 @@ var gui_list_object = {
     state : {
         search_filters:{}
     },
-    init : function (page_options, objects)
+    init : function (page_options, url_vars = undefined, object_data = undefined)
     {
         this.base_init.apply(this, arguments)
 
-        if(objects)
+        if(object_data)
         {
-            this.model.data = objects
+            this.model.data = object_data
             this.model.status = 200
-        }
-
-        if(!this.model.title)
-        {
-            this.model.title = this.name
-        }
+        } 
     },
 
     deleteArray : function (ids)

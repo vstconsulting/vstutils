@@ -193,14 +193,20 @@ var gui_page_object = {
         return promise.promise();
     },
 
-    init : function (page_options = {}, object)
+    init : function (page_options = {}, url_vars = undefined, object_data = undefined)
     {
         this.base_init.apply(this, arguments)
-        if(object)
-        {
-            debugger;
-            this.model.data = object
+        if(object_data)
+        { 
+            this.model.data = object_data
             this.model.status = 200
+            
+            this.model.title += " #" + this.model.data.id
+            
+            if(this.api.name_field && this.model.data[this.api.name_field])
+            {
+                this.model.title = this.model.data[this.api.name_field]
+            }
         }
     },
 
