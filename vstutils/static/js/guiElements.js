@@ -9,6 +9,12 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
+    /*this.prepareProperties = function(value)
+    {
+        return value
+    }
+    */
+
     this.setValue = function(value)
     {
         this.value = value
@@ -384,12 +390,39 @@ guiElements.autocomplete = function()
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
+    this.prepareProperties = function(value)
+    {
+        if(value.enum)
+        {
+            return value
+        }
+
+        if(!value.additionalProperties)
+        {
+            throw "Not fount additionalProperties";
+        }
+
+        value.autocomplete_properties = {
+            view_field:value.additionalProperties.view_field,
+            value_field:value.additionalProperties.value_field,
+            list_obj:{
+                $ref:value.additionalProperties.model.$ref
+            },
+        }
+        value.gui_links = [{
+                prop_name:'autocomplete_properties',
+                list_name:'list_obj',
+                $ref:value.additionalProperties.model.$ref
+            }]
+
+        return value
+    }
+
     this.getValue = function()
     {
         if (this.matches &&
-            this.opt.additionalProperties &&
-            this.opt.additionalProperties.view_field &&
-            this.opt.additionalProperties.value_field)
+            this.opt.autocomplete_properties.view_field &&
+            this.opt.autocomplete_properties.value_field)
         {
             var value = $("#" + this.element_id).val();
             var data_value = $("#" + this.element_id).attr('value');
@@ -534,10 +567,10 @@ guiElements.autocomplete = function()
             });
         } */
         /*
-         * options.additionalProperties - object, which comes from api.
+         * options.autocomplete_properties - object, which comes from api.
          * This object has info about model and fields, where data for autocomplete is stored.
          */
-        else if(options.additionalProperties)
+        else if(options.autocomplete_properties)
         { 
             let props = getInfoFromAdditionalProperties(options);
             
@@ -617,6 +650,34 @@ guiElements.select2 = function(field, field_value, parent_object)
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
 
+    this.prepareProperties = function(value)
+    {
+        if(value.enum)
+        {
+            return value
+        }
+
+        if(!value.additionalProperties)
+        {
+            throw "Not fount additionalProperties";
+        }
+
+        value.autocomplete_properties = {
+            view_field:value.additionalProperties.view_field,
+            value_field:value.additionalProperties.value_field,
+            list_obj:{
+                $ref:value.additionalProperties.model.$ref
+            },
+        }
+        value.gui_links = [{
+                prop_name:'autocomplete_properties',
+                list_name:'list_obj',
+                $ref:value.additionalProperties.model.$ref
+            }]
+
+        return value
+    }
+
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
@@ -676,10 +737,10 @@ guiElements.select2 = function(field, field_value, parent_object)
             });
         }
         /*
-         * options.additionalProperties - object, which comes from api.
+         * options.autocomplete_properties - object, which comes from api.
          * This object has info about model and fields, where data for select2 is stored.
          */
-        else if(options.additionalProperties)
+        else if(options.autocomplete_properties)
         { 
             let props = getInfoFromAdditionalProperties(options);
           
@@ -777,6 +838,21 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     this.name = 'dynamic'
     guiElements.base.apply(this, arguments)
 
+    this.prepareProperties = function(value)
+    {
+        if(!value.additionalProperties)
+        {
+            throw "Not fount additionalProperties";
+        }
+
+        value.dynamic_properties = {
+            types:value.additionalProperties.types,
+            choices:value.additionalProperties.choices,
+        }
+
+        return value
+    }
+
 
     if(!opt.dynamic_type)
     {
@@ -823,9 +899,9 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         var override_opt = {};
         var value = newValue.value;
 
-        if(opt.additionalProperties && opt.additionalProperties.types)
+        if(opt.dynamic_properties && opt.dynamic_properties.types)
         {
-            var types = opt.additionalProperties.types;
+            var types = opt.dynamic_properties.types;
 
             if(types[value])
             {
@@ -833,9 +909,9 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
             }
         }
 
-        if(opt.additionalProperties && opt.additionalProperties.choices)
+        if(opt.dynamic_properties && opt.dynamic_properties.choices)
         {
-            var choices = opt.additionalProperties.choices;
+            var choices = opt.dynamic_properties.choices;
 
             for (var i in choices)
             {
@@ -1401,12 +1477,12 @@ function getInfoFromAdditionalProperties(options)
 {
     let obj, value_field, view_field;
 
-    obj = options.additionalProperties.list_obj
+    obj = options.autocomplete_properties.list_obj
     
-    if(options.additionalProperties.value_field && options.additionalProperties.view_field)
+    if(options.autocomplete_properties.value_field && options.autocomplete_properties.view_field)
     {
-        value_field = options.additionalProperties.value_field;
-        view_field = options.additionalProperties.view_field;
+        value_field = options.autocomplete_properties.value_field;
+        view_field = options.autocomplete_properties.view_field;
     }
 
     return {
