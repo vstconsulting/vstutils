@@ -280,12 +280,13 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
         }
         
         let responses_def_name = getObjectNameBySchema(resp)
+        
         if(!responses_def_name)
         {
             continue;
         }
  
-        let responses_def_obj = getObjectDefinitionByName(api, def_name)
+        let responses_def_obj = getObjectDefinitionByName(api, responses_def_name)
         if(!responses_def_obj)
         {
             throw "Not found Definition for name="+responses_def_name
@@ -509,7 +510,6 @@ function openApi_guiSchema(api)
             {
                 if(val.api[query_types[q]])
                 {
-                    debugger;
                     let fields = openApi_guiRemoveReadOnlyMark(openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true))
                     val.schema.exec = {
                         fields:fields,
@@ -834,14 +834,15 @@ function setDefaultPrefetchFunctions(obj)
             }
             
             let prefetch_path = undefined
-            if(obj.paths["/"+i.toLowerCase() +"/"])
-            {
-                prefetch_path = "/"+i.toLowerCase() +"/" 
-            }
-            else if(obj.paths["/"+field.prefetch.toLowerCase() +"/"])
+            if(obj.paths["/"+field.prefetch.toLowerCase() +"/"])
             {
                 prefetch_path = "/"+field.prefetch.toLowerCase() +"/"
             }
+            else if(obj.paths["/"+i.toLowerCase() +"/"])
+            {
+                prefetch_path = "/"+i.toLowerCase() +"/" 
+            }
+            
             
             if(!prefetch_path)
             {
