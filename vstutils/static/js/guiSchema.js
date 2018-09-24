@@ -677,18 +677,35 @@ function getObjectDefinitionByName(api, name, parent_name)
     let path = name.replace("#/", "").split(/\//)
     let definition = path[path.length - 1]
 
+    let obj = undefined
     if(definition == "Data")
     {
         if(parent_name)
         {
-            return {
+            obj = {
                 properties:{},
                 format:"api_"+parent_name,
                 type:"object",
             }
         }
     }
-    return mergeDeep({}, api.definitions[definition])
+    
+    obj = mergeDeep({}, api.definitions[definition])
+    
+    obj.definition_name = definition
+    
+    if(obj.required)
+    {
+        for(let j in obj.required)
+        {
+            obj.properties[obj.required[j]].required = true
+        }
+    }
+     
+    tabSignal.emit("openapi.schema.definition",  {definition:obj, api:api, name:name, parent_name:parent_name});
+    tabSignal.emit("openapi.schema.definition."+definition,  {definition:obj, name:name, parent_name:parent_name});
+     
+    return obj
 }
 
 /**
