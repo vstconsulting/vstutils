@@ -398,6 +398,7 @@ function openApi_guiSchema(api)
         }
         else
         {
+            debugger;
             let query_types =  ['post', 'put', 'delete', 'patch']
             for(let q in query_types)
             {
