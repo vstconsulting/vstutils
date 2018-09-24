@@ -67,3 +67,8 @@ class Select2Field(IntegerField):
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
         self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
         super(Select2Field, self).__init__(**kwargs)
+
+class UptimeField(IntegerField):
+    '''
+    Field for some uptime(time duration), in seconds, for example.
+    '''

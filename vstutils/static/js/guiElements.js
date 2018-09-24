@@ -9,12 +9,6 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
-    /*this.prepareProperties = function(value)
-    {
-        return value
-    }
-    */
-
     this.setValue = function(value)
     {
         this.value = value
@@ -751,7 +745,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
 {
     this.name = 'apiObject'
     guiElements.base.apply(this, arguments)
- 
+
     this._baseRender = this.render
     this.render = function(options)
     {
@@ -764,7 +758,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             this.linkObj = new guiObjectFactory(this.opt.definition.list.page)
         }
- 
+
         return this._baseRender.apply(this, arguments)
     }
 
@@ -774,7 +768,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
     }
 
     this.getLink = function()
-    { 
+    {
         if(!this.linkObj)
         {
             return "#"
