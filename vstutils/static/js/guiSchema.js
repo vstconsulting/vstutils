@@ -593,8 +593,15 @@ function openApi_guiSchema(api)
     for(let path in path_schema)
     {
         let val = path_schema[path]
-        tabSignal.emit("openapi.schema.name."+val.name,  {path:path, value:val});
-        tabSignal.emit("openapi.schema.type."+val.type,  {path:path, value:val}); 
+        tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
+        tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val}); 
+        
+        for(let schema in val.schema)
+        { 
+            tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val}); 
+            tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val, schema:schema, fields:val.schema[schema].fields});  
+        }
+        
     }
 
     return {path:path_schema, object:short_schema};
@@ -770,3 +777,39 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+function setDefaultPrefetchFunctions(obj)
+{ 
+    for(let i in obj.fields)
+    {
+        if(obj.fields[i].prefetch)
+        {
+            let prefetch_path = "/"+i.toLowerCase() +"/"
+            if(obj.paths[prefetch_path])
+            {
+                obj.fields[i].prefetch = {
+                    path:function(path){
+                        return function (obj) {
+                            return "/"+path.toLowerCase() +"/";
+                        }
+                    }(prefetch_path), 
+                }
+            } 
+        }
+    }
+}
+
+tabSignal.connect("openapi.schema.fields", function(obj)
+{  
+    setDefaultPrefetchFunctions.apply(this, arguments)
+})
+
