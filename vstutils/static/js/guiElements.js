@@ -752,11 +752,11 @@ guiElements.apiObject = function(field, field_value, parent_object)
         this.linkObj = undefined
         if(this.opt.definition.page)
         {
-            this.linkObj = new guiObjectFactory(this.opt.definition.page)
+            this.linkObj = new guiObjectFactory(this.opt.definition.page, undefined, this.value)
         }
         else if(this.opt.definition.list && this.opt.definition.list.page)
         {
-            this.linkObj = new guiObjectFactory(this.opt.definition.list.page)
+            this.linkObj = new guiObjectFactory(this.opt.definition.list.page, undefined, this.value)
         }
 
         return this._baseRender.apply(this, arguments)
@@ -780,8 +780,18 @@ guiElements.apiObject = function(field, field_value, parent_object)
 
     this.getName = function()
     {
+        if(!this.linkObj)
+        {
+            if(this.value.name)
+            {
+                return this.value.name
+            }
+            
+            return this.value.id
+        }
+
         // opt.definition.list.path %>/<%- value.id %>
-        return "#"
+        return this.linkObj.getTitle()
     }
 }
 /*
