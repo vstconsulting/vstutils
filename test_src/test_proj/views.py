@@ -24,6 +24,7 @@ class HostGroupFilter(filters.DefaultIDFilter):
 
 
 class HostSerializer(VSTSerializer):
+    id = fields.RedirectIntegerField(read_only=True)
     name = fields.DependEnumField(field='id', choices={ None: 'hello', 1: 'NOO!' })
 
     class Meta:
