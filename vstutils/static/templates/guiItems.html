@@ -268,12 +268,12 @@
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
                                         <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %> light-tr  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %> highlight-tr  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
                                             data-id="<%- guiObj.model.data.results[i].id %>"
                                             data-href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page + '/' + guiObj.model.data.results[i].id %>"
                                             onclick="turnTableTrIntoLink(event)"
                                             >
-                                            <td class="light-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
+                                            <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
@@ -304,7 +304,7 @@
                                             <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             Actions
                                                             <span class="caret"></span>
                                                         </button>
@@ -313,7 +313,7 @@
                                                                 <li>
                                                                     <a
                                                                         href="<%- window.hostname %><%- opt.base_path + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.api.sublinks_l2[k].name %>"
-                                                                        onclick="return spajs.openURL(this.href);"
+                                                                        onclick="return false;"
                                                                         class="sublink-btn">
                                                                             <%- guiObj.api.sublinks_l2[k].name.replace('_', ' ') %>
                                                                     </a>

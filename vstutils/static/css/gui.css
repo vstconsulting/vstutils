@@ -985,7 +985,7 @@ table{
     padding-left: 0px;
 }
 
-.light-tr:hover {
+.highlight-tr:hover {
     background-color: #D8EDF8;
     cursor: pointer;
 }
