@@ -3,7 +3,7 @@
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 
 {% if user.is_authenticated %}
-    <li class="for-web api-link" ><a href="{{ openapi_url }}"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
+    <li class="for-web api-link" ><a href="/api/"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
 {% endif %}
 
 {% if user.is_active and user.is_staff %}

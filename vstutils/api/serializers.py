@@ -30,7 +30,8 @@ class UserSerializer(VSTSerializer):
         fields = ('id',
                   'username',
                   'is_active',
-                  'is_staff',)
+                  'is_staff',
+                  'url',)
         read_only_fields = ('is_superuser',)
 
     def create(self, data):
@@ -93,7 +94,8 @@ class OneUserSerializer(UserSerializer):
                   'is_staff',
                   'first_name',
                   'last_name',
-                  'email',)
+                  'email',
+                  'url',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
 
