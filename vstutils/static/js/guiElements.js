@@ -9,31 +9,25 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
-    /*this.prepareProperties = function(value)
-    {
-        return value
-    }
-    */
-
     this.setValue = function(value)
     {
         this.value = value
     }
 
     this.reductionToType = function(value)
-    { 
+    {
         let res = value
-        
+
         if(value === undefined && this.opt.default && this.opt.required)
         {
             return this.opt.default
         }
-            
+
         if(value === undefined)
         {
             return undefined
         }
-        
+
         if(this.render_options.type == "object")
         {
             res = value
@@ -44,14 +38,14 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             return JSON.stringify(value)
         }
-        
+
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
             if(!value)
             {
                 res = ""
             }
-            
+
             res = value.toString()
         }
 
@@ -71,12 +65,12 @@ guiElements.base = function(opt = {}, value, parent_object)
         {
             res = value == true
         }
-        
+
         if((res === undefined || res === "") && this.opt.default && this.opt.required)
         {
             res = this.opt.default
         }
-            
+
         return res
     }
 
@@ -120,11 +114,11 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         if($('#gui'+this.element_id).hasClass('hide'))
         {
-            return this.reductionToType(); 
+            return this.reductionToType();
         }
-        
-        let value = $("#"+this.element_id).val(); 
-        return this.reductionToType(value); 
+
+        let value = $("#"+this.element_id).val();
+        return this.reductionToType(value);
     }
 
     /**
@@ -252,7 +246,7 @@ guiElements.string = function()
     this.name = 'string'
     guiElements.base.apply(this, arguments)
 }
- 
+
 guiElements.password = function()
 {
     this.name = 'password'
@@ -291,7 +285,7 @@ guiElements.file = function(opt = {})
         let value = $('#fileContent_' + this.element_id).val();
         let default_value = this.opt.default;
 
-        return this.reductionToType(value); 
+        return this.reductionToType(value);
     }
 }
 
@@ -310,11 +304,11 @@ guiElements.boolean = function()
     {
         if($('#gui'+this.element_id).hasClass('hide'))
         {
-            return this.reductionToType(); 
+            return this.reductionToType();
         }
-        
-        let value = $("#"+this.element_id).hasClass('selected'); 
-        return this.reductionToType(value); 
+
+        let value = $("#"+this.element_id).hasClass('selected');
+        return this.reductionToType(value);
     }
 }
 
@@ -409,11 +403,11 @@ guiElements.autocomplete = function()
                 $ref:value.additionalProperties.model.$ref
             },
         }
-        value.gui_links = [{
-                prop_name:'autocomplete_properties',
-                list_name:'list_obj',
-                $ref:value.additionalProperties.model.$ref
-            }]
+        value.gui_links.push({
+            prop_name:'autocomplete_properties',
+            list_name:'list_obj',
+            $ref:value.additionalProperties.model.$ref
+        })
 
         return value
     }
@@ -521,7 +515,7 @@ guiElements.autocomplete = function()
          * options.enum - array, which comes from api.
          * This array has data for autocomplete.
          * @note для поля типа enum есть тип enum, зачем здесь этот код?
-        
+
         else if(options.enum)
         {
             return new autoComplete({
@@ -571,20 +565,20 @@ guiElements.autocomplete = function()
          * This object has info about model and fields, where data for autocomplete is stored.
          */
         else if(options.autocomplete_properties)
-        { 
+        {
             let props = getInfoFromAdditionalProperties(options);
-            
+
             let value_field = props['value_field'];
             let view_field = props['view_field'];
 
-            
+
             let list = undefined;
-            
+
             if(props['obj'])
             {
                 list = new guiObjectFactory(props['obj']);
             }
-            
+
             return new autoComplete({
                 selector: '#'+this.element_id,
                 minChars: 0,
@@ -615,7 +609,7 @@ guiElements.autocomplete = function()
                     }
 
                     if(list)
-                    { 
+                    {
                         let filters = getFiltersForAutocomplete(list, search_str, view_field);
 
                         $.when(list.search(filters)).done((data) => {
@@ -669,11 +663,11 @@ guiElements.select2 = function(field, field_value, parent_object)
                 $ref:value.additionalProperties.model.$ref
             },
         }
-        value.gui_links = [{
-                prop_name:'autocomplete_properties',
-                list_name:'list_obj',
-                $ref:value.additionalProperties.model.$ref
-            }]
+        value.gui_links.push({
+            prop_name:'autocomplete_properties',
+            list_name:'list_obj',
+            $ref:value.additionalProperties.model.$ref
+        })
 
         return value
     }
@@ -681,7 +675,7 @@ guiElements.select2 = function(field, field_value, parent_object)
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
-        this._onBaseRender(options) 
+        this._onBaseRender(options)
         /*
          * options.search - function for JS hardcode, which aim is to redefine way of getting data for select2.
          * @param {object} params - argument from select2 transport function
@@ -741,16 +735,16 @@ guiElements.select2 = function(field, field_value, parent_object)
          * This object has info about model and fields, where data for select2 is stored.
          */
         else if(options.autocomplete_properties)
-        { 
+        {
             let props = getInfoFromAdditionalProperties(options);
-          
+
             let value_field = props['value_field'];
             let view_field = props['view_field'];
 
             if(props['obj'])
             {
                 let list = new guiObjectFactory(props['obj']);
-               
+
                 $('#'+this.element_id).select2({
                     width: '100%',
                     ajax: {
@@ -759,7 +753,7 @@ guiElements.select2 = function(field, field_value, parent_object)
                         {
                             let search_str = trim(params.data.term);
 
-                            let filters = getFiltersForAutocomplete(list, search_str, view_field); 
+                            let filters = getFiltersForAutocomplete(list, search_str, view_field);
                             $.when(list.search(filters)).done((data) =>
                             {
                                 let results =[];
@@ -786,16 +780,61 @@ guiElements.select2 = function(field, field_value, parent_object)
     }
 }
 
-guiElements.apiOwner = function(field, field_value, parent_object)
+guiElements.apiObject = function(field, field_value, parent_object)
 {
-    this.name = 'apiOwner'
+    this.name = 'apiObject'
+    guiElements.base.apply(this, arguments)
+
+    this._baseRender = this.render
+    this.render = function(options)
+    {
+        this.linkObj = undefined
+        if(this.opt.definition.page)
+        {
+            this.linkObj = new guiObjectFactory(this.opt.definition.page)
+        }
+        else if(this.opt.definition.list && this.opt.definition.list.page)
+        {
+            this.linkObj = new guiObjectFactory(this.opt.definition.list.page)
+        }
+
+        return this._baseRender.apply(this, arguments)
+    }
+
+    this.reductionToType = function(value)
+    {
+        return value/1
+    }
+
+    this.getLink = function()
+    {
+        if(!this.linkObj)
+        {
+            return "#"
+        }
+
+        // opt.definition.list.path %>/<%- value.id %>
+        return "#"
+    }
+
+    this.getName = function()
+    {
+        // opt.definition.list.path %>/<%- value.id %>
+        return "#"
+    }
+}
+/*
+guiElements.apiUser = function(field, field_value, parent_object)
+{
+    this.name = 'apiUser'
     guiElements.base.apply(this, arguments)
 
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
-        this._onBaseRender(options) 
-        
+        debugger;
+        this._onBaseRender(options)
+
         if(!options.readOnly)
         {
             $('#'+this.element_id).select2({
@@ -812,7 +851,7 @@ guiElements.apiOwner = function(field, field_value, parent_object)
                             }
                             results.data.results.forEach(res =>{
                                 select2.results.push({
-                                    id:res.id, 
+                                    id:res.id,
                                     text:res.username
                                 })
                             })
@@ -823,15 +862,15 @@ guiElements.apiOwner = function(field, field_value, parent_object)
                         })
                     }
                 }
-            }); 
+            });
         }
     }
-    
+
     this.reductionToType = function(value)
-    { 
+    {
         return value/1
     }
-}
+}*/
 
 guiElements.dynamic = function(opt = {}, value, parent_object)
 {
@@ -1478,7 +1517,7 @@ function getInfoFromAdditionalProperties(options)
     let obj, value_field, view_field;
 
     obj = options.autocomplete_properties.list_obj
-    
+
     if(options.autocomplete_properties.value_field && options.autocomplete_properties.view_field)
     {
         value_field = options.autocomplete_properties.value_field;
@@ -1498,15 +1537,15 @@ function getFiltersForAutocomplete(list, search_str, view_field)
         limit:20,
         offset:0,
         query:{
-            
+
         }
     };
-      
+
     if(search_str)
     {
         filters['query'][view_field] = search_str;
     }
- 
+
     return filters;
 }
 

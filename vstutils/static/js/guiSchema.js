@@ -1,7 +1,12 @@
-
+// Replace link to `Definitions` to object in field list
 // Заменит ссылки на Definitions на объекты в списке полей
 function openApi_guiPrepareFields(api, properties, parent_name)
-{   
+{
+    if(!guiElements)
+    {
+        throw "Error not found window.guiElements"
+    }
+
     let fields = mergeDeep({}, properties)
     for(let i in fields)
     {
@@ -10,8 +15,18 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             // Это для автокомплита поле а не ссылка куда попало.
             continue;
         }*/
-        let field = fields[i] 
-       
+        let field = fields[i]
+
+        if(!field.gui_links)
+        {
+            field.gui_links = []
+        }
+
+        if(!field.definition)
+        {
+            field.definition = {}
+        }
+
         let def_name = getObjectNameBySchema(field, 1)
         if(def_name)
         {
@@ -23,6 +38,11 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             }
             field =  mergeDeep({}, def_obj);
 
+            if(!field.gui_links)
+            {
+                field.gui_links = []
+            }
+
             field.readOnly = true
 
             let format = def_name.replace("#/", "").split(/\//)
@@ -32,37 +52,57 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 field.format = "api"+format[1]
             }
 
+            if(!window.guiElements[field.format])
+            {
+                // Если нет объекта window.guiElements[field.format] то заменим на базолвый apiObject
+                field.format = "apiObject"
+            }
+
             field.definition_ref = def_name
-            field.definition_link = openApi_findParentByDefinition(def_obj, def_name)
-     
+            //field.definition_list = openApi_findParentByDefinition(def_obj, def_name, 'list')
+            //field.definition_one = openApi_findParentByDefinition(def_obj, def_name, 'page')
+
+            field.gui_links.push({
+                prop_name:'definition',
+                list_name:'list',
+                type:'list',
+                $ref:def_name
+            })
+
+            field.gui_links.push({
+                prop_name:'definition',
+                list_name:'page',
+                type:'page',
+                $ref:def_name
+            })
         }
- 
+
         let fieldObj;
-        if(window.guiElements && field.format && window.guiElements[field.format])
-        { 
-            fieldObj = new window.guiElements[field.format](field) 
+        if(field.format && window.guiElements[field.format])
+        {
+            fieldObj = new window.guiElements[field.format](field)
         }
-        else if(window.guiElements && field.type && window.guiElements[field.type])
-        { 
-            fieldObj = new window.guiElements[field.type](field) 
+        else if(field.type && window.guiElements[field.type])
+        {
+            fieldObj = new window.guiElements[field.type](field)
         }
-        
+
         if(fieldObj && fieldObj.prepareProperties)
         {
             field = fieldObj.prepareProperties(field)
         }
-        
+
         fields[i] = field
     }
 
    return fields
 }
 
-
+// Replace link from `additionalProperties` to api link for autocomplete work
 // Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
-function openApi_findParentByDefinition(api_obj, definition)
+function openApi_findParentByDefinition(api_obj, definition, type = 'list')
 {
-    if(api_obj.type == 'list' && api_obj.api.get)
+    if(api_obj.type == type && type == 'list' && api_obj.api.get)
     {
         let schema = getObjectNameBySchema(api_obj.api.get)
         if(schema == definition)
@@ -70,6 +110,16 @@ function openApi_findParentByDefinition(api_obj, definition)
             return api_obj;
         }
     }
+
+    if(api_obj.type == type && type == 'page' && api_obj.page && api_obj.page.api.get)
+    {
+        let schema = getObjectNameBySchema(api_obj.page.api.get)
+        if(schema == definition)
+        {
+            return api_obj;
+        }
+    }
+
 
     if(api_obj.parent)
     {
@@ -81,7 +131,21 @@ function openApi_findParentByDefinition(api_obj, definition)
 }
 
 
-// Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
+/**
+ * Replace link from `additionalProperties` to api link for autocomplete work
+ * Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
+ * @param {type} path_schema
+ * @param {type} api_obj
+ * @param {type} fields
+ *
+ * Найдёт в списке полей такое поле
+ * field.gui_links = [{
+                prop_name:'autocomplete_properties',
+                list_name:'list_obj',
+                $ref:value.additionalProperties.model.$ref
+ * }]
+ * И положит в объект  autocomplete_properties.list_obj близжайший урл с моделью $ref
+ */
 function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
 {
     for(let i in fields)
@@ -90,16 +154,23 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
         {
             continue;
         }
-        
+
         for(let l in fields[i].gui_links)
-        { 
+        {
             let link_type = fields[i].gui_links[l]
-            
+
             let definition = link_type.$ref
+
+            if(!api_obj.parent)
+            {
+                continue;
+            }
+
+            fields[i][link_type.prop_name][link_type.list_name] = undefined
 
             for(let l in api_obj.parent.sublinks)
             {
-                let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition)
+                let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
                 if(list_obj)
                 {
                     fields[i][link_type.prop_name][link_type.list_name] = list_obj
@@ -112,7 +183,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                 continue;
             }
 
-            let definition_obj = openApi_findParentByDefinition(api_obj, definition)
+            let definition_obj = openApi_findParentByDefinition(api_obj, definition, link_type.type)
             if(!definition_obj)
             {
                 for(let j in path_schema)
@@ -123,7 +194,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                         continue;
                     }
 
-                    let list_obj = openApi_findParentByDefinition(val, definition);
+                    let list_obj = openApi_findParentByDefinition(val, definition, link_type.type);
                     if(list_obj)
                     {
                         fields[i][link_type.prop_name][link_type.list_name] = list_obj
@@ -131,7 +202,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                     }
                 }
             }
-        } 
+        }
     }
 
    return fields
@@ -149,6 +220,7 @@ function openApi_guiRemoveReadOnlyMark(properties)
     return properties
 }
 
+// Replace `Definitions` link to field list from `Definitions`
 // Заменит ссылки на Definitions на списки полей из Definitions
 function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
 {
@@ -217,6 +289,7 @@ function openApi_guiSchemaSetRequiredFlags(api)
     return api
 }
 
+// Generate schema based on api
 // Сгенерирует схему на основе апи
 function openApi_guiSchema(api)
 {
@@ -225,18 +298,19 @@ function openApi_guiSchema(api)
 
     api = openApi_guiSchemaSetRequiredFlags(api)
 
+    // Set page type ('page', 'list' or 'action'
     // Проставит типы страниц ('page' или 'list'  или 'action')
     for(let i in api.paths)
     {
         let val = api.paths[i]
 
-        // Уровень вложености меню (по идее там где 1 покажем в меню с лева)
         let urlLevel = (i.match(/\//g) || []).length
 
         let type = undefined
         if(val.get )
         {
             // @todo перезавязаться с operationId на тип ответа в схеме get запроса
+            // rebind from `operationId` to `answer type` in schema of `get` request answer
             if(/_(get)$/.test(val.get.operationId))
             {
                 type = 'page'
@@ -271,7 +345,7 @@ function openApi_guiSchema(api)
                 post:   openApi_guiQuerySchema(api, val.post, 'post', name),
                 delete: openApi_guiQuerySchema(api, val.delete, 'delete', name),
             },
-            buttons:[], // массив кнопок
+            buttons:[], // button array; массив кнопок
             short_name:undefined,
             hide_non_required:guiLocalSettings.get('hide_non_required'),
             extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],
@@ -292,6 +366,7 @@ function openApi_guiSchema(api)
 
     }
 
+    // Set flags `canAdd`, `canRemove`, `canDelete`, `canEdit`
     // Проставит флаги canAdd, canRemove, canDelete, canEdit
     for(let path in path_schema)
     {
@@ -335,6 +410,7 @@ function openApi_guiSchema(api)
         }
     }
 
+    // Set `schema` property
     // Проставит свойство schema
     for(let path in path_schema)
     {
@@ -420,6 +496,7 @@ function openApi_guiSchema(api)
         }
     }
 
+    // Bind list pages and object pages
     // Свяжет страницы списков и страницы объектов
     for(let path in path_schema)
     {
@@ -439,6 +516,7 @@ function openApi_guiSchema(api)
         }
     }
 
+    // Set `sublinks`, `sublinks_12`, `actions`, `links` property for objects
     // Проставит свойства sublinks, sublinks_l2, actions, links объектам
     for(let path in path_schema)
     {
@@ -500,6 +578,7 @@ function openApi_guiSchema(api)
         openApi_set_parents_links(path_schema, path, path_schema[path])
     }
 
+    // Set `schema` property
     // Проставит свойство schema
     for(let path in path_schema)
     {
@@ -535,6 +614,7 @@ function openApi_guiPagesBySchema(schema)
     }
 }
 
+// Return object by link from `Definitions`
 // Вернёт объект из definitions по его ссылке
 function getObjectDefinitionByName(api, name, parent_name)
 {
@@ -545,6 +625,7 @@ function getObjectDefinitionByName(api, name, parent_name)
 
     // "#/definitions/Group"
     // @todo надо чтоб он правильно извлекал путь а не расчитывал на то что оно всегда в definitions будет
+    // need correctly get path, `definition` cann't always have path
     let path = name.replace("#/", "").split(/\//)
     let definition = path[path.length - 1]
 
@@ -564,6 +645,7 @@ function getObjectDefinitionByName(api, name, parent_name)
 
 /**
  * Ищет описание схемы в объекте рекурсивно
+ * Recursive search `schema` description
  * @param {object} obj
  * @returns {undefined|object}
  */
@@ -573,7 +655,7 @@ function getObjectNameBySchema(obj, max_level = 0, level = 0)
     {
         return undefined;
     }
-    
+
     if(max_level && max_level <= level)
     {
         return undefined;
@@ -621,14 +703,16 @@ function getObjectNameBySchema(obj, max_level = 0, level = 0)
 
 /**
  * Вернёт массив вложенных путей для пути base_path
+ * Return array of nested path for `base_path`
  * @param {type} api апи
- * @param {type} base_path путь в апи
- * @returns {Array} экшены этого пути
+ * @param {type} base_path path in api; путь в апи
+ * @returns {Array} actions of this path; экшены этого пути
  */
 function openApi_get_internal_links(paths, base_path, targetLevel)
 {
     var res = []
 
+    // Build `action` list base on data about one note
     // Список Actions строить будем на основе данных об одной записи.
     for(var api_action_path in paths)
     {
@@ -648,7 +732,6 @@ function openApi_get_internal_links(paths, base_path, targetLevel)
         var name = api_action_path.match(/\/([A-z0-9]+)\/$/)
         if(!name)
         {
-            //debugger;
             continue;
         }
 
@@ -678,22 +761,4 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
         api_path_value.parent = parent_obj
     }
 
-}
-
-// * @deprecated
-function ifDataTypeDefinitions(field, name)
-{
-    if(field && field.$ref == "#/definitions/Data")
-    {
-        console.log("New data field ", name)
-        delete field.$ref;
-        field.format = name
-        if(!field.type)
-        {
-            field.type = "object";
-        }
-        return field
-    }
-
-    return field
 }
