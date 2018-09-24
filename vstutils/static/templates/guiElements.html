@@ -54,6 +54,51 @@
     <%! guiElements.base %>
 </script>
 
+
+<!-- guiElements.prefetch -->
+<script type="text/x-just" data-just="guiElements.prefetch">
+    <!-- guiElements.prefetch -->
+    <%[ main_input %>
+      <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
+        <a href="<%- window.hostname %>/?<%- opt[opt.name + '_info']['prefetch_path'] %>/<%- value %>"
+           class="item-name" onclick="return spajs.openURL(this.href);">
+            <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
+        </a>
+      </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.date -->
+<script type="text/x-just" data-just="guiElements.date">
+    <!-- guiElements.date -->
+    <%[ main_input %>
+        <input type="date" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+        value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.date_time -->
+<script type="text/x-just" data-just="guiElements.date_time">
+    <!-- guiElements.date_time -->
+    <%[ main_input %>
+        <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+        value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")  || '' %>">
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.date_time -->
+<script type="text/x-just" data-just="guiElements.uptime">
+    <!-- guiElements.uptime -->
+    <%[ main_input %>
+        <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+        value="<%- getUptime(value)  || '' %>">
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
 <!-- guiElements.password -->
 <script type="text/x-just" data-just="guiElements.password">
     <!-- guiElements.password -->

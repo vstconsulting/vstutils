@@ -52,10 +52,15 @@ var gui_base_object = {
     renderField : function(field, render_options)
     {
         if(!this.model.guiFields[field.name])
-        { 
+        {
             if(!this.model.guiFields[field.name])
             {
                 var type = field.format
+
+                if(type == 'date-time')
+                {
+                    type = 'date_time'
+                }
 
                 if(!type && field.enum !== undefined)
                 {
@@ -65,6 +70,13 @@ var gui_base_object = {
                 if(!type)
                 {
                     type = field.type
+                }
+
+                if(field.prefetch && this.model.data[field.name + "_info"])
+                {
+                    type = "prefetch";
+                    field[field.name + "_info"] = this.model.data[field.name + "_info"];
+                    field[field.name + "_info"]['prefetch_path'] = field.prefetch.path(this.model.data).replace(/^\/|\/$/g, '');
                 }
 
                 if(!window.guiElements[type])
@@ -81,26 +93,6 @@ var gui_base_object = {
             }
 
             // Добавление связи с зависимыми полями
-            // if для хардкода на js
-            if(field.dependsOn)
-            {
-                let thisField = this.model.guiFields[field.name]
-                if(thisField.updateOptions)
-                {
-                    for(let i in field.dependsOn)
-                    {
-                        let parentField = this.model.guiFields[field.dependsOn[i]]
-                        if(parentField && parentField.addOnChangeCallBack)
-                        {
-                            parentField.addOnChangeCallBack(function(){
-                                thisField.updateOptions.apply(thisField, arguments);
-                            })
-                        }
-                    }
-                }
-            }
-
-            // if для привязанных полей из api
             if(field.additionalProperties && field.additionalProperties.field)
             {
                 let thisField = this.model.guiFields[field.name];
@@ -380,10 +372,10 @@ function guiObjectFactory(api_object)
 
 
 
- 
+
 function emptyAction(action_info)
 {
-    var pageItem = new guiObjectFactory(action_info) 
+    var pageItem = new guiObjectFactory(action_info)
     return function(){
         pageItem.exec()
     }
@@ -630,17 +622,16 @@ function questionDeleteOrRemove(thisObj)
  * Функция удаляет элементы, id которых перечислены в массиве ids
  * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
  */
-function deleteSelectedElements(thisObj, ids, tag){
-    window.guiListSelections.unSelectAll(tag);
-
-    for(let i in ids)
-    {
-        $(".item-row.item-"+ids[i]).remove()
-    }
-
+function deleteSelectedElements(thisObj, ids, tag)
+{
     $.when(thisObj.deleteArray(ids)).done(function(d)
     {
+        window.guiListSelections.unSelectAll(tag);
 
+        for(let i in ids)
+        {
+            $(".item-row.item-"+ids[i]).remove()
+        }
     }).fail(function (e)
     {
         webGui.showErrors(e)
