@@ -333,11 +333,12 @@ function openApi_guiSchema(api)
         name = name[name.length - 2]
 
         path_schema[i] = {
-            level:urlLevel,
-            path:i,
-            type:type,
-            name:name,
-            bulk_name:name,
+            level:urlLevel,     // Уровень вложености
+            path:i,             // Путь в апи
+            type:type,          // Тип объекта ( list | page | action )
+            name:name,          // Текст между последним и предпоследним знаком /
+            bulk_name:name,     // Имя сущьности
+            name_field:'name',  // Поле содержащие имя объекта
             api:{
                 get:    openApi_guiQuerySchema(api, val.get, 'get', name),
                 patch:  openApi_guiQuerySchema(api, val.patch, 'patch', name),
@@ -345,10 +346,10 @@ function openApi_guiSchema(api)
                 post:   openApi_guiQuerySchema(api, val.post, 'post', name),
                 delete: openApi_guiQuerySchema(api, val.delete, 'delete', name),
             },
-            buttons:[], // button array; массив кнопок
-            short_name:undefined,
+            buttons:[],             // button array; массив кнопочек
+            short_name:undefined,   // Путь в апи без упоминания блоков \/\{[A-z0-9]\}\/
             hide_non_required:guiLocalSettings.get('hide_non_required'),
-            extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],
+            extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],    // Имена классов от которых надо отнаследоваться
             methodEdit:undefined,
             selectionTag:i.replace(/[^A-z0-9\-]/img, "_"),
         }

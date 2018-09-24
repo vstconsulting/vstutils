@@ -6,6 +6,12 @@ guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value
+    this.parent_object = parent_object
+    if(!parent_object)
+    {
+        this.parent_object = {}
+    }
+    
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
@@ -745,14 +751,14 @@ guiElements.apiObject = function(field, field_value, parent_object)
 {
     this.name = 'apiObject'
     guiElements.base.apply(this, arguments)
-
+   
     this._baseRender = this.render
     this.render = function(options)
-    {
+    { 
         this.linkObj = undefined
         if(this.opt.definition.page)
         {
-            this.linkObj = new guiObjectFactory(this.opt.definition.page, undefined, this.value)
+            this.linkObj = new guiObjectFactory(this.opt.definition.page, this.parent_object.url_vars, this.value)
         }
         else if(this.opt.definition.list && this.opt.definition.list.page)
         {
@@ -773,9 +779,20 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             return "#"
         }
-
-        // opt.definition.list.path %>/<%- value.id %>
-        return "#"
+        
+        let url = window.hostname+this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "?");
+        if(this.linkObj.url_vars)
+        {
+            for(let i in this.linkObj.url_vars)
+            {
+                if(/^api_/.test(i))
+                {
+                    url = url.replace("{"+i.replace("api_", "")+"}", this.linkObj.url_vars[i])
+                }
+            }
+        }
+         
+        return url
     }
 
     this.getName = function()
