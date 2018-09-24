@@ -26,7 +26,7 @@ all_regexp = []
 function guiGetTestUrlFunctionfunction(regexp, api_path_value)
 {
     all_regexp.push({path:api_path_value.path , regexp:regexp})
-    
+
     return function(url)
     {
         var res = guiTestUrl(regexp, url)
@@ -175,13 +175,13 @@ function openApi_add_list_page_path(api_obj)
 
     let pathregexp = "^"
         +"(?<page_and_parents>"
-            +"(?<parents>[A-z]+\\/[0-9]+\\/)*"
-            +"(?<page>"+getNameForUrlRegExp(api_path)+"))"
+        +"(?<parents>[A-z]+\\/[0-9]+\\/)*"
+        +"(?<page>"+getNameForUrlRegExp(api_path)+"))"
         +"(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}"
         +"(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"
 
     path_regexp.push(guiGetTestUrlFunctionfunction(pathregexp, api_obj))
- //   console.log("", pathregexp)
+    //   console.log("", pathregexp)
     // Проверяем есть ли возможность создавать объекты
 
     if(api_obj.canCreate)
@@ -276,21 +276,21 @@ tabSignal.connect("resource.loaded", function()
 {
     window.api = new guiApi()
     $.when(window.api.init()).done(function()
-    { 
+    {
         // Событие в теле которого можно было бы переопределить ответ от open api
         tabSignal.emit("openapi.loaded",  {api: window.api});
 
         window.guiSchema = openApi_guiSchema(window.api.openapi)
-        
+
         tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
-        
+
         openApi_guiPagesBySchema(window.guiSchema)
 
         // Событие в теле которого можно было бы переопределить и дополнить список страниц
         tabSignal.emit("openapi.paths",  {api: window.api});
-        
-        
-        
+
+
+
         tabSignal.emit("openapi.completed",  {api: window.api});
         tabSignal.emit("loading.completed");
     })

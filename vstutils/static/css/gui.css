@@ -985,7 +985,7 @@ table{
     padding-left: 0px;
 }
 
-.light-tr:hover {
+.highlight-tr:hover {
     background-color: #D8EDF8;
     cursor: pointer;
 }
@@ -1123,4 +1123,8 @@ table{
     border: 1px solid #d2d6de;
     padding: 10px;
     min-height: 34px;
+}
+
+.hidden-field {
+    display: none;
 }

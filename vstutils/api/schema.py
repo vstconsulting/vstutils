@@ -18,7 +18,7 @@ FORMAT_JSON = 'json'
 FORMAT_TEXTAREA = 'textarea'
 FORMAT_DYN = 'dynamic'
 FORMAT_SELECT2 = 'select2'
-FORMAT_UPTIME = "uptime"
+FORMAT_UPTIME = 'uptime'
 
 
 # Base types

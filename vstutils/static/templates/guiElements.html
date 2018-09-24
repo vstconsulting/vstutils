@@ -1,6 +1,6 @@
 
-<script type="text/x-just" data-just="guiElements.base">   
- 
+<script type="text/x-just" data-just="guiElements.base">
+
     <%[ element %>
         <div class="form-group
 
@@ -11,29 +11,31 @@
 
             gui-element-<%- guiElement.name %>
             gui-field-<%- opt.name %>
-            
+
+            <% if(opt.hidden){ %> hidden-field <% } %>
+
             <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> "
 
             data-title="<%- opt.title || capitalizeString(opt.name) %>"
             id="gui<%- guiElement.element_id %>"
         >
-           
+
             <%[ title %>
                 <label class="control-label"><%- opt.title || capitalizeString(opt.name) %></label>
             <%] %>
             <%* title %>
-            
+
             <%[ main_input %>
                 <div>guiElements.base</div>
-            <%] %> 
+            <%] %>
             <%* main_input %>
-            
+
             <%[ description %>
                 <div class="help-block"><%- opt.description || '' %></div>
             <%] %>
             <%* description %>
         </div>
-    <%] %> 
+    <%] %>
     <%* element %>
 </script>
 
@@ -46,11 +48,11 @@
 </script>
 
 <!-- guiElements.string -->
-<script type="text/x-just" data-just="guiElements.string">    
+<script type="text/x-just" data-just="guiElements.string">
     <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <%[ main_input %>
         <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
-    <%] %> 
+    <%] %>
     <%! guiElements.base %>
 </script>
 
@@ -109,13 +111,13 @@
 </script>
 
 <!-- guiElements.button -->
-<script type="text/x-just" data-just="guiElements.button">  
+<script type="text/x-just" data-just="guiElements.button">
     <!-- guiElements.button -->
-    <button 
+    <button
         id="<%- guiElement.element_id %>"
-        type="button" 
+        type="button"
         class="
-                gui-element-<%- guiElement.name %> 
+                gui-element-<%- guiElement.name %>
                 <% if(typeof opt.class == 'function'){ %>
                     <%- opt.class.apply(guiElement, [opt]) %>
                 <% }else{ %>
@@ -130,13 +132,13 @@
             <% }else{ %>
                 <%= opt.text %>
             <% } %>
-    </button> 
+    </button>
 </script>
 
 <!-- guiElements.link_button -->
-<script type="text/x-just" data-just="guiElements.link_button">   
+<script type="text/x-just" data-just="guiElements.link_button">
     <!-- guiElements.link_button -->
-    <a 
+    <a
         class="<% if(typeof opt.class == 'function'){ %>
                         <%- opt.class.apply(guiElement, [opt]) %>
                <% }else{ %>
@@ -152,52 +154,68 @@
             <% }else{ %>
                 <%= opt.text %>
             <% } %>
-    </a> 
+    </a>
 </script>
 
 <!-- guiElements.enum -->
-<script type="text/x-just" data-just="guiElements.enum">  
+<script type="text/x-just" data-just="guiElements.enum">
     <!-- guiElements.enum -->
     <%[ main_input %>
         <select id="<%- guiElement.element_id %>"  class="form-control" >
             <% for(var i in opt.enum){ %>
                 <option value='<%- opt.enum[i] %>' <% if(value == opt.enum[i]) { %>selected<% } %> ><%- opt.enum[i] %></option>
             <% } %>
-        </select> 
-    <%] %> 
-    <%! guiElements.base %> 
+        </select>
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
 <!-- guiElements.select2 -->
-<script type="text/x-just" data-just="guiElements.select2">  
+<script type="text/x-just" data-just="guiElements.select2">
     <!-- guiElements.select2 -->
     <%[ main_input %>
-        <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select> 
-    <%] %> 
-    <%! guiElements.base %> 
+        <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select>
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
-<!-- guiElements.apiOwner -->
-<script type="text/x-just" data-just="guiElements.apiOwner">
-    <!-- guiElements.apiOwner -->  
+<!-- guiElements.apiObject -->
+<script type="text/x-just" data-just="guiElements.apiObject">
+    <!-- guiElements.apiObject -->
+    <%[ main_input %>
+        <div
+            class="form-control"
+            <%- set_api_options(opt) %>
+            id="<%- guiElement.element_id %>"
+        >
+            <a href="<%- guiElement.getLink() %>" onclick="return spajs.openURL(this.href);" ><%- guiElement.getName() %></a>
+        </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.apiUser -->
+<script type="text/x-just" data-just="guiElements.apiUser">
+    <!-- guiElements.apiUser -->
     <%[ main_input %>
         <% if (!opt.readOnly) { %>
             <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select>
         <% }else{ %>
-            <input 
-                    type="text" 
-                    class="form-control" 
+            <input
+                    type="text"
+                    class="form-control"
                     <%- set_api_options(opt) %>
                     id="<%- guiElement.element_id %>"
                     value="<% if(value && typeof value == 'object'){ %><%- value.username %><% }else{ %><%- JSON.stringify(value) %><% } %>"
             >
         <% } %>
-    <%] %> 
-    <%! guiElements.base %> 
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
+
 <!-- guiElements.boolean -->
-<script type="text/x-just" data-just="guiElements.boolean"> 
+<script type="text/x-just" data-just="guiElements.boolean">
     <!-- guiElements.boolean -->
     <%[ main_input %>
         <div class="form-control <% if (value) { %> selected <% } %> boolean-select"
@@ -210,29 +228,29 @@
             <div class="ico-off fa  fa-toggle-off" <% if (opt.readOnly) { %> style="cursor: not-allowed!important;" <% } %> ></div>
             <div class="boolean-title" >Boolean value</div>
         </div>
-    <%] %> 
-    <%! guiElements.base %> 
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
 
 <!-- guiElements.autocomplete -->
-<script type="text/x-just" data-just="guiElements.autocomplete"> 
+<script type="text/x-just" data-just="guiElements.autocomplete">
     <!-- guiElements.autocomplete -->
-    <%[ main_input %> 
+    <%[ main_input %>
         <div class="input-group">
-            <input 
-            type="text"  
-            value="<%- value || '' %>" 
-            class="form-control" 
-            <%- set_api_options(opt) %> 
+            <input
+            type="text"
+            value="<%- value || '' %>"
+            class="form-control"
+            <%- set_api_options(opt) %>
             id="<%- guiElement.element_id %>">
-            
+
             <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
                 <span class='glyphicon glyphicon-remove' ></span>
             </span>
-        </div> 
-    <%] %> 
-    <%! guiElements.base %> 
+        </div>
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
 <!-- guiElements.file -->
@@ -250,8 +268,8 @@
             </span>
         </span>
         <textarea placeholder='Enter value' <%- set_api_options(opt) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
-    <%] %> 
-    <%! guiElements.base %>  
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
 <!-- guiElements.secretfile -->
@@ -267,7 +285,7 @@
     <%[ main_input %>
         <textarea rows="3" cols="50" <%- set_api_options(opt) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
-    <%! guiElements.base %>   
+    <%! guiElements.base %>
 </script>
 
 <!-- guiElements.html -->
