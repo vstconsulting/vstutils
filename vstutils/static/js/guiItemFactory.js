@@ -18,7 +18,6 @@ var gui_base_object = {
 
     getTitle : function()
     {
-        debugger;
         return this.api.bulk_name
     },
 

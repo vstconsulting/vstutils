@@ -262,6 +262,32 @@ function turnTableTrIntoLink(event)
     }
 }
 
+/*
+ * Hides field 'id' in list.
+ * This function is calling from signal openapi.schema.type.list
+ */
+function hideIdInList(listObj)
+{
+    try
+    {
+        let fields = listObj.value.schema.list.fields;
+        if(fields['id'])
+        {
+            fields['id'].hidden = true;
+        }
+    }
+    catch(e)
+    {
+        console.warn(e);
+    }
+
+}
+
+tabSignal.connect("openapi.schema.type.list", function(listObj)
+{
+    hideIdInList.apply(this, arguments);
+})
+
 
 window.onresize=function ()
 {
