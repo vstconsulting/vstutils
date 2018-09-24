@@ -11,7 +11,8 @@ from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
 ##############################################################
-PYTHON_INTERPRETER = sys.executable or 'python'
+interpreter_dir = os.path.dirname(sys.executable or 'python')
+PYTHON_INTERPRETER = '/'.join([interpreter_dir, 'python'] if interpreter_dir else 'python')
 VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
