@@ -268,7 +268,33 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
     {
         query_schema.fields[i].name = i
     }
-
+     
+    let responses = {}
+    
+    for(let i in query_schema.responses)
+    {
+        let resp = query_schema.responses[i]
+         
+        responses[i] = {
+            description:resp.description
+        }
+        
+        let responses_def_name = getObjectNameBySchema(resp)
+        if(!responses_def_name)
+        {
+            continue;
+        }
+ 
+        let responses_def_obj = getObjectDefinitionByName(api, def_name)
+        if(!responses_def_obj)
+        {
+            throw "Not found Definition for name="+responses_def_name
+        }
+         
+        responses[i].schema = responses_def_obj
+    }
+    query_schema.responses = responses
+    
     return query_schema;
 }
 
@@ -417,14 +443,15 @@ function openApi_guiSchema(api)
     {
         let val =  path_schema[path]
         val.schema = {}
-
+      
         if(val.type == 'list')
         {
             val.schema.list = {
                 fields:openApi_guiPrepareFields(api, val.api.get.fields),
                 filters:val.api.get.filters,
                 query_type:'get',
-                operationId:val.api.get.operationId
+                operationId:val.api.get.operationId,
+                responses:val.api.get.responses,
             }
 
             if(val.api.post)
@@ -433,7 +460,8 @@ function openApi_guiSchema(api)
                     fields:openApi_guiPrepareFields(api, val.api.post.fields),
                     filters:val.api.post.filters,
                     query_type:'post',
-                    operationId:val.api.post.operationId
+                    operationId:val.api.post.operationId,
+                    responses:val.api.post.responses,
                 }
             }
         }
@@ -443,7 +471,8 @@ function openApi_guiSchema(api)
                 fields:openApi_guiPrepareFields(api, val.api.get.fields),
                 filters:val.api.get.filters,
                 query_type:'get',
-                operationId:val.api.get.operationId
+                operationId:val.api.get.operationId,
+                responses:val.api.get.responses,
             }
 
             for(let f in val.schema.get.fields)
@@ -457,7 +486,8 @@ function openApi_guiSchema(api)
                     fields:openApi_guiPrepareFields(api, val.api.put.fields),
                     filters:val.api.put.filters,
                     query_type:'put',
-                    operationId:val.api.put.operationId
+                    operationId:val.api.put.operationId,
+                    responses:val.api.put.responses,
                 }
             }
 
@@ -467,7 +497,8 @@ function openApi_guiSchema(api)
                     fields:openApi_guiPrepareFields(api, val.api.patch.fields),
                     filters:val.api.patch.filters,
                     query_type:'patch',
-                    operationId:val.api.patch.operationId
+                    operationId:val.api.patch.operationId,
+                    responses:val.api.patch.responses,
                 }
             }
         }
@@ -478,12 +509,14 @@ function openApi_guiSchema(api)
             {
                 if(val.api[query_types[q]])
                 {
+                    debugger;
                     let fields = openApi_guiRemoveReadOnlyMark(openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true))
                     val.schema.exec = {
                         fields:fields,
                         filters:val.api[query_types[q]].filters,
                         query_type:query_types[q],
-                        operationId:val.api[query_types[q]].operationId
+                        operationId:val.api[query_types[q]].operationId,
+                        responses:val.api[query_types[q]].responses,
                     }
                     val.methodExec = query_types[q]
 
@@ -793,16 +826,39 @@ function setDefaultPrefetchFunctions(obj)
     {
         if(obj.fields[i].prefetch)
         {
-            let prefetch_path = "/"+i.toLowerCase() +"/"
-            if(obj.paths[prefetch_path])
+            let field = obj.fields[i]
+            
+            if(typeof field.prefetch == "function" || typeof field.prefetch == "object")
+            { 
+                continue;
+            }
+            
+            let prefetch_path = undefined
+            if(obj.paths["/"+i.toLowerCase() +"/"])
             {
-                obj.fields[i].prefetch = {
-                    path:function(path){
-                        return function (obj) {
-                            return "/"+path.toLowerCase() +"/";
-                        }
-                    }(prefetch_path), 
-                }
+                prefetch_path = "/"+i.toLowerCase() +"/" 
+            }
+            else if(obj.paths["/"+field.prefetch.toLowerCase() +"/"])
+            {
+                prefetch_path = "/"+field.prefetch.toLowerCase() +"/"
+            }
+            
+            if(!prefetch_path)
+            {
+                continue;
+            }
+            
+            if(!obj.paths[prefetch_path])
+            {
+                continue;
+            }
+            
+            obj.fields[i].prefetch = {
+                path:function(path){
+                    return function (obj) {
+                        return "/"+path+"/";
+                    }
+                }(prefetch_path), 
             } 
         }
     }
