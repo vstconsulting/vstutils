@@ -221,25 +221,46 @@ function readFileAndInsert(event, element)
 
 function addCssClassesToElement(element="", title, type)
 {
-    element = element.replace(/\s+/g,'-');
+    element = element.replace(/[\s\/]+/g,'-');
 
     let class_list = element + " ";
 
     if(title)
     {
-        title = title.replace(/\s+/g,'-');
-        class_list += element + "-" + title + " ";
+        title = title.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + title + " ";
     }
 
 
     if(title && type)
     {
-        type = type.replace(/\s+/g,'-');
-        class_list += element + "-" + type + " ";
-        class_list += element + "-" + type + "-" + title;
+        type = type.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + type + " ";
+        class_list += element + "_" + type + "_" + title;
     }
 
     return class_list.toLowerCase();
+}
+
+function addStylesAndClassesToListField(guiObj, field, data, opt)
+{
+    let output = "";
+
+    if(field.style)
+    {
+        output += field.style.apply(guiObj, [data, opt]) + " ";
+    }
+
+    if(field.class)
+    {
+        output += field.class.apply(guiObj, [data, opt]) + " ";
+    }
+    else
+    {
+        output += "class='" + addCssClassesToElement('column', guiObj.api.name_field, guiObj.api.short_name) + "' ";
+    }
+
+    return output;
 }
 
 function turnTableTrIntoLink(event)

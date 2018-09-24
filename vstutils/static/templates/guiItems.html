@@ -256,14 +256,14 @@
                                         <% for(var j in opt.fields){ %>
                                             <% if(!opt.fields[j].hidden) { %>
                                                 <th
-                                                    <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                    <%= addStylesAndClassesToListField(guiObj, opt.fields[j], undefined, opt) %>
+                                                    >
                                                         <%- opt.fields[j].title %>
                                                 </th>
                                             <% } %>
                                         <% } %>
                                         <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
-                                            <th style="width: 95px;" >Actions</th>
+                                            <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
                                         <% } %>
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
@@ -280,8 +280,7 @@
                                             <% for(var j in opt.fields){ %>
                                                 <% if(!opt.fields[j].hidden) { %>
                                                     <td
-                                                        <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                        <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
+                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], guiObj.model.data.results[i], opt) %>
                                                     >
                                                         <% if(!opt.fields[j].value){ %>
                                                                 <!-- если есть имя объекта, то выводим его имя, в противном случае, выводим его значение -->
@@ -302,7 +301,7 @@
                                                 <% } %>
                                             <% } %>
                                             <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
-                                                <td>
+                                                <td class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">
                                                     <div class="btn-group" role="group">
                                                         <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             Actions
@@ -314,7 +313,7 @@
                                                                     <a
                                                                         href="<%- window.hostname %><%- opt.base_path + '/' + guiObj.model.data.results[i].id + '/'+ guiObj.api.sublinks_l2[k].name %>"
                                                                         onclick="return false;"
-                                                                        class="sublink-btn">
+                                                                        class="sublink-btn <%- addCssClassesToElement('action-button', guiObj.api.sublinks_l2[k].name, guiObj.api.short_name ) %>">
                                                                             <%- guiObj.api.sublinks_l2[k].name.replace('_', ' ') %>
                                                                     </a>
                                                                 </li>
@@ -344,6 +343,7 @@
                                         <li>
                                             <a
                                                 href="#"
+                                                class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
                                                  <%= justOn('click', function(){ guiObj.api.multi_actions[k].onClick.apply(guiObj, [])} ) %>
                                             >
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
@@ -353,7 +353,8 @@
                                          <li>
                                             <a
                                                 href="#"
-                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;">
+                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;"
+                                                class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
                                             </a>
                                         </li>
