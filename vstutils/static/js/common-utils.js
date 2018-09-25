@@ -1,3 +1,40 @@
+/**
+ * Function to replace {.+?} in string to variables sended to this function,
+ * array and single variable set ordered inside string
+ * associative array and iterable objects set value for keys that original string have
+ * @param takes array, associative array or single variable and insert it
+ * @returns {String} - return string with inserted arguments
+ */
+String.prototype.format = function()
+{
+    debugger;
+    a = this;
+    let regex = new RegExp("{.+?}", "g");
+    let res = this.match(regex);
+    try {
+        for (let k in arguments) {
+            if (Array.isArray(arguments[k])) {
+                for (let i in arguments[k]) {
+                    a = a.replace(res[k + i], arguments[k][i]);
+                }
+            }
+            else if (typeof arguments[k] != "object") {
+                a = a.replace(res[k], arguments[k]);
+            }
+            else {
+                for (let i in arguments[k]) {
+                    if (res.includes("{" + i + "}")) {
+                        a = a.replace("{" + i + "}", arguments[k][i]);
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        throw e;
+    }
+    return a;
+}
+
 
 // Список файлов тестирующих ГУЙ
 if(!window.guiTestsFiles)
