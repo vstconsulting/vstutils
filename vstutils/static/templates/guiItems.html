@@ -270,7 +270,7 @@
                                         <tr
                                             class="item-row item-<%- guiObj.model.data.results[i].id %> highlight-tr  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
                                             data-id="<%- guiObj.model.data.results[i].id %>"
-                                            data-href="<%- window.hostname %>?<%- spajs.urlInfo.data.reg.page + '/' + guiObj.model.data.results[i].id %>"
+                                            data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, guiObj.model.data.results[i].id]) %>"
                                             onclick="turnTableTrIntoLink(event)"
                                             >
                                             <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">

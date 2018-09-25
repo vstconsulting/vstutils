@@ -6,9 +6,8 @@
  * @returns {String} - return string with inserted arguments
  */
 String.prototype.format = function()
-{
-    debugger;
-    a = this;
+{ 
+    let a = this;
     let regex = new RegExp("{.+?}", "g");
     let res = this.match(regex);
     try {
@@ -30,7 +29,7 @@ String.prototype.format = function()
             }
         }
     } catch (e) {
-        throw e;
+        return a;
     }
     return a;
 }
@@ -404,15 +403,39 @@ function getNewId(){
     return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
 }
 
-
-function vstGO(url, vars = {})
+window.url_delimiter = "?"
+function vstMakeLocalUrl(url, vars = {})
 {
+    if(Array.isArray(url))
+    {
+        url = url.join("/")
+    }
+     
     if(typeof url == "string")
     {
-        return spajs.openURL(url)
+        let new_url = url.format(vars)
+
+        if(new_url.indexOf(window.hostname) != 0)
+        {
+            new_url = window.hostname + window.url_delimiter + new_url
+        }
+        else
+        {
+            console.error("window.hostname already exist in vstMakeLocalUrl")
+        }
+        return new_url
+    } 
+    else
+    {
+        debugger;
+        throw "Error in vstMakeLocalUrl"
     }
     
-    debugger;
-    
-    
+    return url
+}
+
+
+function vstGO()
+{
+    return spajs.openURL(vstMakeLocalUrl.apply(this, arguments))
 }

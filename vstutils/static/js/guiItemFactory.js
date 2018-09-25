@@ -17,19 +17,8 @@ var gui_base_object = {
     },
 
     getTitle : function()
-    {
-        if(this.model.data)
-        {
-            for(let i in this.model.data)
-            {
-                if(typeof this.model.data[i] == "string")
-                {
-                    return this.model.data[i]
-                }
-            }
-        }
-
-        return this.model.title
+    { 
+        return this.api.name
     },
 
     renderAllFields : function(opt)
