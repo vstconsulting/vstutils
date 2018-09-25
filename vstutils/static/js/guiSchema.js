@@ -870,11 +870,6 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
 }
 
 
-
-
-
-
-
 /**
  *
  * @param paths - list of all path
@@ -887,16 +882,15 @@ function findPath(paths, base_path, value_name, replace_part="_id")
 {
     debugger;
     let regexp = new RegExp(replace_part+"$", "");
-    value_name = value_name.replace(regexp, "/");
-    let path_array = base_path.slice("/");
-
+    value_name = value_name.replace(regexp, "");
+    let path_array = base_path.split("/");
 
     do{
         if(paths[path_array.join("/")+value_name+"/"])
         {
             return path_array.join("/")+value_name+"/"
         }
-        else if (path.length <= 2)
+        else if (path_array.length <= 2)
         {
             return false;
         }
@@ -973,4 +967,26 @@ function setDefaultPrefetchFunctions(obj)
 tabSignal.connect("openapi.schema.fields", function(obj)
 {
     setDefaultPrefetchFunctions.apply(this, arguments)
+})
+tabSignal.connect("openapi.schema.schema", function(obj)
+{
+
+    for (let i in obj.value.responses){
+        if (obj.value.responses[i].schema) {
+            for (let k in obj.value.responses[i].schema.properties) {
+                if(obj.value.responses[i].schema.properties[k].additionalProperties)
+                {
+                    if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                        obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
+                        obj.value.responses[i].schema.redirect_field = k;
+                    }
+                    else if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect == false) {
+                        redirect_path = path.split("/")
+                        redirect_path = redirect_path.splice(redirect_path.length - 2, 1).join("/")
+                        obj.value.responses[i].schema.redirect_path = redirect_path;
+                    }
+                }
+            }
+        }
+    }
 })
