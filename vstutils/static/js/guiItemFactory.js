@@ -17,7 +17,7 @@ var gui_base_object = {
     },
 
     getTitle : function()
-    { 
+    {
         if(this.model.data)
         {
             for(let i in this.model.data)
@@ -28,7 +28,7 @@ var gui_base_object = {
                 }
             }
         }
-        
+
         return this.model.title
     },
 
@@ -174,7 +174,7 @@ var gui_base_object = {
         {
             this.url_vars = url_vars
         }
-        
+
         this.model.title = this.api.bulk_name
     },
     init : function ()

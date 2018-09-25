@@ -346,6 +346,45 @@ guiElements.prefetch = function (opt = {}, value)
     }
 }
 
+guiElements.date = function (opt = {}, value)
+{
+    this.name = 'date';
+    guiElements.base.apply(this, arguments)
+
+    this.getValue = function()
+    {
+        let value = $("#"+this.element_id).val();
+
+        return moment(value).tz(window.timeZone).format("YYYY/MM/DD");
+    }
+}
+
+guiElements.date_time = function (opt = {}, value)
+{
+    this.name = 'date_time';
+    guiElements.base.apply(this, arguments)
+
+    this.getValue = function()
+    {
+        let value = $("#"+this.element_id).val();
+
+        return moment(value).tz(window.timeZone).format();
+    }
+}
+
+guiElements.uptime = function (opt = {}, value)
+{
+    this.name = 'uptime';
+    guiElements.base.apply(this, arguments)
+
+    this.getValue = function()
+    {
+        let value = $("#"+this.element_id).val();
+
+        return moment(value).tz(window.timeZone).format();
+    }
+}
+
 guiElements.autocomplete = function()
 {
     this.name = 'autocomplete'
@@ -1535,6 +1574,31 @@ function getFiltersForAutocomplete(list, search_str, view_field)
     }
 
     return filters;
+}
+
+/*
+ * time - in seconds
+ */
+function getUptime(time)
+{
+    let uptime = moment.duration(time, 'seconds')._data;
+
+    if(uptime.years > 0)
+    {
+        return "" + uptime.years + "y " + uptime.months + "m " + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
+
+    } else if(uptime.months > 0)
+    {
+        return "" + uptime.months + "m " + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
+    }
+    else if(uptime.days > 0)
+    {
+        return "" + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
+    }
+    else
+    {
+        return  moment(time*1000).tz('UTC').format('HH:mm:ss');
+    }
 }
 
 /**

@@ -12,6 +12,8 @@
             gui-element-<%- guiElement.name %>
             gui-field-<%- opt.name %>
 
+            <% if(opt.hidden){ %> hidden-field <% } %>
+
             <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> "
 
             data-title="<%- opt.title || capitalizeString(opt.name) %>"

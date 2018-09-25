@@ -550,7 +550,7 @@ WORKER_OPTIONS = WorkerSectionConfig().all() if has_django_celery_beat else {}
 
 # View settings
 ##############################################################
-ENABLE_ADMIN_PANEL = True
+ENABLE_ADMIN_PANEL = main.getboolean('enable_admin_panel', False)
 
 VIEWS = {
     "GUI": {

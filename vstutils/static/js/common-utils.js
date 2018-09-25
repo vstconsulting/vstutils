@@ -221,30 +221,51 @@ function readFileAndInsert(event, element)
 
 function addCssClassesToElement(element="", title, type)
 {
-    element = element.replace(/\s+/g,'-');
+    element = element.replace(/[\s\/]+/g,'-');
 
     let class_list = element + " ";
 
     if(title)
     {
-        title = title.replace(/\s+/g,'-');
-        class_list += element + "-" + title + " ";
+        title = title.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + title + " ";
     }
 
 
     if(title && type)
     {
-        type = type.replace(/\s+/g,'-');
-        class_list += element + "-" + type + " ";
-        class_list += element + "-" + type + "-" + title;
+        type = type.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + type + " ";
+        class_list += element + "_" + type + "_" + title;
     }
 
     return class_list.toLowerCase();
 }
 
+function addStylesAndClassesToListField(guiObj, field, data, opt)
+{
+    let output = "";
+
+    if(field.style)
+    {
+        output += field.style.apply(guiObj, [data, opt]) + " ";
+    }
+
+    if(field.class)
+    {
+        output += field.class.apply(guiObj, [data, opt]) + " ";
+    }
+    else
+    {
+        output += "class='" + addCssClassesToElement('column', guiObj.api.name_field, guiObj.api.short_name) + "' ";
+    }
+
+    return output;
+}
+
 function turnTableTrIntoLink(event)
 {
-    if(!(event.target.classList.contains('light-tr-none') ||
+    if(!(event.target.classList.contains('highlight-tr-none') ||
             event.target.classList.contains('ico-on') ||
             event.target.classList.contains('ico-off'))
     )
@@ -261,6 +282,32 @@ function turnTableTrIntoLink(event)
         spajs.openURL(href);
     }
 }
+
+/*
+ * Hides field 'id' in list.
+ * This function is calling from signal openapi.schema.type.list
+ */
+function hideIdInList(listObj)
+{
+    try
+    {
+        let fields = listObj.value.schema.list.fields;
+        if(fields['id'])
+        {
+            fields['id'].hidden = true;
+        }
+    }
+    catch(e)
+    {
+        console.warn(e);
+    }
+
+}
+
+tabSignal.connect("openapi.schema.type.list", function(listObj)
+{
+    hideIdInList.apply(this, arguments);
+})
 
 
 window.onresize=function ()
