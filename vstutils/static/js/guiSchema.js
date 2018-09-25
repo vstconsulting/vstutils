@@ -836,28 +836,35 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
 
 
 
-function findPath(paths, base_path, value_name)
-{  
-    let path = base_path
+/**
+ *
+ * @param paths - list of all path
+ * @param base_path - path to seatch
+ * @param value_name - value to search in `base_path`
+ * @param replace_part - value for replace for correct `value_name` for path
+ * @returns {*}
+ */
+function findPath(paths, base_path, value_name, replace_part="_id")
+{
+    debugger;
+    let regexp = new RegExp(replace_part+"$", "");
+    value_name = value_name.replace(regexp, "/");
+    let path_array = base_path.slice("/");
+
 
     do{
-        if(paths[path+value_name+"/"] || path.length <= 1)
+        if(paths[path_array.join("/")+value_name+"/"])
         {
-            break;
+            return path_array.join("/")+value_name+"/"
+        }
+        else if (path.length <= 2)
+        {
+            return false;
         }
 
-        path = path.replace(/\/[^\/]+\//g, "\/")
+        path_array.splice(path_array.length-2, 1);
 
     }while(1)
-
-    value_name = path+value_name+"/"
-
-    if(!paths[value_name])
-    {
-        return false;
-    }
-    
-    return value_name
 }
 
 
@@ -927,4 +934,3 @@ tabSignal.connect("openapi.schema.fields", function(obj)
 {
     setDefaultPrefetchFunctions.apply(this, arguments)
 })
-
