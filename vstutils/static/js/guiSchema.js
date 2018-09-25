@@ -880,7 +880,6 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
  */
 function findPath(paths, base_path, value_name, replace_part="_id")
 {
-    debugger;
     let regexp = new RegExp(replace_part+"$", "");
     value_name = value_name.replace(regexp, "");
     let path_array = base_path.split("/");
