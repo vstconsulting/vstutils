@@ -41,6 +41,12 @@ basic_type_info[fields.TextareaField] = dict(
 basic_type_info[fields.UptimeField] = dict(
     type=openapi.TYPE_INTEGER, format=FORMAT_UPTIME
 )
+basic_type_info[fields.RedirectIntegerField] = dict(
+    type=openapi.TYPE_INTEGER
+)
+basic_type_info[fields.RedirectCharField] = dict(
+    type=openapi.TYPE_STRING
+)
 
 
 def field_have_redirect(field, **kwargs):
@@ -137,20 +143,6 @@ class Select2FieldInspector(FieldInspector):  # nocv
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
-class RedirectFieldInspector(FieldInspector): # nocv
-    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
-        # pylint: disable=unused-variable,invalid-name
-        if not getattr(field, 'redirect', False):
-            return NotHandled
-
-        SwaggerType, ChildSwaggerType = self._get_partial_types(
-            field, swagger_object_type, use_references, **kw
-        )
-        kwargs = field_insp.get_basic_type_info(field) or dict(type=openapi.TYPE_INTEGER)
-
-        return SwaggerType(**field_extra_handler(field, **kwargs))
-
-
 class NestedFilterInspector(CoreAPICompatInspector):
     def get_filter_parameters(self, filter_backend):
         subaction_list_actions = [
@@ -172,13 +164,12 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
-                           Select2FieldInspector, DependEnumFieldInspector,
-                           AutoCompletionFieldInspector, VSTFieldInspector,
-                           RedirectFieldInspector,
-                       ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
+        Select2FieldInspector, DependEnumFieldInspector,
+        AutoCompletionFieldInspector, VSTFieldInspector,
+    ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
     filter_inspectors = [
-                            NestedFilterInspector
-                        ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
+        NestedFilterInspector
+    ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     def __init__(self, *args, **kwargs):
         super(VSTAutoSchema, self).__init__(*args, **kwargs)
