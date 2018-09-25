@@ -279,7 +279,7 @@ function turnTableTrIntoLink(event)
         {
             href =  event.currentTarget.getAttribute('data-href');
         }
-        spajs.openURL(href);
+        vstGO(href);
     }
 }
 
@@ -365,4 +365,17 @@ if(window.localStorage['guiLocalSettings'])
 
 function getNewId(){
     return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+}
+
+
+function vstGO(url, vars = {})
+{
+    if(typeof url == "string")
+    {
+        return spajs.openURL(url)
+    }
+    
+    debugger;
+    
+    
 }
