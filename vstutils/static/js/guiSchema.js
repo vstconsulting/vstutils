@@ -295,7 +295,7 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
         responses[i].schema = responses_def_obj
     }
     query_schema.responses = responses
-
+ 
     return query_schema;
 }
 
@@ -626,13 +626,15 @@ function openApi_guiSchema(api)
     for(let path in path_schema)
     {
         let val = path_schema[path]
+         
         tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
         tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
 
         for(let schema in val.schema)
-        {
-            tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val});
-            tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val, schema:schema, fields:val.schema[schema].fields});
+        { 
+            tabSignal.emit("openapi.schema.schema",  {paths:path_schema, path:path, value:val.schema[schema]});
+            tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
+            tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val.schema[schema], schema:schema, fields:val.schema[schema].fields});
         }
 
     }
@@ -834,6 +836,29 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
 
 
 
+function findPath(paths, base_path, value_name)
+{  
+    let path = base_path
+
+    do{
+        if(paths[path+value_name+"/"] || path.length <= 1)
+        {
+            break;
+        }
+
+        path = path.replace(/\/[^\/]+\//g, "\/")
+
+    }while(1)
+
+    value_name = path+value_name+"/"
+
+    if(!paths[value_name])
+    {
+        return false;
+    }
+    
+    return value_name
+}
 
 
 
@@ -880,22 +905,8 @@ function setDefaultPrefetchFunctions(obj)
                 continue;
             }
 
-            prefetch_path = prefetch_path.replace(/_id$/, "")
-
-            let path = obj.path
-
-            do{
-                if(obj.paths[path+prefetch_path+"/"] || path.length <= 1)
-                {
-                    break;
-                }
-
-                path = path.replace(/\/[^\/]+\//g, "\/")
-
-            }while(1)
-
-            prefetch_path = path+prefetch_path+"/"
-
+            
+            prefetch_path = findPath(obj.paths, obj.path, prefetch_path) 
             if(!obj.paths[prefetch_path])
             {
                 continue;
