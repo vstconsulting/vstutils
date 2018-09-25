@@ -295,3 +295,11 @@ tabSignal.connect("resource.loaded", function()
         tabSignal.emit("loading.completed");
     })
 })
+
+/*
+tabSignal.connect("openapi.schema.type.list", function(listObj)
+{ 
+    hideIds.apply(this, arguments)
+    listObj.value.__test = true;
+    //debugger;
+})*/

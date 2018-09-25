@@ -17,8 +17,8 @@ var gui_base_object = {
     },
 
     getTitle : function()
-    {
-        return this.api.bulk_name
+    { 
+        return this.model.title
     },
 
     renderAllFields : function(opt)
@@ -156,13 +156,15 @@ var gui_base_object = {
         return this.getValue.call(arguments);
     },
 
-    base_init : function (api_object, url_vars = undefined)
+    base_init : function (api_object, url_vars = undefined, object_data = undefined)
     {
         this.url_vars = spajs.urlInfo.data.reg
         if(url_vars)
         {
             this.url_vars = url_vars
         }
+        
+        this.model.title = this.api.bulk_name
     },
     init : function ()
     {
