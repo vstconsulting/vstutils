@@ -67,7 +67,7 @@
     <%[ main_input %>
       <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
         <% if(opt[opt.name + '_info']){ %>
-            <a href="<%- vstMakeLocalUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
+            <a href="<%- vstMakeLocalApiUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
                class="item-name" onclick="return vstGO(this.href);">
                 <% if(!opt.prefetch || !opt.prefetch.field_name || opt[opt.name + '_info'][opt.prefetch.field_name] === undefined ){ %>
                     <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>

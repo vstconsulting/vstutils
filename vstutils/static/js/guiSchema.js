@@ -980,7 +980,7 @@ tabSignal.connect("openapi.schema.schema", function(obj)
                         obj.value.responses[i].schema.redirect_field = k;
                     }
                     else if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect == false) {
-                        redirect_path = path.split("/")
+                        let redirect_path = path.split("/")
                         redirect_path = redirect_path.splice(redirect_path.length - 2, 1).join("/")
                         obj.value.responses[i].schema.redirect_path = redirect_path;
                     }
