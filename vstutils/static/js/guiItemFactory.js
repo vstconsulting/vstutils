@@ -79,6 +79,11 @@ var gui_base_object = {
                     field[field.name + "_info"]['prefetch_path'] = field.prefetch.path(this.model.data).replace(/^\/|\/$/g, '');
                 }
 
+                if(type == "apiObject" && field.properties)
+                {
+                    type = "inner_api_object";
+                }
+
                 if(!window.guiElements[type])
                 {
                     type = "string"

@@ -414,19 +414,16 @@ function getNewId(){
 
 window.url_delimiter = "#"
 function vstMakeLocalUrl(url = "", vars = {})
-{ 
+{
     if(Array.isArray(url))
     {
         url = url.join("/")
     }
-     
+
     if(typeof url == "string")
     {
-        //debugger;
         let new_url = url.format(vars)
-        //new_url = new_url.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
-        //new_url = new_url.formatUnicorn(vars)
-        
+
         if(new_url.indexOf(window.hostname) != 0 && new_url.indexOf("//") != 0)
         {
             new_url = window.hostname + window.url_delimiter + new_url
@@ -467,6 +464,6 @@ function vstMakeLocalApiUrl(url, vars = {})
     {
         url = url.join("/")
     }
-     
+
     return vstMakeLocalUrl(makeUrlForApiKeys(url), vars)
 }
