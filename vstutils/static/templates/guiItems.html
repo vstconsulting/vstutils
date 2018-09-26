@@ -48,16 +48,16 @@
             <% }else{ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li><a href="<%- vstMakeLocalUrl(url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                        <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
                     <% }else{ %>
                         <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
                             <% if( dotShow == false){ %>
                                 <% dotShow = true %>
-                                <li><a href="<%- vstMakeLocalUrl(url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
+                                <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
                             <% } %>
                         <% }else{ %>
                             <% dotShow = false %>
-                            <li><a href="<%- vstMakeLocalUrl(url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                            <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
                         <% } %>
                     <% } %>
                 <% } %>
@@ -207,11 +207,11 @@
     <%[ buttons_row %>
 
         <% if(guiObj.api.canCreate){ %>
-            <a href="<%- getUrlBasePath() %>/new" class="btn btn-primary" onclick="return vstGO(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'new']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a>
         <% } %>
 
         <% if(guiObj.api.canAdd){%>
-            <a href="<%- getUrlBasePath() %>/add" class="btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'add']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
         <% } %>
  
         <%* buttons %>

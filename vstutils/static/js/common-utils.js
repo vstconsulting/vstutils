@@ -412,9 +412,9 @@ function getNewId(){
 
 
 
-window.url_delimiter = "?"
+window.url_delimiter = "#"
 function vstMakeLocalUrl(url = "", vars = {})
-{
+{ 
     if(Array.isArray(url))
     {
         url = url.join("/")
@@ -433,7 +433,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         }
         else
         {
-            console.error("window.hostname already exist in vstMakeLocalUrl")
+            //console.error("window.hostname already exist in vstMakeLocalUrl")
         }
         return new_url
     }
