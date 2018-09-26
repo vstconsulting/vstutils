@@ -11,7 +11,7 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         this.parent_object = {}
     }
-    
+
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
@@ -790,10 +790,10 @@ guiElements.apiObject = function(field, field_value, parent_object)
 {
     this.name = 'apiObject'
     guiElements.base.apply(this, arguments)
-   
+
     this._baseRender = this.render
     this.render = function(options)
-    { 
+    {
         this.linkObj = undefined
         if(this.opt.definition.page)
         {
@@ -803,7 +803,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             this.linkObj = new guiObjectFactory(this.opt.definition.list.page, undefined, this.value)
         }
-        
+
         return this._baseRender.apply(this, arguments)
     }
 
@@ -813,12 +813,12 @@ guiElements.apiObject = function(field, field_value, parent_object)
     }
 
     this.getLink = function()
-    { 
+    {
         if(!this.linkObj)
         {
             return "#"
         }
-        
+
         let url = window.hostname+this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "?");
         if(this.linkObj.url_vars)
         {
@@ -830,19 +830,19 @@ guiElements.apiObject = function(field, field_value, parent_object)
                 }
             }
         }
-         
+
         return url
     }
 
     this.getName = function()
-    { 
+    {
         if(!this.linkObj)
         {
             if(this.value.name)
             {
                 return this.value.name
             }
-            
+
             return this.value.id
         }
 
@@ -898,6 +898,97 @@ guiElements.apiUser = function(field, field_value, parent_object)
         return value/1
     }
 }*/
+
+guiElements.inner_api_object = function(field, field_value, parent_object)
+{
+    this.name = 'inner_api_object'
+    guiElements.base.apply(this, arguments)
+
+    this.realElements = {};
+
+    if(field.definition_ref)
+    {
+        field.readOnly = false;
+    }
+
+    for(let i in field.properties)
+    {
+        let prop = field.properties[i];
+
+        if(prop.$ref)
+        {
+            let objName = getObjectNameBySchema(prop);
+            let obj = getObjectDefinitionByName(api.openapi, objName, field.name);
+
+            this.realElements[i] = {}
+
+            for(let j in obj.properties)
+            {
+                let inner_field = obj.properties[j];
+                let inner_field_type = inner_field.type;
+
+                if(inner_field.format && guiElements[inner_field.format])
+                {
+                    inner_field_type = inner_field.format;
+                }
+
+                if(!guiElements[inner_field_type])
+                {
+                    inner_field_type = 'string';
+                }
+
+                let inner_field_value;
+                if(field_value && field_value[i])
+                {
+                    inner_field_value = field_value[i][j];
+                }
+
+                if(Object.keys(obj.properties).length == 1)
+                {
+                    inner_field.title = i + " - " + inner_field.title;
+                }
+
+                let realElement = new guiElements[inner_field_type]($.extend({}, inner_field), inner_field_value, parent_object);
+
+                this.realElements[i][j] = realElement;
+            }
+        }
+    }
+
+    this.getValue = function()
+    {
+        let valueObj = {};
+        for(let obj_name in this.realElements)
+        {
+            valueObj[obj_name] = {}
+            let obj = this.realElements[obj_name];
+            for(let element_name in obj)
+            {
+                let element = this.realElements[obj_name][element_name];
+                valueObj[obj_name][element_name] = element.getValue();
+            }
+        }
+
+        return valueObj;
+    }
+
+    this.getValidValue = function ()
+    {
+        let valueObj = {};
+        for(let obj_name in this.realElements)
+        {
+            valueObj[obj_name] = {}
+            let obj = this.realElements[obj_name];
+            for(let element_name in obj)
+            {
+                let element = this.realElements[obj_name][element_name];
+                valueObj[obj_name][element_name] = element.getValidValue();
+            }
+        }
+
+        return valueObj;
+    }
+}
 
 guiElements.dynamic = function(opt = {}, value, parent_object)
 {
