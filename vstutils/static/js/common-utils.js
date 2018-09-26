@@ -7,7 +7,7 @@
  */
 String.prototype.format = function()
 {
-    let obj = this;
+    let obj = this.toString();
     let arg_list;
     if (typeof arguments[0] == "object")
     {
@@ -39,7 +39,7 @@ String.prototype.format_keys = function()
 {
     let thisObj = this;
     let regex = new RegExp("(?<={).+?(?=})", "g");
-    return thisObj.match(regex);
+    return thisObj.match(regex) || [];
 }
 
 // Список файлов тестирующих ГУЙ
