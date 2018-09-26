@@ -301,7 +301,7 @@ function addStylesAndClassesToListField(guiObj, field, data, opt)
     }
     else
     {
-        output += "class='" + addCssClassesToElement('column', guiObj.api.name_field, guiObj.api.short_name) + "' ";
+        output += "class='" + addCssClassesToElement('column', field.name, guiObj.api.short_name) + "' ";
     }
 
     return output;
@@ -443,7 +443,7 @@ function vstMakeLocalUrl(url, vars = {})
 
     if(typeof url == "string")
     {
-        debugger;
+        // debugger;
         let new_url = url.formatUnicorn(vars)
         new_url = new_url.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
         new_url = new_url.formatUnicorn(vars)
