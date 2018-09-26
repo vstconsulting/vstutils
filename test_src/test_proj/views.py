@@ -1,6 +1,6 @@
-from vstutils.api.serializers import VSTSerializer
+from vstutils.api.serializers import VSTSerializer, EmptySerializer
 from vstutils.api.base import ModelViewSetSet, Response, CopyMixin
-from vstutils.api.decorators import nested_view, action
+from vstutils.api.decorators import nested_view, subaction, action
 from vstutils.api import filters
 from vstutils.api import fields
 from .models import Host, HostGroup
@@ -67,11 +67,14 @@ class HostViewSet(ModelViewSetSet):
     }
     filter_class = HostFilter
 
-    @action(detail=True)
+    @subaction(
+        response_code=200, response_serializer=EmptySerializer, detail=True,
+        description='Some desc'
+    )
     def test(self, request, *args, **kwargs):
         return Response("OK", 200).resp
 
-    @action(detail=True, serializer_class=HostSerializer)
+    @subaction(detail=True, serializer_class=HostSerializer)
     def test2(self, request, *args, **kwargs):
         self.get_object()
         return Response("OK", 201).resp
@@ -123,4 +126,13 @@ try:
     class ErrorView(_HostGroupViewSet):
         pass
 except nested_view.NoView:
+    pass
+
+
+try:
+    class ErrorView(_HostGroupViewSet):
+        @subaction(response_code=200, detail=True)
+        def test_err(self, request, *args, **kwargs):
+            return Response("OK", 200).resp
+except AssertionError:
     pass

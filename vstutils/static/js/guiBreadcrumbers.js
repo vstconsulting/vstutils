@@ -23,7 +23,7 @@ function renderBreadcrumbs()
             }(url_id, obj)) 
         }
         
-        urls.push("<a href='"+url.replace(/\/$/, "")+"' onclick='return spajs.openURL(this.href);' id='"+url_id+"' > "+pages[i]+"</a>");
+        urls.push("<a href='"+url.replace(/\/$/, "")+"' onclick='return vstGO(this.href);' id='"+url_id+"' > "+pages[i]+"</a>");
         
         last_name = pages[i]
     }

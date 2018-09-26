@@ -51,7 +51,11 @@
 <script type="text/x-just" data-just="guiElements.string">
     <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <%[ main_input %>
-        <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+        <input type="text"
+        class="form-control"
+        <%- set_api_options(opt) %> 
+        id="<%- guiElement.element_id %>"
+        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
     <%] %>
     <%! guiElements.base %>
 </script>
@@ -62,10 +66,18 @@
     <!-- guiElements.prefetch -->
     <%[ main_input %>
       <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
-        <a href="<%- window.hostname %>/?<%- opt[opt.name + '_info']['prefetch_path'] %>/<%- value %>"
-           class="item-name" onclick="return spajs.openURL(this.href);">
-            <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
-        </a>
+        <% if(opt[opt.name + '_info']){ %>
+            <a href="<%- vstMakeLocalUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
+               class="item-name" onclick="return vstGO(this.href);">
+                <% if(!opt.prefetch || !opt.prefetch.field_name || opt[opt.name + '_info'][opt.prefetch.field_name] === undefined ){ %>
+                    <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
+                <%}else{ %>
+                    <%- opt[opt.name + '_info'][opt.prefetch.field_name] %>
+                <%} %>
+            </a>
+        <%}else{ %>
+            <%- value %>
+        <%} %>
       </div>
     <%] %>
     <%! guiElements.base %>
@@ -148,7 +160,7 @@
                <%- addCssClassesToElement('btn', opt.title) %>"
         href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiElement, [opt]) %><% }else{ %><%- opt.link %><% } %>"
         title="<%- opt.title || '' %>"
-        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiElement, [opt]) %><% }else{ %>return spajs.openURL(this.href);<% } %>" >
+        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiElement, [opt]) %><% }else{ %>return vstGO(this.href);<% } %>" >
             <% if(typeof opt.text == 'function'){ %>
                 <%= opt.text.apply(guiElement, [opt]) %>
             <% }else{ %>
@@ -188,7 +200,7 @@
             <%- set_api_options(opt) %>
             id="<%- guiElement.element_id %>"
         >
-            <a href="<%- guiElement.getLink() %>" onclick="return spajs.openURL(this.href);" ><%- guiElement.getName() %></a>
+            <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
         </div>
     <%] %>
     <%! guiElements.base %>

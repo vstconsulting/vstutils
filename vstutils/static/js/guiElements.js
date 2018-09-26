@@ -803,7 +803,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             this.linkObj = new guiObjectFactory(this.opt.definition.list.page, undefined, this.value)
         }
-
+        
         return this._baseRender.apply(this, arguments)
     }
 
@@ -813,7 +813,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
     }
 
     this.getLink = function()
-    {
+    { 
         if(!this.linkObj)
         {
             return "#"
@@ -835,7 +835,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
     }
 
     this.getName = function()
-    {
+    { 
         if(!this.linkObj)
         {
             if(this.value.name)

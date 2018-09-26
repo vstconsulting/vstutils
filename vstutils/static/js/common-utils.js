@@ -265,25 +265,46 @@ function readFileAndInsert(event, element)
 
 function addCssClassesToElement(element="", title, type)
 {
-    element = element.replace(/\s+/g,'-');
+    element = element.replace(/[\s\/]+/g,'-');
 
     let class_list = element + " ";
 
     if(title)
     {
-        title = title.replace(/\s+/g,'-');
-        class_list += element + "-" + title + " ";
+        title = title.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + title + " ";
     }
 
 
     if(title && type)
     {
-        type = type.replace(/\s+/g,'-');
-        class_list += element + "-" + type + " ";
-        class_list += element + "-" + type + "-" + title;
+        type = type.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + type + " ";
+        class_list += element + "_" + type + "_" + title;
     }
 
     return class_list.toLowerCase();
+}
+
+function addStylesAndClassesToListField(guiObj, field, data, opt)
+{
+    let output = "";
+
+    if(field.style)
+    {
+        output += field.style.apply(guiObj, [data, opt]) + " ";
+    }
+
+    if(field.class)
+    {
+        output += field.class.apply(guiObj, [data, opt]) + " ";
+    }
+    else
+    {
+        output += "class='" + addCssClassesToElement('column', guiObj.api.name_field, guiObj.api.short_name) + "' ";
+    }
+
+    return output;
 }
 
 function turnTableTrIntoLink(event)
@@ -302,7 +323,7 @@ function turnTableTrIntoLink(event)
         {
             href =  event.currentTarget.getAttribute('data-href');
         }
-        spajs.openURL(href);
+        vstGO(href);
     }
 }
 
@@ -388,4 +409,66 @@ if(window.localStorage['guiLocalSettings'])
 
 function getNewId(){
     return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+}
+
+
+
+
+String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
+function () {
+    "use strict";
+    var str = this.toString();
+    if (arguments.length) {
+        var t = typeof arguments[0];
+        var key;
+        var args = ("string" === t || "number" === t) ?
+            Array.prototype.slice.call(arguments)
+            : arguments[0];
+
+        for (key in args) {
+            str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
+        }
+    }
+
+    return str;
+};
+
+window.url_delimiter = "?"
+function vstMakeLocalUrl(url, vars = {})
+{
+    if(Array.isArray(url))
+    {
+        url = url.join("/")
+    }
+
+    if(typeof url == "string")
+    {
+        debugger;
+        let new_url = url.formatUnicorn(vars)
+        new_url = new_url.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
+        new_url = new_url.formatUnicorn(vars)
+
+        if(new_url.indexOf(window.hostname) != 0 && new_url.indexOf("//") != 0)
+        {
+            new_url = window.hostname + window.url_delimiter + new_url
+        }
+        else
+        {
+            console.error("window.hostname already exist in vstMakeLocalUrl")
+        }
+        return new_url
+    }
+    else
+    {
+        debugger;
+        throw "Error in vstMakeLocalUrl"
+    }
+
+    return url
+}
+
+
+function vstGO()
+{
+    return spajs.openURL(vstMakeLocalUrl.apply(this, arguments))
 }

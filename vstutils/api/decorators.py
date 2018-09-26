@@ -4,6 +4,7 @@ from inspect import getmembers
 from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework import viewsets as vsets, response, status
+from drf_yasg.utils import swagger_auto_schema
 from ..exceptions import VSTUtilsException
 
 
@@ -68,6 +69,33 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
         if arg:
             view._nested_args[name] = request_arg
         return view
+
+    return decorator
+
+
+def subaction(*args, **kwargs):
+    operation_description = kwargs.pop('description', None)
+    response_code = kwargs.pop('response_code', None)
+    response_serializer = kwargs.pop(
+        'response_serializer', kwargs.get('serializer_class', None)
+    )
+    assert (
+        (response_code is None) or
+        (response_code is not None and response_serializer is not None)
+    ), "If `response_code` was setted, `response_serializer` should be setted too."
+
+    def decorator(func):
+        func_object = action(*args, **kwargs)(func)
+        override_kw = dict()
+        if response_code:
+            override_kw['responses'] = {
+                response_code: response_serializer()
+            }
+        if operation_description:
+            override_kw['operation_description'] = operation_description
+        else:
+            override_kw['operation_description'] = str(func.__doc__ or '').strip()
+        return swagger_auto_schema(**override_kw)(func_object)
 
     return decorator
 

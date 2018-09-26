@@ -27,6 +27,8 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             field.definition = {}
         }
 
+        field.name = i
+        
         let def_name = getObjectNameBySchema(field, 1)
         if(def_name)
         {
@@ -36,7 +38,8 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 console.error("can not found definition for object "+def_name)
                 continue;
             }
-            field =  mergeDeep({}, def_obj);
+            
+            field =  mergeDeep(field, def_obj);
 
             if(!field.gui_links)
             {
@@ -97,9 +100,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
 
    return fields
 }
-
-// Replace link from `additionalProperties` to api link for autocomplete work
-// Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
+ 
 function openApi_findParentByDefinition(api_obj, definition, type = 'list')
 {
     if(api_obj.type == type && type == 'list' && api_obj.api.get)
@@ -157,7 +158,8 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
 
         for(let l in fields[i].gui_links)
         {
-            let link_type = fields[i].gui_links[l]
+            let field = fields[i]
+            let link_type = field.gui_links[l]
 
             let definition = link_type.$ref
 
@@ -165,21 +167,57 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
             {
                 continue;
             }
-
-            fields[i][link_type.prop_name][link_type.list_name] = undefined
-
+       
+            if(field[link_type.prop_name] === undefined)
+            {
+                field[link_type.prop_name] = {}
+            }
+            
+            field[link_type.prop_name][link_type.list_name] = undefined
+ 
+            let list_obj = undefined
             for(let l in api_obj.parent.sublinks)
             {
-                let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
+                list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
                 if(list_obj)
-                {
-                    fields[i][link_type.prop_name][link_type.list_name] = list_obj
+                { 
                     break;
                 }
             }
 
-            if(fields[i][link_type.prop_name][link_type.list_name])
+            if(!list_obj)
             {
+                for(let p in path_schema)
+                {
+                    if(path_schema[p].level > 2 || !path_schema[p].api.get)
+                    {
+                        continue;
+                    }
+                    
+                    let schema = getObjectNameBySchema(path_schema[p].api.get)
+                    if(schema != definition)
+                    {
+                        continue;
+                    } 
+                    
+                    list_obj = path_schema[p]
+                    break;
+                } 
+            }
+          
+            if(list_obj)
+            {  
+                if(link_type.type == 'page' && list_obj.type == 'list' && list_obj.page)
+                {
+                    list_obj = list_obj.page
+                }
+
+                if(link_type.type == 'list' && list_obj.type == 'page' && list_obj.list)
+                {
+                    list_obj = list_obj.list
+                }
+                
+                field[link_type.prop_name][link_type.list_name] = list_obj
                 continue;
             }
 
@@ -197,7 +235,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                     let list_obj = openApi_findParentByDefinition(val, definition, link_type.type);
                     if(list_obj)
                     {
-                        fields[i][link_type.prop_name][link_type.list_name] = list_obj
+                        field[link_type.prop_name][link_type.list_name] = list_obj
                         break;
                     }
                 }
@@ -695,6 +733,7 @@ function getObjectDefinitionByName(api, name, parent_name)
     obj = mergeDeep({}, api.definitions[definition])
     
     obj.definition_name = definition
+    obj.definition_ref = name
     
     if(obj.required)
     {
@@ -745,7 +784,7 @@ function getObjectNameBySchema(obj, max_level = 0, level = 0)
 
     for(var i in obj)
     {
-        if(i == '$ref')
+        if(i == '$ref' || i == "definition_ref")
         {
             var name = obj[i].match(/\/([A-z0-9]+)$/)
 
@@ -841,7 +880,6 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
  */
 function findPath(paths, base_path, value_name, replace_part="_id")
 {
-    debugger;
     let regexp = new RegExp(replace_part+"$", "");
     value_name = value_name.replace(regexp, "");
     let path_array = base_path.split("/");
@@ -893,7 +931,7 @@ function setDefaultPrefetchFunctions(obj)
                         }
                     }(prefetch_path),
                 }
-                
+                 
                 continue;
             }
             else
@@ -902,17 +940,18 @@ function setDefaultPrefetchFunctions(obj)
             }
 
             if(!prefetch_path)
-            { 
+            {  
                 continue;
             }
 
             
-            prefetch_path = findPath(obj.paths, obj.path, prefetch_path) 
+            prefetch_path = findPath(obj.paths, obj.path, prefetch_path.replace(/_id$/, "")) 
             if(!obj.paths[prefetch_path])
-            {
+            { 
                 continue;
             }
-            
+           
+            //obj.fields[i].type = "prefetch";  
             obj.fields[i].prefetch = {
                 path:function(path){
                     return function (obj) {

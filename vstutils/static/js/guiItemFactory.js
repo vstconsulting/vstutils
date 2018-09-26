@@ -17,8 +17,8 @@ var gui_base_object = {
     },
 
     getTitle : function()
-    {
-        return this.model.title
+    { 
+        return this.api.name
     },
 
     renderAllFields : function(opt)
@@ -394,10 +394,10 @@ function goToSearch(obj, query)
 {
     if (obj.isEmptySearchQuery(query))
     {
-        spajs.openURL(spajs.urlInfo.data.reg.baseURL());
+        vstGO(spajs.urlInfo.data.reg.baseURL());
     }
 
-    return spajs.openURL(spajs.urlInfo.data.reg.searchURL(obj.searchObjectToString(trim(query))));
+    return vstGO(spajs.urlInfo.data.reg.searchURL(obj.searchObjectToString(trim(query))));
 }
 
 function deleteAndGoUp(obj)
@@ -405,7 +405,7 @@ function deleteAndGoUp(obj)
     var def = obj.delete();
     $.when(def).done(function(){
         var upper_url = spajs.urlInfo.data.reg.baseURL().replace(/\/\d+$/g, '');
-        spajs.openURL(upper_url);
+        vstGO(upper_url);
     })
 
     return def;
@@ -416,7 +416,7 @@ function createAndGoEdit(obj)
     var def = obj.create();
     $.when(def).done(function(newObj){
 
-        spajs.openURL(spajs.urlInfo.data.reg.baseURL(newObj.data.id));
+        vstGO(spajs.urlInfo.data.reg.baseURL(newObj.data.id));
     })
 
     return def;
@@ -433,7 +433,7 @@ function goToMultiAction(ids, action, selection_tag)
         return false;
     }
 
-    return spajs.openURL(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action.name);
+    return vstGO(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action.name);
 }
 
 function goToMultiActionFromElements(elements, action, selection_tag)
@@ -447,7 +447,7 @@ function addToParentsAndGoUp(item_ids)
 {
     return $.when(changeSubItemsInParent('POST', item_ids)).done(function (data)
     {
-        spajs.openURL(window.hostname + spajs.urlInfo.data.reg.baseURL());
+        vstGO(window.hostname + spajs.urlInfo.data.reg.baseURL());
     }).fail(function (e)
     {
         webGui.showErrors(e)
