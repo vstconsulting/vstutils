@@ -667,7 +667,6 @@ function openApi_guiSchema(api)
          
         tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
         tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
-
         for(let schema in val.schema)
         {
             tabSignal.emit("openapi.schema.schema",  {paths:path_schema, path:path, value:val.schema[schema]});
@@ -967,6 +966,7 @@ tabSignal.connect("openapi.schema.fields", function(obj)
 {
     setDefaultPrefetchFunctions.apply(this, arguments)
 })
+
 tabSignal.connect("openapi.schema.schema", function(obj)
 {
 
@@ -975,19 +975,80 @@ tabSignal.connect("openapi.schema.schema", function(obj)
             for (let k in obj.value.responses[i].schema.properties) {
                 if(obj.value.responses[i].schema.properties[k].additionalProperties)
                 {
-                    if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
-                        obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
-                        obj.value.responses[i].schema.redirect_field = k;
-                        break;
-                    }
-                    else if (!obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
-                        let redirect_path = obj.path.split("/")
-                        redirect_path.splice(redirect_path.length - 2, 1)
-                        obj.value.responses[i].schema.redirect_path = redirect_path.join("/");
-                        break;
+                    if(
+                        !obj.value.responses[i].schema.redirect_path &&
+                        !obj.value.responses[i].schema.redirect_field
+                    ) {
+                         if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                            obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
+                            obj.value.responses[i].schema.redirect_field = k;
+                            break;
+                        }
+                        else if (!obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                            let redirect_path = obj.path.split("/")
+                            redirect_path.splice(redirect_path.length - 2, 1)
+                            obj.value.responses[i].schema.redirect_path = redirect_path.join("/");
+                            break;
+                        }
                     }
                 }
             }
         }
     }
+})
+
+tabSignal.connect("openapi.schema.type.action", function(obj) {
+    let actionResponseDefName;
+    try {
+        for (let i in obj.value.schema.exec.responses) {
+            if (i >= 200 && i < 400 && obj.value.schema.exec.responses[i].schema) {
+                try {
+                    actionResponseDefName = obj.value.schema.exec.responses[i];
+                    break;
+                } catch (e) {
+                }
+            }
+        }
+    } catch (e)
+    {
+        console.error("Action " + obj.value.name + " don't have schema")
+        return;
+    }
+
+    if (!actionResponseDefName)
+    {
+        console.error("Action " + obj.value.name + " don't have response definition")
+        return;
+    }
+
+    let test = function(responses, path)
+    {
+        for (let i in responses)
+        {
+            let resp = responses[i]
+            if (i >= 200 && i < 400 && resp.schema) {
+                if (resp.schema.definition_name == actionResponseDefName.schema.definition_name) {
+                    actionResponseDefName.schema.redirect_path = path;
+                    actionResponseDefName.schema.redirect_field = resp.schema.properties["pk"] || resp.schema.properties["id"];
+                    return false;
+                }
+            }
+        }
+    }
+
+    try {
+        let path = obj.value.parent.path.split("/");
+        path.splice(path.length-2, 1);
+        test(obj.value.parent.schema.get.responses, path.join("/"))
+    } catch (e) {
+        return;
+    }
+
+    try{
+        test(obj.value.parent.parent.schema.list.responses, obj.value.parent.path)
+    } catch (e) {
+        return;
+    }
+
+    return;
 })
