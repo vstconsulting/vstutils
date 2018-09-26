@@ -9,19 +9,19 @@ String.prototype.format = function()
 {
     let obj = this;
     let arg_list;
-    if (arguments.length > 1)
-    {
-        arg_list = Array.from(arguments);
-    }
-    else if (typeof arguments[0] == "object")
+    if (typeof arguments[0] == "object")
     {
         arg_list = arguments[0]
+    }
+    else if (arguments.length > 1)
+    {
+        arg_list = Array.from(arguments);
     }
     for (let key of this.format_keys())
     {
         if (arg_list[key] != undefined)
         {
-            obj = obj.replace(key , arg_list[key])
+            obj = obj.replace('{'+ key + '}', arg_list[key])
         }
         else
         {
@@ -38,7 +38,7 @@ String.prototype.format = function()
 String.prototype.format_keys = function()
 {
     let thisObj = this;
-    let regex = new RegExp("{.+?}", "g");
+    let regex = new RegExp("(?<={).+?(?=})", "g");
     return thisObj.match(regex);
 }
 
