@@ -12,12 +12,15 @@ String.prototype.format = function()
     let res = this.match(regex);
     try {
         for (let k in arguments) {
-            if (Array.isArray(arguments[k])) {
-                for (let i in arguments[k]) {
+            if (Array.isArray(arguments[k])) 
+            {
+                for (let i in arguments[k]) 
+                {
                     a = a.replace(res[k + i], arguments[k][i]);
                 }
             }
-            else if (typeof arguments[k] != "object") {
+            else if (typeof arguments[k] != "object") 
+            {
                 a = a.replace(res[k], arguments[k]);
             }
             else {
@@ -33,7 +36,6 @@ String.prototype.format = function()
     }
     return a;
 }
-
 
 // Список файлов тестирующих ГУЙ
 if(!window.guiTestsFiles)
@@ -403,6 +405,28 @@ function getNewId(){
     return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
 }
 
+
+
+
+String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
+function () {
+    "use strict";
+    var str = this.toString();
+    if (arguments.length) {
+        var t = typeof arguments[0];
+        var key;
+        var args = ("string" === t || "number" === t) ?
+            Array.prototype.slice.call(arguments)
+            : arguments[0];
+
+        for (key in args) {
+            str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
+        }
+    }
+
+    return str;
+};
+
 window.url_delimiter = "?"
 function vstMakeLocalUrl(url, vars = {})
 {
@@ -413,9 +437,12 @@ function vstMakeLocalUrl(url, vars = {})
      
     if(typeof url == "string")
     {
-        let new_url = url.format(vars)
-
-        if(new_url.indexOf(window.hostname) != 0)
+        debugger;
+        let new_url = url.formatUnicorn(vars)
+        new_url = new_url.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
+        new_url = new_url.formatUnicorn(vars)
+        
+        if(new_url.indexOf(window.hostname) != 0 && new_url.indexOf("//") != 0)
         {
             new_url = window.hostname + window.url_delimiter + new_url
         }
