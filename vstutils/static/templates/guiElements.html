@@ -80,6 +80,30 @@
     <%! guiElements.base %>
 </script>
 
+<!-- guiElements.json -->
+<script type="text/x-just" data-just="guiElements.json">
+    <!-- guiElements.json -->
+    <% if(Object.keys(guiElement.realElements).length > 0) { %>
+        <%[ wrapper_classes %>
+           col-lg-12 col-xs-12 col-sm-12 col-md-12
+        <%] %>
+    <% } %>
+    <%[ main_input %>
+        <div id="gui<%- guiElement.element_id %>" class="row">
+            <% if(Object.keys(guiElement.realElements).length > 0) { %>
+                <% for(var i in guiElement.realElements) { %>
+                    <%= guiElement.realElements[i].render() %>
+                <% } %>
+            <% } else { %>
+                <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                    <input type="text" class="form-control" readonly disabled  value="This field is empty">
+                </div>
+            <% } %>
+        </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">
     <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
@@ -223,7 +247,7 @@
     <%] %>
     <%! guiElements.base %>
 </script>
- 
+
 <!-- guiElements.apiObject -->
 <script type="text/x-just" data-just="guiElements.apiObject">
     <!-- guiElements.apiObject -->
