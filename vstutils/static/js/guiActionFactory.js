@@ -18,7 +18,7 @@ var gui_action_object = {
                     }
                 })
                 debugger;
-                let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field] || "")
+                let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field.title.toLowerCase()] || "")
                 vstGO(url);
             }
         })
