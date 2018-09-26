@@ -438,7 +438,7 @@ function goToMultiAction(ids, action, selection_tag)
         return false;
     }
 
-    return vstGO(window.hostname + "?" + spajs.urlInfo.data.reg.page_and_parents+"/"+ids.join(",")+"/"+action.name);
+    return vstGO([spajs.urlInfo.data.reg.page_and_parents, ids.join(","), action.name]);
 }
 
 function goToMultiActionFromElements(elements, action, selection_tag)
@@ -452,7 +452,7 @@ function addToParentsAndGoUp(item_ids)
 {
     return $.when(changeSubItemsInParent('POST', item_ids)).done(function (data)
     {
-        vstGO(window.hostname + spajs.urlInfo.data.reg.baseURL());
+        vstGO(spajs.urlInfo.data.reg.baseURL());
     }).fail(function (e)
     {
         webGui.showErrors(e)
@@ -517,7 +517,7 @@ function changeSubItemsInParent(action, item_ids)
 
 function getUrlBasePath()
 {
-    return window.location.search.replace(/\/$/, "")
+    return window.location.hash.replace(/^#/, "")
 }
 
 function renderErrorAsPage(error)

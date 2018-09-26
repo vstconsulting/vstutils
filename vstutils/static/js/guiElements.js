@@ -816,8 +816,8 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             return "#"
         }
-
-        let url = window.hostname+this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "?");
+        
+        let url = this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "");
         if(this.linkObj.url_vars)
         {
             for(let i in this.linkObj.url_vars)
@@ -828,19 +828,19 @@ guiElements.apiObject = function(field, field_value, parent_object)
                 }
             }
         }
-
-        return url
+         
+        return vstMakeLocalUrl(url)
     }
 
     this.getName = function()
-    {
+    { 
         if(!this.linkObj)
         {
             if(this.value.name)
             {
                 return this.value.name
             }
-
+            
             return this.value.id
         }
 
