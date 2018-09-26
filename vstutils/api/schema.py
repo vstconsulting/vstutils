@@ -185,14 +185,18 @@ class VSTAutoSchema(SwaggerAutoSchema):
         self._sch = args[0].schema
         self._sch.view = args[0]
 
-    def __get_nested_serializer(self, nested_view):
-        action_suffix = self.view.action.split('_')[-1]
+    def __get_nested_serializer(self, nested_view, view_action_func):
+        nested_action_name = view_action_func._nested_name
+        action_suffix = self.view.action.split('_')[-len(nested_action_name.split('_')):]
+        action_suffix = '_'.join(action_suffix)
         is_detail = action_suffix == 'detail'
         is_list = action_suffix == 'list'
         method = self.method.lower()
         nested_view_obj = nested_view()
         nested_view_obj.request = self.view.request
         nested_view_obj.kwargs = self.view.kwargs
+        nested_view_obj.lookup_field = self.view.lookup_field
+        nested_view_obj.lookup_url_kwarg = self.view.lookup_url_kwarg
         nested_view_obj.format_kwarg = None
         if method == 'post' and is_list:
             nested_view_obj.action = 'create'
@@ -206,8 +210,14 @@ class VSTAutoSchema(SwaggerAutoSchema):
             nested_view_obj.action = 'partial_update'
         elif method == 'delete' and is_detail:  # nocv
             nested_view_obj.action = 'destroy'
-        else:  # nocv
+        else:
             nested_view_obj.action = action_suffix
+            if hasattr(nested_view_obj, action_suffix):
+                nested_view_obj.action = action_suffix
+                view = getattr(nested_view_obj, action_suffix)
+                serializer_class = view.kwargs.get('serializer_class', None)
+                if serializer_class:
+                    nested_view_obj.serializer_class = serializer_class
 
         return nested_view_obj.get_serializer()
 
@@ -216,7 +226,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
             view_action_func = getattr(self.view, self.view.action, None)
             nested_view = getattr(view_action_func, '_nested_view', None)
             if nested_view:
-                return self.__get_nested_serializer(nested_view)
+                return self.__get_nested_serializer(nested_view, view_action_func)
         return super(VSTAutoSchema, self).get_view_serializer()
 
     def get_operation_id(self, operation_keys):

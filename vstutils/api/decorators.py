@@ -381,6 +381,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             kwargs['methods'] = self.view.get_view_methods(detail)
         view_class = self.get_decorator(**kwargs)(view)
         view_class._nested_view = self.view
+        view_class._nested_name = self.name
         return name, view_class
 
     def decorated_list(self):
@@ -406,6 +407,8 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         view._swagger_auto_schema = getattr(
             sub_view, '_swagger_auto_schema', existing_swagger_auto_schema
         )
+        view._nested_view = getattr(sub_view, '_nested_view', self.view)
+        view._nested_name = sub
         return name, view
 
     def generate_decorated_subs(self):
