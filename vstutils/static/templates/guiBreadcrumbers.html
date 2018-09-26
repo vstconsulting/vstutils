@@ -1,7 +1,7 @@
 <script type="text/x-just" data-just="page_breadcrumb">
     <ol class="breadcrumb">
         <li>
-            <a href="<%- hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a>
+            <a href="<%- hostname %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a>
         </li>
         <% for(var i = 0; i < urls.length; i++){ %>
             <li>
