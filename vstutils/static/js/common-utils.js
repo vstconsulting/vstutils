@@ -413,7 +413,7 @@ function getNewId(){
 
 
 window.url_delimiter = "?"
-function vstMakeLocalUrl(url, vars = {})
+function vstMakeLocalUrl(url = "", vars = {})
 {
     if(Array.isArray(url))
     {
