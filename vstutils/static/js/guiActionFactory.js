@@ -9,12 +9,18 @@ var gui_action_object = {
         {
             guiPopUp.success("Action "+thisObj.api.bulk_name+" was called successfully");
             let thisSchema = thisObj.api.schema.exec.responses[data.status].schema
-            let key_list = thisSchema.redirect_path.format_keys();
-            let id_list = new Array;
-            data.subitem.forEach((v, k) => {if(!k%2) {id_list[key_list[k%2]] = v; } })
-            debugger;
-            let url = thisSchema.redirect_path.format(id_list) + data.data[thisSchema.redirect_field]
-            spajs.openURL(url)
+            if (thisSchema.redirect_path) {
+                let key_list = thisSchema.redirect_path.format_keys();
+                let id_list = new Array;
+                data.subitem.forEach((v, k) => {
+                    if (!k % 2) {
+                        id_list[key_list[k % 2]] = v;
+                    }
+                })
+                debugger;
+                let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field] || "")
+                vstGO(url);
+            }
         })
         return res; 
     },

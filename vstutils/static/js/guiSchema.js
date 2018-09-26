@@ -669,7 +669,7 @@ function openApi_guiSchema(api)
         tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
 
         for(let schema in val.schema)
-        { 
+        {
             tabSignal.emit("openapi.schema.schema",  {paths:path_schema, path:path, value:val.schema[schema]});
             tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
             tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val.schema[schema], schema:schema, fields:val.schema[schema].fields});
@@ -978,11 +978,13 @@ tabSignal.connect("openapi.schema.schema", function(obj)
                     if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
                         obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
                         obj.value.responses[i].schema.redirect_field = k;
+                        break;
                     }
-                    else if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect == false) {
-                        let redirect_path = path.split("/")
-                        redirect_path = redirect_path.splice(redirect_path.length - 2, 1).join("/")
-                        obj.value.responses[i].schema.redirect_path = redirect_path;
+                    else if (!obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                        let redirect_path = obj.path.split("/")
+                        redirect_path.splice(redirect_path.length - 2, 1)
+                        obj.value.responses[i].schema.redirect_path = redirect_path.join("/");
+                        break;
                     }
                 }
             }
