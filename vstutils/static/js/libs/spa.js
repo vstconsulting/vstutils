@@ -232,7 +232,7 @@ if(!window.spajs)
      * @example spajs.openURL("https://app.chat-server.comet-server.com/dev-18/t-chatterbox/") (Надо передавать полный урл)
      */
     spajs.openURL = function(url, title)
-    {
+    { 
         history.pushState({url:url}, title, url);
         var res = spajs.openMenuFromUrl(url, {withoutFailPage: true})
         var state = res.state()
@@ -433,17 +433,7 @@ if(!window.spajs)
         {
             menu.type = "custom"
         }
- 
-        for(var i in spajs.opt.menu)
-        {
-            if(spajs.opt.menu[i].id == menu.id)
-            {
-                // Такой пункт уже есть в меню
-                console.error("Такой пункт уже есть в меню", menu)
-                return;
-            }
-        }
-
+   
         if(!menu.priority)
         {
             menu.priority = 0;

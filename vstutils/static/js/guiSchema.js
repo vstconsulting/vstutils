@@ -245,19 +245,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
 
    return fields
 }
-
-function openApi_guiRemoveReadOnlyMark(properties)
-{
-    for(let i in properties)
-    {
-        if(properties[i].definition_ref)
-        {
-            properties[i].readOnly = false
-        }
-    }
-    return properties
-}
-
+  
 // Replace `Definitions` link to field list from `Definitions`
 // Заменит ссылки на Definitions на списки полей из Definitions
 function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
@@ -548,7 +536,7 @@ function openApi_guiSchema(api)
             {
                 if(val.api[query_types[q]])
                 {
-                    let fields = openApi_guiRemoveReadOnlyMark(openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true))
+                    let fields = openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true)
                     val.schema.exec = {
                         fields:fields,
                         filters:val.api[query_types[q]].filters,

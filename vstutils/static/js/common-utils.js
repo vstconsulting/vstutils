@@ -42,7 +42,6 @@ String.prototype.format_keys = function()
     return thisObj.match(regex) || [];
 }
 
-
 // Список файлов тестирующих ГУЙ
 if(!window.guiTestsFiles)
 {
@@ -413,28 +412,8 @@ function getNewId(){
 
 
 
-
-String.prototype.formatUnicorn = String.prototype.formatUnicorn ||
-function () {
-    "use strict";
-    var str = this.toString();
-    if (arguments.length) {
-        var t = typeof arguments[0];
-        var key;
-        var args = ("string" === t || "number" === t) ?
-            Array.prototype.slice.call(arguments)
-            : arguments[0];
-
-        for (key in args) {
-            str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
-        }
-    }
-
-    return str;
-};
-
-window.url_delimiter = "?"
-function vstMakeLocalUrl(url, vars = {})
+window.url_delimiter = "#"
+function vstMakeLocalUrl(url = "", vars = {})
 {
     if(Array.isArray(url))
     {
@@ -443,10 +422,7 @@ function vstMakeLocalUrl(url, vars = {})
 
     if(typeof url == "string")
     {
-        debugger;
-        let new_url = url.formatUnicorn(vars)
-        new_url = new_url.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
-        new_url = new_url.formatUnicorn(vars)
+        let new_url = url.format(vars)
 
         if(new_url.indexOf(window.hostname) != 0 && new_url.indexOf("//") != 0)
         {
@@ -454,7 +430,7 @@ function vstMakeLocalUrl(url, vars = {})
         }
         else
         {
-            console.error("window.hostname already exist in vstMakeLocalUrl")
+            //console.error("window.hostname already exist in vstMakeLocalUrl")
         }
         return new_url
     }
@@ -471,4 +447,23 @@ function vstMakeLocalUrl(url, vars = {})
 function vstGO()
 {
     return spajs.openURL(vstMakeLocalUrl.apply(this, arguments))
+}
+
+
+
+
+
+function makeUrlForApiKeys(url_string)
+{
+    return url_string.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
+}
+
+function vstMakeLocalApiUrl(url, vars = {})
+{
+    if(Array.isArray(url))
+    {
+        url = url.join("/")
+    }
+
+    return vstMakeLocalUrl(makeUrlForApiKeys(url), vars)
 }
