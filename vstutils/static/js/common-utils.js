@@ -7,32 +7,39 @@
  */
 String.prototype.format = function()
 {
-    debugger;
-    a = this;
-    let regex = new RegExp("{.+?}", "g");
-    let res = this.match(regex);
-    try {
-        for (let k in arguments) {
-            if (Array.isArray(arguments[k])) {
-                for (let i in arguments[k]) {
-                    a = a.replace(res[k + i], arguments[k][i]);
-                }
-            }
-            else if (typeof arguments[k] != "object") {
-                a = a.replace(res[k], arguments[k]);
-            }
-            else {
-                for (let i in arguments[k]) {
-                    if (res.includes("{" + i + "}")) {
-                        a = a.replace("{" + i + "}", arguments[k][i]);
-                    }
-                }
-            }
-        }
-    } catch (e) {
-        throw e;
+    let obj = this;
+    let arg_list;
+    if (arguments.length > 1)
+    {
+        arg_list = Array.from(arguments);
     }
-    return a;
+    else if (typeof arguments[0] == "object")
+    {
+        arg_list = arguments[0]
+    }
+    for (let key of this.format_keys())
+    {
+        if (arg_list[key] != undefined)
+        {
+            obj = obj.replace(key , arg_list[key])
+        }
+        else
+        {
+            throw "String don't have \'" + key + "\' key";
+        }
+    }
+    return obj;
+}
+
+/**
+ * Function search and return all `{key}` in string
+ * @returns {array} array of {key} in string
+ */
+String.prototype.format_keys = function()
+{
+    let thisObj = this;
+    let regex = new RegExp("{.+?}", "g");
+    return thisObj.match(regex);
 }
 
 
