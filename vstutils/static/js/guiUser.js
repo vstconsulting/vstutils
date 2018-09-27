@@ -70,7 +70,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
 
     spajs.addMenu({
         id:url_id,
-        url_parser:[reg_url],
+        urlregexp:[reg_url],
         priority:0,
         onOpen:function(holder, menuInfo, data)
         {
