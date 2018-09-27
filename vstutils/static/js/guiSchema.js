@@ -29,6 +29,11 @@ function openApi_guiPrepareFields(api, properties, parent_name)
 
         field.name = i
         
+        if(field.enum)
+        {
+            field.format = "enum"
+        }
+        
         let def_name = getObjectNameBySchema(field, 1)
         if(def_name)
         {
@@ -58,9 +63,10 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             if(!window.guiElements[field.format])
             {
                 // Если нет объекта window.guiElements[field.format] то заменим на базолвый apiObject
+                field.api_original_format = field.format
                 field.format = "apiObject"
             }
-
+            
             field.definition_ref = def_name
             //field.definition_list = openApi_findParentByDefinition(def_obj, def_name, 'list')
             //field.definition_one = openApi_findParentByDefinition(def_obj, def_name, 'page')
@@ -79,7 +85,24 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 $ref:def_name
             })
         }
+        
+        // В имени класса символ минус не допустим
+        if(field.format)
+        {
+            field.format = field.format.replace(/\-/g, "_")
+        }
+         
+        if(parent_name)
+        {
+            try{
+                field.parent_name_format = parent_name.replace(/\-/g, "_")+"_"+field.name
+            }catch (exception) {
+                debugger;
+            }
 
+            
+        }
+         
         let fieldObj;
         if(field.format && window.guiElements[field.format])
         {
@@ -474,7 +497,7 @@ function openApi_guiSchema(api)
         if(val.type == 'list')
         {
             val.schema.list = {
-                fields:openApi_guiPrepareFields(api, val.api.get.fields),
+                fields:openApi_guiPrepareFields(api, val.api.get.fields, val.name),
                 filters:val.api.get.filters,
                 query_type:'get',
                 operationId:val.api.get.operationId,
@@ -484,7 +507,7 @@ function openApi_guiSchema(api)
             if(val.api.post)
             {
                 val.schema.new = {
-                    fields:openApi_guiPrepareFields(api, val.api.post.fields),
+                    fields:openApi_guiPrepareFields(api, val.api.post.fields, val.name),
                     filters:val.api.post.filters,
                     query_type:'post',
                     operationId:val.api.post.operationId,
@@ -495,7 +518,7 @@ function openApi_guiSchema(api)
         else if(val.type == 'page')
         {
             val.schema.get = {
-                fields:openApi_guiPrepareFields(api, val.api.get.fields),
+                fields:openApi_guiPrepareFields(api, val.api.get.fields, val.name),
                 filters:val.api.get.filters,
                 query_type:'get',
                 operationId:val.api.get.operationId,
@@ -510,7 +533,7 @@ function openApi_guiSchema(api)
             if(val.api.put)
             {
                 val.schema.edit = {
-                    fields:openApi_guiPrepareFields(api, val.api.put.fields),
+                    fields:openApi_guiPrepareFields(api, val.api.put.fields, val.name),
                     filters:val.api.put.filters,
                     query_type:'put',
                     operationId:val.api.put.operationId,
@@ -521,7 +544,7 @@ function openApi_guiSchema(api)
             if(val.api.patch)
             {
                 val.schema.edit = {
-                    fields:openApi_guiPrepareFields(api, val.api.patch.fields),
+                    fields:openApi_guiPrepareFields(api, val.api.patch.fields, val.name),
                     filters:val.api.patch.filters,
                     query_type:'patch',
                     operationId:val.api.patch.operationId,
@@ -536,7 +559,7 @@ function openApi_guiSchema(api)
             {
                 if(val.api[query_types[q]])
                 {
-                    let fields = openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true)
+                    let fields = openApi_guiPrepareFields(api, val.api[query_types[q]].fields, val.name)
                     val.schema.exec = {
                         fields:fields,
                         filters:val.api[query_types[q]].filters,
