@@ -216,7 +216,7 @@ function sliceLongString(string="", valid_length=100)
 {
     if(!string || !string.slice)
     {
-        return string;
+        return "";
     }
 
     var str = string.slice(0, valid_length);
