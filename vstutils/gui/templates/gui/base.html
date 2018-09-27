@@ -179,7 +179,7 @@
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
             { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
-            { prioritet:10.1,   type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
+            { prioritet:10.1, type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiBreadcrumbers.js' %}?v={{gui_version}}"},
             { prioritet:11.1, type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}"},
@@ -192,6 +192,7 @@
             { prioritet:11.5, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
 
             { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
+            { prioritet:300, type:'js', name: "{% static 'js/guiUser.js' %}?v={{gui_version}}"},
             { prioritet:300, type:'js',  name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
             
             { prioritet:100, type:'tpl', name: "{% static 'templates/errorPage.html' %}?v={{gui_version}}"},
@@ -301,7 +302,7 @@
 
                                         </h1>
                                         <ol class="breadcrumb">
-                                            <li><a href="<%- window.hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+                                            <li><a href="<%- window.hostname %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
                                             <li class="active"><i class="fa fa-warning text-yellow"></i> Page not found </li>
                                         </ol>
                                     </section>

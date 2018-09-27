@@ -1,6 +1,22 @@
 
 var gui_page_object = {
 
+    getTitle : function()
+    {
+        if(this.model.data)
+        {
+            for(let i in this.model.data)
+            {
+                if(typeof this.model.data[i] == "string")
+                {
+                    return this.model.data[i]
+                }
+            }
+        }
+        
+        return this.api.name
+    },
+
     prefetch : function (data)
     {
         var prefetch_fields = {};

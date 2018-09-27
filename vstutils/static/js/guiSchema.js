@@ -27,6 +27,8 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             field.definition = {}
         }
 
+        field.name = i
+        
         let def_name = getObjectNameBySchema(field, 1)
         if(def_name)
         {
@@ -36,7 +38,8 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 console.error("can not found definition for object "+def_name)
                 continue;
             }
-            field =  mergeDeep({}, def_obj);
+            
+            field =  mergeDeep(field, def_obj);
 
             if(!field.gui_links)
             {
@@ -97,9 +100,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
 
    return fields
 }
-
-// Replace link from `additionalProperties` to api link for autocomplete work
-// Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
+ 
 function openApi_findParentByDefinition(api_obj, definition, type = 'list')
 {
     if(api_obj.type == type && type == 'list' && api_obj.api.get)
@@ -157,7 +158,8 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
 
         for(let l in fields[i].gui_links)
         {
-            let link_type = fields[i].gui_links[l]
+            let field = fields[i]
+            let link_type = field.gui_links[l]
 
             let definition = link_type.$ref
 
@@ -165,21 +167,57 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
             {
                 continue;
             }
-
-            fields[i][link_type.prop_name][link_type.list_name] = undefined
-
+       
+            if(field[link_type.prop_name] === undefined)
+            {
+                field[link_type.prop_name] = {}
+            }
+            
+            field[link_type.prop_name][link_type.list_name] = undefined
+ 
+            let list_obj = undefined
             for(let l in api_obj.parent.sublinks)
             {
-                let list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
+                list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
                 if(list_obj)
-                {
-                    fields[i][link_type.prop_name][link_type.list_name] = list_obj
+                { 
                     break;
                 }
             }
 
-            if(fields[i][link_type.prop_name][link_type.list_name])
+            if(!list_obj)
             {
+                for(let p in path_schema)
+                {
+                    if(path_schema[p].level > 2 || !path_schema[p].api.get)
+                    {
+                        continue;
+                    }
+                    
+                    let schema = getObjectNameBySchema(path_schema[p].api.get)
+                    if(schema != definition)
+                    {
+                        continue;
+                    } 
+                    
+                    list_obj = path_schema[p]
+                    break;
+                } 
+            }
+          
+            if(list_obj)
+            {  
+                if(link_type.type == 'page' && list_obj.type == 'list' && list_obj.page)
+                {
+                    list_obj = list_obj.page
+                }
+
+                if(link_type.type == 'list' && list_obj.type == 'page' && list_obj.list)
+                {
+                    list_obj = list_obj.list
+                }
+                
+                field[link_type.prop_name][link_type.list_name] = list_obj
                 continue;
             }
 
@@ -197,7 +235,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                     let list_obj = openApi_findParentByDefinition(val, definition, link_type.type);
                     if(list_obj)
                     {
-                        fields[i][link_type.prop_name][link_type.list_name] = list_obj
+                        field[link_type.prop_name][link_type.list_name] = list_obj
                         break;
                     }
                 }
@@ -629,9 +667,8 @@ function openApi_guiSchema(api)
          
         tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
         tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
-
         for(let schema in val.schema)
-        { 
+        {
             tabSignal.emit("openapi.schema.schema",  {paths:path_schema, path:path, value:val.schema[schema]});
             tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
             tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val.schema[schema], schema:schema, fields:val.schema[schema].fields});
@@ -695,6 +732,7 @@ function getObjectDefinitionByName(api, name, parent_name)
     obj = mergeDeep({}, api.definitions[definition])
     
     obj.definition_name = definition
+    obj.definition_ref = name
     
     if(obj.required)
     {
@@ -745,7 +783,7 @@ function getObjectNameBySchema(obj, max_level = 0, level = 0)
 
     for(var i in obj)
     {
-        if(i == '$ref')
+        if(i == '$ref' || i == "definition_ref")
         {
             var name = obj[i].match(/\/([A-z0-9]+)$/)
 
@@ -831,33 +869,33 @@ function openApi_set_parents_links(paths, base_path, parent_obj)
 }
 
 
-
-
-
-
-
-function findPath(paths, base_path, value_name)
-{  
-    let path = base_path
+/**
+ *
+ * @param paths - list of all path
+ * @param base_path - path to seatch
+ * @param value_name - value to search in `base_path`
+ * @param replace_part - value for replace for correct `value_name` for path
+ * @returns {*}
+ */
+function findPath(paths, base_path, value_name, replace_part="_id")
+{
+    let regexp = new RegExp(replace_part+"$", "");
+    value_name = value_name.replace(regexp, "");
+    let path_array = base_path.split("/");
 
     do{
-        if(paths[path+value_name+"/"] || path.length <= 1)
+        if(paths[path_array.join("/")+value_name+"/"])
         {
-            break;
+            return path_array.join("/")+value_name+"/"
+        }
+        else if (path_array.length <= 2)
+        {
+            return false;
         }
 
-        path = path.replace(/\/[^\/]+\//g, "\/")
+        path_array.splice(path_array.length-2, 1);
 
     }while(1)
-
-    value_name = path+value_name+"/"
-
-    if(!paths[value_name])
-    {
-        return false;
-    }
-    
-    return value_name
 }
 
 
@@ -892,7 +930,7 @@ function setDefaultPrefetchFunctions(obj)
                         }
                     }(prefetch_path),
                 }
-                
+                 
                 continue;
             }
             else
@@ -901,17 +939,18 @@ function setDefaultPrefetchFunctions(obj)
             }
 
             if(!prefetch_path)
-            { 
+            {  
                 continue;
             }
 
             
-            prefetch_path = findPath(obj.paths, obj.path, prefetch_path) 
+            prefetch_path = findPath(obj.paths, obj.path, prefetch_path.replace(/_id$/, "")) 
             if(!obj.paths[prefetch_path])
-            {
+            { 
                 continue;
             }
-            
+           
+            //obj.fields[i].type = "prefetch";  
             obj.fields[i].prefetch = {
                 path:function(path){
                     return function (obj) {
@@ -928,3 +967,88 @@ tabSignal.connect("openapi.schema.fields", function(obj)
     setDefaultPrefetchFunctions.apply(this, arguments)
 })
 
+tabSignal.connect("openapi.schema.schema", function(obj)
+{
+
+    for (let i in obj.value.responses){
+        if (obj.value.responses[i].schema) {
+            for (let k in obj.value.responses[i].schema.properties) {
+                if(obj.value.responses[i].schema.properties[k].additionalProperties)
+                {
+                    if(
+                        !obj.value.responses[i].schema.redirect_path &&
+                        !obj.value.responses[i].schema.redirect_field
+                    ) {
+                         if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                            obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
+                            obj.value.responses[i].schema.redirect_field = k;
+                            break;
+                        }
+                        else if (!obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                            let redirect_path = obj.path.split("/")
+                            redirect_path.splice(redirect_path.length - 2, 1)
+                            obj.value.responses[i].schema.redirect_path = redirect_path.join("/");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+})
+
+tabSignal.connect("openapi.schema.type.action", function(obj) {
+    let actionResponseDefName;
+    try {
+        for (let i in obj.value.schema.exec.responses) {
+            if (i >= 200 && i < 400 && obj.value.schema.exec.responses[i].schema) {
+                try {
+                    actionResponseDefName = obj.value.schema.exec.responses[i];
+                    break;
+                } catch (e) {
+                }
+            }
+        }
+    } catch (e)
+    {
+        console.error("Action " + obj.value.name + " don't have schema")
+        return;
+    }
+
+    if (!actionResponseDefName)
+    {
+        console.error("Action " + obj.value.name + " don't have response definition")
+        return;
+    }
+
+    let test = function(responses, path)
+    {
+        for (let i in responses)
+        {
+            let resp = responses[i]
+            if (i >= 200 && i < 400 && resp.schema) {
+                if (resp.schema.definition_name == actionResponseDefName.schema.definition_name) {
+                    actionResponseDefName.schema.redirect_path = path;
+                    actionResponseDefName.schema.redirect_field = resp.schema.properties["pk"] || resp.schema.properties["id"];
+                    return false;
+                }
+            }
+        }
+    }
+
+    try {
+        let path = obj.value.parent.path.split("/");
+        path.splice(path.length-2, 1);
+        test(obj.value.parent.schema.get.responses, path.join("/"))
+    } catch (e) {
+        return;
+    }
+
+    try{
+        test(obj.value.parent.parent.schema.list.responses, obj.value.parent.path)
+    } catch (e) {
+        return;
+    }
+
+    return;
+})

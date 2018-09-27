@@ -68,7 +68,24 @@ class Select2Field(IntegerField):
         self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
         super(Select2Field, self).__init__(**kwargs)
 
+
 class UptimeField(IntegerField):
     '''
     Field for some uptime(time duration), in seconds, for example.
     '''
+
+
+class RedirectIntegerField(IntegerField):
+    '''
+    Field for redirect by id
+    '''
+
+    redirect = True
+
+
+class RedirectCharField(CharField):
+    '''
+    Field for redirect by string
+    '''
+
+    redirect = True
