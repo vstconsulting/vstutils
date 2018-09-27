@@ -1,6 +1,6 @@
 function renderBreadcrumbs()
 { 
-    let current_url = window.location.search.replace("?", "");
+    let current_url = window.location.hash.replace("#", "");
     
     let urls = [];
     let pages = current_url.split(/\//g);

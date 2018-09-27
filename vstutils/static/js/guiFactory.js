@@ -53,13 +53,13 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         }
 
         obj.searchURL = function(query){
-            return "/?"+this.page_and_parents+"/search/"+query;
+            return vstMakeLocalUrl(this.page_and_parents+"/search/"+query);
         }
 
         obj.baseURL = function(){
-            return "/?"+this.page.replace(/\/[^/]+$/, "");
+            return vstMakeLocalUrl(this.page.replace(/\/[^/]+$/, ""));
         }
-
+        
         obj.getApiPath = function (){
             return {api:api_path_value, url:this}
         }
