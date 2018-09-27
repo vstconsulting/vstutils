@@ -236,7 +236,7 @@
                     <% } else { %>
                         <!-- if there is prefetch info, insert it -->
                         <% if(dataLine.opt.fields[j].prefetch && dataLine.line[j + '_info']) { %>
-                            <a  href="<%- vstMakeLocalUrl([dataLine.opt.fields[j].prefetch.path(dataLine.line).replace(/^\/|\/$/g, '') , dataLine.line[j]]) %>"
+                            <a  href="<%- vstMakeLocalApiUrl([dataLine.opt.fields[j].prefetch.path(dataLine.line).replace(/^\/|\/$/g, '') , dataLine.line[j]], guiObj.url_vars) %>"
                                 class="item-name"
                                 onclick="return false;"
                             >
