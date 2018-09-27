@@ -11,7 +11,7 @@ var gui_list_object = {
         {
             this.model.data = object_data
             this.model.status = 200
-        } 
+        }
     },
 
     deleteArray : function (ids)
@@ -61,6 +61,57 @@ var gui_list_object = {
     },
 
     /**
+     * Если поисковый запрос пуст, то вернёт true
+     * @param {type} query
+     * @returns {Boolean}
+     */
+    isEmptySearchQuery : function (query)
+    {
+        if (!query || !trim(query))
+        {
+            return true;
+        }
+
+        return false;
+    },
+
+    /**
+     * Преобразует строку и объект поиска в строку для урла страницы поиска
+     * @param {string} query строка запроса
+     * @param {string} defaultName имя параметра по умолчанию
+     * @returns {string} строка для параметра страницы поиска
+     */
+    searchObjectToString : function (query)
+    {
+        return encodeURIComponent(query);
+    },
+
+     /**
+     * Преобразует строку поиска в объект с параметрами для фильтрации
+     * @param {string} query строка запроса
+     * @param {string} defaultName имя параметра по умолчанию
+     * @returns {pmItems.searchStringToObject.search} объект для поиска
+     */
+    searchStringToObject : function (query, defaultName)
+    {
+        var search = {}
+        if (query == "")
+        {
+            return search;
+        }
+
+        if (!defaultName)
+        {
+            defaultName = 'name'
+        }
+
+        search[defaultName] = query;
+
+        return search;
+    },
+
+
+    /**
      * Функция поиска
      * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
      */
@@ -76,7 +127,7 @@ var gui_list_object = {
 
         return def
     },
- 
+
     prefetch : function (data)
     {
         var prefetch_fields = {};
@@ -268,25 +319,25 @@ var gui_list_object = {
         q.push("offset=" + encodeURIComponent(filters.offset))
         q.push("ordering=" + encodeURIComponent(filters.ordering))
 
-        if(filters.query)
+        if(filters.search_query)
         {
-            if(typeof filters.query == "string")
+            if(typeof filters.search_query == "string")
             {
-                filters.query = this.searchStringToObject(filters.query)
+                filters.search_query = this.searchStringToObject(filters.search_query)
             }
 
-            for (var i in filters.query)
+            for (var i in filters.search_query)
             {
-                if (Array.isArray(filters.query[i]))
+                if (Array.isArray(filters.search_query[i]))
                 {
-                    for (var j in filters.query[i])
+                    for (var j in filters.search_query[i])
                     {
-                        filters.query[i][j] = encodeURIComponent(filters.query[i][j])
+                        filters.search_query[i][j] = encodeURIComponent(filters.search_query[i][j])
                     }
-                    q.push(encodeURIComponent(i) + "=" + filters.query[i].join(","))
+                    q.push(encodeURIComponent(i) + "=" + filters.search_query[i].join(","))
                     continue;
                 }
-                q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.query[i]))
+                q.push(encodeURIComponent(i) + "=" + encodeURIComponent(filters.search_query[i]))
             }
         }
 
@@ -356,30 +407,6 @@ var gui_list_object = {
         }).promise()
     },
 
-    /**
-     * Преобразует строку поиска в объект с параметрами для фильтрации
-     * @param {string} query строка запроса
-     * @param {string} defaultName имя параметра по умолчанию
-     * @returns {pmItems.searchStringToObject.search} объект для поиска
-     */
-    searchStringToObject : function (query, defaultName)
-    {
-        var search = {}
-        if (query == "")
-        {
-            return search;
-        }
-
-        if (!defaultName)
-        {
-            defaultName = 'name'
-        }
-
-        search[defaultName] = query;
-
-        return search;
-    },
-
     create : function ()
     {
         var thisObj = this;
@@ -447,9 +474,9 @@ var gui_list_object = {
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
-    ////////////////////////////////////////////////
-    // pagination
-    ////////////////////////////////////////////////
+////////////////////////////////////////////////
+// pagination
+////////////////////////////////////////////////
 
     paginationHtml : function ()
     {
