@@ -217,7 +217,13 @@
 
 <script type="text/x-just" data-just="entity_list_line">
     <tr
-        class="item-row item-<%- dataLine.line.id %> highlight-tr  <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, dataLine.line.id) %>"
+        class="item-row item-<%- dataLine.line.id %> highlight-tr
+                <% for (var i in dataLine.opt.fields) { %>
+                    <% if(dataLine.opt.fields[i].enum) { %>
+                        <%- addCssClassesToElement('tr', dataLine.line[i], i) %>
+                    <% } %>
+                <% } %>
+                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, dataLine.line.id) %>"
         data-id="<%- dataLine.line.id %>"
         data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, dataLine.line.id]) %>"
         onclick="turnTableTrIntoLink(event)"
