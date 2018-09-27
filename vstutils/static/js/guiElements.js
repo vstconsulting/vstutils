@@ -1,4 +1,11 @@
 
+function renderLineField(field, value, field_name, dataLine)
+{ 
+    // Заготовка под переопределение отрисовки поля на основе типа поля
+    let val = sliceLongString(value)
+    return val;
+}
+
 var guiElements = {
 }
 
