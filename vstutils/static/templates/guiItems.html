@@ -31,7 +31,7 @@
         <div class="help-block"><%- opt.description || '' %></div>
     </div>
 </script>
- 
+
 <!-- Постраничная навигация -->
 <script  type="text/x-just" style="display: none;" data-just="pagination">
     <!-- pagination -->
@@ -114,7 +114,7 @@
 
 <!-- Страница экшена -->
 <script type="text/x-just" data-just="action_page">
-      
+
     <%[ buttons_row %>
         <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
         <%* buttons %>
@@ -123,24 +123,24 @@
     <%[ main_content_row %>
         <section class="col-lg-12">
             <div class="box box-info">
-                <div class="box-header with-border"> 
+                <div class="box-header with-border">
                     &nbsp;
                 </div>
                 <div class="box-body">
-                    <div class="row"> 
-                        <%= guiObj.renderAllFields(opt) %>  
+                    <div class="row">
+                        <%= guiObj.renderAllFields(opt) %>
                     </div>
                 </div>
             </div>
-        </section>  
+        </section>
     <%] %>
 
     <%! entity_base %>
 </script>
 
- 
+
 <script type="text/x-just" data-just="action_as_link">
-    <!-- action_as_link --> 
+    <!-- action_as_link -->
     <a href="<%- vstMakeLocalUrl(opt.link) %>"
         onclick="return vstGO(this.href);"
         class="<%- opt.class %>"
@@ -148,9 +148,9 @@
         <%- opt.title %>
     </a>
 </script>
- 
+
 <script type="text/x-just" data-just="action_as_button">
-    <!-- action_as_button --> 
+    <!-- action_as_button -->
     <a href="<%- vstMakeLocalUrl(opt.link) %>"
         onclick="return vstGO(this.href);"
         class="<%- opt.class %>"
@@ -158,18 +158,18 @@
         <%- opt.title %>
     </a>
 </script>
- 
+
 <script type="text/x-just" data-just="items_empty_list">
-    <!-- items_empty_list --> 
+    <!-- items_empty_list -->
     <div style="text-align: center;" >No child elements, list is empty</div>
 </script>
 
 <script type="text/x-just" data-just="entity_base">
-        
+
     <%[ breadcrumb %>
         <%= renderBreadcrumbs() %>
     <%] %>
-    
+
     <%[ buttons %>
         <% if(guiObj.api.buttons){ %>
             <% for(var i in  guiObj.api.buttons){ %>
@@ -192,7 +192,7 @@
         </section>
     <%] %>
     <%* page_header %>
-     
+
     <%[ main_content %>
         <section class="content">
             <div class="row">
@@ -206,18 +206,80 @@
             <br>
             <div class="row">
                 <%[ main_content_row %>
-                     
+
                 <%] %>
-                <%* main_content_row %> 
+                <%* main_content_row %>
             </div>
         </section>
     <%] %>
-    <%* main_content %> 
-</script>  
-    
+    <%* main_content %>
+</script>
+
+<script type="text/x-just" data-just="entity_list_line">
+    <tr
+        class="item-row item-<%- dataLine.line.id %> highlight-tr  <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, dataLine.line.id) %>"
+        data-id="<%- dataLine.line.id %>"
+        data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, dataLine.line.id]) %>"
+        onclick="turnTableTrIntoLink(event)"
+        >
+        <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', <%- dataLine.line.id %>); return false;">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+        </td>
+        <% for(var j in dataLine.opt.fields){ %>
+            <% if(!dataLine.opt.fields[j].hidden) { %>
+                <td
+                    <%= addStylesAndClassesToListField(guiObj, dataLine.opt.fields[j], dataLine.line, dataLine.opt) %>
+                >
+                    <% if(dataLine.rendered[j]){ %>
+                        <%= dataLine.rendered[j] %>
+                    <% } else { %>
+                        <!-- if there is prefetch info, insert it -->
+                        <% if(dataLine.opt.fields[j].prefetch && dataLine.line[j + '_info']) { %>
+                            <a  href="<%- vstMakeLocalUrl([dataLine.opt.fields[j].prefetch.path(dataLine.line).replace(/^\/|\/$/g, '') , dataLine.line[j]]) %>"
+                                class="item-name"
+                                onclick="return false;"
+                            >
+                               <%- sliceLongString(dataLine.line[j + '_info'].name) ||
+                                   sliceLongString(dataLine.line[j + '_info'].username) %>
+                            </a>
+                        <% } else { %>
+                           <%= renderLineField(dataLine.opt.fields[j], dataLine.line[j], j, dataLine) %>
+                        <% } %>
+                    <% } %>
+                </td>
+            <% } %>
+        <% } %>
+        <% if(!isEmptyObject(dataLine.sublinks_l2)){ %>
+            <td class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Actions
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <% for(var k in dataLine.sublinks_l2){ %>
+                            <% if(!dataLine.sublinks_l2[k].hidden) { %>
+                                <li>
+                                    <a
+                                        href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.line.id , dataLine.sublinks_l2[k].name]) %>"
+                                        onclick="return false;"
+                                        class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
+                                            <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                    </a>
+                                </li>
+                            <% } %>
+                        <% } %>
+                    </ul>
+                </div>
+            </td>
+        <% } %>
+    </tr>
+</script>
+
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
-    
+
     <%[ buttons_row %>
 
         <% if(guiObj.api.canCreate){ %>
@@ -227,11 +289,11 @@
         <% if(guiObj.api.canAdd){%>
             <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'add']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
         <% } %>
- 
+
         <%* buttons %>
         <%* sublink_buttons %>
     <%] %>
-     
+
     <!-- entity_list -->
     <%[ main_content_row %>
         <section class="col-lg-12">
@@ -281,62 +343,7 @@
                                         <% } %>
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
-                                        <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %> highlight-tr  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
-                                            data-id="<%- guiObj.model.data.results[i].id %>"
-                                            data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, guiObj.model.data.results[i].id]) %>"
-                                            onclick="turnTableTrIntoLink(event)"
-                                            >
-                                            <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
-                                                <div class="ico-on fa fa-toggle-on"></div>
-                                                <div class="ico-off fa  fa-toggle-off"></div>
-                                            </td>
-                                            <% for(var j in opt.fields){ %>
-                                                <% if(!opt.fields[j].hidden) { %>
-                                                    <td
-                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], guiObj.model.data.results[i], opt) %>
-                                                    >
-                                                        <% if(!opt.fields[j].value){ %>
-                                                                <!-- if there is prefetch info, insert it -->
-                                                                <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
-                                                                    <a href="<%- vstMakeLocalApiUrl([opt.fields[j].prefetch.path(guiObj.model.data.results[i]).replace(/^\/|\/$/g, '') , guiObj.model.data.results[i][opt.fields[j].name]], guiObj.url_vars) %>" class="item-name"
-                                                                       onclick="return false;" >
-                                                                       <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
-                                                                           sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
-                                                                    </a>
-                                                                <% } else { %>
-                                                                   <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name]) %>
-                                                                <% } %>
-
-                                                        <% }else{ %>
-                                                            <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
-                                                        <% } %>
-                                                    </td>
-                                                <% } %>
-                                            <% } %>
-                                            <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
-                                                <td class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">
-                                                    <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            Actions
-                                                            <span class="caret"></span>
-                                                        </button>
-                                                        <ul class="dropdown-menu dropdown-menu-right">
-                                                            <% for(var k in guiObj.api.sublinks_l2){ %>
-                                                                <li>
-                                                                    <a
-                                                                        href="<%- vstMakeLocalUrl([opt.base_path , guiObj.model.data.results[i].id , guiObj.api.sublinks_l2[k].name]) %>"
-                                                                        onclick="return false;"
-                                                                        class="sublink-btn <%- addCssClassesToElement('action-button', guiObj.api.sublinks_l2[k].name, guiObj.api.short_name ) %>">
-                                                                            <%- guiObj.api.sublinks_l2[k].name.replace('_', ' ') %>
-                                                                    </a>
-                                                                </li>
-                                                            <% } %>
-                                                        </ul>
-                                                    </div>
-                                                </td>
-                                            <% } %>
-                                        </tr>
+                                        <%= guiObj.renderLine(guiObj.model.data.results[i], opt) %>
                                     <% } %>
                                 </tbody>
                             </table>
@@ -407,19 +414,19 @@
                     <%* pagination %>
                 </div>
             </div>
-        </section> 
-    <%] %> 
+        </section>
+    <%] %>
     <%! entity_base %>
 </script>
 
 <script type="text/x-just" data-just="entity_list_add_subitems">
     <!-- entity_list_add_subitems -->
-    
+
     <%[ buttons_row %>
         <a href="#" class="btn btn-primary"
             onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>')); return false;" >Add selected</a>
     <%] %>
-     
+
     <%[ main_content_row %>
         <section class="col-lg-12">
             <div class="box box-info">
@@ -535,58 +542,62 @@
                     <%* pagination %>
                 </div>
             </div>
-        </section> 
-    <%] %> 
+        </section>
+    <%] %>
     <%! entity_base %>
 </script>
 
 <script type="text/x-just" data-just="entity_one">
     <!-- entity_one -->
-    
+
     <%[ sublink_buttons %>
-        <% for(var k in guiObj.api.links){  %>
-            <a
-                href="<%-vstMakeLocalUrl([opt.base_path, guiObj.api.links[k].name]) %>"
-                onclick="return vstGO(this.href);"
-                class="btn btn-default sublink-btn"
-            >
-                <%- guiObj.api.links[k].name.replace('_', ' ') %>
-            </a>
+        <% for(var k in opt.links){  %>
+            <% if  (!opt.links[k].hidden) { %>
+                <a
+                    href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
+                    onclick="return vstGO(this.href);"
+                    class="btn btn-default sublink-btn"
+                >
+                    <%- opt.links[k].name.replace('_', ' ') %>
+                </a>
+            <% } %>
         <% } %>
 
-        <% for(var k in guiObj.api.actions){  %>
-                <% if  (!guiObj.api.actions[k].isEmptyAction) { %>
-                    <a
-                        href="<%- vstMakeLocalUrl([opt.base_path, guiObj.api.actions[k].name]) %>"
-                        onclick="return vstGO(this.href);"
-                        class="btn btn-warning sublink-btn"
-                    >
-                    <%- guiObj.api.sublinks[k].name.replace('_', ' ') %>
-                    </a>
-                <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
-                <% } %> 
+        <% for(var k in opt.actions){  %>
+                <% if  (!opt.actions[k].hidden) { %>
+                    <% if  (!opt.actions[k].isEmptyAction) { %>
+                        <a
+                            href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
+                            onclick="return vstGO(this.href);"
+                            class="btn btn-warning sublink-btn"
+                        >
+                        <%- opt.actions[k].name.replace('_', ' ') %>
+                        </a>
+                    <% } else { %>
+                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <% } %>
+                <% } %>
         <% } %>
     <%] %>
-    
+
     <%[ buttons_row %>
-        
+
         <% if(guiObj.api.canEdit){ %>
             <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
         <% } %>
-        
+
         <% if(guiObj.api.canDelete){ %>
             <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
         <% } %>
-        
+
         <%* buttons %>
         <%* sublink_buttons %>
     <%] %>
-     
-    <%[ main_content_row %> 
+
+    <%[ main_content_row %>
         <section class="col-lg-12">
             <div class="box box-info">
-                <div class="box-header with-border"> 
+                <div class="box-header with-border">
                     &nbsp;
                 </div>
                 <div class="box-body">
@@ -604,7 +615,7 @@
                     </div>
                 </div>
             </div>
-        </section> 
+        </section>
     <%] %>
     <!-- /items_new_page -->
 
@@ -613,14 +624,14 @@
 
 <script type="text/x-just" data-just="entity_new">
     <!-- entity_new -->
- 
+
     <%[ buttons_row %>
-        
+
         <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
-            
+
         <%* buttons %>
     <%] %>
-    
+
     <%! entity_one %>
 
 </script>
@@ -649,4 +660,3 @@
         </div>
     </section>
 </script>
- 

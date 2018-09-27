@@ -417,7 +417,26 @@ var gui_list_object = {
         })
         return res;
     },
-
+ 
+    renderLine : function (line, opt = {})
+    {  
+        let tpl = this.getTemplateName('list_line')
+        
+        line.sublinks_l2 = this.api.sublinks_l2;
+        
+        let dataLine = {
+            line:line,
+            sublinks_l2:this.api.sublinks_l2,
+            opt:opt,
+            rendered:{}
+        }
+        
+        tabSignal.emit("guiList.renderLine",  {guiObj:this, dataLine: dataLine});
+        tabSignal.emit("guiList.renderLine."+this.api.bulk_name,  {guiObj:this, dataLine: dataLine});
+       
+        return spajs.just.render(tpl, {guiObj: this, dataLine: dataLine});
+    },
+    
     /**
      * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
      * @returns {string|promise}
