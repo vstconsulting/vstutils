@@ -11,8 +11,8 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{
-    url = url.replace(/[/#]*$/, "")
+{ 
+    url = url.replace(/[/#]*$/, "").replace(/^\//, "")
     var reg_exp = new RegExp(regexp)
     if(!reg_exp.test(url))
     {

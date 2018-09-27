@@ -432,7 +432,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         {
             //console.error("window.hostname already exist in vstMakeLocalUrl")
         }
-        return new_url
+        return new_url.replace("#/", "#")
     }
     else
     {

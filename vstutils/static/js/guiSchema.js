@@ -1015,7 +1015,8 @@ tabSignal.connect("openapi.schema.type.action", function(obj) {
         {
             let resp = responses[i]
             if (i >= 200 && i < 400 && resp.schema) {
-                if (resp.schema.definition_name == actionResponseDefName.schema.definition_name) {
+                if (resp.schema.definition_name == actionResponseDefName.schema.definition_name) 
+                {
                     actionResponseDefName.schema.redirect_path = path;
                     actionResponseDefName.schema.redirect_field = resp.schema.properties["pk"] || resp.schema.properties["id"];
                     return false;
@@ -1033,7 +1034,9 @@ tabSignal.connect("openapi.schema.type.action", function(obj) {
     }
 
     try{
-        test(obj.value.parent.parent.schema.list.responses, obj.value.parent.path)
+        let path = obj.value.parent.path.split("/");
+        path.splice(path.length-2, 1);
+        test(obj.value.parent.parent.schema.list.responses, path.join("/"))
     } catch (e) {
         return;
     }

@@ -17,7 +17,7 @@ var gui_action_object = {
                         id_list[key_list[k % 2]] = v;
                     }
                 })
-                debugger;
+                
                 let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field.title.toLowerCase()] || "")
                 vstGO(url);
             }
