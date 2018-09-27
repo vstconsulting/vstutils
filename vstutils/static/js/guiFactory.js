@@ -91,26 +91,31 @@ function openApi_add_one_action_page_path(api_obj)
 {
     let api_path = api_obj.path
 
-    // Создали страницу
-    var page = new guiPage();
-
-    // Настроили страницу
-    page.blocks.push({
-        id:'actionOne',
-        prioritet:10,
-        render: function(menuInfo, data)
-        {
-            // Создали список хостов
-            var pageItem = new guiObjectFactory(api_obj)
-
-            return pageItem.renderAsPage();
-        }
-    })
-
     // Страница элемента вложенного куда угодно
-    var regexp_in_other = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+api_obj.name+")$", api_obj);
+    let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path.toLowerCase().replace(/\/([A-z0-9]+)\/$/, "/"))+")\\/(?<action>"+api_obj.name+")$"
+    let regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
 
-    page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path), api_obj.level, api_obj.path);
+    spajs.addMenu({
+        id:getMenuIdFromApiPath(api_path),
+        url_parser:[regexp_in_other],
+        priority:api_obj.level,
+        debug: api_obj.path,
+        onOpen:function(holder, menuInfo, data)
+        {
+            let pageItem = new guiObjectFactory(api_obj)
+
+            var def = new $.Deferred();
+            $.when(pageItem).done(function()
+            {
+                def.resolve(pageItem.renderAsPage())
+            }).fail(function(err)
+            {
+                def.resolve(renderErrorAsPage(err));
+            })
+
+            return def.promise();
+        },
+    })
 }
 
 /**
@@ -123,17 +128,21 @@ function openApi_add_one_action_page_path(api_obj)
  */
 function openApi_add_one_page_path(api_obj)
 {
-    // Создали страницу
-    var page = new guiPage();
     let api_path = api_obj.path
 
-    // Настроили страницу
-    page.blocks.push({
-        id:'itemOne',
-        prioritet:0,
-        render: function(menuInfo, data)
+    // Определяем тип страницы из урла (есть у него id в конце или нет)
+    let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
+
+    // Страница элемента вложенного куда угодно
+    let regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
+
+    spajs.addMenu({
+        id:getMenuIdFromApiPath(api_path),
+        url_parser:[regexp_in_other],
+        priority:api_obj.level,
+        onOpen:function(holder, menuInfo, data)
         {
-            var pageItem = new guiObjectFactory(api_obj)
+            let pageItem = new guiObjectFactory(api_obj)
 
             var def = new $.Deferred();
             $.when(pageItem.load(data.reg)).done(function()
@@ -145,17 +154,10 @@ function openApi_add_one_page_path(api_obj)
             })
 
             return def.promise();
-        }
+        },
     })
-
-    // Определяем тип страницы из урла (есть у него id в конце или нет)
-    var page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
-
-    // Страница элемента вложенного куда угодно
-    var regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
-
-    page.registerURL([regexp_in_other], getMenuIdFromApiPath(api_path), api_obj.level, api_obj.path);
 }
+
 
 /**
  * Создаёт страницу списка и страницу с формой создания объекта
@@ -165,10 +167,9 @@ function openApi_add_one_page_path(api_obj)
  * @param {Number} urlLevel
  * @returns {undefined}
  */
+//
 function openApi_add_list_page_path(api_obj)
 {
-    // Создали страницу
-    let page = new guiPage();
 
     let path_regexp = []
     let api_path = api_obj.path
@@ -181,28 +182,32 @@ function openApi_add_list_page_path(api_obj)
         +"(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$"
 
     path_regexp.push(guiGetTestUrlFunctionfunction(pathregexp, api_obj))
-    //   console.log("", pathregexp)
-    // Проверяем есть ли возможность создавать объекты
 
+    // Проверяем есть ли возможность создавать объекты
     if(api_obj.canCreate)
     {
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
-        var new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_obj)
+        let new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_obj)
 
-        // Создали страницу
-        let page_new = new guiPage();
-        page_new.registerURL([new_page_url], getMenuIdFromApiPath(api_path+"_new"), api_obj.level, api_obj.path);
-
-
-        // Настроили страницу нового элемента
-        page_new.blocks.push({
-            id:'newItem',
-            prioritet:10,
-            render: function(menuInfo, data)
+        spajs.addMenu({
+            id:getMenuIdFromApiPath(api_path + "_new"),
+            url_parser:[new_page_url],
+            priority:api_obj.level,
+            onOpen:function(holder, menuInfo, data)
             {
-                var pageItem = new guiObjectFactory(api_obj)
-                return pageItem.renderAsNewPage()
-            }
+                let pageItem = new guiObjectFactory(api_obj)
+
+                var def = new $.Deferred();
+                $.when(pageItem).done(function()
+                {
+                    def.resolve(pageItem.renderAsNewPage())
+                }).fail(function(err)
+                {
+                    def.resolve(renderErrorAsPage(err));
+                })
+
+                return def.promise();
+            },
         })
 
     }
@@ -213,63 +218,51 @@ function openApi_add_list_page_path(api_obj)
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
         var add_page_url = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_obj)
 
-        // Создали страницу
-        var page_add = new guiPage();
-        page_add.registerURL([add_page_url], getMenuIdFromApiPath(api_path+"_add"), api_obj.level, api_obj.path);
-
-        // Настроили страницу добавления существующего элемента
-        page_add.blocks.push({
-            id:'itemList',
-            prioritet:10,
-            render:function(menuInfo, data, thisGuiPage)
+        spajs.addMenu({
+            id:getMenuIdFromApiPath(api_path + "_add"),
+            url_parser:[add_page_url],
+            priority:api_obj.level,
+            onOpen:function(holder, menuInfo, data)
             {
-                var def = new $.Deferred();
-                var pageItem = new guiObjectFactory(api_obj.shortestURL)
-                //var pageItem = new pageMainBlockObject.list({api:api_path_value, url:data.reg, selectionTag:api_path_value.api_path+"add/"})
-
-                var filter =  $.extend(true, data.reg)
-
+                let pageItem = new guiObjectFactory(api_obj.shortestURL)
+                let filter = $.extend(true, data.reg)
                 filter.parent_id = undefined
                 filter.parent_type = undefined
 
+                var def = new $.Deferred();
                 $.when(pageItem.search(filter)).done(function()
                 {
                     def.resolve(pageItem.renderAsAddSubItemsPage())
                 }).fail(function(err)
                 {
-                    def.reject(err);
+                    def.resolve(renderErrorAsPage(err));
                 })
 
                 return def.promise();
-            }
+            },
         })
     }
 
-    // Настроили страницу списка
-    page.blocks.push({
-        id:'itemList',
-        prioritet:10,
-        render: function(menuInfo, data)
+    spajs.addMenu({
+        id:getMenuIdFromApiPath(api_path),
+        url_parser:path_regexp,
+        priority:api_obj.level,
+        onOpen:function(holder, menuInfo, data)
         {
+            let pageItem = new guiObjectFactory(api_obj)
+
             var def = new $.Deferred();
-
-            // Создали список хостов
-            var pageItem = new guiObjectFactory(api_obj)
-
-            //debugger;
             $.when(pageItem.search(data.reg)).done(function()
             {
                 def.resolve(pageItem.renderAsPage())
             }).fail(function(err)
             {
-                def.reject(err);
+                def.resolve(renderErrorAsPage(err));
             })
 
             return def.promise();
-        }
+        },
     })
-
-    page.registerURL(path_regexp, getMenuIdFromApiPath(api_path), api_obj.level, api_obj.path);
 }
 
 tabSignal.connect("resource.loaded", function()
