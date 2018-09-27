@@ -551,27 +551,31 @@
     <!-- entity_one -->
 
     <%[ sublink_buttons %>
-        <% for(var k in guiObj.api.links){  %>
-            <a
-                href="<%-vstMakeLocalUrl([opt.base_path, guiObj.api.links[k].name]) %>"
-                onclick="return vstGO(this.href);"
-                class="btn btn-default sublink-btn"
-            >
-                <%- guiObj.api.links[k].name.replace('_', ' ') %>
-            </a>
+        <% for(var k in opt.links){  %>
+            <% if  (!opt.links[k].hidden) { %>
+                <a
+                    href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
+                    onclick="return vstGO(this.href);"
+                    class="btn btn-default sublink-btn"
+                >
+                    <%- opt.links[k].name.replace('_', ' ') %>
+                </a>
+            <% } %>
         <% } %>
 
-        <% for(var k in guiObj.api.actions){  %>
-                <% if  (!guiObj.api.actions[k].isEmptyAction) { %>
-                    <a
-                        href="<%- vstMakeLocalUrl([opt.base_path, guiObj.api.actions[k].name]) %>"
-                        onclick="return vstGO(this.href);"
-                        class="btn btn-warning sublink-btn"
-                    >
-                    <%- guiObj.api.sublinks[k].name.replace('_', ' ') %>
-                    </a>
-                <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
+        <% for(var k in opt.actions){  %>
+                <% if  (!opt.actions[k].hidden) { %>
+                    <% if  (!opt.actions[k].isEmptyAction) { %>
+                        <a
+                            href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
+                            onclick="return vstGO(this.href);"
+                            class="btn btn-warning sublink-btn"
+                        >
+                        <%- opt.actions[k].name.replace('_', ' ') %>
+                        </a>
+                    <% } else { %>
+                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <% } %>
                 <% } %>
         <% } %>
     <%] %>
