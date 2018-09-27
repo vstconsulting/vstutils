@@ -115,8 +115,6 @@ guiElements.base = function(opt = {}, value, parent_object)
             return "";
         }
 
-        // debugger;
-
         return spajs.just.render("guiElements."+this.name , {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
@@ -991,6 +989,62 @@ guiElements.inner_api_object = function(field, field_value, parent_object)
                 let element = this.realElements[obj_name][element_name];
                 valueObj[obj_name][element_name] = element.getValidValue();
             }
+        }
+
+        return valueObj;
+    }
+}
+
+guiElements.json = function(opt = {}, value)
+{
+    /*
+     * This field is only for 1-level json-objects.
+     */
+
+    this.name = 'json'
+    guiElements.base.apply(this, arguments)
+
+    this.realElements = {};
+
+    if(value)
+    {
+        for(let field in value)
+        {
+            let options = {
+                readOnly: opt.readOnly || false,
+                title: field,
+            }
+
+            let type = 'string';
+
+            if(typeof value[field] == 'boolean')
+            {
+                type = 'boolean';
+            }
+
+            this.realElements[field] = new guiElements[type]($.extend({}, options), value[field]);
+        }
+    }
+
+    this.getValue = function()
+    {
+        let valueObj = {};
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValue();
+        }
+
+        return valueObj;
+    }
+
+    this.getValidValue = function()
+    {
+        let valueObj = {};
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValidValue();
         }
 
         return valueObj;

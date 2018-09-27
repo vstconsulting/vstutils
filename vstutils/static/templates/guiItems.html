@@ -75,11 +75,25 @@
         placeholder="Search by name"
         class="form-control"
         maxlength="255"
-        value="<% if(guiObj.model.filters.query){ %><%- guiObj.model.filters.query.name %><% } %>"
-        onkeyup="if(event.keyCode == 13) spajs.showLoader(goToSearch(<%- guiObj.api.bulk_name %>, $('#search-query-input').val()));"
+        value="<% if(guiObj.model.filters.search_query){ %><%- guiObj.model.filters.search_query.name %><% } %>"
+        <%= justOn('keyup', function(event)
+            {
+                if(event.keyCode == 13)
+                {
+                    return spajs.showLoader(goToSearch(guiObj, $('#search-query-input').val()));
+                }
+            }, "search-query-input")
+        %>
+
     >
 
-    <div class="input-group-addon" onclick="spajs.showLoader(goToSearch(<%- guiObj.api.bulk_name %>, $('#search-query-input').val()));">
+    <div class="input-group-addon"
+        <%= justOn('click', function()
+            {
+                return spajs.showLoader(goToSearch(guiObj, $('#search-query-input').val()));
+            })
+        %>
+    >
     <span class="glyphicon glyphicon-search" ></span>
     </div>
     </div>
