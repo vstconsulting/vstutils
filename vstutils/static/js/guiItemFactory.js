@@ -56,7 +56,7 @@ var gui_base_object = {
         {
             if(!this.model.guiFields[field.name])
             {
-                let type = getFieldType(field)
+                let type = getFieldType(field, this.model)
 
                 var field_value = undefined
                 if(this.model.data)
@@ -417,10 +417,11 @@ function goToMultiActionFromElements(elements, action, selection_tag)
     return goToMultiAction(ids, action, selection_tag)
 }
 
-function addToParentsAndGoUp(item_ids)
+function addToParentsAndGoUp(item_ids, selection_tag)
 {
     return $.when(changeSubItemsInParent('POST', item_ids)).done(function (data)
     {
+        window.guiListSelections.setSelection(selection_tag, item_ids, false);
         vstGO(spajs.urlInfo.data.reg.baseURL());
     }).fail(function (e)
     {

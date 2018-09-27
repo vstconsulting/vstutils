@@ -430,7 +430,7 @@
 
     <%[ buttons_row %>
         <a href="#" class="btn btn-primary"
-            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>')); return false;" >Add selected</a>
+            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
     <%] %>
 
     <%[ main_content_row %>
@@ -468,33 +468,46 @@
                                             <div class="ico-off fa  fa-toggle-off"></div>
                                         </th>
                                         <% for(var j in opt.fields){ %>
-                                            <th
-                                                <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                                    <%- opt.fields[j].title %>
-                                            </th>
+                                            <% if(!opt.fields[j].hidden) { %>
+                                                <th
+                                                    <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
+                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
+                                                        <%- opt.fields[j].title %>
+                                                </th>
+                                            <% } %>
                                         <% } %>
                                     </tr>
                                     <% for(var i in guiObj.model.data.results){ %>
                                         <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %>  <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
-                                            data-id="<%- guiObj.model.data.results[i].id %>" >
+                                            class="item-row item-<%- guiObj.model.data.results[i].id %> highlight-tr <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
+                                            data-id="<%- guiObj.model.data.results[i].id %>"
+                                            data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page_type, guiObj.model.data.results[i].id]) %>"
+                                            onclick="turnTableTrIntoLink(event)"
+                                            >
                                             <td class=""  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </td>
                                             <% for(var j in opt.fields){ %>
-                                                <td
-                                                    <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj, [guiObj.model.data.results[i], opt]) %><% } %>
-                                                >
-                                                    <% if(!opt.fields[j].value){ %>
-                                                        <a href="<%- vstMakeLocalUrl([opt.base_path , guiObj.model.data.results[i].id]) %>" class="item-name"
-                                                            onclick="return vstGO(this.href);" ><%- guiObj.model.data.results[i][opt.fields[j].name] %></a>
-                                                    <% }else{ %>
-                                                        <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
-                                                    <% } %>
-                                                </td>
+                                                 <% if(!opt.fields[j].hidden) { %>
+                                                    <td
+                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], guiObj.model.data.results[i], opt) %>
+                                                    >
+                                                        <% if(!opt.fields[j].value){ %>
+                                                            <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
+                                                                <a href="<%- window.hostname %>/?<%- opt.fields[j].prefetch.path(guiObj.model.data.results[i]).replace(/^\/|\/$/g, '') + '/' + guiObj.model.data.results[i][opt.fields[j].name] %>" class="item-name"
+                                                                   onclick="return false;" >
+                                                                   <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
+                                                                       sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
+                                                                </a>
+                                                            <% } else { %>
+                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name]) %>
+                                                            <% } %>
+                                                        <% }else{ %>
+                                                            <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
+                                                        <% } %>
+                                                    </td>
+                                                 <% } %>
                                             <% } %>
                                         </tr>
                                     <% } %>
@@ -514,7 +527,7 @@
                             <ul class="dropdown-menu">
                                     <li>
                                         <a href="#"
-                                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>')); return false;" >Add selected</a>
+                                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
                                     </li>
                             </ul>
                         </div>
