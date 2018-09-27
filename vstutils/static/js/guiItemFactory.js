@@ -399,7 +399,7 @@ function goToSearch(obj, query)
 {
     if (obj.isEmptySearchQuery(query))
     {
-        vstGO(spajs.urlInfo.data.reg.baseURL());
+        return vstGO(spajs.urlInfo.data.reg.page);
     }
 
     return vstGO(spajs.urlInfo.data.reg.searchURL(obj.searchObjectToString(trim(query))));
