@@ -214,9 +214,9 @@ function capitalizeString(string)
 
 function sliceLongString(string="", valid_length=100)
 {
-    if(!string || !string.slice)
+    if(typeof string != "string")
     {
-        return "";
+        return sliceLongString(""+string, valid_length);
     }
 
     var str = string.slice(0, valid_length);
