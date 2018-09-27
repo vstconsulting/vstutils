@@ -48,6 +48,7 @@ var gui_base_object = {
      * Отрисует поле при отрисовке объекта.
      * @param {object} field
      * @returns {html}
+     * @todo Наверно можно перенести эту функцию guiElements.js
      */
     renderField : function(field, render_options)
     {
@@ -55,39 +56,7 @@ var gui_base_object = {
         {
             if(!this.model.guiFields[field.name])
             {
-                var type = field.format
-
-                if(type == 'date-time')
-                {
-                    type = 'date_time'
-                }
-
-                if(!type && field.enum !== undefined)
-                {
-                    type = 'enum'
-                }
-
-                if(!type)
-                {
-                    type = field.type
-                }
-
-                if(field.prefetch && this.model.data[field.name + "_info"])
-                {
-                    type = "prefetch";
-                    field[field.name + "_info"] = this.model.data[field.name + "_info"];
-                    field[field.name + "_info"]['prefetch_path'] = field.prefetch.path(this.model.data).replace(/^\/|\/$/g, '');
-                }
-
-                if(type == "apiObject" && field.properties)
-                {
-                    type = "inner_api_object";
-                }
-
-                if(!window.guiElements[type])
-                {
-                    type = "string"
-                }
+                let type = getFieldType(field)
 
                 var field_value = undefined
                 if(this.model.data)
