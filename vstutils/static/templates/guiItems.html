@@ -299,7 +299,7 @@
                                                         <% if(!opt.fields[j].value){ %>
                                                                 <!-- if there is prefetch info, insert it -->
                                                                 <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
-                                                                    <a href="<%- vstMakeLocalUrl([opt.fields[j].prefetch.path(guiObj.model.data.results[i]).replace(/^\/|\/$/g, '') , guiObj.model.data.results[i][opt.fields[j].name]]) %>" class="item-name"
+                                                                    <a href="<%- vstMakeLocalApiUrl([opt.fields[j].prefetch.path(guiObj.model.data.results[i]).replace(/^\/|\/$/g, '') , guiObj.model.data.results[i][opt.fields[j].name]], guiObj.url_vars) %>" class="item-name"
                                                                        onclick="return false;" >
                                                                        <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
                                                                            sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
