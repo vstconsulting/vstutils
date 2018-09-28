@@ -53,11 +53,18 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         }
 
         obj.searchURL = function(query){
-            if(this.search_part)
+           
+            let url = this.page_and_parents
+            url = url.replace(this.search_part, "")
+            
+            url +=  "/search/" + query
+            if(this.page_part)
             {
-              return vstMakeLocalUrl(this.page_and_parents.replace(this.search_part, "") + "/search/" + query);
+                url = url.replace(this.page_part, "") 
+                //url += this.page_part
             }
-            return vstMakeLocalUrl(this.page_and_parents + "/search/" + query);
+           
+            return vstMakeLocalUrl(url);
         }
 
         obj.baseURL = function(){
