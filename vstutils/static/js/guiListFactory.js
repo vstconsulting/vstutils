@@ -244,7 +244,7 @@ var gui_list_object = {
         {
             filters.ordering = "desc";
         }*/
-        debugger;
+      
         if (filters.page_number)
         {
             filters.offset = (filters.page_number-1)/1*filters.limit;
@@ -536,7 +536,7 @@ var gui_list_object = {
         //options.thisObj = this;
 
         this.activeSearch.active = ""
-        
+       
         var search = this.searchStringToObject(searchString, undefined, true)
         var searchfilters = []
         for(var i in search)
@@ -591,7 +591,7 @@ var gui_list_object = {
                     }
                 },
                 source: (term, response) =>
-                {
+                {  
                     term = term.toLowerCase();
                    
                     var matches = []
