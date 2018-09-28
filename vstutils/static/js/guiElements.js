@@ -25,7 +25,8 @@ function getFieldType(field)
          */
         return field.parent_name_format
     }
-     
+    
+
     // Приоритет №3 это поля на основе parent_name_format если они определены как шаблон
     if(spajs.just.isTplExists("field_"+field.parent_name_format))
     {

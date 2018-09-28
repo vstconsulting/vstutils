@@ -199,18 +199,8 @@ function openApi_add_list_page_path(api_obj)
             priority:api_obj.level,
             onOpen:function(holder, menuInfo, data)
             {
-                let pageItem = new guiObjectFactory(api_obj)
-
-                var def = new $.Deferred();
-                $.when(pageItem).done(function()
-                {
-                    def.resolve(pageItem.renderAsNewPage())
-                }).fail(function(err)
-                {
-                    def.resolve(renderErrorAsPage(err));
-                })
-
-                return def.promise();
+                let pageItem = new guiObjectFactory(api_obj) 
+                return pageItem.renderAsNewPage()
             },
         })
 

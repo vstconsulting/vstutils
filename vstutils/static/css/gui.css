@@ -1128,3 +1128,132 @@ table{
 .hidden-field {
     display: none;
 }
+
+
+
+/**
+ * Фильтры для формы поиска
+ **/   
+.filtered-search{
+    float: right;
+    margin-bottom: 10px;
+    margin-left: 10px;
+}
+        
+.input-filter-inner{
+    display: inline-block;
+    float: left; 
+    border-right: 1px solid #ccc;
+    height: 100%;
+    width: calc(100% - 40px);
+}
+        
+.filtered-search .active-name{
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: 9px;
+    margin: 0;
+    float: right;
+    border-radius: 0;   
+    border-radius: 0;
+    margin: 0px;
+}
+        
+.filtered-search .input-group-addon{
+    height: 40px;
+}
+
+.filtered-search #search-query-input{
+    height: 40px;
+}
+
+.filtered-search .input-value{
+    border: 0px;
+    padding: 5px; 
+    display: none;
+    margin-top: 4px;
+    margin-right: 4px;
+}       
+
+.filtered-search .show-input-text .value{
+    display: none;
+}
+
+.filtered-search .show-input-text .input-value{
+    display: inline-block;
+}
+    
+
+.filtered-search .name{
+    background-color: transparent;
+    color: rgb(175, 175, 175);
+    border-radius: 2px 0 0 2px;
+    margin-right: 1px;
+    font-weight: bold;
+    text-transform: capitalize;
+    padding: 9px;
+    float: left;
+}           
+
+.filtered-search .value{ 
+    color: #131313;
+    border-radius: 0 2px 2px 0;
+    margin-right: 5px;
+    padding-right: 8px;
+    padding: 9px;
+    float: left;
+}
+
+.filtered-search .selectable{
+    display: flex;
+    cursor: pointer;
+}
+
+
+.input-filter-item{
+    width: auto;
+    border: 1px solid #ccc;
+    display: inline-block; 
+    margin: 0px;
+    float: right;
+    border-right: 0px;
+
+    margin-bottom: 10px;
+    border-right: 1px solid #ccc;
+    margin-left: 10px;
+}
+
+.filtered-search .search-btn{
+    height: 39px;
+    border-right: 1px solid #ccc;
+}
+
+.remove-token{
+    float: right;
+    width: 40px; 
+    height: 38px;
+    text-align: center;
+    vertical-align: middle;
+    padding: 9px;
+}
+
+@media (max-width: 768px) { 
+    .input-filter-item{
+        margin-top: 10px;
+        border-right: 1px solid #ccc;
+        width: 100%;
+    }
+    
+    .filtered-search{
+        width: 100%;
+    }
+     
+    .filtered-search .input-value{
+        width: 100%;
+        border: 1px solid #ccc;
+    }
+}
+  
+
+

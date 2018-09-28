@@ -7,6 +7,11 @@ var gui_list_object = {
     {
         this.base_init.apply(this, arguments)
 
+        this.activeSearch = {
+            filters: {},
+            fields: {}
+        }
+        
         if(object_data)
         {
             this.model.data = object_data
@@ -58,74 +63,6 @@ var gui_list_object = {
         })
 
         return def.promise();
-    },
-
-    /**
-     * Если поисковый запрос пуст, то вернёт true
-     * @param {type} query
-     * @returns {Boolean}
-     */
-    isEmptySearchQuery : function (query)
-    {
-        if (!query || !trim(query))
-        {
-            return true;
-        }
-
-        return false;
-    },
-
-    /**
-     * Преобразует строку и объект поиска в строку для урла страницы поиска
-     * @param {string} query строка запроса
-     * @param {string} defaultName имя параметра по умолчанию
-     * @returns {string} строка для параметра страницы поиска
-     */
-    searchObjectToString : function (query)
-    {
-        return encodeURIComponent(query);
-    },
-
-     /**
-     * Преобразует строку поиска в объект с параметрами для фильтрации
-     * @param {string} query строка запроса
-     * @param {string} defaultName имя параметра по умолчанию
-     * @returns {pmItems.searchStringToObject.search} объект для поиска
-     */
-    searchStringToObject : function (query, defaultName)
-    {
-        var search = {}
-        if (query == "")
-        {
-            return search;
-        }
-
-        if (!defaultName)
-        {
-            defaultName = 'name'
-        }
-
-        search[defaultName] = query;
-
-        return search;
-    },
-
-
-    /**
-     * Функция поиска
-     * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
-     */
-    search : function (filters)
-    {
-        var thisObj = this;
-        this.model.filters = filters
-
-        var def = this.load(filters)
-        $.when(def).done(function(data){
-            thisObj.model.data = data.data
-        })
-
-        return def
     },
 
     prefetch : function (data)
@@ -303,11 +240,11 @@ var gui_list_object = {
             filters.offset = 0;
         }
 
-        if (!filters.ordering)
+        /*if (!filters.ordering)
         {
             filters.ordering = "desc";
-        }
-
+        }*/
+        debugger;
         if (filters.page_number)
         {
             filters.offset = (filters.page_number-1)/1*filters.limit;
@@ -317,8 +254,8 @@ var gui_list_object = {
 
         q.push("limit=" + encodeURIComponent(filters.limit))
         q.push("offset=" + encodeURIComponent(filters.offset))
-        q.push("ordering=" + encodeURIComponent(filters.ordering))
-
+        //q.push("ordering=" + encodeURIComponent(filters.ordering))
+       
         if(filters.search_query)
         {
             if(typeof filters.search_query == "string")
@@ -453,7 +390,7 @@ var gui_list_object = {
 
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
-
+       
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -487,10 +424,488 @@ var gui_list_object = {
 
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.intTag(render_options.selectionTag)
-
-
+ 
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+    },
+   
+   
+    /**
+     * Добавить фильтр
+     * @param {string} name
+     * @param {string} value
+     */
+    addSearchFilter : function(name, value)
+    {
+        this.activeSearch.active = ""
+        $('#search-query-input').val('')
+
+        this.activeSearch.fields[name].used = true
+
+        for(var i in this.activeSearch.filters)
+        {
+            var val = this.activeSearch.filters[i]
+            if(val.name == name)
+            {
+                if(!this.activeSearch.fields[name].isArray || this.activeSearch.filters[i].value == value)
+                {
+                    this.activeSearch.filters[i].value = value
+                    return;
+                }
+            }
+        }
+
+        this.activeSearch.filters.push({
+            name:name,
+            value:value
+        })
+    },
+
+    /**
+     * Выбрать фильтра, чтоб начать вводить значение фильтра
+     * @param {string} name
+     */
+    selectSearchFilter : function(name)
+    {
+        this.activeSearch.active = name
+        $('#search-query-input').val('')
+    },
+
+    /**
+     * Удалить фильтр
+     * @param {string} name
+     */
+    onRemoveSearchFilter : function(name)
+    {
+        for(var i in this.activeSearch.filters)
+        {
+            if(this.activeSearch.filters[i] == undefined || this.activeSearch.filters[i].name == name)
+            {
+                this.activeSearch.filters.splice(i, 1)
+                break;
+            }
+        }
+        this.activeSearch.fields[name].used = false
+
+        return this.searchGO(this.searchObjectToString(""), this.searchAdditionalData);
+    },
+
+    /**
+     * Ввод текста в поисковую строку
+     * @param {Object} options параметры
+     * @return {string} HTML поля ввода для поиска
+     */
+    renderSearchForm : function ()
+    {  
+        let searchString = ""
+        
+        if(this.url_vars && this.url_vars.search_part)
+        {
+            searchString = this.url_vars.search_part.replace("/search/", "");
+        }
+        
+        this.activeSearch = {
+            filters:[],
+            fields: {}
+        }
+        
+        for(let i in this.api.schema.list.filters)
+        {
+            let val = this.api.schema.list.filters[i]
+            /*let key = val.name.replace("__in", "").replace("__contains", "").replace("__not", "")
+            // Переменная не встречается в списке допустимых фильтров 
+            if(!this.api.schema.list.fields[key])
+            {
+                console.warn("Переменная `"+key+"` не встречается в списке допустимых фильтров", this.api.schema.list.fields)
+                debugger;
+                continue;
+            }*/
+ 
+            this.activeSearch.fields[val.name] = val
+            this.activeSearch.fields[val.name].value = ""
+        }
+        
+        
+        /*
+        return spajs.just.render('search_field', {guiObj: this, opt:{query:""}}) */
+        
+        
+        var thisObj = this;
+        //options.className = this.model.className;
+        this.searchAdditionalData = {}// options
+        //options.thisObj = this;
+
+        this.activeSearch.active = ""
+        
+        var search = this.searchStringToObject(searchString, undefined, true)
+        var searchfilters = []
+        for(var i in search)
+        {
+            var key = i.replace(/(__contains|__in)/mgi, "")
+            if(this.activeSearch.fields[key])
+            {
+                searchfilters.push({
+                    name:key,
+                    value:search[i]
+                })
+
+                this.activeSearch.fields[key].used = true
+            }
+        }
+        this.activeSearch.filters = searchfilters
+       
+        return spajs.just.render('search_field', {guiObj: this, opt:{query:""}}, () =>
+        {
+            new autoComplete({
+                selector: '#search-query-input',
+                minChars: 0,
+                cache:false,
+                showByClick:true,
+                menuClass:".autocomplete-suggestion",
+                renderItem: function(item, search)
+                {
+                    var name = item.name
+                    if(item.title != undefined)
+                    {
+                        name = item.title
+                    }
+                    name = name + " ="
+                    name = name.replace("__not =", " != ")
+                    
+                    
+                    return '<div class="autocomplete-suggestion"  data-value="' + item.name + '" >' + name + '</div>';
+                },
+                onSelect: (event, term, item) =>
+                {
+                    var value = $(item).attr('data-value')
+                    if(!this.activeSearch.active)
+                    {
+                        this.selectSearchFilter(value)
+                    }
+                    else
+                    {
+                        this.addSearchFilter(this.activeSearch.active, value)
+                        setTimeout(() =>{
+                            spajs.showLoader(this.searchGO('', this.searchAdditionalData))
+                        }, 0)
+                    }
+                },
+                source: (term, response) =>
+                {
+                    term = term.toLowerCase();
+                   
+                    var matches = []
+
+                    if(!this.activeSearch.active)
+                    {
+                        for(var i in this.activeSearch.fields)
+                        {
+                            var val = this.activeSearch.fields[i]
+                            if( (!val.used || val.isArray) && val.name.toLowerCase().indexOf(term) == 0)
+                            { 
+                                matches.push(val)
+                            }
+                        }
+                    }
+                    else if(this.activeSearch.fields[this.activeSearch.active])
+                    {
+                        var activeOption = this.activeSearch.fields[this.activeSearch.active]
+                        if(activeOption.options)
+                        {
+                            for(var i in activeOption.options)
+                            {
+                                var val = activeOption.options[i]
+                                if(val.toLowerCase().indexOf(term) != -1)
+                                {
+                                debugger;
+                                    matches.push({name:val})
+                                }
+                            }
+                        }
+                    }
+
+                    if(matches && matches.length)
+                    {
+                        response(matches);
+                    }
+                }
+            });
+        }); 
+    },
+  
+    /**
+     * Функция поиска
+     * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
+     */
+    search : function (filters)
+    {
+        var thisObj = this;
+        this.model.filters = filters
+     
+        var def = this.load(filters)
+        $.when(def).done(function(data){
+            thisObj.model.data = data.data
+        })
+
+        return def
+    },
+    
+    /**
+     * Выполняет переход на страницу с результатами поиска
+     * @param {string} query
+     * @returns {$.Deferred}
+     */
+    searchGO : function (query, options)
+    {
+        if (this.isEmptySearchQuery(query))
+        {
+            return vstGO(this.url_vars.baseURL());
+        }
+
+        return vstGO(this.url_vars.searchURL(this.searchObjectToString(trim(query)))) 
+    },
+
+    /**
+     * Если поисковый запрос пуст, то вернёт true
+     * @param {type} query
+     * @returns {Boolean}
+     */
+    isEmptySearchQuery : function (query)
+    {
+        if (!query || !trim(query)
+            && this.activeSearch 
+            && this.activeSearch.filters 
+            && this.activeSearch.filters.length == 0)
+        {
+            return true;
+        }
+
+        return false;
+    },
+  
+    onSearchInput : function(event, input)
+    {
+        var value = input.value 
+        if(event.key == "Backspace" && value.length == 0)
+        {
+            if(input.getAttribute('data-backspace') == "true")
+            {
+                input.setAttribute('data-backspace', "false")
+                this.activeSearch.active = ""
+                $('#search-query-input').val('')
+            }
+            else
+            {
+                input.setAttribute('data-backspace', "true")
+            }
+        }
+
+        if(/[: ]$/mgi.test(value) && !this.activeSearch.active)
+        {
+            value = value.substr(0, value.length-1)
+            if(this.activeSearch.fields[value])
+            {
+                this.selectSearchFilter(value)
+            }
+        }
+        else if(/[: ]$/mgi.test(value) && this.activeSearch.active)
+        {
+            value = value.substr(0, value.length-1)
+            this.addSearchFilter(this.activeSearch.active, value)
+            spajs.showLoader(this.searchGO('', this.searchAdditionalData))
+            return
+        }
+
+        if(event.keyCode == 13)
+        {
+            spajs.showLoader(this.searchGO(value, this.searchAdditionalData))
+        }
+    },
+  
+    /**
+     * Преобразует строку и объект поиска в строку для урла страницы поиска
+     * @param {string} query строка запроса
+     * @param {string} defaultName имя параметра по умолчанию
+     * @returns {string} строка для параметра страницы поиска
+     */
+    searchObjectToString : function(query, defaultName)
+    {
+        var isAddedDefaultValue = false;
+        if(!defaultName)
+        {
+            defaultName = 'name'
+        }
+
+        if(this.activeSearch.active)
+        {
+            defaultName = this.activeSearch.active
+        }
+
+        var defaultValue = undefined
+        if(query != "" && query.indexOf("=") == -1)
+        {
+            defaultValue = query;
+        }
+        else if(query.indexOf("=") != -1)
+        {
+            return query;
+        }
+
+        var querystring = []
+        for(var i in this.activeSearch.filters)
+        {
+            var val = this.activeSearch.filters[i]
+            if(val.name == defaultName && defaultValue != undefined)
+            {
+                val.value = defaultValue
+                isAddedDefaultValue = true
+            }
+
+            querystring.push(val.name + "=" + encodeURIComponent(val.value))
+        }
+
+        if(!isAddedDefaultValue && defaultValue)
+        {
+            querystring.push(defaultName + "=" + encodeURIComponent(defaultValue))
+        }
+
+        return querystring.join(",");
+    },
+ 
+    /**
+     * Преобразует строку поиска в объект с параметрами для фильтрации
+     * @param {string} query строка запроса
+     * @param {string} defaultName имя параметра по умолчанию
+     * @param {boolean} includeVariables если передать true то переменные из Variables будут добавлены не в массив search['variables'] а в search
+     * @returns {pmItems.searchStringToObject.search} объект для поиска
+     */
+    searchStringToObject : function(query, defaultName, includeVariables)
+    { 
+        var search = {}
+        if(query == "")
+        {
+            return search;
+        }
+
+        if(query.indexOf("=") == -1)
+        {
+            if(!defaultName)
+            {
+                defaultName = 'name'
+            }
+
+            search[defaultName+"__contains"] = query;
+        }
+        else
+        {
+            var vars = query.split(",")
+            for(var i in vars)
+            {
+                if(vars[i].indexOf("=") == -1)
+                {
+                    continue;
+                }
+
+                var arg = vars[i].split("=")
+
+                if(!search[arg[0]] && !search[arg[0]+"__in"])
+                {
+                    if(this.activeSearch.fields[arg[0]] && this.activeSearch.fields[arg[0]].mode == "__contains")
+                    {
+                        search[arg[0]+"__contains"] = arg[1]
+                    }
+                    else
+                    {
+                        search[arg[0]] = arg[1]
+                    }
+                }
+                else if(Array.isArray(search[arg[0]+"__in"])) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск 
+                {
+                    search[arg[0]+"__in"].push(arg[1]) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск 
+                }
+                else
+                {
+                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]] // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск 
+                    delete search[arg[0]]
+                    delete search[arg[0]+"__contains"]
+                }
+            }
+        }
+
+        var variables = {}
+        for(var i in search)
+        {
+            if(!this.activeSearch.fields[i]
+                && !this.activeSearch.fields[i.replace("__in", "")]
+                && !this.activeSearch.fields[i.replace("__contains", "")])
+            {
+                // Проверка того что мы получили возможно синоним одного из полей вместо имени и надо заменить синоним именем фильтра
+                for(var j in this.activeSearch.fields)
+                {
+                    if(this.activeSearch.fields[j].alias)
+                    {
+                        for(var k in this.activeSearch.fields[j].alias)
+                        {
+                            if(this.activeSearch.fields[j].alias[k] == i)
+                            {
+                                // заменить синоним именем фильтра
+                                search[this.activeSearch.fields[j].name] = search[i]
+                                delete search[i]
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // Переменная не встречается в списке допустимых фильтров
+                //console.warn("Переменная `"+i+"` не встречается в списке допустимых фильтров", this.activeSearch.fields)
+                //delete search[i]
+                continue;
+            }
+
+            if(this.activeSearch.fields[i] && this.activeSearch.fields[i].variables)
+            {
+                // Переменная не фильтр а из variables для ansible
+                variables[i] = search[i]
+                delete search[i]
+            }
+        }
+
+        if(Object.getOwnPropertyNames(variables).length)
+        {
+            if(includeVariables)
+            {
+                // Добавить variables в search
+                for(var i in variables)
+                {
+                    search[i] = variables[i]
+                }
+            }
+            else
+            {
+                // Добавить variables в search['variables']
+                var variablesString = [];
+                for(var i in variables)
+                {
+                    variablesString.push(i +":"+variables[i])
+                }
+
+                search['variables'] = variablesString//.join(",")
+            }
+        }
+
+        return search;
+    },
+
+
+    megreVariablesToFields : function(variables)
+    {
+        for(var i in variables)
+        {
+            this.activeSearch.fields[i] = variables[i]
+            this.activeSearch.fields[i].name = i
+            this.activeSearch.fields[i].variables = true
+        }
     },
 
 ////////////////////////////////////////////////
