@@ -417,6 +417,18 @@ guiElements.textarea = function(opt = {})
     guiElements.base.apply(this, arguments)
 }
 
+guiElements.hidden = function(opt = {})
+{
+    this.name = 'hidden';
+    guiElements.base.apply(this, arguments)
+}
+
+guiElements.integer = function(opt = {})
+{
+    this.name = 'integer';
+    guiElements.base.apply(this, arguments)
+}
+
 guiElements.prefetch = function (opt = {}, value)
 {
     this.name = 'prefetch';
