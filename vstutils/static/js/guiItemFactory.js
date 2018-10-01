@@ -67,17 +67,25 @@ var gui_base_object = {
             }
 
             // Добавление связи с зависимыми полями
+            let parent_field = undefined
             if(field.additionalProperties && field.additionalProperties.field)
             {
-                let thisField = this.model.guiFields[field.name];
-                let parentField = this.model.guiFields[field.additionalProperties.field];
+                parent_field = field.additionalProperties.field
+            }
+            if(field.parent_field)
+            {
+                parent_field = field.parent_field
+            }
+            
+            
+            let thisField = this.model.guiFields[field.name];
+            let parentField = this.model.guiFields[parent_field];
 
-                if(parentField && parentField.addOnChangeCallBack)
-                {
-                    parentField.addOnChangeCallBack(function() {
-                        thisField.updateOptions.apply(thisField, arguments);
-                    })
-                }
+            if(parentField && parentField.addOnChangeCallBack)
+            {
+                parentField.addOnChangeCallBack(function() {
+                    thisField.updateOptions.apply(thisField, arguments);
+                })
             }
 
         }
@@ -149,7 +157,7 @@ var gui_base_object = {
     {
         var def = new $.Deferred();
         var data = {}
-
+         
         try{
             data = this.getValue(true)
             if (this['onBefore'+method])
@@ -250,7 +258,7 @@ var gui_base_object = {
                         }
                     }
 
-                    webGui.showErrors(e)
+                    this.showErrors(e, q.method)
                     def.reject(e)
                 })
             })
@@ -267,6 +275,22 @@ var gui_base_object = {
 
         return def.promise();
     },
+    
+    showErrors : function(error, method){
+            
+        if(!error.status || error.status < 400)
+        { 
+            return webGui.showErrors(error)
+        }
+         
+        if(this.api.api[method] 
+            && this.api.api[method].responses 
+            && this.api.api[method].responses[error.status] 
+            && this.api.api[method].responses[error.status].description)
+        {
+            guiPopUp.error(this.api.api[method].responses[error.status].description)
+        } 
+    }
 }
 
 /**
@@ -380,17 +404,6 @@ function deleteAndGoUp(obj)
     $.when(def).done(function(){
         var upper_url = spajs.urlInfo.data.reg.baseURL().replace(/\/\d+$/g, '');
         vstGO(upper_url);
-    })
-
-    return def;
-}
-
-function createAndGoEdit(obj)
-{
-    var def = obj.create();
-    $.when(def).done(function(newObj){
-
-        vstGO(spajs.urlInfo.data.reg.baseURL(newObj.data.id));
     })
 
     return def;
