@@ -618,12 +618,13 @@ if(!window.spajs)
         tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
         tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
         let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
-        if(res)
+        if(typeof res == "string")
         {
             // in-loading
-            $("body").addClass("in-loading")
-
+            $("body").addClass("in-loading") 
             spajs.wait_result(jQuery('#spajs-right-area'), res)
+            def.resolve()
+            res = def
         }
         else
         {
