@@ -66,7 +66,7 @@
     <% } %>
 </script>
 
-<!--  Поле поиска -->
+<!--  Поле поиска
 <script  type="text/x-just" style="display: none;" data-just="search_field">
     <div class="input-group col-lg-2" style="float: right;">
     <input
@@ -95,8 +95,113 @@
         %>
     >
     <span class="glyphicon glyphicon-search" ></span>
+    </div> 
     </div>
-    </div>
+</script> -->
+
+<script  type="text/x-just" style="display: none;" data-just="search_field">
+    <!-- Pm+ searchFiled -->
+    <div>
+        
+        <div class="filtered-search">
+            <~ guiObj.activeSearch.filters> 
+                <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
+                    <span class="input-filter-item">
+                        <div class="input-filter-inner">
+                            <span class="name"
+                                  onclick="/* $(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/"> 
+                                  <%= (valfield.name+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=") %>
+                            </span>
+                            <span class="value"
+                                  onclick=" /*$(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/"
+                                ><%= val.justText('value') %></span>
+                            <input
+                                type="text"
+                                id="search-query-input-<%- valfield.name %>"
+                                data-value-name="<%- valfield.name %>"
+                                
+                                placeholder="Search by name"
+                                class="input-value"
+                                maxlength="255"
+                                value="<%- valfield.value %>"
+                                <%= justOn('keyup', function(event)
+                                    {
+                                        guiObj.onSearchInput(event, event.currentTarget)
+                                        event.preventDefault();
+                                    }, "search-query-input")
+                                %>
+                                
+                                <%= justOn('blur', function(event)
+                                    {
+                                        $(event.currentTarget).parent().parent().toggleClass('show-input-text');
+                                        event.preventDefault();
+                                        guiObj.addSearchFilter($(event.currentTarget).attr('data-value-name'), event.currentTarget.value);
+                                    }, "search-query-input-"+valfield.name)
+                                %> 
+                            >
+                        </div>
+                        <span class="remove-token" 
+                                role="button" 
+                                data-value-name="<%- valfield.name %>"
+                                <%= justOn('click', function(event)
+                                    { 
+                                        guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
+                                        event.preventDefault();
+                                    })
+                                %>  
+                                >
+                            <i class="fa fa-close"></i>
+                        </span>
+                    </span>
+                <% } %>
+            <~>
+        </div>
+        
+        <div class="input-group filtered-search col-lg-6 col-sm-12 col-xs-12 col-md-12" style="float: right; ">
+            <table>
+                <tr>
+                    <td class="<%- guiObj.activeSearch.justNotClass('active', 'hide') %>">
+                        <span class="name active-name">
+                            <~ guiObj.activeSearch.active>
+                                <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
+                                    <%= (guiObj.activeSearch.active+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=")  %>
+                                <% } %>
+                            <~>
+                        </span>
+                    </td>
+                    <td style="width: 100%;">
+                        <input
+                            type="text"
+                            id="search-query-input"
+                            placeholder="Search by name"
+                            class="form-control"
+                            maxlength="255"
+                            data-backspace="false"
+                            value="<%- opt.query %>" 
+                            <%= justOn('keyup', function(event)
+                                {
+                                    guiObj.onSearchInput(event, event.currentTarget)
+                                    event.preventDefault();
+                                }, "search-query-input")
+                            %> 
+                        >
+                    </td>
+                    <td>
+                        <div class="input-group-addon search-btn" 
+                            <%= justOn('click', function(event)
+                                {
+                                    guiObj.searchGO($('#search-query-input').val(), guiObj.searchAdditionalData)
+                                    event.preventDefault();
+                                })
+                            %>  
+                            >
+                            <span class="glyphicon glyphicon-search" ></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div> 
+    </div> 
 </script>
 
 
@@ -306,7 +411,7 @@
             <div class="box box-info">
                 <div class="box-header with-border">
                     <%[ search_form %>
-                        <%= spajs.just.render('search_field', {guiObj: guiObj}) %>
+                        <%= guiObj.renderSearchForm() %>
                     <%] %>
                     <%* search_form %>
 
@@ -438,7 +543,7 @@
             <div class="box box-info">
                 <div class="box-header with-border">
                     <%[ search_form %>
-                        <%= spajs.just.render('search_field', {guiObj: guiObj}) %>
+                        <%= guiObj.renderSearchForm() %>
                     <%] %>
                     <%* search_form %>
 

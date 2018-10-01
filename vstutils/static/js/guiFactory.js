@@ -11,7 +11,7 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{
+{ 
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
     var reg_exp = new RegExp(regexp)
     if(!reg_exp.test(url))
@@ -53,17 +53,24 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         }
 
         obj.searchURL = function(query){
-            if(this.search_part)
+
+            let url = this.page_and_parents
+            url = url.replace(this.search_part, "")
+
+            url +=  "/search/" + query
+            if(this.page_part)
             {
-                return vstMakeLocalUrl(this.page_and_parents.replace(this.search_part, "") + "/search/" + query);
+                url = url.replace(this.page_part, "")
+                //url += this.page_part
             }
-            return vstMakeLocalUrl(this.page_and_parents + "/search/" + query);
+
+            return vstMakeLocalUrl(url);
         }
 
         obj.baseURL = function(){
             return vstMakeLocalUrl(this.page.replace(/\/[^/]+$/, ""));
         }
-
+        
         obj.getApiPath = function (){
             return {api:api_path_value, url:this}
         }
@@ -200,17 +207,7 @@ function openApi_add_list_page_path(api_obj)
             onOpen:function(holder, menuInfo, data)
             {
                 let pageItem = new guiObjectFactory(api_obj)
-
-                var def = new $.Deferred();
-                $.when(pageItem).done(function()
-                {
-                    def.resolve(pageItem.renderAsNewPage())
-                }).fail(function(err)
-                {
-                    def.resolve(renderErrorAsPage(err));
-                })
-
-                return def.promise();
+                return pageItem.renderAsNewPage()
             },
         })
 

@@ -124,6 +124,34 @@ function openApi_guiPrepareFields(api, properties, parent_name)
     return fields
 }
 
+function openApi_guiPrepareFilters(schema)
+{
+    let filters = jQuery.extend(true, {}, schema.filters);
+    for(let i in schema.responses)
+    {
+        if(i/1 >= 200 && i/1 < 400)
+        {
+            let val = schema.responses[i]
+
+            if(    val.schema
+                && val.schema.properties
+                && val.schema.properties.next
+                && val.schema.properties.previous)
+            {
+                for(let j in filters)
+                {
+                    if(filters[j].name == "limit" || filters[j].name == "offset")
+                    {
+                        delete filters[j]
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return filters
+}
+
 function openApi_findParentByDefinition(api_obj, definition, type = 'list')
 {
     if(api_obj.type == type && type == 'list' && api_obj.api.get)
@@ -266,7 +294,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
         }
     }
 
-    return fields
+   return fields
 }
 
 // Replace `Definitions` link to field list from `Definitions`
@@ -285,6 +313,7 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
         if(query_schema.parameters)
         {
             query_schema.filters = query_schema.parameters
+            query_schema.filters = openApi_guiPrepareFilters(query_schema)
         }
 
         def_name = getObjectNameBySchema(query_schema)
@@ -421,7 +450,7 @@ function openApi_guiSchema(api)
             level:urlLevel,     // Уровень вложености
             path:i,             // Путь в апи
             type:type,          // Тип объекта ( list | page | action )
-            name:name,          // Текст между последним и предпоследним знаком /
+            name:name,          // Текст между последним и предпоследним знаком
             bulk_name:name,     // Имя сущьности
             name_field:'name',  // Поле содержащие имя объекта
             api:{
@@ -657,7 +686,18 @@ function openApi_guiSchema(api)
         {
             val.multi_actions['delete'] = {
                 name:"delete",
-                onClick: multi_action_delete,
+                onClick:function()
+                {
+                    if(this.api.canRemove)
+                    {
+                        return questionDeleteOrRemove(this);
+                    }
+                    else
+                    {
+                        return questionDeleteAllSelectedOrNot(this);
+                    }
+
+                }
             }
         }
     }
@@ -705,7 +745,7 @@ function emitSchemaPathSignals(path_schema)
     for(let path in path_schema)
     {
         let val = path_schema[path]
-
+         
         tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
         tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
         for(let schema in val.schema)
@@ -782,7 +822,7 @@ function getObjectDefinitionByName(api, name, parent_name)
         }
     }
 
-    obj = mergeDeep({}, api.definitions[definition])
+    obj = jQuery.extend(true, {}, api.definitions[definition])
 
     obj.definition_name = definition
     obj.definition_ref = name
@@ -794,8 +834,10 @@ function getObjectDefinitionByName(api, name, parent_name)
             obj.properties[obj.required[j]].required = true
         }
     }
+
     tabSignal.emit("openapi.schema.definition",  {definition:obj, api:api, name:name, parent_name:parent_name});
     tabSignal.emit("openapi.schema.definition."+definition,  {definition:obj, name:name, parent_name:parent_name});
+
     return obj
 }
 
@@ -1002,12 +1044,12 @@ function setDefaultPrefetchFunctions(obj)
                 }
 
                 prefetch_path = field.prefetch.toLowerCase()
-
+                
                 if(!obj.paths[prefetch_path])
                 {
                     throw "Error in prefetch_path="+prefetch_path+" field="+JSON.stringify(field)
                 }
-
+                 
                 obj.fields[i].prefetch = {
                     path:function(path){
                         return function (obj) {
@@ -1015,7 +1057,7 @@ function setDefaultPrefetchFunctions(obj)
                         }
                     }(prefetch_path),
                 }
-
+                 
                 continue;
             }
             else
@@ -1024,7 +1066,7 @@ function setDefaultPrefetchFunctions(obj)
             }
 
             if(!prefetch_path)
-            {
+            {  
                 continue;
             }
 
@@ -1035,7 +1077,7 @@ function setDefaultPrefetchFunctions(obj)
                 continue;
             }
 
-            //obj.fields[i].type = "prefetch";  
+            //obj.fields[i].type = "prefetch";
             obj.fields[i].prefetch = {
                 path:function(path){
                     return function (obj) {
@@ -1064,7 +1106,7 @@ tabSignal.connect("openapi.schema.schema", function(obj)
                         !obj.value.responses[i].schema.redirect_path &&
                         !obj.value.responses[i].schema.redirect_field
                     ) {
-                        if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                         if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
                             obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
                             obj.value.responses[i].schema.redirect_field = k;
                             break;

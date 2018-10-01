@@ -621,9 +621,9 @@ if(!window.spajs)
         if(res)
         {
             // in-loading
-            $("body").addClass("in-loading")
-
+            $("body").addClass("in-loading") 
             spajs.wait_result(jQuery('#spajs-right-area'), res)
+            
         }
         else
         {
@@ -643,6 +643,11 @@ if(!window.spajs)
             opt.callback();
         }
 
+        if(typeof res == "string")
+        { 
+            def.resolve()
+            res = def
+        }
         return res.promise();
     }
 
