@@ -271,6 +271,13 @@ var gui_page_object = {
         if(!render_options.page_type) render_options.page_type = 'one'
 
         render_options.base_path = getUrlBasePath()
+        
+        render_options.links = this.api.links
+        render_options.actions = this.api.actions
+        
+        tabSignal.emit("guiList.renderPage",  {guiObj:this, options: render_options, data:this.model.data});
+        tabSignal.emit("guiList.renderPage."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data});
+        
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 

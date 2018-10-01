@@ -232,7 +232,7 @@ if(!window.spajs)
      * @example spajs.openURL("https://app.chat-server.comet-server.com/dev-18/t-chatterbox/") (Надо передавать полный урл)
      */
     spajs.openURL = function(url, title)
-    { 
+    {
         history.pushState({url:url}, title, url);
         var res = spajs.openMenuFromUrl(url, {withoutFailPage: true})
         var state = res.state()
@@ -617,34 +617,14 @@ if(!window.spajs)
         spajs.urlInfo = {menuInfo:menuInfo, data:data}
         tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
         tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
-        var res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
-        if(res)
+        let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
+        if(typeof res == "string")
         {
             // in-loading
-            $("body").addClass("in-loading")
-
-            //console.time("Mopen")
-            jQuery("#spajs-menu-"+menuInfo.id).addClass("menu-loading")
-            setTimeout(function(){
-                $.when(res).done(function()
-                {
-                    //console.timeEnd("Mopen")
-                    jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
-
-                    // in-loading
-                    $("body").removeClass("in-loading")
-                    def.resolve()
-                }).fail(function(e)
-                {
-                    //console.timeEnd("Mopen")
-                    jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
-
-                    // in-loading
-                    $("body").removeClass("in-loading")
-
-                    def.reject(e)
-                })
-            }, 0)
+            $("body").addClass("in-loading") 
+            spajs.wait_result(jQuery('#spajs-right-area'), res)
+            def.resolve()
+            res = def
         }
         else
         {
@@ -665,6 +645,36 @@ if(!window.spajs)
         }
 
         return res.promise();
+    }
+
+    spajs.wait_result = function(block, res)
+    {
+        if(typeof res == "string")
+        {
+            $(block).insertTpl(res)
+            $("body").removeClass("in-loading")
+            return;
+        }
+
+        if(!res)
+        {
+            $("body").removeClass("in-loading")
+            return;
+        }
+
+        $.when(res).done((html) =>
+        {
+            if(typeof html == "string")
+            {
+                $(block).insertTpl(html)
+            }
+            $("body").removeClass("in-loading")
+
+        }).fail(function(error)
+        {
+            $(block).insertTpl("error"+JSON.stringify(error))
+            $("body").removeClass("in-loading")
+        })
     }
 
     /**

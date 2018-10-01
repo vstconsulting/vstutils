@@ -30,18 +30,18 @@ tabSignal.connect("openapi.completed", function()
         }
     }
 
-    let page = new guiPage();
-
-    page.blocks.push({
-        id:'itemOne',
-        render:(menuInfo, data)=>
+    spajs.addMenu({
+        id:"profile",
+        urlregexp:[/^profile$/],
+        priority:0,
+        onOpen:function(holder, menuInfo, data)
         {
             let pageItem = new guiObjectFactory('/user/{pk}/', {
                 page:'user/'+ my_user_id,
                 api_pk:my_user_id
             })
 
-            let def = new $.Deferred();
+            var def = new $.Deferred();
             $.when(pageItem.load(my_user_id)).done(function()
             {
                 def.resolve(pageItem.renderAsPage())
@@ -51,10 +51,8 @@ tabSignal.connect("openapi.completed", function()
             })
 
             return def.promise();
-        }
+        },
     })
-
-    page.registerURL([/^profile$/], "profile");
 })
 
 
@@ -67,25 +65,32 @@ tabSignal.connect("openapi.completed", function()
  */
 function registerProfileSublinkAction(sublink, path, api_pk)
 {
-    let page = new guiPage();
+    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
-    page.blocks.push({
-        id:'itemOne',
-        render:(menuInfo, data)=>
+    spajs.addMenu({
+        id:url_id,
+        urlregexp:[reg_url],
+        priority:0,
+        onOpen:function(holder, menuInfo, data)
         {
             let pageItem = new guiObjectFactory(path, {
                 page:'user/'+ api_pk +'/' + sublink,
                 api_pk:api_pk,
             })
 
-            return pageItem.renderAsPage();
-        }
+            var def = new $.Deferred();
+            $.when(pageItem).done(function()
+            {
+                def.resolve(pageItem.renderAsPage())
+            }).fail(function(err)
+            {
+                def.resolve(renderErrorAsPage(err));
+            })
+
+            return def.promise();
+        },
     })
-
-    let reg_url = new RegExp('^profile/' + sublink + '$');
-    let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
-
-    page.registerURL([reg_url], url_id);
 }
 
 
@@ -98,18 +103,21 @@ function registerProfileSublinkAction(sublink, path, api_pk)
  */
 function registerProfileSublinkPage(sublink, path, api_pk)
 {
-    let page = new guiPage();
+    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
-    page.blocks.push({
-        id:'itemOne',
-        render:(menuInfo, data)=>
+    spajs.addMenu({
+        id:url_id,
+        urlregexp:[reg_url],
+        priority:0,
+        onOpen:function(holder, menuInfo, data)
         {
             let pageItem = new guiObjectFactory(path, {
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
             })
 
-            let def = new $.Deferred();
+            var def = new $.Deferred();
             $.when(pageItem.load(api_pk)).done(function()
             {
                 def.resolve(pageItem.renderAsPage())
@@ -119,13 +127,8 @@ function registerProfileSublinkPage(sublink, path, api_pk)
             })
 
             return def.promise();
-        }
+        },
     })
-
-    let reg_url = new RegExp('^profile/' + sublink + '$');
-    let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
-
-    page.registerURL([reg_url], url_id);
 }
 
 
@@ -138,18 +141,21 @@ function registerProfileSublinkPage(sublink, path, api_pk)
  */
 function registerProfileSublinkList(sublink, path, api_pk)
 {
-    let page = new guiPage();
+    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
-    page.blocks.push({
-        id:'itemOne',
-        render:(menuInfo, data)=>
+    spajs.addMenu({
+        id:url_id,
+        urlregexp:[reg_url],
+        priority:0,
+        onOpen:function(holder, menuInfo, data)
         {
             let pageItem = new guiObjectFactory(path, {
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
             })
 
-            let def = new $.Deferred();
+            var def = new $.Deferred();
             $.when(pageItem.load()).done(function()
             {
                 def.resolve(pageItem.renderAsPage())
@@ -159,11 +165,6 @@ function registerProfileSublinkList(sublink, path, api_pk)
             })
 
             return def.promise();
-        }
+        },
     })
-
-    let reg_url = new RegExp('^profile/' + sublink + '$');
-    let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
-
-    page.registerURL([reg_url], url_id);
 }

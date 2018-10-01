@@ -6,7 +6,7 @@
 function guiApi()
 {
     var thisObj = this;
-    this.init = function()
+    this.load = function()
     {
         var def = new $.Deferred();
         spajs.ajax.Call({
@@ -17,13 +17,46 @@ function guiApi()
             success: function(data)
             {
                 thisObj.openapi = data
-                def.resolve();
+                def.resolve(data);
             },
-            error: function (){
-                def.reject();
+            error: function (e){
+                def.reject(e);
             }
         });
         return def.promise();
+    }
+    this.getFromCache = function ()
+    {
+        let def = new $.Deferred();
+        let openApiFromCache = guiFilesCache.getFile('openapi');
+        openApiFromCache.then(
+            result => {
+                thisObj.openapi = result.data;
+                def.resolve();
+            },
+            error => {
+                $.when(thisObj.load()).done(data => {
+                    guiFilesCache.setFile('openapi', data);
+                    thisObj.openapi = data;
+                    def.resolve();
+                }).fail(e => {
+                    def.reject(e);
+                })
+            }
+        )
+
+        return def.promise();
+    }
+    this.init = function()
+    {
+        if(guiFilesCache && guiFilesCache.noCache)
+        {
+            return this.load();
+        }
+        else
+        {
+            return this.getFromCache();
+        }
     }
 
     var query_data = {}

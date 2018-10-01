@@ -214,9 +214,9 @@ function capitalizeString(string)
 
 function sliceLongString(string="", valid_length=100)
 {
-    if(!string || !string.slice)
+    if(typeof string != "string")
     {
-        return string;
+        return sliceLongString(""+string, valid_length);
     }
 
     var str = string.slice(0, valid_length);
@@ -300,7 +300,7 @@ function addStylesAndClassesToListField(guiObj, field, data, opt)
     }
     else
     {
-        output += "class='" + addCssClassesToElement('column', field.name, guiObj.api.short_name) + "' ";
+        output += "class='" + addCssClassesToElement('td', field.name, guiObj.api.short_name) + "' ";
     }
 
     return output;
@@ -432,7 +432,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         {
             //console.error("window.hostname already exist in vstMakeLocalUrl")
         }
-        return new_url
+        return new_url.replace("#/", "#")
     }
     else
     {

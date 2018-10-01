@@ -28,7 +28,12 @@ function openApi_guiPrepareFields(api, properties, parent_name)
         }
 
         field.name = i
-        
+
+        if(field.enum)
+        {
+            field.format = "enum"
+        }
+
         let def_name = getObjectNameBySchema(field, 1)
         if(def_name)
         {
@@ -38,7 +43,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 console.error("can not found definition for object "+def_name)
                 continue;
             }
-            
+
             field =  mergeDeep(field, def_obj);
 
             if(!field.gui_links)
@@ -58,6 +63,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             if(!window.guiElements[field.format])
             {
                 // Если нет объекта window.guiElements[field.format] то заменим на базолвый apiObject
+                field.api_original_format = field.format
                 field.format = "apiObject"
             }
 
@@ -80,6 +86,23 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             })
         }
 
+        // В имени класса символ минус не допустим
+        if(field.format)
+        {
+            field.format = field.format.replace(/\-/g, "_")
+        }
+
+        if(parent_name)
+        {
+            try{
+                field.parent_name_format = parent_name.replace(/\-/g, "_")+"_"+field.name
+            }catch (exception) {
+                debugger;
+            }
+
+
+        }
+
         let fieldObj;
         if(field.format && window.guiElements[field.format])
         {
@@ -100,7 +123,35 @@ function openApi_guiPrepareFields(api, properties, parent_name)
 
    return fields
 }
- 
+
+function openApi_guiPrepareFilters(schema)
+{
+    let filters = jQuery.extend(true, {}, schema.filters); 
+    for(let i in schema.responses)
+    {
+        if(i/1 >= 200 && i/1 < 400)
+        {
+            let val = schema.responses[i]
+
+            if(    val.schema
+                && val.schema.properties
+                && val.schema.properties.next
+                && val.schema.properties.previous)
+            { 
+                for(let j in filters)
+                {
+                    if(filters[j].name == "limit" || filters[j].name == "offset")
+                    {
+                        delete filters[j]
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return filters
+}
+
 function openApi_findParentByDefinition(api_obj, definition, type = 'list')
 {
     if(api_obj.type == type && type == 'list' && api_obj.api.get)
@@ -167,20 +218,20 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
             {
                 continue;
             }
-       
+
             if(field[link_type.prop_name] === undefined)
             {
                 field[link_type.prop_name] = {}
             }
-            
+
             field[link_type.prop_name][link_type.list_name] = undefined
- 
+
             let list_obj = undefined
             for(let l in api_obj.parent.sublinks)
             {
                 list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
                 if(list_obj)
-                { 
+                {
                     break;
                 }
             }
@@ -193,20 +244,20 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                     {
                         continue;
                     }
-                    
+
                     let schema = getObjectNameBySchema(path_schema[p].api.get)
                     if(schema != definition)
                     {
                         continue;
-                    } 
-                    
+                    }
+
                     list_obj = path_schema[p]
                     break;
-                } 
+                }
             }
-          
+
             if(list_obj)
-            {  
+            {
                 if(link_type.type == 'page' && list_obj.type == 'list' && list_obj.page)
                 {
                     list_obj = list_obj.page
@@ -216,7 +267,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                 {
                     list_obj = list_obj.list
                 }
-                
+
                 field[link_type.prop_name][link_type.list_name] = list_obj
                 continue;
             }
@@ -245,7 +296,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
 
    return fields
 }
-  
+
 // Replace `Definitions` link to field list from `Definitions`
 // Заменит ссылки на Definitions на списки полей из Definitions
 function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
@@ -262,7 +313,8 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
         if(query_schema.parameters)
         {
             query_schema.filters = query_schema.parameters
-        }
+            query_schema.filters = openApi_guiPrepareFilters(query_schema)
+        } 
 
         def_name = getObjectNameBySchema(query_schema)
     }
@@ -321,7 +373,7 @@ function openApi_guiQuerySchema(api, QuerySchema, type, parent_name)
         responses[i].schema = responses_def_obj
     }
     query_schema.responses = responses
- 
+
     return query_schema;
 }
 
@@ -389,7 +441,7 @@ function openApi_guiSchema(api)
             level:urlLevel,     // Уровень вложености
             path:i,             // Путь в апи
             type:type,          // Тип объекта ( list | page | action )
-            name:name,          // Текст между последним и предпоследним знаком /
+            name:name,          // Текст между последним и предпоследним знаком 
             bulk_name:name,     // Имя сущьности
             name_field:'name',  // Поле содержащие имя объекта
             api:{
@@ -474,7 +526,7 @@ function openApi_guiSchema(api)
         if(val.type == 'list')
         {
             val.schema.list = {
-                fields:openApi_guiPrepareFields(api, val.api.get.fields),
+                fields:openApi_guiPrepareFields(api, val.api.get.fields, val.name),
                 filters:val.api.get.filters,
                 query_type:'get',
                 operationId:val.api.get.operationId,
@@ -484,7 +536,7 @@ function openApi_guiSchema(api)
             if(val.api.post)
             {
                 val.schema.new = {
-                    fields:openApi_guiPrepareFields(api, val.api.post.fields),
+                    fields:openApi_guiPrepareFields(api, val.api.post.fields, val.name),
                     filters:val.api.post.filters,
                     query_type:'post',
                     operationId:val.api.post.operationId,
@@ -495,7 +547,7 @@ function openApi_guiSchema(api)
         else if(val.type == 'page')
         {
             val.schema.get = {
-                fields:openApi_guiPrepareFields(api, val.api.get.fields),
+                fields:openApi_guiPrepareFields(api, val.api.get.fields, val.name),
                 filters:val.api.get.filters,
                 query_type:'get',
                 operationId:val.api.get.operationId,
@@ -510,7 +562,7 @@ function openApi_guiSchema(api)
             if(val.api.put)
             {
                 val.schema.edit = {
-                    fields:openApi_guiPrepareFields(api, val.api.put.fields),
+                    fields:openApi_guiPrepareFields(api, val.api.put.fields, val.name),
                     filters:val.api.put.filters,
                     query_type:'put',
                     operationId:val.api.put.operationId,
@@ -521,7 +573,7 @@ function openApi_guiSchema(api)
             if(val.api.patch)
             {
                 val.schema.edit = {
-                    fields:openApi_guiPrepareFields(api, val.api.patch.fields),
+                    fields:openApi_guiPrepareFields(api, val.api.patch.fields, val.name),
                     filters:val.api.patch.filters,
                     query_type:'patch',
                     operationId:val.api.patch.operationId,
@@ -536,7 +588,7 @@ function openApi_guiSchema(api)
             {
                 if(val.api[query_types[q]])
                 {
-                    let fields = openApi_guiPrepareFields(api, val.api[query_types[q]].fields, true)
+                    let fields = openApi_guiPrepareFields(api, val.api[query_types[q]].fields, val.name)
                     val.schema.exec = {
                         fields:fields,
                         filters:val.api[query_types[q]].filters,
@@ -652,7 +704,7 @@ function openApi_guiSchema(api)
     for(let path in path_schema)
     {
         let val = path_schema[path]
-         
+
         tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
         tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
         for(let schema in val.schema)
@@ -716,12 +768,12 @@ function getObjectDefinitionByName(api, name, parent_name)
             }
         }
     }
-    
-    obj = mergeDeep({}, api.definitions[definition])
-    
+
+    obj = jQuery.extend(true, {}, api.definitions[definition])
+
     obj.definition_name = definition
     obj.definition_ref = name
-    
+
     if(obj.required)
     {
         for(let j in obj.required)
@@ -729,10 +781,10 @@ function getObjectDefinitionByName(api, name, parent_name)
             obj.properties[obj.required[j]].required = true
         }
     }
-     
+
     tabSignal.emit("openapi.schema.definition",  {definition:obj, api:api, name:name, parent_name:parent_name});
     tabSignal.emit("openapi.schema.definition."+definition,  {definition:obj, name:name, parent_name:parent_name});
-     
+
     return obj
 }
 
@@ -905,12 +957,12 @@ function setDefaultPrefetchFunctions(obj)
             if(typeof field.prefetch == "string")
             {
                 prefetch_path = field.prefetch.toLowerCase()
-                
+
                 if(!obj.paths[prefetch_path])
                 {
                     throw "Error in prefetch_path="+prefetch_path+" field="+JSON.stringify(field)
                 }
-                 
+
                 obj.fields[i].prefetch = {
                     path:function(path){
                         return function (obj) {
@@ -918,7 +970,7 @@ function setDefaultPrefetchFunctions(obj)
                         }
                     }(prefetch_path),
                 }
-                 
+
                 continue;
             }
             else
@@ -927,18 +979,18 @@ function setDefaultPrefetchFunctions(obj)
             }
 
             if(!prefetch_path)
-            {  
+            {
                 continue;
             }
 
-            
-            prefetch_path = findPath(obj.paths, obj.path, prefetch_path.replace(/_id$/, "")) 
+
+            prefetch_path = findPath(obj.paths, obj.path, prefetch_path.replace(/_id$/, ""))
             if(!obj.paths[prefetch_path])
-            { 
+            {
                 continue;
             }
-           
-            //obj.fields[i].type = "prefetch";  
+
+            //obj.fields[i].type = "prefetch";
             obj.fields[i].prefetch = {
                 path:function(path){
                     return function (obj) {
@@ -1015,7 +1067,8 @@ tabSignal.connect("openapi.schema.type.action", function(obj) {
         {
             let resp = responses[i]
             if (i >= 200 && i < 400 && resp.schema) {
-                if (resp.schema.definition_name == actionResponseDefName.schema.definition_name) {
+                if (resp.schema.definition_name == actionResponseDefName.schema.definition_name)
+                {
                     actionResponseDefName.schema.redirect_path = path;
                     actionResponseDefName.schema.redirect_field = resp.schema.properties["pk"] || resp.schema.properties["id"];
                     return false;
@@ -1033,7 +1086,9 @@ tabSignal.connect("openapi.schema.type.action", function(obj) {
     }
 
     try{
-        test(obj.value.parent.parent.schema.list.responses, obj.value.parent.path)
+        let path = obj.value.parent.path.split("/");
+        path.splice(path.length-2, 1);
+        test(obj.value.parent.parent.schema.list.responses, path.join("/"))
     } catch (e) {
         return;
     }

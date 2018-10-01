@@ -1,4 +1,74 @@
 
+function renderLineField(field, value, field_name, dataLine)
+{
+    // Заготовка под переопределение отрисовки поля на основе типа поля
+    let val = sliceLongString(value)
+    return val;
+}
+
+function getFieldType(field, model)
+{
+    // Приоритет №1 это prefetch поля
+    if(field.prefetch && model.data[field.name + "_info"])
+    {
+        field[field.name + "_info"] = model.data[field.name + "_info"];
+        field[field.name + "_info"]['prefetch_path'] = field.prefetch.path(model.data).replace(/^\/|\/$/g, '');
+        return "prefetch";
+    }
+
+    // Приоритет №2 это поля на основе parent_name_format если они определены в guiElements
+    if(window.guiElements[field.parent_name_format])
+    {
+        /**
+         * Достаточно объявить такой window.guiElements[field.parent_name_format] класс чтоб переопределить поле
+         */
+        return field.parent_name_format
+    }
+
+    // Приоритет №3 это поля на основе parent_name_format если они определены как шаблон
+    if(spajs.just.isTplExists("field_"+field.parent_name_format))
+    {
+        /**
+         * Достаточно объявить такой шаблон чтоб переопределить поле
+            <script type="text/x-just" data-just="field_project_repository">
+                <!-- field_project_repository -->
+                <% debugger; %>
+            </script>
+         * @type String
+         */
+        return "named_template"
+    }
+
+    let type = undefined
+
+    if(!type)
+    {
+        // Приоритет №4 это поля на основе format
+        type = field.format
+    }
+
+    if(!type && field.enum !== undefined)
+    {
+        // Приоритет №4 это поля на основе enum
+        type = 'enum'
+    }
+
+    if(!type)
+    {
+        // Приоритет №4 это поля на основе type
+        type = field.type
+    }
+
+    if(window.guiElements[type])
+    {
+        return type
+    }
+
+    // Если не чего совсем не найдено то нарисуем как строку 
+    return "string";
+}
+
+
 var guiElements = {
 }
 
@@ -12,6 +82,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.parent_object = {}
     }
 
+    this.template_name = undefined
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
 
@@ -108,7 +179,12 @@ guiElements.base = function(opt = {}, value, parent_object)
             return "";
         }
 
-        return spajs.just.render("guiElements."+this.name , {opt:this.render_options, guiElement:this, value:this.value}, () => {
+        if(!this.template_name || !spajs.just.isTplExists(this.template_name))
+        {
+            this.template_name = "guiElements."+this.name
+        }
+
+        return spajs.just.render(this.template_name, {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
         });
@@ -249,6 +325,14 @@ guiElements.string = function()
 {
     this.name = 'string'
     guiElements.base.apply(this, arguments)
+}
+
+guiElements.named_template = function()
+{
+    this.name = 'named_template'
+    guiElements.base.apply(this, arguments)
+
+    this.template_name = "field_" + this.opt.parent_name_format
 }
 
 guiElements.password = function()
@@ -816,7 +900,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             return "#"
         }
-        
+
         let url = this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "");
         if(this.linkObj.url_vars)
         {
@@ -828,19 +912,19 @@ guiElements.apiObject = function(field, field_value, parent_object)
                 }
             }
         }
-         
+
         return vstMakeLocalUrl(url)
     }
 
     this.getName = function()
-    { 
+    {
         if(!this.linkObj)
         {
             if(this.value.name)
             {
                 return this.value.name
             }
-            
+
             return this.value.id
         }
 
