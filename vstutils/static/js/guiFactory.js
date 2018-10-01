@@ -11,7 +11,7 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{ 
+{
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
     var reg_exp = new RegExp(regexp)
     if(!reg_exp.test(url))
@@ -55,7 +55,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         obj.searchURL = function(query){
             if(this.search_part)
             {
-              return vstMakeLocalUrl(this.page_and_parents.replace(this.search_part, "") + "/search/" + query);
+                return vstMakeLocalUrl(this.page_and_parents.replace(this.search_part, "") + "/search/" + query);
             }
             return vstMakeLocalUrl(this.page_and_parents + "/search/" + query);
         }
@@ -63,7 +63,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         obj.baseURL = function(){
             return vstMakeLocalUrl(this.page.replace(/\/[^/]+$/, ""));
         }
-        
+
         obj.getApiPath = function (){
             return {api:api_path_value, url:this}
         }
@@ -271,24 +271,198 @@ function openApi_add_list_page_path(api_obj)
 
 tabSignal.connect("resource.loaded", function()
 {
-    window.api = new guiApi()
+    window.api = new guiApi();
+
     $.when(window.api.init()).done(function()
     {
         // Событие в теле которого можно было бы переопределить ответ от open api
         tabSignal.emit("openapi.loaded",  {api: window.api});
 
-        window.guiSchema = openApi_guiSchema(window.api.openapi)
+        $.when(getGuiSchema()).done(function ()
+        {
+            //.. декодирование схемы из кэша
+            window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
-        tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
+            emitFinalSignals()
 
-        openApi_guiPagesBySchema(window.guiSchema)
+        }).fail(()=>{
 
-        // Событие в теле которого можно было бы переопределить и дополнить список страниц
-        tabSignal.emit("openapi.paths",  {api: window.api});
+            window.guiSchema = openApi_guiSchema(window.api.openapi);
+            tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
 
+            //... Сохранение в кеш схемы
+            if(!guiFilesCache.noCache)
+            {
+                let guiSchemaForCache =
+                    {
+                        path: deleteParentLinks(window.guiSchema.path),
+                        object: window.guiSchema.object,
+                    }
+                guiFilesCache.setFile('guiSchema', JSON.stringify(guiSchemaForCache));
+                window.guiSchema.path = returnParentLinks(window.guiSchema.path);
+            }
 
+            emitFinalSignals();
+        })
 
-        tabSignal.emit("openapi.completed",  {api: window.api});
-        tabSignal.emit("loading.completed");
     })
 })
+
+
+/*
+ * Function checks is there cache fo guiSchema.
+ * If it is, function calls getGuiSchemaFromCache().
+ */
+function getGuiSchema()
+{
+    let def = new $.Deferred();
+    if(guiFilesCache && guiFilesCache.noCache)
+    {
+        def.reject();
+    }
+    else
+    {
+        $.when(getGuiSchemaFromCache()).done(data => {
+            def.resolve();
+        }).fail(f => {
+            def.reject();
+        })
+    }
+
+    return def.promise();
+}
+
+
+/*
+ * Function returns guiSchema from cache.
+ */
+function getGuiSchemaFromCache()
+{
+    let def = new $.Deferred();
+    let guiSchemaFromCache = guiFilesCache.getFile('guiSchema');
+    guiSchemaFromCache.then(
+        result => {
+            window.guiSchema = JSON.parse(result.data);
+            def.resolve();
+        },
+        error => {
+            def.reject();
+        }
+    )
+
+    return def.promise();
+}
+
+
+/*
+ * Function deletes circular links in paths.
+ * It's necessary procedure before putting guiSchema into cache.
+ */
+function deleteParentLinks(path_obj)
+{
+    for(let i in path_obj)
+    {
+        if(path_obj[i])
+        {
+            delete path_obj[i]['parent'];
+            delete path_obj[i]['sublinks'];
+            delete path_obj[i]['sublinks_l2'];
+
+            if(i != 'schema')
+            {
+                delete path_obj[i]['page'];
+            }
+
+            if(i != 'schema')
+            {
+                delete path_obj[i]['list'];
+            }
+        }
+
+        if(typeof path_obj[i] == 'object')
+        {
+            path_obj[i] = deleteParentLinks(path_obj[i]);
+        }
+    }
+
+    return path_obj;
+}
+
+
+/*
+ * Function returns circular links in paths.
+ * It's necessary procedure after getting guiSchema from cache.
+ */
+function returnParentLinks(path_obj)
+{
+    for(let i in path_obj)
+    {
+        if(path_obj[i])
+        {
+            path_obj[i] = returnParentLinksSubFunc1(path_obj, i, '__link_parent', 'parent');
+            path_obj[i] = returnParentLinksSubFunc1(path_obj, i, 'list_path', 'list');
+            path_obj[i] = returnParentLinksSubFunc1(path_obj, i, 'page_path', 'page');
+            path_obj[i] = returnParentLinksSubFunc2(path_obj, i, '__link_sublinks', 'sublinks');
+            path_obj[i] = returnParentLinksSubFunc2(path_obj, i, '__link_sublinks_l2', 'sublinks_l2');
+            path_obj[i] = returnParentLinksSubFunc2(path_obj, i, '__link_multi_actions', 'multi_actions');
+            if(path_obj[i].type == 'list' &&  path_obj[i].page && (path_obj[i].canRemove || path_obj[i].page.canDelete))
+            {
+                path_obj[i]['multi_actions']['delete'] = {
+                    name:"delete",
+                    onClick: multi_action_delete,
+                }
+            }
+        }
+    }
+
+    return path_obj;
+}
+
+
+/*
+ * Function returns circular links for objects like parent, list and page.
+ */
+function returnParentLinksSubFunc1(path_obj, path, prop_to_search, prop_to_replace)
+{
+    if(path_obj[path][prop_to_search])
+    {
+        path_obj[path][prop_to_replace] = path_obj[path_obj[path][prop_to_search]];
+    }
+    return path_obj[path];
+}
+
+
+/*
+ * Function returns circular links for objects like sublinks and multi_actions.
+ */
+function returnParentLinksSubFunc2(path_obj, path, prop_to_search, prop_to_replace)
+{
+    if(path_obj[path][prop_to_search])
+    {
+        path_obj[path][prop_to_replace] = {};
+        for(let item in path_obj[path][prop_to_search])
+        {
+            path_obj[path][prop_to_replace][item] = path_obj[path_obj[path][prop_to_search][item]];
+        }
+    }
+
+    return path_obj[path];
+}
+
+
+/*
+ * Function emits signals which are necessary to call after getting guiSchema.
+ */
+function emitFinalSignals()
+{
+    emitSchemaPathSignals(window.guiSchema.path);
+
+    openApi_guiPagesBySchema(window.guiSchema)
+
+    // Событие в теле которого можно было бы переопределить и дополнить список страниц
+    tabSignal.emit("openapi.paths",  {api: window.api});
+
+    tabSignal.emit("openapi.completed",  {api: window.api});
+    tabSignal.emit("loading.completed");
+}
+

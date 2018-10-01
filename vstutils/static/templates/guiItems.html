@@ -371,7 +371,7 @@
                                             <a
                                                 href="#"
                                                 class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
-                                                 <%= justOn('click', function(){ guiObj.api.multi_actions[k].onClick.apply(guiObj, [])} ) %>
+                                                 <%= justOn('click', function(){ guiObj.api.multi_actions[k].onClick.apply(guiObj, []); return false;} ) %>
                                             >
                                                     <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
                                             </a>
