@@ -177,9 +177,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
         self._sch.view = args[0]
 
     def __get_nested_serializer(self, nested_view, view_action_func):
+        # pylint: disable=protected-access
         nested_action_name = view_action_func._nested_name
-        action_suffix = self.view.action.split('_')[-len(nested_action_name.split('_')):]
-        action_suffix = '_'.join(action_suffix)
+        action_suffix = self.view.action.replace(view_action_func._nested_name + '_', '')
         is_detail = action_suffix == 'detail'
         is_list = action_suffix == 'list'
         method = self.method.lower()
@@ -203,9 +203,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
             nested_view_obj.action = 'destroy'
         else:
             nested_view_obj.action = action_suffix
-            if hasattr(nested_view_obj, action_suffix):
-                nested_view_obj.action = action_suffix
-                view = getattr(nested_view_obj, action_suffix)
+            if hasattr(nested_view_obj, nested_action_name):
+                nested_view_obj.action = nested_action_name
+                view = getattr(nested_view_obj, nested_action_name)
                 serializer_class = view.kwargs.get('serializer_class', None)
                 if serializer_class:
                     nested_view_obj.serializer_class = serializer_class
