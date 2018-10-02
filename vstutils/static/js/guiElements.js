@@ -85,6 +85,14 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.template_name = undefined
     this.element_id = ("field_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
     this.onChange_calls = []
+    
+    if(opt.on_change_calls)
+    {
+        for(let i in opt.on_change_calls)
+        {
+            this.onChange_calls.push(opt.on_change_calls[i])
+        }
+    }
 
     this.setValue = function(value)
     {
@@ -92,7 +100,7 @@ guiElements.base = function(opt = {}, value, parent_object)
     }
 
     this.reductionToType = function(value)
-    {
+    { 
         let res = value
 
         if(value === undefined && this.opt.default && this.opt.required)
@@ -112,18 +120,22 @@ guiElements.base = function(opt = {}, value, parent_object)
             {
                 res = undefined
             }
-
-            return JSON.stringify(value)
+            else
+            {
+                res = value
+            }
         }
 
         if(this.render_options.type == "string" || this.render_options.type == "file")
         {
-            if(!value)
+            if(!value || value == null)
             {
                 res = ""
             }
-
-            res = value.toString()
+            else
+            {
+                res = value.toString()
+            }
         }
 
         if(this.render_options.type == "number" || this.render_options.type == "integer" )
@@ -175,8 +187,8 @@ guiElements.base = function(opt = {}, value, parent_object)
         }
 
         if(this.render_options.hideReadOnly && this.render_options.readOnly)
-        {
-            return "";
+        { 
+            return "<!-- hidden field guiElements."+this.name+" hideReadOnly && readOnly -->";
         }
 
         if(!this.template_name || !spajs.just.isTplExists(this.template_name))
@@ -273,11 +285,22 @@ guiElements.base = function(opt = {}, value, parent_object)
         let val = this.getValue()
         for(let i in this.onChange_calls)
         {
-            this.onChange_calls[i]({
-                field:this,
-                opt:opt,
-                value:val
-            })
+            if(typeof this.onChange_calls[i] == "string")
+            {
+                window[this.onChange_calls[i]]({
+                    field:this,
+                    opt:opt,
+                    value:val
+                })
+            }
+            else
+            {
+                this.onChange_calls[i]({
+                    field:this,
+                    opt:opt,
+                    value:val
+                })
+            }
         }
     }
     /**
@@ -493,7 +516,9 @@ guiElements.autocomplete = function()
 
         if(!value.additionalProperties)
         {
-            throw "Not fount additionalProperties";
+            debugger;
+            console.error("Not fount additionalProperties");
+            return value;
         }
 
         value.autocomplete_properties = {
@@ -514,6 +539,12 @@ guiElements.autocomplete = function()
 
     this.getValue = function()
     {
+        if(this.opt.dynamic_properties)
+        {  
+            let properties = mergeDeep(this.opt.autocomplete_properties, this.opt.dynamic_properties)
+            this.opt.autocomplete_properties = properties 
+        }   
+
         if (this.matches &&
             this.opt.autocomplete_properties.view_field &&
             this.opt.autocomplete_properties.value_field)
@@ -664,8 +695,15 @@ guiElements.autocomplete = function()
          * options.autocomplete_properties - object, which comes from api.
          * This object has info about model and fields, where data for autocomplete is stored.
          */
-        else if(options.autocomplete_properties)
+        else if(options.autocomplete_properties || options.dynamic_properties)
         {
+            if(options.dynamic_properties)
+            {  
+                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                options.autocomplete_properties = properties
+             
+            }   
+            
             let props = getInfoFromAdditionalProperties(options);
 
             let value_field = props['value_field'];
@@ -768,7 +806,7 @@ guiElements.select2 = function(field, field_value, parent_object)
             list_name:'list_obj',
             $ref:value.additionalProperties.model.$ref
         })
-
+        
         return value
     }
 
@@ -834,8 +872,14 @@ guiElements.select2 = function(field, field_value, parent_object)
          * options.autocomplete_properties - object, which comes from api.
          * This object has info about model and fields, where data for select2 is stored.
          */
-        else if(options.autocomplete_properties)
+        else if(options.autocomplete_properties || options.dynamic_properties)
         {
+            if(options.dynamic_properties)
+            {   
+                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                options.autocomplete_properties = properties 
+            }   
+            
             let props = getInfoFromAdditionalProperties(options);
 
             let value_field = props['value_field'];
@@ -885,6 +929,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
     this.name = 'apiObject'
     guiElements.base.apply(this, arguments)
 
+       
     this._baseRender = this.render
     this.render = function(options)
     {
@@ -908,7 +953,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
 
     this.getLink = function()
     {
-        if(!this.linkObj)
+        if(!this.linkObj || !this.value || !this.value.id)
         {
             return "#"
         }
@@ -929,9 +974,14 @@ guiElements.apiObject = function(field, field_value, parent_object)
     }
 
     this.getName = function()
-    {
+    { 
         if(!this.linkObj)
         {
+            if(!this.value || !this.value.id)
+            {
+                return "#"
+            }
+        
             if(this.value.name)
             {
                 return this.value.name
@@ -944,6 +994,14 @@ guiElements.apiObject = function(field, field_value, parent_object)
         return this.linkObj.getTitle()
     }
 }
+
+
+guiElements.apiData = function(field, field_value, parent_object)
+{
+    this.name = 'apiData'
+    guiElements.base.apply(this, arguments) 
+}
+
 /*
 guiElements.apiUser = function(field, field_value, parent_object)
 {
@@ -1152,11 +1210,19 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
             throw "Not fount additionalProperties";
         }
 
-        value.dynamic_properties = {
-            types:value.additionalProperties.types,
-            choices:value.additionalProperties.choices,
+        if(!value.dynamic_properties)
+        {
+            value.dynamic_properties = { }
         }
-
+        
+        let dynamic_properties = mergeDeep(
+                                            value.dynamic_properties, 
+                                            {
+                                                types:value.additionalProperties.types,
+                                                choices:value.additionalProperties.choices,
+                                            })
+            
+        value.dynamic_properties = dynamic_properties 
         return value
     }
 
@@ -1177,7 +1243,9 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     this.getValue = func('getValue')
 
     this.setType = function(type, override_opt)
-    {
+    { 
+        this.name;
+        this.opt.name;
         if(!guiElements[type])
         {
             type = 'string'
@@ -1192,7 +1260,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         {
             lastValue = options.default;
         }
-
+         
         this.realElement = new guiElements[type](options, value, parent_object);
 
         this.realElement.setValue(lastValue);
@@ -1200,12 +1268,22 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     }
 
     this.opt.onUpdateOptions = [];
-    this.opt.onUpdateOptions.push(function (fieldObj, newValue) {
-
+    this.opt.onUpdateOptions.push(function (fieldObj, newValue) 
+    {
         var new_type = "string";
         var override_opt = {};
         var value = newValue.value;
 
+        if(opt.dynamic_properties && opt.dynamic_properties.callback)
+        {
+            var res = opt.dynamic_properties.callback.apply(this, arguments);
+            if(res && res.type)
+            {
+                thisObj.setType(res.type, res.override_opt);
+                return;
+            } 
+        }
+        
         if(opt.dynamic_properties && opt.dynamic_properties.types)
         {
             var types = opt.dynamic_properties.types;
