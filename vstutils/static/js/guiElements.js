@@ -5,7 +5,12 @@ function renderLineField(field, value, field_name, dataLine)
     let val = sliceLongString(value);
     if(field.value && typeof field.value == 'function')
     {
-        val = field.value.apply(dataLine, [value]);
+        let opt = {
+            data: dataLine.line,
+            fields: dataLine.opt.fields,
+            value: value,
+        }
+        val = field.value.apply(dataLine, [opt]);
     }
 
     return val;
@@ -35,10 +40,10 @@ function getFieldType(field, model)
     {
         /**
          * Достаточно объявить такой шаблон чтоб переопределить поле
-            <script type="text/x-just" data-just="field_project_repository">
-                <!-- field_project_repository -->
-                <% debugger; %>
-            </script>
+         <script type="text/x-just" data-just="field_project_repository">
+         <!-- field_project_repository -->
+         <% debugger; %>
+         </script>
          * @type String
          */
         return "named_template"
