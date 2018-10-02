@@ -12,7 +12,7 @@
 
 {% if user.is_authenticated %}
     {% block profile_link %}
-        <li><a href='#' ><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
+        <li><a href="/#profile" onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
     {% endblock %}
 
     <li class="for-cordova"><a href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>

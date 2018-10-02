@@ -209,8 +209,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             return serializer_class
         # Get 'serializer_class_one' for detail operations
         if self.request and (lookup_field_data or self.action in detail_actions):
-            if self.serializer_class_one is not None:
-                return self.serializer_class_one
+            return self.serializer_class_one
         return super(GenericViewSet, self).get_serializer_class()
 
     def nested_allow_check(self):
