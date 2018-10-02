@@ -117,7 +117,7 @@
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.string -->
+<!-- guiElements.integer -->
 <script type="text/x-just" data-just="guiElements.integer">
     <!-- guiElements.integer [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <%[ main_input %>
@@ -130,7 +130,7 @@
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.dynamic -->
+<!-- guiElements.hidden -->
 <script type="text/x-just" data-just="guiElements.hidden">
     <!-- guiElements.hidden [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <div style="display:none;">
@@ -143,6 +143,11 @@
         <%] %>
         <%! guiElements.base %>
     </div>
+</script>
+        
+<!-- guiElements.null -->
+<script type="text/x-just" data-just="guiElements.null">
+    <!-- guiElements.null [type=<%- opt.type %>, format=<%- opt.format %>] --> 
 </script>
  
 <!-- guiElements.prefetch -->
@@ -286,6 +291,19 @@
         >
             <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
         </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.apiData -->
+<script type="text/x-just" data-just="guiElements.apiData">
+    <!-- guiElements.apiData [type=<%- opt.type %>, format=<%- opt.format %>] --> 
+    <%[ main_input %>
+        <input type="text"
+        class="form-control"
+        <%- set_api_options(opt) %> 
+        id="<%- guiElement.element_id %>"
+        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
     <%] %>
     <%! guiElements.base %>
 </script>

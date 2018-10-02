@@ -51,15 +51,14 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 field.gui_links = []
             }
 
-            field.readOnly = true
+            //field.readOnly = true
 
             let format = def_name.replace("#/", "").split(/\//)
 
-            if(format[1] != "Data")
-            {
-                field.format = "api"+format[1]
-            }
-
+            //if(format[1] == "Data") debugger;
+            
+            field.format = "api"+format[1]
+ 
             if(!window.guiElements[field.format])
             {
                 // Если нет объекта window.guiElements[field.format] то заменим на базолвый apiObject
@@ -106,11 +105,11 @@ function openApi_guiPrepareFields(api, properties, parent_name)
         let fieldObj;
         if(field.format && window.guiElements[field.format])
         {
-            fieldObj = new window.guiElements[field.format](field)
+            fieldObj = window.guiElements[field.format]
         }
         else if(field.type && window.guiElements[field.type])
         {
-            fieldObj = new window.guiElements[field.type](field)
+            fieldObj = window.guiElements[field.type]
         }
 
         if(fieldObj && fieldObj.prepareProperties)
