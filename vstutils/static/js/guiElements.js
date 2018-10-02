@@ -1068,11 +1068,6 @@ guiElements.inner_api_object = function(field, field_value, parent_object)
 
     this.realElements = {};
 
-    if(field.definition_ref)
-    {
-        field.readOnly = false;
-    }
-
     for(let i in field.properties)
     {
         let prop = field.properties[i];
