@@ -1,3 +1,4 @@
+from copy import copy
 from collections import OrderedDict
 from rest_framework import status
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
@@ -144,7 +145,7 @@ class Select2FieldInspector(FieldInspector):  # nocv
 
 
 class NestedFilterInspector(CoreAPICompatInspector):
-    def get_filter_parameters(self, filter_backend):
+    def get_filter_parameters(self, filter_backend):  # nocv
         subaction_list_actions = [
             '{}_list'.format(name)
             for name in getattr(self.view, '_nested_args', {}).keys()
@@ -152,7 +153,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
         if self.view.action not in subaction_list_actions:
             return NotHandled
         if self.method != 'GET':
-            return NotHandled  # nocv
+            return NotHandled
         nested_view = getattr(self.view, self.view.action, None)
         nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
         filter_class = getattr(self.view, 'filter_class', None)
@@ -176,10 +177,12 @@ class VSTAutoSchema(SwaggerAutoSchema):
         self._sch = args[0].schema
         self._sch.view = args[0]
 
-    def __get_nested_serializer(self, nested_view, view_action_func):
+    def __get_nested_view_obj(self, nested_view, view_action_func):
         # pylint: disable=protected-access
         nested_action_name = view_action_func._nested_name
         action_suffix = self.view.action.replace(view_action_func._nested_name + '_', '')
+        if action_suffix.endswith(view_action_func._nested_name):
+            action_suffix = action_suffix.split('_')[-1]
         is_detail = action_suffix == 'detail'
         is_list = action_suffix == 'list'
         method = self.method.lower()
@@ -210,7 +213,10 @@ class VSTAutoSchema(SwaggerAutoSchema):
                 if serializer_class:
                     nested_view_obj.serializer_class = serializer_class
 
-        return nested_view_obj.get_serializer()
+        return nested_view_obj
+
+    def __get_nested_serializer(self, nested_view, view_action_func):
+        return self.__get_nested_view_obj(nested_view, view_action_func).get_serializer()
 
     def get_view_serializer(self):
         if hasattr(self.view, 'get_serializer'):
@@ -250,6 +256,29 @@ class VSTAutoSchema(SwaggerAutoSchema):
             schema=self.serializer_to_schema(error_serializer),
         )
         return responses
+
+    def __perform_with_nested(self, func_name, *args, **kwargs):
+        # pylint: disable=protected-access
+        sub_action = getattr(self.view, self.view.action, None)
+        if hasattr(sub_action, '_nested_view'):
+            schema = copy(self)
+            schema.view = self.__get_nested_view_obj(sub_action._nested_view, sub_action)
+            result = getattr(schema, func_name)(*args, **kwargs)
+            if result:
+                return result
+        return getattr(super(VSTAutoSchema, self), func_name)(*args, **kwargs)
+
+    def get_pagination_parameters(self, *args, **kwargs):
+        return self.__perform_with_nested('get_pagination_parameters', *args, **kwargs)
+
+    def get_paginated_response(self, *args, **kwargs):
+        return self.__perform_with_nested('get_paginated_response', *args, **kwargs)
+
+    def get_filter_parameters(self, *args, **kwargs):
+        return self.__perform_with_nested('get_filter_parameters', *args, **kwargs)
+
+    def get_responses(self, *args, **kwargs):
+        return self.__perform_with_nested('get_responses', *args, **kwargs)
 
 
 class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
