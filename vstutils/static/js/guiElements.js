@@ -440,10 +440,30 @@ guiElements.textarea = function(opt = {})
     guiElements.base.apply(this, arguments)
 }
 
+/**
+ * Поле которое не видимо но хранит значение
+ * @param {type} opt
+ * @returns {guiElements.null}
+ */
 guiElements.hidden = function(opt = {})
 {
     this.name = 'hidden';
     guiElements.base.apply(this, arguments)
+}
+
+/**
+ * Поле которое не возвращает значение
+ * @param {type} opt
+ * @returns {guiElements.null}
+ */
+guiElements.null = function(opt = {})
+{
+    this.name = 'null';
+    guiElements.base.apply(this, arguments)
+    this.getValue = function()
+    {
+        return undefined;
+    }
 }
 
 guiElements.integer = function(opt = {})

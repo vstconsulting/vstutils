@@ -117,7 +117,7 @@
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.string -->
+<!-- guiElements.integer -->
 <script type="text/x-just" data-just="guiElements.integer">
     <!-- guiElements.integer [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <%[ main_input %>
@@ -130,7 +130,7 @@
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.dynamic -->
+<!-- guiElements.hidden -->
 <script type="text/x-just" data-just="guiElements.hidden">
     <!-- guiElements.hidden [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <div style="display:none;">
@@ -143,6 +143,11 @@
         <%] %>
         <%! guiElements.base %>
     </div>
+</script>
+        
+<!-- guiElements.null -->
+<script type="text/x-just" data-just="guiElements.null">
+    <!-- guiElements.null [type=<%- opt.type %>, format=<%- opt.format %>] --> 
 </script>
  
 <!-- guiElements.prefetch -->
