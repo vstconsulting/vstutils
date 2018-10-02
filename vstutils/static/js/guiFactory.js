@@ -11,7 +11,7 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{ 
+{
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
     var reg_exp = new RegExp(regexp)
     if(!reg_exp.test(url))
@@ -70,7 +70,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         obj.baseURL = function(){
             return vstMakeLocalUrl(this.page.replace(/\/[^/]+$/, ""));
         }
-        
+
         obj.getApiPath = function (){
             return {api:api_path_value, url:this}
         }
@@ -385,65 +385,66 @@ function deleteParentLinks(path_obj)
     return path_obj;
 }
 
-
 /*
  * Function returns circular links in paths.
  * It's necessary procedure after getting guiSchema from cache.
  */
 function returnParentLinks(path_obj)
 {
-    for(let i in path_obj)
-    {
-        if(path_obj[i])
+    getFunctionNameBySchema(path_obj, '_path', (obj, key) => {
+        let keyname =  key.replace('_path', '');
+
+        if(obj[key])
         {
-            path_obj[i] = returnParentLinksSubFunc1(path_obj, i, '__link_parent', 'parent');
-            path_obj[i] = returnParentLinksSubFunc1(path_obj, i, 'list_path', 'list');
-            path_obj[i] = returnParentLinksSubFunc1(path_obj, i, 'page_path', 'page');
-            path_obj[i] = returnParentLinksSubFunc2(path_obj, i, '__link_sublinks', 'sublinks');
-            path_obj[i] = returnParentLinksSubFunc2(path_obj, i, '__link_sublinks_l2', 'sublinks_l2');
-            path_obj[i] = returnParentLinksSubFunc2(path_obj, i, '__link_multi_actions', 'multi_actions');
-            if(path_obj[i].type == 'list' &&  path_obj[i].page && (path_obj[i].canRemove || path_obj[i].page.canDelete))
+            obj[keyname] = path_obj[key];
+        }
+
+        return obj;
+    }, 3)
+
+
+    getFunctionNameBySchema(path_obj, '__link__', (obj, key) => {
+
+        if(obj[key])
+        {
+            let keyname =  key.replace('__link__', '');
+
+            obj[keyname] = {};
+
+            for(let item in obj[key])
             {
-                path_obj[i]['multi_actions']['delete'] = {
-                    name:"delete",
-                    onClick: multi_action_delete,
+                if(obj[key][item].indexOf('__func__') == 0)
+                {
+                    obj[keyname][item] = {
+                        name: item,
+                        onClick: findFunctionByName(obj[key][item], '__func__'),
+                    }
+                }
+                else
+                {
+                    obj[keyname][item] = path_obj[obj[key][item]];
                 }
             }
+
+            return obj[keyname];
         }
-    }
+
+        return {};
+
+    }, 3)
+
+    getFunctionNameBySchema(path_obj, '__func__', (obj, key) => {
+        let func_name =  key.replace('__func__', '');
+        if(!window[func_name])
+        {
+            throw "error function "+func_name+" not exists"
+        }
+
+        return window[func_name];
+    }, 3)
+
 
     return path_obj;
-}
-
-
-/*
- * Function returns circular links for objects like parent, list and page.
- */
-function returnParentLinksSubFunc1(path_obj, path, prop_to_search, prop_to_replace)
-{
-    if(path_obj[path][prop_to_search])
-    {
-        path_obj[path][prop_to_replace] = path_obj[path_obj[path][prop_to_search]];
-    }
-    return path_obj[path];
-}
-
-
-/*
- * Function returns circular links for objects like sublinks and multi_actions.
- */
-function returnParentLinksSubFunc2(path_obj, path, prop_to_search, prop_to_replace)
-{
-    if(path_obj[path][prop_to_search])
-    {
-        path_obj[path][prop_to_replace] = {};
-        for(let item in path_obj[path][prop_to_search])
-        {
-            path_obj[path][prop_to_replace][item] = path_obj[path_obj[path][prop_to_search][item]];
-        }
-    }
-
-    return path_obj[path];
 }
 
 

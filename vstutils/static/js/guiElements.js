@@ -2,7 +2,12 @@
 function renderLineField(field, value, field_name, dataLine)
 {
     // Заготовка под переопределение отрисовки поля на основе типа поля
-    let val = sliceLongString(value)
+    let val = sliceLongString(value);
+    if(field.value && typeof field.value == 'function')
+    {
+        val = field.value.apply(dataLine, [value]);
+    }
+
     return val;
 }
 
