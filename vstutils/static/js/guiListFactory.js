@@ -995,3 +995,14 @@ var gui_list_object = {
     },
 
 }
+
+function createAndGoEdit(obj)
+{
+    var def = obj.create();
+    $.when(def).done(function(newObj){
+
+        vstGO(spajs.urlInfo.data.reg.baseURL(newObj.data.id));
+    })
+
+    return def;
+}

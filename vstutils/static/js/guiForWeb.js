@@ -94,6 +94,11 @@ webGui.start = function(options)
 
 webGui.showErrors = function(res)
 {
+    if(res && typeof res.error == "string" && typeof res.message == "string")
+    { 
+        return guiPopUp.error(res.message, res.error)
+    }
+    
     for(let i in res)
     {
         if(i == "detail")
