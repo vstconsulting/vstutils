@@ -17,7 +17,7 @@ var gui_base_object = {
     },
 
     getTitle : function()
-    { 
+    {
         return this.api.name
     },
 
@@ -76,8 +76,7 @@ var gui_base_object = {
             {
                 parent_field = field.parent_field
             }
-            
-            
+ 
             let thisField = this.model.guiFields[field.name];
             let parentField = this.model.guiFields[parent_field];
 
@@ -87,7 +86,6 @@ var gui_base_object = {
                     thisField.updateOptions.apply(thisField, arguments);
                 })
             }
-
         }
 
         return this.model.guiFields[field.name].render($.extend({}, render_options))
@@ -157,7 +155,7 @@ var gui_base_object = {
     {
         var def = new $.Deferred();
         var data = {}
-         
+
         try{
             data = this.getValue(true)
             if (this['onBefore'+method])
@@ -275,21 +273,21 @@ var gui_base_object = {
 
         return def.promise();
     },
-    
+
     showErrors : function(error, method){
-            
+
         if(!error.status || error.status < 400)
-        { 
+        {
             return webGui.showErrors(error)
         }
-         
-        if(this.api.api[method] 
-            && this.api.api[method].responses 
-            && this.api.api[method].responses[error.status] 
+
+        if(this.api.api[method]
+            && this.api.api[method].responses
+            && this.api.api[method].responses[error.status]
             && this.api.api[method].responses[error.status].description)
         {
             guiPopUp.error(this.api.api[method].responses[error.status].description)
-        } 
+        }
     }
 }
 

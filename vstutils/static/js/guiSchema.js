@@ -105,11 +105,11 @@ function openApi_guiPrepareFields(api, properties, parent_name)
         let fieldObj;
         if(field.format && window.guiElements[field.format])
         {
-            fieldObj = new window.guiElements[field.format](field)
+            fieldObj = window.guiElements[field.format]
         }
         else if(field.type && window.guiElements[field.type])
         {
-            fieldObj = new window.guiElements[field.type](field)
+            fieldObj = window.guiElements[field.type]
         }
 
         if(fieldObj && fieldObj.prepareProperties)
