@@ -19,7 +19,7 @@ function renderLineField(field, value, field_name, dataLine)
 function getFieldType(field, model)
 {
     // Приоритет №1 это prefetch поля
-    if(field.prefetch && model &&model.data[field.name + "_info"])
+    if(field.prefetch && model && model.data[field.name + "_info"])
     {
         field[field.name + "_info"] = model.data[field.name + "_info"];
         field[field.name + "_info"]['prefetch_path'] = field.prefetch.path(model.data).replace(/^\/|\/$/g, '');
