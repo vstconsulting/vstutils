@@ -210,6 +210,11 @@ function notUseCache(type)
 {
     if(type !== undefined)
     {
+        if(type == "true")
+        {
+            loadTipe('js') 
+        }
+        
         window.localStorage['useCache'] = type
     }
 
