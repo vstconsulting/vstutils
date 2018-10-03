@@ -1208,9 +1208,11 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     {
         this.opt.dynamic_type = 'string'
     }
-    
-    this.opt.onInit = undefined
-    this.realElement = new guiElements[this.opt.dynamic_type]($.extend({}, this.opt, this.opt.override_opt), value, parent_object);
+     
+    let override_options = $.extend({}, this.opt, this.opt.override_opt)
+    override_options.onInit = undefined
+     
+    this.realElement = new guiElements[this.opt.dynamic_type](override_options, value, parent_object);
  
     let func = function(name)
     {
@@ -1230,12 +1232,14 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         let lastValue = this.realElement.getValue();
 
         let options = $.extend({}, opt, override_opt);
+        options.onInit = undefined
 
         if(type == "boolean" && options.default !== undefined && options.readOnly)
         {
             lastValue = options.default;
         }
-
+ 
+        
         this.realElement = new guiElements[type](options, value, parent_object);
         
         this.realElement.addOnChangeCallBack(function(){
