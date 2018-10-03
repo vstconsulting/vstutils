@@ -31,12 +31,12 @@ function guiApi()
         let openApiFromCache = guiFilesCache.getFile('openapi');
         openApiFromCache.then(
             result => {
-                thisObj.openapi = result.data;
+                thisObj.openapi = JSON.parse(result.data);
                 def.resolve();
             },
             error => {
                 $.when(thisObj.load()).done(data => {
-                    guiFilesCache.setFile('openapi', data);
+                    guiFilesCache.setFile('openapi', JSON.stringify(data));
                     thisObj.openapi = data;
                     def.resolve();
                 }).fail(e => {

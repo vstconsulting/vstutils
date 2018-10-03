@@ -2,14 +2,24 @@
 function renderLineField(field, value, field_name, dataLine)
 {
     // Заготовка под переопределение отрисовки поля на основе типа поля
-    let val = sliceLongString(value)
+    let val = sliceLongString(value);
+    if(field.value && typeof field.value == 'function')
+    {
+        let opt = {
+            data: dataLine.line,
+            fields: dataLine.opt.fields,
+            value: value,
+        }
+        val = field.value.apply(dataLine, [opt]);
+    }
+
     return val;
 }
 
 function getFieldType(field, model)
 {
     // Приоритет №1 это prefetch поля
-    if(field.prefetch && model &&model.data[field.name + "_info"])
+    if(field.prefetch && model && model.data[field.name + "_info"])
     {
         field[field.name + "_info"] = model.data[field.name + "_info"];
         field[field.name + "_info"]['prefetch_path'] = field.prefetch.path(model.data).replace(/^\/|\/$/g, '');
@@ -30,10 +40,10 @@ function getFieldType(field, model)
     {
         /**
          * Достаточно объявить такой шаблон чтоб переопределить поле
-            <script type="text/x-just" data-just="field_project_repository">
-                <!-- field_project_repository -->
-                <% debugger; %>
-            </script>
+         <script type="text/x-just" data-just="field_project_repository">
+         <!-- field_project_repository -->
+         <% debugger; %>
+         </script>
          * @type String
          */
         return "named_template"
@@ -1057,11 +1067,6 @@ guiElements.inner_api_object = function(field, field_value, parent_object)
     guiElements.base.apply(this, arguments)
 
     this.realElements = {};
-
-    if(field.definition_ref)
-    {
-        field.readOnly = false;
-    }
 
     for(let i in field.properties)
     {
