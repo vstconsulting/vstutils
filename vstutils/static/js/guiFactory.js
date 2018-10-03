@@ -268,8 +268,7 @@ function openApi_add_list_page_path(api_obj)
 
 tabSignal.connect("resource.loaded", function()
 {
-    window.api = new guiApi();
-
+    window.api = new guiApi(); 
     $.when(window.api.init()).done(function()
     {
         // Событие в теле которого можно было бы переопределить ответ от open api
@@ -277,7 +276,7 @@ tabSignal.connect("resource.loaded", function()
 
         $.when(getGuiSchema()).done(function ()
         {
-            //.. декодирование схемы из кэша
+            //.. декодирование схемы из кэша 
             window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
             emitFinalSignals()
@@ -288,7 +287,7 @@ tabSignal.connect("resource.loaded", function()
             tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
 
             //... Сохранение в кеш схемы
-            if(!guiFilesCache.noCache)
+            if(notUseCache() != "true")
             {
                 let guiSchemaForCache =
                     {
@@ -296,8 +295,8 @@ tabSignal.connect("resource.loaded", function()
                         object: window.guiSchema.object,
                     }
                 guiFilesCache.setFile('guiSchema', JSON.stringify(guiSchemaForCache));
-                window.guiSchema.path = returnParentLinks(window.guiSchema.path);
             }
+            window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
             emitFinalSignals();
         })
@@ -313,7 +312,7 @@ tabSignal.connect("resource.loaded", function()
 function getGuiSchema()
 {
     let def = new $.Deferred();
-    if(guiFilesCache && guiFilesCache.noCache)
+    if(notUseCache() == "true")
     {
         def.reject();
     }
@@ -357,32 +356,70 @@ function getGuiSchemaFromCache()
  */
 function deleteParentLinks(path_obj)
 {
-    for(let i in path_obj)
+    
+    let del_func = deleteByPatternInSchema(path_obj, '__func__')
+    let del_link = deleteByPatternInSchema(path_obj, '__link__')
+    debugger;
+    for(let i in del_link)
     {
-        if(path_obj[i])
-        {
-            delete path_obj[i]['parent'];
-            delete path_obj[i]['sublinks'];
-            delete path_obj[i]['sublinks_l2'];
+        eval("delete path_obj"+del_link[i])
+    }
 
-            if(i != 'schema')
-            {
-                delete path_obj[i]['page'];
-            }
+    for(let i in del_func)
+    {
+        eval("delete path_obj"+del_func[i])
+    }
+     
+    return path_obj;
+}
 
-            if(i != 'schema')
-            {
-                delete path_obj[i]['list'];
-            }
+function deleteByPatternInSchema(obj, pattern, max_level = 0, level = 0, path = "", objects = [])
+{
+    if(!obj)
+    {
+        return undefined;
+    }
+
+    if(level > 20)
+    {
+        console.warn(obj, pattern, max_level, level)
+        debugger;
+        throw "Error level > "+level
+    }
+     
+    if(max_level && max_level <= level)
+    {
+        debugger;
+        return undefined;
+    }
+ 
+    if(typeof obj != 'object')
+    {
+        return undefined;
+    }
+
+    for(var i in obj)
+    {
+        if(i.indexOf(pattern) == 0)
+        {  
+            objects.push(path+"['"+i.replace(pattern, "")+"']")
+            continue;
         }
 
-        if(typeof path_obj[i] == 'object')
-        {
-            path_obj[i] = deleteParentLinks(path_obj[i]);
+        if(typeof obj[i] == 'object')
+        { 
+            if(obj["__link__"+i])
+            { 
+                // skip
+            }
+            else
+            { 
+                deleteByPatternInSchema(obj[i], pattern, max_level, level+1, ""+path+"['"+i+"']", objects)
+            } 
         }
     }
 
-    return path_obj;
+    return objects;
 }
 
 /*
@@ -391,26 +428,44 @@ function deleteParentLinks(path_obj)
  */
 function returnParentLinks(path_obj)
 {
-    getFunctionNameBySchema(path_obj, '_path', (obj, key) => {
-        let keyname =  key.replace('_path', '');
-
-        if(obj[key])
+    //debugger;
+    
+    let del_func = getFunctionNameBySchema(path_obj, '__func__', (obj, key) => {
+        
+        if(!window[obj[key]])
         {
-            obj[keyname] = path_obj[key];
+            throw "error function "+obj[key]+" not exists"
         }
 
-        return obj;
-    }, 3)
+        return window[obj[key]];
+    })
+    
+    let del_links = getFunctionNameBySchema(path_obj, '__link__', (obj, key) => { 
+        
+        if(!path_obj[obj[key]])
+        {
+            throw "error link "+obj[key]+" not exists"
+        }
 
+        return path_obj[obj[key]];
+    })
+ 
+    for(let i in del_func)
+    {
+        eval("delete path_obj"+del_func[i])
+    }
 
-    getFunctionNameBySchema(path_obj, '__link__', (obj, key) => {
+    for(let i in del_links)
+    {
+        eval("delete path_obj"+del_links[i])
+    }
 
+    /*getFunctionNameBySchema(path_obj, '__link__', (obj, key) => {
+        debugger;
         if(obj[key])
         {
             let keyname =  key.replace('__link__', '');
-
             obj[keyname] = {};
-
             for(let item in obj[key])
             {
                 if(obj[key][item].indexOf('__func__') == 0)
@@ -425,24 +480,12 @@ function returnParentLinks(path_obj)
                     obj[keyname][item] = path_obj[obj[key][item]];
                 }
             }
-
             return obj[keyname];
         }
-
         return {};
 
-    }, 3)
-
-    getFunctionNameBySchema(path_obj, '__func__', (obj, key) => {
-        let func_name =  key.replace('__func__', '');
-        if(!window[func_name])
-        {
-            throw "error function "+func_name+" not exists"
-        }
-
-        return window[func_name];
-    }, 3)
-
+    }, 10)*/
+    
 
     return path_obj;
 }
@@ -452,7 +495,7 @@ function returnParentLinks(path_obj)
  * Function emits signals which are necessary to call after getting guiSchema.
  */
 function emitFinalSignals()
-{
+{ 
     emitSchemaPathSignals(window.guiSchema.path);
 
     openApi_guiPagesBySchema(window.guiSchema)
