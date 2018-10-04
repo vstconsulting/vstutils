@@ -285,17 +285,17 @@ tabSignal.connect("resource.loaded", function()
 
             window.guiSchema = openApi_guiSchema(window.api.openapi);
             tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
-
+          
             //... Сохранение в кеш схемы
-            if(notUseCache() != "true")
-            {
+            //if(notUseCache() != "true")
+            //{
                 let guiSchemaForCache =
                     {
                         path: deleteParentLinks(window.guiSchema.path),
                         object: window.guiSchema.object,
                     }
                 guiFilesCache.setFile('guiSchema', JSON.stringify(guiSchemaForCache));
-            }
+            //}
             window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
             emitFinalSignals();
@@ -357,19 +357,22 @@ function getGuiSchemaFromCache()
 function deleteParentLinks(path_obj)
 {
     
+    //@todo улучшить функцию deleteByPatternInSchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__ 
     let del_func = deleteByPatternInSchema(path_obj, '__func__')
     let del_link = deleteByPatternInSchema(path_obj, '__link__')
-    debugger;
-    for(let i in del_link)
-    {
-        eval("delete path_obj"+del_link[i])
-    }
-
+    
+    let action = []
     for(let i in del_func)
     {
-        eval("delete path_obj"+del_func[i])
+        action.push("delete path_obj"+del_func[i])
     }
-     
+
+    for(let i in del_link)
+    {
+        action.push("delete path_obj"+del_link[i])
+    }
+    eval(action.join(";"))
+  
     return path_obj;
 }
 
@@ -428,8 +431,8 @@ function deleteByPatternInSchema(obj, pattern, max_level = 0, level = 0, path = 
  */
 function returnParentLinks(path_obj)
 {
-    //debugger;
-    
+    //@todo улучшить функцию getFunctionNameBySchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__ 
+    //@todo можно вместо того чтоб пробежаться рекурсивно каждый раз сохранить список ключей над которыми нужно выполнить операцию и закешировать его.
     let del_func = getFunctionNameBySchema(path_obj, '__func__', (obj, key) => {
         
         if(!window[obj[key]])
@@ -450,15 +453,17 @@ function returnParentLinks(path_obj)
         return path_obj[obj[key]];
     })
  
+    let action = []
     for(let i in del_func)
     {
-        eval("delete path_obj"+del_func[i])
+        action.push("delete path_obj"+del_func[i])
     }
 
     for(let i in del_links)
     {
-        eval("delete path_obj"+del_links[i])
+        action.push("delete path_obj"+del_links[i])
     }
+    eval(action.join(";"))
 
     /*getFunctionNameBySchema(path_obj, '__link__', (obj, key) => {
         debugger;
