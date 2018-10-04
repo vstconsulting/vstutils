@@ -167,6 +167,7 @@
             { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
             { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziModal.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
 
@@ -180,6 +181,7 @@
 
             { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
             { prioritet:10.1, type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
+            { prioritet:10.2, type:'js', name: "{% static 'js/guiModal.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiBreadcrumbers.js' %}?v={{gui_version}}"},
             { prioritet:11.1, type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}"},
@@ -198,10 +200,12 @@
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiDashboard.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiBreadcrumbers.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiModals.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
 
             { prioritet:101, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
             { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
             { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
             { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
             { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
@@ -335,6 +339,13 @@
 
                             {% block footer %}
                                 <footer class="main-footer">
+
+                                    <div class="btn-group" role="group">
+                                        <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="openHelpModal(); return false;">
+                                            <span class="glyphicon glyphicon-question-sign"></span> About
+                                        </a>
+                                    </div>
+
 
                                     {% block footer_buttons %}{% endblock %}
 

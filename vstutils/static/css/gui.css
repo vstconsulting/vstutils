@@ -1448,4 +1448,17 @@ table{
 
 /* End of styles for htmlfield */
 
+.with_bottom_border {
+    border-bottom: solid 1px #ecf0f5;
+    padding-bottom: 5px;
+    /*border-bottom-color: #959da5;*/
+}
+
+.iziModal-header-title {
+    font-size: 1.75em!important;
+}
+
+.iziModal-header-subtitle {
+    font-size: 1em!important;
+}
 
