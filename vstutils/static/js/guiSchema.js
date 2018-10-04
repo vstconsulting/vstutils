@@ -460,14 +460,15 @@ function openApi_guiSchema(api)
                 post:   openApi_guiQuerySchema(api, val.post, 'post', name),
                 delete: openApi_guiQuerySchema(api, val.delete, 'delete', name),
             },
+            method:{'get':'', 'patch':'', 'put':'', 'post':'', 'delete':''},
             buttons:[],             // button array; массив кнопочек
             short_name:undefined,   // Путь в апи без упоминания блоков \/\{[A-z0-9]\}\/
             hide_non_required:guiLocalSettings.get('hide_non_required'),
-            extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/^\//g, "_")],    // Имена классов от которых надо отнаследоваться
+            extension_class_name:["gui_"+i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "").replace(/\//g, "_")],    // Имена классов от которых надо отнаследоваться
             methodEdit:undefined,
             selectionTag:i.replace(/[^A-z0-9\-]/img, "_"),
         }
-
+        
         if(type != 'action')
         {
             let short_key = i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "")
@@ -541,6 +542,7 @@ function openApi_guiSchema(api)
                 operationId:val.api.get.operationId,
                 responses:val.api.get.responses,
             }
+            val.method['get'] = 'list'
 
             if(val.api.post)
             {
@@ -551,6 +553,7 @@ function openApi_guiSchema(api)
                     operationId:val.api.post.operationId,
                     responses:val.api.post.responses,
                 }
+                val.method['new'] = 'post'
             }
         }
         else if(val.type == 'page')
@@ -562,6 +565,7 @@ function openApi_guiSchema(api)
                 operationId:val.api.get.operationId,
                 responses:val.api.get.responses,
             }
+            val.method['get'] = 'page'
 
             for(let f in val.schema.get.fields)
             {
@@ -577,6 +581,7 @@ function openApi_guiSchema(api)
                     operationId:val.api.put.operationId,
                     responses:val.api.put.responses,
                 }
+                val.method['put'] = 'edit'
             }
 
             if(val.api.patch)
@@ -588,6 +593,7 @@ function openApi_guiSchema(api)
                     operationId:val.api.patch.operationId,
                     responses:val.api.patch.responses,
                 }
+                val.method['patch'] = 'edit'
             }
         }
         else
@@ -611,12 +617,13 @@ function openApi_guiSchema(api)
                         val.isEmptyAction = true;
                     }
 
+                    val.method[query_types] = 'exec'
                     break;
                 }
             }
         }
     }
-
+    
     // Bind list pages and object pages
     // Свяжет страницы списков и страницы объектов
     for(let path in path_schema)
@@ -712,6 +719,11 @@ function openApi_guiSchema(api)
         {
             val.schema[schema].fields = openApi_guiPrepareAdditionalProperties(path_schema, val, val.schema[schema].fields)
         }
+    }
+
+    for(let path in path_schema)
+    {
+        delete path_schema[path].api
     }
 
     // for(let path in path_schema)
@@ -944,7 +956,7 @@ function getFunctionNameBySchema(obj, pattern, callback, max_level = 0, level = 
             if(obj["__link__"+i])
             {
                 // debugger;
-                console.log("skip " + path+"."+i)
+                // console.log("skip " + path+"."+i)
             }
             else
             {

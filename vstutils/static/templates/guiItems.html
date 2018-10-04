@@ -769,13 +769,15 @@
             <section class="col-lg-12">
                 <div class="box box-info">
                     <div class="box-header with-border">
-                        Error renderErrorAsPage<br>
+                        Error<br>
                     </div>
                     <div class="box-body">
                         <div class="row">
                             <div class="col-lg-12">
-                                <%- error.status %><br>
-                                <%- error.data.detail %>
+                                <% debugger; if(error){ %>
+                                    <%- error.status %><br>
+                                    <%- error.data.detail %>
+                                <% } %>
                             </div>
                         </div>
                     </div>

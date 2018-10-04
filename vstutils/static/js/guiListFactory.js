@@ -52,7 +52,7 @@ var gui_list_object = {
 
         }
 
-        $.when(api.query(q)).done(function(data)
+        $.when(this.apiQuery(q)).done(function(data)
         {
             guiPopUp.success("Objects of '"+thisObj.api.bulk_name+"' type were successfully deleted");
             def.resolve(data)
@@ -156,7 +156,7 @@ var gui_list_object = {
         }
 
         //отправляем bulk запрос
-        $.when(api.query(bulkArr)).done(d =>
+        $.when(this.apiQuery(bulkArr)).done(d =>
         {
             for(var item in dataFromApi)
             {
@@ -300,14 +300,14 @@ var gui_list_object = {
 
         var promise = new $.Deferred();
 
-        $.when(api.query(queryObj)).done(d => {
+        $.when(this.apiQuery(queryObj)).done(d => {
 
             $.when(this.prefetch(d)).always(a => {
                 promise.resolve(a);
             });
 
-        }).fail(f => {
-            promise.reject();
+        }).fail(e => {
+            promise.reject(e);
         })
 
         return promise.promise();
