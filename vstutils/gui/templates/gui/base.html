@@ -32,18 +32,17 @@
             var is_authenticated = false
         {% endif %}
 
+        var is_superuser = false
+        var is_staff = false
+
         {% if user.is_superuser %}
-            var is_superuser = true
-            var is_staff = true
-        {% else %}
-            {% if user.is_staff %}
-                var is_superuser = true
-                var is_staff = true
-            {% else %}
-                var is_superuser = false
-                var is_staff = false
-            {% endif %}
+            is_superuser = true
         {% endif %}
+
+        {% if user.is_staff %}
+             is_staff = true
+        {% endif %}
+
 
         window.guiStaticPath = "{% static '' %}";
         window.isDebug = {% if debug %}true{% else %}false{% endif %}
@@ -248,7 +247,7 @@
             </div>
         {% endblock %}
 
-        <div id="RealBody" style="display: none;">
+        <div id="RealBody" class="{% if user.is_superuser %} is_superuser {% endif %} {% if user.is_staff %} is_staff {% endif %}" style="display: none;">
             {% block gui_body_template %}
                 <div class="hold-transition skin-black-light sidebar-mini " style="width: 100vw;    height: 100vh;">
                     <div id="loader-wrapper">
