@@ -102,9 +102,9 @@
 <script  type="text/x-just" style="display: none;" data-just="search_field">
     <!-- Pm+ searchFiled -->
     <div>
-        
+
         <div class="filtered-search">
-            <~ guiObj.activeSearch.filters> 
+            <~ guiObj.activeSearch.filters>
                 <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
                     <span class="input-filter-item">
                         <div class="input-filter-inner">
@@ -119,7 +119,7 @@
                                 type="text"
                                 id="search-query-input-<%- valfield.name %>"
                                 data-value-name="<%- valfield.name %>"
-                                
+
                                 placeholder="Search by name"
                                 class="input-value"
                                 maxlength="255"
@@ -140,8 +140,8 @@
                                 %> 
                             >
                         </div>
-                        <span class="remove-token" 
-                                role="button" 
+                        <span class="remove-token"
+                                role="button"
                                 data-value-name="<%- valfield.name %>"
                                 <%= justOn('click', function(event)
                                     { 
@@ -156,7 +156,7 @@
                 <% } %>
             <~>
         </div>
-        
+
         <div class="input-group filtered-search col-lg-6 col-sm-12 col-xs-12 col-md-12" style="float: right; ">
             <table>
                 <tr>
@@ -177,44 +177,41 @@
                             class="form-control"
                             maxlength="255"
                             data-backspace="false"
-                            value="<%- opt.query %>" 
+                            value="<%- opt.query %>"
                             <%= justOn('keyup', function(event)
                                 {
                                     guiObj.onSearchInput(event, event.currentTarget)
                                     event.preventDefault();
                                 }, "search-query-input")
-                            %> 
+                            %>
                         >
                     </td>
                     <td>
-                        <div class="input-group-addon search-btn" 
+                        <div class="input-group-addon search-btn"
                             <%= justOn('click', function(event)
                                 {
                                     guiObj.searchGO($('#search-query-input').val(), guiObj.searchAdditionalData)
                                     event.preventDefault();
                                 })
-                            %>  
+                            %>
                             >
                             <span class="glyphicon glyphicon-search" ></span>
                         </div>
                     </td>
                 </tr>
             </table>
-        </div> 
-    </div> 
+        </div>
+    </div>
 </script>
 
 
 <script type="text/x-just" data-just="page_breadcrumb">
-    <section class="content-header">
-        <h1>
-            page_breadcrumb
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">page_breadcrumb</li>
-        </ol>
-    </section>
+    <ol class="breadcrumb">
+        <li><a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+        <% for(var i in urls) { %>
+            <li <% if(i == urls.length-1) { %> class="active" <% } %> > <%= urls[i] %> </li>
+        <% } %>
+    </ol>
 </script>
 
 <!-- Страница экшена -->
@@ -745,7 +742,7 @@
 
     <%! entity_base %>
 </script>
- 
+
 <script type="text/x-just" data-just="entity_new">
     <!-- entity_new -->
 

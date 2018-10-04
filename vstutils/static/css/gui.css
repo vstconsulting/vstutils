@@ -711,7 +711,7 @@ table{
 .menu-treeview>.menu-treeview-menu{
     display: none;
 }
- 
+
 .menu-treeview.hover-li .menu-treeview-menu {
     display: block;
     position: absolute;
@@ -1089,17 +1089,17 @@ table{
 }
 
 @media (max-width: 767px) {
-    
+
     .main-header .logo{
         display: none;
     }
-    
+
     .sidebar-menu ul.menu-treeview-menu{
         /*position: relative;
         display: block;*/
         color: #f00;
     }
-    
+
     .sidebar-menu .menu-treeview.hover-li .menu-treeview-menu {
         display: block !important;
         margin: 0;
@@ -1108,35 +1108,35 @@ table{
         position: initial;
     }
     .sidebar-menu .menu-treeview.hover-li .menu-treeview-menu .group-header-copy {
-        display: none;  
+        display: none;
     }
-    
+
     .sidebar-mini.sidebar-open .sidebar-menu>li.menu-treeview-active>.menu-treeview-menu{
         display: block;
     }
-    
+
     .sidebar-menu .menu-treeview-menu>li>a {
         background-color: transparent;
     }
-    
+
     .sidebar-menu>li.menu-treeview-active>a, .sidebar-menu>li.menu-treeview-active>.menu-treeview-menu {
         border-left: 5px solid #00c0ef;
     }
-    
+
     .menu-treeview.hover-li .menu-treeview-menu>li>a{
         padding-left: 45px;
     }
 }
 
 .menu-treeview.hover-li .open-menu-treeview-button i, .menu-treeview-active .open-menu-treeview-button i{
-    transform: rotate(4.7rad); 
+    transform: rotate(4.7rad);
 }
- 
-.h1-header { 
+
+.h1-header {
     text-transform: capitalize;
 }
 
-.sublink-btn { 
+.sublink-btn {
     text-transform: capitalize;
 }
 
@@ -1154,21 +1154,21 @@ table{
 
 /**
  * Фильтры для формы поиска
- **/   
+ **/
 .filtered-search{
     float: right;
     margin-bottom: 10px;
     margin-left: 10px;
 }
-        
+
 .input-filter-inner{
     display: inline-block;
-    float: left; 
+    float: left;
     border-right: 1px solid #ccc;
     height: 100%;
     width: calc(100% - 40px);
 }
-        
+
 .filtered-search .active-name{
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
@@ -1176,11 +1176,11 @@ table{
     padding: 9px;
     margin: 0;
     float: right;
-    border-radius: 0;   
+    border-radius: 0;
     border-radius: 0;
     margin: 0px;
 }
-        
+
 .filtered-search .input-group-addon{
     height: 40px;
 }
@@ -1191,11 +1191,11 @@ table{
 
 .filtered-search .input-value{
     border: 0px;
-    padding: 5px; 
+    padding: 5px;
     display: none;
     margin-top: 4px;
     margin-right: 4px;
-}       
+}
 
 .filtered-search .show-input-text .value{
     display: none;
@@ -1204,7 +1204,7 @@ table{
 .filtered-search .show-input-text .input-value{
     display: inline-block;
 }
-    
+
 
 .filtered-search .name{
     background-color: transparent;
@@ -1215,9 +1215,9 @@ table{
     text-transform: capitalize;
     padding: 9px;
     float: left;
-}           
+}
 
-.filtered-search .value{ 
+.filtered-search .value{
     color: #131313;
     border-radius: 0 2px 2px 0;
     margin-right: 5px;
@@ -1235,7 +1235,7 @@ table{
 .input-filter-item{
     width: auto;
     border: 1px solid #ccc;
-    display: inline-block; 
+    display: inline-block;
     margin: 0px;
     float: right;
     border-right: 0px;
@@ -1252,24 +1252,24 @@ table{
 
 .remove-token{
     float: right;
-    width: 40px; 
+    width: 40px;
     height: 38px;
     text-align: center;
     vertical-align: middle;
     padding: 9px;
 }
 
-@media (max-width: 768px) { 
+@media (max-width: 768px) {
     .input-filter-item{
         margin-top: 10px;
         border-right: 1px solid #ccc;
         width: 100%;
     }
-    
+
     .filtered-search{
         width: 100%;
     }
-     
+
     .filtered-search .input-value{
         width: 100%;
         border: 1px solid #ccc;
@@ -1462,3 +1462,12 @@ table{
     font-size: 1em!important;
 }
 
+.content-header > .breadcrumb > li.active > a {
+    color: #777;
+}
+
+@media (max-width: 992px) {
+    .content-header >.breadcrumb {
+        /*margin-top: 15px;*/
+    }
+}
