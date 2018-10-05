@@ -177,14 +177,31 @@ class VSTAutoSchema(SwaggerAutoSchema):
         self._sch = args[0].schema
         self._sch.view = args[0]
 
+    def _get_nested_view_class(self, nested_view, view_action_func):
+        # pylint: disable=protected-access
+        if not hasattr(view_action_func, '_nested_name'):
+            return nested_view
+        nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
+        nested_view_class = getattr(view_action_func, '_nested_view', None)
+        if nested_view is None:  # nocv
+            return nested_view
+        view_action_func = getattr(nested_view_class, nested_action_name, None)
+        if view_action_func is None:
+            return nested_view
+        return self._get_nested_view_class(nested_view_class, view_action_func)
+
     def __get_nested_view_obj(self, nested_view, view_action_func):
         # pylint: disable=protected-access
-        nested_action_name = view_action_func._nested_name
-        action_suffix = self.view.action.replace(view_action_func._nested_name + '_', '')
-        if action_suffix.endswith(view_action_func._nested_name):
-            action_suffix = action_suffix.split('_')[-1]
-        is_detail = action_suffix == 'detail'
-        is_list = action_suffix == 'list'
+        # Get nested view recursively
+        nested_view = self._get_nested_view_class(nested_view, view_action_func)
+        # Get action suffix
+        replace_pattern = view_action_func._nested_subname + '_'
+        replace_index = self.view.action.index(replace_pattern) + len(replace_pattern)
+        action_suffix = self.view.action[replace_index:]
+        # Check detail or list action
+        is_detail = action_suffix.endswith('detail')
+        is_list = action_suffix.endswith('list')
+        # Create view object
         method = self.method.lower()
         nested_view_obj = nested_view()
         nested_view_obj.request = self.view.request
@@ -192,6 +209,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         nested_view_obj.lookup_field = self.view.lookup_field
         nested_view_obj.lookup_url_kwarg = self.view.lookup_url_kwarg
         nested_view_obj.format_kwarg = None
+        # Check operation action
         if method == 'post' and is_list:
             nested_view_obj.action = 'create'
         elif method == 'get' and is_list:
@@ -206,25 +224,13 @@ class VSTAutoSchema(SwaggerAutoSchema):
             nested_view_obj.action = 'destroy'
         else:
             nested_view_obj.action = action_suffix
-            if hasattr(nested_view_obj, nested_action_name):
-                nested_view_obj.action = nested_action_name
-                view = getattr(nested_view_obj, nested_action_name)
+            if hasattr(nested_view_obj, action_suffix):
+                view = getattr(nested_view_obj, action_suffix)
                 serializer_class = view.kwargs.get('serializer_class', None)
                 if serializer_class:
                     nested_view_obj.serializer_class = serializer_class
 
         return nested_view_obj
-
-    def __get_nested_serializer(self, nested_view, view_action_func):
-        return self.__get_nested_view_obj(nested_view, view_action_func).get_serializer()
-
-    def get_view_serializer(self):
-        if hasattr(self.view, 'get_serializer'):
-            view_action_func = getattr(self.view, self.view.action, None)
-            nested_view = getattr(view_action_func, '_nested_view', None)
-            if nested_view:
-                return self.__get_nested_serializer(nested_view, view_action_func)
-        return super(VSTAutoSchema, self).get_view_serializer()
 
     def get_operation_id(self, operation_keys):
         new_operation_keys = []
@@ -267,6 +273,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
             if result:
                 return result
         return getattr(super(VSTAutoSchema, self), func_name)(*args, **kwargs)
+
+    def get_view_serializer(self, *args, **kwargs):
+        return self.__perform_with_nested('get_view_serializer', *args, **kwargs)
 
     def get_pagination_parameters(self, *args, **kwargs):
         return self.__perform_with_nested('get_pagination_parameters', *args, **kwargs)
