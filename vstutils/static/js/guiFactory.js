@@ -86,7 +86,8 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
  */
 function getNameForUrlRegExp(api_path)
 {
-    var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
+     var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
+    // var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[A-z0-9%\\-.:,=]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
     return url;
 }
 
@@ -509,6 +510,7 @@ function emitFinalSignals()
     tabSignal.emit("openapi.paths",  {api: window.api});
 
     tabSignal.emit("openapi.completed",  {api: window.api});
+
     tabSignal.emit("loading.completed");
 }
 
