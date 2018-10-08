@@ -2,8 +2,8 @@
 var gui_base_object = {
 
     getTemplateName : function (type, default_name)
-    {
-        var tpl = this.bulk_name + '_'+type
+    { 
+        var tpl = this.api.bulk_name + '_'+type
         if (!spajs.just.isTplExists(tpl))
         {
             if(default_name)

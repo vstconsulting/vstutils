@@ -1471,3 +1471,13 @@ table{
         /*margin-top: 15px;*/
     }
 }
+
+.col12-mode .col-lg-4{
+    width: 100%
+}
+.col12-mode .col-sm-6 {
+    width: 100%
+}
+.col12-mode .col-md-6{
+    width: 100%
+}
