@@ -368,6 +368,17 @@ var gui_list_object = {
             rendered:{}
         }
         
+        // Добавим поле id принудительно если его даже нет в списке
+        if(line.id === undefined)
+        {
+            line.id = Object.keys(line)[0]
+        }
+        dataLine.url_key = line.id
+        if(dataLine.url_key/1 +"" !== dataLine.url_key+"")
+        {
+            dataLine.url_key = "@"+dataLine.url_key
+        }
+        
         tabSignal.emit("guiList.renderLine",  {guiObj:this, dataLine: dataLine});
         tabSignal.emit("guiList.renderLine."+this.api.bulk_name,  {guiObj:this, dataLine: dataLine});
        

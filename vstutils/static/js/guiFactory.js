@@ -35,6 +35,14 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             return false;
         }
 
+        for(let i in res.groups)
+        {
+            if(i.indexOf("api_") == 0 && res.groups[i][0] == '@')
+            { 
+                res.groups[i] = res.groups[i].substring(1)
+            }
+        }
+        
         var obj = res.groups
         obj.url = res[0]                 // текущий урл в блоке
         obj.page_and_parents = res[0]    // страница+родители
@@ -51,6 +59,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
                 obj.page_name = match.groups.page_type
             }
         }
+        
 
         obj.searchURL = function(query){
 
@@ -86,9 +95,9 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
  */
 function getNameForUrlRegExp(api_path)
 {
-     var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
-    // var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[A-z0-9%\\-.:,=]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
-    return url;
+    //var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
+    var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+|@[A-z0-9]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
+    return url; // ((?<parent_id>[0-9]+)|(?<=@)(?<parent_id>[A-z0-9]+))
 }
 
 /**
@@ -144,7 +153,7 @@ function openApi_add_one_page_path(api_obj)
 
     // Определяем тип страницы из урла (есть у него id в конце или нет)
     let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
-
+   
     // Страница элемента вложенного куда угодно
     let regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
 
@@ -200,7 +209,7 @@ function openApi_add_list_page_path(api_obj)
     {
         // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
         let new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_obj)
-
+         
         spajs.addMenu({
             id:getMenuIdFromApiPath(api_path + "_new"),
             url_parser:[new_page_url],
