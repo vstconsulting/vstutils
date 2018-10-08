@@ -76,7 +76,7 @@ var gui_base_object = {
             {
                 parent_field = field.parent_field
             }
- 
+
             let thisField = this.model.guiFields[field.name];
             let parentField = this.model.guiFields[parent_field];
 
@@ -151,29 +151,67 @@ var gui_base_object = {
         this.base_init.apply(this, arguments)
     },
 
-    sendToApi : function (method, callback, error_callback)
+    apiQuery : function ()
+    {
+        return api.query.apply(api, arguments)
+    },
+
+    getDataFromForm : function (method)
+    {
+        let data = this.getValue(true)
+        if (this['onBefore'+method])
+        {
+            data = this['onBefore'+method].apply(this, [data]);
+        }
+
+        return data
+    },
+
+    sendToApi : function (method, callback, error_callback, data)
     {
         var def = new $.Deferred();
-        var data = {}
-
+        
         try{
-            data = this.getValue(true)
-            if (this['onBefore'+method])
+            if(!data)
             {
-                data = this['onBefore'+method].apply(this, [data]);
-                if (data == undefined || data == false)
+                data = this.getDataFromForm(method)
+            }
+            
+            if (data == undefined || data == false)
+            {
+                def.reject()
+                if(error_callback)
                 {
-                    def.reject()
-                    return def.promise();
+                    if(error_callback(data) === false)
+                    {
+                        return;
+                    }
                 }
-            }
 
-            if(!this.api.api[method] || !this.api.api[method].operationId)
+                return def.promise();
+            }
+            
+            if (data == true)
             {
-                throw "!this.api[method].operationId"
+                if(callback)
+                {
+                    if(callback(data) === false)
+                    {
+                        return;
+                    }
+                }
+
+                def.resolve()
+                return def.promise();
             }
 
-            let operationId = this.api.api[method].operationId.replace(/(set)_([A-z0-9]+)/g, "$1-$2")
+
+            if(!this.api.schema[this.api.method[method]] || !this.api.schema[this.api.method[method]].operationId)
+            {
+                throw "!this.schema[this.api.method[method]].operationId"
+            }
+
+            let operationId = this.api.schema[this.api.method[method]].operationId.replace(/(set)_([A-z0-9]+)/g, "$1-$2")
 
             var operations = []
             operations = operationId.split("_");
@@ -229,7 +267,7 @@ var gui_base_object = {
                     method:method
                 }
 
-                $.when(api.query(q)).done(data =>
+                $.when(this.apiQuery(q)).done(data =>
                 {
                     if(callback)
                     {
@@ -281,12 +319,12 @@ var gui_base_object = {
             return webGui.showErrors(error)
         }
 
-        if(this.api.api[method]
-            && this.api.api[method].responses
-            && this.api.api[method].responses[error.status]
-            && this.api.api[method].responses[error.status].description)
+        if(this.api.schema[this.api.method[method]]
+            && this.api.schema[this.api.method[method]].responses
+            && this.api.schema[this.api.method[method]].responses[error.status]
+            && this.api.schema[this.api.method[method]].responses[error.status].description)
         {
-            guiPopUp.error(this.api.api[method].responses[error.status].description)
+            guiPopUp.error(this.api.schema[this.api.method[method]].responses[error.status].description)
         }
     }
 }
@@ -321,11 +359,11 @@ function guiObjectFactory(api_object)
         arr.push(window["gui_"+api_object.type+"_object"])
     }
 
-    if(api_object.extension_class_names)
+    if(api_object.extension_class_name)
     {
-        for(let i in api_object.extension_class_names)
+        for(let i in api_object.extension_class_name)
         {
-            if(api_object.extension_class_names[i] && window[api_object.extension_class_name[i]])
+            if(api_object.extension_class_name[i] && window[api_object.extension_class_name[i]])
             {
                 arr.push(window[api_object.extension_class_name[i]])
             }

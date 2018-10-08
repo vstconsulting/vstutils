@@ -106,7 +106,8 @@ var gui_page_object = {
         }
 
         //отправляем bulk запрос
-        $.when(api.query(bulkArr)).done(d =>
+        // $.when(api.query(bulkArr)).done(d =>
+        $.when(this.apiQuery(bulkArr)).done(d =>
         {
             for(var field in dataFromApi)
             {
@@ -190,7 +191,8 @@ var gui_page_object = {
             method:'get'
         }
 
-        var def = api.query(q)
+        // var def = api.query(q)
+        var def = this.apiQuery(q);
 
         var promise = new $.Deferred();
 

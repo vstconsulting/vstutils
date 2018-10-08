@@ -1,0 +1,36 @@
+<!-- base template of base modal content -->
+<script type="text/x-just" data-just="modal_content">
+    <div class="iziModal-wrap">
+        <div class="iziModal-content" style="padding:20px;">
+            <%[ modal_content_block %>
+            <%] %>
+            <%* modal_content_block %>
+        </div>
+    </div>
+</script>
+
+<!-- template of help modal content -->
+<script type="text/x-just" data-just="help_modal_content">
+     <%[ modal_content_block %>
+        <h4 class="with_bottom_border">Versions</h4>
+        <ul>
+            <% for(var item in info['x-versions']) { %>
+                <li> <b><%- item %>:</b> <%- info['x-versions'][item] %> </li>
+            <% } %>
+        </ul>
+
+        <% for(var i in info['x-links']) { %>
+            <h4 class="with_bottom_border" style="margin-top:20px;"> <%- i %> </h4>
+            <ul>
+                <% if($.isArray(info['x-links'][i])) { %>
+                        <% for(var j in info['x-links'][i]) { %>
+                            <li> <a href="<%- info['x-links'][i][j].url %>"><%- info['x-links'][i][j].name %></a> </li>
+                        <% } %>
+                <% } else { %>
+                    <li> <a href="<%- info['x-links'][i].url %>"><%- info['x-links'][i].name %></a> </li>
+                <% } %>
+            </ul>
+        <% } %>
+    <%] %>
+    <%! modal_content %>
+</script>

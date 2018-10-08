@@ -467,3 +467,16 @@ function vstMakeLocalApiUrl(url, vars = {})
 
     return vstMakeLocalUrl(makeUrlForApiKeys(url), vars)
 }
+
+function openHelpModal()
+{
+    let info = api.openapi.info;
+    let opt = {};
+    if(info.title)
+    {
+        opt.title = info.title;
+    }
+    let html = spajs.just.render('help_modal_content', {info: info});
+    guiModal.setModalHTML(html, opt);
+    guiModal.modalOpen();
+}
