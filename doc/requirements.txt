@@ -1,0 +1,3 @@
+sphinx<1.8
+sphinxcontrib-mermaid
+sphinx_bootstrap_theme
