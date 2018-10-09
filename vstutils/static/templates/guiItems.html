@@ -715,6 +715,18 @@
         <%* sublink_buttons %>
     <%] %>
 
+    <%[ fields_block %>
+        <% for(var i in opt.fields){ %>
+            <%= guiObj.renderField(opt.fields[i], opt) %>
+        <% } %>
+
+        <% if(opt.sections){ %>
+            <% for(var i in opt.sections){ %>
+                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
+            <% } %>
+        <% } %>
+    <%] %>
+    
     <%[ main_content_row %>
         <section class="col-lg-12">
             <div class="box box-info">
@@ -722,17 +734,8 @@
                     &nbsp;
                 </div>
                 <div class="box-body">
-                    <div class="row">
-
-                        <% for(var i in opt.fields){ %>
-                            <%= guiObj.renderField(opt.fields[i], opt) %>
-                        <% } %>
-
-                        <% if(opt.sections){ %>
-                            <% for(var i in opt.sections){ %>
-                                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
-                            <% } %>
-                        <% } %>
+                    <div class="row"> 
+                        <%* fields_block %>
                     </div>
                 </div>
             </div>

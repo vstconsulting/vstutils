@@ -617,7 +617,7 @@ function openApi_guiSchema(api)
                         val.isEmptyAction = true;
                     }
 
-                    val.method[query_types] = 'exec'
+                    val.method[query_types[q]] = 'exec'
                     break;
                 }
             }
@@ -1094,31 +1094,7 @@ function setDefaultPrefetchFunctions(obj)
             {
                 continue;
             }
-
-            if(typeof field.prefetch == "object")
-            {
-                for(let item in field.prefetch)
-                {
-                    if(!field.prefetch[item])
-                    {
-                        continue;
-                    }
-
-                    if(typeof field.prefetch[item] != "string")
-                    {
-                        console.error("typeof field.prefetch['"+field.prefetch[item]+"'] != 'string' ", typeof field.prefetch[item])
-                        debugger;
-                        throw "Error, typeof field.prefetch['"+field.prefetch[item]+"'] != 'string' "
-                    }
-
-                    if(field.prefetch[item].indexOf('__func__') == 0)
-                    {
-                        field.prefetch[item] = findFunctionByName(field.prefetch[item], '__func__');
-                    }
-                }
-                continue;
-            }
-
+  
             let prefetch_path = undefined
             if(typeof field.prefetch == "string")
             {
