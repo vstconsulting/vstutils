@@ -333,7 +333,7 @@ guiElements.base = function(opt = {}, value, parent_object)
             }
         }
     }
- 
+
     if(this.opt.onInit)
     {
         this.opt.onInit.apply(this, arguments)
@@ -792,7 +792,7 @@ guiElements.autocomplete.prepareProperties = function(value)
     if(!value.additionalProperties)
     {
         debugger;
-        console.error("Not fount additionalProperties");
+        console.error("AdditionalProperties was not found");
         return value;
     }
 
@@ -817,7 +817,7 @@ guiElements.select2 = function(field, field_value, parent_object)
 {
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
- 
+
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
@@ -896,6 +896,28 @@ guiElements.select2 = function(field, field_value, parent_object)
             if(props['obj'])
             {
                 let list = new guiObjectFactory(props['obj']);
+
+                if(field_value)
+                {
+                    let filters = getFiltersForAutocomplete(list, field_value, value_field);
+                    $.when(list.search(filters)).done(data => {
+                        try
+                        {
+                            let option_data = {
+                                id: data.data.results[0][value_field],
+                                text: data.data.results[0][view_field],
+                            }
+
+                            let newOption = new Option(option_data.text, option_data.id, false, false);
+
+                            $('#'+this.element_id).append(newOption).trigger('change');
+                        }
+                        catch(e)
+                        {
+                            console.warn(e);
+                        }
+                    })
+                }
 
                 $('#'+this.element_id).select2({
                     width: '100%',
@@ -1213,12 +1235,12 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     {
         this.opt.dynamic_type = 'string'
     }
-     
+
     let override_options = $.extend({}, this.opt, this.opt.override_opt)
     override_options.onInit = undefined
-     
+
     this.realElement = new guiElements[this.opt.dynamic_type](override_options, value, parent_object);
- 
+
     let func = function(name)
     {
         return function(){ return thisObj.realElement[name].apply(thisObj.realElement, arguments)}
@@ -1243,17 +1265,17 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         {
             lastValue = options.default;
         }
- 
-        
+
+
         this.realElement = new guiElements[type](options, value, parent_object);
-        
+
         this.realElement.addOnChangeCallBack(function(){
             thisObj._callAllonChangeCallback()
         })
 
         this.realElement.setValue(lastValue);
         $('#gui'+this.element_id).insertTpl(this.realElement.render());
-         
+
     }
 
     this.opt.onUpdateOptions = [];
@@ -1338,14 +1360,14 @@ guiElements.dynamic.prepareProperties = function(value)
     if(value.additionalProperties)
     {
         let dynamic_properties = mergeDeep(
-                                        value.dynamic_properties,
-                                        {
-                                            types:value.additionalProperties.types,
-                                            choices:value.additionalProperties.choices,
-                                        })
+            value.dynamic_properties,
+            {
+                types:value.additionalProperties.types,
+                choices:value.additionalProperties.choices,
+            })
         value.dynamic_properties = dynamic_properties
     }
-    
+
     return value
 }
 
@@ -1894,14 +1916,14 @@ function getFiltersForAutocomplete(list, search_str, view_field)
     let filters = {
         limit:20,
         offset:0,
-        query:{
+        search_query:{
 
         }
     };
 
     if(search_str)
     {
-        filters['query'][view_field] = search_str;
+        filters['search_query'][view_field] = search_str;
     }
 
     return filters;

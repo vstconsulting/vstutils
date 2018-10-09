@@ -701,7 +701,10 @@ function openApi_guiSchema(api)
                 name:"delete",
                 onClick:multi_action_delete,
             }
-            val['multi_actions']['delete'] = '__func__multi_action_delete';
+            val['multi_actions']['delete'] = {
+                    name:"delete",
+                    __func__onClick: 'multi_action_delete',
+                };
         }
     }
 
