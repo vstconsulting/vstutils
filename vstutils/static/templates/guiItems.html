@@ -369,12 +369,22 @@
                         <% for(var k in dataLine.sublinks_l2){ %>
                             <% if(!dataLine.sublinks_l2[k].hidden) { %>
                                 <li>
-                                    <a
-                                        href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
-                                        onclick="return false;"
-                                        class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
-                                            <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
-                                    </a>
+                                    <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
+                                        <a
+                                            href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
+                                            onclick="return false;"
+                                            class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
+                                                <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                        </a> 
+                                    <% } else { %> 
+                                        <b   
+                                            class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>" 
+                                            >
+                                                <i <%= justOn('click', emptyAction(dataLine.sublinks_l2[k])) %>>
+                                                    <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                                </i>
+                                        </b>  
+                                    <% } %>
                                 </li>
                             <% } %>
                         <% } %>

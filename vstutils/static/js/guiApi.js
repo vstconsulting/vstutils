@@ -80,14 +80,8 @@ function guiApi()
         var this_query_data = mergeDeep({}, query_data)
         reinit_query_data()
 
-        var scheme = "http"
-        if($.inArray("https", thisObj.openapi.schemes) != -1)
-        {
-            scheme = "https"
-        }
-
         spajs.ajax.Call({
-            url: scheme+"://"+thisObj.openapi.host + thisObj.openapi.basePath+"/_bulk/",
+            url: thisObj.openapi.schemes[0]+"://"+thisObj.openapi.host + thisObj.openapi.basePath+"/_bulk/",
             type: "PUT",
             contentType:'application/json',
             data: JSON.stringify(this_query_data.data),

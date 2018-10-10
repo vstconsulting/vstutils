@@ -318,14 +318,31 @@ var gui_base_object = {
         {
             return webGui.showErrors(error)
         }
+        
+        let text = ""
+        if(error.data.detail)
+        {
+            text = error.data.detail +". "
+        }
+        
+        
 
         if(this.api.schema[this.api.method[method]]
             && this.api.schema[this.api.method[method]].responses
             && this.api.schema[this.api.method[method]].responses[error.status]
             && this.api.schema[this.api.method[method]].responses[error.status].description)
         {
-            guiPopUp.error(this.api.schema[this.api.method[method]].responses[error.status].description)
+            text += this.api.schema[this.api.method[method]].responses[error.status].description
         }
+        else if(this.api.schema[method]
+            && this.api.schema[method].responses
+            && this.api.schema[method].responses[error.status]
+            && this.api.schema[method].responses[error.status].description)
+        {
+            text += this.api.schema[method].responses[error.status].description
+        }
+        
+        return guiPopUp.error(text)
     }
 }
 
@@ -410,7 +427,7 @@ function guiObjectFactory(api_object)
 
 
 function emptyAction(action_info)
-{
+{ 
     var pageItem = new guiObjectFactory(action_info)
     return function(){
         pageItem.exec()
