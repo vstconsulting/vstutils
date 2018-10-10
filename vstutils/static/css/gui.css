@@ -1481,3 +1481,12 @@ table{
 .col12-mode .col-md-6{
     width: 100%
 }
+
+.sublink-btn-empty-action{
+    padding: 5px 20px;
+    display: block;
+}
+
+.sublink-btn-empty-action:hover{
+    background-color: #e2e4ea;
+}
