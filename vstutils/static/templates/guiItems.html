@@ -319,18 +319,18 @@
 
 <script type="text/x-just" data-just="entity_list_line">
     <tr
-        class="item-row item-<%- dataLine.url_key %> highlight-tr
+        class="item-row item-<%- String(dataLine.url_key).replace('@', '') %> highlight-tr
                 <% for (var i in dataLine.opt.fields) { %>
                     <% if(dataLine.opt.fields[i].enum) { %>
                         <%- addCssClassesToElement('tr', dataLine.line[i], i) %>
                     <% } %>
                 <% } %>
-                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, dataLine.url_key) %>"
-        data-id="<%- dataLine.url_key %>"
+                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, String(dataLine.url_key).replace('@', '')) %>"
+        data-id="<%- String(dataLine.url_key).replace('@', '') %>"
         data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, dataLine.url_key]) %>"
         onclick="turnTableTrIntoLink(event)"
         >
-        <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', <%- dataLine.url_key %>); return false;">
+        <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
             <div class="ico-on fa fa-toggle-on"></div>
             <div class="ico-off fa  fa-toggle-off"></div>
         </td>
@@ -477,7 +477,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <% for(var k in guiObj.api.multi_actions){   %>
+                                <% for(let k in guiObj.api.multi_actions){   %>
                                     <% if(guiObj.api.multi_actions[k].onClick){ %>
                                         <li>
                                             <a

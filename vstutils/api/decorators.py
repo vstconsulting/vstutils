@@ -382,6 +382,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         view_class = self.get_decorator(**kwargs)(view)
         view_class._nested_view = self.view
         view_class._nested_name = self.name
+        view_class._nested_subname = self.name
         return name, view_class
 
     def decorated_list(self):
@@ -409,6 +410,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         )
         view._nested_view = getattr(sub_view, '_nested_view', self.view)
         view._nested_name = sub
+        view._nested_subname = getattr(sub_view, '_nested_subname', self.name)
         return name, view
 
     def generate_decorated_subs(self):
