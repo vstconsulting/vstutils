@@ -1,21 +1,32 @@
 Signals
 ========================
 
-List of signals that you can use to customize your application. If you want customize your application by using signals, you can add your own signals, insert in your source code ``tabsignal.emit('name_of_signal', {object})``, instead of ``name_of_signal``  you can use you custom name of signal, instead of object you can send object with arguments for functions that subscribe to this signal. If you need subscribe to signal use ``tabsignal.connect('name_of_signal', function)``, on ``name_of_signal`` you need insert name of signal for what you want to subscribe, instead of ``function`` insert function that you need for this signal. Signals list of  `VST Utils`
+List of signals that you can use to customize your application.
+If you want customize your application by using signals, you can
+add your own signals, insert in your source code
+``tabsignal.emit('name_of_signal', {object})``,
+instead of ``name_of_signal``
+you can use you custom name of signal, instead of object
+you can send object with arguments for functions that subscribe to this signal.
+If you need subscribe to signal use ``tabsignal.connect('name_of_signal', function)``,
+on ``name_of_signal`` you need insert name of signal for what you want to subscribe,
+instead of ``function`` insert function that you need for this signal.
+Signals list of  `VST Utils` grouped by milestones.
 
 
-1. Get Schema
+
+Get Schema
 -------------------------
 
-    resourse.loaded
-    """"""""""""""""""""""""
+resourse.loaded
+~~~~~~~~~~~~~~~
 
     Arguments: None
 
     Description: This Signal send after load all resources
 
-    openapi.loaded
-    """"""""""""""""""""""""
+openapi.loaded
+~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -27,8 +38,8 @@ List of signals that you can use to customize your application. If you want cust
 2. Parsing Schema
 ----------------------
 
-    openapi.schema
-    """"""""""""""""""""""""
+openapi.schema
+~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -38,8 +49,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal send if gui schema not in cache
 
-    openapi.schema.name.[name]
-    """""""""""""""""""""""""""""""""
+openapi.schema.name.[name]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parameters:
 
@@ -55,8 +66,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal calls after getting gui schema and calls with `name` of current object.
 
-    openapi.schema.type.[type]
-    """"""""""""""""""""""""""""""""""
+openapi.schema.type.[type]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parameters:
 
@@ -72,8 +83,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal calls after getting gui schema and calls with `type` of current object.
 
-    openapi.schema.schema
-    """""""""""""""""""""""""""""""""
+openapi.schema.schema
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -85,8 +96,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description:
 
-    openapi.schema.schema.[schema]
-    """"""""""""""""""""""""""""""""""""""""""""""""""""
+openapi.schema.schema.[schema]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parameters:
 
@@ -104,8 +115,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal calls after getting gui schema and calls with `schema_name` of current object.
 
-    openapi.schema.fields
-    """""""""""""""""""""""""""""""""
+openapi.schema.fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -125,8 +136,8 @@ List of signals that you can use to customize your application. If you want cust
 3. Render
 ----------------------------
 
-    guiLocalSettings.[name]
-    """"""""""""""""""""""""""""""""
+guiLocalSettings.[name]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parameters:
 
@@ -142,8 +153,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal send after set settings
 
-    openapi.schema.definition
-    """""""""""""""""""""""""""""""""
+openapi.schema.definition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -157,8 +168,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal send in function ```getObjectDefinitionByName```
 
-    openapi.schema.definition.[definition]
-    """""""""""""""""""""""""""""""""""""""""""""""""""
+openapi.schema.definition.[definition]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parameters:
 
@@ -174,8 +185,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal send in function ```getObjectDefinitionByName```
 
-    guiList.renderPage
-    """""""""""""""""""""""""""
+guiList.renderPage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -187,8 +198,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: using this signal to modify page for render
 
-    guiList.renderPage.[bulk_name]
-    """"""""""""""""""""""""""""""""""""""""""""""
+guiList.renderPage.[bulk_name]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Parameters:
 
@@ -204,8 +215,7 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: using this signal to modify page for render
 
-    guiList.renderLine.[bulk_name]
-    """"""""""""""""""""""""""""""""""""""""""""""
+    ``guiList.renderLine.[bulk_name]``
 
     Parameters:
 
@@ -219,8 +229,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: using this signal to modify lines in list
 
-    guiList.renderLine
-    """"""""""""""""""""""""""""""""""""""""""""""
+guiList.renderLine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -230,13 +240,13 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: using this signal to modify lines in list
 
-    webGui.start
-    """""""""""""""""""""""""""""
+webGui.start
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Description: after initialization of web gui can be used to add additional pages
 
-    loading.completed
-    """""""""""""""""""""""""
+loading.completed
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments: None
 
@@ -246,8 +256,8 @@ List of signals that you can use to customize your application. If you want cust
 4. Deprecated functions
 ----------------------------------
 
-    openapi.paths
-    """"""""""""""""""""""""
+openapi.paths
+~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -255,8 +265,8 @@ List of signals that you can use to customize your application. If you want cust
 
     Description: Signal send after schema signals
 
-    openapi.completed
-    """""""""""""""""""""""""""
+openapi.completed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
@@ -314,12 +324,10 @@ Examples
             window.api = new guiApi();
             $.when(window.api.init()).done(function()
             {
-                // Событие в теле которого можно было бы переопределить ответ от open api
                 tabSignal.emit("openapi.loaded",  {api: window.api});
 
                 $.when(getGuiSchema()).done(function ()
                 {
-                    //.. декодирование схемы из кэша
                     window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
                     emitFinalSignals()
