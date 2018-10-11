@@ -1,40 +1,42 @@
 VST Utils functions
 ===========================
 
-``String.format()``
+List of common functions that you can use in your application
+
+String.format()
 """"""""""""""""""""
 Description: This function get list or associative array and insert in string by keys
 
-``String.format_keys()``
-""""""""""""""""""""""
+String.format_keys()
+""""""""""""""""""""""""""""""""
 
-Description: Function search and return all `{keys}` as list
+Description: Function search and return all ``{keys}`` as list
 
-``addslashes(string)``
+addslashes(string)
 """"""""""""""""""""""
 Arguments:
 
-    string: `string` that would be edit
+    string: ``string`` that would be edit
 
 Description: Function get string and replace all '/' to '//'
 
-``inheritance(obj, constructor)``
+inheritance(obj, constructor)
 """"""""""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    obj:
+    obj: parent object
 
-    constructor:
+    constructor: not required
 
-Description:
+Description: return new object that have propertiest and functions of parent object
 
-``hidemodal()``
+hidemodal()
 """""""""""""""""""""""
 
 Description: hide modal window
 
-``capitalizeString(string)``
+capitalizeString(string)
 """""""""""""""""""""""""""""""
 
 Arguments:
@@ -43,51 +45,51 @@ Arguments:
 
 Description: Return string with first letter in upper case and other in lower case
 
-``sliceLongString(string, valid_length)``
+sliceLongString(string, valid_length)
 """"""""""""""""""""""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    string: String for slicing. Default value: `""`
+    string: String for slicing. Default value: ``""``
 
     valid_length: Amount of letters. Default value: 100
 
-Description: Slice long string and if `'string.length > valid_length'` at end of slicing string add `'...'`.
+Description: Slice long string and if ``'string.length > valid_length'`` at end of slicing string add ``'...'``.
 
-``toIdString(string)``
+toIdString(string)
 """"""""""""""""""""""
 Arguments:
 
-    string: `string` that would be edit
+    string: ``string`` that would be edit
 
 Description: Replace all non letter, non numeric or ```-``` to ```_```. After that replace ```[]``` to ```_```.
 
-``isEmptyObject(object)``
+isEmptyObject(object)
 """"""""""""""""""""""""""
 
 Arguments:
 
-    object: `object` for check
+    object: ``object`` for check
 
-Description: Check `object` is empty.
+Description: Check ``object`` is empty.
 
-``readFileAndInsert(event, element)``
+readFileAndInsert(event, element)
 """"""""""""""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    event:
+    event: event from browser
 
-    element:
+    element: DOM element. Must be input field
 
-Description:
+Description: Insert in ``element`` data from file,
 
-``addCssClassesToElement(element, title, type)``
-""""""""""""""""""""""""""""""""""
+addCssClassesToElement(element, title, type)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    element: Name of element. Default value: `""`
+    element: Name of element. Default value: ``""``
 
     title: Title of element.
 
@@ -96,7 +98,7 @@ Arguments:
 Description: Return string contains css class(-es)
 
 
-``addStylesAndClassesToListField(guiObj, field, data, opt)``
+addStylesAndClassesToListField(guiObj, field, data, opt)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Arguments:
@@ -111,46 +113,46 @@ Arguments:
 
 Description: Return style and class as string
 
-``turnTableTrIntoLink(event)``
+turnTableTrIntoLink(event)
 """"""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    event:
+    event: event
 
-Description: Open URL from event data
+Description: Turn data to link
 
-``hideIdInList(listObject)``
+hideIdInList(listObject)
 """"""""""""""""""""""""""""
 
 Arguments:
 
-    listObject: list object when find `id` field
+    listObject: list object when find ``id`` field
 
-Description: Add `hidden` property to `id` field
+Description: Add ``hidden`` property to ``id`` field
 
-``getNewId()``
+getNewId()
 """""""""""""""""""""""""""""""""
 
 Description: return new id
 
-``vstMakeLocalUrl(url, vars)``
+vstMakeLocalUrl(url, vars)
 """"""""""""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    url: `array` or `string` hat contains URL. Default value: `""`
+    url: ``array`` or ``string`` hat contains URL. Default value: ``""``
 
-    vars: variable that would be enter inside url. Default value: `{}`
+    vars: variable that would be enter inside url. Default value: ``{}``
 
 Description: Make local URL
 
-``vstGO()``
+vstGO()
 """"""""""""""""
 
 Description:  create local URL and open it
 
-``makeUrlForApiKeys(url_string)``
+makeUrlForApiKeys(url_string)
 """"""""""""""""""""""""""""""""""
 
 Arguments:
@@ -159,18 +161,18 @@ Arguments:
 
 Description: replace keys to API
 
-``vstMakeLocalApiUrl(url, vars)``
+vstMakeLocalApiUrl(url, vars)
 """"""""""""""""""""""""""""""""""""""""
 
 Arguments:
 
-    url: `array` or `string` hat contains URL.
+    url: ``array`` or ``string`` hat contains URL.
 
-    vars: variable that would be enter inside url. Default value: `{}`
+    vars: variable that would be enter inside url. Default value: ``{}``
 
 Description: Create local URL for API
 
-``openHelpModal()``
+openHelpModal()
 """"""""""""""""""""""
 
 Description: Open help menu in modal window

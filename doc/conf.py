@@ -18,7 +18,6 @@ from __future__ import unicode_literals
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-import sphinx_bootstrap_theme
 import vstutils
 
 # -- Project information -----------------------------------------------------
@@ -83,20 +82,11 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_logo = 'logo.png'
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-html_theme = 'bootstrap'
-html_theme = 'alabaster'
+html_theme_path = ['.', vstutils.__path__[0] + '/doc_themes']
+html_theme = 'vst-sphinx-theme'
 html_theme_options = {
-    'navbar_title': 'VST Utils',
-    'navbar_site_name': 'Menu',
-    'navbar_sidebarrel': True,
-    'navbar_pagenav_name': "Pages",
-    'navbar_class': "navbar navbar-inverse",
-    'bootstrap_version': "3",
-    'bootswatch_theme': "Spacelab",
     'github_user': 'vstconsulting',
-    'github_repo': 'vst-utils',
+    'github_repo': 'vstutils',
     'github_button': True,
     'github_banner': True,
 }
@@ -109,7 +99,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['../vstutils/static']
+html_static_path = [vstutils.__path__[0]+'/static', '_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -212,7 +202,7 @@ todo_include_todos = False
 
 viewcode_enable_epub = True
 
-_mermaid_cmd = '/home/grey/node_modules/.bin/mmdc'
+_mermaid_cmd = os.path.expanduser('~/node_modules/.bin/mmdc')
 if os.path.exists(_mermaid_cmd):
     mermaid_cmd = _mermaid_cmd
     mermaid_pdfcrop = 'pdfcrop'
