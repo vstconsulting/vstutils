@@ -243,7 +243,7 @@ var gui_page_object = {
     {
         debugger;
         var thisObj = this;
-        var res = this.sendToApi(this.api.methodDelete)
+        var res = this.sendToApi('delete')
         $.when(res).done(function()
         {
             guiPopUp.success("Changes in "+thisObj.api.bulk_name+" were successfully deleted");

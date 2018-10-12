@@ -501,7 +501,7 @@ function openApi_guiSchema(api)
                 if(val.api.post != undefined)
                 {
                     val.canAdd = true
-                    val.shortestURL = path_schema['/'+key+'/']
+                    val.shortestURL = '/'+key+'/'
                 }
                 val.canRemove = val.api.post != undefined
             }
