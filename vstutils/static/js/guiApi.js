@@ -80,14 +80,8 @@ function guiApi()
         var this_query_data = mergeDeep({}, query_data)
         reinit_query_data()
 
-        var scheme = "http"
-        if($.inArray("https", thisObj.openapi.schemes) != -1)
-        {
-            scheme = "https"
-        }
-
         spajs.ajax.Call({
-            url: scheme+"://"+thisObj.openapi.host + thisObj.openapi.basePath+"/_bulk/",
+            url: thisObj.openapi.schemes[0]+"://"+thisObj.openapi.host + thisObj.openapi.basePath+"/_bulk/",
             type: "PUT",
             contentType:'application/json',
             data: JSON.stringify(this_query_data.data),
@@ -101,7 +95,23 @@ function guiApi()
         });
         return this_query_data.def.promise();
     }
-
+    
+    this.addQuery = function(query_data, data, chunked)
+    {
+        if(chunked)
+        {
+            for(let i in query_data.data)
+            {
+                if(deepEqual(query_data.data[i], data))
+                { 
+                    return i
+                }
+            }
+        }
+         
+        query_data.data.push(data) 
+        return query_data.data.length - 1
+    }
     /**
      * Примеры запросов
      * https://git.vstconsulting.net/vst/vst-utils/blob/master/vstutils/unittests.py#L337
@@ -112,7 +122,7 @@ function guiApi()
      * @param {Object} data для балк запроса
      * @returns {promise}
      */
-    this.query = function(data)
+    this.query = function(data, chunked)
     {
         if(!query_data.def)
         {
@@ -125,20 +135,18 @@ function guiApi()
         }
 
         let data_index = undefined
-
+ 
         if($.isArray(data))
         {
             data_index = []
             for(let i in data)
             {
-                data_index.push(query_data.data.length)
-                query_data.data.push(data[i])
+                data_index.push(this.addQuery(query_data, data[i], chunked)) 
             }
         }
         else
         {
-            data_index = query_data.data.length
-            query_data.data.push(data)
+            data_index = this.addQuery(query_data, data, chunked)
         }
 
         var promise = new $.Deferred();

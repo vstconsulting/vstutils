@@ -9,7 +9,7 @@ var gui_action_object = {
         {
             guiPopUp.success("Action "+thisObj.api.bulk_name+" was called successfully");
             let thisSchema = thisObj.api.schema.exec.responses[data.status].schema
-            if (thisSchema.redirect_path) {
+            if (thisSchema && thisSchema.redirect_path) {
                 let key_list = thisSchema.redirect_path.format_keys();
                 let id_list = new Array;
                 data.subitem.forEach((v, k) => {
@@ -18,9 +18,11 @@ var gui_action_object = {
                     }
                 })
                 
-                let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field.title.toLowerCase()] || "")
+                let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field.toLowerCase()] || "")
                 vstGO(url);
             }
+        }).fail(function(data){ 
+            //thisObj.showErrors(data, 'exec')
         })
         return res; 
     },

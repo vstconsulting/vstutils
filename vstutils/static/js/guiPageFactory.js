@@ -243,7 +243,7 @@ var gui_page_object = {
     {
         debugger;
         var thisObj = this;
-        var res = this.sendToApi(this.api.methodDelete)
+        var res = this.sendToApi('delete')
         $.when(res).done(function()
         {
             guiPopUp.success("Changes in "+thisObj.api.bulk_name+" were successfully deleted");
@@ -276,11 +276,18 @@ var gui_page_object = {
         
         render_options.links = this.api.links
         render_options.actions = this.api.actions
+
+        this.model.data = this.prepareDataBeforeRender();
         
         tabSignal.emit("guiList.renderPage",  {guiObj:this, options: render_options, data:this.model.data});
         tabSignal.emit("guiList.renderPage."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data});
         
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+    },
+
+    prepareDataBeforeRender: function()
+    {
+        return this.model.data;
     },
 
     /**

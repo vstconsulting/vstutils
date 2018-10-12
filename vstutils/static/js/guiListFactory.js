@@ -347,7 +347,7 @@ var gui_list_object = {
     create : function ()
     {
         var thisObj = this;
-        var res = this.sendToApi(this.api.methodAdd)
+        var res = this.sendToApi('post')
         $.when(res).done(function()
         {
             guiPopUp.success("New object in "+thisObj.api.bulk_name+" was successfully created");

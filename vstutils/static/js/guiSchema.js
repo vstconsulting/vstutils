@@ -501,7 +501,7 @@ function openApi_guiSchema(api)
                 if(val.api.post != undefined)
                 {
                     val.canAdd = true
-                    val.shortestURL = path_schema['/'+key+'/']
+                    val.shortestURL = '/'+key+'/'
                 }
                 val.canRemove = val.api.post != undefined
             }
@@ -553,7 +553,7 @@ function openApi_guiSchema(api)
                     operationId:val.api.post.operationId,
                     responses:val.api.post.responses,
                 }
-                val.method['new'] = 'post'
+                val.method['post'] = 'new'
             }
         }
         else if(val.type == 'page')
@@ -617,7 +617,7 @@ function openApi_guiSchema(api)
                         val.isEmptyAction = true;
                     }
 
-                    val.method[query_types] = 'exec'
+                    val.method[query_types[q]] = 'exec'
                     break;
                 }
             }
@@ -697,11 +697,14 @@ function openApi_guiSchema(api)
 
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
         {
-            val.multi_actions['delete'] = {
+            /*val.multi_actions['delete'] = {
                 name:"delete",
                 onClick:multi_action_delete,
-            }
-            val['multi_actions']['delete'] = '__func__multi_action_delete';
+            }*/
+            val['multi_actions']['delete'] = {
+                    name:"delete",
+                    __func__onClick: 'multi_action_delete',
+                };
         }
     }
 
@@ -1091,31 +1094,7 @@ function setDefaultPrefetchFunctions(obj)
             {
                 continue;
             }
-
-            if(typeof field.prefetch == "object")
-            {
-                for(let item in field.prefetch)
-                {
-                    if(!field.prefetch[item])
-                    {
-                        continue;
-                    }
-
-                    if(typeof field.prefetch[item] != "string")
-                    {
-                        console.error("typeof field.prefetch['"+field.prefetch[item]+"'] != 'string' ", typeof field.prefetch[item])
-                        debugger;
-                        throw "Error, typeof field.prefetch['"+field.prefetch[item]+"'] != 'string' "
-                    }
-
-                    if(field.prefetch[item].indexOf('__func__') == 0)
-                    {
-                        field.prefetch[item] = findFunctionByName(field.prefetch[item], '__func__');
-                    }
-                }
-                continue;
-            }
-
+  
             let prefetch_path = undefined
             if(typeof field.prefetch == "string")
             {

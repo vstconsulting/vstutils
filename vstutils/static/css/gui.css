@@ -1471,3 +1471,34 @@ table{
         /*margin-top: 15px;*/
     }
 }
+
+.col12-mode .col-lg-4{
+    width: 100%
+}
+.col12-mode .col-sm-6 {
+    width: 100%
+}
+.col12-mode .col-md-6{
+    width: 100%
+}
+
+.sublink-btn-empty-action{
+    padding: 5px 20px;
+    display: block;
+}
+
+.sublink-btn-empty-action:hover{
+    background-color: #e2e4ea;
+}
+
+.guiListElements-boolean{
+    font-size: 24px;
+}
+
+.guiListElements-boolean .boolean-true{
+    color: #128200;
+}
+
+.guiListElements-boolean .boolean-false{
+    color: #949494; 
+}
