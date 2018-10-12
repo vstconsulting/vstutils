@@ -141,7 +141,7 @@ function guiApi()
             data_index = []
             for(let i in data)
             {
-                data_index.push(this.addQuery(query_data, data, chunked)) 
+                data_index.push(this.addQuery(query_data, data[i], chunked)) 
             }
         }
         else

@@ -553,7 +553,7 @@ function openApi_guiSchema(api)
                     operationId:val.api.post.operationId,
                     responses:val.api.post.responses,
                 }
-                val.method['new'] = 'post'
+                val.method['post'] = 'new'
             }
         }
         else if(val.type == 'page')

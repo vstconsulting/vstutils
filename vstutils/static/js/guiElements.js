@@ -1,23 +1,11 @@
 
-function renderLineField(field, value, field_name, dataLine)
+function getFieldType(field, model, elements = undefined)
 {
-    // Заготовка под переопределение отрисовки поля на основе типа поля
-    let val = sliceLongString(value);
-    if(field.value && typeof field.value == 'function')
+    if(!elements)
     {
-        let opt = {
-            data: dataLine.line,
-            fields: dataLine.opt.fields,
-            value: value,
-        }
-        val = field.value.apply(dataLine, [opt]);
+        elements = window.guiElements
     }
-
-    return val;
-}
-
-function getFieldType(field, model)
-{
+    
     // Приоритет №1 это prefetch поля
     if(field.prefetch && model && model.data[field.name + "_info"])
     {
@@ -27,10 +15,10 @@ function getFieldType(field, model)
     }
 
     // Приоритет №2 это поля на основе parent_name_format если они определены в guiElements
-    if(window.guiElements[field.parent_name_format])
+    if(elements[field.parent_name_format])
     {
         /**
-         * Достаточно объявить такой window.guiElements[field.parent_name_format] класс чтоб переопределить поле
+         * Достаточно объявить такой elements[field.parent_name_format] класс чтоб переопределить поле
          */
         return field.parent_name_format
     }
@@ -69,7 +57,7 @@ function getFieldType(field, model)
         type = field.type
     }
 
-    if(window.guiElements[type])
+    if(elements[type])
     {
         return type
     }

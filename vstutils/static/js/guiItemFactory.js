@@ -208,6 +208,7 @@ var gui_base_object = {
 
             if(!this.api.schema[this.api.method[method]] || !this.api.schema[this.api.method[method]].operationId)
             {
+                debugger;
                 throw "!this.schema[this.api.method[method]].operationId"
             }
 
