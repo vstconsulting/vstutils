@@ -697,10 +697,10 @@ function openApi_guiSchema(api)
 
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
         {
-            val.multi_actions['delete'] = {
+            /*val.multi_actions['delete'] = {
                 name:"delete",
                 onClick:multi_action_delete,
-            }
+            }*/
             val['multi_actions']['delete'] = {
                     name:"delete",
                     __func__onClick: 'multi_action_delete',

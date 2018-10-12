@@ -95,7 +95,66 @@ function guiApi()
         });
         return this_query_data.def.promise();
     }
+    
+    /**
+     * https://stackoverflow.com/a/25456134/7835270
+     * @param {type} x
+     * @param {type} y
+     * @returns {Boolean}
+     */
+    let deepEqual = function (x, y)
+    {
+        if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null))
+        {
+            if (Object.keys(x).length != Object.keys(y).length)
+            { 
+                return false;
+            }
 
+            for (var prop in x)
+            {
+                if (y.hasOwnProperty(prop))
+                {
+                    if (! deepEqual(x[prop], y[prop]))
+                    { 
+                        return false;
+                    }
+                }
+                else
+                { 
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        else if (x !== y)
+        { 
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+
+    this.addQuery = function(query_data, data, chunked)
+    {
+        if(chunked)
+        {
+            for(let i in query_data.data)
+            {
+                if(deepEqual(query_data.data[i], data))
+                { 
+                    return i
+                }
+            }
+        }
+         
+        query_data.data.push(data) 
+        return query_data.data.length - 1
+    }
     /**
      * Примеры запросов
      * https://git.vstconsulting.net/vst/vst-utils/blob/master/vstutils/unittests.py#L337
@@ -106,7 +165,7 @@ function guiApi()
      * @param {Object} data для балк запроса
      * @returns {promise}
      */
-    this.query = function(data)
+    this.query = function(data, chunked)
     {
         if(!query_data.def)
         {
@@ -119,20 +178,18 @@ function guiApi()
         }
 
         let data_index = undefined
-
+ 
         if($.isArray(data))
         {
             data_index = []
             for(let i in data)
             {
-                data_index.push(query_data.data.length)
-                query_data.data.push(data[i])
+                data_index.push(this.addQuery(query_data, data, chunked)) 
             }
         }
         else
         {
-            data_index = query_data.data.length
-            query_data.data.push(data)
+            data_index = this.addQuery(query_data, data, chunked)
         }
 
         var promise = new $.Deferred();
