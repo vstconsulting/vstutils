@@ -64,7 +64,7 @@ openapi.loaded
 
         api: ``object`` contains :doc:`OpenAPI structure <../Schema>`
 
-    Description: Inside this event can overload openapi answer
+    Description: Signal send after static resource load complete. Inside this event can overload openapi answer
 
 Parsing Schema
 ----------------------
@@ -125,7 +125,7 @@ openapi.schema.schema
 
         value: schema ``object`` that equivalent to path
 
-    Description:
+    Description: Signal calls after getting gui schema
 
 openapi.schema.schema.[schema]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

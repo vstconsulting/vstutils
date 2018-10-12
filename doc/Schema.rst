@@ -3,7 +3,7 @@
 Terms and description
 =======================
 
-``Entity`` - object which are operaterated of creation, modification, deletion and any other are performed.
+``Entity`` - object which are operated of creation, modification, deletion and any other are performed.
 
 ``Model`` - object that contain information for draw object
 
@@ -44,7 +44,7 @@ canAdd
 """""""""""""""""
 Type: ``Boolean``
 
-Description: Flag show, that can this :ref:`entity<terms>` append to parent :ref:`entity<terms>`
+Description: Flag show, that :ref:`entity<terms>` can be appended to parent :ref:`entity<terms>`
 
 
 canCreate
@@ -57,19 +57,19 @@ canDelete
 """""""""""""""""
 Type: ``Boolean``
 
-Description: Flag show, that can this :ref:`entity<terms>` be deleted
+Description: Flag show, that :ref:`entity<terms>` can be deleted
 
 canEdit
 """""""""""""""""
 Type: ``Boolean``
 
-Description: Flag show, that can this :ref:`entity<terms>` be edited
+Description: Flag show, that :ref:`entity<terms>` can be edited
 
 canRemove
 """""""""""""""""
 Type: ``Boolean``
 
-Description: Flag show, that can this :ref:`entity<terms>` be remove from parent :ref:`entity<terms>`
+Description: Flag show, that :ref:`entity<terms>` can be removed from parent :ref:`entity<terms>`
 
 extension_class_name
 """"""""""""""""""""""""""""
