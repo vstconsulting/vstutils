@@ -23,135 +23,7 @@ resourse.loaded
 
     Arguments: None
 
-    Description: This Signal send after load all resources
-
-openapi.loaded
-~~~~~~~~~~~~~~
-
-    Arguments:
-
-        api: variable contains API
-
-    Description: Inside this event can overload openapi answer
-
-
-2. Parsing Schema
-----------------------
-
-openapi.schema
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Arguments:
-
-        api: ``object`` contains API
-
-        schema: ``object`` contains gui schema
-
-    Description: Signal send if gui schema not in cache
-
-openapi.schema.name.[name]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Parameters:
-
-        [name]: this is ``string`` contains name of schema
-
-    Arguments:
-
-        paths: List of all paths
-
-        path: ``string`` variable contains path for current object
-
-        value: schema ``object`` that equivalent to path
-
-    Description: Signal calls after getting gui schema and calls with `name` of current object.
-
-openapi.schema.type.[type]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Parameters:
-
-        [type]: this is ``string`` contains type of schema
-
-    Arguments:
-
-        paths: List of all paths
-
-        path: ``string`` variable contains path for current object
-
-        value: schema ``object`` that equivalent to path
-
-    Description: Signal calls after getting gui schema and calls with `type` of current object.
-
-openapi.schema.schema
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Arguments:
-
-        paths: List of all paths
-
-        path: Current path
-
-        value: schema ``object`` that equivalent to path
-
-    Description:
-
-openapi.schema.schema.[schema]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Parameters:
-
-        [schema]: contains ``string`` name of schema
-
-    Arguments:
-
-        paths: List of all paths
-
-        path: ``string`` variable contains path for current object
-
-        value: schema ``object`` that equivalent to path
-
-        schema: name of one of schema's of this object
-
-    Description: Signal calls after getting gui schema and calls with `schema_name` of current object.
-
-openapi.schema.fields
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Arguments:
-
-        paths: List of all paths
-
-        path: ``string`` variable contains path for current object
-
-        value: schema ``object`` that equivalent to path
-
-        schema: name of one of schema's of this object
-
-        fields: list of fields of ``schema``
-
-    Description: Signal calls after getting gui schema and calls with `fields` of current object.
-
-
-3. Render
-----------------------------
-
-guiLocalSettings.[name]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Parameters:
-
-        [name]: ``string`` contains name of local setting
-
-    Arguments:
-
-        type: http method
-
-        name: name of setting
-
-        value: value for setting
-
-    Description: Signal send after set settings
+    Description: This Signal send after load all static resources
 
 openapi.schema.definition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,7 +32,7 @@ openapi.schema.definition
 
         definitions: definition object
 
-        api: api
+        api: ``object`` contains :doc:`OpenAPI structure <../Schema>`
 
         name: name of this object
 
@@ -185,12 +57,139 @@ openapi.schema.definition.[definition]
 
     Description: Signal send in function ```getObjectDefinitionByName```
 
+openapi.loaded
+~~~~~~~~~~~~~~
+
+    Arguments:
+
+        api: ``object`` contains :doc:`OpenAPI structure <../Schema>`
+
+    Description: Inside this event can overload openapi answer
+
+Parsing Schema
+----------------------
+
+openapi.schema
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Arguments:
+
+        api: ``object`` contains :doc:`OpenAPI structure <../Schema>`
+
+        schema: ``object`` contains :doc:`gui schema <../Schema>`.
+
+    Description: Signal sends if gui schema don't in cache
+
+openapi.schema.name.[name]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Parameters:
+
+        [name]: this is ``string`` contains :doc:`entity <../Schema>` name
+
+    Arguments:
+
+        paths: List of all paths from :doc:`guiSchema <../Schema>`
+
+        path: ``string`` variable contains path for current object
+
+        value: schema ``object`` that equivalent to path
+
+    Description: Signal calls after getting gui schema and calls with `name` of current object.
+
+openapi.schema.type.[type]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Parameters:
+
+        [type]: this is ``string`` contains entity type
+
+    Arguments:
+
+        paths: List of all paths from :doc:`guiSchema <../Schema>`
+
+        path: ``string`` variable contains path for current object
+
+        value: schema ``object`` that equivalent to path
+
+    Description: Signal calls after getting gui schema and calls with `type` of current object.
+
+openapi.schema.schema
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Arguments:
+
+        paths: List of all paths from :doc:`guiSchema <../Schema>`
+
+        path: Current path
+
+        value: schema ``object`` that equivalent to path
+
+    Description:
+
+openapi.schema.schema.[schema]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Parameters:
+
+        [schema]: ``string`` contains entity schema
+
+    Arguments:
+
+        paths: List of all paths from :doc:`guiSchema <../Schema>`
+
+        path: ``string`` variable contains path for current object
+
+        value: schema ``object`` that equivalent to path
+
+        schema: name of one of schema's of this object
+
+    Description: Signal calls after getting gui schema and calls with `schema_name` of current object.
+
+openapi.schema.fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Arguments:
+
+        paths: List of all paths from :doc:`guiSchema <../Schema>`
+
+        path: ``string`` variable contains path for current object
+
+        value: schema ``object`` that equivalent to path
+
+        schema: name of one of schema's of this object
+
+        fields: list of fields of ``schema``
+
+    Description: Signal calls after getting gui schema and calls with `fields` of current object.
+
+
+Render
+----------------------------
+
+guiLocalSettings.[name]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Parameters:
+
+        [name]: ``string`` contains name of local setting
+
+    Arguments:
+
+        type: http method
+
+        name: name of setting
+
+        value: value for setting
+
+    Description: Signal send after set settings
+
 guiList.renderPage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Arguments:
 
-        guiObj: object that would be render
+        guiObj: object that would be rendered
 
         options: page render options
 
@@ -203,11 +202,11 @@ guiList.renderPage.[bulk_name]
 
     Parameters:
 
-        [bulk_name]: ``string`` contains bulk name of rendered page
+        [bulk_name]: ``string`` contains :doc:`bulk name <../Schema>` of rendered page
 
     Arguments:
 
-        guiObj: object that would be render
+        guiObj: object that would be rendered
 
         options: page render options
 
@@ -219,7 +218,7 @@ guiList.renderPage.[bulk_name]
 
     Parameters:
 
-        [bulk_name]: ``string`` contains bulk name of rendered list
+        [bulk_name]: ``string`` contains :doc:`bulk name <../Schema>` of entity
 
     Arguments:
 
@@ -243,6 +242,8 @@ guiList.renderLine
 webGui.start
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    Arguments: None
+
     Description: after initialization of web gui can be used to add additional pages
 
 loading.completed
@@ -251,29 +252,6 @@ loading.completed
     Arguments: None
 
     Description: Signal send after complete loading all
-
-
-4. Deprecated functions
-----------------------------------
-
-openapi.paths
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Arguments:
-
-        api: variable contains API
-
-    Description: Signal send after schema signals
-
-openapi.completed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    Arguments:
-
-        api: variable contains API
-
-    Description: signal send after complete openapi load
-
 
 Examples
 ---------------------
@@ -316,24 +294,3 @@ Examples
         tabSignal.connect("openapi.schema.definition.History", addHistoryPrefetchCommon);
 
     Also we can send function as object to signal
-
-    .. sourcecode:: javascript
-
-        tabSignal.connect("resource.loaded", function()
-        {
-            window.api = new guiApi();
-            $.when(window.api.init()).done(function()
-            {
-                tabSignal.emit("openapi.loaded",  {api: window.api});
-
-                $.when(getGuiSchema()).done(function ()
-                {
-                    window.guiSchema.path = returnParentLinks(window.guiSchema.path);
-
-                    emitFinalSignals()
-
-                }
-            }
-        }
-
-    We can send signal inside function of another signal.

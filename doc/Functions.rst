@@ -27,9 +27,9 @@ Arguments:
 
     obj: parent object
 
-    constructor: not required
+    constructor: constructor of object, not required
 
-Description: return new object that have propertiest and functions of parent object
+Description: return new object that have properties and functions of parent object
 
 hidemodal()
 """""""""""""""""""""""
@@ -103,7 +103,7 @@ addStylesAndClassesToListField(guiObj, field, data, opt)
 
 Arguments:
 
-    guiObj: elemnt of gui
+    guiObj: element of gui
 
     field: field of this gui object
 
