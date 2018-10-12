@@ -1,0 +1,25 @@
+
+<script type="text/x-just" data-just="guiListElements.base"> 
+    <%[ element %>
+        <div class="guiListElements guiListElements-<%- guiObj.type %>" > 
+            <%[ content %>
+                <%- value %>
+            <%] %>
+            <%* content %> 
+        </div>
+    <%] %>
+    <%* element %>
+</script>
+   
+<!-- guiElements.string -->
+<script type="text/x-just" data-just="guiListElements.boolean"> 
+    <%[ content %>
+        <% if(value){ %> 
+            <i class="boolean-true fa fa-check"></i>
+        <% }else{ %>
+            <i class="boolean-false fa fa-times"></i> 
+        <% } %> 
+    <%] %>
+    <%! guiListElements.base %>
+</script>
+ 

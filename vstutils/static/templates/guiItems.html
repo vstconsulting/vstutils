@@ -95,7 +95,7 @@
         %>
     >
     <span class="glyphicon glyphicon-search" ></span>
-    </div> 
+    </div>
     </div>
 </script> -->
 
@@ -109,7 +109,7 @@
                     <span class="input-filter-item">
                         <div class="input-filter-inner">
                             <span class="name"
-                                  onclick="/* $(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/"> 
+                                  onclick="/* $(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/">
                                   <%= (valfield.name+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=") %>
                             </span>
                             <span class="value"
@@ -130,25 +130,25 @@
                                         event.preventDefault();
                                     }, "search-query-input")
                                 %>
-                                
+
                                 <%= justOn('blur', function(event)
                                     {
                                         $(event.currentTarget).parent().parent().toggleClass('show-input-text');
                                         event.preventDefault();
                                         guiObj.addSearchFilter($(event.currentTarget).attr('data-value-name'), event.currentTarget.value);
                                     }, "search-query-input-"+valfield.name)
-                                %> 
+                                %>
                             >
                         </div>
                         <span class="remove-token"
                                 role="button"
                                 data-value-name="<%- valfield.name %>"
                                 <%= justOn('click', function(event)
-                                    { 
+                                    {
                                         guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
                                         event.preventDefault();
                                     })
-                                %>  
+                                %>
                                 >
                             <i class="fa fa-close"></i>
                         </span>
@@ -319,18 +319,18 @@
 
 <script type="text/x-just" data-just="entity_list_line">
     <tr
-        class="item-row item-<%- dataLine.url_key %> highlight-tr
+        class="item-row item-<%- String(dataLine.url_key).replace('@', '') %> highlight-tr
                 <% for (var i in dataLine.opt.fields) { %>
                     <% if(dataLine.opt.fields[i].enum) { %>
                         <%- addCssClassesToElement('tr', dataLine.line[i], i) %>
                     <% } %>
                 <% } %>
-                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, dataLine.url_key) %>"
-        data-id="<%- dataLine.url_key %>"
+                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, String(dataLine.url_key).replace('@', '')) %>"
+        data-id="<%- String(dataLine.url_key).replace('@', '') %>"
         data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, dataLine.url_key]) %>"
         onclick="turnTableTrIntoLink(event)"
         >
-        <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', <%- dataLine.url_key %>); return false;">
+        <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
             <div class="ico-on fa fa-toggle-on"></div>
             <div class="ico-off fa  fa-toggle-off"></div>
         </td>
@@ -369,12 +369,22 @@
                         <% for(var k in dataLine.sublinks_l2){ %>
                             <% if(!dataLine.sublinks_l2[k].hidden) { %>
                                 <li>
-                                    <a
-                                        href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
-                                        onclick="return false;"
-                                        class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
-                                            <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
-                                    </a>
+                                    <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
+                                        <a
+                                            href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
+                                            onclick="return false;"
+                                            class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
+                                                <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                        </a>
+                                    <% } else { %>
+                                        <b
+                                            class="sublink-btn sublink-btn-empty-action <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
+                                            >
+                                                <i <%= justOn('click', emptyAction(dataLine.sublinks_l2[k])) %>>
+                                                    <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                                </i>
+                                        </b>
+                                    <% } %>
                                 </li>
                             <% } %>
                         <% } %>
@@ -467,7 +477,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <% for(var k in guiObj.api.multi_actions){   %>
+                                <% for(let k in guiObj.api.multi_actions){   %>
                                     <% if(guiObj.api.multi_actions[k].onClick){ %>
                                         <li>
                                             <a
@@ -715,6 +725,18 @@
         <%* sublink_buttons %>
     <%] %>
 
+    <%[ fields_block %>
+        <% for(var i in opt.fields){ %>
+            <%= guiObj.renderField(opt.fields[i], opt) %>
+        <% } %>
+
+        <% if(opt.sections){ %>
+            <% for(var i in opt.sections){ %>
+                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
+            <% } %>
+        <% } %>
+    <%] %>
+
     <%[ main_content_row %>
         <section class="col-lg-12">
             <div class="box box-info">
@@ -723,16 +745,7 @@
                 </div>
                 <div class="box-body">
                     <div class="row">
-
-                        <% for(var i in opt.fields){ %>
-                            <%= guiObj.renderField(opt.fields[i], opt) %>
-                        <% } %>
-
-                        <% if(opt.sections){ %>
-                            <% for(var i in opt.sections){ %>
-                                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
-                            <% } %>
-                        <% } %>
+                        <%* fields_block %>
                     </div>
                 </div>
             </div>
