@@ -3,7 +3,7 @@
 Terms and description
 =======================
 
-``Entity`` -
+``Entity`` - object which are operaterated of creation, modification, deletion and any other are performed.
 
 ``Model`` - object that contain information for draw object
 
@@ -51,7 +51,7 @@ canCreate
 """""""""""""""""
 Type: ``Boolean``
 
-Description: Flag show, that can this :ref:`entity<terms>` create new :ref:`entity<terms>`
+Description: Flag show, that new :ref:`entity<terms>` can be created from GUI
 
 canDelete
 """""""""""""""""
@@ -112,7 +112,7 @@ list_path
 """""""""""""""""""""""""""""
 Type: ``String``
 
-Description: API path tha equal 'list :ref:`entity<terms>`'
+Description: API path that equal 'list :ref:`entity<terms>`'
 
 
 method
