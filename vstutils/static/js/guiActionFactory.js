@@ -17,7 +17,13 @@ var gui_action_object = {
                         id_list[key_list[k % 2]] = v;
                     }
                 })
-                let url = thisSchema.redirect_path.format(id_list) + (data.data[thisSchema.redirect_field.title.toLowerCase()] || "")
+
+                let redirect_field = ""
+                if (thisSchema.redirect_field)
+                {
+                    redirect_field = thisSchema.redirect_field.title || ""
+                }
+                let url = thisSchema.redirect_path.format(id_list) + (data.data[redirect_field.toLowerCase()] || "")
                 vstGO(url);
             }
         }).fail(function(data){ 
