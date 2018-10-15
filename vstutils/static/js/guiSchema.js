@@ -690,7 +690,12 @@ function openApi_guiSchema(api)
             {
                 continue;
             }
-
+            
+            if(!is_multi_action(subobj))
+            { 
+                continue;
+            }
+             
             val.multi_actions[subobj.name] = subobj
             val['multi_actions']["__link__" + subobj.name] = subobj.path;
         }
@@ -745,6 +750,17 @@ function openApi_guiSchema(api)
     // }
 
     return {path:path_schema, object:short_schema};
+}
+
+function is_multi_action(action)
+{ 
+    if(action.is_multi_action === undefined)
+    { 
+        action.is_multi_action = false
+        tabSignal.emit("openapi.schema.is_multi_action",  {path:action.path, action:action});
+    }
+
+    return action.is_multi_action
 }
 
 /*
