@@ -595,6 +595,18 @@ function openApi_guiSchema(api)
                 }
                 val.method['patch'] = 'edit'
             }
+            //@todo check the code branch below
+            if(val.api.delete)
+            {
+                val.schema.delete = {
+                    fields:openApi_guiPrepareFields(api, val.api.delete.fields, val.name),
+                    filters:val.api.delete.filters,
+                    query_type:'delete',
+                    operationId:val.api.delete.operationId,
+                    responses:val.api.delete.responses,
+                }
+                val.method['delete'] = 'delete'
+            }
         }
         else
         {
