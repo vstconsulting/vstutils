@@ -68,7 +68,7 @@ function guiSelections(){
             {
                 if(this.selectedItems[tag][id[i]] === undefined)
                 {
-                    this.selectedItems[tag][id[i]] = false
+                    continue;
                 }
                 delta -= this.selectedItems[tag][id[i]] - !!value
                 this.selectedItems[tag][id[i]] = !!value

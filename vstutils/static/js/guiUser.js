@@ -3,7 +3,7 @@
  */
 tabSignal.connect("openapi.completed", function()
 {
-    let subLinksArr = ['sublinks', 'sublinks_l2'];
+    let subLinksArr = ['actions', 'links'];
 
     let pathObj = guiSchema.path['/user/{pk}/'];
 
@@ -23,7 +23,7 @@ tabSignal.connect("openapi.completed", function()
             {
                 registerProfileSublinkPage(sublink.name, sublink.path, my_user_id);
             }
-            else
+            else if(sublink.type == 'list')
             {
                 registerProfileSublinkList(sublink.name, sublink.path, my_user_id);
             }

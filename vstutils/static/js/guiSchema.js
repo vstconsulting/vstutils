@@ -595,6 +595,18 @@ function openApi_guiSchema(api)
                 }
                 val.method['patch'] = 'edit'
             }
+            //@todo check the code branch below
+            if(val.api.delete)
+            {
+                val.schema.delete = {
+                    fields:openApi_guiPrepareFields(api, val.api.delete.fields, val.name),
+                    filters:val.api.delete.filters,
+                    query_type:'delete',
+                    operationId:val.api.delete.operationId,
+                    responses:val.api.delete.responses,
+                }
+                val.method['delete'] = 'delete'
+            }
         }
         else
         {
@@ -690,7 +702,12 @@ function openApi_guiSchema(api)
             {
                 continue;
             }
-
+            
+            if(!is_multi_action(subobj))
+            { 
+                continue;
+            }
+             
             val.multi_actions[subobj.name] = subobj
             val['multi_actions']["__link__" + subobj.name] = subobj.path;
         }
@@ -745,6 +762,17 @@ function openApi_guiSchema(api)
     // }
 
     return {path:path_schema, object:short_schema};
+}
+
+function is_multi_action(action)
+{ 
+    if(action.is_multi_action === undefined)
+    { 
+        action.is_multi_action = false
+        tabSignal.emit("openapi.schema.is_multi_action",  {path:action.path, action:action});
+    }
+
+    return action.is_multi_action
 }
 
 /*
@@ -1176,7 +1204,7 @@ tabSignal.connect("openapi.schema.schema", function(obj)
                         else if (!obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
                             let redirect_path = obj.path.split("/")
                             redirect_path.splice(redirect_path.length - 2, 1)
-                            obj.value.responses[i].schema.redirect_path = redirect_path.join("/");
+                            obj.value.responses[i].schema.redirect_path = redirect_path.join("/").slice(1, -1);
                             break;
                         }
                     }
