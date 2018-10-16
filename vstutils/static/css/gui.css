@@ -1502,3 +1502,7 @@ table{
 .guiListElements-boolean .boolean-false{
     color: #949494; 
 }
+
+.td {
+    word-wrap: break-word;
+}
