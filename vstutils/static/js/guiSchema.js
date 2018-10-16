@@ -1204,7 +1204,7 @@ tabSignal.connect("openapi.schema.schema", function(obj)
                         else if (!obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
                             let redirect_path = obj.path.split("/")
                             redirect_path.splice(redirect_path.length - 2, 1)
-                            obj.value.responses[i].schema.redirect_path = redirect_path.join("/");
+                            obj.value.responses[i].schema.redirect_path = redirect_path.join("/").slice(1, -1);
                             break;
                         }
                     }
