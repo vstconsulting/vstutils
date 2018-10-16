@@ -8,6 +8,8 @@ _default_settings = {
     'VST_DEV_SETTINGS': 'settings.ini',
     # django settings module
     "DJANGO_SETTINGS_MODULE": 'vstutils.settings',
+    # Default urlconf
+    "VST_ROOT_URLCONF": "vstutils.urls",
 }
 
 
