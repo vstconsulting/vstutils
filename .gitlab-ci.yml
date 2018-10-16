@@ -50,6 +50,19 @@ py36-django111-install:
     TOX_ENVS: "$CI_BUILD_NAME"
 
 
+pages:
+  <<: *branch_tests
+  stage: release
+  variables:
+    TOX_ENVS: "builddoc"
+  after_script:
+    - mv doc/_build/html public
+  artifacts:
+    paths:
+    - public
+  only:
+    - master
+
 release_pypi:
   stage: release
   only:
