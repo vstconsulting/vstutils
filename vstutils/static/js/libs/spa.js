@@ -450,6 +450,45 @@ if(!window.spajs)
   
     spajs.currentOpenMenu = undefined
 
+    spajs.findMenu = function(menuId)
+    {   
+        var regExpRes = [] 
+        for(var i in spajs.opt.menu)
+        {
+            let val = spajs.opt.menu[i]
+            //console.log(val.priority, val.debug)
+            if(val.url_parser != undefined)
+            {
+                for(var j in val.url_parser)
+                {
+                    var parsed = val.url_parser[j](menuId)
+                    if(parsed)
+                    {
+                        regExpRes = parsed
+                        return val 
+                    }
+                }
+            }
+            else if(val.urlregexp != undefined)
+            {
+                for(var j in val.urlregexp)
+                {
+                    if(val.urlregexp[j].test(menuId))
+                    {
+                        regExpRes = val.urlregexp[j].exec(menuId)
+                        return val
+                    }
+                }
+            }
+            else if(val.id == menuId)
+            {
+                return val 
+            } 
+        }
+  
+        return false 
+    }
+
     /**
      * Открывает окно с произвольным содержимым
      * @param string menuId

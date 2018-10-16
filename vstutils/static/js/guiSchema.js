@@ -434,8 +434,8 @@ function openApi_guiSchema(api)
                 type = 'list'
             }
             else
-            {
-                type = 'action'
+            { 
+                type = 'page'
             }
         }
         else

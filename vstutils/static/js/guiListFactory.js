@@ -404,6 +404,7 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
 
+        render_options.base_href = spajs.urlInfo.data.reg.page_and_parents
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -438,6 +439,9 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.intTag(render_options.selectionTag)
 
+        render_options.base_href = spajs.urlInfo.data.reg.page_type
+
+        render_options.hideActions = true
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
@@ -526,7 +530,7 @@ var gui_list_object = {
         {
             let val = this.api.schema.list.filters[i]
             /*let key = val.name.replace("__in", "").replace("__contains", "").replace("__not", "")
-            // Переменная не встречается в списке допустимых фильтров 
+            // Переменная не встречается в списке допустимых фильтров
             if(!this.api.schema.list.fields[key])
             {
                 console.warn("Переменная `"+key+"` не встречается в списке допустимых фильтров", this.api.schema.list.fields)
@@ -832,13 +836,13 @@ var gui_list_object = {
                         search[arg[0]] = arg[1]
                     }
                 }
-                else if(Array.isArray(search[arg[0]+"__in"])) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск 
+                else if(Array.isArray(search[arg[0]+"__in"])) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск
                 {
-                    search[arg[0]+"__in"].push(arg[1]) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск 
+                    search[arg[0]+"__in"].push(arg[1]) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск
                 }
                 else
                 {
-                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]] // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск 
+                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]] // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск
                     delete search[arg[0]]
                     delete search[arg[0]+"__contains"]
                 }
