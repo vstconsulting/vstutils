@@ -402,8 +402,8 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
        
-        render_options.base_href = spajs.urlInfo.data.reg.page
-        
+        render_options.base_href = spajs.urlInfo.data.reg.page_and_parents
+         
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
