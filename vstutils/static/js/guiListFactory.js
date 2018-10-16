@@ -11,7 +11,7 @@ var gui_list_object = {
             filters: {},
             fields: {}
         }
-        
+
         if(object_data)
         {
             this.model.data = object_data
@@ -158,9 +158,9 @@ var gui_list_object = {
         //отправляем bulk запрос
         $.when(this.apiQuery(bulkArr)).done(d =>
         {
-            for(var item in dataFromApi)
+            for(let item in dataFromApi)
             {
-                for(var field in dataFromApi[item])
+                for(let field in dataFromApi[item])
                 {
                     if(prefetch_fields[field])
                     {
@@ -171,16 +171,19 @@ var gui_list_object = {
                             let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                             if(match != null)
                             {
-                                for(var j in d)
+                                for(let j in d)
                                 {
                                     if(d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
                                     {
                                         let prefetch_data = d[j].data.results;
-                                        for(var k in prefetch_data)
+                                        for(let k in prefetch_data)
                                         {
                                             if($.inArray(prefetch_data[k].id, prefetch_fields_ids[field][path]) != -1)
                                             {
-                                                dataFromApi[item][field+'_info'] = prefetch_data[k];
+                                                if(prefetch_data[k].id == dataFromApi[item][field])
+                                                {
+                                                    dataFromApi[item][field+'_info'] = prefetch_data[k];
+                                                }
                                             }
                                         }
                                     }
@@ -189,12 +192,12 @@ var gui_list_object = {
                             else
                             {
                                 let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                                for(var j in d)
+                                for(let j in d)
                                 {
                                     if(d[j].item == bulk_name[1])
                                     {
                                         let prefetch_data = d[j].data.results;
-                                        for(var k in prefetch_data)
+                                        for(let k in prefetch_data)
                                         {
                                             if(dataFromApi[item][field] == prefetch_data[k].id)
                                             {
@@ -203,7 +206,6 @@ var gui_list_object = {
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
@@ -244,7 +246,7 @@ var gui_list_object = {
         {
             filters.ordering = "desc";
         }*/
-      
+
         if (filters.page_number)
         {
             filters.offset = (filters.page_number-1)/1*filters.limit;
@@ -255,7 +257,7 @@ var gui_list_object = {
         q.push("limit=" + encodeURIComponent(filters.limit))
         q.push("offset=" + encodeURIComponent(filters.offset))
         //q.push("ordering=" + encodeURIComponent(filters.ordering))
-       
+
         if(filters.search_query)
         {
             if(typeof filters.search_query == "string")
@@ -354,20 +356,20 @@ var gui_list_object = {
         })
         return res;
     },
- 
+
     renderLine : function (line, opt = {})
-    {  
+    {
         let tpl = this.getTemplateName('list_line')
-        
+
         line.sublinks_l2 = this.api.sublinks_l2;
-        
+
         let dataLine = {
             line:line,
             sublinks_l2:this.api.sublinks_l2,
             opt:opt,
             rendered:{}
         }
-        
+
         // Добавим поле id принудительно если его даже нет в списке
         if(line.id === undefined)
         {
@@ -378,13 +380,13 @@ var gui_list_object = {
         {
             dataLine.url_key = "@"+dataLine.url_key
         }
-        
+
         tabSignal.emit("guiList.renderLine",  {guiObj:this, dataLine: dataLine});
         tabSignal.emit("guiList.renderLine."+this.api.bulk_name,  {guiObj:this, dataLine: dataLine});
-       
+
         return spajs.just.render(tpl, {guiObj: this, dataLine: dataLine});
     },
-    
+
     /**
      * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
      * @returns {string|promise}
@@ -401,7 +403,7 @@ var gui_list_object = {
 
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
-       
+
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -435,12 +437,12 @@ var gui_list_object = {
 
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.intTag(render_options.selectionTag)
- 
+
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
-   
-   
+
+
     /**
      * Добавить фильтр
      * @param {string} name
@@ -507,19 +509,19 @@ var gui_list_object = {
      * @return {string} HTML поля ввода для поиска
      */
     renderSearchForm : function ()
-    {  
+    {
         let searchString = ""
-        
+
         if(this.url_vars && this.url_vars.search_part)
         {
             searchString = this.url_vars.search_part.replace("/search/", "");
         }
-        
+
         this.activeSearch = {
             filters:[],
             fields: {}
         }
-        
+
         for(let i in this.api.schema.list.filters)
         {
             let val = this.api.schema.list.filters[i]
@@ -531,23 +533,23 @@ var gui_list_object = {
                 debugger;
                 continue;
             }*/
- 
+
             this.activeSearch.fields[val.name] = val
             this.activeSearch.fields[val.name].value = ""
         }
-        
-        
+
+
         /*
         return spajs.just.render('search_field', {guiObj: this, opt:{query:""}}) */
-        
-        
+
+
         var thisObj = this;
         //options.className = this.model.className;
         this.searchAdditionalData = {}// options
         //options.thisObj = this;
 
         this.activeSearch.active = ""
-       
+
         var search = this.searchStringToObject(searchString, undefined, true)
         var searchfilters = []
         for(var i in search)
@@ -564,7 +566,7 @@ var gui_list_object = {
             }
         }
         this.activeSearch.filters = searchfilters
-       
+
         return spajs.just.render('search_field', {guiObj: this, opt:{query:""}}, () =>
         {
             new autoComplete({
@@ -582,8 +584,8 @@ var gui_list_object = {
                     }
                     name = name + " ="
                     name = name.replace("__not =", " != ")
-                    
-                    
+
+
                     return '<div class="autocomplete-suggestion"  data-value="' + item.name + '" >' + name + '</div>';
                 },
                 onSelect: (event, term, item) =>
@@ -602,9 +604,9 @@ var gui_list_object = {
                     }
                 },
                 source: (term, response) =>
-                {  
+                {
                     term = term.toLowerCase();
-                   
+
                     var matches = []
 
                     if(!this.activeSearch.active)
@@ -613,7 +615,7 @@ var gui_list_object = {
                         {
                             var val = this.activeSearch.fields[i]
                             if( (!val.used || val.isArray) && val.name.toLowerCase().indexOf(term) == 0)
-                            { 
+                            {
                                 matches.push(val)
                             }
                         }
@@ -628,7 +630,7 @@ var gui_list_object = {
                                 var val = activeOption.options[i]
                                 if(val.toLowerCase().indexOf(term) != -1)
                                 {
-                                debugger;
+                                    debugger;
                                     matches.push({name:val})
                                 }
                             }
@@ -641,9 +643,9 @@ var gui_list_object = {
                     }
                 }
             });
-        }); 
+        });
     },
-  
+
     /**
      * Функция поиска
      * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
@@ -652,7 +654,7 @@ var gui_list_object = {
     {
         var thisObj = this;
         this.model.filters = filters
-     
+
         var def = this.load(filters)
         $.when(def).done(function(data){
             thisObj.model.data = data.data
@@ -660,7 +662,7 @@ var gui_list_object = {
 
         return def
     },
-    
+
     /**
      * Выполняет переход на страницу с результатами поиска
      * @param {string} query
@@ -673,7 +675,7 @@ var gui_list_object = {
             return vstGO(this.url_vars.baseURL());
         }
 
-        return vstGO(this.url_vars.searchURL(this.searchObjectToString(trim(query)))) 
+        return vstGO(this.url_vars.searchURL(this.searchObjectToString(trim(query))))
     },
 
     /**
@@ -684,8 +686,8 @@ var gui_list_object = {
     isEmptySearchQuery : function (query)
     {
         if (!query || !trim(query)
-            && this.activeSearch 
-            && this.activeSearch.filters 
+            && this.activeSearch
+            && this.activeSearch.filters
             && this.activeSearch.filters.length == 0)
         {
             return true;
@@ -693,10 +695,10 @@ var gui_list_object = {
 
         return false;
     },
-  
+
     onSearchInput : function(event, input)
     {
-        var value = input.value 
+        var value = input.value
         if(event.key == "Backspace" && value.length == 0)
         {
             if(input.getAttribute('data-backspace') == "true")
@@ -732,7 +734,7 @@ var gui_list_object = {
             spajs.showLoader(this.searchGO(value, this.searchAdditionalData))
         }
     },
-  
+
     /**
      * Преобразует строку и объект поиска в строку для урла страницы поиска
      * @param {string} query строка запроса
@@ -782,7 +784,7 @@ var gui_list_object = {
 
         return querystring.join(",");
     },
- 
+
     /**
      * Преобразует строку поиска в объект с параметрами для фильтрации
      * @param {string} query строка запроса
@@ -791,7 +793,7 @@ var gui_list_object = {
      * @returns {pmItems.searchStringToObject.search} объект для поиска
      */
     searchStringToObject : function(query, defaultName, includeVariables)
-    { 
+    {
         var search = {}
         if(query == "")
         {
