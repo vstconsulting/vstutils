@@ -67,24 +67,31 @@ var gui_base_object = {
             }
 
             // Добавление связи с зависимыми полями
-            let parent_field = undefined
+            let parent_field_name = undefined
             if(field.additionalProperties && field.additionalProperties.field)
             {
-                parent_field = field.additionalProperties.field
+                parent_field_name = field.additionalProperties.field
             }
             if(field.parent_field)
             {
-                parent_field = field.parent_field
+                parent_field_name = field.parent_field
             }
-
-            let thisField = this.model.guiFields[field.name];
-            let parentField = this.model.guiFields[parent_field];
-
-            if(parentField && parentField.addOnChangeCallBack)
+            if (!Array.isArray(parent_field_name))
             {
-                parentField.addOnChangeCallBack(function() {
-                    thisField.updateOptions.apply(thisField, arguments);
-                })
+                parent_field_name = [parent_field_name]
+            }
+            let thisField = this.model.guiFields[field.name];
+
+            for (let i in parent_field_name)
+            {
+                let parentField = this.model.guiFields[parent_field_name[i]];
+
+                if(parentField && parentField.addOnChangeCallBack)
+                {
+                    parentField.addOnChangeCallBack(function() {
+                        thisField.updateOptions.apply(thisField, arguments);
+                    })
+                }
             }
         }
 

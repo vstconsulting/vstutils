@@ -540,7 +540,7 @@ guiElements.autocomplete = function()
             this.opt.autocomplete_properties.value_field)
         {
             var value = $("#" + this.element_id).val();
-            var data_value = $("#" + this.element_id).attr('value');
+            var data_value = $("#" + this.element_id).attr('data-value');
             var match = false;
             for (var i in this.matches)
             {
@@ -1165,7 +1165,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         if(opt.dynamic_properties && opt.dynamic_properties.callback)
         {
-            var res = opt.dynamic_properties.callback.apply(this, arguments);
+            var res = opt.dynamic_properties.callback.apply(thisObj, arguments);
             if(res && res.type)
             {
                 thisObj.setType(res.type, res.override_opt);
