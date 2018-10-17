@@ -23,11 +23,30 @@ let _insertTpl = function(func)
             return this;
         }
 
+        if(!this.length)
+        {
+            return this;
+        }
+        
         if(typeof tplText !== "string")
         {
             tplText = ""+tplText
         }
+        
+        
+           
+        let val = this[0].getAttribute("data-tplText")
+        let testTplText = tplText.replace(/just-watch-class-[0-9]+/g, "")
+      
+      
+        if( val == testTplText)
+        {
+            return this;
+        }
+        this[0].setAttribute("data-tplText", testTplText)
+        
         var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
 
         this.each(function()
         {
@@ -182,7 +201,7 @@ var justReactive = {
             {
                 if(typeof newval[i] == "object" && newval[i] !== null)
                 {
-                    if(level < 100)
+                    if(level < 40)
                     {
                         justReactive.megreFunc(obj[prop], i, newval[i], level+1);
                     }

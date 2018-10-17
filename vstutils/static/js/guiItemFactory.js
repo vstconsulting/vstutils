@@ -21,6 +21,17 @@ var gui_base_object = {
         return this.api.name
     },
 
+    stopUpdates : function()
+    {
+        // stopUpdates
+        clearTimeout(this.update_timoutid)
+    },
+
+    startUpdates : function()
+    { 
+        // stopUpdates
+    },
+     
     renderAllFields : function(opt)
     {
         let html = []

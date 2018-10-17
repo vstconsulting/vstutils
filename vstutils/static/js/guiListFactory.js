@@ -390,19 +390,29 @@ var gui_list_object = {
      * @returns {string|promise}
      */
     renderAsPage : function (render_options = {})
-    {
+    { 
         let tpl = this.getTemplateName('list')
-
+       
+        if(this.api.autoupdate &&
+                                    (
+                                        !render_options  ||
+                                        render_options.autoupdate === undefined ||
+                                        render_options.autoupdate
+                                    )
+            )
+        {
+            this.startUpdates()
+        }
+        
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
-
-        //render_options.sections = this.getSections('renderAsPage')
+ 
         if(!render_options.page_type) render_options.page_type = 'list'
 
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.intTag(render_options.selectionTag)
 
-        render_options.base_href = spajs.urlInfo.data.reg.page_and_parents 
+        render_options.base_href = spajs.urlInfo.data.reg.page_and_parents
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -429,7 +439,18 @@ var gui_list_object = {
     renderAsAddSubItemsPage : function (render_options = {})
     {
         let tpl = this.getTemplateName('list_add_subitems')
-
+        
+        if(this.api.autoupdate &&
+                                    (
+                                        !render_options  ||
+                                        render_options.autoupdate === undefined ||
+                                        render_options.autoupdate
+                                    )
+            )
+        {
+            this.startUpdates()
+        }
+        
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
         //render_options.sections = this.getSections('renderAsAddSubItemsPage')
@@ -664,6 +685,31 @@ var gui_list_object = {
 
         return def
     },
+
+    startUpdates : function()
+    {
+        if(this.update_timoutid)
+        {
+            return;
+        }
+         
+        this.update_timoutid = setTimeout(() => 
+        { 
+            this.update_timoutid = undefined
+            if(!this.model.filters)
+            {
+                console.warn("startUpdates [no filters]")
+                this.startUpdates()
+                return;
+            }
+
+            $.when(this.search(this.model.filters)).always(() => { 
+                console.log("startUpdates [updated]")
+                this.startUpdates()
+            })
+        }, 50) 
+    },
+
 
     /**
      * Выполняет переход на страницу с результатами поиска

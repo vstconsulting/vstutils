@@ -121,7 +121,7 @@ function openApi_add_one_action_page_path(api_obj)
         url_parser:[regexp_in_other],
         priority:api_obj.level,
         debug: api_obj.path,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(api_obj)
 
@@ -132,6 +132,10 @@ function openApi_add_one_action_page_path(api_obj)
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
             })
 
             return def.promise();
@@ -161,7 +165,7 @@ function openApi_add_one_page_path(api_obj)
         id:getMenuIdFromApiPath(api_path),
         url_parser:[regexp_in_other],
         priority:api_obj.level,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(api_obj)
 
@@ -172,6 +176,10 @@ function openApi_add_one_page_path(api_obj)
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
             })
 
             return def.promise();
@@ -233,7 +241,7 @@ function openApi_add_list_page_path(api_obj)
             id:getMenuIdFromApiPath(api_path + "_add"),
             url_parser:[add_page_url],
             priority:api_obj.level,
-            onOpen:function(holder, menuInfo, data)
+            onOpen:function(holder, menuInfo, data, onClose_promise)
             {
                 let pageItem = new guiObjectFactory(api_obj.shortestURL)
                 let filter = $.extend(true, data.reg)
@@ -249,6 +257,10 @@ function openApi_add_list_page_path(api_obj)
                     def.resolve(renderErrorAsPage(err));
                 })
 
+                $.when(onClose_promise).always(() => {
+                    pageItem.stopUpdates();
+                })
+
                 return def.promise();
             },
         })
@@ -258,21 +270,28 @@ function openApi_add_list_page_path(api_obj)
         id:getMenuIdFromApiPath(api_path),
         url_parser:path_regexp,
         priority:api_obj.level,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(api_obj)
 
             var def = new $.Deferred();
             $.when(pageItem.search(data.reg)).done(function()
             {
-                def.resolve(pageItem.renderAsPage())
+                def.resolve(pageItem.renderAsPage()) 
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
             })
+            
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
+            })
 
             return def.promise();
         },
+        onClose:function(){
+            
+        }
     })
 }
 
