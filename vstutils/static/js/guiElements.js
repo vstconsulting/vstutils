@@ -229,7 +229,6 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         if(field.maxLength && value_length > field.maxLength)
         {
-            debugger;
             throw {error:'validation', message:'Field '+field.name +" is too long"}
         }
 
@@ -239,7 +238,6 @@ guiElements.base = function(opt = {}, value, parent_object)
             {
                 if(field.required)
                 {
-                    debugger;
                     throw {error:'validation', message:'Field '+field.name +" is empty"}
                 }
                 else
@@ -250,7 +248,6 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             if(value_length < field.minLength)
             {
-                debugger;
                 throw {error:'validation', message:'Field '+field.name +" is too short"}
             }
         }
@@ -573,17 +570,7 @@ guiElements.autocomplete = function()
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-        /*
-         * options.searchObj - object for JS hardcode, which aim is to redefine way of getting data for autocomplete.
-         *
-         * Example of hardcode:
-         * tabSignal.connect("openapi.factory.ansiblemodule", function(data)
-         * {
-         *      let inventory = apiansiblemodule.one.view.definition.properties.inventory;
-         *      inventory.type = "autocomplete"
-         *      inventory.searchObj = new apiinventory.list();
-         * });
-         */
+
         if(options.searchObj)
         {
             return new autoComplete({
@@ -636,55 +623,6 @@ guiElements.autocomplete = function()
             });
         }
         /*
-         * options.enum - array, which comes from api.
-         * This array has data for autocomplete.
-         * @note для поля типа enum есть тип enum, зачем здесь этот код?
-
-        else if(options.enum)
-        {
-            return new autoComplete({
-                selector: '#'+this.element_id,
-                minChars: 0,
-                cache:false,
-                showByClick:true,
-                menuClass:'autocomplete autocomplete-'+this.element_id,
-                renderItem: function(item, search)
-                {
-                    return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
-                },
-                onSelect: (event, term, item) =>
-                {
-                    let value = $(item).attr('data-value');
-                    $('#'+this.element_id).val($(item).text());
-                    $('#'+this.element_id).attr('value', value);
-                    $('#'+this.element_id).attr({'data-hide':'hide'});
-                },
-                source: (original_term, response) =>
-                {
-                    let search_str = trim(original_term);
-
-                    let isHide = $('#'+this.element_id).attr('data-hide')
-                    if(isHide == "hide")
-                    {
-                        $('#'+this.element_id).attr({'data-hide':'show'})
-                        return;
-                    }
-
-                    let choices = options.enum;
-
-                    let matches = [];
-                    for(let i in choices)
-                    {
-                        if (choices[i].toLowerCase().indexOf(search_str.toLowerCase()) != -1)
-                        {
-                            matches.push(choices[i]);
-                        }
-                    }
-                    response(matches);
-                }
-            });
-        } */
-        /*
          * options.autocomplete_properties - object, which comes from api.
          * This object has info about model and fields, where data for autocomplete is stored.
          */
@@ -701,13 +639,20 @@ guiElements.autocomplete = function()
 
             let value_field = props['value_field'];
             let view_field = props['view_field'];
+            if (!Array.isArray(props['obj']))
+            {
+                props['obj'] = [props['obj']]
+            }
 
 
-            let list = undefined;
+            let list = [];
 
             if(props['obj'])
             {
-                list = new guiObjectFactory(props['obj']);
+                for (let i in props['obj'])
+                {
+                    list.push(new guiObjectFactory(props['obj'][i]));
+                }
             }
 
             return new autoComplete({
@@ -741,24 +686,38 @@ guiElements.autocomplete = function()
 
                     if(list)
                     {
+
                         let filters = getFiltersForAutocomplete(list, search_str, view_field);
+                        let lists_deffered =[]
+                        for (let i in list)
+                        {
+                            lists_deffered.push(list[i].search(filters))
+                        }
 
-                        $.when(list.search(filters)).done((data) => {
+                        $.when.apply($, lists_deffered).done(function() {
 
-                            let res = data.data.results;
                             let matches = [];
 
-                            for(let i in res)
+                            for (let i in arguments)
                             {
-                                matches.push({
-                                    value_field: res[i][value_field],
-                                    view_field: res[i][view_field],
-                                });
+                                let res = arguments[i].data.results;
+
+                                for(let i in res)
+                                {
+                                    let value_field = res[i].id
+                                    if (matches.length == 0 || matches.every(element => element['value_field'] != value_field))
+                                    {
+                                        matches.push({
+                                            value_field: value_field,
+                                            view_field: res[i][view_field],
+                                        });
+                                    }
+                                }
                             }
 
                             this.matches = matches;
-
                             response(matches)
+
 
                         }).fail((e) => {
                             response([]);
@@ -779,7 +738,6 @@ guiElements.autocomplete.prepareProperties = function(value)
 
     if(!value.additionalProperties)
     {
-        debugger;
         console.error("AdditionalProperties was not found");
         return value;
     }
@@ -838,26 +796,8 @@ guiElements.select2 = function(field, field_value, parent_object)
                     {
                         $.when(options.search(params, field, field_value, parent_object)).done((results) =>
                         {
-                            /*
-                             * {
-                                "results": [
-                                  {
-                                    "id": 1,
-                                    "text": "Option 1"
-                                  },
-                                  {
-                                    "id": 2,
-                                    "text": "Option 2"
-                                  }
-                                ],
-                                "pagination": {
-                                  "more": true
-                                }
-                              }
-                             */
                             success(results)
                         }).fail((e) => {
-                            debugger;
                             failure([])
                         })
                     }
@@ -931,7 +871,6 @@ guiElements.select2 = function(field, field_value, parent_object)
                                 }
                                 success({results:results})
                             }).fail((e) => {
-                                debugger;
                                 failure([])
                             })
                         }
@@ -1021,55 +960,6 @@ guiElements.apiData = function(field, field_value, parent_object)
     this.name = 'apiData'
     guiElements.base.apply(this, arguments)
 }
-
-/*
-guiElements.apiUser = function(field, field_value, parent_object)
-{
-    this.name = 'apiUser'
-    guiElements.base.apply(this, arguments)
-
-    this._onBaseRender = this._onRender
-    this._onRender = function(options)
-    {
-        debugger;
-        this._onBaseRender(options)
-
-        if(!options.readOnly)
-        {
-            $('#'+this.element_id).select2({
-                width: '100%',
-                ajax: {
-                    transport: function (params, success, failure)
-                    {
-                        var users = new guiObjectFactory("/user/")
-
-                        $.when(users.search(params, field, field_value, parent_object)).done((results) =>
-                        {
-                            let select2 = {
-                                results:[]
-                            }
-                            results.data.results.forEach(res =>{
-                                select2.results.push({
-                                    id:res.id,
-                                    text:res.username
-                                })
-                            })
-
-                            success(select2)
-                        }).fail(() => {
-                            failure([])
-                        })
-                    }
-                }
-            });
-        }
-    }
-
-    this.reductionToType = function(value)
-    {
-        return value/1
-    }
-}*/
 
 guiElements.inner_api_object = function(field, field_value, parent_object)
 {
