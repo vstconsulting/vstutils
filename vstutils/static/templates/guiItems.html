@@ -395,6 +395,50 @@
     </tr>
 </script>
 
+<!-- Список multi_actions сущностей -->
+<script type="text/x-just" data-just="multi_actions_buttons">
+    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.multi_actions, show_all: true}) %>
+            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.sublinks_l2, show_all: false}) %>
+        </ul>
+    </div>
+</script>
+    
+<script type="text/x-just" data-just="multi_actions_buttons_list">
+    <% for(let k in multi_actions){ %>
+        
+        <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
+        
+        <% if(multi_actions[k].onClick){ %>
+            <li>
+                <a
+                    href="#"
+                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
+                     <%= justOn('click', function(){ multi_actions[k].onClick.apply(guiObj, []); return false;} ) %>
+                >
+                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
+                </a>
+            </li>
+        <% }else{ %>
+             <li>
+                <a
+                    href="#"
+                    onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- multi_actions[k].path %>'); return false;"
+                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
+                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
+                </a>
+            </li>
+        <% } %>
+        <li role="separator" class="divider"></li>
+    <% } %>
+</script>
+    
+                                    
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
 
@@ -471,37 +515,7 @@
                 </div>
                 <div class="box-footer clearfix">
                     <%[ action_buttons %>
-                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <% for(let k in guiObj.api.multi_actions){   %>
-                                    <% if(guiObj.api.multi_actions[k].onClick){ %>
-                                        <li>
-                                            <a
-                                                href="#"
-                                                class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
-                                                 <%= justOn('click', function(){ guiObj.api.multi_actions[k].onClick.apply(guiObj, []); return false;} ) %>
-                                            >
-                                                    <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
-                                            </a>
-                                        </li>
-                                    <% }else{ %>
-                                         <li>
-                                            <a
-                                                href="#"
-                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;"
-                                                class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
-                                                    <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
-                                            </a>
-                                        </li>
-                                    <% } %>
-                                    <li role="separator" class="divider"></li>
-                                <% } %>
-                            </ul>
-                        </div>
+                        <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
                     <%] %>
                     <%* action_buttons %>
 

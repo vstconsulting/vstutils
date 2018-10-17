@@ -158,9 +158,9 @@ var gui_list_object = {
         //отправляем bulk запрос
         $.when(this.apiQuery(bulkArr)).done(d =>
         {
-            for(let item in dataFromApi)
+            for(var item in dataFromApi)
             {
-                for(let field in dataFromApi[item])
+                for(var field in dataFromApi[item])
                 {
                     if(prefetch_fields[field])
                     {
@@ -171,19 +171,16 @@ var gui_list_object = {
                             let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                             if(match != null)
                             {
-                                for(let j in d)
+                                for(var j in d)
                                 {
                                     if(d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
                                     {
                                         let prefetch_data = d[j].data.results;
-                                        for(let k in prefetch_data)
+                                        for(var k in prefetch_data)
                                         {
                                             if($.inArray(prefetch_data[k].id, prefetch_fields_ids[field][path]) != -1)
                                             {
-                                                if(prefetch_data[k].id == dataFromApi[item][field])
-                                                {
-                                                    dataFromApi[item][field+'_info'] = prefetch_data[k];
-                                                }
+                                                dataFromApi[item][field+'_info'] = prefetch_data[k];
                                             }
                                         }
                                     }
@@ -192,12 +189,12 @@ var gui_list_object = {
                             else
                             {
                                 let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                                for(let j in d)
+                                for(var j in d)
                                 {
                                     if(d[j].item == bulk_name[1])
                                     {
                                         let prefetch_data = d[j].data.results;
-                                        for(let k in prefetch_data)
+                                        for(var k in prefetch_data)
                                         {
                                             if(dataFromApi[item][field] == prefetch_data[k].id)
                                             {
@@ -206,6 +203,7 @@ var gui_list_object = {
                                         }
                                     }
                                 }
+
                             }
                         }
                     }
@@ -634,7 +632,7 @@ var gui_list_object = {
                                 var val = activeOption.options[i]
                                 if(val.toLowerCase().indexOf(term) != -1)
                                 {
-                                    debugger;
+                                debugger;
                                     matches.push({name:val})
                                 }
                             }
