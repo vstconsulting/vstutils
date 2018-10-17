@@ -5,7 +5,7 @@ function getFieldType(field, model, elements = undefined)
     {
         elements = window.guiElements
     }
-    
+
     // Приоритет №1 это prefetch поля
     if(field.prefetch && model && model.data && model.data[field.name + "_info"])
     {
@@ -798,6 +798,86 @@ guiElements.autocomplete.prepareProperties = function(value)
     })
 
     return value
+}
+
+guiElements.hybrid_autocomplete = function()
+{
+    this.name = 'hybrid_autocomplete'
+    guiElements.base.apply(this, arguments)
+
+    this.renderModal = function (options)
+    {
+        let def = new $.Deferred();
+
+        // let modal_obj_list = {};
+
+        if(options.autocomplete_properties || options.dynamic_properties)
+        {
+            if (options.dynamic_properties)
+            {
+                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                options.autocomplete_properties = properties
+
+            }
+
+            let props = getInfoFromAdditionalProperties(options);
+
+            let value_field = props['value_field'];
+            let view_field = props['view_field'];
+
+
+            let list = undefined;
+
+            if (props['obj'])
+            {
+                list = new guiObjectFactory(props['obj']);
+            }
+            debugger;
+
+            $.when(list.load(list.url_vars.api_pk)).done(data => {
+                let modal_opt = {
+                    title: 'Select ' + list.api.name,
+                };
+                list.model.data = data.data;
+
+                ///
+                let render_options = {};
+                render_options.fields = list.api.schema.list.fields
+                render_options.base_path = getUrlBasePath()
+
+                //render_options.sections = this.getSections('renderAsPage')
+                if(!render_options.page_type) render_options.page_type = 'list'
+
+                render_options.selectionTag =  list.api.selectionTag
+                window.guiListSelections.intTag(render_options.selectionTag)
+
+                render_options.base_href = spajs.urlInfo.data.reg.page_and_parents
+                ///
+                debugger;
+                let html = spajs.just.render('hybrid_autocomplete_modal', {query:"", guiObj:list, opt:render_options});
+                guiModal.setModalHTML(html, modal_opt);
+                guiModal.modalOpen();
+            }).fail(e => {
+                def.reject(e);
+            })
+        }
+        else
+        {
+            def.reject();
+        }
+
+
+
+        debugger;
+
+
+
+
+
+        return def.promise()
+    }
+
+
 }
 
 

@@ -34,3 +34,20 @@
     <%] %>
     <%! modal_content %>
 </script>
+
+<!-- template of hybrid_autocomplete modal -->
+<script type="text/x-just" data-just="hybrid_autocomplete_modal">
+     <%[ modal_content_block %>
+        <h4 class="with_bottom_border">hybrid_autocomplete_modal</h4>
+        <%= spajs.just.render('hybrid_autocomplete_modal_content', {query:query, guiObj:guiObj, opt: opt}) %>
+    <%] %>
+    <%! modal_content %>
+</script>
+
+<script type="text/x-just" data-just="hybrid_autocomplete_modal_content">
+
+
+    <%! entity_list %>
+</script>
+
+
