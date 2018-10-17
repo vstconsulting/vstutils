@@ -241,12 +241,11 @@ var gui_page_object = {
 
     delete : function ()
     {
-        debugger;
         var thisObj = this;
         var res = this.sendToApi('delete')
         $.when(res).done(function()
         {
-            guiPopUp.success("Changes in "+thisObj.api.bulk_name+" were successfully deleted");
+            guiPopUp.success("Object of '"+thisObj.api.bulk_name+"' type was successfully deleted");
         })
         return res;
 
