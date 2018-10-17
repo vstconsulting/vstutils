@@ -435,7 +435,7 @@ function openApi_guiSchema(api)
             }
             else
             {
-                type = 'action'
+                type = 'page'
             }
         }
         else
@@ -468,7 +468,7 @@ function openApi_guiSchema(api)
             methodEdit:undefined,
             selectionTag:i.replace(/[^A-z0-9\-]/img, "_"),
         }
-        
+
         if(type != 'action')
         {
             let short_key = i.replace(/\/{[A-z]+}/g, "").replace(/^\/|\/$/g, "")
@@ -635,7 +635,7 @@ function openApi_guiSchema(api)
             }
         }
     }
-    
+
     // Bind list pages and object pages
     // Свяжет страницы списков и страницы объектов
     for(let path in path_schema)
@@ -693,35 +693,13 @@ function openApi_guiSchema(api)
 
 
         val.multi_actions = []
-
-        // object with paths to multiactions
-        for(let subaction in  val.sublinks_l2)
-        {
-            let subobj = val.sublinks_l2[subaction]
-            if(subobj.type != 'action')
-            {
-                continue;
-            }
-            
-            if(!is_multi_action(subobj))
-            { 
-                continue;
-            }
-             
-            val.multi_actions[subobj.name] = subobj
-            val['multi_actions']["__link__" + subobj.name] = subobj.path;
-        }
-
+ 
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
-        {
-            /*val.multi_actions['delete'] = {
-                name:"delete",
-                onClick:multi_action_delete,
-            }*/
+        { 
             val['multi_actions']['delete'] = {
-                    name:"delete",
-                    __func__onClick: 'multi_action_delete',
-                };
+                name:"delete",
+                __func__onClick: 'multi_action_delete',
+            };
         }
     }
 
@@ -763,18 +741,7 @@ function openApi_guiSchema(api)
 
     return {path:path_schema, object:short_schema};
 }
-
-function is_multi_action(action)
-{ 
-    if(action.is_multi_action === undefined)
-    { 
-        action.is_multi_action = false
-        tabSignal.emit("openapi.schema.is_multi_action",  {path:action.path, action:action});
-    }
-
-    return action.is_multi_action
-}
-
+ 
 /*
  * Function emits signals for schema
  * @param {object} path_schema - guiShema.path
@@ -1122,7 +1089,7 @@ function setDefaultPrefetchFunctions(obj)
             {
                 continue;
             }
-  
+
             let prefetch_path = undefined
             if(typeof field.prefetch == "string")
             {

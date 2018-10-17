@@ -327,7 +327,7 @@
                 <% } %>
                 <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, String(dataLine.url_key).replace('@', '')) %>"
         data-id="<%- String(dataLine.url_key).replace('@', '') %>"
-        data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page, dataLine.url_key]) %>"
+        data-href="<%- vstMakeLocalUrl([dataLine.opt.base_href, dataLine.url_key]) %>"
         onclick="turnTableTrIntoLink(event)"
         >
         <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
@@ -358,7 +358,7 @@
                 </td>
             <% } %>
         <% } %>
-        <% if(!isEmptyObject(dataLine.sublinks_l2)){ %>
+        <% if(!isEmptyObject(dataLine.sublinks_l2) && !dataLine.opt.hideActions){ %>
             <td class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -395,6 +395,50 @@
     </tr>
 </script>
 
+<!-- Список multi_actions сущностей -->
+<script type="text/x-just" data-just="multi_actions_buttons">
+    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.multi_actions, show_all: true}) %>
+            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.sublinks_l2, show_all: false}) %>
+        </ul>
+    </div>
+</script>
+    
+<script type="text/x-just" data-just="multi_actions_buttons_list">
+    <% for(let k in multi_actions){ %>
+        
+        <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
+        
+        <% if(multi_actions[k].onClick){ %>
+            <li>
+                <a
+                    href="#"
+                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
+                     <%= justOn('click', function(){ multi_actions[k].onClick.apply(guiObj, []); return false;} ) %>
+                >
+                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
+                </a>
+            </li>
+        <% }else{ %>
+             <li>
+                <a
+                    href="#"
+                    onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- multi_actions[k].path %>'); return false;"
+                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
+                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
+                </a>
+            </li>
+        <% } %>
+        <li role="separator" class="divider"></li>
+    <% } %>
+</script>
+    
+                                    
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
 
@@ -456,7 +500,7 @@
                                                 </th>
                                             <% } %>
                                         <% } %>
-                                        <% if(!isEmptyObject(guiObj.api.sublinks_l2)){ %>
+                                        <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
                                             <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
                                         <% } %>
                                     </tr>
@@ -471,37 +515,7 @@
                 </div>
                 <div class="box-footer clearfix">
                     <%[ action_buttons %>
-                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <% for(let k in guiObj.api.multi_actions){   %>
-                                    <% if(guiObj.api.multi_actions[k].onClick){ %>
-                                        <li>
-                                            <a
-                                                href="#"
-                                                class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
-                                                 <%= justOn('click', function(){ guiObj.api.multi_actions[k].onClick.apply(guiObj, []); return false;} ) %>
-                                            >
-                                                    <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
-                                            </a>
-                                        </li>
-                                    <% }else{ %>
-                                         <li>
-                                            <a
-                                                href="#"
-                                                onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- guiObj.api.multi_actions[k].path %>'); return false;"
-                                                class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
-                                                    <%- k %> <% if(guiObj.api.multi_actions[k].description) { %> <%- guiObj.api.multi_actions[k].description %> <% } %>
-                                            </a>
-                                        </li>
-                                    <% } %>
-                                    <li role="separator" class="divider"></li>
-                                <% } %>
-                            </ul>
-                        </div>
+                        <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
                     <%] %>
                     <%* action_buttons %>
 
@@ -544,138 +558,40 @@
         <a href="#" class="btn btn-primary"
             onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
     <%] %>
-
-    <%[ main_content_row %>
-        <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <%[ search_form %>
-                        <%= guiObj.renderSearchForm() %>
-                    <%] %>
-                    <%* search_form %>
-
-                    <%[ pagination %>
-                        <% if(guiObj.getTotalPages()){ %>
-                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
-                                <%= guiObj.paginationHtml() %>
-                            </div>
-                        <% } %>
-                    <%] %>
-                    <%* pagination %>
-
-                </div>
-                <div class="box-body">
-                    <%  if (!guiObj.model.data.results.length){ %>
-                        <%[ empty_list %>
-                                <%= this.partial('items_empty_list', { }) %>
-                        <%] %>
-                        <%* empty_list %>
-                    <% } else{ %>
-                        <%[ data_list %>
-                            <table class="table table-bordered multiple-select">
-                                <tbody>
-                                    <tr>
-                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
-                                            <div class="ico-on fa fa-toggle-on"></div>
-                                            <div class="ico-off fa  fa-toggle-off"></div>
-                                        </th>
-                                        <% for(var j in opt.fields){ %>
-                                            <% if(!opt.fields[j].hidden) { %>
-                                                <th
-                                                    <% if(opt.fields[j].style){ %><%= opt.fields[j].style.apply(guiObj,[undefined, opt]) %><% } %>
-                                                    <% if(opt.fields[j].class){ %><%= opt.fields[j].class.apply(guiObj,[undefined, opt]) %><% } %>  >
-                                                        <%- opt.fields[j].title %>
-                                                </th>
-                                            <% } %>
-                                        <% } %>
-                                    </tr>
-                                    <% for(var i in guiObj.model.data.results){ %>
-                                        <tr
-                                            class="item-row item-<%- guiObj.model.data.results[i].id %> highlight-tr <%- window.guiListSelections.selectionControll(opt.selectionTag, guiObj.model.data.results[i].id) %>"
-                                            data-id="<%- guiObj.model.data.results[i].id %>"
-                                            data-href="<%- vstMakeLocalUrl([spajs.urlInfo.data.reg.page_type, guiObj.model.data.results[i].id]) %>"
-                                            onclick="turnTableTrIntoLink(event)"
-                                            >
-                                            <td class=""  onclick="window.guiListSelections.toggleSelection('<%- opt.selectionTag %>', <%- guiObj.model.data.results[i].id %>); return false;">
-                                                <div class="ico-on fa fa-toggle-on"></div>
-                                                <div class="ico-off fa  fa-toggle-off"></div>
-                                            </td>
-                                            <% for(var j in opt.fields){ %>
-                                                 <% if(!opt.fields[j].hidden) { %>
-                                                    <td
-                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], guiObj.model.data.results[i], opt) %>
-                                                    >
-                                                        <% if(!opt.fields[j].value){ %>
-                                                            <% if(opt.fields[j].prefetch && guiObj.model.data.results[i][opt.fields[j].name + '_info']) { %>
-                                                                <a href="<%- window.hostname %>/?<%- opt.fields[j].prefetch.path(guiObj.model.data.results[i]).replace(/^\/|\/$/g, '') + '/' + guiObj.model.data.results[i][opt.fields[j].name] %>" class="item-name"
-                                                                   onclick="return false;" >
-                                                                   <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].name) ||
-                                                                       sliceLongString(guiObj.model.data.results[i][opt.fields[j].name + '_info'].username) %>
-                                                                </a>
-                                                            <% } else { %>
-                                                               <%- sliceLongString(guiObj.model.data.results[i][opt.fields[j].name]) %>
-                                                            <% } %>
-                                                        <% }else{ %>
-                                                            <%= opt.fields[j].value.apply(guiObj, [guiObj.model.data.results[i], opt.fields[j].name, opt]) %>
-                                                        <% } %>
-                                                    </td>
-                                                 <% } %>
-                                            <% } %>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        <%] %>
-                        <%* data_list %>
-                    <% } %>
-                </div>
-                <div class="box-footer clearfix">
-                    <%[ action_buttons %>
-                        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#"
-                                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
-                                    </li>
-                            </ul>
-                        </div>
-                    <%] %>
-                    <%* action_buttons %>
-
-                    <% if(!query){ %>
-                        <%[ select_buttons %>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Select
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
-                                    </li>
-                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        <%] %>
-                        <%* select_buttons %>
-                    <% } %>
-                    <%[ pagination %>
-                        <% if(guiObj.getTotalPages()){ %>
-                            <%= guiObj.paginationHtml(guiObj.model.data) %>
-                        <% } %>
-                    <%] %>
-                    <%* pagination %>
-                </div>
-            </div>
-        </section>
+     
+    <%[ action_buttons %>
+        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                    <li>
+                        <a href="#"
+                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
+                    </li>
+            </ul>
+        </div>
+    <%] %> 
+ 
+    <%[ select_buttons %>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Select
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
+                </li>
+                <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                    <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                </li>
+            </ul>
+        </div>
     <%] %>
-    <%! entity_base %>
+
+    <%! entity_list %>
 </script>
 
 <script type="text/x-just" data-just="entity_one">
