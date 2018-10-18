@@ -143,14 +143,9 @@ var gui_base_object = {
         return this.getValue.call(arguments);
     },
 
-    base_init : function (api_object, url_vars = undefined, object_data = undefined)
+    base_init : function (api_object,  url_vars= {}, object_data = undefined)
     {
-        this.url_vars = spajs.urlInfo.data.reg
-        if(url_vars)
-        {
-            this.url_vars = url_vars
-        }
-
+        this.url_vars = $.extend(spajs.urlInfo.data.reg, url_vars)
         this.model.title = this.api.bulk_name
     },
     init : function ()
@@ -364,6 +359,9 @@ function guiObjectFactory(api_object)
     if(typeof api_object == "string")
     {
         api_object = window.guiSchema.path[api_object]
+        if (api_object == undefined)
+            console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object}))
+        }
     }
 
     /**

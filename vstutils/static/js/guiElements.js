@@ -527,45 +527,6 @@ guiElements.autocomplete = function()
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
-    this.getValue = function()
-    {
-        if(this.opt.dynamic_properties)
-        {
-            let properties = mergeDeep(this.opt.autocomplete_properties, this.opt.dynamic_properties)
-            this.opt.autocomplete_properties = properties
-        }
-
-        if (this.matches &&
-            this.opt.autocomplete_properties.view_field &&
-            this.opt.autocomplete_properties.value_field)
-        {
-            var value = $("#" + this.element_id).val();
-            var data_value = $("#" + this.element_id).attr('data-value');
-            var match = false;
-            for (var i in this.matches)
-            {
-                if (value == this.matches[i]['view_field'] &&
-                    data_value == this.matches[i]['value_field'])
-                {
-                    match = true;
-                }
-            }
-
-            if (match)
-            {
-                return this.reductionToType(data_value);
-            }
-            else
-            {
-                return this.reductionToType(value)
-            }
-        }
-        else
-        {
-            return this.reductionToType($("#" + this.element_id).val());
-        }
-    }
-
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
@@ -651,7 +612,11 @@ guiElements.autocomplete = function()
             {
                 for (let i in props['obj'])
                 {
-                    list.push(new guiObjectFactory(props['obj'][i]));
+                    list.push(new guiObjectFactory(props['obj'][i],
+                        {
+                            api_inventory_id: options.dynamic_properties.inventory_id
+                        })
+                    );
                 }
             }
 
@@ -686,7 +651,6 @@ guiElements.autocomplete = function()
 
                     if(list)
                     {
-
                         let filters = getFiltersForAutocomplete(list, search_str, view_field);
                         let lists_deffered =[]
                         for (let i in list)
