@@ -686,31 +686,11 @@ var gui_list_object = {
         return def
     },
 
-    startUpdates : function()
+    updateFromServer : function ()
     {
-        if(this.update_timoutid)
-        {
-            return;
-        }
-         
-        this.update_timoutid = setTimeout(() => 
-        { 
-            this.update_timoutid = undefined
-            if(!this.model.filters)
-            {
-                console.warn("startUpdates [no filters]")
-                this.startUpdates()
-                return;
-            }
-
-            $.when(this.search(this.model.filters)).always(() => { 
-                console.log("startUpdates [updated]")
-                this.startUpdates()
-            })
-        }, 50) 
+        return this.search(this.model.filters)
     },
-
-
+      
     /**
      * Выполняет переход на страницу с результатами поиска
      * @param {string} query

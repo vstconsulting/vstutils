@@ -25,10 +25,28 @@
             <%] %>
             <%* title %>
 
-            <%[ main_input %>
-                <div>guiElements.base</div>
+            <%[ main_input_group %>
+                    <%[ main_input %>
+                        <div>guiElements.base</div>
+                    <%] %>
+                    <%[ readonly_input %>
+                        <~ guiElement.db_value>
+                            <input type="text"
+                                style="width: 100%;"
+                                class="form-control"
+                                <%- set_api_options(opt) %>
+                                id="<%- guiElement.element_id %>"
+                                value="<% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ if($.isArray(guiElement.db_value)){ %><%- guiElement.db_value.join() %><% }else{ %><%- JSON.stringify(guiElement.db_value) %><% }}else{ %><%- guiElement.db_value || '' %><% } %>">
+                        <~>
+                    <%] %>
+
+                    <% if(opt.readOnly){ %>
+                        <%* readonly_input %>
+                    <% }else{ %>
+                        <%* main_input %>
+                    <% } %>
             <%] %>
-            <%* main_input %>
+            <%* main_input_group %>
 
             <%[ description %>
                 <div class="help-block"><%- opt.description || '' %></div>
@@ -107,12 +125,34 @@
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">
     <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
+
     <%[ main_input %>
-        <input type="text"
-        class="form-control"
-        <%- set_api_options(opt) %> 
-        id="<%- guiElement.element_id %>"
-        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+        <div class="input-group">
+            <~ guiElement.db_value>
+                <% if(guiElement.db_value != value){ %>
+                    <span class="input-group-addon db_value_input">
+                        <% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ %>
+                            <% if($.isArray(guiElement.db_value)){ %>
+                                <%- guiElement.db_value.join() %>
+                            <% }else{ %>
+                                <%- JSON.stringify(guiElement.db_value) %>
+                            <% } %>
+                        <% }else{ %>
+                            <%- guiElement.db_value || '' %>
+                        <% } %>
+                        <i class="glyphicon glyphicon-arrow-right"></i>
+                    </span>
+                <% }else{ %>
+                    <span class="input-group-addon" style="display: table-column;"></span>
+                <% } %>
+            <~>
+            <input type="text"
+                    style="width: 100%;"
+                    class="form-control"
+                    <%- set_api_options(opt) %>
+                    id="<%- guiElement.element_id %>"
+                    value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+        </div>
     <%] %>
     <%! guiElements.base %>
 </script>
@@ -123,7 +163,7 @@
     <%[ main_input %>
         <input type="number"
         class="form-control"
-        <%- set_api_options(opt) %> 
+        <%- set_api_options(opt) %>
         id="<%- guiElement.element_id %>"
         value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
     <%] %>
@@ -135,21 +175,21 @@
     <!-- guiElements.hidden [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <div style="display:none;">
         <%[ main_input %>
-            <input type="text"  
+            <input type="text"
             class="form-control"
-            <%- set_api_options(opt) %> 
+            <%- set_api_options(opt) %>
             id="<%- guiElement.element_id %>"
             value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
         <%] %>
         <%! guiElements.base %>
     </div>
 </script>
-        
+
 <!-- guiElements.null -->
 <script type="text/x-just" data-just="guiElements.null">
-    <!-- guiElements.null [type=<%- opt.type %>, format=<%- opt.format %>] --> 
+    <!-- guiElements.null [type=<%- opt.type %>, format=<%- opt.format %>] -->
 </script>
- 
+
 <!-- guiElements.prefetch -->
 <script type="text/x-just" data-just="guiElements.prefetch">
     <!-- guiElements.prefetch -->
@@ -283,32 +323,39 @@
 <!-- guiElements.apiObject -->
 <script type="text/x-just" data-just="guiElements.apiObject">
     <!-- guiElements.apiObject -->
-    <%[ main_input %>
-        <div
-            class="form-control"
-            <%- set_api_options(opt) %>
-            id="<%- guiElement.element_id %>"
-        >
-            <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
-        </div>
+    <%[ readonly_input %>
+        <~ guiElement.db_value>
+            <div
+                class="form-control"
+                <%- set_api_options(opt) %>
+                id="<%- guiElement.element_id %>"
+            >
+                <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
+            </div>
+        <~>
     <%] %>
+    
+    <%[ main_input %>
+        <%* readonly_input %>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
 <!-- guiElements.apiData -->
 <script type="text/x-just" data-just="guiElements.apiData">
-    <!-- guiElements.apiData [type=<%- opt.type %>, format=<%- opt.format %>] --> 
+    <!-- guiElements.apiData [type=<%- opt.type %>, format=<%- opt.format %>] -->
     <%[ main_input %>
         <input type="text"
         class="form-control"
-        <%- set_api_options(opt) %> 
+        <%- set_api_options(opt) %>
         id="<%- guiElement.element_id %>"
         value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
     <%] %>
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.apiUser 
+<!-- guiElements.apiUser
 <script type="text/x-just" data-just="guiElements.apiUser">
     <!-- guiElements.apiUser -- >
     <%[ main_input %>
