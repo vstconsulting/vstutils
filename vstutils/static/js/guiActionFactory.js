@@ -13,8 +13,12 @@ var gui_action_object = {
                 let key_list = thisSchema.redirect_path.format_keys();
                 let id_list = new Array;
                 data.subitem.forEach((v, k) => {
-                    if (!k % 2) {
-                        id_list[key_list[k % 2]] = v;
+                    if (!(k % 2)) {
+                        let key = key_list[Math.floor(k/2)]
+                        if (key)
+                        {
+                            id_list[key] = v;
+                        }
                     }
                 })
 
