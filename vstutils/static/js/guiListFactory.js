@@ -390,13 +390,23 @@ var gui_list_object = {
      * @returns {string|promise}
      */
     renderAsPage : function (render_options = {})
-    {
+    { 
         let tpl = this.getTemplateName('list')
-
+       
+        if(this.api.autoupdate &&
+                                    (
+                                        !render_options  ||
+                                        render_options.autoupdate === undefined ||
+                                        render_options.autoupdate
+                                    )
+            )
+        {
+            this.startUpdates()
+        }
+        
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
-
-        //render_options.sections = this.getSections('renderAsPage')
+ 
         if(!render_options.page_type) render_options.page_type = 'list'
 
         render_options.selectionTag =  this.api.selectionTag
@@ -429,7 +439,18 @@ var gui_list_object = {
     renderAsAddSubItemsPage : function (render_options = {})
     {
         let tpl = this.getTemplateName('list_add_subitems')
-
+        
+        if(this.api.autoupdate &&
+                                    (
+                                        !render_options  ||
+                                        render_options.autoupdate === undefined ||
+                                        render_options.autoupdate
+                                    )
+            )
+        {
+            this.startUpdates()
+        }
+        
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
         //render_options.sections = this.getSections('renderAsAddSubItemsPage')
@@ -665,6 +686,11 @@ var gui_list_object = {
         return def
     },
 
+    updateFromServer : function ()
+    {
+        return this.search(this.model.filters)
+    },
+      
     /**
      * Выполняет переход на страницу с результатами поиска
      * @param {string} query

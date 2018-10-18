@@ -625,11 +625,25 @@ if(!window.spajs)
                 opt.event_state.url = url;
             }
         }
-
+        
+        menuInfo.onClose_promise = new $.Deferred();  
         if(spajs.currentOpenMenu && spajs.currentOpenMenu.onClose)
-        {
-            //console.log("onClose", spajs.currentOpenMenu)
-            spajs.currentOpenMenu.onClose(menuInfo);
+        { 
+            if(spajs.currentOpenMenu.onClose_promise)
+            {
+                if(spajs.currentOpenMenu.onClose)
+                {
+                    spajs.currentOpenMenu.onClose_promise.resolve(spajs.currentOpenMenu.onClose(menuInfo))
+                }
+                else
+                {
+                    spajs.currentOpenMenu.onClose_promise.resolve(menuInfo)
+                }
+            }
+            else
+            {
+                spajs.currentOpenMenu.onClose(menuInfo)
+            }
         }
 
         var data = {}
@@ -656,7 +670,8 @@ if(!window.spajs)
         spajs.urlInfo = {menuInfo:menuInfo, data:data}
         tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
         tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
-        let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
+         
+        let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data, menuInfo.onClose_promise.promise());
         if(res)
         {
             // in-loading

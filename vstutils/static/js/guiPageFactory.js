@@ -165,8 +165,24 @@ var gui_page_object = {
 
     },
 
+    updateFromServer : function ()
+    {
+        let res = this.load(this.model.filters) 
+      
+        $.when(res).done(() =>
+        { 
+            for(let i in this.model.guiFields)
+            {
+                this.model.guiFields[i].updateValue(this.model.data[i])
+            }
+        })
+        
+        return res
+    },
+    
     load : function (filters)
     {
+        this.model.filters =  $.extend(true, {}, filters)
         if(typeof filters !== "object")
         {
             filters = {api_pk:filters}
@@ -210,7 +226,7 @@ var gui_page_object = {
 
         return promise.promise();
     },
-
+ 
     init : function (page_options = {}, url_vars = undefined, object_data = undefined)
     {
         this.base_init.apply(this, arguments)
@@ -259,6 +275,17 @@ var gui_page_object = {
     {
         let tpl = this.getTemplateName('one')
 
+        if(this.api.autoupdate &&
+                                    (
+                                        !render_options  ||
+                                        render_options.autoupdate === undefined ||
+                                        render_options.autoupdate
+                                    )
+            )
+        {
+            this.startUpdates()
+        }
+        
         render_options.fields = []
         if(this.api.schema.edit)
         {
