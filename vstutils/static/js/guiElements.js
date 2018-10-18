@@ -97,11 +97,11 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         this.value = value
     }
-    
+
     this._onUpdateValue = function(){}
-    
+
     this.updateValue = function(value)
-    { 
+    {
         this.db_value = value
         this._onUpdateValue(value)
     }
@@ -537,45 +537,6 @@ guiElements.autocomplete = function()
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
-    this.getValue = function()
-    {
-        if(this.opt.dynamic_properties)
-        {
-            let properties = mergeDeep(this.opt.autocomplete_properties, this.opt.dynamic_properties)
-            this.opt.autocomplete_properties = properties
-        }
-
-        if (this.matches &&
-            this.opt.autocomplete_properties.view_field &&
-            this.opt.autocomplete_properties.value_field)
-        {
-            var value = $("#" + this.element_id).val();
-            var data_value = $("#" + this.element_id).attr('data-value');
-            var match = false;
-            for (var i in this.matches)
-            {
-                if (value == this.matches[i]['view_field'] &&
-                    data_value == this.matches[i]['value_field'])
-                {
-                    match = true;
-                }
-            }
-
-            if (match)
-            {
-                return this.reductionToType(data_value);
-            }
-            else
-            {
-                return this.reductionToType(value)
-            }
-        }
-        else
-        {
-            return this.reductionToType($("#" + this.element_id).val());
-        }
-    }
-
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
@@ -661,7 +622,9 @@ guiElements.autocomplete = function()
             {
                 for (let i in props['obj'])
                 {
-                    list.push(new guiObjectFactory(props['obj'][i]));
+                    list.push(new guiObjectFactory(props['obj'][i],
+                        options.dynamic_properties.url_vars)
+                    );
                 }
             }
 
@@ -899,7 +862,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
     guiElements.base.apply(this, arguments)
 
     this.createLinkedObj = function()
-    {   
+    {
         if(this.opt.definition.page)
         {
             return new guiObjectFactory(this.opt.definition.page, this.parent_object.url_vars, this.db_value)
@@ -908,22 +871,22 @@ guiElements.apiObject = function(field, field_value, parent_object)
         {
             return new guiObjectFactory(this.opt.definition.list.page, undefined, this.db_value)
         }
-        
+
         return undefined
     }
     this._onUpdateValue = function(value)
-    {   
-        this.linkObj = this.createLinkedObj() 
+    {
+        this.linkObj = this.createLinkedObj()
     }
 
 
     this._baseRender = this.render
     this.render = function(options)
-    { 
-        this.linkObj = this.createLinkedObj()  
+    {
+        this.linkObj = this.createLinkedObj()
         return this._baseRender.apply(this, arguments)
     }
- 
+
     this.getLink = function()
     {
         if(!this.linkObj || !this.db_value || !this.db_value.id)
@@ -947,7 +910,7 @@ guiElements.apiObject = function(field, field_value, parent_object)
     }
 
     this.getName = function()
-    { 
+    {
         if(!this.linkObj)
         {
             if(!this.db_value || !this.db_value.id)
