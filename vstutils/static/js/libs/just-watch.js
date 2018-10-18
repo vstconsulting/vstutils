@@ -81,25 +81,7 @@ $.fn.insertTpl =  _insertTpl('html')
 $.fn.appendTpl = _insertTpl('append')
 $.fn.prependTpl = _insertTpl('prepend')
 $.fn.replaceWithTpl = _insertTpl('replaceWith')
- 
- 
-function mergeCopyM(obj){
-    
-   // debugger;
-    if(Array.isArray(obj))
-    {
-        return obj.slice()
-    }
-    
-    if(typeof obj == "object" && obj !== null)
-    {
-        return $.extend(true, {}, obj)
-    }
-    
-    return obj
-}
-
-
+  
 var justReactive = {
 
     /**
@@ -157,108 +139,11 @@ var justReactive = {
     ],
     megreFunc:function(obj, prop, newval, level)
     {
-        obj[prop] = newval
-        return;
-        
-        if(!level)
-        {
-            level = 0;
-        }
-
-        var res = Object.getOwnPropertyDescriptor(obj, prop);
-        if(!res)
-        {
-            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(newval);
-            obj.justWatch(prop);
-            return;
-        }
-
-        if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
-        {
-            if(obj[prop] !== newval)
-            {
-                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop] = mergeCopyM(newval);
-            }
-            return;
-        }
-
-        if(typeof obj[prop] != "object" || obj[prop] !== null)
-        {
-            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(newval);
-            obj.justWatch(prop);
-            return;
-        }
-
-        if(Array.isArray(obj[prop]) && Array.isArray(newval))
-        {
-            if(newval.length < obj[prop].length)
-            {
-                // Если новый массив короче старого то укоротим старый чтоб у них была одинаковая длинна
-                //console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
-                Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
-            }
-
-            for(var i in newval)
-            {
-                if(typeof newval[i] == "object" && newval[i] !== null)
-                {
-                    if(level < 40)
-                    {
-                        justReactive.megreFunc(obj[prop], i, newval[i], level+1);
-                    }
-                    obj[prop].justWatch(i);
-                }
-                else
-                {
-                    // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                    obj[prop][i] = mergeCopyM(newval[i]);
-                    obj[prop].justWatch(i);
-                }
-            }
-            return;
-        }
-
-        // Свойство существует и оно не массив. Поэтому надо выполнить рекурсивное объединение объектов 
-        var v1arr = {}
-        for(var i in obj[prop])
-        {
-            v1arr[i] = false;
-        }
-
-        for(var i in newval)
-        {
-            v1arr[i] = true;
-
-            if(typeof newval[i] == "object" && newval[i] !== null)
-            {
-                if(level < 100)
-                {
-                    justReactive.megreFunc(obj[prop], i, newval[i], level+1);
-                }
-                obj[prop].justWatch(i);
-            }
-            else
-            {
-                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop][i] = mergeCopyM(newval[i]);
-                obj[prop].justWatch(i);
-            }
-        }
-
-        for(var i in v1arr)
-        {
-            if(!v1arr[i])
-            {
-                delete obj[prop][i];
-            }
-        }
+        obj[prop] = newval 
     },
     applyFunc:function(val, newval)
     {
-        console.log("setter", newval);
+        // console.log("setter", newval);
         
         // @todo Refactor
         // Если элементы из just_ids хранить не в объекте замыканием а в глобальном массиве
