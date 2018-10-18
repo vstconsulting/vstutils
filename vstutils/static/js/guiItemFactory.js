@@ -403,6 +403,7 @@ function guiObjectFactory(api_object)
     {
         api_object = window.guiSchema.path[api_object]
         if (api_object == undefined)
+        {
             console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object}))
         }
     }
