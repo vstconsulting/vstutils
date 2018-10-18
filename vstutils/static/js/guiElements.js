@@ -623,9 +623,7 @@ guiElements.autocomplete = function()
                 for (let i in props['obj'])
                 {
                     list.push(new guiObjectFactory(props['obj'][i],
-                        {
-                            api_inventory_id: options.dynamic_properties.inventory_id
-                        })
+                        options.dynamic_properties.url_vars)
                     );
                 }
             }
