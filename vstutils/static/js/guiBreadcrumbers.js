@@ -31,7 +31,51 @@ function renderBreadcrumbs()
     return spajs.just.render("page_breadcrumb", {urls: urls})
 }
 
-function getUpLink()
-{   
-    return window.location.href.replace(/\/[^\/]+$/, "").replace(/([0-9]+),[,0-9]+/g, "$1");
+callTryErr.count = 0
+function callTryErr()
+{ 
+    callTryErr.count++
+    if(callTryErr > 10)
+    {
+         throw "Error"+callTryErr
+    }
+}
+
+function getUpLink(link)
+{      
+    if(!window.location.hash.length)
+    {
+        return window.location.origin
+    }
+     
+    if(!link)
+    {
+        link = window.location.hash.slice(1)
+    }
+    
+    if(link.indexOf("/") == -1)
+    {
+        return vstMakeLocalUrl("")
+    }
+    
+    link = link.replace(/\/[^\/]+$/, "").replace(/([0-9]+),[,0-9]+/g, "$1");
+ 
+    // Если menu_url не задан то используем первый знак вопроса в строке адреса
+    if(window.location.href.indexOf("?") != -1)
+    {
+        menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
+    } 
+    else
+    {
+        // Если menu_url не задан то используем window.location.hash
+        menuId = window.location.hash.slice(1)
+    }
+
+    
+    if(!spajs.findMenu(link))
+    {
+        return getUpLink(link);
+    }
+    
+    return vstMakeLocalUrl(link)
 }

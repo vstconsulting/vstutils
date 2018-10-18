@@ -23,11 +23,30 @@ let _insertTpl = function(func)
             return this;
         }
 
+        if(!this.length)
+        {
+            return this;
+        }
+        
         if(typeof tplText !== "string")
         {
             tplText = ""+tplText
         }
+        
+        
+           
+        let val = this[0].getAttribute("data-tplText")
+        let testTplText = tplText.replace(/just-watch-class-[0-9]+/g, "")
+      
+      
+        if( val == testTplText)
+        {
+            return this;
+        }
+        this[0].setAttribute("data-tplText", testTplText)
+        
         var html = tplText.replace(window.__JustEvalJsPattern_reg_pageUUID, "")
+ 
 
         this.each(function()
         {
@@ -62,24 +81,7 @@ $.fn.insertTpl =  _insertTpl('html')
 $.fn.appendTpl = _insertTpl('append')
 $.fn.prependTpl = _insertTpl('prepend')
 $.fn.replaceWithTpl = _insertTpl('replaceWith')
- 
- 
-function mergeCopyM(obj){
-    
-    if(Array.isArray(obj))
-    {
-        return obj.slice()
-    }
-    
-    if(typeof obj == "object" && obj !== null)
-    {
-        return $.extend(true, {}, obj)
-    }
-    
-    return obj
-}
-
-
+  
 var justReactive = {
 
     /**
@@ -137,105 +139,11 @@ var justReactive = {
     ],
     megreFunc:function(obj, prop, newval, level)
     {
-        if(!level)
-        {
-            level = 0;
-        }
-
-        var res = Object.getOwnPropertyDescriptor(obj, prop);
-        if(!res)
-        {
-            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(newval);
-            obj.justWatch(prop);
-            return;
-        }
-
-        if(res.hasOwnProperty('get') || res.hasOwnProperty('set'))
-        {
-            if(obj[prop] !== newval)
-            {
-                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop] = mergeCopyM(newval);
-            }
-            return;
-        }
-
-        if(typeof obj[prop] != "object" || obj[prop] !== null)
-        {
-            // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-            obj[prop] = mergeCopyM(newval);
-            obj.justWatch(prop);
-            return;
-        }
-
-        if(Array.isArray(obj[prop]) && Array.isArray(newval))
-        {
-            if(newval.length < obj[prop].length)
-            {
-                // Если новый массив короче старого то укоротим старый чтоб у них была одинаковая длинна
-                //console.log("watch megre splice", newval.length, obj[prop].length - newval.length);
-                Array.prototype.splice.apply(obj[prop], [newval.length, obj[prop].length - newval.length]); 
-            }
-
-            for(var i in newval)
-            {
-                if(typeof newval[i] == "object" && newval[i] !== null)
-                {
-                    if(level < 100)
-                    {
-                        justReactive.megreFunc(obj[prop], i, newval[i], level+1);
-                    }
-                    obj[prop].justWatch(i);
-                }
-                else
-                {
-                    // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                    obj[prop][i] = mergeCopyM(newval[i]);
-                    obj[prop].justWatch(i);
-                }
-            }
-            return;
-        }
-
-        // Свойство существует и оно не массив. Поэтому надо выполнить рекурсивное объединение объектов 
-        var v1arr = {}
-        for(var i in obj[prop])
-        {
-            v1arr[i] = false;
-        }
-
-        for(var i in newval)
-        {
-            v1arr[i] = true;
-
-            if(typeof newval[i] == "object" && newval[i] !== null)
-            {
-                if(level < 100)
-                {
-                    justReactive.megreFunc(obj[prop], i, newval[i], level+1);
-                }
-                obj[prop].justWatch(i);
-            }
-            else
-            {
-                // @FixME Вероятно на level > 0 можно не использовать mergeDeep для экономии памяти
-                obj[prop][i] = mergeCopyM(newval[i]);
-                obj[prop].justWatch(i);
-            }
-        }
-
-        for(var i in v1arr)
-        {
-            if(!v1arr[i])
-            {
-                delete obj[prop][i];
-            }
-        }
+        obj[prop] = newval 
     },
     applyFunc:function(val, newval)
     {
-        console.log("setter", newval);
+        // console.log("setter", newval);
         
         // @todo Refactor
         // Если элементы из just_ids хранить не в объекте замыканием а в глобальном массиве
@@ -257,152 +165,187 @@ var justReactive = {
             {
                 // innerTPL - вставить на страницу обработав как шаблон.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
-                if(el) $(el).insertTpl(newval.just_ids[i].callBack(val, newval.just_ids[i].customData))
+                if(!el) 
+                {
+                    delete newval.just_ids[i]
+                    continue;
+                }
+                
+                $(el).insertTpl(newval.just_ids[i].callBack(val, newval.just_ids[i].customData))
             }
             else if(newval.just_ids[i].type == 'innerHTML')
             {
                 // innerHTML - вставить без обработки на страницу.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
-                if(el) el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                if(!el) 
+                {
+                    //delete newval.just_ids[i]
+                    continue;
+                }
+                
+                el.innerHTML = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
             }
             else if(newval.just_ids[i].type == 'textContent')
             {
                 // textContent - вставить с вырезанием html кода на страницу.
                 var el = document.getElementById("_justReactive"+newval.just_ids[i].id)
-                if(el) el.textContent = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                if(!el) 
+                {
+                    //delete newval.just_ids[i]
+                    continue;
+                }
+                
+                el.textContent = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
             }
             else if(newval.just_ids[i].type == 'class')
             {
                 // class - вставить класс на страницу.
                 var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
-                if(el && el.length)
+                
+                if(!el || !el.length)
                 {
-                    var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
-                    //console.log("class", valT)
-                    for(var j = 0; j < el.length; j++)
+                    //delete newval.just_ids[i]
+                    continue;
+                }
+                
+                var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                //console.log("class", valT)
+                for(var j = 0; j < el.length; j++)
+                {
+                    if(!valT)
                     {
-                        if(!valT)
-                        {
-                            el[j].className = el[j].className
-                                .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
-                                .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), " ")
-                        }
-                        else
-                        {
-                            el[j].className = el[j].className
-                                .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
-                                .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), " ")
-                                + " " + newval.just_ids[i].className
-                        }
+                        el[j].className = el[j].className
+                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                            .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), " ")
+                    }
+                    else
+                    {
+                        el[j].className = el[j].className
+                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                            .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), " ")
+                            + " " + newval.just_ids[i].className
                     }
                 }
+
             }
             else if(newval.just_ids[i].type == 'notClass')
             {
                 // class - вставить класс на страницу.
                 var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
-                if(el && el.length)
+                
+                if(!el || !el.length)
                 {
-                    var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
-                    //console.log("class", valT)
-                    for(var j = 0; j < el.length; j++)
-                    {
-                        if(valT)
-                        {
-                            el[j].className = el[j].className
-                                .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
-                                .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), "")
-                        }
-                        else
-                        {
-                            el[j].className = el[j].className
-                                .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
-                                .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
-                                .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), " ")
-                                + " " + newval.just_ids[i].className
-                        }
-                    }
+                    //delete newval.just_ids[i]
+                    continue;
                 }
+                
+                var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                //console.log("class", valT)
+                for(var j = 0; j < el.length; j++)
+                {
+                    if(valT)
+                    {
+                        el[j].className = el[j].className
+                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                            .replace(new RegExp(" +"+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), "")
+                    }
+                    else
+                    {
+                        el[j].className = el[j].className
+                            .replace(new RegExp("^"+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp(" +"+newval.just_ids[i].className+" +","g"), " ")
+                            .replace(new RegExp(" "+newval.just_ids[i].className+"$","g"), "")
+                            .replace(new RegExp("^"+newval.just_ids[i].className+" +","g"), " ")
+                            + " " + newval.just_ids[i].className
+                    }
+                } 
             }
             else if(newval.just_ids[i].type == 'className')
             {
                 // className - вставить класс на страницу.
                 var el = document.getElementsByClassName("just-watch-class-"+newval.just_ids[i].id)
-                if(el && el.length)
+                if(!el || !el.length)
                 {
-                    var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
-                    //console.log("className", valT)
-                    for(var j = 0; j < el.length; j++)
-                    {
-                        var oldValuematch = el[j].className.match(/just-old-val-([^ "']*)/)
-
-                        var newClassValue = el[j].className;
-                        if(oldValuematch && oldValuematch[0])
-                        {
-                            newClassValue = newClassValue
-                                // Удаляем мета класс с инфой о прошлом значении нашего класса
-                                .replace(new RegExp("^"+oldValuematch[0]+"$","g"), "")
-                                .replace(new RegExp(" +"+oldValuematch[0]+" +","g"), " ")
-                                .replace(new RegExp(" "+oldValuematch[0]+"$","g"), "")
-                                .replace(new RegExp("^"+oldValuematch[0]+" +","g"), " ")
-                                // Удаляем класс прошлого значения нашего класса
-                                .replace(new RegExp("^"+oldValuematch[1]+"$","g"), "")
-                                .replace(new RegExp(" +"+oldValuematch[1]+" +","g"), " ")
-                                .replace(new RegExp(" "+oldValuematch[1]+"$","g"), "")
-                                .replace(new RegExp("^"+oldValuematch[1]+" +","g"), " ")
-                        }
-                        else
-                        {
-                            // Удаляем мета класс с инфой о прошлом значении нашего класса
-                            newClassValue = newClassValue
-                                .replace(new RegExp("^just-old-val-$","g"), "")
-                                .replace(new RegExp(" +just-old-val- +","g"), " ")
-                                .replace(new RegExp(" just-old-val-$","g"), "")
-                                .replace(new RegExp("^just-old-val- +","g"), " ")
-                        }
-
-                        el[j].className = newClassValue + " " + valT + " just-old-val-" + valT
-                    }
+                    //delete newval.just_ids[i]
+                    continue;
                 }
+                
+                var valT = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                //console.log("className", valT)
+                for(var j = 0; j < el.length; j++)
+                {
+                    var oldValuematch = el[j].className.match(/just-old-val-([^ "']*)/)
+
+                    var newClassValue = el[j].className;
+                    if(oldValuematch && oldValuematch[0])
+                    {
+                        newClassValue = newClassValue
+                            // Удаляем мета класс с инфой о прошлом значении нашего класса
+                            .replace(new RegExp("^"+oldValuematch[0]+"$","g"), "")
+                            .replace(new RegExp(" +"+oldValuematch[0]+" +","g"), " ")
+                            .replace(new RegExp(" "+oldValuematch[0]+"$","g"), "")
+                            .replace(new RegExp("^"+oldValuematch[0]+" +","g"), " ")
+                            // Удаляем класс прошлого значения нашего класса
+                            .replace(new RegExp("^"+oldValuematch[1]+"$","g"), "")
+                            .replace(new RegExp(" +"+oldValuematch[1]+" +","g"), " ")
+                            .replace(new RegExp(" "+oldValuematch[1]+"$","g"), "")
+                            .replace(new RegExp("^"+oldValuematch[1]+" +","g"), " ")
+                    }
+                    else
+                    {
+                        // Удаляем мета класс с инфой о прошлом значении нашего класса
+                        newClassValue = newClassValue
+                            .replace(new RegExp("^just-old-val-$","g"), "")
+                            .replace(new RegExp(" +just-old-val- +","g"), " ")
+                            .replace(new RegExp(" just-old-val-$","g"), "")
+                            .replace(new RegExp("^just-old-val- +","g"), " ")
+                    }
+
+                    el[j].className = newClassValue + " " + valT + " just-old-val-" + valT
+                } 
             }
             else if(newval.just_ids[i].type == 'attr' || newval.just_ids[i].type == 'bindAttr')
             {
                 // class - вставить атрибут на страницу.
                 var el = document.querySelectorAll("[data-just-watch-"+newval.just_ids[i].id+"]");
-                if(el && el.length)
+                
+                if(!el || !el.length)
                 {
-                    var attrVal = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
-                    for(var j = 0; j < el.length; j++)
+                    //delete newval.just_ids[i]
+                    continue;
+                }
+                
+                var attrVal = newval.just_ids[i].callBack(val, newval.just_ids[i].customData)
+                for(var j = 0; j < el.length; j++)
+                {
+                    if(attrVal)
                     {
-                        if(attrVal)
+                        if(el[j][newval.just_ids[i].attrName])
                         {
-                            if(el[j][newval.just_ids[i].attrName])
-                            {
-                                el[j][newval.just_ids[i].attrName] = attrVal
-                            }
-                            else
-                            {
-                                el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
-                            }
+                            el[j][newval.just_ids[i].attrName] = attrVal
                         }
                         else
                         {
-                            if(el[j][newval.just_ids[i].attrName])
-                            {
-                                el[j][newval.just_ids[i].attrName] = null
-                            }
-
-                            el[j].removeAttribute(newval.just_ids[i].attrName);
+                            el[j].setAttribute(newval.just_ids[i].attrName, attrVal);
                         }
                     }
+                    else
+                    {
+                        if(el[j][newval.just_ids[i].attrName])
+                        {
+                            el[j][newval.just_ids[i].attrName] = null
+                        }
+
+                        el[j].removeAttribute(newval.just_ids[i].attrName);
+                    }
                 }
+
             }
         }
     },
@@ -593,15 +536,15 @@ var justReactive = {
         // Вернём в ответ код который надо вставить в шаблон
         if(opt.type == 'innerTPL')
         {
-            return "<div id='_justReactive"+id+"' class='just-watch just-watch-tpl' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
+            return "<div id='_justReactive"+id+"' class='just-watch just-watch-tpl' style='display: contents;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
         }
         else if(opt.type == 'innerHTML')
         {
-            return "<div id='_justReactive"+id+"' class='just-watch just-watch-html' style='display: inline;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
+            return "<div id='_justReactive"+id+"' class='just-watch just-watch-html' style='display: contents;' >"+opt.callBack(this[opt.prop], opt.customData)+"</div>";
         }
         else  if(opt.type == 'textContent')
         {
-            return "<div id='_justReactive"+id+"' style='display: inline;' class='just-watch just-watch-text' >"+justReactive.justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
+            return "<div id='_justReactive"+id+"' style='display: contents;' class='just-watch just-watch-text' >"+justReactive.justStrip(opt.callBack(this[opt.prop], opt.customData))+"</div>";
         }
         else if(opt.type == 'class')
         {

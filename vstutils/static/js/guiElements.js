@@ -74,6 +74,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value
+    this.db_value = value
     this.parent_object = parent_object
     if(!parent_object)
     {
@@ -95,6 +96,14 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.setValue = function(value)
     {
         this.value = value
+    }
+
+    this._onUpdateValue = function(){}
+
+    this.updateValue = function(value)
+    {
+        this.db_value = value
+        this._onUpdateValue(value)
     }
 
     this.reductionToType = function(value)
@@ -197,6 +206,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         return spajs.just.render(this.template_name, {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
+            this.rendered = true
         });
     }
 
@@ -651,6 +661,7 @@ guiElements.autocomplete = function()
 
                     if(list)
                     {
+
                         let filters = getFiltersForAutocomplete(list, search_str, view_field);
                         let lists_deffered =[]
                         for (let i in list)
@@ -852,36 +863,40 @@ guiElements.apiObject = function(field, field_value, parent_object)
     this.name = 'apiObject'
     guiElements.base.apply(this, arguments)
 
+    this.createLinkedObj = function()
+    {
+        if(this.opt.definition.page)
+        {
+            return new guiObjectFactory(this.opt.definition.page, this.parent_object.url_vars, this.db_value)
+        }
+        else if(this.opt.definition.list && this.opt.definition.list.page)
+        {
+            return new guiObjectFactory(this.opt.definition.list.page, undefined, this.db_value)
+        }
+
+        return undefined
+    }
+    this._onUpdateValue = function(value)
+    {
+        this.linkObj = this.createLinkedObj()
+    }
+
 
     this._baseRender = this.render
     this.render = function(options)
     {
-        this.linkObj = undefined
-        if(this.opt.definition.page)
-        {
-            this.linkObj = new guiObjectFactory(this.opt.definition.page, this.parent_object.url_vars, this.value)
-        }
-        else if(this.opt.definition.list && this.opt.definition.list.page)
-        {
-            this.linkObj = new guiObjectFactory(this.opt.definition.list.page, undefined, this.value)
-        }
-
+        this.linkObj = this.createLinkedObj()
         return this._baseRender.apply(this, arguments)
-    }
-
-    this.reductionToType = function(value)
-    {
-        return value/1
     }
 
     this.getLink = function()
     {
-        if(!this.linkObj || !this.value || !this.value.id)
+        if(!this.linkObj || !this.db_value || !this.db_value.id)
         {
             return "#"
         }
 
-        let url = this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "");
+        let url = this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.db_value.id).replace(/^\//, "");
         if(this.linkObj.url_vars)
         {
             for(let i in this.linkObj.url_vars)
@@ -900,17 +915,17 @@ guiElements.apiObject = function(field, field_value, parent_object)
     {
         if(!this.linkObj)
         {
-            if(!this.value || !this.value.id)
+            if(!this.db_value || !this.db_value.id)
             {
                 return "#"
             }
 
-            if(this.value.name)
+            if(this.db_value.name)
             {
-                return this.value.name
+                return this.db_value.name
             }
 
-            return this.value.id
+            return this.db_value.id
         }
 
         // opt.definition.list.path %>/<%- value.id %>

@@ -1,4 +1,6 @@
 
+guiLocalSettings.setIfNotExists('page_update_interval', 2000)
+
 var gui_base_object = {
 
     getTemplateName : function (type, default_name)
@@ -21,6 +23,47 @@ var gui_base_object = {
         return this.api.name
     },
 
+    stopUpdates : function()
+    {
+        // stopUpdates
+        this.update_stoped = true
+        clearTimeout(this.update_timoutid)
+    },
+
+    startUpdates : function()
+    {
+        if(this.update_timoutid)
+        {
+            return;
+        }
+         
+        if(this.update_stoped === true)
+        {
+            return;
+        }
+        
+        this.update_timoutid = setTimeout(() => 
+        { 
+            this.update_timoutid = undefined
+            if(!this.model.filters)
+            {
+                console.warn("startUpdates [no filters]")
+                this.startUpdates()
+                return;
+            }
+
+            $.when(this.updateFromServer()).always(() => { 
+                console.log("startUpdates [updated]")
+                this.startUpdates()
+            })
+        }, guiLocalSettings.get('page_update_interval')) 
+    },
+ 
+    updateFromServer : function ()
+    {
+        return false;
+    },
+      
     renderAllFields : function(opt)
     {
         let html = []
