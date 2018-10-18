@@ -129,7 +129,7 @@
     <%[ main_input %>
         <div class="input-group">
             <~ guiElement.db_value>
-                <% if(guiElement.db_value != value){ %>
+                <% if(guiElement.rendered && guiElement.db_value != guiElement.getValue()){ %>
                     <span class="input-group-addon db_value_input">
                         <% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ %>
                             <% if($.isArray(guiElement.db_value)){ %>
