@@ -355,9 +355,12 @@ var gui_list_object = {
         return res;
     },
 
-    renderLine : function (line, opt = {})
+    renderLine : function (line, opt = {}, tpl)
     {
-        let tpl = this.getTemplateName('list_line')
+        if(!tpl)
+        {
+            tpl = this.getTemplateName('list_line')
+        }
 
         line.sublinks_l2 = this.api.sublinks_l2;
 
@@ -653,7 +656,7 @@ var gui_list_object = {
                                 var val = activeOption.options[i]
                                 if(val.toLowerCase().indexOf(term) != -1)
                                 {
-                                debugger;
+                                    debugger;
                                     matches.push({name:val})
                                 }
                             }
@@ -953,8 +956,17 @@ var gui_list_object = {
 // pagination
 ////////////////////////////////////////////////
 
-    paginationHtml : function ()
+    paginationHtml : function (opt)
     {
+        if(!opt)
+        {
+            opt = {}
+        }
+
+        if(!opt.tpl)
+        {
+            opt.tpl = 'pagination';
+        }
         var list = this.model.data
 
         // http://testserver/api/v2/host/?limit=20&offset=40&ordering=desc
@@ -1005,10 +1017,11 @@ var gui_list_object = {
         }
         var url = window.location.href
 
-        return  spajs.just.render('pagination', {
+        return  spajs.just.render(opt.tpl, {
             totalPage: totalPage,
             currentPage: currentPage,
-            url: url})
+            url: url,
+            opt: opt})
     },
 
     getTotalPages : function ()

@@ -414,6 +414,39 @@
     <%! guiElements.base %>
 </script>
 
+<!-- guiElements.hybrid_autocomplete -->
+<script type="text/x-just" data-just="guiElements.hybrid_autocomplete">
+    <!-- guiElements.hybrid_autocomplete -->
+    <%[ main_input %>
+        <div class="input-group">
+            <input
+            type="text"
+            value="<%- value || '' %>"
+            class="form-control"
+            <%- set_api_options(opt) %>
+            id="<%- guiElement.element_id %>"
+            onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
+            >
+
+            <span class="input-group-addon"
+                <%= justOn('click', function()
+                    {
+                        return spajs.showLoader(guiElement.renderModal(opt));
+                    })
+                %>
+                style="cursor: pointer;"
+            >
+                <span class='glyphicon glyphicon-chevron-down' ></span>
+            </span>
+            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
+                <span class='glyphicon glyphicon-remove' ></span>
+            </span>
+        </div>
+    <%] %>
+    <%! guiElements.base %>
+</script>
+
+
 <!-- guiElements.file -->
 <script type="text/x-just" data-just="guiElements.file">
     <!-- guiElements.file -->

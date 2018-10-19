@@ -51,14 +51,15 @@ guiModal = {
                 modalHolder.remove();
             }
 
-            $("body").append('<div class="iziModal" tabindex="-1" role="dialog" id="guiModal-iziModal" data-izimodal-zindex="20000" data-iziModal-transitionIn="fadeInDown" data-iziModal-transitionOut="fadeOutDown"></div>')
+            $("body").appendTpl('<div class="iziModal" tabindex="-1" role="dialog" id="guiModal-iziModal" data-izimodal-zindex="20000" data-iziModal-transitionIn="fadeInDown" data-iziModal-transitionOut="fadeOutDown"></div>')
             modalHolder = jQuery("#guiModal-iziModal");
 
             $(modalHolder).iziModal(local_options);
 
             if(html)
             {
-                $(modalHolder).iziModal('setContent', html);
+                $(modalHolder).iziModal('setContent', '<div id="modal-content-wrapper-div"></div>');
+                $('#modal-content-wrapper-div').appendTpl(html);
             }
 
         }

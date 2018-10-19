@@ -5,7 +5,7 @@ function getFieldType(field, model, elements = undefined)
     {
         elements = window.guiElements
     }
-    
+
     // Приоритет №1 это prefetch поля
     if(field.prefetch && model && model.data && model.data[field.name + "_info"])
     {
@@ -736,6 +736,190 @@ guiElements.autocomplete.prepareProperties = function(value)
 
     return value
 }
+
+guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
+{
+    this.name = 'hybrid_autocomplete'
+    guiElements.base.apply(this, arguments)
+
+    this.renderModal = function (options)
+    {
+        let def = new $.Deferred();
+
+        if(options.autocomplete_properties || options.dynamic_properties)
+        {
+            if (options.dynamic_properties)
+            {
+                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                options.autocomplete_properties = properties
+            }
+
+            let props = getInfoFromAdditionalProperties(options);
+
+            let value_field = props['value_field'];
+            let view_field = props['view_field'];
+
+            let list = undefined;
+
+            if (props['obj'])
+            {
+                list = new guiObjectFactory(props['obj']);
+            }
+
+            let filters = {};
+
+            if(options.search_query)
+            {
+                filters = getFiltersForAutocomplete(list);
+
+                for(let i in options.search_query)
+                {
+                    filters.search_query[i] = options.search_query[i];
+                }
+                if(options.page_num)
+                {
+                    filters.offset = options.page_num * guiLocalSettings.get('page_size');
+                }
+            }
+            else
+            {
+                filters = getFiltersForAutocomplete(list);
+                if(options.page_num)
+                {
+                    filters.offset = options.page_num * guiLocalSettings.get('page_size');
+                }
+            }
+
+            $.when(list.search(filters)).done(data => {
+                let modal_opt = {
+                    title: 'Select ' + list.api.name,
+                };
+                list.model.data = data.data;
+                list.model.filters = {};
+
+                let render_options = {};
+                render_options.fields = list.api.schema.list.fields
+                render_options.base_path = list.api.path.format({pk:list.url_vars.api_pk}).slice(1,-1);
+                render_options.base_href = render_options.base_path;
+
+                if(!render_options.page_type) render_options.page_type = 'list'
+
+                render_options.selectionTag =  list.api.selectionTag
+                window.guiListSelections.intTag(render_options.selectionTag)
+
+                render_options.autocomplete_properties = options.autocomplete_properties;
+
+                list.model.filters = filters;
+
+                let html = spajs.just.render('hybrid_autocomplete_modal', {query:"", guiObj:list, guiElement:this, opt:render_options });
+                guiModal.setModalHTML(html, modal_opt);
+                guiModal.modalOpen();
+                def.resolve();
+            }).fail(e => {
+                def.reject(e);
+            })
+        }
+        else
+        {
+            def.reject();
+        }
+
+        return def.promise()
+    }
+
+    this.getValue = function()
+    {
+        if(this.opt && this.opt.custom_getValue)
+        {
+            return this.opt.custom_getValue.apply(this, arguments);
+        }
+        else
+        {
+            let view_field_value = $("#" + this.element_id).val();
+            let value_field_value = $("#" + this.element_id).attr('value');
+
+            if(value_field_value)
+            {
+                return value_field_value;
+            }
+
+            return view_field_value;
+        }
+    }
+
+    this.getValueFromModal = function(tag)
+    {
+        let id = window.guiListSelections.getSelection(tag);
+        if(id.length != 0)
+        {
+            let view_field_name = $('.modal-item-'+id[0]).attr('data-view-field-name');
+            let view_field_value = $('.modal-item-'+id[0]).attr('data-view-value');
+
+            let value_field_name = $('.modal-item-'+id[0]).attr('data-value-field-name');
+            let value_field_value = $('.modal-item-'+id[0]).attr('data-value-value');
+
+            $('#' + this.element_id).attr('value', value_field_value);
+            $('#' + this.element_id).val(view_field_value);
+
+        }
+        else
+        {
+            $('#' + this.element_id).attr('value', '');
+            $('#' + this.element_id).val('');
+        }
+
+        $('#' + this.element_id).trigger('change');
+        window.guiListSelections.unSelectAll(tag);
+        guiModal.modalClose();
+    }
+
+
+    this._onBaseRender = this._onRender
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options);
+
+        if(options.autocomplete_properties || options.dynamic_properties)
+        {
+            if (options.dynamic_properties)
+            {
+                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                options.autocomplete_properties = properties
+
+            }
+
+            let props = getInfoFromAdditionalProperties(options);
+
+            let value_field = props['value_field'];
+            let view_field = props['view_field'];
+
+
+            let list = undefined;
+
+            if (props['obj'])
+            {
+                list = new guiObjectFactory(props['obj']);
+            }
+
+            if(field_value)
+            {
+                let filters = getFiltersForAutocomplete(list, field_value, value_field);
+                $.when(list.search(filters)).done(data => {
+                    if(data.data && data.data.results)
+                    {
+                        $('#' + this.element_id).attr('value', data.data.results[0][value_field]);
+                        $('#' + this.element_id).val(data.data.results[0][view_field]);
+                    }
+                }).fail(e => {
+                    $('#' + this.element_id).attr('value', '');
+                    $('#' + this.element_id).val(field_value);
+                })
+            }
+        }
+    }
+}
+
+guiElements.hybrid_autocomplete.prepareProperties = guiElements.autocomplete.prepareProperties
 
 
 guiElements.select2 = function(field, field_value, parent_object)
@@ -1813,6 +1997,39 @@ function getUptime(time)
     {
         return  moment(time*1000).tz('UTC').format('HH:mm:ss');
     }
+}
+
+
+/**
+ * Function make search through the list in hybrid_autocomplete modal.
+ * @param object - obj - list of objects, that is used in hybrid_autocomplete modal.
+ * @param object - guiElement - hybrid_autocomplete guiElement.
+ * @param object - opt - object of options for modal rendering.
+ * @param string - query - search query value.
+ */
+function goToSearchModal(obj, guiElement, opt, query)
+{
+    let def = new $.Deferred();
+    if (obj.isEmptySearchQuery(query))
+    {
+        $.when(guiElement.renderModal(opt)).done(d => {
+            def.resolve();
+        }).fail(e => {
+            def.reject(e);
+        })
+    }
+    else
+    {
+        opt.search_query = obj.searchStringToObject(obj.searchObjectToString(trim(query)));
+
+        $.when(guiElement.renderModal(opt)).done(d => {
+            def.resolve();
+        }).fail(e => {
+            def.reject(e);
+        })
+    }
+
+    return def.promise();
 }
 
 /**
