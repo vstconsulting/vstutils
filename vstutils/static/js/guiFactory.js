@@ -47,9 +47,9 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         obj.url = res[0]                 // текущий урл в блоке
         obj.page_and_parents = res[0]    // страница+родители
 
-        if(obj.page_and_parents)
+        if(obj.page)
         {
-            var match = obj.page_and_parents.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
+            var match = obj.page.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
 
             if(match && match.groups)
             {
@@ -178,7 +178,7 @@ function openApi_add_one_page_path(api_obj)
                 def.resolve(renderErrorAsPage(err));
             })
 
-            $.when(onClose_promise).always(() => {
+            $.when(onClose_promise).always(() => { 
                 pageItem.stopUpdates();
             })
 

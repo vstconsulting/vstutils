@@ -805,7 +805,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
                 if(!render_options.page_type) render_options.page_type = 'list'
 
                 render_options.selectionTag =  list.api.selectionTag
-                window.guiListSelections.intTag(render_options.selectionTag)
+                window.guiListSelections.initTag(render_options.selectionTag)
 
                 render_options.autocomplete_properties = options.autocomplete_properties;
 

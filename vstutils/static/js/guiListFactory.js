@@ -413,9 +413,16 @@ var gui_list_object = {
         if(!render_options.page_type) render_options.page_type = 'list'
 
         render_options.selectionTag =  this.api.selectionTag
-        window.guiListSelections.intTag(render_options.selectionTag)
-
+        window.guiListSelections.initTag(render_options.selectionTag)
+       
         render_options.base_href = spajs.urlInfo.data.reg.page_and_parents
+        render_options.base_href = spajs.urlInfo.data.reg.page
+        render_options.base_href = (spajs.urlInfo.data.reg.parents || "") + spajs.urlInfo.data.reg.page
+        if(/[0-9]$/.test(render_options.base_href))
+        {
+            debugger;
+        }
+        
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -459,7 +466,7 @@ var gui_list_object = {
         //render_options.sections = this.getSections('renderAsAddSubItemsPage')
 
         render_options.selectionTag =  this.api.selectionTag+"_add"
-        window.guiListSelections.intTag(render_options.selectionTag)
+        window.guiListSelections.initTag(render_options.selectionTag)
 
         render_options.base_href = spajs.urlInfo.data.reg.page_type
 

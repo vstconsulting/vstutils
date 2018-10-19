@@ -9,12 +9,24 @@ function guiSelections(){
     this.selectedItems = {}
     this.selectedCount = {}
 
-    this.intTag = function(tag)
+    this.lastTag = undefined
+    this.initTag = function(tag, doNotDeleteOldSelections = false)
     {
+        if(this.lastTag != tag && !doNotDeleteOldSelections)
+        {
+            this.selectedItems = {}
+            this.selectedCount = {}
+        }
+        
         if(!this.selectedItems[tag])
         {
             this.selectedItems[tag] = {}
             this.selectedCount[tag] = 0
+        }
+        
+        if(!doNotDeleteOldSelections)
+        {
+            this.lastTag = tag
         }
 
     }

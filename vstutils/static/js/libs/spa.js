@@ -451,21 +451,19 @@ if(!window.spajs)
     spajs.currentOpenMenu = undefined
 
     spajs.findMenu = function(menuId)
-    {   
-        var regExpRes = [] 
-        for(var i in spajs.opt.menu)
+    {     
+        for(var i in this.opt.menu)
         {
-            let val = spajs.opt.menu[i]
-            //console.log(val.priority, val.debug)
+            let val = this.opt.menu[i]
+            
             if(val.url_parser != undefined)
             {
                 for(var j in val.url_parser)
                 {
                     var parsed = val.url_parser[j](menuId)
                     if(parsed)
-                    {
-                        regExpRes = parsed
-                        return val 
+                    {  
+                        return {menu:val, regExpRes:parsed}
                     }
                 }
             }
@@ -474,15 +472,14 @@ if(!window.spajs)
                 for(var j in val.urlregexp)
                 {
                     if(val.urlregexp[j].test(menuId))
-                    {
-                        regExpRes = val.urlregexp[j].exec(menuId)
-                        return val
+                    { 
+                        return {menu:val, regExpRes:val.urlregexp[j].exec(menuId) }
                     }
                 }
             }
             else if(val.id == menuId)
             {
-                return val 
+                return {menu:val, regExpRes:[]}
             } 
         }
   
@@ -502,6 +499,8 @@ if(!window.spajs)
      */
     spajs.open = function(opt)
     {
+        console.log("spajs.open", opt)
+        
         if(!opt.menuId)
         {
             opt.menuId = "";
@@ -518,6 +517,7 @@ if(!window.spajs)
         {
             $.when(def).fail(function(e)
             {
+                debugger;
                 if(spajs.errorPage)
                 {
                     spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, data, e)
@@ -534,49 +534,9 @@ if(!window.spajs)
         //console.table(spajs.opt.menu)
         
         var regExpRes = []
-        var menuInfo = undefined;
-        
-        for(var i in spajs.opt.menu)
-        {
-            let val = spajs.opt.menu[i]
-            //console.log(val.priority, val.debug)
-            if(val.url_parser != undefined)
-            {
-                for(var j in val.url_parser)
-                {
-                    var parsed = val.url_parser[j](opt.menuId)
-                    if(parsed)
-                    {
-                        regExpRes = parsed
-                        menuInfo = val
-                        break;
-                    }
-                }
-            }
-            else if(val.urlregexp != undefined)
-            {
-                for(var j in val.urlregexp)
-                {
-                    if(val.urlregexp[j].test(opt.menuId))
-                    {
-                        regExpRes = val.urlregexp[j].exec(opt.menuId)
-                        menuInfo = val
-                        break;
-                    }
-                }
-            }
-            else if(val.id == opt.menuId)
-            {
-                menuInfo = val
-                break;
-            }
+        let findedMenu = spajs.findMenu(opt.menuId)
+        var menuInfo = findedMenu.menu
             
-            if(menuInfo)
-            {
-                break;
-            }
-        }
- 
         console.log("openMenu", menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
@@ -586,7 +546,7 @@ if(!window.spajs)
                 console.error("URL not registered", opt.menuId, opt)
             }
 
-            //debugger;
+            debugger;
             def.reject({detail:"Error URL not registered", status:404})
             throw { text:"URL not registered " + opt.menuId, code:404};
             return def.promise();
@@ -594,6 +554,7 @@ if(!window.spajs)
 
         if(spajs.currentOpenMenu && menuInfo.id == spajs.currentOpenMenu.id && !opt.reopen)
         {
+            debugger;
             console.warn("Re-opening the menu", menuInfo)
             def.resolve()
             return def.promise();
@@ -627,28 +588,18 @@ if(!window.spajs)
         }
         
         menuInfo.onClose_promise = new $.Deferred();  
-        if(spajs.currentOpenMenu && spajs.currentOpenMenu.onClose)
-        { 
+        if(spajs.currentOpenMenu)
+        {  
             if(spajs.currentOpenMenu.onClose_promise)
             {
-                if(spajs.currentOpenMenu.onClose)
-                {
-                    spajs.currentOpenMenu.onClose_promise.resolve(spajs.currentOpenMenu.onClose(menuInfo))
-                }
-                else
-                {
-                    spajs.currentOpenMenu.onClose_promise.resolve(menuInfo)
-                }
+                spajs.currentOpenMenu.onClose_promise.resolve(menuInfo)
             }
-            else
+            
+            if(spajs.currentOpenMenu.onClose)
             {
                 spajs.currentOpenMenu.onClose(menuInfo)
             }
         }
-
-        var data = {}
-        data.url = spajs.getAllUrlParam(opt.event_state)
-        data.reg = regExpRes
 
         if(menuInfo.hideMenu)
         {
@@ -667,8 +618,20 @@ if(!window.spajs)
         }
         $(spajs.opt.holder).addClass("spajs-active-"+menuInfo.id);
 
-        spajs.urlInfo = {menuInfo:menuInfo, data:data}
-        tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
+        var data = {}
+        data.url = spajs.getAllUrlParam(opt.event_state)
+        data.reg = findedMenu.regExpRes
+        //debugger;
+        
+        spajs.urlInfo = {
+                            menuInfo:menuInfo, 
+                            data:{
+                                url : spajs.getAllUrlParam(opt.event_state),
+                                reg : findedMenu.regExpRes
+                            }
+                        }
+                        
+        //tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
         tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
          
         let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data, menuInfo.onClose_promise.promise());
