@@ -514,7 +514,7 @@ guiElements.date_time = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
-
+        
         return moment(value).tz(window.timeZone).format();
     }
 }

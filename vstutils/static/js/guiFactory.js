@@ -133,7 +133,7 @@ function openApi_add_one_action_page_path(api_obj)
             {
                 def.resolve(renderErrorAsPage(err));
             })
-
+ 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
             })
@@ -177,7 +177,7 @@ function openApi_add_one_page_path(api_obj)
             {
                 def.resolve(renderErrorAsPage(err));
             })
-
+ 
             $.when(onClose_promise).always(() => { 
                 pageItem.stopUpdates();
             })
@@ -256,7 +256,7 @@ function openApi_add_list_page_path(api_obj)
                 {
                     def.resolve(renderErrorAsPage(err));
                 })
-
+ 
                 $.when(onClose_promise).always(() => {
                     pageItem.stopUpdates();
                 })
@@ -282,7 +282,7 @@ function openApi_add_list_page_path(api_obj)
             {
                 def.resolve(renderErrorAsPage(err));
             })
-            
+             
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
             })

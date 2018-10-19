@@ -38,9 +38,9 @@ var gui_list_object = {
         }
         else
         {
-            let parent_type = spajs.urlInfo.data.reg.parent_type;
-            let parent_id = spajs.urlInfo.data.reg.parent_id;
-            let page_type = spajs.urlInfo.data.reg.page_type;
+            let parent_type = this.url_vars.parent_type;
+            let parent_id = this.url_vars.parent_id;
+            let page_type = this.url_vars.page_type;
             for(let i in ids)
             {
                 q.push({
@@ -415,9 +415,9 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.initTag(render_options.selectionTag)
        
-        render_options.base_href = spajs.urlInfo.data.reg.page_and_parents
-        render_options.base_href = spajs.urlInfo.data.reg.page
-        render_options.base_href = (spajs.urlInfo.data.reg.parents || "") + spajs.urlInfo.data.reg.page
+        render_options.base_href = this.url_vars.page_and_parents
+        render_options.base_href = this.url_vars.page
+        render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page
         if(/[0-9]$/.test(render_options.base_href))
         {
             debugger;
@@ -468,7 +468,7 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.initTag(render_options.selectionTag)
 
-        render_options.base_href = spajs.urlInfo.data.reg.page_type
+        render_options.base_href = this.url_vars.page_type
 
         render_options.hideActions = true
         render_options.base_path = getUrlBasePath()
