@@ -488,9 +488,8 @@ guiElements.prefetch = function (opt = {}, value)
     guiElements.base.apply(this, arguments)
 
     this.updateValue = function(value, allData)
-    {
-       
-        this.render_options[this.opt.name +"_info"] = allData[this.opt.name +"_info"]
+    { 
+        this.render_options[this.opt.name +"_info"] = $.extend(this.render_options[this.opt.name +"_info"], allData[this.opt.name +"_info"]) 
         
         this.db_value = value
         this._onUpdateValue(value)

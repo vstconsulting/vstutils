@@ -493,7 +493,7 @@ function makeUrlForApiKeys(url_string)
 }
 
 function vstMakeLocalApiUrl(url, vars = {})
-{
+{ 
     if(Array.isArray(url))
     {
         url = url.join("/")
