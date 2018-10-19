@@ -26,6 +26,8 @@ var gui_base_object = {
     stopUpdates : function()
     {
         // stopUpdates
+        console.warn("stopUpdates")
+       
         this.update_stoped = true
         clearTimeout(this.update_timoutid)
     },
@@ -503,6 +505,7 @@ function goToSearch(obj, query)
 
 function deleteAndGoUp(obj)
 {
+    debugger;
     var def = obj.delete();
     $.when(def).done(function(){
         var upper_url = spajs.urlInfo.data.reg.baseURL().replace(/\/\d+$/g, '');
