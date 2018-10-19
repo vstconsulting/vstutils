@@ -173,7 +173,7 @@ var gui_page_object = {
         { 
             for(let i in this.model.guiFields)
             {
-                this.model.guiFields[i].updateValue(this.model.data[i])
+                this.model.guiFields[i].updateValue(this.model.data[i], this.model.data)
             }
         })
         
@@ -183,9 +183,9 @@ var gui_page_object = {
     load : function (filters)
     {
         this.model.filters =  $.extend(true, {}, filters)
-        if(typeof filters !== "object")
+        if(typeof this.model.filters !== "object")
         {
-            filters = {api_pk:filters}
+            this.model.filters = {api_pk:this.model.filters}
         }
 
         var thisObj = this;

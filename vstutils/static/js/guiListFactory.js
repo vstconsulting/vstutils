@@ -686,9 +686,9 @@ var gui_list_object = {
     search : function (filters)
     {
         var thisObj = this;
-        this.model.filters = filters
+        this.model.filters = $.extend(true, {}, filters)
 
-        var def = this.load(filters)
+        var def = this.load(this.model.filters)
         $.when(def).done(function(data){
             thisObj.model.data = data.data
         })

@@ -487,6 +487,15 @@ guiElements.prefetch = function (opt = {}, value)
     this.name = 'prefetch';
     guiElements.base.apply(this, arguments)
 
+    this.updateValue = function(value, allData)
+    {
+       
+        this.render_options[this.opt.name +"_info"] = allData[this.opt.name +"_info"]
+        
+        this.db_value = value
+        this._onUpdateValue(value)
+    }
+
     this.getValue = function()
     {
         return $("#"+this.element_id).attr('attr-value');

@@ -166,7 +166,7 @@ function openApi_add_one_page_path(api_obj)
         url_parser:[regexp_in_other],
         priority:api_obj.level,
         onOpen:function(holder, menuInfo, data, onClose_promise)
-        {
+        { 
             let pageItem = new guiObjectFactory(api_obj)
 
             var def = new $.Deferred();
