@@ -256,8 +256,13 @@ var gui_page_object = {
     },
 
     delete : function ()
-    {
+    { 
         var thisObj = this;
+        
+        if(this.model && this.model.data && this.api.parent)
+        {
+            window.guiListSelections.setSelection(this.api.parent.selectionTag, this.model.data.id)
+        }
         var res = this.sendToApi('delete')
         $.when(res).done(function()
         {
