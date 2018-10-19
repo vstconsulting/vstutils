@@ -238,29 +238,7 @@ h3 {
 h1 {
     max-width: 850px;
 }
-
-*::-webkit-scrollbar-button {
-    height: 0px
-}
-
-*::-webkit-scrollbar-track {
-    background-color: #EEF1F7;
-}
-
-*::-webkit-scrollbar-thumb {
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-    background-color: #ADD5F3;
-}
-
-*::-webkit-scrollbar {
-    width: 4px
-}
-
-*::-webkit-scrollbar-thumb {
-    background-color: #E9F8EC;
-}
-
+ 
 .logo-img {
     width:50%;
     margin-bottom:20px;
@@ -278,4 +256,4 @@ h1 {
     .logo-img {
         margin-top: 0vh;
     }
-}
+} 
