@@ -314,10 +314,7 @@ function addStylesAndClassesToListField(guiObj, field, data, opt)
  */
 function turnTableTrIntoLink(event, blank)
 {
-    if(!(event.target.classList.contains('highlight-tr-none') ||
-            event.target.classList.contains('ico-on') ||
-            event.target.classList.contains('ico-off'))
-    )
+    if(!blockTrLink(event.target, 'tr', 'highlight-tr-none'))
     {
         let href;
         if(event.target.hasAttribute('href'))
@@ -337,6 +334,30 @@ function turnTableTrIntoLink(event, blank)
             vstGO(href);
         }
     }
+}
+
+/**
+ * Function makes recursive search through DOM tree
+ * and tries to find a search_class in the classList of DOM elements.
+ * If function finds this search_class, it returns true.
+ * Otherwise, it returns false.
+ * @param object - element - DOM tree element.
+ * @param string - stop_element_name - name of DOM tree element on which function stops search.
+ * @param string - search_class - name of CSS class, which function tries to find.
+ */
+function blockTrLink(element, stop_element_name, search_class)
+{
+    if(element.classList.contains(search_class))
+    {
+        return true;
+    }
+
+    if(element.parentElement.localName != stop_element_name)
+    {
+        return blockTrLink(element.parentElement, stop_element_name, search_class);
+    }
+
+    return false;
 }
 
 /*
