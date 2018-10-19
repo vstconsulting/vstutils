@@ -1,7 +1,14 @@
 <!-- base template of base modal content -->
 <script type="text/x-just" data-just="modal_content">
     <div class="iziModal-wrap">
-        <div class="iziModal-content" style="padding:20px;">
+        <div class="iziModal-content"
+            style="
+            <%[ modal_content_block_style %>
+                padding:20px;
+            <%] %>
+            <%* modal_content_block_style %>
+            ">
+
             <%[ modal_content_block %>
             <%] %>
             <%* modal_content_block %>
@@ -34,3 +41,255 @@
     <%] %>
     <%! modal_content %>
 </script>
+
+<!-- template of hybrid_autocomplete modal -->
+<script type="text/x-just" data-just="hybrid_autocomplete_modal">
+    <%[ modal_content_block_style %>
+        padding:20px;
+        background-color: #ecf0f5;
+    <%] %>
+     <%[ modal_content_block %>
+        <%= spajs.just.render('hybrid_autocomplete_modal_content', {query:query, guiObj:guiObj, guiElement:guiElement, opt:opt}) %>
+    <%] %>
+    <%! modal_content %>
+</script>
+
+<script type="text/x-just" data-just="hybrid_autocomplete_modal_content">
+    <section class="col-lg-12">
+
+        <%  if(guiObj.model.data.results.length) { %>
+            <button
+                type="button"
+                class="btn btn-primary"
+                title="Add selected"
+                <%= justOn('click', function()
+                    {
+                        return guiElement.getValueFromModal(opt.selectionTag);
+                    })
+                %>
+                >
+                  Add selected
+            </button> <br> <br>
+        <% } %>
+
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <%[ search_form %>
+                    <%= spajs.just.render('search_field_modal', {query:query, guiObj:guiObj, guiElement:guiElement, opt:opt}) %>
+                <%] %>
+                <%* search_form %>
+
+                <%[ pagination %>
+                    <% if(guiObj.getTotalPages()){ %>
+                        <div style="float: right; margin-right: 20px;" >
+                            <%= guiObj.paginationHtml({tpl:'pagination_modal', guiElement: guiElement, opt:opt }) %>
+                        </div>
+                    <% } %>
+                <%] %>
+                <%* pagination %>
+            </div>
+            <div class="box-body">
+                <%  if (!guiObj.model.data.results.length){ %>
+                    <%[ empty_list %>
+                            <%= this.partial('items_empty_list', { }) %>
+                    <%] %>
+                    <%* empty_list %>
+                <% } else{ %>
+                    <%[ data_list %>
+                        <table class="table table-bordered multiple-select">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 45px" onclick=" window.guiListSelections.unSelectAll('<%- opt.selectionTag %>'); return false;" class="global-select" >
+                                        <div class="ico-on fa fa-toggle-on"></div>
+                                        <div class="ico-off fa  fa-toggle-off"></div>
+                                    </th>
+                                    <% for(var j in opt.fields){ %>
+                                        <% if(!opt.fields[j].hidden) { %>
+                                            <th
+                                                <%= addStylesAndClassesToListField(guiObj, opt.fields[j], undefined, opt) %>
+                                                >
+                                                    <%- opt.fields[j].title %>
+                                            </th>
+                                        <% } %>
+                                    <% } %>
+                                </tr>
+                                <% for(var i in guiObj.model.data.results){ %>
+                                    <%= guiObj.renderLine(guiObj.model.data.results[i], opt, 'entity_list_line_for_hybrid_autocomplete') %>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    <%] %>
+                    <%* data_list %>
+                <% } %>
+            </div>
+            <!--<div class="box-footer clearfix">-->
+
+            <!--</div>-->
+        </div>
+    </section>
+</script>
+
+
+<script type="text/x-just" data-just="entity_list_line_for_hybrid_autocomplete">
+    <tr
+        class="modal-item-row modal-item-<%- String(dataLine.url_key).replace('@', '') %> highlight-tr
+                <% for (var i in dataLine.opt.fields) { %>
+                    <% if(dataLine.opt.fields[i].enum) { %>
+                        <%- addCssClassesToElement('tr', dataLine.line[i], i) %>
+                    <% } %>
+                <% } %>
+                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, String(dataLine.url_key).replace('@', '')) %>"
+        data-id="<%- String(dataLine.url_key).replace('@', '') %>"
+        data-href="<%- vstMakeLocalUrl([dataLine.opt.base_href, dataLine.url_key]) %>"
+        data-view-field-name="<%- dataLine.opt.autocomplete_properties.view_field %>"
+        data-view-value="<%- dataLine.line[dataLine.opt.autocomplete_properties.view_field] %>"
+        data-value-field-name="<%- dataLine.opt.autocomplete_properties.value_field %>"
+        data-value-value="<%- dataLine.line[dataLine.opt.autocomplete_properties.value_field] %>"
+
+        onclick="turnTableTrIntoLink(event, true)"
+        >
+        <td class="highlight-tr-none"
+            onclick=" if(window.guiListSelections.isSelected('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>')) {
+                window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>');
+            } else {
+                window.guiListSelections.unSelectAll('<%- dataLine.opt.selectionTag %>'); window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>');
+            }
+            return false;
+        ">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+        </td>
+        <% for(var j in dataLine.opt.fields){ %>
+            <% if(!dataLine.opt.fields[j].hidden) { %>
+                <td
+                    <%= addStylesAndClassesToListField(guiObj, dataLine.opt.fields[j], dataLine.line, dataLine.opt) %>
+                >
+                    <% if(dataLine.rendered[j]){ %>
+                        <%= dataLine.rendered[j] %>
+                    <% } else { %>
+                        <!-- if there is prefetch info, insert it -->
+                        <% if(dataLine.opt.fields[j].prefetch && dataLine.line[j + '_info']) { %>
+                            <a  href="<%- vstMakeLocalApiUrl([dataLine.opt.fields[j].prefetch.path(dataLine.line).replace(/^\/|\/$/g, '') , dataLine.line[j]], guiObj.url_vars) %>"
+                                class="item-name"
+                                onclick="return false;"
+                            >
+                               <%- sliceLongString(dataLine.line[j + '_info'].name) ||
+                                   sliceLongString(dataLine.line[j + '_info'].username) %>
+                            </a>
+                        <% } else { %>
+                           <%= renderLineField(dataLine.opt.fields[j], dataLine.line[j], j, dataLine) %>
+                        <% } %>
+                    <% } %>
+                </td>
+            <% } %>
+        <% } %>
+    </tr>
+</script>
+
+<script  type="text/x-just" style="display: none;" data-just="search_field_modal">
+    <div class="input-group col-lg-6" style="float: right;">
+        <input
+            type="text"
+            id="search-query-input"
+            placeholder="Search by <%- opt.autocomplete_properties.view_field %>"
+            class="form-control"
+            maxlength="255"
+            value="<% if(guiObj.model.filters.search_query && guiObj.model.filters.search_query[opt.autocomplete_properties.view_field]){ %><%- guiObj.model.filters.search_query[opt.autocomplete_properties.view_field] %><% } %>"
+            <% console.log('guiObj', guiObj) %>
+            <%= justOn('keyup', function(event)
+                {
+                    if(event.keyCode == 13)
+                    {
+                        return spajs.showLoader(goToSearchModal(guiObj, guiElement, opt, $('#search-query-input').val()));
+                    }
+                }, "search-query-input")
+            %>
+
+        >
+
+        <div class="input-group-addon"
+            <%= justOn('click', function()
+                {
+                    return spajs.showLoader(goToSearchModal(guiObj, guiElement, opt, $('#search-query-input').val()));
+                })
+            %>
+        >
+        <span class="glyphicon glyphicon-search" ></span>
+        </div>
+    </div>
+</script>
+
+<script  type="text/x-just" style="display: none;" data-just="pagination_modal">
+    <!-- pagination -->
+    <% if(totalPage > 1){ %>
+        <ul class="pagination no-margin pull-right">
+            <% if(totalPage < 21){ %>
+                <% for(let i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href=""
+                         <%= justOn('click', function()
+                            {
+                                opt.opt.page_num = i;
+                                spajs.showLoader(opt.guiElement.renderModal(opt.opt));
+                                return false;
+                            })
+                        %>
+                        style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <li><a href=""
+                           <%= justOn('click', function()
+                                {
+                                    opt.opt.page_num = i;
+                                    spajs.showLoader(opt.guiElement.renderModal(opt.opt));
+                                    return false;
+                                })
+                            %>
+                        ><%- i+1 %></a></li>
+                    <% } %>
+                <% } %>
+            <% }else{ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href=""
+                              <%= justOn('click', function()
+                                {
+                                    opt.opt.page_num = i;
+                                    spajs.showLoader(opt.guiElement.renderModal(opt.opt));
+                                    return false;
+                                })
+                            %>
+                            style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
+                            <% if( dotShow == false){ %>
+                                <% dotShow = true %>
+                                <li><a href=""
+                                       <%= justOn('click', function()
+                                            {
+                                                opt.opt.page_num = i;
+                                                spajs.showLoader(opt.guiElement.renderModal(opt.opt));
+                                                return false;
+                                            })
+                                        %>
+                                     >..</a></li>
+                            <% } %>
+                        <% }else{ %>
+                            <% dotShow = false %>
+                            <li><a href=""
+                                   <%= justOn('click', function()
+                                        {
+                                            opt.opt.page_num = i;
+                                            spajs.showLoader(opt.guiElement.renderModal(opt.opt));
+                                            return false;
+                                        })
+                                    %>
+                                 ><%- i+1 %></a></li>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul>
+    <% } %>
+</script>
+
+

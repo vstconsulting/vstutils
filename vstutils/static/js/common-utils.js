@@ -306,7 +306,13 @@ function addStylesAndClassesToListField(guiObj, field, data, opt)
     return output;
 }
 
-function turnTableTrIntoLink(event)
+/**
+ * Function handles click on table row (<tr>), and depending to the place of user's click
+ * it redirects user to <tr> link or to <td> link.
+ * @param object - event - click event.
+ * @param boolean - blank - if true, function opens link in new window.
+ */
+function turnTableTrIntoLink(event, blank)
 {
     if(!(event.target.classList.contains('highlight-tr-none') ||
             event.target.classList.contains('ico-on') ||
@@ -322,7 +328,14 @@ function turnTableTrIntoLink(event)
         {
             href =  event.currentTarget.getAttribute('data-href');
         }
-        vstGO(href);
+        if(blank)
+        {
+            window.open(href);
+        }
+        else
+        {
+            vstGO(href);
+        }
     }
 }
 
@@ -492,7 +505,7 @@ function deepEqual(x, y)
     if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null))
     {
         if (Object.keys(x).length != Object.keys(y).length)
-        { 
+        {
             return false;
         }
 
@@ -501,12 +514,12 @@ function deepEqual(x, y)
             if (y.hasOwnProperty(prop))
             {
                 if (! deepEqual(x[prop], y[prop]))
-                { 
+                {
                     return false;
                 }
             }
             else
-            { 
+            {
                 return false;
             }
         }
@@ -514,7 +527,7 @@ function deepEqual(x, y)
         return true;
     }
     else if (x !== y)
-    { 
+    {
         return false;
     }
     else
