@@ -74,6 +74,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 {
     this.opt = opt
     this.value = value
+    this.db_value = value
     this.parent_object = parent_object
     if(!parent_object)
     {
@@ -95,6 +96,14 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.setValue = function(value)
     {
         this.value = value
+    }
+
+    this._onUpdateValue = function(){}
+
+    this.updateValue = function(value)
+    {
+        this.db_value = value
+        this._onUpdateValue(value)
     }
 
     this.reductionToType = function(value)
@@ -197,6 +206,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         return spajs.just.render(this.template_name, {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
+            this.rendered = true
         });
     }
 
@@ -229,7 +239,6 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         if(field.maxLength && value_length > field.maxLength)
         {
-            debugger;
             throw {error:'validation', message:'Field '+field.name +" is too long"}
         }
 
@@ -239,7 +248,6 @@ guiElements.base = function(opt = {}, value, parent_object)
             {
                 if(field.required)
                 {
-                    debugger;
                     throw {error:'validation', message:'Field '+field.name +" is empty"}
                 }
                 else
@@ -250,7 +258,6 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             if(value_length < field.minLength)
             {
-                debugger;
                 throw {error:'validation', message:'Field '+field.name +" is too short"}
             }
         }
@@ -530,60 +537,11 @@ guiElements.autocomplete = function()
     this.name = 'autocomplete'
     guiElements.base.apply(this, arguments)
 
-    this.getValue = function()
-    {
-        if(this.opt.dynamic_properties)
-        {
-            let properties = mergeDeep(this.opt.autocomplete_properties, this.opt.dynamic_properties)
-            this.opt.autocomplete_properties = properties
-        }
-
-        if (this.matches &&
-            this.opt.autocomplete_properties.view_field &&
-            this.opt.autocomplete_properties.value_field)
-        {
-            var value = $("#" + this.element_id).val();
-            var data_value = $("#" + this.element_id).attr('value');
-            var match = false;
-            for (var i in this.matches)
-            {
-                if (value == this.matches[i]['view_field'] &&
-                    data_value == this.matches[i]['value_field'])
-                {
-                    match = true;
-                }
-            }
-
-            if (match)
-            {
-                return this.reductionToType(data_value);
-            }
-            else
-            {
-                return this.reductionToType(value)
-            }
-        }
-        else
-        {
-            return this.reductionToType($("#" + this.element_id).val());
-        }
-    }
-
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-        /*
-         * options.searchObj - object for JS hardcode, which aim is to redefine way of getting data for autocomplete.
-         *
-         * Example of hardcode:
-         * tabSignal.connect("openapi.factory.ansiblemodule", function(data)
-         * {
-         *      let inventory = apiansiblemodule.one.view.definition.properties.inventory;
-         *      inventory.type = "autocomplete"
-         *      inventory.searchObj = new apiinventory.list();
-         * });
-         */
+
         if(options.searchObj)
         {
             return new autoComplete({
@@ -636,55 +594,6 @@ guiElements.autocomplete = function()
             });
         }
         /*
-         * options.enum - array, which comes from api.
-         * This array has data for autocomplete.
-         * @note для поля типа enum есть тип enum, зачем здесь этот код?
-
-        else if(options.enum)
-        {
-            return new autoComplete({
-                selector: '#'+this.element_id,
-                minChars: 0,
-                cache:false,
-                showByClick:true,
-                menuClass:'autocomplete autocomplete-'+this.element_id,
-                renderItem: function(item, search)
-                {
-                    return '<div class="autocomplete-suggestion" data-value="' + item + '" >' + item + '</div>';
-                },
-                onSelect: (event, term, item) =>
-                {
-                    let value = $(item).attr('data-value');
-                    $('#'+this.element_id).val($(item).text());
-                    $('#'+this.element_id).attr('value', value);
-                    $('#'+this.element_id).attr({'data-hide':'hide'});
-                },
-                source: (original_term, response) =>
-                {
-                    let search_str = trim(original_term);
-
-                    let isHide = $('#'+this.element_id).attr('data-hide')
-                    if(isHide == "hide")
-                    {
-                        $('#'+this.element_id).attr({'data-hide':'show'})
-                        return;
-                    }
-
-                    let choices = options.enum;
-
-                    let matches = [];
-                    for(let i in choices)
-                    {
-                        if (choices[i].toLowerCase().indexOf(search_str.toLowerCase()) != -1)
-                        {
-                            matches.push(choices[i]);
-                        }
-                    }
-                    response(matches);
-                }
-            });
-        } */
-        /*
          * options.autocomplete_properties - object, which comes from api.
          * This object has info about model and fields, where data for autocomplete is stored.
          */
@@ -701,13 +610,22 @@ guiElements.autocomplete = function()
 
             let value_field = props['value_field'];
             let view_field = props['view_field'];
+            if (!Array.isArray(props['obj']))
+            {
+                props['obj'] = [props['obj']]
+            }
 
 
-            let list = undefined;
+            let list = [];
 
             if(props['obj'])
             {
-                list = new guiObjectFactory(props['obj']);
+                for (let i in props['obj'])
+                {
+                    list.push(new guiObjectFactory(props['obj'][i],
+                        options.dynamic_properties.url_vars)
+                    );
+                }
             }
 
             return new autoComplete({
@@ -741,24 +659,38 @@ guiElements.autocomplete = function()
 
                     if(list)
                     {
+
                         let filters = getFiltersForAutocomplete(list, search_str, view_field);
+                        let lists_deffered =[]
+                        for (let i in list)
+                        {
+                            lists_deffered.push(list[i].search(filters))
+                        }
 
-                        $.when(list.search(filters)).done((data) => {
+                        $.when.apply($, lists_deffered).done(function() {
 
-                            let res = data.data.results;
                             let matches = [];
 
-                            for(let i in res)
+                            for (let i in arguments)
                             {
-                                matches.push({
-                                    value_field: res[i][value_field],
-                                    view_field: res[i][view_field],
-                                });
+                                let res = arguments[i].data.results;
+
+                                for(let i in res)
+                                {
+                                    let value_field = res[i].id
+                                    if (matches.length == 0 || matches.every(element => element['value_field'] != value_field))
+                                    {
+                                        matches.push({
+                                            value_field: value_field,
+                                            view_field: res[i][view_field],
+                                        });
+                                    }
+                                }
                             }
 
                             this.matches = matches;
-
                             response(matches)
+
 
                         }).fail((e) => {
                             response([]);
@@ -779,7 +711,6 @@ guiElements.autocomplete.prepareProperties = function(value)
 
     if(!value.additionalProperties)
     {
-        debugger;
         console.error("AdditionalProperties was not found");
         return value;
     }
@@ -984,26 +915,8 @@ guiElements.select2 = function(field, field_value, parent_object)
                     {
                         $.when(options.search(params, field, field_value, parent_object)).done((results) =>
                         {
-                            /*
-                             * {
-                                "results": [
-                                  {
-                                    "id": 1,
-                                    "text": "Option 1"
-                                  },
-                                  {
-                                    "id": 2,
-                                    "text": "Option 2"
-                                  }
-                                ],
-                                "pagination": {
-                                  "more": true
-                                }
-                              }
-                             */
                             success(results)
                         }).fail((e) => {
-                            debugger;
                             failure([])
                         })
                     }
@@ -1077,7 +990,6 @@ guiElements.select2 = function(field, field_value, parent_object)
                                 }
                                 success({results:results})
                             }).fail((e) => {
-                                debugger;
                                 failure([])
                             })
                         }
@@ -1095,36 +1007,40 @@ guiElements.apiObject = function(field, field_value, parent_object)
     this.name = 'apiObject'
     guiElements.base.apply(this, arguments)
 
+    this.createLinkedObj = function()
+    {
+        if(this.opt.definition.page)
+        {
+            return new guiObjectFactory(this.opt.definition.page, this.parent_object.url_vars, this.db_value)
+        }
+        else if(this.opt.definition.list && this.opt.definition.list.page)
+        {
+            return new guiObjectFactory(this.opt.definition.list.page, undefined, this.db_value)
+        }
+
+        return undefined
+    }
+    this._onUpdateValue = function(value)
+    {
+        this.linkObj = this.createLinkedObj()
+    }
+
 
     this._baseRender = this.render
     this.render = function(options)
     {
-        this.linkObj = undefined
-        if(this.opt.definition.page)
-        {
-            this.linkObj = new guiObjectFactory(this.opt.definition.page, this.parent_object.url_vars, this.value)
-        }
-        else if(this.opt.definition.list && this.opt.definition.list.page)
-        {
-            this.linkObj = new guiObjectFactory(this.opt.definition.list.page, undefined, this.value)
-        }
-
+        this.linkObj = this.createLinkedObj()
         return this._baseRender.apply(this, arguments)
-    }
-
-    this.reductionToType = function(value)
-    {
-        return value/1
     }
 
     this.getLink = function()
     {
-        if(!this.linkObj || !this.value || !this.value.id)
+        if(!this.linkObj || !this.db_value || !this.db_value.id)
         {
             return "#"
         }
 
-        let url = this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.value.id).replace(/^\//, "");
+        let url = this.linkObj.api.path.replace(/\/(\{[A-z]+\})\/$/, "\/"+this.db_value.id).replace(/^\//, "");
         if(this.linkObj.url_vars)
         {
             for(let i in this.linkObj.url_vars)
@@ -1143,17 +1059,17 @@ guiElements.apiObject = function(field, field_value, parent_object)
     {
         if(!this.linkObj)
         {
-            if(!this.value || !this.value.id)
+            if(!this.db_value || !this.db_value.id)
             {
                 return "#"
             }
 
-            if(this.value.name)
+            if(this.db_value.name)
             {
-                return this.value.name
+                return this.db_value.name
             }
 
-            return this.value.id
+            return this.db_value.id
         }
 
         // opt.definition.list.path %>/<%- value.id %>
@@ -1167,55 +1083,6 @@ guiElements.apiData = function(field, field_value, parent_object)
     this.name = 'apiData'
     guiElements.base.apply(this, arguments)
 }
-
-/*
-guiElements.apiUser = function(field, field_value, parent_object)
-{
-    this.name = 'apiUser'
-    guiElements.base.apply(this, arguments)
-
-    this._onBaseRender = this._onRender
-    this._onRender = function(options)
-    {
-        debugger;
-        this._onBaseRender(options)
-
-        if(!options.readOnly)
-        {
-            $('#'+this.element_id).select2({
-                width: '100%',
-                ajax: {
-                    transport: function (params, success, failure)
-                    {
-                        var users = new guiObjectFactory("/user/")
-
-                        $.when(users.search(params, field, field_value, parent_object)).done((results) =>
-                        {
-                            let select2 = {
-                                results:[]
-                            }
-                            results.data.results.forEach(res =>{
-                                select2.results.push({
-                                    id:res.id,
-                                    text:res.username
-                                })
-                            })
-
-                            success(select2)
-                        }).fail(() => {
-                            failure([])
-                        })
-                    }
-                }
-            });
-        }
-    }
-
-    this.reductionToType = function(value)
-    {
-        return value/1
-    }
-}*/
 
 guiElements.inner_api_object = function(field, field_value, parent_object)
 {
@@ -1421,7 +1288,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         if(opt.dynamic_properties && opt.dynamic_properties.callback)
         {
-            var res = opt.dynamic_properties.callback.apply(this, arguments);
+            var res = opt.dynamic_properties.callback.apply(thisObj, arguments);
             if(res && res.type)
             {
                 thisObj.setType(res.type, res.override_opt);

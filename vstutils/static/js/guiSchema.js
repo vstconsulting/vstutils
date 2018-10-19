@@ -453,6 +453,7 @@ function openApi_guiSchema(api)
             name:name,          // Текст между последним и предпоследним знаком
             bulk_name:name,     // Имя сущьности
             name_field:'name',  // Поле содержащие имя объекта
+            autoupdate:true,    // Auto update field data
             api:{
                 get:    openApi_guiQuerySchema(api, val.get, 'get', name),
                 patch:  openApi_guiQuerySchema(api, val.patch, 'patch', name),

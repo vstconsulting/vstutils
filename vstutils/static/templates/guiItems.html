@@ -484,31 +484,34 @@
                         <%* empty_list %>
                     <% } else{ %>
                         <%[ data_list %>
-                            <table class="table table-bordered multiple-select">
-                                <tbody>
-                                    <tr>
-                                        <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
-                                            <div class="ico-on fa fa-toggle-on"></div>
-                                            <div class="ico-off fa  fa-toggle-off"></div>
-                                        </th>
-                                        <% for(var j in opt.fields){ %>
-                                            <% if(!opt.fields[j].hidden) { %>
-                                                <th
-                                                    <%= addStylesAndClassesToListField(guiObj, opt.fields[j], undefined, opt) %>
-                                                    >
-                                                        <%- opt.fields[j].title %>
-                                                </th>
+                            <~ guiObj.model.data>
+                                <table class="table table-bordered multiple-select">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                                <div class="ico-on fa fa-toggle-on"></div>
+                                                <div class="ico-off fa  fa-toggle-off"></div>
+                                            </th>
+                                            <% for(var j in opt.fields){ %>
+                                                <% if(!opt.fields[j].hidden) { %>
+                                                    <th
+                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], undefined, opt) %>
+                                                        >
+                                                            <%- opt.fields[j].title %>
+                                                    </th>
+                                                <% } %>
                                             <% } %>
+                                            <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
+                                                <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
+                                            <% } %>
+                                        </tr>
+
+                                        <% for(var i in guiObj.model.data.results){ %>
+                                            <%= guiObj.renderLine(guiObj.model.data.results[i], opt) %>
                                         <% } %>
-                                        <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
-                                            <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
-                                        <% } %>
-                                    </tr>
-                                    <% for(var i in guiObj.model.data.results){ %>
-                                        <%= guiObj.renderLine(guiObj.model.data.results[i], opt) %>
-                                    <% } %>
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
+                            <~>
                         <%] %>
                         <%* data_list %>
                     <% } %>

@@ -1503,6 +1503,11 @@ table{
     color: #949494; 
 }
 
+.db_value_input{
+    background-color: #eee !important;
+    border-left: 1px solid #d2d6de !important;
+}
+
 .td {
     word-wrap: break-word;
 }

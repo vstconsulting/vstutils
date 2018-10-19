@@ -1,4 +1,6 @@
 
+guiLocalSettings.setIfNotExists('page_update_interval', 2000)
+
 var gui_base_object = {
 
     getTemplateName : function (type, default_name)
@@ -21,6 +23,47 @@ var gui_base_object = {
         return this.api.name
     },
 
+    stopUpdates : function()
+    {
+        // stopUpdates
+        this.update_stoped = true
+        clearTimeout(this.update_timoutid)
+    },
+
+    startUpdates : function()
+    {
+        if(this.update_timoutid)
+        {
+            return;
+        }
+         
+        if(this.update_stoped === true)
+        {
+            return;
+        }
+        
+        this.update_timoutid = setTimeout(() => 
+        { 
+            this.update_timoutid = undefined
+            if(!this.model.filters)
+            {
+                console.warn("startUpdates [no filters]")
+                this.startUpdates()
+                return;
+            }
+
+            $.when(this.updateFromServer()).always(() => { 
+                console.log("startUpdates [updated]")
+                this.startUpdates()
+            })
+        }, guiLocalSettings.get('page_update_interval')) 
+    },
+ 
+    updateFromServer : function ()
+    {
+        return false;
+    },
+      
     renderAllFields : function(opt)
     {
         let html = []
@@ -67,24 +110,31 @@ var gui_base_object = {
             }
 
             // Добавление связи с зависимыми полями
-            let parent_field = undefined
+            let parent_field_name = undefined
             if(field.additionalProperties && field.additionalProperties.field)
             {
-                parent_field = field.additionalProperties.field
+                parent_field_name = field.additionalProperties.field
             }
             if(field.parent_field)
             {
-                parent_field = field.parent_field
+                parent_field_name = field.parent_field
             }
-
-            let thisField = this.model.guiFields[field.name];
-            let parentField = this.model.guiFields[parent_field];
-
-            if(parentField && parentField.addOnChangeCallBack)
+            if (!Array.isArray(parent_field_name))
             {
-                parentField.addOnChangeCallBack(function() {
-                    thisField.updateOptions.apply(thisField, arguments);
-                })
+                parent_field_name = [parent_field_name]
+            }
+            let thisField = this.model.guiFields[field.name];
+
+            for (let i in parent_field_name)
+            {
+                let parentField = this.model.guiFields[parent_field_name[i]];
+
+                if(parentField && parentField.addOnChangeCallBack)
+                {
+                    parentField.addOnChangeCallBack(function() {
+                        thisField.updateOptions.apply(thisField, arguments);
+                    })
+                }
             }
         }
 
@@ -136,14 +186,9 @@ var gui_base_object = {
         return this.getValue.call(arguments);
     },
 
-    base_init : function (api_object, url_vars = undefined, object_data = undefined)
+    base_init : function (api_object,  url_vars= {}, object_data = undefined)
     {
-        this.url_vars = spajs.urlInfo.data.reg
-        if(url_vars)
-        {
-            this.url_vars = url_vars
-        }
-
+        this.url_vars = $.extend(spajs.urlInfo.data.reg, url_vars)
         this.model.title = this.api.bulk_name
     },
     init : function ()
@@ -357,6 +402,10 @@ function guiObjectFactory(api_object)
     if(typeof api_object == "string")
     {
         api_object = window.guiSchema.path[api_object]
+        if (api_object == undefined)
+        {
+            console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object}))
+        }
     }
 
     /**
