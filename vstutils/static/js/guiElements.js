@@ -823,20 +823,56 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 
     this.getValue = function()
     {
-        let view_field_value = $("#" + this.element_id).val();
-        let value_field_value = $("#" + this.element_id).attr('value');
-
-        if(value_field_value)
+        if(this.opt && this.opt.custom_getValue)
         {
-            return value_field_value;
+            return this.opt.custom_getValue.apply(this, arguments);
+        }
+        else
+        {
+            let view_field_value = $("#" + this.element_id).val();
+            let value_field_value = $("#" + this.element_id).attr('value');
+
+            if(value_field_value)
+            {
+                return value_field_value;
+            }
+
+            return view_field_value;
+        }
+    }
+
+    this.getValueFromModal = function(tag)
+    {
+        let id = window.guiListSelections.getSelection(tag);
+        if(id.length != 0)
+        {
+            let view_field_name = $('.modal-item-'+id[0]).attr('data-view-field-name');
+            let view_field_value = $('.modal-item-'+id[0]).attr('data-view-value');
+
+            let value_field_name = $('.modal-item-'+id[0]).attr('data-value-field-name');
+            let value_field_value = $('.modal-item-'+id[0]).attr('data-value-value');
+
+            $('#' + this.element_id).attr('value', value_field_value);
+            $('#' + this.element_id).val(view_field_value);
+
+        }
+        else
+        {
+            $('#' + this.element_id).attr('value', '');
+            $('#' + this.element_id).val('');
         }
 
-        return view_field_value;
+        $('#' + this.element_id).trigger('change');
+        window.guiListSelections.unSelectAll(tag);
+        guiModal.modalClose();
     }
+
 
     this._onBaseRender = this._onRender
     this._onRender = function(options)
     {
+        this._onBaseRender(options);
+
         if(options.autocomplete_properties || options.dynamic_properties)
         {
             if (options.dynamic_properties)
@@ -876,6 +912,8 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         }
     }
 }
+
+guiElements.hybrid_autocomplete.prepareProperties = guiElements.autocomplete.prepareProperties
 
 
 guiElements.select2 = function(field, field_value, parent_object)
@@ -1953,36 +1991,6 @@ function getUptime(time)
     {
         return  moment(time*1000).tz('UTC').format('HH:mm:ss');
     }
-}
-
-/**
- * Function gets values of view and value fields from hybrid_autocomplete modal.
- * @param string - guiElement_id - id of hybrid_autocomplete guiElement.
- * @param string - tag - selection tag of hybrid_autocomplete list.
- */
-function getSelectedObjectFromModal(guiElement_id, tag)
-{
-    let id = window.guiListSelections.getSelection(tag);
-    if(id.length != 0)
-    {
-        let view_field_name = $('.modal-item-'+id[0]).attr('data-view-field-name');
-        let view_field_value = $('.modal-item-'+id[0]).attr('data-view-value');
-
-        let value_field_name = $('.modal-item-'+id[0]).attr('data-value-field-name');
-        let value_field_value = $('.modal-item-'+id[0]).attr('data-value-value');
-
-        $('#' + guiElement_id).attr('value', value_field_value);
-        $('#' + guiElement_id).val(view_field_value);
-
-    }
-    else
-    {
-        $('#' + guiElement_id).attr('value', '');
-        $('#' + guiElement_id).val('');
-    }
-
-    window.guiListSelections.unSelectAll(tag);
-    guiModal.modalClose();
 }
 
 

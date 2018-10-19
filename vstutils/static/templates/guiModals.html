@@ -62,7 +62,11 @@
                 type="button"
                 class="btn btn-primary"
                 title="Add selected"
-                onclick="getSelectedObjectFromModal('<%- guiElement.element_id %>', '<%- opt.selectionTag %>'); return false;"
+                <%= justOn('click', function()
+                    {
+                        return guiElement.getValueFromModal(opt.selectionTag);
+                    })
+                %>
                 >
                   Add selected
             </button> <br> <br>
