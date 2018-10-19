@@ -81,7 +81,7 @@
 
                 <%[ pagination %>
                     <% if(guiObj.getTotalPages()){ %>
-                        <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                        <div style="float: right; margin-right: 20px;" >
                             <%= guiObj.paginationHtml({tpl:'pagination_modal', guiElement: guiElement, opt:opt }) %>
                         </div>
                     <% } %>
@@ -187,7 +187,7 @@
 </script>
 
 <script  type="text/x-just" style="display: none;" data-just="search_field_modal">
-    <div class="input-group col-lg-2" style="float: right;">
+    <div class="input-group col-lg-6" style="float: right;">
         <input
             type="text"
             id="search-query-input"
