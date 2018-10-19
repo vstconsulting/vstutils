@@ -56,14 +56,14 @@ window.hostname = "{{host_url}}"
 
 function appAjaxLogin()
 {
-    var fileds = document.querySelectorAll(".app-form-signin input")
+    var fields = document.querySelectorAll(".app-form-signin input")
 
     var fd = new FormData();
     data = {}
-    for(var i = 0; i < fileds.length; i++)
+    for(var i = 0; i < fields.length; i++)
     {
-        fd.append(fileds[i].getAttribute('name'), fileds[i].value);
-        data[fileds[i].getAttribute('name')] = fileds[i].value
+        fd.append(fields[i].getAttribute('name'), fields[i].value);
+        data[fields[i].getAttribute('name')] = fields[i].value
     }
 
     var request = new XMLHttpRequest();

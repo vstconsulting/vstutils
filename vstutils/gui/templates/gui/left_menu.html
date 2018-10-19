@@ -1,9 +1,45 @@
 {% block sidebar_menu %}
     <li class="header">MAIN NAVIGATION</li>
-    <li id="menu-home"><a href="/" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span"><i class="li-header-span-i">Home</i></span></a></li>
+    <li id="menu-home"><a href="/" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span"><i class="li-header-span-i">Home</i></span></a></li>
+    {% for item in project_menu %}
+        {% if item.name %}
+            {% if item.sublinks %}
+                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %}" id="menu-{{item.name|lower}}">
+                    {% if item.url %}
+                        <a href="/#{{item.url}}" onclick="return vstGO(this.href);">
+                            <i class="{{item.span_class}}"></i> <span class="li-header-span"><i class="li-header-span-i">{{item.name|title}}</i></span>
+                        </a>
+                    {% else %}
+                        <a><i class="{{item.span_class}}"></i> <span class="li-header-span"><i class="li-header-span-i-none">{{item.name|title}}</i></span></a>
+                    {% endif %}
+                    <span class="open-menu-treeview-button"><i class="fa fa-angle-left"></i></span>
+                    <ul class="menu-treeview-menu">
+                        {% for subitem in item.sublinks %}
+                            {% if subitem.name %}
+                                <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}">
+                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" onclick="return vstGO(this.href);" >
+                                        <i class="{{subitem.span_class}}"></i> <span>{{subitem.name|title}}</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% else %}
+                <li id="{{item.name}}">
+                    <a href="/#{% firstof item.url item.name|lower %}" onclick="return vstGO(this.href);" >
+                        <i class="{{item.span_class}}"></i>
+                        <span class="li-header-span">
+                            <i class="li-header-span-i">{{item.name|title}}</i>
+                        </span>
+                    </a>
+                </li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
     {% if has_docs %}
         <li id="menu-docs">
-            <a href={% block doc_link %}"{{host_url}}/docs/index"{% endblock %}
+            <a href={% block doc_link %}"{{host_url}}/docs"{% endblock %}
                onclick="return openURLInAppBrowser(this.href);" >
                <i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span>
             </a>

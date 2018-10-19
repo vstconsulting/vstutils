@@ -222,9 +222,12 @@ class VSTUtilsTestCase(BaseTestCase):
                 self.assertEqual(output.read(), "Test\n")
 
     def test_kvexchanger(self):
-        utils.KVExchanger("somekey").send(True, 10)
-        utils.KVExchanger("somekey").prolong()
-        self.assertTrue(utils.KVExchanger("somekey").get())
+        exchenger = utils.KVExchanger("somekey")
+        exchenger.send(True, 10)
+        exchenger.prolong()
+        self.assertTrue(exchenger.get())
+        exchenger.delete()
+        self.assertTrue(not exchenger.get())
 
     def test_locks(self):
         @utils.model_lock_decorator()
@@ -271,7 +274,9 @@ class VSTUtilsTestCase(BaseTestCase):
         self.get_result('post', '/login/', 200)
         self.get_result('get', '/login/', 302)
         # API
-        self.assertEqual(list(self.get_result('get', '/api/').keys()), ['v1'])
+        keys = list(self.get_result('get', '/api/').keys())
+        for key in ['openapi', 'v1']:
+            self.assertIn(key, keys)
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(settings.API[settings.VST_API_VERSION].keys()).sort()
@@ -403,6 +408,7 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["users", self.user.id]},
+            {"method": "get", 'data_type': ["users"]},
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
@@ -424,6 +430,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[6]['data']['PY'], settings.PY_VER)
         self.assertEqual(result[7]['status'], 200)
         self.assertEqual(result[7]['data']['id'], self.user.id)
+        self.assertEqual(result[8]['status'], 200)
 
         bulk_request_data = [
             # Check unsupported media type

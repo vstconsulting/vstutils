@@ -91,6 +91,17 @@ class BulkViewSet(base.rvs.APIView):
     get: Return allowed_types and operations_types
     post: Return result of bulk-operations.
     '''
+    client_environ_keys_copy = [
+        "SCRIPT_NAME",
+        "SERVER_NAME",
+        "SERVER_PORT",
+        "SERVER_PROTOCOL",
+        "SERVER_SOFTWARE",
+        "REMOTE_ADDR",
+        "HTTP_X_FORWARDED_PROTOCOL",
+        "HTTP_HOST",
+        "HTTP_USER_AGENT",
+    ]
     api_version = settings.VST_API_VERSION
     schema = None
 
@@ -129,8 +140,10 @@ class BulkViewSet(base.rvs.APIView):
 
     def _get_obj_with_extra(self, param):
         if isinstance(param, (six.text_type, six.string_types)):
-            param = param.replace('<', '{').replace('>', '}')
-            return self._load_param(param.format(*self.results))
+            if not ('{' in param and '}' in param):
+                param = param.replace('<', '{').replace('>', '}')
+                param = param.format(*self.results)
+            return self._load_param(param)
         return param
 
     def _json_dump(self, value, inner=False):
@@ -156,7 +169,7 @@ class BulkViewSet(base.rvs.APIView):
         if data_type is not None:
             if isinstance(data_type, (list, tuple)):
                 data_type = '/'.join([str(i) for i in data_type])
-            url += "{}/".format(self._get_obj_with_extra(data_type))
+            url += "{}/".format(self._get_obj_with_extra(data_type)) if data_type else ''
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
         return "/{}/{}/{}/{}".format(
@@ -181,7 +194,7 @@ class BulkViewSet(base.rvs.APIView):
             operation.get('filters', None),
         )
         method = getattr(self.client, self.get_method_type(op_type, operation))
-        return method(url, **kwargs)
+        return method(url, secure=self.is_secure, **kwargs), url
 
     def create_response(self, status, data, operation, **kwargs):
         result = Dict(
@@ -194,8 +207,12 @@ class BulkViewSet(base.rvs.APIView):
         return result
 
     def _get_rendered(self, res):
-        if getattr(res, 'data', None):
-            return Dict(res.data)
+        data = getattr(res, 'data', {})
+        if data:
+            try:
+                return Dict(data)
+            except:  # nocv
+                pass
         if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
             return json.loads(res.rendered_content.decode())
         else:
@@ -204,11 +221,11 @@ class BulkViewSet(base.rvs.APIView):
     def perform(self, operation):
         kwargs = dict()
         kwargs["content_type"] = "application/json"
-        response = self.get_operation(operation, kwargs)
+        response, url = self.get_operation(operation, kwargs)
         return self.create_response(
             response.status_code,
             self._get_rendered(response),
-            operation
+            operation, url=url
         )
 
     def operate_handler(self, operation, allow_fail=True):
@@ -238,10 +255,23 @@ class BulkViewSet(base.rvs.APIView):
                 operation, **kwargs
             ))
 
+    def original_environ_data(self, *args):
+        # pylint: disable=protected-access
+        orig_environ = self.request._request.environ
+        get_environ = orig_environ.get
+        kwargs = dict()
+        for env_var in tuple(self.client_environ_keys_copy) + args:
+            value = get_environ(env_var, None)
+            if value:
+                kwargs[env_var] = str(value)
+        return kwargs
+
     def operate(self, request, allow_fail=True):
+        # pylint: disable=protected-access
+        self.is_secure = request._request.is_secure()
         operations = request.data
         self.results = []
-        self.client = Client()
+        self.client = Client(**self.original_environ_data())
         self.client.force_login(request.user)
         for operation in operations:
             with transaction.atomic():

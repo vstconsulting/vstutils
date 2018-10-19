@@ -13,3 +13,4 @@ recursive-include vstutils/*/templates *
 recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *
 recursive-include vstutils/static *
+recursive-include vstutils/doc_themes *

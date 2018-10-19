@@ -371,36 +371,7 @@ if(!window.spajs)
 
         return res
     }
-
-    /**
-     * Сортирует меню.
-     * @param element targetBlock блок содержащий сортеруемые элементы (так как меню несколько)
-     * @private
-     */
-    spajs.sortMenu = function(targetBlock)
-    {
-        var sortmenu = targetBlock.children();
-
-        sortmenu.sort(function(a, b)
-        {
-            a = parseInt($(a).attr("data-index"));
-            if(isNaN(a))
-            {
-                return 1;
-            }
-
-            b = parseInt($(b).attr("data-index"));
-            if(isNaN(b))
-            {
-                return -1;
-            }
-
-            return b-a;
-        });
-
-        sortmenu.detach().appendTo(targetBlock);
-    }
-
+ 
     /**
      * Добавляет произвольный пункт меню
      * @param {object} menu Описание пункта меню
@@ -462,43 +433,61 @@ if(!window.spajs)
         {
             menu.type = "custom"
         }
-
-        var targetBlock = $("#left_sidebar")
- 
-        for(var i in spajs.opt.menu)
-        {
-            if(spajs.opt.menu[i].id == menu.id)
-            {
-                // Такой пункт уже есть в меню
-                console.error("Такой пункт уже есть в меню", menu)
-                return;
-            }
-        }
-
+   
         if(!menu.priority)
         {
             menu.priority = 0;
         }
 
         spajs.opt.menu.push(menu)
-
-        if(menu.type == "custom")
-        {
-            targetBlock.append('<div data-index="'+menu.priority+'" >'+menu.menuHtml+'</div>');
-        }
-        else if(menu.type == "hidden")
-        {
-            // Невидимый пункт меню.
-        }
-        
-        spajs.sortMenu(targetBlock)
-        if(menu.onInsert)
-        {
-            menu.onInsert($("#spajs-menu-"+menu.id))
-        }
+  
+        spajs.opt.menu = spajs.opt.menu.sort((a, b)=>
+        { 
+            return b.priority - a.priority
+        });
+       
     }
   
     spajs.currentOpenMenu = undefined
+
+    spajs.findMenu = function(menuId)
+    {   
+        var regExpRes = [] 
+        for(var i in spajs.opt.menu)
+        {
+            let val = spajs.opt.menu[i]
+            //console.log(val.priority, val.debug)
+            if(val.url_parser != undefined)
+            {
+                for(var j in val.url_parser)
+                {
+                    var parsed = val.url_parser[j](menuId)
+                    if(parsed)
+                    {
+                        regExpRes = parsed
+                        return val 
+                    }
+                }
+            }
+            else if(val.urlregexp != undefined)
+            {
+                for(var j in val.urlregexp)
+                {
+                    if(val.urlregexp[j].test(menuId))
+                    {
+                        regExpRes = val.urlregexp[j].exec(menuId)
+                        return val
+                    }
+                }
+            }
+            else if(val.id == menuId)
+            {
+                return val 
+            } 
+        }
+  
+        return false 
+    }
 
     /**
      * Открывает окно с произвольным содержимым
@@ -541,45 +530,54 @@ if(!window.spajs)
             opt.event_state = {}
             opt.event_state.url = window.location.href;
         }
- 
+        
+        //console.table(spajs.opt.menu)
+        
         var regExpRes = []
         var menuInfo = undefined;
+        
         for(var i in spajs.opt.menu)
         {
-            val = spajs.opt.menu[i]
-            if(spajs.opt.menu[i].url_parser != undefined)
+            let val = spajs.opt.menu[i]
+            //console.log(val.priority, val.debug)
+            if(val.url_parser != undefined)
             {
-                for(var j in spajs.opt.menu[i].url_parser)
+                for(var j in val.url_parser)
                 {
-                    var parsed = spajs.opt.menu[i].url_parser[j](opt.menuId)
+                    var parsed = val.url_parser[j](opt.menuId)
                     if(parsed)
                     {
                         regExpRes = parsed
-                        menuInfo = spajs.opt.menu[i]
+                        menuInfo = val
                         break;
                     }
                 }
             }
-            else if(spajs.opt.menu[i].urlregexp != undefined)
+            else if(val.urlregexp != undefined)
             {
-                for(var j in spajs.opt.menu[i].urlregexp)
+                for(var j in val.urlregexp)
                 {
-                    if(spajs.opt.menu[i].urlregexp[j].test(opt.menuId))
+                    if(val.urlregexp[j].test(opt.menuId))
                     {
-                        regExpRes = spajs.opt.menu[i].urlregexp[j].exec(opt.menuId)
-                        menuInfo = spajs.opt.menu[i]
+                        regExpRes = val.urlregexp[j].exec(opt.menuId)
+                        menuInfo = val
                         break;
                     }
                 }
             }
-            else if(spajs.opt.menu[i].id == opt.menuId)
+            else if(val.id == opt.menuId)
             {
-                menuInfo = spajs.opt.menu[i]
+                menuInfo = val
+                break;
+            }
+            
+            if(menuInfo)
+            {
                 break;
             }
         }
-
-        //console.log("openMenu", menuId, menuInfo)
+ 
+        console.log("openMenu", menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
             
@@ -627,11 +625,25 @@ if(!window.spajs)
                 opt.event_state.url = url;
             }
         }
-
+        
+        menuInfo.onClose_promise = new $.Deferred();  
         if(spajs.currentOpenMenu && spajs.currentOpenMenu.onClose)
-        {
-            //console.log("onClose", spajs.currentOpenMenu)
-            spajs.currentOpenMenu.onClose(menuInfo);
+        { 
+            if(spajs.currentOpenMenu.onClose_promise)
+            {
+                if(spajs.currentOpenMenu.onClose)
+                {
+                    spajs.currentOpenMenu.onClose_promise.resolve(spajs.currentOpenMenu.onClose(menuInfo))
+                }
+                else
+                {
+                    spajs.currentOpenMenu.onClose_promise.resolve(menuInfo)
+                }
+            }
+            else
+            {
+                spajs.currentOpenMenu.onClose(menuInfo)
+            }
         }
 
         var data = {}
@@ -658,34 +670,14 @@ if(!window.spajs)
         spajs.urlInfo = {menuInfo:menuInfo, data:data}
         tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
         tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
-        var res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data);
+         
+        let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data, menuInfo.onClose_promise.promise());
         if(res)
         {
             // in-loading
-            $("body").addClass("in-loading")
-
-            //console.time("Mopen")
-            jQuery("#spajs-menu-"+menuInfo.id).addClass("menu-loading")
-            setTimeout(function(){
-                $.when(res).done(function()
-                {
-                    //console.timeEnd("Mopen")
-                    jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
-
-                    // in-loading
-                    $("body").removeClass("in-loading")
-                    def.resolve()
-                }).fail(function(e)
-                {
-                    //console.timeEnd("Mopen")
-                    jQuery("#spajs-menu-"+menuInfo.id).removeClass("menu-loading")
-
-                    // in-loading
-                    $("body").removeClass("in-loading")
-
-                    def.reject(e)
-                })
-            }, 0)
+            $("body").addClass("in-loading") 
+            spajs.wait_result(jQuery('#spajs-right-area'), res)
+            
         }
         else
         {
@@ -705,7 +697,42 @@ if(!window.spajs)
             opt.callback();
         }
 
+        if(typeof res == "string")
+        { 
+            def.resolve()
+            res = def
+        }
         return res.promise();
+    }
+
+    spajs.wait_result = function(block, res)
+    {
+        if(typeof res == "string")
+        {
+            $(block).insertTpl(res)
+            $("body").removeClass("in-loading")
+            return;
+        }
+
+        if(!res)
+        {
+            $("body").removeClass("in-loading")
+            return;
+        }
+
+        $.when(res).done((html) =>
+        {
+            if(typeof html == "string")
+            {
+                $(block).insertTpl(html)
+            }
+            $("body").removeClass("in-loading")
+
+        }).fail(function(error)
+        {
+            $(block).insertTpl("error"+JSON.stringify(error))
+            $("body").removeClass("in-loading")
+        })
     }
 
     /**
@@ -778,7 +805,7 @@ if(!window.spajs)
     {
         if(typeof data === "string")
         {
-            $.notify(data, "error");
+            guiPopUp.error(data);
             return;
         }
 
@@ -801,7 +828,7 @@ if(!window.spajs)
 
             if(typeof data[i] === "string")
             {
-                $.notify(data[i], "error");
+                guiPopUp.error(data[i]);
             }
             else if(typeof data[i] === "object")
             {
@@ -826,7 +853,7 @@ if(!window.spajs)
 
         if(data && data.status === 500)
         {
-            $.notify("Ошибка 500", "error");
+            guiPopUp.error("Error 500")
             return true;
         }
 
@@ -844,7 +871,7 @@ if(!window.spajs)
 
         if(data && data.error)
         {
-            $.notify(data.error, "error");
+            guiPopUp.error(data.error);
             return true;
         }
         return false;

@@ -210,6 +210,14 @@ function notUseCache(type)
 {
     if(type !== undefined)
     {
+        if(type == "true")
+        {
+            loadTipe('js') 
+        }
+        else
+        {
+            loadTipe('inline-js') 
+        }
         window.localStorage['useCache'] = type
     }
 

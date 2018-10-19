@@ -1,16 +1,99 @@
+/**
+ * Function to replace {.+?} in string to variables sended to this function,
+ * array and single variable set ordered inside string
+ * associative array and iterable objects set value for keys that original string have
+ * @param takes array, associative array or single variable and insert it
+ * @returns {String} - return string with inserted arguments
+ */
+String.prototype.format = function()
+{
+    let obj = this.toString();
+    let arg_list;
+    if (typeof arguments[0] == "object")
+    {
+        arg_list = arguments[0]
+    }
+    else if (arguments.length > 1)
+    {
+        arg_list = Array.from(arguments);
+    }
+    for (let key of this.format_keys())
+    {
+        if (arg_list[key] != undefined)
+        {
+            obj = obj.replace('{'+ key + '}', arg_list[key])
+        }
+        else
+        {
+            throw "String don't have \'" + key + "\' key";
+        }
+    }
+    return obj;
+}
+
+/**
+ * Function search and return all `{key}` in string
+ * @returns {array} array of {key} in string
+ */
+String.prototype.format_keys = function()
+{
+    let thisObj = this;
+    let regex = new RegExp("(?<={).+?(?=})", "g");
+    return thisObj.match(regex) || [];
+}
+
+// Список файлов тестирующих ГУЙ
+if(!window.guiTestsFiles)
+{
+    window.guiTestsFiles = []
+}
+
+// Добавляем файл тестов к списку файлов для тестов гуя
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
+//window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/dashboard.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
+
+
+
+// Запускает тесты гуя
 function loadQUnitTests()
 {
+    loadAllUnitTests(window.guiTestsFiles)
+}
 
-    $('body').append('<script src=\'' + hostname + window.guiStaticPath + 'js/tests/qUnitTest.js\'></script>');
-
-    var intervaId = setInterval(function()
+// Загружает и запускает тесты гуя в строгом порядке.
+function loadAllUnitTests(urls)
+{
+    let promises = []
+    for(let i in urls)
     {
-        if(window.injectQunit !== undefined)
+        let def = new $.Deferred();
+        promises.push(def.promise());
+
+        var link = document.createElement("script");
+        link.setAttribute("type", "text/javascript");
+        link.setAttribute("src", urls[i]+'?r='+Math.random());
+
+        link.onload = function(def){
+            return function(){
+                def.resolve();
+            }
+        }(def)
+        document.getElementsByTagName("head")[0].appendChild(link);
+
+        break;
+    }
+
+    $.when.apply($, promises).done(() => {
+        //injectQunit()
+
+        if(urls.length == 1)
         {
-            clearInterval(intervaId)
-            injectQunit()
+            return injectQunit()
         }
-    }, 1000)
+        urls.splice(0, 1)
+        loadAllUnitTests(urls)
+    })
 }
 
 
@@ -109,7 +192,7 @@ function toIdString(str)
 
 function hidemodal()
 {
-    var def= new $.Deferred();
+    var def = new $.Deferred();
     $(".modal.fade.in").on('hidden.bs.modal', function (e) {
         def.resolve();
     })
@@ -121,10 +204,32 @@ function hidemodal()
 
 function capitalizeString(string)
 {
+    if(!string)
+    {
+        return "";
+    }
+
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
-function isEmptyObject(obj) {
+function sliceLongString(string="", valid_length=100)
+{
+    if(typeof string != "string")
+    {
+        return sliceLongString(""+string, valid_length);
+    }
+
+    var str = string.slice(0, valid_length);
+    if(string.length > valid_length)
+    {
+        str += "...";
+    }
+
+    return str;
+}
+
+function isEmptyObject(obj)
+{
     for (var i in obj) {
         if (obj.hasOwnProperty(i)) {
             return false;
@@ -132,6 +237,134 @@ function isEmptyObject(obj) {
     }
     return true;
 }
+
+function readFileAndInsert(event, element)
+{
+    for (var i = 0; i < event.target.files.length; i++)
+    {
+        if (event.target.files[i].size > 1024 * 1024 * 1)
+        {
+            guiPopUp.error("File is too large")
+            console.log("File is too large " + event.target.files[i].size)
+            continue;
+        }
+
+        var reader = new FileReader();
+
+        reader.onload = function (e)
+        {
+            $(element).val(e.target.result);
+        }
+
+        reader.readAsText(event.target.files[i]);
+    }
+
+    return false;
+}
+
+function addCssClassesToElement(element="", title, type)
+{
+    element = element.replace(/[\s\/]+/g,'-');
+
+    let class_list = element + " ";
+
+    if(title)
+    {
+        title = title.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + title + " ";
+    }
+
+
+    if(title && type)
+    {
+        type = type.replace(/[\s\/]+/g,'-');
+        class_list += element + "_" + type + " ";
+        class_list += element + "_" + type + "_" + title;
+    }
+
+    return class_list.toLowerCase();
+}
+
+function addStylesAndClassesToListField(guiObj, field, data, opt)
+{
+    let output = "";
+
+    if(field.style)
+    {
+        output += field.style.apply(guiObj, [data, opt]) + " ";
+    }
+
+    if(field.class)
+    {
+        output += field.class.apply(guiObj, [data, opt]) + " ";
+    }
+    else
+    {
+        output += "class='" + addCssClassesToElement('td', field.name, guiObj.api.short_name) + "' ";
+    }
+
+    return output;
+}
+
+/**
+ * Function handles click on table row (<tr>), and depending to the place of user's click
+ * it redirects user to <tr> link or to <td> link.
+ * @param object - event - click event.
+ * @param boolean - blank - if true, function opens link in new window.
+ */
+function turnTableTrIntoLink(event, blank)
+{
+    if(!(event.target.classList.contains('highlight-tr-none') ||
+            event.target.classList.contains('ico-on') ||
+            event.target.classList.contains('ico-off'))
+    )
+    {
+        let href;
+        if(event.target.hasAttribute('href'))
+        {
+            href =  event.target.getAttribute('href');
+        }
+        else
+        {
+            href =  event.currentTarget.getAttribute('data-href');
+        }
+        if(blank)
+        {
+            window.open(href);
+        }
+        else
+        {
+            vstGO(href);
+        }
+    }
+}
+
+/*
+ * Hides field 'id' in list.
+ * This function is calling from signal openapi.schema.type.list
+ */
+function hideIdInList(listObj)
+{
+    try
+    {
+        let fields = listObj.value.schema.list.fields;
+        if(fields['id'])
+        {
+            fields['id'].hidden = true;
+        }
+    }
+    catch(e)
+    {
+        console.warn(e);
+    }
+
+}
+
+tabSignal.connect("openapi.schema.type.list", function(listObj)
+{
+    hideIdInList.apply(this, arguments);
+})
+
 
 window.onresize=function ()
 {
@@ -155,7 +388,8 @@ window.onresize=function ()
 }
 
 var guiLocalSettings = {
-    __settings:{},
+    __settings:{
+    },
     get:function(name){
         return this.__settings[name];
     },
@@ -163,9 +397,15 @@ var guiLocalSettings = {
         this.__settings[name] = value;
         window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
         tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+    },
+    setIfNotExists:function(name, value)
+    {
+        if(this.__settings[name] === undefined)
+        {
+            this.__settings[name] = value;
+        }
     }
 }
-
 
 if(window.localStorage['guiLocalSettings'])
 {
@@ -176,6 +416,123 @@ if(window.localStorage['guiLocalSettings'])
     }catch (e)
     {
 
+    }
+}
+
+function getNewId(){
+    return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
+}
+
+
+
+window.url_delimiter = "#"
+function vstMakeLocalUrl(url = "", vars = {})
+{
+    if(Array.isArray(url))
+    {
+        url = url.join("/")
+    }
+
+    if(typeof url == "string")
+    {
+        let new_url = url.format(vars)
+
+        if(new_url.indexOf(window.hostname) != 0 && new_url.indexOf("//") != 0)
+        {
+            new_url = window.hostname + window.url_delimiter + new_url
+        }
+        else
+        {
+            //console.error("window.hostname already exist in vstMakeLocalUrl")
+        }
+        return new_url.replace("#/", "#")
+    }
+    else
+    {
+        debugger;
+        throw "Error in vstMakeLocalUrl"
+    }
+
+    return url
+}
+
+
+function vstGO()
+{
+    return spajs.openURL(vstMakeLocalUrl.apply(this, arguments))
+}
+
+
+
+
+
+function makeUrlForApiKeys(url_string)
+{
+    return url_string.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
+}
+
+function vstMakeLocalApiUrl(url, vars = {})
+{
+    if(Array.isArray(url))
+    {
+        url = url.join("/")
+    }
+
+    return vstMakeLocalUrl(makeUrlForApiKeys(url), vars)
+}
+
+function openHelpModal()
+{
+    let info = api.openapi.info;
+    let opt = {};
+    if(info.title)
+    {
+        opt.title = info.title;
+    }
+    let html = spajs.just.render('help_modal_content', {info: info});
+    guiModal.setModalHTML(html, opt);
+    guiModal.modalOpen();
+}
+
+/**
+ * https://stackoverflow.com/a/25456134/7835270
+ * @param {type} x
+ * @param {type} y
+ * @returns {Boolean}
+ */
+function deepEqual(x, y)
+{
+    if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null))
+    {
+        if (Object.keys(x).length != Object.keys(y).length)
+        {
+            return false;
+        }
+
+        for (var prop in x)
+        {
+            if (y.hasOwnProperty(prop))
+            {
+                if (! deepEqual(x[prop], y[prop]))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    else if (x !== y)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
     }
 }
 

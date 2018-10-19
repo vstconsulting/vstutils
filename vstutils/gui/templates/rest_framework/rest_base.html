@@ -8,7 +8,7 @@
 
 {% block common_sciprt %}
     <!-- jQuery 2.2.3 -->
-    <script src="{% static_path 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"></script>
+    <script src="{% static_path 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"></script>
 
     <!-- Bootstrap 3.3.6 -->
     <script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
@@ -24,8 +24,7 @@
     window.drf = {
     csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
             csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}"
-    };</script>
-    <!--<script src="{% static_path "rest_framework/js/jquery-1.12.4.min.js" %}"></script>-->
+    };</script> 
     <script src="{% static_path "rest_framework/js/ajax-form.js" %}"></script>
     <script src="{% static_path "rest_framework/js/csrf.js" %}"></script>
     <script src="{% static_path "rest_framework/js/prettify-min.js" %}"></script>
