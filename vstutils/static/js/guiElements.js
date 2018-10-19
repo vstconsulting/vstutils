@@ -618,12 +618,18 @@ guiElements.autocomplete = function()
 
             let list = [];
 
+            let url_vars = {}
+            if (options.dynamic_properties && options.dynamic_properties.url_vars)
+            {
+                url_vars = options.dynamic_properties.url_vars
+            }
+
             if(props['obj'])
             {
                 for (let i in props['obj'])
                 {
                     list.push(new guiObjectFactory(props['obj'][i],
-                        options.dynamic_properties.url_vars)
+                        url_vars)
                     );
                 }
             }
