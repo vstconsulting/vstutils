@@ -13,13 +13,23 @@ function getMenuIdFromApiPath(path){
 function guiTestUrl(regexp, url)
 {
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
+   
+    let reg_exp = XRegExp(regexp, 'x');   
+    if(!XRegExp.test(url, reg_exp) )
+    {
+        return false;
+    }
+
+    return XRegExp.exec(url, reg_exp) 
+    /*
+    
     var reg_exp = new RegExp(regexp)
     if(!reg_exp.test(url))
     {
         return false;
     }
 
-    return reg_exp.exec(url)
+    return reg_exp.exec(url)*/
 }
 
 all_regexp = []
@@ -30,33 +40,47 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
     return function(url)
     {
         var res = guiTestUrl(regexp, url)
+       
         if(!res)
         {
             return false;
         }
-
-        for(let i in res.groups)
+        
+        let obj = {}
+        for(let i in res)
         {
-            if(i.indexOf("api_") == 0 && res.groups[i][0] == '@')
+            if(/^[0-9]+$/.test(i))
+            {
+                continue;
+            }
+            
+            if(i.indexOf("api_") == 0 && res[i][0] == '@')
             { 
-                res.groups[i] = res.groups[i].substring(1)
+                obj[i] = res[i].substring(1)
+            }
+            else
+            {
+                obj[i] = res[i]
             }
         }
         
-        var obj = res.groups
+        //debugger;
+        
         obj.url = res[0]                 // текущий урл в блоке
         obj.page_and_parents = res[0]    // страница+родители
 
         if(obj.page)
         {
-            var match = obj.page.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
+            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');  
+            let match = XRegExp.exec(obj.page, xregexpItem) 
+            //var match = obj.page.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
 
-            if(match && match.groups)
+            if(match)
             {
-                obj.parent_type = match.groups.parent_type
-                obj.parent_id = match.groups.parent_id
-                obj.page_type = match.groups.page_type.replace(/\/[A-z]+$/, "")
-                obj.page_name = match.groups.page_type
+                obj.parent_type = match.parent_type
+                obj.parent_id = match.parent_id
+                obj.page_type = match.page_type.replace(/\/[A-z]+$/, "")
+                obj.page_name = match.page_type
             }
         }
         

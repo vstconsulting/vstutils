@@ -4,7 +4,7 @@
  * associative array and iterable objects set value for keys that original string have
  * @param takes array, associative array or single variable and insert it
  * @returns {String} - return string with inserted arguments
- */
+ * / 
 String.prototype.format = function()
 {
     let obj = this.toString();
@@ -29,8 +29,22 @@ String.prototype.format = function()
         }
     }
     return obj;
-}
+} // */
 
+// Временная замена format которая рботает в FF 
+// /*
+ String.prototype.format = function() {
+    var args;
+    args = arguments;
+    if (args.length === 1 && args[0] !== null && typeof args[0] === 'object') {
+      args = args[0];
+    }
+    return this.replace(/{([^}]*)}/g, function(match, key) {
+      return (typeof args[key] !== "undefined" ? args[key] : match);
+    });
+  };
+ 
+  
 /**
  * Function search and return all `{key}` in string
  * @returns {array} array of {key} in string
@@ -38,8 +52,13 @@ String.prototype.format = function()
 String.prototype.format_keys = function()
 {
     let thisObj = this;
+    
+    //let xregexpItem = XRegExp(`(?<={).+?(?=})`, 'g');  
+    //let match = XRegExp.exec(thisObj, xregexpItem)   
+       
     let regex = new RegExp("(?<={).+?(?=})", "g");
-    return thisObj.match(regex) || [];
+    let match = thisObj.match(regex) 
+    return match || [];
 }
 
 // Список файлов тестирующих ГУЙ

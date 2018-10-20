@@ -78,8 +78,9 @@ var gui_page_object = {
         {
             for(var path in prefetch_fields_ids[field])
             {
-
-                let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x'); 
+                //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                let match = XRegExp.exec(path, xregexpItem)
                 if(match != null)
                 {
                     queryObj = {
@@ -116,7 +117,10 @@ var gui_page_object = {
                     let path = prefetch_fields[field].path(dataFromApi);
                     if(path)
                     {
-                        let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                        let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x'); 
+                        //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
+                        let match = XRegExp.exec(path, xregexpItem)
+                        //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                         if(match != null)
                         {
                             for(var j in d)
