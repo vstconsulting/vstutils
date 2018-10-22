@@ -732,8 +732,8 @@ function justOn(event, action, id)
         id = Math.floor(Math.random()*900000);
     }
 
-    return JUST.onInsert(" id='"+id+"' ", function(){
-        $("#"+id).on(event, action)
+    return JUST.onInsert(" id='justId"+id+"' ", function(){
+        $("#justId"+id).on(event, action)
     }, true)
 }
 

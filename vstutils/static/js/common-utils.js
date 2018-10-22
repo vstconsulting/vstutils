@@ -4,7 +4,7 @@
  * associative array and iterable objects set value for keys that original string have
  * @param takes array, associative array or single variable and insert it
  * @returns {String} - return string with inserted arguments
- */
+ */ 
 String.prototype.format = function()
 {
     let obj = this.toString();
@@ -38,30 +38,37 @@ String.prototype.format = function()
 String.prototype.format_keys = function()
 {
     let thisObj = this;
-    let regex = new RegExp("(?<={).+?(?=})", "g");
-    return thisObj.match(regex) || [];
+    //let regex = new RegExp("(?<={).+?(?=})", "g");
+    //let match = thisObj.match(regex) 
+    //return match || [];
+    let res = thisObj.match(/{([^\}]+)}/g)
+    if(!res)
+    {
+        return []
+    }
+    
+    return res.map((item) =>{ return item.slice(1, item.length - 1) })
 }
 
-// Список файлов тестирующих ГУЙ
+// List of Gui Testing Files
 if(!window.guiTestsFiles)
 {
     window.guiTestsFiles = []
 }
 
-// Добавляем файл тестов к списку файлов для тестов гуя
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
-//window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/dashboard.js')
+// Add a test file to the list of files for test gui
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js') 
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
 
 
 
-// Запускает тесты гуя
+// Run tests
 function loadQUnitTests()
 {
     loadAllUnitTests(window.guiTestsFiles)
 }
 
-// Загружает и запускает тесты гуя в строгом порядке.
+// Loads and runs tests in strict order.
 function loadAllUnitTests(urls)
 {
     let promises = []
@@ -493,7 +500,7 @@ function makeUrlForApiKeys(url_string)
 }
 
 function vstMakeLocalApiUrl(url, vars = {})
-{
+{ 
     if(Array.isArray(url))
     {
         url = url.join("/")
