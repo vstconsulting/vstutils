@@ -22,4 +22,15 @@
     <%] %>
     <%! guiListElements.base %>
 </script>
- 
+
+<!-- guiElements.array -->
+<script type="text/x-just" data-just="guiListElements.array">
+    <%[ content %>
+        <ul class="table_ul">
+             <% for(let i in value) { %>
+                <li> <%- value[i] %> </li>
+            <% } %>
+        </ul>
+    <%] %>
+    <%! guiListElements.base %>
+</script>

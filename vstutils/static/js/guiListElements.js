@@ -37,4 +37,9 @@ guiListElements.base = {
 guiListElements.boolean = $.extend(guiListElements.base, {
     type:'boolean',
     template_name:'guiListElements.boolean'
-}) 
+})
+
+guiListElements.array = $.extend(guiListElements.base, {
+    type:'array',
+    template_name:'guiListElements.array'
+})
