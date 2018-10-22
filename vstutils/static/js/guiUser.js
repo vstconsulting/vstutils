@@ -34,7 +34,7 @@ tabSignal.connect("openapi.completed", function()
         id:"profile",
         urlregexp:[/^profile$/],
         priority:0,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory('/user/{pk}/', {
                 page:'user/'+ my_user_id,
@@ -48,6 +48,10 @@ tabSignal.connect("openapi.completed", function()
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
             })
 
             return def.promise();
@@ -72,7 +76,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
         id:url_id,
         urlregexp:[reg_url],
         priority:0,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(path, {
                 page:'user/'+ api_pk +'/' + sublink,
@@ -86,6 +90,10 @@ function registerProfileSublinkAction(sublink, path, api_pk)
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
             })
 
             return def.promise();
@@ -110,7 +118,7 @@ function registerProfileSublinkPage(sublink, path, api_pk)
         id:url_id,
         urlregexp:[reg_url],
         priority:0,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(path, {
                 page: 'user/' + api_pk + '/' + sublink,
@@ -124,6 +132,10 @@ function registerProfileSublinkPage(sublink, path, api_pk)
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
             })
 
             return def.promise();
@@ -148,7 +160,7 @@ function registerProfileSublinkList(sublink, path, api_pk)
         id:url_id,
         urlregexp:[reg_url],
         priority:0,
-        onOpen:function(holder, menuInfo, data)
+        onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(path, {
                 page: 'user/' + api_pk + '/' + sublink,
@@ -162,6 +174,10 @@ function registerProfileSublinkList(sublink, path, api_pk)
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
             })
 
             return def.promise();

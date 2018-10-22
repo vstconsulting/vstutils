@@ -1,10 +1,8 @@
 
 function renderLineField(field, value, field_name, dataLine)
-{
-    // Заготовка под переопределение отрисовки поля на основе типа поля
-     
+{ 
     let type = getFieldType(field, dataLine, guiListElements)
-    
+
     if(guiListElements[type])
     {
         return guiListElements[type].render(field, value, dataLine)
@@ -37,7 +35,12 @@ guiListElements.base = {
     } 
 }
 
-guiListElements.boolean = $.extend(guiListElements.base, {
+guiListElements.boolean = $.extend({}, guiListElements.base, {
     type:'boolean',
     template_name:'guiListElements.boolean'
-}) 
+})
+
+guiListElements.array = $.extend({}, guiListElements.base, {
+    type:'array',
+    template_name:'guiListElements.array'
+})

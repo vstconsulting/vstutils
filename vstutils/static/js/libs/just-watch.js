@@ -37,7 +37,9 @@ let _insertTpl = function(func)
            
         let val = this[0].getAttribute("data-tplText")
         let testTplText = tplText.replace(/just-watch-class-[0-9]+/g, "")
-      
+                                .replace(/justId[0-9]+/g, "")
+                                .replace(/__JUST_onInsertFunctions\['[^']+']/g, "")
+
       
         if( val == testTplText)
         {

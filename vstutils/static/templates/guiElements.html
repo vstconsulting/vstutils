@@ -119,6 +119,11 @@
             <% } %>
         </div>
     <%] %>
+    
+    <%[ readonly_input %> 
+        <%* main_input %> 
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -194,21 +199,28 @@
 <script type="text/x-just" data-just="guiElements.prefetch">
     <!-- guiElements.prefetch -->
     <%[ main_input %>
-      <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
-        <% if(opt[opt.name + '_info']){ %>
-            <a href="<%- vstMakeLocalApiUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
-               class="item-name" onclick="return vstGO(this.href);">
-                <% if(!opt.prefetch || !opt.prefetch.field_name || opt[opt.name + '_info'][opt.prefetch.field_name] === undefined ){ %>
-                    <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
-                <%}else{ %>
-                    <%- opt[opt.name + '_info'][opt.prefetch.field_name] %>
-                <%} %>
-            </a>
-        <%}else{ %>
-            <%- value %>
-        <%} %>
-      </div>
+        <~ guiElement.db_value>
+            <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
+              <% if(opt[opt.name + '_info']){ %>
+                  <a href="<%- vstMakeLocalApiUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
+                     class="item-name" onclick="return vstGO(this.href);">
+                      <% if(!opt.prefetch || !opt.prefetch.field_name || opt[opt.name + '_info'][opt.prefetch.field_name] === undefined ){ %>
+                          <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
+                      <%}else{ %>
+                          <%- opt[opt.name + '_info'][opt.prefetch.field_name] %>
+                      <%} %>
+                  </a>
+              <%}else{ %>
+                  <%- value %>
+              <%} %>
+            </div>
+        <~>
     <%] %>
+    
+    <%[ readonly_input %> 
+        <%* main_input %> 
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -219,6 +231,19 @@
         <input type="date" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
     <%] %>
+    
+    <%[ readonly_input %>  
+        <~ guiElement.db_value>
+            <input type="date" 
+                    class="form-control"
+                    <%- set_api_options(opt) %> 
+                    id="<%- guiElement.element_id %>
+                    style="width: 100%;"
+                    class="form-control" 
+                    value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
+        <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -229,6 +254,15 @@
         <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")  || '' %>">
     <%] %>
+    
+    <%[ readonly_input %>  
+        <~ guiElement.db_value>
+            <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+            value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(guiElement.db_value).tz(window.timeZone).format("HH:mm")  || '' %>">
+            
+        <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -239,6 +273,14 @@
         <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- getUptime(value)  || '' %>">
     <%] %>
+    
+    <%[ readonly_input %>  
+        <~ guiElement.db_value>
+            <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+                    value="<%- getUptime(guiElement.db_value)  || '' %>"> 
+        <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -248,6 +290,13 @@
     <%[ main_input %>
         <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- value || '' %>">
     <%] %>
+    
+    <%[ readonly_input %>  
+        <~ guiElement.db_value>
+            <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- guiElement.db_value || '' %>">
+        <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -492,6 +541,11 @@
     <%[ main_input %>
          <div class="html_content"> <%= value || opt.default || '' %> </div>
     <%] %>
+
+    <%[ readonly_input %>
+        <div class="html_content"> <%= value || opt.default || '' %> </div>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 

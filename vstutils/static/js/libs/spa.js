@@ -617,24 +617,18 @@ if(!window.spajs)
             //error("Не удалён предыдущий класс меню", spajs.currentOpenMenu, menuInfo)
         }
         $(spajs.opt.holder).addClass("spajs-active-"+menuInfo.id);
-
-        var data = {}
-        data.url = spajs.getAllUrlParam(opt.event_state)
-        data.reg = findedMenu.regExpRes
-        //debugger;
-        
+ 
         spajs.urlInfo = {
                             menuInfo:menuInfo, 
                             data:{
                                 url : spajs.getAllUrlParam(opt.event_state),
                                 reg : findedMenu.regExpRes
-                            }
                         }
-                        
+                    }
         //tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
-        tabSignal.emit("spajs.open", {menuInfo:menuInfo, data:data})
+        tabSignal.emit("spajs.open", spajs.urlInfo)
          
-        let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, data, menuInfo.onClose_promise.promise());
+        let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, spajs.urlInfo.data, menuInfo.onClose_promise.promise());
         if(res)
         {
             // in-loading
