@@ -375,7 +375,7 @@ var gui_list_object = {
             rendered:{}
         }
 
-        // Добавим поле id принудительно если его даже нет в списке
+        // Add id field forcibly if it is not even in the list
         if(line.id === undefined)
         {
             line.id = Object.keys(line)[0]
@@ -393,7 +393,7 @@ var gui_list_object = {
     },
 
     /**
-     * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
+     * The function should return either the html block code or should promise chtol to return the html block code later
      * @returns {string|promise}
      */
     renderAsPage : function (render_options = {})
@@ -419,17 +419,12 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.initTag(render_options.selectionTag)
         
-        render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page
-        if(/[0-9]$/.test(render_options.base_href))
-        {
-            debugger;
-        }
-           
+        render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page 
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
     /**
-     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
+     * The function should return either the html block code or should promise chtol to return the html block code later
      * @returns {string|promise}
      */
     renderAsNewPage : function (render_options = {})
@@ -445,7 +440,7 @@ var gui_list_object = {
     },
 
     /**
-     * Функция должна вернуть или html код блока или должа пообещать чтол вернёт html код блока позже
+     * The function should return either the html block code or should promise chtol to return the html block code later
      * @returns {string|promise}
      */
     renderAsAddSubItemsPage : function (render_options = {})
@@ -465,17 +460,11 @@ var gui_list_object = {
         
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
-        //render_options.sections = this.getSections('renderAsAddSubItemsPage')
-
+        
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.initTag(render_options.selectionTag)
 
-        render_options.base_href = this.url_vars.page_type 
-        //render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page
-        if(/[0-9]$/.test(render_options.base_href))
-        {
-            debugger;
-        }
+        render_options.base_href = this.url_vars.page_type  
         
         render_options.hideActions = true
         render_options.base_path = getUrlBasePath()
@@ -484,7 +473,7 @@ var gui_list_object = {
 
 
     /**
-     * Добавить фильтр
+     * Add filter
      * @param {string} name
      * @param {string} value
      */
@@ -515,7 +504,7 @@ var gui_list_object = {
     },
 
     /**
-     * Выбрать фильтра, чтоб начать вводить значение фильтра
+     * Select a filter to start entering the filter value.
      * @param {string} name
      */
     selectSearchFilter : function(name)
@@ -525,7 +514,7 @@ var gui_list_object = {
     },
 
     /**
-     * Удалить фильтр
+     * Remove filter
      * @param {string} name
      */
     onRemoveSearchFilter : function(name)
@@ -544,9 +533,9 @@ var gui_list_object = {
     },
 
     /**
-     * Ввод текста в поисковую строку
-     * @param {Object} options параметры
-     * @return {string} HTML поля ввода для поиска
+     * Enter text in the search box
+     * @param {Object} options
+     * @return {string} HTML input fields for search
      */
     renderSearchForm : function ()
     {
@@ -564,30 +553,12 @@ var gui_list_object = {
 
         for(let i in this.api.schema.list.filters)
         {
-            let val = this.api.schema.list.filters[i]
-            /*let key = val.name.replace("__in", "").replace("__contains", "").replace("__not", "")
-            // Переменная не встречается в списке допустимых фильтров
-            if(!this.api.schema.list.fields[key])
-            {
-                console.warn("Переменная `"+key+"` не встречается в списке допустимых фильтров", this.api.schema.list.fields)
-                debugger;
-                continue;
-            }*/
-
+            let val = this.api.schema.list.filters[i] 
             this.activeSearch.fields[val.name] = val
             this.activeSearch.fields[val.name].value = ""
         }
-
-
-        /*
-        return spajs.just.render('search_field', {guiObj: this, opt:{query:""}}) */
-
-
-        var thisObj = this;
-        //options.className = this.model.className;
-        this.searchAdditionalData = {}// options
-        //options.thisObj = this;
-
+  
+        this.searchAdditionalData = {}  
         this.activeSearch.active = ""
 
         var search = this.searchStringToObject(searchString, undefined, true)
@@ -687,15 +658,15 @@ var gui_list_object = {
     },
 
     /**
-     * Функция поиска
+     * Search function
      * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
      */
     search : function (filters)
     {
-        var thisObj = this;
+        let thisObj = this;
         this.model.filters = $.extend(true, {}, filters)
 
-        var def = this.load(this.model.filters)
+        let def = this.load(this.model.filters)
         $.when(def).done(function(data){
             thisObj.model.data = data.data
         })
@@ -709,7 +680,7 @@ var gui_list_object = {
     },
       
     /**
-     * Выполняет переход на страницу с результатами поиска
+     * Goes to the search results page.
      * @param {string} query
      * @returns {$.Deferred}
      */
@@ -724,7 +695,7 @@ var gui_list_object = {
     },
 
     /**
-     * Если поисковый запрос пуст, то вернёт true
+     * If the search query is empty, it will return true
      * @param {type} query
      * @returns {Boolean}
      */
@@ -781,10 +752,10 @@ var gui_list_object = {
     },
 
     /**
-     * Преобразует строку и объект поиска в строку для урла страницы поиска
-     * @param {string} query строка запроса
-     * @param {string} defaultName имя параметра по умолчанию
-     * @returns {string} строка для параметра страницы поиска
+     * Converts the string and the search object to the string for the search page URL
+     * @param {string} query string
+     * @param {string} defaultName default parameter name
+     * @returns {string} string for the search page parameter
      */
     searchObjectToString : function(query, defaultName)
     {
@@ -831,11 +802,11 @@ var gui_list_object = {
     },
 
     /**
-     * Преобразует строку поиска в объект с параметрами для фильтрации
-     * @param {string} query строка запроса
-     * @param {string} defaultName имя параметра по умолчанию
-     * @param {boolean} includeVariables если передать true то переменные из Variables будут добавлены не в массив search['variables'] а в search
-     * @returns {pmItems.searchStringToObject.search} объект для поиска
+     * Converts a search string into an object with filtering options.
+     * @param {string} query string
+     * @param {string} defaultName default parameter name
+     * @param {boolean} includeVariables  if you pass true, then variables from variables will not be added to the search ['variables'] array, but to search
+     * @returns {pmItems.searchStringToObject.search} object to search
      */
     searchStringToObject : function(query, defaultName, includeVariables)
     {
@@ -877,13 +848,13 @@ var gui_list_object = {
                         search[arg[0]] = arg[1]
                     }
                 }
-                else if(Array.isArray(search[arg[0]+"__in"])) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск
+                else if(Array.isArray(search[arg[0]+"__in"]))  
                 {
-                    search[arg[0]+"__in"].push(arg[1]) // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск
+                    search[arg[0]+"__in"].push(arg[1])  
                 }
                 else
                 {
-                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]] // @fixme Можно попробовать удалить +"__in" тогда надо проверить поиск
+                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]]  
                     delete search[arg[0]]
                     delete search[arg[0]+"__contains"]
                 }
@@ -897,7 +868,7 @@ var gui_list_object = {
                 && !this.activeSearch.fields[i.replace("__in", "")]
                 && !this.activeSearch.fields[i.replace("__contains", "")])
             {
-                // Проверка того что мы получили возможно синоним одного из полей вместо имени и надо заменить синоним именем фильтра
+                // Checking what we got is probably a synonym for one of the fields instead of a name and we need to replace the synonym with the filter name
                 for(var j in this.activeSearch.fields)
                 {
                     if(this.activeSearch.fields[j].alias)
@@ -906,7 +877,7 @@ var gui_list_object = {
                         {
                             if(this.activeSearch.fields[j].alias[k] == i)
                             {
-                                // заменить синоним именем фильтра
+                                // replace synonym with filter name
                                 search[this.activeSearch.fields[j].name] = search[i]
                                 delete search[i]
                                 continue;
@@ -915,15 +886,13 @@ var gui_list_object = {
                     }
                 }
 
-                // Переменная не встречается в списке допустимых фильтров
-                //console.warn("Переменная `"+i+"` не встречается в списке допустимых фильтров", this.activeSearch.fields)
-                //delete search[i]
+                // Variable is not found in the list of valid filters.
                 continue;
             }
 
             if(this.activeSearch.fields[i] && this.activeSearch.fields[i].variables)
             {
-                // Переменная не фильтр а из variables для ansible
+                // The variable is not a filter but from variables for ansible
                 variables[i] = search[i]
                 delete search[i]
             }
@@ -933,7 +902,7 @@ var gui_list_object = {
         {
             if(includeVariables)
             {
-                // Добавить variables в search
+                // Add variables into search
                 for(var i in variables)
                 {
                     search[i] = variables[i]
@@ -941,14 +910,14 @@ var gui_list_object = {
             }
             else
             {
-                // Добавить variables в search['variables']
+                //Add variables into search['variables']
                 var variablesString = [];
                 for(var i in variables)
                 {
                     variablesString.push(i +":"+variables[i])
                 }
 
-                search['variables'] = variablesString//.join(",")
+                search['variables'] = variablesString 
             }
         }
 

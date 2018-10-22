@@ -6,7 +6,7 @@ function getFieldType(field, model, elements = undefined)
         elements = window.guiElements
     }
 
-    // Приоритет №1 это prefetch поля
+    // Priority #1 is the prefetch fields
     if(field.prefetch && model && model.data && model.data[field.name + "_info"])
     {
         field[field.name + "_info"] = model.data[field.name + "_info"];
@@ -14,20 +14,20 @@ function getFieldType(field, model, elements = undefined)
         return "prefetch";
     }
 
-    // Приоритет №2 это поля на основе parent_name_format если они определены в guiElements
+    // Priority №2 these are fields based on parent_name_format if they are defined in guiElements
     if(elements[field.parent_name_format])
     {
         /**
-         * Достаточно объявить такой elements[field.parent_name_format] класс чтоб переопределить поле
+         * It is enough to declare such elements [field.parent_name_format] class to override the field
          */
         return field.parent_name_format
     }
 
-    // Приоритет №3 это поля на основе parent_name_format если они определены как шаблон
+    // Priority №3 These are fields based on parent_name_format if they are defined as a template.
     if(spajs.just.isTplExists("field_"+field.parent_name_format))
     {
         /**
-         * Достаточно объявить такой шаблон чтоб переопределить поле
+         * It is enough to declare such a template to override the field.
          <script type="text/x-just" data-just="field_project_repository">
          <!-- field_project_repository -->
          <% debugger; %>
@@ -41,19 +41,19 @@ function getFieldType(field, model, elements = undefined)
 
     if(!type)
     {
-        // Приоритет №4 это поля на основе format
+        // Priority №4 это поля на основе format
         type = field.format
     }
 
     if(!type && field.enum !== undefined)
     {
-        // Приоритет №4 это поля на основе enum
+        // Priority №5 these are enum fields
         type = 'enum'
     }
 
     if(!type)
     {
-        // Приоритет №4 это поля на основе type
+        // Priority №6 these are fields based on type
         type = field.type
     }
 
@@ -62,7 +62,7 @@ function getFieldType(field, model, elements = undefined)
         return type
     }
 
-    // Если не чего совсем не найдено то нарисуем как строку
+    // If nothing is found at all then draw as a string.
     return "string";
 }
 

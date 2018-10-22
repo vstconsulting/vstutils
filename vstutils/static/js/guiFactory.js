@@ -1,13 +1,13 @@
 
-// Если количество не обязательных полей больше или равно чем hide_non_required то они будут спрятаны
+// If the number of optional fields is greater than or equal to hide_non_required, then they will be hidden.
 guiLocalSettings.setIfNotExists('hide_non_required', 4)
 
-// Количество элементов на странице
+// Number of elements on the page
 guiLocalSettings.setIfNotExists('page_size', 20)
 
 
 function getMenuIdFromApiPath(path){
-    return path.replace(/[^A-z0-9\-]/img, "_")//+Math.random()
+    return path.replace(/[^A-z0-9\-]/img, "_") 
 }
 
 function guiTestUrl(regexp, url)
@@ -20,16 +20,7 @@ function guiTestUrl(regexp, url)
         return false;
     }
 
-    return XRegExp.exec(url, reg_exp) 
-    /*
-    
-    var reg_exp = new RegExp(regexp)
-    if(!reg_exp.test(url))
-    {
-        return false;
-    }
-
-    return reg_exp.exec(url)*/
+    return XRegExp.exec(url, reg_exp)  
 }
 
 all_regexp = []
@@ -63,18 +54,14 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
                 obj[i] = res[i]
             }
         }
-        
-        //debugger;
-        
-        obj.url = res[0]                 // текущий урл в блоке
-        obj.page_and_parents = res[0]    // страница+родители
+         
+        obj.url = res[0]               
+        obj.page_and_parents = res[0]    
 
         if(obj.page)
         {
             let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');  
-            let match = XRegExp.exec(obj.page, xregexpItem) 
-            //var match = obj.page.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/)
-
+            let match = XRegExp.exec(obj.page, xregexpItem)  
             if(match)
             {
                 obj.parent_type = match.parent_type
@@ -93,8 +80,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             url +=  "/search/" + query
             if(this.page_part)
             {
-                url = url.replace(this.page_part, "")
-                //url += this.page_part
+                url = url.replace(this.page_part, "") 
             }
 
             return vstMakeLocalUrl(url);
@@ -113,19 +99,17 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
 }
 
 /**
- * По пути в апи определяет ключевое имя для регулярного выражения урла страницы
+ * By `path` in api defines the key name for the regular expression of the page url
  * @param {type} api_path
  * @returns {getNameForUrlRegExp.url}
  */
 function getNameForUrlRegExp(api_path)
-{
-    //var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
-    var url = api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+|@[A-z0-9]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
-    return url; // ((?<parent_id>[0-9]+)|(?<=@)(?<parent_id>[A-z0-9]+))
+{  
+    return api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+|@[A-z0-9]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
 }
 
 /**
- * Создаёт страницу экшена
+ * Creates an action page.
  * @param {Object} api
  * @param {Object} api_path
  * @param {Object} action
@@ -168,7 +152,7 @@ function openApi_add_one_action_page_path(api_obj)
 }
 
 /**
- * Создаёт страницу объекта
+ * Creates an object page
  * @param {Object} api
  * @param {Object} api_path
  * @param {Object} pageMainBlockObject
@@ -177,12 +161,8 @@ function openApi_add_one_action_page_path(api_obj)
  */
 function openApi_add_one_page_path(api_obj)
 {
-    let api_path = api_obj.path
-
-    // Определяем тип страницы из урла (есть у него id в конце или нет)
-    let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
-   
-    // Страница элемента вложенного куда угодно
+    let api_path = api_obj.path 
+    let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$" 
     let regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
 
     spajs.addMenu({
@@ -213,7 +193,7 @@ function openApi_add_one_page_path(api_obj)
 
 
 /**
- * Создаёт страницу списка и страницу с формой создания объекта
+ * Creates a list page and a page with a form for creating an object
  * @param {Object} api
  * @param {Object} api_path
  * @param {Object} pageMainBlockObject
@@ -236,10 +216,10 @@ function openApi_add_list_page_path(api_obj)
 
     path_regexp.push(guiGetTestUrlFunctionfunction(pathregexp, api_obj))
 
-    // Проверяем есть ли возможность создавать объекты
+    // Check if there is a possibility to create objects.
     if(api_obj.canCreate)
     {
-        // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
+        // If there is a button to create an object, then you need to register the page for creating an object.
         let new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_obj)
          
         spajs.addMenu({
@@ -255,10 +235,10 @@ function openApi_add_list_page_path(api_obj)
 
     }
 
-    // Страница добавления под элементов
+    // Page to add nested items
     if(api_obj.canAdd)
     {
-        // Если есть кнопка создать объект то надо зарегистрировать страницу создания объекта
+        // If there is a button to create an object, then you need to register the page for creating an object.
         var add_page_url = guiGetTestUrlFunctionfunction("^(?<page_and_parents>(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+"\\/add))(?<search_part>\\/search\\/(?<search_query>[A-z0-9 %\-.:,=]+)){0,1}(?<page_part>\\/page\\/(?<page_number>[0-9]+)){0,1}$", api_obj)
 
         spajs.addMenu({
@@ -324,12 +304,12 @@ tabSignal.connect("resource.loaded", function()
     window.api = new guiApi(); 
     $.when(window.api.init()).done(function()
     {
-        // Событие в теле которого можно было бы переопределить ответ от open api
+        // An event in the body of which one could override the response from open api
         tabSignal.emit("openapi.loaded",  {api: window.api});
 
         $.when(getGuiSchema()).done(function ()
         {
-            //.. декодирование схемы из кэша 
+            //.. decoding guiSchema from cache
             window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
             emitFinalSignals()
@@ -339,16 +319,13 @@ tabSignal.connect("resource.loaded", function()
             window.guiSchema = openApi_guiSchema(window.api.openapi);
             tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
           
-            //... Сохранение в кеш схемы
-            //if(notUseCache() != "true")
-            //{
-                let guiSchemaForCache =
-                    {
-                        path: deleteParentLinks(window.guiSchema.path),
-                        object: window.guiSchema.object,
-                    }
-                guiFilesCache.setFile('guiSchema', JSON.stringify(guiSchemaForCache));
-            //}
+            //... Saving to cache 
+            let guiSchemaForCache =
+                {
+                    path: deleteParentLinks(window.guiSchema.path),
+                    object: window.guiSchema.object,
+                }
+            guiFilesCache.setFile('guiSchema', JSON.stringify(guiSchemaForCache));
             window.guiSchema.path = returnParentLinks(window.guiSchema.path);
 
             emitFinalSignals();
@@ -517,34 +494,7 @@ function returnParentLinks(path_obj)
         action.push("delete path_obj"+del_links[i])
     }
     eval(action.join(";"))
-
-    /*getFunctionNameBySchema(path_obj, '__link__', (obj, key) => {
-        debugger;
-        if(obj[key])
-        {
-            let keyname =  key.replace('__link__', '');
-            obj[keyname] = {};
-            for(let item in obj[key])
-            {
-                if(obj[key][item].indexOf('__func__') == 0)
-                {
-                    obj[keyname][item] = {
-                        name: item,
-                        onClick: findFunctionByName(obj[key][item], '__func__'),
-                    }
-                }
-                else
-                {
-                    obj[keyname][item] = path_obj[obj[key][item]];
-                }
-            }
-            return obj[keyname];
-        }
-        return {};
-
-    }, 10)*/
-    
-
+ 
     return path_obj;
 }
 
@@ -558,7 +508,7 @@ function emitFinalSignals()
 
     openApi_guiPagesBySchema(window.guiSchema)
 
-    // Событие в теле которого можно было бы переопределить и дополнить список страниц
+    // An event in the body of which one could redefine and add to the list of pages
     tabSignal.emit("openapi.paths",  {api: window.api});
 
     tabSignal.emit("openapi.completed",  {api: window.api});

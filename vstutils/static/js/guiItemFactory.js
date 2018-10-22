@@ -24,10 +24,7 @@ var gui_base_object = {
     },
 
     stopUpdates : function()
-    {
-        // stopUpdates
-        console.warn("stopUpdates")
-       
+    {  
         this.update_stoped = true
         clearTimeout(this.update_timoutid)
     },
@@ -90,7 +87,7 @@ var gui_base_object = {
     },
 
     /**
-     * Отрисует поле при отрисовке объекта.
+     * Draw a field when drawing an object.
      * @param {object} field
      * @returns {html}
      * @todo Наверно можно перенести эту функцию guiElements.js
@@ -111,7 +108,7 @@ var gui_base_object = {
                 this.model.guiFields[field.name] = new window.guiElements[type](field, field_value, this)
             }
 
-            // Добавление связи с зависимыми полями
+            // Add link to dependent fields
             let parent_field_name = undefined
             if(field.additionalProperties && field.additionalProperties.field)
             {
@@ -144,8 +141,7 @@ var gui_base_object = {
     },
 
     /**
-     * Получает значения всех полей из this.model.guiFields
-     *
+     * Gets the values of all fields from this.model.guiFields 
      * @returns {basePageView.getValue.obj}
      */
     getValue : function (hideReadOnly)
@@ -177,7 +173,7 @@ var gui_base_object = {
     },
 
     /**
-     * Вернёт значение только правильное, если оно не правильное то должно выкинуть исключение
+     * It returns only the correct value, if it is not correct then it should throw an exception
      */
     getValidValue : function (hideReadOnly)
     {
@@ -280,7 +276,7 @@ var gui_base_object = {
                     }
                 }
 
-                // Модификация на то если у нас мультиоперация
+                // Modification to that if we have a multi-operation
                 for(let i in this.url_vars)
                 {
                     if(/^api_/.test(i))
@@ -301,7 +297,7 @@ var gui_base_object = {
 
             if(query.length == 0)
             {
-                // Модификация на то если у нас не мультиоперация
+                // Modification to that if we have not a multi-operation
                 query = [url]
             }
 
@@ -395,7 +391,7 @@ var gui_base_object = {
 }
 
 /**
- * На основе описания апи пути формирует объект страницы.
+ * Based on the description of the api path, forms the page object.
  * @param {type} api_object
  * @returns {guiObjectFactory.res}
  */
@@ -411,14 +407,10 @@ function guiObjectFactory(api_object)
     }
 
     /**
-     * Используется в шаблоне страницы
+     * Used in page template
      */
     this.model = {
-        selectedItems : {},
-        /**
-         * Переменная на основе пути к апи которая используется для группировки выделенных элементов списка
-         * Чтоб выделение одного списка не смешивалось с выделением другого списка
-         */
+        selectedItems : {}, 
         guiFields:{}
     }
 
@@ -487,8 +479,8 @@ function emptyAction(action_info)
 }
 
 /**
- * Выполняет переход на страницу с результатами поиска
- * Урл строит на основе того какая страница открыта.
+ * Goes to the search results page.
+ * Url builds on the basis of which page is open.
  *
  * @param {string} query
  * @returns {$.Deferred}
@@ -549,7 +541,7 @@ function addToParentsAndGoUp(item_ids, selection_tag)
 }
 
 /**
- * Для добавления и удаления подэлементов в списке
+ * To add and remove items in the list
  * @param {array} item_ids
  * @returns {promise}
  */
@@ -715,8 +707,8 @@ function questionDeleteOrRemove(thisObj)
 }
 
 /**
- * Функция удаляет элементы, id которых перечислены в массиве ids
- * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
+ * The function deletes elements whose id are listed in the ids array
+ * (can be either all selected items or just items from the current page).
  */
 function deleteSelectedElements(thisObj, ids, tag)
 {
@@ -739,8 +731,8 @@ function deleteSelectedElements(thisObj, ids, tag)
 
 
 /**
- * Функция убирает из списка (но не удаляет совсем) элементы, id которых перечислены в массиве ids
- * (могут быть как все выделенные элементы, так и только элементы с текущей страницы).
+ * The function removes from the list (but does not delete at all) the elements whose id are listed in the ids array
+ * (can be either all selected items or just items from the current page).
  */
 function removeSelectedElements(ids, tag)
 {

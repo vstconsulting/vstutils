@@ -60,14 +60,14 @@ function getUpLink(link)
     
     link = link.replace(/\/[^\/]+$/, "").replace(/([0-9]+),[,0-9]+/g, "$1");
  
-    // Если menu_url не задан то используем первый знак вопроса в строке адреса
+    // If menu_url is not set then use the first question mark in the address bar
     if(window.location.href.indexOf("?") != -1)
     {
         menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
     } 
     else
     {
-        // Если menu_url не задан то используем window.location.hash
+        // If menu_url is not set then use window.location.hash
         menuId = window.location.hash.slice(1)
     }
 

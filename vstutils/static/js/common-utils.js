@@ -50,26 +50,25 @@ String.prototype.format_keys = function()
     return res.map((item) =>{ return item.slice(1, item.length - 1) })
 }
 
-// Список файлов тестирующих ГУЙ
+// List of Gui Testing Files
 if(!window.guiTestsFiles)
 {
     window.guiTestsFiles = []
 }
 
-// Добавляем файл тестов к списку файлов для тестов гуя
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
-//window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/dashboard.js')
+// Add a test file to the list of files for test gui
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js') 
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
 
 
 
-// Запускает тесты гуя
+// Run tests
 function loadQUnitTests()
 {
     loadAllUnitTests(window.guiTestsFiles)
 }
 
-// Загружает и запускает тесты гуя в строгом порядке.
+// Loads and runs tests in strict order.
 function loadAllUnitTests(urls)
 {
     let promises = []
