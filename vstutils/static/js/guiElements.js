@@ -1340,7 +1340,14 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         if(opt.dynamic_properties && opt.dynamic_properties.callback)
         {
+            
             var res = opt.dynamic_properties.callback.apply(thisObj, arguments);
+            
+            if(res && res.format)
+            {
+                thisObj.setType(res.format, res.override_opt);
+                return;
+            }
             if(res && res.type)
             {
                 thisObj.setType(res.type, res.override_opt);
