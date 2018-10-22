@@ -418,14 +418,13 @@ var gui_list_object = {
 
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.initTag(render_options.selectionTag)
-       
-        render_options.base_href = this.url_vars.page_and_parents
-        render_options.base_href = this.url_vars.page
+        
         render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page
         if(/[0-9]$/.test(render_options.base_href))
         {
             debugger;
         }
+            debugger;
         
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
@@ -472,8 +471,13 @@ var gui_list_object = {
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.initTag(render_options.selectionTag)
 
-        render_options.base_href = this.url_vars.page_type
-
+        render_options.base_href = this.url_vars.page_type 
+        //render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page
+        if(/[0-9]$/.test(render_options.base_href))
+        {
+            debugger;
+        }
+        
         render_options.hideActions = true
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});

@@ -190,7 +190,7 @@ var gui_base_object = {
 
     base_init : function (api_object,  url_vars= {}, object_data = undefined)
     {
-        this.url_vars = $.extend(spajs.urlInfo.data.reg, url_vars)
+        this.url_vars = $.extend(true, {}, spajs.urlInfo.data.reg, url_vars)
         this.model.title = this.api.bulk_name
     },
     init : function ()
