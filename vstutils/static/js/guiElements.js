@@ -262,6 +262,16 @@ guiElements.base = function(opt = {}, value, parent_object)
             }
         }
 
+        if(field.max && value > field.max)
+        {
+            throw {error:'validation', message:'Field '+field.name +" is too big"}
+        }
+
+        if(field.min && value < field.min)
+        {
+            throw { error: 'validation', message: 'Field ' + field.name + " is too small" }
+        }
+
         if((value === "" || value === undefined) && field.required && !this.opt.default)
         {
             throw {error:'validation', message:'Field '+field.name +" is required"}
@@ -488,9 +498,9 @@ guiElements.prefetch = function (opt = {}, value)
     guiElements.base.apply(this, arguments)
 
     this.updateValue = function(value, allData)
-    { 
-        this.render_options[this.opt.name +"_info"] = $.extend(this.render_options[this.opt.name +"_info"], allData[this.opt.name +"_info"]) 
-        
+    {
+        this.render_options[this.opt.name +"_info"] = $.extend(this.render_options[this.opt.name +"_info"], allData[this.opt.name +"_info"])
+
         this.db_value = value
         this._onUpdateValue(value)
     }
@@ -522,7 +532,7 @@ guiElements.date_time = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
-        
+
         return moment(value).tz(window.timeZone).format();
     }
 }
@@ -1301,6 +1311,8 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
     this.getValue = func('getValue')
 
+    this.getValidValue = func('getValidValue')
+
     this.setType = function(type, override_opt)
     {
         if(!guiElements[type])
@@ -1935,6 +1947,14 @@ function set_api_options(options)
 
     if (options.maxLength) {
         additional_options += "maxlength=" + options.maxLength + " "
+    }
+
+    if (options.min) {
+        additional_options += "min=" + options.min + " "
+    }
+
+    if (options.max) {
+        additional_options += "max=" + options.max + " "
     }
 
     if (/^Required/.test(options.description)) {
