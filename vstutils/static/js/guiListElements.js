@@ -1,7 +1,8 @@
 
 function renderLineField(field, value, field_name, dataLine)
 { 
-    let type = getFieldType(field, dataLine, guiListElements) 
+    let type = getFieldType(field, dataLine, guiListElements)
+
     if(guiListElements[type])
     {
         return guiListElements[type].render(field, value, dataLine)
@@ -34,7 +35,12 @@ guiListElements.base = {
     } 
 }
 
-guiListElements.boolean = $.extend(guiListElements.base, {
+guiListElements.boolean = $.extend({}, guiListElements.base, {
     type:'boolean',
     template_name:'guiListElements.boolean'
-}) 
+})
+
+guiListElements.array = $.extend({}, guiListElements.base, {
+    type:'array',
+    template_name:'guiListElements.array'
+})
