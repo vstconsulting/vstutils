@@ -1511,3 +1511,8 @@ table{
 .td {
     word-wrap: break-word;
 }
+
+.table_ul {
+    margin-left:20px;
+    padding-left: 0px;
+}
