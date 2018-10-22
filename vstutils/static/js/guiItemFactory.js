@@ -1,5 +1,5 @@
 
-guiLocalSettings.setIfNotExists('page_update_interval', 2000)
+guiLocalSettings.setIfNotExists('page_update_interval', 15000)
 
 var gui_base_object = {
 
