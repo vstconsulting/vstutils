@@ -1,10 +1,7 @@
 
 function renderLineField(field, value, field_name, dataLine)
-{
-    // Заготовка под переопределение отрисовки поля на основе типа поля
-     
-    let type = getFieldType(field, dataLine, guiListElements)
-    
+{ 
+    let type = getFieldType(field, dataLine, guiListElements) 
     if(guiListElements[type])
     {
         return guiListElements[type].render(field, value, dataLine)
