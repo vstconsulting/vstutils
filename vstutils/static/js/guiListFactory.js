@@ -424,8 +424,7 @@ var gui_list_object = {
         {
             debugger;
         }
-            debugger;
-        
+           
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 

@@ -41,7 +41,13 @@ String.prototype.format_keys = function()
     //let regex = new RegExp("(?<={).+?(?=})", "g");
     //let match = thisObj.match(regex) 
     //return match || [];
-    return thisObj.match(/{([^\}]+)}/g).map((item) =>{ return item.slice(1, item.length - 1) })
+    let res = thisObj.match(/{([^\}]+)}/g)
+    if(!res)
+    {
+        return []
+    }
+    
+    return res.map((item) =>{ return item.slice(1, item.length - 1) })
 }
 
 // Список файлов тестирующих ГУЙ
