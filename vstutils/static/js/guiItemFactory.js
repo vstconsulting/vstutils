@@ -358,6 +358,14 @@ var gui_base_object = {
 
     showErrors : function(error, method){
 
+        tabSignal.emit('guiItemFactory.showErrors', {thisObj: this, api_response: error, query_method: method})
+
+        if (!error)
+        {
+            return
+        }
+
+        debugger;
         if(!error.status || error.status < 400)
         {
             return webGui.showErrors(error)
@@ -720,10 +728,6 @@ function deleteSelectedElements(thisObj, ids, tag)
         {
             $(".item-row.item-"+ids[i]).remove()
         }
-    }).fail(function (e)
-    {
-        webGui.showErrors(e)
-        debugger;
     })
 
     return false;

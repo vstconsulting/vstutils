@@ -98,23 +98,31 @@ webGui.showErrors = function(res)
     { 
         return guiPopUp.error(res.message, res.error)
     }
-    
-    for(let i in res)
-    {
-        if(i == "detail")
-        {
-            console.error('showErrors:' + res[i])
-            guiPopUp.error(res[i])
-            return res[i];
-        }
-        else if(typeof res[i] === "object")
-        {
-            let error = webGui.showErrors(res[i])
-            if (error)
-            {
-                return error;
-            }
 
+    if (Array.isArray(res))
+    {
+        for (let i in res)
+        {
+            webGui.showErrors(res[i])
+        }
+    } else {
+        for(let i in res)
+        {
+            if(i == "detail")
+            {
+                console.error('showErrors:' + res[i])
+                guiPopUp.error(res[i])
+                return res[i];
+            }
+            else if(typeof res[i] === "object")
+            {
+                let error = webGui.showErrors(res[i])
+                if (error)
+                {
+                    return error;
+                }
+
+            }
         }
     }
 }

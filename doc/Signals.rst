@@ -239,6 +239,17 @@ guiList.renderLine
 
     Description: using this signal to modify lines in list
 
+guiItemFactory.showErrors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Arguments:
+
+        thisObj: object that send bulk request
+
+        api_response: received response from OpenAPI
+
+        query_method: method type that send to OpenAPI
+
 webGui.start
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
