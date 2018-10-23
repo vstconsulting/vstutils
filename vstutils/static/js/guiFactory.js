@@ -87,7 +87,14 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         }
 
         obj.baseURL = function(){
-            return vstMakeLocalUrl(this.page.replace(/\/[^/]+$/, ""));
+        
+            let arr = [this.page_and_parents.replace(/\/[^/]+$/, "")]
+            for(let i = 0; i < arguments.length; i++)
+            {
+                arr.push(arguments[i])
+            }
+            
+            return vstMakeLocalUrl(arr)
         }
 
         obj.getApiPath = function (){
