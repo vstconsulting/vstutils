@@ -87,7 +87,14 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         }
 
         obj.baseURL = function(){
-            return vstMakeLocalUrl(this.page.replace(/\/[^/]+$/, ""));
+        
+            let arr = [this.page_and_parents.replace(/\/[^/]+$/, "")]
+            for(let i = 0; i < arguments.length; i++)
+            {
+                arr.push(arguments[i])
+            }
+            
+            return vstMakeLocalUrl(arr)
         }
 
         obj.getApiPath = function (){
@@ -300,7 +307,7 @@ function openApi_add_list_page_path(api_obj)
 }
 
 tabSignal.connect("resource.loaded", function()
-{
+{ 
     window.api = new guiApi(); 
     $.when(window.api.init()).done(function()
     {
@@ -460,7 +467,7 @@ function deleteByPatternInSchema(obj, pattern, max_level = 0, level = 0, path = 
  * It's necessary procedure after getting guiSchema from cache.
  */
 function returnParentLinks(path_obj)
-{
+{ 
     //@todo улучшить функцию getFunctionNameBySchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__ 
     //@todo можно вместо того чтоб пробежаться рекурсивно каждый раз сохранить список ключей над которыми нужно выполнить операцию и закешировать его.
     let del_func = getFunctionNameBySchema(path_obj, '__func__', (obj, key) => {
