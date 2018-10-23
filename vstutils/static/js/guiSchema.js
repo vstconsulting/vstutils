@@ -693,7 +693,7 @@ function openApi_guiSchema(api)
         }
 
 
-        val.multi_actions = []
+        val.multi_actions = {}
  
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
         { 
