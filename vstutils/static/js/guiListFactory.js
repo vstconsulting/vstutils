@@ -354,7 +354,7 @@ var gui_list_object = {
 
     create : function ()
     {
-        var thisObj = this;
+        var thisObj = this; 
         var res = this.sendToApi('post')
         $.when(res).done(function()
         {
@@ -1049,7 +1049,7 @@ var gui_list_object = {
 }
 
 function createAndGoEdit(obj)
-{
+{ 
     var def = obj.create();
     $.when(def).done(function(newObj){
 
