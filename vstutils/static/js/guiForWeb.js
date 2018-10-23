@@ -169,14 +169,3 @@ tabSignal.connect("loading.completed", function()
 
     hideLoadingProgress();
 })
-
-/*
-tabSignal.connect("webGui.start", function()
-{
-    spajs.addMenu({
-        id:"home",
-        urlregexp:[/^(home|)$/],
-        onOpen:function(holder, menuInfo, data){return guiServers.showList(holder, menuInfo, data);}
-    })
-
-})*/
