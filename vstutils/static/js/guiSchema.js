@@ -43,7 +43,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 console.error("can not found definition for object "+def_name)
                 continue;
             }
-
+            
             field =  mergeDeep(field, def_obj);
 
             if(!field.gui_links)
@@ -51,10 +51,12 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 field.gui_links = []
             }
 
-            //field.readOnly = true
-
             let format = def_name.replace("#/", "").split(/\//)
 
+            if(format[1] != "Data") 
+            {
+                field.readOnly = true
+            }
             //if(format[1] == "Data") debugger;
 
             field.format = "api"+format[1]
@@ -85,7 +87,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             })
         }
 
-        // В имени класса символ минус не допустим
+        // In the class name the minus character is not allowed
         if(field.format)
         {
             field.format = field.format.replace(/\-/g, "_")
@@ -568,6 +570,7 @@ function openApi_guiSchema(api)
             }
             val.method['get'] = 'page'
 
+            // Если поля рисуем из схемы get запроса то они точно readOnly
             for(let f in val.schema.get.fields)
             {
                 val.schema.get.fields[f].readOnly = true
@@ -693,7 +696,7 @@ function openApi_guiSchema(api)
         }
 
 
-        val.multi_actions = []
+        val.multi_actions = {}
  
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
         { 
@@ -724,22 +727,7 @@ function openApi_guiSchema(api)
     {
         delete path_schema[path].api
     }
-
-    // for(let path in path_schema)
-    // {
-    //     let val = path_schema[path]
-    //
-    //     tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
-    //     tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
-    //     for(let schema in val.schema)
-    //     {
-    //         tabSignal.emit("openapi.schema.schema",  {paths:path_schema, path:path, value:val.schema[schema]});
-    //         tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
-    //         tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val.schema[schema], schema:schema, fields:val.schema[schema].fields});
-    //     }
-    //
-    // }
-
+ 
     return {path:path_schema, object:short_schema};
 }
  
@@ -976,7 +964,7 @@ function getFunctionNameBySchema(obj, pattern, callback, max_level = 0, level = 
  */
 function openApi_get_internal_links(paths, base_path, targetLevel)
 {
-    var res = []
+    var res = {}
 
     // Build `action` list base on data about one note
     // Список Actions строить будем на основе данных об одной записи.

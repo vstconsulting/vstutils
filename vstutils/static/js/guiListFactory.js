@@ -228,6 +228,22 @@ var gui_list_object = {
      * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
      */
     load : function (filters)
+    { 
+        var promise = new $.Deferred();
+
+        $.when(this.load_list(filters)).done(d => { 
+            $.when(this.prefetch(d)).always(a => {
+                promise.resolve(a);
+            });
+
+        }).fail(e => {
+            promise.reject(e);
+        })
+
+        return promise.promise();
+    },
+
+    load_list: function (filters)
     {
         if (!filters)
         {
@@ -301,22 +317,10 @@ var gui_list_object = {
             filters:q.join("&"),
             method:'get'
         }
-
-        var promise = new $.Deferred();
-
-        $.when(this.apiQuery(queryObj)).done(d => {
-
-            $.when(this.prefetch(d)).always(a => {
-                promise.resolve(a);
-            });
-
-        }).fail(e => {
-            promise.reject(e);
-        })
-
-        return promise.promise();
+ 
+        return this.apiQuery(queryObj)
     },
-
+    
     toggleSelectEachItem : function (tag, mode)
     {
         if(!mode)
@@ -325,13 +329,13 @@ var gui_list_object = {
             return false;
         }
 
-        let filters = this.model.filters
+        let filters = $.extend(true, {}, this.model.filters)
 
         filters.limit = 9999999
         filters.offset = 0;
         filters.page_number = 0;
 
-        return $.when(this.load(filters)).done(function(data)
+        return $.when(this.load_list(filters)).done(function(data)
         {
             if(!data || !data.data || !data.data.results)
             {
@@ -350,7 +354,7 @@ var gui_list_object = {
 
     create : function ()
     {
-        var thisObj = this;
+        var thisObj = this; 
         var res = this.sendToApi('post')
         $.when(res).done(function()
         {
@@ -436,7 +440,18 @@ var gui_list_object = {
         render_options.hideReadOnly = true
 
         render_options.base_path = getUrlBasePath()
+
+        this.beforeRenderAsNewPage();
+
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+    },
+
+    beforeRenderAsNewPage: function()
+    {
+        for(let i in this.api.schema.new.fields)
+        {
+            this.initField(this.api.schema.new.fields[i]);
+        }
     },
 
     /**
@@ -1034,7 +1049,7 @@ var gui_list_object = {
 }
 
 function createAndGoEdit(obj)
-{
+{ 
     var def = obj.create();
     $.when(def).done(function(newObj){
 

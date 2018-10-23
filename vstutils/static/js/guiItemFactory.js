@@ -1,10 +1,10 @@
 
-guiLocalSettings.setIfNotExists('page_update_interval', 2000)
+guiLocalSettings.setIfNotExists('page_update_interval', 15000)
 
 var gui_base_object = {
 
     getTemplateName : function (type, default_name)
-    { 
+    {
         var tpl = this.api.bulk_name + '_'+type
         if (!spajs.just.isTplExists(tpl))
         {
@@ -24,7 +24,7 @@ var gui_base_object = {
     },
 
     stopUpdates : function()
-    {  
+    {
         this.update_stoped = true
         clearTimeout(this.update_timoutid)
     },
@@ -35,14 +35,14 @@ var gui_base_object = {
         {
             return;
         }
-         
+
         if(this.update_stoped === true)
         {
             return;
         }
-        
-        this.update_timoutid = setTimeout(() => 
-        { 
+
+        this.update_timoutid = setTimeout(() =>
+        {
             this.update_timoutid = undefined
             if(!this.model.filters)
             {
@@ -51,18 +51,38 @@ var gui_base_object = {
                 return;
             }
 
-            $.when(this.updateFromServer()).always(() => { 
+            $.when(this.updateFromServer()).always(() => {
                 console.log("startUpdates [updated]")
                 this.startUpdates()
             })
-        }, guiLocalSettings.get('page_update_interval')) 
+        }, guiLocalSettings.get('page_update_interval'))
     },
- 
+
     updateFromServer : function ()
     {
         return false;
     },
-      
+
+    /*
+     * Function inits field in model.
+     */
+    initField: function(field)
+    {
+        if(!this.model.guiFields[field.name])
+        {
+            if (!this.model.guiFields[field.name])
+            {
+                let type = getFieldType(field, this.model)
+
+                var field_value = undefined
+                if (this.model.data) {
+                    field_value = this.model.data[field.name]
+                }
+                this.model.guiFields[field.name] = new window.guiElements[type](field, field_value, this)
+            }
+        }
+    },
+
     renderAllFields : function(opt)
     {
         let html = []
@@ -94,46 +114,31 @@ var gui_base_object = {
      */
     renderField : function(field, render_options)
     {
-        if(!this.model.guiFields[field.name])
+        // Add link to dependent fields
+        let parent_field_name = undefined
+        if(field.additionalProperties && field.additionalProperties.field)
         {
-            if(!this.model.guiFields[field.name])
-            {
-                let type = getFieldType(field, this.model)
+            parent_field_name = field.additionalProperties.field
+        }
+        if(field.parent_field)
+        {
+            parent_field_name = field.parent_field
+        }
+        if (!Array.isArray(parent_field_name))
+        {
+            parent_field_name = [parent_field_name]
+        }
+        let thisField = this.model.guiFields[field.name];
 
-                var field_value = undefined
-                if(this.model.data)
-                {
-                    field_value = this.model.data[field.name]
-                }
-                this.model.guiFields[field.name] = new window.guiElements[type](field, field_value, this)
-            }
+        for (let i in parent_field_name)
+        {
+            let parentField = this.model.guiFields[parent_field_name[i]];
 
-            // Add link to dependent fields
-            let parent_field_name = undefined
-            if(field.additionalProperties && field.additionalProperties.field)
+            if(parentField && parentField.addOnChangeCallBack)
             {
-                parent_field_name = field.additionalProperties.field
-            }
-            if(field.parent_field)
-            {
-                parent_field_name = field.parent_field
-            }
-            if (!Array.isArray(parent_field_name))
-            {
-                parent_field_name = [parent_field_name]
-            }
-            let thisField = this.model.guiFields[field.name];
-
-            for (let i in parent_field_name)
-            {
-                let parentField = this.model.guiFields[parent_field_name[i]];
-
-                if(parentField && parentField.addOnChangeCallBack)
-                {
-                    parentField.addOnChangeCallBack(function() {
-                        thisField.updateOptions.apply(thisField, arguments);
-                    })
-                }
+                parentField.addOnChangeCallBack(function() {
+                    thisField.updateOptions.apply(thisField, arguments);
+                })
             }
         }
 
@@ -141,7 +146,7 @@ var gui_base_object = {
     },
 
     /**
-     * Gets the values of all fields from this.model.guiFields 
+     * Gets the values of all fields from this.model.guiFields
      * @returns {basePageView.getValue.obj}
      */
     getValue : function (hideReadOnly)
@@ -213,13 +218,13 @@ var gui_base_object = {
     sendToApi : function (method, callback, error_callback, data)
     {
         var def = new $.Deferred();
-        
+
         try{
             if(!data)
             {
                 data = this.getDataFromForm(method)
             }
-            
+
             if (data == undefined || data == false)
             {
                 def.reject()
@@ -233,7 +238,7 @@ var gui_base_object = {
 
                 return def.promise();
             }
-            
+
             if (data == true)
             {
                 if(callback)
@@ -362,14 +367,14 @@ var gui_base_object = {
         {
             return webGui.showErrors(error)
         }
-        
+
         let text = ""
         if(error.data.detail)
         {
             text = error.data.detail +". "
         }
-        
-        
+
+
 
         if(this.api.schema[this.api.method[method]]
             && this.api.schema[this.api.method[method]].responses
@@ -385,7 +390,7 @@ var gui_base_object = {
         {
             text += this.api.schema[method].responses[error.status].description
         }
-        
+
         return guiPopUp.error(text)
     }
 }
@@ -400,17 +405,18 @@ function guiObjectFactory(api_object)
     if(typeof api_object == "string")
     {
         api_object = window.guiSchema.path[api_object]
-        if (api_object == undefined)
-        {
-            console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object}))
-        }
+    }
+
+    if (api_object == undefined)
+    {
+        console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object}))
     }
 
     /**
      * Used in page template
      */
     this.model = {
-        selectedItems : {}, 
+        selectedItems : {},
         guiFields:{}
     }
 
@@ -471,7 +477,7 @@ function guiObjectFactory(api_object)
 
 
 function emptyAction(action_info)
-{ 
+{
     var pageItem = new guiObjectFactory(action_info)
     return function(){
         pageItem.exec()

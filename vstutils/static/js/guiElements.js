@@ -695,20 +695,19 @@ guiElements.autocomplete = function()
 
                             let matches = [];
 
-                            for (let i in arguments)
+                            for (let i=0; i<arguments.length; i++)
                             {
                                 let res = arguments[i].data.results;
 
                                 for(let i in res)
                                 {
                                     let value_field = res[i].id
-                                    if (matches.length == 0 || matches.every(element => element['value_field'] != value_field))
-                                    {
-                                        matches.push({
-                                            value_field: value_field,
-                                            view_field: res[i][view_field],
-                                        });
-                                    }
+
+                                    matches.push({
+                                        value_field: value_field,
+                                        view_field: res[i][view_field],
+                                    });
+
                                 }
                             }
 
@@ -1352,7 +1351,14 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         if(opt.dynamic_properties && opt.dynamic_properties.callback)
         {
+            
             var res = opt.dynamic_properties.callback.apply(thisObj, arguments);
+            
+            if(res && res.format)
+            {
+                thisObj.setType(res.format, res.override_opt);
+                return;
+            }
             if(res && res.type)
             {
                 thisObj.setType(res.type, res.override_opt);
