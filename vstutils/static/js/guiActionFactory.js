@@ -45,7 +45,18 @@ var gui_action_object = {
         if(!render_options.page_type) render_options.page_type = 'action'
         
         render_options.base_path = getUrlBasePath()
+
+        this.beforeRenderAsPage();
+
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+    },
+
+    beforeRenderAsPage: function()
+    {
+        for(let i in this.api.schema.exec.fields)
+        {
+            this.initField(this.api.schema.exec.fields[i]);
+        }
     },
  
 } 

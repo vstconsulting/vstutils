@@ -695,20 +695,19 @@ guiElements.autocomplete = function()
 
                             let matches = [];
 
-                            for (let i in arguments)
+                            for (let i=0; i<arguments.length; i++)
                             {
                                 let res = arguments[i].data.results;
 
                                 for(let i in res)
                                 {
                                     let value_field = res[i].id
-                                    if (matches.length == 0 || matches.every(element => element['value_field'] != value_field))
-                                    {
-                                        matches.push({
-                                            value_field: value_field,
-                                            view_field: res[i][view_field],
-                                        });
-                                    }
+
+                                    matches.push({
+                                        value_field: value_field,
+                                        view_field: res[i][view_field],
+                                    });
+
                                 }
                             }
 
