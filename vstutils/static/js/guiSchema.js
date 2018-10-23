@@ -693,7 +693,7 @@ function openApi_guiSchema(api)
         }
 
 
-        val.multi_actions = []
+        val.multi_actions = {}
  
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
         { 
@@ -961,7 +961,7 @@ function getFunctionNameBySchema(obj, pattern, callback, max_level = 0, level = 
  */
 function openApi_get_internal_links(paths, base_path, targetLevel)
 {
-    var res = []
+    var res = {}
 
     // Build `action` list base on data about one note
     // Список Actions строить будем на основе данных об одной записи.
