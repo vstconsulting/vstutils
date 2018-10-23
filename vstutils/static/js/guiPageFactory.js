@@ -313,11 +313,31 @@ var gui_page_object = {
         render_options.actions = this.api.actions
 
         this.model.data = this.prepareDataBeforeRender();
+
+        this.beforeRenderAsPage();
         
         tabSignal.emit("guiList.renderPage",  {guiObj:this, options: render_options, data:this.model.data});
         tabSignal.emit("guiList.renderPage."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data});
         
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+    },
+
+    beforeRenderAsPage: function()
+    {
+        let schema_name = '';
+        if(this.api.schema.edit)
+        {
+            schema_name = 'edit';
+        }
+        else if(this.api.schema.get)
+        {
+            schema_name = 'get';
+        }
+
+        for(let i in this.api.schema[schema_name].fields)
+        {
+            this.initField(this.api.schema[schema_name].fields[i]);
+        }
     },
 
     prepareDataBeforeRender: function()
