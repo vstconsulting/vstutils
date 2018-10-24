@@ -291,7 +291,7 @@ guiElements.base = function(opt = {}, value, parent_object)
      * @returns {undefined}
      */
     this.addOnChangeCallBack = function(callback)
-    { 
+    {
         this.onChange_calls.push(callback)
     }
 
@@ -324,7 +324,7 @@ guiElements.base = function(opt = {}, value, parent_object)
      * @returns {undefined}
      */
     this.updateOptions = function(arg)
-    { 
+    {
         if(this.onUpdateOptions)
         {
             if(typeof this.onUpdateOptions != 'object')
@@ -574,8 +574,8 @@ guiElements.autocomplete = function()
                 },
                 onSelect: (event, term, item) =>
                 {
-                    let value = $(item).attr('data-value');
-                    $('#'+this.element_id).val($(item).text());
+                    let value = $(item).attr('data-value'); 
+                    $('#'+this.element_id).val(value);
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
                 },
@@ -665,7 +665,8 @@ guiElements.autocomplete = function()
                 },
                 onSelect: (event, term, item) =>
                 {
-                    var value = $(item).attr('data-value');
+                    let value = $(item).attr('data-value');
+                    $('#'+this.element_id).val(value);
                     $('#'+this.element_id).val($(item).text());
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
@@ -701,10 +702,8 @@ guiElements.autocomplete = function()
 
                                 for(let i in res)
                                 {
-                                    let value_field = res[i].id
-
                                     matches.push({
-                                        value_field: value_field,
+                                        value_field: res[i][value_field],
                                         view_field: res[i][view_field],
                                     });
 
@@ -1351,9 +1350,9 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         if(opt.dynamic_properties && opt.dynamic_properties.callback)
         {
-            
+
             var res = opt.dynamic_properties.callback.apply(thisObj, arguments);
-            
+
             if(res && res.format)
             {
                 thisObj.setType(res.format, res.override_opt);
