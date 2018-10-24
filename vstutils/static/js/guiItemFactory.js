@@ -486,9 +486,11 @@ function guiObjectFactory(api_object)
 
 function emptyAction(action_info)
 {
-    var pageItem = new guiObjectFactory(action_info)
+    var pageItem = new guiObjectFactory(action_info, {
+        // Сюда надо передать дополнительную переменную api_* с id объекта списка
+    })
     return function(){
-        pageItem.exec()
+        return pageItem.exec()
     }
 }
 
@@ -511,7 +513,6 @@ function goToSearch(obj, query)
 
 function deleteAndGoUp(obj)
 {
-    debugger;
     var def = obj.delete();
     $.when(def).done(function(){
         var upper_url = spajs.urlInfo.data.reg.baseURL().replace(/\/\d+$/g, '');

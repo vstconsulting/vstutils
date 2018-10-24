@@ -184,7 +184,7 @@
 <script type="text/x-just" data-just="action_page">
 
     <%[ buttons_row %>
-        <%= new guiElements.button({onclick:function(){guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
+        <%= new guiElements.button({onclick:function(){ return guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
         <%* buttons %>
     <%] %>
 
@@ -385,7 +385,7 @@
                 <a
                     href="#"
                     class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
-                     <%= justOn('click', function(){ multi_actions[k].onClick.apply(guiObj, []); return false;} ) %>
+                     <%= justOn('click', function(){ spajs.showLoader(multi_actions[k].onClick.apply(guiObj, [])); return false;} ) %>
                 >
                         <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
                 </a>
@@ -524,8 +524,7 @@
     <!-- entity_list_add_subitems -->
 
     <%[ buttons_row %>
-        <a href="#" class="btn btn-primary"
-            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
+        <%= new guiElements.button({onclick:function(){ return addToParentsAndGoUp(window.guiListSelections.getSelection(opt.selectionTag), opt.selectionTag) }, class:'btn btn-primary', title:'Add selected', text:'Add selected'}).render() %>
     <%] %>
 
     <%[ action_buttons %>
@@ -537,7 +536,7 @@
             <ul class="dropdown-menu">
                     <li>
                         <a href="#"
-                            onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
+                            onclick="spajs.showLoader(addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>')); return false;" >Add selected</a>
                     </li>
             </ul>
         </div>
@@ -595,11 +594,11 @@
     <%[ buttons_row %>
 
         <% if(guiObj.api.canEdit){ %>
-            <%= new guiElements.button({onclick:function(){guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
         <% } %>
 
         <% if(guiObj.api.canDelete){ %>
-            <%= new guiElements.button({onclick:function(){ deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
         <% } %>
 
         <%* buttons %>
@@ -642,7 +641,7 @@
 
     <%[ buttons_row %>
 
-        <%= new guiElements.button({onclick:function(){createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
+        <%= new guiElements.button({onclick:function(){ return createAndGoEdit(guiObj)}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
 
         <%* buttons %>
     <%] %>
