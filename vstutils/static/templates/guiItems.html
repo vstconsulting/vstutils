@@ -344,9 +344,9 @@
                                         </a>
                                     <% } else { %>
                                         <b
-                                            class="sublink-btn sublink-btn-empty-action <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
+                                            class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
                                             >
-                                                <i <%= justOn('click', emptyAction(dataLine.sublinks_l2[k])) %>>
+                                                <i <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %>>
                                                     <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
                                                 </i>
                                         </b>
@@ -586,7 +586,7 @@
                     <%- opt.actions[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(opt.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
                 <% } %>
         <% } %>
     <%] %>
