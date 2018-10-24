@@ -519,19 +519,6 @@ table{
     background: #ffe7e7;
 }
 
-.history-stdout{
-    overflow: auto;
-    max-height: calc(100vh - 338px);
-    min-height: 400px;
-    background: #fff;
-}
-
-@media (min-width: 767px) {
-    .history-stdout{
-        max-height: calc(100vh - 414px);
-    }
-}
-
 @media (min-width: 992px) {
     .h1-header{
         display: inline-table;
@@ -1500,7 +1487,7 @@ table{
 }
 
 .guiListElements-boolean .boolean-false{
-    color: #949494; 
+    color: #949494;
 }
 
 .db_value_input{
@@ -1515,4 +1502,12 @@ table{
 .table_ul {
     margin-left:20px;
     padding-left: 0px;
+}
+
+.hidden-false{
+
+}
+
+.hidden-true{
+    display: none;
 }

@@ -25,7 +25,7 @@ var gui_action_object = {
                 let redirect_field = ""
                 if (thisSchema.redirect_field)
                 {
-                    redirect_field = thisSchema.redirect_field.title || ""
+                    redirect_field = thisSchema.redirect_field.title ||  thisSchema.redirect_field || ""
                 }
                 let url = thisSchema.redirect_path.format(id_list) + (data.data[redirect_field.toLowerCase()] || "")
                 vstGO(url);
