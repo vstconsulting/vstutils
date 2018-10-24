@@ -59,7 +59,7 @@ var gui_list_object = {
         }).fail(function (e)
         {
             def.reject(e)
-            webGui.showErrors(e)
+            thisObj.showErrors(e)
         })
 
         return def.promise();
