@@ -178,7 +178,30 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         if(options.onclick)
         {
-            $('#'+this.element_id).on('click', false, options.onclick)
+            let thisObj = this;
+            $('#'+this.element_id).on('click', false, function(){
+
+                if(thisObj.blocked)
+                {
+                    return false;
+                }
+
+                let res = options.onclick.call(arguments)
+                if(res)
+                {
+                    $('#'+thisObj.element_id).addClass('disabled')
+                    thisObj.blocked = true
+                    $.when(res).always(() =>
+                    {
+                        thisObj.blocked = false
+                        $('#'+thisObj.element_id).removeClass('disabled')
+                    })
+                }
+                else
+                {
+                    debugger;
+                }
+            })
         }
     }
 
@@ -574,7 +597,7 @@ guiElements.autocomplete = function()
                 },
                 onSelect: (event, term, item) =>
                 {
-                    let value = $(item).attr('data-value'); 
+                    let value = $(item).attr('data-value');
                     $('#'+this.element_id).val(value);
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
