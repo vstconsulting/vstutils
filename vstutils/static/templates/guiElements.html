@@ -429,16 +429,29 @@
     <!-- guiElements.boolean -->
     <%[ main_input %>
         <div class="form-control <% if (value) { %> selected <% } %> boolean-select"
-                <% if (!opt.readOnly) { %> onclick="$(this).toggleClass('selected');" <% } %>
+                onclick="$(this).toggleClass('selected');"
                 onselectstart="return false"
                 onmousedown="return false"
                 style="cursor: pointer;"
                 id="<%- guiElement.element_id %>" >
-            <div class="ico-on fa fa-toggle-on" <% if (opt.readOnly) { %> style="cursor: not-allowed!important;" <% } %> ></div>
-            <div class="ico-off fa  fa-toggle-off" <% if (opt.readOnly) { %> style="cursor: not-allowed!important;" <% } %> ></div>
+            <div class="ico-on fa fa-toggle-on" ></div>
+            <div class="ico-off fa  fa-toggle-off" ></div>
             <div class="boolean-title" >Boolean value</div>
         </div>
     <%] %>
+
+     <%[ readonly_input %>
+        <div class="form-control <% if (value) { %> selected <% } %> boolean-select"
+                onselectstart="return false"
+                onmousedown="return false"
+                style="cursor: not-allowed!important;"
+                id="<%- guiElement.element_id %>" >
+            <div class="ico-on fa fa-toggle-on" style="cursor: not-allowed!important;" ></div>
+            <div class="ico-off fa  fa-toggle-off" style="cursor: not-allowed!important;" ></div>
+            <div class="boolean-title" style="cursor: not-allowed!important;">Boolean value</div>
+        </div>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
