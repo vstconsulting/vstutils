@@ -7,20 +7,20 @@ guiLocalSettings.setIfNotExists('page_size', 20)
 
 
 function getMenuIdFromApiPath(path){
-    return path.replace(/[^A-z0-9\-]/img, "_") 
+    return path.replace(/[^A-z0-9\-]/img, "_")
 }
 
 function guiTestUrl(regexp, url)
 {
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
-   
-    let reg_exp = XRegExp(regexp, 'x');   
+
+    let reg_exp = XRegExp(regexp, 'x');
     if(!XRegExp.test(url, reg_exp) )
     {
         return false;
     }
 
-    return XRegExp.exec(url, reg_exp)  
+    return XRegExp.exec(url, reg_exp)
 }
 
 all_regexp = []
@@ -31,12 +31,12 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
     return function(url)
     {
         var res = guiTestUrl(regexp, url)
-       
+
         if(!res)
         {
             return false;
         }
-        
+
         let obj = {}
         for(let i in res)
         {
@@ -44,9 +44,9 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             {
                 continue;
             }
-            
+
             if(i.indexOf("api_") == 0 && res[i][0] == '@')
-            { 
+            {
                 obj[i] = res[i].substring(1)
             }
             else
@@ -54,14 +54,14 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
                 obj[i] = res[i]
             }
         }
-         
-        obj.url = res[0]               
-        obj.page_and_parents = res[0]    
+
+        obj.url = res[0]
+        obj.page_and_parents = res[0]
 
         if(obj.page)
         {
-            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');  
-            let match = XRegExp.exec(obj.page, xregexpItem)  
+            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
+            let match = XRegExp.exec(obj.page, xregexpItem)
             if(match)
             {
                 obj.parent_type = match.parent_type
@@ -70,7 +70,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
                 obj.page_name = match.page_type
             }
         }
-        
+
 
         obj.searchURL = function(query){
 
@@ -80,20 +80,20 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
             url +=  "/search/" + query
             if(this.page_part)
             {
-                url = url.replace(this.page_part, "") 
+                url = url.replace(this.page_part, "")
             }
 
             return vstMakeLocalUrl(url);
         }
 
         obj.baseURL = function(){
-        
+
             let arr = [this.page_and_parents.replace(/\/[^/]+$/, "")]
             for(let i = 0; i < arguments.length; i++)
             {
                 arr.push(arguments[i])
             }
-            
+
             return vstMakeLocalUrl(arr)
         }
 
@@ -111,7 +111,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
  * @returns {getNameForUrlRegExp.url}
  */
 function getNameForUrlRegExp(api_path)
-{  
+{
     return api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+|@[A-z0-9]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
 }
 
@@ -148,7 +148,7 @@ function openApi_add_one_action_page_path(api_obj)
             {
                 def.resolve(renderErrorAsPage(err));
             })
- 
+
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
             })
@@ -168,8 +168,8 @@ function openApi_add_one_action_page_path(api_obj)
  */
 function openApi_add_one_page_path(api_obj)
 {
-    let api_path = api_obj.path 
-    let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$" 
+    let api_path = api_obj.path
+    let page_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")$"
     let regexp_in_other = guiGetTestUrlFunctionfunction(page_url_regexp, api_obj);
 
     spajs.addMenu({
@@ -177,7 +177,7 @@ function openApi_add_one_page_path(api_obj)
         url_parser:[regexp_in_other],
         priority:api_obj.level,
         onOpen:function(holder, menuInfo, data, onClose_promise)
-        { 
+        {
             let pageItem = new guiObjectFactory(api_obj)
 
             var def = new $.Deferred();
@@ -188,8 +188,8 @@ function openApi_add_one_page_path(api_obj)
             {
                 def.resolve(renderErrorAsPage(err));
             })
- 
-            $.when(onClose_promise).always(() => { 
+
+            $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
             })
 
@@ -228,7 +228,7 @@ function openApi_add_list_page_path(api_obj)
     {
         // If there is a button to create an object, then you need to register the page for creating an object.
         let new_page_url = guiGetTestUrlFunctionfunction("^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")\\/new$", api_obj)
-         
+
         spajs.addMenu({
             id:getMenuIdFromApiPath(api_path + "_new"),
             url_parser:[new_page_url],
@@ -267,7 +267,7 @@ function openApi_add_list_page_path(api_obj)
                 {
                     def.resolve(renderErrorAsPage(err));
                 })
- 
+
                 $.when(onClose_promise).always(() => {
                     pageItem.stopUpdates();
                 })
@@ -288,12 +288,12 @@ function openApi_add_list_page_path(api_obj)
             var def = new $.Deferred();
             $.when(pageItem.search(data.reg)).done(function()
             {
-                def.resolve(pageItem.renderAsPage()) 
+                def.resolve(pageItem.renderAsPage())
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
             })
-             
+
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
             })
@@ -301,14 +301,14 @@ function openApi_add_list_page_path(api_obj)
             return def.promise();
         },
         onClose:function(){
-            
+
         }
     })
 }
 
 tabSignal.connect("resource.loaded", function()
-{ 
-    window.api = new guiApi(); 
+{
+    window.api = new guiApi();
     $.when(window.api.init()).done(function()
     {
         // An event in the body of which one could override the response from open api
@@ -325,8 +325,8 @@ tabSignal.connect("resource.loaded", function()
 
             window.guiSchema = openApi_guiSchema(window.api.openapi);
             tabSignal.emit("openapi.schema",  {api: window.api, schema:window.guiSchema});
-          
-            //... Saving to cache 
+
+            //... Saving to cache
             let guiSchemaForCache =
                 {
                     path: deleteParentLinks(window.guiSchema.path),
@@ -393,11 +393,11 @@ function getGuiSchemaFromCache()
  */
 function deleteParentLinks(path_obj)
 {
-    
-    //@todo улучшить функцию deleteByPatternInSchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__ 
+
+    //@todo улучшить функцию deleteByPatternInSchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__
     let del_func = deleteByPatternInSchema(path_obj, '__func__')
     let del_link = deleteByPatternInSchema(path_obj, '__link__')
-    
+
     let action = []
     for(let i in del_func)
     {
@@ -409,7 +409,7 @@ function deleteParentLinks(path_obj)
         action.push("delete path_obj"+del_link[i])
     }
     eval(action.join(";"))
-  
+
     return path_obj;
 }
 
@@ -426,13 +426,13 @@ function deleteByPatternInSchema(obj, pattern, max_level = 0, level = 0, path = 
         debugger;
         throw "Error level > "+level
     }
-     
+
     if(max_level && max_level <= level)
     {
         debugger;
         return undefined;
     }
- 
+
     if(typeof obj != 'object')
     {
         return undefined;
@@ -441,21 +441,21 @@ function deleteByPatternInSchema(obj, pattern, max_level = 0, level = 0, path = 
     for(var i in obj)
     {
         if(i.indexOf(pattern) == 0)
-        {  
+        {
             objects.push(path+"['"+i.replace(pattern, "")+"']")
             continue;
         }
 
         if(typeof obj[i] == 'object')
-        { 
+        {
             if(obj["__link__"+i])
-            { 
+            {
                 // skip
             }
             else
-            { 
+            {
                 deleteByPatternInSchema(obj[i], pattern, max_level, level+1, ""+path+"['"+i+"']", objects)
-            } 
+            }
         }
     }
 
@@ -467,11 +467,11 @@ function deleteByPatternInSchema(obj, pattern, max_level = 0, level = 0, path = 
  * It's necessary procedure after getting guiSchema from cache.
  */
 function returnParentLinks(path_obj)
-{ 
-    //@todo улучшить функцию getFunctionNameBySchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__ 
+{
+    //@todo улучшить функцию getFunctionNameBySchema так чтоб можно было все операции сделать за 1 прохрд и для __func__ и для __link__
     //@todo можно вместо того чтоб пробежаться рекурсивно каждый раз сохранить список ключей над которыми нужно выполнить операцию и закешировать его.
     let del_func = getFunctionNameBySchema(path_obj, '__func__', (obj, key) => {
-        
+
         if(!window[obj[key]])
         {
             throw "error function "+obj[key]+" not exists"
@@ -479,9 +479,9 @@ function returnParentLinks(path_obj)
 
         return window[obj[key]];
     })
-    
-    let del_links = getFunctionNameBySchema(path_obj, '__link__', (obj, key) => { 
-        
+
+    let del_links = getFunctionNameBySchema(path_obj, '__link__', (obj, key) => {
+
         if(!path_obj[obj[key]])
         {
             throw "error link "+obj[key]+" not exists"
@@ -489,7 +489,7 @@ function returnParentLinks(path_obj)
 
         return path_obj[obj[key]];
     })
- 
+
     let action = []
     for(let i in del_func)
     {
@@ -501,7 +501,7 @@ function returnParentLinks(path_obj)
         action.push("delete path_obj"+del_links[i])
     }
     eval(action.join(";"))
- 
+
     return path_obj;
 }
 
@@ -510,7 +510,7 @@ function returnParentLinks(path_obj)
  * Function emits signals which are necessary to call after getting guiSchema.
  */
 function emitFinalSignals()
-{ 
+{
     emitSchemaPathSignals(window.guiSchema.path);
 
     openApi_guiPagesBySchema(window.guiSchema)

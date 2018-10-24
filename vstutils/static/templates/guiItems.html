@@ -66,43 +66,9 @@
     <% } %>
 </script>
 
-<!--  Поле поиска
 <script  type="text/x-just" style="display: none;" data-just="search_field">
-    <div class="input-group col-lg-2" style="float: right;">
-    <input
-        type="text"
-        id="search-query-input"
-        placeholder="Search by name"
-        class="form-control"
-        maxlength="255"
-        value="<% if(guiObj.model.filters.search_query){ %><%- guiObj.model.filters.search_query.name %><% } %>"
-        <%= justOn('keyup', function(event)
-            {
-                if(event.keyCode == 13)
-                {
-                    return spajs.showLoader(goToSearch(guiObj, $('#search-query-input').val()));
-                }
-            }, "search-query-input")
-        %>
-
-    >
-
-    <div class="input-group-addon"
-        <%= justOn('click', function()
-            {
-                return spajs.showLoader(goToSearch(guiObj, $('#search-query-input').val()));
-            })
-        %>
-    >
-    <span class="glyphicon glyphicon-search" ></span>
-    </div>
-    </div>
-</script> -->
-
-<script  type="text/x-just" style="display: none;" data-just="search_field">
-    <!-- Pm+ searchFiled -->
+    <!-- searchFiled  -->
     <div>
-
         <div class="filtered-search">
             <~ guiObj.activeSearch.filters>
                 <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
@@ -142,7 +108,7 @@
                         </div>
                         <span class="remove-token"
                                 role="button"
-                                data-value-name="<%- valfield.name %>"
+                                data-value-name="<%- valfield.name %>" 
                                 <%= justOn('click', function(event)
                                     {
                                         guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
@@ -408,12 +374,12 @@
         </ul>
     </div>
 </script>
-    
+
 <script type="text/x-just" data-just="multi_actions_buttons_list">
     <% for(let k in multi_actions){ %>
-        
+
         <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
-        
+
         <% if(multi_actions[k].onClick){ %>
             <li>
                 <a
@@ -437,8 +403,8 @@
         <li role="separator" class="divider"></li>
     <% } %>
 </script>
-    
-                                    
+
+
 <!-- Список сущностей -->
 <script type="text/x-just" data-just="entity_list">
 
@@ -561,7 +527,7 @@
         <a href="#" class="btn btn-primary"
             onclick="addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>'); return false;" >Add selected</a>
     <%] %>
-     
+
     <%[ action_buttons %>
         <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -575,8 +541,8 @@
                     </li>
             </ul>
         </div>
-    <%] %> 
- 
+    <%] %>
+
     <%[ select_buttons %>
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
