@@ -108,7 +108,7 @@
                         </div>
                         <span class="remove-token"
                                 role="button"
-                                data-value-name="<%- valfield.name %>" 
+                                data-value-name="<%- valfield.name %>"
                                 <%= justOn('click', function(event)
                                     {
                                         guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
@@ -568,30 +568,26 @@
 
     <%[ sublink_buttons %>
         <% for(var k in opt.links){  %>
-            <% if  (!opt.links[k].hidden) { %>
-                <a
-                    href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
-                    onclick="return vstGO(this.href);"
-                    class="btn btn-default sublink-btn"
-                >
-                    <%- opt.links[k].name.replace('_', ' ') %>
-                </a>
-            <% } %>
+            <a
+                href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
+                onclick="return vstGO(this.href);"
+                class="btn btn-default sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %> "
+            >
+                <%- opt.links[k].name.replace('_', ' ') %>
+            </a>
         <% } %>
 
         <% for(var k in opt.actions){  %>
-                <% if  (!opt.actions[k].hidden) { %>
-                    <% if  (!opt.actions[k].isEmptyAction) { %>
-                        <a
-                            href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
-                            onclick="return vstGO(this.href);"
-                            class="btn btn-warning sublink-btn"
-                        >
-                        <%- opt.actions[k].name.replace('_', ' ') %>
-                        </a>
-                    <% } else { %>
-                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
-                    <% } %>
+                <% if  (!opt.actions[k].isEmptyAction) { %>
+                    <a
+                        href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
+                        onclick="return vstGO(this.href);"
+                        class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
+                    >
+                    <%- opt.actions[k].name.replace('_', ' ') %>
+                    </a>
+                <% } else { %>
+                    <%= new guiElements.button({onclick:emptyAction(opt.actions[k]), class:'btn btn-primary', title:k, text:k}).render() %>
                 <% } %>
         <% } %>
     <%] %>
