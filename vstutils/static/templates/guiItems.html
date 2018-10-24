@@ -108,7 +108,7 @@
                         </div>
                         <span class="remove-token"
                                 role="button"
-                                data-value-name="<%- valfield.name %>" 
+                                data-value-name="<%- valfield.name %>"
                                 <%= justOn('click', function(event)
                                     {
                                         guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
@@ -582,7 +582,7 @@
                     <a
                         href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
                         onclick="return vstGO(this.href);"
-                        class="btn btn-warning sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %>"
+                        class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
                     >
                     <%- opt.actions[k].name.replace('_', ' ') %>
                     </a>
