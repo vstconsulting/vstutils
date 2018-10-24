@@ -129,8 +129,8 @@ var gui_list_object = {
             for(var path in prefetch_fields_ids[field])
             {
 
-                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');  
-                let match = XRegExp.exec(path, xregexpItem)  
+                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
+                let match = XRegExp.exec(path, xregexpItem)
                 //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                 if(match != null)
                 {
@@ -170,8 +170,8 @@ var gui_list_object = {
 
                         if(path)
                         {
-                            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');  
-                            let match = XRegExp.exec(path, xregexpItem)   
+                            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
+                            let match = XRegExp.exec(path, xregexpItem)
                             //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                             if(match != null)
                             {
@@ -228,10 +228,10 @@ var gui_list_object = {
      * @returns {jQuery.ajax|spajs.ajax.Call.defpromise|type|spajs.ajax.Call.opt|spajs.ajax.Call.spaAnonym$10|Boolean|undefined|spajs.ajax.Call.spaAnonym$9}
      */
     load : function (filters)
-    { 
+    {
         var promise = new $.Deferred();
 
-        $.when(this.load_list(filters)).done(d => { 
+        $.when(this.load_list(filters)).done(d => {
             $.when(this.prefetch(d)).always(a => {
                 promise.resolve(a);
             });
@@ -317,10 +317,10 @@ var gui_list_object = {
             filters:q.join("&"),
             method:'get'
         }
-  
+
         return this.apiQuery(queryObj)
     },
-    
+
     toggleSelectEachItem : function (tag, mode)
     {
         if(!mode)
@@ -354,7 +354,7 @@ var gui_list_object = {
 
     create : function ()
     {
-        var thisObj = this; 
+        var thisObj = this;
         var res = this.sendToApi('post')
         $.when(res).done(function()
         {
@@ -401,9 +401,9 @@ var gui_list_object = {
      * @returns {string|promise}
      */
     renderAsPage : function (render_options = {})
-    { 
+    {
         let tpl = this.getTemplateName('list')
-       
+
         if(this.api.autoupdate &&
                                     (
                                         !render_options  ||
@@ -414,16 +414,16 @@ var gui_list_object = {
         {
             this.startUpdates()
         }
-        
+
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
- 
+
         if(!render_options.page_type) render_options.page_type = 'list'
 
         render_options.selectionTag =  this.api.selectionTag
         window.guiListSelections.initTag(render_options.selectionTag)
-        
-        render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page 
+
+        render_options.base_href = (this.url_vars.parents || "") + this.url_vars.page
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
@@ -461,7 +461,7 @@ var gui_list_object = {
     renderAsAddSubItemsPage : function (render_options = {})
     {
         let tpl = this.getTemplateName('list_add_subitems')
-        
+
         if(this.api.autoupdate &&
                                     (
                                         !render_options  ||
@@ -472,15 +472,15 @@ var gui_list_object = {
         {
             this.startUpdates()
         }
-        
+
         render_options.fields = this.api.schema.list.fields
         render_options.base_path = getUrlBasePath()
-        
+
         render_options.selectionTag =  this.api.selectionTag+"_add"
         window.guiListSelections.initTag(render_options.selectionTag)
 
-        render_options.base_href = this.url_vars.page_type  
-        
+        render_options.base_href = this.url_vars.page_type
+
         render_options.hideActions = true
         render_options.base_path = getUrlBasePath()
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
@@ -568,12 +568,12 @@ var gui_list_object = {
 
         for(let i in this.api.schema.list.filters)
         {
-            let val = this.api.schema.list.filters[i] 
+            let val = this.api.schema.list.filters[i]
             this.activeSearch.fields[val.name] = val
             this.activeSearch.fields[val.name].value = ""
         }
-  
-        this.searchAdditionalData = {}  
+
+        this.searchAdditionalData = {}
         this.activeSearch.active = ""
 
         var search = this.searchStringToObject(searchString, undefined, true)
@@ -623,6 +623,12 @@ var gui_list_object = {
                     }
                     else
                     {
+                        if(this.activeSearch.fields[value])
+                        {
+                            this.selectSearchFilter(value)
+                            return;
+                        }
+
                         this.addSearchFilter(this.activeSearch.active, value)
                         setTimeout(() =>{
                             spajs.showLoader(this.searchGO('', this.searchAdditionalData))
@@ -693,7 +699,7 @@ var gui_list_object = {
     {
         return this.search(this.model.filters)
     },
-      
+
     /**
      * Goes to the search results page.
      * @param {string} query
@@ -703,7 +709,7 @@ var gui_list_object = {
     {
         if (this.isEmptySearchQuery(query))
         {
-            return vstGO(this.url_vars.baseURL());
+            return vstGO(this.url_vars.baseURL().replace(/\/search\/?$/, ""));
         }
 
         return vstGO(this.url_vars.searchURL(this.searchObjectToString(trim(query))))
@@ -863,13 +869,13 @@ var gui_list_object = {
                         search[arg[0]] = arg[1]
                     }
                 }
-                else if(Array.isArray(search[arg[0]+"__in"]))  
+                else if(Array.isArray(search[arg[0]+"__in"]))
                 {
-                    search[arg[0]+"__in"].push(arg[1])  
+                    search[arg[0]+"__in"].push(arg[1])
                 }
                 else
                 {
-                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]]  
+                    search[arg[0]+"__in"] = [search[arg[0]], arg[1]]
                     delete search[arg[0]]
                     delete search[arg[0]+"__contains"]
                 }
@@ -932,7 +938,7 @@ var gui_list_object = {
                     variablesString.push(i +":"+variables[i])
                 }
 
-                search['variables'] = variablesString 
+                search['variables'] = variablesString
             }
         }
 
@@ -1049,7 +1055,7 @@ var gui_list_object = {
 }
 
 function createAndGoEdit(obj)
-{ 
+{
     var def = obj.create();
     $.when(def).done(function(newObj){
 
