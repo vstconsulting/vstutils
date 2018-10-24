@@ -728,26 +728,30 @@ function openApi_guiSchema(api)
         delete path_schema[path].api
     }
  
-    return {path:path_schema, object:short_schema};
+    let schema = {path:path_schema, object:short_schema}
+    emitSchemaPathSignals(schema.path, "gui.schema.");
+    
+    return schema;
 }
  
 /*
  * Function emits signals for schema
  * @param {object} path_schema - guiShema.path
  */
-function emitSchemaPathSignals(path_schema)
+function emitSchemaPathSignals(path_schema, prefix = "openapi.schema.")
 {
     for(let path in path_schema)
     {
         let val = path_schema[path]
-
-        tabSignal.emit("openapi.schema.name."+val.name,  {paths:path_schema, path:path, value:val});
-        tabSignal.emit("openapi.schema.type."+val.type,  {paths:path_schema, path:path, value:val});
+      
+        tabSignal.emit(prefix + "name."+val.name,  {paths:path_schema, path:path, value:val});
+        tabSignal.emit(prefix + "type."+val.type,  {paths:path_schema, path:path, value:val});
         for(let schema in val.schema)
         {
-            tabSignal.emit("openapi.schema.schema",  {paths:path_schema, path:path, value:val.schema[schema]});
-            tabSignal.emit("openapi.schema.schema."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
-            tabSignal.emit("openapi.schema.fields",  {paths:path_schema, path:path, value:val.schema[schema], schema:schema, fields:val.schema[schema].fields});
+            tabSignal.emit(prefix + "name."+val.name+"."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
+            tabSignal.emit(prefix + "schema",  {paths:path_schema, path:path, value:val.schema[schema]});
+            tabSignal.emit(prefix + "schema."+schema,  {paths:path_schema, path:path, value:val.schema[schema], schema:schema});
+            tabSignal.emit(prefix + "fields",  {paths:path_schema, path:path, value:val.schema[schema], schema:schema, fields:val.schema[schema].fields});
         }
     }
 }
