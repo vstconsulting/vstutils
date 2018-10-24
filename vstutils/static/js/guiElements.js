@@ -291,7 +291,7 @@ guiElements.base = function(opt = {}, value, parent_object)
      * @returns {undefined}
      */
     this.addOnChangeCallBack = function(callback)
-    {
+    { 
         this.onChange_calls.push(callback)
     }
 
@@ -324,17 +324,17 @@ guiElements.base = function(opt = {}, value, parent_object)
      * @returns {undefined}
      */
     this.updateOptions = function(arg)
-    {
-        if(opt.onUpdateOptions)
+    { 
+        if(this.onUpdateOptions)
         {
-            if(typeof opt.onUpdateOptions != 'object')
+            if(typeof this.onUpdateOptions != 'object')
             {
-                opt.onUpdateOptions = [opt.onUpdateOptions]
+                this.onUpdateOptions = [this.onUpdateOptions]
             }
 
-            for(let i in opt.onUpdateOptions)
+            for(let i in this.onUpdateOptions)
             {
-                opt.onUpdateOptions[i](this, arg)
+                this.onUpdateOptions[i](this, arg)
             }
         }
     }
@@ -1342,8 +1342,8 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
     }
 
-    this.opt.onUpdateOptions = [];
-    this.opt.onUpdateOptions.push(function (fieldObj, newValue)
+    this.onUpdateOptions = [];
+    this.onUpdateOptions.push(function (fieldObj, newValue)
     {
         var new_type = "string";
         var override_opt = {};
