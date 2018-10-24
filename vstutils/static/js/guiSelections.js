@@ -17,13 +17,13 @@ function guiSelections(){
             this.selectedItems = {}
             this.selectedCount = {}
         }
-        
+
         if(!this.selectedItems[tag])
         {
             this.selectedItems[tag] = {}
             this.selectedCount[tag] = 0
         }
-        
+
         if(!doNotDeleteOldSelections)
         {
             this.lastTag = tag
@@ -33,11 +33,21 @@ function guiSelections(){
 
     this.isSelected = function(tag, id)
     {
+        if(!this.selectedItems[tag])
+        {
+            return false;
+        }
+
         return this.selectedItems[tag][id] == true
     }
 
     this.unSelectAll = function(tag)
     {
+        if(!this.selectedItems[tag])
+        {
+            return;
+        }
+
         for(let i in this.selectedItems[tag])
         {
             this.selectedItems[tag][i] = false
@@ -48,6 +58,11 @@ function guiSelections(){
 
     this.getSelection = function(tag)
     {
+        if(!this.selectedItems[tag])
+        {
+            return []
+        }
+
         let ids = []
         for(let i in this.selectedItems[tag])
         {
@@ -72,6 +87,11 @@ function guiSelections(){
 
     this.setSelection = function(tag, id, value)
     {
+        if(!this.selectedItems[tag])
+        {
+            return;
+        }
+
         let delta = 0;
 
         if($.isArray(id))
@@ -102,6 +122,11 @@ function guiSelections(){
 
     this.toggleSelectElements = function (tag, elements, mode)
     {
+        if(!this.selectedItems[tag])
+        {
+            return;
+        }
+
         let ids = []
         for (var i = 0; i < elements.length; i++)
         {
@@ -113,6 +138,11 @@ function guiSelections(){
 
     this.toggleSelection = function(tag, id)
     {
+        if(!this.selectedItems[tag])
+        {
+            return;
+        }
+
         let delta = 0;
         if($.isArray(id))
         {
@@ -141,6 +171,11 @@ function guiSelections(){
 
     this.selectionControll = function(tag, id, css_class)
     {
+        if(!this.selectedItems[tag])
+        {
+            return;
+        }
+
         if(!this.selectedItems[tag][id])
         {
             this.selectedItems[tag][id] = false
