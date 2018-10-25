@@ -690,7 +690,6 @@ guiElements.autocomplete = function()
                 {
                     let value = $(item).attr('data-value');
                     $('#'+this.element_id).val(value);
-                    $('#'+this.element_id).val($(item).text());
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
                 },
@@ -998,9 +997,21 @@ guiElements.select2 = function(field, field_value, parent_object)
                     {
                         $.when(options.search(params, field, field_value, parent_object)).done((results) =>
                         {
+                            if(options.autocomplete_properties && options.autocomplete_properties.default_value)
+                            {
+                                results.push(options.autocomplete_properties.default_value)
+                            }
+
                             success(results)
                         }).fail((e) => {
-                            failure([])
+
+                            let results =[];
+                            if(options.autocomplete_properties && options.autocomplete_properties.default_value)
+                            {
+                                results.push(options.autocomplete_properties.default_value)
+                            }
+
+                            failure(results)
                         })
                     }
                 }
@@ -1071,9 +1082,22 @@ guiElements.select2 = function(field, field_value, parent_object)
                                         }
                                     )
                                 }
+
+                                if(options.autocomplete_properties && options.autocomplete_properties.default_value)
+                                {
+                                    results.push(options.autocomplete_properties.default_value)
+                                }
+
                                 success({results:results})
                             }).fail((e) => {
-                                failure([])
+
+                                let results =[];
+                                if(options.autocomplete_properties && options.autocomplete_properties.default_value)
+                                {
+                                    results.push(options.autocomplete_properties.default_value)
+                                }
+
+                                failure(results)
                             })
                         }
                     }
