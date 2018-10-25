@@ -1065,15 +1065,30 @@ var gui_list_object = {
         return this.model.data.count / limit
     },
 
-}
+    createAndGoEdit: function()
+    {
+        var def = this.create();
+        $.when(def).done((newObj) => {
 
-function createAndGoEdit(obj)
-{
-    var def = obj.create();
-    $.when(def).done(function(newObj){
+            let id = newObj.data.id
+            if(newObj.data.id === undefined)
+            {
+                id = newObj.data.pk
+                if(newObj.data.pk === undefined)
+                {
+                    id = newObj.data.name
+                    if(newObj.data.name === undefined)
+                    {
+                        console.error("Primary key not found")
+                        debugger;
+                    }
+                }
+            }
 
-        vstGO(spajs.urlInfo.data.reg.baseURL(newObj.data.id));
-    })
+            vstGO(this.url_vars.baseURL(id));
+        })
 
-    return def;
+        return def;
+    }
+
 }
