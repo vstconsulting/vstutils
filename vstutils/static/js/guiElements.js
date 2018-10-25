@@ -1072,6 +1072,11 @@ guiElements.select2 = function(field, field_value, parent_object)
                             $.when(list.search(filters)).done((data) =>
                             {
                                 let results =[];
+                                if(options.autocomplete_properties && options.autocomplete_properties.default_value)
+                                {
+                                    results.push(options.autocomplete_properties.default_value)
+                                }
+
                                 let api_data = data.data.results;
                                 for(let i in api_data)
                                 {
@@ -1081,11 +1086,6 @@ guiElements.select2 = function(field, field_value, parent_object)
                                             text: api_data[i][view_field]
                                         }
                                     )
-                                }
-
-                                if(options.autocomplete_properties && options.autocomplete_properties.default_value)
-                                {
-                                    results.push(options.autocomplete_properties.default_value)
                                 }
 
                                 success({results:results})
