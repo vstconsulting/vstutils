@@ -286,6 +286,11 @@ var gui_base_object = {
                 {
                     if(/^api_/.test(i))
                     {
+                        if(typeof this.url_vars[i] != "string")
+                        {
+                            this.url_vars[i] = this.url_vars[i]+""
+                        }
+
                         if(this.url_vars[i].indexOf(",") != -1)
                         {
                             let ids = this.url_vars[i].split(",")
@@ -484,11 +489,23 @@ function guiObjectFactory(api_object)
 
 
 
-function emptyAction(action_info)
+function emptyAction(action_info, guiObj, dataLine = undefined)
 {
-    var pageItem = new guiObjectFactory(action_info, {
-        // Сюда надо передать дополнительную переменную api_* с id объекта списка
-    })
+    let url_vars = $.extend(true, {}, guiObj.url_vars)
+    if(dataLine)
+    {
+        let keys = action_info.path.match(/{([^\}]+)}/g)
+        for(let i in keys)
+        {
+            let key = keys[i].slice(1, keys[i].length - 1)
+            if(url_vars['api_'+key] === undefined)
+            {
+                url_vars['api_'+key] = dataLine.url_key
+            }
+        }
+    }
+
+    var pageItem = new guiObjectFactory(action_info, url_vars)
     return function(){
         return pageItem.exec()
     }
