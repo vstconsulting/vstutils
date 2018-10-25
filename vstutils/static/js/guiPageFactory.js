@@ -13,7 +13,7 @@ var gui_page_object = {
                 }
             }
         }
-        
+
         return this.api.name
     },
 
@@ -78,7 +78,7 @@ var gui_page_object = {
         {
             for(var path in prefetch_fields_ids[field])
             {
-                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x'); 
+                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
                 //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                 let match = XRegExp.exec(path, xregexpItem)
                 if(match != null)
@@ -117,7 +117,7 @@ var gui_page_object = {
                     let path = prefetch_fields[field].path(dataFromApi);
                     if(path)
                     {
-                        let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x'); 
+                        let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
                         //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                         let match = XRegExp.exec(path, xregexpItem)
                         //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
@@ -171,22 +171,22 @@ var gui_page_object = {
 
     updateFromServer : function ()
     {
-        let res = this.load(this.model.filters) 
-      
+        let res = this.load(this.model.filters)
+
         $.when(res).done(() =>
-        { 
+        {
             for(let i in this.model.guiFields)
             {
                 this.model.guiFields[i].updateValue(this.model.data[i], this.model.data)
             }
         })
-        
+
         return res
     },
-    
+
     load : function (filters)
-    {
-        this.model.filters =  $.extend(true, {}, filters)
+    { 
+        this.model.filters =  $.extend(true, {}, this.url_vars, filters)
         if(typeof this.model.filters !== "object")
         {
             this.model.filters = {api_pk:this.model.filters}
@@ -194,13 +194,13 @@ var gui_page_object = {
 
         var thisObj = this;
         var url = this.api.path
-        if(this.url_vars)
+        if(this.model.filters)
         {
-            for(let i in this.url_vars)
+            for(let i in this.model.filters)
             {
                 if(/^api_/.test(i))
                 {
-                    url = url.replace("{"+i.replace("api_", "")+"}", this.url_vars[i])
+                    url = url.replace("{"+i.replace("api_", "")+"}", this.model.filters[i])
                 }
             }
         }
@@ -230,17 +230,17 @@ var gui_page_object = {
 
         return promise.promise();
     },
- 
+
     init : function (page_options = {}, url_vars = undefined, object_data = undefined)
     {
         this.base_init.apply(this, arguments)
         if(object_data)
-        { 
+        {
             this.model.data = object_data
             this.model.status = 200
-            
+
             this.model.title += " #" + this.model.data.id
-            
+
             if(this.api.name_field && this.model.data[this.api.name_field])
             {
                 this.model.title = this.model.data[this.api.name_field]
@@ -260,9 +260,9 @@ var gui_page_object = {
     },
 
     delete : function ()
-    { 
+    {
         var thisObj = this;
-        
+
         if(this.model && this.model.data && this.api.parent)
         {
             window.guiListSelections.setSelection(this.api.parent.selectionTag, this.model.data.id)
@@ -294,7 +294,7 @@ var gui_page_object = {
         {
             this.startUpdates()
         }
-        
+
         render_options.fields = []
         if(this.api.schema.edit)
         {
@@ -308,17 +308,17 @@ var gui_page_object = {
         if(!render_options.page_type) render_options.page_type = 'one'
 
         render_options.base_path = getUrlBasePath()
-        
+
         render_options.links = this.api.links
         render_options.actions = this.api.actions
 
         this.model.data = this.prepareDataBeforeRender();
 
         this.beforeRenderAsPage();
-        
+
         tabSignal.emit("guiList.renderPage",  {guiObj:this, options: render_options, data:this.model.data});
         tabSignal.emit("guiList.renderPage."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data});
-        
+
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
     },
 
