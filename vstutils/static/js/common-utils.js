@@ -4,7 +4,7 @@
  * associative array and iterable objects set value for keys that original string have
  * @param takes array, associative array or single variable and insert it
  * @returns {String} - return string with inserted arguments
- */ 
+ */
 String.prototype.format = function()
 {
     let obj = this.toString();
@@ -39,14 +39,14 @@ String.prototype.format_keys = function()
 {
     let thisObj = this;
     //let regex = new RegExp("(?<={).+?(?=})", "g");
-    //let match = thisObj.match(regex) 
+    //let match = thisObj.match(regex)
     //return match || [];
     let res = thisObj.match(/{([^\}]+)}/g)
     if(!res)
     {
         return []
     }
-    
+
     return res.map((item) =>{ return item.slice(1, item.length - 1) })
 }
 
@@ -57,7 +57,7 @@ if(!window.guiTestsFiles)
 }
 
 // Add a test file to the list of files for test gui
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js') 
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
 
 
@@ -500,7 +500,7 @@ function makeUrlForApiKeys(url_string)
 }
 
 function vstMakeLocalApiUrl(url, vars = {})
-{ 
+{
     if(Array.isArray(url))
     {
         url = url.join("/")
