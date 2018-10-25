@@ -379,12 +379,25 @@ var gui_list_object = {
             rendered:{}
         }
 
+        dataLine.opt.pk_name = 'id'
+        dataLine.url_key = line.id
         // Add id field forcibly if it is not even in the list
         if(line.id === undefined)
         {
-            line.id = Object.keys(line)[0]
+            dataLine.opt.pk_name = 'pk'
+            dataLine.url_key = line.pk
+            if(line.pk === undefined)
+            {
+                dataLine.opt.pk_name = 'name'
+                dataLine.url_key = line.name
+                if(line.name === undefined)
+                {
+                    console.error("Primary key not defined")
+                    debugger;
+                }
+            }
         }
-        dataLine.url_key = line.id
+
         if(dataLine.url_key/1 +"" !== dataLine.url_key+"")
         {
             dataLine.url_key = "@"+dataLine.url_key
