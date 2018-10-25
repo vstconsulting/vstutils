@@ -630,7 +630,7 @@ function changeSubItemsInParent(action, item_ids)
 
 function getUrlBasePath()
 {
-    return window.location.hash.replace(/^#/, "")
+    return window.location.hash.replace(/^#/, "").replace(/\/+$/, "")
 }
 
 function renderErrorAsPage(error)
