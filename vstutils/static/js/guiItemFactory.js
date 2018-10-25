@@ -290,7 +290,7 @@ var gui_base_object = {
                         {
                             this.url_vars[i] = this.url_vars[i]+""
                         }
-                        
+
                         if(this.url_vars[i].indexOf(",") != -1)
                         {
                             let ids = this.url_vars[i].split(",")
