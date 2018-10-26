@@ -245,39 +245,39 @@ if(!window.spajs)
      * @returns {boolean} Если параметр не найден или информации в нём содержится о не зарегистрированном menuId то вернёт false
      */
     spajs.openMenuFromUrl = function(event_state, opt)
-    { 
+    {
         if(!opt)
         {
             opt = {}
         }
-        
+
         // Если menu_url не задан то используем первый знак вопроса в строке адреса
         if(window.location.href.indexOf("?") != -1)
         {
             opt.menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
-        } 
+        }
         else
         {
             // Если menu_url не задан то используем window.location.hash
             opt.menuId = window.location.hash.slice(1)
         }
-        
+
         if(spajs.opt.menu_url)
         {
             opt.menuId = spajs.getUrlParam(spajs.opt.menu_url, event_state)
-        } 
- 
-         
+        }
+
+
         opt.addUrlParams = {}
         opt.notAddToHistory = true
         opt.event_state = event_state
- 
-        return spajs.open(opt) 
+
+        return spajs.open(opt)
     }
 
     spajs.setUrlParam = function(params, title)
     {
-        var url = window.location.pathname + "?" + params.toString(); 
+        var url = window.location.pathname + "?" + params.toString();
         if(typeof params === "object")
         {
             var new_url = window.location.href;
@@ -318,7 +318,7 @@ if(!window.spajs)
 
             url = new_url.replace(/&+/img, "&").replace(/&+$/img, "").replace(/\?+$/img, "").replace(/\?&+/img, "?")
         }
-        
+
         if(!spajs.opt.addParamsToUrl)
         {
             url = window.location.href;
@@ -371,7 +371,7 @@ if(!window.spajs)
 
         return res
     }
- 
+
     /**
      * Добавляет произвольный пункт меню
      * @param {object} menu Описание пункта меню
@@ -428,41 +428,41 @@ if(!window.spajs)
         {
             menu.id = Math.random()
         }
-        
+
         if(!menu.type)
         {
             menu.type = "custom"
         }
-   
+
         if(!menu.priority)
         {
             menu.priority = 0;
         }
 
         spajs.opt.menu.push(menu)
-  
+
         spajs.opt.menu = spajs.opt.menu.sort((a, b)=>
-        { 
+        {
             return b.priority - a.priority
         });
-       
+
     }
-  
+
     spajs.currentOpenMenu = undefined
 
     spajs.findMenu = function(menuId)
-    {     
+    {
         for(var i in this.opt.menu)
         {
             let val = this.opt.menu[i]
-            
+
             if(val.url_parser != undefined)
             {
                 for(var j in val.url_parser)
                 {
                     var parsed = val.url_parser[j](menuId)
                     if(parsed)
-                    {  
+                    {
                         return {menu:val, regExpRes:parsed}
                     }
                 }
@@ -472,7 +472,7 @@ if(!window.spajs)
                 for(var j in val.urlregexp)
                 {
                     if(val.urlregexp[j].test(menuId))
-                    { 
+                    {
                         return {menu:val, regExpRes:val.urlregexp[j].exec(menuId) }
                     }
                 }
@@ -480,10 +480,10 @@ if(!window.spajs)
             else if(val.id == menuId)
             {
                 return {menu:val, regExpRes:[]}
-            } 
+            }
         }
-  
-        return false 
+
+        return false
     }
 
     /**
@@ -500,19 +500,19 @@ if(!window.spajs)
     spajs.open = function(opt)
     {
         console.log("spajs.open", opt)
-        
+
         if(!opt.menuId)
         {
             opt.menuId = "";
         }
-        
+
         if(opt.reopen === undefined)
         {
             opt.reopen = true;
         }
-        
+
         var def = new $.Deferred();
-         
+
         if(!opt.withoutFailPage)
         {
             $.when(def).fail(function(e)
@@ -524,23 +524,23 @@ if(!window.spajs)
                 }
             })
         }
-        
+
         if(!spajs.opt.addParamsToUrl && opt.event_state == undefined)
         {
             opt.event_state = {}
             opt.event_state.url = window.location.href;
         }
-        
+
         //console.table(spajs.opt.menu)
-        
+
         var regExpRes = []
         let findedMenu = spajs.findMenu(opt.menuId)
         var menuInfo = findedMenu.menu
-            
+
         console.log("openMenu", menuInfo)
         if(!menuInfo || !menuInfo.onOpen)
         {
-            
+
             if(!opt.withoutFailPage)
             {
                 console.error("URL not registered", opt.menuId, opt)
@@ -586,15 +586,14 @@ if(!window.spajs)
                 opt.event_state.url = url;
             }
         }
-        
-        menuInfo.onClose_promise = new $.Deferred();  
+
         if(spajs.currentOpenMenu)
-        {  
+        {
             if(spajs.currentOpenMenu.onClose_promise)
             {
                 spajs.currentOpenMenu.onClose_promise.resolve(menuInfo)
             }
-            
+
             if(spajs.currentOpenMenu.onClose)
             {
                 spajs.currentOpenMenu.onClose(menuInfo)
@@ -617,9 +616,10 @@ if(!window.spajs)
             //error("Не удалён предыдущий класс меню", spajs.currentOpenMenu, menuInfo)
         }
         $(spajs.opt.holder).addClass("spajs-active-"+menuInfo.id);
- 
+
+        menuInfo.onClose_promise = new $.Deferred();
         spajs.urlInfo = {
-                            menuInfo:menuInfo, 
+                            menuInfo:menuInfo,
                             data:{
                                 url : spajs.getAllUrlParam(opt.event_state),
                                 reg : findedMenu.regExpRes
@@ -627,14 +627,14 @@ if(!window.spajs)
                     }
         //tabSignal.emit("spajsOpen", {menuInfo:menuInfo, data:data})
         tabSignal.emit("spajs.open", spajs.urlInfo)
-         
+
         let res = menuInfo.onOpen(jQuery('#spajs-right-area'), menuInfo, spajs.urlInfo.data, menuInfo.onClose_promise.promise());
         if(res)
         {
             // in-loading
-            $("body").addClass("in-loading") 
+            $("body").addClass("in-loading")
             spajs.wait_result(jQuery('#spajs-right-area'), res)
-            
+
         }
         else
         {
@@ -648,14 +648,14 @@ if(!window.spajs)
         jQuery("#spajs-menu-"+menuInfo.id).addClass("active")
 
         spajs.currentOpenMenu = menuInfo;
-        
+
         if(opt.callback)
         {
             opt.callback();
         }
 
         if(typeof res == "string")
-        { 
+        {
             def.resolve()
             res = def
         }
@@ -770,7 +770,7 @@ if(!window.spajs)
         {
             return spajs.ajax.showErrors(data.responseJSON)
         }
-        
+
         if(data && data.message)
         {
             return spajs.ajax.showErrors(data.message)
@@ -1020,5 +1020,5 @@ if(!window.spajs)
             jQuery.ajax(spajs.ajax.ajaxQueue[i]);
         }
         spajs.ajax.ajaxQueue = []
-    } 
+    }
 }
