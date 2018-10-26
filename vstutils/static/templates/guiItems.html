@@ -334,24 +334,26 @@
                     <ul class="dropdown-menu dropdown-menu-right">
                         <% for(var k in dataLine.sublinks_l2){ %>
                             <% if(!dataLine.sublinks_l2[k].hidden) { %>
-                                <li>
                                     <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
-                                        <a
-                                            href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
-                                            onclick="return false;"
-                                            class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
-                                                <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
-                                        </a>
-                                    <% } else { %>
-                                        <b
-                                            class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
-                                            >
-                                                <i <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %>>
+                                        <li>
+                                            <a
+                                                href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
+                                                onclick="return false;"
+                                                class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
                                                     <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
-                                                </i>
-                                        </b>
+                                            </a>
+                                        </li>
+                                    <% } else { %>
+                                        <li <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
+                                            <b
+                                                class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
+                                                >
+                                                    <i >
+                                                        <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                                    </i>
+                                            </b>
+                                        </li>
                                     <% } %>
-                                </li>
                             <% } %>
                         <% } %>
                     </ul>
