@@ -100,7 +100,6 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
         obj.getApiPath = function (){
             return {api:api_path_value, url:this}
         }
-
         return obj
     }
 }
