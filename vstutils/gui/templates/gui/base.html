@@ -16,8 +16,8 @@
         var hostname = '{{host_url}}';
         var server_status_types = '{{server_status_types|safe}}';
 
-        var polemarch_version = '{{gui_version}}';
         var gui_version = '{{gui_version}}';
+        var api_version = 'v2';
 
         var gui_logout_url = hostname + '{{logout_url}}';
 
@@ -33,18 +33,17 @@
             var is_authenticated = false
         {% endif %}
 
+        var is_superuser = false
+        var is_staff = false
+
         {% if user.is_superuser %}
-            var is_superuser = true
-            var is_staff = true
-        {% else %}
-            {% if user.is_staff %}
-                var is_superuser = true
-                var is_staff = true
-            {% else %}
-                var is_superuser = false
-                var is_staff = false
-            {% endif %}
+            is_superuser = true
         {% endif %}
+
+        {% if user.is_staff %}
+             is_staff = true
+        {% endif %}
+
 
         window.guiStaticPath = "{% static '' %}";
         window.isDebug = {% if debug %}true{% else %}false{% endif %}
@@ -112,8 +111,8 @@
                 font-family: 'Ubuntu Mono', monospace;
                 color: #3F51B5;
                 text-transform: uppercase;
-                
-                
+
+
                 font-size: 36px;
                 margin-top: 20px;
                 margin-bottom: 10px;
@@ -122,7 +121,7 @@
                 margin: .67em 0;
                 box-sizing: border-box;
             }
-            
+
             .loadInfoWrapper a{
                 position: absolute;
                 border-radius: 7px;
@@ -139,9 +138,9 @@
                 font-weight: 400;
                 font-size: 14px;
             }
-            
-            .loadInfoWrapper a:hover{ 
-                background-color: #d0d0d0; 
+
+            .loadInfoWrapper a:hover{
+                background-color: #d0d0d0;
             }
         </style>
     {% endblock %}
@@ -161,51 +160,75 @@
 {% block resource_list %}
     <script>
         window.resourceList = [
-            { prioritet:0, type:'js', name: "{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}?v={{gui_version}}"},
+            { prioritet:0, type:'js', name: "{% static 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"},
             { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"},
 
 
             { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
-            { prioritet:4, type:'js', name: "{% static 'js/libs/notify.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
+            { prioritet:4, type:'js', name: "{% static 'js/libs/iziModal.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
 
             { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
             { prioritet:7, type:'js', name: "{% static 'js/libs/just-watch.js' %}?v={{gui_version}}"},
 
+            { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
 
             { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
- 
+
+            { prioritet:110, type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"},
+            { prioritet:110, type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"},
+            { prioritet:110, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
+
+            { prioritet:50, type:'js', name: "{% static 'js/libs/moment.min.js' %}?v={{gui_version}}"},
+            { prioritet:51, type:'js', name: "{% static 'js/libs/moment-timezone.min.js' %}?v={{gui_version}}"},
+            { prioritet:50, type:'js', name: "{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{gui_version}}"},
+
             { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
+            { prioritet:10.1, type:'js', name: "{% static 'js/guiPopUp.js' %}?v={{gui_version}}"},
+            { prioritet:10.2, type:'js', name: "{% static 'js/guiModal.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiElements.js' %}?v={{gui_version}}"},
+            { prioritet:11.0, type:'js', name: "{% static 'js/guiListElements.js' %}?v={{gui_version}}"},
             { prioritet:11.0, type:'js', name: "{% static 'js/guiBreadcrumbers.js' %}?v={{gui_version}}"},
             { prioritet:11.1, type:'js', name: "{% static 'js/guiApi.js' %}?v={{gui_version}}"},
-            { prioritet:11.2, type:'js', name: "{% static 'js/guiPage.js' %}?v={{gui_version}}"},
             { prioritet:11.3, type:'js', name: "{% static 'js/guiItemFactory.js' %}?v={{gui_version}}"},
-            { prioritet:11.4, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiPageFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiListFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.3, type:'js', name: "{% static 'js/guiActionFactory.js' %}?v={{gui_version}}"},
+            { prioritet:11.4, type:'js', name: "{% static 'js/guiSchema.js' %}?v={{gui_version}}"},
+            { prioritet:11.5, type:'js', name: "{% static 'js/guiFactory.js' %}?v={{gui_version}}"},
 
             { prioritet:11.7, type:'js', name: "{% static 'js/guiForWeb.js' %}?v={{gui_version}}"},
-            { prioritet:300, type:'js', name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
-            { prioritet:100, type:'tpl', name: "{% static '/' %}templates/errorPage.html?v={{gui_version}}"},
-            { prioritet:300, type:'tpl', name: "{% static '/' %}templates/guiDashboard.html?v={{gui_version}}"},
-            { prioritet:300, type:'tpl', name: "{% static '/' %}templates/guiBreadcrumbers.html?v={{gui_version}}"},
-            { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'js', name: "{% static 'js/guiUser.js' %}?v={{gui_version}}"},
+            { prioritet:300, type:'js',  name: "{% static 'js/guiDashboard.js' %}?v={{gui_version}}"},
 
-            { prioritet:102, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:100, type:'tpl', name: "{% static 'templates/errorPage.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiDashboard.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiBreadcrumbers.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiElements.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiListElements.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiModals.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
+
+            { prioritet:101, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
+            { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
             { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
             { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
             { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
             { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
-            { prioritet:107, type:'css', name: "{% static 'js/libs/c3/c3.min.css' %}?v={{gui_version}}"},
             { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
+
+            { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
 
         ]
     </script>
 {% endblock %}
- 
+
 {% block body %}
     <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}">
         {% block gui_init_inline_body %}
@@ -226,18 +249,18 @@
                 <div class="loadWrapper">
                     <div class="loadProgress"  id="LoadingProgressBarLine"></div>
                 </div>
-                 
+
                 <div class="loadInfoWrapper">
-                    <a href="#" onclick="window.guiFilesCache.deleteAllCache(); return false;">Reload all cache</a> 
+                    <a href="#" onclick="window.guiFilesCache.deleteAllCache(); return false;">Reload all cache</a>
                 </div>
-                
+
                 <div id="LoadingProgressBar-errorLog">
-                     
+
                 </div>
             </div>
         {% endblock %}
- 
-        <div id="RealBody" style="display: none;">
+
+        <div id="RealBody" class="{% if user.is_superuser %} is_superuser {% endif %} {% if user.is_staff %} is_staff {% endif %}" style="display: none;">
             {% block gui_body_template %}
                 <div class="hold-transition skin-black-light sidebar-mini " style="width: 100vw;    height: 100vh;">
                     <div id="loader-wrapper">
@@ -246,12 +269,12 @@
 
                     {% block navbar %}
                         <div class="wrapper" >
-                            <header class="main-header"> 
+                            <header class="main-header">
                                 {% block logo %}
                                     <!-- Logo -->
                                     <a href="/" class="logo">
                                         <span>{{ project_gui_name }}</span>
-                                    </a>       
+                                    </a>
                                 {% endblock %}
                                 <!-- Header Navbar: style can be found in header.less -->
                                 <nav class="navbar navbar-static-top">
@@ -289,12 +312,12 @@
                                 {% block content %}
                                     <!-- errorPage -->
                                     <section class="content-header">
-                                        <h1> 
+                                        <h1>
                                             <span class="h1-header" ><i class="fa fa-warning text-yellow"></i> Page not found</span>
 
                                         </h1>
                                         <ol class="breadcrumb">
-                                            <li><a href="<%- window.hostname %>" onclick="return spajs.openURL(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li> 
+                                            <li><a href="<%- window.hostname %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
                                             <li class="active"><i class="fa fa-warning text-yellow"></i> Page not found </li>
                                         </ol>
                                     </section>
@@ -312,22 +335,29 @@
                                                     <div class="box-header with-border">
 
                                                     </div>
-                                                    <div class="box-body"> 
+                                                    <div class="box-body">
                                                         <p>
                                                             Status: 404
-                                                        </p> 
-                                                        Follow the link to create a bug report  
+                                                        </p>
+                                                        Follow the link to create a bug report
                                                     </div>
                                                 </div>
                                             </section>
                                         </div>
                                     </section>
-                                    <!-- /errorPage --> 
+                                    <!-- /errorPage -->
                                 {% endblock %}
                             </div>
 
                             {% block footer %}
                                 <footer class="main-footer">
+
+                                    <div class="btn-group" role="group">
+                                        <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="openHelpModal(); return false;">
+                                            <span class="glyphicon glyphicon-question-sign"></span> About
+                                        </a>
+                                    </div>
+
 
                                     {% block footer_buttons %}{% endblock %}
 
@@ -343,9 +373,9 @@
                                             &nbsp;&nbsp;&nbsp;
                                         </div>
                                     {% endif %}
-                                    <div class="pull-right">  
-                                        <a  
-                                                href="#" 
+                                    <div class="pull-right">
+                                        <a
+                                                href="#"
                                                 onclick="window.guiFilesCache.deleteAllCache(); return false;"
                                                 style="color:#ccc;"
                                                 >Reload cache</a>
@@ -361,13 +391,13 @@
         </div>
 
         <!-- /gui_body_template -->
-            
+
         <!-- inline_app_loader -->
-        {% block inline_app_loader %} 
+        {% block inline_app_loader %}
             {% include "gui/inline_app_loader.html" %}
         {% endblock %}
         <!-- /inline_app_loader -->
-        
+
         <!-- script -->
         {% block script %}{{ block.super }}{% endblock %}
         <!-- /script -->

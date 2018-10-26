@@ -1,3 +1,4 @@
+from copy import copy
 from collections import OrderedDict
 from rest_framework import status
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
@@ -13,6 +14,13 @@ from . import fields, serializers
 FORMAT_FILE = openapi.TYPE_FILE
 FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
+FORMAT_HTML = 'html'
+FORMAT_JSON = 'json'
+FORMAT_TEXTAREA = 'textarea'
+FORMAT_DYN = 'dynamic'
+FORMAT_SELECT2 = 'select2'
+FORMAT_UPTIME = 'uptime'
+
 
 # Base types
 basic_type_info = OrderedDict()
@@ -22,9 +30,40 @@ basic_type_info[fields.FileInStringField] = dict(
 basic_type_info[fields.SecretFileInString] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_SECRET_FILE
 )
-basic_type_info[fields.AutoCompletionField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE
+basic_type_info[fields.HtmlField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_HTML
 )
+basic_type_info[serializers.JsonObjectSerializer] = dict(
+    type=openapi.TYPE_OBJECT, format=FORMAT_JSON
+)
+basic_type_info[fields.TextareaField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
+)
+basic_type_info[fields.UptimeField] = dict(
+    type=openapi.TYPE_INTEGER, format=FORMAT_UPTIME
+)
+basic_type_info[fields.RedirectIntegerField] = dict(
+    type=openapi.TYPE_INTEGER
+)
+basic_type_info[fields.RedirectCharField] = dict(
+    type=openapi.TYPE_STRING
+)
+
+
+def field_have_redirect(field, **kwargs):
+    if not getattr(field, 'redirect', False):
+        return kwargs
+
+    if kwargs.get('additionalProperties', None) is None:
+        kwargs['additionalProperties'] = dict()
+    kwargs['additionalProperties']['redirect'] = True
+
+    return kwargs
+
+
+def field_extra_handler(field, **kwargs):
+    kwargs = field_have_redirect(field, **kwargs)
+    return kwargs
 
 
 class VSTFieldInspector(FieldInspector):
@@ -37,18 +76,76 @@ class VSTFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(**type_info)
-        if type_info.get('format', None) == FORMAT_AUTOCOMPLETE:
-            kwargs['additionalProperties'] = openapi.SchemaRef(
-                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                field.autocomplete + '/properties/id', ignore_unresolved=True
-            )
+        return SwaggerType(**field_extra_handler(field, **type_info))
 
-        return SwaggerType(**kwargs)
+
+class AutoCompletionFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.AutoCompletionField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE)
+        if isinstance(field.autocomplete, (list, tuple)):
+            kwargs['enum'] = list(field.autocomplete)
+        else:
+            prop = dict(
+                model=openapi.SchemaRef(
+                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                    field.autocomplete, ignore_unresolved=True
+                ),
+                value_field=field.autocomplete_property,
+                view_field=field.autocomplete_represent
+            )
+            kwargs['additionalProperties'] = prop
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class DependEnumFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.DependEnumField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_DYN)
+        kwargs['additionalProperties'] = dict(
+            field=field.field, choices=field.choices, types=field.types
+        )
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class Select2FieldInspector(FieldInspector):  # nocv
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.Select2Field):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_INTEGER, format=FORMAT_SELECT2)
+        kwargs['additionalProperties'] = dict(
+            model = openapi.SchemaRef(
+                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                field.select_model, ignore_unresolved=True
+            ),
+            value_field=field.autocomplete_property,
+            view_field=field.autocomplete_represent
+        )
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
 class NestedFilterInspector(CoreAPICompatInspector):
-    def get_filter_parameters(self, filter_backend):
+    def get_filter_parameters(self, filter_backend):  # nocv
         subaction_list_actions = [
             '{}_list'.format(name)
             for name in getattr(self.view, '_nested_args', {}).keys()
@@ -56,25 +153,84 @@ class NestedFilterInspector(CoreAPICompatInspector):
         if self.view.action not in subaction_list_actions:
             return NotHandled
         if self.method != 'GET':
-            return NotHandled  # nocv
+            return NotHandled
         nested_view = getattr(self.view, self.view.action, None)
         nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
         filter_class = getattr(self.view, 'filter_class', None)
         self.view.filter_class = nested_view_filter_class
-        result = super(NestedFilterInspector, self).get_filter_parameters(
-            filter_backend
-        )
+        result = super(NestedFilterInspector, self).get_filter_parameters(filter_backend)
         self.view.filter_class = filter_class
         return result
 
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
-        VSTFieldInspector,
+        Select2FieldInspector, DependEnumFieldInspector,
+        AutoCompletionFieldInspector, VSTFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
     filter_inspectors = [
         NestedFilterInspector
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
+
+    def __init__(self, *args, **kwargs):
+        super(VSTAutoSchema, self).__init__(*args, **kwargs)
+        self._sch = args[0].schema
+        self._sch.view = args[0]
+
+    def _get_nested_view_class(self, nested_view, view_action_func):
+        # pylint: disable=protected-access
+        if not hasattr(view_action_func, '_nested_name'):
+            return nested_view
+        nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
+        nested_view_class = getattr(view_action_func, '_nested_view', None)
+        if nested_view is None:  # nocv
+            return nested_view
+        view_action_func = getattr(nested_view_class, nested_action_name, None)
+        if view_action_func is None:
+            return nested_view
+        return self._get_nested_view_class(nested_view_class, view_action_func)
+
+    def __get_nested_view_obj(self, nested_view, view_action_func):
+        # pylint: disable=protected-access
+        # Get nested view recursively
+        nested_view = self._get_nested_view_class(nested_view, view_action_func)
+        # Get action suffix
+        replace_pattern = view_action_func._nested_subname + '_'
+        replace_index = self.view.action.index(replace_pattern) + len(replace_pattern)
+        action_suffix = self.view.action[replace_index:]
+        # Check detail or list action
+        is_detail = action_suffix.endswith('detail')
+        is_list = action_suffix.endswith('list')
+        # Create view object
+        method = self.method.lower()
+        nested_view_obj = nested_view()
+        nested_view_obj.request = self.view.request
+        nested_view_obj.kwargs = self.view.kwargs
+        nested_view_obj.lookup_field = self.view.lookup_field
+        nested_view_obj.lookup_url_kwarg = self.view.lookup_url_kwarg
+        nested_view_obj.format_kwarg = None
+        # Check operation action
+        if method == 'post' and is_list:
+            nested_view_obj.action = 'create'
+        elif method == 'get' and is_list:
+            nested_view_obj.action = 'list'
+        elif method == 'get' and is_detail:
+            nested_view_obj.action = 'retrieve'
+        elif method == 'put' and is_detail:
+            nested_view_obj.action = 'update'
+        elif method == 'patch' and is_detail:
+            nested_view_obj.action = 'partial_update'
+        elif method == 'delete' and is_detail:  # nocv
+            nested_view_obj.action = 'destroy'
+        else:
+            nested_view_obj.action = action_suffix
+            if hasattr(nested_view_obj, action_suffix):
+                view = getattr(nested_view_obj, action_suffix)
+                serializer_class = view.kwargs.get('serializer_class', None)
+                if serializer_class:
+                    nested_view_obj.serializer_class = serializer_class
+
+        return nested_view_obj
 
     def get_operation_id(self, operation_keys):
         new_operation_keys = []
@@ -106,6 +262,32 @@ class VSTAutoSchema(SwaggerAutoSchema):
             schema=self.serializer_to_schema(error_serializer),
         )
         return responses
+
+    def __perform_with_nested(self, func_name, *args, **kwargs):
+        # pylint: disable=protected-access
+        sub_action = getattr(self.view, self.view.action, None)
+        if hasattr(sub_action, '_nested_view'):
+            schema = copy(self)
+            schema.view = self.__get_nested_view_obj(sub_action._nested_view, sub_action)
+            result = getattr(schema, func_name)(*args, **kwargs)
+            if result:
+                return result
+        return getattr(super(VSTAutoSchema, self), func_name)(*args, **kwargs)
+
+    def get_view_serializer(self, *args, **kwargs):
+        return self.__perform_with_nested('get_view_serializer', *args, **kwargs)
+
+    def get_pagination_parameters(self, *args, **kwargs):
+        return self.__perform_with_nested('get_pagination_parameters', *args, **kwargs)
+
+    def get_paginated_response(self, *args, **kwargs):
+        return self.__perform_with_nested('get_paginated_response', *args, **kwargs)
+
+    def get_filter_parameters(self, *args, **kwargs):
+        return self.__perform_with_nested('get_filter_parameters', *args, **kwargs)
+
+    def get_responses(self, *args, **kwargs):
+        return self.__perform_with_nested('get_responses', *args, **kwargs)
 
 
 class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
@@ -166,6 +348,8 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
     def get_operation_keys(self, subpath, method, view):
         keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
         subpath_keys = [item for item in subpath.split('/') if item]
+        if method.upper() == 'GET' and '_detail' in keys[-1]:
+            keys = keys[:-1] + ['_'.join(keys[-1].split('_')[:-1])] + ['get']
         if keys[-1] == 'get' and subpath_keys[-1] == keys[-2]:
             if getattr(view, '_'.join([keys[-2], 'list']), None) is not None:
                 keys = keys[0:-1] + ['list']

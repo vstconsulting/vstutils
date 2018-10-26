@@ -1,11 +1,14 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
-import coreapi
+import os
+import shutil
+import six
 try:
     from mock import patch
 except ImportError:  # nocv
     from unittest.mock import patch
 from fakeldap import MockLDAP
 from django.test import Client
+from django.core.management import call_command
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 from vstutils.tests import BaseTestCase, json, settings, override_settings
@@ -26,6 +29,53 @@ test_handler_structure = {
         }
     }
 }
+
+class VSTUtilsCommandsTestCase(BaseTestCase):
+
+    def setUp(self):
+        super(VSTUtilsCommandsTestCase, self).setUp()
+        self.project_place = '/tmp/test_project'
+        self.remove_project_place(self.project_place)
+
+    def tearDown(self):
+        super(VSTUtilsCommandsTestCase, self).tearDown()
+        self.remove_project_place(self.project_place)
+
+    def remove_project_place(self, path):
+        try:
+            shutil.rmtree(path)
+        except OSError:
+            pass
+
+    def test_startproject(self):
+        # Easy create
+        out = six.StringIO()
+        call_command(
+            'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
+        )
+        self.assertIn(
+            'Project successfully created at {}.'.format(self.project_place),
+            out.getvalue()
+        )
+        self.assertTrue(os.path.exists(self.project_place))
+        self.assertTrue(os.path.isdir(self.project_place))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project'))
+        self.assertTrue(os.path.isdir(self.project_place + '/test_project'))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project/__init__.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test_project/__init__.py'))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project/__main__.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test_project/__main__.py'))
+        self.assertTrue(os.path.exists(self.project_place + '/test_project/settings.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test_project/settings.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/setup.py'))
+        self.assertTrue(os.path.isfile(self.project_place + '/setup.cfg'))
+        self.assertTrue(os.path.isfile(self.project_place + '/requirements.txt'))
+        self.assertTrue(os.path.isfile(self.project_place + '/README.rst'))
+        self.assertTrue(os.path.isfile(self.project_place + '/MANIFEST.in'))
+        self.assertTrue(os.path.isfile(self.project_place + '/test.py'))
+        self.remove_project_place(self.project_place)
+        with self.assertRaises(Exception):
+            call_command('newproject', '--name', 'test_project', dir=None, interactive=0)
 
 
 class VSTUtilsTestCase(BaseTestCase):
@@ -172,9 +222,12 @@ class VSTUtilsTestCase(BaseTestCase):
                 self.assertEqual(output.read(), "Test\n")
 
     def test_kvexchanger(self):
-        utils.KVExchanger("somekey").send(True, 10)
-        utils.KVExchanger("somekey").prolong()
-        self.assertTrue(utils.KVExchanger("somekey").get())
+        exchenger = utils.KVExchanger("somekey")
+        exchenger.send(True, 10)
+        exchenger.prolong()
+        self.assertTrue(exchenger.get())
+        exchenger.delete()
+        self.assertTrue(not exchenger.get())
 
     def test_locks(self):
         @utils.model_lock_decorator()
@@ -221,7 +274,9 @@ class VSTUtilsTestCase(BaseTestCase):
         self.get_result('post', '/login/', 200)
         self.get_result('get', '/login/', 302)
         # API
-        self.assertEqual(list(self.get_result('get', '/api/').keys()), ['v1'])
+        keys = list(self.get_result('get', '/api/').keys())
+        for key in ['openapi', 'v1']:
+            self.assertIn(key, keys)
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(settings.API[settings.VST_API_VERSION].keys()).sort()
@@ -353,6 +408,7 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["users", self.user.id]},
+            {"method": "get", 'data_type': ["users"]},
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
@@ -374,6 +430,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[6]['data']['PY'], settings.PY_VER)
         self.assertEqual(result[7]['status'], 200)
         self.assertEqual(result[7]['data']['id'], self.user.id)
+        self.assertEqual(result[8]['status'], 200)
 
         bulk_request_data = [
             # Check unsupported media type

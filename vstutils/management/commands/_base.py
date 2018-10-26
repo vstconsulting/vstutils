@@ -13,6 +13,7 @@ logger_lib = logging.getLogger(settings.VST_PROJECT_LIB)
 
 
 class BaseCommand(_BaseCommand):
+    interactive = False
     requires_system_checks = False
     keep_base_opts = False
     stdout, stderr = sys.stdout, sys.stderr
@@ -31,6 +32,13 @@ class BaseCommand(_BaseCommand):
             default=False,
             type=str,
             help='Set logs level [debug|warning|error|critical]')
+        if self.interactive:
+            parser.add_argument(
+                '--noinput', '--no-input',
+                action='store_false', dest='interactive', default=True,
+                help="Do NOT prompt the user for input of any kind.",
+            )
+
 
     def _print(self, msg, style=None):
         style = style or 'HTTP_INFO'
@@ -56,8 +64,23 @@ class BaseCommand(_BaseCommand):
             '{}={}'.format(k.title(), v) for k, v in self._get_versions().items()
         ])
 
+    def ask_user(self, message, default=None):
+        # pylint: disable=import-error
+        from django.utils.six.moves import input
+        if getattr(self, 'interactive_mode', False):
+            return input(message) or default
+        return default
+
+    def ask_user_bool(self, message, default=True):
+        reply = self.ask_user(message, 'yes' if default else 'no').lower()
+        if reply in ['y', 'yes']:
+            return True
+        elif reply in ['n', 'no']:
+            return False
+
     def handle(self, *args, **options):
         # pylint: disable=invalid-name
+        self.interactive_mode = options.pop('interactive', False)
         LOG_LEVEL = settings.LOG_LEVEL
         if options.get('log-level', False):
             LOG_LEVEL = options.pop('log-level', LOG_LEVEL)

@@ -1,0 +1,680 @@
+
+<!--
+    <%[ blockBody %>
+        <p>This is block contentRT</p>
+    <%] %>
+
+    <%[ testB %> // Переопределение блока
+        <p>This is block testBAS</p>
+    <%] %>
+
+    <%* blockName %> // Вывод блока
+
+    <%! base_items_list %> // Наследование, писать последней строкой в шаблоне
+    <! - - Список сущностей - - >
+    <script type="text/x-just" data-just="base_items_list">
+        < ! - - base_items_list - - >
+    </script>
+-->
+
+<!-- Поле для выбора какие ещё поля показать в форме  -->
+<script type="text/x-just" data-just="show_not_required_fields">
+    <!-- show_not_required_fields -->
+    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+        <label class="control-label">Add field</label>
+        <select class="form-control" onchange="$('#'+this.value).removeClass('hide'); this.options[this.selectedIndex].disabled = true;" >
+            <option disabled selected >Select field</option>
+            <% for(var i = 0; i < fields.length; i++){  %>
+                <option value="<%- $(fields[i]).attr('id') %>" ><%- $(fields[i]).attr('data-title') %></option>
+            <% } %>
+        </select>
+        <div class="help-block"><%- opt.description || '' %></div>
+    </div>
+</script>
+
+<!-- Постраничная навигация -->
+<script  type="text/x-just" style="display: none;" data-just="pagination">
+    <!-- pagination -->
+    <% if(totalPage > 1){ %>
+        <ul class="pagination no-margin pull-right">
+            <% if(totalPage < 21){ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                    <% } %>
+                <% } %>
+            <% }else{ %>
+                <% for(var i = 0; i < totalPage; i++){ %>
+                    <% if(i == currentPage){ %>
+                        <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                    <% }else{ %>
+                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
+                            <% if( dotShow == false){ %>
+                                <% dotShow = true %>
+                                <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
+                            <% } %>
+                        <% }else{ %>
+                            <% dotShow = false %>
+                            <li><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </ul>
+    <% } %>
+</script>
+
+<script  type="text/x-just" style="display: none;" data-just="search_field">
+    <!-- searchFiled  -->
+    <div>
+        <div class="filtered-search">
+            <~ guiObj.activeSearch.filters>
+                <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
+                    <span class="input-filter-item">
+                        <div class="input-filter-inner">
+                            <span class="name"
+                                  onclick="/* $(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/">
+                                  <%= (valfield.name+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=") %>
+                            </span>
+                            <span class="value"
+                                  onclick=" /*$(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/"
+                                ><%= val.justText('value') %></span>
+                            <input
+                                type="text"
+                                id="search-query-input-<%- valfield.name %>"
+                                data-value-name="<%- valfield.name %>"
+
+                                placeholder="Search by name"
+                                class="input-value"
+                                maxlength="255"
+                                value="<%- valfield.value %>"
+                                <%= justOn('keyup', function(event)
+                                    {
+                                        guiObj.onSearchInput(event, event.currentTarget)
+                                        event.preventDefault();
+                                    }, "search-query-input")
+                                %>
+
+                                <%= justOn('blur', function(event)
+                                    {
+                                        $(event.currentTarget).parent().parent().toggleClass('show-input-text');
+                                        event.preventDefault();
+                                        guiObj.addSearchFilter($(event.currentTarget).attr('data-value-name'), event.currentTarget.value);
+                                    }, "search-query-input-"+valfield.name)
+                                %>
+                            >
+                        </div>
+                        <span class="remove-token"
+                                role="button"
+                                data-value-name="<%- valfield.name %>"
+                                <%= justOn('click', function(event)
+                                    {
+                                        guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
+                                        event.preventDefault();
+                                    })
+                                %>
+                                >
+                            <i class="fa fa-close"></i>
+                        </span>
+                    </span>
+                <% } %>
+            <~>
+        </div>
+
+        <div class="input-group filtered-search col-lg-6 col-sm-12 col-xs-12 col-md-12" style="float: right; ">
+            <table>
+                <tr>
+                    <td class="<%- guiObj.activeSearch.justNotClass('active', 'hide') %>">
+                        <span class="name active-name">
+                            <~ guiObj.activeSearch.active>
+                                <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
+                                    <%= (guiObj.activeSearch.active+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=")  %>
+                                <% } %>
+                            <~>
+                        </span>
+                    </td>
+                    <td style="width: 100%;">
+                        <input
+                            type="text"
+                            id="search-query-input"
+                            placeholder="Search by name"
+                            class="form-control"
+                            maxlength="255"
+                            data-backspace="false"
+                            value="<%- opt.query %>"
+                            <%= justOn('keyup', function(event)
+                                {
+                                    guiObj.onSearchInput(event, event.currentTarget)
+                                    event.preventDefault();
+                                }, "search-query-input")
+                            %>
+                        >
+                    </td>
+                    <td>
+                        <div class="input-group-addon search-btn"
+                            <%= justOn('click', function(event)
+                                {
+                                    guiObj.searchGO($('#search-query-input').val(), guiObj.searchAdditionalData)
+                                    event.preventDefault();
+                                })
+                            %>
+                            >
+                            <span class="glyphicon glyphicon-search" ></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</script>
+
+
+<script type="text/x-just" data-just="page_breadcrumb">
+    <ol class="breadcrumb">
+        <li><a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+        <% for(var i in urls) { %>
+            <li <% if(i == urls.length-1) { %> class="active" <% } %> > <%= urls[i] %> </li>
+        <% } %>
+    </ol>
+</script>
+
+<!-- Страница экшена -->
+<script type="text/x-just" data-just="action_page">
+
+    <%[ buttons_row %>
+        <%= new guiElements.button({onclick:function(){ return guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
+        <%* buttons %>
+    <%] %>
+
+    <%[ main_content_row %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    &nbsp;
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <%= guiObj.renderAllFields(opt) %>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <%] %>
+
+    <%! entity_base %>
+</script>
+
+
+<script type="text/x-just" data-just="action_as_link">
+    <!-- action_as_link -->
+    <a href="<%- vstMakeLocalUrl(opt.link) %>"
+        onclick="return vstGO(this.href);"
+        class="<%- opt.class %>"
+    >
+        <%- opt.title %>
+    </a>
+</script>
+
+<script type="text/x-just" data-just="action_as_button">
+    <!-- action_as_button -->
+    <a href="<%- vstMakeLocalUrl(opt.link) %>"
+        onclick="return vstGO(this.href);"
+        class="<%- opt.class %>"
+    >
+        <%- opt.title %>
+    </a>
+</script>
+
+<script type="text/x-just" data-just="items_empty_list">
+    <!-- items_empty_list -->
+    <div style="text-align: center;" >No child elements, list is empty</div>
+</script>
+
+<script type="text/x-just" data-just="entity_base">
+
+    <%[ breadcrumb %>
+        <%= renderBreadcrumbs() %>
+    <%] %>
+
+    <%[ buttons %>
+        <% if(guiObj.api.buttons){ %>
+            <% for(var i in  guiObj.api.buttons){ %>
+                <%= guiObj.api.buttons[i].render() %>
+            <% } %>
+        <% } %>
+    <%] %>
+
+    <%[ page_header %>
+        <section class="content-header">
+            <h1>
+
+                <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
+                    <span class="glyphicon glyphicon-arrow-left"></span>
+                </a>
+
+                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
+            </h1>
+            <%* breadcrumb %>
+        </section>
+    <%] %>
+    <%* page_header %>
+
+    <%[ main_content %>
+        <section class="content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <%[ buttons_row %>
+                        <%* buttons %>
+                    <%] %>
+                    <%* buttons_row %>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <%[ main_content_row %>
+
+                <%] %>
+                <%* main_content_row %>
+            </div>
+        </section>
+    <%] %>
+    <%* main_content %>
+</script>
+
+<script type="text/x-just" data-just="entity_list_line">
+    <tr
+        class="item-row item-<%- String(dataLine.url_key).replace('@', '') %> highlight-tr
+                <% for (var i in dataLine.opt.fields) { %>
+                    <% if(dataLine.opt.fields[i].enum) { %>
+                        <%- addCssClassesToElement('tr', dataLine.line[i], i) %>
+                    <% } %>
+                <% } %>
+                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, String(dataLine.url_key).replace('@', '')) %>"
+        data-id="<%- String(dataLine.url_key).replace('@', '') %>"
+        data-href="<%- vstMakeLocalUrl([dataLine.opt.base_href, dataLine.url_key]) %>"
+        onclick="turnTableTrIntoLink(event)"
+        >
+        <td class="highlight-tr-none"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+        </td>
+        <% for(var j in dataLine.opt.fields){ %>
+            <% if(!dataLine.opt.fields[j].hidden) { %>
+                <td
+                    <%= addStylesAndClassesToListField(guiObj, dataLine.opt.fields[j], dataLine.line, dataLine.opt) %>
+                >
+                    <% if(dataLine.rendered[j]){ %>
+                        <%= dataLine.rendered[j] %>
+                    <% } else { %>
+                        <!-- if there is prefetch info, insert it -->
+                        <% if(dataLine.opt.fields[j].prefetch && dataLine.line[j + '_info']) { %>
+                            <a  href="<%- vstMakeLocalApiUrl([dataLine.opt.fields[j].prefetch.path(dataLine.line).replace(/^\/|\/$/g, '') , dataLine.line[j]], guiObj.url_vars) %>"
+                                class="item-name"
+                                onclick="return false;"
+                            >
+                               <%- sliceLongString(dataLine.line[j + '_info'].name) ||
+                                   sliceLongString(dataLine.line[j + '_info'].username) %>
+                            </a>
+                        <% } else { %>
+                           <%= renderLineField(dataLine.opt.fields[j], dataLine.line[j], j, dataLine) %>
+                        <% } %>
+                    <% } %>
+                </td>
+            <% } %>
+        <% } %>
+        <% if(!isEmptyObject(dataLine.sublinks_l2) && !dataLine.opt.hideActions){ %>
+            <td class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Actions
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <% for(var k in dataLine.sublinks_l2){ %>
+                            <% if(!dataLine.sublinks_l2[k].hidden) { %>
+                                    <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
+                                        <li>
+                                            <a
+                                                href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
+                                                onclick="return false;"
+                                                class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
+                                                    <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                            </a>
+                                        </li>
+                                    <% } else { %>
+                                        <li <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
+                                            <b
+                                                class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
+                                                >
+                                                    <i >
+                                                        <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
+                                                    </i>
+                                            </b>
+                                        </li>
+                                    <% } %>
+                            <% } %>
+                        <% } %>
+                    </ul>
+                </div>
+            </td>
+        <% } %>
+    </tr>
+</script>
+
+<!-- Список multi_actions сущностей -->
+<script type="text/x-just" data-just="multi_actions_buttons">
+    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.multi_actions, show_all: true}) %>
+            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.sublinks_l2, show_all: false}) %>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-just" data-just="multi_actions_buttons_list">
+    <% for(let k in multi_actions){ %>
+
+        <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
+
+        <% if(multi_actions[k].onClick){ %>
+            <li>
+                <a
+                    href="#"
+                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
+                     <%= justOn('click', function(){ spajs.showLoader(multi_actions[k].onClick.apply(guiObj, [])); return false;} ) %>
+                >
+                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
+                </a>
+            </li>
+        <% }else{ %>
+             <li>
+                <a
+                    href="#"
+                    onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- multi_actions[k].path %>'); return false;"
+                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
+                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
+                </a>
+            </li>
+        <% } %>
+        <li role="separator" class="divider"></li>
+    <% } %>
+</script>
+
+
+<!-- Список сущностей -->
+<script type="text/x-just" data-just="entity_list">
+
+    <%[ buttons_row %>
+
+        <% if(guiObj.api.canCreate){ %>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'new']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a>
+        <% } %>
+
+        <% if(guiObj.api.canAdd){%>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'add']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
+        <% } %>
+
+        <%* buttons %>
+        <%* sublink_buttons %>
+    <%] %>
+
+    <!-- entity_list -->
+    <%[ main_content_row %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <%[ search_form %>
+                        <%= guiObj.renderSearchForm() %>
+                    <%] %>
+                    <%* search_form %>
+
+                    <%[ pagination %>
+                        <% if(guiObj.getTotalPages()){ %>
+                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
+                                <%= guiObj.paginationHtml() %>
+                            </div>
+                        <% } %>
+                    <%] %>
+                    <%* pagination %>
+
+                </div>
+                <div class="box-body">
+                    <%  if (!guiObj.model.data.results.length){ %>
+                        <%[ empty_list %>
+                                <%= this.partial('items_empty_list', { }) %>
+                        <%] %>
+                        <%* empty_list %>
+                    <% } else{ %>
+                        <%[ data_list %>
+                            <~ guiObj.model.data>
+                                <table class="table table-bordered multiple-select">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                                <div class="ico-on fa fa-toggle-on"></div>
+                                                <div class="ico-off fa  fa-toggle-off"></div>
+                                            </th>
+                                            <% for(var j in opt.fields){ %>
+                                                <% if(!opt.fields[j].hidden) { %>
+                                                    <th
+                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], undefined, opt) %>
+                                                        >
+                                                            <%- opt.fields[j].title %>
+                                                    </th>
+                                                <% } %>
+                                            <% } %>
+                                            <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
+                                                <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
+                                            <% } %>
+                                        </tr>
+
+                                        <% for(var i in guiObj.model.data.results){ %>
+                                            <%= guiObj.renderLine(guiObj.model.data.results[i], opt) %>
+                                        <% } %>
+                                    </tbody>
+                                </table>
+                            <~>
+                        <%] %>
+                        <%* data_list %>
+                    <% } %>
+                </div>
+                <div class="box-footer clearfix">
+                    <%[ action_buttons %>
+                        <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
+                    <%] %>
+                    <%* action_buttons %>
+
+                    <% if(!query){ %>
+                        <%[ select_buttons %>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
+                                    </li>
+                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        <%] %>
+                        <%* select_buttons %>
+                    <% } %>
+                    <%[ pagination %>
+                        <% if(guiObj.getTotalPages()){ %>
+                            <%= guiObj.paginationHtml() %>
+                        <% } %>
+                    <%] %>
+                    <%* pagination %>
+                </div>
+            </div>
+        </section>
+    <%] %>
+    <%! entity_base %>
+</script>
+
+<script type="text/x-just" data-just="entity_list_add_subitems">
+    <!-- entity_list_add_subitems -->
+
+    <%[ buttons_row %>
+        <%= new guiElements.button({onclick:function(){ return addToParentsAndGoUp(window.guiListSelections.getSelection(opt.selectionTag), opt.selectionTag) }, class:'btn btn-primary', title:'Add selected', text:'Add selected'}).render() %>
+    <%] %>
+
+    <%[ action_buttons %>
+        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                    <li>
+                        <a href="#"
+                            onclick="spajs.showLoader(addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>')); return false;" >Add selected</a>
+                    </li>
+            </ul>
+        </div>
+    <%] %>
+
+    <%[ select_buttons %>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Select
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
+                </li>
+                <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                    <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                </li>
+            </ul>
+        </div>
+    <%] %>
+
+    <%! entity_list %>
+</script>
+
+<script type="text/x-just" data-just="entity_one">
+    <!-- entity_one -->
+
+    <%[ sublink_buttons %>
+        <% for(var k in opt.links){  %>
+            <a
+                href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
+                onclick="return vstGO(this.href);"
+                class="btn btn-default sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %> "
+            >
+                <%- opt.links[k].name.replace('_', ' ') %>
+            </a>
+        <% } %>
+
+        <% for(var k in opt.actions){  %>
+                <% if  (!opt.actions[k].isEmptyAction) { %>
+                    <a
+                        href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
+                        onclick="return vstGO(this.href);"
+                        class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
+                    >
+                    <%- opt.actions[k].name.replace('_', ' ') %>
+                    </a>
+                <% } else { %>
+                    <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                <% } %>
+        <% } %>
+    <%] %>
+
+    <%[ buttons_row %>
+
+        <% if(guiObj.api.canEdit){ %>
+            <%= new guiElements.button({onclick:function(){ return guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+        <% } %>
+
+        <% if(guiObj.api.canDelete){ %>
+            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+        <% } %>
+
+        <%* buttons %>
+        <%* sublink_buttons %>
+    <%] %>
+
+    <%[ fields_block %>
+        <% for(var i in opt.fields){ %>
+            <%= guiObj.renderField(opt.fields[i], opt) %>
+        <% } %>
+
+        <% if(opt.sections){ %>
+            <% for(var i in opt.sections){ %>
+                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
+            <% } %>
+        <% } %>
+    <%] %>
+
+    <%[ main_content_row %>
+        <section class="col-lg-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    &nbsp;
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <%* fields_block %>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <%] %>
+    <!-- /items_new_page -->
+
+    <%! entity_base %>
+</script>
+
+<script type="text/x-just" data-just="entity_new">
+    <!-- entity_new -->
+
+    <%[ buttons_row %>
+
+        <%= new guiElements.button({onclick:function(){ return guiObj.createAndGoEdit()}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
+
+        <%* buttons %>
+    <%] %>
+
+    <%! entity_one %>
+
+</script>
+
+
+<!-- Отрисует страницу ошибки загрузки данных -->
+<script type="text/x-just" data-just="error_as_page">
+    <!-- error_as_page -->
+    <section class="content">
+        <div class="row">
+            <section class="col-lg-12">
+                <div class="box box-info">
+                    <div class="box-header with-border">
+                        Error<br>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <% debugger; if(error){ %>
+                                    <%- error.status %><br>
+                                    <% if(error.data && error.data.detail){ %><%- error.data.detail %><% } %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</script>

@@ -1,0 +1,36 @@
+
+<script type="text/x-just" data-just="guiListElements.base"> 
+    <%[ element %>
+        <div class="guiListElements guiListElements-<%- guiObj.type %>" > 
+            <%[ content %>
+                <%- value %>
+            <%] %>
+            <%* content %> 
+        </div>
+    <%] %>
+    <%* element %>
+</script>
+   
+<!-- guiListElements.boolean -->
+<script type="text/x-just" data-just="guiListElements.boolean"> 
+    <%[ content %>
+        <% if(value){ %> 
+            <i class="boolean-true fa fa-check"></i>
+        <% }else{ %>
+            <i class="boolean-false fa fa-times"></i> 
+        <% } %> 
+    <%] %>
+    <%! guiListElements.base %>
+</script>
+
+<!-- guiListElements.array -->
+<script type="text/x-just" data-just="guiListElements.array">
+    <%[ content %>
+        <ul class="table_ul">
+             <% for(let i in value) { %>
+                <li> <%- value[i] %> </li>
+            <% } %>
+        </ul>
+    <%] %>
+    <%! guiListElements.base %>
+</script>

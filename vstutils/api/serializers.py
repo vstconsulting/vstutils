@@ -30,8 +30,7 @@ class UserSerializer(VSTSerializer):
         fields = ('id',
                   'username',
                   'is_active',
-                  'is_staff',
-                  'url',)
+                  'is_staff',)
         read_only_fields = ('is_superuser',)
 
     def create(self, data):
@@ -94,8 +93,7 @@ class OneUserSerializer(UserSerializer):
                   'is_staff',
                   'first_name',
                   'last_name',
-                  'email',
-                  'url',)
+                  'email',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
 
@@ -128,6 +126,10 @@ class DataSerializer(EmptySerializer):
             if not isinstance(value, (dict, list))
             else value
         )
+
+
+class JsonObjectSerializer(DataSerializer):
+    pass
 
 
 class ErrorSerializer(DataSerializer):

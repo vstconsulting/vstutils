@@ -1,14 +1,18 @@
 import os
+import pwd
 import sys
 from warnings import warn
 
 from configparser import ConfigParser
-import six
-import pytimeparse
+import pyximport
+pyximport.install()
+from .section import Section
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
 ##############################################################
+interpreter_dir = os.path.dirname(sys.executable or 'python')
+PYTHON_INTERPRETER = '/'.join([interpreter_dir, 'python'] if interpreter_dir else 'python')
 VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
@@ -25,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
 __kwargs = dict(
     PY=PY_VER, PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
-    TMP=TMP_DIR, HOME=BASE_DIR,
+    INTERPRETER=PYTHON_INTERPRETER, TMP=TMP_DIR, HOME=BASE_DIR,
     PROG=VST_PROJECT_DIR, LIB=BASE_DIR, VST=VSTUTILS_DIR,
     PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB
 )
@@ -43,103 +47,11 @@ config = ConfigParser()
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
 
 
-class SectionConfig(object):
+class SectionConfig(Section):
     config = config
     section = 'main'
-    subsections = []
-    section_defaults = {}
-    types_map = {}
+    kwargs = KWARGS
 
-    def __init__(self, section=None, default=None):
-        self.section = section or self.section
-        self._subsections = self.get_subsections()
-        self.default = default
-
-    def get_subsections(self):
-        return {
-            sub: '{}.{}'.format(self.section, sub) for sub in self.subsections
-        }
-
-    def get_value_kwargs(self, **additional_kwargs):
-        kwargs = dict()
-        kwargs.update(KWARGS)
-        kwargs.update(additional_kwargs)
-        kwargs['__section'] = self.section
-        return kwargs
-
-    def opt_handler(self, option):
-        return option.upper()
-
-    def key_handler(self, key):
-        return key
-
-    def value_handler(self, value):
-        if isinstance(value, (six.string_types, six.text_type)):
-            return value.format(**self.get_value_kwargs())
-        else:
-            return value
-
-    def _get_from_section(self, section, option=None):
-        default_value = (
-            self.default or self.section_defaults.get(option if option else '.', {})
-        )
-        try:
-            return self.config[section, section] or default_value
-        except:
-            return default_value
-
-    def _get_section_data(self, section, option=None):
-        section_data = {}
-        for key, value in self._get_from_section(section, option).items():
-            key_name = key if not option else "{}.{}".format(option, key)
-            type_handler = self.types_map.get(key_name, str)
-            section_data[self.key_handler(key)] = type_handler(
-                self.value_handler(value)
-            )
-        return section_data
-
-    def _all(self):
-        self._current_section = self.section
-        settings = self._get_section_data(self.section)
-        for option, section in self._subsections.items():
-            self._current_section = option
-            settings[self.opt_handler(option)] = self._get_section_data(section, option)
-        return settings
-
-    def all(self):
-        settings = getattr(self, '__settings__', None)
-        if settings is None:
-            self.__settings__ = self._all()
-        return self.__settings__
-
-    def get(self, option, fallback=None):
-        return self.all().get(option, self.value_handler(fallback))
-
-    def getboolean(self, option, fallback=None):
-        return bool(self.get(option, fallback))
-
-    def getint(self, option, fallback=None):
-        value = self.get(option, str(fallback)).strip()
-        return self.int(value)
-
-    def getseconds(self, option, fallback=None):
-        return self.int_seconds(self.get(option, str(fallback)))
-
-    def getlist(self, option, fallback=None):
-        fallback = fallback or ''
-        return [item for item in self.get(option, fallback).split(",") if item != ""]
-
-    @classmethod
-    def int_seconds(cls, value):
-        value = pytimeparse.parse(str(value)) or value
-        return int(value)
-
-    @classmethod
-    def int(cls, value):
-        value = value.replace('K', '0' * 3)
-        value = value.replace('M', '0' * 6)
-        value = value.replace('G', '0' * 9)
-        return int(float(value))
 
 class BackendsSectionConfig(SectionConfig):
 
@@ -165,7 +77,7 @@ except IOError:
 ##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', main.getboolean("debug", False))
-ALLOWED_HOSTS = main.getlist("allowed_hosts")
+ALLOWED_HOSTS = main.getlist("allowed_hosts", '*')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # Include some addons if packages exists in env
@@ -204,14 +116,7 @@ INSTALLED_APPS += [
     'django_filters',
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
-
-
-try:
-    import drf_yasg
-    INSTALLED_APPS += ['drf_yasg']
-except:  # pragma: no cover
-    pass
-
+INSTALLED_APPS += ['drf_yasg']
 
 ADDONS = ['vstutils', ]
 
@@ -357,7 +262,7 @@ class DBSectionConfig(BackendsSectionConfig):
             'timeout': 20
         },
         'test': {
-            'serialize': False
+            'serialize': 'false'
         }
     }
     types_map = {
@@ -366,7 +271,7 @@ class DBSectionConfig(BackendsSectionConfig):
         'options.connect_timeout': BackendsSectionConfig.int_seconds,
         'options.read_timeout': BackendsSectionConfig.int_seconds,
         'options.write_timeout': BackendsSectionConfig.int_seconds,
-        'test.serialize': bool,
+        'test.serialize': BackendsSectionConfig.bool,
     }
 
     def key_handler(self, key):
@@ -449,6 +354,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
+    'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
+    'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
     'SCHEMA_COERCE_PATH_PK': False,
     'SCHEMA_COERCE_METHOD_NAMES': {
         'create': 'add',
@@ -471,6 +378,12 @@ SWAGGER_API_DESCRIPTION = web.get('rest_swagger_description', fallback=vst_proje
 TERMS_URL = ''
 CONTACT = SectionConfig('contact').all() or dict(name='System Administrator')
 
+OPENAPI_EXTRA_LINKS = {
+    'vstutils': {
+        'url': 'https://github.com/vstconsulting/vstutils.git',
+        'name': 'VST Utils sources'
+    }
+}
 
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
@@ -484,14 +397,8 @@ SWAGGER_SETTINGS = {
     },
 }
 
-API_CREATE_SCHEMA = web.getboolean('rest_schema', fallback=True)
-try:
-    import coreapi
-    HAS_COREAPI = True
-except ImportError:  # nocv
-    if API_CREATE_SCHEMA:
-        warn('CoreAPI will not enabled, because there is no "coreapi" package installed.')
-    API_CREATE_SCHEMA = False
+# Hardcoded because GUI based on OpenAPI
+API_CREATE_SCHEMA = True
 
 API = {
     VST_API_VERSION: {
@@ -530,35 +437,6 @@ TIME_ZONE = main.get("timezone", fallback="UTC")
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
-
-
-# Celery broker settings
-# Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
-##############################################################
-rpc = SectionConfig('rpc')
-__broker_url = rpc.get("connection", fallback="filesystem:///var/tmp")
-if __broker_url.startswith("filesystem://"):
-    __broker_folder = __broker_url.split("://", 1)[1]
-    CELERY_BROKER_URL = "filesystem://"
-    CELERY_BROKER_TRANSPORT_OPTIONS = {
-        "data_folder_in": __broker_folder,
-        "data_folder_out": __broker_folder,
-        "data_folder_processed": __broker_folder,
-    }
-else:
-    CELERY_BROKER_URL = __broker_url  # nocv
-
-CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback="file:///tmp")
-CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
-CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=10)
-CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
-
-CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
-CONCURRENCY = rpc.getint("concurrency", fallback=4)
 
 
 # LOGGING settings
@@ -607,9 +485,72 @@ SILENCED_SYSTEM_CHECKS = [
 ]
 
 
+# Celery broker settings
+# Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
+##############################################################
+rpc = SectionConfig('rpc')
+__broker_url = rpc.get("connection", fallback="filesystem:///var/tmp")
+if __broker_url.startswith("filesystem://"):
+    __broker_folder = __broker_url.split("://", 1)[1]
+    CELERY_BROKER_URL = "filesystem://"
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        "data_folder_in": __broker_folder,
+        "data_folder_out": __broker_folder,
+        "data_folder_processed": __broker_folder,
+    }
+else:
+    CELERY_BROKER_URL = __broker_url  # nocv
+
+CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback="file:///tmp")
+CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
+CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=10)
+CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
+
+CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
+CONCURRENCY = rpc.getint("concurrency", fallback=4)
+RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
+
+
+class WorkerSectionConfig(SectionConfig):
+    section = 'worker'
+    section_defaults = {
+        '.': {
+            'app': '{PROG_NAME}.wapp:app',
+            'loglevel': LOG_LEVEL,
+            'logfile': '/var/log/{PROG_NAME}/worker.log',
+            'pidfile': '/run/{PROG_NAME}_worker.pid',
+            'autoscale': '{},1'.format(CONCURRENCY),
+            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
+            'beat': True
+        }
+    }
+    types_map = {
+        'beat': SectionConfig.bool,
+        'events': SectionConfig.bool,
+        'task-events': SectionConfig.bool,
+        'without-gossip': SectionConfig.bool,
+        'without-mingle': SectionConfig.bool,
+        'without-heartbeat': SectionConfig.bool,
+        'purge': SectionConfig.bool,
+        'discard': SectionConfig.bool,
+    }
+
+    def get_from_section(self, section, option=None):
+        result = self.get_default_data_from_section(option)
+        data = super(WorkerSectionConfig, self).get_from_section(section, option)
+        result.update(data)
+        return result
+
+
+WORKER_OPTIONS = WorkerSectionConfig().all() if has_django_celery_beat else {}
+
 # View settings
 ##############################################################
-ENABLE_ADMIN_PANEL = True
+ENABLE_ADMIN_PANEL = main.getboolean('enable_admin_panel', False)
 
 VIEWS = {
     "GUI": {

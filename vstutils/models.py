@@ -15,8 +15,8 @@ def __cyfunc():  # noprj
 CyFunctionType = type(__cyfunc)
 
 
-def iscyfunction(object):  # noprj
-    return isinstance(object, CyFunctionType)
+def iscyfunction(obj):  # noprj
+    return callable(obj) and not isinstance(obj, object)
 
 
 class BQuerySet(models.QuerySet):  # noprj

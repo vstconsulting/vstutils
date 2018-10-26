@@ -122,6 +122,7 @@ ext_list = [
     'vstutils.environment',
     'vstutils.middleware',
     'vstutils.tests',
+    'vstutils.section',
     'vstutils.auth',
     'vstutils.urls',
     'vstutils.utils',
@@ -164,6 +165,9 @@ kwargs = dict(
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
+    entry_points={
+        'console_scripts': ['vstutilsctl=vstutils.__main__:cmd_execution']
+    },
     project_urls={
         "Issue Tracker": "https://github.com/vstconsulting/vstutils/issues",
         "Source Code": "https://github.com/vstconsulting/vstutils",
