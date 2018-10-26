@@ -1034,28 +1034,57 @@ guiElements.select2 = function(field, field_value, parent_object)
             let value_field = props['value_field'];
             let view_field = props['view_field'];
 
+            if (!Array.isArray(props['obj']))
+            {
+                props['obj'] = [props['obj']]
+            }
+
+            let list = [];
+
+            let url_vars = {}
+            if (options.dynamic_properties && options.dynamic_properties.url_vars)
+            {
+                url_vars = options.dynamic_properties.url_vars
+            }
+
             if(props['obj'])
             {
-                let list = new guiObjectFactory(props['obj']);
+                let thisObj = this;
+
+                for (let i in props['obj'])
+                {
+                    list.push(new guiObjectFactory(props['obj'][i],
+                        url_vars)
+                    );
+                }
 
                 if(field_value)
                 {
                     let filters = getFiltersForAutocomplete(list, field_value, value_field);
-                    $.when(list.search(filters)).done(data => {
-                        try
+                    let lists_deffered = [];
+                    for (let i in list)
+                    {
+                        lists_deffered.push(list[i].search(filters))
+                    }
+
+                    $.when.apply($, lists_deffered).done(function() {
+                        for (let i=0; i<arguments.length; i++)
                         {
-                            let option_data = {
-                                id: data.data.results[0][value_field],
-                                text: data.data.results[0][view_field],
+                            try
+                            {
+                                let option_data = {
+                                    id: arguments[i].data.results[0][value_field],
+                                    text: arguments[i]. data.results[0][view_field],
+                                }
+
+                                let newOption = new Option(option_data.text, option_data.id, false, false);
+
+                                $('#' + thisObj.element_id).append(newOption).trigger('change');
                             }
-
-                            let newOption = new Option(option_data.text, option_data.id, false, false);
-
-                            $('#'+this.element_id).append(newOption).trigger('change');
-                        }
-                        catch(e)
-                        {
-                            console.warn(e);
+                            catch (e)
+                            {
+                                console.warn(e);
+                            }
                         }
                     })
                 }
@@ -1069,23 +1098,30 @@ guiElements.select2 = function(field, field_value, parent_object)
                             let search_str = trim(params.data.term);
 
                             let filters = getFiltersForAutocomplete(list, search_str, view_field);
-                            $.when(list.search(filters)).done((data) =>
+                            let lists_deffered = [];
+                            for (let i in list)
                             {
+                                lists_deffered.push(list[i].search(filters))
+                            }
+                            $.when.apply($, lists_deffered).done(function() {
+
                                 let results =[];
                                 if(options.autocomplete_properties && options.autocomplete_properties.default_value)
                                 {
                                     results.push(options.autocomplete_properties.default_value)
                                 }
 
-                                let api_data = data.data.results;
-                                for(let i in api_data)
+                                for (let i=0; i<arguments.length; i++)
                                 {
-                                    results.push(
-                                        {
-                                            id: api_data[i][value_field],
-                                            text: api_data[i][view_field]
-                                        }
-                                    )
+                                    let api_data = arguments[i].data.results;
+                                    for (let i in api_data) {
+                                        results.push(
+                                            {
+                                                id: api_data[i][value_field],
+                                                text: api_data[i][view_field]
+                                            }
+                                        )
+                                    }
                                 }
 
                                 success({results:results})
