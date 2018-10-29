@@ -59,8 +59,8 @@ if(!window.guiTestsFiles)
 // Add a test file to the list of files for test gui
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
-
-
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
+ 
 
 // Run tests
 function loadQUnitTests()

@@ -520,7 +520,7 @@ if(!window.spajs)
                 debugger;
                 if(spajs.errorPage)
                 {
-                    spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, data, e)
+                    spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, {}, e)
                 }
             })
         }

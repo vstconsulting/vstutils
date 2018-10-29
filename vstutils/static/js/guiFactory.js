@@ -12,6 +12,11 @@ function getMenuIdFromApiPath(path){
 
 function guiTestUrl(regexp, url)
 {
+    if(!url || !url.replace)
+    {
+        debugger;
+    }
+
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
 
     let reg_exp = XRegExp(regexp, 'x');
@@ -140,13 +145,7 @@ function openApi_add_one_action_page_path(api_obj)
             let pageItem = new guiObjectFactory(api_obj)
 
             var def = new $.Deferred();
-            $.when(pageItem).done(function()
-            {
-                def.resolve(pageItem.renderAsPage())
-            }).fail(function(err)
-            {
-                def.resolve(renderErrorAsPage(err));
-            })
+            def.resolve(pageItem.renderAsPage())
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
