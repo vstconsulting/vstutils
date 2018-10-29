@@ -165,6 +165,15 @@
                         </div>
                     </td>
                 </tr>
+                <tr>
+                    <td colspan="3" style="padding: 9px;">
+                        <~ guiObj.activeSearch.active>
+                            <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
+                                <%= guiObj.activeSearch.fields[guiObj.activeSearch.active].description || '' %>
+                            <% } %>
+                        <~>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
