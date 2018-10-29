@@ -564,3 +564,112 @@ function deepEqual(x, y)
     }
 }
 
+/**
+ * Function checks string for keeping boolean value
+ * @param {string} string - string, which we want to check on boolean value
+ * @returns {Boolean}
+ */
+function stringToBoolean(string){
+    switch(string.toLowerCase().trim()){
+        case "true": case "yes": case "1": return true;
+        case "false": case "no": case "0": case null: return false;
+    }
+}
+
+/**
+ * Function for search on JS (when there is no opportunity to use API search).
+ * Function gets 2 arguments:
+ * @param {object} filters - object with search filters
+ * @param {array} data - array with list of objects.
+ * @returns {array} - search_results - data, that satisfies search filters.
+ */
+function searchObjectsInListByJs(filters, data)
+{
+    if(!data)
+    {
+        data = [];
+    }
+
+    if(!filters)
+    {
+        filters = {
+            search_query: {}
+        }
+    }
+
+    let search_results = [];
+
+    let search_query_keys = Object.keys(filters.search_query);
+
+    // in this loop we add to search results all objects from data
+    // that satisfy the first search_query key
+    for(let i in data)
+    {
+        let item = data[i];
+
+        let search_key = search_query_keys[0];
+        let search_value = filters.search_query[search_key];
+
+        if(checkDataValidityForSearchQuery(item[search_key], search_value))
+        {
+            search_results.push(item);
+        }
+    }
+
+    // in this loop we delete from search results all objects
+    // that do not satisfy other search_query keys
+    for(let i = 1; i < search_query_keys.length; i++)
+    {
+        let search_key = search_query_keys[i];
+        let search_value =  filters.search_query[search_key];
+
+        for(let j = 0; j < search_results.length; j++)
+        {
+            let item = search_results[j];
+
+            if(!checkDataValidityForSearchQuery(item[search_key], search_value))
+            {
+                search_results.splice(j, 1);
+                j -= 1;
+            }
+        }
+    }
+
+    return search_results;
+}
+
+/**
+ * Function checks validity of data value to search query.
+ * If it is valid, function returns true.
+ * Otherwise, function returns false.
+ * Function gets 2 arguments:
+ * @param {string, number, boolean} data_value - data value
+ * @param {string, number, boolean} search_value - search query
+ * @returns {boolean}
+ */
+function checkDataValidityForSearchQuery(data_value, search_value)
+{
+    let valid = false;
+
+    if(typeof data_value == 'string')
+    {
+        if(data_value.match(search_value) != null)
+        {
+            valid = true;
+        }
+    }
+    else
+    {
+        if(typeof data_value == 'boolean' && typeof search_value == 'string')
+        {
+            search_value = stringToBoolean(search_value);
+        }
+
+        if(data_value == search_value)
+        {
+            valid = true;
+        }
+    }
+
+    return valid;
+}
