@@ -1067,8 +1067,8 @@ var gui_list_object = {
 
     createAndGoEdit: function()
     {
-        var def = this.create();
-        $.when(def).done((newObj) => {
+        var def = new $.Deferred();
+        $.when(this.create()).done((newObj) => {
 
             let id = newObj.data.id
             if(newObj.data.id === undefined)
@@ -1085,10 +1085,16 @@ var gui_list_object = {
                 }
             }
 
-            vstGO(this.url_vars.baseURL(id));
+            $.when(vstGO(this.url_vars.baseURL(id))).done(()=>{
+                def.resolve();
+            }).fail(()=>{
+                def.reject();
+            })
+        }).fail(()=>{
+            def.reject();
         })
 
-        return def;
+        return def.promise();
     }
 
 }

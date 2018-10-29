@@ -15,8 +15,14 @@ window.qunitTestsArray['guiPaths.New'] = {
                 continue;
             }
 
+            if(path != "/inventory/")
+            {
+                continue;
+            }
+
+
             // Проверка того что страница открывается
-            syncQUnit.addTest("guiPaths['"+path+"'].List", function ( assert )
+            /*syncQUnit.addTest("guiPaths['"+path+"'].List", function ( assert )
             {
                 console.log("guiPaths['"+path+"'].List")
 
@@ -29,22 +35,26 @@ window.qunitTestsArray['guiPaths.New'] = {
                     assert.ok(false, 'guiPaths["'+path+'"].List fail');
                 })
             });
-
+            */
             if(!api_obj.canCreate)
             {
                 // Проверка того что страница с флагом api_obj.canCreate != true не открывается
                 syncQUnit.addTest("guiPaths['"+path+"new']", function ( assert )
                 {
+                    let done = assert.async();
                     try{
                         $.when(vstGO(path+"new")).done(() => {
                             debugger;
                             assert.ok(false, 'guiPaths["'+path+'new"] !canCreate');
+                            testdone(done)
                         }).fail(() => {
                             assert.ok(true, 'guiPaths["'+path+'new"] !canCreate');
+                            testdone(done)
                         })
                     }catch (ex)
                     {
                         assert.ok(true, 'guiPaths["'+path+'new"] !canCreate');
+                        testdone(done)
                     }
                 });
                 continue;
@@ -54,15 +64,30 @@ window.qunitTestsArray['guiPaths.New'] = {
                 // Проверка того что страница с флагом api_obj.canCreate == true открывается
                 syncQUnit.addTest("guiPaths['"+path+"'new]", function ( assert )
                 {
+                    let done = assert.async();
                     console.log("guiPaths['"+path+"new']")
 
                     $.when(vstGO(path+"new")).done(() => {
 
                         assert.ok(true, 'guiPaths["'+path+'new"]');
 
+                        window.curentPageObject;
+                        window.curentPageObject.model.guiFields.name.insertTestValue("ABC")
+                        window.curentPageObject.model.guiFields.notes.insertTestValue("note ABC")
+
+                        $.when(window.curentPageObject.createAndGoEdit()).done(() => {
+                            
+                            assert.ok(window.curentPageObject.model.guiFields.name.getValue() == "ABC", 'test name of new object');
+                            testdone(done)
+                        }).fail(() => {
+                            debugger;
+                            assert.ok(false, 'guiPaths["'+path+'new"] fail');
+                            testdone(done)
+                        })
                     }).fail(() => {
                         debugger;
                         assert.ok(false, 'guiPaths["'+path+'new"] fail');
+                        testdone(done)
                     })
                 });
 
@@ -86,7 +111,7 @@ window.qunitTestsArray['guiPaths.New'] = {
     }
 }
 
-//if(0)
+if(0)
 window.qunitTestsArray['guiPaths.Actions'] = {
     test:function()
     {

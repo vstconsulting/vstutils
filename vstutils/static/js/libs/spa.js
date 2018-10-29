@@ -235,8 +235,7 @@ if(!window.spajs)
     {
         history.pushState({url:url}, title, url);
         var res = spajs.openMenuFromUrl(url, {withoutFailPage: true})
-        var state = res.state()
-        return  state == "rejected"
+        return res
     }
 
     /**

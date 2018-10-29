@@ -98,6 +98,15 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.value = value
     }
 
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        $("#"+this.element_id).val(value)
+    }
+
     this._onUpdateValue = function(){}
 
     this.updateValue = function(value)
