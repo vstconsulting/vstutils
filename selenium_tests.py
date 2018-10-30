@@ -16,6 +16,7 @@ class SeleniumTestCase(LiveServerTestCase):
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         self.selenium = webdriver.Chrome(options=options)
+        self.selenium.set_window_size(1280, 3240)
         User = get_user_model()
         self.user = User.objects.create_superuser('admin', 'admin@example.com', 'admin')
         super(SeleniumTestCase, self).setUp()
@@ -45,3 +46,4 @@ class SeleniumTestCase(LiveServerTestCase):
             else:
                 break
         self.assertNotEqual(saveReportObj, None)
+        selenium.save_screenshot('test_screenshot.png')
