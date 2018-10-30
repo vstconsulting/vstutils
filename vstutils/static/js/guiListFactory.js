@@ -539,6 +539,14 @@ var gui_list_object = {
     {
         this.activeSearch.active = name
         $('#search-query-input').val('')
+
+        let placeholder = 'Search by ' + name;
+
+        if(name.match('__not') != null)
+        {
+            placeholder = 'Search by ' + name.split('__not')[0] + ' not equal to';
+        }
+        $('#search-query-input').attr('placeholder', placeholder);
     },
 
     /**
@@ -756,6 +764,7 @@ var gui_list_object = {
                 input.setAttribute('data-backspace', "false")
                 this.activeSearch.active = ""
                 $('#search-query-input').val('')
+                $('#search-query-input').attr('placeholder', 'Search by name');
             }
             else
             {
