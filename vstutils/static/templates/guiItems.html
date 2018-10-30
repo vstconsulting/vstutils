@@ -600,7 +600,7 @@
         <% } %>
 
         <% if(guiObj.api.canDelete){ %>
-            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
         <% } %>
 
         <%* buttons %>
@@ -656,7 +656,7 @@
 <!-- Отрисует страницу ошибки загрузки данных -->
 <script type="text/x-just" data-just="error_as_page">
     <!-- error_as_page -->
-    <section class="content">
+    <section class="content error-as-page <% if(error){ %>error-status-<%- error.status %><% } %>">
         <div class="row">
             <section class="col-lg-12">
                 <div class="box box-info">
@@ -666,7 +666,7 @@
                     <div class="box-body">
                         <div class="row">
                             <div class="col-lg-12">
-                                <% debugger; if(error){ %>
+                                <% if(error){ %>
                                     <%- error.status %><br>
                                     <% if(error.data && error.data.detail){ %><%- error.data.detail %><% } %>
                                 <% } %>

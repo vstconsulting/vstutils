@@ -11,12 +11,7 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{
-    if(!url || !url.replace)
-    {
-        debugger;
-    }
-
+{ 
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
 
     let reg_exp = XRegExp(regexp, 'x');
@@ -144,7 +139,7 @@ function openApi_add_one_action_page_path(api_obj)
         {
             let pageItem = new guiObjectFactory(api_obj)
             window.curentPageObject = pageItem // Нужен для работы тестов
-            
+
             var def = new $.Deferred();
             def.resolve(pageItem.renderAsPage())
 

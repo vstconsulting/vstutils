@@ -1,151 +1,198 @@
 
-window.qunitTestsArray['guiPaths.New'] = {
-    test:function()
+function rundomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489")
+{
+    let res = ""
+    for(let i =0; i< length; i++)
     {
-        for(let path in guiSchema.path)
-        {
-            let api_obj = guiSchema.path[path]
-            if(api_obj.type != 'list')
-            {
-                continue;
-            }
-
-            if(api_obj.level >= 3)
-            {
-                continue;
-            }
-
-            if(path != "/inventory/")
-            {
-                continue;
-            }
-
-
-            // Проверка того что страница открывается
-            /*syncQUnit.addTest("guiPaths['"+path+"'].List", function ( assert )
-            {
-                console.log("guiPaths['"+path+"'].List")
-
-                $.when(vstGO(path)).done(() => {
-
-                    assert.ok(true, 'guiPaths["'+path+'"].List');
-
-                }).fail(() => {
-                    debugger;
-                    assert.ok(false, 'guiPaths["'+path+'"].List fail');
-                })
-            });
-            */
-            if(!api_obj.canCreate)
-            {
-                // Проверка того что страница с флагом api_obj.canCreate != true не открывается
-                syncQUnit.addTest("guiPaths['"+path+"new']", function ( assert )
-                {
-                    let done = assert.async();
-                    try{
-                        $.when(vstGO(path+"new")).done(() => {
-                            debugger;
-                            assert.ok(false, 'guiPaths["'+path+'new"] !canCreate');
-                            testdone(done)
-                        }).fail(() => {
-                            assert.ok(true, 'guiPaths["'+path+'new"] !canCreate');
-                            testdone(done)
-                        })
-                    }catch (ex)
-                    {
-                        assert.ok(true, 'guiPaths["'+path+'new"] !canCreate');
-                        testdone(done)
-                    }
-                });
-                continue;
-            }
-            else
-            {
-                // Проверка того что страница с флагом api_obj.canCreate == true открывается
-                syncQUnit.addTest("guiPaths['"+path+"'new]", function ( assert )
-                {
-                    let done = assert.async();
-                    console.log("guiPaths['"+path+"new']")
-
-                    $.when(vstGO(path+"new")).done(() => {
-
-                        assert.ok(true, 'guiPaths["'+path+'new"]');
-
-                        window.curentPageObject;
-                        window.curentPageObject.model.guiFields.name.insertTestValue("ABC")
-                        window.curentPageObject.model.guiFields.notes.insertTestValue("note ABC")
-
-                        $.when(window.curentPageObject.createAndGoEdit()).done(() => {
-                            
-                            assert.ok(window.curentPageObject.model.guiFields.name.getValue() == "ABC", 'test name of new object');
-                            testdone(done)
-                        }).fail(() => {
-                            debugger;
-                            assert.ok(false, 'guiPaths["'+path+'new"] fail');
-                            testdone(done)
-                        })
-                    }).fail(() => {
-                        debugger;
-                        assert.ok(false, 'guiPaths["'+path+'new"] fail');
-                        testdone(done)
-                    })
-                });
-
-                // Проверка того что страница открывается
-                /*syncQUnit.addTest("guiPaths['"+path+"'].List", function ( assert )
-                {
-                    console.log("guiPaths['"+path+"'].List")
-
-                    $.when(vstGO(path)).done(() => {
-
-                        assert.ok(true, 'guiPaths["'+path+'"].List');
-
-                    }).fail(() => {
-                        debugger;
-                        assert.ok(false, 'guiPaths["'+path+'"].List fail');
-                    })
-                });*/
-            }
-
-        }
+        res += abc[Math.floor(Math.random()*abc.length)]
     }
+
+    return res;
 }
 
-if(0)
-window.qunitTestsArray['guiPaths.Actions'] = {
-    test:function()
+guiTests = {
+
+}
+
+guiTests.openPage =  function(path)
+{
+    // Проверка того что страница открывается
+    syncQUnit.addTest("guiPaths['"+path+"'].List", function ( assert )
     {
-        for(let path in guiSchema.path)
+        let done = assert.async();
+        $.when(vstGO(path)).done(() => {
+            assert.ok(true, 'guiPaths["'+path+'"].opened');
+            testdone(done)
+        }).fail(() => {
+            debugger;
+            assert.ok(false, 'guiPaths["'+path+'"].opened fail');
+            testdone(done)
+        })
+    });
+}
+
+guiTests.openError404Page =  function(env, path_callback)
+{
+    syncQUnit.addTest("guiPaths['openError404Page'].Error404", function ( assert )
+    {
+        debugger;
+        let done = assert.async();
+        let path = path_callback(env);
+        $.when(vstGO(path)).always(() => {
+            assert.ok($(".error-as-page.error-status-404").length != 0, 'guiPaths["'+path+'"] ok, and delete was failed');
+            testdone(done)
+        })
+    })
+}
+
+guiTests.canCreateObject =  function(path, canCreate)
+{
+    // Проверка того что страница с флагом path.canCreate != true не открывается
+    syncQUnit.addTest("guiPaths['"+path+"new']", function ( assert )
+    {
+        let done = assert.async();
+        try{
+            $.when(vstGO(path+"new")).done(() => {
+                assert.ok(canCreate == true, 'guiPaths["'+path+'new"] canCreate("'+canCreate+'")');
+                testdone(done)
+            }).fail(() => {
+                assert.ok(canCreate == false, 'guiPaths["'+path+'new"] canCreate("'+canCreate+'")');
+                testdone(done)
+            })
+        }catch (ex)
         {
-            let api_obj = guiSchema.path[path]
-            if(api_obj.type != 'action')
+            assert.ok(canCreate == false, 'guiPaths["'+path+'new"] [catch] canCreate("'+canCreate+'")');
+            testdone(done)
+        }
+    });
+}
+
+guiTests.createObject =  function(api_obj, fieldsData, env = {}, isWillCreated = true)
+{
+    // Проверка того что страница с флагом api_obj.canCreate == true открывается
+    syncQUnit.addTest("guiPaths['"+api_obj.path+"new']", function ( assert )
+    {
+        let done = assert.async();
+
+        // Открыли страницу создания
+        $.when(vstGO(api_obj.path+"new")).done(() => {
+
+            let values = []
+            for(let i in fieldsData)
             {
-                continue;
+                let field = window.curentPageObject.model.guiFields[i]
+                // Наполнили объект набором случайных данных
+                values[i] = field.insertTestValue(fieldsData[i].value)
+
+                if(fieldsData[i].real_value != undefined && values[i] != fieldsData[i].real_value )
+                {
+                    assert.ok(true, 'fieldsData["'+i+'"].real_value !=' + values[i]);
+                    testdone(done)
+                    return;
+                }
             }
 
-            syncQUnit.addTest("guiPaths['"+path+"']", function ( assert )
-            {
-                console.log("guiPaths['"+path+"']")
-                let done = assert.async();
+            // Создали объект с набором случайных данных
+            $.when(window.curentPageObject.createAndGoEdit()).done(() => {
 
-                let pageItem = new guiObjectFactory(api_obj)
-                assert.ok(pageItem, 'guiPaths["'+path+'"], pageItem != false');
+                assert.ok(isWillCreated == true, 'guiPaths["'+api_obj.path+'new"] done');
+                for(let i in fieldsData)
+                {
+                    let field = window.curentPageObject.model.guiFields[i]
 
-                var def = new $.Deferred();
-                spajs.wait_result("#spajs-right-area", def)
-                def.resolve(pageItem.renderAsPage())
+                    if(fieldsData[i].do_not_compare)
+                    {
+                        continue;
+                    }
 
-                $.when(def).always(() => {
-                    assert.ok(pageItem, 'guiPaths["'+path+'"], renderAsPage != false');
-                    setTimeout(()=>{
-                        pageItem.stopUpdates();
-                        assert.ok(pageItem, 'guiPaths["'+path+'"], stopUpdates');
-                        testdone(done)
-                    }, 1000)
-                })
+                    // Проверили что данные теже
+                    assert.ok(field.getValue() == values[i], 'test["'+api_obj.path+'"]["'+i+'"] == ' + values[i]);
+                }
 
-            });
+                if(window.curentPageObject.model.data.id)
+                {
+                    env.objectId = window.curentPageObject.model.data.id;
+                }
+                else if(window.curentPageObject.model.data.pk)
+                {
+                    env.objectId = window.curentPageObject.model.data.pk;
+                }
+                else if(window.curentPageObject.model.data.name)
+                {
+                    env.objectId = window.curentPageObject.model.data.name;
+                }
+
+                testdone(done)
+            }).fail((err) => {
+                debugger;
+                assert.ok(isWillCreated == false, 'guiPaths["'+api_obj.path+'new"] fail');
+                testdone(done)
+            })
+        }).fail((err) => {
+            debugger;
+            assert.ok(isWillCreated == false, 'guiPaths["'+api_obj.path+'new"] fail');
+            testdone(done)
+        })
+    });
+}
+
+guiTests.deleteObject =  function(path = "deleteObject")
+{
+    // Проверка того что страница с флагом api_obj.canCreate == true открывается
+    syncQUnit.addTest("guiPaths['"+path+"objectId'].delete", function ( assert )
+    {
+        let done = assert.async();
+        tabSignal.once("spajs.open", () => {
+            assert.ok(true, 'guiPaths["'+path+'objectId"] ok');
+            testdone(done)
+        })
+
+        $(".btn-delete-one-entity").trigger('click')
+    });
+}
+
+guiTests.canDeleteObject =  function(canDelete, path = "canDeleteObject")
+{
+    // Проверка того что страница с флагом api_obj.canCreate == true открывается
+    syncQUnit.addTest("guiPaths['"+path+"'].canDelete['"+canDelete+"']", function ( assert )
+    {
+        let done = assert.async();
+        assert.ok( $(".btn-delete-one-entity").length == canDelete/1, 'guiPaths["'+path+'"] has ("'+$(".btn-delete-one-entity").length+'") delete button with api_obj.page.canDelete == '+canDelete);
+        testdone(done)
+    });
+}
+
+
+window.qunitTestsArray['guiPaths.users'] = {
+    test:function()
+    {
+        let env = {}
+        let path = '/user/'
+        let api_obj = guiSchema.path[path]
+
+        // Проверка того что страница открывается
+        guiTests.openPage(path)
+
+        // Проверка возможности создания объекта
+        guiTests.canCreateObject(path, true)
+
+        // Создание объекта
+        let pass = rundomString(6)
+        let obj = {
+            username:{value:rundomString(6)},
+            password:{value:pass, do_not_compare:true},
+            password2:{value:pass, do_not_compare:true},
         }
 
+        guiTests.createObject(api_obj, obj, env, true)
+
+        // Проверка возможности удаления объекта
+        guiTests.canDeleteObject(true)
+
+        // Проверка удаления объекта
+        guiTests.deleteObject()
+
+        // Проверка что страницы нет
+        guiTests.openError404Page(env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
     }
 }

@@ -105,6 +105,7 @@ guiElements.base = function(opt = {}, value, parent_object)
     this.insertTestValue = function(value)
     {
         $("#"+this.element_id).val(value)
+        return value;
     }
 
     this._onUpdateValue = function(){}
@@ -436,6 +437,20 @@ guiElements.enum = function(opt = {}, value)
             width: '100%',
         });
     }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        let options = $("#"+this.element_id+" option")
+        value = options[Math.floor(Math.random()*options.length)].value
+        $("#"+this.element_id).val(value).trigger('change');
+           
+        return value
+    }
+
 }
 
 guiElements.file = function(opt = {})
@@ -472,6 +487,22 @@ guiElements.boolean = function()
 
         let value = $("#"+this.element_id).hasClass('selected');
         return this.reductionToType(value);
+    }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        if(value)
+        {
+            $("#"+this.element_id).addClass('selected')
+            return true
+        }
+
+        $("#"+this.element_id).removeClass('selected')
+        return false
     }
 }
 
