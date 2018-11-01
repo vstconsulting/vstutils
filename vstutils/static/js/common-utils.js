@@ -60,7 +60,8 @@ if(!window.guiTestsFiles)
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
- 
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js')
+
 
 // Run tests
 function loadQUnitTests()

@@ -413,11 +413,11 @@
     <%[ buttons_row %>
 
         <% if(guiObj.api.canCreate){ %>
-            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'new']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Create new <%- 'Add '+guiObj.api.name %>" >Create</a>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'new']) %>" class="btn-create-one-entity btn btn-primary" onclick="return vstGO(this.href);" title="<%- 'Add '+guiObj.api.name %>" >Create</a>
         <% } %>
 
         <% if(guiObj.api.canAdd){%>
-            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'add']) %>" class="btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'add']) %>" class="btn-add-one-entity btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
         <% } %>
 
         <%* buttons %>

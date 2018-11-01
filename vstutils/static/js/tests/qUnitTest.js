@@ -209,7 +209,7 @@ function testdone(name, callback)
     }
 
     var def = new $.Deferred();
-    var time = 4
+    var time = 1
 
     setTimeout(function(name){
         setTimeout(function(){

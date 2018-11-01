@@ -14,11 +14,29 @@ guiTests = {
 
 }
 
-guiTests.openPage =  function(path)
+/**
+ * Создаёт тест который выполнит переход на страницу и завалится если там ошибка
+ * @param {string} path
+ */
+guiTests.openPage =  function(test_name, env, path_callback)
 {
     // Проверка того что страница открывается
-    syncQUnit.addTest("guiPaths['"+path+"'].List", function ( assert )
+    syncQUnit.addTest("guiPaths['"+test_name+"']", function ( assert )
     {
+        let path;
+        if(env === undefined)
+        {
+            path = test_name
+        }
+        else if(typeof env == "string")
+        {
+            path = env
+        }
+        else
+        {
+            path = path_callback(env);
+        }
+
         let done = assert.async();
         $.when(vstGO(path)).done(() => {
             assert.ok(true, 'guiPaths["'+path+'"].opened');
@@ -31,11 +49,14 @@ guiTests.openPage =  function(path)
     });
 }
 
+/**
+ * Создаёт тест который выполнит переход на страницу и завалится если переход выполнен без ошибки
+ * @param {string} path
+ */
 guiTests.openError404Page =  function(env, path_callback)
 {
     syncQUnit.addTest("guiPaths['openError404Page'].Error404", function ( assert )
     {
-        debugger;
         let done = assert.async();
         let path = path_callback(env);
         $.when(vstGO(path)).always(() => {
@@ -45,69 +66,30 @@ guiTests.openError404Page =  function(env, path_callback)
     })
 }
 
-guiTests.canCreateObject =  function(path, canCreate)
-{
-    // Проверка того что страница с флагом path.canCreate != true не открывается
-    syncQUnit.addTest("guiPaths['"+path+"new']", function ( assert )
-    {
-        let done = assert.async();
-        try{
-            $.when(vstGO(path+"new")).done(() => {
-                assert.ok(canCreate == true, 'guiPaths["'+path+'new"] canCreate("'+canCreate+'")');
-                testdone(done)
-            }).fail(() => {
-                assert.ok(canCreate == false, 'guiPaths["'+path+'new"] canCreate("'+canCreate+'")');
-                testdone(done)
-            })
-        }catch (ex)
-        {
-            assert.ok(canCreate == false, 'guiPaths["'+path+'new"] [catch] canCreate("'+canCreate+'")');
-            testdone(done)
-        }
-    });
-}
-
-guiTests.createObject =  function(api_obj, fieldsData, env = {}, isWillCreated = true)
+/**
+ * Попытается создать объект, выполнить переход на страницу объекта и проверить что он создался правильно
+ * @param {type} path пут в апи (ждёт /user/ а не /user/new)
+ * @param {type} fieldsData данные полей
+ * @param {type} env в атрибут objectId этого объекта будет записан id созданного элемента
+ * @param {type} isWillCreated должен ли в итоге создаться объект или ожидаем ошибку
+ */
+guiTests.createObject =  function(path, fieldsData, env = {}, isWillCreated = true)
 {
     // Проверка того что страница с флагом api_obj.canCreate == true открывается
-    syncQUnit.addTest("guiPaths['"+api_obj.path+"new']", function ( assert )
+    syncQUnit.addTest("guiPaths['"+path+"new'] WillCreated = "+isWillCreated+", fieldsData="+JSON.stringify(fieldsData), function ( assert )
     {
         let done = assert.async();
 
         // Открыли страницу создания
-        $.when(vstGO(api_obj.path+"new")).done(() => {
+        $.when(vstGO(path+"new")).done(() => {
 
-            let values = []
-            for(let i in fieldsData)
-            {
-                let field = window.curentPageObject.model.guiFields[i]
-                // Наполнили объект набором случайных данных
-                values[i] = field.insertTestValue(fieldsData[i].value)
-
-                if(fieldsData[i].real_value != undefined && values[i] != fieldsData[i].real_value )
-                {
-                    assert.ok(true, 'fieldsData["'+i+'"].real_value !=' + values[i]);
-                    testdone(done)
-                    return;
-                }
-            }
+            let values = guiTests.setValues(assert, fieldsData)
 
             // Создали объект с набором случайных данных
             $.when(window.curentPageObject.createAndGoEdit()).done(() => {
 
-                assert.ok(isWillCreated == true, 'guiPaths["'+api_obj.path+'new"] done');
-                for(let i in fieldsData)
-                {
-                    let field = window.curentPageObject.model.guiFields[i]
-
-                    if(fieldsData[i].do_not_compare)
-                    {
-                        continue;
-                    }
-
-                    // Проверили что данные теже
-                    assert.ok(field.getValue() == values[i], 'test["'+api_obj.path+'"]["'+i+'"] == ' + values[i]);
-                }
+                assert.ok(isWillCreated == true, 'guiPaths["'+path+'new"] done');
+                guiTests.compareValues(assert, path, fieldsData, values)
 
                 if(window.curentPageObject.model.data.id)
                 {
@@ -124,16 +106,74 @@ guiTests.createObject =  function(api_obj, fieldsData, env = {}, isWillCreated =
 
                 testdone(done)
             }).fail((err) => {
-                debugger;
-                assert.ok(isWillCreated == false, 'guiPaths["'+api_obj.path+'new"] fail');
+                assert.ok(isWillCreated == false, 'guiPaths["'+path+'new"] fail');
                 testdone(done)
             })
         }).fail((err) => {
             debugger;
-            assert.ok(isWillCreated == false, 'guiPaths["'+api_obj.path+'new"] fail');
+            assert.ok(isWillCreated == false, 'guiPaths["'+path+'new"] fail');
             testdone(done)
         })
     });
+}
+
+guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
+{
+    // Проверка того что страница с флагом api_obj.canCreate == true открывается
+    syncQUnit.addTest("guiPaths['"+path+"update'] isWillSaved = "+isWillSaved+", fieldsData="+JSON.stringify(fieldsData), function ( assert )
+    {
+        let done = assert.async();
+
+        let values = guiTests.setValues(assert, fieldsData)
+
+        // Создали объект с набором случайных данных
+        $.when(window.curentPageObject.update()).done(() => {
+
+            assert.ok(isWillSaved == true, 'guiPaths["'+path+'update"] done');
+            guiTests.compareValues(assert, path, fieldsData, values)
+
+            testdone(done)
+        }).fail((err) => {
+            assert.ok(isWillSaved == false, 'guiPaths["'+path+'update"] fail');
+            testdone(done)
+        })
+
+    });
+}
+
+guiTests.compareValues =  function(assert, path, fieldsData, values)
+{
+    for(let i in fieldsData)
+    {
+        let field = window.curentPageObject.model.guiFields[i]
+
+        if(fieldsData[i].do_not_compare)
+        {
+            continue;
+        }
+
+        // Проверили что данные теже
+        assert.ok(field.getValue() == values[i], 'test["'+path+'"]["'+i+'"] == ' + values[i]);
+    }
+}
+
+guiTests.setValues =  function(assert, fieldsData)
+{
+    let values = []
+    for(let i in fieldsData)
+    {
+        let field = window.curentPageObject.model.guiFields[i]
+        // Наполнили объект набором случайных данных
+        values[i] = field.insertTestValue(fieldsData[i].value)
+
+        if(fieldsData[i].real_value != undefined && values[i] != fieldsData[i].real_value )
+        {
+            debugger;
+            assert.ok(false, 'fieldsData["'+i+'"].real_value !=' + values[i]);
+        }
+    }
+
+    return values
 }
 
 guiTests.deleteObject =  function(path = "deleteObject")
@@ -151,48 +191,32 @@ guiTests.deleteObject =  function(path = "deleteObject")
     });
 }
 
-guiTests.canDeleteObject =  function(canDelete, path = "canDeleteObject")
+/**
+ * Проверка что на странице есть кнопка удаления объекта
+ * @param {type} canDelete (если true то кнопка должна быть, если false то не должна быть )
+ * @param {type} path необязательный параметр для вывода в имени теста
+ */
+guiTests.hasDeleteButton =  function(canDelete, path = "canDeleteObject")
 {
-    // Проверка того что страница с флагом api_obj.canCreate == true открывается
-    syncQUnit.addTest("guiPaths['"+path+"'].canDelete['"+canDelete+"']", function ( assert )
-    {
-        let done = assert.async();
-        assert.ok( $(".btn-delete-one-entity").length == canDelete/1, 'guiPaths["'+path+'"] has ("'+$(".btn-delete-one-entity").length+'") delete button with api_obj.page.canDelete == '+canDelete);
-        testdone(done)
-    });
+    return guiTests.hasElement(canDelete, ".btn-delete-one-entity", path)
+}
+guiTests.hasCreateButton =  function(isHas, path = "canDeleteObject")
+{
+    return guiTests.hasElement(isHas, ".btn-create-one-entity", path)
+}
+guiTests.hasAddButton =  function(isHas, path = "canDeleteObject")
+{
+    return guiTests.hasElement(isHas, ".btn-add-one-entity", path)
 }
 
 
-window.qunitTestsArray['guiPaths.users'] = {
-    test:function()
+
+guiTests.hasElement =  function(isHas, selector, path = "canDeleteObject")
+{
+    syncQUnit.addTest("guiPaths['"+path+"'].hasElement['"+selector+"'] == "+isHas, function ( assert )
     {
-        let env = {}
-        let path = '/user/'
-        let api_obj = guiSchema.path[path]
-
-        // Проверка того что страница открывается
-        guiTests.openPage(path)
-
-        // Проверка возможности создания объекта
-        guiTests.canCreateObject(path, true)
-
-        // Создание объекта
-        let pass = rundomString(6)
-        let obj = {
-            username:{value:rundomString(6)},
-            password:{value:pass, do_not_compare:true},
-            password2:{value:pass, do_not_compare:true},
-        }
-
-        guiTests.createObject(api_obj, obj, env, true)
-
-        // Проверка возможности удаления объекта
-        guiTests.canDeleteObject(true)
-
-        // Проверка удаления объекта
-        guiTests.deleteObject()
-
-        // Проверка что страницы нет
-        guiTests.openError404Page(env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
-    }
+        let done = assert.async();
+        assert.ok( $(selector).length == isHas/1, 'hasElement["'+path+'"][selector='+selector+'] has ("'+$(selector).length+'") isHas == '+isHas);
+        testdone(done)
+    });
 }
