@@ -11,3 +11,4 @@ build
 dist
 pylint_*
 .idea/*
+test_screenshot.png
