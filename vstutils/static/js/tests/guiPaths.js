@@ -220,3 +220,54 @@ guiTests.hasElement =  function(isHas, selector, path = "canDeleteObject")
         testdone(done)
     });
 }
+
+
+
+guiTests.testForPath = function (path, params)
+{
+    let env = {}
+
+    let api_obj = guiSchema.path[path]
+
+    // Проверка того что страница открывается
+    guiTests.openPage(path)
+
+    // Проверка наличия элемента на странице
+    guiTests.hasCreateButton(1, path)
+    guiTests.hasAddButton(0, path)
+
+    // Проверка возможности создания объекта
+    guiTests.openPage(path+"new")
+
+    for(let i in params.create)
+    {
+        guiTests.createObject(path, params.create[i].data, env, params.create[i].is_valid)
+        if(params.create[i].is_valid)
+        {
+            break;
+        }
+    }
+
+    guiTests.openPage(path)
+    guiTests.openPage(path, env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
+
+    // Проверка возможности удаления объекта
+    guiTests.hasDeleteButton(true, path)
+    guiTests.hasCreateButton(false, path)
+    guiTests.hasAddButton(false, path)
+
+    for(let i in params.update)
+    {
+        guiTests.updateObject(path, params.update[i].data, params.update[i].is_valid)
+        if(params.update[i].is_valid)
+        {
+            break;
+        }
+    }
+
+    // Проверка удаления объекта
+    guiTests.deleteObject()
+
+    // Проверка что страницы нет
+    guiTests.openError404Page(env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
+}
