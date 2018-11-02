@@ -444,10 +444,13 @@ guiElements.enum = function(opt = {}, value)
      */
     this.insertTestValue = function(value)
     {
-        let options = $("#"+this.element_id+" option")
-        value = options[Math.floor(Math.random()*options.length)].value
+        let options = $("#"+this.element_id+" option[value="+value+"]")
+        if(options.length == 0)
+        {
+            return null;
+        }
+
         $("#"+this.element_id).val(value).trigger('change');
-           
         return value
     }
 
@@ -1539,6 +1542,15 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         thisObj.setType(new_type, override_opt);
     });
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function()
+    {
+        return this.realElement.insertTestValue.apply(this.realElement, arguments);
+    }
 
 }
 

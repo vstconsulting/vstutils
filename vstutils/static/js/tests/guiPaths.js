@@ -43,7 +43,7 @@ guiTests.openPage =  function(test_name, env, path_callback)
             testdone(done)
         }).fail(() => {
             debugger;
-            assert.ok(false, 'guiPaths["'+path+'"].opened fail');
+            assert.ok(false, 'guiPaths["'+path+'"].opened openPage=fail');
             testdone(done)
         })
     });
@@ -75,47 +75,51 @@ guiTests.openError404Page =  function(env, path_callback)
  */
 guiTests.createObject =  function(path, fieldsData, env = {}, isWillCreated = true)
 {
+    guiTests.openPage(path+"new")
+    guiTests.setValuesAndCreate(path, fieldsData, (data) => {
+
+        if(data.id)
+        {
+            env.objectId = data.id;
+        }
+        else if(data.pk)
+        {
+            env.objectId = data.pk;
+        }
+        else if(data.name)
+        {
+            env.objectId = data.name;
+        }
+
+    }, isWillCreated)
+}
+
+guiTests.setValuesAndCreate =  function(path, fieldsData, onCreateCallback, isWillCreated = true)
+{
     // Проверка того что страница с флагом api_obj.canCreate == true открывается
-    syncQUnit.addTest("guiPaths['"+path+"new'] WillCreated = "+isWillCreated+", fieldsData="+JSON.stringify(fieldsData), function ( assert )
+    syncQUnit.addTest("guiPaths['"+path+"'] WillCreated = "+isWillCreated+", fieldsData="+JSON.stringify(fieldsData), function ( assert )
     {
         let done = assert.async();
 
-        // Открыли страницу создания
-        $.when(vstGO(path+"new")).done(() => {
+        let values = guiTests.setValues(assert, fieldsData)
 
-            let values = guiTests.setValues(assert, fieldsData)
+        // Создали объект с набором случайных данных
+        $.when(window.curentPageObject.createAndGoEdit()).done(() => {
 
-            // Создали объект с набором случайных данных
-            $.when(window.curentPageObject.createAndGoEdit()).done(() => {
+            assert.ok(isWillCreated == true, 'guiPaths["'+path+'"] done');
+            guiTests.compareValues(assert, path, fieldsData, values)
 
-                assert.ok(isWillCreated == true, 'guiPaths["'+path+'new"] done');
-                guiTests.compareValues(assert, path, fieldsData, values)
+            onCreateCallback(window.curentPageObject.model.data)
 
-                if(window.curentPageObject.model.data.id)
-                {
-                    env.objectId = window.curentPageObject.model.data.id;
-                }
-                else if(window.curentPageObject.model.data.pk)
-                {
-                    env.objectId = window.curentPageObject.model.data.pk;
-                }
-                else if(window.curentPageObject.model.data.name)
-                {
-                    env.objectId = window.curentPageObject.model.data.name;
-                }
-
-                testdone(done)
-            }).fail((err) => {
-                assert.ok(isWillCreated == false, 'guiPaths["'+path+'new"] fail');
-                testdone(done)
-            })
+            testdone(done)
         }).fail((err) => {
-            debugger;
-            assert.ok(isWillCreated == false, 'guiPaths["'+path+'new"] fail');
+            assert.ok(isWillCreated == false, 'guiPaths["'+path+'"] setValuesAndCreate=fail');
             testdone(done)
         })
     });
 }
+
+
 
 guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
 {
@@ -134,7 +138,7 @@ guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
 
             testdone(done)
         }).fail((err) => {
-            assert.ok(isWillSaved == false, 'guiPaths["'+path+'update"] fail');
+            assert.ok(isWillSaved == false, 'guiPaths["'+path+'update"] updateObject=fail');
             testdone(done)
         })
 

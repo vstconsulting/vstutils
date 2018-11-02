@@ -56,10 +56,14 @@ var gui_list_object = {
         {
             guiPopUp.success("Objects of '"+thisObj.api.bulk_name+"' type were successfully deleted");
             def.resolve(data)
+
+
+            tabSignal.emit("guiList.deleted",  {guiObj:this, ids: ids, success:true});
         }).fail(function (e)
         {
             def.reject(e)
             thisObj.showErrors(e)
+            tabSignal.emit("guiList.deleted",  {guiObj:this, ids: ids, success:false});
         })
 
         return def.promise();
