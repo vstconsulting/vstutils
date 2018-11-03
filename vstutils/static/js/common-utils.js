@@ -427,6 +427,10 @@ var guiLocalSettings = {
         window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
         tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
     },
+    setAsTmp:function(name, value){
+        this.__settings[name] = value; 
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+    },
     setIfNotExists:function(name, value)
     {
         if(this.__settings[name] === undefined)

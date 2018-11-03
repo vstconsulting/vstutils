@@ -1,4 +1,21 @@
 
+window.qunitTestsArray['common'] = {
+    test:function()
+    {
+        // openHelpModal
+        // stringToBoolean
+        // searchObjectsInListByJs
+        // checkDataValidityForSearchQuery
+
+        //  isCordova()
+        // Экшены и мультиэкшены
+        // spajs.errorPage
+        // pmLicense
+        // teams acl_member_callback
+        // guiElements
+    }
+}
+
 window.qunitTestsArray['guiPaths.users'] = {
     test:function()
     {
@@ -35,7 +52,7 @@ window.qunitTestsArray['guiPaths.users'] = {
         guiTests.testForPath(path, params)
 
         let users_parts = 3
-        let users_count = users_parts*7
+        let users_count = users_parts*2
         let users = []
 
         let curentTime = new Date()
@@ -70,6 +87,33 @@ window.qunitTestsArray['guiPaths.users'] = {
         {
             guiTests.hasElement(2, ".pagination-page2")
         }
+
+        guiTests.openPage(path+"search/last_name=lastName1,is_active=true")
+        guiTests.wait(200);
+
+        guiTests.openPage(path+"search/id__not=1/page/2")
+        guiTests.wait(200);
+
+        guiTests.actionAndWaitRedirect("addSearchFilter", () =>{
+            window.curentPageObject.addSearchFilter("username__not", "unitTestNullResults")
+            $(".search-btn").trigger('click')
+        })
+
+        guiTests.hasElement(1, ".remove-token-id__not")
+        guiTests.hasElement(1, ".remove-token-username__not")
+
+
+        guiTests.openPage(path+"search/id__not=1,username__not=unitTestNullResults/page/2")
+
+        guiTests.hasElement(1, ".remove-token-id__not")
+        guiTests.clickAndWaitRedirect(".remove-token-id__not")
+        guiTests.hasElement(0, ".remove-token-id__not")
+
+        guiTests.hasElement(1, ".remove-token-username__not")
+        guiTests.clickAndWaitRedirect(".remove-token-username__not")
+        guiTests.hasElement(0, ".remove-token-username__not")
+
+
 
         guiTests.openPage(path+"search/first_name=searchTest-"+curentTime+",last_name=lastName0")
 
@@ -123,5 +167,25 @@ window.qunitTestsArray['guiPaths.users'] = {
                 })
             });
         }
+
+
+
+        syncQUnit.addTest("toggleSelectEachItem in users", function ( assert )
+        {
+            let done = assert.async();
+
+            $.when(window.curentPageObject.toggleSelectEachItem('testUsers', true)).done(()=>{
+                assert.ok(true, 'toggleSelectEachItem ok');
+
+                $(".unselect-all-btn").trigger('click')
+
+                testdone(done)
+            }).fail(()=>{
+                assert.ok(false, 'toggleSelectEachItem fail');
+                testdone(done)
+            })
+        });
+
+
     }
 }

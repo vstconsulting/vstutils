@@ -148,58 +148,7 @@ var Base64 = {
     }
 
 }
-
-/**
- * https://stackoverflow.com/a/25456134/7835270
- * @param {type} x
- * @param {type} y
- * @returns {Boolean}
- */
-var deepEqual = function (x, y)
-{
-    if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null))
-    {
-        if (Object.keys(x).length != Object.keys(y).length)
-        {
-            console.error("x.keys.length != y.keys.length")
-            throw("x.keys.length != y.keys.length")
-            return false;
-        }
-
-        for (var prop in x)
-        {
-            if (y.hasOwnProperty(prop))
-            {
-                if (! deepEqual(x[prop], y[prop]))
-                {
-                    console.error("x["+prop + "] != y["+prop+"]")
-                    throw("x["+prop + "] != y["+prop+"]")
-                    return false;
-                }
-            }
-            else
-            {
-                console.error("x["+prop + "] != undefined")
-                throw("x["+prop + "] != undefined")
-                return false;
-            }
-        }
-
-        return true;
-    }
-    else if (x !== y)
-    {
-        console.error("x("+x + ") != y("+ y + ")")
-        throw("x("+x + ") != y("+ y + ")")
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
-
+  
 function testdone(name, callback)
 {
     if(callback === undefined)

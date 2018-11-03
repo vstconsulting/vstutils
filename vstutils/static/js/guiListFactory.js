@@ -560,7 +560,6 @@ var gui_list_object = {
             }
         }
         this.activeSearch.fields[name].used = false
-
         return this.searchGO(this.searchObjectToString(""), this.searchAdditionalData);
     },
 
@@ -726,7 +725,7 @@ var gui_list_object = {
     {
         if (this.isEmptySearchQuery(query))
         {
-            return vstGO(this.url_vars.baseURL().replace(/\/search\/?$/, ""));
+            return vstGO(this.url_vars.baseURL().replace(/\/search\/?.*$/, ""));
         }
 
         return vstGO(this.url_vars.searchURL(this.searchObjectToString(trim(query))))

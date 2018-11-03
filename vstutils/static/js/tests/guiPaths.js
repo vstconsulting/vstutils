@@ -10,6 +10,8 @@ function rundomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489")
     return res;
 }
 
+guiLocalSettings.setAsTmp('page_update_interval', 90)
+
 guiTests = {
 
 }
@@ -46,6 +48,18 @@ guiTests.openPage =  function(test_name, env, path_callback)
             assert.ok(false, 'guiPaths["'+path+'"].opened openPage=fail');
             testdone(done)
         })
+    });
+}
+
+guiTests.wait =  function(test_name, time)
+{
+    syncQUnit.addTest("wait['"+test_name+"']", function ( assert )
+    {
+        let done = assert.async();
+        setTimeout(() => {
+            assert.ok(true, 'wait["'+test_name+'"]');
+            testdone(done)
+        }, time)
     });
 }
 
@@ -180,20 +194,33 @@ guiTests.setValues =  function(assert, fieldsData)
     return values
 }
 
-guiTests.deleteObject =  function(path = "deleteObject")
+guiTests.actionAndWaitRedirect =  function(test_name, action)
 {
-    // Проверка того что страница с флагом api_obj.canCreate == true открывается
-    syncQUnit.addTest("guiPaths['"+path+"objectId'].delete", function ( assert )
+    syncQUnit.addTest("actionAndWaitRedirect['"+test_name+"']", function ( assert )
     {
         let done = assert.async();
         tabSignal.once("spajs.open", () => {
-            assert.ok(true, 'guiPaths["'+path+'objectId"] ok');
+            assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
             testdone(done)
         })
 
-        $(".btn-delete-one-entity").trigger('click')
+        action(test_name)
     });
 }
+
+guiTests.clickAndWaitRedirect =  function(secector_string)
+{
+    guiTests.actionAndWaitRedirect(secector_string, (secector_string) =>{
+        $(secector_string).trigger('click')
+    })
+}
+
+guiTests.deleteObject =  function(path = "deleteObject")
+{
+    guiTests.clickAndWaitRedirect(".btn-delete-one-entity")
+}
+
+
 
 /**
  * Проверка что на странице есть кнопка удаления объекта
@@ -250,6 +277,7 @@ guiTests.testForPath = function (path, params)
         {
             break;
         }
+        guiTests.wait(100);
     }
 
     guiTests.openPage(path)

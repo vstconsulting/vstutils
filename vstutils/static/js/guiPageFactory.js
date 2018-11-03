@@ -185,7 +185,7 @@ var gui_page_object = {
     },
 
     load : function (filters)
-    { 
+    {
         this.model.filters =  $.extend(true, {}, this.url_vars, filters)
         if(typeof this.model.filters !== "object")
         {
@@ -349,7 +349,7 @@ var gui_page_object = {
      * Отрисует объект как поле ввода
      * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
      * @returns {string|promise}
-     */
+     * /
     render : function (render_options = {})
     {
         let tpl = this.getTemplateName('one_as_field')
@@ -364,6 +364,6 @@ var gui_page_object = {
         //render_options.sections = this.getSections('render')
         //debugger;
         return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
-    },
+    }, // */
 
 }

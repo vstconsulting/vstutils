@@ -106,7 +106,7 @@
                                 %>
                             >
                         </div>
-                        <span class="remove-token"
+                        <span class="remove-token remove-token-<%- valfield.name %>"
                                 role="button"
                                 data-value-name="<%- valfield.name %>"
                                 <%= justOn('click', function(event)
@@ -499,10 +499,10 @@
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
+                                        <a class="select-all-btn" href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                                     </li>
                                     <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
-                                        <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                        <a class="unselect-all-btn"  href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                                     </li>
                                 </ul>
                             </div>
