@@ -556,7 +556,9 @@
     <%] %>
 
     <%[ readonly_input %>
-        <div class="html_content"> <%= value || opt.default || '' %> </div>
+        <~ guiElement.db_value>
+            <div class="html_content"> <%= guiElement.db_value || opt.default || '' %> </div>
+        <~>
     <%] %>
 
     <%! guiElements.base %>
