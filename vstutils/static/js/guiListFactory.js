@@ -67,151 +67,35 @@ var gui_list_object = {
 
     prefetch : function (data)
     {
-        var prefetch_fields = {};
-        var prefetch_fields_ids = {};
-        var promise = new $.Deferred();
+        let promise = new $.Deferred();
 
-        //отбираем prefetch поля
-        for(var i in this.api.schema.list.fields)
-        {
-            if(this.api.schema.list.fields[i].prefetch)
-            {
-                prefetch_fields[this.api.schema.list.fields[i].name] = $.extend(true, {}, this.api.schema.list.fields[i].prefetch);
-                prefetch_fields_ids[this.api.schema.list.fields[i].name] = {};
-            }
-        }
+        // select prefetch fields
+        let prefetch_collector = selectPrefetchFieldsFromSchema(this.api.schema.list.fields);
 
-        //если prefetch полей не оказалось, то функция завершает свое выполнение
-        if($.isEmptyObject(prefetch_fields))
+        // if there are no prefetch fields, function returns data as it came from API
+        // without any changes
+        if($.isEmptyObject(prefetch_collector.fields))
         {
             return promise.resolve(data);
         }
 
         var dataFromApi = data.data.results;
 
-        //отбираем id prefetch полей
+        // select ids of prefetch fields
         for(var item in dataFromApi)
         {
-            for(var field in dataFromApi[item])
-            {
-                if(prefetch_fields[field])
-                {
-                    if(!prefetch_fields_ids.hasOwnProperty(field))
-                    {
-                        prefetch_fields_ids[field] = {};
-                    }
-
-                    let path = prefetch_fields[field].path(dataFromApi[item]);
-
-                    if(path)
-                    {
-                        if(!prefetch_fields_ids[field].hasOwnProperty(path))
-                        {
-                            prefetch_fields_ids[field][path] = [];
-                        }
-
-                        if($.inArray(dataFromApi[item][field], prefetch_fields_ids[field][path]) == -1 && dataFromApi[item][field] != null )
-                        {
-                            prefetch_fields_ids[field][path].push(dataFromApi[item][field]);
-                        }
-                    }
-                }
-            }
+            selectIdsOfPrefetchFields(dataFromApi[item], prefetch_collector)
         }
 
+        // make bulk request
+        let bulkArr = formBulkRequestForPrefetchFields(prefetch_collector);
 
-        var bulkArr = [];
-        var queryObj = {};
-
-        //формируем bulk запрос
-        for(var field in prefetch_fields_ids)
-        {
-            for(var path in prefetch_fields_ids[field])
-            {
-
-                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                let match = XRegExp.exec(path, xregexpItem)
-                //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
-                if(match != null)
-                {
-                    queryObj = {
-                        type: "mod",
-                        item: match.parent_type.replace(/^\/|\/$/g, ''),
-                        pk: match.parent_id.replace(/^\/|\/$/g, ''),
-                        data_type: match.page_type.replace(/^\/|\/$/g, ''),
-                        method: "get",
-                    }
-                }
-                else
-                {
-                    let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                    queryObj = {
-                        type: "mod",
-                        item: bulk_name[1],
-                        filters:"id="+prefetch_fields_ids[field][path].join(","),
-                        method:"get",
-                    }
-                }
-
-                bulkArr.push(queryObj);
-            }
-        }
-
-        //отправляем bulk запрос
+        // send bulk request
         $.when(this.apiQuery(bulkArr)).done(d =>
         {
             for(var item in dataFromApi)
             {
-                for(var field in dataFromApi[item])
-                {
-                    if(prefetch_fields[field])
-                    {
-                        let path = prefetch_fields[field].path(dataFromApi[item]);
-
-                        if(path)
-                        {
-                            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                            let match = XRegExp.exec(path, xregexpItem)
-                            //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
-                            if(match != null)
-                            {
-                                for(var j in d)
-                                {
-                                    if(d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
-                                    {
-                                        let prefetch_data = d[j].data.results;
-                                        for(var k in prefetch_data)
-                                        {
-                                            if($.inArray(prefetch_data[k].id, prefetch_fields_ids[field][path]) != -1)
-                                            {
-                                                dataFromApi[item][field+'_info'] = prefetch_data[k];
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                                for(var j in d)
-                                {
-                                    if(d[j].item == bulk_name[1])
-                                    {
-                                        let prefetch_data = d[j].data.results;
-                                        for(var k in prefetch_data)
-                                        {
-                                            if(dataFromApi[item][field] == prefetch_data[k].id)
-                                            {
-                                                dataFromApi[item][field+'_info'] = prefetch_data[k];
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                }
+                addPrefetchInfoToDataFromApi(d, dataFromApi[item], prefetch_collector);
             }
 
             promise.resolve(data);
