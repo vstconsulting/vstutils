@@ -781,3 +781,160 @@ function removeSelectedElements(ids, tag)
 
     return false;
 }
+
+/**
+ * Function selects fields from schema, that have prefetch property.
+ * @params fields(object) - fields from guiSchema.
+ */
+function selectPrefetchFieldsFromSchema(fields)
+{
+    let prefetch_collector = {
+        fields: {},
+        fields_ids: {},
+    }
+    for(let i in fields)
+    {
+        if(fields[i].prefetch)
+        {
+            prefetch_collector.fields[fields[i].name] = $.extend(true, {}, fields[i].prefetch);
+            prefetch_collector.fields_ids[fields[i].name] = {};
+        }
+    }
+
+    return prefetch_collector;
+}
+
+/**
+ * Function selects fields select ids of prefetch fields.
+ * @params dataFromApi(object) - data from API.
+ * @params prefetch_collector(object) - object with info about prefetch fields.
+ */
+function selectIdsOfPrefetchFields(dataFromApi, prefetch_collector)
+{
+    for(let field in dataFromApi)
+    {
+        if(prefetch_collector.fields[field])
+        {
+            if(!prefetch_collector.fields_ids.hasOwnProperty(field))
+            {
+                prefetch_collector.fields_ids[field] = {};
+            }
+
+            let path = prefetch_collector.fields[field].path(dataFromApi);
+
+            if(path)
+            {
+                if(!prefetch_collector.fields_ids[field].hasOwnProperty(path))
+                {
+                    prefetch_collector.fields_ids[field][path] = [];
+                }
+
+                if($.inArray(dataFromApi[field], prefetch_collector.fields_ids[field][path]) == -1 && dataFromApi[field] != null )
+                {
+                    prefetch_collector.fields_ids[field][path].push(dataFromApi[field]);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Function forms bulk request for additional info for prefetch fields.
+ * @params prefetch_collector(object) - object with info about prefetch fields.
+ */
+function formBulkRequestForPrefetchFields(prefetch_collector)
+{
+    let bulkArr = [];
+    let queryObj = {};
+
+    for(let field in prefetch_collector.fields_ids)
+    {
+        for(let path in prefetch_collector.fields_ids[field])
+        {
+
+            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
+            let match = XRegExp.exec(path, xregexpItem)
+            if(match != null)
+            {
+                queryObj = {
+                    type: "mod",
+                    item: match.parent_type.replace(/^\/|\/$/g, ''),
+                    pk: match.parent_id.replace(/^\/|\/$/g, ''),
+                    data_type: match.page_type.replace(/^\/|\/$/g, ''),
+                    method: "get",
+                }
+            }
+            else
+            {
+                let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                queryObj = {
+                    type: "mod",
+                    item: bulk_name[1],
+                    filters:"id="+prefetch_collector.fields_ids[field][path].join(","),
+                    method:"get",
+                }
+            }
+
+            bulkArr.push(queryObj);
+        }
+    }
+
+    return bulkArr;
+}
+
+/**
+ * Function adds prefetch info to data from API.
+ * @params d(object) - prefetch data.
+ * @params dataFromApi(object) - data from API.
+ * @params prefetch_collector(object) - object with info about prefetch fields.
+ */
+function addPrefetchInfoToDataFromApi(d, dataFromApi, prefetch_collector)
+{
+    for (let field in dataFromApi)
+    {
+        if (prefetch_collector.fields[field])
+        {
+            let path = prefetch_collector.fields[field].path(dataFromApi);
+            if (path)
+            {
+                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
+                let match = XRegExp.exec(path, xregexpItem)
+                if (match != null)
+                {
+                    for (var j in d)
+                    {
+                        if (d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
+                        {
+                            let prefetch_data = d[j].data.results;
+                            for (var k in prefetch_data)
+                            {
+                                if (dataFromApi[field] == prefetch_data[k].id)
+                                {
+                                    dataFromApi[field + '_info'] = prefetch_data[k];
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
+                    for (var j in d)
+                    {
+                        if (d[j].item == bulk_name[1] && d[j].subitem == null)
+                        {
+                            let prefetch_data = d[j].data.results;
+                            for (var k in prefetch_data)
+                            {
+                                if (dataFromApi[field] == prefetch_data[k].id)
+                                {
+                                    dataFromApi[field + '_info'] = prefetch_data[k];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

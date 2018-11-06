@@ -19,143 +19,29 @@ var gui_page_object = {
 
     prefetch : function (data)
     {
-        var prefetch_fields = {};
-        var prefetch_fields_ids = {};
-        var promise = new $.Deferred();
+        let promise = new $.Deferred();
 
         // select prefetch fields
-        for(var i in this.api.schema.get.fields)
-        {
-            if(this.api.schema.get.fields[i].prefetch)
-            {
-                prefetch_fields[this.api.schema.get.fields[i].name] = $.extend(true, {}, this.api.schema.get.fields[i].prefetch);
-                prefetch_fields_ids[this.api.schema.get.fields[i].name] = {};
-            }
-        }
+        let prefetch_collector = selectPrefetchFieldsFromSchema(this.api.schema.get.fields);
 
         // if there are no prefetch fields, function returns data as it came from API
         // without any changes
-        if($.isEmptyObject(prefetch_fields))
+        if($.isEmptyObject(prefetch_collector.fields))
         {
             return promise.resolve(data);
         }
-
-
         var dataFromApi = data.data;
 
         // select ids of prefetch fields
-        for(var field in dataFromApi)
-        {
-            if(prefetch_fields[field])
-            {
-                if(!prefetch_fields_ids.hasOwnProperty(field))
-                {
-                    prefetch_fields_ids[field] = {};
-                }
-
-                let path = prefetch_fields[field].path(dataFromApi);
-
-                if(path)
-                {
-                    if(!prefetch_fields_ids[field].hasOwnProperty(path))
-                    {
-                        prefetch_fields_ids[field][path] = [];
-                    }
-
-                    if($.inArray(dataFromApi[field], prefetch_fields_ids[field][path]) == -1 && dataFromApi[field] != null )
-                    {
-                        prefetch_fields_ids[field][path].push(dataFromApi[field]);
-                    }
-                }
-            }
-        }
-
-
-        var bulkArr = [];
-        var queryObj = {};
+        selectIdsOfPrefetchFields(dataFromApi, prefetch_collector)
 
         // make bulk request
-        for(var field in prefetch_fields_ids)
-        {
-            for(var path in prefetch_fields_ids[field])
-            {
-                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                let match = XRegExp.exec(path, xregexpItem)
-                if(match != null)
-                {
-                    queryObj = {
-                        type: "mod",
-                        item: match[1].replace(/^\/|\/$/g, ''),
-                        pk: match[2].replace(/^\/|\/$/g, ''),
-                        data_type: match[3].replace(/^\/|\/$/g, ''),
-                        method: "get",
-                    }
-                }
-                else
-                {
-                    let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                    queryObj = {
-                        type: "mod",
-                        item: bulk_name[1],
-                        filters:"id="+prefetch_fields_ids[field][path].join(","),
-                        method:"get",
-                    }
-                }
-
-                bulkArr.push(queryObj);
-            }
-        }
+        let bulkArr = formBulkRequestForPrefetchFields(prefetch_collector);
 
         // send bulk request
         $.when(this.apiQuery(bulkArr)).done(d =>
         {
-            for(var field in dataFromApi)
-            {
-                if(prefetch_fields[field])
-                {
-                    let path = prefetch_fields[field].path(dataFromApi);
-                    if(path)
-                    {
-                        let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                        let match = XRegExp.exec(path, xregexpItem)
-                        if(match != null)
-                        {
-                            for(var j in d)
-                            {
-                                if(d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
-                                {
-                                    let prefetch_data = d[j].data.results;
-                                    for(var k in prefetch_data)
-                                    {
-                                        if(dataFromApi[field] == prefetch_data[k].id)
-                                        {
-                                            dataFromApi[field+'_info'] = prefetch_data[k];
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                            for(var j in d)
-                            {
-                                if(d[j].item == bulk_name[1])
-                                {
-                                    let prefetch_data = d[j].data.results;
-                                    for(var k in prefetch_data)
-                                    {
-                                        if(dataFromApi[field] == prefetch_data[k].id)
-                                        {
-                                            dataFromApi[field+'_info'] = prefetch_data[k];
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            addPrefetchInfoToDataFromApi(d, dataFromApi, prefetch_collector);
 
             promise.resolve(data);
         }).fail(f => {
@@ -182,7 +68,7 @@ var gui_page_object = {
     },
 
     load : function (filters)
-    { 
+    {
         this.model.filters =  $.extend(true, {}, this.url_vars, filters)
         if(typeof this.model.filters !== "object")
         {
@@ -282,12 +168,12 @@ var gui_page_object = {
         let tpl = this.getTemplateName('one')
 
         if(this.api.autoupdate &&
-                                    (
-                                        !render_options  ||
-                                        render_options.autoupdate === undefined ||
-                                        render_options.autoupdate
-                                    )
+            (
+                !render_options  ||
+                render_options.autoupdate === undefined ||
+                render_options.autoupdate
             )
+        )
         {
             this.startUpdates()
         }
