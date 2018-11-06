@@ -1,25 +1,58 @@
 /**
  * Тестирование guiElements.string
  */
-window.qunitTestsArray['guiElements.string'] = {
+window.qunitTestsArray['guiElements.baseTest'] = {
     test:function()
     {
-        syncQUnit.addTest('guiElements.string', function ( assert )
+        let guiElementsArray = {
+            'string':{},
+            'password':{},
+            'file':{},
+            'secretfile':{},
+            'boolean':{},
+            'textarea':{},
+            'hidden':{},
+            'null':{},
+            'integer':{},
+            'date':{},
+            'date_time':{},
+            'uptime':{},
+            'time_interval':{},
+            'autocomplete':{},
+            'hybrid_autocomplete':{},
+            'select2':{},
+            'apiObject':{},
+            'apiData':{},
+            'inner_api_object':{},
+            'json':{},
+            'dynamic':{},
+            'crontab':{},
+            'enum':{},
+            'prefetch':{},
+            'html':{}
+        };
+        for(let i in guiElementsArray)
         {
-            let done = assert.async();
-
-            $("body").append("<div id='guiElementsTestForm'></div>")
-            let element = new guiElements.string();
-
-            $("#guiElementsTestForm").insertTpl(element.render())
-            element.getValue()
-
-            $("#guiElementsTestForm").remove();
-
-            assert.ok(true, 'guiElements.string');
-            testdone(done)
-        });
+            guiElementTestFunction(i)
+        }
     }
+}
+
+function guiElementTestFunction(elementName){
+    syncQUnit.addTest('guiElements.'+elementName, function ( assert )
+    {
+        let done = assert.async();
+
+        $("body").append("<div id='guiElementsTestForm'></div>")
+        let element = new guiElements[elementName]();
+
+        $("#guiElementsTestForm").insertTpl(element.render())
+
+        assert.ok(element.insertTestValue(rundomString(6)) == element.getValue(), 'guiElements.string');
+        $("#guiElementsTestForm").remove();
+
+        testdone(done)
+    });
 }
 
 /**
