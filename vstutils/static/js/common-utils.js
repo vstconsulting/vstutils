@@ -673,3 +673,21 @@ function checkDataValidityForSearchQuery(data_value, search_value)
 
     return valid;
 }
+
+/**
+ * Function checks necessity of opening link in default browser in cordova app.
+ */
+function openExternalLink(event)
+{
+    if(isCordova())
+    {
+        let url = event.target.activeElement.href;
+        if(url && url.match(window.hostname) == null)
+        {
+            window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
+            return false;
+        }
+    }
+}
+
+window.onbeforeunload = openExternalLink;
