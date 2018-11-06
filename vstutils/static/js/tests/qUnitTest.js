@@ -148,7 +148,7 @@ var Base64 = {
     }
 
 }
-  
+
 function testdone(name, callback)
 {
     if(callback === undefined)
@@ -158,7 +158,7 @@ function testdone(name, callback)
     }
 
     var def = new $.Deferred();
-    var time = 1
+    var time = 50
 
     setTimeout(function(name){
         setTimeout(function(){

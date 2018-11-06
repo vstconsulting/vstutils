@@ -658,6 +658,12 @@ if(!window.spajs)
             def.resolve()
             res = def
         }
+
+        $.when(res).done(() =>{
+               tabSignal.emit("spajs.opened", spajs.urlInfo)
+        })
+
+
         return res.promise();
     }
 

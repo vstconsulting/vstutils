@@ -738,7 +738,7 @@ var gui_list_object = {
      */
     isEmptySearchQuery : function (query)
     {
-        if (!query || !trim(query)
+        if ( (!query || !trim(query))
             && this.activeSearch
             && this.activeSearch.filters
             && this.activeSearch.filters.length == 0)

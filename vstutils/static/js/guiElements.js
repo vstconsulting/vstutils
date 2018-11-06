@@ -390,12 +390,12 @@ guiElements.base = function(opt = {}, value, parent_object)
  * onclick:''   - текст события onclick
  * text:''      - текст надписи
  * }
- */
 guiElements.link_button = function(opt = {})
 {
     this.name = 'link_button'
     guiElements.base.apply(this, arguments)
 }
+ */
 
 guiElements.string = function()
 {
@@ -403,13 +403,13 @@ guiElements.string = function()
     guiElements.base.apply(this, arguments)
 }
 
-guiElements.named_template = function()
+/*guiElements.named_template = function()
 {
     this.name = 'named_template'
     guiElements.base.apply(this, arguments)
 
     this.template_name = "field_" + this.opt.parent_name_format
-}
+}*/
 
 guiElements.password = function()
 {

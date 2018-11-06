@@ -10,7 +10,7 @@ function rundomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489")
     return res;
 }
 
-guiLocalSettings.setAsTmp('page_update_interval', 90)
+guiLocalSettings.setAsTmp('page_update_interval', 300)
 
 guiTests = {
 
@@ -51,8 +51,13 @@ guiTests.openPage =  function(test_name, env, path_callback)
     });
 }
 
-guiTests.wait =  function(test_name, time)
+guiTests.wait =  function(test_name, time = undefined)
 {
+    if(!time)
+    {
+       time = guiLocalSettings.get('page_update_interval')*2.2
+    }
+
     syncQUnit.addTest("wait['"+test_name+"']", function ( assert )
     {
         let done = assert.async();
@@ -152,6 +157,8 @@ guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
 
             testdone(done)
         }).fail((err) => {
+            if(isWillSaved != false) debugger;
+
             assert.ok(isWillSaved == false, 'guiPaths["'+path+'update"] updateObject=fail');
             testdone(done)
         })
@@ -199,23 +206,29 @@ guiTests.actionAndWaitRedirect =  function(test_name, action)
     syncQUnit.addTest("actionAndWaitRedirect['"+test_name+"']", function ( assert )
     {
         let done = assert.async();
-        tabSignal.once("spajs.open", () => {
+        let timeId = setTimeout(() =>{
+            assert.ok(false, 'actionAndWaitRedirect["'+test_name+'"] and redirect faild');
+            testdone(done)
+        }, 30*1000)
+
+        tabSignal.once("spajs.opened", () => {
+            clearTimeout(timeId)
             assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
             testdone(done)
         })
-
+        
         action(test_name)
     });
 }
 
 guiTests.clickAndWaitRedirect =  function(secector_string)
 {
-    guiTests.actionAndWaitRedirect(secector_string, (secector_string) =>{
+    guiTests.actionAndWaitRedirect("click for "+secector_string, () =>{
         $(secector_string).trigger('click')
     })
 }
 
-guiTests.deleteObject =  function(path = "deleteObject")
+guiTests.deleteObject =  function()
 {
     guiTests.clickAndWaitRedirect(".btn-delete-one-entity")
 }
@@ -227,26 +240,31 @@ guiTests.deleteObject =  function(path = "deleteObject")
  * @param {type} canDelete (если true то кнопка должна быть, если false то не должна быть )
  * @param {type} path необязательный параметр для вывода в имени теста
  */
-guiTests.hasDeleteButton =  function(canDelete, path = "canDeleteObject")
+guiTests.hasDeleteButton =  function(canDelete, path = "hasDeleteButton")
 {
     return guiTests.hasElement(canDelete, ".btn-delete-one-entity", path)
 }
-guiTests.hasCreateButton =  function(isHas, path = "canDeleteObject")
+guiTests.hasCreateButton =  function(isHas, path = "hasCreateButton")
 {
     return guiTests.hasElement(isHas, ".btn-create-one-entity", path)
 }
-guiTests.hasAddButton =  function(isHas, path = "canDeleteObject")
+guiTests.hasAddButton =  function(isHas, path = "hasAddButton")
 {
     return guiTests.hasElement(isHas, ".btn-add-one-entity", path)
 }
 
 
 
-guiTests.hasElement =  function(isHas, selector, path = "canDeleteObject")
+guiTests.hasElement =  function(isHas, selector, path = "")
 {
     syncQUnit.addTest("guiPaths['"+path+"'].hasElement['"+selector+"'] == "+isHas, function ( assert )
     {
         let done = assert.async();
+        if($(selector).length != isHas/1)
+        {
+            debugger;
+        }
+
         assert.ok( $(selector).length == isHas/1, 'hasElement["'+path+'"][selector='+selector+'] has ("'+$(selector).length+'") isHas == '+isHas);
         testdone(done)
     });
@@ -277,7 +295,7 @@ guiTests.testForPath = function (path, params)
         {
             break;
         }
-        guiTests.wait(100);
+        guiTests.wait();
     }
 
     guiTests.openPage(path)
