@@ -177,7 +177,7 @@ function testdone(name, callback)
 
 function saveReport()
 {
-    $("body").html('<div id="qunit">'+$("#qunit").html()+'</div>');
+    $("body").html('<div id="qunit-saveReport"></div><div id="qunit">'+$("#qunit").html()+'</div>');
     $("body").append('<link rel="stylesheet" href="' + hostname +window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">')
     console.log("saveReport")
 }

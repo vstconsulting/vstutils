@@ -556,7 +556,9 @@
     <%] %>
 
     <%[ readonly_input %>
-        <div class="html_content"> <%= value || opt.default || '' %> </div>
+        <~ guiElement.db_value>
+            <div class="html_content"> <%= guiElement.db_value || opt.default || '' %> </div>
+        <~>
     <%] %>
 
     <%! guiElements.base %>
@@ -789,6 +791,49 @@
                 </div>
             </div>
         </div>
+    <%] %>
+
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.time_interval -->
+<script type="text/x-just" data-just="guiElements.time_interval">
+    <%[ main_input %>
+        <div class="row" >
+            <div class="col-lg-12">
+                <div class="input-group">
+                    <input type="number"
+                            class="form-control"
+                            value="<%- value || '' %>"
+                            id="<%- guiElement.element_id %>"
+                            <%= set_api_options(opt) %>
+                            >
+                    <span class="input-group-addon">
+                        sec
+                    </span>
+                </div>
+            </div>
+        </div>
+    <%] %>
+
+     <%[ readonly_input %>
+        <~ guiElement.db_value>
+            <div class="row" >
+                <div class="col-lg-12">
+                    <div class="input-group">
+                        <input type="number"
+                                class="form-control"
+                                value="<%- guiElement.db_value || '' %>"
+                                id="<%- guiElement.element_id %>"
+                                <%= set_api_options(opt) %>
+                                >
+                        <span class="input-group-addon">
+                            sec
+                        </span>
+                    </div>
+                </div>
+            </div>
+        <~>
     <%] %>
 
     <%! guiElements.base %>

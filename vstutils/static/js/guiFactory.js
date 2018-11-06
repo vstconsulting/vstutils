@@ -111,7 +111,7 @@ function guiGetTestUrlFunctionfunction(regexp, api_path_value)
  */
 function getNameForUrlRegExp(api_path)
 {
-    return api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+|@[A-z0-9]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
+    return api_path.replace(/\{([A-z]+)\}\//g, "(?<api_$1>[0-9,]+|@[A-z0-9_\-]+)\/").replace(/\/$/, "").replace(/^\//, "").replace(/\//g, "\\/")
 }
 
 /**

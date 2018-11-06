@@ -616,6 +616,29 @@ guiElements.uptime = function (opt = {}, value)
     }
 }
 
+/*
+ * Field that gets time in milliseconds and convert it into seconds before render.
+ * Before sending data to API it converts time from seconds to milliseconds.
+ */
+guiElements.time_interval = function(opt = {}, value)
+{
+    this.name = 'time_interval';
+    guiElements.base.apply(this, arguments)
+
+    this.value = value / 1000
+    this.db_value = value / 1000
+
+    this._baseGetValue = this.getValue
+
+    this.getValue = function()
+    {
+        let value = this._baseGetValue();
+
+        return value * 1000;
+    }
+
+}
+
 guiElements.autocomplete = function()
 {
     this.name = 'autocomplete'
@@ -1599,8 +1622,6 @@ guiElements.crontab = function (opt = {}, value)
     this.model.HoursStr = "*"
     this.model.MinutesStr = "*"
 
-    this.value = value || "* * * * *";
-
     this.render = function(render_options)
     {
         if(render_options !== undefined)
@@ -1616,8 +1637,7 @@ guiElements.crontab = function (opt = {}, value)
         {
             this.render_options.description = "Time must be specified according to " + window.timeZone + " time zone";
         }
-
-        this.parseCronString(this.value);
+        this.parseCronString(this.db_value);
         return spajs.just.render("guiElements."+this.name, {opt:this.render_options, guiElement: this, value: this.value }, () => {
             this._onRender();
             this._callAllonChangeCallback();
