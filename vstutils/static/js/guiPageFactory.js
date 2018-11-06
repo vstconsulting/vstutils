@@ -23,7 +23,7 @@ var gui_page_object = {
         var prefetch_fields_ids = {};
         var promise = new $.Deferred();
 
-        //отбираем prefetch поля
+        // select prefetch fields
         for(var i in this.api.schema.get.fields)
         {
             if(this.api.schema.get.fields[i].prefetch)
@@ -33,7 +33,8 @@ var gui_page_object = {
             }
         }
 
-        //если prefetch полей не оказалось, то функция завершает свое выполнение
+        // if there are no prefetch fields, function returns data as it came from API
+        // without any changes
         if($.isEmptyObject(prefetch_fields))
         {
             return promise.resolve(data);
@@ -42,7 +43,7 @@ var gui_page_object = {
 
         var dataFromApi = data.data;
 
-        //отбираем id prefetch полей
+        // select ids of prefetch fields
         for(var field in dataFromApi)
         {
             if(prefetch_fields[field])
@@ -73,13 +74,12 @@ var gui_page_object = {
         var bulkArr = [];
         var queryObj = {};
 
-        //формируем bulk запрос
+        // make bulk request
         for(var field in prefetch_fields_ids)
         {
             for(var path in prefetch_fields_ids[field])
             {
                 let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                 let match = XRegExp.exec(path, xregexpItem)
                 if(match != null)
                 {
@@ -106,8 +106,7 @@ var gui_page_object = {
             }
         }
 
-        //отправляем bulk запрос
-        // $.when(api.query(bulkArr)).done(d =>
+        // send bulk request
         $.when(this.apiQuery(bulkArr)).done(d =>
         {
             for(var field in dataFromApi)
@@ -118,9 +117,7 @@ var gui_page_object = {
                     if(path)
                     {
                         let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                        //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                         let match = XRegExp.exec(path, xregexpItem)
-                        //let match = path.match(/(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$/);
                         if(match != null)
                         {
                             for(var j in d)
@@ -130,7 +127,7 @@ var gui_page_object = {
                                     let prefetch_data = d[j].data.results;
                                     for(var k in prefetch_data)
                                     {
-                                        if($.inArray(prefetch_data[k].id, prefetch_fields_ids[field][path]) != -1)
+                                        if(dataFromApi[field] == prefetch_data[k].id)
                                         {
                                             dataFromApi[field+'_info'] = prefetch_data[k];
                                         }
