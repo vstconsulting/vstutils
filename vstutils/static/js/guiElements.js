@@ -262,7 +262,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         if(field.maxLength && value_length > field.maxLength)
         {
-            throw {error:'validation', message:'Field '+field.name +" is too long"}
+            throw {error:'validation', message:'Field "'+field.name +'" is too long'}
         }
 
         if(field.minLength)
@@ -271,7 +271,7 @@ guiElements.base = function(opt = {}, value, parent_object)
             {
                 if(field.required)
                 {
-                    throw {error:'validation', message:'Field '+field.name +" is empty"}
+                    throw {error:'validation', message:'Field "'+field.name +'" is empty'}
                 }
                 else
                 {
@@ -281,23 +281,24 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             if(value_length < field.minLength)
             {
-                throw {error:'validation', message:'Field '+field.name +" is too short"}
+                throw {error:'validation', message:'Field "'+field.name +'" is too short'}
             }
         }
 
         if(field.max && value > field.max)
         {
-            throw {error:'validation', message:'Field '+field.name +" is too big"}
+            throw {error:'validation', message:'Field "'+field.name +'" is too big'}
         }
 
         if(field.min && value < field.min)
         {
-            throw { error: 'validation', message: 'Field ' + field.name + " is too small" }
+            throw { error: 'validation', message: 'Field "' + field.name + '" is too small' }
         }
 
         if((value === "" || value === undefined) && field.required && !this.opt.default)
+        // if(value === undefined && field.required && !this.opt.default)
         {
-            throw {error:'validation', message:'Field '+field.name +" is required"}
+            throw {error:'validation', message:'Field "'+field.name +'" is required'}
         }
 
         if(value === "" && !this.opt.default)
@@ -1428,11 +1429,17 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         let lastValue = this.realElement.getValue();
 
         let options = $.extend({}, opt, override_opt);
-        options.onInit = undefined
+        options.onInit = undefined;
+        options.type = type;
 
         if(type == "boolean" && options.default !== undefined && options.readOnly)
         {
             lastValue = options.default;
+        }
+
+        if(type == "boolean" && typeof lastValue == "string")
+        {
+           lastValue = stringToBoolean(lastValue)
         }
 
 
