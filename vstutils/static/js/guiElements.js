@@ -436,6 +436,11 @@ guiElements.file = function(opt = {})
 
         return this.reductionToType(value);
     }
+
+    this.readFile = function (event, el_id)
+    {
+        return readFileAndInsert(event, el_id)
+    }
 }
 
 guiElements.secretfile = function(opt = {})
