@@ -62,10 +62,14 @@ var gui_page_object = {
             {
                 this.model.guiFields[i].updateValue(this.model.data[i], this.model.data)
             }
+
+            this.onUpdateFromServer()
         })
 
         return res
     },
+
+    onUpdateFromServer : function (){},
 
     load : function (filters)
     {

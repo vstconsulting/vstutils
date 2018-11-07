@@ -597,7 +597,11 @@
                     <%- opt.actions[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <% if(opt.actions[k].hidden) { %>
+                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary hidden-true', title:k, text:k}).render() %>
+                    <% } else { %>
+                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <% } %>
                 <% } %>
         <% } %>
     <%] %>
