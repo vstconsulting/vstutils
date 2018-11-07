@@ -36,7 +36,7 @@
                                 class="form-control"
                                 <%- set_api_options(opt) %>
                                 id="<%- guiElement.element_id %>"
-                                value="<% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ if($.isArray(guiElement.db_value)){ %><%- guiElement.db_value.join() %><% }else{ %><%- JSON.stringify(guiElement.db_value) %><% }}else{ %><%- guiElement.db_value || '' %><% } %>">
+                                value="<%- insertValue(guiElement.db_value)  %>">
                         <~>
                     <%] %>
 
@@ -156,7 +156,7 @@
                     class="form-control"
                     <%- set_api_options(opt) %>
                     id="<%- guiElement.element_id %>"
-                    value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+                    value="<%- insertValue(value) %>">
         </div>
     <%] %>
     <%! guiElements.base %>
@@ -170,7 +170,7 @@
         class="form-control"
         <%- set_api_options(opt) %>
         id="<%- guiElement.element_id %>"
-        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+        value="<%- insertValue(value) %>">
     <%] %>
     <%! guiElements.base %>
 </script>
@@ -399,7 +399,7 @@
         class="form-control"
         <%- set_api_options(opt) %>
         id="<%- guiElement.element_id %>"
-        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+        value="<%- insertValue(value) %>">
     <%] %>
     <%! guiElements.base %>
 </script>
