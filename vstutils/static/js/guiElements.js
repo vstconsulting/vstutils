@@ -398,13 +398,13 @@ guiElements.string = function()
     guiElements.base.apply(this, arguments)
 }
 
-/*guiElements.named_template = function()
+guiElements.named_template = function()
 {
     this.name = 'named_template'
     guiElements.base.apply(this, arguments)
 
     this.template_name = "field_" + this.opt.parent_name_format
-}*/
+} 
 
 guiElements.password = function()
 {
