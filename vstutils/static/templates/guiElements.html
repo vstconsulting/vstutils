@@ -36,7 +36,7 @@
                                 class="form-control"
                                 <%- set_api_options(opt) %>
                                 id="<%- guiElement.element_id %>"
-                                value="<% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ if($.isArray(guiElement.db_value)){ %><%- guiElement.db_value.join() %><% }else{ %><%- JSON.stringify(guiElement.db_value) %><% }}else{ %><%- guiElement.db_value || '' %><% } %>">
+                                value="<%- insertValue(guiElement.db_value)  %>">
                         <~>
                     <%] %>
 
@@ -158,7 +158,7 @@
                     class="form-control"
                     <%- set_api_options(opt) %>
                     id="<%- guiElement.element_id %>"
-                    value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+                    value="<%- insertValue(value) %>">
         </div>
     <%] %>
     <%! guiElements.base %>
@@ -172,7 +172,7 @@
         class="form-control"
         <%- set_api_options(opt) %>
         id="<%- guiElement.element_id %>"
-        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+        value="<%- insertValue(value) %>">
     <%] %>
     <%! guiElements.base %>
 </script>
@@ -218,9 +218,9 @@
             </div>
         <~>
     <%] %>
-
-    <%[ readonly_input %>
-        <%* main_input %>
+    
+    <%[ readonly_input %> 
+        <%* main_input %> 
     <%] %>
 
     <%! guiElements.base %>
@@ -233,15 +233,15 @@
         <input type="date" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
     <%] %>
-
-    <%[ readonly_input %>
+    
+    <%[ readonly_input %>  
         <~ guiElement.db_value>
-            <input type="date"
+            <input type="date" 
                     class="form-control"
-                    <%- set_api_options(opt) %>
+                    <%- set_api_options(opt) %> 
                     id="<%- guiElement.element_id %>
                     style="width: 100%;"
-                    class="form-control"
+                    class="form-control" 
                     value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
         <~>
     <%] %>
@@ -256,12 +256,12 @@
         <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")  || '' %>">
     <%] %>
-
-    <%[ readonly_input %>
+    
+    <%[ readonly_input %>  
         <~ guiElement.db_value>
             <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
             value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(guiElement.db_value).tz(window.timeZone).format("HH:mm")  || '' %>">
-
+            
         <~>
     <%] %>
 
@@ -275,11 +275,11 @@
         <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- getUptime(value)  || '' %>">
     <%] %>
-
-    <%[ readonly_input %>
+    
+    <%[ readonly_input %>  
         <~ guiElement.db_value>
             <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
-                    value="<%- getUptime(guiElement.db_value)  || '' %>">
+                    value="<%- getUptime(guiElement.db_value)  || '' %>"> 
         <~>
     <%] %>
 
@@ -292,8 +292,8 @@
     <%[ main_input %>
         <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- value || '' %>">
     <%] %>
-
-    <%[ readonly_input %>
+    
+    <%[ readonly_input %>  
         <~ guiElement.db_value>
             <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- guiElement.db_value || '' %>">
         <~>
@@ -385,7 +385,7 @@
             </div>
         <~>
     <%] %>
-
+    
     <%[ main_input %>
         <%* readonly_input %>
     <%] %>
