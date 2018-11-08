@@ -1,21 +1,4 @@
 
-window.qunitTestsArray['common'] = {
-    test:function()
-    {
-        // openHelpModal
-
-        // searchObjectsInListByJs
-        // checkDataValidityForSearchQuery
-
-        //  isCordova()
-        // мультиэкшены
-
-        // pmLicense
-        // teams acl_member_callback
-        // guiElements
-    }
-}
-
 window.qunitTestsArray['stringToBoolean'] = {
     test:function()
     {

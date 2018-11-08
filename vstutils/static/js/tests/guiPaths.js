@@ -10,7 +10,7 @@ function rundomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489")
     return res;
 }
 
-guiLocalSettings.setAsTmp('page_update_interval', 300)
+guiLocalSettings.setAsTmp('page_update_interval', 600)
 
 guiTests = {
 
@@ -216,7 +216,7 @@ guiTests.actionAndWaitRedirect =  function(test_name, action)
             assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
             testdone(done)
         })
-        
+
         action(test_name)
     });
 }

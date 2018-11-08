@@ -104,8 +104,8 @@ guiElements.base = function(opt = {}, value, parent_object)
      */
     this.insertTestValue = function(value)
     {
-        $("#"+this.element_id).val(value)
-        return value;
+        $("#"+this.element_id).val(value+"")
+        return value+"";
     }
 
     this._onUpdateValue = function(){}
@@ -464,9 +464,17 @@ guiElements.file = function(opt = {})
     this.getValue = function ()
     {
         let value = $('#fileContent_' + this.element_id).val();
-        let default_value = this.opt.default;
-
         return this.reductionToType(value);
+    }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        $("#fileContent_"+this.element_id).val(value)
+        return value;
     }
 }
 
@@ -518,6 +526,11 @@ guiElements.html = function(opt = {})
     {
         return undefined;
     }
+
+    this.insertTestValue = function(value)
+    {
+        return undefined;
+    }
 }
 
 guiElements.textarea = function(opt = {})
@@ -550,12 +563,29 @@ guiElements.null = function(opt = {})
     {
         return undefined;
     }
+
+    this.insertTestValue = function(value)
+    {
+        return undefined;
+    }
 }
 
 guiElements.integer = function(opt = {})
 {
     this.name = 'integer';
     guiElements.base.apply(this, arguments)
+
+    this.getValue = function ()
+    {
+        let value = $('#' + this.element_id).val();
+        return  value/1;
+    }
+
+    this.insertTestValue = function(value)
+    {
+        $("#"+this.element_id).val(value/1)
+        return value/1;
+    }
 }
 
 guiElements.prefetch = function (opt = {}, value)
@@ -585,7 +615,13 @@ guiElements.date = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
+        return moment(value).tz(window.timeZone).format("YYYY/MM/DD");
+    }
 
+    this.insertTestValue = function(value)
+    {
+        let time  = moment(value).tz(window.timeZone).format("YYYY-MM-DD")
+        $("#"+this.element_id).val(time)
         return moment(value).tz(window.timeZone).format("YYYY/MM/DD");
     }
 }
@@ -598,7 +634,13 @@ guiElements.date_time = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
+        return moment(value).tz(window.timeZone).format();
+    }
 
+    this.insertTestValue = function(value)
+    {
+        let time  = moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")
+        $("#"+this.element_id).val(time)
         return moment(value).tz(window.timeZone).format();
     }
 }
@@ -611,7 +653,6 @@ guiElements.uptime = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
-
         return moment(value).tz(window.timeZone).format();
     }
 }
@@ -633,10 +674,14 @@ guiElements.time_interval = function(opt = {}, value)
     this.getValue = function()
     {
         let value = this._baseGetValue();
-
         return value * 1000;
     }
 
+    this._baseinsertTestValue = this.insertTestValue
+    this.insertTestValue = function(value)
+    {
+        return this._baseinsertTestValue(value/1) * 1000;
+    }
 }
 
 guiElements.autocomplete = function()
@@ -1234,6 +1279,10 @@ guiElements.apiObject = function(field, field_value, parent_object)
         this.linkObj = this.createLinkedObj()
     }
 
+    this.insertTestValue = function(value)
+    {
+        return this.getValue();
+    }
 
     this._baseRender = this.render
     this.render = function(options)
@@ -1388,26 +1437,41 @@ guiElements.json = function(opt = {}, value)
     this.name = 'json'
     guiElements.base.apply(this, arguments)
 
+
     this.realElements = {};
-
-    if(value)
+    this.setValue = function(value)
     {
-        for(let field in value)
+        this.value = value
+        let realElements = {};
+        if(value)
         {
-            let options = {
-                readOnly: opt.readOnly || false,
-                title: field,
-            }
-
-            let type = 'string';
-
-            if(typeof value[field] == 'boolean')
+            for(let field in value)
             {
-                type = 'boolean';
-            }
+                let options = {
+                    readOnly: opt.readOnly || false,
+                    title: field,
+                }
 
-            this.realElements[field] = new guiElements[type]($.extend({}, options), value[field]);
+                let type = 'string';
+
+                if(typeof value[field] == 'boolean')
+                {
+                    type = 'boolean';
+                }
+
+                realElements[field] = new guiElements[type]($.extend({}, options), value[field]);
+            }
         }
+
+        this.realElements = realElements
+
+    }
+    this.setValue(value)
+
+    this.insertTestValue = function(value)
+    {
+        this.setValue(value);
+        return value;
     }
 
     this.getValue = function()

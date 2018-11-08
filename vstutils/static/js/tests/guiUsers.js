@@ -149,6 +149,7 @@ window.qunitTestsArray['guiPaths.users'] = {
             $(".btn_exec").trigger('click')
         })
 
+        guiTests.wait();
         guiTests.deleteObject()
 
         guiTests.openPage(path+"search/first_name=searchTest-"+curentTime+",last_name=lastName0")
