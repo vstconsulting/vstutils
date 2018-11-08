@@ -43,7 +43,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
                 console.error("can not found definition for object "+def_name)
                 continue;
             }
-            
+
             field =  mergeDeep(field, def_obj);
 
             if(!field.gui_links)
@@ -53,7 +53,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
 
             let format = def_name.replace("#/", "").split(/\//)
 
-            if(format[1] != "Data") 
+            if(format[1] != "Data")
             {
                 field.readOnly = true
             }
@@ -396,15 +396,6 @@ function openApi_guiSchemaSetRequiredFlags(api)
     return api
 }
 
-function openApi_getPathesOfSublinks(sublinks) {
-    let obj_path = {};
-    for(let item in sublinks)
-    {
-        obj_path[item] = sublinks[item].path;
-    }
-    return obj_path;
-}
-
 // Generate schema based on api
 // Сгенерирует схему на основе апи
 function openApi_guiSchema(api)
@@ -671,10 +662,7 @@ function openApi_guiSchema(api)
         val.sublinks = openApi_get_internal_links(path_schema, path, 1)
         val.sublinks_l2 = openApi_get_internal_links(path_schema, path, 2)
 
-        // objects with paths to sublinks, sublinks_l2
-        //val.sublinks = openApi_getPathesOfSublinks(val.sublinks)
-        //val.sublinks_l2 = openApi_getPathesOfSublinks(val.sublinks_l2)
-
+        // objects with paths to sublinks, sublinks_l2 
         val.actions = {}
         val.links = {}
         for(let subpage in  val.sublinks)
@@ -697,9 +685,9 @@ function openApi_guiSchema(api)
 
 
         val.multi_actions = {}
- 
+
         if(val.type == 'list' && val.page && (val.canRemove || val.page.canDelete))
-        { 
+        {
             val['multi_actions']['delete'] = {
                 name:"delete",
                 __func__onClick: 'multi_action_delete',
@@ -727,13 +715,13 @@ function openApi_guiSchema(api)
     {
         delete path_schema[path].api
     }
- 
+
     let schema = {path:path_schema, object:short_schema}
     emitSchemaPathSignals(schema.path, "gui.schema.");
-    
+
     return schema;
 }
- 
+
 /*
  * Function emits signals for schema
  * @param {object} path_schema - guiShema.path
@@ -743,7 +731,7 @@ function emitSchemaPathSignals(path_schema, prefix = "openapi.schema.")
     for(let path in path_schema)
     {
         let val = path_schema[path]
-      
+
         tabSignal.emit(prefix + "name."+val.name,  {paths:path_schema, path:path, value:val});
         tabSignal.emit(prefix + "type."+val.type,  {paths:path_schema, path:path, value:val});
         for(let schema in val.schema)

@@ -11,7 +11,7 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{
+{ 
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
 
     let reg_exp = XRegExp(regexp, 'x');
@@ -138,15 +138,10 @@ function openApi_add_one_action_page_path(api_obj)
         onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(api_obj)
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
-            $.when(pageItem).done(function()
-            {
-                def.resolve(pageItem.renderAsPage())
-            }).fail(function(err)
-            {
-                def.resolve(renderErrorAsPage(err));
-            })
+            def.resolve(pageItem.renderAsPage())
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
@@ -178,6 +173,7 @@ function openApi_add_one_page_path(api_obj)
         onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(api_obj)
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load(data.reg)).done(function()
@@ -235,6 +231,8 @@ function openApi_add_list_page_path(api_obj)
             onOpen:function(holder, menuInfo, data)
             {
                 let pageItem = new guiObjectFactory(api_obj)
+                window.curentPageObject = pageItem // Нужен для работы тестов
+
                 return pageItem.renderAsNewPage()
             },
         })
@@ -254,6 +252,8 @@ function openApi_add_list_page_path(api_obj)
             onOpen:function(holder, menuInfo, data, onClose_promise)
             {
                 let pageItem = new guiObjectFactory(api_obj.shortestURL)
+                window.curentPageObject = pageItem // Нужен для работы тестов
+
                 let filter = $.extend(true, data.reg)
                 filter.parent_id = undefined
                 filter.parent_type = undefined
@@ -283,6 +283,7 @@ function openApi_add_list_page_path(api_obj)
         onOpen:function(holder, menuInfo, data, onClose_promise)
         {
             let pageItem = new guiObjectFactory(api_obj)
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.search(data.reg)).done(function()

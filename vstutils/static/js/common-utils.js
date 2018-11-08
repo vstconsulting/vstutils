@@ -58,8 +58,10 @@ if(!window.guiTestsFiles)
 
 // Add a test file to the list of files for test gui
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
-
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js')
 
 
 // Run tests
@@ -328,10 +330,15 @@ function turnTableTrIntoLink(event, blank)
         {
             href =  event.target.getAttribute('href');
         }
-        else
+        else if(event.currentTarget)
         {
             href =  event.currentTarget.getAttribute('data-href');
         }
+        else
+        {
+            href =  event.target.getAttribute('data-href');
+        }
+
         if(blank)
         {
             window.open(href);
@@ -354,12 +361,17 @@ function turnTableTrIntoLink(event, blank)
  */
 function blockTrLink(element, stop_element_name, search_class)
 {
+    if(!element)
+    {
+        return false;
+    }
+
     if(element.classList.contains(search_class))
     {
         return true;
     }
 
-    if(element.parentElement.localName != stop_element_name)
+    if(element.parentElement && element.parentElement.localName != stop_element_name)
     {
         return blockTrLink(element.parentElement, stop_element_name, search_class);
     }
@@ -424,6 +436,10 @@ var guiLocalSettings = {
     set:function(name, value){
         this.__settings[name] = value;
         window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+    },
+    setAsTmp:function(name, value){
+        this.__settings[name] = value;
         tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
     },
     setIfNotExists:function(name, value)
@@ -570,6 +586,12 @@ function deepEqual(x, y)
  * @returns {Boolean}
  */
 function stringToBoolean(string){
+
+    if(string == null)
+    {
+        return false;
+    }
+
     switch(string.toLowerCase().trim()){
         case "true": case "yes": case "1": return true;
         case "false": case "no": case "0": case null: return false;

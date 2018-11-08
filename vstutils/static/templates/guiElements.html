@@ -107,21 +107,23 @@
         <%] %>
     <% } %>
     <%[ main_input %>
-        <div id="gui<%- guiElement.element_id %>" class="row">
-            <% if(Object.keys(guiElement.realElements).length > 0) { %>
-                <% for(var i in guiElement.realElements) { %>
-                    <%= guiElement.realElements[i].render() %>
+        <~ guiElement.realElements>
+            <div id="gui<%- guiElement.element_id %>" class="row">
+                <% if(Object.keys(guiElement.realElements).length > 0) { %>
+                    <% for(var i in guiElement.realElements) { %>
+                        <%= guiElement.realElements[i].render() %>
+                    <% } %>
+                <% } else { %>
+                    <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                        <input type="text" class="form-control" readonly disabled  value="This field is empty">
+                    </div>
                 <% } %>
-            <% } else { %>
-                <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                    <input type="text" class="form-control" readonly disabled  value="This field is empty">
-                </div>
-            <% } %>
-        </div>
+            </div>
+        <~>
     <%] %>
-    
-    <%[ readonly_input %> 
-        <%* main_input %> 
+
+    <%[ readonly_input %>
+        <%* main_input %>
     <%] %>
 
     <%! guiElements.base %>
@@ -216,9 +218,9 @@
             </div>
         <~>
     <%] %>
-    
-    <%[ readonly_input %> 
-        <%* main_input %> 
+
+    <%[ readonly_input %>
+        <%* main_input %>
     <%] %>
 
     <%! guiElements.base %>
@@ -231,15 +233,15 @@
         <input type="date" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
-            <input type="date" 
+            <input type="date"
                     class="form-control"
-                    <%- set_api_options(opt) %> 
+                    <%- set_api_options(opt) %>
                     id="<%- guiElement.element_id %>
                     style="width: 100%;"
-                    class="form-control" 
+                    class="form-control"
                     value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
         <~>
     <%] %>
@@ -254,30 +256,30 @@
         <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")  || '' %>">
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
             <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
             value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(guiElement.db_value).tz(window.timeZone).format("HH:mm")  || '' %>">
-            
+
         <~>
     <%] %>
 
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.date_time -->
+<!-- guiElements.uptime -->
 <script type="text/x-just" data-just="guiElements.uptime">
     <!-- guiElements.uptime -->
     <%[ main_input %>
         <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
         value="<%- getUptime(value)  || '' %>">
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
             <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
-                    value="<%- getUptime(guiElement.db_value)  || '' %>"> 
+                    value="<%- getUptime(guiElement.db_value)  || '' %>">
         <~>
     <%] %>
 
@@ -290,8 +292,8 @@
     <%[ main_input %>
         <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- value || '' %>">
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
             <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- guiElement.db_value || '' %>">
         <~>
@@ -323,28 +325,6 @@
                 <%= opt.text %>
             <% } %>
     </button>
-</script>
-
-<!-- guiElements.link_button -->
-<script type="text/x-just" data-just="guiElements.link_button">
-    <!-- guiElements.link_button -->
-    <a
-        class="<% if(typeof opt.class == 'function'){ %>
-                        <%- opt.class.apply(guiElement, [opt]) %>
-               <% }else{ %>
-                    <%- opt.class %>
-               <% } %>
-               gui-element-<%- guiElement.name %>
-               <%- addCssClassesToElement('btn', opt.title) %>"
-        href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiElement, [opt]) %><% }else{ %><%- opt.link %><% } %>"
-        title="<%- opt.title || '' %>"
-        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiElement, [opt]) %><% }else{ %>return vstGO(this.href);<% } %>" >
-            <% if(typeof opt.text == 'function'){ %>
-                <%= opt.text.apply(guiElement, [opt]) %>
-            <% }else{ %>
-                <%= opt.text %>
-            <% } %>
-    </a>
 </script>
 
 <!-- guiElements.enum -->
@@ -383,7 +363,7 @@
             </div>
         <~>
     <%] %>
-    
+
     <%[ main_input %>
         <%* readonly_input %>
     <%] %>
@@ -394,14 +374,7 @@
 <!-- guiElements.apiData -->
 <script type="text/x-just" data-just="guiElements.apiData">
     <!-- guiElements.apiData [type=<%- opt.type %>, format=<%- opt.format %>] -->
-    <%[ main_input %>
-        <input type="text"
-        class="form-control"
-        <%- set_api_options(opt) %>
-        id="<%- guiElement.element_id %>"
-        value="<%- insertValue(value) %>">
-    <%] %>
-    <%! guiElements.base %>
+    <%! guiElements.string %>
 </script>
 
 <!-- guiElements.apiUser
