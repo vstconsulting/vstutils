@@ -373,25 +373,6 @@ guiElements.base = function(opt = {}, value, parent_object)
     }
 }
 
-/**
- *
- * @param {type} opt
- * @returns {guiElements.button}
- *
- * opt = {
- * class:''     - css
- * link:''      - ссылка
- * title:''     - подсказка
- * onclick:''   - текст события onclick
- * text:''      - текст надписи
- * }
-guiElements.link_button = function(opt = {})
-{
-    this.name = 'link_button'
-    guiElements.base.apply(this, arguments)
-}
- */
-
 guiElements.string = function()
 {
     this.name = 'string'
@@ -404,7 +385,7 @@ guiElements.named_template = function()
     guiElements.base.apply(this, arguments)
 
     this.template_name = "field_" + this.opt.parent_name_format
-} 
+}
 
 guiElements.password = function()
 {
@@ -470,6 +451,11 @@ guiElements.file = function(opt = {})
     {
         $("#fileContent_"+this.element_id).val(value)
         return value;
+    }
+
+    this.readFile = function (event, el_id)
+    {
+        return readFileAndInsert(event, el_id)
     }
 }
 
@@ -1431,7 +1417,6 @@ guiElements.json = function(opt = {}, value)
 
     this.name = 'json'
     guiElements.base.apply(this, arguments)
-
 
     this.realElements = {};
     this.setValue = function(value)

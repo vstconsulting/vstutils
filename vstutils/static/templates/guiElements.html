@@ -492,7 +492,7 @@
         </span>
 
         <span id="<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'>
-            <input type='file' class='input-file' onchange="readFileAndInsert(event, '#fileContent_<%- guiElement.element_id %>');">
+            <input type='file' class='input-file' <%= justOn('change', ()=>{ guiElement.readFile(event, '#fileContent_' + guiElement.element_id); return false; }, guiElement.element_id) %> >
             <span class='glyphicon glyphicon-file'>
             </span>
         </span>
