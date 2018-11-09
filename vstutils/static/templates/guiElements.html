@@ -272,7 +272,7 @@
     <%[ main_input %>
         <div class="input-group">
             <input type="text" class="form-control" sec-value="<%- value || 0 %>" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
-            value="<%- getUptimeWriteMod(value)  || '' %>"
+            value="<%- guiElement.getTimeInUptimeFormat(value)  || '' %>"
                 <%= justOn('change', guiElement.changeOnChangeByHands, guiElement.element_id)
                 %>
             >
@@ -288,7 +288,7 @@
     <%[ readonly_input %>  
         <~ guiElement.db_value>
             <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
-                    value="<%- getUptime(guiElement.db_value)  || '' %>"> 
+                    value="<%- guiElement.getTimeInUptimeFormat(guiElement.db_value)  || '' %>">
         <~>
     <%] %>
 

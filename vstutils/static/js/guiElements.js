@@ -560,6 +560,15 @@ guiElements.date_time = function (opt = {}, value)
     }
 }
 
+/**
+ * Field that gets time in seconds as value and shows it in convenient way for user.
+ * Due to size of time field selects one of the most appropriate pattern from these templates:
+ * - 23:59:59
+ * - 01d 00:00:00
+ * - 01m 30d 00:00:00
+ * - 99y 11m 30d 22:23:24
+ * Function getValue returns time in seconds.
+ */
 guiElements.uptime = function (opt = {}, value)
 {
     this.name = 'uptime';
@@ -569,22 +578,31 @@ guiElements.uptime = function (opt = {}, value)
     {
         let value = $("#"+this.element_id).val();
 
-        let uptime_reg = /(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/;
+        let reg_arr = [
+            /(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            /(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            /(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            /(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+        ]
 
-        let time_parts = value.match(uptime_reg)
-
+        let time_parts = [];
         let uptime_in_seconds =  0;
 
-        if(time_parts != null)
+        for(let i in reg_arr)
         {
-            uptime_in_seconds = moment.duration({
-                seconds: Number(time_parts.groups['ss']),
-                minutes:  Number(time_parts.groups['mm']),
-                hours:  Number(time_parts.groups['hh']),
-                days: Number(time_parts.groups['d']),
-                months: Number(time_parts.groups['m']),
-                years: Number(time_parts.groups['y']),
-            }).asSeconds();
+            time_parts = value.match(reg_arr[i]);
+            if(time_parts != null)
+            {
+                let duration_obj = {
+                    seconds: Number(time_parts.groups['ss']),
+                    minutes:  Number(time_parts.groups['mm']),
+                    hours:  Number(time_parts.groups['hh']),
+                    days: Number(time_parts.groups['d'] || 0),
+                    months: Number(time_parts.groups['m'] || 0),
+                    years: Number(time_parts.groups['y'] || 0),
+                }
+                return uptime_in_seconds = moment.duration(duration_obj).asSeconds();
+            }
         }
 
         return uptime_in_seconds;
@@ -620,7 +638,7 @@ guiElements.uptime = function (opt = {}, value)
             new_time = 0
         }
         $("#"+this.element_id).attr('sec-value', new_time);
-        $("#"+this.element_id).val(getUptimeWriteMod(new_time))
+        $("#"+this.element_id).val(this.getTimeInUptimeFormat(new_time))
     }
 
     this.valueDown = function (increement)
@@ -632,7 +650,7 @@ guiElements.uptime = function (opt = {}, value)
             new_time = 0
         }
         $("#"+this.element_id).attr('sec-value', new_time);
-        $("#"+this.element_id).val(getUptimeWriteMod(new_time))
+        $("#"+this.element_id).val(this.getTimeInUptimeFormat(new_time))
     }
 
     this.mousePress = function(obj, func)
@@ -698,42 +716,148 @@ guiElements.uptime = function (opt = {}, value)
     }
 
     this.maskObj = {
-        mask:'YEARy MONTHm DAYd HH:mm:SS',
-        lazy: false,
-        blocks: {
-            YEAR: {
-                mask: IMask.MaskedRange,
-                from: 0,
-                to: 99
+        mask:[
+            {
+                mask:'HH:mm:SS',
+                blocks: {
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
             },
-            MONTH: {
-                mask: IMask.MaskedRange,
-                from: 0,
-                to: 12
+            {
+                mask:'DAYd HH:mm:SS',
+                blocks: {
+                    DAY: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 31
+                    },
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
             },
-            DAY: {
-                mask: IMask.MaskedRange,
-                from: 0,
-                to: 31
+            {
+                mask:'MONTHm DAYd HH:mm:SS',
+                blocks: {
+                    MONTH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 12
+                    },
+                    DAY: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 31
+                    },
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
             },
-            HH: {
-                mask: IMask.MaskedRange,
-                from: 0,
-                to: 23
+            {
+                mask:'YEARy MONTHm DAYd HH:mm:SS',
+                blocks: {
+                    YEAR: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 99
+                    },
+                    MONTH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 12
+                    },
+                    DAY: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 31
+                    },
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
             },
-            mm: {
-                mask: IMask.MaskedRange,
-                from: 0,
-                to: 59
-            },
-            SS: {
-                mask: IMask.MaskedRange,
-                from: 0,
-                to: 59
-            }
-        },
+        ],
     }
 
+    this.getTimeInUptimeFormat = function(time)
+    {
+        if(isNaN(time))
+        {
+            return "00:00:00";
+        }
+
+        let uptime = moment.duration(Number(time), 'seconds')._data;
+
+        let n = oneCharNumberToTwoChar;
+
+        if(uptime.years > 0)
+        {
+            return n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+
+        } else if(uptime.months > 0)
+        {
+            return n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+        }
+        else if(uptime.days > 0)
+        {
+            return n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+        }
+        else
+        {
+            return n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+        }
+    }
 
     this._onRender = function(options)
     {
@@ -741,10 +865,9 @@ guiElements.uptime = function (opt = {}, value)
         {
             let element = document.getElementById(this.element_id);
             let momentMask = new IMask(element, this.maskObj);
+            this.mousePress($('#uptime-up'), thisObj.doIncrease);
+            this.mousePress($('#uptime-down'),thisObj.doDecrease);
         }
-
-        this.mousePress($('#uptime-up'), thisObj.doIncrease);
-        this.mousePress($('#uptime-down'),thisObj.doDecrease);
     }
 }
 
@@ -2294,69 +2417,6 @@ function getFiltersForAutocomplete(list, search_str, view_field)
 
     return filters;
 }
-
-/*
- * time - in seconds
- */
-function getUptime(time)
-{
-    let uptime = moment.duration(time, 'seconds')._data;
-
-    if(uptime.years > 0)
-    {
-        return "" + uptime.years + "y " + uptime.months + "m " + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-
-    } else if(uptime.months > 0)
-    {
-        return "" + uptime.months + "m " + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    }
-    else if(uptime.days > 0)
-    {
-        return "" + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    }
-    else
-    {
-        return  moment(time*1000).tz('UTC').format('HH:mm:ss');
-    }
-}
-
-function getUptimeWriteMod(time)
-{
-    if(isNaN(time))
-    {
-        debugger;
-        return "00y 00m 00d 00:00:00";
-    }
-    let uptime = moment.duration(Number(time), 'seconds')._data;
-    // if(uptime.days > 30 || uptime.days < 1)
-    // {
-    //     debugger;
-    //
-    // }
-    let n = oneCharNumberToTwoChar;
-
-    // debugger;
-
-    // if(uptime.years > 0)
-    // {
-    //     return "" + n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    //
-    // } else if(uptime.months > 0)
-    // {
-    //     return "" + n(uptime.months) + "m " + n(uptime.days) + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    // }
-    // else if(uptime.days > 0)
-    // {
-    //     return "" + n(uptime.days) + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    // }
-    // else
-    // {
-    let result =  n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-    // debugger;
-    return result;
-    // }
-}
-
 
 /**
  * Function makes search through the list in hybrid_autocomplete modal.
