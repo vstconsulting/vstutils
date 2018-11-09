@@ -20,6 +20,8 @@ class AutoCompletionField(CharField):
     '''
     Field with autocomplite from list of objects.
     '''
+    __slots__ = 'autocomplete', 'autocomplete_property'
+
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
         self.autocomplete_property = None
@@ -33,6 +35,8 @@ class DependEnumField(CharField):
     '''
     Field based on another field.
     '''
+    __slots__ = 'field', 'choices', 'types'
+
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', dict())
@@ -62,6 +66,8 @@ class Select2Field(IntegerField):
     '''
     Field what means where we got list.
     '''
+    __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent'
+
     def __init__(self, **kwargs):  # nocv
         self.select_model = kwargs.pop('select')
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')

@@ -219,6 +219,8 @@ def nested_view_function(master_view, view, view_request, *args, **kw):
 
 
 class BaseClassDecorator(object):
+    __slots__ = 'name', 'arg', 'request_arg', 'args', 'kwargs'
+
     def __init__(self, name, arg, *args, **kwargs):
         self.name = name
         self.arg = arg
@@ -237,6 +239,8 @@ class BaseClassDecorator(object):
 
 
 class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
+    __slots__ = 'view', 'allowed_subs', '_subs', 'serializers', 'methods'
+
     filter_subs = ['filter',]
     class NoView(VSTUtilsException):
         msg = 'Argument "view" must be installed for `nested_view` decorator.'
@@ -319,6 +323,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             nested_manager = getattr(nested_parent_object, manager_name)
 
             class NestedView(mixin_class, self.view):
+                __slots__ = 'nested_detail',
                 __doc__ = self.view.__doc__
                 master_view = view_obj
                 lookup_field = nested_append_arg
