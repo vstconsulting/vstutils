@@ -673,3 +673,11 @@ function checkDataValidityForSearchQuery(data_value, search_value)
 
     return valid;
 }
+
+/**
+ * Function converts numbers from 0 to 9 into 00 to 09.
+ * @param n(number) - number
+ */
+function oneCharNumberToTwoChar(n){
+    return n > 9 ? "" + n: "0" + n;
+}

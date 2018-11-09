@@ -569,7 +569,182 @@ guiElements.uptime = function (opt = {}, value)
     {
         let value = $("#"+this.element_id).val();
 
-        return moment(value).tz(window.timeZone).format();
+        let uptime_reg = /(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/;
+
+        let time_parts = value.match(uptime_reg)
+
+        let uptime_in_seconds =  0;
+
+        if(time_parts != null)
+        {
+            uptime_in_seconds = moment.duration({
+                seconds: Number(time_parts.groups['ss']),
+                minutes:  Number(time_parts.groups['mm']),
+                hours:  Number(time_parts.groups['hh']),
+                days: Number(time_parts.groups['d']),
+                months: Number(time_parts.groups['m']),
+                years: Number(time_parts.groups['y']),
+            }).asSeconds();
+        }
+
+        return uptime_in_seconds;
+    }
+
+    this.getValueInSeconds = function()
+    {
+        return Number($("#"+this.element_id).attr('sec-value')) || 0;
+    }
+
+    this.changeOnChangeByHands = function()
+    {
+        let new_value = thisObj.getValue();
+        if(new_value != 0)
+        {
+            $("#"+thisObj.element_id).attr('sec-value', new_value);
+        }
+    }
+
+    this.uptimeSettings = {
+        timeout: 100,
+        iteration: 1,
+        mouseDown: false,
+    }
+
+    this.valueUp = function (increement)
+    {
+        let new_time = this.getValueInSeconds();
+
+        new_time = new_time + increement
+        if(new_time >= 3155759999)
+        {
+            new_time = 0
+        }
+        $("#"+this.element_id).attr('sec-value', new_time);
+        $("#"+this.element_id).val(getUptimeWriteMod(new_time))
+    }
+
+    this.valueDown = function (increement)
+    {
+        let new_time = this.getValueInSeconds();
+        new_time = new_time - increement
+        if(new_time < 0)
+        {
+            new_time = 0
+        }
+        $("#"+this.element_id).attr('sec-value', new_time);
+        $("#"+this.element_id).val(getUptimeWriteMod(new_time))
+    }
+
+    this.mousePress = function(obj, func)
+    {
+        obj.unbind('mousedown');
+        obj.unbind('mouseup');
+        obj.unbind('mouseleave');
+        obj.bind('mousedown', () => {
+            this.uptimeSettings.mouseDown = true;
+            setTimeout(func, this.uptimeSettings.timeout);
+        });
+
+        obj.bind('mouseup', () =>  {
+            this.uptimeSettings.mouseDown = false;
+            this.uptimeSettings.iteration = 1;
+        });
+
+        obj.bind('mouseleave', () =>  {
+            this.uptimeSettings.mouseDown = false;
+            this.uptimeSettings.iteration = 1;
+        });
+    }
+
+    let thisObj = this;
+    this.doIncrease = function()
+    {
+        if (thisObj.uptimeSettings.mouseDown)
+        {
+            let increement = thisObj.getIncrement(thisObj.uptimeSettings.iteration);
+            thisObj.valueUp(increement)
+            thisObj.uptimeSettings.iteration++;
+            setTimeout(thisObj.doIncrease, thisObj.uptimeSettings.timeout);
+        }
+    }
+
+    this.doDecrease = function()
+    {
+        if (thisObj.uptimeSettings.mouseDown)
+        {
+            let increement = thisObj.getIncrement(thisObj.uptimeSettings.iteration);
+            thisObj.valueDown(increement)
+            thisObj.uptimeSettings.iteration++;
+            setTimeout(thisObj.doDecrease, thisObj.uptimeSettings.timeout);
+        }
+    }
+
+    this.getIncrement = function(iteration)
+    {
+        let increement = 1;
+
+        if(iteration >= 20){
+            increement = 10;
+        }
+
+        if(iteration >= 30){
+            increement = 100;
+        }
+
+        if(iteration >= 40){
+            increement = 1000;
+        }
+        return  increement;
+    }
+
+    this.maskObj = {
+        mask:'YEARy MONTHm DAYd HH:mm:SS',
+        lazy: false,
+        blocks: {
+            YEAR: {
+                mask: IMask.MaskedRange,
+                from: 0,
+                to: 99
+            },
+            MONTH: {
+                mask: IMask.MaskedRange,
+                from: 0,
+                to: 12
+            },
+            DAY: {
+                mask: IMask.MaskedRange,
+                from: 0,
+                to: 31
+            },
+            HH: {
+                mask: IMask.MaskedRange,
+                from: 0,
+                to: 23
+            },
+            mm: {
+                mask: IMask.MaskedRange,
+                from: 0,
+                to: 59
+            },
+            SS: {
+                mask: IMask.MaskedRange,
+                from: 0,
+                to: 59
+            }
+        },
+    }
+
+
+    this._onRender = function(options)
+    {
+        if(!options.readOnly)
+        {
+            let element = document.getElementById(this.element_id);
+            let momentMask = new IMask(element, this.maskObj);
+        }
+
+        this.mousePress($('#uptime-up'), thisObj.doIncrease);
+        this.mousePress($('#uptime-down'),thisObj.doDecrease);
     }
 }
 
@@ -2145,9 +2320,46 @@ function getUptime(time)
     }
 }
 
+function getUptimeWriteMod(time)
+{
+    if(isNaN(time))
+    {
+        debugger;
+        return "00y 00m 00d 00:00:00";
+    }
+    let uptime = moment.duration(Number(time), 'seconds')._data;
+    // if(uptime.days > 30 || uptime.days < 1)
+    // {
+    //     debugger;
+    //
+    // }
+    let n = oneCharNumberToTwoChar;
+
+    // debugger;
+
+    // if(uptime.years > 0)
+    // {
+    //     return "" + n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
+    //
+    // } else if(uptime.months > 0)
+    // {
+    //     return "" + n(uptime.months) + "m " + n(uptime.days) + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
+    // }
+    // else if(uptime.days > 0)
+    // {
+    //     return "" + n(uptime.days) + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
+    // }
+    // else
+    // {
+    let result =  n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+    // debugger;
+    return result;
+    // }
+}
+
 
 /**
- * Function make search through the list in hybrid_autocomplete modal.
+ * Function makes search through the list in hybrid_autocomplete modal.
  * @param object - obj - list of objects, that is used in hybrid_autocomplete modal.
  * @param object - guiElement - hybrid_autocomplete guiElement.
  * @param object - opt - object of options for modal rendering.
