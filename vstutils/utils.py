@@ -74,6 +74,8 @@ class tmp_file(object):
     Temporary file with name
     generated and auto removed on close.
     '''
+    __slots__ = 'fd',
+
     def __init__(self, data="", mode="w", bufsize=0, **kwargs):
         '''
         tmp_file constructor
@@ -131,6 +133,8 @@ class tmp_file_context(object):
     Auto close on exit from context and
     remove if file stil exist.
     '''
+    __slots__ = 'tmp',
+
     def __init__(self, *args, **kwargs):
         self.tmp = tmp_file(*args, **kwargs)
 
@@ -347,6 +351,7 @@ class Paginator(BasePaginator):
 
 
 class ClassPropertyDescriptor(object):
+    __slots__ = 'fget', 'fset'
 
     def __init__(self, fget, fset=None):
         self.fget = fget
@@ -388,6 +393,7 @@ class redirect_stdany(object):
         - On context return stream object.
         - On exit return old streams
     '''
+    __slots__ = 'stream', 'streams', '_old_streams'
     _streams = ["stdout", "stderr"]
 
     def __init__(self, new_stream=six.StringIO(), streams=None):
@@ -397,18 +403,18 @@ class redirect_stdany(object):
         :param streams: -- names of streams like ``['stdout', 'stderr']``
         :type streams: list
         '''
-        self._streams = streams or self._streams
+        self.streams = streams or self._streams
         self.stream = new_stream
         self._old_streams = {}
 
     def __enter__(self):
-        for stream in self._streams:
+        for stream in self.streams:
             self._old_streams[stream] = getattr(sys, stream)
             setattr(sys, stream, self.stream)
         return self.stream
 
     def __exit__(self, exctype, excinst, exctb):
-        for stream in self._streams:
+        for stream in self.streams:
             setattr(sys, stream, self._old_streams.pop(stream))
 
 
@@ -427,6 +433,9 @@ class ModelHandlers(object):
     :type values: list
 
     '''
+
+    __slots__ = 'type', 'err_message', '_list', '_loaded_backends'
+
     def __init__(self, tp, err_message=None):
         '''
         :param tp: -- type name for backends.Like name in dict.

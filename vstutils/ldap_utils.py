@@ -19,6 +19,15 @@ def json_default(obj):  # nocv
 
 class LDAP(object):
     # pylint: disable=no-member
+    __slots__ = (
+        'settings',
+        'logger',
+        'connection_string',
+        'username',
+        'password',
+        'domain',
+        '__conn',
+    )
     fields = ['cn', 'sAMAccountName', 'accountExpires', 'name', 'memberOf']
     LdapError = ldap.LDAPError
 

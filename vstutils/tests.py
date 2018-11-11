@@ -10,6 +10,7 @@ from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.conf import settings
 from django.contrib.auth.models import User
+
 try:
     from mock import patch
 except ImportError:  # nocv
@@ -95,7 +96,7 @@ class BaseTestCase(TestCase):
     def __get_rendered(self, response):
         try:
             rendered_content = (
-                    getattr(response, "rendered_content", False) or response.content
+                getattr(response, "rendered_content", False) or response.content
             )
             if getattr(rendered_content, 'decode', False):
                 rendered_content = str(rendered_content.decode('utf-8'))

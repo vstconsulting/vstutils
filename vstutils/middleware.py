@@ -6,6 +6,8 @@ logger = logging.getLogger(settings.VST_PROJECT)
 
 
 class BaseMiddleware(object):
+    __slots__ = 'get_response', 'logger'
+
     def __init__(self, get_response):
         self.get_response = get_response
         self.logger = logger

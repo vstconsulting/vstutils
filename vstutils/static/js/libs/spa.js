@@ -235,8 +235,7 @@ if(!window.spajs)
     {
         history.pushState({url:url}, title, url);
         var res = spajs.openMenuFromUrl(url, {withoutFailPage: true})
-        var state = res.state()
-        return  state == "rejected"
+        return res
     }
 
     /**
@@ -520,7 +519,7 @@ if(!window.spajs)
                 debugger;
                 if(spajs.errorPage)
                 {
-                    spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, data, e)
+                    spajs.errorPage(jQuery('#spajs-right-area'), menuInfo, {}, e)
                 }
             })
         }
@@ -659,6 +658,12 @@ if(!window.spajs)
             def.resolve()
             res = def
         }
+
+        $.when(res).done(() =>{
+               tabSignal.emit("spajs.opened", spajs.urlInfo)
+        })
+
+
         return res.promise();
     }
 

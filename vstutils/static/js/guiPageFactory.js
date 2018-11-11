@@ -231,26 +231,4 @@ var gui_page_object = {
     {
         return this.model.data;
     },
-
-    /**
-     * Отрисует объект как поле ввода
-     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
-     * @returns {string|promise}
-     */
-    render : function (render_options = {})
-    {
-        let tpl = this.getTemplateName('one_as_field')
-
-        debugger;
-        if(render_options.hideReadOnly)
-        {
-            return "";
-        }
-
-        render_options.fields = this.api.schema.get.fields
-        //render_options.sections = this.getSections('render')
-        //debugger;
-        return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
-    },
-
 }
