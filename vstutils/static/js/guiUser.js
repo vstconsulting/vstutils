@@ -40,6 +40,7 @@ tabSignal.connect("openapi.completed", function()
                 page:'user/'+ my_user_id,
                 api_pk:my_user_id
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load(my_user_id)).done(function()
@@ -82,6 +83,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
                 page:'user/'+ api_pk +'/' + sublink,
                 api_pk:api_pk,
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem).done(function()
@@ -124,6 +126,7 @@ function registerProfileSublinkPage(sublink, path, api_pk)
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load(api_pk)).done(function()
@@ -166,6 +169,7 @@ function registerProfileSublinkList(sublink, path, api_pk)
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load()).done(function()

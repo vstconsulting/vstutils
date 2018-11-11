@@ -4,6 +4,8 @@ from ..utils import raise_context
 
 
 class SuperUserPermission(permissions.IsAuthenticated):
+    __slots__ = ()
+
     def has_permission(self, request, view):
         if request.user.is_staff or request.method in permissions.SAFE_METHODS:
             return super(SuperUserPermission, self).has_permission(request, view)
@@ -23,4 +25,4 @@ class SuperUserPermission(permissions.IsAuthenticated):
 
 
 class StaffPermission(permissions.IsAdminUser):
-    pass
+    __slots__ = ()

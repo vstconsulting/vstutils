@@ -95,7 +95,7 @@ function guiApi()
         });
         return this_query_data.def.promise();
     }
-    
+
     this.addQuery = function(query_data, data, chunked)
     {
         if(chunked)
@@ -103,13 +103,13 @@ function guiApi()
             for(let i in query_data.data)
             {
                 if(deepEqual(query_data.data[i], data))
-                { 
+                {
                     return i
                 }
             }
         }
-         
-        query_data.data.push(data) 
+
+        query_data.data.push(data)
         return query_data.data.length - 1
     }
     /**
@@ -135,13 +135,13 @@ function guiApi()
         }
 
         let data_index = undefined
- 
+
         if($.isArray(data))
         {
             data_index = []
             for(let i in data)
             {
-                data_index.push(this.addQuery(query_data, data[i], chunked)) 
+                data_index.push(this.addQuery(query_data, data[i], chunked))
             }
         }
         else
