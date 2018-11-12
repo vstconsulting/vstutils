@@ -409,6 +409,12 @@ class VSTUtilsTestCase(BaseTestCase):
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["users", self.user.id]},
             {"method": "get", 'data_type': ["users"]},
+            # Check json in data fields
+            {'method': "post", 'data_type': ['users'],
+             'data': {
+                 "username": 'ttt', 'password': 'ttt333',
+                 'first_name': json.dumps({"some": 'json'})}
+            }
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
@@ -431,6 +437,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[7]['status'], 200)
         self.assertEqual(result[7]['data']['id'], self.user.id)
         self.assertEqual(result[8]['status'], 200)
+        self.assertEqual(result[9]['status'], 201, result[9])
 
         bulk_request_data = [
             # Check unsupported media type
