@@ -63,6 +63,14 @@ var gui_base_object = {
         return false;
     },
 
+    initAllFields: function(schema_name)
+    {
+        for(let i in this.api.schema[schema_name].fields)
+        {
+            this.initField(this.api.schema[schema_name].fields[i]);
+        }
+    },
+
     /*
      * Function inits field in model.
      */
@@ -92,6 +100,19 @@ var gui_base_object = {
         }
 
         let id =  getNewId();
+        /*let add_show_not_required_fields_button = false;
+        if(this.api.hide_non_required && this.api.hide_non_required <= html.length)
+        {
+            for(let i in opt.fields)
+            {
+                let field = this.model.guiFields[opt.fields[i].name]
+                if(!field.isRequired())
+                {
+                    this.model.guiFields[opt.fields[i].name].setHidden(true)
+                    add_show_not_required_fields_button = true
+                }
+            }
+        }*/
         return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
             let fields = $('#'+id+" .gui-not-required")
@@ -498,7 +519,7 @@ function emptyAction(action_info, guiObj, dataLine = undefined)
         return pageItem.exec()
     }
 }
- 
+
 function deleteAndGoUp(obj)
 {
     var def = obj.delete();

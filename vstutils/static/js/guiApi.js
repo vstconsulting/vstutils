@@ -1,4 +1,7 @@
 
+guiLocalSettings.setIfNotExists('guiApi.real_query_timeout', 100)
+
+
 /**
  * Класс апи и запросов к нему
  * @returns {guiApi}
@@ -151,7 +154,7 @@ function guiApi()
 
         var promise = new $.Deferred();
 
-        query_data.timeOutId = setTimeout(real_query, 100, query_data)
+        query_data.timeOutId = setTimeout(real_query, guiLocalSettings.get('guiApi.real_query_timeout'), query_data)
 
         $.when(query_data.def).done(data => {
 

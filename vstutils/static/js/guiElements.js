@@ -98,6 +98,51 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.value = value
     }
 
+    this.isHidden = function()
+    {
+        return $('#gui'+this.element_id).hasClass('hide')
+    }
+
+    this.isRequired = function()
+    {
+        return this.opt.required
+    }
+
+    this.setHidden = function(value)
+    {
+        if(value)
+        {
+            $('#gui'+this.element_id).addClass('hide')
+        }
+        else
+        {
+            $('#gui'+this.element_id).removeClass('hide')
+        }
+    }
+
+    /**
+     * Function for inserting value into templates of guiElements.
+     */
+    this.insertValue = function(value)
+    {
+        if(value === undefined)
+        {
+            return this.opt.default || '';
+        }
+ 
+        if(typeof value == 'object')
+        {
+            if($.isArray(value))
+            {
+                return value.join()
+            }
+
+            return JSON.stringify(value)
+        }
+
+        return value
+    }
+
     /**
      * Функция вызываемая из тестов для установки значения
      * @param {string} value
@@ -120,7 +165,17 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         let res = value
 
-        if(value === undefined && this.opt.default && this.opt.required)
+        if(this.render_options.name == 'group') debugger;
+
+        if(this.isHidden())
+        {
+            if(!this.isRequired())
+            {
+                return undefined
+            }
+        }
+
+        if(value === undefined && this.opt.default && this.isRequired())
         {
             return this.opt.default
         }
@@ -136,10 +191,6 @@ guiElements.base = function(opt = {}, value, parent_object)
             if(!value)
             {
                 res = undefined
-            }
-            else
-            {
-                res = value
             }
         }
 
@@ -172,7 +223,7 @@ guiElements.base = function(opt = {}, value, parent_object)
             res = value == true
         }
 
-        if((res === undefined || res === "") && this.opt.default && this.opt.required)
+        if((res === undefined || res === "") && this.opt.default && this.isRequired())
         {
             res = this.opt.default
         }
@@ -196,7 +247,7 @@ guiElements.base = function(opt = {}, value, parent_object)
                     return false;
                 }
 
-                let res = options.onclick.call(arguments)
+                let res = options.onclick.apply(thisObj, arguments)
                 if(res)
                 {
                     $('#'+thisObj.element_id).addClass('disabled')
@@ -245,11 +296,6 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.getValue = function()
     {
-        if($('#gui'+this.element_id).hasClass('hide'))
-        {
-            return this.reductionToType();
-        }
-
         let value = $("#"+this.element_id).val();
         return this.reductionToType(value);
     }
@@ -279,7 +325,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         {
             if(value_length == 0)
             {
-                if(field.required)
+                if(this.isRequired())
                 {
                     throw {error:'validation', message:'Field "'+field.name +'" is empty'}
                 }
@@ -305,7 +351,7 @@ guiElements.base = function(opt = {}, value, parent_object)
             throw { error: 'validation', message: 'Field "' + field.name + '" is too small' }
         }
 
-        if(value === undefined && field.required && !this.opt.default)
+        if(value === undefined && this.isRequired() && !this.opt.default)
         {
             throw {error:'validation', message:'Field "'+field.name +'" is required'}
         }
@@ -397,6 +443,17 @@ guiElements.button = function()
 {
     this.name = 'button'
     guiElements.base.apply(this, arguments)
+
+    this.getValue = function()
+    {
+        return this.reductionToType(this.value);
+    }
+}
+
+guiElements.formButton = function()
+{
+    guiElements.button.apply(this, arguments)
+    this.name = 'formButton'
 }
 
 guiElements.enum = function(opt = {}, value)
@@ -472,11 +529,6 @@ guiElements.boolean = function()
 
     this.getValue = function()
     {
-        if($('#gui'+this.element_id).hasClass('hide'))
-        {
-            return this.reductionToType();
-        }
-
         let value = $("#"+this.element_id).hasClass('selected');
         return this.reductionToType(value);
     }
@@ -559,7 +611,7 @@ guiElements.integer = function(opt = {}, value)
     this.getValue = function ()
     {
         let value = $('#' + this.element_id).val();
-        return  value/1;
+        return this.reductionToType(value/1);
     }
 
     this.insertTestValue = function(value)
@@ -568,6 +620,13 @@ guiElements.integer = function(opt = {}, value)
         return value/1;
     }
 }
+
+guiElements.int32 = guiElements.integer
+guiElements.int64 = guiElements.integer
+guiElements.double = guiElements.integer
+guiElements.number = guiElements.integer
+guiElements.float = guiElements.integer
+
 
 guiElements.prefetch = function (opt = {}, value)
 {
@@ -584,7 +643,7 @@ guiElements.prefetch = function (opt = {}, value)
 
     this.getValue = function()
     {
-        return $("#"+this.element_id).attr('attr-value');
+        return this.reductionToType($("#"+this.element_id).attr('attr-value'));
     }
 }
 
@@ -596,7 +655,7 @@ guiElements.date = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
-        return moment(value).tz(window.timeZone).format("YYYY/MM/DD");
+        return this.reductionToType(moment(value).tz(window.timeZone).format("YYYY/MM/DD"));
     }
 
     this.insertTestValue = function(value)
@@ -615,7 +674,7 @@ guiElements.date_time = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
-        return moment(value).tz(window.timeZone).format();
+        return this.reductionToType(moment(value).tz(window.timeZone).format());
     }
 
     this.insertTestValue = function(value)
@@ -634,7 +693,7 @@ guiElements.uptime = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
-        return moment(value).tz(window.timeZone).format();
+        return this.reductionToType(moment(value).tz(window.timeZone).format());
     }
 }
 
@@ -655,7 +714,7 @@ guiElements.time_interval = function(opt = {}, value)
     this.getValue = function()
     {
         let value = this._baseGetValue();
-        return value * 1000;
+        return this.reductionToType(value * 1000);
     }
 
     this._baseinsertTestValue = this.insertTestValue
@@ -961,7 +1020,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
     {
         if(this.opt && this.opt.custom_getValue)
         {
-            return this.opt.custom_getValue.apply(this, arguments);
+            return this.reductionToType(this.opt.custom_getValue.apply(this, arguments));
         }
         else
         {
@@ -970,10 +1029,10 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 
             if(value_field_value)
             {
-                return value_field_value;
+                return this.reductionToType(value_field_value);
             }
 
-            return view_field_value;
+            return this.reductionToType(view_field_value);
         }
     }
 
@@ -1388,7 +1447,7 @@ guiElements.inner_api_object = function(field, field_value, parent_object)
             }
         }
 
-        return valueObj;
+        return this.reductionToType(valueObj);
     }
 
     this.getValidValue = function ()
@@ -1463,7 +1522,7 @@ guiElements.json = function(opt = {}, value)
             valueObj[element_name] = element.getValue();
         }
 
-        return valueObj;
+        return this.reductionToType(valueObj);
     }
 
     this.getValidValue = function()
@@ -2141,7 +2200,7 @@ guiElements.crontab = function (opt = {}, value)
     }
 }
 
-function set_api_options(options)
+function set_api_options(options, guiElement)
 {
     let additional_options = "";
     if (options.readOnly) {
@@ -2164,7 +2223,7 @@ function set_api_options(options)
         additional_options += "max=" + options.max + " "
     }
 
-    if (/^Required/.test(options.description)) {
+    if (guiElement && guiElement.isRequired()) {
         additional_options += "required "
     }
 
@@ -2272,29 +2331,6 @@ function goToSearchModal(obj, guiElement, opt, query)
     }
 
     return def.promise();
-}
-
-/**
- * Function for inserting value into templates of guiElements.
- */
-function insertValue(value)
-{
-    if(value === undefined)
-    {
-        return '';
-    }
-
-    if(typeof value == 'object')
-    {
-        if($.isArray(value))
-        {
-            return value.join()
-        }
-
-        return JSON.stringify(value)
-    }
-
-    return value
 }
 
 /**

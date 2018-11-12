@@ -1,6 +1,6 @@
 
-var gui_action_object = { 
-    
+var gui_action_object = {
+
     exec : function (callback, error_callback)
     {
         var thisObj = this;
@@ -30,12 +30,12 @@ var gui_action_object = {
                 let url = thisSchema.redirect_path.format(id_list) + (data.data[redirect_field.toLowerCase()] || "")
                 vstGO(url);
             }
-        }).fail(function(data){ 
+        }).fail(function(data){
             //thisObj.showErrors(data, 'exec')
         })
-        return res; 
+        return res;
     },
- 
+
     renderAsPage : function (render_options = {})
     {
         let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
@@ -43,7 +43,7 @@ var gui_action_object = {
         render_options.fields = this.api.schema.exec.fields
         //render_options.sections = this.getSections('renderAsPage')
         if(!render_options.page_type) render_options.page_type = 'action'
-        
+
         render_options.base_path = getUrlBasePath()
 
         this.beforeRenderAsPage();
@@ -53,10 +53,7 @@ var gui_action_object = {
 
     beforeRenderAsPage: function()
     {
-        for(let i in this.api.schema.exec.fields)
-        {
-            this.initField(this.api.schema.exec.fields[i]);
-        }
+        this.initAllFields('exec'); 
     },
- 
-} 
+
+}

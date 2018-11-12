@@ -11,6 +11,7 @@ function rundomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489")
 }
 
 guiLocalSettings.setAsTmp('page_update_interval', 600)
+guiLocalSettings.get('guiApi.real_query_timeout', 1200)
 
 guiTests = {
 
