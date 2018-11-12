@@ -99,20 +99,7 @@ var gui_base_object = {
             html.push(this.renderField(opt.fields[i], opt))
         }
 
-        let id =  getNewId();
-        /*let add_show_not_required_fields_button = false;
-        if(this.api.hide_non_required && this.api.hide_non_required <= html.length)
-        {
-            for(let i in opt.fields)
-            {
-                let field = this.model.guiFields[opt.fields[i].name]
-                if(!field.isRequired())
-                {
-                    this.model.guiFields[opt.fields[i].name].setHidden(true)
-                    add_show_not_required_fields_button = true
-                }
-            }
-        }*/
+        let id =  getNewId(); 
         return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
             let fields = $('#'+id+" .gui-not-required")
