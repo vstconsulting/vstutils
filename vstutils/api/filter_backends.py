@@ -1,9 +1,11 @@
 # Call standart filtering
 class VSTFilterBackend(object):
+    __slots__ = ()
     required = False
 
 
 class HideHiddenFilterBackend(VSTFilterBackend):
+    __slots__ = ()
     required = True
 
     def filter_queryset(self, request, queryset, view):
