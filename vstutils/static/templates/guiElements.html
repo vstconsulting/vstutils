@@ -536,12 +536,12 @@
     <%] %>
 
     <%[ main_input %>
-         <div class="html_content"> <%= value || opt.default || '' %> </div>
+         <div class="html_content" id="<%- guiElement.element_id %>"> <%= value || opt.default || '' %> </div>
     <%] %>
 
     <%[ readonly_input %>
         <~ guiElement.db_value>
-            <div class="html_content"> <%= guiElement.db_value || opt.default || '' %> </div>
+            <div class="html_content" id="<%- guiElement.element_id %>"> <%= guiElement.db_value || opt.default || '' %> </div>
         <~>
     <%] %>
 
