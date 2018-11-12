@@ -512,6 +512,47 @@ guiElements.html = function(opt = {})
     {
         return undefined;
     }
+
+    this._onBaseRender = this._onRender;
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options);
+        this.setLinksInsideField();
+    }
+
+    this.setLinksInsideField = function()
+    {
+        let links_array = $('#' + this.element_id).find('a');
+        let id_reg_exp = /#(?<id>[A-z,0-9,-]+)/;
+        for(let i in links_array)
+        {
+            let link = links_array[i];
+            if(link['href'] && link['href'].search(window.hostname) != -1)
+            {
+                let match = link['href'].match(id_reg_exp);
+                if(match != null && link['href'].search(window.location.href) == -1 && $('*').is('#' + match.groups['id']))
+                {
+                    link.onclick = function ()
+                    {
+                        $(".wrapper").scrollTo('#' + match.groups['id'], 700);
+                        return false;
+                    }
+                    continue;
+                }
+
+                if(link['href'].search(window.location.href) == -1)
+                {
+                    link['href'] = window.location.href + link['href'].split(window.hostname)[1];
+                }
+
+            }
+        }
+    }
+
+    this._onUpdateValue = function()
+    {
+        this.setLinksInsideField();
+    }
 }
 
 guiElements.textarea = function(opt = {})
@@ -925,8 +966,11 @@ guiElements.uptime = function (opt = {}, value)
         }
     }
 
+    this._onBaseRender = this._onRender;
     this._onRender = function(options)
     {
+        this._onBaseRender(options);
+
         if(!options.readOnly)
         {
             let element = document.getElementById(this.element_id);
