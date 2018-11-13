@@ -573,18 +573,18 @@ guiElements.html = function(opt = {})
     this.setLinksInsideField = function()
     {
         let links_array = $('#' + this.element_id).find('a');
-        let id_reg_exp = XRegExp(`#(?<id>[A-z,0-9,-]+)`, 'x');
+        let id_reg_exp = XRegExp(`#(?<id>[A-z0-9,\-]+)$`);
         for(let i in links_array)
         {
             let link = links_array[i];
             if(link['href'] && link['href'].search(window.hostname) != -1)
             {
                 let match = XRegExp.exec(link['href'], id_reg_exp)
-                if(match != null && link['href'].search(window.location.href) == -1 && $('*').is('#' + match.groups['id']))
+                if(match && link['href'].search(window.location.href) == -1 && $('*').is('#' + match['id']))
                 {
                     link.onclick = function ()
                     {
-                        $(".wrapper").scrollTo('#' + match.groups['id'], 700);
+                        $(".wrapper").scrollTo('#' + match['id'], 700);
                         return false;
                     }
                     continue;
@@ -743,10 +743,10 @@ guiElements.uptime = function (opt = {}, value)
         let value = $("#"+this.element_id).val();
 
         let reg_arr = [
-            XRegExp(`(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
-            XRegExp(`(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
-            XRegExp(`(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
-            XRegExp(`(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
+            XRegExp(`(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
+            XRegExp(`(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
+            XRegExp(`(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
         ]
 
         let time_parts = [];
@@ -758,12 +758,12 @@ guiElements.uptime = function (opt = {}, value)
             if(time_parts != null)
             {
                 let duration_obj = {
-                    seconds: Number(time_parts.groups['ss']),
-                    minutes:  Number(time_parts.groups['mm']),
-                    hours:  Number(time_parts.groups['hh']),
-                    days: Number(time_parts.groups['d'] || 0),
-                    months: Number(time_parts.groups['m'] || 0),
-                    years: Number(time_parts.groups['y'] || 0),
+                    seconds: Number(time_parts['ss']),
+                    minutes:  Number(time_parts['mm']),
+                    hours:  Number(time_parts['hh']),
+                    days: Number(time_parts['d'] || 0),
+                    months: Number(time_parts['m'] || 0),
+                    years: Number(time_parts['y'] || 0),
                 }
                 uptime_in_seconds = moment.duration(duration_obj).asSeconds();
                 return this.reductionToType(uptime_in_seconds)
