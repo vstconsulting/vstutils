@@ -1,3 +1,61 @@
+
+// List of Gui Testing Files
+if(!window.guiTestsFiles)
+{
+    window.guiTestsFiles = []
+}
+
+// Add a test file to the list of files for test gui
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js')
+
+// Run tests
+function loadQUnitTests()
+{
+    loadAllUnitTests(window.guiTestsFiles)
+}
+
+// Loads and runs tests in strict order.
+function loadAllUnitTests(urls)
+{
+    let promises = []
+    for(let i in urls)
+    {
+        let def = new $.Deferred();
+        promises.push(def.promise());
+
+        var link = document.createElement("script");
+        link.setAttribute("type", "text/javascript");
+        link.setAttribute("src", urls[i]+'?r='+Math.random());
+
+        link.onload = function(def){
+            return function(){
+                def.resolve();
+            }
+        }(def)
+        document.getElementsByTagName("head")[0].appendChild(link);
+
+        break;
+    }
+
+    $.when.apply($, promises).done(() => {
+        //injectQunit()
+
+        if(urls.length == 1)
+        {
+            return injectQunit()
+        }
+        urls.splice(0, 1)
+        loadAllUnitTests(urls)
+    })
+}
+
+
+
+
 /**
  * Function to replace {.+?} in string to variables sended to this function,
  * array and single variable set ordered inside string
@@ -49,62 +107,6 @@ String.prototype.format_keys = function()
 
     return res.map((item) =>{ return item.slice(1, item.length - 1) })
 }
-
-// List of Gui Testing Files
-if(!window.guiTestsFiles)
-{
-    window.guiTestsFiles = []
-}
-
-// Add a test file to the list of files for test gui
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js')
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js')
-
-
-// Run tests
-function loadQUnitTests()
-{
-    loadAllUnitTests(window.guiTestsFiles)
-}
-
-// Loads and runs tests in strict order.
-function loadAllUnitTests(urls)
-{
-    let promises = []
-    for(let i in urls)
-    {
-        let def = new $.Deferred();
-        promises.push(def.promise());
-
-        var link = document.createElement("script");
-        link.setAttribute("type", "text/javascript");
-        link.setAttribute("src", urls[i]+'?r='+Math.random());
-
-        link.onload = function(def){
-            return function(){
-                def.resolve();
-            }
-        }(def)
-        document.getElementsByTagName("head")[0].appendChild(link);
-
-        break;
-    }
-
-    $.when.apply($, promises).done(() => {
-        //injectQunit()
-
-        if(urls.length == 1)
-        {
-            return injectQunit()
-        }
-        urls.splice(0, 1)
-        loadAllUnitTests(urls)
-    })
-}
-
 
 function addslashes(string) {
     return string.replace(/\\/g, '\\\\').
@@ -489,7 +491,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         {
             //console.error("window.hostname already exist in vstMakeLocalUrl")
         }
-        return new_url.replace("#/", "#")
+        url = new_url.replace("#/", "#")
     }
     else
     {
@@ -497,7 +499,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         throw "Error in vstMakeLocalUrl"
     }
 
-    return url
+    return url.replace("#", "#/")
 }
 
 
