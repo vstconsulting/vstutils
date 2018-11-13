@@ -221,10 +221,7 @@ var gui_page_object = {
             schema_name = 'get';
         }
 
-        for(let i in this.api.schema[schema_name].fields)
-        {
-            this.initField(this.api.schema[schema_name].fields[i]);
-        }
+        this.initAllFields(schema_name);
     },
 
     prepareDataBeforeRender: function()
