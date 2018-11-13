@@ -32,7 +32,7 @@ tabSignal.connect("openapi.completed", function()
 
     spajs.addMenu({
         id:"profile",
-        urlregexp:[/^profile$/],
+        urlregexp:[/^\/?profile$/],
         priority:0,
         onOpen:function(holder, menuInfo, data, onClose_promise)
         {
@@ -70,7 +70,7 @@ tabSignal.connect("openapi.completed", function()
  */
 function registerProfileSublinkAction(sublink, path, api_pk)
 {
-    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
     spajs.addMenu({
@@ -113,7 +113,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
  */
 function registerProfileSublinkPage(sublink, path, api_pk)
 {
-    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
     spajs.addMenu({
@@ -156,7 +156,7 @@ function registerProfileSublinkPage(sublink, path, api_pk)
  */
 function registerProfileSublinkList(sublink, path, api_pk)
 {
-    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
     spajs.addMenu({

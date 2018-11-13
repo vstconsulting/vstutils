@@ -165,8 +165,6 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         let res = value
 
-        if(this.render_options.name == 'group') debugger;
-
         if(this.isHidden())
         {
             if(!this.isRequired())
@@ -260,7 +258,7 @@ guiElements.base = function(opt = {}, value, parent_object)
                 }
                 else
                 {
-                    debugger;
+                    console.warn("Button onclick callback do not return promiss object.")
                 }
             })
         }
@@ -575,13 +573,13 @@ guiElements.html = function(opt = {})
     this.setLinksInsideField = function()
     {
         let links_array = $('#' + this.element_id).find('a');
-        let id_reg_exp = /#(?<id>[A-z,0-9,-]+)/;
+        let id_reg_exp = XRegExp(`#(?<id>[A-z,0-9,-]+)`, 'x');
         for(let i in links_array)
         {
             let link = links_array[i];
             if(link['href'] && link['href'].search(window.hostname) != -1)
             {
-                let match = link['href'].match(id_reg_exp);
+                let match = XRegExp.exec(link['href'], id_reg_exp)
                 if(match != null && link['href'].search(window.location.href) == -1 && $('*').is('#' + match.groups['id']))
                 {
                     link.onclick = function ()
@@ -745,10 +743,10 @@ guiElements.uptime = function (opt = {}, value)
         let value = $("#"+this.element_id).val();
 
         let reg_arr = [
-            /(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
-            /(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
-            /(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
-            /(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            XRegExp(`(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
         ]
 
         let time_parts = [];
@@ -756,7 +754,7 @@ guiElements.uptime = function (opt = {}, value)
 
         for(let i in reg_arr)
         {
-            time_parts = value.match(reg_arr[i]);
+            time_parts = XRegExp.exec(value, reg_arr[i]);  
             if(time_parts != null)
             {
                 let duration_obj = {

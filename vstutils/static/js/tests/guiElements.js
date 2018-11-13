@@ -93,10 +93,9 @@ window.qunitTestsArray['guiElements.uptime'] = {
     {
         syncQUnit.addTest('guiElements.uptime', function ( assert )
         {
-            assert.ok(getUptime(120) == "00:02:00", 'uptime 120s');
-            assert.ok(getUptime(0) == "00:00:00", 'uptime 0s');
-            assert.ok(getUptime() == "Invalid date");
-            assert.ok(getUptime(-45) == "23:59:15", 'uptime -45s');
+            let uptime = new guiElements.uptime() 
+            assert.ok(uptime.getTimeInUptimeFormat(120) == "00:02:00", 'uptime 120s');
+            assert.ok(uptime.getTimeInUptimeFormat(0) == "00:00:00", 'uptime 0s');
         })
     }
 }
