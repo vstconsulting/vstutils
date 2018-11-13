@@ -165,8 +165,6 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         let res = value
 
-        if(this.render_options.name == 'group') debugger;
-
         if(this.isHidden())
         {
             if(!this.isRequired())
@@ -260,7 +258,7 @@ guiElements.base = function(opt = {}, value, parent_object)
                 }
                 else
                 {
-                    debugger;
+                    console.warn("Button onclick callback do not return promiss object.")
                 }
             })
         }
