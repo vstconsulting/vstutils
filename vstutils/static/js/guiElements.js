@@ -573,7 +573,7 @@ guiElements.html = function(opt = {})
     this.setLinksInsideField = function()
     {
         let links_array = $('#' + this.element_id).find('a');
-        let id_reg_exp = XRegExp(`#(?<id>[A-z,0-9,-]+)`, 'x'); 
+        let id_reg_exp = XRegExp(`#(?<id>[A-z,0-9,-]+)`, 'x');
         for(let i in links_array)
         {
             let link = links_array[i];
@@ -754,7 +754,7 @@ guiElements.uptime = function (opt = {}, value)
 
         for(let i in reg_arr)
         {
-            time_parts = XRegExp.exec(value, reg_arr[i]); // value.match(reg_arr[i]);
+            time_parts = XRegExp.exec(value, reg_arr[i]);  
             if(time_parts != null)
             {
                 let duration_obj = {
