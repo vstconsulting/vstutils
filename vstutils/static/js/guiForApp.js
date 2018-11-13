@@ -21,13 +21,3 @@ function inAppClose()
 {
     window.parent.inAppClose();
 }
-
-function openURLInAppBrowser(url)
-{
-    if(window.parent && window.parent.cordova && window.parent.cordova.InAppBrowser) 
-    {
-        window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
-        return false;
-    }
-    return true;
-}

@@ -178,8 +178,16 @@ guiTests.compareValues =  function(assert, path, fieldsData, values)
             continue;
         }
 
+        assert.ok(field, 'test["'+path+'"]["'+i+'"] exist');
+
         // Проверили что данные теже
-        assert.ok(field.getValue() == values[i], 'test["'+path+'"]["'+i+'"] == ' + values[i]);
+        try{
+
+            assert.ok(field.getValue() == values[i], 'test["'+path+'"]["'+i+'"] == ' + values[i]);
+        }catch (e)
+        {
+           // debugger
+        }
     }
 }
 
