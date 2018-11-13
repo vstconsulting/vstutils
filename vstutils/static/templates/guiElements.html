@@ -34,9 +34,9 @@
                             <input type="text"
                                 style="width: 100%;"
                                 class="form-control"
-                                <%- set_api_options(opt) %>
+                                <%- set_api_options(opt, guiElement) %>
                                 id="<%- guiElement.element_id %>"
-                                value="<% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ if($.isArray(guiElement.db_value)){ %><%- guiElement.db_value.join() %><% }else{ %><%- JSON.stringify(guiElement.db_value) %><% }}else{ %><%- guiElement.db_value || '' %><% } %>">
+                                value="<%- guiElement.insertValue(guiElement.db_value)  %>">
                         <~>
                     <%] %>
 
@@ -54,6 +54,18 @@
             <%* description %>
         </div>
     <%] %>
+
+    <%[ input_addons %>
+        <% if(guiElement.opt.default){ %>
+            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
+                <span class='glyphicon glyphicon-repeat' ></span>
+            </span>
+        <% } %>
+        <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
+            <span class='glyphicon glyphicon-remove' ></span>
+        </span>
+    <%] %>
+
     <%* element %>
 </script>
 
@@ -107,21 +119,23 @@
         <%] %>
     <% } %>
     <%[ main_input %>
-        <div id="gui<%- guiElement.element_id %>" class="row">
-            <% if(Object.keys(guiElement.realElements).length > 0) { %>
-                <% for(var i in guiElement.realElements) { %>
-                    <%= guiElement.realElements[i].render() %>
+        <~ guiElement.realElements>
+            <div id="gui<%- guiElement.element_id %>" class="row">
+                <% if(Object.keys(guiElement.realElements).length > 0) { %>
+                    <% for(var i in guiElement.realElements) { %>
+                        <%= guiElement.realElements[i].render() %>
+                    <% } %>
+                <% } else { %>
+                    <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                        <input type="text" class="form-control" readonly disabled  value="This field is empty">
+                    </div>
                 <% } %>
-            <% } else { %>
-                <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                    <input type="text" class="form-control" readonly disabled  value="This field is empty">
-                </div>
-            <% } %>
-        </div>
+            </div>
+        <~>
     <%] %>
-    
-    <%[ readonly_input %> 
-        <%* main_input %> 
+
+    <%[ readonly_input %>
+        <%* main_input %>
     <%] %>
 
     <%! guiElements.base %>
@@ -136,27 +150,18 @@
             <~ guiElement.db_value>
                 <% if(guiElement.rendered && guiElement.db_value != guiElement.getValue()){ %>
                     <span class="input-group-addon db_value_input">
-                        <% if(guiElement.db_value && typeof guiElement.db_value == 'object'){ %>
-                            <% if($.isArray(guiElement.db_value)){ %>
-                                <%- guiElement.db_value.join() %>
-                            <% }else{ %>
-                                <%- JSON.stringify(guiElement.db_value) %>
-                            <% } %>
-                        <% }else{ %>
-                            <%- guiElement.db_value || '' %>
-                        <% } %>
+                        <%- guiElement.insertValue(guiElement.db_value) %>
                         <i class="glyphicon glyphicon-arrow-right"></i>
                     </span>
-                <% }else{ %>
-                    <span class="input-group-addon" style="display: table-column;"></span>
                 <% } %>
             <~>
-            <input type="text"
+            <input type="<%[ input_type %>text<%] %>"
                     style="width: 100%;"
                     class="form-control"
-                    <%- set_api_options(opt) %>
+                    <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>"
-                    value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+                    value="<%- guiElement.insertValue(value) %>">
+            <%* input_addons %>
         </div>
     <%] %>
     <%! guiElements.base %>
@@ -165,14 +170,8 @@
 <!-- guiElements.integer -->
 <script type="text/x-just" data-just="guiElements.integer">
     <!-- guiElements.integer [type=<%- opt.type %>, format=<%- opt.format %>] -->
-    <%[ main_input %>
-        <input type="number"
-        class="form-control"
-        <%- set_api_options(opt) %>
-        id="<%- guiElement.element_id %>"
-        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
-    <%] %>
-    <%! guiElements.base %>
+    <%[ input_type %>number<%] %>
+    <%! guiElements.string %>
 </script>
 
 <!-- guiElements.hidden -->
@@ -182,9 +181,9 @@
         <%[ main_input %>
             <input type="text"
             class="form-control"
-            <%- set_api_options(opt) %>
+            <%- set_api_options(opt, guiElement) %>
             id="<%- guiElement.element_id %>"
-            value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
+            value="<%- guiElement.insertValue(value) %>">
         <%] %>
         <%! guiElements.base %>
     </div>
@@ -200,7 +199,7 @@
     <!-- guiElements.prefetch -->
     <%[ main_input %>
         <~ guiElement.db_value>
-            <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- value %>">
+            <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- guiElement.insertValue(value) %>">
               <% if(opt[opt.name + '_info']){ %>
                   <a href="<%- vstMakeLocalApiUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
                      class="item-name" onclick="return vstGO(this.href);">
@@ -216,9 +215,9 @@
             </div>
         <~>
     <%] %>
-    
-    <%[ readonly_input %> 
-        <%* main_input %> 
+
+    <%[ readonly_input %>
+        <%* main_input %>
     <%] %>
 
     <%! guiElements.base %>
@@ -228,18 +227,18 @@
 <script type="text/x-just" data-just="guiElements.date">
     <!-- guiElements.date -->
     <%[ main_input %>
-        <input type="date" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+        <input type="date" class="form-control" <%- set_api_options(opt, guiElement) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
-            <input type="date" 
+            <input type="date"
                     class="form-control"
-                    <%- set_api_options(opt) %> 
+                    <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>
                     style="width: 100%;"
-                    class="form-control" 
+                    class="form-control"
                     value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
         <~>
     <%] %>
@@ -251,33 +250,44 @@
 <script type="text/x-just" data-just="guiElements.date_time">
     <!-- guiElements.date_time -->
     <%[ main_input %>
-        <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+        <input type="datetime-local" class="form-control" <%- set_api_options(opt, guiElement) %> id="<%- guiElement.element_id %>"
         value="<%- moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")  || '' %>">
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
-            <input type="datetime-local" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+            <input type="datetime-local" class="form-control" <%- set_api_options(opt, guiElement) %> id="<%- guiElement.element_id %>"
             value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(guiElement.db_value).tz(window.timeZone).format("HH:mm")  || '' %>">
-            
+
         <~>
     <%] %>
 
     <%! guiElements.base %>
 </script>
 
-<!-- guiElements.date_time -->
+<!-- guiElements.uptime -->
 <script type="text/x-just" data-just="guiElements.uptime">
     <!-- guiElements.uptime -->
     <%[ main_input %>
-        <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
-        value="<%- getUptime(value)  || '' %>">
+        <div class="input-group">
+            <input type="text" class="form-control" sec-value="<%- value || 0 %>" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
+            value="<%- guiElement.getTimeInUptimeFormat(value)  || '' %>"
+                <%= justOn('change', guiElement.changeOnChangeByHands, guiElement.element_id)
+                %>
+            >
+            <span class="input-group-addon" id="uptime-down">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </span>
+            <span class="input-group-addon" id="uptime-up">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </span>
+        </div>
     <%] %>
-    
-    <%[ readonly_input %>  
+
+    <%[ readonly_input %>
         <~ guiElement.db_value>
             <input type="text" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>"
-                    value="<%- getUptime(guiElement.db_value)  || '' %>"> 
+                    value="<%- guiElement.getTimeInUptimeFormat(guiElement.db_value)  || '' %>">
         <~>
     <%] %>
 
@@ -287,17 +297,8 @@
 <!-- guiElements.password -->
 <script type="text/x-just" data-just="guiElements.password">
     <!-- guiElements.password -->
-    <%[ main_input %>
-        <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- value || '' %>">
-    <%] %>
-    
-    <%[ readonly_input %>  
-        <~ guiElement.db_value>
-            <input type="password" class="form-control" <%- set_api_options(opt) %> id="<%- guiElement.element_id %>" value="<%- guiElement.db_value || '' %>">
-        <~>
-    <%] %>
-
-    <%! guiElements.base %>
+    <%[ input_type %>password<%] %>
+    <%! guiElements.string %>
 </script>
 
 <!-- guiElements.button -->
@@ -313,7 +314,7 @@
                 <% }else{ %>
                     <%- opt.class %>
                 <% } %>
-                <%- addCssClassesToElement('btn', opt.title) %>"
+                <%- addCssClassesToElement('btn', opt.title).replace(/[^A-z0-9 _\/-]/g, '_') %>"
 
         title="<%- opt.title || '' %>"
         >
@@ -325,26 +326,17 @@
     </button>
 </script>
 
-<!-- guiElements.link_button -->
-<script type="text/x-just" data-just="guiElements.link_button">
-    <!-- guiElements.link_button -->
-    <a
-        class="<% if(typeof opt.class == 'function'){ %>
-                        <%- opt.class.apply(guiElement, [opt]) %>
-               <% }else{ %>
-                    <%- opt.class %>
-               <% } %>
-               gui-element-<%- guiElement.name %>
-               <%- addCssClassesToElement('btn', opt.title) %>"
-        href="<% if(typeof opt.link == 'function'){ %><%- opt.link.apply(guiElement, [opt]) %><% }else{ %><%- opt.link %><% } %>"
-        title="<%- opt.title || '' %>"
-        onclick="<% if(typeof opt.onclick == 'function'){ %><%= opt.onclick.apply(guiElement, [opt]) %><% }else{ %>return vstGO(this.href);<% } %>" >
-            <% if(typeof opt.text == 'function'){ %>
-                <%= opt.text.apply(guiElement, [opt]) %>
-            <% }else{ %>
-                <%= opt.text %>
-            <% } %>
-    </a>
+<!-- guiElements.formButton -->
+<script type="text/x-just" data-just="guiElements.formButton">
+    <!-- guiElements.formButton -->
+
+    <%[ title %><%] %>
+    <%[ description %><%] %>
+
+    <%[ main_input %>
+        <%= this.partial('guiElements.button', {guiElement:guiElement, opt:opt}) %>
+    <%] %>
+    <%! guiElements.base %>
 </script>
 
 <!-- guiElements.enum -->
@@ -376,14 +368,14 @@
         <~ guiElement.db_value>
             <div
                 class="form-control"
-                <%- set_api_options(opt) %>
+                <%- set_api_options(opt, guiElement) %>
                 id="<%- guiElement.element_id %>"
             >
                 <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
             </div>
         <~>
     <%] %>
-    
+
     <%[ main_input %>
         <%* readonly_input %>
     <%] %>
@@ -394,35 +386,8 @@
 <!-- guiElements.apiData -->
 <script type="text/x-just" data-just="guiElements.apiData">
     <!-- guiElements.apiData [type=<%- opt.type %>, format=<%- opt.format %>] -->
-    <%[ main_input %>
-        <input type="text"
-        class="form-control"
-        <%- set_api_options(opt) %>
-        id="<%- guiElement.element_id %>"
-        value="<% if(value && typeof value == 'object'){ if($.isArray(value)){ %><%- value.join() %><% }else{ %><%- JSON.stringify(value) %><% }}else{ %><%- value || '' %><% } %>">
-    <%] %>
-    <%! guiElements.base %>
+    <%! guiElements.string %>
 </script>
-
-<!-- guiElements.apiUser
-<script type="text/x-just" data-just="guiElements.apiUser">
-    <!-- guiElements.apiUser -- >
-    <%[ main_input %>
-        <% if (!opt.readOnly) { %>
-            <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select>
-        <% }else{ %>
-            <input
-                    type="text"
-                    class="form-control"
-                    <%- set_api_options(opt) %>
-                    id="<%- guiElement.element_id %>"
-                    value="<% if(value && typeof value == 'object'){ %><%- value.username %><% }else{ %><%- JSON.stringify(value) %><% } %>"
-            >
-        <% } %>
-    <%] %>
-    <%! guiElements.base %>
-</script>-->
-
 
 <!-- guiElements.boolean -->
 <script type="text/x-just" data-just="guiElements.boolean">
@@ -463,14 +428,12 @@
         <div class="input-group">
             <input
             type="text"
-            value="<%- value || '' %>"
+            value="<%- guiElement.insertValue(value) %>"
             class="form-control"
-            <%- set_api_options(opt) %>
+            <%- set_api_options(opt, guiElement) %>
             id="<%- guiElement.element_id %>">
 
-            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
-                <span class='glyphicon glyphicon-remove' ></span>
-            </span>
+            <%* input_addons %>
         </div>
     <%] %>
     <%! guiElements.base %>
@@ -483,9 +446,9 @@
         <div class="input-group">
             <input
             type="text"
-            value="<%- value || '' %>"
+            value="<%- guiElement.insertValue(value) %>"
             class="form-control"
-            <%- set_api_options(opt) %>
+            <%- set_api_options(opt, guiElement) %>
             id="<%- guiElement.element_id %>"
             onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
             >
@@ -519,11 +482,11 @@
         </span>
 
         <span id="<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'>
-            <input type='file' class='input-file' onchange="readFileAndInsert(event, '#fileContent_<%- guiElement.element_id %>');">
+            <input type='file' class='input-file' <%= justOn('change', ()=>{ guiElement.readFile(event, '#fileContent_' + guiElement.element_id); return false; }, guiElement.element_id) %> >
             <span class='glyphicon glyphicon-file'>
             </span>
         </span>
-        <textarea placeholder='Enter value' <%- set_api_options(opt) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
+        <textarea placeholder='Enter value' <%- set_api_options(opt, guiElement) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
     <%! guiElements.base %>
 </script>
@@ -539,7 +502,7 @@
 <script type="text/x-just" data-just="guiElements.textarea">
     <!-- guiElements.textarea -->
     <%[ main_input %>
-        <textarea rows="3" cols="50" <%- set_api_options(opt) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
+        <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
     <%! guiElements.base %>
 </script>
@@ -552,12 +515,12 @@
     <%] %>
 
     <%[ main_input %>
-         <div class="html_content"> <%= value || opt.default || '' %> </div>
+         <div class="html_content" id="<%- guiElement.element_id %>"> <%= value || opt.default || '' %> </div>
     <%] %>
 
     <%[ readonly_input %>
         <~ guiElement.db_value>
-            <div class="html_content"> <%= guiElement.db_value || opt.default || '' %> </div>
+            <div class="html_content" id="<%- guiElement.element_id %>"> <%= guiElement.db_value || opt.default || '' %> </div>
         <~>
     <%] %>
 
@@ -577,7 +540,7 @@
                 <div class="input-group">
                     <input type="text"
                             class="form-control"
-                            value="<%- value || '' %>"
+                            value="<%- guiElement.insertValue(value) %>"
                             id="<%- guiElement.element_id %>"
                             >
                     <span class="input-group-addon" onclick="$('#guiElement-gui').toggle();" >
@@ -804,9 +767,9 @@
                 <div class="input-group">
                     <input type="number"
                             class="form-control"
-                            value="<%- value || '' %>"
+                            value="<%- guiElement.insertValue(value) %>"
                             id="<%- guiElement.element_id %>"
-                            <%= set_api_options(opt) %>
+                            <%= set_api_options(opt, guiElement) %>
                             >
                     <span class="input-group-addon">
                         sec
@@ -823,9 +786,9 @@
                     <div class="input-group">
                         <input type="number"
                                 class="form-control"
-                                value="<%- guiElement.db_value || '' %>"
+                                value="<%- guiElement.insertValue(guiElement.db_value) %>"
                                 id="<%- guiElement.element_id %>"
-                                <%= set_api_options(opt) %>
+                                <%= set_api_options(opt, guiElement) %>
                                 >
                         <span class="input-group-addon">
                             sec

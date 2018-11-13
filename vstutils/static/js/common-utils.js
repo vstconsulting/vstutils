@@ -1,3 +1,61 @@
+
+// List of Gui Testing Files
+if(!window.guiTestsFiles)
+{
+    window.guiTestsFiles = []
+}
+
+// Add a test file to the list of files for test gui
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js')
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js')
+
+// Run tests
+function loadQUnitTests()
+{
+    loadAllUnitTests(window.guiTestsFiles)
+}
+
+// Loads and runs tests in strict order.
+function loadAllUnitTests(urls)
+{
+    let promises = []
+    for(let i in urls)
+    {
+        let def = new $.Deferred();
+        promises.push(def.promise());
+
+        var link = document.createElement("script");
+        link.setAttribute("type", "text/javascript");
+        link.setAttribute("src", urls[i]+'?r='+Math.random());
+
+        link.onload = function(def){
+            return function(){
+                def.resolve();
+            }
+        }(def)
+        document.getElementsByTagName("head")[0].appendChild(link);
+
+        break;
+    }
+
+    $.when.apply($, promises).done(() => {
+        //injectQunit()
+
+        if(urls.length == 1)
+        {
+            return injectQunit()
+        }
+        urls.splice(0, 1)
+        loadAllUnitTests(urls)
+    })
+}
+
+
+
+
 /**
  * Function to replace {.+?} in string to variables sended to this function,
  * array and single variable set ordered inside string
@@ -49,60 +107,6 @@ String.prototype.format_keys = function()
 
     return res.map((item) =>{ return item.slice(1, item.length - 1) })
 }
-
-// List of Gui Testing Files
-if(!window.guiTestsFiles)
-{
-    window.guiTestsFiles = []
-}
-
-// Add a test file to the list of files for test gui
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
-
-
-
-// Run tests
-function loadQUnitTests()
-{
-    loadAllUnitTests(window.guiTestsFiles)
-}
-
-// Loads and runs tests in strict order.
-function loadAllUnitTests(urls)
-{
-    let promises = []
-    for(let i in urls)
-    {
-        let def = new $.Deferred();
-        promises.push(def.promise());
-
-        var link = document.createElement("script");
-        link.setAttribute("type", "text/javascript");
-        link.setAttribute("src", urls[i]+'?r='+Math.random());
-
-        link.onload = function(def){
-            return function(){
-                def.resolve();
-            }
-        }(def)
-        document.getElementsByTagName("head")[0].appendChild(link);
-
-        break;
-    }
-
-    $.when.apply($, promises).done(() => {
-        //injectQunit()
-
-        if(urls.length == 1)
-        {
-            return injectQunit()
-        }
-        urls.splice(0, 1)
-        loadAllUnitTests(urls)
-    })
-}
-
 
 function addslashes(string) {
     return string.replace(/\\/g, '\\\\').
@@ -328,10 +332,15 @@ function turnTableTrIntoLink(event, blank)
         {
             href =  event.target.getAttribute('href');
         }
-        else
+        else if(event.currentTarget)
         {
             href =  event.currentTarget.getAttribute('data-href');
         }
+        else
+        {
+            href =  event.target.getAttribute('data-href');
+        }
+
         if(blank)
         {
             window.open(href);
@@ -354,12 +363,17 @@ function turnTableTrIntoLink(event, blank)
  */
 function blockTrLink(element, stop_element_name, search_class)
 {
+    if(!element)
+    {
+        return false;
+    }
+
     if(element.classList.contains(search_class))
     {
         return true;
     }
 
-    if(element.parentElement.localName != stop_element_name)
+    if(element.parentElement && element.parentElement.localName != stop_element_name)
     {
         return blockTrLink(element.parentElement, stop_element_name, search_class);
     }
@@ -426,6 +440,10 @@ var guiLocalSettings = {
         window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
         tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
     },
+    setAsTmp:function(name, value){
+        this.__settings[name] = value;
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+    },
     setIfNotExists:function(name, value)
     {
         if(this.__settings[name] === undefined)
@@ -473,7 +491,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         {
             //console.error("window.hostname already exist in vstMakeLocalUrl")
         }
-        return new_url.replace("#/", "#")
+        url = new_url.replace("#/", "#")
     }
     else
     {
@@ -481,7 +499,7 @@ function vstMakeLocalUrl(url = "", vars = {})
         throw "Error in vstMakeLocalUrl"
     }
 
-    return url
+    return url.replace("#", "#/")
 }
 
 
@@ -570,6 +588,12 @@ function deepEqual(x, y)
  * @returns {Boolean}
  */
 function stringToBoolean(string){
+
+    if(string == null)
+    {
+        return false;
+    }
+
     switch(string.toLowerCase().trim()){
         case "true": case "yes": case "1": return true;
         case "false": case "no": case "0": case null: return false;
@@ -672,6 +696,14 @@ function checkDataValidityForSearchQuery(data_value, search_value)
     }
 
     return valid;
+}
+
+/**
+ * Function converts numbers from 0 to 9 into 00 to 09.
+ * @param n(number) - number
+ */
+function oneCharNumberToTwoChar(n){
+    return n > 9 ? "" + n: "0" + n;
 }
 
 /**

@@ -1,4 +1,7 @@
 
+guiLocalSettings.setIfNotExists('guiApi.real_query_timeout', 100)
+
+
 /**
  * Класс апи и запросов к нему
  * @returns {guiApi}
@@ -95,7 +98,7 @@ function guiApi()
         });
         return this_query_data.def.promise();
     }
-    
+
     this.addQuery = function(query_data, data, chunked)
     {
         if(chunked)
@@ -103,13 +106,13 @@ function guiApi()
             for(let i in query_data.data)
             {
                 if(deepEqual(query_data.data[i], data))
-                { 
+                {
                     return i
                 }
             }
         }
-         
-        query_data.data.push(data) 
+
+        query_data.data.push(data)
         return query_data.data.length - 1
     }
     /**
@@ -135,13 +138,13 @@ function guiApi()
         }
 
         let data_index = undefined
- 
+
         if($.isArray(data))
         {
             data_index = []
             for(let i in data)
             {
-                data_index.push(this.addQuery(query_data, data[i], chunked)) 
+                data_index.push(this.addQuery(query_data, data[i], chunked))
             }
         }
         else
@@ -151,7 +154,7 @@ function guiApi()
 
         var promise = new $.Deferred();
 
-        query_data.timeOutId = setTimeout(real_query, 100, query_data)
+        query_data.timeOutId = setTimeout(real_query, guiLocalSettings.get('guiApi.real_query_timeout'), query_data)
 
         $.when(query_data.def).done(data => {
 

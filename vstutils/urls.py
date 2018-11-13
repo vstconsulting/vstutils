@@ -40,9 +40,9 @@ urlpatterns += [
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls))]
-if 'runserver' in sys.argv:  # nocv
+if 'runserver' in sys.argv or 'test' in sys.argv:
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
-else:
+else:  # nocv
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if 'docs' in settings.INSTALLED_APPS:  # nocv
     urlpatterns += [url(r'^{}'.format(doc_url), include('docs.urls'))]

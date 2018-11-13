@@ -4,8 +4,9 @@ from __future__ import unicode_literals
 import json
 
 import six
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, models
 from rest_framework import serializers, exceptions
+from . import fields
 
 
 class BaseSerializer(serializers.Serializer):
@@ -15,7 +16,11 @@ class BaseSerializer(serializers.Serializer):
 
 class VSTSerializer(serializers.ModelSerializer):
     # pylint: disable=abstract-method
-    pass
+    serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
+    serializer_field_mapping.update({
+        models.CharField: fields.VSTCharField,
+        models.TextField: fields.VSTCharField,
+    })
 
 
 class UserSerializer(VSTSerializer):
@@ -50,7 +55,8 @@ class UserSerializer(VSTSerializer):
     def is_valid(self, raise_exception=False):
         if self.instance is None:
             try:
-                User.objects.get(username=self.initial_data.get('username', None))
+                initial_data = self.initial_data
+                User.objects.get(username=initial_data.get('username', None))
                 raise self.UserExist({'username': ["Already exists."]})
             except User.DoesNotExist:
                 pass
@@ -81,7 +87,7 @@ class UserSerializer(VSTSerializer):
 
 
 class OneUserSerializer(UserSerializer):
-    password = serializers.CharField(write_only=True, required=False)
+    password = fields.VSTCharField(write_only=True, required=False)
     email = serializers.EmailField(required=False)
 
     class Meta:
@@ -133,7 +139,7 @@ class JsonObjectSerializer(DataSerializer):
 
 
 class ErrorSerializer(DataSerializer):
-    detail = serializers.CharField(required=True)
+    detail = fields.VSTCharField(required=True)
 
     def to_internal_value(self, data):
         return data
@@ -147,4 +153,4 @@ class ValidationErrorSerializer(ErrorSerializer):
 
 
 class OtherErrorsSerializer(ErrorSerializer):
-    error_type = serializers.CharField(required=False, allow_null=True)
+    error_type = fields.VSTCharField(required=False, allow_null=True)

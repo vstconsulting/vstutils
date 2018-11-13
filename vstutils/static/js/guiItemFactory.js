@@ -63,6 +63,14 @@ var gui_base_object = {
         return false;
     },
 
+    initAllFields: function(schema_name)
+    {
+        for(let i in this.api.schema[schema_name].fields)
+        {
+            this.initField(this.api.schema[schema_name].fields[i]);
+        }
+    },
+
     /*
      * Function inits field in model.
      */
@@ -91,7 +99,7 @@ var gui_base_object = {
             html.push(this.renderField(opt.fields[i], opt))
         }
 
-        let id =  getNewId();
+        let id =  getNewId(); 
         return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
             let fields = $('#'+id+" .gui-not-required")
@@ -175,18 +183,6 @@ var gui_base_object = {
         }
 
         return obj;
-    },
-
-    /**
-     * It returns only the correct value, if it is not correct then it should throw an exception
-     */
-    getValidValue : function (hideReadOnly)
-    {
-        if(hideReadOnly)
-        {
-            return undefined
-        }
-        return this.getValue.call(arguments);
     },
 
     base_init : function (api_object,  url_vars= {}, object_data = undefined)
@@ -509,23 +505,6 @@ function emptyAction(action_info, guiObj, dataLine = undefined)
     return function(){
         return pageItem.exec()
     }
-}
-
-/**
- * Goes to the search results page.
- * Url builds on the basis of which page is open.
- *
- * @param {string} query
- * @returns {$.Deferred}
- */
-function goToSearch(obj, query)
-{
-    if (obj.isEmptySearchQuery(query))
-    {
-        return vstGO(spajs.urlInfo.data.reg.page);
-    }
-
-    return vstGO(spajs.urlInfo.data.reg.searchURL(obj.searchObjectToString(trim(query))));
 }
 
 function deleteAndGoUp(obj)

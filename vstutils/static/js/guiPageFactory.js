@@ -62,10 +62,14 @@ var gui_page_object = {
             {
                 this.model.guiFields[i].updateValue(this.model.data[i], this.model.data)
             }
+
+            this.onUpdateFromServer()
         })
 
         return res
     },
+
+    onUpdateFromServer : function (){},
 
     load : function (filters)
     {
@@ -217,36 +221,11 @@ var gui_page_object = {
             schema_name = 'get';
         }
 
-        for(let i in this.api.schema[schema_name].fields)
-        {
-            this.initField(this.api.schema[schema_name].fields[i]);
-        }
+        this.initAllFields(schema_name);
     },
 
     prepareDataBeforeRender: function()
     {
         return this.model.data;
     },
-
-    /**
-     * Отрисует объект как поле ввода
-     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
-     * @returns {string|promise}
-     */
-    render : function (render_options = {})
-    {
-        let tpl = this.getTemplateName('one_as_field')
-
-        debugger;
-        if(render_options.hideReadOnly)
-        {
-            return "";
-        }
-
-        render_options.fields = this.api.schema.get.fields
-        //render_options.sections = this.getSections('render')
-        //debugger;
-        return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
-    },
-
 }

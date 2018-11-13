@@ -12,3 +12,4 @@ dist
 pylint_*
 .idea/*
 test_screenshot.png
+.coverage.*

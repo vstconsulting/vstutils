@@ -98,6 +98,61 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.value = value
     }
 
+    this.isHidden = function()
+    {
+        return $('#gui'+this.element_id).hasClass('hide')
+    }
+
+    this.isRequired = function()
+    {
+        return this.opt.required
+    }
+
+    this.setHidden = function(value)
+    {
+        if(value)
+        {
+            $('#gui'+this.element_id).addClass('hide')
+        }
+        else
+        {
+            $('#gui'+this.element_id).removeClass('hide')
+        }
+    }
+
+    /**
+     * Function for inserting value into templates of guiElements.
+     */
+    this.insertValue = function(value)
+    {
+        if(value === undefined)
+        {
+            return this.opt.default || '';
+        }
+
+        if(typeof value == 'object')
+        {
+            if($.isArray(value))
+            {
+                return value.join()
+            }
+
+            return JSON.stringify(value)
+        }
+
+        return value
+    }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        $("#"+this.element_id).val(value+"")
+        return value+"";
+    }
+
     this._onUpdateValue = function(){}
 
     this.updateValue = function(value)
@@ -110,7 +165,15 @@ guiElements.base = function(opt = {}, value, parent_object)
     {
         let res = value
 
-        if(value === undefined && this.opt.default && this.opt.required)
+        if(this.isHidden())
+        {
+            if(!this.isRequired())
+            {
+                return undefined
+            }
+        }
+
+        if(value === undefined && this.opt.default && this.isRequired())
         {
             return this.opt.default
         }
@@ -126,10 +189,6 @@ guiElements.base = function(opt = {}, value, parent_object)
             if(!value)
             {
                 res = undefined
-            }
-            else
-            {
-                res = value
             }
         }
 
@@ -162,7 +221,7 @@ guiElements.base = function(opt = {}, value, parent_object)
             res = value == true
         }
 
-        if((res === undefined || res === "") && this.opt.default && this.opt.required)
+        if((res === undefined || res === "") && this.opt.default && this.isRequired())
         {
             res = this.opt.default
         }
@@ -186,7 +245,7 @@ guiElements.base = function(opt = {}, value, parent_object)
                     return false;
                 }
 
-                let res = options.onclick.call(arguments)
+                let res = options.onclick.apply(thisObj, arguments)
                 if(res)
                 {
                     $('#'+thisObj.element_id).addClass('disabled')
@@ -199,7 +258,7 @@ guiElements.base = function(opt = {}, value, parent_object)
                 }
                 else
                 {
-                    debugger;
+                    console.warn("Button onclick callback do not return promiss object.")
                 }
             })
         }
@@ -235,11 +294,6 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.getValue = function()
     {
-        if($('#gui'+this.element_id).hasClass('hide'))
-        {
-            return this.reductionToType();
-        }
-
         let value = $("#"+this.element_id).val();
         return this.reductionToType(value);
     }
@@ -262,16 +316,16 @@ guiElements.base = function(opt = {}, value, parent_object)
 
         if(field.maxLength && value_length > field.maxLength)
         {
-            throw {error:'validation', message:'Field '+field.name +" is too long"}
+            throw {error:'validation', message:'Field "'+field.name +'" is too long'}
         }
 
         if(field.minLength)
         {
             if(value_length == 0)
             {
-                if(field.required)
+                if(this.isRequired())
                 {
-                    throw {error:'validation', message:'Field '+field.name +" is empty"}
+                    throw {error:'validation', message:'Field "'+field.name +'" is empty'}
                 }
                 else
                 {
@@ -281,28 +335,23 @@ guiElements.base = function(opt = {}, value, parent_object)
 
             if(value_length < field.minLength)
             {
-                throw {error:'validation', message:'Field '+field.name +" is too short"}
+                throw {error:'validation', message:'Field "'+field.name +'" is too short'}
             }
         }
 
         if(field.max && value > field.max)
         {
-            throw {error:'validation', message:'Field '+field.name +" is too big"}
+            throw {error:'validation', message:'Field "'+field.name +'" is too big'}
         }
 
         if(field.min && value < field.min)
         {
-            throw { error: 'validation', message: 'Field ' + field.name + " is too small" }
+            throw { error: 'validation', message: 'Field "' + field.name + '" is too small' }
         }
 
-        if((value === "" || value === undefined) && field.required && !this.opt.default)
+        if(value === undefined && this.isRequired() && !this.opt.default)
         {
-            throw {error:'validation', message:'Field '+field.name +" is required"}
-        }
-
-        if(value === "" && !this.opt.default)
-        {
-            return undefined
+            throw {error:'validation', message:'Field "'+field.name +'" is required'}
         }
 
         return value;
@@ -368,25 +417,6 @@ guiElements.base = function(opt = {}, value, parent_object)
     }
 }
 
-/**
- *
- * @param {type} opt
- * @returns {guiElements.button}
- *
- * opt = {
- * class:''     - css
- * link:''      - ссылка
- * title:''     - подсказка
- * onclick:''   - текст события onclick
- * text:''      - текст надписи
- * }
- */
-guiElements.link_button = function(opt = {})
-{
-    this.name = 'link_button'
-    guiElements.base.apply(this, arguments)
-}
-
 guiElements.string = function()
 {
     this.name = 'string'
@@ -411,6 +441,17 @@ guiElements.button = function()
 {
     this.name = 'button'
     guiElements.base.apply(this, arguments)
+
+    this.getValue = function()
+    {
+        return this.reductionToType(this.value);
+    }
+}
+
+guiElements.formButton = function()
+{
+    guiElements.button.apply(this, arguments)
+    this.name = 'formButton'
 }
 
 guiElements.enum = function(opt = {}, value)
@@ -427,6 +468,23 @@ guiElements.enum = function(opt = {}, value)
             width: '100%',
         });
     }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        let options = $("#"+this.element_id+" option[value="+value+"]")
+        if(options.length == 0)
+        {
+            return null;
+        }
+
+        $("#"+this.element_id).val(value).trigger('change');
+        return value
+    }
+
 }
 
 guiElements.file = function(opt = {})
@@ -437,9 +495,22 @@ guiElements.file = function(opt = {})
     this.getValue = function ()
     {
         let value = $('#fileContent_' + this.element_id).val();
-        let default_value = this.opt.default;
-
         return this.reductionToType(value);
+    }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        $("#fileContent_"+this.element_id).val(value)
+        return value;
+    }
+
+    this.readFile = function (event, el_id)
+    {
+        return readFileAndInsert(event, el_id)
     }
 }
 
@@ -456,13 +527,24 @@ guiElements.boolean = function()
 
     this.getValue = function()
     {
-        if($('#gui'+this.element_id).hasClass('hide'))
-        {
-            return this.reductionToType();
-        }
-
         let value = $("#"+this.element_id).hasClass('selected');
         return this.reductionToType(value);
+    }
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        if(value)
+        {
+            $("#"+this.element_id).addClass('selected')
+            return true
+        }
+
+        $("#"+this.element_id).removeClass('selected')
+        return false
     }
 }
 
@@ -474,6 +556,52 @@ guiElements.html = function(opt = {})
     this.getValue = function()
     {
         return undefined;
+    }
+
+    this.insertTestValue = function(value)
+    {
+        return undefined;
+    }
+
+    this._onBaseRender = this._onRender;
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options);
+        this.setLinksInsideField();
+    }
+
+    this.setLinksInsideField = function()
+    {
+        let links_array = $('#' + this.element_id).find('a');
+        let id_reg_exp = XRegExp(`#(?<id>[A-z,0-9,-]+)`, 'x');
+        for(let i in links_array)
+        {
+            let link = links_array[i];
+            if(link['href'] && link['href'].search(window.hostname) != -1)
+            {
+                let match = XRegExp.exec(link['href'], id_reg_exp)
+                if(match != null && link['href'].search(window.location.href) == -1 && $('*').is('#' + match.groups['id']))
+                {
+                    link.onclick = function ()
+                    {
+                        $(".wrapper").scrollTo('#' + match.groups['id'], 700);
+                        return false;
+                    }
+                    continue;
+                }
+
+                if(link['href'].search(window.location.href) == -1)
+                {
+                    link['href'] = window.location.href + link['href'].split(window.hostname)[1];
+                }
+
+            }
+        }
+    }
+
+    this._onUpdateValue = function()
+    {
+        this.setLinksInsideField();
     }
 }
 
@@ -507,13 +635,37 @@ guiElements.null = function(opt = {})
     {
         return undefined;
     }
+
+    this.insertTestValue = function(value)
+    {
+        return undefined;
+    }
 }
 
-guiElements.integer = function(opt = {})
+guiElements.integer = function(opt = {}, value)
 {
     this.name = 'integer';
     guiElements.base.apply(this, arguments)
+
+    this.getValue = function ()
+    {
+        let value = $('#' + this.element_id).val();
+        return this.reductionToType(value/1);
+    }
+
+    this.insertTestValue = function(value)
+    {
+        $("#"+this.element_id).val(value/1)
+        return value/1;
+    }
 }
+
+guiElements.int32 = guiElements.integer
+guiElements.int64 = guiElements.integer
+guiElements.double = guiElements.integer
+guiElements.number = guiElements.integer
+guiElements.float = guiElements.integer
+
 
 guiElements.prefetch = function (opt = {}, value)
 {
@@ -530,7 +682,7 @@ guiElements.prefetch = function (opt = {}, value)
 
     this.getValue = function()
     {
-        return $("#"+this.element_id).attr('attr-value');
+        return this.reductionToType($("#"+this.element_id).attr('attr-value'));
     }
 }
 
@@ -542,7 +694,13 @@ guiElements.date = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
+        return this.reductionToType(moment(value).tz(window.timeZone).format("YYYY/MM/DD"));
+    }
 
+    this.insertTestValue = function(value)
+    {
+        let time  = moment(value).tz(window.timeZone).format("YYYY-MM-DD")
+        $("#"+this.element_id).val(time)
         return moment(value).tz(window.timeZone).format("YYYY/MM/DD");
     }
 }
@@ -555,11 +713,26 @@ guiElements.date_time = function (opt = {}, value)
     this.getValue = function()
     {
         let value = $("#"+this.element_id).val();
+        return this.reductionToType(moment(value).tz(window.timeZone).format());
+    }
 
+    this.insertTestValue = function(value)
+    {
+        let time  = moment(value).tz(window.timeZone).format("YYYY-MM-DD") + 'T' + moment(value).tz(window.timeZone).format("HH:mm")
+        $("#"+this.element_id).val(time)
         return moment(value).tz(window.timeZone).format();
     }
 }
 
+/**
+ * Field that gets time in seconds as value and shows it in convenient way for user.
+ * Due to size of time field selects one of the most appropriate pattern from these templates:
+ * - 23:59:59
+ * - 01d 00:00:00
+ * - 01m 30d 00:00:00
+ * - 99y 11m 30d 22:23:24
+ * Function getValue returns time in seconds.
+ */
 guiElements.uptime = function (opt = {}, value)
 {
     this.name = 'uptime';
@@ -569,9 +742,303 @@ guiElements.uptime = function (opt = {}, value)
     {
         let value = $("#"+this.element_id).val();
 
-        return moment(value).tz(window.timeZone).format();
+        let reg_arr = [
+            XRegExp(`(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+            XRegExp(`(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`, 'x'),
+        ]
+
+        let time_parts = [];
+        let uptime_in_seconds =  0;
+
+        for(let i in reg_arr)
+        {
+            time_parts = XRegExp.exec(value, reg_arr[i]);  
+            if(time_parts != null)
+            {
+                let duration_obj = {
+                    seconds: Number(time_parts.groups['ss']),
+                    minutes:  Number(time_parts.groups['mm']),
+                    hours:  Number(time_parts.groups['hh']),
+                    days: Number(time_parts.groups['d'] || 0),
+                    months: Number(time_parts.groups['m'] || 0),
+                    years: Number(time_parts.groups['y'] || 0),
+                }
+                uptime_in_seconds = moment.duration(duration_obj).asSeconds();
+                return this.reductionToType(uptime_in_seconds)
+            }
+        }
+
+        return this.reductionToType(uptime_in_seconds);
+    }
+
+    this.getValueInSeconds = function()
+    {
+        return Number($("#"+this.element_id).attr('sec-value')) || 0;
+    }
+
+    this.changeOnChangeByHands = function()
+    {
+        let new_value = thisObj.getValue();
+        if(new_value != 0)
+        {
+            $("#"+thisObj.element_id).attr('sec-value', new_value);
+        }
+    }
+
+    this.uptimeSettings = {
+        timeout: 100,
+        iteration: 1,
+        mouseDown: false,
+    }
+
+    this.valueUp = function (increement)
+    {
+        let new_time = this.getValueInSeconds();
+
+        new_time = new_time + increement
+        if(new_time >= 3155759999)
+        {
+            new_time = 0
+        }
+        $("#"+this.element_id).attr('sec-value', new_time);
+        $("#"+this.element_id).val(this.getTimeInUptimeFormat(new_time))
+    }
+
+    this.valueDown = function (increement)
+    {
+        let new_time = this.getValueInSeconds();
+        new_time = new_time - increement
+        if(new_time < 0)
+        {
+            new_time = 0
+        }
+        $("#"+this.element_id).attr('sec-value', new_time);
+        $("#"+this.element_id).val(this.getTimeInUptimeFormat(new_time))
+    }
+
+    this.mousePress = function(obj, func)
+    {
+        obj.unbind('mousedown');
+        obj.unbind('mouseup');
+        obj.unbind('mouseleave');
+        obj.bind('mousedown', () => {
+            this.uptimeSettings.mouseDown = true;
+            setTimeout(func, this.uptimeSettings.timeout);
+        });
+
+        obj.bind('mouseup', () =>  {
+            this.uptimeSettings.mouseDown = false;
+            this.uptimeSettings.iteration = 1;
+        });
+
+        obj.bind('mouseleave', () =>  {
+            this.uptimeSettings.mouseDown = false;
+            this.uptimeSettings.iteration = 1;
+        });
+    }
+
+    let thisObj = this;
+    this.doIncrease = function()
+    {
+        if (thisObj.uptimeSettings.mouseDown)
+        {
+            let increement = thisObj.getIncrement(thisObj.uptimeSettings.iteration);
+            thisObj.valueUp(increement)
+            thisObj.uptimeSettings.iteration++;
+            setTimeout(thisObj.doIncrease, thisObj.uptimeSettings.timeout);
+        }
+    }
+
+    this.doDecrease = function()
+    {
+        if (thisObj.uptimeSettings.mouseDown)
+        {
+            let increement = thisObj.getIncrement(thisObj.uptimeSettings.iteration);
+            thisObj.valueDown(increement)
+            thisObj.uptimeSettings.iteration++;
+            setTimeout(thisObj.doDecrease, thisObj.uptimeSettings.timeout);
+        }
+    }
+
+    this.getIncrement = function(iteration)
+    {
+        let increement = 1;
+
+        if(iteration >= 20){
+            increement = 10;
+        }
+
+        if(iteration >= 30){
+            increement = 100;
+        }
+
+        if(iteration >= 40){
+            increement = 1000;
+        }
+        return  increement;
+    }
+
+    this.maskObj = {
+        mask:[
+            {
+                mask:'HH:mm:SS',
+                blocks: {
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
+            },
+            {
+                mask:'DAYd HH:mm:SS',
+                blocks: {
+                    DAY: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 31
+                    },
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
+            },
+            {
+                mask:'MONTHm DAYd HH:mm:SS',
+                blocks: {
+                    MONTH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 12
+                    },
+                    DAY: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 31
+                    },
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
+            },
+            {
+                mask:'YEARy MONTHm DAYd HH:mm:SS',
+                blocks: {
+                    YEAR: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 99
+                    },
+                    MONTH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 12
+                    },
+                    DAY: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 31
+                    },
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 23
+                    },
+                    mm: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    },
+                    SS: {
+                        mask: IMask.MaskedRange,
+                        from: 0,
+                        to: 59
+                    }
+                },
+            },
+        ],
+    }
+
+    this.getTimeInUptimeFormat = function(time)
+    {
+        if(isNaN(time))
+        {
+            return "00:00:00";
+        }
+
+        let uptime = moment.duration(Number(time), 'seconds')._data;
+
+        let n = oneCharNumberToTwoChar;
+
+        if(uptime.years > 0)
+        {
+            return n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+
+        } else if(uptime.months > 0)
+        {
+            return n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+        }
+        else if(uptime.days > 0)
+        {
+            return n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+        }
+        else
+        {
+            return n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+        }
+    }
+
+    this._onBaseRender = this._onRender;
+    this._onRender = function(options)
+    {
+        this._onBaseRender(options);
+
+        if(!options.readOnly)
+        {
+            let element = document.getElementById(this.element_id);
+            let momentMask = new IMask(element, this.maskObj);
+            this.mousePress($('#uptime-up'), thisObj.doIncrease);
+            this.mousePress($('#uptime-down'),thisObj.doDecrease);
+        }
     }
 }
+
 
 /*
  * Field that gets time in milliseconds and convert it into seconds before render.
@@ -590,10 +1057,14 @@ guiElements.time_interval = function(opt = {}, value)
     this.getValue = function()
     {
         let value = this._baseGetValue();
-
-        return value * 1000;
+        return this.reductionToType(value * 1000);
     }
 
+    this._baseinsertTestValue = this.insertTestValue
+    this.insertTestValue = function(value)
+    {
+        return this._baseinsertTestValue(value/1) * 1000;
+    }
 }
 
 guiElements.autocomplete = function()
@@ -892,7 +1363,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
     {
         if(this.opt && this.opt.custom_getValue)
         {
-            return this.opt.custom_getValue.apply(this, arguments);
+            return this.reductionToType(this.opt.custom_getValue.apply(this, arguments));
         }
         else
         {
@@ -901,10 +1372,10 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 
             if(value_field_value)
             {
-                return value_field_value;
+                return this.reductionToType(value_field_value);
             }
 
-            return view_field_value;
+            return this.reductionToType(view_field_value);
         }
     }
 
@@ -1191,6 +1662,10 @@ guiElements.apiObject = function(field, field_value, parent_object)
         this.linkObj = this.createLinkedObj()
     }
 
+    this.insertTestValue = function(value)
+    {
+        return this.getValue();
+    }
 
     this._baseRender = this.render
     this.render = function(options)
@@ -1315,7 +1790,7 @@ guiElements.inner_api_object = function(field, field_value, parent_object)
             }
         }
 
-        return valueObj;
+        return this.reductionToType(valueObj);
     }
 
     this.getValidValue = function ()
@@ -1346,25 +1821,39 @@ guiElements.json = function(opt = {}, value)
     guiElements.base.apply(this, arguments)
 
     this.realElements = {};
-
-    if(value)
+    this.setValue = function(value)
     {
-        for(let field in value)
+        this.value = value
+        let realElements = {};
+        if(value)
         {
-            let options = {
-                readOnly: opt.readOnly || false,
-                title: field,
-            }
-
-            let type = 'string';
-
-            if(typeof value[field] == 'boolean')
+            for(let field in value)
             {
-                type = 'boolean';
-            }
+                let options = {
+                    readOnly: opt.readOnly || false,
+                    title: field,
+                }
 
-            this.realElements[field] = new guiElements[type]($.extend({}, options), value[field]);
+                let type = 'string';
+
+                if(typeof value[field] == 'boolean')
+                {
+                    type = 'boolean';
+                }
+
+                realElements[field] = new guiElements[type]($.extend({}, options), value[field]);
+            }
         }
+
+        this.realElements = realElements
+
+    }
+    this.setValue(value)
+
+    this.insertTestValue = function(value)
+    {
+        this.setValue(value);
+        return value;
     }
 
     this.getValue = function()
@@ -1376,7 +1865,7 @@ guiElements.json = function(opt = {}, value)
             valueObj[element_name] = element.getValue();
         }
 
-        return valueObj;
+        return this.reductionToType(valueObj);
     }
 
     this.getValidValue = function()
@@ -1428,13 +1917,23 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         let lastValue = this.realElement.getValue();
 
         let options = $.extend({}, opt, override_opt);
-        options.onInit = undefined
+        options.onInit = undefined;
+        options.type = type;
 
         if(type == "boolean" && options.default !== undefined && options.readOnly)
         {
             lastValue = options.default;
         }
 
+        if(type == "boolean" && typeof lastValue == "string")
+        {
+            lastValue = stringToBoolean(lastValue)
+        }
+
+        if((type == "number" || type == "integer") && lastValue == "")
+        {
+            lastValue = 0;
+        }
 
         this.realElement = new guiElements[type](options, value, parent_object);
 
@@ -1522,6 +2021,15 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
 
         thisObj.setType(new_type, override_opt);
     });
+
+    /**
+     * Функция вызываемая из тестов для установки значения
+     * @param {string} value
+     */
+    this.insertTestValue = function()
+    {
+        return this.realElement.insertTestValue.apply(this.realElement, arguments);
+    }
 
 }
 
@@ -2035,7 +2543,7 @@ guiElements.crontab = function (opt = {}, value)
     }
 }
 
-function set_api_options(options)
+function set_api_options(options, guiElement)
 {
     let additional_options = "";
     if (options.readOnly) {
@@ -2058,7 +2566,7 @@ function set_api_options(options)
         additional_options += "max=" + options.max + " "
     }
 
-    if (/^Required/.test(options.description)) {
+    if (guiElement && guiElement.isRequired()) {
         additional_options += "required "
     }
 
@@ -2110,34 +2618,8 @@ function getFiltersForAutocomplete(list, search_str, view_field)
     return filters;
 }
 
-/*
- * time - in seconds
- */
-function getUptime(time)
-{
-    let uptime = moment.duration(time, 'seconds')._data;
-
-    if(uptime.years > 0)
-    {
-        return "" + uptime.years + "y " + uptime.months + "m " + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-
-    } else if(uptime.months > 0)
-    {
-        return "" + uptime.months + "m " + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    }
-    else if(uptime.days > 0)
-    {
-        return "" + uptime.days + "d " + moment(time*1000).tz('UTC').format('HH:mm:ss');
-    }
-    else
-    {
-        return  moment(time*1000).tz('UTC').format('HH:mm:ss');
-    }
-}
-
-
 /**
- * Function make search through the list in hybrid_autocomplete modal.
+ * Function makes search through the list in hybrid_autocomplete modal.
  * @param object - obj - list of objects, that is used in hybrid_autocomplete modal.
  * @param object - guiElement - hybrid_autocomplete guiElement.
  * @param object - opt - object of options for modal rendering.

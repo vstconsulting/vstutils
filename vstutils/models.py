@@ -93,6 +93,7 @@ class Manager(BaseManager.from_queryset(BQuerySet)):
 
 class BaseModel(models.Model):  # noprj
     # pylint: disable=no-member
+    __slots__ = 'no_signal',
     objects    = Manager()
 
     def __init__(self, *args, **kwargs):  # nocv

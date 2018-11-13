@@ -1,27 +1,104 @@
 /**
  * Тестирование guiElements.string
  */
-window.qunitTestsArray['guiElements.string'] = {
+window.qunitTestsArray['guiElements.baseTest'] = {
     test:function()
     {
-        syncQUnit.addTest('guiElements.string', function ( assert )
+        let guiElementsArray = {
+            'string':{
+                values:['ABC', 'null', 12, true]
+            },
+            'password':{},
+            'file':{},
+            'secretfile':{},
+            'boolean':{},
+            'textarea':{},
+            'hidden':{},
+            'null':{},
+            'integer':{                 values:[1, 0 ] },
+            'date':{                    values:[1941554845000, 0],},
+            'date_time':{               values:[1441554840000],},
+            'time_interval':{           values:[100]},
+            //'autocomplete':{},
+            //'hybrid_autocomplete':{},
+            //'select2':{},
+            'apiObject':{ init:[{definition:guiSchema.path["/user/"]}, {id:1}]},
+            'apiData':{                   values:['ABC', 'null', 12, true]},
+            //'inner_api_object':{},
+            'json':{                      values:[{'ABC':"CDE"}, {'A2':'1'}, {'A3':'false'}], init:[undefined, {'ABCtt':"CDErer"}]},
+            'dynamic':{},
+            'enum':{},
+            //'prefetch':{},
+            'html':{}
+        };
+        for(let i in guiElementsArray)
         {
-            let done = assert.async();
-
-            $("body").append("<div id='guiElementsTestForm'></div>")
-            let element = new guiElements.string();
-
-            $("#guiElementsTestForm").insertTpl(element.render())
-            element.getValue()
-
-            $("#guiElementsTestForm").remove();
-
-            assert.ok(true, 'guiElements.string');
-            testdone(done)
-        });
+            guiElementTestFunction(i, guiElementsArray[i])
+        }
     }
 }
 
+function guiElementTestFunction(elementName, opt){
+    syncQUnit.addTest('guiElements.'+elementName, function ( assert )
+    {
+        let done = assert.async();
+        $("body").append("<div id='guiElementsTestForm'></div>")
+
+        if(!opt.init)
+        {
+            opt.init = []
+        }
+
+        let element = new guiElements[elementName](opt.init[0], opt.init[1]);
+
+        $("#guiElementsTestForm").insertTpl(element.render())
+
+        if(opt && opt.values)
+        {
+            for(let i in opt.values)
+            {
+                let val = opt.values[i]
+                let res = element.insertTestValue(val)
+                let value = element.getValue()
+                if(res !== value)
+                {
+                    if(deepEqual(res, value))
+                    {
+                        assert.ok(true, 'guiElements.'+elementName);
+                    }
+                    else
+                    {
+                        debugger;
+                        assert.ok(value === res, 'guiElements.'+elementName);
+                    }
+                }
+                else
+                {
+                    assert.ok(value === res, 'guiElements.'+elementName);
+                }
+            }
+        }
+        else
+        {
+            assert.ok(element.insertTestValue(rundomString(6)) === element.getValue(), 'guiElements.string');
+        }
+
+        $("#guiElementsTestForm").remove();
+        testdone(done)
+    });
+}
+
+window.qunitTestsArray['guiElements.uptime'] = {
+    test:function()
+    {
+        syncQUnit.addTest('guiElements.uptime', function ( assert )
+        {
+            let uptime = new guiElements.uptime() 
+            assert.ok(uptime.getTimeInUptimeFormat(120) == "00:02:00", 'uptime 120s');
+            assert.ok(uptime.getTimeInUptimeFormat(0) == "00:00:00", 'uptime 0s');
+        })
+    }
+}
 /**
  * Тестирование guiElements.crontab
  */

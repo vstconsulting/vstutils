@@ -56,10 +56,14 @@ var gui_list_object = {
         {
             guiPopUp.success("Objects of '"+thisObj.api.bulk_name+"' type were successfully deleted");
             def.resolve(data)
+
+
+            tabSignal.emit("guiList.deleted",  {guiObj:this, ids: ids, success:true});
         }).fail(function (e)
         {
             def.reject(e)
             thisObj.showErrors(e)
+            tabSignal.emit("guiList.deleted",  {guiObj:this, ids: ids, success:false});
         })
 
         return def.promise();
@@ -345,10 +349,7 @@ var gui_list_object = {
 
     beforeRenderAsNewPage: function()
     {
-        for(let i in this.api.schema.new.fields)
-        {
-            this.initField(this.api.schema.new.fields[i]);
-        }
+        this.initAllFields('new');
     },
 
     /**
@@ -448,7 +449,6 @@ var gui_list_object = {
             }
         }
         this.activeSearch.fields[name].used = false
-
         return this.searchGO(this.searchObjectToString(""), this.searchAdditionalData);
     },
 
@@ -614,7 +614,7 @@ var gui_list_object = {
     {
         if (this.isEmptySearchQuery(query))
         {
-            return vstGO(this.url_vars.baseURL().replace(/\/search\/?$/, ""));
+            return vstGO(this.url_vars.baseURL().replace(/\/search\/?.*$/, ""));
         }
 
         return vstGO(this.url_vars.searchURL(this.searchObjectToString(trim(query))))
@@ -627,7 +627,7 @@ var gui_list_object = {
      */
     isEmptySearchQuery : function (query)
     {
-        if (!query || !trim(query)
+        if ( (!query || !trim(query))
             && this.activeSearch
             && this.activeSearch.filters
             && this.activeSearch.filters.length == 0)
@@ -960,8 +960,8 @@ var gui_list_object = {
 
     createAndGoEdit: function()
     {
-        var def = this.create();
-        $.when(def).done((newObj) => {
+        var def = new $.Deferred();
+        $.when(this.create()).done((newObj) => {
 
             let id = newObj.data.id
             if(newObj.data.id === undefined)
@@ -978,10 +978,16 @@ var gui_list_object = {
                 }
             }
 
-            vstGO(this.url_vars.baseURL(id));
+            $.when(vstGO(this.url_vars.baseURL(id))).done(()=>{
+                def.resolve();
+            }).fail(()=>{
+                def.reject();
+            })
+        }).fail(()=>{
+            def.reject();
         })
 
-        return def;
+        return def.promise();
     }
 
 }

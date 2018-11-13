@@ -32,7 +32,7 @@ tabSignal.connect("openapi.completed", function()
 
     spajs.addMenu({
         id:"profile",
-        urlregexp:[/^profile$/],
+        urlregexp:[/^\/?profile$/],
         priority:0,
         onOpen:function(holder, menuInfo, data, onClose_promise)
         {
@@ -40,6 +40,7 @@ tabSignal.connect("openapi.completed", function()
                 page:'user/'+ my_user_id,
                 api_pk:my_user_id
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load(my_user_id)).done(function()
@@ -69,7 +70,7 @@ tabSignal.connect("openapi.completed", function()
  */
 function registerProfileSublinkAction(sublink, path, api_pk)
 {
-    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
     spajs.addMenu({
@@ -82,6 +83,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
                 page:'user/'+ api_pk +'/' + sublink,
                 api_pk:api_pk,
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem).done(function()
@@ -111,7 +113,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
  */
 function registerProfileSublinkPage(sublink, path, api_pk)
 {
-    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
     spajs.addMenu({
@@ -124,6 +126,7 @@ function registerProfileSublinkPage(sublink, path, api_pk)
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load(api_pk)).done(function()
@@ -153,7 +156,7 @@ function registerProfileSublinkPage(sublink, path, api_pk)
  */
 function registerProfileSublinkList(sublink, path, api_pk)
 {
-    let reg_url = new RegExp('^profile/' + sublink + '$');
+    let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
 
     spajs.addMenu({
@@ -166,6 +169,7 @@ function registerProfileSublinkList(sublink, path, api_pk)
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
             })
+            window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load()).done(function()

@@ -1,4 +1,17 @@
+import json
+import six
 from rest_framework.serializers import CharField, IntegerField
+from ..utils import raise_context
+
+
+class VSTCharField(CharField):
+    def to_internal_value(self, data):
+        allowed_types = six.string_types, six.text_type
+        with raise_context():
+            if not isinstance(data, allowed_types):
+                data = json.dumps(data)
+        data = str(data)
+        return super(VSTCharField, self).to_internal_value(data)
 
 
 class FileInStringField(CharField):
@@ -20,6 +33,8 @@ class AutoCompletionField(CharField):
     '''
     Field with autocomplite from list of objects.
     '''
+    __slots__ = 'autocomplete', 'autocomplete_property'
+
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
         self.autocomplete_property = None
@@ -33,6 +48,8 @@ class DependEnumField(CharField):
     '''
     Field based on another field.
     '''
+    __slots__ = 'field', 'choices', 'types'
+
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', dict())
@@ -62,6 +79,8 @@ class Select2Field(IntegerField):
     '''
     Field what means where we got list.
     '''
+    __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent'
+
     def __init__(self, **kwargs):  # nocv
         self.select_model = kwargs.pop('select')
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
