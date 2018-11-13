@@ -349,10 +349,7 @@ var gui_list_object = {
 
     beforeRenderAsNewPage: function()
     {
-        for(let i in this.api.schema.new.fields)
-        {
-            this.initField(this.api.schema.new.fields[i]);
-        }
+        this.initAllFields('new');
     },
 
     /**

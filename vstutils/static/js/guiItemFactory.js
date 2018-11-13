@@ -63,6 +63,14 @@ var gui_base_object = {
         return false;
     },
 
+    initAllFields: function(schema_name)
+    {
+        for(let i in this.api.schema[schema_name].fields)
+        {
+            this.initField(this.api.schema[schema_name].fields[i]);
+        }
+    },
+
     /*
      * Function inits field in model.
      */
@@ -91,7 +99,7 @@ var gui_base_object = {
             html.push(this.renderField(opt.fields[i], opt))
         }
 
-        let id =  getNewId();
+        let id =  getNewId(); 
         return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
             let fields = $('#'+id+" .gui-not-required")
@@ -498,7 +506,7 @@ function emptyAction(action_info, guiObj, dataLine = undefined)
         return pageItem.exec()
     }
 }
- 
+
 function deleteAndGoUp(obj)
 {
     var def = obj.delete();
