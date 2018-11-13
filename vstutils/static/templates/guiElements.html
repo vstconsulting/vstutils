@@ -314,7 +314,7 @@
                 <% }else{ %>
                     <%- opt.class %>
                 <% } %>
-                <%- addCssClassesToElement('btn', opt.title) %>"
+                <%- addCssClassesToElement('btn', opt.title).replace(/[^A-z0-9 _\/-]/g, '_') %>"
 
         title="<%- opt.title || '' %>"
         >
