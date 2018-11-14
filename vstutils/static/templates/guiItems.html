@@ -603,33 +603,90 @@
     <!-- entity_one -->
 
     <%[ sublink_buttons %>
-        <% for(var k in opt.links){  %>
-            <a
-                href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
-                onclick="return vstGO(this.href);"
-                class="btn btn-default sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %> "
-            >
-                <%- opt.links[k].name.replace('_', ' ') %>
-            </a>
+        <~ window.current_window_width >
+        <% if (opt.links) { %>
+            <% if (!groupButtonsOrNot(window.current_window_width, opt.links)) { %>
+                <% for(var k in opt.links){  %>
+                    <a
+                        href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
+                        onclick="return vstGO(this.href);"
+                        class="btn btn-default sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %> "
+                    >
+                        <%- opt.links[k].name.replace('_', ' ') %>
+                    </a>
+                <% } %>
+            <% } else { %>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Sublinks
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <% for(var k in opt.links){  %>
+                            <li>
+                                <a
+                                    href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
+                                    onclick="return vstGO(this.href);"
+                                    class="sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %>">
+                                        <%- opt.links[k].name.replace('_', ' ') %>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            <% } %>
         <% } %>
 
-        <% for(var k in opt.actions){  %>
-                <% if  (!opt.actions[k].isEmptyAction) { %>
-                    <a
-                        href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
-                        onclick="return vstGO(this.href);"
-                        class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
-                    >
-                    <%- opt.actions[k].name.replace('_', ' ') %>
-                    </a>
-                <% } else { %>
-                    <% if(opt.actions[k].hidden) { %>
-                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary hidden-true', title:k, text:k}).render() %>
-                    <% } else { %>
-                        <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
-                    <% } %>
+        <% if (opt.actions) { %>
+            <% if (!groupButtonsOrNot(window.current_window_width, opt.actions)) { %>
+                <% for(var k in opt.actions){  %>
+                        <% if  (!opt.actions[k].isEmptyAction) { %>
+                            <a
+                                href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
+                                onclick="return vstGO(this.href);"
+                                class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
+                            >
+                            <%- opt.actions[k].name.replace('_', ' ') %>
+                            </a>
+                        <% } else { %>
+                            <% if(opt.actions[k].hidden) { %>
+                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary hidden-true', title:k, text:k}).render() %>
+                            <% } else { %>
+                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                            <% } %>
+                        <% } %>
                 <% } %>
+            <% } else { %>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-warning dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Actions
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <% for(var k in opt.actions){  %>
+                            <li>
+                                <a
+                                    <% if (!opt.actions[k].isEmptyAction) { %>
+                                        onclick="return vstGO(this.href);"
+                                        href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
+                                    <% } else { %>
+                                        <%= justOn('click', function()
+                                            {
+                                                return emptyAction(opt.actions[k], guiObj)();
+                                            })
+                                        %>
+                                    <% } %>
+                                    class="sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
+                                >
+                                <%- opt.actions[k].name.replace('_', ' ') %>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            <% } %>
         <% } %>
+        <~>
     <%] %>
 
     <%[ buttons_row %>

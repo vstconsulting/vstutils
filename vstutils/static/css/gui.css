@@ -1511,3 +1511,10 @@ table{
 .hidden-true{
     display: none;
 }
+
+@media (max-width: 480px) {
+    .dropdown-menu li a {
+        padding-top:7px;
+        padding-bottom:7px;
+    }
+}
