@@ -717,9 +717,17 @@ function openExternalLink(event)
         if(url && url.match(window.hostname) == null)
         {
             window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
+            event.preventDefault()
             return false;
         }
     }
 }
 
 window.onbeforeunload = openExternalLink;
+
+if(isCordova())
+{
+    window.onunload = function(){
+        inAppClose()
+    }
+}
