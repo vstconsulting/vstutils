@@ -76,6 +76,18 @@ function guiElementTestFunction(elementName, opt){
                 {
                     assert.ok(value === res, 'guiElements.'+elementName);
                 }
+
+                assert.ok(element.isHidden() == false, 'guiElements.'+elementName+" isHidden");
+                element.setHidden(true)
+                assert.ok(element.isHidden() == true, 'guiElements.'+elementName+" isHidden true");
+
+
+                assert.ok(element.getValue() === undefined, 'guiElements.'+elementName+" get value when field hidden");
+                element.setHidden(false)
+                assert.ok(element.isHidden() == false, 'guiElements.'+elementName+" isHidden false");
+
+                assert.ok(deepEqual(element.getValue(), value), 'guiElements.'+elementName+" value after hidden");
+
             }
         }
         else
@@ -93,7 +105,7 @@ window.qunitTestsArray['guiElements.uptime'] = {
     {
         syncQUnit.addTest('guiElements.uptime', function ( assert )
         {
-            let uptime = new guiElements.uptime() 
+            let uptime = new guiElements.uptime()
             assert.ok(uptime.getTimeInUptimeFormat(120) == "00:02:00", 'uptime 120s');
             assert.ok(uptime.getTimeInUptimeFormat(0) == "00:00:00", 'uptime 0s');
         })

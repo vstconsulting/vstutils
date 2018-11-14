@@ -773,12 +773,9 @@ function openExternalLink(event)
     if(isCordova())
     {
         let url = event.target.activeElement.href;
-        if(url && url.match(window.hostname) == null)
-        {
-            window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
-            event.preventDefault()
-            return false;
-        }
+        window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
+        event.preventDefault()
+        return false;
     }
 }
 
