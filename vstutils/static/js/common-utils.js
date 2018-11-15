@@ -407,9 +407,12 @@ tabSignal.connect("openapi.schema.type.list", function(listObj)
     hideIdInList.apply(this, arguments);
 })
 
+window.current_window_width = window.innerWidth;
 
 window.onresize=function ()
 {
+    window.current_window_width = window.innerWidth;
+
     if(window.innerWidth>767)
     {
         if(guiLocalSettings.get('hideMenu'))
@@ -427,6 +430,62 @@ window.onresize=function ()
             $("body").removeClass('sidebar-collapse');
         }
     }
+}
+
+/**
+ * Function makes a decision about grouping buttons or not.
+ * The decision is based on analysis of width of window and buttons amount.
+ */
+function groupButtonsOrNot(window_width, buttons)
+{
+    let buttons_amount = 0;
+    if(typeof buttons == "number")
+    {
+        buttons_amount = buttons;
+    }
+    else if(typeof buttons == "string")
+    {
+        buttons_amount = Number(buttons) || 0;
+    }
+    else if(typeof buttons == "object")
+    {
+        if($.isArray(buttons))
+        {
+            buttons_amount = buttons.length;
+        }
+        else
+        {
+            buttons_amount = Object.keys(buttons).length;
+        }
+    }
+
+    if(buttons_amount < 2)
+    {
+        return false;
+    }
+    else if(buttons_amount >= 2 && buttons_amount < 5)
+    {
+        if(window_width >= 992)
+        {
+            return false;
+        }
+    }
+    else if(buttons_amount >= 5 && buttons_amount < 8 )
+    {
+        if(window_width >= 1200)
+        {
+            return false;
+        }
+    }
+    else if(buttons_amount > 8)
+    {
+        if(window_width >= 1620)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 var guiLocalSettings = {
@@ -714,12 +773,17 @@ function openExternalLink(event)
     if(isCordova())
     {
         let url = event.target.activeElement.href;
-        if(url && url.match(window.hostname) == null)
-        {
-            window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
-            return false;
-        }
+        window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
+        event.preventDefault()
+        return false;
     }
 }
 
 window.onbeforeunload = openExternalLink;
+
+if(isCordova())
+{
+    window.onunload = function(){
+        inAppClose()
+    }
+}
