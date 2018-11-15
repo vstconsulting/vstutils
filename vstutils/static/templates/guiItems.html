@@ -181,10 +181,12 @@
 
 
 <script type="text/x-just" data-just="page_breadcrumb">
-    <ol class="breadcrumb">
-        <li><a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item" >
+            <a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a>
+        </li>
         <% for(var i in urls) { %>
-            <li <% if(i == urls.length-1) { %> class="active" <% } %> > <%= urls[i] %> </li>
+            <li class="breadcrumb-item <% if(i == urls.length-1) { %> active<% } %>"  > <%= urls[i] %> </li>
         <% } %>
     </ol>
 </script>
@@ -199,11 +201,11 @@
 
     <%[ main_content_row %>
         <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     &nbsp;
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <%= guiObj.renderAllFields(opt) %>
                     </div>
@@ -257,35 +259,39 @@
 
     <%[ page_header %>
         <section class="content-header">
-            <h1>
+            <div class="container-fluid">
+                <h1>
 
-                <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
-                    <span class="glyphicon glyphicon-arrow-left"></span>
-                </a>
+                    <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                    </a>
 
-                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
-            </h1>
-            <%* breadcrumb %>
+                    <span class="h1-header"><%= guiObj.getTitle('title') %></span>
+                </h1>
+                <%* breadcrumb %>
+            </div>
         </section>
     <%] %>
     <%* page_header %>
 
     <%[ main_content %>
         <section class="content">
-            <div class="row">
-                <div class="col-lg-12">
-                    <%[ buttons_row %>
-                        <%* buttons %>
-                    <%] %>
-                    <%* buttons_row %>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <%[ buttons_row %>
+                            <%* buttons %>
+                        <%] %>
+                        <%* buttons_row %>
+                    </div>
                 </div>
-            </div>
-            <br>
-            <div class="row">
-                <%[ main_content_row %>
+                <br>
+                <div class="row">
+                    <%[ main_content_row %>
 
-                <%] %>
-                <%* main_content_row %>
+                    <%] %>
+                    <%* main_content_row %>
+                </div>
             </div>
         </section>
     <%] %>
@@ -462,8 +468,8 @@
     <!-- entity_list -->
     <%[ main_content_row %>
         <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     <%[ search_form %>
                         <%= guiObj.renderSearchForm() %>
                     <%] %>
@@ -479,7 +485,7 @@
                     <%* pagination %>
 
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <%  if (!guiObj.model.data.results.length){ %>
                         <%[ empty_list %>
                                 <%= this.partial('items_empty_list', { }) %>
@@ -519,7 +525,7 @@
                         <%* data_list %>
                     <% } %>
                 </div>
-                <div class="box-footer clearfix">
+                <div class="card-footer clearfix">
                     <%[ action_buttons %>
                         <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
                     <%] %>
@@ -717,11 +723,11 @@
 
     <%[ main_content_row %>
         <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     &nbsp;
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <%* fields_block %>
                     </div>
@@ -755,11 +761,11 @@
     <section class="content error-as-page <% if(error){ %>error-status-<%- error.status %><% } %>">
         <div class="row">
             <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
+                <div class="card card-info">
+                    <div class="card-header with-border">
                         Error<br>
                     </div>
-                    <div class="box-body">
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-lg-12">
                                 <% if(error){ %>

@@ -114,13 +114,15 @@
                 <h1>{{ project }} documentation</h1>
         </section>
         <section class="content">
-            <div class="box box-info">
-                <div class="box-body">
-                {%- block content %}
-                    {%- block document %}
-                         {% block body %} {% endblock %}
+            <div class="container-fluid">
+                <div class="card card-info">
+                    <div class="card-body">
+                    {%- block content %}
+                        {%- block document %}
+                             {% block body %} {% endblock %}
+                        {%- endblock %}
                     {%- endblock %}
-                {%- endblock %}
+                    </div>
                 </div>
             </div>
         </section>

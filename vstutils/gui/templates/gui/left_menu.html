@@ -1,24 +1,33 @@
 {% block sidebar_menu %}
-    <li class="header">MAIN NAVIGATION</li>
-    <li id="menu-home"><a href="/#/" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> <span class="li-header-span"><i class="li-header-span-i">Home</i></span></a></li>
+
+    <li id="menu-home" class="nav-item">
+        <a href="/#/" class="nav-link" onclick="return vstGO(this.href);" >
+            <i class="nav-icon fa fa-dashboard"></i> <p><span class="li-header-span"><i class="li-header-span-i">Home</i></span></p>
+        </a>
+    </li>
     {% for item in project_menu %}
         {% if item.name %}
             {% if item.sublinks %}
-                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %}" id="menu-{{item.name|lower}}">
+                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item" id="menu-{{item.name|lower}}">
                     {% if item.url %}
-                        <a href="/#{{item.url}}" onclick="return vstGO(this.href);">
-                            <i class="{{item.span_class}}"></i> <span class="li-header-span"><i class="li-header-span-i">{{item.name|title}}</i></span>
+                        <a href="/#{{item.url}}" class="nav-link"  onclick="return vstGO(this.href);">
+                            <i class="nav-icon {{item.span_class}}"></i> <p><span class="li-header-span"><i class="li-header-span-i">{{item.name|title}}</i></span></p>
                         </a>
                     {% else %}
-                        <a><i class="{{item.span_class}}"></i> <span class="li-header-span"><i class="li-header-span-i-none">{{item.name|title}}</i></span></a>
+                        <a class="nav-link"  >
+                            <i class="nav-icon {{item.span_class}}"></i>
+                            <p>
+                                <span class="li-header-span"><i class="li-header-span-i-none">{{item.name|title}}</i></span>
+                            </p>
+                        </a>
                     {% endif %}
                     <span class="open-menu-treeview-button"><i class="fa fa-angle-left"></i></span>
-                    <ul class="menu-treeview-menu">
+                    <ul class="menu-treeview-menu nav nav-treeview">
                         {% for subitem in item.sublinks %}
                             {% if subitem.name %}
-                                <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}">
-                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" onclick="return vstGO(this.href);" >
-                                        <i class="{{subitem.span_class}}"></i> <span>{{subitem.name|title}}</span>
+                                <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}" class="nav-item">
+                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" class="nav-link" onclick="return vstGO(this.href);" >
+                                        <i class="nav-icon {{subitem.span_class}}"></i> <p><span>{{subitem.name|title}}</span></p>
                                     </a>
                                 </li>
                             {% endif %}
@@ -26,21 +35,23 @@
                     </ul>
                 </li>
             {% else %}
-                <li id="{{item.name}}">
-                    <a href="/#{% firstof item.url item.name|lower %}" onclick="return vstGO(this.href);" >
-                        <i class="{{item.span_class}}"></i>
-                        <span class="li-header-span">
-                            <i class="li-header-span-i">{{item.name|title}}</i>
-                        </span>
+                <li id="{{item.name}}" class="nav-item">
+                    <a href="/#{% firstof item.url item.name|lower %}"  class="nav-link" onclick="return vstGO(this.href);" >
+                        <i class="nav-icon {{item.span_class}}"></i>
+                        <p>
+                            <span class="li-header-span">
+                                <i class="li-header-span-i">{{item.name|title}}</i>
+                            </span>
+                        </p>
                     </a>
                 </li>
             {% endif %}
         {% endif %}
     {% endfor %}
     {% if has_docs %}
-        <li id="menu-docs">
-            <a href={% block doc_link %}"{{host_url}}/docs"{% endblock %} >
-               <i class="fa fa-book"></i> <span class="li-header-span"><i class="li-header-span-i">Documentation</i></span>
+        <li id="menu-docs" class="nav-item">
+            <a href={% block doc_link %}"{{host_url}}/docs"{% endblock %} class="nav-link" >
+               <i class="nav-icon fa fa-book"></i> <p><span class="li-header-span"><i class="li-header-span-i">Documentation</i></span></p>
             </a>
         </li>
     {% endif %}
