@@ -8,20 +8,27 @@
     {% for item in project_menu %}
         {% if item.name %}
             {% if item.sublinks %}
-                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item" id="menu-{{item.name|lower}}">
+                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item has-treeview " id="menu-{{item.name|lower}}">
                     {% if item.url %}
                         <a href="/#{{item.url}}" class="nav-link"  onclick="return vstGO(this.href);">
-                            <i class="nav-icon {{item.span_class}}"></i> <p><span class="li-header-span"><i class="li-header-span-i">{{item.name|title}}</i></span></p>
+                            <i class="nav-icon {{item.span_class}}"></i>
+                            <p>
+                                <span class="li-header-span">
+                                    <i class="li-header-span-i">{{item.name|title}}</i>
+                                </span>
+                                <i class="right fa fa-angle-left"></i>
+                            </p>
                         </a>
                     {% else %}
                         <a class="nav-link"  >
                             <i class="nav-icon {{item.span_class}}"></i>
                             <p>
                                 <span class="li-header-span"><i class="li-header-span-i-none">{{item.name|title}}</i></span>
+                                <i class="right fa fa-angle-left"></i>
                             </p>
                         </a>
                     {% endif %}
-                    <span class="open-menu-treeview-button"><i class="fa fa-angle-left"></i></span>
+
                     <ul class="menu-treeview-menu nav nav-treeview">
                         {% for subitem in item.sublinks %}
                             {% if subitem.name %}

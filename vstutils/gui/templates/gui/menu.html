@@ -16,56 +16,56 @@
             </li>
         {% endif %}
 
-        {% if user.is_active and user.is_staff %}
-            <!--<li><a href="/admin/"><i class="glyphicon glyphicon-cog"></i> <span>{% trans 'Settings' %}</span></a></li>-->
-        {% endif %}
-
         {% if user.is_authenticated %}
-            {% block profile_link %}
-                <li class="nav-item" ><a class="nav-link" href="/#profile" onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
-            {% endblock %}
 
-            <li class="nav-item for-cordova"><a class="nav-link" href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>
-            <li class="nav-item for-cordova"><a class="nav-link" href="#" onclick="inAppLogout()"><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
-            <li class="nav-item for-web logout-link"><a class="nav-link" href='{{ logout_url|default:"/logout/" }}'><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
         {% else %}
             <li class="nav-item for-web login-link"><a class="nav-link" href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-log-out"></i> <span>Login</span></a></li>
         {% endif %}
     </ul>
 
 
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
+    {% if user.is_authenticated %}
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
 
-      <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="fa fa-bell-o"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"><i class="fa fa-th-large"></i></a>
-      </li>
-    </ul>
+          <!-- Notifications Dropdown Menu -->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+              <i class="fa fa-user"></i> {{user.username}}
+              <!--<span class="badge badge-warning navbar-badge">15</span>-->
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right">
+
+                {% block profile_link %}
+                    <a href="/#profile" onclick="return spajs.openURL(this.href);" class="dropdown-item">
+                        <i class="fa fa-user mr-2"></i> {{user.first_name}} {{user.last_name}}
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+                    <a href="/#profile/settings" onclick="return spajs.openURL(this.href);" class="dropdown-item">
+                        <i class="fa fa-user mr-2"></i> Settings
+                    </a>
+                {% endblock %}
+              <div class="dropdown-divider for-cordova"></div>
+              <a  href="#" onclick="inAppClose()" class="dropdown-item for-cordova">
+                <i class="fa fa-users mr-2"></i> Close
+              </a>
+
+              <div class="dropdown-divider for-cordova"></div>
+              <a  href="#" onclick="inAppLogout()" class="dropdown-item for-cordova">
+                <i class="fa fa-users mr-2"></i> Logout
+              </a>
+
+              <div class="dropdown-divider for-web"></div>
+              <a  href="{{ logout_url|default:'/logout/' }}" class="dropdown-item for-web">
+                <i class="fa fa-users mr-2"></i> Logout
+              </a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"><i class="fa fa-th-large"></i></a>
+          </li>
+        </ul>
+    {% endif %}
 </nav>

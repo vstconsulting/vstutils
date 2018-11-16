@@ -1069,10 +1069,6 @@ table{
     .app-logo{
         display: none !important;
     }
-
-    .main-sidebar {
-        padding-top: 50px !important;
-    }
 }
 
 @media (max-width: 767px) {
