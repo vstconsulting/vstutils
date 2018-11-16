@@ -134,7 +134,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         {
             if($.isArray(value))
             {
-                return value.join()
+                return value.join(this.arr_divider || ", ");
             }
 
             return JSON.stringify(value)
@@ -609,6 +609,14 @@ guiElements.textarea = function(opt = {})
 {
     this.name = 'textarea';
     guiElements.base.apply(this, arguments)
+}
+
+guiElements.text_paragraph = function(opt = {})
+{
+    this.name = 'text_paragraph'
+    guiElements.base.apply(this, arguments)
+
+    this.arr_divider = "\n";
 }
 
 /**
