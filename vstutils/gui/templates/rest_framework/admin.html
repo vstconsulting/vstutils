@@ -34,7 +34,7 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         {% for format in available_formats %}
-                                        <li>
+                                        <li class="dropdown-item">
                                             <a class="format-option"
                                                href='{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}'
                                                rel="nofollow">

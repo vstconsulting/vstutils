@@ -36,28 +36,28 @@
 <script  type="text/x-just" style="display: none;" data-just="pagination">
     <!-- pagination -->
     <% if(totalPage > 1){ %>
-        <ul class="pagination no-margin pull-right">
+        <ul class="pagination pagination-sm no-margin pull-right">
             <% if(totalPage < 21){ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
                     <% }else{ %>
-                        <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
                     <% } %>
                 <% } %>
             <% }else{ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
                     <% }else{ %>
                         <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
                             <% if( dotShow == false){ %>
                                 <% dotShow = true %>
-                                <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
+                                <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
                             <% } %>
                         <% }else{ %>
                             <% dotShow = false %>
-                            <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                            <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
                         <% } %>
                     <% } %>
                 <% } %>
@@ -68,7 +68,7 @@
 
 <script  type="text/x-just" style="display: none;" data-just="search_field">
     <!-- searchFiled  -->
-    <div>
+    <div style="display: inline-block;  border: 1px solid #f00; background: #3336;">
         <div class="filtered-search">
             <~ guiObj.activeSearch.filters>
                 <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
@@ -161,7 +161,7 @@
                                 })
                             %>
                             >
-                            <span class="glyphicon glyphicon-search" ></span>
+                            <span class="fa fa-search" ></span>
                         </div>
                     </td>
                 </tr>
@@ -260,15 +260,21 @@
     <%[ page_header %>
         <section class="content-header">
             <div class="container-fluid">
-                <h1>
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>
 
-                    <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
-                        <span class="glyphicon glyphicon-arrow-left"></span>
-                    </a>
+                            <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
+                                <span class="fa fa-arrow-left"></span>
+                            </a>
 
-                    <span class="h1-header"><%= guiObj.getTitle('title') %></span>
-                </h1>
-                <%* breadcrumb %>
+                            <span class="h1-header"><%= guiObj.getTitle('title') %></span>
+                        </h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <%* breadcrumb %>
+                    </div>
+                </div>
             </div>
         </section>
     <%] %>
@@ -350,7 +356,7 @@
                         <% for(var k in dataLine.sublinks_l2){ %>
                             <% if(!dataLine.sublinks_l2[k].hidden) { %>
                                     <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
-                                        <li>
+                                        <li class="dropdown-item">
                                             <a
                                                 href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
                                                 onclick="return false;"
@@ -359,7 +365,7 @@
                                             </a>
                                         </li>
                                     <% } else { %>
-                                        <li <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
+                                        <li  class="dropdown-item" <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
                                             <b
                                                 class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
                                                 >
@@ -380,7 +386,7 @@
 
 <!-- Список multi_actions сущностей -->
 <script type="text/x-just" data-just="multi_actions_buttons">
-    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %> float-left" role="group">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
             <span class="caret"></span>
@@ -398,7 +404,7 @@
         <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
 
         <% if(multi_actions[k].onClick){ %>
-            <li>
+            <li class="dropdown-item">
                 <a
                     href="#"
                     class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
@@ -408,7 +414,7 @@
                 </a>
             </li>
         <% }else{ %>
-             <li>
+             <li class="dropdown-item">
                 <a
                     href="#"
                     onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- multi_actions[k].path %>'); return false;"
@@ -470,20 +476,25 @@
         <section class="col-lg-12">
             <div class="card card-info">
                 <div class="card-header with-border">
-                    <%[ search_form %>
-                        <%= guiObj.renderSearchForm() %>
-                    <%] %>
-                    <%* search_form %>
 
-                    <%[ pagination %>
-                        <% if(guiObj.getTotalPages()){ %>
-                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
-                                <%= guiObj.paginationHtml() %>
-                            </div>
-                        <% } %>
-                    <%] %>
-                    <%* pagination %>
+                    <h3 class="card-title">
+                        &nbsp;
+                    </h3>
+                    <div class="card-tools">
+                        <%[ search_form %>
+                            <%= guiObj.renderSearchForm() %>
+                        <%] %>
+                        <%* search_form %>
 
+                        <%[ pagination %>
+                            <% if(guiObj.getTotalPages()){ %>
+                                <div class="hidden-xs">
+                                    <%= guiObj.paginationHtml() %>
+                                </div>
+                            <% } %>
+                        <%] %>
+                        <%* pagination %>
+                    </div>
                 </div>
                 <div class="card-body">
                     <%  if (!guiObj.model.data.results.length){ %>
@@ -497,7 +508,7 @@
                                 <table class="table table-bordered multiple-select">
                                     <tbody>
                                         <tr>
-                                            <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                            <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
@@ -511,7 +522,7 @@
                                                 <% } %>
                                             <% } %>
                                             <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
-                                                <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
+                                                <th style="width: 120px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
                                             <% } %>
                                         </tr>
 
@@ -533,16 +544,16 @@
 
                     <% if(!query){ %>
                         <%[ select_buttons %>
-                            <div class="btn-group" role="group">
+                            <div class="btn-group float-left ml-1" role="group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Select
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li>
+                                    <li class="dropdown-item">
                                         <a class="select-all-btn" href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                                     </li>
-                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                                    <li class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
                                         <a class="unselect-all-btn"  href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                                     </li>
                                 </ul>
@@ -577,7 +588,7 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-                    <li>
+                    <li class="dropdown-item">
                         <a href="#"
                             onclick="spajs.showLoader(addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>')); return false;" >Add selected</a>
                     </li>
@@ -592,10 +603,10 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-                <li>
+                <li class="dropdown-item">
                     <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                 </li>
-                <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                <li  class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
                     <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                 </li>
             </ul>
@@ -629,7 +640,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
                         <% for(var k in opt.links){  %>
-                            <li>
+                            <li class="dropdown-item">
                                 <a
                                     href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
                                     onclick="return vstGO(this.href);"
@@ -670,7 +681,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
                         <% for(var k in opt.actions){  %>
-                            <li>
+                            <li class="dropdown-item">
                                 <a
                                     <% if (!opt.actions[k].isEmptyAction) { %>
                                         onclick="return vstGO(this.href);"

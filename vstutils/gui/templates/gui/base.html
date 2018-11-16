@@ -172,7 +172,7 @@
 
             { prioritet:4, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"},
             { prioritet:5, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js' %}?v={{gui_version}}"},
-            { prioritet:7, type:'js', name: "{% static 'AdminLTE-3.0.0/dist/js/demo.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'AdminLTE-3.0.0/dist/js/LTECustomize.js' %}?v={{gui_version}}"},
 
             { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
 
@@ -181,7 +181,7 @@
 
             { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
 
-            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/dist/js/adminlte.js' %}?v={{gui_version}}"},
+            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/dist/js/adminlte.min.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
@@ -223,7 +223,7 @@
             { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
             { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
             { prioritet:103, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}"},
-            { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
+            //{ prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
             { prioritet:105, type:'css', name: "{% static 'AdminLTE-3.0.0/dist/css/adminlte.min.css' %}?v={{gui_version}}"},
             //{ prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
             { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
@@ -373,11 +373,9 @@
                             {% block footer %}
                                 <footer class="main-footer">
 
-                                    <div class="btn-group" role="group">
-                                        <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="openHelpModal(); return false;">
-                                            <span class="glyphicon glyphicon-question-sign"></span> About
-                                        </a>
-                                    </div>
+                                    <a href="#" style="color:#ccc;" onclick="openHelpModal(); return false;">
+                                        <span class="fa fa-question-circle-o"></span> About
+                                    </a>
 
 
                                     {% block footer_buttons %}{% endblock %}
