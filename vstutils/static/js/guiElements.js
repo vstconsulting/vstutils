@@ -464,9 +464,12 @@ guiElements.enum = function(opt = {}, value)
     {
         this._onBaseRender(options)
 
-        $('#'+this.element_id).select2({
-            width: '100%',
-        });
+        if(!options.readOnly)
+        {
+            $('#'+this.element_id).select2({
+                width: '100%',
+            });
+        }
     }
 
     /**
@@ -762,7 +765,7 @@ guiElements.uptime = function (opt = {}, value)
 
         for(let i in reg_arr)
         {
-            time_parts = XRegExp.exec(value, reg_arr[i]);  
+            time_parts = XRegExp.exec(value, reg_arr[i]);
             if(time_parts != null)
             {
                 let duration_obj = {

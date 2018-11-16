@@ -356,6 +356,18 @@
             <% } %>
         </select>
     <%] %>
+
+    <%[ readonly_input %>
+        <~ guiElement.db_value>
+            <input type="text"
+                style="width: 100%;"
+                class="form-control  <%- addCssClassesToElement('field', guiElement.db_value, opt.name) %> "
+                <%- set_api_options(opt, guiElement) %>
+                id="<%- guiElement.element_id %>"
+                value="<%- guiElement.insertValue(guiElement.db_value)  %>">
+        <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
