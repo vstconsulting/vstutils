@@ -16,12 +16,19 @@
 
             <% if(opt.required){ %>gui-required<% }else{ %>gui-not-required<% } %> "
 
+            style="
+            <%[ wrapper_style %> <%] %>
+            <%* wrapper_style %>
+            "
+
             data-title="<%- opt.title || capitalizeString(opt.name) %>"
             id="gui<%- guiElement.element_id %>"
         >
 
             <%[ title %>
-                <label class="control-label"><%- opt.title || capitalizeString(opt.name) %></label>
+                 <% if(!opt.hide_title) { %>
+                    <label class="control-label"><%- opt.title || capitalizeString(opt.name) %></label>
+                 <% } %>
             <%] %>
             <%* title %>
 
@@ -504,6 +511,38 @@
     <%[ main_input %>
         <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
+    <%[ readonly_input %>
+        <~ guiElement.db_value>
+            <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= guiElement.insertValue(guiElement.db_value)%></textarea>
+        <~>
+    <%] %>
+
+    <%! guiElements.base %>
+</script>
+
+
+<!-- guiElements.text_paragraph -->
+<script type="text/x-just" data-just="guiElements.text_paragraph">
+    <!-- guiElements.text_paragraph [type=<%- opt.type %>, format=<%- opt.format %>] -->
+
+     <% if(opt.readOnly) { %>
+        <%[ wrapper_classes %>
+           col-lg-12 col-xs-12 col-sm-12 col-md-12
+        <%] %>
+    <% } %>
+
+    <%[ main_input %>
+        <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= guiElement.insertValue(value) %></textarea>
+    <%] %>
+
+    <%[ readonly_input %>
+       <~ guiElement.db_value>
+           <div>
+                <p id="<%- guiElement.element_id %>"><%= guiElement.insertValue(guiElement.db_value)%></p>
+           </div>
+       <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
