@@ -44,7 +44,7 @@ var gui_base_object = {
         this.update_timoutid = setTimeout(() =>
         {
             this.update_timoutid = undefined
-            if(!this.model.filters)
+            if(!this.model.filters || Visibility.state() == 'hidden')
             {
                 console.warn("startUpdates [no filters]")
                 this.startUpdates()
