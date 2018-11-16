@@ -787,3 +787,27 @@ if(isCordova())
         inAppClose()
     }
 }
+
+/**
+ * Function checks that all properties of object are also objects.
+ * @param obj(object) - some object
+ * @returns {boolean}
+ */
+function allPropertiesIsObjects(obj)
+{
+    for(let prop in obj)
+    {
+        if(typeof obj[prop] != 'object')
+        {
+            return false;
+        }
+        else
+        {
+            if($.isArray(obj[prop]))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}

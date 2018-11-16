@@ -13,6 +13,7 @@ window.qunitTestsArray['guiElements.baseTest'] = {
             'secretfile':{},
             'boolean':{},
             'textarea':{},
+            'text_paragraph':{},
             'hidden':{},
             'null':{},
             'integer':{                 values:[1, 0 ] },
