@@ -181,7 +181,7 @@
 
             { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
 
-            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/dist/js/adminlte.min.js' %}?v={{gui_version}}"},
+            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.min.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
@@ -224,7 +224,7 @@
             { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
             { prioritet:103, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}"},
             //{ prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
-            { prioritet:105, type:'css', name: "{% static 'AdminLTE-3.0.0/dist/css/adminlte.min.css' %}?v={{gui_version}}"},
+            { prioritet:105, type:'css', name: "{% static 'AdminLTE-3.0.0/min/css/adminlte.min.css' %}?v={{gui_version}}"},
             //{ prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
             { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
 
@@ -286,7 +286,6 @@
                               {% block logo %}
                                   <!-- Logo -->
                                   <a href="/" class="brand-link logo">
-                                      <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
                                       <span class="brand-text font-weight-light">{{ project_gui_name }}</span>
                                   </a>
                               {% endblock %}

@@ -1514,3 +1514,8 @@ table{
         padding-bottom:7px;
     }
 }
+
+
+.main-sidebar{
+    overflow: hidden;
+}
