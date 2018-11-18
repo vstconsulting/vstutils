@@ -457,6 +457,14 @@ function groupButtonsOrNot(window_width, buttons)
         {
             buttons_amount = Object.keys(buttons).length;
         }
+
+        for(let i in buttons)
+        {
+            if(buttons[i].hidden)
+            {
+                buttons_amount--;
+            }
+        }
     }
 
     if(buttons_amount < 2)
