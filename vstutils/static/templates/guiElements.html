@@ -105,11 +105,9 @@
                         </div>
                     </div>
                 <% } else { %>
-                    <div>
                         <% for(var j in guiElement.realElements[i]) { %>
                                 <%= guiElement.realElements[i][j].render() %>
                         <% } %>
-                    </div>
                 <% } %>
             <% } %>
         </div>
@@ -810,9 +808,11 @@
                             id="<%- guiElement.element_id %>"
                             <%= set_api_options(opt, guiElement) %>
                             >
-                    <span class="input-group-addon">
-                        sec
-                    </span>
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            sec
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
