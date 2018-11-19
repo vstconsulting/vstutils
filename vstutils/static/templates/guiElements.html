@@ -63,13 +63,17 @@
 
     <%[ input_addons %>
         <% if(guiElement.opt.default){ %>
-            <span class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
-                <div class="input-group-text"><span class='fa fa-repeat' ></span></div>
-            </span>
+            <div class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
+                <span class="input-group-text">
+                    <span class='fa fa-repeat' ></span>
+                </span>
+            </div>
         <% } %>
-        <span class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
-            <div class="input-group-text"><span class='fa fa-times' ></span></div>
-        </span>
+        <div class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
+            <span class="input-group-text">
+                <span class='fa fa-times' ></span>
+            </span>
+        </div>
     <%] %>
 
     <%* element %>
@@ -279,12 +283,12 @@
                 <%= justOn('change', guiElement.changeOnChangeByHands, guiElement.element_id)
                 %>
             >
-            <span class="input-group-append" id="uptime-down">
-                <div class="input-group-text"><span class="fa fa-chevron-left"></span></div>
-            </span>
-            <span class="input-group-append" id="uptime-up">
-                <div class="input-group-text"><span class="fa fa-chevron-down"></span></div>
-            </span>
+            <div class="input-group-append" id="uptime-down">
+                <span class="input-group-text"><span class="fa fa-chevron-left"></span></span>
+            </div>
+            <div class="input-group-append" id="uptime-up">
+                <span class="input-group-text"><span class="fa fa-chevron-right"></span></span>
+            </div>
         </div>
     <%] %>
 
@@ -456,8 +460,8 @@
             id="<%- guiElement.element_id %>"
             onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
             >
-            <div class="input-group-text">
-                <span class="input-group-append"
+            <div class="input-group-append">
+                <span class="input-group-text"
                     <%= justOn('click', function()
                         {
                             return spajs.showLoader(guiElement.renderModal(opt));
@@ -468,8 +472,8 @@
                     <span class='fa fa-chevron-down' ></span>
                 </span>
             </div>
-            <div class="input-group-text">
-                <span class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
+            <div class="input-group-append">
+                <span class="input-group-text" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
                     <span class='fa fa-times' ></span>
                 </span>
             </div>
