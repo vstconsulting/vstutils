@@ -1116,10 +1116,16 @@ table{
 /**
  * Фильтры для формы поиска
  **/
+
+.search-form{
+    float: left;
+    display: inline-block;
+    border: 1px solid #f00;
+    background: #3336;
+}
+
 .filtered-search{
     float: right;
-    margin-bottom: 10px;
-    margin-left: 10px;
 }
 
 .input-filter-inner{
@@ -1131,7 +1137,7 @@ table{
 }
 
 .filtered-search .active-name{
-    border-top: 1px solid #ccc;
+    /*border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     padding: 9px;
@@ -1139,23 +1145,20 @@ table{
     float: right;
     border-radius: 0;
     border-radius: 0;
-    margin: 0px;
+    margin: 0px;*/
 }
 
 .filtered-search .input-group-addon{
-    height: 40px;
+   /* height: 40px;*/
 }
 
 .filtered-search #search-query-input{
-    height: 40px;
+   /* height: 40px;*/
 }
 
 .filtered-search .input-value{
     border: 0px;
-    padding: 5px;
     display: none;
-    margin-top: 4px;
-    margin-right: 4px;
 }
 
 .filtered-search .show-input-text .value{
@@ -1168,22 +1171,12 @@ table{
 
 
 .filtered-search .name{
-    background-color: transparent;
-    color: rgb(175, 175, 175);
-    border-radius: 2px 0 0 2px;
-    margin-right: 1px;
-    font-weight: bold;
-    text-transform: capitalize;
-    padding: 9px;
-    float: left;
 }
 
 .filtered-search .value{
     color: #131313;
     border-radius: 0 2px 2px 0;
     margin-right: 5px;
-    padding-right: 8px;
-    padding: 9px;
     float: left;
 }
 
@@ -1192,33 +1185,24 @@ table{
     cursor: pointer;
 }
 
+.filtered-search .active-filter{
+    max-width: 100px;
+}
 
 .input-filter-item{
-    width: auto;
-    border: 1px solid #ccc;
-    display: inline-block;
-    margin: 0px;
-    float: right;
-    border-right: 0px;
-
-    margin-bottom: 10px;
-    border-right: 1px solid #ccc;
-    margin-left: 10px;
 }
 
 .filtered-search .search-btn{
-    height: 39px;
-    border-right: 1px solid #ccc;
 }
 
-.remove-token{
+/*.remove-token{
     float: right;
     width: 40px;
     height: 38px;
     text-align: center;
     vertical-align: middle;
     padding: 9px;
-}
+}*/
 
 @media (max-width: 768px) {
     .input-filter-item{

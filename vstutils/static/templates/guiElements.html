@@ -39,7 +39,6 @@
                     <%[ readonly_input %>
                         <~ guiElement.db_value>
                             <input type="text"
-                                style="width: 100%;"
                                 class="form-control"
                                 <%- set_api_options(opt, guiElement) %>
                                 id="<%- guiElement.element_id %>"
@@ -64,12 +63,12 @@
 
     <%[ input_addons %>
         <% if(guiElement.opt.default){ %>
-            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
-                <span class='glyphicon glyphicon-repeat' ></span>
+            <span class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
+                <div class="input-group-text"><span class='fa fa-repeat' ></span></div>
             </span>
         <% } %>
-        <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
-            <span class='glyphicon glyphicon-remove' ></span>
+        <span class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
+            <div class="input-group-text"><span class='fa fa-times' ></span></div>
         </span>
     <%] %>
 
@@ -154,14 +153,15 @@
         <div class="input-group">
             <~ guiElement.db_value>
                 <% if(guiElement.rendered && guiElement.db_value != guiElement.getValue()){ %>
-                    <span class="input-group-addon db_value_input">
-                        <%- guiElement.insertValue(guiElement.db_value) %>
-                        <i class="glyphicon glyphicon-arrow-right"></i>
+                    <span class="input-group-prepend db_value_input">
+                        <div class="input-group-text">
+                            <%- guiElement.insertValue(guiElement.db_value) %>
+                            <i class="fa fa-arrow-right"></i>
+                        </div>
                     </span>
                 <% } %>
             <~>
             <input type="<%[ input_type %>text<%] %>"
-                    style="width: 100%;"
                     class="form-control"
                     <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>"
@@ -242,7 +242,6 @@
                     class="form-control"
                     <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>
-                    style="width: 100%;"
                     class="form-control"
                     value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
         <~>
@@ -280,11 +279,11 @@
                 <%= justOn('change', guiElement.changeOnChangeByHands, guiElement.element_id)
                 %>
             >
-            <span class="input-group-addon" id="uptime-down">
-                <span class="glyphicon glyphicon-chevron-left"></span>
+            <span class="input-group-append" id="uptime-down">
+                <div class="input-group-text"><span class="fa fa-chevron-left"></span></div>
             </span>
-            <span class="input-group-addon" id="uptime-up">
-                <span class="glyphicon glyphicon-chevron-right"></span>
+            <span class="input-group-append" id="uptime-up">
+                <div class="input-group-text"><span class="fa fa-chevron-down"></span></div>
             </span>
         </div>
     <%] %>
@@ -457,20 +456,23 @@
             id="<%- guiElement.element_id %>"
             onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
             >
-
-            <span class="input-group-addon"
-                <%= justOn('click', function()
-                    {
-                        return spajs.showLoader(guiElement.renderModal(opt));
-                    })
-                %>
-                style="cursor: pointer;"
-            >
-                <span class='glyphicon glyphicon-chevron-down' ></span>
-            </span>
-            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
-                <span class='glyphicon glyphicon-remove' ></span>
-            </span>
+            <div class="input-group-text">
+                <span class="input-group-append"
+                    <%= justOn('click', function()
+                        {
+                            return spajs.showLoader(guiElement.renderModal(opt));
+                        })
+                    %>
+                    style="cursor: pointer;"
+                >
+                    <span class='fa fa-chevron-down' ></span>
+                </span>
+            </div>
+            <div class="input-group-text">
+                <span class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
+                    <span class='fa fa-times' ></span>
+                </span>
+            </div>
         </div>
     <%] %>
     <%! guiElements.base %>
@@ -482,13 +484,13 @@
     <!-- guiElements.file -->
     <%[ main_input %>
         <span id="deleteFileId_<%- guiElement.element_id %>" onclick="$('#fileContent_<%- guiElement.element_id %>').val('');" class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'>
-            <span class='glyphicon glyphicon-remove'>
+            <span class='fa fa-times'>
             </span>
         </span>
 
         <span id="<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'>
             <input type='file' class='input-file' <%= justOn('change', ()=>{ guiElement.readFile(event, '#fileContent_' + guiElement.element_id); return false; }, guiElement.element_id) %> >
-            <span class='glyphicon glyphicon-file'>
+            <span class='fa fa-file-text-o'>
             </span>
         </span>
         <textarea placeholder='Enter value' <%- set_api_options(opt, guiElement) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
@@ -580,8 +582,8 @@
                             value="<%- guiElement.insertValue(value) %>"
                             id="<%- guiElement.element_id %>"
                             >
-                    <span class="input-group-addon" onclick="$('#guiElement-gui').toggle();" >
-                        <span class="glyphicon glyphicon-pencil"></span>
+                    <span class="input-group-append" onclick="$('#guiElement-gui').toggle();" >
+                        <div class="input-group-text"><span class="fa fa-pencil"></span></div>
                     </span>
                 </div>
             </div>
@@ -591,8 +593,8 @@
 
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Minutes
                         <span class="caret"></span>
                     </button>
@@ -636,8 +638,8 @@
 
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Hours
                         <span class="caret"></span>
                     </button>
@@ -681,8 +683,8 @@
 
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Day of Month
                         <span class="caret"></span>
                     </button>
@@ -723,8 +725,8 @@
 
             <div class="form-group col-lg-3 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Months
                         <span class="caret"></span>
                     </button>
@@ -761,8 +763,8 @@
 
             <div class="form-group col-lg-3 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Days of Week
                         <span class="caret"></span>
                     </button>
@@ -808,11 +810,9 @@
                             id="<%- guiElement.element_id %>"
                             <%= set_api_options(opt, guiElement) %>
                             >
-                    <div class="input-group-append">
-                        <span class="input-group-text">
-                            sec
-                        </span>
-                    </div>
+                    <span class="input-group-append">
+                        <div class="input-group-text">sec</div>
+                    </span>
                 </div>
             </div>
         </div>
@@ -829,8 +829,8 @@
                                 id="<%- guiElement.element_id %>"
                                 <%= set_api_options(opt, guiElement) %>
                                 >
-                        <span class="input-group-addon">
-                            sec
+                        <span class="input-group-append">
+                            <div class="input-group-text">sec</div>
                         </span>
                     </div>
                 </div>
