@@ -49,7 +49,7 @@ guiSkins.base = function(value){
     {
         this.setValue(this.loadSettings())
         this.initFormOptions()
-        
+
         this.customizerForm = new guiElements.form(undefined, this.options);
     }
 
@@ -68,7 +68,7 @@ guiSkins.base = function(value){
                 apply:{
                     title:'Apply',
                     text:'Apply',
-                    format:'button',
+                    format:'formButton',
                     type: "string",
                     onclick:() => {
                         this.applySettings()
@@ -77,7 +77,7 @@ guiSkins.base = function(value){
                 save:{
                     title:'Save',
                     text:'Save',
-                    format:'button',
+                    format:'formButton',
                     type: "string",
                     onclick:() => {
                         this.applySettings()

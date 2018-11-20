@@ -1521,3 +1521,10 @@ table{
     border-color: var(--action-bg-color);
     color: var(--action-color);
 }
+
+
+.guiCustomizer .gui-element{
+    width: 100%;
+    max-width: 100%;
+    flex: auto;
+}

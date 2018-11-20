@@ -9,6 +9,7 @@
             <%] %>
             <%* wrapper_classes %>
 
+            gui-element
             gui-element-<%- guiElement.name %>
             gui-field-<%- opt.name %>
 
@@ -353,6 +354,7 @@
         id="<%- guiElement.element_id %>"
         type="button"
         class="
+                gui-element
                 gui-element-<%- guiElement.name %>
                 <% if(typeof opt.class == 'function'){ %>
                     <%- opt.class.apply(guiElement, [opt]) %>
