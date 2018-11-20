@@ -11,7 +11,8 @@
     <script src="{% static_path 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"></script>
 
     <!-- Bootstrap 3.3.6 -->
-    <script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+    <!--<script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>-->
+    <script defer src="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"></script>
 {% endblock %}
 
 {% block bootstrap_theme %}
@@ -57,7 +58,7 @@
             {% block description %}
                 {% if not description == "<p></p>" %}
                     <small>
-                        <a class="glyphicon glyphicon-question-sign help-popover"
+                        <a class="fa fa-question-circle help-popover"
                            data-container="body" data-toggle="popover"
                            data-placement="right" data-content="{{ description }}">
                         </a>
