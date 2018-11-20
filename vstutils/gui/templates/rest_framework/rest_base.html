@@ -11,7 +11,8 @@
     <script src="{% static_path 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"></script>
 
     <!-- Bootstrap 3.3.6 -->
-    <script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+    <!--<script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>-->
+    <script defer src="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"></script>
 {% endblock %}
 
 {% block bootstrap_theme %}
@@ -52,32 +53,37 @@
             </small>
         </h1>-->
         {% endcomment %}
-        <h1>
-            {% if name %}{{ name }}{% endif %}
-            {% block description %}
-                {% if not description == "<p></p>" %}
-                    <small>
-                        <a class="glyphicon glyphicon-question-sign help-popover"
-                           data-container="body" data-toggle="popover"
-                           data-placement="right" data-content="{{ description }}">
-                        </a>
-                    </small>
-                {% endif %}
-            {% endblock %}
-        </h1>
-
-        <ol class="breadcrumb">
-            {% block breadcrumbs %}
-            <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
-            {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
-                {% if forloop.last %}
-                <li class="active"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
-                {% else %}
-                <li><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
-                {% endif %}
-            {% endfor %}
-            {% endblock %}
-        </ol>
+        <div class="row">
+            <div class="col-sm-6">
+                <h1>
+                    {% if name %}{{ name }}{% endif %}
+                    {% block description %}
+                        {% if not description == "<p></p>" %}
+                            <small>
+                                <a class="fa fa-question-circle help-popover"
+                                   data-container="body" data-toggle="popover"
+                                   data-placement="right" data-content="{{ description }}">
+                                </a>
+                            </small>
+                        {% endif %}
+                    {% endblock %}
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    {% block breadcrumbs %}
+                    <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+                    {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+                        {% if forloop.last %}
+                        <li class="breadcrumb-item active"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
+                        {% else %}
+                        <li class="breadcrumb-item"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% endblock %}
+                </ol>
+            </div>
+        </div>
     </section>
 
     <section class="content">
@@ -138,7 +144,7 @@
 
                     {% if filter_form %}
                     <button style="float: right; margin-right: 10px" data-toggle="modal" data-target="#filtersModal" class="btn btn-default">
-                        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                        <span class="fa fa-wrench" aria-hidden="true"></span>
                         {% trans "Filters" %}
                     </button>
                     {% endif %}
@@ -175,11 +181,11 @@
                     <div {% if post_form %}class="tabbable"{% endif %}>
                         {% if post_form %}
                         <ul class="nav nav-tabs form-switcher">
-                            <li>
-                                <a name='html-tab' href="#post-object-form" data-toggle="tab">HTML form</a>
+                            <li class="nav-item">
+                                <a class="nav-link" name='html-tab' href="#post-object-form" data-toggle="tab">HTML form</a>
                             </li>
-                            <li>
-                                <a name='raw-tab' href="#post-generic-content-form" data-toggle="tab">Raw data</a>
+                            <li class="nav-item">
+                                <a class="nav-link" name='raw-tab' href="#post-generic-content-form" data-toggle="tab">Raw data</a>
                             </li>
                         </ul>
                         {% endif %}
@@ -221,11 +227,11 @@
                     <div {% if put_form %}class="tabbable"{% endif %}>
                         {% if put_form %}
                         <ul class="nav nav-tabs form-switcher">
-                            <li>
-                                <a name='html-tab' href="#put-object-form" data-toggle="tab">HTML form</a>
+                            <li class="nav-item">
+                                <a class="nav-link" name='html-tab' href="#put-object-form" data-toggle="tab">HTML form</a>
                             </li>
-                            <li>
-                                <a  name='raw-tab' href="#put-generic-content-form" data-toggle="tab">Raw data</a>
+                            <li class="nav-item">
+                                <a class="nav-link" name='raw-tab' href="#put-generic-content-form" data-toggle="tab">Raw data</a>
                             </li>
                         </ul>
                         {% endif %}
