@@ -367,6 +367,12 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.onChange_calls.push(callback)
     }
 
+    if(this.opt.onchange)
+    {
+        this.addOnChangeCallBack(this.opt.onchange)
+    }
+
+
     this._callAllonChangeCallback = function()
     {
         let val = this.getValue()
@@ -762,7 +768,7 @@ guiElements.uptime = function (opt = {}, value)
 
         for(let i in reg_arr)
         {
-            time_parts = XRegExp.exec(value, reg_arr[i]);  
+            time_parts = XRegExp.exec(value, reg_arr[i]);
             if(time_parts != null)
             {
                 let duration_obj = {
@@ -2548,6 +2554,84 @@ guiElements.crontab = function (opt = {}, value)
             + " " + this.model.DaysOfWeekStr;
 
         $("#"+this.element_id).val(this.value)
+    }
+}
+
+guiElements.form = function(opt = {}, value, parent_object)
+{
+    this.name = 'form'
+    guiElements.base.apply(this, arguments)
+
+    this.realElements = {};
+
+    this.prepareFieldOptions = function(field)
+    {
+        if(field.enum)
+        {
+            field.format = "enum"
+        }
+
+        return field
+    }
+
+    this.setValue = function(value)
+    {
+        this.value = value
+        let realElements = {};
+        if(value.form)
+        {
+            for(let i in value.form)
+            {
+                let field = value.form[i]
+                field.name = i
+
+                field = this.prepareFieldOptions(field)
+                let type = getFieldType(field)
+
+                realElements[i] = new guiElements[type]($.extend(true, {}, field), field.value);
+            }
+        }
+
+        this.realElements = realElements
+    }
+
+    if(opt.form && !value)
+    {
+        this.setValue(opt)
+    }
+    else
+    {
+        this.setValue(value)
+    }
+
+    this.insertTestValue = function(value)
+    {
+        this.setValue(value);
+        return value;
+    }
+
+    this.getValue = function()
+    {
+        let valueObj = {};
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValue();
+        }
+
+        return this.reductionToType(valueObj);
+    }
+
+    this.getValidValue = function()
+    {
+        let valueObj = {};
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValidValue();
+        }
+
+        return this.reductionToType(valueObj);
     }
 }
 

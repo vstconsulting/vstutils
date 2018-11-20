@@ -716,7 +716,7 @@
         <% } %>
 
         <% if(guiObj.api.canDelete){ %>
-            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="fa fa-times"></span> <span class="d-none d-lg-block">Remove</span>'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="fa fa-times"></span> <span class="d-none d-lg-inline-block">Remove</span>'}).render() %>
         <% } %>
 
         <%* buttons %>

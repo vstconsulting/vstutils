@@ -1482,3 +1482,16 @@ table{
 .main-sidebar{
     overflow: hidden;
 }
+
+
+.gui-skin-dark{
+
+}
+.gui-skin-dark .main-header{
+    background-color: #828282 !important;
+}
+
+
+.gui-skin-light{
+
+}
