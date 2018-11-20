@@ -521,7 +521,7 @@ table{
 
 @media (min-width: 992px) {
     .h1-header{
-        display: inline-table;
+        /*display: inline-table;*/
         max-width: calc(100% - 440px);
     }
 }
@@ -1468,9 +1468,34 @@ table{
 }
 
 .content-wrapper, .right-side {
-    /*min-height: 100%;*/
     background-color: #ecf0f5;
     z-index: 800;
+    min-height: calc(100vh - 112px);
+}
+
+.breadcrumb {
+    font-size: 14px;
+}
+
+.breadcrumb>li.breadcrumb-item>a {
+    color: #444;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.breadcrumb>li.breadcrumb-item.active>a{
+    color: #777;
+}
+
+
+@media (max-width: 991px) {
+
+    .breadcrumb {
+        margin-top: 15px;
+        width: 100%;
+        background-color: #d2d6de!important;
+        padding: 5px 10px!important;
+    }
 }
 
 .modal .btn-default.btn-primary {
@@ -1494,7 +1519,7 @@ table{
     border: 1px solid #e3e3e3;
     border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
-     box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
 }
 
 .fields-block {
@@ -1514,8 +1539,8 @@ table{
 }
 
 .gui-skin-dark {
-  --action-bg-color: #ffeebc;
-  --action-color: #474f57;
+    --action-bg-color: #ffeebc;
+    --action-color: #474f57;
 }
 
 .gui-skin-dark .btn-action{
