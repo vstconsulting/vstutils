@@ -1510,3 +1510,14 @@ table{
 .gui-skin-light{
 
 }
+
+.gui-skin-dark {
+  --action-bg-color: #ffeebc;
+  --action-color: #474f57;
+}
+
+.gui-skin-dark .btn-action{
+    background-color: var(--action-bg-color);
+    border-color: var(--action-bg-color);
+    color: var(--action-color);
+}

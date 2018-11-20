@@ -450,12 +450,12 @@
                     <a
                         href="<%- vstMakeLocalUrl([opt.base_path, guiObj.api.actions[k].name]) %>"
                         onclick="return vstGO(this.href);"
-                        class="btn btn-warning sublink-btn hidden-<%- guiObj.api.actions[k].hidden %> sublink-btn-<%- guiObj.api.actions[k].name %>"
+                        class="btn btn-warning btn-action sublink-btn hidden-<%- guiObj.api.actions[k].hidden %> sublink-btn-<%- guiObj.api.actions[k].name %>"
                     >
                     <%- guiObj.api.actions[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action', title:k, text:k}).render() %>
                 <% } %>
         <% } %>
     <%] %>
@@ -664,15 +664,15 @@
                             <a
                                 href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
                                 onclick="return vstGO(this.href);"
-                                class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
+                                class="btn btn-warning btn-action sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
                             >
                             <%- opt.actions[k].name.replace('_', ' ') %>
                             </a>
                         <% } else { %>
                             <% if(opt.actions[k].hidden) { %>
-                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary hidden-true', title:k, text:k}).render() %>
+                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action hidden-true', title:k, text:k}).render() %>
                             <% } else { %>
-                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action', title:k, text:k}).render() %>
                             <% } %>
                         <% } %>
                 <% } %>
