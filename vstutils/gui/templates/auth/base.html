@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block login_body %}
-     <div class="login-box-body">
+     <div class="login-box-body rounded">
         <p class="login-box-msg">Sign in to start your session</p>
 
         <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;">
@@ -20,15 +20,15 @@
                 <div class="row">
                     {% if metadata.HTTP_X_CORDOVA_APP %}
                         <div class="col-xs-8">
-                            <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                         </div>
 
                         <div class="col-xs-4 for-cordova">
-                            <button type="button" onclick="window.parent.inAppClose(); return false;" class="btn btn-default btn-block btn-flat">Cancel</button>
+                            <button type="button" onclick="window.parent.inAppClose(); return false;" class="btn btn-default btn-block">Cancel</button>
                         </div>
                     {% else %}
                         <div class="col-xs-4">
-                            <button type="submit" class="btn btn-primary btn-block btn-flat" id="login_button">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block" id="login_button">Sign In</button>
                         </div>
                     {% endif %}
                 </div>

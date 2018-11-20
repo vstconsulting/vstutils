@@ -1481,3 +1481,39 @@ table{
 .main-sidebar{
     overflow: hidden;
 }
+
+.iziToast,
+.iziModal .iziModal-header-subtitle,
+.iziModal .iziModal-header-title {
+    font-family: 'Source Sans Pro','Lato',Tahoma,Arial;
+}
+
+.content-wrapper, .right-side {
+    /*min-height: 100%;*/
+    background-color: #ecf0f5;
+    z-index: 800;
+}
+
+.modal .btn-default.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    box-shadow: 0 1px 1px rgba(0,0,0,.075);
+}
+
+.modal .btn-default.btn-primary:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.well {
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    background-color: #f7f7f9;
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+     box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+}
