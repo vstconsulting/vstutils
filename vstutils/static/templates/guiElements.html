@@ -64,13 +64,13 @@
 
     <%[ input_addons %>
         <% if(guiElement.opt.default){ %>
-            <div class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
+            <div class="input-group-append guiElement-revert-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>'); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
                 <span class="input-group-text">
                     <span class='fa fa-repeat' ></span>
                 </span>
             </div>
         <% } %>
-        <div class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
+        <div class="input-group-append guiElement-clear-addon" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
             <span class="input-group-text">
                 <span class='fa fa-times' ></span>
             </span>
@@ -153,7 +153,7 @@
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">
     <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
-
+    <%[ input_type %>text<%] %>
     <%[ main_input %>
         <div class="input-group">
             <~ guiElement.db_value>
@@ -166,7 +166,7 @@
                     </span>
                 <% } %>
             <~>
-            <input type="<%[ input_type %>text<%] %>"
+            <input type="<%* input_type %>"
                     class="form-control"
                     <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>"
@@ -341,6 +341,20 @@
 </script>
 
 <!-- guiElements.password -->
+<script type="text/x-just" data-just="guiElements.color">
+    <!-- guiElements.color -->
+    <%[ input_type %>color<%] %>
+
+
+    <%[ readonly_input %>
+        <%* main_input %>
+    <%] %>
+
+
+    <%! guiElements.string %>
+</script>
+
+<!-- guiElements.password -->
 <script type="text/x-just" data-just="guiElements.password">
     <!-- guiElements.password -->
     <%[ input_type %>password<%] %>
@@ -400,6 +414,18 @@
             <% } %>
         </select>
     <%] %>
+
+    <%[ readonly_input %>
+        <~ guiElement.db_value>
+            <input type="text"
+                style="width: 100%;"
+                class="form-control  <%- addCssClassesToElement('field', guiElement.db_value, opt.name) %> "
+                <%- set_api_options(opt, guiElement) %>
+                id="<%- guiElement.element_id %>"
+                value="<%- guiElement.insertValue(guiElement.db_value)  %>">
+        <~>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 

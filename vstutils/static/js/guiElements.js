@@ -238,8 +238,8 @@ guiElements.base = function(opt = {}, value, parent_object)
         if(options.onclick)
         {
             let thisObj = this;
-            $('#'+this.element_id).on('click', false, function(){
-
+            $('#'+this.element_id).on('click', false, function()
+            { 
                 if(thisObj.blocked)
                 {
                     return false;
@@ -429,6 +429,12 @@ guiElements.string = function()
     guiElements.base.apply(this, arguments)
 }
 
+guiElements.color = function()
+{
+    this.name = 'color'
+    guiElements.base.apply(this, arguments)
+}
+
 guiElements.named_template = function()
 {
     this.name = 'named_template'
@@ -470,9 +476,12 @@ guiElements.enum = function(opt = {}, value)
     {
         this._onBaseRender(options)
 
-        $('#'+this.element_id).select2({
-            width: '100%',
-        });
+        if(!options.readOnly)
+        {
+            $('#'+this.element_id).select2({
+                width: '100%',
+            });
+        }
     }
 
     /**

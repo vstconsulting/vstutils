@@ -475,6 +475,14 @@ function groupButtonsOrNot(window_width, buttons)
         {
             buttons_amount = Object.keys(buttons).length;
         }
+
+        for(let i in buttons)
+        {
+            if(buttons[i].hidden)
+            {
+                buttons_amount--;
+            }
+        }
     }
 
     if(buttons_amount < 2)
@@ -828,4 +836,28 @@ function allPropertiesIsObjects(obj)
         }
     }
     return true;
+}
+
+/**
+ * @param {type} f
+ * @param {type} ms
+ * @returns {Function}
+ * @see https://learn.javascript.ru/task/debounce
+ */
+function debounce(f, ms) {
+
+  let timer = null;
+
+  return function (...args) {
+    const onComplete = () => {
+      f.apply(this, args);
+      timer = null;
+    }
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    timer = setTimeout(onComplete, ms);
+  };
 }

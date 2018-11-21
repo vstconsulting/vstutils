@@ -13,7 +13,7 @@ guiSkins.base = function(value){
     }
 
     this.activate = function(){
-        this.setValue(this.loadSettings())
+        //this.setValue(this.loadSettings())
         this.replaceCss(this.getCss())
     }
 
@@ -26,7 +26,7 @@ guiSkins.base = function(value){
         return this.value.custom_style
     }
 
-    this.saveSettings = function(){
+    this.saveSettings = function(){ 
         guiLocalSettings.set(this.name+"_settings", this.value)
     }
 
@@ -101,10 +101,10 @@ guiSkins.base = function(value){
     }
 }
 
-guiSkins.light = function(){
+guiSkins.default = function(){
     guiSkins.base.apply(this, arguments)
-    this.title = 'Light'
-    this.name = 'light'
+    this.title = 'Default'
+    this.name = 'default'
 
     this.init()
 }
@@ -113,6 +113,223 @@ guiSkins.dark = function(){
     guiSkins.base.apply(this, arguments)
     this.title = 'Dark'
     this.name = 'dark'
+
+    this.getCss = function(){
+        let css = ""
+
+        let color_vars = []
+
+        for(let i in this.options.form)
+        {
+            if(!this.options.form[i].color_var)
+            {
+                continue;
+            }
+
+            if(!this.value[i])
+            {
+                continue;
+            }
+
+            color_vars.push(this.options.form[i].color_var+":"+this.value[i])
+        }
+
+        css += ".gui-skin-dark{"+color_vars.join(';\n')+"}"
+        css = css + "\n" + this.value.custom_style
+
+        return css
+    }
+
+    this.initFormOptions = function()
+    {
+        this.options = {
+            form:{
+                menu_active_bg_color:{
+                    color_var:"--menu-active-bg-color",
+                    title:'Active menu background',
+                    format:'color',
+                    type: "string",
+                    default:"#0ca4ba",
+                    value:this.value.menu_active_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                content_wrapper:{
+                    color_var:"--content-wrapper",
+                    title:'Body background',
+                    format:'color',
+                    type: "string",
+                    default:"#515151",
+                    value:this.value.content_wrapper,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                main_header_bg_color:{
+                    color_var:"--main-header-bg-color",
+                    title:'Top navigation background',
+                    format:'color',
+                    type: "string",
+                    default:"#828282",
+                    value:this.value.main_header_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                main_border_color:{
+                    color_var:"--main-border-color",
+                    title:'Top navigation border',
+                    format:'color',
+                    type: "string",
+                    default:"#1f2d3d",
+                    value:this.value.main_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_default_bg_color:{
+                    color_var:"--btn-default-bg-color",
+                    title:'Buttons background',
+                    format:'color',
+                    type: "string",
+                    default:"#7e7e7e",
+                    value:this.value.btn_default_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_default_color:{
+                    color_var:"--btn-default-color",
+                    title:'Buttons text',
+                    format:'color',
+                    type: "string",
+                    default:"#e3e3e3",
+                    value:this.value.btn_default_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_default_border_color:{
+                    color_var:"--btn-default-border-color",
+                    title:'Buttons border',
+                    format:'color',
+                    type: "string",
+                    default:"#5f5f5f",
+                    value:this.value.btn_default_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                action_bg_color:{
+                    color_var:"--action-bg-color",
+                    title:'Action buttons background',
+                    format:'color',
+                    type: "string",
+                    default:"#ffeebc",
+                    value:this.value.action_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                action_color:{
+                    color_var:"--action-color",
+                    title:'Action buttons color',
+                    format:'color',
+                    type: "string",
+                    default:"#474f57",
+                    value:this.value.action_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                a_color:{
+                    color_var:"--a-color",
+                    title:'Links',
+                    format:'color',
+                    type: "string",
+                    default:"#97b8cc",
+                    value:this.value.a_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                card_header_bg_color:{
+                    color_var:"--card-header-bg-color",
+                    title:'Card header background',
+                    format:'color',
+                    type: "string",
+                    default:"#17a2b8",
+                    value:this.value.card_header_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                card_body_bg_color:{
+                    color_var:"--card-body-bg-color",
+                    title:'Card body background',
+                    format:'color',
+                    type: "string",
+                    default:"#6c6c6c",
+                    value:this.value.card_body_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                control_label_color:{
+                    color_var:"--control-label-color",
+                    title:'Labels',
+                    format:'color',
+                    type: "string",
+                    default:"#d9d9d9",
+                    value:this.value.control_label_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                help_block_color:{
+                    color_var:"--help-block-color",
+                    title:'Help content',
+                    format:'color',
+                    type: "string",
+                    default:"#a3a3a3",
+                    value:this.value.help_block_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                custom_style:{
+                    title:'Custom CSS',
+                    format:'textarea',
+                    type: "string",
+                    value:this.value.custom_style,
+                    onchange:() => {
+                    },
+                },
+                apply:{
+                    title:'Apply',
+                    text:'Apply',
+                    format:'formButton',
+                    type: "string",
+                    onclick:() => {
+                        this.applySettings()
+                    },
+                },
+                save:{
+                    title:'Save',
+                    text:'Save',
+                    format:'formButton',
+                    type: "string",
+                    onclick:() => {
+                        this.applySettings()
+                        this.saveSettings()
+                    },
+                },
+            },
+        }
+
+        return this.options
+    }
 
     this.init()
 }
@@ -200,5 +417,6 @@ guiCustomizer.render = function()
 tabSignal.connect("webGui.start", function()
 {
     guiCustomizer.setSkin(guiLocalSettings.get('skin'))
+    guiCustomizer.render();
 })
 
