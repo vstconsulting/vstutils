@@ -6,7 +6,7 @@
 
     <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i></a>
+            <a class="nav-link" onclick="saveHideMenuSettings()" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i></a>
         </li>
         {% if user.is_authenticated %}
             <li class="nav-item for-web api-link" >

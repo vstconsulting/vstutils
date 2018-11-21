@@ -144,7 +144,7 @@ guiElements.base = function(opt = {}, value, parent_object)
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -482,7 +482,7 @@ guiElements.enum = function(opt = {}, value)
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -511,7 +511,7 @@ guiElements.file = function(opt = {})
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -544,7 +544,7 @@ guiElements.boolean = function()
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -557,6 +557,25 @@ guiElements.boolean = function()
 
         $("#"+this.element_id).removeClass('selected')
         return false
+    }
+
+    /**
+     * Function is supposed to be called from guiElement template
+     * to make a decision about adding selected CSS class or not.
+     */
+    this.setSelectedOrNot = function(value, opt)
+    {
+        if(value !== undefined)
+        {
+            return value;
+        }
+
+        if(opt && opt.default)
+        {
+            return opt.default;
+        }
+
+        return false;
     }
 }
 
@@ -2043,7 +2062,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     });
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function()

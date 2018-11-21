@@ -413,7 +413,7 @@ window.onresize=function ()
 {
     window.current_window_width = window.innerWidth;
 
-    if(window.innerWidth>767)
+    if(window.innerWidth>991)
     {
         if(guiLocalSettings.get('hideMenu'))
         {
@@ -428,6 +428,24 @@ window.onresize=function ()
     {
         if ($("body").hasClass('sidebar-collapse')){
             $("body").removeClass('sidebar-collapse');
+        }
+    }
+}
+
+/**
+ * Function is supposed to be called when push-menu button was clicked.
+ */
+function saveHideMenuSettings()
+{
+    if(window.innerWidth > 991)
+    {
+        if($('body').hasClass('sidebar-collapse'))
+        {
+            guiLocalSettings.set('hideMenu', false);
+        }
+        else
+        {
+            guiLocalSettings.set('hideMenu', true);
         }
     }
 }
