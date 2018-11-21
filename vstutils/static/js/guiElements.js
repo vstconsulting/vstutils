@@ -429,6 +429,12 @@ guiElements.string = function()
     guiElements.base.apply(this, arguments)
 }
 
+guiElements.color = function()
+{
+    this.name = 'color'
+    guiElements.base.apply(this, arguments)
+}
+
 guiElements.named_template = function()
 {
     this.name = 'named_template'
