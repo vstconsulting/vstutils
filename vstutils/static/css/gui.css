@@ -1193,6 +1193,7 @@ table{
     .filtered-search-input{
         margin-bottom: 7px;
         padding-right: 0px;
+        min-width: 100%;
     }
 
     .filtered-search-form{
