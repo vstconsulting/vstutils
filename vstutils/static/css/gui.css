@@ -1446,7 +1446,8 @@ table{
 
 }
 
-.hidden-true{
+.hidden-true,
+.open>.dropdown-menu .hidden-true {
     display: none;
 }
 

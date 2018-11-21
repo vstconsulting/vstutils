@@ -476,9 +476,12 @@ guiElements.enum = function(opt = {}, value)
     {
         this._onBaseRender(options)
 
-        $('#'+this.element_id).select2({
-            width: '100%',
-        });
+        if(!options.readOnly)
+        {
+            $('#'+this.element_id).select2({
+                width: '100%',
+            });
+        }
     }
 
     /**

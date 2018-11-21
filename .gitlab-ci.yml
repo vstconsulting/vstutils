@@ -23,7 +23,15 @@ stages:
   script:
    - tox -e $TOX_ENVS $TOX_ARGS
   except:
+    refs:
     - tags
+    changes:
+    - vstutils/static/*
+    - vstutils/templates/*
+    - vstutils/gui/templates/*
+    - vstutils/settings.ini
+    - README.rst
+    - LICENSE
   retry: 2
 
 
@@ -61,7 +69,11 @@ pages:
     paths:
     - public
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - doc/*
+      - vstutils/doc_themes/*
 
 release_pypi:
   stage: release
