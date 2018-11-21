@@ -2,7 +2,7 @@
 
     <li id="menu-home" class="nav-item">
         <a href="/#/" class="nav-link" onclick="return vstGO(this.href);" >
-            <i class="nav-icon fa fa-dashboard"></i> <p><span class="li-header-span"><i class="li-header-span-i">Home</i></span></p>
+            <i class="nav-icon fa fa-dashboard ico-menu"></i> <p><span class="li-header-span"><i class="li-header-span-i menu-text-data">Home</i></span></p>
         </a>
     </li>
     {% for item in project_menu %}
@@ -11,20 +11,20 @@
                 <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item has-treeview " id="menu-{{item.name|lower}}">
                     {% if item.url %}
                         <a href="/#{{item.url}}" class="nav-link"  onclick="return vstGO(this.href);">
-                            <i class="nav-icon {{item.span_class}}"></i>
+                            <i class="nav-icon {{item.span_class}} ico-menu"></i>
                             <p>
                                 <span class="li-header-span">
-                                    <i class="li-header-span-i">{{item.name|title}}</i>
+                                    <i class="li-header-span-i menu-text-data">{{item.name|title}}</i>
                                 </span>
-                                <i class="right fa fa-angle-left"></i>
+                                <i class="right fa fa-angle-left ico-menu"></i>
                             </p>
                         </a>
                     {% else %}
                         <a class="nav-link"  >
-                            <i class="nav-icon {{item.span_class}}"></i>
+                            <i class="nav-icon {{item.span_class}} ico-menu"></i>
                             <p>
-                                <span class="li-header-span"><i class="li-header-span-i-none">{{item.name|title}}</i></span>
-                                <i class="right fa fa-angle-left"></i>
+                                <span class="li-header-span"><i class="li-header-span-i-none menu-text-data">{{item.name|title}}</i></span>
+                                <i class="right fa fa-angle-left ico-menu"></i>
                             </p>
                         </a>
                     {% endif %}
@@ -34,7 +34,7 @@
                             {% if subitem.name %}
                                 <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}" class="nav-item">
                                     <a href="/#{% firstof subitem.url subitem.name|lower %}" class="nav-link" onclick="return vstGO(this.href);" >
-                                        <i class="nav-icon {{subitem.span_class}}"></i> <p><span>{{subitem.name|title}}</span></p>
+                                        <i class="nav-icon {{subitem.span_class}} ico-menu"></i> <p><span class="menu-text-data">{{subitem.name|title}}</span></p>
                                     </a>
                                 </li>
                             {% endif %}
@@ -44,10 +44,10 @@
             {% else %}
                 <li id="{{item.name}}" class="nav-item">
                     <a href="/#{% firstof item.url item.name|lower %}"  class="nav-link" onclick="return vstGO(this.href);" >
-                        <i class="nav-icon {{item.span_class}}"></i>
+                        <i class="nav-icon {{item.span_class}} ico-menu"></i>
                         <p>
                             <span class="li-header-span">
-                                <i class="li-header-span-i">{{item.name|title}}</i>
+                                <i class="li-header-span-i menu-text-data">{{item.name|title}}</i>
                             </span>
                         </p>
                     </a>
@@ -58,7 +58,7 @@
     {% if has_docs %}
         <li id="menu-docs" class="nav-item">
             <a href={% block doc_link %}"{{host_url}}/docs"{% endblock %} class="nav-link" >
-               <i class="nav-icon fa fa-book"></i> <p><span class="li-header-span"><i class="li-header-span-i">Documentation</i></span></p>
+               <i class="nav-icon fa fa-book ico-menu"></i> <p><span class="li-header-span"><i class="li-header-span-i menu-text-data">Documentation</i></span></p>
             </a>
         </li>
     {% endif %}

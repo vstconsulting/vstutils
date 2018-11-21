@@ -379,7 +379,7 @@
                             {% block footer %}
                                 <footer class="main-footer">
 
-                                    <a href="#" onclick="openHelpModal(); return false;">
+                                    <a href="#" onclick="openHelpModal(); return false;" class="help-text-data">
                                         <span class="fa fa-question-circle"></span> About
                                     </a>
 
@@ -393,7 +393,7 @@
                                     {% if debug %}
                                         <div class="pull-right">
                                             <b><a href="#"
-                                                  style="color:#ccc;"
+                                                class="help-text-data"
                                                   onclick="loadQUnitTests(); return false;" >Test qUnit</a></b>
                                             &nbsp;&nbsp;&nbsp;
                                         </div>
@@ -402,7 +402,7 @@
                                         <a
                                                 href="#"
                                                 onclick="window.guiFilesCache.deleteAllCache(); return false;"
-                                                style="color:#ccc;"
+                                                class="help-text-data"
                                                 >Reload cache</a>
                                         &nbsp;&nbsp;&nbsp;
                                     </div>

@@ -344,7 +344,7 @@ div.spinner div.bar12 {
     display: block;
     font-size: 24px;
     /* color: #f44;*/
-    color: #eee;
+    color: #c6c6c6;
 }
 
 .boolean-select.selected .ico-on{
@@ -1408,12 +1408,9 @@ table{
 }
 
 .sublink-btn-empty-action{
-    padding: 5px 20px;
+    padding: 5px 0px;
     display: block;
-}
-
-.sublink-btn-empty-action:hover{
-    background-color: #e2e4ea;
+    font-weight: bolder;
 }
 
 .guiListElements-boolean{
@@ -1587,11 +1584,24 @@ body{
   --btn-default-border-color: #ddd;
 
   --a-color: #007bff;
+  --a-color-hover: #0056b3;
+  --text-color: #1b2026;
+  --ico-default-color: #141a21;
+  --text-header-color: #1f2d3d;
+  --background-default-color: #fff;
 
   --card-header-bg-color: #17a2b8;
   --card-body-bg-color: #00000000;
+  --card-footer-bg-color: #f7f7f7;
   --control-label-color: #212529;
   --help-block-color: #a3a3a3;
+  --help-text-color: #a3a3a3;
+
+  --highlight-tr-hover-color: #D8EDF8;
+  --table-border-color: #dfe3e7;
+  --selected-color: #23900026;
+  --background-active-color: #f8f9fa;
+  --text-hover-color: #16181b;
 }
 
 
@@ -1599,7 +1609,7 @@ body{
   --action-bg-color: #ffeebc;
   --action-color: #474f57;
 
-  --menu-active-bg-color: #0ca4ba61;
+  --menu-active-bg-color: #005a67;
   --content-wrapper: #515151;
 
   --main-header-bg-color: #828282;
@@ -1609,16 +1619,91 @@ body{
   --btn-default-color: #e3e3e3;
   --btn-default-border-color: #5f5f5f;
 
-  --a-color: #97b8cc;
+  --a-color: #e2e2e2;
+  --a-color-hover: #ffffff;
+  --text-color: #bebebe;
+  --ico-default-color: #bebebe;
+  --text-header-color: #c2c7d0;
+  --background-default-color: #838383;
 
   --card-header-bg-color: #17a2b8;
   --card-body-bg-color: #6c6c6c;
+  --card-footer-bg-color: #6c6c6c;
   --control-label-color: #d9d9d9;
   --help-block-color: #a3a3a3;
+  --help-text-color: #a3a3a3;
+
+  --highlight-tr-hover-color: #474747;
+  --table-border-color: #979797;
+  --selected-color: #0a2a0094;
+  --background-active-color: rgba(110, 110, 110, 0.9);
+  --text-hover-color: #ffffff;
 }
 
+.multiple-select .selected{
+    background-color: var(--selected-color);
+}
 
-.main-header{
+.gui-skin-dark .table-bordered td, .table-bordered th{
+    border: 1px solid var(--table-border-color);
+}
+
+.highlight-tr:hover{
+    background-color: var(--highlight-tr-hover-color);
+}
+
+.h1-header,th, .dropdown-item a.sublink-btn-empty-action{
+    color: var(--text-header-color);
+}
+
+.text-data,td, .dropdown-item a.sublink-btn, .iziModal-content{
+    color: var(--text-color);
+}
+
+.help-text-data{
+    color: var(--help-text-color);
+}
+
+.background-default{
+    background-color: var(--background-default-color);
+    border-color: var(--background-default-color);
+}
+ 
+.sidebar-dark-primary .nav-treeview>.nav-item>.nav-link.active, .sidebar-dark-primary .nav-treeview>.nav-item>.nav-link.active:hover{
+    background-color: var(--background-active-color);
+}
+
+.dropdown-item:focus, .dropdown-item:hover{
+    background-color: var(--background-active-color);
+    color: var(--text-hover-color);
+}
+
+.btn-default.hover, .btn-default:active, .btn-default:hover{
+    background-color: var(--background-active-color);
+    color: var(--text-hover-color);
+}
+
+.dropdown-menu{
+    background-color: var(--background-default-color);
+}
+
+.breadcrumb>li.breadcrumb-item>a{
+    color: var(--text-header-color);
+}
+
+.dropdown-divider{
+    border-top: 1px solid #e9ecef8c;
+}
+
+.ico-data-default{
+    color: var(--ico-default-color);
+}
+
+.text-header{
+    color: var(--text-header-color);
+}
+
+.main-header, .main-footer{
     background-color: var(--main-header-bg-color) !important;
 }
 
@@ -1628,7 +1713,7 @@ body{
     color: var(--action-color);
 }
 
-.content-wrapper{
+.content-wrapper, .iziModal-content{
     background-color: var(--content-wrapper);
 }
 
@@ -1650,9 +1735,17 @@ a{
     color: var(--a-color);
 }
 
+a:hover{
+    color: var(--a-color-hover) !important;
+}
+
 
 .card-body{
     background-color: var(--card-body-bg-color);
+}
+
+.card-footer{
+    background-color: var(--card-footer-bg-color);
 }
 
 .control-label{
@@ -1666,7 +1759,14 @@ a{
 .main-header.border-bottom{
     border-bottom: 1px solid var(--main-border-color) !important;
 }
+.main-footer{
+    border-top: 1px solid var(--main-border-color) !important;
+}
 
 input[type=color]{
     height: 30px;
+}
+
+.sidebar-dark-primary .sidebar a.text-data{
+    color: #c2c7d0;
 }
