@@ -444,7 +444,7 @@
 <script type="text/x-just" data-just="guiElements.boolean">
     <!-- guiElements.boolean -->
     <%[ main_input %>
-        <div class="form-control <% if (value || opt.default) { %> selected <% } %> boolean-select"
+        <div class="form-control <% if (guiElement.setSelectedOrNot(value, opt)) { %> selected <% } %> boolean-select"
                 onclick="$(this).toggleClass('selected');"
                 onselectstart="return false"
                 onmousedown="return false"
@@ -457,7 +457,7 @@
     <%] %>
 
      <%[ readonly_input %>
-        <div class="form-control <% if (value || opt.default) { %> selected <% } %> boolean-select"
+        <div class="form-control <% if (guiElement.setSelectedOrNot(value, opt)) { %> selected <% } %> boolean-select"
                 onselectstart="return false"
                 onmousedown="return false"
                 style="cursor: not-allowed!important;"
