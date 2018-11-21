@@ -837,3 +837,27 @@ function allPropertiesIsObjects(obj)
     }
     return true;
 }
+
+/**
+ * @param {type} f
+ * @param {type} ms
+ * @returns {Function}
+ * @see https://learn.javascript.ru/task/debounce
+ */
+function debounce(f, ms) {
+
+  let timer = null;
+
+  return function (...args) {
+    const onComplete = () => {
+      f.apply(this, args);
+      timer = null;
+    }
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    timer = setTimeout(onComplete, ms);
+  };
+}

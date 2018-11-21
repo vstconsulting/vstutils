@@ -64,13 +64,13 @@
 
     <%[ input_addons %>
         <% if(guiElement.opt.default){ %>
-            <div class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
+            <div class="input-group-append guiElement-revert-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>'); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
                 <span class="input-group-text">
                     <span class='fa fa-repeat' ></span>
                 </span>
             </div>
         <% } %>
-        <div class="input-group-append" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
+        <div class="input-group-append guiElement-clear-addon" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
             <span class="input-group-text">
                 <span class='fa fa-times' ></span>
             </span>

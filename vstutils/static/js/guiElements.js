@@ -238,8 +238,8 @@ guiElements.base = function(opt = {}, value, parent_object)
         if(options.onclick)
         {
             let thisObj = this;
-            $('#'+this.element_id).on('click', false, function(){
-
+            $('#'+this.element_id).on('click', false, function()
+            { 
                 if(thisObj.blocked)
                 {
                     return false;

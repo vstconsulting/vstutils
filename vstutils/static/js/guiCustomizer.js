@@ -13,7 +13,7 @@ guiSkins.base = function(value){
     }
 
     this.activate = function(){
-        this.setValue(this.loadSettings())
+        //this.setValue(this.loadSettings())
         this.replaceCss(this.getCss())
     }
 
@@ -26,7 +26,7 @@ guiSkins.base = function(value){
         return this.value.custom_style
     }
 
-    this.saveSettings = function(){
+    this.saveSettings = function(){ 
         guiLocalSettings.set(this.name+"_settings", this.value)
     }
 
@@ -136,7 +136,7 @@ guiSkins.dark = function(){
 
         css += ".gui-skin-dark{"+color_vars.join(';\n')+"}"
         css = css + "\n" + this.value.custom_style
-        //debugger;
+
         return css
     }
 
@@ -149,7 +149,8 @@ guiSkins.dark = function(){
                     title:'Active menu background',
                     format:'color',
                     type: "string",
-                    value:this.value.menu_active_bg_color || "#0ca4ba61",
+                    default:"#0ca4ba",
+                    value:this.value.menu_active_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -159,7 +160,8 @@ guiSkins.dark = function(){
                     title:'Body background',
                     format:'color',
                     type: "string",
-                    value:this.value.content_wrapper || "#515151",
+                    default:"#515151",
+                    value:this.value.content_wrapper,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -169,7 +171,8 @@ guiSkins.dark = function(){
                     title:'Top navigation background',
                     format:'color',
                     type: "string",
-                    value:this.value.main_header_bg_color || "#828282",
+                    default:"#828282",
+                    value:this.value.main_header_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -179,7 +182,8 @@ guiSkins.dark = function(){
                     title:'Top navigation border',
                     format:'color',
                     type: "string",
-                    value:this.value.main_border_color || "#1f2d3d",
+                    default:"#1f2d3d",
+                    value:this.value.main_border_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -189,7 +193,8 @@ guiSkins.dark = function(){
                     title:'Buttons background',
                     format:'color',
                     type: "string",
-                    value:this.value.btn_default_bg_color || "#7e7e7e",
+                    default:"#7e7e7e",
+                    value:this.value.btn_default_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -199,7 +204,8 @@ guiSkins.dark = function(){
                     title:'Buttons text',
                     format:'color',
                     type: "string",
-                    value:this.value.btn_default_color || "#e3e3e3",
+                    default:"#e3e3e3",
+                    value:this.value.btn_default_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -209,7 +215,8 @@ guiSkins.dark = function(){
                     title:'Buttons border',
                     format:'color',
                     type: "string",
-                    value:this.value.btn_default_border_color || "#5f5f5f",
+                    default:"#5f5f5f",
+                    value:this.value.btn_default_border_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -219,7 +226,8 @@ guiSkins.dark = function(){
                     title:'Action buttons background',
                     format:'color',
                     type: "string",
-                    value:this.value.action_bg_color || "#ffeebc",
+                    default:"#ffeebc",
+                    value:this.value.action_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -229,7 +237,8 @@ guiSkins.dark = function(){
                     title:'Action buttons color',
                     format:'color',
                     type: "string",
-                    value:this.value.action_color || "#474f57",
+                    default:"#474f57",
+                    value:this.value.action_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -239,7 +248,8 @@ guiSkins.dark = function(){
                     title:'Links',
                     format:'color',
                     type: "string",
-                    value:this.value.a_color || "#97b8cc",
+                    default:"#97b8cc",
+                    value:this.value.a_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -249,7 +259,8 @@ guiSkins.dark = function(){
                     title:'Card header background',
                     format:'color',
                     type: "string",
-                    value:this.value.card_header_bg_color || "#17a2b8",
+                    default:"#17a2b8",
+                    value:this.value.card_header_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -259,7 +270,8 @@ guiSkins.dark = function(){
                     title:'Card body background',
                     format:'color',
                     type: "string",
-                    value:this.value.card_body_bg_color || "#6c6c6c",
+                    default:"#6c6c6c",
+                    value:this.value.card_body_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -269,7 +281,8 @@ guiSkins.dark = function(){
                     title:'Labels',
                     format:'color',
                     type: "string",
-                    value:"#d9d9d9",
+                    default:"#d9d9d9",
+                    value:this.value.control_label_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -279,7 +292,8 @@ guiSkins.dark = function(){
                     title:'Help content',
                     format:'color',
                     type: "string",
-                    value:"#a3a3a3",
+                    default:"#a3a3a3",
+                    value:this.value.help_block_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -403,5 +417,6 @@ guiCustomizer.render = function()
 tabSignal.connect("webGui.start", function()
 {
     guiCustomizer.setSkin(guiLocalSettings.get('skin'))
+    guiCustomizer.render();
 })
 

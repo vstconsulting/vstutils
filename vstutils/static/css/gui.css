@@ -1549,6 +1549,10 @@ table{
     border-color: #dfe3e7;
 }
 
+.gui-element-color .guiElement-clear-addon{
+    display: none;
+}
+
 .guiCustomizer .customizer-options{
     overflow: auto;
     height: 100%;
