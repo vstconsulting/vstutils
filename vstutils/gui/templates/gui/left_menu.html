@@ -1,6 +1,6 @@
 {% block sidebar_menu %}
 
-    <li id="menu-home" class="nav-item">
+    <li id="menu-home" class="nav-item" data-url="/">
         <a href="/#/" class="nav-link" onclick="return vstGO(this.href);" >
             <i class="nav-icon fa fa-dashboard ico-menu"></i> <p><span class="li-header-span"><i class="li-header-span-i menu-text-data">Home</i></span></p>
         </a>
@@ -8,9 +8,9 @@
     {% for item in project_menu %}
         {% if item.name %}
             {% if item.sublinks %}
-                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item has-treeview " id="menu-{{item.name|lower}}">
+                <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item has-treeview " data-url="{{item.url}}" id="menu-{{item.name|lower}}">
                     {% if item.url %}
-                        <a href="/#{{item.url}}" class="nav-link"  onclick="return vstGO(this.href);">
+                        <a href="/#{{item.url}}" class="nav-link"  onclick="event.stopPropagation(); return vstGO(this.href);"  >
                             <i class="nav-icon {{item.span_class}} ico-menu"></i>
                             <p>
                                 <span class="li-header-span">
@@ -32,8 +32,8 @@
                     <ul class="menu-treeview-menu nav nav-treeview">
                         {% for subitem in item.sublinks %}
                             {% if subitem.name %}
-                                <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}" class="nav-item">
-                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" class="nav-link" onclick="return vstGO(this.href);" >
+                                <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}"  data-url="{{subitem.url}}" class="nav-item">
+                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" class="nav-link" onclick="event.stopPropagation(); return vstGO(this.href);" >
                                         <i class="nav-icon {{subitem.span_class}} ico-menu"></i> <p><span class="menu-text-data">{{subitem.name|title}}</span></p>
                                     </a>
                                 </li>
@@ -42,8 +42,8 @@
                     </ul>
                 </li>
             {% else %}
-                <li id="{{item.name}}" class="nav-item">
-                    <a href="/#{% firstof item.url item.name|lower %}"  class="nav-link" onclick="return vstGO(this.href);" >
+                <li id="{{item.name}}" class="nav-item" data-url="{{item.url}}">
+                    <a href="/#{% firstof item.url item.name|lower %}"  class="nav-link" onclick="event.stopPropagation(); return vstGO(this.href);" >
                         <i class="nav-icon {{item.span_class}} ico-menu"></i>
                         <p>
                             <span class="li-header-span">
@@ -56,7 +56,7 @@
         {% endif %}
     {% endfor %}
     {% if has_docs %}
-        <li id="menu-docs" class="nav-item">
+        <li id="menu-docs" class="nav-item" data-url="{{item.url}}">
             <a href={% block doc_link %}"{{host_url}}/docs"{% endblock %} class="nav-link" >
                <i class="nav-icon fa fa-book ico-menu"></i> <p><span class="li-header-span"><i class="li-header-span-i menu-text-data">Documentation</i></span></p>
             </a>

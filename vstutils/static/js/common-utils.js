@@ -861,3 +861,99 @@ function debounce(f, ms) {
     timer = setTimeout(onComplete, ms);
   };
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function setActiveMenuLi( )
+{
+    let url = window.location.hash.replace("#", "")
+    $(".nav-sidebar li[data-url]").removeClass("active");
+    $(".nav-sidebar a.nav-link").removeClass('active')
+
+    $(".nav-sidebar .menu-open").removeClass('menu-open')
+    $(".nav-sidebar .nav-treeview").hide()
+
+    let li = $(".nav-sidebar li[data-url]")
+
+    let urllevel = url.split("/").length - 1
+
+    for(let i=0; i< li.length; i++)
+    {
+        let val = $(li[i])
+        let dataurl = val.attr('data-url')
+
+        if(urllevel > 1 && url.indexOf(dataurl) != 0)
+        {
+            continue;
+        }
+
+        if(urllevel <= 1 && url != dataurl)
+        {
+            continue;
+        }
+
+        //debugger;
+        if(val.hasClass('has-treeview'))
+        {
+            val.addClass("menu-open")
+            val.children(".nav-treeview").show()
+        }
+
+        val.children("a.nav-link").addClass('active')
+
+        let parent = val.parent()
+        let step = 0;
+        do{
+            step++;
+            if($(parent).hasClass('has-treeview'))
+            {
+                $(parent).addClass("menu-open")
+                parent.children(".nav-treeview").show()
+            }
+            parent = $(parent).parent()
+
+        }while(parent.length && step < 10)
+
+        //debugger;
+        break;
+    }
+}
+
+tabSignal.connect("spajs.open", setActiveMenuLi);
+tabSignal.connect("loading.completed", setActiveMenuLi)
+
+/*
+ * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
+ */
+$(".content-wrapper").hover(function () {
+    $(".hover-li").removeClass("hover-li");
+})
+
+$(".navbar").hover(function () {
+    $(".hover-li").removeClass("hover-li");
+})
+
