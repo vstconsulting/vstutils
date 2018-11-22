@@ -1517,15 +1517,19 @@ table{
     display: contents;
 }
 
+a.multiaction-button{
+    width: 100%;
+    display: block;
+}
 
 .pagination a,
 .card-info:not(.card-outline) .card-header .pagination a {
-    color: #444;
+    color: #444 !important;
 }
 
 .pagination a:hover,
 .card-info:not(.card-outline) .card-header .pagination a:hover {
-    color: #0056b3;
+    color: #0056b3 !important;
 
 }
 
@@ -1658,8 +1662,8 @@ body{
 
   --highlight-tr-hover-color: #474747;
   --table-border-color: #979797;
-  --selected-color: #0a2a0094;
-  --background-active-color: rgba(110, 110, 110, 0.9);
+  --selected-color: #0a2a00;
+  --background-active-color: #6c6c6c;
   --text-hover-color: #ffffff;
 
   --boolean-true-color: #21d703;

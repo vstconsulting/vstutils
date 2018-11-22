@@ -6,7 +6,6 @@ var guiSkins = {
 guiSkins.base = function(value){
 
     this.name = 'base'
-    this.hidden = true
     this.value = value
 
     this.deactivate = function(){
@@ -103,6 +102,7 @@ guiSkins.base = function(value){
         $("body").append("<style id='curentSkin' >"+css+"</style>")
     }
 }
+guiSkins.base.hidden = true
 
 guiSkins.default = function(){
     guiSkins.base.apply(this, arguments)
@@ -215,7 +215,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#444444",
-                    value:this.value.btn_default_color || "",
+                    value:this.value.btn_default_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -250,7 +250,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
-                    value:this.value.btn_primary_color || "",
+                    value:this.value.btn_primary_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -320,7 +320,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#1f2d3d",
-                    value:this.value.btn_warning_color || "",
+                    value:this.value.btn_warning_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -620,11 +620,27 @@ guiSkins.dark = function(){
         form.btn_default_bg_color.default       = "#7e7e7e"
         form.btn_default_color.default          = "#e3e3e3"
         form.btn_default_border_color.default   = "#5f5f5f"
-        form.a_color.default                    = "#97b8cc"
-        form.card_header_bg_color.default       = "#17a2b8"
+        form.a_color.default                    = "#ffffff"
+        form.a_color_hover.default              = "#d5d5d5"
+        form.card_header_bg_color.default       = "#73979d"
         form.card_body_bg_color.default         = "#6c6c6c"
         form.control_label_color.default        = "#d9d9d9"
         form.help_block_color.default           = "#a3a3a3"
+        form.text_color.default                 = "#cccccc"
+        form.table_border_color.default         = "#8d8d8d"
+
+
+        form.highlight_tr_hover_color.default   = "#474747"
+        form.selected_color.default             = "#0a2a00"
+        form.background_active_color.default    = "#6c6c6c"
+        form.text_header_color.default          = "#c2c7d0"
+
+        form.background_default_color.default   = "#838383"
+        form.ico_default_color.default   = "#bebebe"
+        form.card_footer_bg_color.default   = "#6c6c6c"
+
+        form.boolean_false_color.default   = "#949494"
+        form.boolean_true_color.default   = "#21d703"
 
     }
 
