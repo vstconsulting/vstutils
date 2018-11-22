@@ -1484,7 +1484,7 @@ table{
     .breadcrumb {
         margin-top: 15px;
         width: 100%;
-        background-color: #d2d6de!important;
+        background-color: var(--breadcrumb-bg-color)!important;
         padding: 5px 10px!important;
     }
 }
@@ -1756,6 +1756,18 @@ body{
 
 .main-header, .main-footer{
     background-color: var(--main-header-bg-color) !important;
+}
+
+.main-sidebar {
+    background-color: var(--left-sidebar-bg-color) !important;
+}
+
+.brand-link {
+   border-bottom-color: var(--left-sidebar-border-color) !important;
+}
+
+.customizer-options {
+    background-color: var(--customizer-options-bg-color) !important;
 }
 
 .content-wrapper, .iziModal-content{

@@ -239,7 +239,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         {
             let thisObj = this;
             $('#'+this.element_id).on('click', false, function()
-            { 
+            {
                 if(thisObj.blocked)
                 {
                     return false;
@@ -2660,6 +2660,31 @@ guiElements.form = function(opt = {}, value, parent_object)
         }
 
         return this.reductionToType(valueObj);
+    }
+
+    this.sortRealElements = function(Obj1, Obj2)
+    {
+        let sort_1 = Obj1.val.opt.priority || 0;
+        let sort_2 = Obj2.val.opt.priority || 0;
+        return sort_1 - sort_2;
+    }
+
+    this.renderAllRealElements = function()
+    {
+        let elements_arr = []
+        for(let i in this.realElements) {
+            elements_arr.push({name:i, val:this.realElements[i]})
+        }
+
+        elements_arr.sort(this.sortRealElements);
+
+        let html = '';
+
+        for(let i in elements_arr) {
+            html += elements_arr[i].val.render()
+        }
+
+        return html;
     }
 }
 

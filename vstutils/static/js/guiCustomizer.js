@@ -51,6 +51,8 @@ guiSkins.base = function(value){
         this.initFormOptions()
         this.afterInitFormOptions()
 
+        tabSignal.emit('guiSkin.' + this.name + '.init', {guiSkin: this});
+
         this.customizerForm = new guiElements.form(undefined, this.options);
     }
 
@@ -145,6 +147,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#0078ff",
+                    priority: 0,
                     value:this.value.menu_active_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -156,6 +159,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 1,
                     value:this.value.menu_active_color,
                     onchange:() => {
                         this.applySettings()
@@ -167,6 +171,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ecf0f5",
+                    priority: 2,
                     value:this.value.content_wrapper,
                     onchange:() => {
                         this.applySettings()
@@ -178,6 +183,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 3,
                     value:this.value.main_header_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -189,12 +195,61 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#dee2e6",
+                    priority: 4,
                     value:this.value.main_border_color,
                     onchange:() => {
                         this.applySettings()
                     },
                 },
 
+                left_sidebar_bg_color:{
+                    color_var:"--left-sidebar-bg-color",
+                    title:'Left sidebar background',
+                    format:'color',
+                    type: "string",
+                    default:"#343a40",
+                    priority: 5,
+                    value:this.value.left_sidebar_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                left_sidebar_border_color:{
+                    color_var:"--left-sidebar-border-color",
+                    title:'Left sidebar border',
+                    format:'color',
+                    type: "string",
+                    default:"#4b545c",
+                    priority: 6,
+                    value:this.value.left_sidebar_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                customizer_options_bg_color:{
+                    color_var:"--customizer-options-bg-color",
+                    title:'Customizer sidebar background',
+                    format:'color',
+                    type: "string",
+                    default:"#343a40",
+                    priority: 7,
+                    value:this.value.customizer_options_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                breadcrumb_bg_color:{
+                    color_var:"--breadcrumb-bg-color",
+                    title:'Customizer sidebar background',
+                    format:'color',
+                    type: "string",
+                    default:"#d2d6de",
+                    priority: 8,
+                    value:this.value.breadcrumb_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
 
 
                 // default btn
@@ -204,6 +259,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#f4f4f4",
+                    priority: 9,
                     value:this.value.btn_default_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -215,6 +271,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#444444",
+                    priority: 10,
                     value:this.value.btn_default_color,
                     onchange:() => {
                         this.applySettings()
@@ -226,6 +283,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#dddddd",
+                    priority: 11,
                     value:this.value.btn_default_border_color,
                     onchange:() => {
                         this.applySettings()
@@ -239,6 +297,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#007bff",
+                    priority: 12,
                     value:this.value.btn_primary_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -250,6 +309,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 13,
                     value:this.value.btn_primary_color,
                     onchange:() => {
                         this.applySettings()
@@ -261,6 +321,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#007bff",
+                    priority: 14,
                     value:this.value.btn_primary_border_color,
                     onchange:() => {
                         this.applySettings()
@@ -274,6 +335,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#dc3545",
+                    priority: 15,
                     value:this.value.btn_danger_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -285,6 +347,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 16,
                     value:this.value.btn_danger_color,
                     onchange:() => {
                         this.applySettings()
@@ -296,6 +359,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#dc3545",
+                    priority: 17,
                     value:this.value.btn_danger_border_color,
                     onchange:() => {
                         this.applySettings()
@@ -309,6 +373,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffc107",
+                    priority: 18,
                     value:this.value.btn_warning_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -320,6 +385,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#1f2d3d",
+                    priority: 19,
                     value:this.value.btn_warning_color,
                     onchange:() => {
                         this.applySettings()
@@ -331,6 +397,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffc107",
+                    priority: 20,
                     value:this.value.btn_warning_border_color,
                     onchange:() => {
                         this.applySettings()
@@ -344,6 +411,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#007bff",
+                    priority: 21,
                     value:this.value.a_color,
                     onchange:() => {
                         this.applySettings()
@@ -355,6 +423,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#0056b3",
+                    priority: 22,
                     value:this.value.a_color_hover,
                     onchange:() => {
                         this.applySettings()
@@ -367,6 +436,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#1b2026",
+                    priority: 23,
                     value:this.value.text_color,
                     onchange:() => {
                         this.applySettings()
@@ -378,6 +448,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#141a21",
+                    priority: 24,
                     value:this.value.ico_default_color,
                     onchange:() => {
                         this.applySettings()
@@ -389,6 +460,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#1f2d3d",
+                    priority: 25,
                     value:this.value.text_header_color,
                     onchange:() => {
                         this.applySettings()
@@ -400,6 +472,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 26,
                     value:this.value.background_default_color,
                     onchange:() => {
                         this.applySettings()
@@ -414,6 +487,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#17a2b8",
+                    priority: 27,
                     value:this.value.card_header_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -425,6 +499,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 28,
                     value:this.value.card_body_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -436,6 +511,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#f7f7f7",
+                    priority: 29,
                     value:this.value.card_footer_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -447,6 +523,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#ffffff",
+                    priority: 30,
                     value:this.value.card_color,
                     onchange:() => {
                         this.applySettings()
@@ -459,6 +536,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#212529",
+                    priority: 31,
                     value:this.value.control_label_color,
                     onchange:() => {
                         this.applySettings()
@@ -470,6 +548,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#a3a3a3",
+                    priority: 32,
                     value:this.value.help_block_color,
                     onchange:() => {
                         this.applySettings()
@@ -481,6 +560,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#a3a3a3",
+                    priority: 33,
                     value:this.value.help_text_color,
                     onchange:() => {
                         this.applySettings()
@@ -495,6 +575,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#D8EDF8",
+                    priority: 34,
                     value:this.value.highlight_tr_hover_color,
                     onchange:() => {
                         this.applySettings()
@@ -506,6 +587,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#dfe3e7",
+                    priority: 35,
                     value:this.value.table_border_color,
                     onchange:() => {
                         this.applySettings()
@@ -517,6 +599,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#dfeed9",
+                    priority: 36,
                     value:this.value.selected_color,
                     onchange:() => {
                         this.applySettings()
@@ -528,6 +611,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#f8f9fa",
+                    priority: 37,
                     value:this.value.background_active_color,
                     onchange:() => {
                         this.applySettings()
@@ -539,6 +623,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#16181b",
+                    priority: 38,
                     value:this.value.text_hover_color,
                     onchange:() => {
                         this.applySettings()
@@ -550,6 +635,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#128200",
+                    priority: 39,
                     value:this.value.boolean_true_color,
                     onchange:() => {
                         this.applySettings()
@@ -561,6 +647,7 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#949494",
+                    priority: 40,
                     value:this.value.boolean_false_color,
                     onchange:() => {
                         this.applySettings()
@@ -573,6 +660,7 @@ guiSkins.default = function(){
                     title:'Custom CSS',
                     format:'textarea',
                     type: "string",
+                    priority: 900,
                     value:this.value.custom_style,
                     onchange:() => {
                     },
@@ -582,6 +670,7 @@ guiSkins.default = function(){
                     text:'Apply',
                     format:'formButton',
                     type: "string",
+                    priority: 902,
                     onclick:() => {
                         this.applySettings()
                     },
@@ -591,6 +680,7 @@ guiSkins.default = function(){
                     text:'Save',
                     format:'formButton',
                     type: "string",
+                    priority: 901,
                     onclick:() => {
                         this.applySettings()
                         this.saveSettings()
@@ -617,6 +707,10 @@ guiSkins.dark = function(){
         form.content_wrapper.default            = "#515151"
         form.main_header_bg_color.default       = "#828282"
         form.main_border_color.default          = "#1f2d3d"
+        form.left_sidebar_bg_color.default      = "#828282"
+        form.left_sidebar_border_color.default  = "#1f2d3d"
+        form.customizer_options_bg_color.default= "#828282"
+        form.breadcrumb_bg_color.default        = "#8E8E90"
         form.btn_default_bg_color.default       = "#7e7e7e"
         form.btn_default_color.default          = "#e3e3e3"
         form.btn_default_border_color.default   = "#5f5f5f"
@@ -636,11 +730,11 @@ guiSkins.dark = function(){
         form.text_header_color.default          = "#c2c7d0"
 
         form.background_default_color.default   = "#838383"
-        form.ico_default_color.default   = "#bebebe"
-        form.card_footer_bg_color.default   = "#6c6c6c"
+        form.ico_default_color.default          = "#bebebe"
+        form.card_footer_bg_color.default       = "#6c6c6c"
 
-        form.boolean_false_color.default   = "#949494"
-        form.boolean_true_color.default   = "#21d703"
+        form.boolean_false_color.default        = "#949494"
+        form.boolean_true_color.default         = "#21d703"
 
     }
 
