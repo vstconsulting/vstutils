@@ -1417,14 +1417,6 @@ table{
     font-size: 24px;
 }
 
-.guiListElements-boolean .boolean-true{
-    color: #128200;
-}
-
-.guiListElements-boolean .boolean-false{
-    color: #949494;
-}
-
 .db_value_input{
     background-color: #eee !important;
     border-left: 1px solid #d2d6de !important;
@@ -1570,10 +1562,8 @@ table{
 }
 
 body{
-  --action-bg-color: #ffc107;
-  --action-color: #1f2d3d;
-
   --menu-active-bg-color: #007bff;
+  --menu-active-color: #ffffff;
   --content-wrapper: #ecf0f5;
 
   --main-header-bg-color: #fff;
@@ -1582,6 +1572,18 @@ body{
   --btn-default-bg-color: #f4f4f4;
   --btn-default-color: #444;
   --btn-default-border-color: #ddd;
+
+  --btn-primary-bg-color: #007bff;
+  --btn-primary-color: #fff;
+  --btn-primary-border-color: #007bff;
+
+  --btn-danger-bg-color: #dc3545;
+  --btn-danger-color: #ffffff;
+  --btn-danger-border-color: #dc3545;
+
+  --btn-warning-bg-color: #ffc107;
+  --btn-warning-color: #1f2d3d;
+  --btn-warning-border-color: #ffc107;
 
   --a-color: #007bff;
   --a-color-hover: #0056b3;
@@ -1593,23 +1595,28 @@ body{
   --card-header-bg-color: #17a2b8;
   --card-body-bg-color: #00000000;
   --card-footer-bg-color: #f7f7f7;
+  --card-color: #fff;
+
+
+
   --control-label-color: #212529;
   --help-block-color: #a3a3a3;
   --help-text-color: #a3a3a3;
 
   --highlight-tr-hover-color: #D8EDF8;
   --table-border-color: #dfe3e7;
-  --selected-color: #23900026;
+  --selected-color: #dfeed9;
   --background-active-color: #f8f9fa;
   --text-hover-color: #16181b;
+
+  --boolean-true-color: #128200;
 }
 
 
 .gui-skin-dark{
-  --action-bg-color: #ffeebc;
-  --action-color: #474f57;
 
   --menu-active-bg-color: #005a67;
+  --menu-active-color: #ffffff;
   --content-wrapper: #515151;
 
   --main-header-bg-color: #828282;
@@ -1618,6 +1625,13 @@ body{
   --btn-default-bg-color: #7e7e7e;
   --btn-default-color: #e3e3e3;
   --btn-default-border-color: #5f5f5f;
+
+
+  --btn-primary-bg-color: #7e7e7e;
+  --btn-primary-color: #e3e3e3;
+  --btn-primary-border-color: #5f5f5f;
+
+
 
   --a-color: #e2e2e2;
   --a-color-hover: #ffffff;
@@ -1629,6 +1643,8 @@ body{
   --card-header-bg-color: #17a2b8;
   --card-body-bg-color: #6c6c6c;
   --card-footer-bg-color: #6c6c6c;
+  --card-color: #fff;
+
   --control-label-color: #d9d9d9;
   --help-block-color: #a3a3a3;
   --help-text-color: #a3a3a3;
@@ -1638,10 +1654,34 @@ body{
   --selected-color: #0a2a0094;
   --background-active-color: rgba(110, 110, 110, 0.9);
   --text-hover-color: #ffffff;
+
+  --boolean-true-color: #21d703;
+  --boolean-false-color: #949494;
+}
+
+.guiListElements-boolean .boolean-true{
+    color: var(--boolean-true-color);
+}
+
+.guiListElements-boolean .boolean-false{
+    color: var(--boolean-false-color);
+}
+
+
+.alert-info, .bg-info, .label-info{
+    background-color: var(--card-header-bg-color) !important;
+}
+
+.alert-info, .alert-info a, .bg-info, .bg-info a, .label-info, .label-info a{
+    color: var(--card-color) !important;
+}
+.card-info:not(.card-outline) .card-header, .card-info:not(.card-outline) .card-header a{
+    color: var(--card-color) !important;
 }
 
 .multiple-select .selected{
     background-color: var(--selected-color);
+
 }
 
 .gui-skin-dark .table-bordered td, .table-bordered th{
@@ -1668,7 +1708,7 @@ body{
     background-color: var(--background-default-color);
     border-color: var(--background-default-color);
 }
- 
+
 .sidebar-dark-primary .nav-treeview>.nav-item>.nav-link.active, .sidebar-dark-primary .nav-treeview>.nav-item>.nav-link.active:hover{
     background-color: var(--background-active-color);
 }
@@ -1707,18 +1747,17 @@ body{
     background-color: var(--main-header-bg-color) !important;
 }
 
-.btn-action{
-    background-color: var(--action-bg-color);
-    border-color: var(--action-bg-color);
-    color: var(--action-color);
-}
-
 .content-wrapper, .iziModal-content{
     background-color: var(--content-wrapper);
 }
 
 .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active{
     background-color: var(--menu-active-bg-color);
+    color: var(--menu-active-color) !important;
+}
+
+.main-sidebar a.nav-link{
+    color: var(--menu-active-color) !important;
 }
 
 .card-info:not(.card-outline) .card-header{
@@ -1729,6 +1768,24 @@ body{
     background-color: var(--btn-default-bg-color);
     color: var(--btn-default-color);
     border-color: var(--btn-default-border-color);
+}
+
+.btn-primary{
+    background-color: var(--btn-primary-bg-color);
+    color: var(--btn-primary-color);
+    border-color: var(--btn-primary-border-color);
+}
+
+.btn-danger{
+    background-color: var(--btn-danger-bg-color);
+    color: var(--btn-danger-color);
+    border-color: var(--btn-danger-border-color);
+}
+
+.btn-warning{
+    background-color: var(--btn-warning-bg-color);
+    color: var(--btn-warning-color);
+    border-color: var(--btn-warning-border-color);
 }
 
 a{
@@ -1769,4 +1826,9 @@ input[type=color]{
 
 .sidebar-dark-primary .sidebar a.text-data{
     color: #c2c7d0;
+}
+
+.control-sidebar, .control-sidebar:before{
+    width: 300px;
+    right: -300px;
 }

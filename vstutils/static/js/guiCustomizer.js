@@ -6,6 +6,7 @@ var guiSkins = {
 guiSkins.base = function(value){
 
     this.name = 'base'
+    this.hidden = true
     this.value = value
 
     this.deactivate = function(){
@@ -26,7 +27,7 @@ guiSkins.base = function(value){
         return this.value.custom_style
     }
 
-    this.saveSettings = function(){ 
+    this.saveSettings = function(){
         guiLocalSettings.set(this.name+"_settings", this.value)
     }
 
@@ -49,10 +50,12 @@ guiSkins.base = function(value){
     {
         this.setValue(this.loadSettings())
         this.initFormOptions()
+        this.afterInitFormOptions()
 
         this.customizerForm = new guiElements.form(undefined, this.options);
     }
 
+    this.afterInitFormOptions = function(){}
     this.initFormOptions = function()
     {
         this.options = {
@@ -106,14 +109,6 @@ guiSkins.default = function(){
     this.title = 'Default'
     this.name = 'default'
 
-    this.init()
-}
-
-guiSkins.dark = function(){
-    guiSkins.base.apply(this, arguments)
-    this.title = 'Dark'
-    this.name = 'dark'
-
     this.getCss = function(){
         let css = ""
 
@@ -134,7 +129,7 @@ guiSkins.dark = function(){
             color_vars.push(this.options.form[i].color_var+":"+this.value[i])
         }
 
-        css += ".gui-skin-dark{"+color_vars.join(';\n')+"}"
+        css += ".gui-skin-"+this.name+"{"+color_vars.join(';\n')+"}"
         css = css + "\n" + this.value.custom_style
 
         return css
@@ -149,8 +144,19 @@ guiSkins.dark = function(){
                     title:'Active menu background',
                     format:'color',
                     type: "string",
-                    default:"#0ca4ba",
+                    default:"#0078ff",
                     value:this.value.menu_active_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                menu_active_color:{
+                    color_var:"--menu-active-color",
+                    title:'Active menu color',
+                    format:'color',
+                    type: "string",
+                    default:"#ffffff",
+                    value:this.value.menu_active_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -160,7 +166,7 @@ guiSkins.dark = function(){
                     title:'Body background',
                     format:'color',
                     type: "string",
-                    default:"#515151",
+                    default:"#ecf0f5",
                     value:this.value.content_wrapper,
                     onchange:() => {
                         this.applySettings()
@@ -171,7 +177,7 @@ guiSkins.dark = function(){
                     title:'Top navigation background',
                     format:'color',
                     type: "string",
-                    default:"#828282",
+                    default:"#ffffff",
                     value:this.value.main_header_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -182,18 +188,22 @@ guiSkins.dark = function(){
                     title:'Top navigation border',
                     format:'color',
                     type: "string",
-                    default:"#1f2d3d",
+                    default:"#dee2e6",
                     value:this.value.main_border_color,
                     onchange:() => {
                         this.applySettings()
                     },
                 },
+
+
+
+                // default btn
                 btn_default_bg_color:{
                     color_var:"--btn-default-bg-color",
-                    title:'Buttons background',
+                    title:'Buttons default background',
                     format:'color',
                     type: "string",
-                    default:"#7e7e7e",
+                    default:"#f4f4f4",
                     value:this.value.btn_default_bg_color,
                     onchange:() => {
                         this.applySettings()
@@ -201,59 +211,203 @@ guiSkins.dark = function(){
                 },
                 btn_default_color:{
                     color_var:"--btn-default-color",
-                    title:'Buttons text',
+                    title:'Buttons default text',
                     format:'color',
                     type: "string",
-                    default:"#e3e3e3",
-                    value:this.value.btn_default_color,
+                    default:"#444444",
+                    value:this.value.btn_default_color || "",
                     onchange:() => {
                         this.applySettings()
                     },
                 },
                 btn_default_border_color:{
                     color_var:"--btn-default-border-color",
-                    title:'Buttons border',
+                    title:'Buttons default border',
                     format:'color',
                     type: "string",
-                    default:"#5f5f5f",
+                    default:"#dddddd",
                     value:this.value.btn_default_border_color,
                     onchange:() => {
                         this.applySettings()
                     },
                 },
-                action_bg_color:{
-                    color_var:"--action-bg-color",
-                    title:'Action buttons background',
+
+                // primary btn
+                btn_primary_bg_color:{
+                    color_var:"--btn-primary-bg-color",
+                    title:'Buttons primary background',
                     format:'color',
                     type: "string",
-                    default:"#ffeebc",
-                    value:this.value.action_bg_color,
+                    default:"#007bff",
+                    value:this.value.btn_primary_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
                 },
-                action_color:{
-                    color_var:"--action-color",
-                    title:'Action buttons color',
+                btn_primary_color:{
+                    color_var:"--btn-primary-color",
+                    title:'Buttons primary text',
                     format:'color',
                     type: "string",
-                    default:"#474f57",
-                    value:this.value.action_color,
+                    default:"#ffffff",
+                    value:this.value.btn_primary_color || "",
                     onchange:() => {
                         this.applySettings()
                     },
                 },
+                btn_primary_border_color:{
+                    color_var:"--btn-primary-border-color",
+                    title:'Buttons primary border',
+                    format:'color',
+                    type: "string",
+                    default:"#007bff",
+                    value:this.value.btn_primary_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+                // danger btn
+                btn_danger_bg_color:{
+                    color_var:"--btn-danger-bg-color",
+                    title:'Buttons danger background',
+                    format:'color',
+                    type: "string",
+                    default:"#dc3545",
+                    value:this.value.btn_danger_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_danger_color:{
+                    color_var:"--btn-danger-color",
+                    title:'Buttons danger text',
+                    format:'color',
+                    type: "string",
+                    default:"#ffffff",
+                    value:this.value.btn_danger_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_danger_border_color:{
+                    color_var:"--btn-danger-border-color",
+                    title:'Buttons danger border',
+                    format:'color',
+                    type: "string",
+                    default:"#dc3545",
+                    value:this.value.btn_danger_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+                // warning btn
+                btn_warning_bg_color:{
+                    color_var:"--btn-warning-bg-color",
+                    title:'Buttons warning background',
+                    format:'color',
+                    type: "string",
+                    default:"#ffc107",
+                    value:this.value.btn_warning_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_warning_color:{
+                    color_var:"--btn-warning-color",
+                    title:'Buttons warning text',
+                    format:'color',
+                    type: "string",
+                    default:"#1f2d3d",
+                    value:this.value.btn_warning_color || "",
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                btn_warning_border_color:{
+                    color_var:"--btn-warning-border-color",
+                    title:'Buttons warning border',
+                    format:'color',
+                    type: "string",
+                    default:"#ffc107",
+                    value:this.value.btn_warning_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+
                 a_color:{
                     color_var:"--a-color",
                     title:'Links',
                     format:'color',
                     type: "string",
-                    default:"#97b8cc",
+                    default:"#007bff",
                     value:this.value.a_color,
                     onchange:() => {
                         this.applySettings()
                     },
                 },
+                a_color_hover:{
+                    color_var:"--a-color-hover",
+                    title:'Links hover',
+                    format:'color',
+                    type: "string",
+                    default:"#0056b3",
+                    value:this.value.a_color_hover,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+                text_color:{
+                    color_var:"--text-color",
+                    title:'Text color',
+                    format:'color',
+                    type: "string",
+                    default:"#1b2026",
+                    value:this.value.text_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                ico_default_color:{
+                    color_var:"--ico-default-color",
+                    title:'ICO default color',
+                    format:'color',
+                    type: "string",
+                    default:"#141a21",
+                    value:this.value.ico_default_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                text_header_color:{
+                    color_var:"--text-header-color",
+                    title:'Text header color',
+                    format:'color',
+                    type: "string",
+                    default:"#1f2d3d",
+                    value:this.value.text_header_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                background_default_color:{
+                    color_var:"--background-default-color",
+                    title:'Background default color',
+                    format:'color',
+                    type: "string",
+                    default:"#ffffff",
+                    value:this.value.background_default_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+
+
                 card_header_bg_color:{
                     color_var:"--card-header-bg-color",
                     title:'Card header background',
@@ -270,18 +424,41 @@ guiSkins.dark = function(){
                     title:'Card body background',
                     format:'color',
                     type: "string",
-                    default:"#6c6c6c",
+                    default:"#ffffff",
                     value:this.value.card_body_bg_color,
                     onchange:() => {
                         this.applySettings()
                     },
                 },
+                card_footer_bg_color:{
+                    color_var:"--card-footer-bg-color",
+                    title:'Card footer background',
+                    format:'color',
+                    type: "string",
+                    default:"#f7f7f7",
+                    value:this.value.card_footer_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                card_color:{
+                    color_var:"--card-color",
+                    title:'Card color',
+                    format:'color',
+                    type: "string",
+                    default:"#ffffff",
+                    value:this.value.card_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
                 control_label_color:{
                     color_var:"--control-label-color",
                     title:'Labels',
                     format:'color',
                     type: "string",
-                    default:"#d9d9d9",
+                    default:"#212529",
                     value:this.value.control_label_color,
                     onchange:() => {
                         this.applySettings()
@@ -298,6 +475,100 @@ guiSkins.dark = function(){
                         this.applySettings()
                     },
                 },
+                help_text_color:{
+                    color_var:"---help-text-color",
+                    title:'Help text color',
+                    format:'color',
+                    type: "string",
+                    default:"#a3a3a3",
+                    value:this.value.help_text_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+
+
+                highlight_tr_hover_color:{
+                    color_var:"--highlight-tr-hover-color",
+                    title:'Table line hover bg color',
+                    format:'color',
+                    type: "string",
+                    default:"#D8EDF8",
+                    value:this.value.highlight_tr_hover_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                table_border_color:{
+                    color_var:"--table-border-color",
+                    title:'Table border color',
+                    format:'color',
+                    type: "string",
+                    default:"#dfe3e7",
+                    value:this.value.table_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                selected_color:{
+                    color_var:"--selected-color",
+                    title:'Table line selected bg color',
+                    format:'color',
+                    type: "string",
+                    default:"#dfeed9",
+                    value:this.value.selected_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                background_active_color:{
+                    color_var:"--background-active-color",
+                    title:'Background active color',
+                    format:'color',
+                    type: "string",
+                    default:"#f8f9fa",
+                    value:this.value.background_active_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                text_hover_color:{
+                    color_var:"--text-hover-color",
+                    title:'Text hover color',
+                    format:'color',
+                    type: "string",
+                    default:"#16181b",
+                    value:this.value.text_hover_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                boolean_true_color:{
+                    color_var:"--boolean-true-color",
+                    title:'Boolean true color',
+                    format:'color',
+                    type: "string",
+                    default:"#128200",
+                    value:this.value.boolean_true_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                boolean_false_color:{
+                    color_var:"--boolean-false-color",
+                    title:'Boolean false color',
+                    format:'color',
+                    type: "string",
+                    default:"#949494",
+                    value:this.value.boolean_false_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+
+
                 custom_style:{
                     title:'Custom CSS',
                     format:'textarea',
@@ -329,6 +600,32 @@ guiSkins.dark = function(){
         }
 
         return this.options
+    }
+
+    this.init()
+}
+
+guiSkins.dark = function(){
+    guiSkins.default.apply(this, arguments)
+    this.title = 'Dark'
+    this.name = 'dark'
+
+    this.afterInitFormOptions = function()
+    {
+        let form = this.options.form
+        form.menu_active_bg_color.default       = "#0ca4ba"
+        form.content_wrapper.default            = "#515151"
+        form.main_header_bg_color.default       = "#828282"
+        form.main_border_color.default          = "#1f2d3d"
+        form.btn_default_bg_color.default       = "#7e7e7e"
+        form.btn_default_color.default          = "#e3e3e3"
+        form.btn_default_border_color.default   = "#5f5f5f"
+        form.a_color.default                    = "#97b8cc"
+        form.card_header_bg_color.default       = "#17a2b8"
+        form.card_body_bg_color.default         = "#6c6c6c"
+        form.control_label_color.default        = "#d9d9d9"
+        form.help_block_color.default           = "#a3a3a3"
+
     }
 
     this.init()
@@ -383,7 +680,7 @@ guiCustomizer.render = function()
     let skins = []
     for(let i in guiSkins)
     {
-        if(i == 'base')
+        if(guiSkins[i].hidden)
         {
             continue;
         }
