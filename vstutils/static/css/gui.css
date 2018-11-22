@@ -1529,6 +1529,13 @@ table{
 
 }
 
+.btn-icon {
+    width:30px;
+    height: 31px;
+    padding: 0px;
+    text-align: center;
+}
+
 .profile-menu{
     margin-top: 8px;
     border-radius: 0px;
