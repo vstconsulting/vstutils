@@ -31,7 +31,7 @@
           <!-- Notifications Dropdown Menu -->
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-              <i class="fa fa-user mr-2 ico-data-default"></i>  <span class="text-data">{{user.first_name}} {{user.last_name}}</span>
+              <i class="fa fa-user mr-2 ico-data-default"></i>  <span class="text-data hidden-480">{{user.first_name}} {{user.last_name}}</span>
               <!--<span class="badge badge-warning navbar-badge">15</span>-->
             </a>
 
@@ -39,7 +39,7 @@
 
                 {% block profile_link %}
                     <a href="/#profile" onclick="return spajs.openURL(this.href);" class="dropdown-item text-data">
-                        <i class="fa fa-heart mr-2 ico-data-default"></i> Profile <!-- <span class="float-right text-muted text-sm">12 hours</span> -->
+                        <i class="fa fa-id-card-o mr-2 ico-data-default"></i> Profile <!-- <span class="float-right text-muted text-sm">12 hours</span> -->
                     </a>
 
                     <div class="dropdown-divider"></div>
