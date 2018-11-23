@@ -1820,6 +1820,10 @@ body{
     border-bottom-color: var(--left-sidebar-border-color) !important;
 }
 
+.brand-link:hover {
+    color: rgba(255,255,255,.8) !important;
+}
+
 .customizer-options {
     background-color: var(--customizer-options-bg-color) !important;
 }
