@@ -1,5 +1,6 @@
 # Packages needed for delayed jobs.
 celery[redis]>=4.2.1,<4.3
 django-celery-beat==1.1.1
+redis==2.10.6
 sqlalchemy
 python-memcached
