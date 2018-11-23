@@ -120,6 +120,11 @@ guiElements.base = function(opt = {}, value, parent_object)
         }
     }
 
+    this.isEqual = function (value)
+    {
+        return value == this.getValue();
+    }
+
     /**
      * Function for inserting value into templates of guiElements.
      */
@@ -433,6 +438,15 @@ guiElements.color = function()
 {
     this.name = 'color'
     guiElements.base.apply(this, arguments)
+
+    this.isEqual = function (value)
+    {
+        if(value && value.toUpperCase && this.getValue() && this.getValue().toUpperCase)
+        {
+            return value.toUpperCase() == this.getValue().toUpperCase();
+        }
+        return false;
+    }
 }
 
 guiElements.named_template = function()

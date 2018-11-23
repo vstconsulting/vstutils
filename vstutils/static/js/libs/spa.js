@@ -545,7 +545,6 @@ if(!window.spajs)
                 console.error("URL not registered", opt.menuId, opt)
             }
 
-            debugger;
             def.reject({detail:"Error URL not registered", status:404})
             throw { text:"URL not registered " + opt.menuId, code:404};
             return def.promise();

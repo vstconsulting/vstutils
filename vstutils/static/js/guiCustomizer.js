@@ -28,6 +28,7 @@ guiSkins.base = function(value){
 
     this.saveSettings = function(){
         guiLocalSettings.set(this.name+"_settings", this.value)
+        guiPopUp.success("Skin was saved.");
     }
 
     this.loadSettings = function(){
