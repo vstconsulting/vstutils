@@ -293,8 +293,17 @@ guiElements.base = function(opt = {}, value, parent_object)
         return spajs.just.render(this.template_name, {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
-            this.rendered = true
         });
+    }
+
+    this.isRendered = function()
+    {
+        if($("#"+this.element_id).length != 0)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     this.getValue = function()
