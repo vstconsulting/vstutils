@@ -14,6 +14,7 @@ guiSkins.base = function(value){
 
     this.activate = function(){
         //this.setValue(this.loadSettings())
+        tabSignal.emit("guiSkins.activate", {skin:this});
         this.replaceCss(this.getCss())
     }
 
@@ -27,12 +28,36 @@ guiSkins.base = function(value){
     }
 
     this.saveSettings = function(){
-        guiLocalSettings.set(this.name+"_settings", this.value)
-        guiPopUp.success("Skin was saved.");
+        let skins_settings = guiLocalSettings.get('skins_settings') || {};
+
+        skins_settings[this.name] = this.value;
+
+        guiLocalSettings.set('skins_settings', skins_settings);
+
+
+        // guiLocalSettings.set(this.name+"_settings", this.value)
+
+        tabSignal.emit("guiSkins.save", {skin:this});
+    }
+
+    this.deleteSettings = function()
+    {
+        let skins_settings = guiLocalSettings.get('skins_settings') || {};
+
+        delete skins_settings[this.name];
+
+        guiLocalSettings.set('skins_settings', skins_settings);
+
+        tabSignal.emit("guiSkins.deleteSettings", {skin:this});
     }
 
     this.loadSettings = function(){
-        let val = guiLocalSettings.get(this.name+"_settings")
+
+        let skins_settings = guiLocalSettings.get('skins_settings') || {};
+        let val = skins_settings[this.name];
+        //let val = guiLocalSettings.get(this.name+"_settings")
+        tabSignal.emit("guiSkins.loadSettings", {skin:this, settings:val});
+
         if(!val)
         {
             return {}
@@ -81,15 +106,27 @@ guiSkins.base = function(value){
                         this.applySettings()
                     },
                 },
+                delete_settings:{
+                    title:'Reset settings',
+                    text:'Reset settings',
+                    format:'formButton',
+                    type: "string",
+                    priority: 902,
+                    onclick:() => {
+                        this.deleteSettings()
+                        guiCustomizer.render()
+                    },
+                },
                 save:{
                     title:'Save',
                     text:'Save',
                     format:'formButton',
                     type: "string",
-                    priority: 902,
+                    priority: 903,
                     onclick:() => {
                         this.applySettings()
                         this.saveSettings()
+                        guiPopUp.success("Skin was saved.")
                     },
                 },
             },
@@ -801,15 +838,27 @@ guiSkins.default = function(){
                         this.applySettings()
                     },
                 },
+                delete_settings:{
+                    title:'Reset settings',
+                    text:'Reset settings',
+                    format:'formButton',
+                    type: "string",
+                    priority: 902,
+                    onclick:() => {
+                        this.deleteSettings()
+                        guiCustomizer.render()
+                    },
+                },
                 saveSkin:{
                     title:'Save skin',
                     text:'Save skin',
                     format:'formButton',
                     type: "string",
-                    priority: 902,
+                    priority: 903,
                     onclick:() => {
                         this.applySettings()
                         this.saveSettings()
+                        guiPopUp.success("Skin was saved.")
                     },
                 },
             },
@@ -920,6 +969,10 @@ guiCustomizer.setSkin = function(skinId)
 
     guiLocalSettings.set('skin', skinId)
     this.skin.activate()
+}
+
+guiCustomizer.getSkin = function () {
+    return this.skin;
 }
 
 guiCustomizer.render = function()

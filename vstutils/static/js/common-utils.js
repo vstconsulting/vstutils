@@ -520,6 +520,10 @@ var guiLocalSettings = {
     get:function(name){
         return this.__settings[name];
     },
+    delete:function(name){
+        delete this.__settings[name];
+        localStorage.removeItem(name)
+    },
     set:function(name, value){
         this.__settings[name] = value;
         window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
