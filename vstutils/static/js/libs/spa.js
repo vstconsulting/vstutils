@@ -233,9 +233,35 @@ if(!window.spajs)
      */
     spajs.openURL = function(url, title)
     {
-        history.pushState({url:url}, title, url);
+        if(spajs.findMenu(spajs.getMenuIdFromUrl(url)))
+        {
+            history.pushState({url:url}, title, url);
+        }
+         
         var res = spajs.openMenuFromUrl(url, {withoutFailPage: true})
         return res
+    }
+
+    spajs.getMenuIdFromUrl = function(url)
+    {
+        let menuId
+        // Если menu_url не задан то используем первый знак вопроса в строке адреса
+        if(url.indexOf("?") != -1)
+        {
+            menuId = window.location.href.slice(window.location.href.indexOf("?")+1)
+        }
+        else
+        {
+            // Если menu_url не задан то используем window.location.hash
+            menuId = window.location.hash.slice(1)
+        }
+
+        if(spajs.opt.menu_url)
+        {
+            menuId = spajs.getUrlParam(spajs.opt.menu_url)
+        }
+
+        return menuId
     }
 
     /**
