@@ -78,7 +78,10 @@ webGui.start = function(options)
     tabSignal.emit("webGui.start")
 
     try{
-        spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})
+        if(window.location.pathname == "/" )
+        {
+            spajs.openMenuFromUrl(undefined, {withoutFailPage:window.location.pathname != "/"})
+        }
     }
     catch (exception)
     {
@@ -126,7 +129,7 @@ webGui.showErrors = function(res)
                 return true;
             }
             else if(typeof res[i] === "object")
-            {  
+            {
                 let error = webGui.showErrors(res[i])
                 if (error)
                 {

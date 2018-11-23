@@ -678,9 +678,21 @@ guiSkins.default = function(){
                     title:'Background active color',
                     format:'color',
                     type: "string",
-                    default:"#f8f9fa",
+                    default:"#2d75be",
                     priority: 37,
                     value:this.value.background_active_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                background_passiv_color:{
+                    color_var:"--background-passiv-color",
+                    title:'Background active color',
+                    format:'color',
+                    type: "string",
+                    default:"#3d434a",
+                    priority: 37,
+                    value:this.value.background_passiv_color,
                     onchange:() => {
                         this.applySettings()
                     },
@@ -930,6 +942,7 @@ guiSkins.dark = function(){
         form.highlight_tr_hover_color.default   = "#474747"
         form.selected_color.default             = "#0a2a00"
         form.background_active_color.default    = "#6c6c6c"
+        form.background_passiv_color.default    = "#909090"
         form.text_header_color.default          = "#c2c7d0"
 
         form.background_default_color.default   = "#838383"
