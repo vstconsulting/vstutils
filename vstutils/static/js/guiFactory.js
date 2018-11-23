@@ -11,7 +11,7 @@ function getMenuIdFromApiPath(path){
 }
 
 function guiTestUrl(regexp, url)
-{ 
+{
     url = url.replace(/[/#]*$/, "").replace(/^\//, "")
 
     let reg_exp = XRegExp(regexp, 'x');
@@ -307,8 +307,7 @@ function openApi_add_list_page_path(api_obj)
 }
 
 tabSignal.connect("resource.loaded", function()
-{
-    window.api = new guiApi();
+{ 
     $.when(window.api.init()).done(function()
     {
         // An event in the body of which one could override the response from open api
