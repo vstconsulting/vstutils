@@ -79,7 +79,7 @@ guiSkins.base = function(value){
 
         tabSignal.emit('guiSkin.' + this.name + '.init', {guiSkin: this});
 
-        this.customizerForm = new guiElements.form(undefined, this.options);
+        this.customizerForm = new guiElements.form({css_class:'skin-options skin-'+this.name+'-options'}, this.options);
     }
 
     this.afterInitFormOptions = function(){}
@@ -337,7 +337,7 @@ guiSkins.default = function(){
                     title:'Buttons primary background',
                     format:'color',
                     type: "string",
-                    default:"#007bff",
+                    default:"#3c75b3",
                     priority: 12,
                     value:this.value.btn_primary_bg_color,
                     onchange:() => {
@@ -361,7 +361,7 @@ guiSkins.default = function(){
                     title:'Buttons primary border',
                     format:'color',
                     type: "string",
-                    default:"#007bff",
+                    default:"#2a6fbc",
                     priority: 14,
                     value:this.value.btn_primary_border_color,
                     onchange:() => {
@@ -464,8 +464,34 @@ guiSkins.default = function(){
                     format:'color',
                     type: "string",
                     default:"#0056b3",
-                    priority: 22,
+                    priority: 21.1,
                     value:this.value.a_color_hover,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+
+                a_color_revers:{
+                    color_var:"--a-color-revers",
+                    title:'Links revers',
+                    format:'color',
+                    type: "string",
+                    default:"#2e2e2e",
+                    priority: 22,
+                    value:this.value.a_color_revers,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                a_color_hover_revers:{
+                    color_var:"--a-color-hover-revers",
+                    title:'Links hover revers',
+                    format:'color',
+                    type: "string",
+                    default:"#00002e",
+                    priority: 22.1,
+                    value:this.value.a_color_hover_revers,
                     onchange:() => {
                         this.applySettings()
                     },

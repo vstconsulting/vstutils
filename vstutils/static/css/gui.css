@@ -1105,6 +1105,7 @@ table{
     border: 1px solid #d2d6de;
     padding: 10px;
     min-height: 34px;
+    background-color: #ffffffa1;
 }
 
 .hidden-field {
@@ -1116,7 +1117,6 @@ table{
 /**
  * Фильтры для формы поиска
  **/
-
 .search-form{
     width: 100%;
     display: flex;
@@ -1669,6 +1669,10 @@ body{
 
     --a-color: #e2e2e2;
     --a-color-hover: #ffffff;
+
+    --a-color-revers: #2e2e2e;
+    --a-color-hover-revers: #00002e;
+
     --text-color: #bebebe;
     --ico-default-color: #bebebe;
     --text-header-color: #c2c7d0;
@@ -1832,7 +1836,7 @@ body{
     background-color: var(--content-wrapper);
 }
 
-.iziModal-content, .modal-content
+.iziModal-content, .modal-content, .iziModal
 {
     background-color: var(--modal-bg-color);
 }
@@ -1882,6 +1886,13 @@ a:hover, a:hover .url{
     color: var(--a-color-hover) !important;
 }
 
+a.revers-color{
+    color: var(--a-color-revers);
+}
+
+a.revers-color:hover{
+    color: var(--a-color-hover-revers) !important;
+}
 
 .card-body{
     background-color: var(--card-body-bg-color);
@@ -1947,4 +1958,13 @@ input[type=color]{
 .control-sidebar, .control-sidebar:before{
     width: 300px;
     right: -300px;
+}
+
+
+
+@media (max-width: 800px) {
+    /* hide edit buttons on the Dashboard on small screens and choose colors on the customizer; */
+    .btn-showWidgetSettings, .btn-toggleSortable, .customizer-options .skin-options{
+        display: none;
+    }
 }
