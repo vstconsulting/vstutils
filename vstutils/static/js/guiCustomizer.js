@@ -66,6 +66,7 @@ guiSkins.base = function(value){
                     title:'Custom CSS',
                     format:'textarea',
                     type: "string",
+                    priority: 900,
                     value:this.value.custom_style,
                     onchange:function(event){
                     },
@@ -75,6 +76,7 @@ guiSkins.base = function(value){
                     text:'Apply',
                     format:'formButton',
                     type: "string",
+                    priority: 901,
                     onclick:() => {
                         this.applySettings()
                     },
@@ -84,6 +86,7 @@ guiSkins.base = function(value){
                     text:'Save',
                     format:'formButton',
                     type: "string",
+                    priority: 902,
                     onclick:() => {
                         this.applySettings()
                         this.saveSettings()
@@ -654,6 +657,128 @@ guiSkins.default = function(){
                         this.applySettings()
                     },
                 },
+                modal_bg_color: {
+                    color_var:"--modal-bg-color",
+                    title:'Modal background color',
+                    format:'color',
+                    type: "string",
+                    default:"#ffffff",
+                    priority: 40.1,
+                    value:this.value.modal_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                api_sections_bg_color:{
+                    color_var:"--api-sections-bg-color",
+                    title:'Api sections background color',
+                    format:'color',
+                    type: "string",
+                    default:"#f7f7f9",
+                    priority: 40.2,
+                    value:this.value.api_sections_bg_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                api_sections_border_color:{
+                    color_var:"--api-sections-border-color",
+                    title:'Api sections border color',
+                    format:'color',
+                    type: "string",
+                    default:"#e1e1e8",
+                    priority: 40.3,
+                    value:this.value.api_sections_border_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+
+                //prettify.css colors of code highlighting in api
+                prettify_com_color: {
+                    color_var:"--prettify-com-color",
+                    title:'Code highlighting color 1',
+                    format:'color',
+                    type: "string",
+                    default:"#93a1a1",
+                    priority: 40.4,
+                    value:this.value.prettify_com_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                prettify_lit_color: {
+                    color_var:"--prettify-lit-color",
+                    title:'Code highlighting color 2',
+                    format:'color',
+                    type: "string",
+                    default:"#195f91",
+                    priority: 40.4,
+                    value:this.value.prettify_lit_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                prettify_fun_color: {
+                    color_var:"--prettify-fun-color",
+                    title:'Code highlighting color 3',
+                    format:'color',
+                    type: "string",
+                    default:"#dc322f",
+                    priority: 40.4,
+                    value:this.value.prettify_fun_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                prettify_str_color: {
+                    color_var:"--prettify-str-color",
+                    title:'Code highlighting color 4',
+                    format:'color',
+                    type: "string",
+                    default:"#de1043",
+                    priority: 40.4,
+                    value:this.value.prettify_str_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                prettify_kwd_color: {
+                    color_var:"--prettify-kwd-color",
+                    title:'Code highlighting color 5',
+                    format:'color',
+                    type: "string",
+                    default:"#1e347b",
+                    priority: 40.4,
+                    value:this.value.prettify_kwd_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                prettify_var_color: {
+                    color_var:"--prettify-var-color",
+                    title:'Code highlighting color 6',
+                    format:'color',
+                    type: "string",
+                    default:"#008080",
+                    priority: 40.4,
+                    value:this.value.prettify_var_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
+                prettify_pln_color: {
+                    color_var:"--prettify-pln-color",
+                    title:'Code highlighting color 7',
+                    format:'color',
+                    type: "string",
+                    default:"#48484c",
+                    priority: 40.4,
+                    value:this.value.prettify_pln_color,
+                    onchange:() => {
+                        this.applySettings()
+                    },
+                },
 
 
 
@@ -671,7 +796,7 @@ guiSkins.default = function(){
                     text:'Apply',
                     format:'formButton',
                     type: "string",
-                    priority: 902,
+                    priority: 901,
                     onclick:() => {
                         this.applySettings()
                     },
@@ -681,7 +806,7 @@ guiSkins.default = function(){
                     text:'Save',
                     format:'formButton',
                     type: "string",
-                    priority: 901,
+                    priority: 902,
                     onclick:() => {
                         this.applySettings()
                         this.saveSettings()
@@ -736,6 +861,17 @@ guiSkins.dark = function(){
 
         form.boolean_false_color.default        = "#949494"
         form.boolean_true_color.default         = "#21d703"
+        form.modal_bg_color.default             = "#515151"
+        form.api_sections_bg_color.default      = "#6c6c6c"
+        form.api_sections_border_color.default  = "#8d8d8d"
+
+        form.prettify_com_color.default         = "#93a1a1"
+        form.prettify_lit_color.default         = "#0DDBDE"
+        form.prettify_fun_color.default         = "#FAED5C"
+        form.prettify_str_color.default         = "#E8EC09"
+        form.prettify_kwd_color.default         = "#3DC2F5"
+        form.prettify_var_color.default         = "#12F39C"
+        form.prettify_pln_color.default         = "#C2C2C7"
 
     }
 

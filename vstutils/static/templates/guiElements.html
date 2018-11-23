@@ -157,7 +157,7 @@
     <%[ main_input %>
         <div class="input-group">
             <~ guiElement.db_value>
-                <% if(guiElement.rendered && guiElement.isEqual(guiElement.db_value)){ %>
+                <% if(guiElement.rendered && !guiElement.isEqual(guiElement.db_value)){ %>
                     <span class="input-group-prepend db_value_input">
                         <div class="input-group-text">
                             <%- guiElement.insertValue(guiElement.db_value) %>
