@@ -1622,7 +1622,8 @@ body{
     --highlight-tr-hover-color: #D8EDF8;
     --table-border-color: #dfe3e7;
     --selected-color: #dfeed9;
-    --background-active-color: #f8f9fa;
+    --background-active-color: #2d75be;
+    --background-passiv-color: #3d434a;
     --text-hover-color: #16181b;
 
     --boolean-true-color: #128200;
@@ -1776,6 +1777,10 @@ body{
 .well, .request-info .prettyprint, .response-info .prettyprint, .swagger-ui .opblock,
 .swagger-ui section.models {
     border-color: var(--api-sections-border-color)!important;
+}
+
+.sidebar-dark-primary .nav-treeview>.nav-item>.nav-link{
+    background-color: var(--background-passiv-color);
 }
 
 .sidebar-dark-primary .nav-treeview>.nav-item>.nav-link.active, .sidebar-dark-primary .nav-treeview>.nav-item>.nav-link.active:hover{
