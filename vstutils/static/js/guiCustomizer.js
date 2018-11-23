@@ -1029,8 +1029,6 @@ guiCustomizer.render = function()
         skins.push({id:i, name:guiSkins[i].title || guiSkins[i].name})
     }
 
-    debugger;
-
     let thisObj = this;
     let formData = {
         title:"Customize",
