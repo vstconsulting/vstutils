@@ -292,7 +292,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                         break;
                     }
                 }
-            }
+            } 
         }
     }
 
@@ -662,7 +662,7 @@ function openApi_guiSchema(api)
         val.sublinks = openApi_get_internal_links(path_schema, path, 1)
         val.sublinks_l2 = openApi_get_internal_links(path_schema, path, 2)
 
-        // objects with paths to sublinks, sublinks_l2 
+        // objects with paths to sublinks, sublinks_l2
         val.actions = {}
         val.links = {}
         for(let subpage in  val.sublinks)

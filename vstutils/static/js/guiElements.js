@@ -1194,7 +1194,7 @@ guiElements.autocomplete = function()
         {
             if(options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
 
             }
@@ -1307,7 +1307,7 @@ guiElements.autocomplete.prepareProperties = function(value)
 
     if(!value.additionalProperties)
     {
-        console.error("AdditionalProperties was not found");
+        //console.error("AdditionalProperties was not found");
         return value;
     }
 
@@ -1318,6 +1318,17 @@ guiElements.autocomplete.prepareProperties = function(value)
             $ref:value.additionalProperties.model.$ref
         },
     }
+
+    if(value.additionalProperties.model.$ref == "#/definitions/Template")
+    {
+        //debugger;
+    }
+
+    if(value.additionalProperties.model.$ref == undefined)
+    {
+        debugger;
+    }
+
     value.gui_links.push({
         prop_name:'autocomplete_properties',
         list_name:'list_obj',
@@ -1340,7 +1351,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         {
             if (options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
             }
 
@@ -1473,7 +1484,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         {
             if (options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
 
             }
@@ -1577,7 +1588,7 @@ guiElements.select2 = function(field, field_value, parent_object)
         {
             if(options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
             }
 
@@ -2747,7 +2758,7 @@ function getInfoFromAdditionalProperties(options)
     let obj, value_field, view_field;
 
     obj = options.autocomplete_properties.list_obj
-
+    
     if(options.autocomplete_properties.value_field && options.autocomplete_properties.view_field)
     {
         value_field = options.autocomplete_properties.value_field;
