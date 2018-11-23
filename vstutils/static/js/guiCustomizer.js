@@ -676,9 +676,9 @@ guiSkins.default = function(){
                         this.applySettings()
                     },
                 },
-                save:{
-                    title:'Save',
-                    text:'Save',
+                saveSkin:{
+                    title:'Save skin',
+                    text:'Save skin',
                     format:'formButton',
                     type: "string",
                     priority: 901,

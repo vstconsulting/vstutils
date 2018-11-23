@@ -441,11 +441,13 @@ guiElements.color = function()
 
     this.isEqual = function (value)
     {
-        if(value && value.toUpperCase && this.getValue() && this.getValue().toUpperCase)
+        let val = this.getValue()
+        if(value && value.toUpperCase && val && val.toUpperCase)
         {
-            return value.toUpperCase() == this.getValue().toUpperCase();
+            return value.toUpperCase() == val.toUpperCase();
         }
-        return false;
+
+        return val == value;
     }
 }
 
