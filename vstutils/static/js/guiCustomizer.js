@@ -113,7 +113,8 @@ guiSkins.base = function(value){
                     type: "string",
                     priority: 902,
                     onclick:() => {
-                        this.deleteSettings()
+                        this.deleteSettings();
+                        this.init();
                         guiCustomizer.render()
                     },
                 },
@@ -871,8 +872,9 @@ guiSkins.default = function(){
                     type: "string",
                     priority: 902,
                     onclick:() => {
-                        this.deleteSettings()
-                        guiCustomizer.render()
+                        this.deleteSettings();
+                        this.init();
+                        guiCustomizer.render();
                     },
                 },
                 saveSkin:{
@@ -1013,6 +1015,8 @@ guiCustomizer.render = function()
 
         skins.push({id:i, name:guiSkins[i].title || guiSkins[i].name})
     }
+
+    debugger;
 
     let thisObj = this;
     let formData = {
