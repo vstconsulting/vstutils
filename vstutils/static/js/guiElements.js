@@ -1328,16 +1328,6 @@ guiElements.autocomplete.prepareProperties = function(value)
         },
     }
 
-    if(value.additionalProperties.model.$ref == "#/definitions/Template")
-    {
-        //debugger;
-    }
-
-    if(value.additionalProperties.model.$ref == undefined)
-    {
-        debugger;
-    }
-
     value.gui_links.push({
         prop_name:'autocomplete_properties',
         list_name:'list_obj',
@@ -1416,7 +1406,6 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 
                 render_options.selectionTag =  list.api.selectionTag
                 window.guiListSelections.initTag(render_options.selectionTag)
-
                 render_options.autocomplete_properties = options.autocomplete_properties;
 
                 list.model.filters = filters;
@@ -2767,13 +2756,13 @@ function getInfoFromAdditionalProperties(options)
     let obj, value_field, view_field;
 
     obj = options.autocomplete_properties.list_obj
-    
+
     if(options.autocomplete_properties.value_field && options.autocomplete_properties.view_field)
     {
         value_field = options.autocomplete_properties.value_field;
         view_field = options.autocomplete_properties.view_field;
     }
-
+    
     return {
         obj: obj,
         value_field: value_field,

@@ -414,6 +414,7 @@ function guiObjectFactory(api_object)
     if (!api_object)
     {
         console.error('Path api_object is '+ typeof api_object)
+        debugger;
     }
 
     if(typeof api_object == "string")
@@ -421,6 +422,7 @@ function guiObjectFactory(api_object)
         if (!window.guiSchema.path[api_object])
         {
             console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object+""}))
+            debugger;
         }
 
         api_object = window.guiSchema.path[api_object]

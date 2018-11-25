@@ -19,7 +19,7 @@ guiTests = {
 
 /**
  * Создаёт тест который выполнит переход на страницу и завалится если там ошибка
- * @param {string} path
+ * @param {string} test_name не обязательный параметр имени теста
  */
 guiTests.openPage =  function(test_name, env, path_callback)
 {
@@ -167,6 +167,14 @@ guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
     });
 }
 
+/**
+ *
+ * @param {type} assert
+ * @param {type} path Не обязательный параметр для имени теста
+ * @param {type} fieldsData
+ * @param {type} values
+ * @returns {undefined}
+ */
 guiTests.compareValues =  function(assert, path, fieldsData, values)
 {
     for(let i in fieldsData)

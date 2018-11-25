@@ -10,11 +10,6 @@ function openApi_guiPrepareFields(api, properties, parent_name)
     let fields = mergeDeep({}, properties)
     for(let i in fields)
     {
-        /*if(fields[i].additionalProperties && fields[i].additionalProperties.model && fields[i].additionalProperties.model.$ref)
-        {
-            // Это для автокомплита поле а не ссылка куда попало.
-            continue;
-        }*/
         let field = fields[i]
 
         if(!field.gui_links)
@@ -69,9 +64,6 @@ function openApi_guiPrepareFields(api, properties, parent_name)
             }
 
             field.definition_ref = def_name
-            //field.definition_list = openApi_findParentByDefinition(def_obj, def_name, 'list')
-            //field.definition_one = openApi_findParentByDefinition(def_obj, def_name, 'page')
-
             field.gui_links.push({
                 prop_name:'definition',
                 list_name:'list',
@@ -155,21 +147,39 @@ function openApi_guiPrepareFilters(schema)
 
 function openApi_findParentByDefinition(api_obj, definition, type = 'list')
 {
-    if(api_obj.type == type && type == 'list' && api_obj.api.get)
+    if(api_obj.type == type && type == 'list')
     {
-        let schema = getObjectNameBySchema(api_obj.api.get)
-        if(schema == definition)
-        {
-            return api_obj;
+        try{
+            let schema = api_obj.schema.list.responses[200].schema.definition_ref
+            if(schema == definition)
+            {
+                return api_obj;
+            }
+        }catch (e) {
+            debugger;
         }
     }
 
     if(api_obj.type == type && type == 'page' && api_obj.page && api_obj.page.api.get)
     {
-        let schema = getObjectNameBySchema(api_obj.page.api.get)
-        if(schema == definition)
-        {
-            return api_obj;
+        try{
+            let schema = api_obj.schema.get.responses[200].schema.definition_ref
+            if(schema == definition)
+            {
+                return api_obj;
+            }
+        }catch (e) {
+            debugger;
+        }
+
+        try{
+            let schema = api_obj.schema.edit.responses[200].schema.definition_ref
+            if(schema == definition)
+            {
+                return api_obj;
+            }
+        }catch (e) {
+            debugger;
         }
     }
 
