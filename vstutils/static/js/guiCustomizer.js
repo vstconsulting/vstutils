@@ -113,7 +113,8 @@ guiSkins.base = function(value){
                     type: "string",
                     priority: 902,
                     onclick:() => {
-                        this.deleteSettings()
+                        this.deleteSettings();
+                        this.init();
                         guiCustomizer.render()
                     },
                 },
@@ -883,8 +884,9 @@ guiSkins.default = function(){
                     type: "string",
                     priority: 902,
                     onclick:() => {
-                        this.deleteSettings()
-                        guiCustomizer.render()
+                        this.deleteSettings();
+                        this.init();
+                        guiCustomizer.render();
                     },
                 },
                 saveSkin:{
