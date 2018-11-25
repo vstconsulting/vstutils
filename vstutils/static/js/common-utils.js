@@ -893,7 +893,7 @@ function debounce(f, ms) {
 
 
 function setActiveMenuLi( )
-{
+{ 
     let url = window.location.hash.replace("#", "")
     $(".nav-sidebar li[data-url]").removeClass("active");
     $(".nav-sidebar a.nav-link").removeClass('active')
@@ -910,6 +910,11 @@ function setActiveMenuLi( )
         let val = $(li[i])
         let dataurl = val.attr('data-url')
 
+        if(dataurl == "" && urllevel >= 1)
+        {
+            continue;
+        }
+
         if(urllevel > 1 && url.indexOf(dataurl) != 0)
         {
             continue;
@@ -920,7 +925,6 @@ function setActiveMenuLi( )
             continue;
         }
 
-        //debugger;
         if(val.hasClass('has-treeview'))
         {
             val.addClass("menu-open")
