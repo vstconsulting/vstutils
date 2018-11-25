@@ -29,7 +29,7 @@
                         </a>
                     {% endif %}
 
-                    <ul class="menu-treeview-menu nav nav-treeview">
+                    <ul class="menu-treeview-menu nav nav-treeview"  >
                         {% for subitem in item.sublinks %}
                             {% if subitem.name %}
                                 <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}"  data-url="{{subitem.url}}" class="nav-item">

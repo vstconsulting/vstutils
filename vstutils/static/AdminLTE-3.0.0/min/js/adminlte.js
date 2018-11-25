@@ -820,4 +820,10 @@ exports.Widget = Widget;
 Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
+
+
+// Required to activate the treeview plugin for navigation menu operation.
+$(window).trigger('load.lte.treeview')
+
+
 //# sourceMappingURL=adminlte.js.map
