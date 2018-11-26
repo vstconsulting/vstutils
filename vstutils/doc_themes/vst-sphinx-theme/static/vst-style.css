@@ -1,8 +1,6 @@
-@import url(bootstrap/css/bootstrap.min.css);
-@import url(lte/css/AdminLTE.css);
-@import url(lte/css/font-awesome.min.css);
-@import url(lte/css/ionicons.min.css);
-@import url(lte/css/skins/_all-skins.css);
+@import url(AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css);
+@import url(AdminLTE-3.0.0/min/css/adminlte.min.css);
+@import url(AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css);
 
 
 .sidebar-menu ul {
