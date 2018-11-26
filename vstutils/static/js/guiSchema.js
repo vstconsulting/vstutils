@@ -169,7 +169,7 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
                 return api_obj;
             }
         }catch (e) {
-            debugger;
+            //debugger;
         }
 
         try{
@@ -179,7 +179,7 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
                 return api_obj;
             }
         }catch (e) {
-            debugger;
+            //debugger;
         }
     }
 
@@ -302,7 +302,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                         break;
                     }
                 }
-            } 
+            }
         }
     }
 

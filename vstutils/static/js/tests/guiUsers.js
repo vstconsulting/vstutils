@@ -4,7 +4,8 @@ window.qunitTestsArray['guiPaths.profile'] = {
     {
         let path = "profile"
         guiTests.openPage(path)
-        guiTests.hasElement(1, ".btn_save", path)
+        guiTests.hasElement(0, ".btn_save", path)
+        guiTests.hasEditButton(true)
         guiTests.hasAddButton(0, path)
 
         syncQUnit.addTest("open profile for user window.my_user_id", function ( assert )
@@ -14,6 +15,7 @@ window.qunitTestsArray['guiPaths.profile'] = {
             testdone(done)
         });
 
+        guiTests.clickAndWaitRedirect(".btn-edit-one-entity")
         guiTests.clickAndWaitRedirect(".sublink-btn-copy")
     }
 }

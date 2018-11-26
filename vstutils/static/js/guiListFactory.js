@@ -963,20 +963,7 @@ var gui_list_object = {
         var def = new $.Deferred();
         $.when(this.create()).done((newObj) => {
 
-            let id = newObj.data.id
-            if(newObj.data.id === undefined)
-            {
-                id = newObj.data.pk
-                if(newObj.data.pk === undefined)
-                {
-                    id = newObj.data.name
-                    if(newObj.data.name === undefined)
-                    {
-                        console.error("Primary key not found")
-                        debugger;
-                    }
-                }
-            }
+            let id = this.getPkValue(newObj.data)
 
             $.when(vstGO(this.url_vars.baseURL(id))).done(()=>{
                 def.resolve();

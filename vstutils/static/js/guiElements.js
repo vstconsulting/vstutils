@@ -1402,8 +1402,6 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
                 render_options.base_path = list.api.path.format({pk:list.url_vars.api_pk}).slice(1,-1);
                 render_options.base_href = render_options.base_path;
 
-                if(!render_options.page_type) render_options.page_type = 'list'
-
                 render_options.selectionTag =  list.api.selectionTag
                 window.guiListSelections.initTag(render_options.selectionTag)
                 render_options.autocomplete_properties = options.autocomplete_properties;
@@ -2762,7 +2760,7 @@ function getInfoFromAdditionalProperties(options)
         value_field = options.autocomplete_properties.value_field;
         view_field = options.autocomplete_properties.view_field;
     }
-    
+
     return {
         obj: obj,
         value_field: value_field,

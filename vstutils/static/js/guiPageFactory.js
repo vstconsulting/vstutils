@@ -135,13 +135,17 @@ var gui_page_object = {
         }
     },
 
-    update : function ()
+    update : function (goUp = false)
     {
         var thisObj = this;
         var res = this.sendToApi(this.api.methodEdit)
         $.when(res).done(function()
         {
             guiPopUp.success("Changes in "+thisObj.api.bulk_name+" were successfully saved");
+            if(goUp)
+            {
+                vstGO(thisObj.url_vars.baseURL())
+            }
         })
         return res;
     },
@@ -163,13 +167,9 @@ var gui_page_object = {
 
     },
 
-    /**
-     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
-     * @returns {string|promise}
-     */
-    renderAsPage : function (render_options = {})
+    renderPage : function (mode, render_options = {})
     {
-        let tpl = this.getTemplateName('one')
+        let tpl = this.getTemplateName('one_'+mode)
 
         if(this.api.autoupdate &&
             (
@@ -182,46 +182,46 @@ var gui_page_object = {
             this.startUpdates()
         }
 
-        render_options.fields = []
-        if(this.api.schema.edit)
-        {
-            render_options.fields = this.api.schema.edit.fields
-        }
-        else if(this.api.schema.get)
-        {
-            render_options.fields = this.api.schema.get.fields
-        }
-        //render_options.sections = this.getSections('renderAsPage')
-        if(!render_options.page_type) render_options.page_type = 'one'
-
-        render_options.base_path = getUrlBasePath()
+        render_options.fields = this.api.schema[mode].fields
+        render_options.base_path = getUrlBasePath().replace(/\/edit$/, "")
 
         render_options.links = this.api.links
         render_options.actions = this.api.actions
 
         this.model.data = this.prepareDataBeforeRender();
 
-        this.beforeRenderAsPage();
+        this.beforeRenderAsPage(mode);
 
-        tabSignal.emit("guiList.renderPage",  {guiObj:this, options: render_options, data:this.model.data});
-        tabSignal.emit("guiList.renderPage."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data});
+        tabSignal.emit("guiList.renderPage."+mode+"",  {guiObj:this, options: render_options, data:this.model.data, mode:mode});
+        tabSignal.emit("guiList.renderPage."+mode+"."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data, mode:mode});
 
-        return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options});
+        tabSignal.emit("guiList.renderPage",  {guiObj:this, options: render_options, data:this.model.data, mode:mode});
+        tabSignal.emit("guiList.renderPage."+this.api.bulk_name,  {guiObj:this, options: render_options, data:this.model.data, mode:mode});
+
+        return spajs.just.render(tpl, {query: "", guiObj: this, opt: render_options, mode:mode});
     },
 
-    beforeRenderAsPage: function()
+    /**
+     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
+     * @returns {string|promise}
+     */
+    renderAsEditablePage : function (render_options = {})
     {
-        let schema_name = '';
-        if(this.api.schema.edit)
-        {
-            schema_name = 'edit';
-        }
-        else if(this.api.schema.get)
-        {
-            schema_name = 'get';
-        }
+        return this.renderPage('edit', render_options)
+    },
 
-        this.initAllFields(schema_name);
+    /**
+     * Функция должна вернуть или html код блока или должа пообещать что вернёт html код блока позже
+     * @returns {string|promise}
+     */
+    renderAsPage : function (render_options = {})
+    {
+        return this.renderPage('get', render_options)
+    },
+
+    beforeRenderAsPage: function(mode)
+    {
+        this.initAllFields(mode);
     },
 
     prepareDataBeforeRender: function()

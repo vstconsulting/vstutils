@@ -58,6 +58,35 @@ tabSignal.connect("openapi.completed", function()
             return def.promise();
         },
     })
+
+    spajs.addMenu({
+        id:"profile_edit",
+        urlregexp:[/^\/?profile\/edit$/],
+        priority:0,
+        onOpen:function(holder, menuInfo, data, onClose_promise)
+        {
+            let pageItem = new guiObjectFactory('/user/{pk}/', {
+                page:'user/'+ my_user_id,
+                api_pk:my_user_id
+            })
+            window.curentPageObject = pageItem // Нужен для работы тестов
+
+            var def = new $.Deferred();
+            $.when(pageItem.load(my_user_id)).done(function()
+            {
+                def.resolve(pageItem.renderAsEditablePage())
+            }).fail(function(err)
+            {
+                def.resolve(renderErrorAsPage(err));
+            })
+
+            $.when(onClose_promise).always(() => {
+                pageItem.stopUpdates();
+            })
+
+            return def.promise();
+        },
+    })
 })
 
 

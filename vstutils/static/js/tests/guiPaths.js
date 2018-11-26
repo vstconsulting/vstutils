@@ -270,6 +270,11 @@ guiTests.hasAddButton =  function(isHas, path = "hasAddButton")
     return guiTests.hasElement(isHas, ".btn-add-one-entity", path)
 }
 
+guiTests.hasEditButton =  function(isHas, path = "hasEditButton")
+{
+    return guiTests.hasElement(isHas, ".btn-edit-one-entity", path)
+}
+
 
 
 guiTests.hasElement =  function(isHas, selector, path = "")
