@@ -53,35 +53,37 @@
             </small>
         </h1>-->
         {% endcomment %}
-        <div class="row">
-            <div class="col-lg-6">
-                <h1>
-                    {% if name %}{{ name }}{% endif %}
-                    {% block description %}
-                        {% if not description == "<p></p>" %}
-                            <small>
-                                <a class="fa fa-question-circle help-popover"
-                                   data-container="body" data-toggle="popover"
-                                   data-placement="right" data-content="{{ description }}">
-                                </a>
-                            </small>
-                        {% endif %}
-                    {% endblock %}
-                </h1>
-            </div>
-            <div class="col-lg-6">
-                <ol class="breadcrumb float-sm-right">
-                    {% block breadcrumbs %}
-                    <li class="breadcrumb-item"><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
-                    {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
-                        {% if forloop.last %}
-                        <li class="breadcrumb-item active"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
-                        {% else %}
-                        <li class="breadcrumb-item"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% endblock %}
-                </ol>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6">
+                    <h1 class="h1-header-api">
+                        {% if name %}{{ name }}{% endif %}
+                        {% block description %}
+                            {% if not description == "<p></p>" %}
+                                <small>
+                                    <a class="fa fa-question-circle help-popover"
+                                       data-container="body" data-toggle="popover"
+                                       data-placement="right" data-content="{{ description }}">
+                                    </a>
+                                </small>
+                            {% endif %}
+                        {% endblock %}
+                    </h1>
+                </div>
+                <div class="col-lg-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% block breadcrumbs %}
+                        <li class="breadcrumb-item"><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+                        {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+                            {% if forloop.last %}
+                            <li class="breadcrumb-item active"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
+                            {% else %}
+                            <li class="breadcrumb-item"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% endblock %}
+                    </ol>
+                </div>
             </div>
         </div>
     </section>

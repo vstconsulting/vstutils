@@ -120,6 +120,11 @@ guiElements.base = function(opt = {}, value, parent_object)
         }
     }
 
+    this.isEqual = function (value)
+    {
+        return value == this.getValue();
+    }
+
     /**
      * Function for inserting value into templates of guiElements.
      */
@@ -239,7 +244,7 @@ guiElements.base = function(opt = {}, value, parent_object)
         {
             let thisObj = this;
             $('#'+this.element_id).on('click', false, function()
-            { 
+            {
                 if(thisObj.blocked)
                 {
                     return false;
@@ -288,8 +293,17 @@ guiElements.base = function(opt = {}, value, parent_object)
         return spajs.just.render(this.template_name, {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
-            this.rendered = true
         });
+    }
+
+    this.isRendered = function()
+    {
+        if($("#"+this.element_id).length != 0)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     this.getValue = function()
@@ -433,6 +447,17 @@ guiElements.color = function()
 {
     this.name = 'color'
     guiElements.base.apply(this, arguments)
+
+    this.isEqual = function (value)
+    {
+        let val = this.getValue()
+        if(value && value.toUpperCase && val && val.toUpperCase)
+        {
+            return value.toUpperCase() == val.toUpperCase();
+        }
+
+        return val == value;
+    }
 }
 
 guiElements.named_template = function()
@@ -1178,7 +1203,7 @@ guiElements.autocomplete = function()
         {
             if(options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
 
             }
@@ -1291,7 +1316,7 @@ guiElements.autocomplete.prepareProperties = function(value)
 
     if(!value.additionalProperties)
     {
-        console.error("AdditionalProperties was not found");
+        //console.error("AdditionalProperties was not found");
         return value;
     }
 
@@ -1302,6 +1327,7 @@ guiElements.autocomplete.prepareProperties = function(value)
             $ref:value.additionalProperties.model.$ref
         },
     }
+
     value.gui_links.push({
         prop_name:'autocomplete_properties',
         list_name:'list_obj',
@@ -1324,7 +1350,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         {
             if (options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
             }
 
@@ -1380,7 +1406,6 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 
                 render_options.selectionTag =  list.api.selectionTag
                 window.guiListSelections.initTag(render_options.selectionTag)
-
                 render_options.autocomplete_properties = options.autocomplete_properties;
 
                 list.model.filters = filters;
@@ -1457,7 +1482,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         {
             if (options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
 
             }
@@ -1561,7 +1586,7 @@ guiElements.select2 = function(field, field_value, parent_object)
         {
             if(options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
             }
 
@@ -2661,6 +2686,31 @@ guiElements.form = function(opt = {}, value, parent_object)
 
         return this.reductionToType(valueObj);
     }
+
+    this.sortRealElements = function(Obj1, Obj2)
+    {
+        let sort_1 = Obj1.val.opt.priority || 0;
+        let sort_2 = Obj2.val.opt.priority || 0;
+        return sort_1 - sort_2;
+    }
+
+    this.renderAllRealElements = function()
+    {
+        let elements_arr = []
+        for(let i in this.realElements) {
+            elements_arr.push({name:i, val:this.realElements[i]})
+        }
+
+        elements_arr.sort(this.sortRealElements);
+
+        let html = '';
+
+        for(let i in elements_arr) {
+            html += elements_arr[i].val.render()
+        }
+
+        return html;
+    }
 }
 
 function set_api_options(options, guiElement)
@@ -2712,7 +2762,7 @@ function getInfoFromAdditionalProperties(options)
         value_field = options.autocomplete_properties.value_field;
         view_field = options.autocomplete_properties.view_field;
     }
-
+    
     return {
         obj: obj,
         value_field: value_field,

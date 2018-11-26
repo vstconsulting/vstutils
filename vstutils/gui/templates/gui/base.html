@@ -186,7 +186,7 @@
 
             { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
 
-            { prioritet:8, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.min.js' %}?v={{gui_version}}"},
+            { prioritet:9, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
@@ -380,7 +380,7 @@
                             {% block footer %}
                                 <footer class="main-footer">
 
-                                    <a href="#" onclick="openHelpModal(); return false;" class="help-text-data">
+                                    <a href="#" onclick="openHelpModal(); return false;" class="help-text-data hidden-in-api">
                                         <span class="fa fa-question-circle"></span> About
                                     </a>
 

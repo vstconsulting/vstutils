@@ -10,21 +10,8 @@ function tabSignal()
 tabSignal.slotArray = new Array();
 tabSignal.debug = false;
 
-tabSignal.sigId = 0;
+tabSignal.sigId = 1000000;
 
-tabSignal.tabUUID = undefined;
-tabSignal.getTabUUID = function()
-{
-    if(!tabSignal.tabUUID)
-    {
-        tabSignal.tabUUID = "";
-        for(var i = 0; i< 16; i++)
-        {
-            tabSignal.tabUUID += "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM"[Math.floor(Math.random()*62)];
-        }
-    }
-    return tabSignal.tabUUID;
-}
 
 /**
  * Подписывает слот на сигнал
@@ -41,8 +28,9 @@ tabSignal.getTabUUID = function()
  * new new signal().emit("catalogControl.OpenObject",{})
  *
  * </code>
+ * @deprecated Заменена функцией tabSignal.on
  */
-tabSignal.connect = function(slot_name, signal_name, slot_function)
+tabSignal.connect = function(slot_name, signal_name, slot_function, priority = undefined)
 {
     if(slot_function === undefined)
     {
@@ -51,22 +39,76 @@ tabSignal.connect = function(slot_name, signal_name, slot_function)
         slot_name = "sig" + (tabSignal.sigId++)
     }
 
-    if (tabSignal.slotArray[signal_name] === undefined)
+    return tabSignal.on({
+        signal:signal_name,
+        slot:slot_name,
+        function: slot_function,
+        priority:priority,
+    })
+}
+
+/**
+ *
+ * @example tabSignal.on({
+ *      signal:'event-name',
+ *      slot:'slot-ABC',
+ *      function: () =>{ alert('ABC'); },
+ *      priority:1,
+ * })
+ *
+ *
+ * @param {object} callobj
+ * @returns {String} callobj.slot
+ */
+tabSignal.on = function(callobj)
+{
+    if(!callobj.slot)
     {
-        tabSignal.slotArray[signal_name] = {}
+        callobj.slot = "sig" + (tabSignal.sigId++)
     }
-    tabSignal.slotArray[signal_name][slot_name] = slot_function;
-    if(tabSignal.debug) console.log("На прослушивание сигнала " + signal_name + " добавлен слот " + slot_name + "", tabSignal.slotArray)
-    return slot_name;
+
+    if(callobj.priority === undefined)
+    {
+        callobj.priority = tabSignal.sigId
+    }
+
+
+    if (tabSignal.slotArray[callobj.signal] === undefined)
+    {
+        tabSignal.slotArray[callobj.signal] = []
+    }
+
+    tabSignal.slotArray[callobj.signal].push({
+        function:callobj.function,
+        slot:callobj.slot,
+        priority:callobj.priority,
+        once:callobj.once
+    })
+
+    if(tabSignal.slotArray[callobj.signal].length)
+    {
+        tabSignal.slotArray[callobj.signal].sort((a, b) =>{
+            let res = a.priority - b.priority
+            if(isNaN(res))
+            {
+                return 0
+            }
+
+            return res
+        })
+    }
+
+    return callobj.slot;
 }
 
 tabSignal.once = function(signal_name, slot_function)
 {
-    return tabSignal.connect(signal_name, function(param,signal_name, SignalNotFromThisTab, slot_name)
-    {
-        tabSignal.disconnect(slot_name, signal_name)
-        slot_function(param,signal_name, SignalNotFromThisTab, slot_name)
-    }) 
+    return tabSignal.on({
+        signal:signal_name,
+        slot:"sig" + (tabSignal.sigId++),
+        function: slot_function,
+        priority:(tabSignal.sigId++),
+    })
 }
 
 
@@ -75,14 +117,21 @@ tabSignal.once = function(signal_name, slot_function)
  */
 tabSignal.disconnect = function(slot_name, signal_name)
 {
-    if (tabSignal.slotArray[signal_name] !== undefined)
-    {
-        if (tabSignal.slotArray[signal_name][slot_name] !== undefined)
+    debounce(() =>{
+        if (tabSignal.slotArray[signal_name] !== undefined)
         {
-            tabSignal.slotArray[signal_name][slot_name] = undefined;
-            return true
+            for(let i in tabSignal.slotArray[signal_name])
+            {
+                let val = tabSignal.slotArray[signal_name];
+                if(val.slot ==  signal_name)
+                {
+                    debugger;
+                    tabSignal.slotArray[signal_name].splice(i, 1)
+                    return true
+                }
+            }
         }
-    }
+    }, 0)
     return false
 }
 
@@ -91,9 +140,9 @@ tabSignal.disconnect = function(slot_name, signal_name)
  * В добавок ретранслирует сигнал в дочернии iframe если они есть и в родительское окно если оно есть
  * @param signal_name Имя сигнала
  * @param param Параметры переданые слоту при вызове в втором аргументе
- * @param SignalNotFromThisTab Если false то значит это сигнал пришёл из другой вкладки
+ * @param SignalNotFromThisTab Если не false то значит это сигнал пришёл из другой вкладки
  */
-tabSignal.emit = function(signal_name, param, SignalNotFromThisTab)
+tabSignal.emit = function(signal_name, param, SignalNotFromThisTab = false)
 {
     if (tabSignal.slotArray[signal_name] === undefined)
     {
@@ -102,15 +151,25 @@ tabSignal.emit = function(signal_name, param, SignalNotFromThisTab)
     else
     {
         if(tabSignal.debug) console.log("Сигнал " + signal_name + " подписаны слоты")
-        var obj = tabSignal.slotArray[signal_name];
-        for (var slot in obj)
+        let obj = tabSignal.slotArray[signal_name];
+        let onceIds = []
+        for (let i in obj)
         {
-            if( obj.hasOwnProperty(slot) &&  obj[slot] !== undefined)
+            if( obj.hasOwnProperty(i) &&  obj[i] !== undefined)
             {
-                obj[slot](param,signal_name, SignalNotFromThisTab === true, slot)
+                if(obj[i].once)
+                {
+                    onceIds.push(i)
+                }
+                obj[i].function(param, signal_name, SignalNotFromThisTab === true, obj[i].slot)
             }
         }
 
+        for (let i in onceIds)
+        {
+            debugger;
+            tabSignal.slotArray[signal_name].splice(onceIds[i], 1)
+        }
     }
 }
 
@@ -134,89 +193,6 @@ tabSignal.emitAll = function (signal_name, param)
         return false
     }
 }
-
-/**
- * Запись состояния общего для всех вкладок
- * @param {string} name
- * @param {object} value
- * @param {number} minTime минимальный возраст данных меньше которого данные перезаписватся не должны в том случаии если они записанны не этой вкладкой
- */
-tabSignal.setState = function(name, value, minTime)
-{
-    console.log("setState", name, value, minTime)
-    var time = new Date()
-    try{
-        if(minTime)
-        {
-            var value = window.localStorage["tabSignal_"+name];
-            if(value)
-            {
-                var val = JSON.parse(value)
-
-                if(val.time + minTime > time.getTime() && val.tabUUID != tabSignal.getTabUUID() )
-                {
-                    // Возраст данных меньше minTime и они записаны не этой вкладкой, а значит мы их перезаписывать не будем
-                    return false
-                }
-            }
-        }
-
-        window.localStorage["tabSignal_"+name] = JSON.stringify({time: time.getTime(), value: value, tabUUID: tabSignal.getTabUUID()})
-        return true
-    }catch (e){
-        return false
-    }
-}
-
-/**
- * Обновление с интервалом данных чтоб их не перезаписала другая вкладка
- * @param {type} name
- * @param {type} value
- * @param {type} minTime
- * @returns {undefined}
- */
-tabSignal.intervalUpdateState = function(name, value, minTime)
-{
-    if(tabSignal.setState(name, value, minTime))
-    {
-        return setInterval(tabSignal.setState, minTime/3, name, value, minTime)
-    }
-    return undefined
-}
-/**
- * Чтение состояния общего для всех вкладок
- * @param {string} name
- * @param {number} maxTime Максимальный возраст данных в милесекундах после чего они считаются не действительными.
- * @returns {Window.localStorage}
- */
-tabSignal.getState = function(name, maxTime)
-{
-    try{
-        var time = new Date()
-        var value = window.localStorage["tabSignal_"+name];
-        if(value)
-        {
-            var val = JSON.parse(value)
-
-            if(!maxTime)
-            {
-                // Нам не важен возраст данных
-                return val.value
-            }
-
-            if(val.time + maxTime > time.getTime())
-            {
-                // Возраст данных меньше maxTime
-                return val.value
-            }
-            return undefined
-        }
-    }catch (e){ }
-    return undefined
-}
-
-tabSignal.send_emit = tabSignal.emitAll; // Для совместимости с прошлой версией.
-
 
 if(!tabSignal.init)
 {

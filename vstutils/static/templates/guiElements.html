@@ -12,6 +12,8 @@
             gui-element
             gui-element-<%- guiElement.name %>
             gui-field-<%- opt.name %>
+            <%- opt.css_class || '' %>
+            <%- guiElement.css_class || '' %>
 
             <% if(opt.hidden){ %> hidden-field <% } %>
 
@@ -157,7 +159,7 @@
     <%[ main_input %>
         <div class="input-group">
             <~ guiElement.db_value>
-                <% if(guiElement.rendered && guiElement.db_value != guiElement.getValue()){ %>
+                <% if(guiElement.isRendered() && !guiElement.isEqual(guiElement.db_value)){ %>
                     <span class="input-group-prepend db_value_input">
                         <div class="input-group-text">
                             <%- guiElement.insertValue(guiElement.db_value) %>
@@ -194,9 +196,9 @@
             <~ guiElement.realElements>
                 <div id="gui<%- guiElement.element_id %>" class="row">
                     <% if(Object.keys(guiElement.realElements).length > 0) { %>
-                        <% for(var i in guiElement.realElements) { %>
-                            <%= guiElement.realElements[i].render() %>
-                        <% } %>
+
+                            <%= guiElement.renderAllRealElements() %>
+
                     <% } else { %>
                         <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
                             <input type="text" class="form-control" readonly disabled  value="This form is empty">
@@ -249,7 +251,7 @@
             <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- guiElement.insertValue(value) %>">
               <% if(opt[opt.name + '_info']){ %>
                   <a href="<%- vstMakeLocalApiUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
-                     class="item-name" onclick="return vstGO(this.href);">
+                     class="item-name revers-color" onclick="return vstGO(this.href);">
                       <% if(!opt.prefetch || !opt.prefetch.field_name || opt[opt.name + '_info'][opt.prefetch.field_name] === undefined ){ %>
                           <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
                       <%}else{ %>
@@ -375,7 +377,7 @@
                 <% }else{ %>
                     <%- opt.class %>
                 <% } %>
-                <%- addCssClassesToElement('btn', opt.title).replace(/[^A-z0-9 _\/-]/g, '_') %>"
+                <%- addCssClassesToElement('btn', opt.title).replace(/[^A-z0-9 _\/\-]/g, '_') %>"
 
         title="<%- opt.title || '' %>"
         >
@@ -448,7 +450,7 @@
                 <%- set_api_options(opt, guiElement) %>
                 id="<%- guiElement.element_id %>"
             >
-                <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
+                <a href="<%- guiElement.getLink() %>" class="revers-color" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
             </div>
         <~>
     <%] %>
