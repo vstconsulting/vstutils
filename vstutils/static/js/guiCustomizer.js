@@ -1045,6 +1045,7 @@ guiCustomizer.render = function()
                 onchange:function(event){
                     thisObj.setSkin(event.value)
                     $('.customize-skin-options').insertTpl(thisObj.renderSkinOptions())
+                     tabSignal.emit("guiSkin.changed", {skinId: event.value});
                 },
             },
         },
