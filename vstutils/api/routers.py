@@ -3,6 +3,7 @@ from warnings import warn
 from collections import OrderedDict
 
 from django.conf.urls import include, url
+from django.conf import settings
 from rest_framework import routers, permissions
 
 from .base import Response
@@ -137,11 +138,14 @@ class MainRouter(_AbstractRouter):
     def __register_openapi(self):
         # pylint: disable=import-error
         from drf_yasg.views import get_schema_view
-        schema_view = get_schema_view(
-            public=True, permission_classes=(permissions.AllowAny,),
-        )
+        view_kwargs = dict(public=settings.OPENAPI_PUBLIC)
+        if view_kwargs['public']:  # nocv
+            view_kwargs['permission_classes'] = (permissions.AllowAny,)
+        schema_view = get_schema_view(**view_kwargs)
+        swagger_kwargs = dict()
+        swagger_kwargs['cache_timeout'] = 0 if settings.DEBUG else 120
         self.register_view(
-            'openapi', schema_view.with_ui('swagger', cache_timeout=5), name='openapi'
+            'openapi', schema_view.with_ui('swagger', **swagger_kwargs), name='openapi'
         )
 
     def _get_custom_lists(self):

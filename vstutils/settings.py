@@ -258,9 +258,6 @@ class DBSectionConfig(BackendsSectionConfig):
             'engine': 'django.db.backends.sqlite3',
             'name': '{PROG}/db.{PROG_NAME}.sqlite3'
         },
-        'options': {
-            'timeout': 20
-        },
         'test': {
             'serialize': 'false'
         }
@@ -286,6 +283,13 @@ DATABASES = {
 if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.mysql':  # nocv
     import pymysql
     pymysql.install_as_MySQLdb()
+
+if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.sqlite3':
+    try:
+        timeout = DATABASES['default']['OPTIONS'].pop('timeout', 20)
+        DATABASES['default']['OPTIONS']['timeout'] = timeout
+    except:  # nocv
+        pass
 
 
 # Cache settings.
@@ -377,6 +381,7 @@ API_CREATE_SWAGGER = web.getboolean('rest_swagger', fallback=('drf_yasg' in INST
 SWAGGER_API_DESCRIPTION = web.get('rest_swagger_description', fallback=vst_project_module.__doc__ or vst_lib_module.__doc__)
 TERMS_URL = ''
 CONTACT = SectionConfig('contact').all() or dict(name='System Administrator')
+OPENAPI_PUBLIC = web.getboolean('public_openapi', fallback=False)
 
 OPENAPI_EXTRA_LINKS = {
     'vstutils': {
@@ -469,12 +474,17 @@ LOGGING = {
     },
     'loggers': {
         VST_PROJECT_LIB: {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
             'propagate': True,
         },
         VST_PROJECT: {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'vstutils': {
+            'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
             'propagate': True,
         },
