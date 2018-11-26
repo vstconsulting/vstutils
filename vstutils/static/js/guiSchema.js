@@ -169,7 +169,6 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
                 return api_obj;
             }
         }catch (e) {
-            debugger;
         }
 
         try{
@@ -179,7 +178,6 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
                 return api_obj;
             }
         }catch (e) {
-            debugger;
         }
     }
 
