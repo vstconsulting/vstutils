@@ -107,7 +107,7 @@ guiSkins.base = function(value){
                     },
                 },
                 delete_settings:{
-                    title:'Reset settings',
+                    title:'Reset skin settings to default',
                     text:'Reset settings',
                     format:'formButton',
                     type: "string",
@@ -115,7 +115,8 @@ guiSkins.base = function(value){
                     onclick:() => {
                         this.deleteSettings();
                         this.init();
-                        guiCustomizer.render()
+                        guiCustomizer.render();
+                        guiPopUp.success("Skin's settings were reset to default.");
                     },
                 },
                 save:{
@@ -878,7 +879,7 @@ guiSkins.default = function(){
                     },
                 },
                 delete_settings:{
-                    title:'Reset settings',
+                    title:'Reset skin settings to default',
                     text:'Reset settings',
                     format:'formButton',
                     type: "string",
@@ -887,6 +888,7 @@ guiSkins.default = function(){
                         this.deleteSettings();
                         this.init();
                         guiCustomizer.render();
+                        guiPopUp.success("Skin's settings were reset to default.");
                     },
                 },
                 saveSkin:{
@@ -1043,6 +1045,7 @@ guiCustomizer.render = function()
                 onchange:function(event){
                     thisObj.setSkin(event.value)
                     $('.customize-skin-options').insertTpl(thisObj.renderSkinOptions())
+                     tabSignal.emit("guiSkin.changed", {skinId: event.value});
                 },
             },
         },
