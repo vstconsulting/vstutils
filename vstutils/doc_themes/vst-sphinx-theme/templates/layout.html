@@ -2,12 +2,10 @@
 <!DOCTYPE html>
 <html>
 {%- macro css() %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
     <link rel="stylesheet" href="{{ pathto('_static/' + style, 1) }}" type="text/css" />
     <link rel="stylesheet" href="{{ pathto('_static/pygments.css', 1) }}" type="text/css" />
-    <link rel="stylesheet" href="{{ pathto('_static/css/iziToast.min.css', 1) }}" type="text/css" />
-    <link rel="stylesheet" href="{{ pathto('_static/css/iziModal.min.css', 1) }}" type="text/css" />
     <link rel="stylesheet" href="{{ pathto('_static/css/gui.css', 1) }}" type="text/css" />
-    <link rel="stylesheet" href="{{ pathto('_static/plugins/select2/select2.min.css', 1) }}" type="text/css" />
     {%- for css in css_files %}
       {%- if css|attr("rel") %}
     <link rel="{{ css.rel }}" href="{{ pathto(css.filename, 1) }}" type="text/css"{% if css.title is not none %} title="{{ css.title }}"{% endif %} />
@@ -28,28 +26,10 @@
     <script type="text/javascript" src="{{ pathto('_static/AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/AdminLTE-3.0.0/min/js/adminlte.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/tabSignal.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/admin/js/vendor/jquery/jquery.min.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/js/libs/touchwipe.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/visibility/visibility.core.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/iziToast.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/iziModal.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/imask.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/plugins/fastclick/fastclick.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/just.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/just-watch.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/xregexp-all.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/autocomplete.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/plugins/select2/select2.full.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/moment.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/moment-timezone.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/libs/Chart.min.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/js/libs/jquery.scrollTo.min.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/common-utils.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/common.js', 1) }}"></script>
     <script type="text/javascript" src="{{ pathto('_static/docs-sidebar.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/js/app.js', 1) }}"></script>
-
 {%- endmacro %}
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -67,7 +47,7 @@
 {%- block extrahead %} {% endblock %}
 </head>
 
-<body class="hold-transition skin-black-light sidebar-mini">
+<body class="hold-transition gui-skin-default sidebar-mini">
 <div id="loader-wrapper">
     <div id="loader"></div>
 </div>
@@ -85,7 +65,7 @@
         </nav>
     </header>
     <!-- Left side column. contains the logo and sidebar -->
-    <aside class="main-sidebar elevation-4">
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <!-- Logo  -->
         {% block logo %}
             <!-- Logo -->
@@ -96,10 +76,12 @@
         <!-- sidebar: style can be found in sidebar.less -->
         <div class="sidebar">
             <!-- sidebar menu: : style can be found in sidebar.less -->
-            <nav class="sidebar-menu nav-sidebar ico-menu">
+
+        <nav class="mt-2">
+            <ul class="sidebar-menu nav nav-pills nav-sidebar flex-column ico-menu" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-header">DOCS NAVIGATION</li>
                 {{ toctree(includehidden=true, collapse=true) }}
-            </nav>
+            </ul>
             <!-- github link  -->
             {% if theme_github_user and theme_github_repo %}
                 {% if theme_github_button|lower == 'true' %}
@@ -114,6 +96,7 @@
             {%- block sidebarsearch %}
                 {%- include "searchbox.html" %}
             {%- endblock %}
+        </nav>
         </div>
         <!-- /.sidebar -->
     </aside>
