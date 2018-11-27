@@ -1975,3 +1975,9 @@ input[type=color]{
         display: none;
     }
 }
+
+.dropdown-menu .dropdown-item a{
+    display: block;
+}
+
+.btn{ font-size: 14px; }
