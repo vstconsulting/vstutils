@@ -1,4 +1,5 @@
 from django.conf import settings
+from .. import __version__
 
 
 def settings_constants(request):
@@ -15,10 +16,15 @@ def settings_constants(request):
 def project_args(request):
     host_url = request.build_absolute_uri('/')[:-1]
     ver_key = "{}_version".format(getattr(settings, 'VST_PROJECT', "vstutils"))
+    gui_version = "_".join(map(str, [
+        getattr(settings, 'PROJECT_VERSION', ''),
+        getattr(settings, 'PROJECT_LIB_VERSION', ''),
+        __version__
+    ]))
     return {
         "host_url": host_url,
+        "gui_version": gui_version,
         ver_key: getattr(settings, 'PROJECT_VERSION', False),
-        "gui_version": getattr(settings, 'PROJECT_VERSION', ''),
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
         "openapi_url": '/{}/openapi/'.format(settings.VST_API_URL),
