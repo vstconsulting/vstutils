@@ -178,7 +178,7 @@ function openApi_add_one_page_path(api_obj)
             var def = new $.Deferred();
             $.when(pageItem.load(data.reg)).done(function()
             {
-                if(api_obj.canEditInView)
+                if(pageItem.api.canEditInView)
                 {
                     def.resolve(pageItem.renderAsEditablePage())
                 }

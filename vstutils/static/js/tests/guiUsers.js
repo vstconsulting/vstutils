@@ -4,7 +4,7 @@ window.qunitTestsArray['guiPaths.profile'] = {
     {
         let path = "profile"
         guiTests.openPage(path)
-        guiTests.hasElement(0, ".btn_save", path)
+        guiTests.hasElement(false, ".btn_save", path)
         guiTests.hasEditButton(true)
         guiTests.hasAddButton(0, path)
 
@@ -110,7 +110,7 @@ window.qunitTestsArray['guiPaths.users'] = {
         guiTests.hasElement(1, ".remove-token-id__not")
         guiTests.hasElement(1, ".remove-token-username__not")
 
-        guiTests.actionAndWaitRedirect("addSearchFilter", () =>{
+        guiTests.testActionAndWaitRedirect("addSearchFilter", () =>{
             $(".search-btn").trigger('click')
         })
 
@@ -137,16 +137,10 @@ window.qunitTestsArray['guiPaths.users'] = {
             testdone(done)
         });
 
-
-
-        //guiTests.actionAndWaitRedirect(".highlight-tr", () =>{
-        //    debugger;
-        //    $(".highlight-tr:first").trigger('click')
-        //})
         guiTests.clickAndWaitRedirect(".highlight-tr:first")
         guiTests.clickAndWaitRedirect(".sublink-btn-copy")
 
-        guiTests.actionAndWaitRedirect("addSearchFilter", () =>{
+        guiTests.testActionAndWaitRedirect("addSearchFilter", () =>{
             window.curentPageObject.model.guiFields.username.insertTestValue("copyFrom"+spajs.urlInfo.data.reg.api_pk)
             $(".btn_exec").trigger('click')
         })

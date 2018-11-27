@@ -218,29 +218,39 @@ guiTests.setValues =  function(assert, fieldsData)
     return values
 }
 
-guiTests.actionAndWaitRedirect =  function(test_name, action)
+guiTests.actionAndWaitRedirect =  function(test_name, assert, action)
 {
-    syncQUnit.addTest("actionAndWaitRedirect['"+test_name+"']", function ( assert )
+    var def = new $.Deferred();
+    let timeId = setTimeout(() =>{
+        assert.ok(false, 'actionAndWaitRedirect["'+test_name+'"] and redirect faild');
+        def.reject();
+    }, 30*1000)
+
+    tabSignal.once("spajs.opened", () => {
+        clearTimeout(timeId)
+        assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
+        def.resolve();
+    })
+
+    action(test_name)
+    return def.promise();
+}
+
+guiTests.testActionAndWaitRedirect =  function(test_name, action)
+{
+    syncQUnit.addTest("testActionAndWaitRedirect['"+test_name+"']", function ( assert )
     {
         let done = assert.async();
-        let timeId = setTimeout(() =>{
-            assert.ok(false, 'actionAndWaitRedirect["'+test_name+'"] and redirect faild');
-            testdone(done)
-        }, 30*1000)
-
-        tabSignal.once("spajs.opened", () => {
-            clearTimeout(timeId)
-            assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
+        $.when(guiTests.actionAndWaitRedirect(test_name, assert, action)).always(() =>
+        {
             testdone(done)
         })
-
-        action(test_name)
     });
 }
 
 guiTests.clickAndWaitRedirect =  function(secector_string)
 {
-    guiTests.actionAndWaitRedirect("click for "+secector_string, () =>{
+    guiTests.testActionAndWaitRedirect("click for "+secector_string, () =>{
         $(secector_string).trigger('click')
     })
 }
@@ -327,6 +337,9 @@ guiTests.testForPath = function (path, params)
     guiTests.hasDeleteButton(true, path)
     guiTests.hasCreateButton(false, path)
     guiTests.hasAddButton(false, path)
+
+    guiTests.openPage(path, env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
+    guiTests.openPage(path+"edit", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path+"edit", {api_pk:env.objectId}) })
 
     for(let i in params.update)
     {

@@ -21,7 +21,7 @@ tabSignal.connect("openapi.completed", function()
             }
             else if(sublink.type == 'page')
             {
-                registerProfileSublinkPage(sublink.name, sublink.path, my_user_id);
+                registerProfileSublinkPage(sublink.name, sublink.path, my_user_id, sublink);
             }
             else if(sublink.type == 'list')
             {
@@ -140,7 +140,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
  * @param {api_pk} - integer - object's id
  * @returns {deferred}
  */
-function registerProfileSublinkPage(sublink, path, api_pk)
+function registerProfileSublinkPage(sublink, path, api_pk, api_obj)
 {
     let reg_url = new RegExp('^\/?profile/' + sublink + '$');
     let url_id = 'profile_' + sublink.replace(/\/+/g,'_');
@@ -154,13 +154,24 @@ function registerProfileSublinkPage(sublink, path, api_pk)
             let pageItem = new guiObjectFactory(path, {
                 page: 'user/' + api_pk + '/' + sublink,
                 api_pk:api_pk,
+                baseURL:function(){
+                    return "profile"
+                }
             })
             window.curentPageObject = pageItem // Нужен для работы тестов
 
             var def = new $.Deferred();
             $.when(pageItem.load(api_pk)).done(function()
             {
-                def.resolve(pageItem.renderAsPage())
+                if(pageItem.api.canEditInView)
+                {
+                    def.resolve(pageItem.renderAsEditablePage())
+                }
+                else
+                {
+                    def.resolve(pageItem.renderAsPage())
+                }
+
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
@@ -173,6 +184,42 @@ function registerProfileSublinkPage(sublink, path, api_pk)
             return def.promise();
         },
     })
+
+    if(api_obj.canEdit)
+    {
+        let regexp_edit = new RegExp('^\/?profile/' + sublink + '/edit$');
+
+        spajs.addMenu({
+            id:getMenuIdFromApiPath(url_id+"edit"),
+            urlregexp:[regexp_edit],
+            priority:0,
+            onOpen:function(holder, menuInfo, data, onClose_promise)
+            {
+                let pageItem = new guiObjectFactory(path, {
+                    page: 'user/' + api_pk + '/' + sublink,
+                    api_pk:api_pk,
+                    baseURL:function(){
+                        return "profile/" + sublink
+                    }
+                })
+                window.curentPageObject = pageItem // Нужен для работы тестов
+                var def = new $.Deferred();
+                $.when(pageItem.load(data.reg)).done(function()
+                {
+                    def.resolve(pageItem.renderAsEditablePage())
+                }).fail(function(err)
+                {
+                    def.resolve(renderErrorAsPage(err));
+                })
+
+                $.when(onClose_promise).always(() => {
+                    pageItem.stopUpdates();
+                })
+
+                return def.promise();
+            },
+        })
+    }
 }
 
 

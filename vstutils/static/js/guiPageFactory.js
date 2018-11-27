@@ -182,6 +182,7 @@ var gui_page_object = {
             this.startUpdates()
         }
 
+        //debugger;
         render_options.fields = this.api.schema[mode].fields
         render_options.base_path = getUrlBasePath().replace(/\/edit$/, "")
 
@@ -216,6 +217,10 @@ var gui_page_object = {
      */
     renderAsPage : function (render_options = {})
     {
+        for(let i in this.api.schema['get'].fields)
+        {
+            this.api.schema['get'].fields[i].readOnly = true
+        }
         return this.renderPage('get', render_options)
     },
 

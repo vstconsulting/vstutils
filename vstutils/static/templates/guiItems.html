@@ -712,7 +712,7 @@
 
     <%[ buttons_row_save %>
         <% if(guiObj.api.canEdit){ %>
-            <%= new guiElements.button({onclick:function(){ return guiObj.update(true)}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return guiObj.update(!guiObj.api.canEditInView)}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
         <% } %>
     <%] %>
 

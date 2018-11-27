@@ -50,7 +50,9 @@
                     <%] %>
 
                     <% if(opt.readOnly){ %>
-                        <%* readonly_input %>
+                        <div class="readonly " >
+                            <%* readonly_input %>
+                        </div>
                     <% }else{ %>
                         <%* main_input %>
                     <% } %>
@@ -436,7 +438,7 @@
     <!-- guiElements.select2 -->
     <%[ main_input %>
         <select id="<%- guiElement.element_id %>"  class="form-control select2" ></select>
-    <%] %> 
+    <%] %>
     <%! guiElements.base %>
 </script>
 
