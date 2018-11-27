@@ -1,3 +1,18 @@
+function saveHideMenuSettings()
+{
+    if(window.innerWidth > 991)
+    {
+        if($('body').hasClass('sidebar-collapse'))
+        {
+            localStorage.setItem('hideMenuInDocs', false);
+        }
+        else
+        {
+            localStorage.setItem('hideMenuInDocs', true);
+        }
+    }
+}
+
 $( document ).ready(function() {
 
     var headings = $('.sidebar-menu .toctree-l1');
@@ -10,7 +25,7 @@ $( document ).ready(function() {
 
         if(headings[i].children[1])
         {
-           $(headings[i].children[0]).append('<p><span class="li-header-span "><i class=" li-header-span-i menu-text-data">' + t + '</i></span><i class="right fa fa-angle-left ico-menu"></i></p>');
+            $(headings[i].children[0]).append('<p><span class="li-header-span "><i class=" li-header-span-i menu-text-data">' + t + '</i></span><i class="right fa fa-angle-left ico-menu"></i></p>');
         }
         else
         {
@@ -26,5 +41,12 @@ $( document ).ready(function() {
 
             $(child_ul).addClass("menu-treeview-menu nav nav-treeview");
         }
+    }
+
+    let hide_menu = localStorage.getItem('hideMenuInDocs');
+
+    if(hide_menu && hide_menu == 'true')
+    {
+        $('body').addClass('sidebar-collapse')
     }
 });
