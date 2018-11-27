@@ -1965,7 +1965,9 @@ input[type=color]{
     right: -300px;
 }
 
-
+.gui-element .readonly .boolean-select{
+    background-color: #eaedf0;
+}
 
 @media (max-width: 800px) {
     /* hide edit buttons on the Dashboard on small screens and choose colors on the customizer; */

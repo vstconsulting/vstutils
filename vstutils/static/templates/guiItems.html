@@ -709,15 +709,22 @@
         <~>
     <%] %>
 
-    <%[ buttons_row %>
 
+    <%[ buttons_row_save %>
         <% if(guiObj.api.canEdit){ %>
-            <%= new guiElements.button({onclick:function(){ return guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return guiObj.update(!guiObj.api.canEditInView)}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
         <% } %>
+    <%] %>
 
+    <%[ buttons_row_delete %>
         <% if(guiObj.api.canDelete){ %>
             <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="fa fa-times"></span> <span class="d-none d-lg-inline-block">Remove</span>'}).render() %>
         <% } %>
+    <%] %>
+
+    <%[ buttons_row %>
+        <%* buttons_row_save %>
+        <%* buttons_row_delete %>
 
         <%* buttons %>
         <%* sublink_buttons %>
@@ -753,6 +760,24 @@
 
     <%! entity_base %>
 </script>
+
+<script type="text/x-just" data-just="entity_one_get">
+    <!-- entity_one_get -->
+
+    <%[ buttons_row_save %>
+        <% if(guiObj.api.canEdit){ %>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'edit']) %>" class="btn-edit-one-entity btn btn-warning" onclick="return vstGO(this.href);" title="Edit" >Edit</a>
+        <% } %>
+    <%] %>
+
+    <%! entity_one %>
+</script>
+
+<script type="text/x-just" data-just="entity_one_edit">
+    <!-- entity_one_get -->
+    <%! entity_one %>
+</script>
+
 
 <script type="text/x-just" data-just="entity_new">
     <!-- entity_new -->

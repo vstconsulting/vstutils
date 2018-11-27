@@ -185,6 +185,25 @@ var gui_base_object = {
         return obj;
     },
 
+    getPkValue: function(obj)
+    {
+        let id = obj.id
+        if(obj.id === undefined)
+        {
+            id = obj.pk
+            if(obj.pk === undefined)
+            {
+                id = obj.name
+                if(obj.name === undefined)
+                {
+                    console.error("Primary key not found")
+                    debugger;
+                }
+            }
+        }
+        return id
+    },
+
     base_init : function (api_object,  url_vars= {}, object_data = undefined)
     {
         this.url_vars = $.extend(true, {}, spajs.urlInfo.data.reg, url_vars)

@@ -178,7 +178,15 @@ function openApi_add_one_page_path(api_obj)
             var def = new $.Deferred();
             $.when(pageItem.load(data.reg)).done(function()
             {
-                def.resolve(pageItem.renderAsPage())
+                if(pageItem.api.canEditInView)
+                {
+                    def.resolve(pageItem.renderAsEditablePage())
+                }
+                else
+                {
+                    def.resolve(pageItem.renderAsPage())
+                }
+
             }).fail(function(err)
             {
                 def.resolve(renderErrorAsPage(err));
@@ -191,6 +199,38 @@ function openApi_add_one_page_path(api_obj)
             return def.promise();
         },
     })
+
+    if(api_obj.canEdit)
+    {
+        let page_edit_url_regexp = "^(?<parents>[A-z]+\\/[0-9]+\\/)*(?<page>"+getNameForUrlRegExp(api_path)+")/edit$"
+        let regexp_edit_in_other = guiGetTestUrlFunctionfunction(page_edit_url_regexp, api_obj);
+
+        spajs.addMenu({
+            id:getMenuIdFromApiPath(api_path+"edit"),
+            url_parser:[regexp_edit_in_other],
+            priority:api_obj.level,
+            onOpen:function(holder, menuInfo, data, onClose_promise)
+            {
+                let pageItem = new guiObjectFactory(api_obj)
+                window.curentPageObject = pageItem // Нужен для работы тестов
+
+                var def = new $.Deferred();
+                $.when(pageItem.load(data.reg)).done(function()
+                {
+                    def.resolve(pageItem.renderAsEditablePage())
+                }).fail(function(err)
+                {
+                    def.resolve(renderErrorAsPage(err));
+                })
+
+                $.when(onClose_promise).always(() => {
+                    pageItem.stopUpdates();
+                })
+
+                return def.promise();
+            },
+        })
+    }
 }
 
 
@@ -307,7 +347,7 @@ function openApi_add_list_page_path(api_obj)
 }
 
 tabSignal.connect("resource.loaded", function()
-{ 
+{
     $.when(window.api.init()).done(function()
     {
         // An event in the body of which one could override the response from open api

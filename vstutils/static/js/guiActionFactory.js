@@ -41,9 +41,7 @@ var gui_action_object = {
         let tpl = this.getTemplateName('action_page_'+this.model.name, 'action_page')
 
         render_options.fields = this.api.schema.exec.fields
-        //render_options.sections = this.getSections('renderAsPage')
-        if(!render_options.page_type) render_options.page_type = 'action'
-
+        
         render_options.base_path = getUrlBasePath()
 
         this.beforeRenderAsPage();
@@ -53,7 +51,7 @@ var gui_action_object = {
 
     beforeRenderAsPage: function()
     {
-        this.initAllFields('exec'); 
+        this.initAllFields('exec');
     },
 
 }

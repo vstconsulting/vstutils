@@ -1,7 +1,7 @@
 # Main packages
 configparser==3.5.0
 pytimeparse==1.1.8
-six
+six==1.11
 
 # REST API packages
 djangorestframework==3.8.2
