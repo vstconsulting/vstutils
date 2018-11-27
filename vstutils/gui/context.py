@@ -24,6 +24,7 @@ def project_args(request):
     return {
         "host_url": host_url,
         "gui_version": gui_version,
+        "project_version": getattr(settings, 'PROJECT_VERSION', ''),
         ver_key: getattr(settings, 'PROJECT_VERSION', False),
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),

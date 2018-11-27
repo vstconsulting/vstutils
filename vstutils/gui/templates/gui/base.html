@@ -155,8 +155,6 @@
         {{ block.super }}
     {% endblock %}
 
-    <!-- Google Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
 {% endblock %}
 
@@ -374,7 +372,7 @@
                                     {% block footer_buttons %}{% endblock %}
 
                                     <div class="pull-right d-none d-sm-block">
-                                        <b>Version</b> {{gui_version}}
+                                        <b>Version</b> {{project_version}}
                                     </div>
 
                                     {% if debug %}

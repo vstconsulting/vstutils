@@ -1,4 +1,5 @@
 // Replace link to `Definitions` to object in field list
+// Replace link to `Definitions` to object in field list
 // Заменит ссылки на Definitions на объекты в списке полей
 function openApi_guiPrepareFields(api, properties, parent_name)
 {
