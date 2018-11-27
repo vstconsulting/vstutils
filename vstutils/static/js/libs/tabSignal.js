@@ -108,6 +108,7 @@ tabSignal.once = function(signal_name, slot_function)
         slot:"sig" + (tabSignal.sigId++),
         function: slot_function,
         priority:(tabSignal.sigId++),
+        once: true,
     })
 }
 
@@ -117,21 +118,19 @@ tabSignal.once = function(signal_name, slot_function)
  */
 tabSignal.disconnect = function(slot_name, signal_name)
 {
-    debounce(() =>{
-        if (tabSignal.slotArray[signal_name] !== undefined)
+    if (tabSignal.slotArray[signal_name] !== undefined)
+    {
+        for(let i in tabSignal.slotArray[signal_name])
         {
-            for(let i in tabSignal.slotArray[signal_name])
+            let val = tabSignal.slotArray[signal_name][i];
+            if(val.slot ==  slot_name)
             {
-                let val = tabSignal.slotArray[signal_name];
-                if(val.slot ==  signal_name)
-                {
-                    debugger;
-                    tabSignal.slotArray[signal_name].splice(i, 1)
-                    return true
-                }
+                tabSignal.slotArray[signal_name].splice(i, 1)
+                return true
             }
         }
-    }, 0)
+    }
+
     return false
 }
 
@@ -151,7 +150,7 @@ tabSignal.emit = function(signal_name, param, SignalNotFromThisTab = false)
     else
     {
         if(tabSignal.debug) console.log("Сигнал " + signal_name + " подписаны слоты")
-        let obj = tabSignal.slotArray[signal_name];
+        let obj = tabSignal.slotArray[signal_name].slice();
         let onceIds = []
         for (let i in obj)
         {
@@ -167,7 +166,6 @@ tabSignal.emit = function(signal_name, param, SignalNotFromThisTab = false)
 
         for (let i in onceIds)
         {
-            debugger;
             tabSignal.slotArray[signal_name].splice(onceIds[i], 1)
         }
     }
