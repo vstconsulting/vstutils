@@ -19,7 +19,7 @@ guiTests = {
 
 /**
  * Создаёт тест который выполнит переход на страницу и завалится если там ошибка
- * @param {string} path
+ * @param {string} test_name не обязательный параметр имени теста
  */
 guiTests.openPage =  function(test_name, env, path_callback)
 {
@@ -167,6 +167,14 @@ guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
     });
 }
 
+/**
+ *
+ * @param {type} assert
+ * @param {type} path Не обязательный параметр для имени теста
+ * @param {type} fieldsData
+ * @param {type} values
+ * @returns {undefined}
+ */
 guiTests.compareValues =  function(assert, path, fieldsData, values)
 {
     for(let i in fieldsData)
@@ -210,29 +218,39 @@ guiTests.setValues =  function(assert, fieldsData)
     return values
 }
 
-guiTests.actionAndWaitRedirect =  function(test_name, action)
+guiTests.actionAndWaitRedirect =  function(test_name, assert, action)
 {
-    syncQUnit.addTest("actionAndWaitRedirect['"+test_name+"']", function ( assert )
+    var def = new $.Deferred();
+    let timeId = setTimeout(() =>{
+        assert.ok(false, 'actionAndWaitRedirect["'+test_name+'"] and redirect faild');
+        def.reject();
+    }, 30*1000)
+
+    tabSignal.once("spajs.opened", () => {
+        clearTimeout(timeId)
+        assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
+        def.resolve();
+    })
+
+    action(test_name)
+    return def.promise();
+}
+
+guiTests.testActionAndWaitRedirect =  function(test_name, action)
+{
+    syncQUnit.addTest("testActionAndWaitRedirect['"+test_name+"']", function ( assert )
     {
         let done = assert.async();
-        let timeId = setTimeout(() =>{
-            assert.ok(false, 'actionAndWaitRedirect["'+test_name+'"] and redirect faild');
-            testdone(done)
-        }, 30*1000)
-
-        tabSignal.once("spajs.opened", () => {
-            clearTimeout(timeId)
-            assert.ok(true, 'actionAndWaitRedirect["'+test_name+'"] and redirect');
+        $.when(guiTests.actionAndWaitRedirect(test_name, assert, action)).always(() =>
+        {
             testdone(done)
         })
-
-        action(test_name)
     });
 }
 
 guiTests.clickAndWaitRedirect =  function(secector_string)
 {
-    guiTests.actionAndWaitRedirect("click for "+secector_string, () =>{
+    guiTests.testActionAndWaitRedirect("click for "+secector_string, () =>{
         $(secector_string).trigger('click')
     })
 }
@@ -260,6 +278,11 @@ guiTests.hasCreateButton =  function(isHas, path = "hasCreateButton")
 guiTests.hasAddButton =  function(isHas, path = "hasAddButton")
 {
     return guiTests.hasElement(isHas, ".btn-add-one-entity", path)
+}
+
+guiTests.hasEditButton =  function(isHas, path = "hasEditButton")
+{
+    return guiTests.hasElement(isHas, ".btn-edit-one-entity", path)
 }
 
 
@@ -314,6 +337,9 @@ guiTests.testForPath = function (path, params)
     guiTests.hasDeleteButton(true, path)
     guiTests.hasCreateButton(false, path)
     guiTests.hasAddButton(false, path)
+
+    guiTests.openPage(path, env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
+    guiTests.openPage(path+"edit", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path+"edit", {api_pk:env.objectId}) })
 
     for(let i in params.update)
     {

@@ -217,3 +217,5 @@ function guiApi()
 
     return this;
 }
+
+window.api = new guiApi();

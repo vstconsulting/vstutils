@@ -99,7 +99,7 @@ var gui_base_object = {
             html.push(this.renderField(opt.fields[i], opt))
         }
 
-        let id =  getNewId(); 
+        let id =  getNewId();
         return JUST.onInsert('<div class="fields-block" id="'+id+'" >'+html.join("")+'</div>', () => {
 
             let fields = $('#'+id+" .gui-not-required")
@@ -183,6 +183,25 @@ var gui_base_object = {
         }
 
         return obj;
+    },
+
+    getPkValue: function(obj)
+    {
+        let id = obj.id
+        if(obj.id === undefined)
+        {
+            id = obj.pk
+            if(obj.pk === undefined)
+            {
+                id = obj.name
+                if(obj.name === undefined)
+                {
+                    console.error("Primary key not found")
+                    debugger;
+                }
+            }
+        }
+        return id
     },
 
     base_init : function (api_object,  url_vars= {}, object_data = undefined)
@@ -411,14 +430,21 @@ var gui_base_object = {
  */
 function guiObjectFactory(api_object)
 {
-    if(typeof api_object == "string")
+    if (!api_object)
     {
-        api_object = window.guiSchema.path[api_object]
+        console.error('Path api_object is '+ typeof api_object)
+        debugger;
     }
 
-    if (api_object == undefined)
+    if(typeof api_object == "string")
     {
-        console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object}))
+        if (!window.guiSchema.path[api_object])
+        {
+            console.error('Path \`{path}\` doesn\'t exist'.format({path: api_object+""}))
+            debugger;
+        }
+
+        api_object = window.guiSchema.path[api_object]
     }
 
     /**

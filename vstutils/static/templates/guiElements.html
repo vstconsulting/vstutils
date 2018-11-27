@@ -9,8 +9,11 @@
             <%] %>
             <%* wrapper_classes %>
 
+            gui-element
             gui-element-<%- guiElement.name %>
             gui-field-<%- opt.name %>
+            <%- opt.css_class || '' %>
+            <%- guiElement.css_class || '' %>
 
             <% if(opt.hidden){ %> hidden-field <% } %>
 
@@ -39,7 +42,6 @@
                     <%[ readonly_input %>
                         <~ guiElement.db_value>
                             <input type="text"
-                                style="width: 100%;"
                                 class="form-control"
                                 <%- set_api_options(opt, guiElement) %>
                                 id="<%- guiElement.element_id %>"
@@ -48,7 +50,9 @@
                     <%] %>
 
                     <% if(opt.readOnly){ %>
-                        <%* readonly_input %>
+                        <div class="readonly " >
+                            <%* readonly_input %>
+                        </div>
                     <% }else{ %>
                         <%* main_input %>
                     <% } %>
@@ -64,13 +68,17 @@
 
     <%[ input_addons %>
         <% if(guiElement.opt.default){ %>
-            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>');" style="cursor: pointer;" >
-                <span class='glyphicon glyphicon-repeat' ></span>
-            </span>
+            <div class="input-group-append guiElement-revert-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>'); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
+                <span class="input-group-text">
+                    <span class='fa fa-repeat' ></span>
+                </span>
+            </div>
         <% } %>
-        <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val('');" style="cursor: pointer;" >
-            <span class='glyphicon glyphicon-remove' ></span>
-        </span>
+        <div class="input-group-append guiElement-clear-addon" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
+            <span class="input-group-text">
+                <span class='fa fa-times' ></span>
+            </span>
+        </div>
     <%] %>
 
     <%* element %>
@@ -79,7 +87,7 @@
 <!-- guiElements.dynamic -->
 <script type="text/x-just" data-just="guiElements.dynamic">
     <!-- guiElements.dynamic -->
-    <div id="gui<%- guiElement.element_id %>" >
+    <div id="gui<%- guiElement.element_id %>" style="display: contents;">
     <%= guiElement.realElement.render(opt) %>
     </div>
 </script>
@@ -105,11 +113,9 @@
                         </div>
                     </div>
                 <% } else { %>
-                    <div>
                         <% for(var j in guiElement.realElements[i]) { %>
                                 <%= guiElement.realElements[i][j].render() %>
                         <% } %>
-                    </div>
                 <% } %>
             <% } %>
         </div>
@@ -151,19 +157,20 @@
 <!-- guiElements.string -->
 <script type="text/x-just" data-just="guiElements.string">
     <!-- guiElements.string [type=<%- opt.type %>, format=<%- opt.format %>] -->
-
+    <%[ input_type %>text<%] %>
     <%[ main_input %>
         <div class="input-group">
             <~ guiElement.db_value>
-                <% if(guiElement.rendered && guiElement.db_value != guiElement.getValue()){ %>
-                    <span class="input-group-addon db_value_input">
-                        <%- guiElement.insertValue(guiElement.db_value) %>
-                        <i class="glyphicon glyphicon-arrow-right"></i>
+                <% if(guiElement.isRendered() && !guiElement.isEqual(guiElement.db_value)){ %>
+                    <span class="input-group-prepend db_value_input">
+                        <div class="input-group-text">
+                            <%- guiElement.insertValue(guiElement.db_value) %>
+                            <i class="fa fa-arrow-right"></i>
+                        </div>
                     </span>
                 <% } %>
             <~>
-            <input type="<%[ input_type %>text<%] %>"
-                    style="width: 100%;"
+            <input type="<%* input_type %>"
                     class="form-control"
                     <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>"
@@ -171,6 +178,43 @@
             <%* input_addons %>
         </div>
     <%] %>
+    <%! guiElements.base %>
+</script>
+
+<!-- guiElements.json -->
+<script type="text/x-just" data-just="guiElements.form">
+    <!-- guiElements.form -->
+
+    <%[ wrapper_classes %>
+       col-lg-12 col-xs-12 col-sm-12 col-md-12
+    <%] %>
+
+    <%[ title %>
+        <% if(value.title){ %><h2><%- opt.title || capitalizeString(opt.name) %></h2><% } %>
+    <%] %>
+
+    <%[ main_input %>
+        <div class="form_content">
+            <~ guiElement.realElements>
+                <div id="gui<%- guiElement.element_id %>" class="row">
+                    <% if(Object.keys(guiElement.realElements).length > 0) { %>
+
+                            <%= guiElement.renderAllRealElements() %>
+
+                    <% } else { %>
+                        <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                            <input type="text" class="form-control" readonly disabled  value="This form is empty">
+                        </div>
+                    <% } %>
+                </div>
+            <~>
+        </div>
+    <%] %>
+
+    <%[ readonly_input %>
+        <%* main_input %>
+    <%] %>
+
     <%! guiElements.base %>
 </script>
 
@@ -209,7 +253,7 @@
             <div class="form-control disabled" disabled="" maxlength="255" id="<%- guiElement.element_id %>" attr-value="<%- guiElement.insertValue(value) %>">
               <% if(opt[opt.name + '_info']){ %>
                   <a href="<%- vstMakeLocalApiUrl([opt[opt.name + '_info']['prefetch_path'], value], guiElement.parent_object.url_vars)%>"
-                     class="item-name" onclick="return vstGO(this.href);">
+                     class="item-name revers-color" onclick="return vstGO(this.href);">
                       <% if(!opt.prefetch || !opt.prefetch.field_name || opt[opt.name + '_info'][opt.prefetch.field_name] === undefined ){ %>
                           <%- opt[opt.name + '_info'].name || opt[opt.name + '_info'].username %>
                       <%}else{ %>
@@ -244,7 +288,6 @@
                     class="form-control"
                     <%- set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>
-                    style="width: 100%;"
                     class="form-control"
                     value="<%- moment(guiElement.db_value).tz(window.timeZone).format("YYYY-MM-DD") || '' %>">
         <~>
@@ -282,12 +325,12 @@
                 <%= justOn('change', guiElement.changeOnChangeByHands, guiElement.element_id)
                 %>
             >
-            <span class="input-group-addon" id="uptime-down">
-                <span class="glyphicon glyphicon-chevron-left"></span>
-            </span>
-            <span class="input-group-addon" id="uptime-up">
-                <span class="glyphicon glyphicon-chevron-right"></span>
-            </span>
+            <div class="input-group-append" id="uptime-down">
+                <span class="input-group-text"><span class="fa fa-chevron-left"></span></span>
+            </div>
+            <div class="input-group-append" id="uptime-up">
+                <span class="input-group-text"><span class="fa fa-chevron-right"></span></span>
+            </div>
         </div>
     <%] %>
 
@@ -299,6 +342,20 @@
     <%] %>
 
     <%! guiElements.base %>
+</script>
+
+<!-- guiElements.password -->
+<script type="text/x-just" data-just="guiElements.color">
+    <!-- guiElements.color -->
+    <%[ input_type %>color<%] %>
+
+
+    <%[ readonly_input %>
+        <%* main_input %>
+    <%] %>
+
+
+    <%! guiElements.string %>
 </script>
 
 <!-- guiElements.password -->
@@ -315,13 +372,14 @@
         id="<%- guiElement.element_id %>"
         type="button"
         class="
+                gui-element
                 gui-element-<%- guiElement.name %>
                 <% if(typeof opt.class == 'function'){ %>
                     <%- opt.class.apply(guiElement, [opt]) %>
                 <% }else{ %>
                     <%- opt.class %>
                 <% } %>
-                <%- addCssClassesToElement('btn', opt.title).replace(/[^A-z0-9 _\/-]/g, '_') %>"
+                <%- addCssClassesToElement('btn', opt.title).replace(/[^A-z0-9 _\/\-]/g, '_') %>"
 
         title="<%- opt.title || '' %>"
         >
@@ -352,7 +410,11 @@
     <%[ main_input %>
         <select id="<%- guiElement.element_id %>"  class="form-control" >
             <% for(var i in opt.enum){ %>
-                <option value='<%- opt.enum[i] %>' <% if(value == opt.enum[i]) { %>selected<% } %> ><%- opt.enum[i] %></option>
+                <% if(typeof opt.enum[i] == "object" && opt.enum[i].id !== undefined){ %>
+                    <option value='<%- opt.enum[i].id %>' <% if(value == opt.enum[i].id) { %>selected<% } %> ><%- (opt.enum[i].name || opt.enum[i].id) %></option>
+                <% }else{ %>
+                    <option value='<%- opt.enum[i] %>' <% if(value == opt.enum[i]) { %>selected<% } %> ><%- opt.enum[i] %></option>
+                <% } %>
             <% } %>
         </select>
     <%] %>
@@ -390,7 +452,7 @@
                 <%- set_api_options(opt, guiElement) %>
                 id="<%- guiElement.element_id %>"
             >
-                <a href="<%- guiElement.getLink() %>" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
+                <a href="<%- guiElement.getLink() %>" class="revers-color" onclick="return vstGO(this.href);" ><%- guiElement.getName() %></a>
             </div>
         <~>
     <%] %>
@@ -412,7 +474,7 @@
 <script type="text/x-just" data-just="guiElements.boolean">
     <!-- guiElements.boolean -->
     <%[ main_input %>
-        <div class="form-control <% if (value || opt.default) { %> selected <% } %> boolean-select"
+        <div class="form-control <% if (guiElement.setSelectedOrNot(value, opt)) { %> selected <% } %> boolean-select"
                 onclick="$(this).toggleClass('selected');"
                 onselectstart="return false"
                 onmousedown="return false"
@@ -425,7 +487,7 @@
     <%] %>
 
      <%[ readonly_input %>
-        <div class="form-control <% if (value || opt.default) { %> selected <% } %> boolean-select"
+        <div class="form-control <% if (guiElement.setSelectedOrNot(value, opt)) { %> selected <% } %> boolean-select"
                 onselectstart="return false"
                 onmousedown="return false"
                 style="cursor: not-allowed!important;"
@@ -471,20 +533,23 @@
             id="<%- guiElement.element_id %>"
             onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
             >
-
-            <span class="input-group-addon"
-                <%= justOn('click', function()
-                    {
-                        return spajs.showLoader(guiElement.renderModal(opt));
-                    })
-                %>
-                style="cursor: pointer;"
-            >
-                <span class='glyphicon glyphicon-chevron-down' ></span>
-            </span>
-            <span class="input-group-addon" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
-                <span class='glyphicon glyphicon-remove' ></span>
-            </span>
+            <div class="input-group-append">
+                <span class="input-group-text"
+                    <%= justOn('click', function()
+                        {
+                            return spajs.showLoader(guiElement.renderModal(opt));
+                        })
+                    %>
+                    style="cursor: pointer;"
+                >
+                    <span class='fa fa-chevron-down' ></span>
+                </span>
+            </div>
+            <div class="input-group-append">
+                <span class="input-group-text" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
+                    <span class='fa fa-times' ></span>
+                </span>
+            </div>
         </div>
     <%] %>
     <%! guiElements.base %>
@@ -496,13 +561,13 @@
     <!-- guiElements.file -->
     <%[ main_input %>
         <span id="deleteFileId_<%- guiElement.element_id %>" onclick="$('#fileContent_<%- guiElement.element_id %>').val('');" class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'>
-            <span class='glyphicon glyphicon-remove'>
+            <span class='fa fa-times'>
             </span>
         </span>
 
         <span id="<%- guiElement.element_id %>" class='btn btn-default btn-right textfile' style='float: right; margin-left: 10px;  margin-bottom:10px;'>
             <input type='file' class='input-file' <%= justOn('change', ()=>{ guiElement.readFile(event, '#fileContent_' + guiElement.element_id); return false; }, guiElement.element_id) %> >
-            <span class='glyphicon glyphicon-file'>
+            <span class='fa fa-file-text-o'>
             </span>
         </span>
         <textarea placeholder='Enter value' <%- set_api_options(opt, guiElement) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
@@ -594,8 +659,8 @@
                             value="<%- guiElement.insertValue(value) %>"
                             id="<%- guiElement.element_id %>"
                             >
-                    <span class="input-group-addon" onclick="$('#guiElement-gui').toggle();" >
-                        <span class="glyphicon glyphicon-pencil"></span>
+                    <span class="input-group-append" onclick="$('#guiElement-gui').toggle();" >
+                        <div class="input-group-text"><span class="fa fa-pencil"></span></div>
                     </span>
                 </div>
             </div>
@@ -605,8 +670,8 @@
 
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Minutes
                         <span class="caret"></span>
                     </button>
@@ -650,8 +715,8 @@
 
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Hours
                         <span class="caret"></span>
                     </button>
@@ -695,8 +760,8 @@
 
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Day of Month
                         <span class="caret"></span>
                     </button>
@@ -737,8 +802,8 @@
 
             <div class="form-group col-lg-3 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Months
                         <span class="caret"></span>
                     </button>
@@ -775,8 +840,8 @@
 
             <div class="form-group col-lg-3 col-xs-12 col-md-6 col-sm-6">
 
-                <div class="btn-group" role="group" style="width: 100%;">
-                    <button type="button" style="width: 100%;" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <div class="btn-group" role="group" >
+                    <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Days of Week
                         <span class="caret"></span>
                     </button>
@@ -822,8 +887,8 @@
                             id="<%- guiElement.element_id %>"
                             <%= set_api_options(opt, guiElement) %>
                             >
-                    <span class="input-group-addon">
-                        sec
+                    <span class="input-group-append">
+                        <div class="input-group-text">sec</div>
                     </span>
                 </div>
             </div>
@@ -841,8 +906,8 @@
                                 id="<%- guiElement.element_id %>"
                                 <%= set_api_options(opt, guiElement) %>
                                 >
-                        <span class="input-group-addon">
-                            sec
+                        <span class="input-group-append">
+                            <div class="input-group-text">sec</div>
                         </span>
                     </div>
                 </div>

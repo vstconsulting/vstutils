@@ -8,6 +8,7 @@ if(!window.guiTestsFiles)
 // Add a test file to the list of files for test gui
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js')
+
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js')
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js')
@@ -413,7 +414,7 @@ window.onresize=function ()
 {
     window.current_window_width = window.innerWidth;
 
-    if(window.innerWidth>767)
+    if(window.innerWidth>991)
     {
         if(guiLocalSettings.get('hideMenu'))
         {
@@ -428,6 +429,24 @@ window.onresize=function ()
     {
         if ($("body").hasClass('sidebar-collapse')){
             $("body").removeClass('sidebar-collapse');
+        }
+    }
+}
+
+/**
+ * Function is supposed to be called when push-menu button was clicked.
+ */
+function saveHideMenuSettings()
+{
+    if(window.innerWidth > 991)
+    {
+        if($('body').hasClass('sidebar-collapse'))
+        {
+            guiLocalSettings.set('hideMenu', false);
+        }
+        else
+        {
+            guiLocalSettings.set('hideMenu', true);
         }
     }
 }
@@ -501,6 +520,10 @@ var guiLocalSettings = {
     },
     get:function(name){
         return this.__settings[name];
+    },
+    delete:function(name){
+        delete this.__settings[name];
+        localStorage.removeItem(name)
     },
     set:function(name, value){
         this.__settings[name] = value;
@@ -818,4 +841,149 @@ function allPropertiesIsObjects(obj)
         }
     }
     return true;
+}
+
+/**
+ * @param {type} f
+ * @param {type} ms
+ * @returns {Function}
+ * @see https://learn.javascript.ru/task/debounce
+ */
+function debounce(f, ms) {
+
+  let timer = null;
+
+  return function (...args) {
+    const onComplete = () => {
+      f.apply(this, args);
+      timer = null;
+    }
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    timer = setTimeout(onComplete, ms);
+  };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function setActiveMenuLi( )
+{
+    let url = window.location.hash.replace("#", "")
+    $(".nav-sidebar li[data-url]").removeClass("active");
+    $(".nav-sidebar a.nav-link").removeClass('active')
+
+    $(".nav-sidebar .menu-open").removeClass('menu-open')
+    $(".nav-sidebar .nav-treeview").hide()
+
+    let li = $(".nav-sidebar li[data-url]")
+
+    let urllevel = url.split("/").length - 1
+
+    for(let i=0; i< li.length; i++)
+    {
+        let val = $(li[i])
+        let dataurl = val.attr('data-url')
+
+        if(dataurl == "" && urllevel >= 1)
+        {
+            continue;
+        }
+
+        if(urllevel > 1 && url.indexOf(dataurl) != 0)
+        {
+            continue;
+        }
+
+        if(urllevel <= 1 && url != dataurl)
+        {
+            continue;
+        }
+
+        if(val.hasClass('has-treeview'))
+        {
+            val.addClass("menu-open")
+            val.children(".nav-treeview").show()
+        }
+
+        val.children("a.nav-link").addClass('active')
+
+        let parent = val.parent()
+        let step = 0;
+        do{
+            step++;
+            if($(parent).hasClass('has-treeview'))
+            {
+                $(parent).addClass("menu-open")
+                parent.children(".nav-treeview").show()
+            }
+            parent = $(parent).parent()
+
+        }while(parent.length && step < 10)
+
+        //debugger;
+        break;
+    }
+}
+
+tabSignal.connect("spajs.open", setActiveMenuLi);
+tabSignal.connect("loading.completed", setActiveMenuLi)
+
+/*
+ * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
+ */
+$(".content-wrapper").hover(function () {
+    $(".hover-li").removeClass("hover-li");
+})
+
+$(".navbar").hover(function () {
+    $(".hover-li").removeClass("hover-li");
+})
+
+/**
+ * Function converts color from hex to rgba.
+ */
+function hexToRgbA(hex, alpha)
+{
+    if(alpha === undefined)
+    {
+       alpha = 1;
+    }
+
+    let c;
+    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+        c= hex.substring(1).split('');
+        if(c.length== 3){
+            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+        c= '0x'+c.join('');
+        return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',' + alpha +')';
+    }
+   return;
 }

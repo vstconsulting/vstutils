@@ -28,6 +28,8 @@ function renderBreadcrumbs()
         last_name = pages[i]
     }
 
+    urls.splice(0, 1)
+
     return spajs.just.render("page_breadcrumb", {urls: urls})
 }
 

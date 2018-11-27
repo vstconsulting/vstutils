@@ -36,28 +36,28 @@
 <script  type="text/x-just" style="display: none;" data-just="pagination">
     <!-- pagination -->
     <% if(totalPage > 1){ %>
-        <ul class="pagination no-margin pull-right">
+        <ul class="pagination pagination-sm no-margin pull-right">
             <% if(totalPage < 21){ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
                     <% }else{ %>
-                        <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
                     <% } %>
                 <% } %>
             <% }else{ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
+                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
                     <% }else{ %>
                         <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
                             <% if( dotShow == false){ %>
                                 <% dotShow = true %>
-                                <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
+                                <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
                             <% } %>
                         <% }else{ %>
                             <% dotShow = false %>
-                            <li class="pagination-page<%- (i+1) %>" ><a href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
+                            <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
                         <% } %>
                     <% } %>
                 <% } %>
@@ -68,33 +68,81 @@
 
 <script  type="text/x-just" style="display: none;" data-just="search_field">
     <!-- searchFiled  -->
-    <div>
-        <div class="filtered-search">
+    <div class="search-form" >
+
+        <div id="filtered-search-form" class="filtered-search-form" >
+            <div class="input-group filtered-search-input col-lg-6 col-sm-12 col-xs-12 col-md-12" >
+
+                <~ guiObj.activeSearch.active>
+                    <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
+                        <span class="input-group-prepend  name active-name <%- guiObj.activeSearch.justNotClass('active', 'hide') %>">
+                            <div class="input-group-text" style="border-radius: .25rem 0px 0px .25rem;">
+                                <%= (guiObj.activeSearch.active+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=")  %>
+                            </div>
+                        </span>
+                    <% }else{ %>
+                        <span class="input-group-prepend  name active-name <%- guiObj.activeSearch.justClass('active', 'hide') %>">
+                            <div class="input-group-text"
+                                style="border-radius: .25rem 0px 0px .25rem;"
+                                onclick="$('#search-query-input').focus();" >
+                                <i class="fa fa-sliders" aria-hidden="true"></i>
+                            </div>
+                        </span>
+                    <% } %>
+                <~>
+
+                <input
+                    type="text"
+                    id="search-query-input"
+                    placeholder="Search by name"
+                    class="form-control"
+                    maxlength="255"
+                    data-backspace="false"
+                    value="<%- opt.query %>"
+                    <%= justOn('keyup', function(event)
+                        {
+                            guiObj.onSearchInput(event, event.currentTarget)
+                            event.preventDefault();
+                        }, "search-query-input")
+                    %>
+                >
+
+                <div class="input-group-append search-btn"
+                    <%= justOn('click', function(event)
+                        {
+                            guiObj.searchGO($('#search-query-input').val(), guiObj.searchAdditionalData)
+                            event.preventDefault();
+                        })
+                    %>
+                    >
+                    <div class="input-group-text">
+                        <span class="fa fa-search" ></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filtered-search-vars">
             <~ guiObj.activeSearch.filters>
                 <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
-                    <span class="input-filter-item">
-                        <div class="input-filter-inner">
-                            <span class="name"
-                                  onclick="/* $(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/">
-                                  <%= (valfield.name+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=") %>
-                            </span>
-                            <span class="value"
-                                  onclick=" /*$(this).parent().toggleClass('show-input-text'); event.preventDefault(); $('#search-query-input<%- valfield.name %>').focus();*/"
-                                ><%= val.justText('value') %></span>
+                    <div class="input-group filtered-search-value">
+                        <span class="input-group-prepend">
+                            <div class="input-group-text"><%= (valfield.name+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=") %></div>
+                        </span>
                             <input
                                 type="text"
                                 id="search-query-input-<%- valfield.name %>"
                                 data-value-name="<%- valfield.name %>"
-
+                                disabled
                                 placeholder="Search by name"
-                                class="input-value"
+                                class="form-control active-filter"
                                 maxlength="255"
-                                value="<%- valfield.value %>"
+                                value="<%- val.value %>"
                                 <%= justOn('keyup', function(event)
                                     {
                                         guiObj.onSearchInput(event, event.currentTarget)
                                         event.preventDefault();
-                                    }, "search-query-input")
+                                    }, "search-query-input-"+valfield.name)
                                 %>
 
                                 <%= justOn('blur', function(event)
@@ -105,8 +153,7 @@
                                     }, "search-query-input-"+valfield.name)
                                 %>
                             >
-                        </div>
-                        <span class="remove-token remove-token-<%- valfield.name %>"
+                        <span class="input-group-append remove-token remove-token-<%- valfield.name %>"
                                 role="button"
                                 data-value-name="<%- valfield.name %>"
                                 <%= justOn('click', function(event)
@@ -116,75 +163,33 @@
                                     })
                                 %>
                                 >
-                            <i class="fa fa-close"></i>
+                                <div class="input-group-text">
+                                    <i class="fa fa-close"></i>
+                                </div>
                         </span>
-                    </span>
+                    </div>
                 <% } %>
             <~>
         </div>
 
-        <div class="input-group filtered-search col-lg-6 col-sm-12 col-xs-12 col-md-12" style="float: right; ">
-            <table>
-                <tr>
-                    <td class="<%- guiObj.activeSearch.justNotClass('active', 'hide') %>">
-                        <span class="name active-name">
-                            <~ guiObj.activeSearch.active>
-                                <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
-                                    <%= (guiObj.activeSearch.active+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=")  %>
-                                <% } %>
-                            <~>
-                        </span>
-                    </td>
-                    <td style="width: 100%;">
-                        <input
-                            type="text"
-                            id="search-query-input"
-                            placeholder="Search by name"
-                            class="form-control"
-                            maxlength="255"
-                            data-backspace="false"
-                            value="<%- opt.query %>"
-                            <%= justOn('keyup', function(event)
-                                {
-                                    guiObj.onSearchInput(event, event.currentTarget)
-                                    event.preventDefault();
-                                }, "search-query-input")
-                            %>
-                        >
-                    </td>
-                    <td>
-                        <div class="input-group-addon search-btn"
-                            <%= justOn('click', function(event)
-                                {
-                                    guiObj.searchGO($('#search-query-input').val(), guiObj.searchAdditionalData)
-                                    event.preventDefault();
-                                })
-                            %>
-                            >
-                            <span class="glyphicon glyphicon-search" ></span>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3" style="padding: 9px;">
-                        <~ guiObj.activeSearch.active>
-                            <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
-                                <%= guiObj.activeSearch.fields[guiObj.activeSearch.active].description || '' %>
-                            <% } %>
-                        <~>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <!--
+            <~ guiObj.activeSearch.active>
+                <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
+                    <%= guiObj.activeSearch.fields[guiObj.activeSearch.active].description || '' %>
+                <% } %>
+            <~>
+        -->
     </div>
 </script>
 
 
 <script type="text/x-just" data-just="page_breadcrumb">
-    <ol class="breadcrumb">
-        <li><a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a></li>
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item" >
+            <a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a>
+        </li>
         <% for(var i in urls) { %>
-            <li <% if(i == urls.length-1) { %> class="active" <% } %> > <%= urls[i] %> </li>
+            <li class="breadcrumb-item <% if(i == urls.length-1) { %> active<% } %>"  > <%= urls[i] %> </li>
         <% } %>
     </ol>
 </script>
@@ -199,11 +204,11 @@
 
     <%[ main_content_row %>
         <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     &nbsp;
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <%= guiObj.renderAllFields(opt) %>
                     </div>
@@ -257,35 +262,45 @@
 
     <%[ page_header %>
         <section class="content-header">
-            <h1>
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-lg-6">
+                        <h1>
 
-                <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
-                    <span class="glyphicon glyphicon-arrow-left"></span>
-                </a>
+                            <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
+                                <span class="fa fa-arrow-left"></span>
+                            </a>
 
-                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
-            </h1>
-            <%* breadcrumb %>
+                            <span class="h1-header"><%= guiObj.getTitle('title') %></span>
+                        </h1>
+                    </div>
+                    <div class="col-lg-6">
+                        <%* breadcrumb %>
+                    </div>
+                </div>
+            </div>
         </section>
     <%] %>
     <%* page_header %>
 
     <%[ main_content %>
         <section class="content">
-            <div class="row">
-                <div class="col-lg-12">
-                    <%[ buttons_row %>
-                        <%* buttons %>
-                    <%] %>
-                    <%* buttons_row %>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <%[ buttons_row %>
+                            <%* buttons %>
+                        <%] %>
+                        <%* buttons_row %>
+                    </div>
                 </div>
-            </div>
-            <br>
-            <div class="row">
-                <%[ main_content_row %>
+                <br>
+                <div class="row">
+                    <%[ main_content_row %>
 
-                <%] %>
-                <%* main_content_row %>
+                    <%] %>
+                    <%* main_content_row %>
+                </div>
             </div>
         </section>
     <%] %>
@@ -344,7 +359,7 @@
                         <% for(var k in dataLine.sublinks_l2){ %>
                             <% if(!dataLine.sublinks_l2[k].hidden) { %>
                                     <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
-                                        <li>
+                                        <li class="dropdown-item">
                                             <a
                                                 href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
                                                 onclick="return false;"
@@ -353,7 +368,7 @@
                                             </a>
                                         </li>
                                     <% } else { %>
-                                        <li <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
+                                        <li  class="dropdown-item" <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
                                             <b
                                                 class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
                                                 >
@@ -374,7 +389,7 @@
 
 <!-- Список multi_actions сущностей -->
 <script type="text/x-just" data-just="multi_actions_buttons">
-    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
+    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %> float-left" role="group">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
             <span class="caret"></span>
@@ -392,7 +407,7 @@
         <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
 
         <% if(multi_actions[k].onClick){ %>
-            <li>
+            <li class="dropdown-item">
                 <a
                     href="#"
                     class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
@@ -402,7 +417,7 @@
                 </a>
             </li>
         <% }else{ %>
-             <li>
+             <li class="dropdown-item">
                 <a
                     href="#"
                     onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- multi_actions[k].path %>'); return false;"
@@ -435,12 +450,12 @@
                     <a
                         href="<%- vstMakeLocalUrl([opt.base_path, guiObj.api.actions[k].name]) %>"
                         onclick="return vstGO(this.href);"
-                        class="btn btn-warning sublink-btn hidden-<%- guiObj.api.actions[k].hidden %> sublink-btn-<%- guiObj.api.actions[k].name %>"
+                        class="btn btn-warning btn-action sublink-btn hidden-<%- guiObj.api.actions[k].hidden %> sublink-btn-<%- guiObj.api.actions[k].name %>"
                     >
                     <%- guiObj.api.actions[k].name.replace('_', ' ') %>
                     </a>
                 <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action', title:k, text:k}).render() %>
                 <% } %>
         <% } %>
     <%] %>
@@ -459,27 +474,32 @@
         <%* sublink_buttons %>
     <%] %>
 
+    <%[ search_form %>
+        <%= guiObj.renderSearchForm() %>
+    <%] %>
+
+    <%[ pagination %>
+        <% if(guiObj.getTotalPages()){ %>
+            <div>
+                <%= guiObj.paginationHtml() %>
+            </div>
+        <% } %>
+    <%] %>
+
     <!-- entity_list -->
     <%[ main_content_row %>
         <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <%[ search_form %>
-                        <%= guiObj.renderSearchForm() %>
-                    <%] %>
-                    <%* search_form %>
+            <div class="card card-info">
+                <div class="card-header with-border" style="display: flex;">
 
-                    <%[ pagination %>
-                        <% if(guiObj.getTotalPages()){ %>
-                            <div style="float: right; margin-right: 20px;" class="hidden-xs">
-                                <%= guiObj.paginationHtml() %>
-                            </div>
-                        <% } %>
-                    <%] %>
-                    <%* pagination %>
-
+                    <div style="display: flex; width: 100%;">
+                        <%* search_form %>
+                    </div>
+                    <div style="display: flex;" class=" d-none d-xl-block">
+                        <%* pagination %>
+                    </div>
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <%  if (!guiObj.model.data.results.length){ %>
                         <%[ empty_list %>
                                 <%= this.partial('items_empty_list', { }) %>
@@ -491,7 +511,7 @@
                                 <table class="table table-bordered multiple-select">
                                     <tbody>
                                         <tr>
-                                            <th style="width: 45px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                            <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
@@ -505,7 +525,7 @@
                                                 <% } %>
                                             <% } %>
                                             <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
-                                                <th style="width: 95px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
+                                                <th style="width: 120px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
                                             <% } %>
                                         </tr>
 
@@ -519,7 +539,7 @@
                         <%* data_list %>
                     <% } %>
                 </div>
-                <div class="box-footer clearfix">
+                <div class="card-footer clearfix">
                     <%[ action_buttons %>
                         <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
                     <%] %>
@@ -527,16 +547,16 @@
 
                     <% if(!query){ %>
                         <%[ select_buttons %>
-                            <div class="btn-group" role="group">
+                            <div class="btn-group float-left ml-1" role="group">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Select
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li>
+                                    <li class="dropdown-item">
                                         <a class="select-all-btn" href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                                     </li>
-                                    <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                                    <li class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
                                         <a class="unselect-all-btn"  href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                                     </li>
                                 </ul>
@@ -571,7 +591,7 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-                    <li>
+                    <li class="dropdown-item">
                         <a href="#"
                             onclick="spajs.showLoader(addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>')); return false;" >Add selected</a>
                     </li>
@@ -586,10 +606,10 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-                <li>
+                <li class="dropdown-item">
                     <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
                 </li>
-                <li class="<%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                <li  class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
                     <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
                 </li>
             </ul>
@@ -623,7 +643,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
                         <% for(var k in opt.links){  %>
-                            <li>
+                            <li class="dropdown-item">
                                 <a
                                     href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
                                     onclick="return vstGO(this.href);"
@@ -644,15 +664,15 @@
                             <a
                                 href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
                                 onclick="return vstGO(this.href);"
-                                class="btn btn-warning sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
+                                class="btn btn-warning btn-action sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
                             >
                             <%- opt.actions[k].name.replace('_', ' ') %>
                             </a>
                         <% } else { %>
                             <% if(opt.actions[k].hidden) { %>
-                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary hidden-true', title:k, text:k}).render() %>
+                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action hidden-true', title:k, text:k}).render() %>
                             <% } else { %>
-                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary', title:k, text:k}).render() %>
+                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action', title:k, text:k}).render() %>
                             <% } %>
                         <% } %>
                 <% } %>
@@ -664,7 +684,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
                         <% for(var k in opt.actions){  %>
-                            <li>
+                            <li class="dropdown-item">
                                 <a
                                     <% if (!opt.actions[k].isEmptyAction) { %>
                                         onclick="return vstGO(this.href);"
@@ -689,15 +709,22 @@
         <~>
     <%] %>
 
-    <%[ buttons_row %>
 
+    <%[ buttons_row_save %>
         <% if(guiObj.api.canEdit){ %>
-            <%= new guiElements.button({onclick:function(){ return guiObj.update()}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return guiObj.update(!guiObj.api.canEditInView)}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
         <% } %>
+    <%] %>
 
+    <%[ buttons_row_delete %>
         <% if(guiObj.api.canDelete){ %>
-            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="glyphicon glyphicon-remove"></span> <span class="hidden-sm hidden-xs">Remove</span>'}).render() %>
+            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="fa fa-times"></span> <span class="d-none d-lg-inline-block">Remove</span>'}).render() %>
         <% } %>
+    <%] %>
+
+    <%[ buttons_row %>
+        <%* buttons_row_save %>
+        <%* buttons_row_delete %>
 
         <%* buttons %>
         <%* sublink_buttons %>
@@ -717,11 +744,11 @@
 
     <%[ main_content_row %>
         <section class="col-lg-12">
-            <div class="box box-info">
-                <div class="box-header with-border">
+            <div class="card card-info">
+                <div class="card-header with-border">
                     &nbsp;
                 </div>
-                <div class="box-body">
+                <div class="card-body">
                     <div class="row">
                         <%* fields_block %>
                     </div>
@@ -733,6 +760,24 @@
 
     <%! entity_base %>
 </script>
+
+<script type="text/x-just" data-just="entity_one_get">
+    <!-- entity_one_get -->
+
+    <%[ buttons_row_save %>
+        <% if(guiObj.api.canEdit){ %>
+            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'edit']) %>" class="btn-edit-one-entity btn btn-warning" onclick="return vstGO(this.href);" title="Edit" >Edit</a>
+        <% } %>
+    <%] %>
+
+    <%! entity_one %>
+</script>
+
+<script type="text/x-just" data-just="entity_one_edit">
+    <!-- entity_one_get -->
+    <%! entity_one %>
+</script>
+
 
 <script type="text/x-just" data-just="entity_new">
     <!-- entity_new -->
@@ -755,11 +800,11 @@
     <section class="content error-as-page <% if(error){ %>error-status-<%- error.status %><% } %>">
         <div class="row">
             <section class="col-lg-12">
-                <div class="box box-info">
-                    <div class="box-header with-border">
+                <div class="card card-info">
+                    <div class="card-header with-border">
                         Error<br>
                     </div>
-                    <div class="box-body">
+                    <div class="card-body">
                         <div class="row">
                             <div class="col-lg-12">
                                 <% if(error){ %>

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 {% block head %}
-<head> 
+<head>
     {% block meta %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta name="robots" content="NONE,NOARCHIVE" />
@@ -17,14 +17,12 @@
     {% block gui_init_scripts %}{% endblock %}
 
     {% block style %}
-        <!-- Bootstrap 3.3.7 -->
-        <link rel="stylesheet" href="{% static_path 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
         <!-- Font Awesome -->
-        <link rel="stylesheet" href="{% static_path 'lte/css/font-awesome.min.css' %}?v={{gui_version}}">
-        <!-- Ionicons -->
-        <link rel="stylesheet" href="{% static_path 'lte/css/ionicons.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% static_path 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}">
         <!-- Theme style -->
-        <link rel="stylesheet" href="{% static_path 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}">
+        <link rel="stylesheet" href="{% static_path 'AdminLTE-3.0.0/min/css/adminlte.min.css' %}?v={{gui_version}}">
         <!-- Google Font -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
@@ -53,7 +51,7 @@
     {% endblock %}
 </head>
 {% endblock %}
- 
+
 {% block body %}
     <body class="{% block bodyclass %}hold-transition login-page{% endblock %}">
         <div class="login-box">
@@ -72,22 +70,20 @@
                         {% csrf_token %}
                         <div class="form-group has-feedback">
                             <input type="text" class="form-control" placeholder="Username" name="username">
-                            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                         </div>
                         <div class="form-group has-feedback">
                             <input type="password" class="form-control" placeholder="Password" name="password">
-                            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                         </div>
                         {% block button %}
                             <div class="row">
                                 <div class="col-xs-4">
-                                    <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                                 </div>
                             </div>
-                        {% endblock %} 
-                    </form> 
+                        {% endblock %}
+                    </form>
                     {% block alter_auth %}
-                    {% endblock %} 
+                    {% endblock %}
                 </div>
             {% endblock %}
           <!-- /.login-box-body -->
@@ -97,8 +93,7 @@
         {% block script %}
             <!-- jQuery -->
             <script src="{% static_path 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"></script>
-            <!-- Bootstrap 3.3.7 -->
-            <script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>
+            <script defer src="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"></script>
         {% endblock %}
     </body>
 {% endblock %}

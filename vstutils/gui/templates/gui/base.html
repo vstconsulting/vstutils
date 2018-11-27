@@ -155,6 +155,9 @@
         {{ block.super }}
     {% endblock %}
 
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
 {% endblock %}
 
 {% block resource_list %}
@@ -171,7 +174,11 @@
             { prioritet:4, type:'js', name: "{% static 'js/libs/iziToast.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'js/libs/iziModal.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'js/libs/imask.js' %}?v={{gui_version}}"},
-            { prioritet:4, type:'js', name: "{% static 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"},
+
+            { prioritet:4, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"},
+            { prioritet:5, type:'js', name: "{% static 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js' %}?v={{gui_version}}"},
+            { prioritet:7, type:'js', name: "{% static 'js/guiCustomizer.js' %}?v={{gui_version}}"},
+
             { prioritet:4, type:'js', name: "{% static 'plugins/fastclick/fastclick.min.js' %}?v={{gui_version}}"},
 
             { prioritet:6, type:'js', name: "{% static 'js/libs/just.js' %}?v={{gui_version}}"},
@@ -179,16 +186,16 @@
 
             { prioritet:11.5, type:'js', name: "{% static 'js/libs/xregexp-all.js' %}?v={{gui_version}}"},
 
-            { prioritet:8, type:'js', name: "{% static 'js/app.js' %}?v={{gui_version}}"},
+            { prioritet:9, type:'js', name: "{% static 'AdminLTE-3.0.0/min/js/adminlte.js' %}?v={{gui_version}}"},
             { prioritet:8, type:'js', name: "{% static 'js/common-utils.js' %}?v={{gui_version}}"},
             { prioritet:9, type:'js', name: "{% static 'js/libs/spa.js' %}?v={{gui_version}}"},
 
             { prioritet:110, type:'js', name: "{% static 'js/libs/autocomplete.js' %}?v={{gui_version}}"},
             { prioritet:110, type:'js', name: "{% static 'plugins/select2/select2.full.min.js' %}?v={{gui_version}}"},
-            { prioritet:110, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
             { prioritet:50, type:'js', name: "{% static 'js/libs/moment.min.js' %}?v={{gui_version}}"},
             { prioritet:51, type:'js', name: "{% static 'js/libs/moment-timezone.min.js' %}?v={{gui_version}}"},
+            { prioritet:51, type:'js', name: "{% static 'js/libs/Chart.min.js' %}?v={{gui_version}}"},
             { prioritet:50, type:'js', name: "{% static 'js/libs/jquery.scrollTo.min.js' %}?v={{gui_version}}"},
 
             { prioritet:10,   type:'js', name: "{% static 'js/guiSelections.js' %}?v={{gui_version}}"},
@@ -216,14 +223,13 @@
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiListElements.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiModals.html' %}?v={{gui_version}}"},
             { prioritet:300, type:'tpl', name: "{% static 'templates/guiItems.html' %}?v={{gui_version}}"},
+            { prioritet:300, type:'tpl', name: "{% static 'templates/guiCustomizer.html' %}?v={{gui_version}}"},
 
-            { prioritet:101, type:'css', name: "{% static 'bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
+            { prioritet:101, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}"},
             { prioritet:102, type:'css', name: "{% static 'css/iziToast.min.css' %}?v={{gui_version}}"},
             { prioritet:102, type:'css', name: "{% static 'css/iziModal.min.css' %}?v={{gui_version}}"},
-            { prioritet:103, type:'css', name: "{% static 'lte/css/font-awesome.min.css' %}?v={{gui_version}}"},
-            { prioritet:104, type:'css', name: "{% static 'lte/css/ionicons.min.css' %}?v={{gui_version}}"},
-            { prioritet:105, type:'css', name: "{% static 'lte/css/AdminLTE.min.css' %}?v={{gui_version}}"},
-            { prioritet:106, type:'css', name: "{% static 'lte/css/skins/_all-skins.min.css' %}?v={{gui_version}}"},
+            { prioritet:103, type:'css', name: "{% static 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}"},
+            { prioritet:105, type:'css', name: "{% static 'AdminLTE-3.0.0/min/css/adminlte.min.css' %}?v={{gui_version}}"},
             { prioritet:108, type:'css', name: "{% static 'css/gui.css' %}?v={{gui_version}}"},
 
             { prioritet:99, type:'css', name: "{% static 'plugins/select2/select2.min.css' %}?v={{gui_version}}"},
@@ -233,7 +239,7 @@
 {% endblock %}
 
 {% block body %}
-    <body class="hold-transition skin-black-light sidebar-mini {% block bodyclass %}{% endblock %}">
+    <body class="hold-transition sidebar-mini {% block bodyclass %}{% endblock %}">
         {% block gui_init_inline_body %}
             <div id="LoadingProgressBar">
                 <!-- Title -->
@@ -265,48 +271,44 @@
 
         <div id="RealBody" class="{% if user.is_superuser %} is_superuser {% endif %} {% if user.is_staff %} is_staff {% endif %}" style="display: none;">
             {% block gui_body_template %}
-                <div class="hold-transition skin-black-light sidebar-mini " style="width: 100vw;    height: 100vh;">
+                <div class="hold-transition skin-black-light sidebar-mini ">
                     <div id="loader-wrapper">
                         <div id="loader"></div>
                     </div>
 
                     {% block navbar %}
                         <div class="wrapper" >
-                            <header class="main-header">
-                                {% block logo %}
-                                    <!-- Logo -->
-                                    <a href="/" class="logo">
-                                        <span>{{ project_gui_name }}</span>
-                                    </a>
-                                {% endblock %}
-                                <!-- Header Navbar: style can be found in header.less -->
-                                <nav class="navbar navbar-static-top">
-                                    <!-- Sidebar toggle button-->
-                                    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-                                        <span class="sr-only">Toggle navigation</span>
-                                    </a>
+                            <!-- Navbar -->
+                            {% block gui_menu %}
+                                {% include "gui/menu.html" %}
+                            {% endblock %}
+                            <!-- /.navbar -->
 
-                                    <div class="navbar-custom-menu">
-                                        <ul class="nav navbar-nav">
-                                            {% block gui_menu %}
-                                                {% include "gui/menu.html" %}
-                                            {% endblock %}
-                                        </ul>
-                                    </div>
+                            <!-- Main Sidebar Container -->
+                            <aside class="main-sidebar sidebar-dark-primary elevation-4">
+                              <!-- Brand Logo -->
+                              {% block logo %}
+                                  <!-- Logo -->
+                                  <a href="/" class="brand-link logo">
+                                      <span class="brand-text font-weight-light">{{ project_gui_name }}</span>
+                                  </a>
+                              {% endblock %}
+
+                              <!-- Sidebar -->
+                              <div class="sidebar">
+                                <!-- Sidebar Menu -->
+                                <nav class="mt-2 ">
+                                  <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                                    <!-- Add icons to the links using the .nav-icon class
+                                         with font-awesome or any other icon font library -->
+                                      {% block left_menu %}
+                                          {% include "gui/left_menu.html" %}
+                                      {% endblock %}
+                                  </ul>
                                 </nav>
-                            </header>
-                            <!-- Left side column. contains the logo and sidebar -->
-                            <aside class="main-sidebar">
-                                <!-- sidebar: style can be found in sidebar.less -->
-                                <section class="sidebar">
-                                    <!-- sidebar menu: : style can be found in sidebar.less -->
-                                    <ul class="sidebar-menu" data-widget="tree">
-                                        {% block left_menu %}
-                                            {% include "gui/left_menu.html" %}
-                                        {% endblock %}
-                                    </ul>
-                                </section>
-                                <!-- /.sidebar -->
+                                <!-- /.sidebar-menu -->
+                              </div>
+                              <!-- /.sidebar -->
                             </aside>
 
                             <!-- Content Wrapper. Contains page content -->
@@ -326,52 +328,59 @@
                                     </section>
 
                                     <section class="content">
-                                        <div class="row">
-                                            <div class="col-lg-12">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-lg-12">
 
-                                            </div>
-                                        </div>
-                                        <br>
-                                        <div class="row">
-                                            <section class="col-lg-12">
-                                                <div class="box box-info">
-                                                    <div class="box-header with-border">
-
-                                                    </div>
-                                                    <div class="box-body">
-                                                        <p>
-                                                            Status: 404
-                                                        </p>
-                                                        Follow the link to create a bug report
-                                                    </div>
                                                 </div>
-                                            </section>
+                                            </div>
+                                            <br>
+                                            <div class="row">
+                                                <section class="col-lg-12">
+                                                    <div class="card card-info">
+                                                        <div class="card-header with-border">
+
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p>
+                                                                Status: 404
+                                                            </p>
+                                                            Follow the link to create a bug report
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                            </div>
                                         </div>
                                     </section>
                                     <!-- /errorPage -->
                                 {% endblock %}
                             </div>
 
+                            {% block control_sidebar %}
+                                <!-- Control Sidebar -->
+                                <aside class="control-sidebar control-sidebar-dark guiCustomizer">
+                                  <!-- Control sidebar content goes here -->
+                                </aside>
+                            {% endblock %}
+
                             {% block footer %}
                                 <footer class="main-footer">
 
-                                    <div class="btn-group" role="group">
-                                        <a type="button" style="box-shadow:none;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" href="#" onclick="openHelpModal(); return false;">
-                                            <span class="glyphicon glyphicon-question-sign"></span> About
-                                        </a>
-                                    </div>
+                                    <a href="#" onclick="openHelpModal(); return false;" class="help-text-data hidden-in-api">
+                                        <span class="fa fa-question-circle"></span> About
+                                    </a>
 
 
                                     {% block footer_buttons %}{% endblock %}
 
-                                    <div class="pull-right hidden-xs">
+                                    <div class="pull-right d-none d-sm-block">
                                         <b>Version</b> {{gui_version}}
                                     </div>
 
                                     {% if debug %}
                                         <div class="pull-right">
                                             <b><a href="#"
-                                                  style="color:#ccc;"
+                                                class="help-text-data"
                                                   onclick="loadQUnitTests(); return false;" >Test qUnit</a></b>
                                             &nbsp;&nbsp;&nbsp;
                                         </div>
@@ -380,7 +389,7 @@
                                         <a
                                                 href="#"
                                                 onclick="window.guiFilesCache.deleteAllCache(); return false;"
-                                                style="color:#ccc;"
+                                                class="help-text-data"
                                                 >Reload cache</a>
                                         &nbsp;&nbsp;&nbsp;
                                     </div>

@@ -1,23 +1,71 @@
 {% load i18n %}
 {% load rest_framework %}
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
+                              <!-- Left navbar links -->
 
-{% if user.is_authenticated %}
-    <li class="for-web api-link" ><a href="{{ openapi_url }}"><i class="glyphicon glyphicon-star"></i> <span>{% trans 'API' %}</span></a></li>
-{% endif %}
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" onclick="saveHideMenuSettings()" data-widget="pushmenu" href="#"><i class="fa fa-bars  ico-data-default"></i></a>
+        </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item for-web api-link" >
+                <a href="{{ openapi_url }}" class="nav-link">
+                    <i class="fa fa-star ico-data-default"></i> <span class="text-data">{% trans 'API' %}</span>
+                </a>
+            </li>
+        {% endif %}
 
-{% if user.is_active and user.is_staff %}
-    <!--<li><a href="/admin/"><i class="glyphicon glyphicon-cog"></i> <span>{% trans 'Settings' %}</span></a></li>-->
-{% endif %}
+        {% if user.is_authenticated %}
 
-{% if user.is_authenticated %}
-    {% block profile_link %}
-        <li><a href="/#profile" onclick="return spajs.openURL(this.href);"><i class="glyphicon glyphicon-user"></i> <span>{{user.username}}</span></a></li>
-    {% endblock %}
+        {% else %}
+            <li class="nav-item for-web login-link"><a class="nav-link" href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-log-out text-data"></i> <span>Login</span></a></li>
+        {% endif %}
+    </ul>
 
-    <li class="for-cordova"><a href="#" onclick="inAppClose()"><i class="glyphicon glyphicon-share"></i> <span>Close</span></a></li>
-    <li class="for-cordova"><a href="#" onclick="inAppLogout()"><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
-    <li class="for-web logout-link"><a href='{{ logout_url|default:"/logout/" }}'><i class="glyphicon glyphicon-log-out"></i> <span>Logout</span></a></li>
-{% else %}
-    <li class="for-web login-link"><a href='{{ login_url|default:"/login/" }}?next={{request.path}}'><i class="glyphicon glyphicon-log-out"></i> <span>Login</span></a></li>
-{% endif %}
+
+    {% if user.is_authenticated %}
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+
+          <!-- Notifications Dropdown Menu -->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+              <i class="fa fa-user mr-2 ico-data-default"></i>  <span class="text-data hidden-480">{{user.first_name}} {{user.last_name}}</span>
+              <!--<span class="badge badge-warning navbar-badge">15</span>-->
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right profile-menu background-default">
+
+                {% block profile_link %}
+                    <a href="/#profile" onclick="return spajs.openURL(this.href);" class="dropdown-item text-data">
+                        <i class="fa fa-id-card-o mr-2 ico-data-default"></i> Profile <!-- <span class="float-right text-muted text-sm">12 hours</span> -->
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+                    <a href="/#profile/settings" onclick="return spajs.openURL(this.href);" class="dropdown-item text-data">
+                        <i class="fa fa-cogs mr-2 ico-data-default"></i> Settings
+                    </a>
+                {% endblock %}
+              <div class="dropdown-divider for-cordova"></div>
+              <a  href="#" onclick="inAppClose()" class="dropdown-item for-cordova text-data">
+                <i class="fa fa-users mr-2 ico-data-default"></i> Close
+              </a>
+
+              <div class="dropdown-divider for-cordova"></div>
+              <a  href="#" onclick="inAppLogout()" class="dropdown-item for-cordova text-data">
+                <i class="fa fa-users mr-2 ico-data-default"></i> Logout
+              </a>
+
+              <div class="dropdown-divider for-web"></div>
+              <a  href="{{ logout_url|default:'/logout/' }}" class="dropdown-item for-web text-data">
+                <i class="fa fa-sign-out mr-2 ico-data-default"></i> Logout
+              </a>
+            </div>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#"><i class="fa fa-th-large ico-data-default"></i></a>
+          </li>
+        </ul>
+    {% endif %}
+</nav>

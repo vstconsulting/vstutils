@@ -120,6 +120,11 @@ guiElements.base = function(opt = {}, value, parent_object)
         }
     }
 
+    this.isEqual = function (value)
+    {
+        return value == this.getValue();
+    }
+
     /**
      * Function for inserting value into templates of guiElements.
      */
@@ -144,7 +149,7 @@ guiElements.base = function(opt = {}, value, parent_object)
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -238,8 +243,8 @@ guiElements.base = function(opt = {}, value, parent_object)
         if(options.onclick)
         {
             let thisObj = this;
-            $('#'+this.element_id).on('click', false, function(){
-
+            $('#'+this.element_id).on('click', false, function()
+            {
                 if(thisObj.blocked)
                 {
                     return false;
@@ -288,8 +293,17 @@ guiElements.base = function(opt = {}, value, parent_object)
         return spajs.just.render(this.template_name, {opt:this.render_options, guiElement:this, value:this.value}, () => {
             this._onRender(this.render_options)
             this._callAllonChangeCallback()
-            this.rendered = true
         });
+    }
+
+    this.isRendered = function()
+    {
+        if($("#"+this.element_id).length != 0)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     this.getValue = function()
@@ -367,6 +381,12 @@ guiElements.base = function(opt = {}, value, parent_object)
         this.onChange_calls.push(callback)
     }
 
+    if(this.opt.onchange)
+    {
+        this.addOnChangeCallBack(this.opt.onchange)
+    }
+
+
     this._callAllonChangeCallback = function()
     {
         let val = this.getValue()
@@ -423,6 +443,23 @@ guiElements.string = function()
     guiElements.base.apply(this, arguments)
 }
 
+guiElements.color = function()
+{
+    this.name = 'color'
+    guiElements.base.apply(this, arguments)
+
+    this.isEqual = function (value)
+    {
+        let val = this.getValue()
+        if(value && value.toUpperCase && val && val.toUpperCase)
+        {
+            return value.toUpperCase() == val.toUpperCase();
+        }
+
+        return val == value;
+    }
+}
+
 guiElements.named_template = function()
 {
     this.name = 'named_template'
@@ -473,7 +510,7 @@ guiElements.enum = function(opt = {}, value)
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -502,7 +539,7 @@ guiElements.file = function(opt = {})
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -535,7 +572,7 @@ guiElements.boolean = function()
     }
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function(value)
@@ -548,6 +585,25 @@ guiElements.boolean = function()
 
         $("#"+this.element_id).removeClass('selected')
         return false
+    }
+
+    /**
+     * Function is supposed to be called from guiElement template
+     * to make a decision about adding selected CSS class or not.
+     */
+    this.setSelectedOrNot = function(value, opt)
+    {
+        if(value !== undefined)
+        {
+            return value;
+        }
+
+        if(opt && opt.default)
+        {
+            return opt.default;
+        }
+
+        return false;
     }
 }
 
@@ -1147,7 +1203,7 @@ guiElements.autocomplete = function()
         {
             if(options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
 
             }
@@ -1260,7 +1316,7 @@ guiElements.autocomplete.prepareProperties = function(value)
 
     if(!value.additionalProperties)
     {
-        console.error("AdditionalProperties was not found");
+        //console.error("AdditionalProperties was not found");
         return value;
     }
 
@@ -1271,6 +1327,7 @@ guiElements.autocomplete.prepareProperties = function(value)
             $ref:value.additionalProperties.model.$ref
         },
     }
+
     value.gui_links.push({
         prop_name:'autocomplete_properties',
         list_name:'list_obj',
@@ -1293,7 +1350,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         {
             if (options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
             }
 
@@ -1345,11 +1402,8 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
                 render_options.base_path = list.api.path.format({pk:list.url_vars.api_pk}).slice(1,-1);
                 render_options.base_href = render_options.base_path;
 
-                if(!render_options.page_type) render_options.page_type = 'list'
-
                 render_options.selectionTag =  list.api.selectionTag
                 window.guiListSelections.initTag(render_options.selectionTag)
-
                 render_options.autocomplete_properties = options.autocomplete_properties;
 
                 list.model.filters = filters;
@@ -1426,7 +1480,7 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
         {
             if (options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
 
             }
@@ -1530,7 +1584,7 @@ guiElements.select2 = function(field, field_value, parent_object)
         {
             if(options.dynamic_properties)
             {
-                let properties = mergeDeep(options.autocomplete_properties, options.dynamic_properties)
+                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
                 options.autocomplete_properties = properties
             }
 
@@ -2034,7 +2088,7 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
     });
 
     /**
-     * Функция вызываемая из тестов для установки значения
+     * Function is calling from GUI tests for value setting.
      * @param {string} value
      */
     this.insertTestValue = function()
@@ -2551,6 +2605,109 @@ guiElements.crontab = function (opt = {}, value)
             + " " + this.model.DaysOfWeekStr;
 
         $("#"+this.element_id).val(this.value)
+    }
+}
+
+guiElements.form = function(opt = {}, value, parent_object)
+{
+    this.name = 'form'
+    guiElements.base.apply(this, arguments)
+
+    this.realElements = {};
+
+    this.prepareFieldOptions = function(field)
+    {
+        if(field.enum)
+        {
+            field.format = "enum"
+        }
+
+        return field
+    }
+
+    this.setValue = function(value)
+    {
+        this.value = value
+        let realElements = {};
+        if(value.form)
+        {
+            for(let i in value.form)
+            {
+                let field = value.form[i]
+                field.name = i
+
+                field = this.prepareFieldOptions(field)
+                let type = getFieldType(field)
+
+                realElements[i] = new guiElements[type]($.extend(true, {}, field), field.value);
+            }
+        }
+
+        this.realElements = realElements
+    }
+
+    if(opt.form && !value)
+    {
+        this.setValue(opt)
+    }
+    else
+    {
+        this.setValue(value)
+    }
+
+    this.insertTestValue = function(value)
+    {
+        this.setValue(value);
+        return value;
+    }
+
+    this.getValue = function()
+    {
+        let valueObj = {};
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValue();
+        }
+
+        return this.reductionToType(valueObj);
+    }
+
+    this.getValidValue = function()
+    {
+        let valueObj = {};
+        for(let element_name in this.realElements)
+        {
+            let element = this.realElements[element_name];
+            valueObj[element_name] = element.getValidValue();
+        }
+
+        return this.reductionToType(valueObj);
+    }
+
+    this.sortRealElements = function(Obj1, Obj2)
+    {
+        let sort_1 = Obj1.val.opt.priority || 0;
+        let sort_2 = Obj2.val.opt.priority || 0;
+        return sort_1 - sort_2;
+    }
+
+    this.renderAllRealElements = function()
+    {
+        let elements_arr = []
+        for(let i in this.realElements) {
+            elements_arr.push({name:i, val:this.realElements[i]})
+        }
+
+        elements_arr.sort(this.sortRealElements);
+
+        let html = '';
+
+        for(let i in elements_arr) {
+            html += elements_arr[i].val.render()
+        }
+
+        return html;
     }
 }
 

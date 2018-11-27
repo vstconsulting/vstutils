@@ -54,6 +54,9 @@ guiModal = {
             $("body").appendTpl('<div class="iziModal" tabindex="-1" role="dialog" id="guiModal-iziModal" data-izimodal-zindex="20000" data-iziModal-transitionIn="fadeInDown" data-iziModal-transitionOut="fadeOutDown"></div>')
             modalHolder = jQuery("#guiModal-iziModal");
 
+            // deletes previous instance of iziModal
+            $(modalHolder).iziModal('destroy');
+
             $(modalHolder).iziModal(local_options);
 
             if(html)

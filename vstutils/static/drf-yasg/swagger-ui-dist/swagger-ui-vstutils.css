@@ -5,7 +5,7 @@ html {
 }
 
 .skin-black-light .wrapper/*, .skin-black-light .main-sidebar, .skin-black-light .left-side */ {
-    background-color: #ecf0f5!important;
+    /*background-color: #ecf0f5!important;*/
 }
 
 .swagger-ui {
@@ -77,7 +77,7 @@ html {
 }
 
 .swagger-ui button,.swagger-ui input,.swagger-ui optgroup,.swagger-ui select,.swagger-ui textarea {
-    font-family:sans-serif;
+    /*font-family:sans-serif;*/
     font-size:100%;
     line-height:1.15;
     margin:0;
@@ -2498,7 +2498,7 @@ html {
     box-sizing:border-box;
     margin:0 auto;
     padding:0 20px;
-    background-color: #ecf0f5;
+    /*background-color: #ecf0f5;*/
 }
 
 .swagger-ui .opblock-tag {
