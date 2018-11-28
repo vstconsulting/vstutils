@@ -32,6 +32,17 @@ stages:
     - vstutils/settings.ini
     - README.rst
     - LICENSE
+  only:
+    changes:
+      - vstutils/**/*.{py,pyx}
+      - test_src/**/*.{py,pyx}
+      - .coveragerc
+      - .pep8
+      - .pylintrc
+      - requirements*
+      - setup.{cfg,py}
+      - MANIFEST.in
+      - tox.ini
   retry: 2
 
 
