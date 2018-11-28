@@ -13,13 +13,32 @@ function saveHideMenuSettings()
     }
 }
 
-$( document ).ready(function() {
+function changeRootLink()
+{
+    let http = new XMLHttpRequest();
+    http.open('HEAD', window.location.href);
 
-    var headings = $('.sidebar-menu .toctree-l1');
-
-    for(var i=0; i<headings.length; i++)
+    http.onload = function()
     {
-        var t = headings[i].children[0].innerText;
+        let header = this.getResponseHeader("vstutils-version");
+
+        if(header)
+        {
+            $('#root_link').attr('href', '/');
+        }
+    }
+
+    http.send();
+}
+
+
+$(document).ready(function() {
+
+    let headings = $('.sidebar-menu .toctree-l1');
+
+    for(let i=0; i<headings.length; i++)
+    {
+        let t = headings[i].children[0].innerText;
         $(headings[i].children[0]).empty();
         $(headings[i].children[0]).prepend('<i class="nav-icon fa fa-book"></i>');
 
@@ -49,4 +68,6 @@ $( document ).ready(function() {
     {
         $('body').addClass('sidebar-collapse')
     }
+
+    changeRootLink();
 });

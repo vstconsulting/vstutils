@@ -7,6 +7,11 @@ common functions of VST Utils and signals that you can use to customize
 your own application
 
 .. toctree::
+   :hidden:
+
+   Home <self>
+
+.. toctree::
    :maxdepth: 2
    :caption: Contents:
 
