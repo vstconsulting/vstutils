@@ -147,7 +147,7 @@ function openApi_guiPrepareFilters(schema)
 }
 
 function openApi_findParentByDefinition(api_obj, definition, type = 'list')
-{ 
+{
     if(api_obj.type == type && type == 'list')
     {
         try{
@@ -158,7 +158,6 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
             }
         }catch (e) {
             debugger;
-            console.warn("openApi_findParentByDefinition " + api_obj.path + " don't have definition = " + definition)
         }
     }
 
@@ -171,7 +170,6 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
                 return api_obj;
             }
         }catch (e) {
-            console.warn("openApi_findParentByDefinition " + api_obj.path + " don't have definition = " + definition)
         }
 
         try{
@@ -181,7 +179,6 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
                 return api_obj;
             }
         }catch (e) {
-            console.warn("openApi_findParentByDefinition " + api_obj.path + " don't have definition = " + definition)
         }
     }
 
