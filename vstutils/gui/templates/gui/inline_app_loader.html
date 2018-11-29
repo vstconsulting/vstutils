@@ -24,6 +24,12 @@ window._guiFilesCache = function(opt)
     this.myDB             = undefined
     this.noCache          = opt.noCache
 
+
+    this.setNoCache = function(NoCache)
+    {
+        this.noCache = NoCache
+    }
+
     var thisObj = this;
     
     this.closeDB = function()
@@ -177,8 +183,6 @@ var jsToLoad = {}
 function appendError(exception)
 {
     console.error(exception)
-    //alert(exception)
-    //$("#LoadingProgressBar-errorLog").append(""+exception.message+"\n"+exception.stack+"\n\n\n");
 }
 
 /**
@@ -301,8 +305,6 @@ function addToPage(jsToLoad)
                 
                 val.appending = true;
                 try{
-                    //console.log("append", val);
-
                     if(val.type =='tpl')
                     {
                         // Надеюсь что к моменту загрузки шаблона js с jquery уже загружены
@@ -326,16 +328,10 @@ function addToPage(jsToLoad)
                                     addToPage(jsToLoad)
                                 }
 
-                                //link.innerHTML = val.response
                                 document.getElementsByTagName("head")[0].appendChild(link);
                                 return;
                             }
-                            /*else if(loadTipe() == 'eval')
-                            {
-                                eval(val.response)
-                                val.appended = true; 
-                            }*/
-                            else // if(loadTipe() == 'inline-js')
+                            else
                             {
                                 var link = document.createElement("script");
                                 link.setAttribute("type", "text/javascript");
@@ -363,16 +359,8 @@ function addToPage(jsToLoad)
                         link.type = 'text/css';
                         link.media = 'all';
 
-                        //if(isCordova())
-                        //{
-                            link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts")
-                        //}
-                        //else
-                        //{
-                        //    link.innerHTML = val.response
-                        //}
+                        link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts")
 
-                        //debugger;
                         document.getElementsByTagName("body")[0].appendChild(link);
                         val.appended = true;
                     }
@@ -406,17 +394,6 @@ function loadData(index)
         return;
     }
 
-    /*if(jsToLoad[index].type == 'css' && !isCordova())
-    {
-        var link = document.createElement("link");
-        link.setAttribute("rel", "stylesheet");
-        link.setAttribute("type", "text/css");
-        link.setAttribute("href", jsToLoad[index].url);
-        document.getElementsByTagName("head")[0].appendChild(link);
-        jsToLoad[index].status = 200
-        return;
-    } */
-
     if(!window.loadData_jsLoadingProgressSumSteps)
     {
         window.loadData_jsLoadingProgressSumSteps = 0;
@@ -439,8 +416,6 @@ function loadData(index)
         },
         function(err)
         {
-            //console.log("load from server") 
-
             var request = new XMLHttpRequest();
 
             request.onreadystatechange = function ()
@@ -488,9 +463,7 @@ function setLoadingProgress(width)
  * @returns {undefined}
  */
 function hideLoadingProgress()
-{
-    //$("#LoadingProgressBar").remove();
-    $("#RealBody").show();
+{$("#RealBody").show();
     $("#LoadingProgressBar").fadeOut('fast')
     
     setTimeout(function(){ 
@@ -501,7 +474,6 @@ function hideLoadingProgress()
 var cRrrCalls = 0;
 function onReady()
 {
-    //debugger;
     console.log("onReady")
     setLoadingProgress(0)
 
@@ -523,5 +495,12 @@ function onReady()
     }
 }
 
+if (localStorage['gui_version'] !== gui_version)
+{
+    window.guiFilesCache.deleteAllCache();
+    window.guiFilesCache.setNoCache(true)
+}
+
+localStorage['gui_version'] = gui_version;
 onReady()
 </script>
