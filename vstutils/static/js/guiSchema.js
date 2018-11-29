@@ -237,12 +237,29 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
             field[link_type.prop_name][link_type.list_name] = undefined
 
             let list_obj = undefined
-            for(let l in api_obj.parent.sublinks)
+
+            if(api_obj.parent)
             {
-                list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[l], definition, link_type.type)
-                if(list_obj)
+
+                for(let sub_link in api_obj.parent.sublinks)
                 {
-                    break;
+                    list_obj = openApi_findParentByDefinition(api_obj.parent.sublinks[sub_link], definition, link_type.type)
+                    if(list_obj)
+                    {
+                        break;
+                    }
+                }
+
+                if(api_obj.type != 'list' && api_obj.parent.parent)
+                {
+                    for(let sub_link in api_obj.parent.parent.sublinks)
+                    {
+                        list_obj = openApi_findParentByDefinition(api_obj.parent.parent.sublinks[sub_link], definition, link_type.type)
+                        if(list_obj)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -301,7 +318,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
                         break;
                     }
                 }
-            } 
+            }
         }
     }
 
