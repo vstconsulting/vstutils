@@ -36,6 +36,26 @@
         $('.help-popover').popover({html: true, trigger:'hover'});
     });
     </script>
+
+    <script>
+        function sendOptionQuery(path)
+        {
+            return $.ajax({
+                url: path,
+                type: 'OPTIONS',
+                dataType: 'html',
+            }).done( data => {
+                let html = $.parseHTML(data);
+                let el =  $(html).find('.response-info');
+                if(el.length != 0)
+                {
+                    let new_content = el[0].innerHTML;
+                    $($('.response-info')[0]).html(new_content);
+                    prettyPrint();
+                }
+            })
+        }
+    </script>
 {% endblock %}
 
 
@@ -118,9 +138,7 @@
                     {% endif %}
 
                     {% if options_form %}
-                    <form class="button-form" action="{{ request.get_full_path }}" data-method="OPTIONS">
-                        <button class="btn btn-primary js-tooltip" title="Make an OPTIONS request on the {{ name }} resource">OPTIONS</button>
-                    </form>
+                        <button class="btn btn-primary button-form js-tooltip" title="Make an OPTIONS request on the {{ name }} resource" href="{{ request.get_full_path }}" onclick="return sendOptionQuery(this.href)">OPTIONS</button>
                     {% endif %}
 
                     {% if delete_form %}
