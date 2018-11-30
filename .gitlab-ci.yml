@@ -25,20 +25,17 @@ stages:
   except:
     refs:
     - tags
-    changes:
-    - vstutils/static/*
-    - vstutils/templates/*
-    - vstutils/gui/templates/*
-    - vstutils/settings.ini
-    - README.rst
-    - LICENSE
   only:
     changes:
-      - vstutils/**/*.{py,pyx}
-      - test_src/**/*.{py,pyx}
+      - vstutils/*.{py,pyx}
+      - vstutils/api/**
+      - vstutils/gui/*
+      - vstutils/templatetags/*
+      - test_src/**/*
       - .coveragerc
       - .pep8
       - .pylintrc
+      - .gitlab-ci.yml
       - requirements*
       - setup.{cfg,py}
       - MANIFEST.in
