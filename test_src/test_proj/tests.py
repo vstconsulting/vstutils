@@ -4,7 +4,6 @@ from django.core.management import call_command
 from vstutils.unittests import BaseTestCase, VSTUtilsTestCase, VSTUtilsCommandsTestCase
 from .models import Host, HostGroup
 
-
 class ProjectTestCase(BaseTestCase):
     def setUp(self):
         super(ProjectTestCase, self).setUp()
@@ -295,3 +294,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(hostgroup_props['file']['format'], 'file')
         self.assertEqual(hostgroup_props['secret_file']['type'], 'string')
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
+
+
+class FileTestCase(BaseTestCase)
+    def test_create(self):
+        pass

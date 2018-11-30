@@ -128,6 +128,7 @@ ext_list = [
     'vstutils.utils',
     'vstutils.models',
     'vstutils.ldap_utils',
+    'vstutils.custom_model',
     'vstutils.templatetags.vstconfigs',
     'vstutils.templatetags.request_static',
     'vstutils.gui.views',
