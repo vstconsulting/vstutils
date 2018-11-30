@@ -202,7 +202,6 @@ function openApi_findParentByDefinition(api_obj, definition, type = 'list')
     return false
 }
 
-
 /**
  * Replace link from `additionalProperties` to api link for autocomplete work
  * Заменит ссылки из additionalProperties на ссылки в апи для работы автокомплитов
