@@ -31,16 +31,16 @@ window._guiFilesCache = function(opt)
     }
 
     var thisObj = this;
-    
+
     this.closeDB = function()
     {
         if(thisObj.myDB)
         {
             thisObj.myDB.close();
             return;
-        } 
+        }
     }
-    
+
     function connectDB()
     {
         return new Promise(function(resolve, reject)
@@ -128,7 +128,7 @@ window._guiFilesCache = function(opt)
     }
 
     this.deleteAllCache = function()
-    { 
+    {
         this.closeDB();
         var DBDeleteRequest = window.indexedDB.deleteDatabase(baseName);
         DBDeleteRequest.onerror = function(event) {
@@ -138,13 +138,13 @@ window._guiFilesCache = function(opt)
                 {
                     inAppClose()
                 }
-                
+
                 window.location.reload()
             }, 500)
         };
 
-        DBDeleteRequest.onsuccess = DBDeleteRequest.onerror 
-        DBDeleteRequest.onblocked = DBDeleteRequest.onerror 
+        DBDeleteRequest.onsuccess = DBDeleteRequest.onerror
+        DBDeleteRequest.onblocked = DBDeleteRequest.onerror
         DBDeleteRequest.onupgradeneeded = DBDeleteRequest.onerror
 
         return DBDeleteRequest
@@ -180,17 +180,74 @@ var jsLoadingProgressSumSteps = 0;
 
 var jsToLoad = {}
 
-function appendError(exception)
+function appendLog(data, extendData)
 {
-    console.error(exception)
+    try{
+        let text = "";
+        if(!extendData)
+        {
+            extendData = {type:'Log', name:""}
+        }
+
+        text += "Type:"+extendData.type+"\t";
+        if(extendData.name) text += "Name:"+extendData.name+"\t";
+
+        if(typeof data == "string")
+        {
+            text += data
+        }
+        else
+        {
+            text += "JSON:"+JSON.stringify(exception)
+        }
+
+        text+= "\n";
+        $(".LoadingProgressBar-errorLog").append(text)
+    }catch (e) {
+        appendError(e)
+    }
+}
+
+function appendError(exception, extendData)
+{
+    try{
+        console.error(exception)
+
+        let text = "";
+        if(!extendData)
+        {
+            extendData = {type:'Error', name:""}
+        }
+
+        text += "Type:"+extendData.type+"\t";
+        if(extendData.name) text += "Name:"+extendData.name+"\n";
+
+        if(exception && exception.message)
+        {
+            text += exception.message + "\nstack:\n"+exception.stack
+        }
+        else
+        {
+            text += "JSON exeption:\n"+JSON.stringify(exception)
+        }
+
+        $(".LoadingProgressBar-errorLog").append(text)
+        $(".LoadingProgressBar-errorLog").append("\n\n")
+        $(".LoadingProgressBar-errorLog").show()
+        $(".loadInfoWrapper").addClass("need-reload")
+    }catch (e) {
+        debugger;
+        alert("Error in appendError function\n"+JSON.stringify(e))
+    }
+
 }
 
 /**
- * loadTipe('js') 
- * loadTipe('eval') 
- * loadTipe('js-inline') 
- * 
- * @param {type} string 
+ * loadTipe('js')
+ * loadTipe('eval')
+ * loadTipe('js-inline')
+ *
+ * @param {type} string
  * @returns {windowlocalStorage.loadTipe}
  */
 function loadTipe(type)
@@ -204,10 +261,10 @@ function loadTipe(type)
 }
 
 /**
- * notUseCache('true') 
+ * notUseCache('true')
  * notUseCache('false')
- * 
- * @param {type} string 
+ *
+ * @param {type} string
  * @returns {windowlocalStorage.useCache}
  */
 function notUseCache(type)
@@ -216,11 +273,11 @@ function notUseCache(type)
     {
         if(type == "true")
         {
-            loadTipe('js') 
+            loadTipe('js')
         }
         else
         {
-            loadTipe('inline-js') 
+            loadTipe('inline-js')
         }
         window.localStorage['useCache'] = type
     }
@@ -263,19 +320,19 @@ function addToPage(jsToLoad)
         for(var j in indexs[i])
         {
             var val = indexs[i][j]
-            
+
 
             if(val.appended)
             {
                 last_val = val;
                 continue;
             }
-            
+
             if(val.status!= 200)
             {
                 return;
             }
-            
+
             if(val.appending === true && !val.appended)
             {
                 setTimeout(function(){
@@ -283,7 +340,7 @@ function addToPage(jsToLoad)
                 }, 200)
                 return;
             }
-            
+
             if(last_val && !last_val.appended)
             {
                 setTimeout(function(){
@@ -291,8 +348,8 @@ function addToPage(jsToLoad)
                 }, 200)
                 return;
             }
-            
-            
+
+
             if(val.status == 200)
             {
                 if(val.appending === true && val.appended !== true)
@@ -302,7 +359,7 @@ function addToPage(jsToLoad)
                     }, 200)
                     return;
                 }
-                
+
                 val.appending = true;
                 try{
                     if(val.type =='tpl')
@@ -311,6 +368,7 @@ function addToPage(jsToLoad)
                         try{
                             $("body").append(val.response)
                             val.appended = true;
+                            appendLog("Appended "+val.url)
                         }catch (exception) {
                             appendError(exception)
                         }
@@ -323,8 +381,9 @@ function addToPage(jsToLoad)
                                 var link = document.createElement("script");
                                 link.setAttribute("type", "text/javascript");
                                 link.setAttribute("src", val.url);
-                                link.onload = function(){  
+                                link.onload = function(){
                                     val.appended = true;
+                                    appendLog("Appended "+val.url)
                                     addToPage(jsToLoad)
                                 }
 
@@ -336,16 +395,16 @@ function addToPage(jsToLoad)
                                 var link = document.createElement("script");
                                 link.setAttribute("type", "text/javascript");
                                 link.setAttribute("data-url", val.url);
-                                link.innerHTML = val.response
-                                 
+                                link.innerHTML = "try{\n"+val.response+"\n}catch (exception) {appendError(exception, "+JSON.stringify({name:val.url, type:'error'})+");}"
+
                                 document.getElementsByTagName("head")[0].appendChild(link);
+                                appendLog("Appended "+val.url)
                                 val.appended = true;
                             }
 
                         }catch (exception) {
-                            console.error(exception)
-                            console.error(val)
-                            appendError(exception)
+                            debugger;
+                            appendError(exception, {name:val.url, type:'error'})
                         }
                     }
                     else if(val.type =='css' /*&& isCordova()*/)
@@ -362,6 +421,7 @@ function addToPage(jsToLoad)
                         link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts")
 
                         document.getElementsByTagName("body")[0].appendChild(link);
+                        appendLog("Appended "+val.url)
                         val.appended = true;
                     }
                     else if(val.type =='event')
@@ -369,15 +429,15 @@ function addToPage(jsToLoad)
                         try{
                             tabSignal.emit(val.name)
                             val.appended = true;
+                            appendLog("Appended signal"+val.name)
                         }catch (exception) {
-                            appendError(exception)
+                            appendError(exception, {name:val.name, type:'error'})
                         }
                     }
                 }
                 catch (exception)
                 {
-                    console.error("exception", val.url, exception.stack, exception.stack)
-                    console.error(exception.stack)
+                    appendError(exception, {name:val.url, type:'error'})
                     debugger;
                 }
             }
@@ -401,7 +461,7 @@ function loadData(index)
     }
 
     window.loadData_jsLoadingProgressSumSteps++;
- 
+
     guiFilesCache.getFile(jsToLoad[index].url).then(
         function(file)
         {
@@ -433,7 +493,7 @@ function loadData(index)
 
             request.open("GET", jsToLoad[index].url);
 
-            request.send();  
+            request.send();
         }
     )
 }
@@ -465,8 +525,8 @@ function setLoadingProgress(width)
 function hideLoadingProgress()
 {$("#RealBody").show();
     $("#LoadingProgressBar").fadeOut('fast')
-    
-    setTimeout(function(){ 
+
+    setTimeout(function(){
         window.guiFilesCache.closeDB();
     }, 20000)
 }
