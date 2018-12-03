@@ -188,3 +188,92 @@ window.qunitTestsArray['guiElements.crontab'] = {
         });
     }
 }
+
+/**
+ * Тестирование guiElements.form
+ */
+window.qunitTestsArray['guiElements.form'] = {
+    test:function()
+    {
+        syncQUnit.addTest('guiElements.form', function ( assert )
+        {
+            let done = assert.async();
+
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+            let options = {
+                form: {
+                    button:{
+                        title:'Save',
+                        text:'Save',
+                        format:'formButton',
+                        type: "string",
+                        priority: 3,
+                        onclick:() => {
+                            return false;
+                        },
+                    },
+                    string:{
+                        title:'String',
+                        type: 'string',
+                        default: 'default_value',
+                        priority: 2,
+                    },
+                    enum:{
+                        type: 'string',
+                        enum: ['choice1', 'choice2'],
+                        title: 'Enum field',
+                        text: 'Enum field',
+                        priority: 1,
+                        onclick:() => {
+                            return false;
+                        }
+                    },
+
+                },
+            }
+
+            let el_names = ['button', 'string', 'enum'];
+            let sorted_el_names = ['enum', 'string', 'button'];
+
+            let element = new guiElements.form(undefined, options);
+
+            let elements_arr = element.getArrayOfRealElementsForSort();
+
+            assert.ok(elements_arr.length == el_names.length)
+
+            for(let i in elements_arr)
+            {
+                assert.ok(elements_arr[i].name == el_names[i], 'getArrayOfRealElementsForSort');
+            }
+
+            elements_arr.sort(element.sortRealElements);
+
+            for(let i in elements_arr)
+            {
+                assert.ok(elements_arr[i].name == sorted_el_names[i], 'sortRealElements');
+            }
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            let form_value = {
+                enum: 'choice1',
+                string: 'default_value',
+                button: undefined,
+            }
+
+            if(deepEqual(form_value, element.getValue()))
+            {
+                assert.ok(true, 'getValue');
+            }
+            else
+            {
+                assert.ok(false, 'getValue');
+            }
+
+            $("#guiElementsTestForm").remove();
+
+            testdone(done)
+        });
+    }
+}
