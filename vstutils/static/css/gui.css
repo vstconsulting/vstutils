@@ -1981,3 +1981,10 @@ input[type=color]{
 }
 
 .btn{ font-size: 14px; }
+
+.gravatar-img {
+    width:30px;
+    height:30px;
+    margin-top:-5px;
+    margin-right: 5px;
+}

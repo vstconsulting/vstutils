@@ -376,6 +376,20 @@ class VSTUtilsTestCase(BaseTestCase):
         result = self.get_result('get', '/api/v1/users/?username__not=USER')
         self.assertEqual(result['count'], 3)
 
+        # test for get_gravatar method
+        user_hash = ['default', '245cf079454dc9a3374a7c076de247cc']
+        gravatar_link = 'https://www.gravatar.com/avatar/{}?d=mp'
+        user_without_gravatar = dict(
+            username="test_user_1", password="test_password_1",
+        )
+        result = self.get_result('post', '/api/v1/users/', data=user_without_gravatar)
+        self.assertEqual(gravatar_link.format(user_hash[0]), result["gravatar"])
+        user_with_gravatar = dict(
+            username="test_user_2", password="test_password_2", email="test1@gmail.com",
+        )
+        result = self.get_result('post', '/api/v1/users/', data=user_with_gravatar)
+        self.assertEqual(gravatar_link.format(user_hash[1]), result["gravatar"])
+
     def test_bulk(self):
         self.get_model_filter(
             'django.contrib.auth.models.User'
@@ -404,7 +418,7 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check bulk-filters
             {'type': 'get', 'item': 'users',
              'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
-            },
+             },
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["users", self.user.id]},
@@ -414,7 +428,7 @@ class VSTUtilsTestCase(BaseTestCase):
              'data': {
                  "username": 'ttt', 'password': 'ttt333',
                  'first_name': json.dumps({"some": 'json'})}
-            }
+             }
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
