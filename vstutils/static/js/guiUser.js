@@ -53,7 +53,7 @@ tabSignal.connect("openapi.completed", function()
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-            })
+        })
 
             return def.promise();
         },
@@ -82,7 +82,7 @@ tabSignal.connect("openapi.completed", function()
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-            })
+        })
 
             return def.promise();
         },
@@ -125,7 +125,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-            })
+        })
 
             return def.promise();
         },
@@ -179,7 +179,7 @@ function registerProfileSublinkPage(sublink, path, api_pk, api_obj)
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-            })
+        })
 
             return def.promise();
         },
@@ -214,7 +214,7 @@ function registerProfileSublinkPage(sublink, path, api_pk, api_obj)
 
                 $.when(onClose_promise).always(() => {
                     pageItem.stopUpdates();
-                })
+            })
 
                 return def.promise();
             },
@@ -258,9 +258,24 @@ function registerProfileSublinkList(sublink, path, api_pk)
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-            })
+        })
 
             return def.promise();
         },
     })
 }
+
+function hide_gravatar_field(obj)
+{
+    if(obj.definition && obj.definition.properties)
+    {
+        let props = obj.definition.properties;
+        if(props.gravatar)
+        {
+            props.gravatar.hidden = true;
+        }
+    }
+}
+
+tabSignal.connect("openapi.schema.definition.User", hide_gravatar_field);
+tabSignal.connect("openapi.schema.definition.OneUser", hide_gravatar_field);
