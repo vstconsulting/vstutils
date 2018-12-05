@@ -279,12 +279,12 @@ window.qunitTestsArray['guiElements.form'] = {
 }
 
 /**
- * Testing of correct data sending
+ * Testing of guiElements.string behavior
  */
-window.qunitTestsArray['correct_fields_data_sending'] = {
+window.qunitTestsArray['guiElements.string_behavior'] = {
     test:function()
     {
-        syncQUnit.addTest('correct_fields_data_sending', function ( assert )
+        syncQUnit.addTest('guiElements.string_behavior', function ( assert )
         {
             let done = assert.async();
 
@@ -292,13 +292,9 @@ window.qunitTestsArray['correct_fields_data_sending'] = {
 
             let default_value = 'some_string';
 
-            let element = new guiElements.string({default: default_value, hidden:true});
+            let element = new guiElements.string({default: default_value});
 
             $("#guiElementsTestForm").insertTpl(element.render());
-
-            assert.ok(element.getValue() === undefined, 'hidden element will not be send');
-
-            element.setHidden(false);
 
             assert.ok(element.getValue() == default_value, 'default_value as text');
 
