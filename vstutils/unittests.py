@@ -17,6 +17,7 @@ from vstutils.api.views import UserViewSet
 from vstutils import utils
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
+from .templatetags.vst_gravatar import get_user_gravatar
 
 test_config = '''[main]
 test_key = test_value
@@ -376,6 +377,7 @@ class VSTUtilsTestCase(BaseTestCase):
         result = self.get_result('get', '/api/v1/users/?username__not=USER')
         self.assertEqual(result['count'], 3)
 
+    def test_user_gravatar(self):
         # test for get_gravatar method
         user_hash = ['default', '245cf079454dc9a3374a7c076de247cc']
         gravatar_link = 'https://www.gravatar.com/avatar/{}?d=mp'
@@ -389,6 +391,8 @@ class VSTUtilsTestCase(BaseTestCase):
         )
         result = self.get_result('post', '/api/v1/users/', data=user_with_gravatar)
         self.assertEqual(gravatar_link.format(user_hash[1]), result["gravatar"])
+        gravatar_of_nonexisting_user = get_user_gravatar(123321)
+        self.assertEqual(gravatar_link.format(user_hash[0]), gravatar_of_nonexisting_user)
 
     def test_bulk(self):
         self.get_model_filter(

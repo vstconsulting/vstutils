@@ -32,6 +32,7 @@ def project_args(request):
         "api_url": '{}/{}/{}/'.format(
             host_url, settings.VST_API_URL, settings.VST_API_VERSION
         ),
+        "enable_gravatar": settings.ENABLE_GRAVATAR,
     }
 
 

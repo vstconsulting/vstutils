@@ -32,7 +32,11 @@
           <!-- Notifications Dropdown Menu -->
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-              <img src="{% get_user_gravatar user.id %}" class="img-circle elevation-1 gravatar-img">
+                {% if enable_gravatar %}
+                    <img src="{% get_user_gravatar user.id %}" class="img-circle elevation-1 gravatar-img">
+                {% else %}
+                    <i class="fa fa-user mr-2 ico-data-default"></i>
+                {% endif %}
               <span class="text-data hidden-480">{{user.first_name}} {{user.last_name}}</span>
             </a>
 

@@ -2,13 +2,12 @@
 from __future__ import unicode_literals
 
 import json
-
+import hashlib
 import six
+
 from django.contrib.auth.models import User, models
 from rest_framework import serializers, exceptions
 from . import fields
-from ..settings import ENABLE_GRAVATAR
-import hashlib
 
 
 class BaseSerializer(serializers.Serializer):
@@ -91,7 +90,7 @@ class UserSerializer(VSTSerializer):
 
     def get_gravatar(self, instance):
         url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
-        if not instance.email or not ENABLE_GRAVATAR:
+        if not instance.email:
             return url_base.format('default')
         user_hash = hashlib.md5(instance.email.lower()).hexdigest()
         return url_base.format(user_hash)
