@@ -1,5 +1,5 @@
 /**
- * Тестирование guiElements.string
+ * Testing of guiElements.string
  */
 window.qunitTestsArray['guiElements.baseTest'] = {
     test:function()
@@ -113,7 +113,7 @@ window.qunitTestsArray['guiElements.uptime'] = {
     }
 }
 /**
- * Тестирование guiElements.crontab
+ * Testing of guiElements.crontab
  */
 window.qunitTestsArray['guiElements.crontab'] = {
     test:function()
@@ -190,7 +190,7 @@ window.qunitTestsArray['guiElements.crontab'] = {
 }
 
 /**
- * Тестирование guiElements.form
+ * Testing of guiElements.form
  */
 window.qunitTestsArray['guiElements.form'] = {
     test:function()
@@ -270,6 +270,43 @@ window.qunitTestsArray['guiElements.form'] = {
             {
                 assert.ok(false, 'getValue');
             }
+
+            $("#guiElementsTestForm").remove();
+
+            testdone(done)
+        });
+    }
+}
+
+/**
+ * Testing of correct data sending
+ */
+window.qunitTestsArray['correct_fields_data_sending'] = {
+    test:function()
+    {
+        syncQUnit.addTest('correct_fields_data_sending', function ( assert )
+        {
+            let done = assert.async();
+
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+            let default_value = 'some_string';
+
+            let element = new guiElements.string({default: default_value, hidden:true});
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            // assert.ok(element.getValue() === undefined, 'hidden element will not be send');
+
+            element.setHidden(false);
+
+            assert.ok(element.getValue() == default_value, 'default_value as text');
+
+            $("#gui" + element.element_id + " .guiElement-clear-addon").click();
+            assert.ok(element.getValue() == "", "check clear value button on field");
+
+            $("#gui" + element.element_id + " .guiElement-revert-addon").click();
+             assert.ok(element.getValue() == default_value, "check revert default button on field");
 
             $("#guiElementsTestForm").remove();
 
