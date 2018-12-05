@@ -310,3 +310,51 @@ window.qunitTestsArray['guiElements.string_behavior'] = {
         });
     }
 }
+
+/**
+ * Testing for getValue of hidden fields.
+ */
+window.qunitTestsArray['getValue_hidden_field'] = {
+    test:function()
+    {
+        syncQUnit.addTest('getValue_hidden_field', function ( assert )
+        {
+            let done = assert.async();
+
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+            let default_value = 'some_string';
+            let opt = {
+                default: default_value,
+                required: true,
+                hidden:true,
+            };
+
+            let element = new guiElements.string(opt);
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            assert.ok(element.getValue() == default_value, 'Field is hidden, required and with default value');
+
+            element.opt.required = false;
+
+            assert.ok(element.getValue() == undefined, 'Field is hidden, unrequired and with default value');
+
+            element.setHidden(false);
+
+            assert.ok(element.getValue() == default_value, 'Field is unhidden, unrequired and with default value');
+
+            delete opt.default;
+
+            element = new guiElements.string(opt);
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            assert.ok(element.getValue() == undefined, 'Field is hidden, required and without default value');
+
+            $("#guiElementsTestForm").remove();
+
+            testdone(done)
+        });
+    }
+}
