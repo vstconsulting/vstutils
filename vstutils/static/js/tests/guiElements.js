@@ -296,7 +296,7 @@ window.qunitTestsArray['correct_fields_data_sending'] = {
 
             $("#guiElementsTestForm").insertTpl(element.render());
 
-            // assert.ok(element.getValue() === undefined, 'hidden element will not be send');
+            assert.ok(element.getValue() === undefined, 'hidden element will not be send');
 
             element.setHidden(false);
 
