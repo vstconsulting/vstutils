@@ -517,26 +517,51 @@ function groupButtonsOrNot(window_width, buttons)
 }
 
 var guiLocalSettings = {
-    __settings:{
+    __settings:{ // object for storing current settings (including tmpSettings)
+    },
+    __tmpSettings: { // object for storing tmpSettings
+    },
+    __beforeAsTmpSettings: { // object for storing setting value, as it was before user set tmpSettings value
+    },
+    __removeTmpSettings: function() { // function removes tmpSettings from current settings and add previous values (if they were)
+        for(var item in this.__tmpSettings)
+        {
+            if(this.__beforeAsTmpSettings[item])
+            {
+                this.__settings[item] = this.__beforeAsTmpSettings[item];
+            }
+            else
+            {
+                delete this.__settings[item];
+            }
+        }
     },
     get:function(name){
         return this.__settings[name];
     },
     delete:function(name){
+        this.__removeTmpSettings();
         delete this.__settings[name];
-        localStorage.removeItem(name)
+        delete this.__tmpSettings[name];
+        delete this.__beforeAsTmpSettings[name];
+        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings);
     },
     set:function(name, value){
+        this.__removeTmpSettings();
         this.__settings[name] = value;
-        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings)
-        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings);
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value});
     },
     setAsTmp:function(name, value){
+        if(this.__settings[name])
+        {
+            this.__beforeAsTmpSettings[name] = this.__settings[name];
+        }
         this.__settings[name] = value;
-        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value})
+        this.__tmpSettings[name] = value;
+        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value});
     },
-    setIfNotExists:function(name, value)
-    {
+    setIfNotExists:function(name, value){
         if(this.__settings[name] === undefined)
         {
             this.__settings[name] = value;
@@ -852,20 +877,20 @@ function allPropertiesIsObjects(obj)
  */
 function debounce(f, ms) {
 
-  let timer = null;
+    let timer = null;
 
-  return function (...args) {
-    const onComplete = () => {
-      f.apply(this, args);
-      timer = null;
-    }
+    return function (...args) {
+        const onComplete = () => {
+            f.apply(this, args);
+            timer = null;
+        }
 
-    if (timer) {
-      clearTimeout(timer);
-    }
+        if (timer) {
+            clearTimeout(timer);
+        }
 
-    timer = setTimeout(onComplete, ms);
-  };
+        timer = setTimeout(onComplete, ms);
+    };
 }
 
 
@@ -974,7 +999,7 @@ function hexToRgbA(hex, alpha)
 {
     if(alpha === undefined)
     {
-       alpha = 1;
+        alpha = 1;
     }
 
     let c;
@@ -986,5 +1011,5 @@ function hexToRgbA(hex, alpha)
         c= '0x'+c.join('');
         return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',' + alpha +')';
     }
-   return;
+    return;
 }
