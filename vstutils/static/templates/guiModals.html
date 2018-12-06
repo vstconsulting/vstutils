@@ -46,7 +46,6 @@
 <script type="text/x-just" data-just="hybrid_autocomplete_modal">
     <%[ modal_content_block_style %>
         padding:20px;
-        background-color: #ecf0f5;
     <%] %>
      <%[ modal_content_block %>
         <%= spajs.just.render('hybrid_autocomplete_modal_content', {query:query, guiObj:guiObj, guiElement:guiElement, opt:opt}) %>
@@ -192,7 +191,7 @@
             type="text"
             id="search-query-input"
             placeholder="Search by <%- opt.autocomplete_properties.view_field %>"
-            class="form-control"
+            class="form-control rounded"
             maxlength="255"
             value="<% if(guiObj.model.filters.search_query && guiObj.model.filters.search_query[opt.autocomplete_properties.view_field]){ %><%- guiObj.model.filters.search_query[opt.autocomplete_properties.view_field] %><% } %>"
             <% console.log('guiObj', guiObj) %>
