@@ -1494,7 +1494,7 @@ table{
 }
 
 .breadcrumb {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .breadcrumb>li.breadcrumb-item>a {
@@ -1856,6 +1856,7 @@ body{
 
 .brand-link {
     border-bottom-color: var(--left-sidebar-border-color) !important;
+    padding: .75rem .5rem;
 }
 
 .brand-link:hover {
