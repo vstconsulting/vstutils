@@ -100,7 +100,7 @@ guiElements.base = function(opt = {}, value, parent_object)
 
     this.isHidden = function()
     {
-        return $('#gui'+this.element_id).hasClass('hidden-field')
+        return $('#gui'+this.element_id).hasClass('hidden-field') || $('#gui'+this.element_id).hasClass('hide');
     }
 
     this.isRequired = function()
