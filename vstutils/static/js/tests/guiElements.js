@@ -1,5 +1,5 @@
 /**
- * Тестирование guiElements.string
+ * Testing of guiElements.string
  */
 window.qunitTestsArray['guiElements.baseTest'] = {
     test:function()
@@ -113,7 +113,7 @@ window.qunitTestsArray['guiElements.uptime'] = {
     }
 }
 /**
- * Тестирование guiElements.crontab
+ * Testing of guiElements.crontab
  */
 window.qunitTestsArray['guiElements.crontab'] = {
     test:function()
@@ -181,6 +181,176 @@ window.qunitTestsArray['guiElements.crontab'] = {
 
             element.setMinutes("1,2,3,4,5/5,45-51,170-38/2")
             assert.ok("*/5,*/12,*/16,1-4,6,8,14,18,22,26,28,34,38,46,47,49,51 1,2 1,2 1,2 1,2" == element.getValue(), 'getValue');
+
+            $("#guiElementsTestForm").remove();
+
+            testdone(done)
+        });
+    }
+}
+
+/**
+ * Testing of guiElements.form
+ */
+window.qunitTestsArray['guiElements.form'] = {
+    test:function()
+    {
+        syncQUnit.addTest('guiElements.form', function ( assert )
+        {
+            let done = assert.async();
+
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+            let options = {
+                form: {
+                    button:{
+                        title:'Save',
+                        text:'Save',
+                        format:'formButton',
+                        type: "string",
+                        priority: 3,
+                        onclick:() => {
+                            return false;
+                        },
+                    },
+                    string:{
+                        title:'String',
+                        type: 'string',
+                        default: 'default_value',
+                        priority: 2,
+                    },
+                    enum:{
+                        type: 'string',
+                        enum: ['choice1', 'choice2'],
+                        title: 'Enum field',
+                        text: 'Enum field',
+                        priority: 1,
+                        onclick:() => {
+                            return false;
+                        }
+                    },
+
+                },
+            }
+
+            let el_names = ['button', 'string', 'enum'];
+            let sorted_el_names = ['enum', 'string', 'button'];
+
+            let element = new guiElements.form(undefined, options);
+
+            let elements_arr = element.getArrayOfRealElementsForSort();
+
+            assert.ok(elements_arr.length == el_names.length)
+
+            for(let i in elements_arr)
+            {
+                assert.ok(elements_arr[i].name == el_names[i], 'getArrayOfRealElementsForSort');
+            }
+
+            elements_arr.sort(element.sortRealElements);
+
+            for(let i in elements_arr)
+            {
+                assert.ok(elements_arr[i].name == sorted_el_names[i], 'sortRealElements');
+            }
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            let form_value = {
+                enum: 'choice1',
+                string: 'default_value',
+                button: undefined,
+            }
+
+            if(deepEqual(form_value, element.getValue()))
+            {
+                assert.ok(true, 'getValue');
+            }
+            else
+            {
+                assert.ok(false, 'getValue');
+            }
+
+            $("#guiElementsTestForm").remove();
+
+            testdone(done)
+        });
+    }
+}
+
+/**
+ * Testing of guiElements.string behavior
+ */
+window.qunitTestsArray['guiElements.string_behavior'] = {
+    test:function()
+    {
+        syncQUnit.addTest('guiElements.string_behavior', function ( assert )
+        {
+            let done = assert.async();
+
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+            let default_value = 'some_string';
+
+            let element = new guiElements.string({default: default_value});
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            assert.ok(element.getValue() == default_value, 'default_value as text');
+
+            $("#gui" + element.element_id + " .guiElement-clear-addon").click();
+            assert.ok(element.getValue() == "", "check clear value button on field");
+
+            $("#gui" + element.element_id + " .guiElement-revert-addon").click();
+             assert.ok(element.getValue() == default_value, "check revert default button on field");
+
+            $("#guiElementsTestForm").remove();
+
+            testdone(done)
+        });
+    }
+}
+
+/**
+ * Testing for getValue of hidden fields.
+ */
+window.qunitTestsArray['getValue_hidden_field'] = {
+    test:function()
+    {
+        syncQUnit.addTest('getValue_hidden_field', function ( assert )
+        {
+            let done = assert.async();
+
+            $("body").append("<div id='guiElementsTestForm'></div>")
+
+            let default_value = 'some_string';
+            let opt = {
+                default: default_value,
+                required: true,
+                hidden:true,
+            };
+
+            let element = new guiElements.string(opt);
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            assert.ok(element.getValue() == default_value, 'Field is hidden, required and with default value');
+
+            element.opt.required = false;
+
+            assert.ok(element.getValue() == undefined, 'Field is hidden, unrequired and with default value');
+
+            element.setHidden(false);
+
+            assert.ok(element.getValue() == default_value, 'Field is unhidden, unrequired and with default value');
+
+            delete opt.default;
+
+            element = new guiElements.string(opt);
+
+            $("#guiElementsTestForm").insertTpl(element.render());
+
+            assert.ok(element.getValue() == undefined, 'Field is hidden, required and without default value');
 
             $("#guiElementsTestForm").remove();
 

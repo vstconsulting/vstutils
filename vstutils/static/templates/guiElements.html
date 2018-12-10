@@ -354,6 +354,16 @@
         <%* main_input %>
     <%] %>
 
+    <%[ input_addons %>
+        <% if(guiElement.opt.default){ %>
+            <div class="input-group-append guiElement-revert-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>'); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
+                <span class="input-group-text">
+                    <span class='fa fa-repeat' ></span>
+                </span>
+            </div>
+        <% } %>
+    <%] %>
+
 
     <%! guiElements.string %>
 </script>
@@ -635,12 +645,12 @@
     <%] %>
 
     <%[ main_input %>
-         <div class="html_content" id="<%- guiElement.element_id %>"> <%= value || opt.default || '' %> </div>
+         <div class="html_content rounded" id="<%- guiElement.element_id %>"> <%= value || opt.default || '' %> </div>
     <%] %>
 
     <%[ readonly_input %>
         <~ guiElement.db_value>
-            <div class="html_content" id="<%- guiElement.element_id %>"> <%= guiElement.db_value || opt.default || '' %> </div>
+            <div class="html_content rounded" id="<%- guiElement.element_id %>"> <%= guiElement.db_value || opt.default || '' %> </div>
         <~>
     <%] %>
 
