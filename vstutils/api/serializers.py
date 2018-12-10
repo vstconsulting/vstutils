@@ -5,6 +5,7 @@ import json
 import hashlib
 import six
 
+from django.templatetags.static import static
 from django.contrib.auth.models import User, models
 from rest_framework import serializers, exceptions
 from . import fields
@@ -89,9 +90,9 @@ class UserSerializer(VSTSerializer):
         return instance
 
     def get_gravatar(self, instance):
-        url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
         if not instance.email:
-            return url_base.format('default')
+            return static('img/anonymous.png')
+        url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
         user_hash = hashlib.md5(instance.email.lower().encode('utf-8')).hexdigest()
         return url_base.format(user_hash)
 

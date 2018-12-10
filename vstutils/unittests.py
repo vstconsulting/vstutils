@@ -379,20 +379,21 @@ class VSTUtilsTestCase(BaseTestCase):
 
     def test_user_gravatar(self):
         # test for get_gravatar method
-        user_hash = ['default', '245cf079454dc9a3374a7c076de247cc']
+        default_gravatar = '/static/img/anonymous.png'
+        user_hash = '245cf079454dc9a3374a7c076de247cc'
         gravatar_link = 'https://www.gravatar.com/avatar/{}?d=mp'
         user_without_gravatar = dict(
             username="test_user_1", password="test_password_1",
         )
         result = self.get_result('post', '/api/v1/users/', data=user_without_gravatar)
-        self.assertEqual(gravatar_link.format(user_hash[0]), result["gravatar"])
+        self.assertEqual(default_gravatar, result["gravatar"])
         user_with_gravatar = dict(
             username="test_user_2", password="test_password_2", email="test1@gmail.com",
         )
         result = self.get_result('post', '/api/v1/users/', data=user_with_gravatar)
-        self.assertEqual(gravatar_link.format(user_hash[1]), result["gravatar"])
-        gravatar_of_nonexisting_user = get_user_gravatar(123321)
-        self.assertEqual(gravatar_link.format(user_hash[0]), gravatar_of_nonexisting_user)
+        self.assertEqual(gravatar_link.format(user_hash), result["gravatar"])
+        gravatar_of_nonexistent_user = get_user_gravatar(123321)
+        self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
 
     def test_bulk(self):
         self.get_model_filter(
