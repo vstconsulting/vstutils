@@ -92,7 +92,7 @@ class UserSerializer(VSTSerializer):
         url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
         if not instance.email:
             return url_base.format('default')
-        user_hash = hashlib.md5(instance.email.lower()).hexdigest()
+        user_hash = hashlib.md5(instance.email.lower().encode('utf-8')).hexdigest()
         return url_base.format(user_hash)
 
 
