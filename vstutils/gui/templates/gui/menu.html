@@ -33,7 +33,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
                 {% if enable_gravatar %}
-                    <img src="{% get_user_gravatar user.id %}" class="img-circle elevation-1 gravatar-img">
+                    <img src="{% get_user_gravatar user.id %}" class="img-circle elevation-1 gravatar-img" onerror="setDefaultGravatar(this)">
                 {% else %}
                     <i class="fa fa-user mr-2 ico-data-default"></i>
                 {% endif %}

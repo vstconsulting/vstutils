@@ -48,6 +48,12 @@
         window.guiStaticPath = "{% static '' %}";
         window.isDebug = {% if debug %}true{% else %}false{% endif %}
         window.timeZone = '{{timezone}}';
+        window.enable_gravatar = {% if enable_gravatar %}true{% else %}false{% endif %}
+    </script>
+    <script>
+        function setDefaultGravatar(element){
+            element.src = "{% static 'img/anonymous.png' %}";
+        }
     </script>
 {% endblock %}
 

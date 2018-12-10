@@ -1,12 +1,8 @@
-try:
-    from urllib.request import urlopen
-except ImportError:  # nocv
-    from urllib2 import urlopen
+import hashlib
 
 from django import template
 from django.contrib.auth.models import User
 from django.templatetags.static import static
-from ..api.serializers import UserSerializer
 
 register = template.Library()
 
@@ -30,11 +26,8 @@ def get_user_gravatar(user_id):
         user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
         return static('img/anonymous.png')
-    gravatar = UserSerializer(user).data['gravatar']
-    try:
-        get_url = urlopen(gravatar)
-    except:  # nocv
-        return static('img/anonymous.png')  # nocv
-    if get_url.code == 200:
-        return gravatar
-    return static('img/anonymous.png')  # nocv
+    if not user.email:
+        return static('img/anonymous.png')
+    url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
+    user_hash = hashlib.md5(user.email.lower().encode('utf-8')).hexdigest()
+    return url_base.format(user_hash)

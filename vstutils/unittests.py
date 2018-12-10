@@ -386,12 +386,15 @@ class VSTUtilsTestCase(BaseTestCase):
             username="test_user_1", password="test_password_1",
         )
         result = self.get_result('post', '/api/v1/users/', data=user_without_gravatar)
-        self.assertEqual(default_gravatar, result["gravatar"])
+        self.assertEqual(default_gravatar, get_user_gravatar(result["id"]))
         user_with_gravatar = dict(
             username="test_user_2", password="test_password_2", email="test1@gmail.com",
         )
         result = self.get_result('post', '/api/v1/users/', data=user_with_gravatar)
-        self.assertEqual(gravatar_link.format(user_hash), result["gravatar"])
+        self.assertEqual(
+            gravatar_link.format(user_hash),
+            get_user_gravatar(result["id"])
+        )
         gravatar_of_nonexistent_user = get_user_gravatar(123321)
         self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
 

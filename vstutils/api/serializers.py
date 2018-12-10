@@ -2,10 +2,8 @@
 from __future__ import unicode_literals
 
 import json
-import hashlib
 import six
 
-from django.templatetags.static import static
 from django.contrib.auth.models import User, models
 from rest_framework import serializers, exceptions
 from . import fields
@@ -28,7 +26,6 @@ class VSTSerializer(serializers.ModelSerializer):
 class UserSerializer(VSTSerializer):
     is_active = serializers.BooleanField(default=True)
     is_staff = serializers.BooleanField(default=False)
-    gravatar = serializers.SerializerMethodField()
 
     class UserExist(exceptions.ValidationError):
         status_code = 409
@@ -38,8 +35,7 @@ class UserSerializer(VSTSerializer):
         fields = ('id',
                   'username',
                   'is_active',
-                  'is_staff',
-                  'gravatar',)
+                  'is_staff',)
         read_only_fields = ('is_superuser',)
 
     def create(self, data):
@@ -89,13 +85,6 @@ class UserSerializer(VSTSerializer):
         instance.save()
         return instance
 
-    def get_gravatar(self, instance):
-        if not instance.email:
-            return static('img/anonymous.png')
-        url_base = 'https://www.gravatar.com/avatar/{}?d=mp'
-        user_hash = hashlib.md5(instance.email.lower().encode('utf-8')).hexdigest()
-        return url_base.format(user_hash)
-
 
 class OneUserSerializer(UserSerializer):
     password = fields.VSTCharField(write_only=True, required=False)
@@ -110,8 +99,7 @@ class OneUserSerializer(UserSerializer):
                   'is_staff',
                   'first_name',
                   'last_name',
-                  'email',
-                  'gravatar',)
+                  'email',)
         read_only_fields = ('is_superuser',
                             'date_joined',)
 
