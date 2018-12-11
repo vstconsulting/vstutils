@@ -128,9 +128,9 @@
 
     {% block footer %}
     <footer class="main-footer">
+        {% block additional_information %}
+        {% endblock %}
          <div class="pull-right d-none d-sm-block">
-             {% block additional_information %}
-             {% endblock %}
              &copy; {{ copyright }}
          </div>
         <br>

@@ -20,6 +20,11 @@ guiModal = {
     {
         let local_options = {}
 
+        try {
+            this.options['headerColor'] =  guiCustomizer.skin.value['card_header_bg_color'];
+        }
+        catch(e) {}
+
         for(var i in this.options)
         {
             local_options[i] = this.options[i]

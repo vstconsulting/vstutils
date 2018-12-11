@@ -2,7 +2,7 @@
 window.qunitTestsArray['stringToBoolean'] = {
     test:function()
     {
-        syncQUnit.addTest("spajs.errorPage", function ( assert )
+        syncQUnit.addTest("stringToBoolean", function ( assert )
         {
             let done = assert.async();
 
@@ -51,7 +51,7 @@ window.qunitTestsArray['spajs.errorPage'] = {
 window.qunitTestsArray['webGui.showErrors'] = {
     test:function()
     {
-        syncQUnit.addTest("spajs.showErrors", function ( assert )
+        syncQUnit.addTest("webGui.showErrors", function ( assert )
         {
             let done = assert.async();
             let res = webGui.showErrors("ABC")
@@ -82,3 +82,94 @@ window.qunitTestsArray['webGui.showErrors'] = {
     }
 }
 
+window.qunitTestsArray['guiLocalSettings'] = {
+    test:function()
+    {
+        syncQUnit.addTest("guiLocalSettings", function ( assert )
+        {
+            let done = assert.async();
+
+            let test_settings = {
+                test_1: true,
+                test_2: 'string',
+                test_3: 1,
+                test_4: {
+                    prop_1: 1,
+                    prop_2: false,
+                    prop_3: 'str',
+                    prop_4: ['sdf', 'fdgs', true, 12, {abc:'123'}],
+                }
+            };
+
+            let test_tmp_settings_existing = {
+                test_1: false,
+                test_2: '',
+                test_3: 0,
+            };
+
+            let test_tmp_settings_unexisting = {
+                test_8: true,
+                test_9: 'qwerty',
+            }
+
+            // checks setting and getting of value to guiLocalSettings
+            for(let key in test_settings)
+            {
+                guiLocalSettings.set(key, test_settings[key]);
+                assert.ok(deepEqual(guiLocalSettings.get(key), test_settings[key]), 'guiLocalSettings.set & guiLocalSettings.get');
+            }
+
+            // checks setting as tmp values of existing before settings
+            for(let key in test_tmp_settings_existing)
+            {
+                guiLocalSettings.setAsTmp(key, test_tmp_settings_existing[key]);
+                assert.ok(deepEqual(guiLocalSettings.get(key), test_tmp_settings_existing[key]), 'guiLocalSettings.setAsTmp (existing settings) & guiLocalSettings.get');
+            }
+
+             // checks setting as tmp values of unexisting before settings
+            for(let key in test_tmp_settings_unexisting)
+            {
+                guiLocalSettings.setAsTmp(key, test_tmp_settings_unexisting[key]);
+                assert.ok(deepEqual(guiLocalSettings.get(key), test_tmp_settings_unexisting[key]), 'guiLocalSettings.setAsTmp (unexisting settings) & guiLocalSettings.get');
+            }
+
+            guiLocalSettings.set('test_1',test_settings['test_1']);
+
+            // checks that after guiLocalSettings.set() call non tmp values of settings were saved to local storage
+            for(let key in test_settings)
+            {
+                assert.ok(deepEqual(guiLocalSettings.get(key), test_settings[key]), 'existing tmp settings were not added to LocalStorage after guiLocalSettings.set');
+            }
+
+            // checks that after guiLocalSettings.set() call tmp values of unexisting before settings were not saved to local storage
+            for(let key in test_tmp_settings_unexisting)
+            {
+                assert.ok(guiLocalSettings.get(key) === undefined, 'tmp unexisting wetting were not added to LocalStorage after guiLocalSettings.set');
+            }
+
+            // checks guiLocalSettings.delete
+            for(let key in test_settings)
+            {
+                guiLocalSettings.delete(key);
+                assert.ok(guiLocalSettings.get(key) === undefined, 'delete settings');
+            }
+
+            for(let key in test_tmp_settings_unexisting)
+            {
+                delete guiLocalSettings.__tmpSettings[key];
+            }
+
+            // checks guiLocalSettings.setIfNotExists for a new key
+            guiLocalSettings.setIfNotExists('q1w2e3r4t5y6', true);
+            assert.ok(guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - unexisting key');
+
+            // checks guiLocalSettings.setIfNotExists for existing key
+            guiLocalSettings.setIfNotExists('q1w2e3r4t5y6', false);
+            assert.ok(guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - existing key');
+
+            guiLocalSettings.delete('q1w2e3r4t5y6');
+
+            testdone(done)
+        });
+    }
+}

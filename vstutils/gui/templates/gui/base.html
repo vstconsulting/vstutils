@@ -48,6 +48,13 @@
         window.guiStaticPath = "{% static '' %}";
         window.isDebug = {% if debug %}true{% else %}false{% endif %}
         window.timeZone = '{{timezone}}';
+        window.enable_gravatar = {% if enable_gravatar %}true{% else %}false{% endif %}
+    </script>
+    <script>
+        function setDefaultGravatar(element){
+            element.src = "{% static 'img/anonymous.png' %}";
+            return element;
+        }
     </script>
 {% endblock %}
 
@@ -197,7 +204,7 @@
             { prioritet:0, type:'js', name: "{% static 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"},
             { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"},
 
-
+            { prioritet:3, type:'js', name: "{% static 'js/libs/md5.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
             { prioritet:4, type:'js', name: "{% static 'js/libs/visibility/visibility.core.js' %}?v={{gui_version}}"},

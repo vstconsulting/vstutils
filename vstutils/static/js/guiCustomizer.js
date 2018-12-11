@@ -97,8 +97,8 @@ guiSkins.base = function(value){
                     },
                 },
                 apply:{
-                    title:'Apply',
-                    text:'Apply',
+                    title:'Apply custom CSS',
+                    text:'Apply custom CSS',
                     format:'formButton',
                     type: "string",
                     priority: 901,
@@ -120,7 +120,7 @@ guiSkins.base = function(value){
                     },
                 },
                 save:{
-                    title:'Save',
+                    title:'Save skin',
                     text:'Save',
                     format:'formButton',
                     type: "string",
@@ -869,8 +869,8 @@ guiSkins.default = function(){
                     },
                 },
                 apply:{
-                    title:'Apply',
-                    text:'Apply',
+                    title:'Apply custom CSS',
+                    text:'Apply custom CSS',
                     format:'formButton',
                     type: "string",
                     priority: 901,
