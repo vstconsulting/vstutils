@@ -2034,3 +2034,17 @@ input[type=color]{
     margin-top:-5px;
     margin-right: 5px;
 }
+
+.gravatar-img-list {
+    width:30px;
+    height:30px;
+    margin-top:0px;
+    margin-right: 5px;
+}
+
+@media (max-width: 480px) {
+    .td_user_is_active,
+    .gravatar-img-list {
+        display: none;
+    }
+}

@@ -53,7 +53,7 @@ tabSignal.connect("openapi.completed", function()
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-        })
+            })
 
             return def.promise();
         },
@@ -82,7 +82,7 @@ tabSignal.connect("openapi.completed", function()
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-        })
+            })
 
             return def.promise();
         },
@@ -125,7 +125,7 @@ function registerProfileSublinkAction(sublink, path, api_pk)
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-        })
+            })
 
             return def.promise();
         },
@@ -179,7 +179,7 @@ function registerProfileSublinkPage(sublink, path, api_pk, api_obj)
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-        })
+            })
 
             return def.promise();
         },
@@ -214,7 +214,7 @@ function registerProfileSublinkPage(sublink, path, api_pk, api_obj)
 
                 $.when(onClose_promise).always(() => {
                     pageItem.stopUpdates();
-            })
+                })
 
                 return def.promise();
             },
@@ -258,24 +258,93 @@ function registerProfileSublinkList(sublink, path, api_pk)
 
             $.when(onClose_promise).always(() => {
                 pageItem.stopUpdates();
-        })
+            })
 
             return def.promise();
         },
     })
 }
 
-function hide_gravatar_field(obj)
+/**
+ * Function adds to username string gravatar img(if it is enable).
+ * @param opt(object) - object with current username value and user's data.
+ * @returns string - rendered html
+ */
+function format_username(opt)
 {
-    if(obj.definition && obj.definition.properties)
+    let username = "";
+
+    if(opt && opt.value)
     {
-        let props = obj.definition.properties;
-        if(props.gravatar)
-        {
-            props.gravatar.hidden = true;
-        }
+        username = opt.value;
+    }
+
+    let link = setDefaultGravatar({}).src;
+
+    if(opt && opt.data && opt.data.email)
+    {
+        let url_base = 'https://www.gravatar.com/avatar/{hash}?d=mp';
+        link = url_base.format({hash:md5(opt.data.email)});
+    }
+
+    let html = spajs.just.render('gravatar_in_list', {link: link, username: username});
+
+    return html;
+}
+
+/**
+ * Function adds settings to user list fields
+ * @param obj(object) - object with schema options of user list.
+ */
+function addSettingsToUserList(obj)
+{
+    let props = obj.definition.properties;
+    if(props['username'] && window.enable_gravatar)
+    {
+        props['username'].__func__value = 'format_username';
+    }
+
+    if(props['email'])
+    {
+        props['email'].hidden = true;
     }
 }
 
-tabSignal.connect("openapi.schema.definition.User", hide_gravatar_field);
-tabSignal.connect("openapi.schema.definition.OneUser", hide_gravatar_field);
+tabSignal.connect("openapi.schema.definition.User", addSettingsToUserList);
+
+gui_user =  {
+    // adds gravatar img to title on user page
+    getTitle: function()
+    {
+        if(this.api.type == 'page')
+        {
+            let bool = false;
+            try {
+                let page = this.url_vars.page;
+
+                if(page.match(this.api.name))
+                {
+                    bool = true;
+                }
+            }
+            catch(e){}
+
+            if(this.model.data && window.enable_gravatar && bool)
+            {
+                let opt = {
+                    value: this.model.data['username'],
+                    data: this.model.data,
+                };
+                return format_username(opt);
+            }
+            else
+            {
+                return gui_page_object.getTitle.apply(this, arguments);
+            }
+        }
+        else
+        {
+            return gui_base_object.getTitle.apply(this, arguments);
+        }
+    }
+}
