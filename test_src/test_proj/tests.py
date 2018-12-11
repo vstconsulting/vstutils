@@ -1,8 +1,11 @@
 import json
 import six
+import pyximport
+pyximport.install()
 from django.core.management import call_command
 from vstutils.unittests import BaseTestCase, VSTUtilsTestCase, VSTUtilsCommandsTestCase
-from .models import Host, HostGroup
+from .models import Host, HostGroup, File
+
 
 class ProjectTestCase(BaseTestCase):
     def setUp(self):
@@ -296,6 +299,13 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
 
 
-class FileTestCase(BaseTestCase)
-    def test_create(self):
-        pass
+class FileTestCase(BaseTestCase):
+    def test_create_file(self):
+        qs = File.objects.filter(name__in=['ToFilter', 'ToExclude'])
+        qs = qs.exclude(name='ToExclude').order_by('for_order1', 'for_ordrer2')
+
+        self.assertEqual(qs.count(), 5)
+        self.assertEqual(qs.exists(), True)
+
+        # for object in qs.all():
+

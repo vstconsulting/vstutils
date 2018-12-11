@@ -1,18 +1,18 @@
-from vstutils.models import CustomQuerySet, BModel, Manager, models
+import os
+from vstutils.models import models
+from vstutils.custom_model import FileModel
 
 
-class FileQuerySet(CustomQuerySet):
-    pass
-
-
-class File(BModel):
+class File(FileModel):
+    file_path = os.path.dirname(__file__) + '/../custom_model.yaml'
     name = models.CharField(max_length=1024)
-    objects = Manager.from_queryset(FileQuerySet)
+    for_order1 = models.IntegerField()
+    for_order2 = models.IntegerField()
+    origin_pos = models.IntegerField()
 
     class Meta:
-        abstract = True
-    pass
+        managed = False
 
 
-class FileModelView():
+class FilesModelView(object):
     pass

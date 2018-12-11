@@ -19,10 +19,6 @@ def iscyfunction(obj):  # noprj
     return callable(obj) and not isinstance(obj, object)
 
 
-class CustomQuerySet(models.QuerySet):
-    pass
-
-
 class BQuerySet(models.QuerySet):  # noprj
     '''
     QuerySet class with basic operations.
