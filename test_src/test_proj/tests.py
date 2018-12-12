@@ -1,8 +1,10 @@
 import json
 import six
+import pyximport
+pyximport.install()
 from django.core.management import call_command
 from vstutils.unittests import BaseTestCase, VSTUtilsTestCase, VSTUtilsCommandsTestCase
-from .models import Host, HostGroup
+from .models import Host, HostGroup, File, List
 
 
 class ProjectTestCase(BaseTestCase):
@@ -295,3 +297,56 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(hostgroup_props['file']['format'], 'file')
         self.assertEqual(hostgroup_props['secret_file']['type'], 'string')
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
+
+
+class CustomModelTestCase(BaseTestCase):
+    def test_custom_models(self):
+        qs = File.objects.filter(name__in=['ToFilter', 'ToExclude'])
+        qs = qs.exclude(name='ToExclude', invalid='incorrect').order_by('for_order1', '-for_order2').reverse()
+
+        self.assertEqual(qs.count(), 5)
+        self.assertEqual(qs.exists(), True)
+
+        origin_pos_arr = [6, 7, 8, 0, 9]
+        origin_pos_arr.reverse()
+        counter = 0
+        for file_obj in qs.all():
+            self.assertEqual(
+                file_obj.origin_pos, origin_pos_arr[counter],
+                [dict(origin_pos=i.origin_pos, for_order1=i.for_order1, for_order2=i.for_order2)
+                 for i in qs]
+            )
+            counter += 1
+
+        self.assertEqual(qs.none().count(), 0)
+        test_obj = qs.get(pk=6)
+        self.assertEqual(test_obj.name, 'ToFilter')
+        self.assertEqual(test_obj.origin_pos, 6)
+        with self.assertRaises(test_obj.MultipleObjectsReturned):
+            qs.get(name__in=['ToFilter', 'ToExclude'])
+        with self.assertRaises(test_obj.DoesNotExist):
+            qs.get(name='incorrect')
+
+        list_qs = List.objects.all()
+        self.assertEqual(list_qs.count(), 100)
+        self.assertEqual(len(list(list_qs[1:50])), 49)
+
+        self.assertEqual(qs.last().origin_pos, 6)
+        self.assertEqual(qs.first().origin_pos, 9)
+
+        self.assertTrue(File.objects.all()[1:2].query['low_mark'], 1)
+        self.assertTrue(File.objects.all()[1:2].query['high_mark'], 2)
+
+    def test_custom(self):
+        results = self.make_bulk([
+            dict(data_type=['files'], method='get'),
+            dict(data_type=['files', 1], method='get'),
+            dict(data_type=['files'], method='get', filters='name=ToFilter'),
+        ], 'put')
+
+        for result in results:
+            self.assertEqual(result['status'], 200, result)
+
+        self.assertEqual(results[0]['data']['count'], 10)
+        self.assertEqual(results[1]['data']['origin_pos'], 1, results[1]['data'])
+        self.assertEqual(results[2]['data']['count'], 5)
