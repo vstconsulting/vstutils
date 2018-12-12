@@ -10,9 +10,6 @@ class File(FileModel):
     for_order2 = models.IntegerField()
     origin_pos = models.IntegerField(primary_key=True)
 
-    class Meta:
-        managed = False
-
 
 class List(ListModel):
     data = [
@@ -21,6 +18,3 @@ class List(ListModel):
     ]
     id = models.IntegerField(primary_key=True)
     value = models.TextField()
-
-    class Meta:
-        managed = False

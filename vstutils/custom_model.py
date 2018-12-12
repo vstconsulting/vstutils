@@ -1,12 +1,14 @@
-# from libc.stdlib cimport malloc
-# cimport libc.stdlib as stdlib
+# pylint: disable=unused-import
 from copy import deepcopy
+from six import with_metaclass
 from yaml import load
 try:
     from yaml import CLoader as Loader
 except ImportError:  # nocv
     from yaml import Loader
 from django.db.models.query import ModelIterable
+from django.db.models.base import ModelBase
+from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
 from .models import BQuerySet, BaseModel
 
 
@@ -145,7 +147,15 @@ class CustomQuerySet(BQuerySet):
             return data[0]
 
 
-class ListModel(BaseModel):
+class _MetaModel(ModelBase):
+
+    def __new__(mcs, name, bases, attrs):
+        model = super(_MetaModel, mcs).__new__(mcs, name, bases, attrs)
+        model._meta.managed = False
+        return model
+
+
+class ListModel(with_metaclass(_MetaModel, BaseModel)):
     data = []
     objects = CustomQuerySet.as_manager()
 
@@ -164,7 +174,11 @@ class FileModel(ListModel):
         abstract = True
 
     @classmethod
-    def _get_data(cls, chunked_fetch=False):
+    def load_file_data(cls):
         # pylint: disable=no-member
         with open(cls.file_path, 'r') as fp:
-            return load(fp.read(), Loader=Loader)
+            return fp.read()
+
+    @classmethod
+    def _get_data(cls, chunked_fetch=False):
+        return load(cls.load_file_data(), Loader=Loader)
