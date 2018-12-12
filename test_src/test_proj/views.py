@@ -1,9 +1,9 @@
 from vstutils.api.serializers import VSTSerializer, EmptySerializer
-from vstutils.api.base import ModelViewSetSet, Response, CopyMixin
+from vstutils.api.base import ModelViewSetSet, Response, CopyMixin, ReadOnlyModelViewSet
 from vstutils.api.decorators import nested_view, subaction, action
 from vstutils.api import filters
 from vstutils.api import fields
-from .models import Host, HostGroup
+from .models import Host, HostGroup, File
 
 
 class HostFilter(filters.DefaultIDFilter):
@@ -22,6 +22,28 @@ class HostGroupFilter(filters.DefaultIDFilter):
             'id',
         )
 
+
+class FileSerializer(VSTSerializer):
+
+    class Meta:
+        model = File
+        fields = (
+            'name',
+            'for_order1',
+            'for_order2',
+            'origin_pos',
+        )
+
+
+class FileFilter(filters.filters.FilterSet):
+    class Meta:
+        model = File
+        fields = (
+            'name',
+            'for_order1',
+            'for_order2',
+            'origin_pos',
+        )
 
 class HostSerializer(VSTSerializer):
     id = fields.RedirectIntegerField(read_only=True)
@@ -136,3 +158,9 @@ try:
             return Response("OK", 200).resp
 except AssertionError:
     pass
+
+
+class FilesViewSet(ReadOnlyModelViewSet):
+    model = File
+    serializer_class = FileSerializer
+    filter_class = FileFilter

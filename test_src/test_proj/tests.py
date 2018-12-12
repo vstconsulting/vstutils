@@ -299,7 +299,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
 
 
-class FileTestCase(BaseTestCase):
+class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):
         qs = File.objects.filter(name__in=['ToFilter', 'ToExclude'])
         qs = qs.exclude(name='ToExclude', invalid='incorrect').order_by('for_order1', '-for_order2').reverse()
@@ -336,3 +336,17 @@ class FileTestCase(BaseTestCase):
 
         self.assertTrue(File.objects.all()[1:2].query['low_mark'], 1)
         self.assertTrue(File.objects.all()[1:2].query['high_mark'], 2)
+
+    def test_custom(self):
+        results = self.make_bulk([
+            dict(data_type=['files'], method='get'),
+            dict(data_type=['files', 1], method='get'),
+            dict(data_type=['files'], method='get', filters='name=ToFilter'),
+        ], 'put')
+
+        for result in results:
+            self.assertEqual(result['status'], 200, result)
+
+        self.assertEqual(results[0]['data']['count'], 10)
+        self.assertEqual(results[1]['data']['origin_pos'], 1, results[1]['data'])
+        self.assertEqual(results[2]['data']['count'], 5)

@@ -8,7 +8,7 @@ class File(FileModel):
     name = models.CharField(max_length=1024)
     for_order1 = models.IntegerField()
     for_order2 = models.IntegerField()
-    origin_pos = models.AutoField(primary_key=True)
+    origin_pos = models.IntegerField(primary_key=True)
 
     class Meta:
         managed = False
@@ -24,7 +24,3 @@ class List(ListModel):
 
     class Meta:
         managed = False
-
-
-class FilesModelView(object):
-    pass

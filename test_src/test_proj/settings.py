@@ -17,8 +17,8 @@ API[VST_API_VERSION][r'subhosts'] = dict(
     view='test_proj.views.HostViewSet'
 )
 
-# API[VST_API_VERSION][r'files'] = dict(
-#     view='test_proj.views.FilesViewSet'
-# )
+API[VST_API_VERSION][r'files'] = dict(
+    view='test_proj.views.FilesViewSet'
+)
 
 DEBUG = True

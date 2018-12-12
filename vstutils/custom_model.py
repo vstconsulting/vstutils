@@ -41,20 +41,30 @@ class Query(dict):
         return deepcopy(self)
 
     def _check_data(self, check_type, data):
+        # pylint: disable=protected-access
         if getattr(self, 'empty', False):
             return False
         check_data = self.get(check_type, {})
         if check_type == 'exclude' and not check_data:
             return False
+        meta = self.model._meta
         for filter_name, filter_data in check_data.items():
-            if filter_name.split('__')[0] == 'pk':
+            filter_name = filter_name.replace('__exact', '')
+            filter_name__cleared = filter_name.split('__')[0]
+            if filter_name__cleared == 'pk':
                 filter_name = '__'.join(
-                    [self.model._meta.pk.attname] + filter_name.split('__')[1:]
+                    [meta.pk.attname] + filter_name.split('__')[1:]
                 )
+                filter_name__cleared = meta.pk.attname
             try:
-                value = data[filter_name.replace('__in', '')]
+                value = data[filter_name__cleared]
             except KeyError:
                 continue
+            field = meta._forward_fields_map[filter_name__cleared]
+            if isinstance(filter_data, (list, tuple, set)):
+                filter_data = map(field.to_python, filter_data)
+            else:
+                filter_data = field.to_python(filter_data)
             if '__in' in filter_name and value not in filter_data:
                 return False
             elif '__in' not in filter_name and value != filter_data:
