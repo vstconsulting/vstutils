@@ -311,7 +311,11 @@ class FileTestCase(BaseTestCase):
         origin_pos_arr.reverse()
         counter = 0
         for file_obj in qs.all():
-            self.assertEqual(file_obj.origin_pos, origin_pos_arr[counter])
+            self.assertEqual(
+                file_obj.origin_pos, origin_pos_arr[counter],
+                [dict(origin_pos=i.origin_pos, for_order1=i.for_order1, for_order2=i.for_order2)
+                 for i in qs]
+            )
             counter += 1
 
         self.assertEqual(qs.none().count(), 0)

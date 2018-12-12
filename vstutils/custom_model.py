@@ -1,9 +1,6 @@
 # from libc.stdlib cimport malloc
 # cimport libc.stdlib as stdlib
-from operator import itemgetter
-from functools import cmp_to_key
 from copy import deepcopy
-import six
 from yaml import load
 try:
     from yaml import CLoader as Loader
@@ -12,29 +9,23 @@ except ImportError:  # nocv
 from django.db.models.query import ModelIterable
 from .models import BQuerySet, BaseModel
 
-if six.PY3:  # nocv
-    def cmp(a, b):
-        return (a > b) - (a < b)
-
-
-def prep_compare(column):
-    if column.startswith('-'):
-        return (itemgetter(column[1:].strip()), -1)
-    else:
-        return (itemgetter(column.strip()), 1)
-
 
 def multikeysort(items, columns, reverse=False):
-    comparers = map(prep_compare, columns)
+    items = list(items)
+    columns = list(columns)
+    columns.reverse()
 
-    def comparer(left, right):
-        comparer_iter = (
-            cmp(fn(left), fn(right)) * mult
-            for fn, mult in comparers
-        )
-        return next((result for result in comparer_iter if result), 0)
+    for column in columns:
+        # pylint: disable=cell-var-from-loop
+        is_reverse = column.startswith('-')
+        if is_reverse:
+            column = column[1:]
+        items.sort(key=lambda row: row[column], reverse=is_reverse)
 
-    return sorted(list(items), key=cmp_to_key(comparer), reverse=reverse)
+    if reverse:
+        items.reverse()
+
+    return items
 
 
 class Query(dict):
@@ -75,15 +66,18 @@ class Query(dict):
         self['low_mark'], self['high_mark'] = low, high
 
     def has_results(self, *args, **kwargs):
+        # pylint: disable=unused-argument
         return bool(self.queryset.all()[:2])
 
     def get_count(self, using):
+        # pylint: disable=unused-argument
         return len(self.queryset.all())
 
     def can_filter(self):
         return self.get('low_mark', None) is None and self.get('high_mark', None) is None
 
     def clear_ordering(self, *args, **kwargs):
+        # pylint: disable=unused-argument
         self['ordering'] = []
 
     def add_ordering(self, *ordering):
@@ -92,19 +86,19 @@ class Query(dict):
 
 class CustomModelIterable(ModelIterable):
     def __iter__(self):
+        # pylint: disable=protected-access
         queryset = self.queryset
         model = queryset.model
+        query = queryset.query
         model_data = model._get_data(chunked_fetch=self.chunked_fetch)
-        model_data = filter(queryset.query.check_in_query, model_data)
-        ordering = queryset.query.get('ordering', [])
+        model_data = list(filter(query.check_in_query, model_data))
+        ordering = query.get('ordering', [])
         if ordering:
-            # model_data = multikeysort(model_data, ordering, not queryset.query.standard_ordering)
-            model_data = multikeysort(model_data, ordering)
+            model_data = multikeysort(model_data, ordering, not query.standard_ordering)
+        elif not query.standard_ordering:
             model_data.reverse()
-        elif not queryset.query.standard_ordering:
-            model_data.reverse()
-        low = queryset.query.get('low_mark', 0)
-        high = queryset.query.get('high_mark', len(model_data))
+        low = query.get('low_mark', 0)
+        high = query.get('high_mark', len(model_data))
         for data in model_data[low:high]:
             yield model(**data)
 
@@ -145,6 +139,7 @@ class ListModel(BaseModel):
 
     @classmethod
     def _get_data(cls, chunked_fetch=False):
+        # pylint: disable=unused-argument
         return deepcopy(cls.data)
 
 
@@ -155,5 +150,6 @@ class FileModel(ListModel):
 
     @classmethod
     def _get_data(cls, chunked_fetch=False):
+        # pylint: disable=no-member
         with open(cls.file_path, 'r') as fp:
             return load(fp.read(), Loader=Loader)
