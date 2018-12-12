@@ -319,7 +319,7 @@ class FileTestCase(BaseTestCase):
             counter += 1
 
         self.assertEqual(qs.none().count(), 0)
-        test_obj = qs.get(origin_pos=6)
+        test_obj = qs.get(pk=6)
         self.assertEqual(test_obj.name, 'ToFilter')
         self.assertEqual(test_obj.origin_pos, 6)
         with self.assertRaises(test_obj.MultipleObjectsReturned):

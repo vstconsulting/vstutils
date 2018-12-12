@@ -8,7 +8,7 @@ class File(FileModel):
     name = models.CharField(max_length=1024)
     for_order1 = models.IntegerField()
     for_order2 = models.IntegerField()
-    origin_pos = models.IntegerField()
+    origin_pos = models.AutoField(primary_key=True)
 
     class Meta:
         managed = False

@@ -34,6 +34,7 @@ class Query(dict):
     def __init__(self, queryset, *args, **kwargs):
         super(Query, self).__init__(*args, **kwargs)
         self.queryset = queryset
+        self.model = self.queryset.model
         self.standard_ordering = True
 
     def clone(self):
@@ -46,6 +47,10 @@ class Query(dict):
         if check_type == 'exclude' and not check_data:
             return False
         for filter_name, filter_data in check_data.items():
+            if filter_name.split('__')[0] == 'pk':
+                filter_name = '__'.join(
+                    [self.model._meta.pk.attname] + filter_name.split('__')[1:]
+                )
             try:
                 value = data[filter_name.replace('__in', '')]
             except KeyError:
