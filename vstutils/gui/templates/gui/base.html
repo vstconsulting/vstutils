@@ -48,6 +48,13 @@
         window.guiStaticPath = "{% static '' %}";
         window.isDebug = {% if debug %}true{% else %}false{% endif %}
         window.timeZone = '{{timezone}}';
+        window.enable_gravatar = {% if enable_gravatar %}true{% else %}false{% endif %}
+    </script>
+    <script>
+        function setDefaultGravatar(element){
+            element.src = "{% static 'img/anonymous.png' %}";
+            return element;
+        }
     </script>
 {% endblock %}
 
@@ -142,6 +149,39 @@
             .loadInfoWrapper a:hover{
                 background-color: #d0d0d0;
             }
+
+            .LoadingProgressBar-errorLog{
+                position: absolute;
+                top: 190px;
+                left: 50%;
+                transform: translate(-50%, 0%);
+                font-family: 'Ubuntu Mono', monospace;
+                color: #b53f3f;
+                font-size: 12px;
+                font-weight: 500;
+                line-height: 1.1;
+                box-sizing: border-box;
+                padding: 0;
+                margin: 0;
+                width: 98vw;
+                height: calc(100vh - 206px);
+                display: none;
+            }
+
+            .loadInfoWrapper.need-reload span{
+                animation-name: blinker;
+                animation-iteration-count: infinite;
+                animation-timing-function: cubic-bezier(1, -0.75, 0, 2.08);
+                animation-duration: 1s;
+                color: #f00;
+                font-weight: bold;
+            }
+
+            @keyframes blinker {
+              from { opacity: 1.0; }
+              to { opacity: 0.3; }
+            }
+
         </style>
     {% endblock %}
 
@@ -164,7 +204,7 @@
             { prioritet:0, type:'js', name: "{% static 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"},
             { prioritet:1, type:'js', name: "{% static 'js/libs/tabSignal.js' %}?v={{gui_version}}"},
 
-
+            { prioritet:3, type:'js', name: "{% static 'js/libs/md5.min.js' %}?v={{gui_version}}"},
             { prioritet:4, type:'js', name: "{% static 'js/libs/touchwipe.js' %}?v={{gui_version}}"},
 
             { prioritet:4, type:'js', name: "{% static 'js/libs/visibility/visibility.core.js' %}?v={{gui_version}}"},
@@ -258,12 +298,23 @@
                 </div>
 
                 <div class="loadInfoWrapper">
-                    <a href="#" onclick="window.guiFilesCache.deleteAllCache(); return false;">Reload all cache</a>
+                    <a href="#" onclick="window.guiFilesCache.deleteAllCache(); return false;"><span>Reload all cache</span></a>
                 </div>
 
-                <div id="LoadingProgressBar-errorLog">
+                <textarea class="LoadingProgressBar-errorLog">
+project_gui_name    {{project_gui_name}}
+project_version     {{project_version}}
+gui_version         {{gui_version}}
+host_url            {{host_url}}
+is_authenticated    {% if user.is_authenticated %}true{% else %}false{% endif %}
+user.id             {{user.id}}
+is_superuser        {% if user.is_superuser %}true{% else %}false{% endif %}
+is_staff            {% if user.is_staff %}true{% else %}false{% endif %}
+static              {% static '' %}
+debug               {% if debug %}true{% else %}false{% endif %}
+timezone            {{timezone}}
 
-                </div>
+</textarea>
             </div>
         {% endblock %}
 
@@ -364,7 +415,7 @@
                             {% block footer %}
                                 <footer class="main-footer">
 
-                                    <a href="#" onclick="openHelpModal(); return false;" class="help-text-data hidden-in-api">
+                                    <a href="#" onclick="openHelpModal(); return false;" class="help-text-data">
                                         <span class="fa fa-question-circle"></span> About
                                     </a>
 

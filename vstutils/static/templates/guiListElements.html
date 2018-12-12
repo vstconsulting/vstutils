@@ -34,3 +34,9 @@
     <%] %>
     <%! guiListElements.base %>
 </script>
+
+<!-- template for gravatar img in lists and in user page title -->
+<script type="text/x-just" data-just="gravatar_in_list">
+    <img src="<%- link %>" class="img-circle elevation-1 gravatar-img-list" onerror="setDefaultGravatar(this); return false;">
+    <span class="align-middle"> <%- username %> </span>
+</script>

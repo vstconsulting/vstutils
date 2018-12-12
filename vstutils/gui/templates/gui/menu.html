@@ -1,8 +1,9 @@
 {% load i18n %}
 {% load rest_framework %}
+{% load vst_gravatar %}
 {% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
 <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
-                              <!-- Left navbar links -->
+    <!-- Left navbar links -->
 
     <ul class="navbar-nav">
         <li class="nav-item">
@@ -31,8 +32,12 @@
           <!-- Notifications Dropdown Menu -->
           <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-              <i class="fa fa-user mr-2 ico-data-default"></i>  <span class="text-data hidden-480">{{user.first_name}} {{user.last_name}}</span>
-              <!--<span class="badge badge-warning navbar-badge">15</span>-->
+                {% if enable_gravatar %}
+                    <img src="{% get_user_gravatar user.id %}" class="img-circle elevation-1 gravatar-img" onerror="setDefaultGravatar(this); return false;">
+                {% else %}
+                    <i class="fa fa-user mr-2 ico-data-default"></i>
+                {% endif %}
+              <span class="text-data hidden-480">{{user.first_name}} {{user.last_name}}</span>
             </a>
 
             <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right profile-menu background-default">

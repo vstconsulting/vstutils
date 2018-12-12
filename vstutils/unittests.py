@@ -17,6 +17,7 @@ from vstutils.api.views import UserViewSet
 from vstutils import utils
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
+from .templatetags.vst_gravatar import get_user_gravatar
 
 test_config = '''[main]
 test_key = test_value
@@ -376,6 +377,27 @@ class VSTUtilsTestCase(BaseTestCase):
         result = self.get_result('get', '/api/v1/users/?username__not=USER')
         self.assertEqual(result['count'], 3)
 
+    def test_user_gravatar(self):
+        # test for get_gravatar method
+        default_gravatar = '/static/img/anonymous.png'
+        user_hash = '245cf079454dc9a3374a7c076de247cc'
+        gravatar_link = 'https://www.gravatar.com/avatar/{}?d=mp'
+        user_without_gravatar = dict(
+            username="test_user_1", password="test_password_1",
+        )
+        result = self.get_result('post', '/api/v1/users/', data=user_without_gravatar)
+        self.assertEqual(default_gravatar, get_user_gravatar(result["id"]))
+        user_with_gravatar = dict(
+            username="test_user_2", password="test_password_2", email="test1@gmail.com",
+        )
+        result = self.get_result('post', '/api/v1/users/', data=user_with_gravatar)
+        self.assertEqual(
+            gravatar_link.format(user_hash),
+            get_user_gravatar(result["id"])
+        )
+        gravatar_of_nonexistent_user = get_user_gravatar(123321)
+        self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
+
     def test_bulk(self):
         self.get_model_filter(
             'django.contrib.auth.models.User'
@@ -404,7 +426,7 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check bulk-filters
             {'type': 'get', 'item': 'users',
              'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
-            },
+             },
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["users", self.user.id]},
@@ -414,7 +436,7 @@ class VSTUtilsTestCase(BaseTestCase):
              'data': {
                  "username": 'ttt', 'password': 'ttt333',
                  'first_name': json.dumps({"some": 'json'})}
-            }
+             }
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)

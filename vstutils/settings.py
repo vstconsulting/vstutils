@@ -589,3 +589,7 @@ if "test" in sys.argv:
         name: {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
         for name in CACHES
     }
+
+# User settings
+##############################################################
+ENABLE_GRAVATAR = web.get("enable_gravatar", fallback=True)

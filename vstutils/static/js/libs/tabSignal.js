@@ -141,7 +141,7 @@ tabSignal.disconnect = function(slot_name, signal_name)
  * @param param Параметры переданые слоту при вызове в втором аргументе
  * @param SignalNotFromThisTab Если не false то значит это сигнал пришёл из другой вкладки
  */
-tabSignal.emit = function(signal_name, param, SignalNotFromThisTab = false)
+tabSignal.emit = function(signal_name, param, SignalNotFromThisTab = false, failed=false)
 {
     if (tabSignal.slotArray[signal_name] === undefined)
     {
@@ -160,7 +160,19 @@ tabSignal.emit = function(signal_name, param, SignalNotFromThisTab = false)
                 {
                     onceIds.push(i)
                 }
-                obj[i].function(param, signal_name, SignalNotFromThisTab === true, obj[i].slot)
+
+                if(window.isDebug || !failed)
+                {
+                    obj[i].function(param, signal_name, SignalNotFromThisTab === true, obj[i].slot)
+                }
+                else
+                {
+                    try{
+                        obj[i].function(param, signal_name, SignalNotFromThisTab === true, obj[i].slot)
+                    }catch (exception) {
+                        console.warn("Error in emit signal "+signal_name, exception)
+                    }
+                }
             }
         }
 
