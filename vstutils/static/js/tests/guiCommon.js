@@ -126,7 +126,7 @@ window.qunitTestsArray['guiLocalSettings'] = {
                 assert.ok(deepEqual(guiLocalSettings.get(key), test_tmp_settings_existing[key]), 'guiLocalSettings.setAsTmp (existing settings) & guiLocalSettings.get');
             }
 
-             // checks setting as tmp values of unexisting before settings
+            // checks setting as tmp values of unexisting before settings
             for(let key in test_tmp_settings_unexisting)
             {
                 guiLocalSettings.setAsTmp(key, test_tmp_settings_unexisting[key]);
@@ -168,6 +168,169 @@ window.qunitTestsArray['guiLocalSettings'] = {
             assert.ok(guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - existing key');
 
             guiLocalSettings.delete('q1w2e3r4t5y6');
+
+            testdone(done)
+        });
+    }
+}
+
+window.qunitTestsArray['capitalizeString'] = {
+    test:function()
+    {
+        syncQUnit.addTest("capitalizeString", function ( assert )
+        {
+            let done = assert.async();
+
+            let strings = ['hello', 'Hello', 'HELLO', 'hELLO'];
+
+            let answer = 'Hello';
+
+            assert.ok(capitalizeString() == "", 'empty call of capitalizeString');
+
+            strings.forEach(function(item){assert.ok(capitalizeString(item) == answer, 'capitalizeString()')})
+
+            testdone(done)
+        });
+    }
+}
+
+window.qunitTestsArray['sliceLongString'] = {
+    test:function()
+    {
+        syncQUnit.addTest("sliceLongString", function ( assert )
+        {
+            let done = assert.async();
+
+            let short_string = 'string';
+            let long_string = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+            let arguments = [false, short_string, long_string];
+            let answer = ['false','string', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore ...'];
+
+            for(let i in arguments)
+            {
+                assert.ok(sliceLongString(arguments[i]) == answer[i], 'sliceLongString');
+            }
+
+            assert.ok(sliceLongString(short_string, 6) == short_string);
+            assert.ok(sliceLongString(short_string, 5) == 'strin...');
+
+            testdone(done)
+        });
+    }
+}
+
+window.qunitTestsArray['isEmptyObject'] = {
+    test:function()
+    {
+        syncQUnit.addTest("isEmptyObject", function ( assert )
+        {
+            let done = assert.async();
+
+            let obj = {
+                a: 1,
+                b: true,
+                c: ['string', 2],
+            }
+
+            assert.ok(isEmptyObject({}) == true);
+            assert.ok(isEmptyObject(obj) == false);
+
+            for(let i in obj)
+            {
+                delete obj[i];
+            }
+
+            assert.ok(isEmptyObject(obj) == true);
+
+            testdone(done)
+        });
+    }
+}
+
+window.qunitTestsArray['addCssClassesToElement'] = {
+    test:function()
+    {
+        syncQUnit.addTest("addCssClassesToElement", function ( assert )
+        {
+            let done = assert.async();
+
+            assert.ok(addCssClassesToElement('td'), 'td');
+            assert.ok(addCssClassesToElement('td', 'user'), 'td_user');
+            assert.ok(addCssClassesToElement('td', 'user', 'username'), 'td_user_username');
+
+            testdone(done)
+        });
+    }
+}
+
+window.qunitTestsArray['groupButtonsOrNot'] = {
+    test:function()
+    {
+        syncQUnit.addTest("groupButtonsOrNot", function ( assert )
+        {
+            let done = assert.async();
+
+            let window_width = [480, 992, 1200, 1620];
+
+            let buttons_number = [[{}], '3', 6, 9];
+
+            let answer = [
+                [false, true, true, true],
+                [false, false, true, true],
+                [false, false, false, true],
+                [false, false, false, false],
+            ];
+
+            for(let i in window_width)
+            {
+                let width = window_width[i];
+                for(let j in buttons_number)
+                {
+                    let button = buttons_number[j];
+                    assert.ok(groupButtonsOrNot(width, button) == answer[i][j]);
+                }
+            }
+
+            let button_obj = {
+                button1: {hidden: true},
+                button2: {},
+            }
+
+            let button_obj_1 = {
+                button1: {},
+                button2: {},
+            }
+
+            assert.ok(groupButtonsOrNot(480, button_obj) == false);
+            assert.ok(groupButtonsOrNot(480, button_obj_1) == true);
+
+            testdone(done)
+        });
+    }
+}
+
+window.qunitTestsArray['allPropertiesIsObjects'] = {
+    test:function()
+    {
+        syncQUnit.addTest("allPropertiesIsObjects", function ( assert )
+        {
+            let done = assert.async();
+
+            let obj = {
+                a: 'string',
+                b: [1,2],
+                c: {},
+            };
+
+            assert.ok(allPropertiesIsObjects(obj) == false, 'allPropertiesIsObjects');
+
+            obj['a'] = {d:5};
+            assert.ok(allPropertiesIsObjects(obj) == false, 'allPropertiesIsObjects');
+
+            obj['b'] = {};
+            assert.ok(allPropertiesIsObjects(obj) == true, 'allPropertiesIsObjects');
+
+            assert.ok(allPropertiesIsObjects({}) == true, 'allPropertiesIsObjects');
 
             testdone(done)
         });
