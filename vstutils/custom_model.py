@@ -7,7 +7,6 @@ try:
 except ImportError:  # nocv
     from yaml import Loader
 from django.db.models.query import ModelIterable
-from django.db.models.base import ModelBase
 from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
 from .models import BQuerySet, BaseModel
 
@@ -147,15 +146,7 @@ class CustomQuerySet(BQuerySet):
             return data[0]
 
 
-class _MetaModel(ModelBase):
-
-    def __new__(mcs, name, bases, attrs):
-        model = super(_MetaModel, mcs).__new__(mcs, name, bases, attrs)
-        model._meta.managed = False
-        return model
-
-
-class ListModel(with_metaclass(_MetaModel, BaseModel)):
+class ListModel(BaseModel):
     data = []
     objects = CustomQuerySet.as_manager()
 
