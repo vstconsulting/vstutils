@@ -6,19 +6,6 @@ from django.db import models
 from .utils import Paginator
 
 
-@cython.cfunc
-@cython.returns(cython.bint)
-def __cyfunc():  # noprj
-    return 1
-
-
-CyFunctionType = type(__cyfunc)
-
-
-def iscyfunction(obj):  # noprj
-    return callable(obj) and not isinstance(obj, object)
-
-
 class BQuerySet(models.QuerySet):  # noprj
     '''
     QuerySet class with basic operations.
@@ -73,7 +60,8 @@ class BaseManager(models.Manager):  # noprj
 
         orig_method = models.Manager._get_queryset_methods
         new_methods = orig_method(queryset_class)
-        for name, method in inspect.getmembers(queryset_class, predicate=iscyfunction):
+        inspect_func = inspect.isfunction
+        for name, method in inspect.getmembers(queryset_class, predicate=inspect_func):
             # Only copy missing methods.
             if hasattr(cls, name) or name in new_methods:
                 continue

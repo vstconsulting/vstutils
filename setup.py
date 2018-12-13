@@ -118,7 +118,7 @@ def make_setup(**opts):
 # end block
 
 ext_list = [
-    'vstutils.exceptions',
+    # 'vstutils.exceptions',
     'vstutils.environment',
     'vstutils.middleware',
     'vstutils.tests',
@@ -130,9 +130,9 @@ ext_list = [
     'vstutils.ldap_utils',
     'vstutils.custom_model',
     'vstutils.templatetags.vstconfigs',
-    'vstutils.templatetags.request_static',
-    'vstutils.gui.views',
-    'vstutils.gui.context',
+    # 'vstutils.templatetags.request_static',
+    # 'vstutils.gui.views',
+    # 'vstutils.gui.context',
     'vstutils.api.base',
     'vstutils.api.decorators',
     'vstutils.api.fields',
@@ -142,7 +142,7 @@ ext_list = [
     'vstutils.api.routers',
     'vstutils.api.schema',
     'vstutils.api.serializers',
-    'vstutils.api.swagger',
+    # 'vstutils.api.swagger',
     'vstutils.api.views',
 ]
 
@@ -152,7 +152,7 @@ kwargs = dict(
     include_package_data=True,
     install_requires=[
         "django>=1.11,<2.0",
-        'cython>0.28,<1.0',
+        'cython>0.29,<1.0',
     ] +
     load_requirements('requirements.txt')
     + load_requirements('requirements-doc.txt')

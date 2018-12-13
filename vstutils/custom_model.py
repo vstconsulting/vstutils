@@ -1,4 +1,5 @@
 # pylint: disable=unused-import
+from __future__ import unicode_literals
 from copy import deepcopy
 from six import with_metaclass
 from yaml import load
