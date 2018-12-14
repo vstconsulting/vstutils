@@ -505,7 +505,7 @@ function groupButtonsOrNot(window_width, buttons)
             return false;
         }
     }
-    else if(buttons_amount > 8)
+    else if(buttons_amount >= 8)
     {
         if(window_width >= 1620)
         {
@@ -893,6 +893,23 @@ function debounce(f, ms) {
     };
 }
 
+function addTableEntityClass(guiObj)
+{
+    let class_name = "";
+    if(guiObj && guiObj.api && guiObj.api.extension_class_name)
+    {
+        if(typeof(guiObj.api.extension_class_name) == 'string')
+        {
+            class_name = guiObj.api.extension_class_name;
+        }
+        else if(Array.isArray(guiObj.api.extension_class_name) && guiObj.api.extension_class_name.length > 0)
+        {
+            class_name = String(guiObj.api.extension_class_name[0]);
+        }
+    }
+
+    return  class_name.replace('gui_', '');
+}
 
 
 

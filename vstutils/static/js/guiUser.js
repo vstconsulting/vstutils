@@ -67,7 +67,10 @@ tabSignal.connect("openapi.completed", function()
         {
             let pageItem = new guiObjectFactory('/user/{pk}/', {
                 page:'user/'+ my_user_id,
-                api_pk:my_user_id
+                api_pk:my_user_id,
+                baseURL:function(){
+                    return "profile";
+                }
             })
             window.curentPageObject = pageItem // Нужен для работы тестов
 

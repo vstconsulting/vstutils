@@ -479,7 +479,7 @@ guiSkins.default = function(){
                     title:'Links revers',
                     format:'color',
                     type: "string",
-                    default:"#2e2e2e",
+                    default:"#006AE0",
                     priority: 22,
                     value:this.value.a_color_revers,
                     onchange:() => {
@@ -491,7 +491,7 @@ guiSkins.default = function(){
                     title:'Links hover revers',
                     format:'color',
                     type: "string",
-                    default:"#00002e",
+                    default:"#00448F",
                     priority: 22.1,
                     value:this.value.a_color_hover_revers,
                     onchange:() => {

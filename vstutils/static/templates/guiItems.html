@@ -320,7 +320,7 @@
         data-href="<%- vstMakeLocalUrl([dataLine.opt.base_href, dataLine.url_key]) %>"
         onclick="turnTableTrIntoLink(event)"
         >
-        <td class="highlight-tr-none guiListSelections-toggle-btn"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
+        <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
             <div class="ico-on fa fa-toggle-on"></div>
             <div class="ico-off fa  fa-toggle-off"></div>
         </td>
@@ -508,10 +508,10 @@
                     <% } else{ %>
                         <%[ data_list %>
                             <~ guiObj.model.data>
-                                <table class="table table-bordered multiple-select">
+                                <table class="table table-bordered multiple-select table_<%- addTableEntityClass(guiObj) %>">
                                     <tbody>
                                         <tr>
-                                            <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select" >
+                                            <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select td_select_btn" >
                                                 <div class="ico-on fa fa-toggle-on"></div>
                                                 <div class="ico-off fa  fa-toggle-off"></div>
                                             </th>
@@ -540,29 +540,32 @@
                     <% } %>
                 </div>
                 <div class="card-footer clearfix">
-                    <%[ action_buttons %>
-                        <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
-                    <%] %>
-                    <%* action_buttons %>
-
+                    <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
+                            <%[ action_buttons %>
+                                <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
+                            <%] %>
+                            <%* action_buttons %>
+                    <% } %>
                     <% if(!query){ %>
-                        <%[ select_buttons %>
-                            <div class="btn-group float-left ml-1" role="group">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Select
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li class="dropdown-item">
-                                        <a class="select-all-btn" href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
-                                    </li>
-                                    <li class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
-                                        <a class="unselect-all-btn"  href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        <%] %>
-                        <%* select_buttons %>
+                        <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
+                            <%[ select_buttons %>
+                                <div class="btn-group float-left ml-1" role="group">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Select
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li class="dropdown-item">
+                                            <a class="select-all-btn" href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
+                                        </li>
+                                        <li class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
+                                            <a class="unselect-all-btn"  href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            <%] %>
+                            <%* select_buttons %>
+                        <% } %>
                     <% } %>
                     <%[ pagination %>
                         <% if(guiObj.getTotalPages()){ %>

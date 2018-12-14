@@ -1985,10 +1985,6 @@ guiElements.dynamic = function(opt = {}, value, parent_object)
         options.onInit = undefined;
         options.type = type;
 
-        if(type == "boolean" && options.default !== undefined && options.readOnly)
-        {
-            lastValue = options.default;
-        }
 
         if(type == "boolean" && typeof lastValue == "string")
         {

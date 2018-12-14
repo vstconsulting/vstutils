@@ -60,8 +60,6 @@ window.qunitTestsArray["signals"] = {
             let lastPrioValue = PriorityArray.pop()
             prevSignalPrio = -Infinity
 
-
-            debugger;
             tabSignal.disconnect(String(lastPrioValue), "signals.test.function")
             tabSignal.emit("signals.test.function", {assert: assert})
             assert.ok((Number(prevSignalPrio) < Number(lastPrioValue)), "disconect signal with prio=" + lastPrioValue)
