@@ -505,7 +505,7 @@ function groupButtonsOrNot(window_width, buttons)
             return false;
         }
     }
-    else if(buttons_amount > 8)
+    else if(buttons_amount >= 8)
     {
         if(window_width >= 1620)
         {
