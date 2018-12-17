@@ -911,30 +911,44 @@ function addTableEntityClass(guiObj)
     return  class_name.replace('gui_', '');
 }
 
+/**
+ * Function hides sidebar on small screens.
+ * Function calls when user click on a link from sidebar menu.
+ */
+function hideSidebar()
+{
+   if(window.innerWidth <= 991)
+   {
+       $('body').removeClass('sidebar-open');
+       $('body').addClass('sidebar-collapse');
+   }
+}
 
+/**
+ * Function opens/collapses inner menu(".nav-treeview") of the sidebar element.
+ */
+function toggleMenuOpen(el, event)
+{
+    event.stopPropagation();
 
+    let li = el.parentElement.parentElement.parentElement;
+    let ul = $(li).find('ul.nav-treeview');
 
+    $(li).toggleClass('menu-open');
+    $(ul).slideToggle(300);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    setTimeout(function()
+    {
+        if($(li).hasClass('menu-open'))
+        {
+            $(ul).attr("style", "display:block;")
+        }
+        else
+        {
+            $(ul).attr("style", "display:none;")
+        }
+    }, 301)
+}
 
 function setActiveMenuLi( )
 {
@@ -990,7 +1004,6 @@ function setActiveMenuLi( )
 
         }while(parent.length && step < 10)
 
-        //debugger;
         break;
     }
 }

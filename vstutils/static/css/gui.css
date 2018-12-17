@@ -930,6 +930,11 @@ table{
     border-top-right-radius: 4px;
 }
 
+.nav-sidebar .nav-link .right {
+    padding: 3px 8px;
+    z-index: 1500;
+}
+
 /* styles for sidebar on small screens*/
 
 .open-menu-treeview-button {

@@ -1,7 +1,7 @@
 {% block sidebar_menu %}
 
     <li id="menu-home" class="nav-item" data-url="">
-        <a href="/#" class="nav-link" onclick="return vstGO(this.href);" >
+        <a href="/#" class="nav-link" onclick="hideSidebar(); return vstGO(this.href);" >
             <i class="nav-icon fa fa-dashboard ico-menu"></i> <p><span class="li-header-span"><i class="li-header-span-i menu-text-data">Home</i></span></p>
         </a>
     </li>
@@ -10,13 +10,13 @@
             {% if item.sublinks %}
                 <li class="menu-treeview {% if not item.url %}menu-treeview-withouturl{% endif %} nav-item has-treeview " data-url="{{item.url}}" id="menu-{{item.name|lower}}">
                     {% if item.url %}
-                        <a href="/#{{item.url}}" class="nav-link"  onclick="if(vstGO(this.href)) event.stopPropagation(); return false;"  >
+                        <a href="/#{{item.url}}" class="nav-link"  onclick="hideSidebar(); if(vstGO(this.href)) event.stopPropagation(); return false;"  >
                             <i class="nav-icon {{item.span_class}} ico-menu"></i>
                             <p>
                                 <span class="li-header-span">
                                     <i class="li-header-span-i menu-text-data">{{item.name|title}}</i>
                                 </span>
-                                <i class="right fa fa-angle-left ico-menu"></i>
+                                <i class="right fa fa-angle-left ico-menu" onclick="toggleMenuOpen(this, event); return false;"></i>
                             </p>
                         </a>
                     {% else %}
@@ -24,7 +24,7 @@
                             <i class="nav-icon {{item.span_class}} ico-menu"></i>
                             <p>
                                 <span class="li-header-span"><i class="li-header-span-i-none menu-text-data">{{item.name|title}}</i></span>
-                                <i class="right fa fa-angle-left ico-menu"></i>
+                                <i class="right fa fa-angle-left ico-menu" onclick="toggleMenuOpen(this, event); return false;"></i>
                             </p>
                         </a>
                     {% endif %}
@@ -33,7 +33,7 @@
                         {% for subitem in item.sublinks %}
                             {% if subitem.name %}
                                 <li id="menu-{{item.name|lower}}-{{subitem.name|lower}}"  data-url="{{subitem.url}}" class="nav-item">
-                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" class="nav-link" onclick="if(vstGO(this.href)) event.stopPropagation(); return false;" >
+                                    <a href="/#{% firstof subitem.url subitem.name|lower %}" class="nav-link" onclick="hideSidebar(); if(vstGO(this.href)) event.stopPropagation(); return false;" >
                                         <i class="nav-icon {{subitem.span_class}} ico-menu"></i> <p><span class="menu-text-data">{{subitem.name|title}}</span></p>
                                     </a>
                                 </li>
@@ -43,7 +43,7 @@
                 </li>
             {% else %}
                 <li id="{{item.name}}" class="nav-item" data-url="{{item.url}}">
-                    <a href="/#{% firstof item.url item.name|lower %}"  class="nav-link" onclick="if(vstGO(this.href)) event.stopPropagation(); return false;" >
+                    <a href="/#{% firstof item.url item.name|lower %}"  class="nav-link" onclick="hideSidebar(); if(vstGO(this.href)) event.stopPropagation(); return false;" >
                         <i class="nav-icon {{item.span_class}} ico-menu"></i>
                         <p>
                             <span class="li-header-span">
