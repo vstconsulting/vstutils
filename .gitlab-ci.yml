@@ -90,5 +90,5 @@ release_pypi:
   script:
    - python2 -m pip install vstcompile
    - python2 setup.py compile
-   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
   allow_failure: true

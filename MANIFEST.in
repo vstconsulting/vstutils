@@ -10,7 +10,6 @@ include requirements-coreapi.txt
 include requirements-ldap.txt
 include requirements-prod.txt
 recursive-include vstutils/*/templates *
-recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *
 recursive-include vstutils/static *
 recursive-include vstutils/doc_themes *

@@ -2,6 +2,7 @@
 ########################################################################################
 import os
 import sys
+import fnmatch
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -9,6 +10,8 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 from setuptools import find_packages, setup
 from setuptools.extension import Extension
 from setuptools.command.sdist import sdist as _sdist
+from setuptools.command.build_py import build_py as build_py_orig
+from setuptools.command.install_lib import install_lib as _install_lib
 try:
     from Cython.Build import cythonize, build_ext as _build_ext
 except ImportError:
@@ -35,7 +38,7 @@ def load_requirements(file_name, folder=os.getcwd()):
 
 
 def get_file_ext(ext):
-    file_types = [".py", ".pyx", ".c"] if has_cython else [".c", ".py"]
+    file_types = [".py", ".pyx", ".c", '.cpp'] if has_cython else [".c", '.cpp', ".py"]
     for ftype in file_types:
         fname = ext.replace(".", "/") + ftype
         if os.path.exists(fname):
@@ -43,9 +46,32 @@ def get_file_ext(ext):
     return None
 
 
+def listfiles(folder):
+    for root, folders, files in os.walk(folder):
+        for filename in folders + files:
+            yield os.path.join(root, filename)
+
+
+def clear_old_extentions(extensions_list):
+    for filename in listfiles('vstutils'):
+        _filename, _f_ext = os.path.splitext(filename)
+        if os.path.isdir(_filename) or _f_ext not in ['.c', '.cpp']:
+            continue
+        has_py = (
+            os.path.exists('{}.py'.format(_filename)) or
+            os.path.exists('{}.pyx'.format(_filename))
+        )
+
+        if has_py and filename.replace('/', '.').replace(_f_ext, '') in extensions_list:
+            print('Removing old extention [{}].'.format(filename))
+            os.remove(filename)
+
+
 def make_extensions(extensions_list):
     if not isinstance(extensions_list, list):
         raise Exception("Extension list should be `list`.")
+
+    clear_old_extentions(extensions_list)
 
     extensions_dict = {}
     for ext in extensions_list:
@@ -66,8 +92,8 @@ def make_extensions(extensions_list):
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
-    if has_cython and 'compile' in sys.argv:
-        return cythonize(ext_modules, nthreads=nthreads, force=True), extensions_dict
+    if has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
+        return cythonize(ext_modules, nthreads=nthreads, force=True, language_level=2), extensions_dict
     return ext_modules, extensions_dict
 
 
@@ -90,6 +116,54 @@ class _Compile(_sdist):
         return _sdist.run(self)
 
 
+class build_py(build_py_orig):
+    exclude = []
+    compile_extentions_types = ['.py', '.pyx']
+    wheel_extentions_types = ['.c', '.cpp'] + compile_extentions_types
+
+    def _filter_modules(self, module_tuple):
+        pkg, mod, file = module_tuple
+        try:
+            file_name, file_ext = os.path.splitext(file)
+            module_name = file_name.replace('/', '.')
+        except:
+            return True
+        if 'bdist_wheel' in sys.argv:
+            exclude_list = self.wheel_extentions_types
+        elif 'compile' in sys.argv:
+            exclude_list = self.compile_extentions_types
+        else:
+            return True
+        if module_name in self.exclude and file_ext in exclude_list:
+            return False
+        return True
+
+    def find_package_modules(self, package, package_dir):
+        modules = build_py_orig.find_package_modules(self, package, package_dir)
+        return list(filter(self._filter_modules, modules))
+
+
+class install_lib(_install_lib):
+    exclude = []
+
+    def _filter_files_with_ext(self, filename):
+        _filename, _fext = os.path.splitext(filename)
+        if _fext in build_py.wheel_extentions_types:
+            return True
+        return False
+
+    def install(self):
+        result = _install_lib.install(self)
+        files = list(listfiles(self.install_dir))
+        so_extentions = filter(lambda f: fnmatch.fnmatch(f, '*.so'), files)
+        for source in filter(self._filter_files_with_ext, files):
+            _source_name, _source_ext = os.path.splitext(source)
+            if filter(lambda f: fnmatch.fnmatch(f, _source_name+".so"), so_extentions):
+                print('Removing extention sources [{}].'.format(source))
+                os.remove(source)
+        return result
+
+
 def get_compile_command(extensions_dict=None):
     extensions_dict = extensions_dict or dict()
     compile_class = _Compile
@@ -100,15 +174,19 @@ def get_compile_command(extensions_dict=None):
 def make_setup(**opts):
     if 'packages' not in opts:
         opts['packages'] = find_packages()
-    ext_list = opts.pop('ext_modules_list', list())
-    if 'develop' not in sys.argv:
-        ext_mod, ext_mod_dict = make_extensions(ext_list)
-        opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
+    ext_modules_list = opts.pop('ext_modules_list', list())
+    ext_mod, ext_mod_dict = make_extensions(ext_modules_list)
+    opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
     cmdclass = opts.get('cmdclass', dict())
-    if 'compile' not in cmdclass and 'develop' not in sys.argv:
+    if 'compile' not in cmdclass:
         cmdclass.update({"compile": get_compile_command(ext_mod_dict)})
-    if has_cython and 'develop' not in sys.argv:
-        cmdclass.update({'build_ext': _build_ext})
+    if has_cython:
+        build_py.exclude = ext_modules_list
+        cmdclass.update({
+            'build_ext': _build_ext,
+            'build_py': build_py,
+            'install_lib': install_lib
+        })
     if has_sphinx and 'build_sphinx' not in cmdclass:
         cmdclass['build_sphinx'] = BuildDoc
     opts['cmdclass'] = cmdclass
@@ -118,7 +196,7 @@ def make_setup(**opts):
 # end block
 
 ext_list = [
-    # 'vstutils.exceptions',
+    'vstutils.exceptions',
     'vstutils.environment',
     'vstutils.middleware',
     'vstutils.tests',
@@ -130,9 +208,10 @@ ext_list = [
     'vstutils.ldap_utils',
     'vstutils.custom_model',
     'vstutils.templatetags.vstconfigs',
-    # 'vstutils.templatetags.request_static',
-    # 'vstutils.gui.views',
-    # 'vstutils.gui.context',
+    'vstutils.templatetags.vst_gravatar',
+    'vstutils.templatetags.request_static',
+    'vstutils.gui.views',
+    'vstutils.gui.context',
     'vstutils.api.base',
     'vstutils.api.decorators',
     'vstutils.api.fields',
@@ -142,12 +221,15 @@ ext_list = [
     'vstutils.api.routers',
     'vstutils.api.schema',
     'vstutils.api.serializers',
-    # 'vstutils.api.swagger',
+    'vstutils.api.swagger',
     'vstutils.api.views',
 ]
 
+if 'develop' in sys.argv:
+    ext_list = []
+
 kwargs = dict(
-    packages=find_packages(exclude=['tests', 'test_proj']),
+    packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
     include_package_data=True,
     install_requires=[
