@@ -208,7 +208,7 @@ ext_list = [
     'vstutils.ldap_utils',
     'vstutils.custom_model',
     'vstutils.templatetags.vstconfigs',
-    'vstutils.templatetags.vst_gravatar',
+    # 'vstutils.templatetags.vst_gravatar',
     'vstutils.templatetags.request_static',
     'vstutils.gui.views',
     'vstutils.gui.context',
