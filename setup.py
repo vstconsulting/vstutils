@@ -92,8 +92,15 @@ def make_extensions(extensions_list):
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
-    if has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
-        return cythonize(ext_modules, nthreads=nthreads, force=True, language_level=2), extensions_dict
+    if any([a for a in ['-h', '--help'] if a in sys.argv]):
+        pass
+    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
+        cy_kwargs = dict(
+            nthreads=nthreads,
+            force=True,
+            language_level=2
+        )
+        return cythonize(ext_modules, **cy_kwargs), extensions_dict
     return ext_modules, extensions_dict
 
 
@@ -155,10 +162,10 @@ class install_lib(_install_lib):
     def install(self):
         result = _install_lib.install(self)
         files = list(listfiles(self.install_dir))
-        so_extentions = filter(lambda f: fnmatch.fnmatch(f, '*.so'), files)
+        so_extentions = list(filter(lambda f: fnmatch.fnmatch(f, '*.so'), files))
         for source in filter(self._filter_files_with_ext, files):
             _source_name, _source_ext = os.path.splitext(source)
-            if filter(lambda f: fnmatch.fnmatch(f, _source_name+".so"), so_extentions):
+            if any(filter(lambda f: fnmatch.fnmatch(f, _source_name+"*.so"), so_extentions)):
                 print('Removing extention sources [{}].'.format(source))
                 os.remove(source)
         return result
