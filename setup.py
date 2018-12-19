@@ -88,7 +88,13 @@ def make_extensions(extensions_list):
         if files:
             extensions_dict[module_name] = files
 
-    ext_modules = list(Extension(m, f) for m, f in extensions_dict.items())
+    ext_modules = list(
+        Extension(
+            m, f,
+            extra_compile_args=["-O0"]
+        )
+        for m, f in extensions_dict.items()
+    )
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
