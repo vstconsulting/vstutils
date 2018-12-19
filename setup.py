@@ -91,7 +91,7 @@ def make_extensions(extensions_list):
     ext_modules = list(
         Extension(
             m, f,
-            extra_compile_args=["-OO"]
+            extra_compile_args=["-O0"]
         )
         for m, f in extensions_dict.items()
     )
