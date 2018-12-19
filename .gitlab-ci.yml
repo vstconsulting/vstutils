@@ -88,10 +88,6 @@ pre_release:
   only:
     refs:
       - master
-    changes:
-      - vstutils/__init__.py
-    variables:
-      - $CI_COMMIT_TITLE =~ /release up .*>.*.dev/
   script:
     - tox -e build
     - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
