@@ -7,7 +7,7 @@ import fnmatch
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, Command
 from setuptools.extension import Extension
 from setuptools.command.sdist import sdist as _sdist
 from setuptools.command.build_py import build_py as build_py_orig
@@ -25,6 +25,9 @@ try:
     has_sphinx = True
 except ImportError:
     has_sphinx = False
+
+
+is_help = any([a for a in ['-h', '--help'] if a in sys.argv])
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
@@ -71,7 +74,8 @@ def make_extensions(extensions_list):
     if not isinstance(extensions_list, list):
         raise Exception("Extension list should be `list`.")
 
-    clear_old_extentions(extensions_list)
+    if not is_help:
+        clear_old_extentions(extensions_list)
 
     extensions_dict = {}
     for ext in extensions_list:
@@ -98,7 +102,7 @@ def make_extensions(extensions_list):
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
-    if any([a for a in ['-h', '--help'] if a in sys.argv]):
+    if is_help:
         pass
     elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
         cy_kwargs = dict(
@@ -127,6 +131,50 @@ class _Compile(_sdist):
 
     def run(self):
         return _sdist.run(self)
+
+
+class GithubRelease(Command):
+    '''
+    Make release on github via githubrelease
+    '''
+    description = 'Make release on github via githubrelease'
+
+    user_options = [
+        ('body=', 'b', 'Body message.'),
+        ('assets=', 'a', 'Release assets patterns.'),
+        ('repo=', 'r', 'Repository for release.'),
+        ('release=', 'R', 'Release version.'),
+        ('dry-run=', 'd', 'Dry run.'),
+        ('publish=', 'p', 'Publish release or just create draft.'),
+    ]
+
+    def initialize_options(self):
+        self.body = None or os.getenv('CI_COMMIT_DESCRIPTION', None)
+        self.assets = None
+        self.repo = None
+        self.dry_run = False
+        self.publish = False
+        self.release = None or self.distribution.metadata.version
+
+    def finalize_options(self):
+        if self.repo is None:
+            raise Exception("Parameter --repo is missing")
+        if self.release is None:
+            raise Exception("Parameter --release is missing")
+        self._gh_args = (self.repo, self.release)
+        self._gh_kwargs = dict(
+            publish=self.publish, name=self.release, dry_run=self.dry_run
+        )
+        if self.assets:
+            assets = self.assets.format(release=self.release)
+            assets = list(filter(bool, assets.split('\n')))
+            self._gh_kwargs['asset_pattern'] = assets
+        if self.body:
+            self._gh_kwargs['body'] = self.body
+
+    def run(self):
+        from github_release import gh_release_create
+        gh_release_create(*self._gh_args, **self._gh_kwargs)
 
 
 class build_py(build_py_orig):
@@ -202,6 +250,7 @@ def make_setup(**opts):
         })
     if has_sphinx and 'build_sphinx' not in cmdclass:
         cmdclass['build_sphinx'] = BuildDoc
+    cmdclass['githubrelease'] = GithubRelease
     opts['cmdclass'] = cmdclass
     setup(**opts)
 

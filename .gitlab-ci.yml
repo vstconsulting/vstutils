@@ -1,5 +1,5 @@
 # set to local images because too long execution
-image: onegreyonewhite/tox:tox
+image: onegreyonewhite/tox:centos6
 
 
 variables:
