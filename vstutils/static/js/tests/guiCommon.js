@@ -336,3 +336,27 @@ window.qunitTestsArray['allPropertiesIsObjects'] = {
         });
     }
 }
+
+window.qunitTestsArray['hexToRgbA'] = {
+    test:function()
+    {
+        syncQUnit.addTest("hexToRgbA", function ( assert )
+        {
+            let done = assert.async();
+
+            let test_values = [
+                {hex:"ffffff", alpha:undefined, rgba: undefined },
+                {hex:"#ffffff", alpha:undefined, rgba: "rgba(255,255,255,1)" },
+                {hex:"#ffffff", alpha:0.8, rgba: "rgba(255,255,255,0.8)" },
+                {hex:"#fDac03", alpha:-1, rgba: "rgba(253,172,3,1)" },
+                {hex:"#fDac03", alpha:2, rgba: "rgba(253,172,3,1)" },
+            ]
+
+            test_values.forEach((obj) => {
+                assert.ok(hexToRgbA(obj.hex, obj.alpha) == obj.rgba, 'hexToRgbA()');
+            })
+
+            testdone(done);
+        });
+    }
+}

@@ -917,11 +917,11 @@ function addTableEntityClass(guiObj)
  */
 function hideSidebar()
 {
-   if(window.innerWidth <= 991)
-   {
-       $('body').removeClass('sidebar-open');
-       $('body').addClass('sidebar-collapse');
-   }
+    if(window.innerWidth <= 991)
+    {
+        $('body').removeClass('sidebar-open');
+        $('body').addClass('sidebar-collapse');
+    }
 }
 
 /**
@@ -1028,6 +1028,20 @@ $(".navbar").hover(function () {
 function hexToRgbA(hex, alpha)
 {
     if(alpha === undefined)
+    {
+        alpha = 1;
+    }
+
+    if(typeof(alpha) != "number")
+    {
+        alpha = Number(alpha);
+        if(isNaN(alpha))
+        {
+            alpha = 1;
+        }
+    }
+
+    if(alpha < 0 || alpha > 1)
     {
         alpha = 1;
     }
