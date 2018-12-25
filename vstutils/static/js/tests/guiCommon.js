@@ -336,3 +336,51 @@ window.qunitTestsArray['allPropertiesIsObjects'] = {
         });
     }
 }
+
+window.qunitTestsArray['hexToRgbA'] = {
+    test:function()
+    {
+        syncQUnit.addTest("hexToRgbA", function ( assert )
+        {
+            let done = assert.async();
+
+            let test_values = [
+                {hex:"ffffff", alpha:undefined, rgba: undefined },
+                {hex:"#ffffff", alpha:undefined, rgba: "rgba(255,255,255,1)" },
+                {hex:"#ffffff", alpha:0.8, rgba: "rgba(255,255,255,0.8)" },
+                {hex:"#fDac03", alpha:-1, rgba: "rgba(253,172,3,1)" },
+                {hex:"#fDac03", alpha:2, rgba: "rgba(253,172,3,1)" },
+            ]
+
+            test_values.forEach((obj) => {
+                assert.ok(hexToRgbA(obj.hex, obj.alpha) == obj.rgba, 'hexToRgbA()');
+            })
+
+            testdone(done);
+        });
+    }
+}
+
+window.qunitTestsArray['String.prototype.format'] = {
+    test:function()
+    {
+        syncQUnit.addTest("String.prototype.format", function ( assert )
+        {
+            let done = assert.async();
+
+            let test_values = [
+                {string: "/user/{0}/", argument: 1, answer: '/user/1/', arg_type:'number' },
+                {string: "/user/1/{0}/", argument: 'settings', answer: '/user/1/settings/', arg_type:'string' },
+                {string: "/user/{0}/{1}/", argument: [1, 'settings'], answer: '/user/1/settings/', arg_type:'array' },
+                {string: "/user/{pk}/{sublink}/", argument: {pk: 1, sublink: 'settings'}, answer: '/user/1/settings/', arg_type:'object' },
+            ]
+
+            test_values.forEach((obj) => {
+                assert.ok(obj.string.format(obj.argument) == obj.answer, 'String.prototype.format() argument type is ' + obj.arg_type );
+            })
+
+
+            testdone(done);
+        });
+    }
+}
