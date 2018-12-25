@@ -2053,3 +2053,15 @@ input[type=color]{
         display: none;
     }
 }
+
+.power-on {
+    color: #00c0ef;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.cursor-not-allowed {
+    cursor:not-allowed!important;
+}

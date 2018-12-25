@@ -547,20 +547,46 @@
             id="<%- guiElement.element_id %>"
             onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
             >
+            <% if(opt.enable_button) { %>
+                <div class="input-group-append">
+                    <span class="input-group-text power-on cursor-pointer" id="<%- guiElement.element_id %>_toggle_disabled"
+                        <%= justOn('click', function()
+                            {
+                                $(this).toggleClass('power-on');
+                                $('#' + guiElement.element_id + '_open_modal').toggleClass('cursor-not-allowed');
+                                $('#' + guiElement.element_id + '_clean_value').toggleClass('cursor-not-allowed');
+                                if($('#' + guiElement.element_id).attr('disabled')) {
+                                    $('#' + guiElement.element_id).removeAttr('disabled');
+                                    $('#' + guiElement.element_id).val('');
+                                    $('#' + guiElement.element_id).attr('value', '');
+                                } else {
+                                    $('#' + guiElement.element_id).attr('disabled', true);
+                                    $('#' + guiElement.element_id).val(window.disabled_inv_text);
+                                    $('#' + guiElement.element_id).attr('value',window.disabled_inv_text);
+                                }
+
+                            }, guiElement.element_id + '_toggle_disabled' )
+                        %>
+                    >
+                        <span class='fa fa-power-off' ></span>
+                    </span>
+                </div>
+            <% } %>
             <div class="input-group-append">
-                <span class="input-group-text"
+                <span class="input-group-text cursor-pointer" id="<%- guiElement.element_id %>_open_modal"
                     <%= justOn('click', function()
                         {
-                            return spajs.showLoader(guiElement.renderModal(opt));
-                        })
+                            if(!$('#' +  guiElement.element_id).attr('disabled')) {
+                                return spajs.showLoader(guiElement.renderModal(opt));
+                            }
+                        }, guiElement.element_id + '_open_modal' )
                     %>
-                    style="cursor: pointer;"
                 >
                     <span class='fa fa-chevron-down' ></span>
                 </span>
             </div>
             <div class="input-group-append">
-                <span class="input-group-text" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" style="cursor: pointer;" >
+                <span class="input-group-text cursor-pointer"  id="<%- guiElement.element_id %>_clean_value" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" >
                     <span class='fa fa-times' ></span>
                 </span>
             </div>
