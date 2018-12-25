@@ -73,7 +73,7 @@ String.prototype.format = function()
     {
         arg_list = arguments[0]
     }
-    else if (arguments.length > 1)
+    else if (arguments.length >= 1)
     {
         arg_list = Array.from(arguments);
     }
