@@ -43,7 +43,7 @@
                         <~ guiElement.db_value>
                             <input type="text"
                                 class="form-control"
-                                <%- set_api_options(opt, guiElement) %>
+                                <%= set_api_options(opt, guiElement) %>
                                 id="<%- guiElement.element_id %>"
                                 value="<%- guiElement.insertValue(guiElement.db_value)  %>">
                         <~>
@@ -172,7 +172,7 @@
             <~>
             <input type="<%* input_type %>"
                     class="form-control"
-                    <%- set_api_options(opt, guiElement) %>
+                    <%= set_api_options(opt, guiElement) %>
                     id="<%- guiElement.element_id %>"
                     value="<%- guiElement.insertValue(value) %>">
             <%* input_addons %>
@@ -541,15 +541,18 @@
         <div class="input-group">
             <input
             type="text"
-            value="<%- guiElement.insertValue(value) %>"
+            value="<% if(opt.enable_button_tooltip && guiElement.insertValue(value) == "") { %><%- opt.enable_button_tooltip %><% } else { %><%- guiElement.insertValue(value) %><% } %>"
             class="form-control"
-            <%- set_api_options(opt, guiElement) %>
+            <%= set_api_options(opt, guiElement) %>
             id="<%- guiElement.element_id %>"
             onkeydown="$('#<%- guiElement.element_id %>').attr('value','');"
+            <% if(opt.enable_button && guiElement.insertValue(value) == "") { %>
+                disabled
+            <% } %>
             >
             <% if(opt.enable_button) { %>
                 <div class="input-group-append">
-                    <span class="input-group-text power-on cursor-pointer" id="<%- guiElement.element_id %>_toggle_disabled"
+                    <span class="input-group-text  <% if(!(opt.enable_button && guiElement.insertValue(value) == "")) { %> power-on <% } %>  cursor-pointer" id="<%- guiElement.element_id %>_toggle_disabled"
                         <%= justOn('click', function()
                             {
                                 $(this).toggleClass('power-on');
@@ -573,7 +576,7 @@
                 </div>
             <% } %>
             <div class="input-group-append">
-                <span class="input-group-text cursor-pointer" id="<%- guiElement.element_id %>_open_modal"
+                <span class="input-group-text cursor-pointer <% if(opt.enable_button && guiElement.insertValue(value) == "") { %> cursor-not-allowed <% } %>" id="<%- guiElement.element_id %>_open_modal"
                     <%= justOn('click', function()
                         {
                             if(!$('#' +  guiElement.element_id).attr('disabled')) {
@@ -586,7 +589,16 @@
                 </span>
             </div>
             <div class="input-group-append">
-                <span class="input-group-text cursor-pointer"  id="<%- guiElement.element_id %>_clean_value" onclick="$('#<%- guiElement.element_id %>').val(''); $('#<%- guiElement.element_id %>').attr('value','');" >
+                <span class="input-group-text cursor-pointer <% if(opt.enable_button && guiElement.insertValue(value) == "") { %> cursor-not-allowed <% } %>"  id="<%- guiElement.element_id %>_clean_value"
+                    <%= justOn('click', function()
+                        {
+                            if(!$('#' +  guiElement.element_id).attr('disabled')) {
+                                $('#' + guiElement.element_id).val('');
+                                $('#' + guiElement.element_id).attr('value','');
+                            }
+                        }, guiElement.element_id + '_clean_value' )
+                    %>
+                >
                     <span class='fa fa-times' ></span>
                 </span>
             </div>
@@ -626,11 +638,11 @@
 <script type="text/x-just" data-just="guiElements.textarea">
     <!-- guiElements.textarea -->
     <%[ main_input %>
-        <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
+        <textarea rows="3" cols="50" <%= set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
     <%[ readonly_input %>
         <~ guiElement.db_value>
-            <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= guiElement.insertValue(guiElement.db_value)%></textarea>
+            <textarea rows="3" cols="50" <%= set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= guiElement.insertValue(guiElement.db_value)%></textarea>
         <~>
     <%] %>
 
@@ -649,7 +661,7 @@
     <% } %>
 
     <%[ main_input %>
-        <textarea rows="3" cols="50" <%- set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= guiElement.insertValue(value) %></textarea>
+        <textarea rows="3" cols="50" <%= set_api_options(opt, guiElement) %>  id="<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= guiElement.insertValue(value) %></textarea>
     <%] %>
 
     <%[ readonly_input %>

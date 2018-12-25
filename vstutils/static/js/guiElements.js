@@ -2741,7 +2741,7 @@ function set_api_options(options, guiElement)
     }
 
     if (options.default) {
-        additional_options += "placeholder=" + options.default + " "
+        additional_options += "placeholder='" + options.default + "' "
     }
 
     if (options.pattern) {
