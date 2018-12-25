@@ -360,3 +360,27 @@ window.qunitTestsArray['hexToRgbA'] = {
         });
     }
 }
+
+window.qunitTestsArray['String.prototype.format'] = {
+    test:function()
+    {
+        syncQUnit.addTest("String.prototype.format", function ( assert )
+        {
+            let done = assert.async();
+
+            let test_values = [
+                {string: "/user/{0}/", argument: 1, answer: '/user/1/', arg_type:'number' },
+                {string: "/user/1/{0}/", argument: 'settings', answer: '/user/1/settings/', arg_type:'string' },
+                {string: "/user/{0}/{1}/", argument: [1, 'settings'], answer: '/user/1/settings/', arg_type:'array' },
+                {string: "/user/{pk}/{sublink}/", argument: {pk: 1, sublink: 'settings'}, answer: '/user/1/settings/', arg_type:'object' },
+            ]
+
+            test_values.forEach((obj) => {
+                assert.ok(obj.string.format(obj.argument) == obj.answer, 'String.prototype.format() argument type is ' + obj.arg_type );
+            })
+
+
+            testdone(done);
+        });
+    }
+}
