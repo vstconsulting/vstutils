@@ -1,4 +1,4 @@
 # Packages needed for delayed jobs.
-PyMySQL==0.9.2
+PyMySQL>=0.9.2,<=0.9.3
 # Advanced cache support
-django-redis==4.9.0
+django-redis==4.10.0
