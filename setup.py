@@ -92,23 +92,28 @@ def make_extensions(extensions_list):
         if files:
             extensions_dict[module_name] = files
 
+    extra_compile_args = [
+        "-fno-strict-aliasing",
+        "-fno-var-tracking-assignments",
+        "-O2", "-pipe", "-std=c99"
+    ]
     ext_modules = list(
-        Extension(
-            m, f,
-            extra_compile_args=["-O1"]
-        )
+        Extension(m, f, extra_compile_args=extra_compile_args)
         for m, f in extensions_dict.items()
     )
     ext_count = len(ext_modules)
     nthreads = ext_count if ext_count < 10 else 10
 
+    language_level = 2
+    if 'bdist_wheel' in sys.argv and sys.version_info.major == 3:
+        language_level = 3
     if is_help:
         pass
     elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
         cy_kwargs = dict(
             nthreads=nthreads,
             force=True,
-            language_level=2
+            language_level=language_level
         )
         return cythonize(ext_modules, **cy_kwargs), extensions_dict
     return ext_modules, extensions_dict
@@ -293,7 +298,6 @@ if 'develop' in sys.argv:
 kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
-    include_package_data=True,
     install_requires=[
         "django>=1.11,<2.0",
         'cython>0.29,<1.0',
@@ -319,5 +323,11 @@ kwargs = dict(
         "Releases": "https://pypi.org/project/vstutils/#history",
     },
 )
+
+all_deps = []
+for deps in kwargs['extras_require'].values():
+    all_deps += deps
+
+kwargs['extras_require']['all'] = all_deps
 
 make_setup(**kwargs)

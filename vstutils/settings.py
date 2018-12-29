@@ -137,17 +137,12 @@ MIDDLEWARE = [
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE
 
-try:
-    import ldap
-    AUTHENTICATION_BACKENDS = [
-        'vstutils.auth.LdapBackend',
-        'django.contrib.auth.backends.ModelBackend',
-    ]
-    LDAP_SERVER = main.get("ldap-server", fallback=None)
-    LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
-except ImportError:  # nocv
-    pass
-
+LDAP_SERVER = main.get("ldap-server", fallback=None)
+LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
+AUTHENTICATION_BACKENDS = [
+    'vstutils.auth.LdapBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]
 
 # Sessions settings
 # https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
@@ -555,8 +550,8 @@ class WorkerSectionConfig(SectionConfig):
         result.update(data)
         return result
 
-
-WORKER_OPTIONS = WorkerSectionConfig().all() if has_django_celery_beat else {}
+if RUN_WORKER:
+    WORKER_OPTIONS = WorkerSectionConfig().all() if has_django_celery_beat else {}
 
 # View settings
 ##############################################################

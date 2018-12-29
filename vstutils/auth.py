@@ -1,9 +1,20 @@
 from __future__ import unicode_literals
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from .ldap_utils import LDAP
+try:
+    from .ldap_utils import LDAP as _LDAP
+    HAS_LDAP = True
+except ImportError:
+    _LDAP = object
+    HAS_LDAP = False
 
 UserModel = get_user_model()
+
+
+class LDAP(_LDAP):
+    '''
+    LDAP class wrapper
+    '''
 
 
 class LdapBackend(object):
@@ -21,7 +32,7 @@ class LdapBackend(object):
             backend = LDAP(self.server, username, password, self.domain)
             user = UserModel._default_manager.get_by_natural_key(backend.domain_user)
             return user if self.user_can_authenticate(user) else None
-        except (LDAP.LdapError, UserModel.DoesNotExist):
+        except Exception:
             return
 
     def user_can_authenticate(self, user):
