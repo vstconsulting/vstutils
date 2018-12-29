@@ -5,6 +5,7 @@ import six
 from django.conf import settings
 from django.test import Client
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 from . import base, serializers, permissions, filters, decorators as deco
 from ..utils import Dict
 
@@ -241,7 +242,7 @@ class BulkViewSet(base.rvs.APIView):
             self._check_type(op_type, operation.get("item", None))
             result = self.perform(operation)
             if allow_fail and result['status'] >= 300:
-                raise base.djexcs.ValidationError(result['data'])
+                raise ValidationError(result['data'])
             self.results.append(result)
         except Exception as err:
             if allow_fail:
