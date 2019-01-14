@@ -15,7 +15,8 @@ interpreter_dir = os.path.dirname(sys.executable or 'python')
 PYTHON_INTERPRETER = '/'.join([interpreter_dir, 'python'] if interpreter_dir else 'python')
 VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
 VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
-VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT)
+VST_PROJECT_LIB_NAME = os.getenv("VST_PROJECT_LIB_NAME", VST_PROJECT)
+VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT_LIB_NAME)
 ENV_NAME = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
 vst_project_module = __import__(VST_PROJECT)
 vst_lib_module = __import__(VST_PROJECT_LIB) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
@@ -469,6 +470,11 @@ LOGGING = {
     },
     'loggers': {
         VST_PROJECT_LIB: {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        VST_PROJECT_LIB_NAME: {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
             'propagate': True,
