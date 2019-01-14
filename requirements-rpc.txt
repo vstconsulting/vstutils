@@ -2,4 +2,4 @@
 celery[redis]>=4.2.1,<4.3
 django-celery-beat>=1.1.1,<=1.4.0
 redis>=2.10.6,<=3.0.2
-sqlalchemy>=1.2.10,<=1.2.15
+sqlalchemy>=1.2.10,<=1.2.16
