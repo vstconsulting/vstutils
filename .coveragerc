@@ -22,6 +22,7 @@ omit =
     */vstutils/auth.py
     */vstutils/compile.py
     */vstutils/models.py
+    */vstutils/api/doc_generator.py
     */test_proj/*
 
 [report]
