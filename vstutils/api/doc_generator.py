@@ -120,7 +120,7 @@ class VSTOpenApiBase(Directive):
             self.write('.. _{}:'.format(def_name))
             self.write('')
             self.write('{} Schema'.format(def_name))
-            self.write('{}'.format('```' * len(def_name)))
+            self.write('{}'.format('`' * (len(def_name) + 7)))
             self.write('')
             self.write(self.indent * self.indent_depth + '.. code-block:: json')
             self.indent_depth += 1
