@@ -19,7 +19,7 @@ VST_PROJECT_LIB_NAME = os.getenv("VST_PROJECT_LIB_NAME", VST_PROJECT)
 VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT_LIB_NAME)
 ENV_NAME = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
 vst_project_module = __import__(VST_PROJECT)
-vst_lib_module = __import__(VST_PROJECT_LIB) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
+vst_lib_module = __import__(VST_PROJECT_LIB_NAME) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
 PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
 PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
 PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
@@ -32,7 +32,7 @@ __kwargs = dict(
     PY=PY_VER, PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
     INTERPRETER=PYTHON_INTERPRETER, TMP=TMP_DIR, HOME=BASE_DIR,
     PROG=VST_PROJECT_DIR, LIB=BASE_DIR, VST=VSTUTILS_DIR,
-    PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB
+    PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB_NAME
 )
 KWARGS = __kwargs
 
