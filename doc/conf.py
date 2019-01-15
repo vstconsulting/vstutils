@@ -47,7 +47,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.mermaid',
     'sphinxcontrib.httpdomain',
-    'vstutils.api.vstutils_doc_generator'
+    'vstutils.api.doc_generator'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
