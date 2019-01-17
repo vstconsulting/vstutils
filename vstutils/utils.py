@@ -216,6 +216,9 @@ class Lock(KVExchanger):
             time.sleep(0.01)
         raise self.AcquireLockException(err_msg)
 
+    def get(self):  # nocv
+        return self.cache.get(self.key)
+
     def __enter__(self):
         return self
 
