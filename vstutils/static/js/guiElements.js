@@ -1143,7 +1143,6 @@ guiElements.autocomplete = function()
     this._onRender = function(options)
     {
         this._onBaseRender(options)
-
         if(options.searchObj)
         {
             return new autoComplete({
@@ -1225,14 +1224,19 @@ guiElements.autocomplete = function()
             {
                 url_vars = options.dynamic_properties.url_vars
             }
-
-            if(props['obj'])
+            let is_gui_object = (typeof props['obj'][0] == 'object')||(props['obj'][0] in api.openapi.paths)
+            if((props['obj'])&&is_gui_object)
             {
                 for (let i in props['obj'])
                 {
                     list.push(new guiObjectFactory(props['obj'][i],
                         url_vars)
                     );
+                }
+            } else {
+                for (let i in props['obj'])
+                {
+                    list.push(props['obj'][i]);
                 }
             }
 
@@ -1257,22 +1261,36 @@ guiElements.autocomplete = function()
                 source: (original_term, response) =>
                 {
                     let search_str = trim(original_term);
-
                     let isHide = $('#'+this.element_id).attr('data-hide')
                     if(isHide == "hide")
                     {
                         $('#'+this.element_id).attr({'data-hide':'show'})
                         return;
                     }
-
                     if(list)
                     {
 
                         let filters = getFiltersForAutocomplete(list, search_str, view_field);
                         let lists_deffered =[]
+                        let is_objects_list = typeof list[0] == 'object'
                         for (let i in list)
                         {
-                            lists_deffered.push(list[i].search(filters))
+                            if (is_objects_list) {
+                                lists_deffered.push(list[i].search(filters))
+                            } else {
+                                if ((list[i].includes(search_str)) && (lists_deffered.length < filters.limit)) {
+                                    lists_deffered.push({
+                                        view_field: list[i],
+                                        value_field: list[i],
+                                    })
+                                }
+                            }
+                        }
+                        if (!is_objects_list)
+                        {
+                            this.matches = lists_deffered
+                            response(lists_deffered)
+                            return;
                         }
 
                         $.when.apply($, lists_deffered).done(function() {
@@ -1311,6 +1329,16 @@ guiElements.autocomplete.prepareProperties = function(value)
 {
     if(value.enum)
     {
+        value.additionalProperties = value.autocomplete_properties = {
+            view_field:value.title,
+            value_field:value.title,
+            list_obj:value.enum,
+        }
+
+        value.gui_links.push({
+            prop_name:'autocomplete_properties',
+            list_name:'list_enum'
+        })
         return value
     }
 
@@ -1319,7 +1347,6 @@ guiElements.autocomplete.prepareProperties = function(value)
         //console.error("AdditionalProperties was not found");
         return value;
     }
-
     value.autocomplete_properties = {
         view_field:value.additionalProperties.view_field,
         value_field:value.additionalProperties.value_field,

@@ -25,7 +25,7 @@ function openApi_guiPrepareFields(api, properties, parent_name)
 
         field.name = i
 
-        if(field.enum)
+        if((field.enum) && !field.format)
         {
             field.format = "enum"
         }
