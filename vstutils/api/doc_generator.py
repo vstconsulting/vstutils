@@ -34,12 +34,12 @@ class VSTOpenApiBase(Directive):
         integer=1,
         uri='http://localhost:8080{}',
         string='example {}',
-        textarea='exampletextarea',
-        boolean='true',
+        textarea='example\ntext\narea\n',
+        boolean=True,
         select2='username',
         dynamic='test_dynamic',
         uptime='22:11:34',
-        date_time='22.06.19',
+        date_time='2019-01-07T06:10:31+10:00',
         html='test_html',
         email='example@mail.com'
     )
@@ -80,7 +80,7 @@ class VSTOpenApiBase(Directive):
         self.openapi_version = spec.get('swagger', None) or spec['openapi']
         self.options.setdefault('uri', 'file://%s' % abspath)
 
-    def write(self, value, indent_depth):
+    def write(self, value, indent_depth=0):
         '''
         Add lines to ViewList, for further rendering.
         :param value: --line that would be added to render list
@@ -89,7 +89,7 @@ class VSTOpenApiBase(Directive):
         :type indent_depth: integer
         :return:
         '''
-        indent_depth = indent_depth or 0
+        indent_depth = indent_depth
         self.__view_list.append(self.indent * indent_depth + value, '<openapi>')
 
     def run(self):
@@ -187,7 +187,7 @@ class VSTOpenApiBase(Directive):
                 continue
             self.write('**Example Response**', 1)
             self.write('')
-            self.write('.. code-block:: html', 1)
+            self.write('.. code-block:: http', 1)
             self.write('')
             self.write('HTTP/1.1 {} {}'.format(status_code, status), 2)
             self.write('Vary: {}'.format(response_schema['description']), 2)
@@ -222,7 +222,7 @@ class VSTOpenApiBase(Directive):
             json_name = self.indent + ':jsonparameter {} {}:'.format(var_type, opt_name)
             json_dict[json_name] = self.get_json_props_for_response(var_type, opt_value)
 
-            answer_dict[opt_name] = self.get_response_example(var_type, opt_value)
+            answer_dict[opt_name] = self.get_response_example(opt_name, var_type, opt_value)
             if var_type == 'string':
                 answer_dict[opt_name] = answer_dict[opt_name].format(opt_name)
 
@@ -269,9 +269,11 @@ class VSTOpenApiBase(Directive):
             props_str = ''
         return dict(props_str=props_str, title=option_value.get('title', ''))
 
-    def get_response_example(self, var_type, opt_values):
+    def get_response_example(self, opt_name, var_type, opt_values):
         '''
         Depends on type of variable, return string with example
+        :param opt_name: --option name
+        :type opt_name: str,unicode
         :param var_type: --type of variable
         :type var_type: str, unicode
         :param opt_values: --dictionary with properties of this variable
@@ -279,9 +281,16 @@ class VSTOpenApiBase(Directive):
         :return: example for `var_type` variable
         :rtype: str, unicode
         '''
-        if var_type == 'uri':
-            self.current_path.format(**self.uri_format_values)
-            result = self.type_dict[var_type].format(self.current_path)
+        if opt_name == 'previous' and var_type == 'uri':
+            result = None
+        elif var_type == 'uri':
+            result = self.type_dict[var_type].format(
+                self.current_path.format(**self.uri_format_values)
+            )
+            if opt_name == 'next':
+                result += '?limit=1&offset=1'
+        elif opt_name == 'count' and var_type == 'integer':
+            result = 2
         elif var_type == 'array':
             items = opt_values.get('items', dict()).get('$ref', None)
             item = 'array_example'
@@ -299,7 +308,7 @@ class VSTOpenApiBase(Directive):
             def_model = self.definitions[def_name].get('properties')
             value_field = def_model.get(value_field_name, None)
             var_type = value_field.get('format', None) or value_field.get('type', None)
-            result = self.get_response_example(var_type, def_model)
+            result = self.get_response_example(opt_name, var_type, def_model)
         else:
             var_type = var_type.replace('-', '_')
             result = opt_values.get('default', None) or self.type_dict[var_type]
@@ -318,7 +327,7 @@ class VSTOpenApiBase(Directive):
         example = dict()
         for opt_name, opt_value in def_model.get('properties', dict()).items():
             var_type = opt_value.get('format', None) or opt_value.get('type', None)
-            example[opt_name] = self.get_response_example(var_type, opt_value)
+            example[opt_name] = self.get_response_example(opt_name, var_type, opt_value)
             if var_type == 'string':
                 example[opt_name] = example[opt_name].format(opt_name)
         return example
