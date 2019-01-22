@@ -67,6 +67,19 @@
     <%] %>
 
     <%[ input_addons %>
+        <% if(guiElement.opt.hidden_button && !guiElement.isRequired()) { %>
+            <div class="input-group-append guiElement-revert-addon" style="cursor: pointer;"
+                <%= justOn('click', function()
+                    {
+                        guiElement.setHidden(true);
+                    })
+                %>
+             >
+                <span class="input-group-text">
+                    <span class='fa fa-eye-slash' ></span>
+                </span>
+            </div>
+        <% } %>
         <% if(guiElement.opt.default){ %>
             <div class="input-group-append guiElement-revert-addon" onclick="$('#<%- guiElement.element_id %>').val('<%- guiElement.opt.default %>'); $('#<%- guiElement.element_id %>').trigger('change');" style="cursor: pointer;" >
                 <span class="input-group-text">
@@ -488,15 +501,32 @@
 <script type="text/x-just" data-just="guiElements.boolean">
     <!-- guiElements.boolean -->
     <%[ main_input %>
-        <div class="form-control <% if (guiElement.setSelectedOrNot(value, opt)) { %> selected <% } %> boolean-select"
-                onclick="$(this).toggleClass('selected');"
-                onselectstart="return false"
-                onmousedown="return false"
-                style="cursor: pointer;"
-                id="<%- guiElement.element_id %>" >
-            <div class="ico-on fa fa-toggle-on" ></div>
-            <div class="ico-off fa  fa-toggle-off" ></div>
-            <div class="boolean-title" >Boolean value</div>
+        <div class="input-group">
+            <div class="form-control <% if (guiElement.setSelectedOrNot(value, opt)) { %> selected <% } %> boolean-select"
+                    onclick="$(this).toggleClass('selected');"
+                    onselectstart="return false"
+                    onmousedown="return false"
+                    style="cursor: pointer;"
+                    id="<%- guiElement.element_id %>" >
+                <div class="ico-on fa fa-toggle-on" ></div>
+                <div class="ico-off fa  fa-toggle-off" ></div>
+                <div class="boolean-title" >Boolean value</div>
+            </div>
+            <% if(guiElement.opt.hidden_button && !guiElement.isRequired()) { %>
+                <div class="input-group-append">
+                    <div class="input-group-text" style="float:right; z-index: 9999;"
+                        <%= justOn('click', function()
+                            {
+                                guiElement.setHidden(true);
+                            })
+                        %>
+                    >
+                        <span >
+                            <span class='fa fa-eye-slash' ></span>
+                        </span>
+                    </div>
+                </div>
+            <% } %>
         </div>
     <%] %>
 
@@ -575,6 +605,19 @@
                     </span>
                 </div>
             <% } %>
+            <% if(guiElement.opt.hidden_button && !guiElement.isRequired()) { %>
+                <div class="input-group-append guiElement-revert-addon" style="cursor: pointer;"
+                    <%= justOn('click', function()
+                        {
+                            guiElement.setHidden(true);
+                        })
+                    %>
+                 >
+                    <span class="input-group-text">
+                        <span class='fa fa-eye-slash' ></span>
+                    </span>
+                </div>
+            <% } %>
             <div class="input-group-append">
                 <span class="input-group-text cursor-pointer <% if(opt.enable_button && guiElement.insertValue(value) == "") { %> cursor-not-allowed <% } %>" id="<%- guiElement.element_id %>_open_modal"
                     <%= justOn('click', function()
@@ -612,6 +655,7 @@
 <script type="text/x-just" data-just="guiElements.file">
     <!-- guiElements.file -->
     <%[ main_input %>
+
         <span id="deleteFileId_<%- guiElement.element_id %>" onclick="$('#fileContent_<%- guiElement.element_id %>').val('');" class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'>
             <span class='fa fa-times'>
             </span>
@@ -622,6 +666,18 @@
             <span class='fa fa-file-text-o'>
             </span>
         </span>
+
+        <% if(guiElement.opt.hidden_button && !guiElement.isRequired()) { %>
+                <span class='btn btn-default btn-right textfile'  style='float: right; margin-left: 10px; margin-bottom:10px;'
+                     <%= justOn('click', function()
+                        {
+                            guiElement.setHidden(true);
+                        })
+                    %>
+                >
+                <span class='fa fa-eye-slash' ></span>
+                </span>
+        <% } %>
         <textarea placeholder='Enter value' <%- set_api_options(opt, guiElement) %>  id="fileContent_<%- guiElement.element_id %>" class='form-control' style="resize:vertical;"><%= value || '' %></textarea>
     <%] %>
     <%! guiElements.base %>

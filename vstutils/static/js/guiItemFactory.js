@@ -96,7 +96,8 @@ var gui_base_object = {
         let html = []
         for(let i in opt.fields)
         {
-            html.push(this.renderField(opt.fields[i], opt))
+            opt.fields[i].hidden_button = true;
+            html.push(this.renderField(opt.fields[i], opt));
         }
 
         let id =  getNewId();
@@ -109,7 +110,7 @@ var gui_base_object = {
             }
 
             //fields.hide()
-            fields.addClass("hide")
+            fields.addClass("hidden-field")
             $('#'+id).appendTpl(spajs.just.render('show_not_required_fields', {fields:fields, opt:opt}))
         })
     },
@@ -856,21 +857,18 @@ function formBulkRequestForPrefetchFields(prefetch_collector)
     {
         for(let path in prefetch_collector.fields_ids[field])
         {
-
-            let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-            let match = XRegExp.exec(path, xregexpItem)
-            if(match != null)
-            {
+            let path_parts = path.replace(/^\/|\/$/g, '').split('/');
+            if(path_parts.length > 2 && !isNaN(Number(path_parts[1]))) {
                 queryObj = {
                     type: "mod",
-                    item: match.parent_type.replace(/^\/|\/$/g, ''),
-                    pk: match.parent_id.replace(/^\/|\/$/g, ''),
-                    data_type: match.page_type.replace(/^\/|\/$/g, ''),
+                    item: path_parts[0],
+                    pk: path_parts[1],
+                    data_type: path_parts.slice(2),
                     method: "get",
                 }
             }
-            else
-            {
+            else {
+
                 let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
                 queryObj = {
                     type: "mod",
@@ -888,7 +886,7 @@ function formBulkRequestForPrefetchFields(prefetch_collector)
 }
 
 /**
- * Function adds prefetch info to data from API.
+ * Function adds prefetch info to data from API .
  * @params d(object) - prefetch data.
  * @params dataFromApi(object) - data from API.
  * @params prefetch_collector(object) - object with info about prefetch fields.
@@ -900,44 +898,64 @@ function addPrefetchInfoToDataFromApi(d, dataFromApi, prefetch_collector)
         if (prefetch_collector.fields[field])
         {
             let path = prefetch_collector.fields[field].path(dataFromApi);
-            if (path)
-            {
-                let xregexpItem = XRegExp(`(?<parent_type>[A-z]+)\/(?<parent_id>[0-9]+)\/(?<page_type>[A-z\/]+)$`, 'x');
-                let match = XRegExp.exec(path, xregexpItem)
-                if (match != null)
-                {
-                    for (var j in d)
-                    {
-                        if (d[j].item == match[1].replace(/^\/|\/$/g, '') && d[j].subitem == match[3].replace(/^\/|\/$/g, ''))
-                        {
-                            let prefetch_data = d[j].data.results;
-                            for (var k in prefetch_data)
-                            {
-                                if (dataFromApi[field] == prefetch_data[k].id)
-                                {
-                                    dataFromApi[field + '_info'] = prefetch_data[k];
-                                }
-                            }
-                        }
-                    }
+            if (path)  {
+                let path_parts = path.replace(/^\/|\/$/g, '').split('/');
+                if(path_parts.length > 2){
+                    addPrefetchInfoToDataFromApi_internal_level(d, dataFromApi, field, path_parts)
                 }
-                else
-                {
+                else {
                     let bulk_name = path.replace(/\{[A-z]+\}\/$/, "").toLowerCase().match(/\/([A-z0-9]+)\/$/);
-                    for (var j in d)
-                    {
-                        if (d[j].item == bulk_name[1] && d[j].subitem == null)
-                        {
-                            let prefetch_data = d[j].data.results;
-                            for (var k in prefetch_data)
-                            {
-                                if (dataFromApi[field] == prefetch_data[k].id)
-                                {
-                                    dataFromApi[field + '_info'] = prefetch_data[k];
-                                }
-                            }
-                        }
-                    }
+                    addPrefetchInfoToDataFromApi_second_level(d, dataFromApi, field, bulk_name)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Function adds prefetch info to data from API for prefetch path with level more than 2.
+ * @params d(object) - prefetch data.
+ * @params dataFromApi(object) - data from API.
+ * @params field(string) - name of field with prefetch.
+ * @params path_parts(array) - parts of path.
+ */
+function addPrefetchInfoToDataFromApi_internal_level(d, dataFromApi, field, path_parts) {
+    for (var j in d) {
+        let subitem;
+
+        if(d[j].subitem) {
+            subitem = d[j].subitem;
+        }
+
+        if(typeof subitem == 'string') {
+            subitem = [subitem]
+        }
+
+        if (d[j].item == path_parts[0] && deepEqual(subitem, path_parts.slice(2))) {
+            let prefetch_data = d[j].data.results;
+            for (var k in prefetch_data) {
+                if (dataFromApi[field] == prefetch_data[k].id) {
+                    dataFromApi[field + '_info'] = prefetch_data[k];
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Function adds prefetch info to data from API for prefetch path with level == 2.
+ * @params d(object) - prefetch data.
+ * @params dataFromApi(object) - data from API.
+ * @params field(string) - name of field with prefetch.
+ * @params bulk_name(array) - array, that contains bulk name of model.
+ */
+function addPrefetchInfoToDataFromApi_second_level(d, dataFromApi, field, bulk_name) {
+    for (var j in d) {
+        if (d[j].item == bulk_name[1] && d[j].subitem == null) {
+            let prefetch_data = d[j].data.results;
+            for (var k in prefetch_data) {
+                if (dataFromApi[field] == prefetch_data[k].id) {
+                    dataFromApi[field + '_info'] = prefetch_data[k];
                 }
             }
         }

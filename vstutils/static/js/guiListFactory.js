@@ -38,15 +38,14 @@ var gui_list_object = {
         }
         else
         {
-            let parent_type = this.url_vars.parent_type;
-            let parent_id = this.url_vars.parent_id;
-            let page_type = this.url_vars.page_type;
+
+            let path_parts = this.url_vars.url.replace(/^\/|\/$/g, '').split("/");
             for(let i in ids)
             {
                 q.push({
                     type:"mod",
                     method:"delete",
-                    data_type:[parent_type, parent_id, page_type, ids[i]],
+                    data_type:path_parts.concat(ids[i]),
                 })
             }
 

@@ -2065,3 +2065,7 @@ input[type=color]{
 .cursor-not-allowed {
     cursor:not-allowed!important;
 }
+
+.hidden-section {
+    display: none;
+}

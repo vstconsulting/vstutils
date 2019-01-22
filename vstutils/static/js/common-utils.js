@@ -1057,3 +1057,28 @@ function hexToRgbA(hex, alpha)
     }
     return;
 }
+
+/**
+ * Function returns prefetch text if prefetch exists, otherwise, it returns field value.
+ * @param opt {object} - options for page/list render.
+ * @param dataLine {object} - object with data from API.
+ * @param field_name {string} - name of field
+ * @param max_length {number} - max length of return text.
+ * @returns {html}
+ */
+function getPrefetchText(opt, dataLine, field_name, max_length) {
+    if(!max_length){
+        max_length = 100;
+    }
+
+    if(opt.fields[field_name].prefetch && dataLine[field_name + '_info']) {
+        if(opt.fields['job'].prefetch.field_name && dataLine[field_name + '_info'][opt.fields['job'].prefetch.field_name]){
+            return sliceLongString(dataLine[field_name + '_info'][opt.fields['job'].prefetch.field_name], max_length);
+        } else if (dataLine[field_name + '_info'].name) {
+            return sliceLongString(dataLine[field_name + '_info'].name, max_length)
+        }
+
+    }
+
+    return sliceLongString(dataLine[field_name], max_length);
+}
