@@ -292,7 +292,7 @@ function openApi_guiPrepareAdditionalProperties(path_schema, api_obj, fields)
         }
     }
 
-   return fields
+    return fields
 }
 
 // Replace `Definitions` link to field list from `Definitions`
@@ -1067,6 +1067,14 @@ function setDefaultPrefetchFunctions(obj)
                 continue;
             }
 
+            if(typeof field.prefetch == "object")
+            {
+                if(field.prefetch.path && typeof field.prefetch.path == "function")
+                {
+                    continue;
+                }
+            }
+
             let prefetch_path = undefined
             if(typeof field.prefetch == "string")
             {
@@ -1104,24 +1112,25 @@ function setDefaultPrefetchFunctions(obj)
                 continue;
             }
 
-
             prefetch_path = findPath(obj.paths, obj.path, prefetch_path.replace(/_id$/, ""))
             if(!obj.paths[prefetch_path])
             {
                 continue;
             }
 
-            //obj.fields[i].type = "prefetch";
-            obj.fields[i].prefetch = {
-                path:function(path){
-                    return function (obj) {
-                        return path;
-                    }
-                }(prefetch_path),
+            if(typeof obj.fields[i].prefetch != "object") {
+                obj.fields[i].prefetch = {};
             }
+
+            obj.fields[i].prefetch.path = function(path){
+                return function (obj) {
+                    return path;
+                }
+            }(prefetch_path);
         }
     }
 }
+
 
 tabSignal.connect("openapi.schema.fields", function(obj)
 {
@@ -1140,7 +1149,7 @@ tabSignal.connect("openapi.schema.schema", function(obj)
                         !obj.value.responses[i].schema.redirect_path &&
                         !obj.value.responses[i].schema.redirect_field
                     ) {
-                         if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
+                        if (obj.value.responses[i].schema.properties[k].additionalProperties.redirect) {
                             obj.value.responses[i].schema.redirect_path = findPath(obj.paths, obj.path, k);
                             obj.value.responses[i].schema.redirect_field = k;
                             break;

@@ -22,7 +22,9 @@
     <!-- show_not_required_fields -->
     <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
         <label class="control-label">Add field</label>
-        <select class="form-control" onchange="$('#'+this.value).removeClass('hide'); this.options[this.selectedIndex].disabled = true;" >
+        <select class="form-control" id="show_not_required_fields_select"
+        onchange="$('#'+this.value).removeClass('hide'); $('#'+this.value).removeClass('hidden-field');"
+        onclick="if($('#'+this.value).hasClass('hidden-field')){ $('#'+this.value).removeClass('hidden-field') };">
             <option disabled selected >Select field</option>
             <% for(var i = 0; i < fields.length; i++){  %>
                 <option value="<%- $(fields[i]).attr('id') %>" ><%- $(fields[i]).attr('data-title') %></option>
@@ -270,8 +272,9 @@
                             <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
                                 <span class="fa fa-arrow-left"></span>
                             </a>
-
-                            <span class="h1-header"><%= guiObj.getTitle('title') %></span>
+                            <~ guiObj.model.data >
+                                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
+                            <~>
                         </h1>
                     </div>
                     <div class="col-lg-6">
@@ -320,10 +323,12 @@
         data-href="<%- vstMakeLocalUrl([dataLine.opt.base_href, dataLine.url_key]) %>"
         onclick="turnTableTrIntoLink(event)"
         >
-        <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
-            <div class="ico-on fa fa-toggle-on"></div>
-            <div class="ico-off fa  fa-toggle-off"></div>
-        </td>
+        <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
+            <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
+                <div class="ico-on fa fa-toggle-on"></div>
+                <div class="ico-off fa  fa-toggle-off"></div>
+            </td>
+        <% } %>
         <% for(var j in dataLine.opt.fields){ %>
             <% if(!dataLine.opt.fields[j].hidden) { %>
                 <td
@@ -338,8 +343,8 @@
                                 class="item-name"
                                 onclick="return false;"
                             >
-                               <%- sliceLongString(dataLine.line[j + '_info'].name) ||
-                                   sliceLongString(dataLine.line[j + '_info'].username) %>
+                               <%- sliceLongString(dataLine.line[j + '_info'][dataLine.opt.fields[j].prefetch.field_name]) ||
+                                   sliceLongString(dataLine.line[j + '_info'].name) %>
                             </a>
                         <% } else { %>
                            <%= renderLineField(dataLine.opt.fields[j], dataLine.line[j], j, dataLine) %>
@@ -486,8 +491,14 @@
         <% } %>
     <%] %>
 
+    <%[ main_content_row_append %> <%] %>
+
+    <%[ main_content_row_prepend %> <%] %>
+
     <!-- entity_list -->
     <%[ main_content_row %>
+       <%* main_content_row_prepend %>
+
         <section class="col-lg-12">
             <div class="card card-info">
                 <div class="card-header with-border" style="display: flex;">
@@ -511,10 +522,12 @@
                                 <table class="table table-bordered multiple-select table_<%- addTableEntityClass(guiObj) %>">
                                     <tbody>
                                         <tr>
-                                            <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select td_select_btn" >
-                                                <div class="ico-on fa fa-toggle-on"></div>
-                                                <div class="ico-off fa  fa-toggle-off"></div>
-                                            </th>
+                                            <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
+                                                <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select td_select_btn" >
+                                                    <div class="ico-on fa fa-toggle-on"></div>
+                                                    <div class="ico-off fa  fa-toggle-off"></div>
+                                                </th>
+                                            <% } %>
                                             <% for(var j in opt.fields){ %>
                                                 <% if(!opt.fields[j].hidden) { %>
                                                     <th
@@ -576,6 +589,8 @@
                 </div>
             </div>
         </section>
+
+        <%* main_content_row_append %>
     <%] %>
     <%! entity_base %>
 </script>
@@ -744,7 +759,12 @@
         <% } %>
     <%] %>
 
+    <%[ main_content_row_prepend %> <%] %>
+
+    <%[ main_content_row_append %> <%] %>
+
     <%[ main_content_row %>
+        <%* main_content_row_prepend %>
         <section class="col-lg-12">
             <div class="card card-info">
                 <div class="card-header with-border">
@@ -757,6 +777,7 @@
                 </div>
             </div>
         </section>
+        <%* main_content_row_append %>
     <%] %>
     <!-- /items_new_page -->
 
