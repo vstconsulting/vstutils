@@ -500,8 +500,8 @@ SILENCED_SYSTEM_CHECKS = [
 # Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
 ##############################################################
 rpc = SectionConfig('rpc')
-__broker_url = rpc.get("connection", fallback="filesystem:///var/tmp")
-if __broker_url.startswith("filesystem://"):
+__broker_url = rpc.get("connection", fallback="file:///tmp")
+if __broker_url.startswith("file://"):
     __broker_folder = __broker_url.split("://", 1)[1]
     CELERY_BROKER_URL = "filesystem://"
     CELERY_BROKER_TRANSPORT_OPTIONS = {
@@ -509,16 +509,20 @@ if __broker_url.startswith("filesystem://"):
         "data_folder_out": __broker_folder,
         "data_folder_processed": __broker_folder,
     }
-else:
-    CELERY_BROKER_URL = __broker_url  # nocv
+    CELERY_RESULT_BACKEND = __broker_url
+else:  # nocv
+    CELERY_BROKER_URL = __broker_url
+    CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback=CELERY_BROKER_URL)
 
-CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback="file:///tmp")
 CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_TASK_IGNORE_RESULT = True
+CELERYD_PREFETCH_MULTIPLIER = rpc.getint("prefetch_multiplier", fallback=1)
+CELERYD_MAX_TASKS_PER_CHILD = rpc.getint("max_tasks_per_child", fallback=1)
 CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=10)
+CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=1)
 CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
 
 CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
@@ -590,6 +594,8 @@ if "test" in sys.argv:
         name: {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
         for name in CACHES
     }
+    CELERY_RESULT_BACKEND = 'cache'
+    CELERY_CACHE_BACKEND = 'memory'
 
 # User settings
 ##############################################################
