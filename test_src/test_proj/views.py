@@ -115,13 +115,19 @@ class _HostGroupViewSet(ModelViewSetSet):
     serializer_class_one = HostGroupSerializer
     filter_class = HostGroupFilter
 
+
+def queryset_nested_filter(parent, qs):
+    return qs
+
+
 @nested_view('subgroups', 'id', view=_HostGroupViewSet, subs=None)
 @nested_view('hosts', 'id', view=HostViewSet)
 @nested_view('subhosts', methods=["get"], manager_name='hosts', view=HostViewSet)
 @nested_view(
     'shost', 'id',
-    manager_name='hosts', subs=['test', 'test2'],
-    view=HostViewSet, allow_append=True
+    manager_name=lambda o: getattr(o, 'hosts'), subs=['test', 'test2'],
+    view=HostViewSet, allow_append=True,
+    queryset_filters=[queryset_nested_filter]
 )
 @nested_view(
     'shost_all', 'id',
@@ -133,9 +139,10 @@ class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
     copy_related = ['hosts', 'subgroups']
 
 
-@nested_view('subdeephosts', 'id', manager_name='subgroups', view=HostGroupViewSet)
+@nested_view('subdeephosts', 'id', view=HostGroupViewSet)
 class _DeepHostGroupViewSet(_HostGroupViewSet, CopyMixin):
-    pass
+    def get_manager_subdeephosts(self, parent):
+        return getattr(parent, 'subgroups')
 
 
 @nested_view('subsubhosts', 'id', manager_name='subgroups', view=_DeepHostGroupViewSet)

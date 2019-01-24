@@ -127,7 +127,11 @@ class NestedViewMixin(object):
             self.check_object_permissions(self.request, obj)
 
     def get_queryset(self):
-        return self.nested_manager.all()
+        qs = self.nested_manager.all()
+        for qs_filter in self.queryset_filters:
+            if callable(qs_filter):
+                qs = qs_filter(self.nested_parent_object, qs)
+        return qs
 
     def get_nested_action_name(self):
         return get_action_name(self.master_view, self.request.method)
@@ -239,7 +243,14 @@ class BaseClassDecorator(object):
 
 
 class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
-    __slots__ = 'view', 'allowed_subs', '_subs', 'serializers', 'methods'
+    __slots__ = (
+        'view',
+        'allowed_subs',
+        '_subs',
+        'serializers',
+        'methods',
+        'queryset_filters'
+    )
 
     filter_subs = ['filter',]
     class NoView(VSTUtilsException):
@@ -248,6 +259,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     def __init__(self, name, arg=None, methods=None, *args, **kwargs):
         self.view = kwargs.pop('view', None)
         self.allowed_subs = kwargs.pop('subs', [])
+        self.queryset_filters = kwargs.pop('queryset_filters', [])
         super(nested_view, self).__init__(name, arg, *args, **kwargs)
         self._subs = self.get_subs()
         if self.view is None:
@@ -320,7 +332,15 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
                 nested_id = getattr(nested_parent_object, nested_append_arg, None)
             else:
                 nested_id = None
-            nested_manager = getattr(nested_parent_object, manager_name)
+            if callable(manager_name):
+                nested_manager = manager_name(nested_parent_object)
+            else:
+                if hasattr(nested_parent_object, manager_name):
+                    nested_manager = getattr(nested_parent_object, manager_name)
+                else:
+                    view_manager_function_name = 'get_manager_{}'.format(manager_name)
+                    nested_manager_func = getattr(view_obj, view_manager_function_name)
+                    nested_manager = nested_manager_func(nested_parent_object)
 
             class NestedView(mixin_class, self.view):
                 __slots__ = 'nested_detail',
@@ -329,6 +349,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
                 lookup_field = nested_append_arg
                 lookup_url_kwarg = nested_request_arg
                 format_kwarg = None
+                queryset_filters = self.queryset_filters
 
             NestedView.__name__ = self.view.__name__
             NestedView.nested_detail = detail
