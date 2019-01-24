@@ -1068,31 +1068,7 @@ guiElements.uptime = function (opt = {}, value)
 
     this.getTimeInUptimeFormat = function(time)
     {
-        if(isNaN(time))
-        {
-            return "00:00:00";
-        }
-
-        let uptime = moment.duration(Number(time), 'seconds')._data;
-
-        let n = oneCharNumberToTwoChar;
-
-        if(uptime.years > 0)
-        {
-            return n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-
-        } else if(uptime.months > 0)
-        {
-            return n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-        }
-        else if(uptime.days > 0)
-        {
-            return n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-        }
-        else
-        {
-            return n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-        }
+        return getTimeInUptimeFormat(time);
     }
 
     this._onBaseRender = this._onRender;

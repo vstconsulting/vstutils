@@ -44,3 +44,8 @@ guiListElements.array = $.extend({}, guiListElements.base, {
     type:'array',
     template_name:'guiListElements.array'
 })
+
+guiListElements.uptime = $.extend({}, guiListElements.base, {
+    type:'uptime',
+    template_name:'guiListElements.uptime'
+})
