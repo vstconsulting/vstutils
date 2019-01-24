@@ -176,8 +176,9 @@
             <~ guiElement.db_value>
                 <% if(guiElement.isRendered() && !guiElement.isEqual(guiElement.db_value)){ %>
                     <span class="input-group-prepend db_value_input">
-                        <div class="input-group-text">
-                            <%- guiElement.insertValue(guiElement.db_value) %>
+                        <div class="input-group-text"
+                         data-toggle="tooltip" title="Previous value: <%- guiElement.insertValue(guiElement.db_value) %>" >
+                            <%- guiElement.insertValue(sliceLongString(guiElement.db_value, 5)) %>
                             <i class="fa fa-arrow-right"></i>
                         </div>
                     </span>

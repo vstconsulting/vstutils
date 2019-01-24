@@ -2069,3 +2069,10 @@ input[type=color]{
 .hidden-section {
     display: none;
 }
+
+@media (max-width: 991px) {
+    .pagination-for-modal {
+        margin-right: -12px!important;
+        margin-top: 10px!important;
+    }
+}

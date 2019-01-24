@@ -612,6 +612,8 @@ guiElements.html = function(opt = {})
     this.name = 'html'
     guiElements.base.apply(this, arguments)
 
+    this.link_path = "";
+
     this.getValue = function()
     {
         return undefined;
@@ -643,7 +645,9 @@ guiElements.html = function(opt = {})
                 {
                     link.onclick = function ()
                     {
-                        $(".wrapper").scrollTo('#' + match['id'], 700);
+                        $('body,html').animate({
+                            scrollTop: $('#' + match['id']).offset().top,
+                        }, 600);
                         return false;
                     }
                     continue;
@@ -651,7 +655,7 @@ guiElements.html = function(opt = {})
 
                 if(link['href'].search(window.location.href) == -1)
                 {
-                    link['href'] = window.location.href + link['href'].split(window.hostname)[1];
+                    link['href'] = window.location.href + this.link_path + link['href'].split(window.hostname)[1];
                 }
 
             }
@@ -1366,8 +1370,51 @@ guiElements.autocomplete.prepareProperties = function(value)
 
 guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 {
-    this.name = 'hybrid_autocomplete'
-    guiElements.base.apply(this, arguments)
+    this.name = 'hybrid_autocomplete';
+    guiElements.base.apply(this, arguments);
+
+    this._getProps = function(options)
+    {
+        if (options.dynamic_properties || options.autocomplete_properties)
+        {
+            let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties);
+            options.autocomplete_properties = properties;
+
+            return getInfoFromAdditionalProperties(options);
+        }
+    }
+
+    this._getList = function(props)
+    {
+        if (props['obj'])
+        {
+            return new guiObjectFactory(props['obj']);
+        }
+    }
+
+    this.updateValue = function(value)
+    {
+        if(isNaN(Number(value))) {
+            this.db_value = value;
+            this._onUpdateValue(value);
+            return;
+        }
+
+        let props = this._getProps(field);
+        let list = this._getList(props);
+        if(list) {
+            let filters = getFiltersForAutocomplete(list, value, props.value_field);
+            $.when(list.search(filters)).done(data => {
+                if (data.data && data.data.results) {
+                    this.db_value = data.data.results[0][props.view_field];
+                    this._onUpdateValue(value);
+                }
+            }).fail(e => {
+                this.db_value = value;
+                this._onUpdateValue(value);
+            })
+        }
+    }
 
     this.renderModal = function (options)
     {
@@ -1375,22 +1422,11 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
 
         if(options.autocomplete_properties || options.dynamic_properties)
         {
-            if (options.dynamic_properties)
-            {
-                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
-                options.autocomplete_properties = properties
-            }
+            let props = this._getProps(options);
+            let list = this._getList(props);
 
-            let props = getInfoFromAdditionalProperties(options);
-
-            let value_field = props['value_field'];
-            let view_field = props['view_field'];
-
-            let list = undefined;
-
-            if (props['obj'])
-            {
-                list = new guiObjectFactory(props['obj']);
+            if(!list){
+                return def.reject();
             }
 
             let filters = {};
@@ -1503,36 +1539,22 @@ guiElements.hybrid_autocomplete = function(field, field_value, parent_object)
     {
         this._onBaseRender(options);
 
-        if(options.autocomplete_properties || options.dynamic_properties)
-        {
-            if (options.dynamic_properties)
-            {
-                let properties = mergeDeep({}, options.autocomplete_properties, options.dynamic_properties)
-                options.autocomplete_properties = properties
-
+        if(field_value) {
+            if(isNaN(Number(field_value))) {
+                $('#' + this.element_id).attr('value', '');
+                $('#' + this.element_id).val(field_value);
+                return;
             }
 
-            let props = getInfoFromAdditionalProperties(options);
-
-            let value_field = props['value_field'];
-            let view_field = props['view_field'];
-
-
-            let list = undefined;
-
-            if (props['obj'])
-            {
-                list = new guiObjectFactory(props['obj']);
-            }
-
-            if(field_value)
-            {
-                let filters = getFiltersForAutocomplete(list, field_value, value_field);
+            let props = this._getProps(options);
+            let list = this._getList(props);
+            if(list){
+                let filters = getFiltersForAutocomplete(list, field_value, props.value_field);
                 $.when(list.search(filters)).done(data => {
                     if(data.data && data.data.results)
                     {
-                        $('#' + this.element_id).attr('value', data.data.results[0][value_field]);
-                        $('#' + this.element_id).val(data.data.results[0][view_field]);
+                        $('#' + this.element_id).attr('value', data.data.results[0][props.value_field]);
+                        $('#' + this.element_id).val(data.data.results[0][props.view_field]);
                     }
                 }).fail(e => {
                     $('#' + this.element_id).attr('value', '');
@@ -1550,6 +1572,29 @@ guiElements.select2 = function(field, field_value, parent_object)
 {
     this.name = 'select2'
     guiElements.base.apply(this, arguments)
+
+    /**
+     * Function is calling from GUI tests for value setting.
+     * @param {string} value
+     */
+    this.insertTestValue = function(value)
+    {
+        if(!value){
+            value = {};
+        }
+
+        if(!value.id){
+            return null;
+        }
+
+        if(!value.text){
+            return null;
+        }
+
+        let newOption = new Option(value.text, value.id, false, false);
+        $('#' + this.element_id).append(newOption).trigger('change');
+        return value.id;
+    }
 
     this._onBaseRender = this._onRender
     this._onRender = function(options)

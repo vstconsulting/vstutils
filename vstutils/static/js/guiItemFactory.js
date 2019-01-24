@@ -549,7 +549,15 @@ function goToMultiAction(ids, action, selection_tag)
 {
     if(action && action.isEmptyAction)
     {
-        let pageItem = new guiObjectFactory(action, {api_pk: ids.join(",")});
+        let pageItem;
+        let url_info = spajs.urlInfo.data.reg;
+        if(!url_info.parent_type) {
+            url_info["api_pk"] = ids.join(",");
+        } else {
+            url_info["api_" + url_info.page_name + "_id"] = ids.join(",");
+        }
+
+        pageItem = new guiObjectFactory(action, url_info);
         pageItem.exec();
 
         window.guiListSelections.unSelectAll(selection_tag);

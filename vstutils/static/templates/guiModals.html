@@ -221,11 +221,11 @@
 <script  type="text/x-just" style="display: none;" data-just="pagination_modal">
     <!-- pagination -->
     <% if(totalPage > 1){ %>
-        <ul class="pagination no-margin pull-right">
+        <ul class="pagination pagination-sm no-margin pull-right pagination-for-modal">
             <% if(totalPage < 21){ %>
                 <% for(let i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li><a href=""
+                        <li class="page-item"><a class="page-link" href=""
                          <%= justOn('click', function()
                             {
                                 opt.opt.page_num = i;
@@ -235,7 +235,7 @@
                         %>
                         style="background-color: #d2d6de;"><%- i+1 %></a></li>
                     <% }else{ %>
-                        <li><a href=""
+                        <li class="page-item"><a class="page-link" href=""
                            <%= justOn('click', function()
                                 {
                                     opt.opt.page_num = i;
@@ -249,7 +249,7 @@
             <% }else{ %>
                 <% for(var i = 0; i < totalPage; i++){ %>
                     <% if(i == currentPage){ %>
-                        <li><a href=""
+                        <li class="page-item"><a class="page-link" href=""
                               <%= justOn('click', function()
                                 {
                                     opt.opt.page_num = i;
@@ -262,7 +262,7 @@
                         <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
                             <% if( dotShow == false){ %>
                                 <% dotShow = true %>
-                                <li><a href=""
+                                <li class="page-item"><a class="page-link" href=""
                                        <%= justOn('click', function()
                                             {
                                                 opt.opt.page_num = i;
@@ -274,7 +274,7 @@
                             <% } %>
                         <% }else{ %>
                             <% dotShow = false %>
-                            <li><a href=""
+                            <li class="page-item"><a class="page-link" href=""
                                    <%= justOn('click', function()
                                         {
                                             opt.opt.page_num = i;

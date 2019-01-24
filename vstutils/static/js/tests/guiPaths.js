@@ -18,12 +18,14 @@ guiTests = {
 }
 
 /**
- * Создаёт тест который выполнит переход на страницу и завалится если там ошибка
- * @param {string} test_name не обязательный параметр имени теста
+ * Creates test, that opens page and raises if there are some errors.
+ * @param test_name {string} test_name - name of test (path)
+ * @param env {object} object - object with ids of parent and surrounding objects.
+ * @param path_callback {string} - path, that needs to be formatted with ids from env.
  */
 guiTests.openPage =  function(test_name, env, path_callback)
 {
-    // Проверка того что страница открывается
+    // Checks that page opens
     syncQUnit.addTest("guiPaths['"+test_name+"']", function ( assert )
     {
         let path;
@@ -56,7 +58,7 @@ guiTests.wait =  function(test_name, time = undefined)
 {
     if(!time)
     {
-       time = guiLocalSettings.get('page_update_interval')*2.2
+        time = guiLocalSettings.get('page_update_interval')*2.2
     }
 
     syncQUnit.addTest("wait['"+test_name+"']", function ( assert )
@@ -70,8 +72,9 @@ guiTests.wait =  function(test_name, time = undefined)
 }
 
 /**
- * Создаёт тест который выполнит переход на страницу и завалится если переход выполнен без ошибки
- * @param {string} path
+ * Creates test, that opens page and raises if there are no errors
+ * @param env {object} object - object with ids of parent and surrounding objects.
+ * @param path_callback {string} - path, that needs to be formatted with ids from env.
  */
 guiTests.openError404Page =  function(env, path_callback)
 {
@@ -87,11 +90,11 @@ guiTests.openError404Page =  function(env, path_callback)
 }
 
 /**
- * Попытается создать объект, выполнить переход на страницу объекта и проверить что он создался правильно
- * @param {type} path пут в апи (ждёт /user/ а не /user/new)
- * @param {type} fieldsData данные полей
- * @param {type} env в атрибут objectId этого объекта будет записан id созданного элемента
- * @param {type} isWillCreated должен ли в итоге создаться объект или ожидаем ошибку
+ * Function tries to create object, open object page and checks, that object was created correctly
+ * @param path {string} -  object's path. Waits /user/, not /user/new.
+ * @param fieldsData {object} - fields' data to fill in.
+ * @param env {object} - object's id will be saved to 'objectId' property of env.
+ * @param isWillCreated {boolean} - isWillCreated means test's result expectation: success or fail.
  */
 guiTests.createObject =  function(path, fieldsData, env = {}, isWillCreated = true)
 {
@@ -116,14 +119,18 @@ guiTests.createObject =  function(path, fieldsData, env = {}, isWillCreated = tr
 
 guiTests.setValuesAndCreate =  function(path, fieldsData, onCreateCallback, isWillCreated = true)
 {
-    // Проверка того что страница с флагом api_obj.canCreate == true открывается
+    // Checks that page with property api_obj.canCreate == true opens
     syncQUnit.addTest("guiPaths['"+path+"'] WillCreated = "+isWillCreated+", fieldsData="+JSON.stringify(fieldsData), function ( assert )
     {
         let done = assert.async();
 
+        if(typeof fieldsData == "function"){
+            fieldsData = fieldsData();
+        }
+
         let values = guiTests.setValues(assert, fieldsData)
 
-        // Создали объект с набором случайных данных
+        // Creates object with data
         $.when(window.curentPageObject.createAndGoEdit()).done(() => {
 
             assert.ok(isWillCreated == true, 'guiPaths["'+path+'"] done');
@@ -143,14 +150,18 @@ guiTests.setValuesAndCreate =  function(path, fieldsData, onCreateCallback, isWi
 
 guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
 {
-    // Проверка того что страница с флагом api_obj.canCreate == true открывается
+    // Checks that page with property api_obj.canEdit == true opens
     syncQUnit.addTest("guiPaths['"+path+"update'] isWillSaved = "+isWillSaved+", fieldsData="+JSON.stringify(fieldsData), function ( assert )
     {
         let done = assert.async();
 
+        if(typeof fieldsData == "function"){
+            fieldsData = fieldsData();
+        }
+
         let values = guiTests.setValues(assert, fieldsData)
 
-        // Создали объект с набором случайных данных
+        // Updates object data
         $.when(window.curentPageObject.update()).done(() => {
 
             assert.ok(isWillSaved == true, 'guiPaths["'+path+'update"] done');
@@ -168,12 +179,11 @@ guiTests.updateObject =  function(path, fieldsData, isWillSaved = true)
 }
 
 /**
- *
- * @param {type} assert
- * @param {type} path Не обязательный параметр для имени теста
- * @param {type} fieldsData
- * @param {type} values
- * @returns {undefined}
+ * Function compares input and output values.
+ * @param assert {type}
+ * @param path {string} - path of object/test name (non required).
+ * @param fieldsData {object} - object with input data.
+ * @param values {object} - object with output data (data after operations execution: create page and update page).
  */
 guiTests.compareValues =  function(assert, path, fieldsData, values)
 {
@@ -188,14 +198,11 @@ guiTests.compareValues =  function(assert, path, fieldsData, values)
 
         assert.ok(field, 'test["'+path+'"]["'+i+'"] exist');
 
-        // Проверили что данные теже
-        try{
+        // checks data input data is the same as output data
+        try {
 
             assert.ok(field.getValue() == values[i], 'test["'+path+'"]["'+i+'"] == ' + values[i]);
-        }catch (e)
-        {
-           // debugger
-        }
+        } catch (e) {}
     }
 }
 
@@ -205,7 +212,7 @@ guiTests.setValues =  function(assert, fieldsData)
     for(let i in fieldsData)
     {
         let field = window.curentPageObject.model.guiFields[i]
-        // Наполнили объект набором случайных данных
+        // sets data values
         values[i] = field.insertTestValue(fieldsData[i].value)
 
         if(fieldsData[i].real_value != undefined && values[i] != fieldsData[i].real_value )
@@ -260,16 +267,21 @@ guiTests.deleteObject =  function()
     guiTests.clickAndWaitRedirect(".btn-delete-one-entity")
 }
 
-
+guiTests.deleteObjByPath = function(path, env, pk_obj) {
+    guiTests.openPage(path, env, (env) =>{
+        return vstMakeLocalApiUrl(path, pk_obj)});
+    guiTests.deleteObject(path);
+    guiTests.openError404Page(env, (env) =>{ return vstMakeLocalApiUrl(path, pk_obj) });
+}
 
 /**
- * Проверка что на странице есть кнопка удаления объекта
- * @param {type} canDelete (если true то кнопка должна быть, если false то не должна быть )
- * @param {type} path необязательный параметр для вывода в имени теста
+ * Checks that page has element.
+ * @param isHas {boolean} - if true, page has to have element.
+ * @param path {string} - test name, non required argument.
  */
-guiTests.hasDeleteButton =  function(canDelete, path = "hasDeleteButton")
+guiTests.hasDeleteButton =  function(isHas, path = "hasDeleteButton")
 {
-    return guiTests.hasElement(canDelete, ".btn-delete-one-entity", path)
+    return guiTests.hasElement(isHas, ".btn-delete-one-entity", path)
 }
 guiTests.hasCreateButton =  function(isHas, path = "hasCreateButton")
 {
@@ -284,8 +296,6 @@ guiTests.hasEditButton =  function(isHas, path = "hasEditButton")
 {
     return guiTests.hasElement(isHas, ".btn-edit-one-entity", path)
 }
-
-
 
 guiTests.hasElement =  function(isHas, selector, path = "")
 {
@@ -303,21 +313,25 @@ guiTests.hasElement =  function(isHas, selector, path = "")
 }
 
 
-
+/**
+ * Function tests path of second level.
+ * @param path {string} - path of object.
+ * @param params {object} - object with properties for tests (fields data and test options).
+ */
 guiTests.testForPath = function (path, params)
 {
     let env = {}
 
     let api_obj = guiSchema.path[path]
 
-    // Проверка того что страница открывается
+    // checks that page opens
     guiTests.openPage(path)
 
-    // Проверка наличия элемента на странице
+    // checks page has some element
     guiTests.hasCreateButton(1, path)
     guiTests.hasAddButton(0, path)
 
-    // Проверка возможности создания объекта
+    // checks path/new page
     guiTests.openPage(path+"new")
 
     for(let i in params.create)
@@ -333,7 +347,6 @@ guiTests.testForPath = function (path, params)
     guiTests.openPage(path)
     guiTests.openPage(path, env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
 
-    // Проверка возможности удаления объекта
     guiTests.hasDeleteButton(true, path)
     guiTests.hasCreateButton(false, path)
     guiTests.hasAddButton(false, path)
@@ -350,9 +363,61 @@ guiTests.testForPath = function (path, params)
         }
     }
 
-    // Проверка удаления объекта
+    // checks page delete
     guiTests.deleteObject()
 
-    // Проверка что страницы нет
+    // checks that page is not available anymore
     guiTests.openError404Page(env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path, {api_pk:env.objectId}) })
+}
+
+/**
+ * Function tests path of internal level.
+ * @param path {string} - path of object.
+ * @param params {object} - object with properties for tests (fields data and test options).
+ * @param env {object} - object with ids of parent and surrounding objects.
+ * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ */
+guiTests.testForPathInternalLevel = function (path, params, env, pk_obj)
+{
+    let api_obj = guiSchema.path[path];
+    let bool;
+
+    // checks list
+    guiTests.openPage(api_obj.path, env, (env) =>{ return vstMakeLocalApiUrl(api_obj.path, pk_obj) });
+    bool = (params.list && params.list.hasCreateButton !== undefined) ? params.list.hasCreateButton : true;
+    guiTests.hasCreateButton(bool, api_obj.path);
+    bool = (params.list && params.list.hasAddButton !== undefined) ? params.list.hasAddButton : false;
+    guiTests.hasAddButton(bool, path);
+
+    // checks create new object page
+    guiTests.openPage(api_obj.path + "new/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.path + "new/", pk_obj) });
+    for(let i in params.create){
+        guiTests.setValuesAndCreate(api_obj.path + "new/", params.create[i].data, () => {
+            env[api_obj.bulk_name + "_id"] = window.curentPageObject.model.data.id || window.curentPageObject.model.data.name;
+            env[api_obj.bulk_name + "_name"] = window.curentPageObject.model.data.name || window.curentPageObject.model.data.id;
+            pk_obj['api_' + api_obj.bulk_name + '_id']= env[api_obj.bulk_name + "_id"];
+        }, params.create[i].is_valid)
+    }
+
+    // checks create single object page (get/edit)
+    guiTests.openPage(api_obj.page.path, env, (env) =>{return vstMakeLocalApiUrl(api_obj.page.path, pk_obj)});
+    guiTests.openPage(api_obj.page.path + "edit/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path + "edit/", pk_obj)});
+    guiTests.wait();
+
+    for(let i in params.update) {
+      guiTests.updateObject(api_obj.page.path + "edit/", params.update[i].data, params.update[i].is_valid);
+    }
+
+    bool = (params.page && params.page.hasDeleteButton !== undefined) ? params.page.hasDeleteButton : true;
+    guiTests.hasDeleteButton(bool, api_obj.page.path);
+
+    bool = (params.page && params.page.hasCreateButton !== undefined) ? params.page.hasCreateButton : false;
+    guiTests.hasCreateButton(bool, api_obj.page.path);
+
+    bool = (params.page && params.page.hasAddButton !== undefined) ? params.page.hasAddButton : false;
+    guiTests.hasAddButton(bool, api_obj.page.path);
+
+    if(params.page && params.page.delete){
+        guiTests.deleteObjByPath(api_obj.page.path, env, pk_obj);
+    }
 }
