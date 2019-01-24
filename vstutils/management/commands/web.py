@@ -10,6 +10,20 @@ from django.conf import settings
 from ._base import BaseCommand
 
 
+python_exec_dir = os.path.dirname(sys.executable)
+python_subexec_dir = '/usr/local/bin'
+_uwsgi_default_path = os.path.join(python_exec_dir, 'pyuwsgi')
+_uwsgi_default_path_alt = os.path.join(python_exec_dir, 'uwsgi')
+_uwsgi_default_path_alt2 = os.path.join(python_subexec_dir, 'pyuwsgi')
+_uwsgi_default_path_alt3 = os.path.join(python_subexec_dir, 'uwsgi')
+if not os.path.exists(_uwsgi_default_path) and os.path.exists(_uwsgi_default_path_alt):
+    _uwsgi_default_path = _uwsgi_default_path_alt
+elif os.path.exists(_uwsgi_default_path_alt2):
+    _uwsgi_default_path = _uwsgi_default_path_alt2
+elif os.path.exists(_uwsgi_default_path_alt3):
+    _uwsgi_default_path = _uwsgi_default_path_alt3
+
+
 def wait(proc, timeout=None, delay=0.1):
     while proc.poll() is None and (timeout or timeout is None):
         time.sleep(delay)
@@ -20,7 +34,7 @@ def wait(proc, timeout=None, delay=0.1):
 
 class Command(BaseCommand):
     help = "Backend web-server."
-    _uwsgi_default_path = "{}/uwsgi".format(os.path.dirname(sys.executable))
+    _uwsgi_default_path = _uwsgi_default_path
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)

@@ -1,5 +1,5 @@
 # Main packages
-configparser==3.5.0
+configparser==3.5.1
 pytimeparse==1.1.8
 six==1.12
 pyyaml==3.13
@@ -8,4 +8,5 @@ pyyaml==3.13
 djangorestframework==3.8.2
 django-filter==1.1.0
 django-crispy-forms==1.7.2
-uWSGI==2.0.17.1
+# uWSGI==2.0.17.1
+pyuwsgi==2.0.17.2b5
