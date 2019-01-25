@@ -348,9 +348,11 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
     def get_operation_keys(self, subpath, method, view):
         keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
         subpath_keys = [item for item in subpath.split('/') if item]
-        if method.upper() == 'GET' and '_detail' in keys[-1]:
-            keys = keys[:-1] + ['_'.join(keys[-1].split('_')[:-1])] + ['get']
-        if keys[-1] == 'get' and subpath_keys[-1] == keys[-2]:
-            if getattr(view, '_'.join([keys[-2], 'list']), None) is not None:
-                keys = keys[0:-1] + ['list']
+        r_type = keys[-1]
+        gist = keys[-2]
+        if method.upper() == 'GET' and '_detail' in r_type:
+            keys = keys[:-1] + ['_'.join(r_type.split('_')[:-1])] + ['get']
+        if r_type == 'get' and subpath_keys[-1] == gist:
+            if any([f for f in dir(view) if f.endswith('_'.join([gist, 'list']))]):
+                keys[-1] = 'list'
         return keys
