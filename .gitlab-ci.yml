@@ -84,15 +84,16 @@ pages:
       - doc/*
       - vstutils/doc_themes/*
 
-pre_release:
+release:
   stage: release
   only:
     refs:
       - master
+    changes:
+      - vstutils/__init__.py
+      - autorelease.sh
   script:
-    - tox -e build
-    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
-  when: manual
+    - bash autorelease.sh
 
 release_pypi:
   stage: release
