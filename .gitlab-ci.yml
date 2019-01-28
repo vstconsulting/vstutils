@@ -89,9 +89,6 @@ release:
   only:
     refs:
       - master
-    changes:
-      - vstutils/__init__.py
-      - autorelease.sh
   script:
     - bash autorelease.sh
 
