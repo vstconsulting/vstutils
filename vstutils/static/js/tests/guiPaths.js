@@ -312,6 +312,51 @@ guiTests.hasElement =  function(isHas, selector, path = "")
     });
 }
 
+/**
+ * Function tests feature of adding existing child to parent's list.
+ * @param path {string} - path of parent object (list path).
+ * @param child_path {string} - path of child object (list path).
+ * @param params {object} - object with properties for child creation (fields data and test options).
+ * @param env {object} - object with ids of parent and surrounding objects.
+ * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ */
+guiTests.addChildObjectToParentList = function(path, child_path, params, env, pk_obj)
+{
+    let api_obj = guiSchema.path[child_path];
+
+    // creates child object
+    guiTests.openPage(child_path + "new/", env, (env) =>{ return vstMakeLocalApiUrl(child_path + "new/", pk_obj) });
+    guiTests.setValuesAndCreate(child_path + "new/", params.data, (data) => {
+        if(!data) {
+            return console.error("Tests depended on: '" + child_path + "new/' test will be failed because typeof data == undefined");
+        }
+        env["child_" + api_obj.bulk_name + "_id"] = data.id || "@" + (data.name || data.key);
+        env["child_" + api_obj.bulk_name + "_name"] = data.name || data.key || data.id;
+        pk_obj["api_child_" + api_obj.bulk_name]= env["child_" + api_obj.bulk_name + "_id"];
+    }, params.is_valid);
+
+    // adds child object to parent's list
+    guiTests.openPage(path, env, (env) => {return vstMakeLocalApiUrl(path, pk_obj)});
+    guiTests.testActionAndWaitRedirect(path, () => {
+        $(".btn-add-one-entity").trigger("click");
+    })
+    guiTests.testActionAndWaitRedirect(path, () => {
+        $(".item-row.item-" + pk_obj["api_child_" + api_obj.bulk_name] + " .guiListSelections-toggle-btn").trigger("click");
+        $(".btn_add-selected").trigger("click");
+    })
+    syncQUnit.addTest("guiPaths['"+path+" add child to parent's list'] ", function ( assert ){
+        let done = assert.async();
+        assert.ok($(".item-row.item-" + pk_obj["api_child_" + api_obj.bulk_name]).length > 0, "child object was added to parent list");
+        testdone(done);
+    });
+
+    // removes child from parent's list
+    guiTests.deleteObjByPath(path + "{child_"+api_obj.bulk_name+"}/", env, pk_obj);
+
+    // deletes child object
+    guiTests.deleteObjByPath(child_path + "{child_"+api_obj.bulk_name+"}/", env, pk_obj);
+}
+
 
 /**
  * Function tests path of second level.
@@ -376,8 +421,10 @@ guiTests.testForPath = function (path, params)
  * @param params {object} - object with properties for tests (fields data and test options).
  * @param env {object} - object with ids of parent and surrounding objects.
  * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ * @param is_parent {boolean} - if true - it means that path of second level
+ * and function needs to save object's id as 'api_pk' in pk_obj.
  */
-guiTests.testForPathInternalLevel = function (path, params, env, pk_obj)
+guiTests.testForPathInternalLevel = function (path, params, env, pk_obj, is_parent)
 {
     let api_obj = guiSchema.path[path];
     let bool;
@@ -389,23 +436,40 @@ guiTests.testForPathInternalLevel = function (path, params, env, pk_obj)
     bool = (params.list && params.list.hasAddButton !== undefined) ? params.list.hasAddButton : false;
     guiTests.hasAddButton(bool, path);
 
+    if(params.add_child){
+        guiTests.addChildObjectToParentList(api_obj.path, params.add_child.path, params.add_child.create, env, pk_obj);
+    }
+
     // checks create new object page
     guiTests.openPage(api_obj.path + "new/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.path + "new/", pk_obj) });
     for(let i in params.create){
-        guiTests.setValuesAndCreate(api_obj.path + "new/", params.create[i].data, () => {
-            env[api_obj.bulk_name + "_id"] = window.curentPageObject.model.data.id || window.curentPageObject.model.data.name;
-            env[api_obj.bulk_name + "_name"] = window.curentPageObject.model.data.name || window.curentPageObject.model.data.id;
-            pk_obj['api_' + api_obj.bulk_name + '_id']= env[api_obj.bulk_name + "_id"];
+        guiTests.setValuesAndCreate(api_obj.path + "new/", params.create[i].data, (data) => {
+            let key;
+            if(is_parent){
+                key = 'api_pk';
+            } else {
+                key = 'api_' + api_obj.bulk_name + '_id';
+            }
+
+            if(!data)
+            {
+                return console.error("Tests depended on: '" + api_obj.path + "new/' test will be failed because typeof data == undefined");
+            }
+            env[api_obj.bulk_name + "_id"] = data.id || "@" + (data.name || data.key);
+            env[api_obj.bulk_name + "_name"] = data.name || data.key || data.id;
+            pk_obj[key]= env[api_obj.bulk_name + "_id"];
         }, params.create[i].is_valid)
     }
 
     // checks create single object page (get/edit)
     guiTests.openPage(api_obj.page.path, env, (env) =>{return vstMakeLocalApiUrl(api_obj.page.path, pk_obj)});
     guiTests.openPage(api_obj.page.path + "edit/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path + "edit/", pk_obj)});
-    guiTests.wait();
+    if(params.page && params.page.wait) {
+        guiTests.wait();
+    }
 
     for(let i in params.update) {
-      guiTests.updateObject(api_obj.page.path + "edit/", params.update[i].data, params.update[i].is_valid);
+        guiTests.updateObject(api_obj.page.path + "edit/", params.update[i].data, params.update[i].is_valid);
     }
 
     bool = (params.page && params.page.hasDeleteButton !== undefined) ? params.page.hasDeleteButton : true;

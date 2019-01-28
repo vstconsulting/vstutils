@@ -96,7 +96,9 @@ var gui_base_object = {
         let html = []
         for(let i in opt.fields)
         {
-            opt.fields[i].hidden_button = true;
+            if(this.api.hide_non_required && this.api.hide_non_required < Object.keys(opt.fields).length) {
+                opt.fields[i].hidden_button = true;
+            }
             html.push(this.renderField(opt.fields[i], opt));
         }
 
@@ -109,7 +111,6 @@ var gui_base_object = {
                 return;
             }
 
-            //fields.hide()
             fields.addClass("hidden-field")
             $('#'+id).appendTpl(spajs.just.render('show_not_required_fields', {fields:fields, opt:opt}))
         })
