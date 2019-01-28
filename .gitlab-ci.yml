@@ -94,7 +94,7 @@ release:
       - $GIT_ACCESS_USER
       - $GIT_ACCESS_PASSWORD
   before_script:
-    - url_host=`git remote get-url origin | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
+    - url_host=`echo "${CI_REPOSITORY_URL}" | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
     - git config --global user.name "${GITLAB_USER_NAME}"
     - git config --global user.email "${GITLAB_USER_EMAIL}"
     - git remote set-url origin "https://$GIT_ACCESS_USER:$GIT_ACCESS_PASSWORD@${url_host}"
