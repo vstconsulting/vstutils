@@ -56,7 +56,7 @@ def listfiles(folder):
 
 
 def clear_old_extentions(extensions_list):
-    for filename in listfiles('vstutils'):
+    for filename in listfiles('./'):
         _filename, _f_ext = os.path.splitext(filename)
         if os.path.isdir(_filename) or _f_ext not in ['.c', '.cpp']:
             continue
@@ -95,7 +95,7 @@ def make_extensions(extensions_list):
     extra_compile_args = [
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-O2", "-pipe", "-std=c99"
+        "-pipe", "-std=c99"
     ]
     ext_modules = list(
         Extension(m, f, extra_compile_args=extra_compile_args)
