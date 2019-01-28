@@ -86,6 +86,7 @@ pages:
 
 release:
   stage: release
+  image: onegreyonewhite/tox:tox
   only:
     refs:
       - master
