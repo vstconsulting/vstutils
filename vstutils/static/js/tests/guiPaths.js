@@ -330,8 +330,8 @@ guiTests.addChildObjectToParentList = function(path, child_path, params, env, pk
         if(!data) {
             return console.error("Tests depended on: '" + child_path + "new/' test will be failed because typeof data == undefined");
         }
-        env["child_" + api_obj.bulk_name + "_id"] = data.id || "@" + (data.name || data.key);
-        env["child_" + api_obj.bulk_name + "_name"] = data.name || data.key || data.id;
+        env["child_" + api_obj.bulk_name + "_id"] = window.curentPageObject.getPkValueForUrl(data);
+        env["child_" + api_obj.bulk_name + "_name"] = data.name || window.curentPageObject.getPkValueForUrl(data);
         pk_obj["api_child_" + api_obj.bulk_name]= env["child_" + api_obj.bulk_name + "_id"];
     }, params.is_valid);
 
@@ -339,11 +339,14 @@ guiTests.addChildObjectToParentList = function(path, child_path, params, env, pk
     guiTests.openPage(path, env, (env) => {return vstMakeLocalApiUrl(path, pk_obj)});
     guiTests.testActionAndWaitRedirect(path, () => {
         $(".btn-add-one-entity").trigger("click");
-    })
+    });
+
+    guiTests.openPage(path + "add/search/ordering=-id/", env, (env) => {return vstMakeLocalApiUrl(path + "add/search/ordering=-id/", pk_obj)});
+
     guiTests.testActionAndWaitRedirect(path, () => {
         $(".item-row.item-" + pk_obj["api_child_" + api_obj.bulk_name] + " .guiListSelections-toggle-btn").trigger("click");
         $(".btn_add-selected").trigger("click");
-    })
+    });
     syncQUnit.addTest("guiPaths['"+path+" add child to parent's list'] ", function ( assert ){
         let done = assert.async();
         assert.ok($(".item-row.item-" + pk_obj["api_child_" + api_obj.bulk_name]).length > 0, "child object was added to parent list");
@@ -455,8 +458,8 @@ guiTests.testForPathInternalLevel = function (path, params, env, pk_obj, is_pare
             {
                 return console.error("Tests depended on: '" + api_obj.path + "new/' test will be failed because typeof data == undefined");
             }
-            env[api_obj.bulk_name + "_id"] = data.id || "@" + (data.name || data.key);
-            env[api_obj.bulk_name + "_name"] = data.name || data.key || data.id;
+            env[api_obj.bulk_name + "_id"] = window.curentPageObject.getPkValueForUrl(data);
+            env[api_obj.bulk_name + "_name"] = data.name || window.curentPageObject.getPkValueForUrl(data);
             pk_obj[key]= env[api_obj.bulk_name + "_id"];
         }, params.create[i].is_valid)
     }

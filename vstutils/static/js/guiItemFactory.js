@@ -187,23 +187,28 @@ var gui_base_object = {
         return obj;
     },
 
+    pkValuePriority: ["id", "pk", "name"],
+
     getPkValue: function(obj)
     {
-        let id = obj.id
-        if(obj.id === undefined)
-        {
-            id = obj.pk
-            if(obj.pk === undefined)
-            {
-                id = obj.name
-                if(obj.name === undefined)
-                {
-                    console.error("Primary key not found")
-                    debugger;
-                }
+        let id;
+        for(let i in this.pkValuePriority){
+            let field = this.pkValuePriority[i];
+            if(obj[field] !== undefined){
+                id = obj[field];
+                break;
             }
         }
-        return id
+        return id;
+    },
+
+    getPkValueForUrl: function(obj)
+    {
+        let id = this.getPkValue(obj);
+        if(id !== undefined && isNaN(Number(id))){
+            id = "@" + id;
+        }
+        return id;
     },
 
     base_init : function (api_object,  url_vars= {}, object_data = undefined)
@@ -580,7 +585,7 @@ function addToParentsAndGoUp(item_ids, selection_tag)
     return $.when(changeSubItemsInParent('POST', item_ids)).done(function (data)
     {
         window.guiListSelections.setSelection(selection_tag, item_ids, false);
-        vstGO(spajs.urlInfo.data.reg.baseURL());
+        vstGO(getUrlBasePathDirectToPage());
     }).fail(function (e)
     {
         webGui.showErrors(e)
@@ -646,6 +651,12 @@ function changeSubItemsInParent(action, item_ids)
 function getUrlBasePath()
 {
     return window.location.hash.replace(/^#/, "").replace(/\/+$/, "")
+}
+
+function getUrlBasePathDirectToPage()
+{
+    let api_path = spajs.urlInfo.data.reg.getApiPath();
+    return vstMakeLocalApiUrl(api_path.api.path, api_path.url).replace(/^\/|\/$/g, '');
 }
 
 function renderErrorAsPage(error)
