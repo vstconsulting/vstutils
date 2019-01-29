@@ -77,6 +77,8 @@ except IOError:
 # Main settings
 ##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
+TESTS_RUN = any([True for i in sys.argv if i in ['testserver', 'test']])
+LOCALRUN = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
 DEBUG = os.getenv('DJANGO_DEBUG', main.getboolean("debug", False))
 ALLOWED_HOSTS = main.getlist("allowed_hosts", '*')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
@@ -219,7 +221,7 @@ TEMPLATES = [
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
 STATIC_URL = web.get("static_files_url", fallback="/static/")
-if 'collectstatic' not in sys.argv:
+if LOCALRUN:
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'static'),
         os.path.join(VST_PROJECT_DIR, 'static'),
@@ -231,8 +233,8 @@ STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-if 'runserver' not in sys.argv:
-    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')
+if not LOCALRUN:
+    STATIC_ROOT = os.path.join(VST_PROJECT_DIR, 'static')  # nocv
 
 
 # Documentation files
@@ -390,7 +392,7 @@ SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
     'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.VSTAutoSchema',
     'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.VSTSchemaGenerator',
-    'DEFAULT_API_URL': 'http://localhost:8080/',
+    # 'DEFAULT_API_URL': 'http://localhost:8080/',
     'DEEP_LINKING': True,
     'SECURITY_DEFINITIONS': {
         'basic': {
@@ -407,7 +409,7 @@ API = {
         r'settings': {
             'view': 'vstutils.api.views.SettingsViewSet', 'op_types': ['get', 'mod']
         },
-        r'users': {
+        r'user': {
             'view': 'vstutils.api.views.UserViewSet'
         },
         r'_bulk': {
@@ -486,6 +488,11 @@ LOGGING = {
             'propagate': True,
         },
         'vstutils': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'drf_yasg.generators': {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
             'propagate': True,
@@ -583,7 +590,7 @@ VIEWS = {
 
 # Test settings for speedup tests
 ##############################################################
-if "test" in sys.argv:
+if TESTS_RUN:
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher',]

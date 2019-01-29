@@ -1,5 +1,4 @@
 # pylint: disable=invalid-name
-import sys
 from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
@@ -40,7 +39,7 @@ urlpatterns += [
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls))]
-if 'runserver' in sys.argv or 'test' in sys.argv:
+if getattr(settings, 'LOCALRUN', False):
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 else:  # nocv
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

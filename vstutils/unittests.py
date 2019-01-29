@@ -85,7 +85,7 @@ class VSTUtilsTestCase(BaseTestCase):
 
     def _get_test_ldap(self, client, data):
         self.client.post('/login/', data=data)
-        response = client.get('/api/v1/users/')
+        response = client.get('/api/v1/user/')
         self.assertNotEqual(response.status_code, 200)
         response = self.client.post("/logout/")
         self.assertEqual(response.status_code, 302)
@@ -285,18 +285,18 @@ class VSTUtilsTestCase(BaseTestCase):
         # 404
         self.get_result('get', '/api/v1/some/', code=404)
         self.get_result('get', '/other_invalid_url/', code=404)
-        self.get_result('get', '/api/users/', code=404)
-        self.get_result('get', '/api/v1/users/1000/', code=404)
+        self.get_result('get', '/api/user/', code=404)
+        self.get_result('get', '/api/v1/user/1000/', code=404)
 
     def test_uregister(self):
         router_v1 = router.routers[0][1]
-        router_v1.unregister("users")
+        router_v1.unregister("user")
         for pattern in router_v1.get_urls():
-            self.assertIsNone(pattern.regex.search("users/1/"))
-        router_v1.register('users', UserViewSet)
+            self.assertIsNone(pattern.regex.search("user/1/"))
+        router_v1.register('user', UserViewSet)
         checked = False
         for pattern in router_v1.registry:
-            if pattern[0] == 'users':
+            if pattern[0] == 'user':
                 checked = True
                 self.assertEqual(pattern[1], UserViewSet)
         self.assertTrue(checked, "Not registered!")
@@ -313,28 +313,28 @@ class VSTUtilsTestCase(BaseTestCase):
         self.details_test('/api/v1/settings/system/', PY=settings.PY_VER)
 
     def test_users_api(self):
-        self.list_test('/api/v1/users/', 1)
+        self.list_test('/api/v1/user/', 1)
         self.details_test(
-            '/api/v1/users/{}/'.format(self.user.id),
+            '/api/v1/user/{}/'.format(self.user.id),
             username=self.user.username, id=self.user.id
         )
-        self.get_result('delete', '/api/v1/users/{}/'.format(self.user.id), 409)
+        self.get_result('delete', '/api/v1/user/{}/'.format(self.user.id), 409)
 
         user_data = dict(
             username="test_user", first_name="some", last_name='test', email="1@test.ru"
         )
         post_data = dict(password="some_password", **user_data)
-        result = self.get_result('post', '/api/v1/users/', data=post_data)
+        result = self.get_result('post', '/api/v1/user/', data=post_data)
         self.assertCheckDict(user_data, result)
-        result = self.get_result('get', '/api/v1/users/{}/'.format(result['id']))
+        result = self.get_result('get', '/api/v1/user/{}/'.format(result['id']))
         self.assertCheckDict(user_data, result)
-        self.get_result('patch', '/api/v1/users/', 405, data=dict(email=""))
-        result = self.get_result('get', '/api/v1/users/{}/'.format(result['id']))
+        self.get_result('patch', '/api/v1/user/', 405, data=dict(email=""))
+        result = self.get_result('get', '/api/v1/user/{}/'.format(result['id']))
         self.assertCheckDict(user_data, result)
         user_data['first_name'] = 'new'
         post_data_dict = dict(partial=True, **user_data)
         self._check_update(
-            '/api/v1/users/{}/'.format(result['id']), post_data_dict,
+            '/api/v1/user/{}/'.format(result['id']), post_data_dict,
             method='put', **user_data
         )
         del post_data_dict['partial']
@@ -342,39 +342,39 @@ class VSTUtilsTestCase(BaseTestCase):
         post_data_dict['password'] = "skldjfnlkjsdhfljks"
         post_data = json.dumps(post_data_dict)
         self.get_result(
-            'patch', '/api/v1/users/{}/'.format(result['id']), data=post_data, code=400
+            'patch', '/api/v1/user/{}/'.format(result['id']), data=post_data, code=400
         )
-        self.get_result('delete', '/api/v1/users/{}/'.format(result['id']))
+        self.get_result('delete', '/api/v1/user/{}/'.format(result['id']))
         user_data['email'] = 'invalid_email'
         post_data = dict(password="some_password", **user_data)
-        self.post_result('/api/v1/users/', data=post_data, code=400)
-        self.post_result('/api/v1/users/', data=user_data, code=400)
+        self.post_result('/api/v1/user/', data=post_data, code=400)
+        self.post_result('/api/v1/user/', data=user_data, code=400)
         self.post_result(
-            '/api/v1/users/', data=dict(username=self.user.username), code=409
+            '/api/v1/user/', data=dict(username=self.user.username), code=409
         )
         self.assertCount(self.get_model_filter('django.contrib.auth.models.User'), 1)
-        url_to_user = '/api/v1/users/{}/'.format(self.user.id)
+        url_to_user = '/api/v1/user/{}/'.format(self.user.id)
         self.change_identity(False)
         self.get_result('get', url_to_user, 403)
         user_data['email'] = 'test@test.lan'
-        self.post_result('/api/v1/users/', data=user_data, code=403)
+        self.post_result('/api/v1/user/', data=user_data, code=403)
         self.assertEqual(self.get_count('django.contrib.auth.models.User'), 2)
         update_password = json.dumps(dict(password='12345'))
         self.get_result(
-            'patch', '/api/v1/users/{}/'.format(self.user.id), data=update_password
+            'patch', '/api/v1/user/{}/'.format(self.user.id), data=update_password
         )
         self.change_identity(True)
         data = [
             dict(username="USER{}".format(i), password="123") for i in range(10)
         ]
-        users_id = self.mass_create('/api/v1/users/', data, 'username')
+        users_id = self.mass_create('/api/v1/user/', data, 'username')
         self.assertEqual(self.get_count('django.contrib.auth.models.User'), 13)
         comma_id_list = ",".join([str(i) for i in users_id])
-        result = self.get_result('get', '/api/v1/users/?id={}'.format(comma_id_list))
+        result = self.get_result('get', '/api/v1/user/?id={}'.format(comma_id_list))
         self.assertCount(users_id, result['count'])
-        result = self.get_result('get', '/api/v1/users/?username=USER')
+        result = self.get_result('get', '/api/v1/user/?username=USER')
         self.assertCount(users_id, result['count'])
-        result = self.get_result('get', '/api/v1/users/?username__not=USER')
+        result = self.get_result('get', '/api/v1/user/?username__not=USER')
         self.assertEqual(result['count'], 3)
 
     def test_user_gravatar(self):
@@ -385,12 +385,12 @@ class VSTUtilsTestCase(BaseTestCase):
         user_without_gravatar = dict(
             username="test_user_1", password="test_password_1",
         )
-        result = self.get_result('post', '/api/v1/users/', data=user_without_gravatar)
+        result = self.get_result('post', '/api/v1/user/', data=user_without_gravatar)
         self.assertEqual(default_gravatar, get_user_gravatar(result["id"]))
         user_with_gravatar = dict(
             username="test_user_2", password="test_password_2", email="test1@gmail.com",
         )
-        result = self.get_result('post', '/api/v1/users/', data=user_with_gravatar)
+        result = self.get_result('post', '/api/v1/user/', data=user_with_gravatar)
         self.assertEqual(
             gravatar_link.format(user_hash),
             get_user_gravatar(result["id"])
@@ -408,31 +408,31 @@ class VSTUtilsTestCase(BaseTestCase):
         data = [
             dict(username="USER{}".format(i), password="123") for i in range(10)
         ]
-        users_id = self.mass_create('/api/v1/users/', data, 'username')
+        users_id = self.mass_create('/api/v1/user/', data, 'username')
         test_user = dict(username=self.random_name(), password='123')
         userself_data = dict(first_name='me')
         bulk_request_data = [
             # Check code 204
-            {'type': 'del', 'item': 'users', 'pk': users_id[0]},
+            {'type': 'del', 'item': 'user', 'pk': users_id[0]},
             # Check code 404
-            {'type': 'del', 'item': 'users', 'pk': 0},
+            {'type': 'del', 'item': 'user', 'pk': 0},
             # Check 201 and username
-            {'type': 'add', 'item': 'users', 'data': test_user},
+            {'type': 'add', 'item': 'user', 'data': test_user},
             # Check update first_name by self
-            {'type': 'set', 'item': 'users', 'pk': self.user.id, 'data': userself_data},
+            {'type': 'set', 'item': 'user', 'pk': self.user.id, 'data': userself_data},
             # Check mods to view detail
             {'type': 'mod', 'item': 'settings', "method": "get",
              'data_type': ["system"]},
             # Check bulk-filters
-            {'type': 'get', 'item': 'users',
+            {'type': 'get', 'item': 'user',
              'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
              },
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
-            {"method": "get", 'data_type': ["users", self.user.id]},
-            {"method": "get", 'data_type': ["users"]},
+            {"method": "get", 'data_type': ["user", self.user.id]},
+            {"method": "get", 'data_type': ["user"]},
             # Check json in data fields
-            {'method': "post", 'data_type': ['users'],
+            {'method': "post", 'data_type': ['user'],
              'data': {
                  "username": 'ttt', 'password': 'ttt333',
                  'first_name': json.dumps({"some": 'json'})}
@@ -474,10 +474,10 @@ class VSTUtilsTestCase(BaseTestCase):
         ).exclude(pk=self.user.id).delete()
         bulk_request_data = [
             # Check 201 and username
-            {'type': 'add', 'item': 'users', 'data': test_user},
+            {'type': 'add', 'item': 'user', 'data': test_user},
             # Get details from link
-            {'type': 'get', 'item': 'users', 'pk': "<0[data][id]>"},
-            {'type': 'get', 'item': 'users', 'filters': 'id=<1[data][id]>'}
+            {'type': 'get', 'item': 'user', 'pk': "<0[data][id]>"},
+            {'type': 'get', 'item': 'user', 'filters': 'id=<1[data][id]>'}
         ]
         result = self.get_result(
             "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
@@ -494,10 +494,10 @@ class VSTUtilsTestCase(BaseTestCase):
         )
         client.session.headers.update({'x-test': 'true'})
         schema = client.get('http://testserver/api/v1/schema/')
-        result = client.action(schema, ['users', 'list'])
+        result = client.action(schema, ['user', 'list'])
         self.assertEqual(result['count'], 1)
         create_data = dict(username='test', password='123')
-        result = client.action(schema, ['users', 'add'], create_data)
+        result = client.action(schema, ['user', 'add'], create_data)
         self.assertEqual(result['username'], create_data['username'])
         self.assertFalse(result['is_staff'])
         self.assertTrue(result['is_active'])
