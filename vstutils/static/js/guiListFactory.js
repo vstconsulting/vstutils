@@ -962,7 +962,7 @@ var gui_list_object = {
         var def = new $.Deferred();
         $.when(this.create()).done((newObj) => {
 
-            let id = this.getPkValue(newObj.data)
+            let id = this.getPkValueForUrl(newObj.data);
 
             $.when(vstGO(this.url_vars.baseURL(id))).done(()=>{
                 def.resolve();
