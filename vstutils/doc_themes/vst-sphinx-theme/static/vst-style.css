@@ -93,11 +93,12 @@ img {
     margin-bottom: 10px;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
-    font-size: 22px;
+    font-size: 24px;
 }
 
 .section h2 {
     font-size: 22px;
+    font-weight: 600;
 }
 
 .highlight pre {
