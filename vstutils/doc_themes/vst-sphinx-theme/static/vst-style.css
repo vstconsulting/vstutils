@@ -99,6 +99,7 @@ img {
 .section h2 {
     font-size: 22px;
     font-weight: 600;
+    margin-top: 20px;
 }
 
 .highlight pre {
