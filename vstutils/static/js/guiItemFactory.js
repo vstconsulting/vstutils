@@ -666,6 +666,7 @@ function getUrlBasePathDirectToPage()
             url_vars[item] = api_path.url[item][0] == '@' ? api_path.url[item] : "@" + api_path.url[item];
         }
     }
+
     return vstMakeLocalApiUrl(api_path.api.path, url_vars).replace(/^\/|\/$/g, '');
 }
 
