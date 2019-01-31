@@ -360,6 +360,85 @@ guiTests.addChildObjectToParentList = function(path, child_path, params, env, pk
     guiTests.deleteObjByPath(child_path + "{child_"+api_obj.bulk_name+"}/", env, pk_obj);
 }
 
+/**
+ * Function tests action execution by path.
+ * @param path {string} - path of object.
+ * @param params {object} - object with properties for tests (fields data and test options).
+ * @param env {object} - object with ids of parent and surrounding objects.
+ * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ */
+guiTests.executeAction = function (path, params, env, pk_obj) {
+    guiTests.openPage(path, env, (env) =>{ return vstMakeLocalApiUrl(path, pk_obj) });
+
+    let values;
+    let fieldsData = params.data;
+    syncQUnit.addTest("guiPaths['"+path+"'] ", function ( assert )
+    {
+        let done = assert.async();
+        if(typeof fieldsData == "function") {
+            fieldsData = fieldsData();
+        }
+        values = guiTests.setValues(assert, fieldsData);
+        assert.ok(true);
+        testdone(done);
+    });
+    guiTests.clickAndWaitRedirect(".btn_exec");
+    guiTests.compareValues(values, fieldsData);
+}
+
+/**
+ * Function tests copy action by path.
+ * @param path {string} - path of object.
+ * @param params {object} - object with properties for tests (fields data and test options).
+ * @param env {object} - object with ids of parent and surrounding objects.
+ * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ */
+guiTests.copyObjectByPath = function(path, params, env, pk_obj)
+{
+    guiTests.executeAction(path, params, env, pk_obj);
+
+    if(params.save_id && params.save_id.key){
+        syncQUnit.addTest("guiPaths['"+path+"' save pk of copied object] ", function ( assert )
+        {
+            let done = assert.async();
+            if(window.curentPageObject.model.data){
+                env["copy_" + params.save_id.key + "_id"] = window.curentPageObject.getPkValueForUrl(window.curentPageObject.model.data);
+                env["copy_" + params.save_id.key + "_name"] = window.curentPageObject.model.data.name || window.curentPageObject.getPkValueForUrl(window.curentPageObject.model.data);
+                pk_obj["api_copy_" + params.save_id.key + "_id"] = env["copy_" + params.save_id.key + "_id"];
+                assert.ok(true, "Id of copied object was saved");
+            } else {
+                assert.ok(false, "Id of copied object was not saved");
+            }
+            testdone(done);
+        });
+    }
+    if(params.page && params.page.delete){
+        guiTests.deleteObject();
+    }
+}
+
+/**
+ * Function creates user to use his data in other tests.
+ * @param env {object} - object with ids of parent and surrounding objects.
+ * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ */
+guiTests.createUser = function(env, pk_obj) {
+    let path = '/user/new/';
+    let password = rundomString(6);
+    let fieldsData = {
+        username:{value:rundomString(6)},
+        email: {value:rundomString(6) + "@gmail.com"},
+        password:{value:password, do_not_compare:true},
+        password2:{value:password, do_not_compare:true},
+    };
+    guiTests.openPage(path);
+    guiTests.setValuesAndCreate(path, fieldsData, (data) => {
+        env.user_id = data.id;
+        env.user_name = data.username;
+        pk_obj.api_user_id = data.id;
+    }, true);
+}
+
 
 /**
  * Function tests path of second level.
@@ -444,8 +523,8 @@ guiTests.testForPathInternalLevel = function (path, params, env, pk_obj, is_pare
     }
 
     // checks create new object page
-    guiTests.openPage(api_obj.path + "new/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.path + "new/", pk_obj) });
     for(let i in params.create){
+        guiTests.openPage(api_obj.path + "new/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.path + "new/", pk_obj) });
         guiTests.setValuesAndCreate(api_obj.path + "new/", params.create[i].data, (data) => {
             let key;
             if(is_parent){
@@ -464,15 +543,12 @@ guiTests.testForPathInternalLevel = function (path, params, env, pk_obj, is_pare
         }, params.create[i].is_valid)
     }
 
-    // checks create single object page (get/edit)
+    // checks single object get page
     guiTests.openPage(api_obj.page.path, env, (env) =>{return vstMakeLocalApiUrl(api_obj.page.path, pk_obj)});
-    guiTests.openPage(api_obj.page.path + "edit/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path + "edit/", pk_obj)});
-    if(params.page && params.page.wait) {
-        guiTests.wait();
-    }
 
-    for(let i in params.update) {
-        guiTests.updateObject(api_obj.page.path + "edit/", params.update[i].data, params.update[i].is_valid);
+    //checks single object copy action
+    if(params.page && params.page.copy){
+        guiTests.copyObjectByPath(api_obj.page.path + "copy/", params.page.copy, env, pk_obj);
     }
 
     bool = (params.page && params.page.hasDeleteButton !== undefined) ? params.page.hasDeleteButton : true;
@@ -484,6 +560,7 @@ guiTests.testForPathInternalLevel = function (path, params, env, pk_obj, is_pare
     bool = (params.page && params.page.hasAddButton !== undefined) ? params.page.hasAddButton : false;
     guiTests.hasAddButton(bool, api_obj.page.path);
 
+    //checks delete/remove of object page
     if(params.page && params.page.delete){
         guiTests.deleteObjByPath(api_obj.page.path, env, pk_obj);
     }
