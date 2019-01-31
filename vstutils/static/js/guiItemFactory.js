@@ -656,7 +656,17 @@ function getUrlBasePath()
 function getUrlBasePathDirectToPage()
 {
     let api_path = spajs.urlInfo.data.reg.getApiPath();
-    return vstMakeLocalApiUrl(api_path.api.path, api_path.url).replace(/^\/|\/$/g, '');
+    let url_vars = {};
+    for(let item in api_path.url){
+        if(item.indexOf("api_") == 0 && !isNaN(Number(api_path.url[item]))){
+            url_vars[item] = api_path.url[item];
+        }
+
+        if(item.indexOf("api_") == 0 && isNaN(Number(api_path.url[item]))){
+            url_vars[item] = api_path.url[item][0] == '@' ? api_path.url[item] : "@" + api_path.url[item];
+        }
+    }
+    return vstMakeLocalApiUrl(api_path.api.path, url_vars).replace(/^\/|\/$/g, '');
 }
 
 function renderErrorAsPage(error)
