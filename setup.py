@@ -123,27 +123,46 @@ def make_extensions(extensions_list, packages):
     return ext_modules, extensions_dict
 
 
-def minify_js(base_dir, files, exclude=None):
+def minify_js_file(js_file, jsmin_func):
+    with open(js_file, 'r') as js_file_fd:
+        return jsmin_func(js_file_fd.read(), quote_chars="'\"`")
+
+
+def minify_css_file(css_file, cssmin_func):
+    with open(css_file, 'r') as js_file_fd:
+        return cssmin_func(js_file_fd.read())
+
+
+def minify_static_files(base_dir, files, exclude=None):
+    exclude = exclude or []
+    patterns = dict()
     try:
         from jsmin import jsmin as jsmin_func
+        patterns['*.js'] = (minify_js_file, jsmin_func)
     except:
-        return
-    exclude = exclude or []
-    for js_file in filter(lambda f: fnmatch.fnmatch(f, '*.js'), files):
-        if any(filter(lambda f: js_file.endswith(f), exclude)):
-            continue
-        js_file = os.path.join(base_dir, js_file)
-        if os.path.exists(js_file):
-            with open(js_file) as js_file_fd:
-                minified = jsmin_func(js_file_fd.read(), quote_chars="'\"`")
-            with open(js_file, 'w') as js_file_fd:
-                js_file_fd.write(minified)
-            print('Minfied file {}.'.format(js_file))
+        pass
+    try:
+        from csscompressor import compress as csscompressor_func
+        patterns['*.css'] = (minify_css_file, csscompressor_func)
+    except:
+        pass
+
+    for fnext, funcs in patterns.items():
+        for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
+            if any(filter(lambda fp: fext_file.endswith(fp), exclude)):
+                continue
+            fext_file = os.path.join(base_dir, fext_file)
+            if os.path.exists(fext_file):
+                func, subfunc = funcs
+                minified = func(fext_file, subfunc)
+                with open(fext_file, 'w') as js_file_fd:
+                    js_file_fd.write(minified)
+                print('Minfied file {}.'.format(fext_file))
 
 
 class _Compile(_sdist):
     extensions_dict = dict()
-    js_exclude = []
+    static_exclude = []
 
     def __filter_files(self, files):
         for _files in self.extensions_dict.values():
@@ -156,7 +175,7 @@ class _Compile(_sdist):
         if has_cython:
             files = self.__filter_files(files)
         _sdist.make_release_tree(self, base_dir, files)
-        minify_js(base_dir, files, self.js_exclude)
+        minify_static_files(base_dir, files, self.static_exclude)
 
     def run(self):
         return _sdist.run(self)
@@ -235,7 +254,7 @@ class build_py(build_py_orig):
 
 class install_lib(_install_lib):
     exclude = []
-    js_exclude = []
+    static_exclude = []
 
     def _filter_files_with_ext(self, filename):
         _filename, _fext = os.path.splitext(filename)
@@ -252,7 +271,7 @@ class install_lib(_install_lib):
             if any(filter(lambda f: fnmatch.fnmatch(f, _source_name+"*.so"), so_extentions)):
                 print('Removing extention sources [{}].'.format(source))
                 os.remove(source)
-        minify_js('', files, self.js_exclude)
+        minify_static_files('', files, self.static_exclude)
         return result
 
 
@@ -270,14 +289,14 @@ def make_setup(**opts):
     ext_mod, ext_mod_dict = make_extensions(ext_modules_list, opts['packages'])
     opts['ext_modules'] = opts.get('ext_modules', list()) + ext_mod
     cmdclass = opts.get('cmdclass', dict())
-    js_exclude = opts.pop('excluded_min_js', list())
+    static_exclude = opts.pop('static_exclude_min', list())
     if 'compile' not in cmdclass:
         compile_class = get_compile_command(ext_mod_dict)
-        compile_class.js_exclude = js_exclude
+        compile_class.static_exclude = static_exclude
         cmdclass.update({"compile": get_compile_command(ext_mod_dict)})
     if has_cython:
         build_py.exclude = ext_modules_list
-        install_lib.js_exclude = js_exclude
+        install_lib.static_exclude = static_exclude
         cmdclass.update({
             'build_ext': _build_ext,
             'build_py': build_py,
@@ -328,7 +347,7 @@ if 'develop' in sys.argv:
 kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
-    excluded_min_js=['vstutils/static/js/libs/imask.js'],
+    static_exclude_min=['vstutils/static/js/libs/imask.js'],
     install_requires=[
         "django>=1.11,<2.0",
         'cython>0.29,<1.0',
