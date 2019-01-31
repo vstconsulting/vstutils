@@ -79,6 +79,7 @@ except IOError:
 # SECURITY WARNING: don't run with debug turned on in production!
 TESTS_RUN = any([True for i in sys.argv if i in ['testserver', 'test']])
 LOCALRUN = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
+TESTSERVER_RUN = 'testserver' in sys.argv
 DEBUG = os.getenv('DJANGO_DEBUG', main.getboolean("debug", False))
 ALLOWED_HOSTS = main.getlist("allowed_hosts", '*')
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
@@ -594,7 +595,6 @@ if TESTS_RUN:
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher',]
-    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
     CONTACT = dict(
         some_extra_url='https://pypi.org/project/vstutils/', **CONTACT
     )
@@ -604,6 +604,9 @@ if TESTS_RUN:
     }
     CELERY_RESULT_BACKEND = 'cache'
     CELERY_CACHE_BACKEND = 'memory'
+
+if not TESTSERVER_RUN and TESTS_RUN:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
 # User settings
 ##############################################################
