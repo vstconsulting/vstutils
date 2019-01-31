@@ -546,9 +546,13 @@ guiTests.testForPathInternalLevel = function (path, params, env, pk_obj, is_pare
     // checks single object get page
     guiTests.openPage(api_obj.page.path, env, (env) =>{return vstMakeLocalApiUrl(api_obj.page.path, pk_obj)});
 
-    //checks single object copy action
-    if(params.page && params.page.copy){
-        guiTests.copyObjectByPath(api_obj.page.path + "copy/", params.page.copy, env, pk_obj);
+    // checks single object edit page
+    for(let i in params.update) {
+        guiTests.openPage(api_obj.page.path + "edit/", env, (env) =>{ return vstMakeLocalApiUrl(api_obj.page.path + "edit/", pk_obj)});
+        if(params.page && params.page.wait) {
+            guiTests.wait();
+        }
+        guiTests.updateObject(api_obj.page.path + "edit/", params.update[i].data, params.update[i].is_valid);
     }
 
     bool = (params.page && params.page.hasDeleteButton !== undefined) ? params.page.hasDeleteButton : true;
