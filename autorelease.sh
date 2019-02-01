@@ -5,7 +5,7 @@ TAG=$(git tag -l $CURRENT_VERSION)
 if [ -z "${TAG}" ]; then
     echo "Creating new tag ${CURRENT_VERSION}.";
     git tag $CURRENT_VERSION;
-    git push origin $CURRENT_VERSION;
+    git push origin $CURRENT_VERSION > /dev/null;
 else
     echo "Current release ${CURRENT_VERSION} already exists. Update version to release."
 fi
