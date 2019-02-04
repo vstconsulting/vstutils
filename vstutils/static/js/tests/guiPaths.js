@@ -421,8 +421,10 @@ guiTests.copyObjectByPath = function(path, params, env, pk_obj)
  * Function creates user to use his data in other tests.
  * @param env {object} - object with ids of parent and surrounding objects.
  * @param pk_obj {object} - object with ids values suitable for vstMakeLocalApiUrl function.
+ * @param is_parent {boolean} - if true - it means that path of second level
+ * and function needs to save object's id as 'api_pk' in pk_obj.
  */
-guiTests.createUser = function(env, pk_obj) {
+guiTests.createUser = function(env, pk_obj, is_parent) {
     let path = '/user/new/';
     let password = rundomString(6);
     let fieldsData = {
@@ -433,11 +435,17 @@ guiTests.createUser = function(env, pk_obj) {
     };
     guiTests.openPage(path);
     guiTests.setValuesAndCreate(path, fieldsData, (data) => {
+        let key;
+        if(is_parent){
+            key = 'api_pk';
+        } else {
+            key = 'api_user_id';
+        }
         env.user_id = data.id;
         env.user_name = data.username;
-        pk_obj.api_user_id = data.id;
+        pk_obj[key] = data.id;
     }, true);
-}
+};
 
 
 /**
