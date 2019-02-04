@@ -787,9 +787,16 @@ function deleteSelectedElements(thisObj, ids, tag)
 
         for(let i in ids)
         {
-            $(".item-row.item-"+ids[i]).remove()
+            $(".item-row.item-"+ids[i]).remove();
+            thisObj.model.data.count --;
         }
-    })
+
+        if($(".item-row").length == 0 && thisObj.model.data.count == 0)
+        {
+            $("#content-section .card-body").html(spajs.just.render('items_empty_list', {}));
+        }
+
+    });
 
     return false;
 }
