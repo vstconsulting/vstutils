@@ -8,7 +8,7 @@ import signal
 import six
 from django.conf import settings
 from ._base import BaseCommand
-
+from ...utils import raise_context
 
 python_exec_dir = os.path.dirname(sys.executable)
 python_subexec_dir = '/usr/local/bin'
@@ -35,6 +35,7 @@ def wait(proc, timeout=None, delay=0.1):
 class Command(BaseCommand):
     help = "Backend web-server."
     _uwsgi_default_path = _uwsgi_default_path
+    default_addrport = settings.WEB_ADDRPORT
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -53,12 +54,21 @@ class Command(BaseCommand):
             default='{}/web.ini'.format(settings.VST_PROJECT_DIR),
             dest='config', help='Specifies the uwsgi script.',
         )
+        parser.add_argument(
+            '--addrport', '-p',
+            default=self.default_addrport,
+            dest='addrport', help='Specifies the uwsgi address:port. Default: [:8080]',
+        )
 
     def _get_uwsgi_arg(self, arg):
         return arg if isinstance(arg, six.string_types) else None
 
     def _get_uwsgi_args(self, *uwsgi_args):
-        return [self._get_uwsgi_arg(arg) for arg in uwsgi_args]
+        args = []
+        if settings.WEB_DAEMON:
+            args.append('daemonize={}'.format(settings.WEB_DAEMON_LOGFILE))
+        args += [self._get_uwsgi_arg(arg) for arg in uwsgi_args]
+        return args
 
     def _get_worker_options(self):
         cmd = []
@@ -83,6 +93,7 @@ class Command(BaseCommand):
     def handle(self, *uwsgi_args, **opts):
         super(Command, self).handle(*uwsgi_args, **opts)
         cmd = [opts['script'], '--enable-threads', '--master']
+        cmd += ['--http={}'.format(opts['addrport'])]
         cmd += [
             '--{}'.format(arg) for arg in self._get_uwsgi_args(*uwsgi_args)
             if arg is not None
@@ -98,15 +109,16 @@ class Command(BaseCommand):
         cmd += self._get_worker_options()
         try:
             self._print('Execute: ' + ' '.join(cmd))
-            proc = subprocess.Popen(cmd)
+            proc = subprocess.Popen(cmd, env=os.environ.copy())
             try:
                 wait(proc)
-            except:
+            except BaseException as exc:
                 proc.send_signal(signal.SIGTERM)
                 wait(proc, 10)
-                proc.kill()
+                with raise_context():
+                    proc.kill()
                 wait(proc)
-                raise
+                raise exc
         except KeyboardInterrupt:
             self._print('Exit by user...', 'WARNING')
         except CalledProcessError as err:

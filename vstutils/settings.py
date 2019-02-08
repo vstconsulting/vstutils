@@ -185,6 +185,10 @@ UWSGI_APPLICATION = '{module}:{app}'.format(
     module='.'.join(WSGI_APPLICATION.split('.')[:-1]), app=WSGI_APPLICATION.split('.')[-1]
 )
 
+uwsgi_settings = SectionConfig('uwsgi')
+WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
+WEB_DAEMON_LOGFILE = uwsgi_settings.get('log_file', fallback='/dev/null')
+WEB_ADDRPORT = uwsgi_settings.get('addrport', fallback=':8080')
 
 # Templates settings
 ##############################################################
