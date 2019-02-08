@@ -1,6 +1,8 @@
 # pylint: disable=django-not-available
 import os
 import sys
+import warnings
+import six
 
 _default_settings = {
     # vstutils settings for generate settings
@@ -25,6 +27,11 @@ def prepare_environment(default_settings=_default_settings, **kwargs):
     for key, value in default_settings.items():
         os.environ.setdefault(key, value)
     os.environ.update(kwargs)
+    if six.PY2:
+        warnings.warn(
+            'Python 2.7 is deprecated and will dropped in 2.0, use Python >3.5',
+            DeprecationWarning
+        )
 
 
 def cmd_execution(*args, **kwargs):
