@@ -445,7 +445,7 @@ guiTests.createUser = function(env, pk_obj, is_parent) {
         env.user_name = data.username;
         pk_obj[key] = data.id;
     }, true);
-};
+}
 
 
 /**
