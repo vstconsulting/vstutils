@@ -1237,6 +1237,7 @@ guiElements.autocomplete = function()
                     $('#'+this.element_id).val(value);
                     $('#'+this.element_id).attr('value', value);
                     $('#'+this.element_id).attr({'data-hide':'hide'});
+                    this._callAllonChangeCallback()
                 },
                 source: (original_term, response) =>
                 {
