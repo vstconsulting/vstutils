@@ -365,7 +365,7 @@ kwargs = dict(
         'test': load_requirements('requirements-test.txt'),
         'rpc': load_requirements('requirements-rpc.txt'),
         'ldap': load_requirements('requirements-ldap.txt'),
-        'doc': ['django-docs==0.2.1'] + load_requirements('requirements-doc.txt'),
+        'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
     },
     dependency_links=[
