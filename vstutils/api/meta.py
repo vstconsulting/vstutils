@@ -4,7 +4,7 @@ from . import fields, serializers
 
 class VSTMetadata(SimpleMetadata):
     origin_mapping = SimpleMetadata.label_lookup.mapping
-    mapping = {
+    mapping_fields = {
         fields.FileInStringField: 'file',
         fields.SecretFileInString: 'secretfile',
         fields.AutoCompletionField: 'autocomplete',

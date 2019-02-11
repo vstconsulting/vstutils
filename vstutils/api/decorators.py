@@ -3,7 +3,7 @@ from collections import OrderedDict
 from inspect import getmembers
 from django.db import transaction
 from rest_framework.decorators import action
-from rest_framework import viewsets as vsets, response, status
+from rest_framework import response, status
 from drf_yasg.utils import swagger_auto_schema
 from ..exceptions import VSTUtilsException
 
@@ -281,7 +281,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def _get_subs_from_view(self):
         # pylint: disable=protected-access
-        extra_acts = map(lambda x: x[0], getmembers(self.view, vsets._is_extra_action))
+        def _is_extra_action(attr):
+            return hasattr(attr, 'mapping')
+
+        extra_acts = map(lambda x: x[0], getmembers(self.view, _is_extra_action))
         filter_subs = self.filter_subs
         return list(filter(lambda name: name not in filter_subs, extra_acts))
 
@@ -424,7 +427,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         decorator = self.get_decorator(
             detail=sub_view.detail,
             sub_opts=dict(sub_path=sub_path),
-            methods=sub_view.bind_to_methods or self.methods,
+            methods=sub_view.mapping or self.methods,
             serializer_class=sub_view.kwargs.get('serializer_class', self.serializer),
             url_name='{}-{}'.format(self.name, sub_view.url_name),
             _nested_args=getattr(sub_view, '_nested_args', OrderedDict())

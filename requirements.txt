@@ -5,7 +5,7 @@ six==1.12
 pyyaml==3.13
 
 # REST API packages
-djangorestframework==3.8.2
+djangorestframework==3.9.1
 django-filter==1.1.0
 django-crispy-forms==1.7.2
 # uWSGI==2.0.17.1
