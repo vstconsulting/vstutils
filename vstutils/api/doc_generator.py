@@ -23,6 +23,7 @@ _YamlOrderedLoader.add_constructor(
 
 class VSTOpenApiBase(Directive):
     find_model = re.compile(r"\"\$ref\":.*\"#\/(?P<def_path>.*)\/(?P<def_name>.*)\"")
+    find_param = re.compile(r"(?<=\{)[\w]+(?=\})")
     required_arguments = 1  # path to openapi spec
     final_argument_whitespace = True  # path may contain whitespaces
     openapi_version = None
@@ -42,14 +43,6 @@ class VSTOpenApiBase(Directive):
         date_time='2019-01-07T06:10:31+10:00',
         html='test_html',
         email='example@mail.com'
-    )
-    uri_format_values = dict(
-        pk=1,
-        host_id=1,
-        group_id=1,
-        inventory_id=1,
-        periodic_task_id=1,
-        variables_id=1,
     )
 
     def __init__(self, *args, **kwargs):
@@ -284,9 +277,8 @@ class VSTOpenApiBase(Directive):
         if opt_name == 'previous' and var_type == 'uri':
             result = None
         elif var_type == 'uri':
-            result = self.type_dict[var_type].format(
-                self.current_path.format(**self.uri_format_values)
-            )
+            params = {i.group(0): 1 for i in self.find_param.finditer(self.current_path)}
+            result = self.type_dict[var_type].format(self.current_path.format(**params))
             if opt_name == 'next':
                 result += '?limit=1&offset=1'
         elif opt_name == 'count' and var_type == 'integer':
