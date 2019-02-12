@@ -83,6 +83,8 @@ class Command(BaseCommand):
             if is_boolean:
                 continue
             options += "={}".format(value.replace(',', r'\,'))
+        if '--queues' not in options:
+            options += ' --queues={}'.format(r'\,'.join(settings.WORKER_QUEUES))
         cmd += ['--attach-daemon2']
         run = 'stopsignal=15,reloadsignal=1,'
         run += 'exec={} -m celery worker'.format(settings.PYTHON_INTERPRETER)

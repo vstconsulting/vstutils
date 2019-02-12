@@ -537,9 +537,11 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=1)
 CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
+CELERY_TASK_CREATE_MISSING_QUEUES = True
 
 CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
 CONCURRENCY = rpc.getint("concurrency", fallback=4)
+WORKER_QUEUES = ['celery']
 RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
 
 
