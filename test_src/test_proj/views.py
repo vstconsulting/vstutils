@@ -47,7 +47,7 @@ class FileFilter(filters.filters.FilterSet):
 
 class HostSerializer(VSTSerializer):
     id = fields.RedirectIntegerField(read_only=True)
-    name = fields.DependEnumField(field='id', choices={ None: 'hello', 1: 'NOO!' })
+    name = fields.DependEnumField(field='id', choices={ 3: 'hello', 1: 'NOO!' })
 
     class Meta:
         model = Host
