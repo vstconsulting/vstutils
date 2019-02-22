@@ -3,6 +3,7 @@ configparser==3.5.1
 pytimeparse==1.1.8
 six==1.12
 pyyaml==3.13
+django-cors-headers==2.4.0
 
 # REST API packages
 djangorestframework==3.9.1

@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 ]
 INSTALLED_APPS += ['django_celery_beat'] if has_django_celery_beat else []
 INSTALLED_APPS += [
@@ -131,6 +132,7 @@ INSTALLED_APPS += ADDONS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -140,6 +142,9 @@ MIDDLEWARE = [
 ]
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE
+
+# Allow cross-domain access
+CORS_ORIGIN_ALLOW_ALL = web.getboolean('allow_cors', fallback=False)
 
 LDAP_SERVER = main.get("ldap-server", fallback=None)
 LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
