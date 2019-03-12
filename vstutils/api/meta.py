@@ -3,6 +3,7 @@ from . import fields, serializers
 
 
 class VSTMetadata(SimpleMetadata):
+    label_lookup = SimpleMetadata.label_lookup
     origin_mapping = SimpleMetadata.label_lookup.mapping
     mapping_fields = {
         fields.FileInStringField: 'file',
@@ -12,3 +13,4 @@ class VSTMetadata(SimpleMetadata):
         fields.DependEnumField: 'dynamic',
         fields.HtmlField: 'html',
     }
+    label_lookup.mapping.update(mapping_fields)
