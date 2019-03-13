@@ -143,7 +143,8 @@ class MainRouter(_AbstractRouter):
             view_kwargs['permission_classes'] = (permissions.AllowAny,)
         schema_view = get_schema_view(**view_kwargs)
         swagger_kwargs = dict()
-        swagger_kwargs['cache_timeout'] = 0 if settings.DEBUG else 120
+        cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
+        swagger_kwargs['cache_timeout'] = 0 if settings.DEBUG else cache_timeout
         self.register_view(
             'openapi', schema_view.with_ui('swagger', **swagger_kwargs), name='openapi'
         )

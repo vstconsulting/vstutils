@@ -390,6 +390,7 @@ SWAGGER_API_DESCRIPTION = web.get('rest_swagger_description', fallback=vst_proje
 TERMS_URL = ''
 CONTACT = SectionConfig('contact').all() or dict(name='System Administrator')
 OPENAPI_PUBLIC = web.getboolean('public_openapi', fallback=False)
+SCHEMA_CACHE_TIMEOUT = web.getint('openapi_cache_timeout', fallback=120)
 
 OPENAPI_EXTRA_LINKS = {
     'vstutils': {
@@ -599,6 +600,19 @@ VIEWS = {
     },
 }
 
+PROJECT_GUI_MENU = [
+    {
+        'name': 'System',
+        'span_class': 'fa fa-cog',
+        'sublinks': [
+            {
+                'name': 'Users',
+                'url': '/user',
+                'span_class': 'fa fa-user',
+            },
+        ]
+    },
+]
 
 # Test settings for speedup tests
 ##############################################################
