@@ -421,22 +421,28 @@ class VSTUtilsTestCase(BaseTestCase):
             # Check update first_name by self
             {'type': 'set', 'item': 'user', 'pk': self.user.id, 'data': userself_data},
             # Check mods to view detail
-            {'type': 'mod', 'item': 'settings', "method": "get",
-             'data_type': ["system"]},
+            {
+                'type': 'mod', 'item': 'settings', "method": "get",
+                'data_type': ["system"]
+            },
             # Check bulk-filters
-            {'type': 'get', 'item': 'user',
-             'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
-             },
+            {
+                'type': 'get', 'item': 'user',
+                'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
+            },
             # Check `__init__` mod as default
             {"method": "get", 'data_type': ["settings", "system"]},
             {"method": "get", 'data_type': ["user", self.user.id]},
             {"method": "get", 'data_type': ["user"]},
             # Check json in data fields
-            {'method': "post", 'data_type': ['user'],
-             'data': {
-                 "username": 'ttt', 'password': 'ttt333',
-                 'first_name': json.dumps({"some": 'json'})}
-             }
+            {
+                'method': "post", 'data_type': ['user'],
+                'data': {
+                    "username": 'ttt', 'password': 'ttt333',
+                    'first_name': json.dumps({"some": 'json'})
+                }
+            },
+            {"method": 'get', 'data_type': ['usr', self.user.id]}
         ]
         self.get_result(
             "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
@@ -460,6 +466,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[7]['data']['id'], self.user.id)
         self.assertEqual(result[8]['status'], 200)
         self.assertEqual(result[9]['status'], 201, result[9])
+        self.assertEqual(result[10]['status'], 404, result[10])
 
         bulk_request_data = [
             # Check unsupported media type

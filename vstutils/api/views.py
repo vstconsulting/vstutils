@@ -6,6 +6,10 @@ from django.conf import settings
 from django.test import Client
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+try:
+    from Queue import Queue
+except ImportError:  # nocv
+    from queue import Queue
 from . import base, serializers, permissions, filters, decorators as deco
 from ..utils import Dict
 
@@ -126,9 +130,24 @@ class BulkViewSet(base.rvs.APIView):
         allowed_types.update(_allowed_types_typed)
         return allowed_types
 
+    def _create_results_if_not_exists(self):
+        if not hasattr(self, '_results'):
+            self._results = Queue()
+
+    @property
+    def results(self):
+        self._create_results_if_not_exists()
+        return list(self._results.queue)
+
+    def put_result(self, result):
+        self._create_results_if_not_exists()
+        self._results.put(result)
+
     def _check_type(self, op_type, item):
-        allowed_types = self.allowed_types.get(item, [])
-        if op_type not in allowed_types:
+        allowed_types = self.allowed_types.get(item, None)
+        if allowed_types is None:
+            raise serializers.exceptions.NotFound()
+        if isinstance(allowed_types, (list, tuple)) and op_type not in allowed_types:
             raise serializers.exceptions.UnsupportedMediaType(
                 media_type=op_type
             )
@@ -229,6 +248,7 @@ class BulkViewSet(base.rvs.APIView):
             operation, url=url
         )
 
+    @transaction.atomic()
     def operate_handler(self, operation, allow_fail=True):
         try:
             op_type = operation.get("type", 'mod')
@@ -243,14 +263,14 @@ class BulkViewSet(base.rvs.APIView):
             result = self.perform(operation)
             if allow_fail and result['status'] >= 300:
                 raise ValidationError(result['data'])
-            self.results.append(result)
+            self.put_result(result)
         except Exception as err:
             if allow_fail:
                 raise
             response = base.exception_handler(err, None)
             kwargs= dict(error_type=err.__class__.__name__, message=str(err))
             kwargs.update({'results': self.results} if isinstance(err, KeyError) else {})
-            self.results.append(self.create_response(
+            self.put_result(self.create_response(
                 response.status_code,
                 self._get_rendered(response),
                 operation, **kwargs
@@ -267,16 +287,17 @@ class BulkViewSet(base.rvs.APIView):
                 kwargs[env_var] = str(value)
         return kwargs
 
+    def _operates(self, operations, allow_fail):
+        for operation in operations:
+            self.operate_handler(operation, allow_fail)
+
     def operate(self, request, allow_fail=True):
         # pylint: disable=protected-access
         self.is_secure = request._request.is_secure()
         operations = request.data
-        self.results = []
         self.client = Client(**self.original_environ_data())
         self.client.force_login(request.user)
-        for operation in operations:
-            with transaction.atomic():
-                self.operate_handler(operation, allow_fail)
+        self._operates(operations, allow_fail)
         return base.Response(self.results, 200).resp
 
     @transaction.atomic()
