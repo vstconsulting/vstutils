@@ -4,6 +4,7 @@ import sys
 from warnings import warn
 
 from configparser import ConfigParser
+from django.contrib import admin
 import pyximport
 pyximport.install()
 from .section import Section
@@ -231,12 +232,14 @@ TEMPLATES = [
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
 STATIC_URL = web.get("static_files_url", fallback="/static/")
+STATIC_FILES_FOLDERS = list()
+STATIC_FILES_FOLDERS.append(os.path.join(VST_PROJECT_DIR, 'static'))
+if BASE_DIR != VST_PROJECT_DIR:
+    STATIC_FILES_FOLDERS.append(os.path.join(BASE_DIR, 'static'))
+STATIC_FILES_FOLDERS.append(os.path.join(VSTUTILS_DIR, 'static'))
+STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(admin.__file__), 'static'))
 if LOCALRUN:
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-        os.path.join(VST_PROJECT_DIR, 'static'),
-        os.path.join(VSTUTILS_DIR, 'static')
-    ]
+    STATICFILES_DIRS = STATIC_FILES_FOLDERS
 
 STATICFILES_FINDERS = (
   'django.contrib.staticfiles.finders.FileSystemFinder',
