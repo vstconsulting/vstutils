@@ -5,6 +5,7 @@ from warnings import warn
 
 from configparser import ConfigParser
 from django.contrib import admin
+from drf_yasg import errors
 import pyximport
 pyximport.install()
 from .section import Section
@@ -238,6 +239,7 @@ if BASE_DIR != VST_PROJECT_DIR:
     STATIC_FILES_FOLDERS.append(os.path.join(BASE_DIR, 'static'))
 STATIC_FILES_FOLDERS.append(os.path.join(VSTUTILS_DIR, 'static'))
 STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(admin.__file__), 'static'))
+STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(errors.__file__), 'static'))
 if LOCALRUN:
     STATICFILES_DIRS = STATIC_FILES_FOLDERS
 
