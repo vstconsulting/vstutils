@@ -39,6 +39,9 @@ class Query(dict):
         self.model = self.queryset.model
         self.standard_ordering = True
 
+    def chain(self):  # nocv
+        return self.clone()
+
     def clone(self):
         return deepcopy(self)
 

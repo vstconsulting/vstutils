@@ -19,25 +19,10 @@ class GUIView(BaseView):
     template_name = "gui/gui.html"
 
 
-class Login(BaseView):
+class Login(auth.LoginView):
     template_name = 'auth/login.html'
-
-    def login(self, request):
-        return auth.login(request, template_name=self.template_name)
-
-    def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return HttpResponseRedirect(request.GET.get('next', '/'))
-        return self.login(request)  # nocv
-
-    def post(self, request, *args, **kwargs):
-        return self.login(request)
+    redirect_authenticated_user = True
 
 
-class Logout(BaseView):
-
-    def get(self, request, *args, **kwargs):
-        return auth.logout(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.get(request, *args, **kwargs)
+class Logout(auth.LogoutView):
+    next_page = '/login/'

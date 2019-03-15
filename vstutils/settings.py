@@ -235,7 +235,7 @@ TEMPLATES = [
 STATIC_URL = web.get("static_files_url", fallback="/static/")
 STATIC_FILES_FOLDERS = list()
 STATIC_FILES_FOLDERS.append(os.path.join(VST_PROJECT_DIR, 'static'))
-if BASE_DIR != VST_PROJECT_DIR:
+if BASE_DIR != VST_PROJECT_DIR:  # nocv
     STATIC_FILES_FOLDERS.append(os.path.join(BASE_DIR, 'static'))
 STATIC_FILES_FOLDERS.append(os.path.join(VSTUTILS_DIR, 'static'))
 STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(admin.__file__), 'static'))

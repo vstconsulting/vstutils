@@ -272,7 +272,7 @@ class VSTUtilsTestCase(BaseTestCase):
         # Main
         self.get_result('get', '/')
         self.get_result('post', '/logout/', 302)
-        self.get_result('post', '/login/', 200)
+        self.get_result('post', '/login/', 302)
         self.get_result('get', '/login/', 302)
         # API
         keys = list(self.get_result('get', '/api/').keys())
@@ -292,7 +292,11 @@ class VSTUtilsTestCase(BaseTestCase):
         router_v1 = router.routers[0][1]
         router_v1.unregister("user")
         for pattern in router_v1.get_urls():
-            self.assertIsNone(pattern.regex.search("user/1/"))
+            if hasattr(pattern, 'pattern'):  # nocv
+                regex = pattern.pattern.regex
+            else:  # nocv
+                regex = pattern.regex
+            self.assertIsNone(regex.search("user/1/"))
         router_v1.register('user', UserViewSet)
         checked = False
         for pattern in router_v1.registry:
