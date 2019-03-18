@@ -2,7 +2,6 @@
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth
-from django.http import HttpResponseRedirect
 
 
 class BaseView(TemplateView):
