@@ -71,11 +71,11 @@ py36-django111-install:
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-django22-coverage:
-  <<: *branch_tests
-  image: onegreyonewhite/tox:ubuntu
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
+#py36-django22-coverage:
+#  <<: *branch_tests
+#  image: onegreyonewhite/tox:ubuntu
+#  variables:
+#    TOX_ENVS: "$CI_BUILD_NAME"
 
 
 pages:
