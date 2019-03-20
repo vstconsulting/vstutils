@@ -14,13 +14,14 @@ from django.template import loader
 from django.utils import translation
 from django.core.paginator import Paginator as BasePaginator
 from django.core.cache import caches, InvalidCacheBackendError
+from django.utils.module_loading import import_string as import_class
 from . import exceptions as ex
 
 
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
 
 
-def import_class(path):
+def _import_class(path):  # nocv
     '''
     Get class from string-path
 

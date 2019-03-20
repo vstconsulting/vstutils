@@ -25,8 +25,11 @@ class BaseMiddleware(object):
         # pylint: disable=unused-argument
         return response
 
+    def get_response_handler(self, request):
+        return self.get_response(request)
+
     def __call__(self, request):
-        return self.handler(request, self.get_response(request))
+        return self.handler(request, self.get_response_handler(request))
 
 
 class TimezoneHeadersMiddleware(BaseMiddleware):
