@@ -8,7 +8,6 @@ import uuid
 import six
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
-from django.conf import settings
 from django.contrib.auth.models import User
 
 try:
@@ -24,17 +23,19 @@ class BaseTestCase(TestCase):
     std_codes = dict(get=200, post=201, patch=200, delete=204)
 
     def setUp(self):
+        from django.conf import settings
+        self.settings_obj = settings
         client_kwargs = {
             "HTTP_X_FORWARDED_PROTOCOL": 'https',
             'SERVER_NAME': self.server_name
         }
         self.client = self.client_class(**client_kwargs)
         self.user = self._create_user()
-        self.login_url = getattr(settings, 'LOGIN_URL', '/login/')
-        self.logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')
+        self.login_url = getattr(self.settings_obj, 'LOGIN_URL', '/login/')
+        self.logout_url = getattr(self.settings_obj, 'LOGOUT_URL', '/logout/')
 
     def _settings(self, item, default=None):
-        return getattr(settings, item, default)
+        return getattr(self.settings_obj, item, default)
 
     def random_name(self):
         return str(uuid.uuid1())
