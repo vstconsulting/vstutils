@@ -48,6 +48,16 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         except OSError:
             pass
 
+    def test_executors(self):
+        dir_name = os.path.dirname(__file__)
+        cmd = utils.UnhandledExecutor(stderr=utils.UnhandledExecutor.DEVNULL)
+        self.assertEqual('yes', cmd.execute('echo yes'.split(' '), dir_name))
+        cmd = utils.Executor(stderr=utils.Executor.DEVNULL)
+        self.assertEqual('yes', cmd.execute('echo yes'.split(' '), dir_name))
+        cmd = utils.Executor()
+        with self.assertRaises(utils.subprocess.CalledProcessError):
+            cmd.execute('bash -c unknown command'.split(' '), dir_name)
+
     def test_startproject(self):
         # Easy create
         out = six.StringIO()

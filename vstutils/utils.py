@@ -1,46 +1,31 @@
 # pylint: disable=django-not-available,invalid-name
 from __future__ import unicode_literals
+
+import collections
+import json
+import logging
 import os
 import sys
-import json
-import time
 import tempfile
-import logging
+import time
 import traceback
-import collections
+import subprocess
+from threading import Thread
+
 import six
-from django.conf import settings
+from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
-from django.core.paginator import Paginator as BasePaginator
-from django.core.cache import caches, InvalidCacheBackendError
 from django.utils.module_loading import import_string as import_class
+
 from . import exceptions as ex
 
-
-logger = logging.getLogger(settings.VST_PROJECT_LIB)
-
-
-def _import_class(path):  # nocv
-    '''
-    Get class from string-path
-
-    :param path: -- string containing full python-path
-    :type path: str,unicode
-    :return: -- return class or module in path
-    :rtype: class, module, object
-    '''
-    m_len = path.rfind(".")
-    class_name = path[m_len + 1:len(path)]
-    try:
-        module = __import__(path[0:m_len], globals(), locals(), [class_name])
-        return getattr(module, class_name)
-    except SystemExit:  # nocv
-        return None  # nocv
+logger = logging.getLogger('vstutils')
+ON_POSIX = 'posix' in sys.builtin_module_names
 
 
 def get_render(name, data, trans='en'):
-    '''
+    """
     Render string based on template
 
     :param name: -- full template name
@@ -51,307 +36,12 @@ def get_render(name, data, trans='en'):
     :type trans: str,unicode
     :return: -- rendered string
     :rtype: str,unicode
-    '''
+    """
     translation.activate(trans)
     config = loader.get_template(name)
     result = config.render(data).replace('\r', '')
     translation.deactivate()
     return result
-
-
-class Dict(collections.OrderedDict):
-    def __repr__(self):  # nocv
-        return self.__str__()
-
-    def __str__(self):  # nocv
-        return self.__unicode__()
-
-    def __unicode__(self):  # nocv
-        return json.dumps(self)
-
-
-class tmp_file(object):
-    '''
-    Temporary file with name
-    generated and auto removed on close.
-    '''
-    __slots__ = 'fd',
-
-    def __init__(self, data="", mode="w", bufsize=0, **kwargs):
-        '''
-        tmp_file constructor
-
-        :param data: -- string to write in tmp file.
-        :type data: str
-        :param mode: -- file open mode. Default 'w'.
-        :type mode: str
-        :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
-        :type bufsize: int
-        :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
-        '''
-        kw = not six.PY3 and {"bufsize": bufsize} or {}
-        kwargs.update(kw)
-        fd = tempfile.NamedTemporaryFile(mode, **kwargs)
-        self.fd = fd
-        if data:
-            self.write(data)
-
-    def write(self, wr_string):
-        '''
-        Write to file and flush
-
-        :param wr_string: -- writable string
-        :type wr_string: str
-        :return: None
-        :rtype: None
-        '''
-        result = self.fd.write(wr_string)
-        self.fd.flush()
-        return result
-
-    def __getattr__(self, name):
-        return getattr(self.fd, name)
-
-    def __del__(self):
-        self.fd.close()
-
-    def __enter__(self):
-        '''
-        :return: -- file object
-        :rtype: tempfile.NamedTemporaryFile
-        '''
-        return self
-
-    def __exit__(self, type_e, value, tb):
-        self.fd.close()
-        if value is not None:
-            return False
-
-
-class tmp_file_context(object):
-    '''
-    Context object for work with tmp_file.
-    Auto close on exit from context and
-    remove if file stil exist.
-    '''
-    __slots__ = 'tmp',
-
-    def __init__(self, *args, **kwargs):
-        self.tmp = tmp_file(*args, **kwargs)
-
-    def __enter__(self):
-        return self.tmp
-
-    def __exit__(self, type_e, value, tb):
-        self.tmp.close()
-        if os.path.exists(self.tmp.name):
-            os.remove(self.tmp.name)
-
-
-class KVExchanger(object):
-    '''
-    Class for transmit data using key-value fast (cache-like) storage between
-    services. Uses same cache-backend as Lock.
-    '''
-    TIMEOUT = 60
-    PREFIX = "{}_exchange_".format(settings.VST_PROJECT_LIB)
-
-    try:
-        cache = caches["locks"]
-    except InvalidCacheBackendError:  # nocv
-        cache = caches["default"]
-
-    def __init__(self, key, timeout=None):
-        self.key = self.PREFIX + str(key)
-        self.timeout = timeout or self.TIMEOUT
-
-    def send(self, value, ttl=None):
-        return self.cache.add(self.key, value, ttl or self.timeout)
-
-    def prolong(self, ttl=None):
-        payload = self.cache.get(self.key)
-        self.cache.set(self.key, payload, ttl or self.timeout)
-
-    def get(self):
-        value = self.cache.get(self.key)
-        self.cache.delete(self.key)
-        return value
-
-    def delete(self):
-        self.cache.delete(self.key)
-
-
-class Lock(KVExchanger):
-    '''
-    Lock class for multi-jobs workflow.
-
-    .. note::
-        - Used django.core.cache lib and settings in `settings.py`
-        - Have Lock.SCHEDULER and Lock.GLOBAL id
-    '''
-    TIMEOUT = 60*60*24
-    GLOBAL = "global-deploy"
-    SCHEDULER = "celery-beat"
-    PREFIX = "{}_lock_".format(settings.VST_PROJECT_LIB)
-
-    class AcquireLockException(Exception):
-        pass
-
-    def __init__(self, id, payload=None, repeat=1, err_msg="", timeout=None):
-        # pylint: disable=too-many-arguments
-        '''
-        :param id: -- unique id for lock.
-        :type id: int,str
-        :param payload: -- lock additional info.
-        :param repeat: -- time to wait lock.release. Default 1 sec.
-        :type repeat: int
-        :param err_msg: -- message for AcquireLockException error.
-        :type err_msg: str
-        '''
-        super(Lock, self).__init__(id, timeout)
-        self.id, start = None, time.time()
-        while time.time() - start <= repeat:
-            if self.send(payload):
-                self.id = id
-                return
-            time.sleep(0.01)
-        raise self.AcquireLockException(err_msg)
-
-    def get(self):  # nocv
-        return self.cache.get(self.key)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type_e, value, tb):
-        self.release()
-
-    def release(self):
-        self.cache.delete(self.key)
-
-    def __del__(self):
-        self.release()
-
-
-class __LockAbstractDecorator(object):
-    _err = "Wait until the end."
-    _lock_key = None
-
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-        self.kwargs["err_msg"] = self.kwargs.get("err_msg", self._err)
-
-    def execute(self, func, *args, **kwargs):
-        if self._lock_key is not None:
-            with Lock(self._lock_key, **self.kwargs):
-                return func(*args, **kwargs)
-        return func(*args, **kwargs)
-
-    def __call__(self, original_function):
-        def wrapper(*args, **kwargs):
-            return self.execute(original_function, *args, **kwargs)
-        return wrapper
-
-
-class model_lock_decorator(__LockAbstractDecorator):
-    '''
-    Decorator for functions where 'pk' kwarg exist
-    for lock by id.
-
-    .. warning::
-        - On locked error raised ``Lock.AcquireLockException``
-        - Method must have and called with ``pk`` named arg.
-
-    '''
-    _err = "Object locked. Wait until unlock."
-
-    def execute(self, func, *args, **kwargs):
-        self._lock_key = kwargs.get('pk', None)
-        return super(model_lock_decorator, self).execute(func, *args, **kwargs)
-
-
-class assertRaises(object):
-    '''
-    Context for exclude rises
-    '''
-    def __init__(self, *args, **kwargs):
-        '''
-        :param args: -- list of exception classes should be passed
-        :type args: list,Exception
-        :param exclude: -- list of exception classes should be raised
-        :type exclude: list,Exception
-        :param verbose: -- logging
-        :type verbose: bool
-        '''
-        self._kwargs = dict(**kwargs)
-        self._verbose = kwargs.pop("verbose", False)
-        self._exclude = kwargs.pop("exclude", False)
-        self._excepts = tuple(args)
-
-    def __enter__(self):
-        return self  # pragma: no cover
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return exc_type is not None and (
-            (not self._exclude and not issubclass(exc_type, self._excepts)) or
-            (self._exclude and issubclass(exc_type, self._excepts))
-        )
-
-
-# noinspection PyUnreachableCode
-class raise_context(assertRaises):
-
-    def execute(self, func, *args, **kwargs):
-        with self.__class__(self._excepts, **self._kwargs):
-            return func(*args, **kwargs)
-        type, value, traceback_obj = sys.exc_info()
-        if type is not None:  # nocv
-            logger.debug(traceback.format_exc())
-        return type, value, traceback_obj
-
-    def __enter__(self):
-        return self.execute
-
-    def __call__(self, original_function):
-        def wrapper(*args, **kwargs):
-            return self.execute(original_function, *args, **kwargs)
-
-        return wrapper
-
-
-class exception_with_traceback(raise_context):
-    def __init__(self, *args, **kwargs):
-        super(exception_with_traceback, self).__init__(**kwargs)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_val is not None:
-            exc_val.traceback = traceback.format_exc()
-            six.reraise(exc_type, exc_val, exc_tb)
-
-
-class Paginator(BasePaginator):
-    '''
-    Class for fragmenting the query for small queries.
-    '''
-    def __init__(self, qs, chunk_size=getattr(settings, "PAGE_LIMIT")):
-        '''
-        :param qs: -- queryset for fragmenting
-        :type qs: django.db.models.QuerySet
-        :param chunk_size: -- size of the fragments.
-        :type chunk_size: int
-        '''
-        super(Paginator, self).__init__(qs, chunk_size)
-
-    def __iter__(self):
-        for page in range(1, self.num_pages + 1):
-            yield self.page(page)
-
-    def items(self):
-        for page in self:
-            for obj in page.object_list:
-                obj.paginator = self
-                obj.page = page
-                yield obj
 
 
 class ClassPropertyDescriptor(object):
@@ -390,23 +80,23 @@ def classproperty(func):
 
 
 class redirect_stdany(object):
-    '''
+    """
     Context for redirect any output to own stream.
 
     .. note::
         - On context return stream object.
         - On exit return old streams
-    '''
+    """
     __slots__ = 'stream', 'streams', '_old_streams'
     _streams = ["stdout", "stderr"]
 
     def __init__(self, new_stream=six.StringIO(), streams=None):
-        '''
+        """
         :param new_stream: -- stream where redirects all
         :type new_stream: object
         :param streams: -- names of streams like ``['stdout', 'stderr']``
         :type streams: list
-        '''
+        """
         self.streams = streams or self._streams
         self.stream = new_stream
         self._old_streams = {}
@@ -422,8 +112,447 @@ class redirect_stdany(object):
             setattr(sys, stream, self._old_streams.pop(stream))
 
 
-class ModelHandlers(object):
-    '''
+class Dict(collections.OrderedDict):
+    def __repr__(self):  # nocv
+        return self.__str__()
+
+    def __str__(self):  # nocv
+        return self.__unicode__()
+
+    def __unicode__(self):  # nocv
+        return json.dumps(self)
+
+
+class tmp_file(object):
+    """
+    Temporary file with name
+    generated and auto removed on close.
+    """
+    __slots__ = 'fd',
+
+    def __init__(self, data="", mode="w", bufsize=0, **kwargs):
+        """
+        tmp_file constructor
+
+        :param data: -- string to write in tmp file.
+        :type data: str
+        :param mode: -- file open mode. Default 'w'.
+        :type mode: str
+        :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
+        :type bufsize: int
+        :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
+        """
+        kw = not six.PY3 and {"bufsize": bufsize} or {}
+        kwargs.update(kw)
+        fd = tempfile.NamedTemporaryFile(mode, **kwargs)
+        self.fd = fd
+        if data:
+            self.write(data)
+
+    def write(self, wr_string):
+        """
+        Write to file and flush
+
+        :param wr_string: -- writable string
+        :type wr_string: str
+        :return: None
+        :rtype: None
+        """
+        result = self.fd.write(wr_string)
+        self.fd.flush()
+        return result
+
+    def __getattr__(self, name):
+        return getattr(self.fd, name)
+
+    def __del__(self):
+        self.fd.close()
+
+    def __enter__(self):
+        """
+        :return: -- file object
+        :rtype: tempfile.NamedTemporaryFile
+        """
+        return self
+
+    def __exit__(self, type_e, value, tb):
+        self.fd.close()
+        if value is not None:
+            return False
+
+
+class tmp_file_context(object):
+    """
+    Context object for work with tmp_file.
+    Auto close on exit from context and
+    remove if file stil exist.
+    """
+    __slots__ = 'tmp',
+
+    def __init__(self, *args, **kwargs):
+        self.tmp = tmp_file(*args, **kwargs)
+
+    def __enter__(self):
+        return self.tmp
+
+    def __exit__(self, type_e, value, tb):
+        self.tmp.close()
+        if os.path.exists(self.tmp.name):
+            os.remove(self.tmp.name)
+
+
+class assertRaises(object):
+    """
+    Context for exclude rises
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        :param args: -- list of exception classes should be passed
+        :type args: list,Exception
+        :param exclude: -- list of exception classes should be raised
+        :type exclude: list,Exception
+        :param verbose: -- logging
+        :type verbose: bool
+        """
+        self._kwargs = dict(**kwargs)
+        self._verbose = kwargs.pop("verbose", False)
+        self._exclude = kwargs.pop("exclude", False)
+        self._excepts = tuple(args)
+
+    def __enter__(self):
+        return self  # pragma: no cover
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return exc_type is not None and (
+                (not self._exclude and not issubclass(exc_type, self._excepts)) or
+                (self._exclude and issubclass(exc_type, self._excepts))
+        )
+
+
+# noinspection PyUnreachableCode
+class raise_context(assertRaises):
+
+    def execute(self, func, *args, **kwargs):
+        with self.__class__(self._excepts, **self._kwargs):
+            return func(*args, **kwargs)
+        type, value, traceback_obj = sys.exc_info()
+        if type is not None:  # nocv
+            logger.debug(traceback.format_exc())
+        return type, value, traceback_obj
+
+    def __enter__(self):
+        return self.execute
+
+    def __call__(self, original_function):
+        def wrapper(*args, **kwargs):
+            return self.execute(original_function, *args, **kwargs)
+
+        return wrapper
+
+
+class exception_with_traceback(raise_context):
+    def __init__(self, *args, **kwargs):
+        super(exception_with_traceback, self).__init__(**kwargs)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_val is not None:
+            exc_val.traceback = traceback.format_exc()
+            six.reraise(exc_type, exc_val, exc_tb)
+
+
+class BaseVstObject(object):
+
+    @classmethod
+    def get_django_settings(cls, name, default=None):
+        # pylint: disable=access-member-before-definition
+        if hasattr(cls, '__django_settings__'):
+            return getattr(cls.__django_settings__, name, default)
+        from django.conf import settings
+        cls.__django_settings__ = settings
+        return cls.get_django_settings(name)
+
+    @classmethod
+    def get_django_cache(cls, cache_name='default'):
+        from django.core.cache import caches, InvalidCacheBackendError
+        try:
+            return caches[cache_name]
+        except InvalidCacheBackendError:  # nocv
+            return caches['default']
+
+
+class Executor(BaseVstObject):
+    """
+        Command executor with realtime output write
+        """
+    __slots__ = 'output', '_stdout', '_stderr', 'env'
+
+    CANCEL_PREFIX = "CANCEL_EXECUTE_"
+    newlines = ['\n', '\r\n', '\r']
+    STDOUT = subprocess.PIPE
+    STDERR = subprocess.STDOUT
+    DEVNULL = getattr(subprocess, 'DEVNULL', -3)
+    CalledProcessError = subprocess.CalledProcessError
+
+    def __init__(self, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
+        """
+
+        :type stdout: BinaryIO,int
+        :type stderr: BinaryIO,int
+        """
+        self.output = ''
+        self._stdout = stdout
+        self._stderr = stderr
+        self.env = {}
+
+    def write_output(self, line):
+        """
+        :param line: -- line from command output
+        :type line: str
+        :return: None
+        :rtype: None
+        """
+        self.output += str(line)
+
+    def _handle_process(self, proc, stream):
+        while not getattr(proc, stream).closed:
+            self.working_handler(proc)
+            time.sleep(0.1)
+
+    def working_handler(self, proc):
+        # pylint: disable=unused-argument
+        """
+        Additional handler for executions.
+
+        :type proc: subprocess.Popen
+        """
+
+    def _unbuffered(self, proc, stream='stdout'):
+        if self.working_handler is not None:
+            t = Thread(target=self._handle_process, args=(proc, stream))
+            t.start()
+        out = getattr(proc, stream)
+        try:
+            for line in iter(out.readline, ""):
+                yield line.rstrip()
+        finally:
+            out.close()
+
+    def line_handler(self, line):
+        if line is not None:
+            with raise_context():
+                self.write_output(line)
+
+    def execute(self, cmd, cwd):
+        """
+        Execute commands and output this
+
+        :param cmd: -- list of cmd command and arguments
+        :type cmd: list
+        :param cwd: -- workdir for executions
+        :type cwd: str,unicode
+        :return: -- string with full output
+        :rtype: str
+        """
+        self.output = ""
+        env = os.environ.copy()
+        env.update(self.env)
+        if six.PY2:  # nocv
+            # Ugly hack because python 2.7.
+            if self._stdout == self.DEVNULL:
+                self._stdout = open(os.devnull, 'w+b')
+            if self._stderr == self.DEVNULL:
+                self._stderr = open(os.devnull, 'w+b')
+        proc = subprocess.Popen(
+            cmd, stdout=self._stdout, stderr=self._stderr,
+            bufsize=0, universal_newlines=True,
+            cwd=cwd, env=env,
+            close_fds=ON_POSIX
+        )
+        for line in self._unbuffered(proc):
+            self.line_handler(line)
+        return_code = proc.poll()
+        if return_code:
+            logger.error(self.output)
+            raise subprocess.CalledProcessError(
+                return_code, cmd, output=str(self.output)
+            )
+        return self.output
+
+
+class UnhandledExecutor(Executor):
+    working_handler = None
+
+
+class KVExchanger(BaseVstObject):
+    """
+    Class for transmit data using key-value fast (cache-like) storage between
+    services. Uses same cache-backend as Lock.
+    """
+    TIMEOUT = 60
+
+    @classproperty
+    def PREFIX(cls):
+        # pylint: disable=no-self-argument
+        return "{}_exchange_".format(cls.get_django_settings('VST_PROJECT_LIB'))
+
+    @classproperty
+    def cache(cls):
+        # pylint: disable=no-self-argument,no-member
+        if hasattr(cls, '__django_cache__'):
+            return getattr(cls, '__django_cache__')
+        cls.__django_cache__ = cls.get_django_cache('locks')
+        return cls.cache
+
+    def __init__(self, key, timeout=None):
+        self.key = self.PREFIX + str(key)
+        self.timeout = timeout or self.TIMEOUT
+
+    def send(self, value, ttl=None):
+        # pylint: disable=no-member
+        return self.cache.add(self.key, value, ttl or self.timeout)
+
+    def prolong(self, ttl=None):
+        # pylint: disable=no-member
+        payload = self.cache.get(self.key)
+        self.cache.set(self.key, payload, ttl or self.timeout)
+
+    def get(self):
+        # pylint: disable=no-member
+        value = self.cache.get(self.key)
+        self.cache.delete(self.key)
+        return value
+
+    def delete(self):
+        # pylint: disable=no-member
+        self.cache.delete(self.key)
+
+
+class Lock(KVExchanger):
+    """
+    Lock class for multi-jobs workflow.
+
+    .. note::
+        - Used django.core.cache lib and settings in `settings.py`
+        - Have Lock.SCHEDULER and Lock.GLOBAL id
+    """
+    TIMEOUT = 60 * 60 * 24
+    GLOBAL = "global-deploy"
+    SCHEDULER = "celery-beat"
+
+    class AcquireLockException(Exception):
+        pass
+
+    @classproperty
+    def PREFIX(cls):
+        # pylint: disable=no-self-argument
+        return "{}_lock_".format(cls.get_django_settings('VST_PROJECT_LIB'))
+
+    def __init__(self, id, payload=None, repeat=1, err_msg="", timeout=None):
+        # pylint: disable=too-many-arguments
+        """
+        :param id: -- unique id for lock.
+        :type id: int,str
+        :param payload: -- lock additional info.
+        :param repeat: -- time to wait lock.release. Default 1 sec.
+        :type repeat: int
+        :param err_msg: -- message for AcquireLockException error.
+        :type err_msg: str
+        """
+        super(Lock, self).__init__(id, timeout)
+        self.id, start = None, time.time()
+        while time.time() - start <= repeat:
+            if self.send(payload):
+                self.id = id
+                return
+            time.sleep(0.01)
+        raise self.AcquireLockException(err_msg)
+
+    def get(self):  # nocv
+        # pylint: disable=no-member
+        return self.cache.get(self.key)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type_e, value, tb):
+        self.release()
+
+    def release(self):
+        # pylint: disable=no-member
+        self.cache.delete(self.key)
+
+    def __del__(self):
+        self.release()
+
+
+class __LockAbstractDecorator(object):
+    _err = "Wait until the end."
+    _lock_key = None
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.kwargs["err_msg"] = self.kwargs.get("err_msg", self._err)
+
+    def execute(self, func, *args, **kwargs):
+        if self._lock_key is not None:
+            with Lock(self._lock_key, **self.kwargs):
+                return func(*args, **kwargs)
+        return func(*args, **kwargs)
+
+    def __call__(self, original_function):
+        def wrapper(*args, **kwargs):
+            return self.execute(original_function, *args, **kwargs)
+
+        return wrapper
+
+
+class model_lock_decorator(__LockAbstractDecorator):
+    """
+    Decorator for functions where 'pk' kwarg exist
+    for lock by id.
+
+    .. warning::
+        - On locked error raised ``Lock.AcquireLockException``
+        - Method must have and called with ``pk`` named arg.
+
+    """
+    _err = "Object locked. Wait until unlock."
+
+    def execute(self, func, *args, **kwargs):
+        self._lock_key = kwargs.get('pk', None)
+        return super(model_lock_decorator, self).execute(func, *args, **kwargs)
+
+
+class Paginator(BasePaginator, BaseVstObject):
+    """
+    Class for fragmenting the query for small queries.
+    """
+
+    def __init__(self, qs, chunk_size=None):
+        """
+        :param qs: -- queryset for fragmenting
+        :type qs: django.db.models.QuerySet
+        :param chunk_size: -- size of the fragments.
+        :type chunk_size: int
+        """
+        chunk_size = chunk_size or self.get_django_settings("PAGE_LIMIT", None)
+        super(Paginator, self).__init__(qs, chunk_size)
+
+    def __iter__(self):
+        for page in range(1, self.num_pages + 1):
+            yield self.page(page)
+
+    def items(self):
+        for page in self:
+            for obj in page.object_list:
+                obj.paginator = self
+                obj.page = page
+                yield obj
+
+
+class ModelHandlers(BaseVstObject):
+    """
     Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
     All handlers backends get by first argument model object.
 
@@ -436,18 +565,18 @@ class ModelHandlers(object):
     :param values: -- supported backends classes
     :type values: list
 
-    '''
+    """
 
     __slots__ = 'type', 'err_message', '_list', '_loaded_backends'
 
     def __init__(self, tp, err_message=None):
-        '''
+        """
         :param tp: -- type name for backends.Like name in dict.
         :type tp: str,unicode
-        '''
+        """
         self.type = tp
         self.err_message = err_message
-        self._list = getattr(settings, self.type, {})
+        self._list = self.get_django_settings(self.type, {})
         self._loaded_backends = dict()
 
     @property
@@ -488,34 +617,33 @@ class ModelHandlers(object):
         return self._loaded_backends[backend]
 
     def backend(self, name):
-        '''
+        """
         Get backend class
 
         :param name: -- name of backend type
         :type name: str
         :return: class of backend
         :rtype: class,module,object
-        '''
+        """
         try:
             backend = self.list()[name].get('BACKEND', None)
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_baskend(backend)
         except KeyError or ImportError:
-            msg = "{} ({})".format(name, self.err_message) if self.err_message\
-                                                           else name
+            msg = "{} ({})".format(name, self.err_message) if self.err_message else name
             raise ex.UnknownTypeException(msg)
 
     def opts(self, name):
         return self.list().get(name, {}).get('OPTIONS', {})
 
     def get_object(self, name, obj):
-        '''
+        """
         :param name: -- string name of backend
         :param name: str
         :param obj: -- model object
         :type obj: django.db.models.Model
         :return: backend object
         :rtype: object
-        '''
+        """
         return self[name](obj, **self.opts(name))
