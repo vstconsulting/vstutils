@@ -100,7 +100,8 @@ def make_extensions(extensions_list, packages):
     extra_compile_args = [
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-pipe", "-std=c99"
+        "-pipe", "-std=c99",
+        "-D_FORTIFY_SOURCE=1"
     ]
     ext_modules = list(
         Extension(m, f, extra_compile_args=extra_compile_args)

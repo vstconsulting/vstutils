@@ -2,6 +2,49 @@
 @import url(AdminLTE-3.0.0/min/css/adminlte.min.css);
 @import url(AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css);
 
+.admonition .admonition-title {
+    color: #0000008a;
+}
+
+.admonition.important,
+.admonition.warning .admonition-title {
+    color: #ffa10abd;
+}
+
+.admonition.attention,
+.admonition.caution,
+.admonition.danger,
+.admonition.error .admonition-title {
+    color: #c70413bd;
+}
+
+.admonition.admonition,
+.admonition.hint,
+.admonition.note,
+.admonition.tip
+{
+    background-color: #d3d3d36b;
+    border: 1px solid lightgray;
+    padding-left: 10px;
+}
+
+.admonition.attention,
+.admonition.caution,
+.admonition.danger,
+.admonition.error
+{
+    background-color: #ff97976b;
+    border: 1px solid lightgray;
+    padding-left: 10px;
+}
+
+.admonition.important,
+.admonition.warning
+{
+    background-color: #fff8a96b;
+    border: 1px solid lightgray;
+    padding-left: 10px;
+}
 
 .sidebar-menu ul {
     list-style: none;
