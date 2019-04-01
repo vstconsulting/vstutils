@@ -100,8 +100,7 @@ def make_extensions(extensions_list, packages):
     extra_compile_args = [
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-pipe", "-std=c99",
-        "-D_FORTIFY_SOURCE=1"
+        "-pipe", "-std=c99"
     ]
     ext_modules = list(
         Extension(m, f, extra_compile_args=extra_compile_args)
@@ -315,6 +314,7 @@ def make_setup(**opts):
 # end block
 
 ext_list = [
+    'vstutils.settings',
     'vstutils.exceptions',
     'vstutils.environment',
     'vstutils.middleware',
