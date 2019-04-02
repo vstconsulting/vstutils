@@ -13,6 +13,7 @@ import subprocess
 from threading import Thread
 
 import six
+from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
@@ -274,7 +275,6 @@ class BaseVstObject(object):
 
     @classmethod
     def get_django_cache(cls, cache_name='default'):
-        from django.core.cache import caches, InvalidCacheBackendError
         try:
             return caches[cache_name]
         except InvalidCacheBackendError:  # nocv
@@ -576,7 +576,7 @@ class ModelHandlers(BaseVstObject):
         """
         self.type = tp
         self.err_message = err_message
-        self._list = self.get_django_settings(self.type, {})
+        self._list = None
         self._loaded_backends = dict()
 
     @property
@@ -599,7 +599,7 @@ class ModelHandlers(BaseVstObject):
         return self.items()
 
     def keys(self):
-        return dict(self.objects).keys()
+        return self.objects.keys()
 
     def values(self):  # pragma: no cover
         return dict(self).values()
@@ -608,6 +608,8 @@ class ModelHandlers(BaseVstObject):
         return self.objects.items()
 
     def list(self):
+        if self._list is None:
+            self._list = self.get_django_settings(self.type, {})
         return self._list
 
     def _get_baskend(self, backend):
