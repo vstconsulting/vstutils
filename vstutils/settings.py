@@ -141,6 +141,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'vstutils.middleware.TimezoneHeadersMiddleware',
+    'vstutils.middleware.ExecuteTimeHeadersMiddleware',
 ]
 # Fix for django 1.8-9
 MIDDLEWARE_CLASSES = MIDDLEWARE

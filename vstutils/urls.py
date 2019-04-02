@@ -39,7 +39,7 @@ urlpatterns += [
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls))]
-if getattr(settings, 'LOCALRUN', False):
+if getattr(settings, 'LOCALRUN', False) or getattr(settings, 'TESTSERVER_RUN', False):
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 else:  # nocv
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

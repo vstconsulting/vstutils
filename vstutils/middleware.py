@@ -1,3 +1,4 @@
+import time
 import logging
 from django.conf import settings
 
@@ -37,3 +38,11 @@ class TimezoneHeadersMiddleware(BaseMiddleware):
         response['Server-Timezone'] = self.get_setting('TIME_ZONE')
         response['VSTutils-Version'] = self.get_setting('VSTUTILS_VERSION')
         return response
+
+
+class ExecuteTimeHeadersMiddleware(BaseMiddleware):
+    def get_response_handler(self, request):
+        start_time = time.time()
+        resonse = super(ExecuteTimeHeadersMiddleware, self).get_response_handler(request)
+        resonse['ResponseTime'] = time.time() - start_time
+        return resonse
