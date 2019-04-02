@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import logging
+import traceback
 from django.contrib.auth import get_user_model
 from django.conf import settings
 try:
@@ -9,6 +11,7 @@ except ImportError:
     HAS_LDAP = False
 
 UserModel = get_user_model()
+logger = logging.getLogger(settings.VST_PROJECT_LIB)
 
 
 class LDAP(_LDAP):
@@ -33,6 +36,7 @@ class LdapBackend(object):
             user = UserModel._default_manager.get_by_natural_key(backend.domain_user)
             return user if self.user_can_authenticate(user) else None
         except Exception:
+            logger.info(traceback.format_exc())
             return
 
     def user_can_authenticate(self, user):

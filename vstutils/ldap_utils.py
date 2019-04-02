@@ -27,6 +27,7 @@ class LDAP(object):
         'password',
         'domain',
         '__conn',
+        'user_format',
     )
     fields = ['cn', 'sAMAccountName', 'accountExpires', 'name', 'memberOf']
     LdapError = ldap.LDAPError
@@ -49,17 +50,17 @@ class LDAP(object):
         '''
         from django.conf import settings
         self.settings = settings
+        self.user_format = settings.LDAP_FORMAT.replace('<', "{").replace('>', '}')
         self.logger = logging.getLogger(settings.VST_PROJECT_LIB)
         self.connection_string = connection_string
         self.username = username
         self.password = password
-        self.domain = domain
+        self.domain = (domain or username.split('@')[-1]).strip()
         if not self.domain:
             if r'@' not in username:
                 raise self.InvalidDomainName(
                     "Domain should be setuped or username should be with @domain.name"
                 )
-            self.domain = self.username.split('@')[1]
         if len(self.domain.split('.')) <= 1:
             raise self.InvalidDomainName(
                 "Invalid name {}. Should be [full.domain.name]".format(domain)
@@ -72,11 +73,13 @@ class LDAP(object):
         self.__conn = self.__authenticate(self.connection_string, username, password)
 
     def __prepare_user_with_domain(self, username):
-        user = str(username)
-        if r'@' in user or '\\' in user:
-            return user
-        if len(self.domain.split('.')) > 1:
-            user = "{}@{}".format(username, self.domain.lower())
+        user = str(username).split('@')[0]
+        domain = str(username).split('@')[-1] or self.domain
+        domain = domain.lower()
+        if domain != user:
+            domain = ','.join(['dc={}'.format(d) for d in domain.split('.') if d])
+        user = self.user_format.format(username=user, domain=domain)
+        self.logger.debug('Trying auth in ldap with user "{}"'.format(user))
         return user
 
     def __authenticate(self, ad, username, password):
