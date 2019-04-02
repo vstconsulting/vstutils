@@ -134,10 +134,12 @@ class VSTUtilsTestCase(BaseTestCase):
         admin_dict = {
             "objectCategory": ['top', 'user'],
             "userPassword": [admin_password],
+            "userpassword": admin_password,
             'cn': [admin]
         }
         tree = {
             admin: admin_dict,
+            "cn=admin,dc=test,dc=lan": admin_dict,
             "dc=test,dc=lan": {
                 'cn=admin,dc=test,dc=lan': admin_dict,
                 'cn=test,dc=test,dc=lan': {"objectCategory": ['person', 'user']},
@@ -145,6 +147,10 @@ class VSTUtilsTestCase(BaseTestCase):
         }
         LDAP_obj = MockLDAP(tree)
         ldap_obj.return_value = LDAP_obj
+        with self.assertRaises(LDAP.InvalidDomainName):
+            LDAP('ldap://10.10.10.22', '')
+        with self.assertRaises(LDAP.InvalidDomainName):
+            LDAP('ldap://10.10.10.22', ' ')
         ldap_backend = LDAP('ldap://10.10.10.22', admin, domain='test.lan')
         self.assertFalse(ldap_backend.isAuth())
         with self.assertRaises(LDAP.NotAuth):

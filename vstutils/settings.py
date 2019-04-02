@@ -150,6 +150,7 @@ CORS_ORIGIN_ALLOW_ALL = web.getboolean('allow_cors', fallback=False)
 
 LDAP_SERVER = main.get("ldap-server", fallback=None)
 LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
+LDAP_FORMAT = main.get("ldap-auth_format", fallback='cn=<username>,<domain>')
 AUTHENTICATION_BACKENDS = [
     'vstutils.auth.LdapBackend',
     'django.contrib.auth.backends.ModelBackend'
