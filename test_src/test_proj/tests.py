@@ -64,7 +64,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.assertEqual('yes', cmd.execute('echo yes'.split(' '), dir_name))
         cmd = utils.Executor()
         with self.assertRaises(utils.subprocess.CalledProcessError):
-            cmd.execute('bash -c unknown command'.split(' '), dir_name)
+            cmd.execute('bash -c unknown'.split(' '), dir_name)
 
     def test_startproject(self):
         # Easy create
