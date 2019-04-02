@@ -63,8 +63,8 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         cmd = utils.Executor(stderr=utils.Executor.DEVNULL)
         self.assertEqual('yes', cmd.execute('echo yes'.split(' '), dir_name))
         cmd = utils.Executor()
-        with self.assertRaises(utils.subprocess.CalledProcessError):
-            cmd.execute('python0.0 --version'.split(' '), dir_name)
+        with utils.raise_context():
+            cmd.execute('bash -c "python0.0 --version"'.split(' '), dir_name)
 
     def test_startproject(self):
         # Easy create
