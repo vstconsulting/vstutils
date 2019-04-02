@@ -630,12 +630,12 @@ if TESTS_RUN:
     CONTACT = dict(
         some_extra_url='https://pypi.org/project/vstutils/', **CONTACT
     )
+    CELERY_RESULT_BACKEND = 'cache'
+    CELERY_CACHE_BACKEND = 'memory'
     CACHES = {
         name: {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
         for name in CACHES
     }
-    CELERY_RESULT_BACKEND = 'cache'
-    CELERY_CACHE_BACKEND = 'memory'
 
 if not TESTSERVER_RUN and TESTS_RUN:
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
