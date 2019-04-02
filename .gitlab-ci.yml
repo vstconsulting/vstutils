@@ -55,10 +55,10 @@ code_style:
     TOX_ENVS: "flake,pylint"
   allow_failure: true
 
-py27-django111-coverage:
-  <<: *branch_tests
-  variables:
-    TOX_ENVS: "$CI_BUILD_NAME"
+#py27-django111-coverage:
+#  <<: *branch_tests
+#  variables:
+#    TOX_ENVS: "$CI_BUILD_NAME"
 
 # Python 2.7 and Django 1.11 deprecated
 #py27-django111-install:
@@ -66,7 +66,7 @@ py27-django111-coverage:
 #  variables:
 #    TOX_ENVS: "$CI_BUILD_NAME"
 
-py36-django111-install:
+py36-django22-install:
   <<: *branch_tests
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
@@ -77,11 +77,11 @@ py36-django111-install:
 #  variables:
 #    TOX_ENVS: "$CI_BUILD_NAME"
 
-#py36-django22-coverage:
-#  <<: *branch_tests
-#  image: onegreyonewhite/tox:ubuntu
-#  variables:
-#    TOX_ENVS: "$CI_BUILD_NAME"
+py36-django22-coverage:
+  <<: *branch_tests
+  image: onegreyonewhite/tox:ubuntu
+  variables:
+    TOX_ENVS: "$CI_BUILD_NAME"
 
 
 pages:
