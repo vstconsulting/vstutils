@@ -18,6 +18,7 @@ from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation
 from django.utils.module_loading import import_string as import_class
+from django.views.decorators.csrf import csrf_exempt
 
 from . import exceptions as ex
 
@@ -618,6 +619,12 @@ class ModelHandlers(BaseVstObject):
         self._loaded_backends[backend] = import_class(backend)
         return self._loaded_backends[backend]
 
+    def get_backend_data(self, name):
+        return self.list()[name]
+
+    def get_backend_handler_path(self, name):
+        return self.get_backend_data(name).get('BACKEND', None)
+
     def backend(self, name):
         """
         Get backend class
@@ -628,7 +635,7 @@ class ModelHandlers(BaseVstObject):
         :rtype: class,module,object
         """
         try:
-            backend = self.list()[name].get('BACKEND', None)
+            backend = self.get_backend_handler_path(name)
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_baskend(backend)
@@ -637,7 +644,7 @@ class ModelHandlers(BaseVstObject):
             raise ex.UnknownTypeException(msg)
 
     def opts(self, name):
-        return self.list().get(name, {}).get('OPTIONS', {})
+        return self.get_backend_data(name).get('OPTIONS', {})
 
     def get_object(self, name, obj):
         """
@@ -649,3 +656,44 @@ class ModelHandlers(BaseVstObject):
         :rtype: object
         """
         return self[name](obj, **self.opts(name))
+
+
+class URLHandlers(ModelHandlers):
+    settings_urls = ['LOGIN_URL', 'LOGOUT_URL']
+
+    def __init__(self, tp='GUI_VIEWS', *args, **kwargs):
+        self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [tp]
+        super(URLHandlers, self).__init__(tp, *args, **kwargs)
+
+    @property
+    def view_handlers(self):
+        if not hasattr(self, '__handlers__'):
+            self.__handlers__ = []
+            handler_class = self.__class__
+            for handler_settings_name in self.additional_handlers:
+                self.__handlers__.append(handler_class(handler_settings_name))
+        return self.__handlers__
+
+    def get_backend_data(self, name):
+        data = super(URLHandlers, self).get_backend_data(name)
+        if isinstance(data, (six.string_types, six.text_type)):
+            for handler in self.view_handlers:
+                try:
+                    handler_data = handler.get_backend_data(data)
+                except:
+                    continue
+                if handler_data:
+                    return handler_data
+        return data
+
+    def urls(self):
+        for regexp, backend in self.items():
+            options = self.opts(regexp)
+            args = options.pop('view_args', tuple())
+            csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
+            if regexp in self.settings_urls:
+                regexp = r'^{}'.format(self.get_django_settings(regexp)[1:])
+            view = backend.as_view()
+            if not csrf_enable:
+                view = csrf_exempt(view)
+            yield regexp, view, args, options

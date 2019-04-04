@@ -600,11 +600,23 @@ VIEWS = {
         "BACKEND": 'vstutils.gui.views.GUIView'
     },
     "LOGIN": {
-        "BACKEND": 'vstutils.gui.views.Login'
+        "BACKEND": 'vstutils.gui.views.Login',
+        "OPTIONS": {
+            'name': 'login'
+        }
     },
     "LOGOUT": {
-        "BACKEND": 'vstutils.gui.views.Logout'
+        "BACKEND": 'vstutils.gui.views.Logout',
+        "OPTIONS": {
+            'view_args': [{'next_page': '/'}]
+        }
     },
+}
+
+GUI_VIEWS = {
+    r'^$': 'GUI',
+    'LOGIN_URL': 'LOGIN',
+    'LOGOUT_URL': 'LOGOUT'
 }
 
 PROJECT_GUI_MENU = [

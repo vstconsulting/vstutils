@@ -21,4 +21,10 @@ API[VST_API_VERSION][r'files'] = dict(
     view='test_proj.views.FilesViewSet'
 )
 
+GUI_VIEWS[r'^gui/$'] = r'^$'
+GUI_VIEWS[r'^csrf_disable_gui/$'] = {
+    'BACKEND': 'vstutils.gui.views.GUIView',
+    'CSRF_ENABLE': False
+}
+
 DEBUG = True

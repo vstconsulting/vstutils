@@ -5,11 +5,8 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from rest_framework import permissions
 from .api.routers import MainRouter
-from .utils import ModelHandlers
+from .utils import URLHandlers
 
-
-# Views handler for get views via name
-views_hndlr = ModelHandlers('VIEWS')
 
 # Main router for all APIs versions
 router = MainRouter(
@@ -21,16 +18,13 @@ router.generate_routers(settings.API)
 
 admin.site.site_header = 'Admin panel'
 admin.site.site_title = settings.VST_PROJECT
-admin.site.index_title = "{} Settings Panel".format(settings.VST_PROJECT)
+admin.site.index_title = "{} Settings Panel".format(settings.VST_PROJECT.upper())
 admin.site.site_url = "/"
-login_url = getattr(settings, 'LOGIN_URL', '/login/')[1:]
-logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')[1:]
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
 urlpatterns = [
-    url(r'^$', views_hndlr['GUI'].as_view()),
-    url(r'^{}'.format(login_url), views_hndlr['LOGIN'].as_view(), name='login'),
-    url(r'^{}'.format(logout_url), views_hndlr['LOGOUT'].as_view(), {'next_page': '/'}),
+    url(regexp, view, *args, **opts)
+    for regexp, view, args, opts in URLHandlers().urls()
 ]
 
 urlpatterns += [
