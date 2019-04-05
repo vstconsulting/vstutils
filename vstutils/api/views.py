@@ -95,6 +95,7 @@ class BulkViewSet(base.rvs.APIView):
 
     get: Return allowed_types and operations_types
     post: Return result of bulk-operations.
+    put: Return result of bulk-operations without rollback.
     '''
     client_environ_keys_copy = [
         "SCRIPT_NAME",
