@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test import Client
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+from rest_framework import permissions as rest_permissions, status
 try:
     from Queue import Queue
 except ImportError:  # nocv
@@ -18,10 +19,13 @@ class UserViewSet(base.ModelViewSetSet):
     '''
     API endpoint that allows users to be viewed or edited.
     '''
+    # pylint: disable=invalid-name
 
     model = serializers.User
     serializer_class = serializers.UserSerializer
     serializer_class_one = serializers.OneUserSerializer
+    serializer_class_create = serializers.CreateUserSerializer
+    serializer_class_change_password = serializers.ChangePasswordSerializer
     filter_class = filters.UserFilter
     permission_classes = (permissions.SuperUserPermission,)
 
@@ -40,14 +44,19 @@ class UserViewSet(base.ModelViewSetSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance,
-                                         data=request.data,
-                                         partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if not serializer.is_valid(raise_exception=False):
             raise Exception("Invalid data was sended.")
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return base.Response(serializer.data, 200).resp
+
+    @deco.action(["post"], detail=True, permission_classes=(rest_permissions.IsAuthenticated,))
+    def change_password(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
 class SettingsViewSet(base.ListNonModelViewSet):
@@ -217,9 +226,9 @@ class BulkViewSet(base.rvs.APIView):
         method = getattr(self.client, self.get_method_type(op_type, operation))
         return method(url, secure=self.is_secure, **kwargs), url
 
-    def create_response(self, status, data, operation, **kwargs):
+    def create_response(self, status_code, data, operation, **kwargs):
         result = Dict(
-            status=status, data=data,
+            status=status_code, data=data,
             type=operation.get('type', None), item=operation.get('item', None),
             additional_info=kwargs
         )

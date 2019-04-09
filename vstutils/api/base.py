@@ -203,8 +203,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         detail_actions = ['create', 'retrieve', 'update', 'partial_update']
         lookup_field_data = self.kwargs.get(lookup_field, False)
         action_name = getattr(self, 'action', None)
-        # Try to get overloaded serializer from 'action_serializers'
-        serializer_class = self.action_serializers.get(action_name, None)
+        # Try to get overloaded serializer from 'action_serializers' or from attrs
+        serializer_class = getattr(self, 'serializer_class_{}'.format(action_name), None)
+        serializer_class = serializer_class or self.action_serializers.get(action_name, None)
         if serializer_class:
             return serializer_class
         # Get 'serializer_class_one' for detail operations

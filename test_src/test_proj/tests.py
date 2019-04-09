@@ -351,7 +351,13 @@ class VSTUtilsTestCase(BaseTestCase):
         user_data = dict(
             username="test_user", first_name="some", last_name='test', email="1@test.ru"
         )
-        post_data = dict(password="some_password", **user_data)
+        post_data = dict(
+            password="some_password",
+            password2='some_another_password',
+            **user_data
+        )
+        self.get_result('post', '/api/v1/user/', data=post_data, code=400)
+        post_data['password2'] = post_data['password']
         result = self.get_result('post', '/api/v1/user/', data=post_data)
         self.assertCheckDict(user_data, result)
         result = self.get_result('get', '/api/v1/user/{}/'.format(result['id']))
@@ -387,13 +393,35 @@ class VSTUtilsTestCase(BaseTestCase):
         user_data['email'] = 'test@test.lan'
         self.post_result('/api/v1/user/', data=user_data, code=403)
         self.assertEqual(self.get_count('django.contrib.auth.models.User'), 2)
-        update_password = json.dumps(dict(password='12345'))
         self.get_result(
-            'patch', '/api/v1/user/{}/'.format(self.user.id), data=update_password
+            'patch', '/api/v1/user/{}/'.format(self.user.id),
+            data=json.dumps(dict(last_name=self.user.last_name))
+        )
+        invalid_old_password = json.dumps(dict(
+            old_password='1', password='2', password2='2'
+        ))
+        self.get_result(
+            'post', '/api/v1/user/{}/change_password/'.format(self.user.id),
+            data=invalid_old_password, code=403
+        )
+        not_identical_passwords = json.dumps(dict(
+            old_password=self.user.data['password'], password='2', password2='3'
+        ))
+        self.get_result(
+            'post', '/api/v1/user/{}/change_password/'.format(self.user.id),
+            data=not_identical_passwords, code=400
+        )
+        update_password = json.dumps(dict(
+            old_password=self.user.data['password'], password='12345', password2='12345'
+        ))
+        self.get_result(
+            'post', '/api/v1/user/{}/change_password/'.format(self.user.id),
+            data=update_password
         )
         self.change_identity(True)
         data = [
-            dict(username="USER{}".format(i), password="123") for i in range(10)
+            dict(username="USER{}".format(i), password="123", password2="123")
+            for i in range(10)
         ]
         users_id = self.mass_create('/api/v1/user/', data, 'username')
         self.assertEqual(self.get_count('django.contrib.auth.models.User'), 13)
@@ -411,12 +439,17 @@ class VSTUtilsTestCase(BaseTestCase):
         user_hash = '245cf079454dc9a3374a7c076de247cc'
         gravatar_link = 'https://www.gravatar.com/avatar/{}?d=mp'
         user_without_gravatar = dict(
-            username="test_user_1", password="test_password_1",
+            username="test_user_1",
+            password="test_password_1",
+            password2="test_password_1",
         )
         result = self.get_result('post', '/api/v1/user/', data=user_without_gravatar)
         self.assertEqual(default_gravatar, get_user_gravatar(result["id"]))
         user_with_gravatar = dict(
-            username="test_user_2", password="test_password_2", email="test1@gmail.com",
+            username="test_user_2",
+            password="test_password_2",
+            password2="test_password_2",
+            email="test1@gmail.com",
         )
         result = self.get_result('post', '/api/v1/user/', data=user_with_gravatar)
         self.assertEqual(
@@ -435,10 +468,11 @@ class VSTUtilsTestCase(BaseTestCase):
             operations_types=list(self.settings_obj.BULK_OPERATION_TYPES.keys())
         )
         data = [
-            dict(username="USER{}".format(i), password="123") for i in range(10)
+            dict(username="USER{}".format(i), password="123", password2='123')
+            for i in range(10)
         ]
         users_id = self.mass_create('/api/v1/user/', data, 'username')
-        test_user = dict(username=self.random_name(), password='123')
+        test_user = dict(username=self.random_name(), password='123', password2='123')
         userself_data = dict(first_name='me')
         bulk_request_data = [
             # Check code 204
@@ -467,7 +501,9 @@ class VSTUtilsTestCase(BaseTestCase):
             {
                 'method': "post", 'data_type': ['user'],
                 'data': {
-                    "username": 'ttt', 'password': 'ttt333',
+                    "username": 'ttt',
+                    'password': 'ttt333',
+                    'password2': 'ttt333',
                     'first_name': json.dumps({"some": 'json'})
                 }
             },
@@ -532,7 +568,7 @@ class VSTUtilsTestCase(BaseTestCase):
         schema = client.get('http://testserver/api/v1/schema/')
         result = client.action(schema, ['user', 'list'])
         self.assertEqual(result['count'], 1)
-        create_data = dict(username='test', password='123')
+        create_data = dict(username='test', password='123', password2='123')
         result = client.action(schema, ['user', 'add'], create_data)
         self.assertEqual(result['username'], create_data['username'])
         self.assertFalse(result['is_staff'])
