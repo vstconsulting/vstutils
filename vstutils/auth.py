@@ -76,7 +76,7 @@ class AuthPluginsBackend(BaseAuthBackend):
     @raise_context()
     def authenticate(self, request, username=None, password=None):
         # pylint: disable=protected-access,unused-argument
-        if self.auth_header in request.META:
+        if request and self.auth_header in request.META:
             return self.auth_with_plugin(
                 request.META[self.auth_header], request, username, password
             )

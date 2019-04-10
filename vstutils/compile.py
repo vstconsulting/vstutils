@@ -1,3 +1,0 @@
-# pylint: disable=wildcard-import,import-error
-# legacy...
-from vstcompile import *
