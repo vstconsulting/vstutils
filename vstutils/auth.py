@@ -71,7 +71,7 @@ class AuthPluginsBackend(BaseAuthBackend):
 
     @raise_context()
     def auth_with_plugin(self, plugin, request, username, password):
-        return self.auth_handlers[plugin].authenticate(request, username, password)
+        return self.auth_handlers[plugin]().authenticate(request, username, password)
 
     @raise_context()
     def authenticate(self, request, username=None, password=None):
