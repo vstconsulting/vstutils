@@ -38,7 +38,7 @@ class LDAP(object):
     class InvalidDomainName(ldap.INVALID_CREDENTIALS):
         pass
 
-    def __init__(self, connection_string, username='', password='', domain=''):
+    def __init__(self, connection_string, username=None, password=None, domain=None):
         '''
         LDAP constructor
 
@@ -55,7 +55,11 @@ class LDAP(object):
         self.connection_string = connection_string
         self.username = username
         self.password = password
-        self.domain = (domain or username.split('@')[-1]).strip()
+        if domain:
+            self.domain = domain
+        else:
+            self.domain = username.split('@')[-1]
+        self.domain = self.domain.strip()
         if not self.domain:
             if r'@' not in username:
                 raise self.InvalidDomainName(
@@ -74,7 +78,9 @@ class LDAP(object):
 
     def __prepare_user_with_domain(self, username):
         user = str(username).split('@')[0]
-        domain = str(username).split('@')[-1] or self.domain
+        domain = str(self.domain)
+        if len(str(username).split('@')) > 1:
+            domain = str(username).split('@')[-1]
         domain = domain.lower()
         if domain != user:
             domain = ','.join(['dc={}'.format(d) for d in domain.split('.') if d])

@@ -108,16 +108,18 @@ class VSTUtilsTestCase(BaseTestCase):
         response = self.client.post("/logout/")
         self.assertEqual(response.status_code, 302)
 
-    @patch('vstutils.ldap_utils.ldap.initialize')
+    @patch('ldap.initialize')
     def test_ldap_auth(self, ldap_obj):
         User = self.get_model_class('django.contrib.auth.models.User')
-        User.objects.create(username='admin')
+        User.objects.create(username='admin', password='some_strong_password')
         # Test on fakeldap
         admin = "admin@test.lan"
         admin_password = "ldaptest"
+        admin_dict = {"userPassword": admin_password, 'cn': [admin]}
         LDAP_obj = MockLDAP({
-            admin: {"userPassword": [admin_password], 'cn': [admin]},
-            'test': {"userPassword": [admin_password]}
+            admin: admin_dict,
+            "cn=admin,dc=test,dc=lan": admin_dict,
+            'test': {"userPassword": admin_password}
         })
         data = dict(username=admin, password=admin_password)
         client = Client()
@@ -130,7 +132,18 @@ class VSTUtilsTestCase(BaseTestCase):
             self._get_test_ldap(client, data)
 
         # Unittest
+        ldap_backend = LDAP(
+            'ldap://10.10.10.22',
+            admin.replace('@test.lan', ''),
+            admin_password,
+            'test.lan'
+        )
+        self.assertTrue(ldap_backend.isAuth())
+        self.assertEqual(ldap_backend.domain_user, admin.replace('@test.lan', ''))
+        self.assertEqual(ldap_backend.domain_name, 'test.lan')
+
         ldap_obj.reset_mock()
+
         admin_dict = {
             "objectCategory": ['top', 'user'],
             "userPassword": [admin_password],
@@ -151,6 +164,8 @@ class VSTUtilsTestCase(BaseTestCase):
             LDAP('ldap://10.10.10.22', '')
         with self.assertRaises(LDAP.InvalidDomainName):
             LDAP('ldap://10.10.10.22', ' ')
+        with self.assertRaises(LDAP.InvalidDomainName):
+            LDAP('ldap://10.10.10.22', admin.replace('test.lan', ''), admin_password)
         ldap_backend = LDAP('ldap://10.10.10.22', admin, domain='test.lan')
         self.assertFalse(ldap_backend.isAuth())
         with self.assertRaises(LDAP.NotAuth):

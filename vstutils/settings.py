@@ -1,10 +1,12 @@
 import os
 import pwd
 import sys
+from collections import OrderedDict
 from warnings import warn
 
 from configparser import ConfigParser
 from django.contrib import admin
+from django.utils.functional import lazy
 from drf_yasg import errors
 import pyximport
 pyximport.install()
@@ -152,8 +154,32 @@ CORS_ORIGIN_ALLOW_ALL = web.getboolean('allow_cors', fallback=False)
 LDAP_SERVER = main.get("ldap-server", fallback=None)
 LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
 LDAP_FORMAT = main.get("ldap-auth_format", fallback='cn=<username>,<domain>')
+
+DEFAULT_AUTH_PLUGINS = {
+    'LDAP': {
+        "BACKEND": "vstutils.auth.LdapBackend"
+    }
+}
+
+DEFAULT_AUTH_PLUGIN_LIST = 'LDAP'
+
+def get_plugins():
+    plugins = OrderedDict()
+    for plugin_name in main.getlist('auth-plugins', fallback=DEFAULT_AUTH_PLUGIN_LIST):
+        if plugin_name in DEFAULT_AUTH_PLUGINS:
+            data = DEFAULT_AUTH_PLUGINS[plugin_name]
+            name = plugin_name
+        else:
+            data = {"BACKEND": plugin_name}
+            name = list(filter(bool, plugin_name.split('.')))[-1].lower().replace(
+                'backend', '')
+        plugins[name] = data
+    return plugins
+
+AUTH_PLUGINS = lazy(get_plugins, OrderedDict)()
+
 AUTHENTICATION_BACKENDS = [
-    'vstutils.auth.LdapBackend',
+    'vstutils.auth.AuthPluginsBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
 
