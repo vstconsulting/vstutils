@@ -90,7 +90,7 @@ class redirect_stdany(object):
         - On exit return old streams
     """
     __slots__ = 'stream', 'streams', '_old_streams'
-    _streams = ["stdout", "stderr"]
+    _streams = ["stdout", "stderr"]  # type: list
 
     def __init__(self, new_stream=six.StringIO(), streams=None):
         """
@@ -146,8 +146,7 @@ class tmp_file(object):
         """
         kw = not six.PY3 and {"bufsize": bufsize} or {}
         kwargs.update(kw)
-        fd = tempfile.NamedTemporaryFile(mode, **kwargs)
-        self.fd = fd
+        self.fd = tempfile.NamedTemporaryFile(mode, **kwargs)
         if data:
             self.write(data)
 
@@ -168,7 +167,8 @@ class tmp_file(object):
         return getattr(self.fd, name)
 
     def __del__(self):
-        self.fd.close()
+        with raise_context():
+            self.fd.close()
 
     def __enter__(self):
         """
@@ -288,8 +288,8 @@ class Executor(BaseVstObject):
         """
     __slots__ = 'output', '_stdout', '_stderr', 'env'
 
-    CANCEL_PREFIX = "CANCEL_EXECUTE_"
-    newlines = ['\n', '\r\n', '\r']
+    CANCEL_PREFIX = "CANCEL_EXECUTE_"  # type: str
+    newlines = ['\n', '\r\n', '\r']  # type: list
     STDOUT = subprocess.PIPE
     STDERR = subprocess.STDOUT
     DEVNULL = getattr(subprocess, 'DEVNULL', -3)
@@ -329,6 +329,13 @@ class Executor(BaseVstObject):
         """
 
     def _unbuffered(self, proc, stream='stdout'):
+        """
+        Unbuffered output handler.
+
+        :type proc: subprocess.Popen
+        :type stream: six.text_types
+        :return:
+        """
         if self.working_handler is not None:
             t = Thread(target=self._handle_process, args=(proc, stream))
             t.start()
@@ -340,6 +347,11 @@ class Executor(BaseVstObject):
             out.close()
 
     def line_handler(self, line):
+        """
+        Per line handler.
+
+        :type line: str
+        """
         if line is not None:
             with raise_context():
                 self.write_output(line)
@@ -390,7 +402,7 @@ class KVExchanger(BaseVstObject):
     Class for transmit data using key-value fast (cache-like) storage between
     services. Uses same cache-backend as Lock.
     """
-    TIMEOUT = 60
+    TIMEOUT = 60  # type: int
 
     @classproperty
     def PREFIX(cls):
@@ -437,9 +449,9 @@ class Lock(KVExchanger):
         - Used django.core.cache lib and settings in `settings.py`
         - Have Lock.SCHEDULER and Lock.GLOBAL id
     """
-    TIMEOUT = 60 * 60 * 24
-    GLOBAL = "global-deploy"
-    SCHEDULER = "celery-beat"
+    TIMEOUT = 60 * 60 * 24  # type: int
+    GLOBAL = "global-deploy"  # type: str
+    SCHEDULER = "celery-beat"  # type: str
 
     class AcquireLockException(Exception):
         pass
@@ -658,8 +670,15 @@ class ModelHandlers(BaseVstObject):
         return self[name](obj, **self.opts(name))
 
 
-class URLHandlers(ModelHandlers):
-    settings_urls = ['LOGIN_URL', 'LOGOUT_URL']
+class ObjectHandlers(ModelHandlers):
+    def get_object(self, name, *args, **kwargs):
+        opts = self.opts(name)
+        opts.update(kwargs)
+        return self[name](*args, **opts)
+
+
+class URLHandlers(ObjectHandlers):
+    settings_urls = ['LOGIN_URL', 'LOGOUT_URL']  # type: list
 
     def __init__(self, tp='GUI_VIEWS', *args, **kwargs):
         self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [tp]

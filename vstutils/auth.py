@@ -3,7 +3,7 @@ import logging
 import traceback
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from .utils import ModelHandlers, raise_context
+from .utils import ObjectHandlers, raise_context
 try:
     from .ldap_utils import LDAP as _LDAP
     HAS_LDAP = True
@@ -66,12 +66,12 @@ class LdapBackend(BaseAuthBackend):
 
 
 class AuthPluginsBackend(BaseAuthBackend):
-    auth_handlers = ModelHandlers('AUTH_PLUGINS')
+    auth_handlers = ObjectHandlers('AUTH_PLUGINS')
     auth_header = 'HTTP_X_AUTH_PLUGIN'
 
     @raise_context()
     def auth_with_plugin(self, plugin, request, username, password):
-        return self.auth_handlers[plugin]().authenticate(request, username, password)
+        return self.auth_handlers.get_object(plugin).authenticate(request, username, password)
 
     @raise_context()
     def authenticate(self, request, username=None, password=None):
