@@ -15,6 +15,7 @@ from threading import Thread
 import six
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
+from django.conf.urls import url
 from django.template import loader
 from django.utils import translation
 from django.utils.module_loading import import_string as import_class
@@ -705,14 +706,29 @@ class URLHandlers(ObjectHandlers):
                     return handler_data
         return data
 
+    def get_object(self, name, *argv, **kwargs):
+        """
+        Get url object tuple for url
+
+        :param name: url regexp from
+        :type name: str
+        :param argv: overrided args
+        :param kwargs: overrided kwargs
+        :return: url object
+        :rtype: django.conf.urls.url
+        """
+        regexp = name
+        options = self.opts(regexp)
+        options.update(kwargs)
+        args = options.pop('view_args', argv)
+        csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
+        if regexp in self.settings_urls:
+            regexp = r'^{}'.format(self.get_django_settings(regexp)[1:])
+        view = self[name].as_view()
+        if not csrf_enable:
+            view = csrf_exempt(view)
+        return url(regexp, view, *args, **options)
+
     def urls(self):
-        for regexp, backend in self.items():
-            options = self.opts(regexp)
-            args = options.pop('view_args', tuple())
-            csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
-            if regexp in self.settings_urls:
-                regexp = r'^{}'.format(self.get_django_settings(regexp)[1:])
-            view = backend.as_view()
-            if not csrf_enable:
-                view = csrf_exempt(view)
-            yield regexp, view, args, options
+        for regexp in self.list():
+            yield self.get_object(regexp)

@@ -22,10 +22,7 @@ admin.site.index_title = "{} Settings Panel".format(settings.VST_PROJECT.upper()
 admin.site.site_url = "/"
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
-urlpatterns = [
-    url(regexp, view, *args, **opts)
-    for regexp, view, args, opts in URLHandlers().urls()
-]
+urlpatterns = list(URLHandlers().urls())
 
 urlpatterns += [
     url(r'^admin/', admin.site.urls),
