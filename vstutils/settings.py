@@ -71,12 +71,17 @@ web = SectionConfig('web')
 SECRET_FILE = os.getenv(
     "{}_SECRET_FILE".format(ENV_NAME), "/etc/{}/secret".format(VST_PROJECT_LIB)
 )
-SECRET_KEY = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
-try:
-    with open(SECRET_FILE, "r") as secret_file:
-        SECRET_KEY = secret_file.read().strip()  # nocv
-except IOError:
-    pass
+
+def secret_key():
+    result = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
+    try:
+        with open(SECRET_FILE, "r") as secret_file:
+            result = secret_file.read().strip()  # nocv
+    except IOError:
+        pass
+    return result
+
+SECRET_KEY = lazy(secret_key, str)()
 
 # Main settings
 ##############################################################
@@ -322,8 +327,14 @@ DATABASES = {
     'default': DBSectionConfig().all()
 }
 if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.mysql':  # nocv
-    import pymysql
-    pymysql.install_as_MySQLdb()
+    try:
+        import mysql
+    except ImportError:
+        try:
+            import pymysql
+            pymysql.install_as_MySQLdb()
+        except ImportError:
+            pass
 
 if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.sqlite3':
     try:
