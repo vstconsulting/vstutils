@@ -13,8 +13,10 @@ from .models import BQuerySet, BaseModel
 
 
 def multikeysort(items, columns, reverse=False):
-    items = list(items)
-    columns = list(columns)
+    if not isinstance(items, list):
+        items = list(items)  # nocv
+    if not isinstance(columns, list):
+        columns = list(columns)
     columns.reverse()
 
     for column in columns:
@@ -36,8 +38,11 @@ class Query(dict):
     def __init__(self, queryset, *args, **kwargs):
         super(Query, self).__init__(*args, **kwargs)
         self.queryset = queryset
-        self.model = self.queryset.model
         self.standard_ordering = True
+
+    @property
+    def model(self):
+        return self.queryset.model
 
     def chain(self):  # nocv
         return self.clone()
@@ -103,6 +108,9 @@ class Query(dict):
     def add_ordering(self, *ordering):
         self['ordering'] = ordering
 
+    def __bool__(self):
+        return True
+
 
 class CustomModelIterable(ModelIterable):
     def __iter__(self):
@@ -124,10 +132,12 @@ class CustomModelIterable(ModelIterable):
 
 
 class CustomQuerySet(BQuerySet):
+    custom_iterable_class = CustomModelIterable
+
     def __init__(self, model=None, query=None, using=None, hints=None):
-        super(CustomQuerySet, self).__init__(model=model, query=None, using=using, hints=hints)
-        self.query = query or Query(self)
-        self._iterable_class = CustomModelIterable
+        if query is None:
+            query = Query(self)
+        super(CustomQuerySet, self).__init__(model=model, query=query, using=using, hints=hints)
 
     def _filter_or_exclude(self, is_exclude, *args, **kwargs):
         clone = self._clone()

@@ -11,6 +11,23 @@ class BQuerySet(models.QuerySet):  # noprj
     '''
     use_for_related_fields = True
 
+    @property
+    def _iterable_class(self):
+        if hasattr(self, '__iterable_class__'):
+            return self.__iterable_class__
+        if hasattr(self, 'custom_iterable_class'):
+            self.__iterable_class__ = self.custom_iterable_class
+        return self._iterable_class
+
+    @_iterable_class.setter
+    def _iterable_class(self, value):
+        if not hasattr(self, 'custom_iterable_class'):
+            self.__iterable_class__ = value
+
+    @_iterable_class.deleter
+    def _iterable_class(self):
+        del self.__iterable_class__
+
     def paged(self, *args, **kwargs):
         return self.get_paginator(*args, **kwargs).items()
 
