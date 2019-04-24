@@ -19,9 +19,7 @@ cdef class Section:
     types_map = {}
     kwargs = {}
 
-    cdef dict _subsections
-    cdef dict __default__
-    cdef dict __settings__
+    cdef dict _subsections, __default__, __settings__
 
     def __cinit__(self, str section = '', dict default = PyDict_New()):
         self.section = section or self.section
@@ -53,8 +51,7 @@ cdef class Section:
     def value_handler(self, value):
         if isinstance(value, (six.string_types, six.text_type)):
             return value.format(**self.get_value_kwargs())
-        else:
-            return value
+        return value
 
     cdef dict __get_default_data_from_section__(self, option):
         if self.__default__:

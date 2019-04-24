@@ -11,9 +11,9 @@ Quickstart
 
 2. Create package 'prj': `vstutilsctl newproject --name proj`
 
-3. Change directory to project and run `python proj runserver 0.0.0.0:8081 --insecure`
+3. Change directory to project and run `python proj web`
 
-4. Enjoy!
+4. Enjoy! See http://localhost:8080/
 
 See example in `test_src/test_proj`.
 

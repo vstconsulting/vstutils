@@ -38,11 +38,19 @@ class Query(dict):
     def __init__(self, queryset, *args, **kwargs):
         super(Query, self).__init__(*args, **kwargs)
         self.queryset = queryset
-        self.standard_ordering = True
+        self['standard_ordering'] = True
 
     @property
     def model(self):
         return self.queryset.model
+
+    @property
+    def standard_ordering(self):
+        return self['standard_ordering']
+
+    @standard_ordering.setter
+    def standard_ordering(self, value):
+        self['standard_ordering'] = bool(value)
 
     def chain(self):  # nocv
         return self.clone()
@@ -107,9 +115,6 @@ class Query(dict):
 
     def add_ordering(self, *ordering):
         self['ordering'] = ordering
-
-    def __bool__(self):
-        return True
 
 
 class CustomModelIterable(ModelIterable):
