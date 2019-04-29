@@ -10,7 +10,7 @@ from django.utils.functional import lazy
 from drf_yasg import errors
 import pyximport
 pyximport.install()
-from .section import Section
+from .section import Section, get_file_value
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
@@ -73,13 +73,9 @@ SECRET_FILE = os.getenv(
 )
 
 def secret_key():
-    result = '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
-    try:
-        with open(SECRET_FILE, "r") as secret_file:
-            result = secret_file.read().strip()  # nocv
-    except IOError:
-        pass
-    return result
+    return get_file_value(
+        SECRET_FILE, '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
+    )
 
 SECRET_KEY = lazy(secret_key, str)()
 

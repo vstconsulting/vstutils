@@ -1,3 +1,5 @@
+from libc.stdio cimport FILE, fopen, fread, fclose, fseek, ftell, rewind, SEEK_END
+from libc.stdlib cimport malloc, free
 from cpython.dict cimport (
     PyDict_New, PyDict_Copy, PyDict_Items,
     PyDict_Update, PyDict_SetItemString, PyDict_SetItem
@@ -9,6 +11,69 @@ try:
     xrange
 except:
     xrange = range
+
+
+def get_file_value(str filename, default='qwerty'):
+    result = default
+
+    try:
+        result = File(filename.encode('utf-8')).read().decode('utf-8').strip()
+    except IOError:
+        pass
+
+    return result
+
+
+cdef class File(object):
+    cdef FILE* file
+    cdef char* buff
+    cdef long int _size
+    cdef const char* filename
+    cdef const char* mode
+
+    def __cinit__(self, const char* filename, const char* mode = 'r'):
+        self.filename = filename
+        self.mode = mode
+        self.file = self._open()
+
+    def allowed(self):
+        if not self.file == NULL:
+            return True
+
+    cdef FILE*_open(self):
+        return fopen(self.filename, self.mode)
+
+    cdef size(self):
+        if not self.allowed():
+            raise IOError('File is not found.')
+        if not self._size:
+            fseek(self.file, 0, SEEK_END)
+            self._size = ftell(self.file) + sizeof(char)
+            rewind(self.file)
+        return self._size - 1
+
+    cdef read(self):
+        if not self.allowed():
+            raise IOError('File is not found.')
+
+        if self.buff == NULL:
+            self.buff = <char*> malloc(self.size() * sizeof(char))
+            if self.buff == NULL:
+                raise MemoryError('low memory')
+            read = fread(self.buff, sizeof(char), self.size(), self.file)
+
+        return self.buff[: self.size()]
+
+    def __len__(self):
+        return len(self.read())
+
+    def __dealloc__(self):
+        if self.buff is not NULL:
+            free(self.buff)
+
+    def close(self):
+        if self.file is not NULL:
+            fclose(self.file)
 
 
 cdef class Section:
