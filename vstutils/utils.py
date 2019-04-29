@@ -269,6 +269,15 @@ class BaseVstObject(object):
     @classmethod
     def get_django_settings(cls, name, default=None):
         # pylint: disable=access-member-before-definition
+        """
+        Get params from Django settings.
+
+        :param name: name of param
+        :type name: str,unicode
+        :param default: default value of param
+        :type default: object
+        :return: Param from Django settings or default.
+        """
         if hasattr(cls, '__django_settings__'):
             return getattr(cls.__django_settings__, name, default)
         from django.conf import settings
@@ -285,8 +294,8 @@ class BaseVstObject(object):
 
 class Executor(BaseVstObject):
     """
-        Command executor with realtime output write
-        """
+    Command executor with realtime output write
+    """
     __slots__ = 'output', '_stdout', '_stderr', 'env'
 
     CANCEL_PREFIX = "CANCEL_EXECUTE_"  # type: str
