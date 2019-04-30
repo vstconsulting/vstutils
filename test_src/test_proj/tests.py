@@ -936,3 +936,9 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(results[0]['data']['count'], 10)
         self.assertEqual(results[1]['data']['origin_pos'], 1, results[1]['data'])
         self.assertEqual(results[2]['data']['count'], 5)
+
+    def test_additional_urls(self):
+        response = self.client.get('/suburls/admin/login/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get('/suburls/login/')
+        self.assertEqual(response.status_code, 200)

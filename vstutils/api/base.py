@@ -187,11 +187,15 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     model = None
     action_serializers = {}
 
+    def filter_for_filter_backends(self, backend):
+        return getattr(backend, 'required', False)
+
     def filter_queryset(self, queryset):
         if hasattr(self, 'nested_name'):
-            self.filter_backends = filter(
-                lambda backend: getattr(backend, 'required', False), self.filter_backends
-            )
+            self.filter_backends = list(filter(
+                self.filter_for_filter_backends,
+                self.filter_backends
+            ))
         return super(GenericViewSet, self).filter_queryset(queryset)
 
     @classproperty

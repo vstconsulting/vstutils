@@ -34,16 +34,16 @@ class EmptySerializer(serializers.Serializer):
 
 
 class DataSerializer(EmptySerializer):
+    allowed_data_types = (
+        six.string_types,
+        six.text_type,
+        dict,
+        list,
+        tuple
+    )
 
-    def to_internal_value(self, data):  # nocv
-        return (
-            data
-            if (
-                isinstance(data, (six.string_types, six.text_type)) or
-                isinstance(data, (dict, list))
-            )
-            else self.fail("Unknown type.")
-        )
+    def to_internal_value(self, data):
+        return data if isinstance(data, self.allowed_data_types) else self.fail("Unknown type.")
 
     def to_representation(self, value):  # nocv
         return (

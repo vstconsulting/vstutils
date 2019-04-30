@@ -26,5 +26,8 @@ GUI_VIEWS[r'^csrf_disable_gui/$'] = {
     'BACKEND': 'vstutils.gui.views.GUIView',
     'CSRF_ENABLE': False
 }
+GUI_VIEWS[r'^suburls/'] = {
+    'BACKEND': 'test_proj.suburls.urlpatterns'
+}
 
 DEBUG = True
