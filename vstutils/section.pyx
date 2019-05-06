@@ -4,6 +4,8 @@ from cpython.dict cimport (
     PyDict_New, PyDict_Copy, PyDict_Items,
     PyDict_Update, PyDict_SetItemString, PyDict_SetItem
 )
+import os
+from configparser import ConfigParser as BaseConfigParser
 import six
 import pytimeparse
 
@@ -24,7 +26,7 @@ def get_file_value(str filename, default='qwerty'):
     return result
 
 
-cdef class File(object):
+cdef class File:
     cdef FILE* file
     cdef char* buff
     cdef long int _size
@@ -204,3 +206,20 @@ cdef class Section:
             value = value.replace('False', '')
             value = value.replace('false', '')
         return bool(value)
+
+
+class ConfigParser(BaseConfigParser):
+
+    def read(self, filenames, encoding=None):
+        if isinstance(filenames, (str, os.PathLike)):
+            filenames = [filenames]
+        read_ok = []
+        for filename in filenames:
+            data = get_file_value(filename, default='')
+            if not data:
+                continue
+            self.read_string(data, filename)
+            if isinstance(filename, os.PathLike):
+                filename = os.fspath(filename)
+            read_ok.append(filename)
+        return read_ok

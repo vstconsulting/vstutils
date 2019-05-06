@@ -4,13 +4,12 @@ import sys
 from collections import OrderedDict
 from warnings import warn
 
-from configparser import ConfigParser
 from django.contrib import admin
 from django.utils.functional import lazy
 from drf_yasg import errors
 import pyximport
 pyximport.install()
-from .section import Section, get_file_value
+from .section import ConfigParser, Section, get_file_value
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
@@ -48,7 +47,9 @@ CONFIG_FILE = os.getenv(
     "{}_SETTINGS_FILE".format(ENV_NAME),
     "/etc/{}/settings.ini".format(VST_PROJECT_LIB)
 )
-config = ConfigParser()
+config = ConfigParser(
+    default_section='defaults'
+)
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
 
 

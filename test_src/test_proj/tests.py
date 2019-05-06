@@ -98,8 +98,6 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
 
 class VSTUtilsTestCase(BaseTestCase):
-    def setUp(self):
-        super(VSTUtilsTestCase, self).setUp()
 
     def _get_test_ldap(self, client, data):
         self.client.post('/login/', data=data)
@@ -307,6 +305,9 @@ class VSTUtilsTestCase(BaseTestCase):
         with self.assertRaises(Exception):
             ex_method()
 
+
+class ViewsTestCase(BaseTestCase):
+
     def test_main_views(self):
         # Main
         self.get_result('get', '/')
@@ -474,6 +475,9 @@ class VSTUtilsTestCase(BaseTestCase):
         gravatar_of_nonexistent_user = get_user_gravatar(123321)
         self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
 
+
+class DefaultBulkTestCase(BaseTestCase):
+
     def test_bulk(self):
         self.get_model_filter(
             'django.contrib.auth.models.User'
@@ -573,6 +577,9 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(result[0]['data']['username'], test_user['username'])
         self.assertEqual(result[1]['status'], 200)
         self.assertEqual(result[1]['data']['username'], test_user['username'])
+
+
+class CoreApiTestCase(BaseTestCase):
 
     def test_coreapi(self):
         client = CoreAPIClient()

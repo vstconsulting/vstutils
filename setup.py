@@ -359,7 +359,7 @@ kwargs = dict(
     install_requires=[
         "django>=1.11,<2.0;python_version<'3.5'",
         "django>=2.2,<3.0;python_version>='3.5'",
-        'cython>0.29,<1.0',
+        'cython>0.29,<0.30',
     ] +
     load_requirements('requirements.txt')
     + load_requirements('requirements-doc.txt')
