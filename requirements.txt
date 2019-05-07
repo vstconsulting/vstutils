@@ -6,7 +6,7 @@ pyyaml==3.13
 django-cors-headers==2.4.0
 
 # REST API packages
-djangorestframework==3.9.2
+djangorestframework==3.9.3
 django-filter==2.1.0; python_version>'3.4'
 django-filter==1.1.0; python_version<'3.0'
 django-crispy-forms==1.7.2
