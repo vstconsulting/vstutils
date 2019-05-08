@@ -24,6 +24,7 @@ from vstutils import utils
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
+from vstutils.tools import get_file_value, File as ToolsFile
 from .models import Host, HostGroup, File, List
 
 
@@ -949,3 +950,18 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get('/suburls/login/')
         self.assertEqual(response.status_code, 200)
+
+
+class ToolsTestCase(BaseTestCase):
+    def test_get_file_value(self):
+        file_name = os.path.join(os.path.dirname(__file__), 'settings.ini')
+        with open(file_name, 'r') as fd:
+            test_data = fd.read()
+        self.assertEqual(get_file_value(file_name, strip=False), test_data)
+        self.assertEqual(get_file_value(file_name), test_data[:-1])
+
+        with utils.tmp_file_context(test_data) as tmp_fd:
+            fd = ToolsFile(tmp_fd.name.encode('utf-8'))
+            self.assertEqual(fd.read(), test_data.encode('utf-8'))
+            self.assertEqual(len(fd), len(test_data))
+            del fd

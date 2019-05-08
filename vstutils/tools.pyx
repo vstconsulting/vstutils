@@ -2,11 +2,13 @@ from libc.stdio cimport FILE, fopen, fread, fclose, fseek, ftell, rewind, SEEK_E
 from libc.stdlib cimport malloc, free
 
 
-def get_file_value(filename, default='', raise_error=False):
+def get_file_value(filename, default='', raise_error=False, strip=True):
     result = default
 
     try:
-        result = File(filename.encode('utf-8')).read().decode('utf-8').strip()
+        result = File(filename.encode('utf-8')).read().decode('utf-8')
+        if strip:
+            result = result.strip()
     except IOError:
         if raise_error:
             raise
@@ -43,7 +45,7 @@ cdef class File:
                 rewind(self.file)
             return self._size - 1
 
-    cdef read(self):
+    cdef _read(self):
         if not self.allowed():
             raise IOError('File is not found.')
 
@@ -60,6 +62,9 @@ cdef class File:
                 read = fread(self.buff, typesize, size, self.file)
 
         return self.buff[:size]
+
+    def read(self):
+        return self._read()
 
     def __len__(self):
         return self.size()
