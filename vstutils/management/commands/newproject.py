@@ -51,7 +51,7 @@ class Command(BaseCommand):
         os.makedirs(dir_path)
 
     def create_file(self, render_path, *path, **render_data):
-        with open('/'.join(path), 'w') as fd:
+        with open(os.path.join(*path), 'w') as fd:
             fd.write(get_render(render_path + '.template', render_data))
 
     def _from_user(self, name, options, default=None):
@@ -103,8 +103,7 @@ class Command(BaseCommand):
         opts = self.get_render_kwargs(options)
         self.make_dirs(**opts)
         self.make_files(**opts)
-        project_dir = '/'.join([opts['project_place'], opts['project_name']])
-        project_dir = project_dir.replace('//', '/')
+        project_dir = os.path.join(opts['project_place'], opts['project_name'])
         self._print(
             'Project successfully created at {}.'.format(project_dir), 'SUCCESS'
         )

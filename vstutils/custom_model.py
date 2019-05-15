@@ -10,6 +10,7 @@ except ImportError:  # nocv
 from django.db.models.query import ModelIterable
 from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
 from .models import BQuerySet, BaseModel
+from .tools import get_file_value
 
 
 def multikeysort(items, columns, reverse=False):
@@ -186,8 +187,7 @@ class FileModel(ListModel):
     @classmethod
     def load_file_data(cls):
         # pylint: disable=no-member
-        with open(cls.file_path, 'r') as fp:
-            return fp.read()
+        return get_file_value(cls.file_path, strip=False)
 
     @classmethod
     def _get_data(cls, chunked_fetch=False):
