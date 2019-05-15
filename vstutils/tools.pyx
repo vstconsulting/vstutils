@@ -1,4 +1,4 @@
-from libc.stdio cimport FILE, fopen, fread, fclose, fseek, ftell, rewind, SEEK_END
+from libc.stdio cimport FILE, fopen, fread, fwrite, fflush, fclose, fseek, ftell, rewind, SEEK_END
 from libc.stdlib cimport malloc, free
 
 
@@ -65,6 +65,26 @@ cdef class File:
 
     def read(self):
         return self._read()
+
+    cdef void _write(self, const char* value):
+        if self.mode == b'r':
+            raise IOError('File should opened for writing')
+        if not self.allowed():
+            raise IOError('File is not found.')
+
+        size = len(value)
+        typesize = sizeof(char)
+        with nogil:
+            fwrite(value, typesize, size, self.file)
+
+    def write(self, value):
+        self._write(value)
+
+    cdef int _flush(self):
+        return fflush(self.file)
+
+    def flush(self):
+        return self._flush()
 
     def __len__(self):
         return self.size()

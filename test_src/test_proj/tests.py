@@ -971,3 +971,12 @@ class ToolsTestCase(BaseTestCase):
             self.assertEqual(fd.read(), test_data.encode('utf-8'))
             self.assertEqual(len(fd), len(test_data))
             del fd
+
+        with utils.tmp_file_context(test_data, mode='w+') as tmp_fd:
+            fd = ToolsFile(tmp_fd.name.encode('utf-8'), b'wb')
+            test_data_text = 'some text data\n'*10
+            fd.write(test_data_text.encode('utf-8'))
+            fd.flush()
+            with open(tmp_fd.name, 'rb') as fd1:
+                self.assertEqual(fd1.read().decode('utf-8'), test_data_text)
+            del fd
