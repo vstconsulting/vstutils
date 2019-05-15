@@ -31,3 +31,6 @@ GUI_VIEWS[r'^suburls/'] = {
 }
 
 DEBUG = True
+PWA_MANIFEST = {
+    'display': 'standalone'
+}

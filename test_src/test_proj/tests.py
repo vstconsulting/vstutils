@@ -892,6 +892,12 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(hostgroup_props['secret_file']['type'], 'string')
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
 
+    def test_manifest_json(self):
+        result = self.get_result('get', '/manifest.json')
+        self.assertEqual(result['name'], 'Example Project')
+        self.assertEqual(result['short_name'], 'test_proj')
+        self.assertEqual(result['display'], 'standalone')
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):

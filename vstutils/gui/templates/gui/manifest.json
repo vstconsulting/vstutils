@@ -1,0 +1,1 @@
+{% autoescape off %}{{ manifest_data }}{% endautoescape %}

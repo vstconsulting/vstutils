@@ -633,6 +633,9 @@ VIEWS = {
     "GUI": {
         "BACKEND": 'vstutils.gui.views.GUIView'
     },
+    "MANIFEST": {
+        "BACKEND": 'vstutils.gui.views.ManifestView'
+    },
     "LOGIN": {
         "BACKEND": 'vstutils.gui.views.Login',
         "OPTIONS": {
@@ -649,6 +652,7 @@ VIEWS = {
 
 GUI_VIEWS = {
     r'^$': 'GUI',
+    r'^manifest.json$': 'MANIFEST',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT'
 }
