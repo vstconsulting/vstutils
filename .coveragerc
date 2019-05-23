@@ -8,20 +8,15 @@ omit =
     *.tox/*
     */management/commands/web.py
     */management/commands/_base.py
-    */*/migrations/*
-    */main/wsgi.py
-    */manage.py
     *ihsctl
     *setup.py
     test.py
     upload_big.py
-    */vstutils/__init__.py
     */vstutils/__main__.py
     */vstutils/celery_beat_scheduler.py
     */vstutils/wsgi.py
     */vstutils/auth.py
     */vstutils/compile.py
-    */vstutils/models.py
     */vstutils/api/doc_generator.py
     */test_proj/*
 

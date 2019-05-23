@@ -1,7 +1,9 @@
-VST Utils
-=========
+VSTUtils Framework
+==================
 
-Small lib for easy generates web-applications.
+Small framework for easy generates web-applications (SPA or Single Page Application).
+It uses OpenAPI schema for GUI rendering based over the REST API
+and also provides the ability to generate documentation for the API based on the schema.
 
 
 Quickstart
@@ -26,8 +28,16 @@ New project
 *  Name which will be shown in GUI could be changed via --guiname=[GUI NAME].
 
 
+Projects
+--------
+
+* Polemarch (https://polemarch.org/)
+
+
 License
 -------
 
-Apache Software License
+VSTUtils is licensed under the terms of the Apache License 2.0.
+See the file "LICENSE" for more information.
 
+Copyright 2018-2019 VST Consulting
