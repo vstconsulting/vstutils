@@ -33,8 +33,7 @@ class UserViewSet(base.ModelViewSetSet):
         user = self.get_object()
         if user == request.user:
             return base.Response("Could not remove youself.", 409).resp
-        else:
-            return super(UserViewSet, self).destroy(request, *args, **kwargs)
+        return super(UserViewSet, self).destroy(request, *args, **kwargs)
 
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
@@ -209,8 +208,7 @@ class BulkViewSet(base.rvs.APIView):
     def get_method_type(self, op_type, operation):
         if op_type != 'mod':
             return self.op_types[op_type]
-        else:
-            return operation.get('method', self.op_types[op_type]).lower()
+        return operation.get('method', self.op_types[op_type]).lower()
 
     def get_operation(self, operation, kwargs):
         op_type = operation['type']
@@ -245,8 +243,7 @@ class BulkViewSet(base.rvs.APIView):
                 pass
         if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
             return json.loads(res.rendered_content.decode())
-        else:
-            return Dict(dict(detail=str(res.content.decode('utf-8'))))
+        return Dict(dict(detail=str(res.content.decode('utf-8'))))
 
     def perform(self, operation):
         kwargs = dict()

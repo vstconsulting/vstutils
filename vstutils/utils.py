@@ -131,7 +131,7 @@ class tmp_file(object):
     Temporary file with name
     generated and auto removed on close.
     """
-    __slots__ = 'fd',
+    __slots__ = ('fd',)
 
     def __init__(self, data="", mode="w", bufsize=0, **kwargs):
         """
@@ -190,7 +190,7 @@ class tmp_file_context(object):
     Auto close on exit from context and
     remove if file stil exist.
     """
-    __slots__ = 'tmp',
+    __slots__ = ('tmp',)
 
     def __init__(self, *args, **kwargs):
         self.tmp = tmp_file(*args, **kwargs)

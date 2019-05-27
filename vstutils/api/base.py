@@ -287,6 +287,7 @@ class CopyMixin(GenericViewSet):
 
 
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
+    # pylint: disable=useless-super-delegation
     def create(self, request, *args, **kwargs):
         return super(ModelViewSetSet, self).create(request, *args, **kwargs)
 

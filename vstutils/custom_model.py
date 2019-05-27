@@ -10,7 +10,7 @@ except ImportError:  # nocv
 from django.db.models.query import ModelIterable
 from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
 from .models import BQuerySet, BaseModel
-from .tools import get_file_value
+from .tools import get_file_value  # pylint: disable=import-error
 
 
 def multikeysort(items, columns, reverse=False):

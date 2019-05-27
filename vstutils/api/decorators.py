@@ -346,7 +346,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
                     nested_manager = nested_manager_func(nested_parent_object)
 
             class NestedView(mixin_class, self.view):
-                __slots__ = 'nested_detail',
+                __slots__ = ('nested_detail',)
                 __doc__ = self.view.__doc__
                 master_view = view_obj
                 lookup_field = nested_append_arg
