@@ -1,844 +1,860 @@
-
 <!--
-    <%[ blockBody %>
-        <p>This is block contentRT</p>
-    <%] %>
-
-    <%[ testB %> // Переопределение блока
-        <p>This is block testBAS</p>
-    <%] %>
-
-    <%* blockName %> // Вывод блока
-
-    <%! base_items_list %> // Наследование, писать последней строкой в шаблоне
-    <! - - Список сущностей - - >
-    <script type="text/x-just" data-just="base_items_list">
-        < ! - - base_items_list - - >
-    </script>
+    Block of COMMON components -
+    - components for ALL view types
 -->
+<!-- Base template of View (<router-view></router-view>) of ANY type -->
+<script type="text/x-template" id="template_view_entity">
+    <div style="display:contents;" >
 
-<!-- Поле для выбора какие ещё поля показать в форме  -->
-<script type="text/x-just" data-just="show_not_required_fields">
-    <!-- show_not_required_fields -->
-    <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-        <label class="control-label">Add field</label>
-        <select class="form-control" id="show_not_required_fields_select"
-        onchange="$('#'+this.value).removeClass('hide'); $('#'+this.value).removeClass('hidden-field');"
-        onclick="if($('#'+this.value).hasClass('hidden-field')){ $('#'+this.value).removeClass('hidden-field') };">
-            <option disabled selected >Select field</option>
-            <% for(var i = 0; i < fields.length; i++){  %>
-                <option value="<%- $(fields[i]).attr('id') %>" ><%- $(fields[i]).attr('data-title') %></option>
-            <% } %>
-        </select>
-        <div class="help-block"><%- opt.description || '' %></div>
-    </div>
-</script>
+        <preloader :show="loading"></preloader>
 
-<!-- Постраничная навигация -->
-<script  type="text/x-just" style="display: none;" data-just="pagination">
-    <!-- pagination -->
-    <% if(totalPage > 1){ %>
-        <ul class="pagination pagination-sm no-margin pull-right">
-            <% if(totalPage < 21){ %>
-                <% for(var i = 0; i < totalPage; i++){ %>
-                    <% if(i == currentPage){ %>
-                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
-                    <% }else{ %>
-                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)]) %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
-                    <% } %>
-                <% } %>
-            <% }else{ %>
-                <% for(var i = 0; i < totalPage; i++){ %>
-                    <% if(i == currentPage){ %>
-                        <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" style="background-color: #d2d6de;"><%- i+1 %></a></li>
-                    <% }else{ %>
-                        <% if(Math.abs(i - currentPage) > 5 && i > 3 && totalPage - i > 3){ %>
-                            <% if( dotShow == false){ %>
-                                <% dotShow = true %>
-                                <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);">..</a></li>
-                            <% } %>
-                        <% }else{ %>
-                            <% dotShow = false %>
-                            <li class="page-item pagination-page<%- (i+1) %>" ><a class="page-link" href="<%- vstMakeLocalUrl([url.replace(/\/page\/[0-9]+/igm, '') + '/page/'+(i+1)])  %>" onclick="return vstGO(this.href);" ><%- i+1 %></a></li>
-                        <% } %>
-                    <% } %>
-                <% } %>
-            <% } %>
-        </ul>
-    <% } %>
-</script>
-
-<script  type="text/x-just" style="display: none;" data-just="search_field">
-    <!-- searchFiled  -->
-    <div class="search-form" >
-
-        <div id="filtered-search-form" class="filtered-search-form" >
-            <div class="input-group filtered-search-input col-lg-6 col-sm-12 col-xs-12 col-md-12" >
-
-                <~ guiObj.activeSearch.active>
-                    <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
-                        <span class="input-group-prepend  name active-name <%- guiObj.activeSearch.justNotClass('active', 'hide') %>">
-                            <div class="input-group-text" style="border-radius: .25rem 0px 0px .25rem;">
-                                <%= (guiObj.activeSearch.active+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=")  %>
-                            </div>
-                        </span>
-                    <% }else{ %>
-                        <span class="input-group-prepend  name active-name <%- guiObj.activeSearch.justClass('active', 'hide') %>">
-                            <div class="input-group-text"
-                                style="border-radius: .25rem 0px 0px .25rem;"
-                                onclick="$('#search-query-input').focus();" >
-                                <i class="fa fa-sliders" aria-hidden="true"></i>
-                            </div>
-                        </span>
-                    <% } %>
-                <~>
-
-                <input
-                    type="text"
-                    id="search-query-input"
-                    placeholder="Search by name"
-                    class="form-control no-left-border"
-                    maxlength="255"
-                    data-backspace="false"
-                    value="<%- opt.query %>"
-                    <%= justOn('keyup', function(event)
-                        {
-                            guiObj.onSearchInput(event, event.currentTarget)
-                            event.preventDefault();
-                        }, "search-query-input")
-                    %>
-                >
-
-                <div class="input-group-append search-btn"
-                    <%= justOn('click', function(event)
-                        {
-                            guiObj.searchGO($('#search-query-input').val(), guiObj.searchAdditionalData)
-                            event.preventDefault();
-                        })
-                    %>
-                    >
-                    <div class="input-group-text">
-                        <span class="fa fa-search" ></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="filtered-search-vars">
-            <~ guiObj.activeSearch.filters>
-                <% for(var i in guiObj.activeSearch.filters){  var val = guiObj.activeSearch.filters[i]; var valfield = guiObj.activeSearch.fields[val.name]; %>
-                    <div class="input-group filtered-search-value">
-                        <span class="input-group-prepend">
-                            <div class="input-group-text"><%= (valfield.name+"&nbsp;=").replace("__not&nbsp;=", "&nbsp;!=") %></div>
-                        </span>
-                            <input
-                                type="text"
-                                id="search-query-input-<%- valfield.name %>"
-                                data-value-name="<%- valfield.name %>"
-                                disabled
-                                placeholder="Search by name"
-                                class="form-control no-left-border active-filter"
-                                maxlength="255"
-                                value="<%- val.value %>"
-                                <%= justOn('keyup', function(event)
-                                    {
-                                        guiObj.onSearchInput(event, event.currentTarget)
-                                        event.preventDefault();
-                                    }, "search-query-input-"+valfield.name)
-                                %>
-
-                                <%= justOn('blur', function(event)
-                                    {
-                                        $(event.currentTarget).parent().parent().toggleClass('show-input-text');
-                                        event.preventDefault();
-                                        guiObj.addSearchFilter($(event.currentTarget).attr('data-value-name'), event.currentTarget.value);
-                                    }, "search-query-input-"+valfield.name)
-                                %>
-                            >
-                        <span class="input-group-append remove-token remove-token-<%- valfield.name %>"
-                                role="button"
-                                data-value-name="<%- valfield.name %>"
-                                <%= justOn('click', function(event)
-                                    {
-                                        guiObj.onRemoveSearchFilter($(event.currentTarget).attr('data-value-name'));
-                                        event.preventDefault();
-                                    })
-                                %>
-                                >
-                                <div class="input-group-text">
-                                    <i class="fa fa-close"></i>
-                                </div>
-                        </span>
-                    </div>
-                <% } %>
-            <~>
-        </div>
-
-        <!--
-            <~ guiObj.activeSearch.active>
-                <% if(guiObj.activeSearch.fields[guiObj.activeSearch.active]){ %>
-                    <%= guiObj.activeSearch.fields[guiObj.activeSearch.active].description || '' %>
-                <% } %>
-            <~>
-        -->
-    </div>
-</script>
-
-
-<script type="text/x-just" data-just="page_breadcrumb">
-    <ol class="breadcrumb float-sm-right">
-        <li class="breadcrumb-item" >
-            <a href="<%- vstMakeLocalUrl() %>" onclick="return vstGO(this.href);" ><i class="fa fa-dashboard"></i> Home</a>
-        </li>
-        <% for(var i in urls) { %>
-            <li class="breadcrumb-item <% if(i == urls.length-1) { %> active<% } %>"  > <%= urls[i] %> </li>
-        <% } %>
-    </ol>
-</script>
-
-<!-- Страница экшена -->
-<script type="text/x-just" data-just="action_page">
-
-    <%[ buttons_row %>
-        <%= new guiElements.button({onclick:function(){ return guiObj.exec()}, class:'btn btn-primary', title:'Exec', text:'Exec'}).render() %>
-        <%* buttons %>
-    <%] %>
-
-    <%[ main_content_row %>
-        <section class="col-lg-12">
-            <div class="card card-info">
-                <div class="card-header with-border">
-                    &nbsp;
-                </div>
-                <div class="card-body">
+        <!--<div class="content-wrapper" v-if="error">-->
+        <div class="content-wrapper-2" v-if="error">
+            <section class="content-header">
+                <div class="container-fluid">
                     <div class="row">
-                        <%= guiObj.renderAllFields(opt) %>
-                    </div>
-                </div>
-            </div>
-        </section>
-    <%] %>
-
-    <%! entity_base %>
-</script>
-
-
-<script type="text/x-just" data-just="action_as_link">
-    <!-- action_as_link -->
-    <a href="<%- vstMakeLocalUrl(opt.link) %>"
-        onclick="return vstGO(this.href);"
-        class="<%- opt.class %>"
-    >
-        <%- opt.title %>
-    </a>
-</script>
-
-<script type="text/x-just" data-just="action_as_button">
-    <!-- action_as_button -->
-    <a href="<%- vstMakeLocalUrl(opt.link) %>"
-        onclick="return vstGO(this.href);"
-        class="<%- opt.class %>"
-    >
-        <%- opt.title %>
-    </a>
-</script>
-
-<script type="text/x-just" data-just="items_empty_list">
-    <!-- items_empty_list -->
-    <div style="text-align: center;" >No child elements, list is empty</div>
-</script>
-
-<script type="text/x-just" data-just="entity_base">
-
-    <%[ breadcrumb %>
-        <%= renderBreadcrumbs() %>
-    <%] %>
-
-    <%[ buttons %>
-        <% if(guiObj.api.buttons){ %>
-            <% for(var i in  guiObj.api.buttons){ %>
-                <%= guiObj.api.buttons[i].render() %>
-            <% } %>
-        <% } %>
-    <%] %>
-
-    <%[ page_header %>
-        <section class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-lg-6">
-                        <h1>
-
-                            <a href="<%- getUpLink() %>" onclick="return vstGO(this.href);" class="btn btn-default">
-                                <span class="fa fa-arrow-left"></span>
-                            </a>
-                            <~ guiObj.model.data >
-                                <span class="h1-header"><%= guiObj.getTitle('title') %></span>
-                            <~>
-                        </h1>
-                    </div>
-                    <div class="col-lg-6">
-                        <%* breadcrumb %>
-                    </div>
-                </div>
-            </div>
-        </section>
-    <%] %>
-    <%* page_header %>
-
-    <%[ main_content %>
-        <section class="content">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <%[ buttons_row %>
-                            <%* buttons %>
-                        <%] %>
-                        <%* buttons_row %>
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <%[ main_content_row %>
-
-                    <%] %>
-                    <%* main_content_row %>
-                </div>
-            </div>
-        </section>
-    <%] %>
-    <%* main_content %>
-</script>
-
-<script type="text/x-just" data-just="entity_list_line">
-    <tr
-        class="item-row item-<%- String(dataLine.url_key).replace('@', '') %> highlight-tr
-                <% for (var i in dataLine.opt.fields) { %>
-                    <% if(dataLine.opt.fields[i].enum) { %>
-                        <%- addCssClassesToElement('tr', dataLine.line[i], i) %>
-                    <% } %>
-                <% } %>
-                <%- window.guiListSelections.selectionControll(dataLine.opt.selectionTag, String(dataLine.url_key).replace('@', '')) %>"
-        data-id="<%- String(dataLine.url_key).replace('@', '') %>"
-        data-href="<%- vstMakeLocalUrl([dataLine.opt.base_href, dataLine.url_key]) %>"
-        onclick="turnTableTrIntoLink(event)"
-        >
-        <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
-            <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"  onclick="window.guiListSelections.toggleSelection('<%- dataLine.opt.selectionTag %>', '<%- String(dataLine.url_key).replace('@', '') %>'); return false;">
-                <div class="ico-on fa fa-toggle-on"></div>
-                <div class="ico-off fa  fa-toggle-off"></div>
-            </td>
-        <% } %>
-        <% for(var j in dataLine.opt.fields){ %>
-            <% if(!dataLine.opt.fields[j].hidden) { %>
-                <td
-                    <%= addStylesAndClassesToListField(guiObj, dataLine.opt.fields[j], dataLine.line, dataLine.opt) %>
-                >
-                    <% if(dataLine.rendered[j]){ %>
-                        <%= dataLine.rendered[j] %>
-                    <% } else { %>
-                        <!-- if there is prefetch info, insert it -->
-                        <% if(dataLine.opt.fields[j].prefetch && dataLine.line[j + '_info']) { %>
-                            <a  href="<%- vstMakeLocalApiUrl([dataLine.opt.fields[j].prefetch.path(dataLine.line).replace(/^\/|\/$/g, '') , dataLine.line[j]], guiObj.url_vars) %>"
-                                class="item-name"
-                                onclick="return false;"
-                            >
-                               <%- sliceLongString(dataLine.line[j + '_info'][dataLine.opt.fields[j].prefetch.field_name]) ||
-                                   sliceLongString(dataLine.line[j + '_info'].name) %>
-                            </a>
-                        <% } else { %>
-                           <%= renderLineField(dataLine.opt.fields[j], dataLine.line[j], j, dataLine) %>
-                        <% } %>
-                    <% } %>
-                </td>
-            <% } %>
-        <% } %>
-        <% if(!isEmptyObject(dataLine.sublinks_l2) && !dataLine.opt.hideActions){ %>
-            <td class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Actions
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right">
-                        <% for(var k in dataLine.sublinks_l2){ %>
-                            <% if(!dataLine.sublinks_l2[k].hidden) { %>
-                                    <% if  (!dataLine.sublinks_l2[k].isEmptyAction) { %>
-                                        <li class="dropdown-item">
-                                            <a
-                                                href="<%- vstMakeLocalUrl([dataLine.opt.base_path , dataLine.url_key , dataLine.sublinks_l2[k].name]) %>"
-                                                onclick="return false;"
-                                                class="sublink-btn <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>">
-                                                    <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
-                                            </a>
-                                        </li>
-                                    <% } else { %>
-                                        <li  class="dropdown-item" <%= justOn('click', emptyAction(dataLine.sublinks_l2[k], guiObj, dataLine)) %> >
-                                            <b
-                                                class="sublink-btn sublink-btn-empty-action highlight-tr-none <%- addCssClassesToElement('action-button', dataLine.sublinks_l2[k].name, guiObj.api.short_name ) %>"
-                                                >
-                                                    <i >
-                                                        <%- dataLine.sublinks_l2[k].name.replace('_', ' ') %>
-                                                    </i>
-                                            </b>
-                                        </li>
-                                    <% } %>
-                            <% } %>
-                        <% } %>
-                    </ul>
-                </div>
-            </td>
-        <% } %>
-    </tr>
-</script>
-
-<!-- Список multi_actions сущностей -->
-<script type="text/x-just" data-just="multi_actions_buttons">
-    <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %> float-left" role="group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.multi_actions, show_all: true}) %>
-            <%= this.partial('multi_actions_buttons_list', {guiObj:guiObj, opt:opt, multi_actions: guiObj.api.sublinks_l2, show_all: false}) %>
-        </ul>
-    </div>
-</script>
-
-<script type="text/x-just" data-just="multi_actions_buttons_list">
-    <% for(let k in multi_actions){ %>
-
-        <% if(!multi_actions[k].is_multi_action && !show_all){ continue; } %>
-
-        <% if(multi_actions[k].onClick){ %>
-            <li class="dropdown-item">
-                <a
-                    href="#"
-                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>"
-                     <%= justOn('click', function(){ spajs.showLoader(multi_actions[k].onClick.apply(guiObj, [])); return false;} ) %>
-                >
-                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
-                </a>
-            </li>
-        <% }else{ %>
-             <li class="dropdown-item">
-                <a
-                    href="#"
-                    onclick="questionForAllSelectedOrNot('<%- opt.selectionTag %>', '<%- multi_actions[k].path %>'); return false;"
-                    class="<%- addCssClassesToElement('multiaction-button', k, guiObj.api.short_name) %>">
-                        <%- k %> <% if(multi_actions[k].description) { %> <%- multi_actions[k].description %> <% } %>
-                </a>
-            </li>
-        <% } %>
-        <li role="separator" class="divider"></li>
-    <% } %>
-</script>
-
-
-<!-- Список сущностей -->
-<script type="text/x-just" data-just="entity_list">
-
-    <%[ sublink_buttons %>
-        <% for(var k in guiObj.api.links){  %>
-            <a
-                href="<%-vstMakeLocalUrl([opt.base_path, guiObj.api.links[k].name]) %>"
-                onclick="return vstGO(this.href);"
-                class="btn btn-default sublink-btn hidden-<%- guiObj.api.links[k].hidden %> sublink-btn-<%- guiObj.api.links[k].name %> "
-            >
-                <%- guiObj.api.links[k].name.replace('_', ' ') %>
-            </a>
-        <% } %>
-
-        <% for(var k in guiObj.api.actions){  %>
-                <% if  (!guiObj.api.actions[k].isEmptyAction) { %>
-                    <a
-                        href="<%- vstMakeLocalUrl([opt.base_path, guiObj.api.actions[k].name]) %>"
-                        onclick="return vstGO(this.href);"
-                        class="btn btn-warning btn-action sublink-btn hidden-<%- guiObj.api.actions[k].hidden %> sublink-btn-<%- guiObj.api.actions[k].name %>"
-                    >
-                    <%- guiObj.api.actions[k].name.replace('_', ' ') %>
-                    </a>
-                <% } else { %>
-                    <%= new guiElements.button({onclick:emptyAction(guiObj.api.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action', title:k, text:k}).render() %>
-                <% } %>
-        <% } %>
-    <%] %>
-
-    <%[ buttons_row %>
-
-        <% if(guiObj.api.canCreate){ %>
-            <a href="<%- vstMakeLocalUrl([getUrlBasePathDirectToPage(), 'new']) %>" class="btn-create-one-entity btn btn-primary" onclick="return vstGO(this.href);" title="<%- 'Add '+guiObj.api.name %>" >Create</a>
-        <% } %>
-
-        <% if(guiObj.api.canAdd){%>
-            <a href="<%- vstMakeLocalUrl([getUrlBasePathDirectToPage(), 'add']) %>" class="btn-add-one-entity btn btn-primary" onclick="return vstGO(this.href);" title="Add <%- 'Add '+guiObj.api.name %>" >Add</a>
-        <% } %>
-
-        <%* buttons %>
-        <%* sublink_buttons %>
-    <%] %>
-
-    <%[ search_form %>
-        <%= guiObj.renderSearchForm() %>
-    <%] %>
-
-    <%[ pagination %>
-        <% if(guiObj.getTotalPages()){ %>
-            <div>
-                <%= guiObj.paginationHtml() %>
-            </div>
-        <% } %>
-    <%] %>
-
-    <%[ main_content_row_append %> <%] %>
-
-    <%[ main_content_row_prepend %> <%] %>
-
-    <!-- entity_list -->
-    <%[ main_content_row %>
-       <%* main_content_row_prepend %>
-
-        <section class="col-lg-12" id="content-section">
-            <div class="card card-info">
-                <div class="card-header with-border" style="display: flex;">
-
-                    <div style="display: flex; width: 100%;">
-                        <%* search_form %>
-                    </div>
-                    <div style="display: flex;" class=" d-none d-xl-block">
-                        <%* pagination %>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <%  if (!guiObj.model.data.results.length){ %>
-                        <%[ empty_list %>
-                                <%= this.partial('items_empty_list', { }) %>
-                        <%] %>
-                        <%* empty_list %>
-                    <% } else{ %>
-                        <%[ data_list %>
-                            <~ guiObj.model.data>
-                                <table class="table table-bordered multiple-select table_<%- addTableEntityClass(guiObj) %>">
-                                    <tbody>
-                                        <tr>
-                                            <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
-                                                <th style="width: 50px" onclick=" $(this).parent().toggleClass('selected'); window.guiListSelections.toggleSelectElements('<%- opt.selectionTag %>', $('.multiple-select tr'), $(this).parent().hasClass('selected')); return false;" class="global-select td_select_btn" >
-                                                    <div class="ico-on fa fa-toggle-on"></div>
-                                                    <div class="ico-off fa  fa-toggle-off"></div>
-                                                </th>
-                                            <% } %>
-                                            <% for(var j in opt.fields){ %>
-                                                <% if(!opt.fields[j].hidden) { %>
-                                                    <th
-                                                        <%= addStylesAndClassesToListField(guiObj, opt.fields[j], undefined, opt) %>
-                                                        >
-                                                            <%- opt.fields[j].title %>
-                                                    </th>
-                                                <% } %>
-                                            <% } %>
-                                            <% if(!isEmptyObject(guiObj.api.sublinks_l2) && !opt.hideActions){ %>
-                                                <th style="width: 120px;" class="<%- addCssClassesToElement('column', 'actions', guiObj.api.short_name) %>">Actions</th>
-                                            <% } %>
-                                        </tr>
-
-                                        <% for(var i in guiObj.model.data.results){ %>
-                                            <%= guiObj.renderLine(guiObj.model.data.results[i], opt) %>
-                                        <% } %>
-                                    </tbody>
-                                </table>
-                            <~>
-                        <%] %>
-                        <%* data_list %>
-                    <% } %>
-                </div>
-                <div class="card-footer clearfix">
-                    <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
-                            <%[ action_buttons %>
-                                <%= this.partial('multi_actions_buttons', {guiObj:guiObj, opt:opt}) %>
-                            <%] %>
-                            <%* action_buttons %>
-                    <% } %>
-                    <% if(!query){ %>
-                        <% if(guiObj.api && guiObj.api.multi_actions && !isEmptyObject(guiObj.api.multi_actions)) { %>
-                            <%[ select_buttons %>
-                                <div class="btn-group float-left ml-1" role="group">
-                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Select
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li class="dropdown-item">
-                                            <a class="select-all-btn" href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
-                                        </li>
-                                        <li class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
-                                            <a class="unselect-all-btn"  href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            <%] %>
-                            <%* select_buttons %>
-                        <% } %>
-                    <% } %>
-                    <%[ pagination %>
-                        <% if(guiObj.getTotalPages()){ %>
-                            <%= guiObj.paginationHtml() %>
-                        <% } %>
-                    <%] %>
-                    <%* pagination %>
-                </div>
-            </div>
-        </section>
-
-        <%* main_content_row_append %>
-    <%] %>
-    <%! entity_base %>
-</script>
-
-<script type="text/x-just" data-just="entity_list_add_subitems">
-    <!-- entity_list_add_subitems -->
-
-    <%[ buttons_row %>
-        <%= new guiElements.button({onclick:function(){ return addToParentsAndGoUp(window.guiListSelections.getSelection(opt.selectionTag), opt.selectionTag) }, class:'btn btn-primary', title:'Add selected', text:'Add selected'}).render() %>
-    <%] %>
-
-    <%[ action_buttons %>
-        <div class="btn-group <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" role="group">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Actions on <%= window.guiListSelections.selectedCount.justText(opt.selectionTag) %> items
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-                    <li class="dropdown-item">
-                        <a href="#"
-                            onclick="spajs.showLoader(addToParentsAndGoUp(window.guiListSelections.getSelection('<%- opt.selectionTag %>'), '<%- opt.selectionTag %>')); return false;" >Add selected</a>
-                    </li>
-            </ul>
-        </div>
-    <%] %>
-
-    <%[ select_buttons %>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Select
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-                <li class="dropdown-item">
-                    <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, true)); return false; }) %> >Select all</a>
-                </li>
-                <li  class="dropdown-item <%- window.guiListSelections.selectedCount.justNotClass(opt.selectionTag, 'hide') %>" >
-                    <a href="#" <%= justOn('click', function(){ spajs.showLoader(guiObj.toggleSelectEachItem(opt.selectionTag, false)); return false; }) %>" >Unselect all</a>
-                </li>
-            </ul>
-        </div>
-    <%] %>
-
-    <%! entity_list %>
-</script>
-
-<script type="text/x-just" data-just="entity_one">
-    <!-- entity_one -->
-    <%[ sublink_buttons %>
-        <~ window.current_window_width >
-        <% if (opt.links) { %>
-            <% if (!groupButtonsOrNot(window.current_window_width, opt.links)) { %>
-                <% for(var k in opt.links){  %>
-                    <a
-                        href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
-                        onclick="return vstGO(this.href);"
-                        class="btn btn-default sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %> "
-                    >
-                        <%- opt.links[k].name.replace('_', ' ') %>
-                    </a>
-                <% } %>
-            <% } else { %>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Sublinks
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right">
-                        <% for(var k in opt.links){  %>
-                            <li class="dropdown-item">
-                                <a
-                                    href="<%-vstMakeLocalUrl([opt.base_path, opt.links[k].name]) %>"
-                                    onclick="return vstGO(this.href);"
-                                    class="sublink-btn hidden-<%- opt.links[k].hidden %> sublink-btn-<%- opt.links[k].name %>">
-                                        <%- opt.links[k].name.replace('_', ' ') %>
-                                </a>
-                            </li>
-                        <% } %>
-                    </ul>
-                </div>
-            <% } %>
-        <% } %>
-
-        <% if (opt.actions) { %>
-            <% if (!groupButtonsOrNot(window.current_window_width, opt.actions)) { %>
-                <% for(var k in opt.actions){  %>
-                        <% if  (!opt.actions[k].isEmptyAction) { %>
-                            <a
-                                href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
-                                onclick="return vstGO(this.href);"
-                                class="btn btn-warning btn-action sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
-                            >
-                            <%- opt.actions[k].name.replace('_', ' ') %>
-                            </a>
-                        <% } else { %>
-                            <% if(opt.actions[k].hidden) { %>
-                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action hidden-true', title:k, text:k}).render() %>
-                            <% } else { %>
-                                <%= new guiElements.button({onclick:emptyAction(opt.actions[k], guiObj), class:'btn btn-primary btn-action btn-empty-action', title:k, text:k}).render() %>
-                            <% } %>
-                        <% } %>
-                <% } %>
-            <% } else { %>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-warning dropdown-toggle highlight-tr-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Actions
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right">
-                        <% for(var k in opt.actions){  %>
-                            <li class="dropdown-item">
-                                <a
-                                    <% if (!opt.actions[k].isEmptyAction) { %>
-                                        onclick="return vstGO(this.href);"
-                                        href="<%- vstMakeLocalUrl([opt.base_path, opt.actions[k].name]) %>"
-                                    <% } else { %>
-                                        <%= justOn('click', function()
-                                            {
-                                                return emptyAction(opt.actions[k], guiObj)();
-                                            })
-                                        %>
-                                    <% } %>
-                                    class="sublink-btn hidden-<%- opt.actions[k].hidden %> sublink-btn-<%- opt.actions[k].name %>"
-                                >
-                                <%- opt.actions[k].name.replace('_', ' ') %>
-                                </a>
-                            </li>
-                        <% } %>
-                    </ul>
-                </div>
-            <% } %>
-        <% } %>
-        <~>
-    <%] %>
-
-
-    <%[ buttons_row_save %>
-        <% if(guiObj.api.canEdit){ %>
-            <%= new guiElements.button({onclick:function(){ return guiObj.update(!guiObj.api.canEditInView)}, class:'btn btn-primary', title:'Save', text:'Save'}).render() %>
-        <% } %>
-    <%] %>
-
-    <%[ buttons_row_delete %>
-        <% if(guiObj.api.canDelete){ %>
-            <%= new guiElements.button({onclick:function(){ return deleteAndGoUp(guiObj) }, class:'btn btn-danger danger-right btn-delete-one-entity', title:'Delete', text:'<span class="fa fa-times"></span> <span class="d-none d-lg-inline-block">Remove</span>'}).render() %>
-        <% } %>
-    <%] %>
-
-    <%[ buttons_row %>
-        <%* buttons_row_save %>
-        <%* buttons_row_delete %>
-
-        <%* buttons %>
-        <%* sublink_buttons %>
-    <%] %>
-
-    <%[ fields_block %>
-        <% for(var i in opt.fields){ %>
-            <%= guiObj.renderField(opt.fields[i], opt) %>
-        <% } %>
-
-        <% if(opt.sections){ %>
-            <% for(var i in opt.sections){ %>
-                <%= opt.sections[i].apply(guiObj, [opt.sections[i], opt]) %>
-            <% } %>
-        <% } %>
-    <%] %>
-
-    <%[ main_content_row_prepend %> <%] %>
-
-    <%[ main_content_row_append %> <%] %>
-
-    <%[ main_content_row %>
-        <%* main_content_row_prepend %>
-        <section class="col-lg-12">
-            <div class="card card-info">
-                <div class="card-header with-border">
-                    &nbsp;
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <%* fields_block %>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <%* main_content_row_append %>
-    <%] %>
-    <!-- /items_new_page -->
-
-    <%! entity_base %>
-</script>
-
-<script type="text/x-just" data-just="entity_one_get">
-    <!-- entity_one_get -->
-
-    <%[ buttons_row_save %>
-        <% if(guiObj.api.canEdit){ %>
-            <a href="<%- vstMakeLocalUrl([getUrlBasePath(), 'edit']) %>" class="btn-edit-one-entity btn btn-warning" onclick="return vstGO(this.href);" title="Edit" >Edit</a>
-        <% } %>
-    <%] %>
-
-    <%! entity_one %>
-</script>
-
-<script type="text/x-just" data-just="entity_one_edit">
-    <!-- entity_one_get -->
-    <%! entity_one %>
-</script>
-
-
-<script type="text/x-just" data-just="entity_new">
-    <!-- entity_new -->
-
-    <%[ buttons_row %>
-
-        <%= new guiElements.button({onclick:function(){ return guiObj.createAndGoEdit()}, class:'btn btn-primary', title:'Create', text:'Create'}).render() %>
-
-        <%* buttons %>
-    <%] %>
-
-    <%! entity_one %>
-
-</script>
-
-
-<!-- Отрисует страницу ошибки загрузки данных -->
-<script type="text/x-just" data-just="error_as_page">
-    <!-- error_as_page -->
-    <section class="content error-as-page <% if(error){ %>error-status-<%- error.status %><% } %>">
-        <div class="row">
-            <section class="col-lg-12">
-                <div class="card card-info">
-                    <div class="card-header with-border">
-                        Error<br>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <% if(error){ %>
-                                    <%- error.status %><br>
-                                    <% if(error.data && error.data.detail){ %><%- error.data.detail %><% } %>
-                                <% } %>
-                            </div>
+                        <div class="col-lg-6">
+                            <h1>
+                        <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
+                            <span class="fa fa-arrow-left"></span>
+                        </span>
+                                <span class="h1-header" > Error {{ error.status }} </span>
+                            </h1>
+                        </div>
+                        <div class="col-lg-6">
+                            <breadcrumbs :breadcrumbs="breadcrumbs"></breadcrumbs>
                         </div>
                     </div>
                 </div>
             </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <section class="col-lg-12">
+                            <div class="card card-info">
+                                <div class="card-header with-border">
+                                    <br>
+                                </div>
+                                <div class="card-body">
+                                    {{ error_data }}
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
         </div>
-    </section>
+
+        <!--<div class="content-wrapper" v-if="response">-->
+        <div class="content-wrapper-2" v-if="response">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h1>
+                                <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
+                                    <span class="fa fa-arrow-left"></span>
+                                </span>
+                                <span class="h1-header" > {{ title  | capitalize | split }} </span>
+                            </h1>
+                        </div>
+                        <div class="col-lg-6" >
+                            <breadcrumbs :breadcrumbs="breadcrumbs"></breadcrumbs>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <gui_buttons_row :view="view" :data="data"></gui_buttons_row>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <section class="col-lg-12">
+                            <div class="card card-info">
+                                <div class="card-header with-border" style="min-height: 50px;">
+                                    <component :is="content_header_component" :data="data" :view="view"></component>
+
+                                    <div class="card-tools pull-right" v-if="card_collapsed_button">
+                                        <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
+                                                @click="toggleCardCollapsed"
+                                        >
+                                            <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <transition name="fade">
+                                    <div class="card-body" v-show="!card_collapsed">
+                                        <component :is="content_body_component" :data="data" :view="view"></component>
+                                    </div>
+                                </transition>
+                                <transition name="fade">
+                                    <div class="card-footer clearfix" v-if="content_footer_component && !card_collapsed">
+                                        <component :is="content_footer_component" :data="data" :view="view"></component>
+                                    </div>
+                                </transition>
+                            </div>
+                            <component :is="content_additional" :data="data" :view="view" v-if="content_additional">
+                            </component>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 </script>
+
+<!-- template of preloader (Vue component - '<preloader></preloader>') -->
+<script type="text/x-template" id="template_preloader">
+    <div class="in-loading" v-if="show">
+        <div class="loader-wrapper">
+            <div class="loader"></div>
+        </div>
+    </div>
+</script>
+
+<!-- template of breadcrumbs (Vue component - '<breadcrumbs></breadcrumbs>') -->
+<script type="text/x-template" id="template_breadcrumbs">
+    <ol class="breadcrumb float-sm-right">
+        <li
+                v-for="breadcrumb in breadcrumbs"
+                class="breadcrumb-item"
+                :class="{'active': !breadcrumb.link}"
+        >
+            <template v-if="breadcrumb.link">
+                <router-link :to="breadcrumb.link">
+                    {{ breadcrumb.name }}
+                </router-link>
+            </template>
+            <template v-else>
+                {{ breadcrumb.name }}
+            </template>
+        </li>
+    </ol>
+</script>
+
+<!-- template of top menu/navigation -->
+<script type="text/x-template" id="template_top_nav">
+    <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" onclick="saveHideMenuSettings()" data-widget="pushmenu" href="#">
+                    <i class="fa fa-bars  ico-data-default"></i>
+                </a>
+            </li>
+            <template v-if="is_authenticated">
+                <li class="nav-item for-web api-link" >
+                    <a :href="openapi_url" class="nav-link">
+                        <i class="fa fa-star ico-data-default"></i> <span class="text-data">API</span>
+                    </a>
+                </li>
+            </template>
+            <template v-else>
+                <li class="nav-item for-web login-link">
+                    <a class="nav-link" :href="login_url">
+                        <i class="fa fa-sign-out text-data"></i>
+                        <span>Login</span>
+                    </a>
+                </li>
+            </template>
+        </ul>
+
+        <template v-if="is_authenticated">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <template v-if="enable_gravatar">
+                            <img :src="gravatar_img" class="img-circle elevation-1 gravatar-img"
+                                 @error="setDefaultGravatar($event.target)"
+                            >
+                        </template>
+                        <template v-else>
+                            <i class="fa fa-user mr-2 ico-data-default"></i>
+                        </template>
+                        <span class="text-data hidden-480">
+                            {{user.first_name | capitalize}} {{user.last_name | capitalize}}
+                        </span>
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right profile-menu background-default">
+                        <component :is="link_component" :[link_attr]="profile_url" class="dropdown-item text-data">
+                            <i class="fa fa-id-card-o mr-2 ico-data-default"></i> Profile
+                        </component>
+
+                        <div class="dropdown-divider"></div>
+
+                        <component :is="link_component" :[link_attr]="profile_settings_url" class="dropdown-item text-data">
+                            <i class="fa fa-cogs mr-2 ico-data-default"></i> Settings
+                        </component>
+
+                        <div class="dropdown-divider for-web"></div>
+
+                        <a :href="logout_url" class="dropdown-item for-web text-data">
+                            <i class="fa fa-sign-out mr-2 ico-data-default"></i> Logout
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#">
+                        <i class="fa fa-th-large ico-data-default"></i>
+                    </a>
+                </li>
+            </ul>
+        </template>
+    </nav>
+</script>
+
+<!-- template of logo (Vue component - '<logo></logo>' -->
+<script type="text/x-template" id="template_logo">
+    <a href="/" class="logo-link nav-link brand-link logo">
+        <i class="nav-icon fa fa-globe mr-2" style="margin-left: 20px;"></i>
+        <span class="brand-text font-weight-light">{{ title | capitalize }}</span>
+    </a>
+</script>
+
+<!-- template of sidebar (Vue component - '<sidebar></sidebar>') -->
+<script type="text/x-template" id="template_sidebar">
+    <div class="sidebar">
+        <nav class="mt-2 ">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <template v-for="item in menu_items">
+                    <sidebar_link_wrapper :item="item" @hideSidebar="hideSidebar"></sidebar_link_wrapper>
+                </template>
+            </ul>
+        </nav>
+    </div>
+</script>
+
+<!-- template of sidebar link -->
+<script type="text/x-template" id="template_sidebar_link">
+    <component :is="link_type" :[link_url_attr]="link_url" class="nav-link" :class="link_classes"
+               @click="onLinkClickHandler" @click.native="onLinkClickHandler">
+        <i class="nav-icon ico-menu" :class="icon_classes"></i>
+        <p>
+            <span class="li-header-span">
+                <i class="li-header-span-i-none menu-text-data">{{ item.name | capitalize }}</i>
+            </span>
+            <template v-if="item.sublinks">
+                <i class="right fa fa-angle-left ico-menu" @click.stop.prevent="onToggleIconClickHandler"></i>
+            </template>
+        </p>
+    </component>
+</script>
+
+<!-- template of sidebar link with wrapper -->
+<script type="text/x-template" id="template_sidebar_link2">
+    <li class="nav-item" :class="wrapper_classes" :data-url="item.url">
+        <sidebar_link :item="item" @toggleMenuOpen="toggleMenuOpen" @hideSidebar="hideSidebar"></sidebar_link>
+        <template v-if="item.sublinks">
+            <ul class="menu-treeview-menu nav nav-treeview" >
+                <template v-for="subitem in item.sublinks">
+                    <li class="nav-item" :data-url="subitem.url">
+                        <sidebar_link :item="subitem" @hideSidebar="hideSidebar"></sidebar_link>
+                    </li>
+                </template>
+            </ul>
+        </template>
+    </li>
+</script>
+
+<!-- template of main footer -->
+<script type="text/x-template" id="template_main_footer">
+    <footer class="main-footer">
+        <gui_help_modal></gui_help_modal>
+
+        <slot name="footer_buttons"></slot>
+
+        <div class="pull-right d-none d-sm-block" style="margin-right: 0px;">
+            <b>Version</b> {{ project_version }}
+        </div>
+
+        <template v-if="is_debug">
+            <div class="pull-right">
+                <b>
+                    <a href="#" class="help-text-data"
+                       onclick="loadQUnitTests(); return false;" >Test qUnit</a>
+                </b>
+            </div>
+        </template>
+
+        <div class="pull-right">
+            <a href="#" class="help-text-data"
+               onclick="window.guiFilesCache.deleteAllCacheAndUpdatePage(); return false;"
+            >Reload cache</a>
+        </div>
+        <br>
+    </footer>
+</script>
+
+<!-- template of buttons_row component (Vue component - '<gui_buttons_row></gui_buttons_row>' ) -->
+<script type="text/x-template" id="template_buttons_row">
+    <div>
+        <template v-for="item in operations">
+            <template v-if="item.component">
+                <component :is="item.component" :options="item"></component>
+            </template>
+            <template v-else>
+                <gui_button_common type="operation" :options="item" :look="{classes:['btn-primary']}"></gui_button_common>
+            </template>
+        </template>
+
+        <gui_group_of_buttons type="sublink" title="sublinks" classes="btn-default" :buttons="sublinks"></gui_group_of_buttons>
+
+        <gui_group_of_buttons type="action" title="actions" classes="btn-warning" :buttons="actions"></gui_group_of_buttons>
+    </div>
+</script>
+
+<!-- template for buttons, that can be grouped on small screens in drop-down list (Actions, Sublinks on page view, for example)
+     or can be represented as independent buttons on big screens
+-->
+<script type="text/x-template" id="template_group_of_buttons">
+    <span>
+            <template v-if="groupButtonsOrNot">
+                <gui_buttons_list :buttons="buttons" :type="type" :text="title" :look="{classes: classes}"></gui_buttons_list>
+            </template>
+            <template v-else>
+                <gui_button_common v-for="item in buttons" :type="type" :options="item" :look="{classes: classes}"></gui_button_common>
+            </template>
+        </span>
+</script>
+
+<!-- template of button with drop-down buttons list (button 'Actions' in table list row, for example) -->
+<script type="text/x-template" id="template_buttons_list">
+    <div class="btn-group" role="group">
+        <button type="button" class="btn dropdown-toggle highlight-tr-none gui-btn" :class="classes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ text | capitalize }}
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+            <gui_button_li v-for="button in buttons" :type="type" :options="button" :instance_id="instance_id"></gui_button_li>
+        </ul>
+    </div>
+</script>
+
+<!-- template of multi-actions button with drop-down list -->
+<script type="text/x-template" id="template_multi_actions">
+    <div class="btn-group" role="group" v-show="selected">
+        <button type="button" class="btn dropdown-toggle highlight-tr-none" :class="classes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ text | capitalize | split }}
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+            <gui_button_li v-for="button in multi_actions" type="multi_action" :options="button" ></gui_button_li>
+        </ul>
+    </div>
+</script>
+
+<!-- template of independent button:
+      - It can be link button(it has 'path' property in it's 'options'),
+       that do redirect to another view.
+      - It can be just button(it has no 'path' property in it's 'options'),
+       that calls some method of root component.
+-->
+<script type="text/x-template" id="template_button_common">
+    <button class="btn gui-btn" :class="classes" @click="onClickHandler" v-if="!options.hidden">
+        <template v-if="icon_classes">
+            <span :class="icon_classes"></span>
+            <span :class="title_classes">{{ title | capitalize | split }}</span>
+        </template>
+        <template v-else>
+            {{ title | capitalize | split }}
+        </template>
+    </button>
+</script>
+
+<!-- template of buttons from drop-down list of buttons. -->
+<script type="text/x-template" id="template_button_li">
+    <li class="dropdown-item" v-if="!options.hidden">
+        <a class="sublink-btn highlight-tr-none" :class="class_with_name" @click="onClickHandler(instance_id)">
+            {{ title | capitalize | split }}
+        </a>
+    </li>
+</script>
+
+<!-- template of modal window -->
+<script type="text/x-template" id="template_modal">
+    <transition name="modal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+                    <div class="modal-header text-data" v-if="with_header">
+                        <slot name="header">
+                            default header
+                        </slot>
+                        <span @click="close" class="btn-modal-header-close">
+                                 <i class="fa fa-times"></i>
+                        </span>
+                    </div>
+
+                    <div class="modal-body text-data">
+                        <slot name="body">
+                        </slot>
+                    </div>
+
+                    <div class="modal-footer text-data" v-if="with_footer">
+                        <slot name="footer">
+                            default footer
+                            <button class="modal-default-button" @click="$emit('close')">
+                                OK
+                            </button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</script>
+
+<!-- template of help modal window -->
+<script type="text/x-template" id="template_help_modal">
+    <div style="display: inline-block;">
+        <gui_modal v-show="show_modal" @close="close" :opt="{footer:false}">
+            <template v-slot:header>
+                <h3>{{ info.title }}</h3>
+            </template>
+            <template v-slot:body>
+                <h4 class="with_bottom_border">Versions</h4>
+                <ul>
+                    <li v-for="(item, index) in info['x-versions']">
+                        <b>{{index}}:</b> {{item}}
+                    </li>
+                </ul>
+                <template v-for="(item, index) in info['x-links']">
+                    <h4 class="with_bottom_border" style="margin-top:20px;">{{index}}</h4>
+                    <ul>
+                        <template v-if="isArray(item)">
+                            <li v-for="prop in item">
+                                <a :href="prop.url" target="_blank">{{prop.name}}</a>
+                            </li>
+                        </template>
+                        <template v-else>
+                            <li>
+                                <a :href="item.url" target="_blank">{{item.name}}</a>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </template>
+        </gui_modal>
+        <a href="#" @click.stop.prevent="open" class="help-text-data">
+            <span class="fa fa-question-circle"></span> About
+        </a>
+    </div>
+</script>
+
+<!-- template of gui_customizer -->
+<script type="text/x-template" id="template_gui_customizer">
+    <div class="p-3 customizer-options">
+        <h5>Customize application styles</h5>
+        <hr class="mb-2">
+        <field_choices :field="skinField" :wrapper_opt="{use_prop_data: true}"
+                       :prop_data="{skin_name: skin_name}"
+                       @setValueInStore="skinOnChangeHandler"
+        >
+        </field_choices>
+        <hr class="mb-2">
+        <div class='customize-skin-options' >
+            <field_form :field="formField" :wrapper_opt="{use_prop_data: true}"
+                        :prop_data="{skin_settings: skin_settings}"
+                        @setValueInStore="formOnChangeHandler"
+            >
+            </field_form>
+        </div>
+    </div>
+</script>
+<!--
+    EndBlock of COMMON components -
+    - components for ALL view types
+-->
+
+
+<!--
+   Block of LIST components -
+   - components for LIST views
+-->
+<!-- Base template of content_component (Vue component - <gui_entity_list></gui_entity_list>) of view with 'list' type -->
+<script type="text/x-template" id="template_entity_list">
+    <div>
+        <template v-if="is_empty">
+            <p class="text-center">List is empty.</p>
+        </template>
+        <template v-else>
+            <gui_list_table :instances="data.instances" :fields="fields" :view="view"></gui_list_table>
+        </template>
+    </div>
+</script>
+
+<!-- Base template of content_component_footer (Vue component - <gui_entity_footer_list></gui_entity_footer_list>) of view with 'list' type -->
+<script type="text/x-template" id="template_entity_footer_list">
+    <div>
+        <gui_multi_actions :instances="data.instances" :multi_actions="schema.multi_actions" v-if="multi_actions_exist"></gui_multi_actions>
+        <pagination :options="data.pagination"></pagination>
+    </div>
+</script>
+
+<!-- Base component for content_header of list Views -->
+<script type="text/x-template" id="template_entity_header_list">
+    <div>
+        <gui_filters_modal :opt="{store: 'filters'}" :view="view" :data="data"></gui_filters_modal>
+        <pagination :options="data.pagination"></pagination>
+    </div>
+</script>
+
+<!-- Component for a modal window with filter fields -->
+<script type="text/x-template" id="template_filters_modal">
+    <div style="display: inline-block;">
+        <gui_modal v-show="show_modal" @close="close">
+            <template v-slot:header>
+                <h3>Filters</h3>
+            </template>
+            <template v-slot:body>
+                <filters_wrapper :opt="opt" :view="view" :filters_data="data.filters"></filters_wrapper>
+            </template>
+            <template v-slot:footer>
+                <button class="btn btn-default btn-close-filters-modal" @click="close">Cancel</button>
+                <button class="btn btn-primary btn-apply-filters" @click="filter">Filter</button>
+            </template>
+        </gui_modal>
+        <button class="btn btn-default btn-open-filters-modal" @click="open">
+            <i class="fa fa-sliders" aria-hidden="true"></i>
+            <span style="margin-left:5px;">Filters</span>
+        </button>
+    </div>
+</script>
+
+<!-- template for Vue component - <filters_wrapper></filters_wrapper> -
+    container for list view filters
+-->
+<script type="text/x-template" id="template_filters_wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div
+                    v-for="field in filters"
+                    :field="field"
+                    :is="'field_' + field.options.format"
+                    v-model="data_to_represent[field.options.name]"
+                    v-if="!(opt.hideReadOnly && field.options.readOnly)"
+                    :wrapper_opt="wrapper_opt"
+            ></div>
+        </div>
+    </div>
+</script>
+
+
+<!-- template of <gui_list_table></gui_list_table> component -->
+<script type="text/x-template" id="template_list_table">
+    <table class="table table-bordered multiple-select">
+        <thead>
+        <tr :class="classes">
+            <th style="width: 50px" @click="changeAllRowsSelection" class="global-select td_select_btn" v-if="multi_actions_exist">
+                <div class="ico-on fa fa-toggle-on"></div>
+                <div class="ico-off fa  fa-toggle-off"></div>
+            </th>
+
+            <th v-for="field in fields" v-if="!hideField(field)" :class="td_classes('td', field.options.name)">
+                {{ field.options.title || field.options.name | capitalize | split }}
+            </th>
+
+            <th style="width: 120px;" :class="td_classes('column', 'actions')" v-if="child_actions_exist">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <gui_list_table_row v-for="instance in instances" :instance="instance" :fields="fields" :view="view"></gui_list_table_row>
+        </tbody>
+    </table>
+</script>
+
+<!-- template of <gui_list_table_row></gui_list_table_row> component -->
+<script type="text/x-template" id="template_list_table_row">
+    <tr class="item-row item-row-id highlight-tr" :class="classes" @click="goToTrLink($event)" @mousedown="onMouseDownHandler"
+        :data-id="instance.getPkValue()" :data-href="base_url + '/' + instance.getPkValue()"
+    >
+        <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"  @click="toggleSelection" v-if="multi_actions_exist">
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+        </td>
+        <td v-for="field in fields" v-if="!hideField(field)" :class="td_classes('td', field.options.name)">
+            <component :is="'field_' + field.options.format"
+                       :prop_data="data_to_represent"
+                       :field="field"
+                       :wrapper_opt="{list_view: true, use_prop_data: true}"
+            ></component>
+        </td>
+        <td :class="td_classes('column', 'actions')" v-if="child_actions_exist">
+            <div class="btn-group" role="group">
+                <gui_buttons_list :instance_id="instance.getPkValue()" :buttons="child_links_buttons"
+                                  type="child_link" text="actions" :look="{classes: ['btn-primary']}"
+                ></gui_buttons_list>
+            </div>
+        </td>
+    </tr>
+</script>
+
+<!-- template of <pagination></pagination> component  -->
+<script type="text/x-template" id="template_pagination">
+    <ul class="pagination pagination-sm no-margin pull-right" style="margin-top: 5px;" v-if="pages_amount > 1">
+        <li class="page-item pagination-page" v-for="item in items">
+            <a class="page-link" :style="styles(item.number)"  @click.stop.prevent="goToPage(item.number)">{{ item.text }}</a>
+        </li>
+    </ul>
+</script>
+
+<!-- template of add child to list modal window -->
+<script type="text/x-template" id="template_add_child_modal">
+    <!--<div style="display: contents;">-->
+    <div style="display: inline-block;">
+        <preloader :show="show_loader"></preloader>
+
+        <gui_modal v-show="show_modal" @close="close">
+            <template v-slot:header>
+                <h3>Add child instances</h3>
+            </template>
+            <template v-slot:body>
+                <div class="card card-info">
+                    <div class="card-header with-border">
+                        <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
+                        </current_search_input>
+                        <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
+                    </div>
+                    <div class="card-body">
+                        <template v-if="is_empty">
+                            <p class="text-center">List is empty.</p>
+                        </template>
+                        <template v-else>
+                            <current_table :instances="instances" :opt="opt" @changeValue="changeValue" @setSelections="setSelections" @toggleSelection="toggleSelection">
+                            </current_table>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template v-slot:footer>
+                <button class="btn btn-default btn-operation-add-child-close" @click="close">Cancel</button>
+                <button class="btn btn-primary btn-operation-add-child-apply" @click="addSelected">Add selected</button>
+            </template>
+        </gui_modal>
+        <button class="btn btn-primary btn-operation-add" @click="open">Add</button>
+    </div>
+</script>
+
+<!-- template of modal window table -->
+<script type="text/x-template" id="template_base_instances_list_table">
+    <table class="table table-bordered" :class="table_classes">
+        <thead>
+        <tr :class="header_tr_classes">
+            <th style="width: 50px" @click="changeAllRowsSelection" class="global-select td_select_btn" v-if="with_multiple_select">
+                <div class="ico-on fa fa-toggle-on"></div>
+                <div class="ico-off fa  fa-toggle-off"></div>
+            </th>
+
+            <th v-for="field in fields" v-if="!hideField(field)" :class="td_classes('td', field.options.name)">
+                {{ field.options.title || field.options.name | capitalize | split }}
+            </th>
+
+            <th style="width: 120px;" :class="td_classes('column', 'actions')" v-if="with_actions">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <current_table_row v-for="instance in instances"
+                           :instance="instance" :opt="row_opt(instance)"
+                           @toggleSelection="toggleSelection"
+        ></current_table_row>
+        </tbody>
+    </table>
+</script>
+
+<!-- template of modal window table row -->
+<script type="text/x-template" id="template_base_instances_list_table_row">
+    <tr class="item-row item-row-id highlight-tr" :class="tr_classes"
+        @click="goToTrLink($event, _blank)" @mousedown="onMouseDownHandler" :data-id="instance.getPkValue()"
+        :data-href="base_url + '/' + instance.getPkValue()"
+    >
+        <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
+            @click="toggleSelection" v-if="with_select"
+        >
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+        </td>
+        <td v-for="field in fields" v-if="!hideField(field)"
+            :class="td_classes('td', field.options.name)"
+        >
+            <component :is="'field_' + field.options.format"
+                       :prop_data="data_to_represent"
+                       :field="field"
+                       :wrapper_opt="{list_view: true, use_prop_data: true}"
+            ></component>
+        </td>
+        <td :class="td_classes('column', 'actions')" v-if="with_actions">
+            <div class="btn-group" role="group">
+                <gui_buttons_list
+                        type="child_link"
+                        :instance_id="instance.getPkValue()"
+                        :buttons="child_links_buttons" text="actions"
+                        :look="{classes: ['btn-primary']}">
+                </gui_buttons_list>
+            </div>
+        </td>
+    </tr>
+</script>
+<!--
+   EndBlock of LIST components -
+   - components for LIST views
+-->
+
+
+<!--
+   Block of PAGE components -
+     - components for PAGE views (page, page_new, page_edit, action)
+-->
+<!-- Base template of content_component (Vue component - 'gui_entity_{page, page_new, page_edit, action}')
+     of view with (page, page_new, page_edit, action) type
+ -->
+<script type="text/x-template" id="template_entity_page">
+    <fields_wrapper :opt="options" :instance="instance"></fields_wrapper>
+</script>
+
+<!-- template for Vue component - <fields_wrapper></fields_wrapper> -
+     container for guiFields on pages with ['page', 'page_new', 'page_edit', 'action'] type
+-->
+<script type="text/x-template" id="template_fields_wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6" v-if="show_fields_select">
+                <label class="control-label">Add field</label>
+                <select class="form-control" id="show_not_required_fields_select"
+                        @change="addFieldHandler($event.target.value); $event.target.selectedIndex = 0; return false;"
+                >
+                    <option disabled selected >Select field</option>
+                    <option v-for="field in fields" :value="field.options.name" :disabled="field.options.required">
+                        {{ field.options.title  || field.options.name | capitalize | split }}
+                    </option>
+                </select>
+            </div>
+
+            <div
+                    v-for="field in fields"
+                    :field="field"
+                    :is="'field_' + field.options.format"
+                    v-model="data_to_represent[field.options.name]"
+                    v-if="!(opt.hideReadOnly && field.options.readOnly)"
+                    :wrapper_opt="getFieldWrapperOpt(field)"
+                    @toggleHidden="toggleHidden"
+            ></div>
+        </div>
+    </div>
+</script>
+
+<!--
+   EndBlock of PAGE components -
+     - components for PAGE views (page, page_new, page_edit, action)
+-->
+
+
+<!--
+  Block of CUSTOM pages -
+    - home page, 404 page and so on
+-->
+<!-- base custom page template -->
+<script type="text/x-template" id="template_custom_view">
+    <div class="content-wrapper-2">
+        <section class="content-header">
+            <h1>
+                    <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
+                        <span class="fa fa-arrow-left"></span>
+                    </span>
+                <span class="h1-header" > {{ title }} </span>
+            </h1>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h2>{{ message }}</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</script>
+<!--
+   EndBlock of CUSTOM pages -
+     - home page, 404 page and so on
+-->
+
+<!--
+  Block of WIDGETS templates
+-->
+<!-- template of counter widget -->
+<script type="text/x-template" id="template_w_counter">
+    <div class="col-lg-2 col-6 dnd-block" v-if="item.active">
+        <div class="small-box bg-info cursor-move1">
+            <div class="inner">
+                <transition name="slide-fade" mode="out-in">
+                    <div :key="value">
+                        <h3>{{ value }}&nbsp;</h3>
+                    </div>
+                </transition>
+                <p>{{ item.title || item.name | capitalize }}</p>
+            </div>
+            <div class="icon hidden-xs" style="top: 0px;">
+                <i class="fa fa-cog"></i>
+            </div>
+            <template v-if="item.url">
+                <router-link :to="item.url" class="small-box-footer">
+                    More info <i class="fa fa-arrow-circle-right"></i>
+                </router-link>
+            </template>
+            <template v-else>
+                <i  class="small-box-footer" >&nbsp;</i>
+            </template>
+        </div>
+    </div>
+</script>
+
+<!-- template of line chart widget -->
+<script type="text/x-template" id="template_w_line_chart">
+    <div class="col-lg-12 col-12 dnd-block" v-if="item.active">
+        <!--<div class="col-lg-12 col-12 dnd-block">-->
+        <div class="card card-info">
+            <div class="card-header ui-sortable-handle cursor-move1">
+                {{ item.title || item.name | capitalize }}
+                <div class="pull-right">
+                    <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
+                            @click="toggleCollapsed"
+                    >
+                        <i class="fa " :class="item.collapsed ? 'fa-plus' : 'fa-minus'"></i>
+                    </button>
+                </div>
+
+                <content_header :item="item" :value="value" v-if="with_content_header"></content_header>
+
+            </div>
+            <transition name="fade">
+                <div class="card-body border-radius-none" v-if="!item.collapsed">
+                    <content_body :item="item" :value="value"></content_body>
+                </div>
+            </transition>
+        </div>
+    </div>
+</script>
+
+<!-- template of line chart widget - content body -->
+<script type="text/x-template" id="template_w_line_chart_content_body">
+    <div class="row">
+        <div class="col-lg-12">
+            <div style="position: relative; margin: auto; height: 300px; width: 100%; overflow:hidden;">
+                <canvas id="chart_js_canvas"></canvas>
+            </div>
+        </div>
+    </div>
+</script>
+<!--
+  EndBlock of WIDGETS templates
+-->

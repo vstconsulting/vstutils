@@ -1,566 +1,917 @@
 <script type="text/javascript">
-function isCordova(){
-    if(window.cordova)
-    {
-        return true;
-    }
-    else if(window.parent && window.parent.cordova)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-window._guiFilesCache = function(opt)
-{
-    var indexedDB 	  = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
-
-    var hostId = "{{host_url}}".replace(/[^0-9A-z]/img, "_")
-
-    var baseName 	  = "filesCache_"+hostId
-    var storeName 	  = "filesCacheStore"
-    var bdVersion 	  = 1
-    this.myDB             = undefined
-    this.noCache          = opt.noCache
-
-
-    this.setNoCache = function(NoCache)
-    {
-        this.noCache = NoCache
+    /**
+     * Function, that defines App's launch environment: Cordova or not.
+     * @return {boolean}
+     */
+    function isCordova() {
+        if(window.cordova) {
+            return true;
+        } else if(window.parent && window.parent.cordova) {
+            return true;
+        }
+        return false;
     }
 
-    var thisObj = this;
+    /**
+     * Function, that turns load type of js files.
+     * loadType('js').
+     * loadType('eval').
+     * loadType('js-inline').
+     * @param {boolean} type
+     * @return {string}
+     */
+    function loadType(type) {
+        if(type !== undefined) {
+            window.localStorage['loadType'] = type;
+        }
 
-    this.closeDB = function()
-    {
-        if(thisObj.myDB)
-        {
-            thisObj.myDB.close();
-            return;
+        return window.localStorage['loadType'];
+    }
+
+    /**
+     * Function, that turns use_cache modes (true/false).
+     * True - use_cache.
+     * False - no_cache.
+     * useCache(true).
+     * useCache(false).
+     * @param {boolean} mode
+     * @return {boolean}
+     */
+    function useCache(mode) {
+        if(mode !== undefined) {
+            loadType(mode ? 'inline-js': 'js');
+            window.localStorage['useCache'] = JSON.stringify(mode);
+        }
+
+        // return JSON.parse(window.localStorage['useCache']);
+        return window.localStorage['useCache'] == 'true';
+    }
+
+    /**
+     * Handler for window.onerror event, that should be called during Files loading.
+     */
+    function onLoadingErrorHandler(event) {
+        if(window && window.guiFilesLoader && window.guiFilesLoader.appendError &&
+            typeof window.guiFilesLoader.appendError == "function") {
+            window.guiFilesLoader.appendError(event.error);
         }
     }
 
-    function connectDB()
-    {
-        return new Promise(function(resolve, reject)
-        {
-            if(thisObj.myDB)
-            {
-                resolve(thisObj.myDB);
+    /**
+     * Function selects DOM elements by selector and push them into JQ Class constructor.
+     * If typeof selector is 'string', function will find DOM element,
+     * appropriate to this selector.
+     * If typeof selector is 'object' function will push selector.
+     * @param {string, object} selector DOM element or DOM elements' selector.
+     * @return {object} JQ Class instance.
+     */
+    function jqConstructor(selector) {
+        function _getElement(selector) {
+            if(typeof selector == "object") {
+                return selector;
+            }
+
+            if(typeof selector != "string") {
                 return;
             }
 
-            var request = indexedDB.open(baseName, bdVersion);
-            request.onerror = function(err)
-            {
-                console.error("connectDB", err);
-                reject(err)
+            selector = selector.trim();
+            let method = 'getElementsByTagName';
+
+            if(selector[0] == "#") {
+                method = 'getElementById';
+                selector = selector.slice(1);
+            } else if(selector[0] == ".") {
+                method = 'getElementsByClassName';
+                selector = selector.slice(1);
             }
 
-            request.onsuccess = function(event)
-            {
-                thisObj.myDB = event.target.result
-                resolve(event.target.result);
-            }
+            return document[method](selector);
+        }
 
-            request.onupgradeneeded = function(e)
-            {
-                e.currentTarget.result.createObjectStore(storeName, { keyPath: "path", autoIncrement: true });
-                connectDB().then(resolve, reject)
-            }
-        })
+        return new JQ(_getElement(selector));
     }
 
-    this.getFile = function(file_url)
-    {
-        var thisObj = this
-        return new Promise(function(resolve, reject)
-        {
-            if(thisObj.noCache)
-            {
-                reject()
-            }
-
-            connectDB().then(function(db)
-            {
-                var request = db.transaction([storeName], "readonly").objectStore(storeName).get(file_url);
-
-                request.onerror = function(err)
-                {
-                    console.error("getFile", err);
-                    reject(err)
+    /**
+     * Class, that provides some methods, that make DOM manipulations easier.
+     * Simple analog of JQuery, has only basic methods.
+     */
+    class JQ {
+        /**
+         * Constructor of JQ Class.
+         * @param {object, HTMLCollection} elements DOM elements, that should be edited.
+         */
+        constructor(elements) {
+            if(!elements) {
+                this.length = 0;
+            } else {
+                if (elements.length) {
+                    for (let i = 0; i < elements.length; i++) {
+                        this[i] = elements[i];
+                    }
+                    this.length = elements.length;
+                } else {
+                    this[0] = elements;
+                    this.length = 1;
                 }
 
-                request.onsuccess = function()
-                {
-                    if(!request.result)
-                    {
-                        reject()
-                        return;
+                let props = [];
+                for(let i = 0; i < this.length; i++) {
+                    if(!this[i]) {
+                        continue;
+                    }
+                    props.push(this[i]);
+                }
+
+                Object.defineProperty(this, 'elements', {
+                    value: props,
+                });
+            }
+        }
+        /**
+         * Static method.
+         * This method is supposed to be called from fadeIn and fadeOut methods.
+         * @param {number, string} speed Animation speed.
+         */
+        static getSpeed(speed) {
+            let speed_props = {
+                fast: 50,
+                normal: 150,
+                slow: 300,
+            };
+
+            if(typeof speed == "string") {
+                if(speed_props[speed]) {
+                    speed = speed_props[speed];
+                }
+            }
+
+            if(!speed) {
+                speed = 50;
+            }
+            return speed;
+        }
+        /**
+         * Method, that inserts into end of DOM element some HTML.
+         * @param {string} html HTML, that should be appended.
+         */
+        append(html) {
+            this.elements.forEach(el => {
+                el.innerHTML = el.innerHTML + html;
+            });
+        }
+        /**
+         * Method, that inserts into beginning of DOM element some HTML.
+         * @param {string} html HTML, that should be appended.
+         */
+        prepend(html) {
+            this.elements.forEach(el => {
+                el.innerHTML = html + el.innerHTML;
+            });
+        }
+        /**
+         * Method, that shows DOM element.
+         */
+        show() {
+            this.elements.forEach(el => {
+                let prop = "";
+                if(el.jq_props && el.jq_props && el.jq_props.style) {
+                    prop = el.jq_props.style.display || "";
+                }
+                el.style.display = prop;
+            });
+        }
+        /**
+         * Method, that hides DOM element.
+         */
+        hide() {
+            this.elements.forEach(el => {
+                if(el.style.display && el.style.display != "none") {
+                    if(!el.jq_props) {
+                        el.jq_props = {};
                     }
 
-                    resolve(request.result ? request.result : -1)
+                    if(!el.jq_props.style) {
+                        el.jq_props.style = {};
+                    }
+                    el.jq_props.style.display = el.style.display;
                 }
-            }, reject);
-        });
-    }
+                el.style.display = "none";
+            });
+        }
+        /**
+         * Method, that adds CSS class to DOM element.
+         * @param {string} item CSS class, that should be added.
+         */
+        addClass(item) {
+            this.elements.forEach(el => {
+                if(el.className.indexOf(item) == -1) {
+                    el.className += " " + item;
+                }
+            });
+        }
+        /**
+         * Method, that removes CSS class from DOM element.
+         * @param {string} item CSS class, that should be removed.
+         */
+        removeClass(item) {
+            this.elements.forEach(el => {
+                el.className = el.className.replace(item, "");
+            });
+        }
+        /**
+         * Method, that smoothly shows DOM element.
+         * @param {number, string} speed Animation speed.
+         */
+        fadeIn(speed) {
+            speed = this.constructor.getSpeed(speed);
 
-    this.setFile = function(file_url, file_data)
-    {
-        var thisObj = this
+            this.elements.forEach(el => {
+                let prop = 1;
+                if(el.jq_props && el.jq_props.style && el.jq_props.style.opacity) {
+                    prop = el.jq_props.style.opacity;
+                }
+                let interval_id = setInterval(() => {
+                    jqConstructor(el).show();
 
-        connectDB().then(function(db)
-        {
-            var transaction = db.transaction([storeName],"readwrite");
-            transaction.oncomplete = function(event) {
-                //console.log("setFile Success", event);
-            };
+                    if (!el.style.opacity || el.style.opacity == "0") {
+                        el.style.opacity = 0;
+                    }
 
-            transaction.onerror = function(event) {
-                console.error("setFile Error", event);
-            };
+                    if (el.style.opacity < prop) {
+                        el.style.opacity = Number(el.style.opacity) + 0.1;
+                    } else {
+                        if(!(el.jq_props && el.jq_props.style &&
+                                el.jq_props.style.opacity)) {
+                            el.style.opacity = "";
+                        }
+                        clearInterval(interval_id);
+                    }
+                }, speed);
+            });
+        }
+        /**
+         * Method, that smoothly hides DOM element.
+         * @param {number, string} speed Animation speed.
+         */
+        fadeOut(speed) {
+            speed = this.constructor.getSpeed(speed);
 
-            var objectStore = transaction.objectStore(storeName);
+            this.elements.forEach(el => {
+                let prop = 1;
+                if(el.style.opacity && el.style.opacity != "0") {
+                    if(!el.jq_props) {
+                        el.jq_props = {};
+                    }
 
-            objectStore.put({path: file_url, data: file_data});
-        });
-    }
-
-    this.deleteAllCache = function()
-    {
-        this.closeDB();
-        var DBDeleteRequest = window.indexedDB.deleteDatabase(baseName);
-        DBDeleteRequest.onerror = function(event) {
-            console.log("Error deleting database.", event);
-            setTimeout(function(){
-                if(isCordova())
-                {
-                    inAppClose()
+                    if(!el.jq_props.style) {
+                        el.jq_props.style = {};
+                    }
+                    prop = el.jq_props.style.opacity = el.style.opacity;
                 }
 
-                window.location.reload()
-            }, 500)
-        };
-
-        DBDeleteRequest.onsuccess = DBDeleteRequest.onerror
-        DBDeleteRequest.onblocked = DBDeleteRequest.onerror
-        DBDeleteRequest.onupgradeneeded = DBDeleteRequest.onerror
-
-        return DBDeleteRequest
+                let interval_id = setInterval(() => {
+                    if (!el.style.opacity) {
+                        el.style.opacity = prop;
+                    }
+                    if (el.style.opacity > 0) {
+                        el.style.opacity -= 0.1;
+                    } else {
+                        jqConstructor(el).hide();
+                        clearInterval(interval_id);
+                    }
+                }, speed);
+            });
+        }
     }
 
-    this.delFile = function(file_url)
-    {
-        var thisObj = this
+    /**
+     * Class, that creates FilesCache instances - Objects, that communicate with indexedDB.
+     * More about indexedDB:
+     * - https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Basic_Concepts_Behind_IndexedDB
+     * - https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+     */
+    class FilesCache {
+        /**
+         * Constructor of FilesCache class.
+         * @param {object} opt Object with options for FilesCache instance.
+         */
+        constructor(opt) {
+            this.indexed_db = window.indexedDB || window.mozIndexedDB ||
+                window.webkitIndexedDB || window.msIndexedDB;
+            // this.host_id = window.location.host;
+            this.host_id = "{{host_url}}".replace(/[^0-9A-z]/img, "_");
+            this.db_name = 'cache_' + this.host_id + "__";
+            this.db_version = 1;
+            this.store_name = 'cache_store';
+            this.use_cache = true;
 
-        connectDB().then(function(db)
-        {
-            var transaction = db.transaction([storeName],"readwrite");
-            transaction.oncomplete = function(event) {
-                //console.log("setFile Success", event);
+            for(let key in opt) {
+                this[key] = opt[key];
+            }
+        }
+        /**
+         * Method, that returns promise of connection to FilesCache indexedDB.
+         */
+        connectDB() {
+            return new Promise((resolve, reject) => {
+                let request = this.indexed_db.open(this.db_name, this.db_version);
+
+                request.onerror = (err) => {
+                    console.error("Error in FilesCache.connectDB().", err);
+                    reject(err);
+                };
+
+                request.onsuccess = (event) => {
+                    let db = event.target.result;
+
+                    db.onerror = function(event) {
+                        console.log('indexedDB - db.onerror ', event);
+                    };
+
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    let db = event.target.result;
+                    db.createObjectStore(
+                        this.store_name, { keyPath: "path", autoIncrement: true }
+                    );
+                    this.connectDB().then(resolve, reject)
+                }
+            })
+        }
+        /**
+         * Method, that returns promise to get file from FilesCache.
+         */
+        getFile(file_url) {
+            return new Promise((resolve, reject) => {
+                if(!this.use_cache) {
+                    reject();
+                }
+
+                this.connectDB().then(db => {
+                    let transaction = db.transaction([this.store_name], "readonly");
+                    let request = transaction.objectStore(this.store_name).get(file_url);
+
+                    transaction.oncomplete = function(event) {
+                        db.close();
+                    };
+
+                    request.onerror = (err) => {
+                        console.error("Error in FilesCache.getFile()", err);
+                        reject(err);
+                    };
+
+                    request.onsuccess = () => {
+                        if(!request.result) {
+                            reject();
+                            return;
+                        }
+
+                        resolve(request.result ? request.result : -1);
+                    }
+                }, reject);
+            });
+        }
+        /**
+         * Method, that returns promise to save file in FilesCache.
+         */
+        setFile(file_url, file_data) {
+            return new Promise((resolve, reject) => {
+                this.connectDB().then(db => {
+                    let transaction = db.transaction([this.store_name],"readwrite");
+                    transaction.oncomplete = (event) => {
+                        db.close();
+                    };
+
+                    transaction.onerror = (event) => {
+                        console.error("Error in FilesCache.setFile().", event);
+                    };
+
+                    let objectStore = transaction.objectStore(this.store_name);
+
+                    let request = objectStore.put({path: file_url, data: file_data});
+
+                    request.onerror = (err) => {
+                        console.error("Error in FilesCache.setFile()", err);
+                        reject(err);
+                    };
+
+                    request.onsuccess = () => {
+                        if(!request.result) {
+                            reject();
+                            return;
+                        }
+                        resolve(request.result ? request.result : -1);
+                    }
+                }, reject);
+            });
+        }
+        /**
+         * Method, that returns promise to delete file from FilesCache.
+         */
+        delFile(file_url) {
+            return new Promise((resolve, reject) => {
+                this.connectDB().then(db => {
+                    let transaction = db.transaction([this.store_name],"readwrite");
+                    transaction.oncomplete = (event) => {
+                        db.close();
+                    };
+
+                    transaction.onerror = (event) => {
+                        console.error("Error in FilesCache.delFile()", event);
+                    };
+
+                    let objectStore = transaction.objectStore(this.store_name);
+                    let request = objectStore.delete(file_url);
+
+                    request.onerror = (err) => {
+                        console.error("Error in FilesCache.detFile()", err);
+                        reject(err);
+                    };
+
+                    request.onsuccess = () => {
+                        resolve(true);
+                    }
+                }, reject);
+            });
+        }
+        /**
+         * Method, that returns promise to delete all file from FilesCache (delete FilesCache indexedDB).
+         */
+        deleteAllCache() {
+            return new Promise((resolve, reject) => {
+                let DBDeleteRequest = this.indexed_db.deleteDatabase(this.db_name);
+
+                DBDeleteRequest.onerror = (event) => {
+                    console.error("Error during 'deleteAllCache' method execution. ", event);
+                    reject(event);
+                };
+
+                DBDeleteRequest.onblocked = (event) => {
+                    console.error("Error during 'deleteAllCache' method execution. DB blocked ", event);
+                    reject(event);
+                };
+
+                DBDeleteRequest.onsuccess = (event) => {
+                    resolve(event);
+                };
+            });
+        }
+        /**
+         * Method, that returns promise to delete all file from FilesCache (delete FilesCache indexedDB)
+         * and after promise resolving/rejecting updates page.
+         */
+        deleteAllCacheAndUpdatePage() {
+            let callback = () => {
+                return setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             };
 
-            transaction.onerror = function(event) {
-                console.error("setFile Error", event);
+            return this.deleteAllCache().then(response => {
+                callback();
+            }).catch(error => {
+                callback();
+            });
+        }
+    }
+
+    /**
+     * Class, that manages loading static files (tpl, css, js, events)
+     * and appending them to html document.
+     */
+    class FilesLoader {
+        /**
+         * Constructor of FilesLoader Class.
+         */
+        constructor(files_cache, resource_list) {
+            /**
+             * Dict of JS objects - files, that should be loaded.
+             * File (JS object) has properties about it's type, source url,
+             * status (appended/appending), response status code (200, 404, and so on).
+             */
+            this.files_to_load = {};
+            /**
+             * Instance of FilesCache Class.
+             * This property communicates with indexedDB, where cache is stored.
+             */
+            this.files_cache = files_cache;
+            /**
+             * Array of JS objects, that contain info about files, that should be loaded.
+             */
+            this.resource_list = resource_list;
+            /**
+             * Object, that contents properties about loading progress.
+             * steps_sum - amount of files to be loaded.
+             * step - number of loaded files.
+             */
+            this.loading_progress = {
+                step: 0,
+                steps_sum: 0,
             };
-
-            var objectStore = transaction.objectStore(storeName);
-
-            objectStore.delete(file_url);
-        });
-    }
-}
-
-window.guiFilesCache = new window._guiFilesCache({ noCache:notUseCache() == "true" })
-
-var jsLoadingProgress = 0;
-var jsLoadingProgressStep = 0;
-var jsLoadingProgressSumSteps = 0;
-
-var jsToLoad = {}
-
-function appendLog(data, extendData)
-{
-    try{
-        let text = "";
-        if(!extendData)
-        {
-            extendData = {type:'Log', name:""}
+            /**
+             * Property - simple analog of JQuery.
+             * FilesLoader use it, because at the moment of files loading
+             * there is no JQuery yet.
+             */
+            this.jq = jqConstructor;
         }
+        /**
+         * Method, that changes loading progress bar value.
+         * @param {number} width Value of loading progress bar width.
+         */
+        setLoadingProgress(width) {
+            let elem = document.getElementById("LoadingProgressBarLine");
 
-        text += "Type:"+extendData.type+"\t";
-        if(extendData.name) text += "Name:"+extendData.name+"\t";
-
-        if(typeof data == "string")
-        {
-            text += data
-        }
-        else
-        {
-            text += "JSON:"+JSON.stringify(exception)
-        }
-
-        text+= "\n";
-        $(".LoadingProgressBar-errorLog").append(text)
-    }catch (e) {
-        appendError(e)
-    }
-}
-
-function appendError(exception, extendData)
-{
-    try{
-        console.error(exception)
-
-        let text = "";
-        if(!extendData)
-        {
-            extendData = {type:'Error', name:""}
-        }
-
-        text += "Type:"+extendData.type+"\t";
-        if(extendData.name) text += "Name:"+extendData.name+"\n";
-
-        if(exception && exception.message)
-        {
-            text += exception.message + "\nstack:\n"+exception.stack
-        }
-        else
-        {
-            text += "JSON exeption:\n"+JSON.stringify(exception)
-        }
-
-        $(".LoadingProgressBar-errorLog").append(text)
-        $(".LoadingProgressBar-errorLog").append("\n\n")
-        $(".LoadingProgressBar-errorLog").show()
-        $(".loadInfoWrapper").addClass("need-reload")
-    }catch (e) {
-        debugger;
-        alert("Error in appendError function\n"+JSON.stringify(e))
-    }
-
-}
-
-/**
- * loadTipe('js')
- * loadTipe('eval')
- * loadTipe('js-inline')
- *
- * @param {type} string
- * @returns {windowlocalStorage.loadTipe}
- */
-function loadTipe(type)
-{
-    if(type !== undefined)
-    {
-        window.localStorage['loadTipe'] = type
-    }
-
-    return window.localStorage['loadTipe']
-}
-
-/**
- * notUseCache('true')
- * notUseCache('false')
- *
- * @param {type} string
- * @returns {windowlocalStorage.useCache}
- */
-function notUseCache(type)
-{
-    if(type !== undefined)
-    {
-        if(type == "true")
-        {
-            loadTipe('js')
-        }
-        else
-        {
-            loadTipe('inline-js')
-        }
-        window.localStorage['useCache'] = type
-    }
-
-    return window.localStorage['useCache']
-}
-
-
-function addToPage(jsToLoad)
-{
-    indexs = []
-    for(var i in jsToLoad)
-    {
-        if(!indexs[jsToLoad[i].index])
-        {
-            indexs[jsToLoad[i].index] = []
-        }
-
-        indexs[jsToLoad[i].index].push(jsToLoad[i])
-    }
-
-    function compareNumeric(a, b)
-    {
-        if (!a[0].prioritet && a[0].prioritet !== 0) a[0].prioritet = 999;
-        if (!b[0].prioritet && b[0].prioritet !== 0) b[0].prioritet = 999;
-
-        if (a[0].prioritet > b[0].prioritet) return 1;
-        if (a[0].prioritet < b[0].prioritet) return -1;
-        return 0
-
-
-        if (a[0].index > b[0].index) return 1;
-        if (a[0].index < b[0].index) return -1;
-    }
-
-    indexs = indexs.sort(compareNumeric);
-    var last_val = undefined
-    for(var i in indexs)
-    {
-        for(var j in indexs[i])
-        {
-            var val = indexs[i][j]
-
-
-            if(val.appended)
-            {
-                last_val = val;
-                continue;
-            }
-
-            if(val.status!= 200)
-            {
+            if(!elem) {
                 return;
             }
 
-            if(val.appending === true && !val.appended)
-            {
-                setTimeout(function(){
-                    addToPage(jsToLoad)
-                }, 200)
+            elem.style.width = Math.ceil(width) + '%';
+
+            elem = document.getElementById("LoadingProgressBarCount");
+
+            if(!elem) {
                 return;
             }
 
-            if(last_val && !last_val.appended)
-            {
-                setTimeout(function(){
-                    addToPage(jsToLoad)
-                }, 200)
-                return;
+            elem.style.width = Math.ceil(width) + '%';
+            elem.innerHTML = Math.ceil(width) * 1  + '%';
+        }
+        /**
+         * Method, that hides loading progress bar and shows App content.
+         */
+        hideLoadingProgress() {
+            this.jq("#RealBody").show();
+
+            this.jq("#LoadingProgressBar").fadeOut();
+        }
+        /**
+         * Method, needed for sorting of files array.
+         * @param {object} a Array property 1
+         * @param {object} b Array property 2
+         */
+        _compareNumeric(a, b) {
+            if (!a.prioritet && a.prioritet !== 0) a.prioritet = 999;
+            if (!b.prioritet && b.prioritet !== 0) b.prioritet = 999;
+
+            if (a.prioritet > b.prioritet) return 1;
+            if (a.prioritet < b.prioritet) return -1;
+
+            return 0;
+        }
+        /**
+         * Method, that returns array with sorted filed from this.files_to_load.
+         */
+        getSortedFiles() {
+            let files = [];
+
+            for(let item in this.files_to_load) {
+                files.push(this.files_to_load[item]);
             }
 
+            return files.sort(this._compareNumeric);
+        }
+        /**
+         * Method, that creates DOM element for file content.
+         * @param {string} type Type (tag) of DOM element.
+         * @param {array} attributes Array of objects -
+         * DOM element attributes(key, value).
+         * @param {object} props Object with properties of DOM element.
+         */
+        createFileDomElement(type, attributes, props) {
+            let el = document.createElement(type);
 
-            if(val.status == 200)
-            {
-                if(val.appending === true && val.appended !== true)
-                {
-                    setTimeout(function(){
-                        addToPage(jsToLoad)
-                    }, 200)
+            attributes.forEach(attr => {
+                el.setAttribute(attr.key, attr.value);
+            });
+
+            for(let key in props) {
+                el[key] = props[key];
+            }
+
+            return el;
+        }
+        /**
+         *  Method, that inserts file content's DOM element into html document,
+         *  adds info about in to logs and changes file status.
+         *  @param {string} target Name of parent element - container of file DOM element.
+         *  @param {object} el File content's DOM element.
+         *  @param {object} file File object.
+         *  @param {string} file Message, that should be added into logs.
+         */
+        appendFileDomElement(target, el, file, log_msg) {
+            if(!log_msg) {
+                log_msg = "Appended " + file.url;
+            }
+            document.getElementsByTagName(target)[0].appendChild(el);
+            this.appendLog(log_msg);
+            file.appended = true;
+        }
+        /**
+         * Method, that adds TPL file content to html document.
+         * @param {object} file Object of TPL file.
+         */
+        addFileToPage_tpl(file) {
+            $("body").append(file.response);
+            file.appended = true;
+            this.appendLog("Appended "+file.url);
+            return this.addToPage();
+        }
+        /**
+         * Method, that adds JS file content to html document.
+         * @param {object} file Object of JS file.
+         */
+        addFileToPage_js(file) {
+            if(loadType() == 'js') {
+                let attributes = [
+                    {key: "type", value: "text/javascript"},
+                    {key: "src", value: file.url},
+                ];
+                let props = {
+                    onload: () => {
+                        file.appended = true;
+                        this.appendLog("Appended "+file.url);
+                        this.addToPage();
+                    }
+                };
+                let link = this.createFileDomElement("script", attributes, props);
+
+                document.getElementsByTagName("head")[0].appendChild(link);
+            } else {
+                let attributes = [
+                    {key: "type", value: "text/javascript"},
+                    {key: "data-url", value: file.url},
+                ];
+                let props = {
+                    innerHTML: file.response,
+                };
+                let link = this.createFileDomElement("script", attributes, props);
+
+                this.appendFileDomElement("head", link, file);
+
+                return this.addToPage();
+            }
+        }
+        /**
+         * Method, that adds CSS file content to html document.
+         * @param {object} file Object of CSS file.
+         */
+        addFileToPage_css(file) {
+            let attributes = [
+                {key: "rel", value: "stylesheet"}, {key: "type", value: "text/css"},
+                {key: "media", value: "text/css"}, {key: "data-url", value: file.url},
+
+            ];
+            let props = {
+                rel: 'stylesheet',
+                type: 'text/css',
+                media: 'all',
+                innerHTML: file.response.replace(
+                    /\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts"
+                ),
+            };
+            let link = this.createFileDomElement("style", attributes, props);
+
+            this.appendFileDomElement("body", link, file);
+
+            return this.addToPage();
+        }
+        /**
+         * Method, that emits EVENT, from EVENT file.
+         * @param {object} file Object of EVENT file.
+         */
+        addFileToPage_event(file) {
+            tabSignal.emit(file.name);
+            file.appended = true;
+            this.appendLog("Appended signal" + file.name);
+
+            return this.addToPage();
+        }
+        /**
+         * Method, that handles adding of file (of different types) to the html document.
+         * @param {object} file File, that should be added to the html document.
+         */
+        addFileToPage(file) {
+            try {
+                let handler = 'addFileToPage_' + file.type;
+                if(this[handler] && typeof this[handler] == 'function') {
+                    return this[handler](file);
+                }
+            }
+            catch (exception) {
+                this.appendError(exception, {name:file.url, type:'error'});
+                debugger;
+            }
+        }
+        /**
+         * Method, that adds sorted filed to the html documnet.
+         */
+        addToPage() {
+            let files = this.files_to_load_sorted;
+
+            if(!files) {
+                files = this.files_to_load_sorted = this.getSortedFiles();
+            }
+
+            let last_file;
+
+            for(let i in files) {
+                let file = files[i];
+
+                if(file.appended) {
+                    last_file = file;
+                    continue;
+                }
+
+                if(file.status!= 200) {
                     return;
                 }
 
-                val.appending = true;
-                try{
-                    if(val.type =='tpl')
-                    {
-                        // Надеюсь что к моменту загрузки шаблона js с jquery уже загружены
-                        try{
-                            $("body").append(val.response)
-                            val.appended = true;
-                            appendLog("Appended "+val.url)
-                        }catch (exception) {
-                            appendError(exception)
-                        }
-                    }
-                    else if(val.type =='js')
-                    {
-                        try{
-                            if(loadTipe() == 'js')
-                            {
-                                var link = document.createElement("script");
-                                link.setAttribute("type", "text/javascript");
-                                link.setAttribute("src", val.url);
-                                link.onload = function(){
-                                    val.appended = true;
-                                    appendLog("Appended "+val.url)
-                                    addToPage(jsToLoad)
-                                }
-
-                                document.getElementsByTagName("head")[0].appendChild(link);
-                                return;
-                            }
-                            else
-                            {
-                                var link = document.createElement("script");
-                                link.setAttribute("type", "text/javascript");
-                                link.setAttribute("data-url", val.url);
-                                link.innerHTML = "try{\n"+val.response+"\n}catch (exception) {appendError(exception, "+JSON.stringify({name:val.url, type:'error'})+");}"
-
-                                document.getElementsByTagName("head")[0].appendChild(link);
-                                appendLog("Appended "+val.url)
-                                val.appended = true;
-                            }
-
-                        }catch (exception) {
-                            debugger;
-                            appendError(exception, {name:val.url, type:'error'})
-                        }
-                    }
-                    else if(val.type =='css' /*&& isCordova()*/)
-                    {
-                        var link = document.createElement("style");
-                        link.setAttribute("rel", "stylesheet");
-                        link.setAttribute("type", "text/css");
-                        link.setAttribute("media", "text/css");
-                        link.setAttribute("data-url", val.url);
-                        link.rel  = 'stylesheet';
-                        link.type = 'text/css';
-                        link.media = 'all';
-
-                        link.innerHTML = val.response.replace(/\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts")
-
-                        document.getElementsByTagName("body")[0].appendChild(link);
-                        appendLog("Appended "+val.url)
-                        val.appended = true;
-                    }
-                    else if(val.type =='event')
-                    {
-                        try{
-                            tabSignal.emit(val.name)
-                            val.appended = true;
-                            appendLog("Appended signal"+val.name)
-                        }catch (exception) {
-                            appendError(exception, {name:val.name, type:'error'})
-                        }
-                    }
+                if(file.appending === true && !file.appended) {
+                    setTimeout(() => {
+                        this.addToPage();
+                    }, 200);
+                    return;
                 }
-                catch (exception)
-                {
-                    appendError(exception, {name:val.url, type:'error'})
-                    debugger;
+
+                if(last_file && !last_file.appended) {
+                    setTimeout(() => {
+                        this.addToPage();
+                    }, 200);
+                    return;
+                }
+
+                if(file.status == 200) {
+                    if(file.appending === true && file.appended !== true) {
+                        setTimeout(() => {
+                            this.addToPage();
+                        }, 200);
+                        return;
+                    }
+
+                    file.appending = true;
+
+                    return this.addFileToPage(file);
                 }
             }
         }
-    }
-}
+        /**
+         * Method, that adds logs of files loading.
+         * @param {object, string} data Logging message.
+         * @param {object} extendData Additional logging message.
+         */
+        appendLog(data, extendData) {
+            try {
+                let text = "";
 
-function loadData(index)
-{
-    if(jsToLoad[index].type == 'event')
-    {
-        jsToLoad[index].status = 200
-        addToPage(jsToLoad)
-        return;
-    }
-
-    if(!window.loadData_jsLoadingProgressSumSteps)
-    {
-        window.loadData_jsLoadingProgressSumSteps = 0;
-        window.loadData_jsLoadingProgressStep = 0;
-    }
-
-    window.loadData_jsLoadingProgressSumSteps++;
-
-    guiFilesCache.getFile(jsToLoad[index].url).then(
-        function(file)
-        {
-            console.log("use from cache")
-
-            // Десериализуем полученную JSON строку в объект JavaScript
-            jsToLoad[index].response = file.data;
-            window.loadData_jsLoadingProgressStep++
-            setLoadingProgress((window.loadData_jsLoadingProgressStep/window.loadData_jsLoadingProgressSumSteps)*100)
-            jsToLoad[index].status = 200
-            addToPage(jsToLoad)
-        },
-        function(err)
-        {
-            var request = new XMLHttpRequest();
-
-            request.onreadystatechange = function ()
-            {
-                if (request.readyState === 4 && request.status === 200)
-                {
-                    jsToLoad[index].response = request.responseText;
-                    window.loadData_jsLoadingProgressStep++
-                    setLoadingProgress((window.loadData_jsLoadingProgressStep/window.loadData_jsLoadingProgressSumSteps)*100)
-                    jsToLoad[index].status = request.status
-                    addToPage(jsToLoad)
-                    guiFilesCache.setFile(jsToLoad[index].url, request.responseText)
+                if(!extendData) {
+                    extendData = {type:'Log', name:""};
                 }
+
+                text += "Type:"+extendData.type+"\t";
+
+                if(extendData.name) text += "Name:"+extendData.name+"\t";
+
+                if(typeof data == "string") {
+                    text += data;
+                } else {
+                    text += "JSON:"+JSON.stringify(data);
+                }
+
+                text = '<pre class="LoadingProgressBar-success">' + text + '</pre>';
+                this.jq('.LoadingProgressBar-logger-wrapper').append(text);
+            } catch(e) {
+                this.appendError(e);
+            }
+        }
+        /**
+         * Method, that adds to the html document info about file loading error.
+         * @param {object, string} exception Error object or string.
+         * @param {object} extendData Additional logging message.
+         */
+        appendError(exception, extendData) {
+            try {
+                console.error(exception);
+
+                let text = "";
+
+                if(!extendData) {
+                    extendData = {type:'Error', name:""};
+                }
+
+                text += "Type:"+extendData.type+"\t";
+
+                if(extendData.name) text += "Name:"+extendData.name+"\n";
+
+                if(exception && exception.message) {
+                    text += exception.message + "\nstack:\n"+exception.stack;
+                } else {
+                    text += "JSON exeption:\n"+JSON.stringify(exception);
+                }
+
+
+                text = '<pre class="LoadingProgressBar-error">' + text + '</pre>';
+                this.jq('.LoadingProgressBar-logger-wrapper').append(text);
+                this.jq(".LoadingProgressBar-logger-wrapper").show();
+                this.jq(".LoadingProgressBar-error-msg").show();
+
+                this.jq(".loadInfoWrapper").addClass("need-reload");
+            } catch(e) {
+                debugger;
+                alert("Error in appendError function\n"+JSON.stringify(e));
+            }
+        }
+        /**
+         * Method, that gets file content (loads it or gets from cache).
+         * @param {object} item File object.
+         */
+        loadData(item) {
+            if(item.type == 'event') {
+                item.status = 200;
+                this.addToPage();
+                return;
             }
 
-            request.open("GET", jsToLoad[index].url);
+            if(!this.loading_progress.steps_sum) {
+                this.loading_progress.steps_sum = 0;
+                this.loading_progress.step = 0;
+            }
 
-            request.send();
+            this.loading_progress.steps_sum++;
+
+            this.files_cache.getFile(item.url).then(file => {
+                console.log("use from cache");
+                item.response = file.data;
+                this.loading_progress.step++;
+                let prog = this.loading_progress.step/this.loading_progress.steps_sum;
+                this.setLoadingProgress(prog * 100);
+                item.status = 200;
+                this.addToPage();
+            }).catch(error => {
+                let request = new XMLHttpRequest();
+
+                request.onreadystatechange = () => {
+                    if (!(request.readyState === 4 && request.status === 200)) {
+                        return;
+                    }
+
+                    item.response = request.responseText;
+                    this.loading_progress.step++;
+                    let prog = this.loading_progress.step/this.loading_progress.steps_sum;
+                    this.setLoadingProgress(prog * 100);
+                    item.status = request.status;
+                    this.addToPage();
+                    this.files_cache.setFile(item.url, request.responseText);
+                };
+
+                request.open("GET", item.url);
+
+                request.send();
+            });
         }
-    )
-}
+        /**
+         * Method, that init files loading.
+         */
+        onReady() {
+            console.log("onReady");
+            this.setLoadingProgress(0);
 
-function setLoadingProgress(width)
-{
-    var elem = document.getElementById("LoadingProgressBarLine");
-    if(!elem)
-    {
-        return;
+            this.resource_list.push(
+                {prioritet:10000, type:'event', name: "resource.loaded"}
+            );
+
+            for(let i in this.resource_list) {
+                let item = Object.assign({}, this.resource_list[i]);
+
+                item.url = hostname + item.name;
+                item.status = 0;
+                item.index =+ i;
+
+                this.files_to_load[item.url] = item;
+            }
+
+            for(let i in this.files_to_load) {
+                this.loadData(this.files_to_load[i]);
+            }
+        }
     }
 
-    elem.style.width = Math.ceil(width) + '%';
+    ///////////////////////////////////code execution/////////////////////////////////////
 
-    var elem = document.getElementById("LoadingProgressBarCount");
-    if(!elem)
-    {
-        return;
+    window.guiFilesCache = new FilesCache({ use_cache: useCache() });
+    window.guiFilesLoader = new FilesLoader(window.guiFilesCache, window.resourceList);
+
+    if (localStorage['gui_version'] !== gui_version) {
+        localStorage['gui_version'] = gui_version;
+        window.guiFilesCache.deleteAllCacheAndUpdatePage();
+    } else {
+        localStorage['gui_version'] = gui_version;
+
+        window.addEventListener("error", onLoadingErrorHandler);
+
+        window.guiFilesLoader.onReady();
     }
-
-    elem.style.width = Math.ceil(width) + '%';
-    elem.innerHTML = Math.ceil(width) * 1  + '%';
-}
-
-/**
- * Hide progress bar page and close connection to indexeddb
- * @returns {undefined}
- */
-function hideLoadingProgress()
-{$("#RealBody").show();
-    $("#LoadingProgressBar").fadeOut('fast')
-
-    setTimeout(function(){
-        window.guiFilesCache.closeDB();
-    }, 20000)
-}
-
-var cRrrCalls = 0;
-function onReady()
-{
-    console.log("onReady")
-    setLoadingProgress(0)
-
-    var index = 0;
-    window.resourceList.push({prioritet:10000,  type:'event', name: "resource.loaded"})
-    for(var i in window.resourceList)
-    {
-        index++;
-        window.resourceList[i].url = hostname + window.resourceList[i].name
-        window.resourceList[i].status = 0
-        window.resourceList[i].index = index
-
-        jsToLoad[window.resourceList[i].url] = window.resourceList[i]
-    }
-
-    for(var i in window.jsToLoad)
-    {
-        loadData(i)
-    }
-}
-
-if (localStorage['gui_version'] !== gui_version)
-{
-    window.guiFilesCache.deleteAllCache();
-    window.guiFilesCache.setNoCache(true)
-}
-
-localStorage['gui_version'] = gui_version;
-onReady()
 </script>

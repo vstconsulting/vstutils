@@ -1,221 +1,322 @@
-
-guiLocalSettings.setIfNotExists('guiApi.real_query_timeout', 100)
-
+guiLocalSettings.setIfNotExists('guiApi.real_query_timeout', 100);
 
 /**
- * Класс апи и запросов к нему
- * @returns {guiApi}
+ * Class, that sends API requests.
  */
-function guiApi()
-{
-    var thisObj = this;
-    this.load = function()
-    {
-        var def = new $.Deferred();
-        spajs.ajax.Call({
-            url: hostname + "/api/openapi/?format=openapi",
-            type: "GET",
-            contentType:'application/json',
-            data: "",
-            success: function(data)
-            {
-                thisObj.openapi = data
-                def.resolve(data);
-            },
-            error: function (e){
-                def.reject(e);
-            }
-        });
-        return def.promise();
-    }
-    this.getFromCache = function ()
-    {
-        let def = new $.Deferred();
-        let openApiFromCache = guiFilesCache.getFile('openapi');
-        openApiFromCache.then(
-            result => {
-                thisObj.openapi = JSON.parse(result.data);
-                def.resolve();
-            },
-            error => {
-                $.when(thisObj.load()).done(data => {
-                    guiFilesCache.setFile('openapi', JSON.stringify(data));
-                    thisObj.openapi = data;
-                    def.resolve();
-                }).fail(e => {
-                    def.reject(e);
-                })
-            }
-        )
-
-        return def.promise();
-    }
-    this.init = function()
-    {
-        if(guiFilesCache && guiFilesCache.noCache)
-        {
-            return this.load();
-        }
-        else
-        {
-            return this.getFromCache();
-        }
-    }
-
-    var query_data = {}
-    var reinit_query_data = function()
-    {
-        query_data = {
-            timeOutId:undefined,
-            data:[],
-            def:undefined,
-            promise:[]
-        }
-    }
-    reinit_query_data()
-
+class ApiConnector {
     /**
-     * Балк запрос к апи который в себе содержит накопленные с разных подсистем запросы
-     * @returns {promise}
+     * Constructor of ApiConnector class.
+     * @param {object} config Object with config properties for Api connector.
      */
-    var real_query = function(query_data)
-    {
-        var this_query_data = mergeDeep({}, query_data)
-        reinit_query_data()
-
-        spajs.ajax.Call({
-            url: thisObj.openapi.schemes[0]+"://"+thisObj.openapi.host + thisObj.openapi.basePath+"/_bulk/",
-            type: "PUT",
-            contentType:'application/json',
-            data: JSON.stringify(this_query_data.data),
-            success: function(data)
-            {
-                this_query_data.def.resolve(data);
-            },
-            error: function (error){
-                this_query_data.def.reject(error);
-            }
-        });
-        return this_query_data.def.promise();
-    }
-
-    this.addQuery = function(query_data, data, chunked)
-    {
-        if(chunked)
-        {
-            for(let i in query_data.data)
-            {
-                if(deepEqual(query_data.data[i], data))
-                {
-                    return i
-                }
-            }
-        }
-
-        query_data.data.push(data)
-        return query_data.data.length - 1
+    constructor(config){
+        /**
+         * Object with config properties for Api connector.
+         */
+        this.config = config;
+        /**
+         * Object with methods for providing Api connection.
+         */
+        this.api = axios.create(config);
+        /**
+         * Property for collecting several bulk requests into one.
+         */
+        this.bulk_collector = {
+            /**
+             * Timeout ID, that setTimeout() function returns.
+             */
+            timeout_id: undefined,
+            /**
+             * Array, that collects objects, created for every bulk request.
+             * Example of this object.
+             * {
+             *   // Body of bulk query.
+             *   data: {method: get, data_type: []},
+             *
+             *   // Promise for bulk request.
+             *   promise: new Promise(),
+             *
+             *   // Object with promise callbacks.
+             *   callbacks: {resolve: function(){}, reject: function(){},},
+             * }
+             */
+            bulk_parts: [],
+        };
     }
     /**
-     * Примеры запросов
-     * https://git.vstconsulting.net/vst/vst-utils/blob/master/vstutils/unittests.py#L337
-     *
-     * Пример как ссылаться на предыдущий результат
-     * https://git.vstconsulting.net/vst/vst-utils/blob/master/vstutils/unittests.py#L383
-     *
-     * @param {Object} data для балк запроса
-     * @returns {promise}
+     * Method, that loads OpeanApi schema from API.
+     * @return {promise} Promise of getting OpenApi schema from API.
      */
-    this.query = function(data, chunked)
-    {
-        if(!query_data.def)
-        {
-            query_data.def = new $.Deferred();
+    loadSchema() {
+        let schema_url = "/openapi/?format=openapi";
+        return this.query('get', schema_url).then(response => {
+            return this.openapi = response.data;
+        }).catch(error => {
+            debugger;
+            throw new Error(error);
+        });
+    }
+    /**
+     * Method, that gets OpeanApi schema from cache.
+     * @return {promise} Promise of getting OpenApi schema from Cache.
+     */
+    getSchemaFromCache() {
+        return app.files_cache.getFile('openapi').then(response => {
+            return this.openapi = JSON.parse(response.data);
+        }).catch(error => {
+            return this.loadSchema().then(openapi => {
+                app.files_cache.setFile('openapi', JSON.stringify(openapi));
+                return openapi;
+            });
+        });
+    }
+    /**
+     * Method, that gets OpenApi schema.
+     * @return {promise} Promise of getting OpenApi schema.
+     */
+    _getSchema() {
+        if(app && app.files_cache && app.files_cache.use_cache) {
+            return this.getSchemaFromCache();
+        } else {
+            return this.loadSchema();
         }
-
-        if(query_data.timeOutId)
-        {
-            clearTimeout(query_data.timeOutId)
-        }
-
-        let data_index = undefined
-
-        if($.isArray(data))
-        {
-            data_index = []
-            for(let i in data)
-            {
-                data_index.push(this.addQuery(query_data, data[i], chunked))
-            }
-        }
-        else
-        {
-            data_index = this.addQuery(query_data, data, chunked)
-        }
-
-        var promise = new $.Deferred();
-
-        query_data.timeOutId = setTimeout(real_query, guiLocalSettings.get('guiApi.real_query_timeout'), query_data)
-
-        $.when(query_data.def).done(data => {
-
-            var val;
-            if($.isArray(data_index))
-            {
-                val = []
-                for(var i in data_index)
-                {
-                    val.push(data[data_index[i]]);
-                }
-            }
-            else
-            {
-                val = data[data_index];
-            }
-
-            if($.isArray(data_index))
-            {
-                let toReject = false;
-                for(var i in val)
-                {
-                    if(!(val[i].status >= 200 && val[i].status < 400))
-                    {
-                        toReject = true;
-                    }
-                }
-
-                if(toReject)
-                {
-                    promise.reject(val);
-                }
-                else
-                {
-                    promise.resolve(val);
-                }
-
-            }
-            else
-            {
-                if(val.status >= 200 && val.status < 400)
-                {
-                    promise.resolve(val);
-                }
-                else
-                {
-                    promise.reject(val);
-                }
-            }
-
-
-        }).fail(function(error)
-        {
-            promise.reject(error)
+    }
+    /**
+     * Method, that gets OpenApi schema and emits "openapi.loaded" signal.
+     * @return {promise} Promise of getting OpenApi schema.
+     */
+    getSchema() {
+        return this._getSchema().then(openapi => {
+            tabSignal.emit("openapi.loaded", openapi);
+            return openapi;
+        }).catch(error => {
+            throw error;
         })
-
-
-        return promise.promise();
     }
+    /**
+     * Method, that sends API request.
+     * @param {string} method Method of HTTP request.
+     * @param {string} url Relative part of link, to which send API requests.
+     * @param {object} data Query body.
+     */
+    query(method, url="", data={}) {
+        let with_data_methods = ["post", "put", "patch"];
+        let without_data_methods = ["get", "delete"];
 
-    return this;
+        if(with_data_methods.includes(method)) {
+            return this.api[method](url, data);
+        } else if(without_data_methods.includes(method)) {
+            return this.api[method](url);
+        }
+    }
+    /**
+     * Method, that collects several bulk requests into one.
+     * @param {object} data Body of bulk request.
+     */
+    bulkQuery(data) {
+        if(this.bulk_collector.timeout_id) {
+            clearTimeout(this.bulk_collector.timeout_id);
+        }
+
+        let callbacks = {
+            resolve: undefined,
+            reject: undefined,
+        };
+
+        let promise = new Promise((resolve, reject) => {
+            callbacks.resolve = resolve;
+            callbacks.reject = reject;
+        });
+
+        this.bulk_collector.bulk_parts.push({
+            data: data,
+            promise: promise,
+            callbacks: callbacks,
+        });
+
+        let bulk_timeout = guiLocalSettings.get('guiApi.real_query_timeout') || 100;
+
+        this.bulk_collector.timeout_id = setTimeout(() => this.sendBulk(), bulk_timeout);
+
+        return promise;
+    }
+    /**
+     * Method, that sends one big bulk request to API.
+     * @return {promise} Promise of getting bulk request response.
+     */
+    sendBulk() {
+        let url = "/v2/_bulk/";
+        let collector = $.extend(true, {}, this.bulk_collector);
+        this.bulk_collector.bulk_parts = [];
+        let bulk_data = [];
+
+        for(let item in collector.bulk_parts) {
+            bulk_data.push(collector.bulk_parts[item].data);
+        }
+
+        return this.query("put", url, bulk_data).then(response => {
+            let result = response.data;
+
+            for(let index in result) {
+                let item = result[index];
+                let method = "resolve";
+
+                if(!(item.status >= 200 && item.status < 400)) {
+                    debugger;
+                    method = "reject";
+                }
+
+                collector.bulk_parts[index].callbacks[method](result[index]);
+            }
+
+        }).catch(error => {
+            debugger;
+            throw new StatusError(error.status, error.data);
+        });
+    }
 }
 
-window.api = new guiApi();
+/**
+ * Class for Errors connected with API requests.
+ */
+class StatusError extends Error {
+    /**
+     * Constructor of StatusError class.
+     * @param {number} status Status of HTTP response.
+     * @param {string, object} data Error object.
+     */
+    constructor(status, data){
+        super();
+        this.status = status;
+        this.message;
+        if(typeof data == "string") {
+            this.message = data;
+        }
+        if(typeof data == "object" && data.detail){
+            this.message = data.detail;
+        }
+    }
+}
+
+/**
+ * Config for instance of ApiConnector class.
+ */
+var api_connector_config = {
+    headers: {
+        'content-type': 'application/json',
+        'X-CSRFToken': csrf_data.token,
+    },
+    baseURL: hostname + "/api",
+};
+
+/**
+ * Dictionary, that contains names of openapi schema attributes.
+ * This dictionary is needed for easier updates of following opeanapi versions,
+ * that can contain another attributes names.
+ */
+var openapi_dictionary = {
+    models: {
+        name: "definitions",
+        fields: {
+            name: "properties",
+        },
+        required_fields: {
+            name: "required",
+        },
+        ref_names: ["$ref", "definition_ref"],
+        filters_to_delete: ["limit", "offset"],
+    },
+    paths: {
+        name: "paths",
+        operation_id: {
+            name: "operationId",
+        },
+        operations: {
+            base: {
+                remove: {
+                    name: 'remove',
+                    title: 'Remove',
+                    icon_classes: ['fa', 'fa-times'],
+                    title_classes: ['d-none', 'd-lg-inline-block'],
+                    classes: ['btn-danger', 'danger-right'],
+                },
+            },
+            list: {
+                new: {
+                    name: 'new',
+                    title: 'Create',
+                },
+                add: {
+                    name: 'add',
+                    title: 'Add',
+                    component: 'gui_add_child_modal',
+                },
+            },
+            page: {
+                edit: {
+                    name: 'edit',
+                    title: 'Edit',
+                },
+            },
+            page_new: {
+                save_new: {
+                    name: 'save',
+                    title: 'Save',
+                },
+            },
+            page_edit: {
+                save: {
+                    name: 'save',
+                    title: 'Save',
+                },
+                reload: {
+                    name: 'reload',
+                    title: 'Reload',
+                },
+            },
+            action: {
+                execute: {
+                    name: 'execute',
+                    title: 'Execute',
+                }
+            },
+        },
+        multi_actions: ['remove'],
+        types_operations_always_to_add: ['page_new', 'page_edit', 'action'],
+    },
+    schema_types: {
+        "_add": {
+            query_type: "post",
+            url_postfix: "new/",
+            type: "page_new",
+        },
+        "_list": {
+            query_type: "get",
+            url_postfix: "",
+            filters: {name: "parameters"},
+            type: "list",
+            autoupdate: true,
+        },
+        "_get": {
+            query_type: "get",
+            url_postfix: "",
+            type: "page",
+            autoupdate: true,
+        },
+        "_edit": {
+            query_type: "patch",
+            url_postfix: "edit/",
+            type: "page_edit",
+        },
+        "_update": {
+            query_type: "put",
+            url_postfix: "edit/",
+            type: "page_edit",
+        },
+        "_remove": {
+            query_type: "delete",
+            url_postfix: "remove/",
+            type: "page_remove",
+            hidden: true,
+        },
+    }
+};
