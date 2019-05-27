@@ -1,58 +1,65 @@
-
 // List of Gui Testing Files
-if(!window.guiTestsFiles)
-{
-    window.guiTestsFiles = []
+if(!window.guiTestsFiles) {
+    window.guiTestsFiles = [];
 }
 
-// Add a test file to the list of files for test gui
+// Adds files with tests to common list.
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiPaths.js');
-
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiElements.js');
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js');
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiFields.js');
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiSignals.js');
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiTests.js');
+window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js');
 
-// Run tests
-function loadQUnitTests()
-{
-    loadAllUnitTests(window.guiTestsFiles)
+// Runs tests
+function loadQUnitTests() {
+    loadAllUnitTests(window.guiTestsFiles);
 }
 
 // Loads and runs tests in strict order.
-function loadAllUnitTests(urls)
-{
-    let promises = []
-    for(let i in urls)
-    {
-        let def = new $.Deferred();
-        promises.push(def.promise());
+function loadAllUnitTests(urls) {
+    let promises = [];
 
-        var link = document.createElement("script");
+    for(let index in urls) {
+        let promise_callbacks = {
+            resolve: undefined,
+            reject: undefined,
+        };
+
+        promises.push(
+            new Promise((resolve, reject) => {
+                promise_callbacks.resolve = resolve;
+                promise_callbacks.reject = reject;
+            })
+        );
+
+        let link = document.createElement("script");
         link.setAttribute("type", "text/javascript");
-        link.setAttribute("src", urls[i]+'?r='+Math.random());
+        link.setAttribute("src", urls[index] + '?r=' + Math.random());
 
-        link.onload = function(def){
-            return function(){
-                def.resolve();
+        link.onload = function(promise_callbacks) {
+            return function() {
+                promise_callbacks.resolve();
             }
-        }(def)
+        }(promise_callbacks);
+
         document.getElementsByTagName("head")[0].appendChild(link);
+
 
         break;
     }
 
-    $.when.apply($, promises).done(() => {
-        //injectQunit()
-
-        if(urls.length == 1)
-        {
-            return injectQunit()
+    //@todo think about current function.
+    Promise.all(promises).then(() => {
+        // injectQunit();
+        if(urls.length == 1) {
+            return injectQunit();
         }
-        urls.splice(0, 1)
-        loadAllUnitTests(urls)
-    })
+
+
+        urls.splice(0, 1);
+        loadAllUnitTests(urls);
+    });
 }
 
 
@@ -62,599 +69,337 @@ function loadAllUnitTests(urls)
  * Function to replace {.+?} in string to variables sended to this function,
  * array and single variable set ordered inside string
  * associative array and iterable objects set value for keys that original string have
- * @param takes array, associative array or single variable and insert it
- * @returns {String} - return string with inserted arguments
+ * @param {*} takes array, associative array or single variable and insert it
+ * @return {string} - return string with inserted arguments
  */
-String.prototype.format = function()
-{
+String.prototype.format = function() {
     let obj = this.toString();
     let arg_list;
-    if (typeof arguments[0] == "object")
-    {
-        arg_list = arguments[0]
-    }
-    else if (arguments.length >= 1)
-    {
+
+    if(typeof arguments[0] == "object") {
+        arg_list = arguments[0];
+    } else if(arguments.length >= 1) {
         arg_list = Array.from(arguments);
     }
-    for (let key of this.format_keys())
-    {
-        if (arg_list[key] != undefined)
-        {
-            obj = obj.replace('{'+ key + '}', arg_list[key])
-        }
-        else
-        {
+
+    for(let key of this.format_keys()) {
+        if (arg_list[key] != undefined) {
+            obj = obj.replace('{'+ key + '}', arg_list[key]);
+        } else {
             throw "String don't have \'" + key + "\' key";
         }
     }
+
     return obj;
-}
+};
 
 /**
- * Function search and return all `{key}` in string
- * @returns {array} array of {key} in string
+ * Function search and return all `{key}` in string.
+ * @return {array} array of {key} in string.
  */
-String.prototype.format_keys = function()
-{
+String.prototype.format_keys = function() {
     let thisObj = this;
     //let regex = new RegExp("(?<={).+?(?=})", "g");
     //let match = thisObj.match(regex)
     //return match || [];
-    let res = thisObj.match(/{([^\}]+)}/g)
-    if(!res)
-    {
-        return []
+    let res = thisObj.match(/{([^\}]+)}/g);
+
+    if(!res) {
+        return [];
     }
 
-    return res.map((item) =>{ return item.slice(1, item.length - 1) })
-}
+    return res.map((item) =>{ return item.slice(1, item.length - 1) });
+};
 
-function addslashes(string) {
-    return string.replace(/\\/g, '\\\\').
-    replace(/\u0008/g, '\\b').
-    replace(/\t/g, '\\t').
-    replace(/\n/g, '\\n').
-    replace(/\f/g, '\\f').
-    //replace(/\r/g, '\\r').
-    //replace(/\a/g, '\\a').
-    replace(/\v/g, '\\v').
-    //replace(/\e/g, '\\e').
-    replace(/'/g, '\\\'').
-    replace(/"/g, '\\"');
-}
-
-function stripslashes (str) {
-    //       discuss at: http://locutus.io/php/stripslashes/
-    //      original by: Kevin van Zonneveld (http://kvz.io)
-    //      improved by: Ates Goral (http://magnetiq.com)
-    //      improved by: marrtins
-    //      improved by: rezna
-    //         fixed by: Mick@el
-    //      bugfixed by: Onno Marsman (https://twitter.com/onnomarsman)
-    //      bugfixed by: Brett Zamir (http://brett-zamir.me)
-    //         input by: Rick Waldron
-    //         input by: Brant Messenger (http://www.brantmessenger.com/)
-    // reimplemented by: Brett Zamir (http://brett-zamir.me)
-    //        example 1: stripslashes('Kevin\'s code')
-    //        returns 1: "Kevin's code"
-    //        example 2: stripslashes('Kevin\\\'s code')
-    //        returns 2: "Kevin\'s code"
-    return (str + '')
-        .replace(/\\(.?)/g, function (s, n1) {
-            switch (n1) {
-                case '\\':
-                    return '\\'
-                case '0':
-                    return '\u0000'
-                case 't':
-                    return "\t"
-                case 'n':
-                    return "\n"
-                case 'f':
-                    return "\f"
-                //case 'e':
-                //  return "\e"
-                case 'v':
-                    return "\v"
-                //case 'a':
-                //  return "\a"
-                case 'b':
-                    return "\b"
-                //case 'r':
-                //  return "\r"
-                case '':
-                    return ''
-                default:
-                    return n1
-            }
-        })
-}
+// function addslashes(string) {
+//     return string.replace(/\\/g, '\\\\').
+//     replace(/\u0008/g, '\\b').
+//     replace(/\t/g, '\\t').
+//     replace(/\n/g, '\\n').
+//     replace(/\f/g, '\\f').
+//     //replace(/\r/g, '\\r').
+//     //replace(/\a/g, '\\a').
+//     replace(/\v/g, '\\v').
+//     //replace(/\e/g, '\\e').
+//     replace(/'/g, '\\\'').
+//     replace(/"/g, '\\"');
+// }
+//
+// function stripslashes (str) {
+//     //       discuss at: http://locutus.io/php/stripslashes/
+//     //      original by: Kevin van Zonneveld (http://kvz.io)
+//     //      improved by: Ates Goral (http://magnetiq.com)
+//     //      improved by: marrtins
+//     //      improved by: rezna
+//     //         fixed by: Mick@el
+//     //      bugfixed by: Onno Marsman (https://twitter.com/onnomarsman)
+//     //      bugfixed by: Brett Zamir (http://brett-zamir.me)
+//     //         input by: Rick Waldron
+//     //         input by: Brant Messenger (http://www.brantmessenger.com/)
+//     // reimplemented by: Brett Zamir (http://brett-zamir.me)
+//     //        example 1: stripslashes('Kevin\'s code')
+//     //        returns 1: "Kevin's code"
+//     //        example 2: stripslashes('Kevin\\\'s code')
+//     //        returns 2: "Kevin\'s code"
+//     return (str + '')
+//         .replace(/\\(.?)/g, function (s, n1) {
+//             switch (n1) {
+//                 case '\\':
+//                     return '\\'
+//                 case '0':
+//                     return '\u0000'
+//                 case 't':
+//                     return "\t"
+//                 case 'n':
+//                     return "\n"
+//                 case 'f':
+//                     return "\f"
+//                 //case 'e':
+//                 //  return "\e"
+//                 case 'v':
+//                     return "\v"
+//                 //case 'a':
+//                 //  return "\a"
+//                 case 'b':
+//                     return "\b"
+//                 //case 'r':
+//                 //  return "\r"
+//                 case '':
+//                     return ''
+//                 default:
+//                     return n1
+//             }
+//         })
+// }
 /**
- * Тестовый тест, чтоб было видно что тесты вообще хоть как то работают.
+ * Function, that removes spaces symbols from the begging and from the end of string.
+ * @param {string} s.
  */
-function trim(s)
-{
-    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "")
+function trim(s) {
+    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "");
     return '';
 }
 
 
-function inheritance(obj, constructor)
-{
-    var object = undefined;
-    var item = function()
-    {
-        if(constructor)
-        {
-            return constructor.apply(jQuery.extend(true, item, object), arguments);
-        }
-
-        return jQuery.extend(true, item, object);
-    }
-
-    object = jQuery.extend(true, item, obj)
-
-    return object
-}
-
-function toIdString(str)
-{
-    return str.replace(/[^A-z0-9\-]/img, "_").replace(/[\[\]]/gi, "_");
-}
-
-function hidemodal()
-{
-    var def = new $.Deferred();
-    $(".modal.fade.in").on('hidden.bs.modal', function (e) {
-        def.resolve();
-    })
-    $(".modal.fade.in").modal('hide');
-
-    return def.promise();
-}
-
-
-function capitalizeString(string)
-{
-    if(!string)
-    {
+/**
+ * Function returns capitalized string - first char is in UpperCase, others - in LowerCase.
+ * @param {string} string String, that should be capitalized.
+ * @return {string}
+ */
+function capitalizeString(string) {
+    if(!string) {
         return "";
     }
 
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
-function sliceLongString(string="", valid_length=100)
-{
-    if(typeof string != "string")
-    {
-        return sliceLongString(""+string, valid_length);
+/**
+ * Function returns shorten version of string.
+ * @param {string} string String, that should be shorten.
+ * @param {number} valid_length Max length of string.
+ * @return {string}
+ */
+function sliceLongString(string="", valid_length=100) {
+    if(typeof string != "string") {
+        return sliceLongString("" + string, valid_length);
     }
 
-    var str = string.slice(0, valid_length);
-    if(string.length > valid_length)
-    {
+    let str = string.slice(0, valid_length);
+
+    if(string.length > valid_length) {
         str += "...";
     }
 
     return str;
 }
 
-function isEmptyObject(obj)
-{
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
+/**
+ * Function returns true if object has no attributes, otherwise it returns false.
+ * @param {object} obj Object, that should be checked.
+ * @returns {boolean}
+ */
+function isEmptyObject(obj) {
+    for(let key in obj) {
+        if (obj.hasOwnProperty(key)) {
             return false;
         }
     }
     return true;
 }
 
-function readFileAndInsert(event, element)
-{
-    for (var i = 0; i < event.target.files.length; i++)
-    {
-        if (event.target.files[i].size > 1024 * 1024 * 1)
-        {
-            guiPopUp.error("File is too large")
-            console.log("File is too large " + event.target.files[i].size)
-            continue;
-        }
-
-        var reader = new FileReader();
-
-        reader.onload = function (e)
-        {
-            $(element).val(e.target.result);
-        }
-
-        reader.readAsText(event.target.files[i]);
-    }
-
-    return false;
-}
-
-function addCssClassesToElement(element="", title, type)
-{
-    element = element.replace(/[\s\/]+/g,'-');
+/**
+ * Function forms names of CSS classes, based on input arguments, and return them.
+ * @param {string} element Name of element.
+ * @param {string} title Title of element
+ * @param {string} type Type of element.
+ * @return {string} String with CSS classes names.
+ */
+function addCssClassesToElement(element="", title, type) {
+    element = element.replace(/[\s\/]+/g,'_');
 
     let class_list = element + " ";
 
-    if(title)
-    {
-        title = title.replace(/[\s\/]+/g,'-');
-        class_list += element + "_" + title + " ";
+    if(title) {
+        title = title.replace(/[\s\/]+/g,'_');
+        class_list += element + "-" + title + " ";
     }
 
-
-    if(title && type)
-    {
-        type = type.replace(/[\s\/]+/g,'-');
-        class_list += element + "_" + type + " ";
-        class_list += element + "_" + type + "_" + title;
+    if(title && type) {
+        type = type.replace(/[\s\/]+/g,'_');
+        class_list += element + "-" + type + " ";
+        class_list += element + "-" + type + "-" + title;
     }
 
     return class_list.toLowerCase();
 }
 
-function addStylesAndClassesToListField(guiObj, field, data, opt)
-{
-    let output = "";
-
-    if(field.style)
-    {
-        output += field.style.apply(guiObj, [data, opt]) + " ";
-    }
-
-    if(field.class)
-    {
-        output += field.class.apply(guiObj, [data, opt]) + " ";
-    }
-    else
-    {
-        output += "class='" + addCssClassesToElement('td', field.name, guiObj.api.short_name) + "' ";
-    }
-
-    return output;
-}
-
 /**
- * Function handles click on table row (<tr>), and depending to the place of user's click
- * it redirects user to <tr> link or to <td> link.
- * @param object - event - click event.
- * @param boolean - blank - if true, function opens link in new window.
+ * Callback for window.onresize event.
  */
-function turnTableTrIntoLink(event, blank)
-{
-    if(!blockTrLink(event.target, 'tr', 'highlight-tr-none'))
-    {
-        let href;
-        if(event.target.hasAttribute('href'))
-        {
-            href =  event.target.getAttribute('href');
-        }
-        else if(event.currentTarget)
-        {
-            href =  event.currentTarget.getAttribute('data-href');
-        }
-        else
-        {
-            href =  event.target.getAttribute('data-href');
-        }
-
-        if(blank)
-        {
-            window.open(href);
-        }
-        else
-        {
-            vstGO(href);
-        }
-    }
-}
-
-/**
- * Function makes recursive search through DOM tree
- * and tries to find a search_class in the classList of DOM elements.
- * If function finds this search_class, it returns true.
- * Otherwise, it returns false.
- * @param object - element - DOM tree element.
- * @param string - stop_element_name - name of DOM tree element on which function stops search.
- * @param string - search_class - name of CSS class, which function tries to find.
- */
-function blockTrLink(element, stop_element_name, search_class)
-{
-    if(!element)
-    {
-        return false;
-    }
-
-    if(element.classList.contains(search_class))
-    {
-        return true;
-    }
-
-    if(element.parentElement && element.parentElement.localName != stop_element_name)
-    {
-        return blockTrLink(element.parentElement, stop_element_name, search_class);
-    }
-
-    return false;
-}
-
-/*
- * Hides field 'id' in list.
- * This function is calling from signal openapi.schema.type.list
- */
-function hideIdInList(listObj)
-{
-    try
-    {
-        let fields = listObj.value.schema.list.fields;
-        if(fields['id'])
-        {
-            fields['id'].hidden = true;
-        }
-    }
-    catch(e)
-    {
-        console.warn(e);
-    }
-
-}
-
-tabSignal.connect("openapi.schema.type.list", function(listObj)
-{
-    hideIdInList.apply(this, arguments);
-})
-
-window.current_window_width = window.innerWidth;
-
-window.onresize=function ()
-{
-    window.current_window_width = window.innerWidth;
-
-    if(window.innerWidth>991)
-    {
-        if(guiLocalSettings.get('hideMenu'))
-        {
+window.onresize = function() {
+    if(window.innerWidth > 991) {
+        if(guiLocalSettings.get('hideMenu')) {
             $("body").addClass('sidebar-collapse');
         }
-        if ($("body").hasClass('sidebar-open'))
-        {
+
+        if($("body").hasClass('sidebar-open')) {
             $("body").removeClass('sidebar-open');
         }
-    }
-    else
-    {
-        if ($("body").hasClass('sidebar-collapse')){
+    } else {
+        if($("body").hasClass('sidebar-collapse')) {
             $("body").removeClass('sidebar-collapse');
         }
     }
-}
+};
 
 /**
+ * Function saves 'hideMenu' options to guiLocalSettings.
  * Function is supposed to be called when push-menu button was clicked.
  */
-function saveHideMenuSettings()
-{
-    if(window.innerWidth > 991)
-    {
-        if($('body').hasClass('sidebar-collapse'))
-        {
+function saveHideMenuSettings() {
+    if(window.innerWidth > 991) {
+        if($('body').hasClass('sidebar-collapse')) {
             guiLocalSettings.set('hideMenu', false);
-        }
-        else
-        {
+        } else {
             guiLocalSettings.set('hideMenu', true);
         }
     }
 }
 
 /**
- * Function makes a decision about grouping buttons or not.
- * The decision is based on analysis of width of window and buttons amount.
+ * Class, that manages manipulations with Local Storage.
+ * It is used for saving some users local settings to the one property(object) of Local Storage.
  */
-function groupButtonsOrNot(window_width, buttons)
-{
-    let buttons_amount = 0;
-    if(typeof buttons == "number")
-    {
-        buttons_amount = buttons;
-    }
-    else if(typeof buttons == "string")
-    {
-        buttons_amount = Number(buttons) || 0;
-    }
-    else if(typeof buttons == "object")
-    {
-        if($.isArray(buttons))
-        {
-            buttons_amount = buttons.length;
-        }
-        else
-        {
-            buttons_amount = Object.keys(buttons).length;
-        }
+class LocalSettings {
+    /**
+     * Constructor of LocalSettings Class.
+     * @param {string} name Key of current LocalSettings, that will be used in Local Storage.
+     */
+    constructor(name) {
+        this.name = name;
+        /**
+         * Property for storing current settings (including tmpSettings).
+         */
+        this.__settings = {};
+        /**
+         * Property for storing tmpSettings.
+         */
+        this.__tmpSettings = {};
+        /**
+         * Property for storing setting value, as it was before user set tmpSettings value.
+         */
+        this.__beforeAsTmpSettings = {};
 
-        for(let i in buttons)
-        {
-            if(buttons[i].hidden)
-            {
-                buttons_amount--;
-            }
-        }
+        this.sync();
     }
 
-    if(buttons_amount < 2)
-    {
-        return false;
-    }
-    else if(buttons_amount >= 2 && buttons_amount < 5)
-    {
-        if(window_width >= 992)
-        {
-            return false;
-        }
-    }
-    else if(buttons_amount >= 5 && buttons_amount < 8 )
-    {
-        if(window_width >= 1200)
-        {
-            return false;
-        }
-    }
-    else if(buttons_amount >= 8)
-    {
-        if(window_width >= 1620)
-        {
-            return false;
+    /**
+     * Method syncs this.__settings property with data from window.localStorage[this.name].
+     */
+    sync() {
+        if(window.localStorage[this.name]) {
+            try {
+                this.__settings = JSON.parse(window.localStorage[this.name]);
+            } catch(e) {}
         }
     }
 
-    return true;
-}
-
-var guiLocalSettings = {
-    __settings:{ // object for storing current settings (including tmpSettings)
-    },
-    __tmpSettings: { // object for storing tmpSettings
-    },
-    __beforeAsTmpSettings: { // object for storing setting value, as it was before user set tmpSettings value
-    },
-    __removeTmpSettings: function() { // function removes tmpSettings from current settings and add previous values (if they were)
-        for(var item in this.__tmpSettings)
-        {
-            if(this.__beforeAsTmpSettings[item])
-            {
-                this.__settings[item] = this.__beforeAsTmpSettings[item];
-            }
-            else
-            {
-                delete this.__settings[item];
-            }
-        }
-    },
-    get:function(name){
+    /**
+     * Method returns property, that is stored is local settings at 'name' key.
+     * @param {string} name Key of property from local settings.
+     */
+    get(name) {
         return this.__settings[name];
-    },
-    delete:function(name){
+    }
+
+    /**
+     * Method sets property value in local settings.
+     * @param {string} name Key of property from local settings.
+     * @param {*} value Value of property from local settings.
+     */
+    set(name, value) {
+        this.__removeTmpSettings();
+        this.__settings[name] = value;
+        window.localStorage[this.name] = JSON.stringify(this.__settings);
+        tabSignal.emit(this.name + '.' + name, {type:'set', name:name, value:value});
+    }
+
+    /**
+     * Method deletes property, that is stored is local settings at 'name' key.
+     * @param {string} name Key of property from local settings.
+     */
+    delete(name) {
         this.__removeTmpSettings();
         delete this.__settings[name];
         delete this.__tmpSettings[name];
         delete this.__beforeAsTmpSettings[name];
-        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings);
-    },
-    set:function(name, value){
-        this.__removeTmpSettings();
-        this.__settings[name] = value;
-        window.localStorage['guiLocalSettings'] = JSON.stringify(this.__settings);
-        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value});
-    },
-    setAsTmp:function(name, value){
-        if(this.__settings[name])
-        {
+        window.localStorage[this.name] = JSON.stringify(this.__settings);
+    }
+
+    /**
+     * Method sets property value in local settings, if it was not set before.
+     * @param {string} name Key of property from local settings.
+     * @param {*} value Value of property from local settings.
+     */
+    setIfNotExists(name, value) {
+        if(this.__settings[name] === undefined) {
+            this.__settings[name] = value;
+        }
+    }
+
+    /**
+     * Method sets temporary property value in local settings.
+     * @param {string} name Key of property from local settings.
+     * @param {*} value Temporary Value of property from local settings.
+     */
+    setAsTmp(name, value) {
+        if(this.__settings[name]) {
             this.__beforeAsTmpSettings[name] = this.__settings[name];
         }
         this.__settings[name] = value;
         this.__tmpSettings[name] = value;
-        tabSignal.emit('guiLocalSettings.'+name, {type:'set', name:name, value:value});
-    },
-    setIfNotExists:function(name, value){
-        if(this.__settings[name] === undefined)
-        {
-            this.__settings[name] = value;
+        tabSignal.emit(this.name + '.' + name, {type:'set', name:name, value:value});
+    }
+
+    /**
+     * Method removes tmpSettings from current settings and add previous values (if they were).
+     */
+    __removeTmpSettings() {
+        for(let key in this.__tmpSettings) {
+            if(this.__beforeAsTmpSettings[key]) {
+                this.__settings[key] = this.__beforeAsTmpSettings[key];
+            } else {
+                delete this.__settings[key];
+            }
         }
     }
 }
 
-if(window.localStorage['guiLocalSettings'])
-{
-    try{
-        guiLocalSettings.__settings = window.localStorage['guiLocalSettings'];
-        guiLocalSettings.__settings = JSON.parse(guiLocalSettings.__settings)
-
-    }catch (e)
-    {
-
-    }
-}
-
-function getNewId(){
-    return ("id_"+ Math.random()+ "" +Math.random()+ "" +Math.random()).replace(/\./g, "")
-}
-
-
-
-window.url_delimiter = "#"
-function vstMakeLocalUrl(url = "", vars = {})
-{
-    if(Array.isArray(url))
-    {
-        url = url.join("/")
-    }
-
-    if(typeof url == "string")
-    {
-        let new_url = url.format(vars)
-
-        if(new_url.indexOf(window.hostname) != 0 && new_url.indexOf("//") != 0)
-        {
-            new_url = window.hostname + window.url_delimiter + new_url
-        }
-        else
-        {
-            //console.error("window.hostname already exist in vstMakeLocalUrl")
-        }
-        url = new_url.replace("#/", "#")
-    }
-    else
-    {
-        debugger;
-        throw "Error in vstMakeLocalUrl"
-    }
-
-    return url.replace("#", "#/")
-}
-
-
-function vstGO()
-{
-    return spajs.openURL(vstMakeLocalUrl.apply(this, arguments))
-}
-
-
-
-
-
-function makeUrlForApiKeys(url_string)
-{
-    return url_string.replace(/\{([A-z0-9]+)\}/g, "{api_$1}")
-}
-
-function vstMakeLocalApiUrl(url, vars = {})
-{
-    if(Array.isArray(url))
-    {
-        url = url.join("/")
-    }
-
-    return vstMakeLocalUrl(makeUrlForApiKeys(url), vars)
-}
-
-function openHelpModal()
-{
-    let info = api.openapi.info;
-    let opt = {};
-    if(info.title)
-    {
-        opt.title = info.title;
-    }
-    let html = spajs.just.render('help_modal_content', {info: info});
-    guiModal.setModalHTML(html, opt);
-    guiModal.modalOpen();
-}
+/**
+ * Object, that manages manipulations with Local Storage.
+ */
+var guiLocalSettings = new LocalSettings('guiLocalSettings');
 
 /**
  * https://stackoverflow.com/a/25456134/7835270
@@ -662,38 +407,26 @@ function openHelpModal()
  * @param {type} y
  * @returns {Boolean}
  */
-function deepEqual(x, y)
-{
-    if ((typeof x == "object" && x != null) && (typeof y == "object" && y != null))
-    {
-        if (Object.keys(x).length != Object.keys(y).length)
-        {
+function deepEqual(x, y) {
+    if((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) {
+        if(Object.keys(x).length != Object.keys(y).length) {
             return false;
         }
 
-        for (var prop in x)
-        {
-            if (y.hasOwnProperty(prop))
-            {
-                if (! deepEqual(x[prop], y[prop]))
-                {
+        for(let prop in x) {
+            if(y.hasOwnProperty(prop)) {
+                if(! deepEqual(x[prop], y[prop])) {
                     return false;
                 }
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }
 
         return true;
-    }
-    else if (x !== y)
-    {
+    } else if(x !== y) {
         return false;
-    }
-    else
-    {
+    } else {
         return true;
     }
 }
@@ -704,164 +437,35 @@ function deepEqual(x, y)
  * @returns {Boolean}
  */
 function stringToBoolean(string){
-
-    if(string == null)
-    {
+    if(string == null) {
         return false;
     }
 
-    switch(string.toLowerCase().trim()){
+    switch(string.toLowerCase().trim()) {
         case "true": case "yes": case "1": return true;
         case "false": case "no": case "0": case null: return false;
     }
 }
 
 /**
- * Function for search on JS (when there is no opportunity to use API search).
- * Function gets 2 arguments:
- * @param {object} filters - object with search filters
- * @param {array} data - array with list of objects.
- * @returns {array} - search_results - data, that satisfies search filters.
- */
-function searchObjectsInListByJs(filters, data)
-{
-    if(!data)
-    {
-        data = [];
-    }
-
-    if(!filters)
-    {
-        filters = {
-            search_query: {}
-        }
-    }
-
-    let search_results = [];
-
-    let search_query_keys = Object.keys(filters.search_query);
-
-    // in this loop we add to search results all objects from data
-    // that satisfy the first search_query key
-    for(let i in data)
-    {
-        let item = data[i];
-
-        let search_key = search_query_keys[0];
-        let search_value = filters.search_query[search_key];
-
-        if(checkDataValidityForSearchQuery(item[search_key], search_value))
-        {
-            search_results.push(item);
-        }
-    }
-
-    // in this loop we delete from search results all objects
-    // that do not satisfy other search_query keys
-    for(let i = 1; i < search_query_keys.length; i++)
-    {
-        let search_key = search_query_keys[i];
-        let search_value =  filters.search_query[search_key];
-
-        for(let j = 0; j < search_results.length; j++)
-        {
-            let item = search_results[j];
-
-            if(!checkDataValidityForSearchQuery(item[search_key], search_value))
-            {
-                search_results.splice(j, 1);
-                j -= 1;
-            }
-        }
-    }
-
-    return search_results;
-}
-
-/**
- * Function checks validity of data value to search query.
- * If it is valid, function returns true.
- * Otherwise, function returns false.
- * Function gets 2 arguments:
- * @param {string, number, boolean} data_value - data value
- * @param {string, number, boolean} search_value - search query
- * @returns {boolean}
- */
-function checkDataValidityForSearchQuery(data_value, search_value)
-{
-    let valid = false;
-
-    if(typeof data_value == 'string')
-    {
-        if(data_value.match(search_value) != null)
-        {
-            valid = true;
-        }
-    }
-    else
-    {
-        if(typeof data_value == 'boolean' && typeof search_value == 'string')
-        {
-            search_value = stringToBoolean(search_value);
-        }
-
-        if(data_value == search_value)
-        {
-            valid = true;
-        }
-    }
-
-    return valid;
-}
-
-/**
  * Function converts numbers from 0 to 9 into 00 to 09.
  * @param n(number) - number
  */
-function oneCharNumberToTwoChar(n){
+function oneCharNumberToTwoChar(n) {
     return n > 9 ? "" + n: "0" + n;
 }
 
 /**
- * Function checks necessity of opening link in default browser in cordova app.
- */
-function openExternalLink(event)
-{
-    if(isCordova())
-    {
-        let url = event.target.activeElement.href;
-        window.parent.cordova.InAppBrowser.open(url, '_blank', 'location=yes');
-        event.preventDefault()
-        return false;
-    }
-}
-
-window.onbeforeunload = openExternalLink;
-
-if(isCordova())
-{
-    window.onunload = function(){
-        inAppClose()
-    }
-}
-
-/**
  * Function checks that all properties of object are also objects.
- * @param obj(object) - some object
- * @returns {boolean}
+ * @param {object} obj Some object.
+ * @return {boolean}.
  */
-function allPropertiesIsObjects(obj)
-{
-    for(let prop in obj)
-    {
-        if(typeof obj[prop] != 'object')
-        {
+function allPropertiesIsObjects(obj) {
+    for(let prop in obj) {
+        if(typeof obj[prop] != 'object') {
             return false;
-        }
-        else
-        {
-            if($.isArray(obj[prop]))
-            {
+        } else {
+            if($.isArray(obj[prop])) {
                 return false;
             }
         }
@@ -869,218 +473,51 @@ function allPropertiesIsObjects(obj)
     return true;
 }
 
-/**
- * @param {type} f
- * @param {type} ms
- * @returns {Function}
- * @see https://learn.javascript.ru/task/debounce
- */
-function debounce(f, ms) {
-
-    let timer = null;
-
-    return function (...args) {
-        const onComplete = () => {
-            f.apply(this, args);
-            timer = null;
-        }
-
-        if (timer) {
-            clearTimeout(timer);
-        }
-
-        timer = setTimeout(onComplete, ms);
-    };
-}
-
-function addTableEntityClass(guiObj)
-{
-    let class_name = "";
-    if(guiObj && guiObj.api && guiObj.api.extension_class_name)
-    {
-        if(typeof(guiObj.api.extension_class_name) == 'string')
-        {
-            class_name = guiObj.api.extension_class_name;
-        }
-        else if(Array.isArray(guiObj.api.extension_class_name) && guiObj.api.extension_class_name.length > 0)
-        {
-            class_name = String(guiObj.api.extension_class_name[0]);
-        }
-    }
-
-    return  class_name.replace('gui_', '');
-}
-
-/**
- * Function hides sidebar on small screens.
- * Function calls when user click on a link from sidebar menu.
- */
-function hideSidebar()
-{
-    if(window.innerWidth <= 991)
-    {
-        $('body').removeClass('sidebar-open');
-        $('body').addClass('sidebar-collapse');
-    }
-}
-
-/**
- * Function opens/collapses inner menu(".nav-treeview") of the sidebar element.
- */
-function toggleMenuOpen(el, event)
-{
-    event.stopPropagation();
-
-    let li = el.parentElement.parentElement.parentElement;
-    let ul = $(li).find('ul.nav-treeview');
-
-    $(li).toggleClass('menu-open');
-    $(ul).slideToggle(300);
-
-    setTimeout(function()
-    {
-        if($(li).hasClass('menu-open'))
-        {
-            $(ul).attr("style", "display:block;")
-        }
-        else
-        {
-            $(ul).attr("style", "display:none;")
-        }
-    }, 301)
-}
-
-function setActiveMenuLi( )
-{
-    let url = window.location.hash.replace("#", "")
-    $(".nav-sidebar li[data-url]").removeClass("active");
-    $(".nav-sidebar a.nav-link").removeClass('active')
-
-    $(".nav-sidebar .menu-open").removeClass('menu-open')
-    $(".nav-sidebar .nav-treeview").hide()
-
-    let li = $(".nav-sidebar li[data-url]")
-
-    let urllevel = url.split("/").length - 1
-
-    for(let i=0; i< li.length; i++)
-    {
-        let val = $(li[i])
-        let dataurl = val.attr('data-url')
-
-        if(dataurl == "" && urllevel >= 1)
-        {
-            continue;
-        }
-
-        if(urllevel > 1 && url.indexOf(dataurl) != 0)
-        {
-            continue;
-        }
-
-        if(urllevel <= 1 && url != dataurl)
-        {
-            continue;
-        }
-
-        if(val.hasClass('has-treeview'))
-        {
-            val.addClass("menu-open")
-            val.children(".nav-treeview").show()
-        }
-
-        val.children("a.nav-link").addClass('active')
-
-        let parent = val.parent()
-        let step = 0;
-        do{
-            step++;
-            if($(parent).hasClass('has-treeview'))
-            {
-                $(parent).addClass("menu-open")
-                parent.children(".nav-treeview").show()
-            }
-            parent = $(parent).parent()
-
-        }while(parent.length && step < 10)
-
-        break;
-    }
-}
-
-tabSignal.connect("spajs.open", setActiveMenuLi);
-tabSignal.connect("loading.completed", setActiveMenuLi)
-
 /*
  * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
  */
-$(".content-wrapper").hover(function () {
+$(".content-wrapper").hover(function() {
     $(".hover-li").removeClass("hover-li");
-})
+});
 
-$(".navbar").hover(function () {
+$(".navbar").hover(function() {
     $(".hover-li").removeClass("hover-li");
-})
+});
 
 /**
  * Function converts color from hex to rgba.
  */
-function hexToRgbA(hex, alpha)
-{
-    if(alpha === undefined)
-    {
+function hexToRgbA(hex, alpha) {
+    if(alpha === undefined) {
         alpha = 1;
     }
 
-    if(typeof(alpha) != "number")
-    {
+    if(typeof(alpha) != "number") {
         alpha = Number(alpha);
-        if(isNaN(alpha))
-        {
+        if(isNaN(alpha)) {
             alpha = 1;
         }
     }
 
-    if(alpha < 0 || alpha > 1)
-    {
+    if(alpha < 0 || alpha > 1) {
         alpha = 1;
     }
 
     let c;
-    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-        c= hex.substring(1).split('');
-        if(c.length== 3){
-            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+
+    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+        c = hex.substring(1).split('');
+
+        if(c.length == 3) {
+            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
         }
-        c= '0x'+c.join('');
-        return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',' + alpha +')';
+
+        c = '0x'+ c.join('');
+
+        return 'rgba('+ [(c>>16)&255, (c>>8)&255, c&255].join(',') + ',' + alpha + ')';
     }
+
     return;
-}
-
-/**
- * Function returns prefetch text if prefetch exists, otherwise, it returns field value.
- * @param opt {object} - options for page/list render.
- * @param dataLine {object} - object with data from API.
- * @param field_name {string} - name of field
- * @param max_length {number} - max length of return text.
- * @returns {html}
- */
-function getPrefetchText(opt, dataLine, field_name, max_length) {
-    if(!max_length){
-        max_length = 100;
-    }
-
-    if(opt.fields[field_name].prefetch && dataLine[field_name + '_info']) {
-        if(opt.fields['job'].prefetch.field_name && dataLine[field_name + '_info'][opt.fields['job'].prefetch.field_name]){
-            return sliceLongString(dataLine[field_name + '_info'][opt.fields['job'].prefetch.field_name], max_length);
-        } else if (dataLine[field_name + '_info'].name) {
-            return sliceLongString(dataLine[field_name + '_info'].name, max_length)
-        }
-
-    }
-
-    return sliceLongString(dataLine[field_name], max_length);
 }
 
 /**
@@ -1088,8 +525,7 @@ function getPrefetchText(opt, dataLine, field_name, max_length) {
  * @param time {number} - time in seconds.
  */
 function getTimeInUptimeFormat(time) {
-    if(isNaN(time))
-    {
+    if(isNaN(time)) {
         return "00:00:00";
     }
 
@@ -1097,20 +533,445 @@ function getTimeInUptimeFormat(time) {
 
     let n = oneCharNumberToTwoChar;
 
-    if(uptime.years > 0)
-    {
-        return n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-
-    } else if(uptime.months > 0)
-    {
-        return n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-    }
-    else if(uptime.days > 0)
-    {
-        return n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
-    }
-    else
-    {
-        return n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds)
+    if(uptime.years > 0) {
+        return n(uptime.years) + "y " + n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" +
+            n(uptime.minutes) + ":" + n(uptime.seconds);
+    } else if(uptime.months > 0) {
+        return n(uptime.months) + "m " + n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" +
+            n(uptime.seconds);
+    } else if(uptime.days > 0) {
+        return n(uptime.days) + "d " + n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds);
+    } else {
+        return n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds);
     }
 }
+
+Object.defineProperty(Array.prototype, 'last', {
+    get: function() {
+        return this[this.length - 1];
+    }
+});
+
+/**
+ * Class, that defines enumerable and non_enumerable properties of some object.
+ * This class make recursive search in all chain of object prototypes.
+ * For example, we have some object, that is instance of SomeClass2.
+ * SomeClass2 is a child of SomeClass1.
+ * SomeClass1 is a child of Object Class.
+ * So, ObjectPropertyRetriever will find all properties of SomeClass2, SomeClass1, Object
+ * prototypes.
+ */
+class ObjectPropertyRetriever {
+    /**
+     * Constructor of ObjectPropertyRetriever Class.
+     */
+    constructor() {
+        /**
+         * This property, stores enumerable properties
+         * of Object Class constructor prototype.
+         */
+        this.ob_proto_attrs = this.constructor.getObjectConstructorProperties;
+        /**
+         * This property, stores non_enumerable properties
+         * of Object Class constructor prototype.
+         */
+        this.obj_proto_methods = this.constructor.getObjectConstructorMethods;
+    }
+    /**
+     * Static property, that returns enumerable properties
+     * of Object Class constructor prototype.
+     */
+    static get getObjectConstructorMethods() {
+        return Object.getOwnPropertyNames({}.constructor.prototype);
+    }
+    /**
+     * Static property, that returns non_enumerable properties
+     * of Object Class constructor prototype.
+     */
+    static get getObjectConstructorProperties() {
+        return Object.keys({}.constructor.prototype);
+    }
+    /**
+     * Method, that returns true, if prop is enumerable property of obj.
+     * Otherwise, returns false.
+     * @param {object} obj Object, that we want to check.
+     * @param {string} prop Property, that we want to check.
+     * @returns {boolean}
+     * @private
+     */
+    _enumerable(obj, prop) {
+        return obj.propertyIsEnumerable(prop);
+    }
+    /**
+     * Method, that returns true, if prop is non_enumerable property of obj.
+     * Otherwise, returns false.
+     * @param {object} obj Object, that we want to check.
+     * @param {string} prop Property, that we want to check.
+     * @returns {boolean}
+     * @private
+     */
+    _notEnumerable(obj, prop) {
+        return !obj.propertyIsEnumerable(prop);
+    }
+    /**
+     * Method, that returns true, if prop is enumerable or non_enumerable property of obj.
+     * @param {object} obj Object, that we want to check.
+     * @param {string} prop Property, that we want to check.
+     * @returns {boolean}
+     * @private
+     */
+    _enumerableAndNotEnumerable(obj, prop) {
+        return true;
+    }
+    /**
+     * Method, that returns names of object properties, that satisfy search arguments.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} iterateSelfBool Means, make search inside obj or not.
+     * @param {boolean} iteratePrototypeBool Means, make search inside obj prototypes or not.
+     * @param {function} includePropCb Method, that checks: property satisfies or not.
+     * @private
+     */
+    _getPropertyNames(obj, iterateSelfBool, iteratePrototypeBool, includePropCb) {
+        let props = [];
+
+        do {
+            if(iterateSelfBool) {
+                Object.getOwnPropertyNames(obj).forEach(function (prop) {
+                    if (props.indexOf(prop) === -1 && includePropCb(obj, prop)) {
+                        props.push(prop);
+                    }
+                });
+            }
+
+            if(!iteratePrototypeBool) {
+                break;
+            }
+
+            iterateSelfBool = true;
+
+        } while (obj = Object.getPrototypeOf(obj));
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     */
+    getOwnEnumerables(obj) {
+        return this._getPropertyNames(obj, true, false, this._enumerable);
+    }
+    /**
+     * Method, that returns obj's own non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     */
+    getOwnNonenumerables(obj) {
+        return this._getPropertyNames(obj, true, false, this._notEnumerable);
+    }
+    /**
+     * Method, that returns obj's own enumerable and non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     */
+    getOwnEnumerablesAndNonenumerables(obj) {
+        return this._getPropertyNames(obj, true, false, this._enumerableAndNotEnumerable);
+    }
+    /**
+     * Method, that returns obj's prototypes enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getPrototypeEnumerables(obj, obj_proto=true) {
+        let props = this._getPropertyNames(obj, false, true, this._enumerable);
+
+        if(!obj_proto) {
+            return props.filter(item => !this.ob_proto_attrs.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's prototypes non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getPrototypeNonenumerables(obj, obj_proto=true) {
+        let props = this._getPropertyNames(obj, false, true, this._notEnumerable);
+
+        if(!obj_proto) {
+            return props.filter(item => !this.obj_proto_methods.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's prototypes enumerable and non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getPrototypeEnumerablesAndNonenumerables(obj, obj_proto=true) {
+        let props = this._getPropertyNames(obj, false, true, this._enumerableAndNotEnumerable);
+
+        if(!obj_proto) {
+            return props.filter(item => !(
+                this.obj_proto_methods.includes(item) || this.ob_proto_attrs.includes(item)
+            ));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own and prototypes enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getOwnAndPrototypeEnumerables(obj, obj_proto=true) {
+        let props = this._getPropertyNames(obj, true, true, this._enumerable);
+
+        if(!obj_proto) {
+            return props.filter(item => !this.ob_proto_attrs.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own and prototypes non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getOwnAndPrototypeNonenumerables(obj, obj_proto=true) {
+        let props = this._getPropertyNames(obj, true, true, this._notEnumerable);
+
+        if(!obj_proto) {
+            return props.filter(item => !this.obj_proto_methods.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own and prototypes enumerable and non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getOwnAndPrototypeEnumerablesAndNonenumerables(obj) {
+        let props = this._getPropertyNames(obj, true, true, this._enumerableAndNotEnumerable);
+
+        if(!obj_proto) {
+            return props.filter(item => !(
+                this.obj_proto_methods.includes(item) || this.ob_proto_attrs.includes(item)
+            ));
+        }
+
+        return props;
+    }
+}
+
+/**
+ * Instance of ObjectPropertyRetriever class.
+ */
+var obj_prop_retriever = new ObjectPropertyRetriever();
+
+/**
+ * Class with common methods for ModelConstructor and ViewConstructor classes.
+ */
+class BaseEntityConstructor {
+    /**
+     * Constructor of BaseEntityConstructor class.
+     * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
+     * and some settings for views of different types.
+     */
+    constructor(openapi_dictionary) {
+        this.dictionary = openapi_dictionary;
+    }
+
+    /**
+     * Method, that returns array with properties names,
+     * that store reference to model.
+     */
+    getModelRefsProps() {
+        return this.dictionary.models.ref_names;
+    }
+
+    /**
+     * Method, that defines format of current field.
+     * @param {object} field Object with field options.
+     */
+    getFieldFormat(field){
+        // if(field.enum && guiFields['choices']){
+        //     return "choices";
+        // }
+
+        if(guiFields[field.format]) {
+            return field.format;
+        }
+
+        if(field.enum && guiFields['choices']){
+            return "choices";
+        }
+
+        let props = Object.keys(field);
+        let refs = this.getModelRefsProps();
+
+        for(let key in props) {
+            if(refs.includes(props[key])) {
+                return 'api_object';
+            }
+        }
+
+        if(guiFields[field.type]){
+            return field.type;
+        }
+
+        return 'string';
+    }
+}
+
+/**
+ * Function, that finds the most appropriate (closest) path from path array to current_path.
+ * It's supposed, that values in 'paths' array' were previously sorted.
+ * It's supposed, that 'paths' array does not contain all application paths.
+ * @param {array} paths Array with paths({string}).
+ * @param {string} current_path Path, based on which function makes search.
+ */
+function findClosestPath(paths, current_path) {
+    let c_p_parts = current_path.replace(/^\/|\/$/g, "").split("/");
+
+    let matches = [];
+
+    for(let index in paths) {
+        let path = paths[index];
+        let path_paths = path.replace(/^\/|\/$/g, "").split("/");
+
+        matches.push({
+            path: path,
+            match: 0,
+        });
+
+        for(let num in c_p_parts) {
+            let item = c_p_parts[num];
+
+            if(item == path_paths[num]) {
+                matches.last.match ++;
+            } else {
+                break;
+            }
+        }
+    }
+
+    matches = matches.sort((a, b) => {
+        return a.match - b.match;
+    });
+
+    if(matches.last && matches.last.path && matches.last.match > 0) {
+        return matches.last.path;
+    }
+}
+
+/**
+ * Class, that saves status of current view, that is opened right now in current tab.
+ * This class is used in gui tests.
+ * This class helps to determine, that page was loaded completely.
+ */
+class CurrentView {
+    /**
+     * Constructor of CurrentView class.
+     */
+    constructor() {
+        /**
+         * Property, that means, that page is loading.
+         */
+        this.loading = null;
+        /**
+         * Property, that means, that page was loaded successfully.
+         */
+        this.success = null;
+        /**
+         * Property, that means, that page was loaded with error.
+         * It stores error.
+         */
+        this.error = null;
+        /**
+         * Property, that stores promise, that current page will be loaded.
+         */
+        this.promise = null;
+        /**
+         * Property, that stores promise status.
+         */
+        this.promise_status = "";
+        /**
+         * Property, that stores promise callbacks.
+         */
+        this.promise_callbacks = {};
+    }
+
+    /**
+     * Method, that inits loading of current view.
+     */
+    initLoading() {
+        this.error = this.response = null;
+        this.loading = true;
+
+        this._initLoadingPromise();
+    }
+
+    /**
+     * Method, that is called when page was loaded successfully.
+     */
+    setLoadingSuccessful() {
+        this.loading = false;
+        this.success = true;
+        this.error = null;
+
+        return setTimeout(() => {
+            this.promise_callbacks.resolve();
+            this.promise_status = 'resolved';
+        }, 10);
+    }
+
+    /**
+     * Method, that is called when page was loaded with error.
+     */
+    setLoadingError(error) {
+        this.loading = false;
+        this.success = null;
+        this.error = error;
+
+        return setTimeout(() => {
+            this.promise_callbacks.reject();
+            this.promise_status = 'rejected';
+        }, 10);
+    }
+
+    /**
+     * Method, that inits new instance of promise.
+     * @private
+     */
+    _initLoadingPromise() {
+        if(!(this.promise && (this.promise_status == "" || this.promise_status == "pending"))) {
+            this.promise_callbacks = {
+                resolve: undefined,
+                reject: undefined,
+            };
+
+            this.promise = new Promise((resolve, reject) => {
+                this.promise_callbacks.resolve = resolve;
+                this.promise_callbacks.reject = reject;
+            });
+
+            this.promise_status = 'pending';
+        }
+    }
+}
+
+/**
+ * Instance of CurrentView class, that is used in gui tests.
+ */
+var current_view = new CurrentView();
+
+/**
+ * Variable, that is responsible for 3rd level path keys.
+ * For example, if path_pk_key == 'pk', all variables in js, that work with paths will contain current value:
+ * - /user/{pk}/.
+ * If path_pk_key == 'id':
+ * - /user/{id}/.
+ * It is supposed, that OpenAPI schema will use 'path_pk_key' value as pk_key for 3rd level paths.
+ */
+var path_pk_key = 'pk';

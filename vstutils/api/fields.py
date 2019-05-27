@@ -75,7 +75,7 @@ class HtmlField(CharField):
     '''
 
 
-class Select2Field(IntegerField):
+class FkField(IntegerField):
     '''
     Field what means where we got list.
     '''
@@ -85,7 +85,7 @@ class Select2Field(IntegerField):
         self.select_model = kwargs.pop('select')
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
         self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
-        super(Select2Field, self).__init__(**kwargs)
+        super(FkField, self).__init__(**kwargs)
 
 
 class UptimeField(IntegerField):

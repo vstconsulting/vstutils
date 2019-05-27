@@ -1,0 +1,725 @@
+<!-- ------------------------------- Block of guiField's COMPONENTS templates ------------------------------- -->
+<!--
+    Block of BASE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- label of guiField -->
+<script type="text/x-template" id="template_field_part_label">
+    <label :class="classes" :style="styles">{{ field.options.title || field.options.name | capitalize | split }}</label>
+</script>
+
+<!-- base button of guiField -->
+<script type="text/x-template" id="template_field_part_button_base">
+    <div :class="wrapper_classes" :style="wrapper_styles"
+         @click="eventHandler" data-toggle="tooltip" :title="help_text">
+            <span :class="span_classes" :style="span_styles">
+                <span :class="icon_classes" :style="icon_styles"></span>
+            </span>
+    </div>
+</script>
+
+<!-- default content (value input area) of base readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_base">
+    <div class="input-group">
+        <input :type="input_type" :class="classes" :style="styles" :value="value" disabled>
+    </div>
+</script>
+
+<!-- default content (value input area) of base editable field -->
+<script type="text/x-template" id="template_field_content_edit_base">
+    <div class="input-group">
+        <input :type="input_type" :class="classes" :style="styles" :value="value"
+               @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
+               :min="attrs['min']" :max="attrs['max']" :required="attrs['required']"
+               :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+        >
+
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <field_default_value_button v-if="with_default_value" :field="field" @valueToDefault="$emit('proxyEvent', 'valueToDefault')"></field_default_value_button>
+
+        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+    </div>
+</script>
+
+<!-- description (help text) of guiField -->
+<script type="text/x-template" id="template_field_part_description">
+    <div :class="classes" :style="styles">{{ field.options.description || field.options.help }}</div>
+</script>
+
+<!-- list_view of guiField -->
+<script type="text/x-template" id="template_field_part_list_view">
+    <div :class="classes" :style="styles">{{ value }}</div>
+</script>
+<!--
+    EndBlock of BASE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of BOOLEAN guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of boolean readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_boolean">
+    <div :class="classes" :style="styles"
+         onselectstart="return false"
+         onmousedown="return false"
+         style="cursor: not-allowed!important; background-color: #eaedf0;"
+    >
+        <div class="ico-on fa fa-toggle-on" style="cursor: not-allowed!important;" ></div>
+        <div class="ico-off fa  fa-toggle-off" style="cursor: not-allowed!important;" ></div>
+        <div class="boolean-title" style="cursor: not-allowed!important;">Boolean value</div>
+    </div>
+</script>
+
+<!-- content (value input area) of boolean editable field -->
+<script type="text/x-template" id="template_field_content_edit_boolean">
+    <div class="input-group">
+        <div :class="classes" :style="styles"
+             @click="$emit('proxyEvent','toggleValue')"
+             onselectstart="return false"
+             onmousedown="return false"
+             style="cursor: pointer;"
+        >
+            <div class="ico-on fa fa-toggle-on" ></div>
+            <div class="ico-off fa  fa-toggle-off" ></div>
+            <div class="boolean-title" >Boolean value</div>
+        </div>
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+    </div>
+</script>
+
+<!-- list_view of boolean field -->
+<script type="text/x-template" id="template_field_part_list_view_boolean">
+    <i :class="classes" :style="styles"></i>
+</script>
+<!--
+    EndBlock of BOOLEAN guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of CHOICES guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of choices editable field -->
+<script type="text/x-template" id="template_field_content_edit_choices">
+    <select :class="classes" :style="styles" :value="value"></select>
+</script>
+
+<!-- content (value input area) of choices readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_choices">
+    <div class="input-group">
+        <input :type="input_type" :class="classes" :style="styles" :value="value" disabled>
+    </div>
+</script>
+<!--
+   EndBlock of CHOICES guiField's components -
+   - elements of base guiField structure
+-->
+
+
+<!--
+   Block of AUTOCOMPLETE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of autocomplete editable field -->
+<script type="text/x-template" id="template_field_content_edit_autocomplete">
+    <div class="input-group">
+        <input type="text" :class="classes" :style="styles"
+               :value="val" @blur="setValueByHandsInStore($event.target.value)">
+
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <field_default_value_button v-if="with_default_value" :field="field" @valueToDefault="$emit('proxyEvent', 'valueToDefault')"></field_default_value_button>
+
+        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+    </div>
+</script>
+<!--
+   EndBlock of AUTOCOMPLETE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of TEXTAREA guiField's components -
+   - elements of base guiField structure
+-->
+<!-- content (value input area) of textarea readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_textarea">
+    <div class="input-group">
+        <textarea :value="value" rows="3" cols="50"
+                  :class="classes" :style="styles"  disabled
+        ></textarea>
+    </div>
+</script>
+
+<!-- content (value input area) of textarea editable field -->
+<script type="text/x-template" id="template_field_content_edit_textarea">
+    <div class="input-group">
+        <textarea :value="value" :required="attrs['required']"
+                  @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
+                  rows="3" cols="50" :class="classes" :style="styles"
+                  :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+        ></textarea>
+    </div>
+</script>
+<!--
+    EndBlock of TEXTAREA guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of FILE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of file editable field -->
+<script type="text/x-template" id="template_field_content_edit_file">
+    <div>
+        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+
+        <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
+
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <textarea :value="value" @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
+                  placeholder='Enter value'  :class="classes" :style="styles"
+                  :required="attrs['required']" :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+        ></textarea>
+    </div>
+</script>
+
+<!-- readFile button of file guiField -->
+<script type="text/x-template" id="template_field_part_button_readFile">
+    <div :class="wrapper_classes" :style="wrapper_styles"
+         data-toggle="tooltip" :title="help_text">
+            <span :class="span_classes" :style="span_styles" @change="eventHandler">
+                <input type='file' class='input-file' id="file_reader_input">
+                <span :class="icon_classes" :style="icon_styles"></span>
+            </span>
+    </div>
+</script>
+<!--
+    EndBlock of FILE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of TEXT_PARAGRAPH  guiField's components -
+   - elements of base guiField structure
+-->
+<!-- content (value input area) of password readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_text_paragraph">
+    <div :class="classes" :style="styles">
+        <p> {{ value }} </p>
+    </div>
+</script>
+<!--
+   EndBlock of TEXT_PARAGRAPH guiField's components -
+   - elements of base guiField structure
+-->
+
+
+<!--
+   Block of PLAIN_TEXT guiField's components -
+   - elements of base guiField structure
+-->
+<!-- content (value input area) of plain_text readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_plain_text">
+    <div :class="classes" :style="styles" v-html="value"></div>
+</script>
+<!--
+   EndBlock of PLAIN_TEXT guiField's components -
+   - elements of base guiField structure
+-->
+
+
+<!--
+   Block of UPTIME guiField's components -
+   - elements of base guiField structure
+-->
+<!-- content (value input area) of uptime editable field -->
+<script type="text/x-template" id="template_field_content_edit_uptime">
+    <div class="input-group">
+        <input type="text" :class="classes" :style="styles" :required="attrs['required']"
+               :value="value" @blur="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
+        >
+
+        <field_uptime_down_button :field="field" @callDoDecrease="$emit('proxyEvent', 'callDoDecrease')" @resetIncrement="$emit('proxyEvent', 'resetIncrement')"></field_uptime_down_button>
+
+        <field_uptime_up_button :field="field" @callDoIncrease="$emit('proxyEvent', 'callDoIncrease')" @resetIncrement="$emit('proxyEvent', 'resetIncrement')"></field_uptime_up_button>
+
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <field_default_value_button v-if="with_default_value" :field="field" @valueToDefault="$emit('proxyEvent', 'valueToDefault')"></field_default_value_button>
+
+    </div>
+</script>
+
+<!-- up/down buttons of uptime guiField -->
+<script type="text/x-template" id="template_field_part_button_uptime">
+    <div :class="wrapper_classes" :style="wrapper_styles"
+         @mousedown="eventHandler" @mouseup="$emit('resetIncrement')" @mouseleave="$emit('resetIncrement')"
+         data-toggle="tooltip" :title="help_text">
+            <span :class="span_classes" :style="span_styles">
+                <span :class="icon_classes" :style="icon_styles"></span>
+            </span>
+    </div>
+</script>
+<!--
+   EndBlock of UPTIME guiField's components -
+   - elements of base guiField structure
+-->
+
+
+<!--
+   Block of CRONTAB guiField's components -
+    - elements of base guiField structure
+-->
+<!-- template for element(one of the periods) of crontab form -->
+<script type="text/x-template" id="template_field_crontab_form_element">
+    <div class="form-group col-lg-3 col-xs-12 col-md-6 col-sm-6">
+        <div class="btn-group" role="group" >
+            <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                {{ options.title | capitalize }}
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-left">
+                <li v-for="item in options.samples">
+                    <a href="#" class="crontab_li_a"
+                       @click.stop.prevent="proxyCrontabEvent('setCrontabElValue', {name: options.name, value: item.value})">
+                        {{ item.view }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="control-label " style="margin-top:15px;">
+            <button class="btn btn-default" v-for="el in values" :class="is_selected(el)"
+                    :style="styles" @click="toggleModelValue(options.name, el.number)">
+                {{ getLabel(options, el) }}
+            </button>
+        </div>
+    </div>
+</script>
+<!-- content (value input area) of crontab editable field -->
+<script type="text/x-template" id="template_field_content_edit_crontab">
+    <div>
+        <div class="row" >
+            <div class="col-lg-12">
+                <div class="input-group">
+                    <input type="text" :class="classes" :style="styles" :required="attrs['required']"
+                           :value="value" @blur="updateValue($event.target.value)"
+                    >
+
+                    <field_toggle_crontab_button :field="field" @toggleCrontab="toggleCrontab"></field_toggle_crontab_button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row crontabEditor" id="guiElement-gui" style="margin-top: 15px; display:none;"  v-show="show_crontab">
+            <crontab_element v-for="item in crontab_elements" :options="item" :model="model"
+                             @setModelValue="setModelValue($event)"
+                             @setCrontabElValue="setCrontabElValue($event)"
+            >
+            </crontab_element>
+        </div>
+    </div>
+</script>
+<!--
+   EndBlock of CRONTAB guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of JSON guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of json editable field -->
+<script type="text/x-template" id="template_field_content_readonly_json">
+    <div class="row">
+        <component v-for="item in realFields"
+                   :is="'field_' + item.options.format" :field="item"
+                   :prop_data="value"
+                   :wrapper_opt="{use_prop_data: true}"
+        ></component>
+    </div>
+</script>
+<!--
+   EndBlock of JSON guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of FK_MULTI_AUTOCOMPLETE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of fk_multi_autocomplete editable field -->
+<script type="text/x-template" id="template_field_content_edit_fk_multi_autocomplete">
+    <div class="input-group">
+        <input type="text" :required="attrs['required']" :disabled="disabled"
+               :value="val" @input="setValueByHandsInStore($event.target.value)"
+               :class="classes" :style="styles"
+        >
+
+        <field_enable_button v-if="field.options.enable_button" :field="field" :disabled="disabled" @toggleEnableField="toggleEnableField"></field_enable_button>
+
+        <field_hidden_button v-if="!disabled && with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <field_fk_multi_autocomplete_modal   v-show="!disabled"
+                                             :options="modal_options"
+                                             @cleanTmpValue="cleanTmpValue"
+                                             @changeValue="changeTmpValue"
+                                             @setNewValue="setValueInStore"
+                                             @updateQuerySet="updateQuerySet"
+        ></field_fk_multi_autocomplete_modal>
+
+        <field_clear_button v-show="!disabled" :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+    </div>
+</script>
+
+<!-- Component for a fk_multi_autocomplete modal window -->
+<script type="text/x-template" id="template_fk_multi_autocomplete_modal">
+    <div style="display: contents;">
+        <preloader :show="show_loader"></preloader>
+
+        <gui_modal v-show="show_modal" @close="close">
+            <template v-slot:header>
+                <h3>{{ qs.model.name | capitalize }}</h3>
+            </template>
+            <template v-slot:body>
+                <div class="card card-info">
+                    <div class="card-header with-border">
+                        <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
+                        </current_search_input>
+                        <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
+                    </div>
+                    <div class="card-body">
+                        <template v-if="is_empty">
+                            <p class="text-center">List is empty.</p>
+                        </template>
+                        <template v-else>
+                            <current_table :instances="instances" :qs="qs" :field_props="field_props"
+                                           :field_value="field_value" @changeValue="changeValue"
+                            ></current_table>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template v-slot:footer>
+                <button class="btn btn-default" @click="close">Cancel</button>
+                <button class="btn btn-primary" @click="setNewValue">Add selected</button>
+            </template>
+        </gui_modal>
+
+        <div data-toggle="tooltip" title="Open modal window" class="input-group-append" @click="open">
+            <span class="input-group-text" style="cursor: pointer;">
+                <span class="fa fa-chevron-down"></span>
+            </span>
+        </div>
+    </div>
+</script>
+
+<!-- template of fk_multi_autocomplete modal table component -->
+<script type="text/x-template" id="template_fk_multi_autocomplete_modal_table">
+    <table class="table table-bordered multiple-select">
+        <thead>
+        <tr>
+            <th style="width: 50px" >
+            </th>
+
+            <th v-for="field in fields" v-if="!hideField(field)">
+                {{ field.options.title || field.options.name | capitalize | split }}
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <fma_table_row v-for="instance in instances" :qs="qs"
+                       :instance="instance" :fields="fields"
+                       :field_props="field_props" :field_value="field_value"
+                       @changeValue="changeValue"
+        ></fma_table_row>
+        </tbody>
+    </table>
+</script>
+
+<!-- template of fk_multi_autocomplete modal table row component -->
+<script type="text/x-template" id="template_fk_multi_autocomplete_modal_table_row">
+    <tr class="item-row item-row-id highlight-tr" :class="is_selected" @click="goToTrLink($event, true)" :data-id="instance.getPkValue()" :data-href="base_url + '/' + instance.getPkValue()">
+        <td class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
+            @click="selectCurrentInstance"
+        >
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+        </td>
+        <td v-for="field in fields" v-if="!hideField(field)">
+            <component :is="'field_' + field.options.format"
+                       :prop_data="data_to_represent"
+                       :field="field"
+                       :wrapper_opt="{list_view: true, use_prop_data: true}"
+            ></component>
+        </td>
+    </tr>
+</script>
+
+<!-- template of fk_multi_autocomplete modal table row component -->
+<script type="text/x-template" id="template_fk_multi_autocomplete_modal_search_input">
+    <div class="input-group mb-3">
+        <div class="input-group-prepend hidden-360">
+            <span class="input-group-text" >{{ field_props.view_field | capitalize }}</span>
+        </div>
+        <input type="text" class="form-control rounded-360 modal-list-search-input"
+               :value="search_input" @input="changeSearchInput($event.target.value)" @keypress="keyPressHandler"
+               :placeholder="'Search by ' + field_props.view_field"
+        >
+        <div class="input-group-append modal-list-search-apply" @click="filterQuerySetItems">
+            <span class="input-group-text" >
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </span>
+        </div>
+        <div class="input-group-append" @click="cleanFilterValue">
+            <span class="input-group-text" >
+                <i class="fa fa-remove" aria-hidden="true"></i>
+            </span>
+        </div>
+    </div>
+</script>
+<!--
+   EndBlock of FK_MULTI_AUTOCOMPLETE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of API_OBJECT guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of api_object editable field -->
+<script type="text/x-template" id="template_field_content_readonly_api_object">
+    <div :class="classes" :style="styles" readonly disabled>
+        <a :href="href" @click.stop.prevent="goToHref" >{{ text }}</a>
+    </div>
+</script>
+<!--
+   EndBlock of API_OBJECT guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of INNER_API_OBJECT guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of inner_api_object readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_inner_api_object">
+    <div class="row">
+        <template v-for="(item, index) in field.options.realFields">
+            <template v-if="!more_than_one_field(item)">
+                <component
+                        v-for="real_field in item"
+                        :is="'field_' + real_field.options.format"
+                        :field="real_field"
+                        :prop_data="realFieldValue(index)"
+                        :wrapper_opt="{readOnly: true, use_prop_data: true}"
+                ></component>
+            </template>
+            <template v-else>
+                <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                    <label class="control-label">{{ index | capitalize | split }}</label>
+                    <div class="row">
+                        <component
+                                v-for="real_field in item"
+                                :is="'field_' + real_field.options.format"
+                                :field="real_field"
+                                :prop_data="realFieldValue(index)"
+                                :wrapper_opt="{readOnly: true, use_prop_data: true}"
+                        ></component>
+                    </div>
+                </div>
+            </template>
+        </template>
+    </div>
+</script>
+
+<!-- content (value input area) of inner_api_object editable field -->
+<script type="text/x-template" id="template_field_content_edit_inner_api_object">
+    <div class="row">
+        <template v-for="(item, index) in field.options.realFields">
+            <template v-if="!more_than_one_field(item)">
+                <component
+                        v-for="real_field in item"
+                        :is="'field_' + real_field.options.format"
+                        :field="real_field"
+                        :prop_data="realFieldValue(index)"
+                        :wrapper_opt="{use_prop_data: true}"
+                        @setValueInStore="setValueInStore($event, index, real_field.options.name)"
+                ></component>
+            </template>
+            <template v-else>
+                <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
+                    <label class="control-label">{{ index | capitalize}}</label>
+                    <div class="row">
+                        <component
+                                v-for="real_field in item"
+                                :is="'field_' + real_field.options.format"
+                                :field="real_field"
+                                :prop_data="realFieldValue(index)"
+                                :wrapper_opt="{use_prop_data: true}"
+                                @setValueInStore="setValueInStore($event, index, real_field.options.name)"
+                        ></component>
+                    </div>
+                </div>
+            </template>
+        </template>
+    </div>
+</script>
+<!--
+   EndBlock of INNER_API_OBJECT guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of FK guiField's components -
+    - elements of base guiField structure
+-->
+<!-- list_view of guiField -->
+<script type="text/x-template" id="template_field_part_list_view_fk">
+    <div :class="classes" :style="styles">
+        <template v-if="with_link">
+            <a :href="href"  @click.stop.prevent="goToHref" >{{ text }}</a>
+        </template>
+        <template v-else>
+            {{ text }}
+        </template>
+    </div>
+</script>
+
+<!-- content (value input area) of fk readonly field  -->
+<script type="text/x-template" id="template_field_content_readonly_fk">
+    <div :class="classes" :style="styles" readonly disabled >
+        <template v-if="with_link">
+            <a :href="href" @click.stop.prevent="goToHref" >{{ text }}</a>
+        </template>
+        <template v-else>
+            {{ text }}
+        </template>
+    </div>
+</script>
+
+<!-- content (value input area) of fk editable field -->
+<script type="text/x-template" id="template_field_content_edit_fk">
+    <select :class="classes" :style="styles" :value="value"></select>
+</script>
+<!--
+   EndBlock of FK guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+   Block of STRING_ARRAY guiField's components -
+    - elements of base guiField structure
+-->
+<!-- list_view of string_array guiField -->
+<script type="text/x-template" id="template_field_part_list_view_string_array">
+    <ul class="table_ul">
+        <li v-for="item in value" >
+            <span :class="classes" :style="styles">{{ item }}</span>
+        </li>
+    </ul>
+</script>
+<!--
+   EndBlock of STRING_ARRAY guiField's components -
+    - elements of base guiField structure
+-->
+<!-- ------------------------------- EndBlock of guiField's COMPONENTS templates ------------------------------- -->
+
+
+<!-- ------------------------------- Block of guiField's templates ------------------------------- -->
+<!-- template of guiField with 'base' type - (Vue component - '') -->
+<script type="text/x-template" id="template_field_base">
+    <div style="display: contents" v-show="!is_hidden">
+        <template v-if="wrapper_opt.list_view">
+            <field_list_view :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data"></field_list_view>
+        </template>
+        <template v-else>
+            <div :class="wrapper_classes" :style="wrapper_styles">
+                <field_label :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" ></field_label>
+                <template v-if="field.options.readOnly || wrapper_opt.readOnly">
+                    <field_content_readonly :value="value" :field="field"
+                                            :wrapper_opt="wrapper_opt" :data="data"
+                                            @proxyEvent="proxyEvent">
+
+                    </field_content_readonly>
+                </template>
+                <template v-else>
+                    <field_content_edit :value="value" :field="field"
+                                        :wrapper_opt="wrapper_opt" :data="data"
+                                        @proxyEvent="proxyEvent">
+
+                    </field_content_edit>
+                </template>
+                <field_description :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data"></field_description>
+            </div>
+        </template>
+    </div>
+</script>
+
+<!-- template of dynamic field -->
+<script type="text/x-template" id="template_field_dynamic">
+    <div style="display: contents" v-show="!is_hidden">
+        <component :is="'field_' + realField.options.format"
+                   :field="realField"
+                   :wrapper_opt="wrapper_opt"
+                   :prop_data="prop_data"
+        >
+        </component>
+    </div>
+</script>
+
+<!-- template of hidden field -->
+<script type="text/x-template" id="template_field_hidden">
+    <div></div>
+</script>
+
+<!-- template of form field -->
+<script type="text/x-template" id="template_field_form">
+    <div :class="wrapper_classes" :style="wrapper_styles" v-show="!is_hidden">
+        <field_label :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data"></field_label>
+        <div class="row">
+            <template v-for="item in realFields">
+                <component
+                        :field="item"
+                        :is="'field_' + item.options.format"
+                        :wrapper_opt="form_wrapper_opt"
+                        :prop_data="form_value"
+                        @setValueInStore="setFormFieldValue(item.options.name, $event)"
+                >
+                </component>
+            </template>
+        </div>
+        <field_description :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data"></field_description>
+    </div>
+</script>
+
+<!-- template of button field -->
+<script type="text/x-template" id="template_field_button">
+    <div :class="wrapper_classes" :style="wrapper_styles" v-show="!is_hidden">
+        <button class="btn btn-primary" data-toggle="tooltip"
+                :title="field.options.help || field.options.description"
+                @click="onClickHandler"
+        >
+            {{ field.options.title || field.options.name | capitalize | split }}
+        </button>
+    </div>
+</script>
+<!-- ------------------------------- EndBlock of guiField's templates ------------------------------- -->

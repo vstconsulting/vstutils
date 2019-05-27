@@ -18,7 +18,7 @@ FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
 FORMAT_TEXTAREA = 'textarea'
 FORMAT_DYN = 'dynamic'
-FORMAT_SELECT2 = 'select2'
+FORMAT_FK = 'fk'
 FORMAT_UPTIME = 'uptime'
 
 
@@ -122,16 +122,16 @@ class DependEnumFieldInspector(FieldInspector):
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
-class Select2FieldInspector(FieldInspector):  # nocv
+class FkFieldInspector(FieldInspector):  # nocv
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
-        if not isinstance(field, fields.Select2Field):
+        if not isinstance(field, fields.FkField):
             return NotHandled
 
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(type=openapi.TYPE_INTEGER, format=FORMAT_SELECT2)
+        kwargs = dict(type=openapi.TYPE_INTEGER, format=FORMAT_FK)
         kwargs['additionalProperties'] = dict(
             model = openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
@@ -165,7 +165,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
-        Select2FieldInspector, DependEnumFieldInspector,
+        FkFieldInspector, DependEnumFieldInspector,
         AutoCompletionFieldInspector, VSTFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
     filter_inspectors = [
