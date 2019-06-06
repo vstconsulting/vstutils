@@ -9,6 +9,7 @@ from docutils.parsers.rst import Directive, directives
 from docutils import nodes
 from sphinx.util.nodes import nested_parse_with_titles
 from sphinxcontrib.httpdomain import HTTP_STATUS_CODES
+from . import schema
 
 
 class _YamlOrderedLoader(yaml.SafeLoader):
@@ -44,6 +45,9 @@ class VSTOpenApiBase(Directive):
         html='test_html',
         email='example@mail.com'
     )
+    for format_type in filter(lambda x: x.startswith('FORMAT_'), dir(schema)):
+        if getattr(schema, format_type, None) not in type_dict:
+            type_dict[getattr(schema, format_type)] = 'value'
 
     def __init__(self, *args, **kwargs):
         super(VSTOpenApiBase, self).__init__(*args, **kwargs)
