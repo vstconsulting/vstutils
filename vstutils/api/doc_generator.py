@@ -9,7 +9,6 @@ from docutils.parsers.rst import Directive, directives
 from docutils import nodes
 from sphinx.util.nodes import nested_parse_with_titles
 from sphinxcontrib.httpdomain import HTTP_STATUS_CODES
-from . import schema
 
 
 class _YamlOrderedLoader(yaml.SafeLoader):
@@ -33,6 +32,7 @@ class VSTOpenApiBase(Directive):
     indent_depth = 2
     indent = '   '
     type_dict = dict(
+        fk=1,
         integer=1,
         uri='http://localhost:8080{}',
         string='example {}',
@@ -43,11 +43,10 @@ class VSTOpenApiBase(Directive):
         uptime='22:11:34',
         date_time='2019-01-07T06:10:31+10:00',
         html='test_html',
-        email='example@mail.com'
+        email='example@mail.com',
+        file='value data',
+        secretfile='secret data',
     )
-    for format_type in filter(lambda x: x.startswith('FORMAT_'), dir(schema)):
-        if getattr(schema, format_type, None) not in type_dict:
-            type_dict[getattr(schema, format_type)] = 'value'
 
     def __init__(self, *args, **kwargs):
         super(VSTOpenApiBase, self).__init__(*args, **kwargs)
@@ -307,7 +306,7 @@ class VSTOpenApiBase(Directive):
             result = self.get_response_example(opt_name, var_type, def_model)
         else:
             var_type = var_type.replace('-', '_')
-            result = opt_values.get('default', None) or self.type_dict[var_type]
+            result = opt_values.get('default', None) or self.type_dict.get(var_type, None)
         return result
 
     def get_object_example(self, def_name):
