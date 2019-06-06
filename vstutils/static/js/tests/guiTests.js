@@ -42,10 +42,15 @@ class GuiTests {
      * @param {prefix} prefix Key prefix, at which data will be saved.
      */
     saveInstanceData(instances_info, is_parent, prefix="") {
-        let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+        // let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+        //
+        let view = app.views[app.application.$route.name];
+        let qs_path = view.objects.url;
+        let url = qs_path.format(app.application.$route.params).replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+        //
         let instance = app.application.$store.state.objects[url].cache;
         let model = app.application.$store.state.objects[url].model;
-        let view = app.views[app.application.$route.name];
+        // let view = app.views[app.application.$route.name];
         let pk_key = path_pk_key;
 
         if(!is_parent) {
@@ -189,7 +194,11 @@ class GuiTests {
             }
 
             try {
-                let url = app.application.$route.path.replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+                // let url = app.application.$route.path.replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+                //
+                let qs_path = view.objects.url;
+                let url = qs_path.format(app.application.$route.params).replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+                //
                 let d_data = $.extend(true, {}, app.application.$store.state.sandbox[url].cache.data);
 
                 for(let key in test_data) {
@@ -222,7 +231,10 @@ class GuiTests {
             let done = assert.async();
             let view = app.views[path];
             let view_type = view.schema.type;
-            let url = app.application.$route.path.replace(/^\/|\/$/g, "").replace("/new", "").replace("/edit", "");
+
+            let qs_path = view.objects.url;
+            let url = qs_path.format(app.application.$route.params).replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+            // let url = app.application.$route.path.replace(/^\/|\/$/g, "").replace("/new", "").replace("/edit", "");
             let store = 'objects';
 
 
@@ -336,7 +348,13 @@ class GuiTests {
 
         syncQUnit.addTest("guiViews[" + path + "].checkReloadButton", function(assert) {
             let done = assert.async();
-            let url = app.application.$route.path.replace(/^\/|\/$/g, "").replace("/edit", "")
+            // let url = app.application.$route.path.replace(/^\/|\/$/g, "").replace("/edit", "");
+            //
+            let view = app.views[app.application.$route.name];
+            let qs_path = view.objects.url;
+            let url = qs_path.format(app.application.$route.params).replace(/^\/|\/$/g, "").replace("/edit", "");
+            //
+
             let api_data = app.application.$store.state.objects[url].cache.data;
             let edit_data = app.application.$store.state.sandbox[url].cache.data;
 
@@ -559,7 +577,12 @@ class GuiTests {
         }
 
         let compareSelectionsWithStore = (assert) => {
-            let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+            // let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+            //
+            let view = app.views[app.application.$route.name];
+            let qs_path = view.objects.url;
+            let url = qs_path.format(app.application.$route.params).replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+            //
             let selections = app.application.$store.state.selections[url];
             let rows = $(".item-row.selected");
 
@@ -662,7 +685,9 @@ class GuiTests {
 
         this.checkViewButtons(path);
 
-        this.checkReloadButtonWork(path, options.data);
+        if(!options.do_not_check_reload_button) {
+            this.checkReloadButtonWork(path, options.data);
+        }
 
         this.setValues(path, options.data);
 
@@ -672,11 +697,15 @@ class GuiTests {
             if(!options.is_valid) {
                 return;
             }
-
-            let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+            // let url = app.application.$route.path.replace(/^\/|\/$/g, "");
+            //
+            let view = app.views[app.application.$route.name];
+            let qs_path = view.objects.url;
+            let url = qs_path.format(app.application.$route.params).replace(/^\/|\/$/g, "").replace("/edit", "").replace("/new", "");
+            //
             let instance = app.application.$store.state.objects[url].cache;
             let model = app.application.$store.state.objects[url].model;
-            let view = app.views[app.application.$route.name];
+            // let view = app.views[app.application.$route.name];
 
             if(instances_info.key_fields_data[view.schema.name] && instance.getViewFieldValue() !== undefined) {
                 instances_info.key_fields_data[view.schema.name][model.view_name] = instance.getViewFieldValue();
@@ -744,7 +773,9 @@ class GuiTests {
             this.testAddChildInstanceToParentList(list_path, instances_info, test_options.add_child);
         }
 
-        this.testListViewFilters(list_path, instances_info, true, true, true);
+        if(!(test_options.list && test_options.list.do_not_check_filters)) {
+            this.testListViewFilters(list_path, instances_info, true, true, true);
+        }
 
         this.testListViewSelections(list_path, instances_info, true, true);
 

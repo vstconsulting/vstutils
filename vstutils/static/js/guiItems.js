@@ -136,7 +136,7 @@ var base_list_table_mixin = {
  * Mixin for gui_entity_{page, page_new, pade_edit, action} components.
  */
 var base_page_type_mixin = {
-    props: ['data', 'view'],
+    props: ['data', 'view', 'opt'],
     template: "#template_entity_page",
     data() {
         return {
@@ -948,7 +948,7 @@ vst_vue_components.items = {
      * Component for buttons wrapper - container, that includes all buttons for current view.
      */
     gui_buttons_row: Vue.component('gui_buttons_row', {
-        props: ['view', 'data'],
+        props: ['view', 'data', 'opt'],
         template: "#template_buttons_row",
         computed: {
             schema() {
@@ -1054,9 +1054,12 @@ vst_vue_components.items = {
      * Component for drop-down list of multi-actions.
      */
     gui_multi_actions: Vue.component('gui_multi_actions', {
-        props: ['instances', 'multi_actions'],
+        props: ['instances', 'multi_actions', 'opt'],
         template: "#template_multi_actions",
         computed: {
+            store_url() {
+              return this.opt.store_url;
+            },
             current_path() {
                 return this.$route.name;
             },
@@ -1067,7 +1070,7 @@ vst_vue_components.items = {
                 return ['btn-primary'];
             },
             selections() {
-                return this.$store.getters.getSelections(this.$route.path.replace(/^\/|\/$/g, ""));
+                return this.$store.getters.getSelections(this.store_url);
             },
             selected() {
                 let count = 0;
@@ -1253,7 +1256,7 @@ vst_vue_components.items = {
      * Base component for content part (area for representation of view data) of 'list' views.
      */
     gui_entity_list: Vue.component('gui_entity_list', {
-        props: ['data', 'view'],
+        props: ['data', 'view', 'opt'],
         template: "#template_entity_list",
         computed: {
             fields() {
@@ -1268,13 +1271,16 @@ vst_vue_components.items = {
      *
      */
     gui_entity_list_header: Vue.component('gui_entity_list_header', {
-        props: ['data', 'view'],
+        props: ['data', 'view', 'opt'],
         template: "#template_entity_header_list",
         computed: {
             filters() {
                 console.log('filters', this.view.schema.filters);
                 return this.view.schema.filters;
-            }
+            },
+            filters_opt() {
+              return $.extend(true, {}, this.opt, {store: 'filters'});
+            },
         },
     }),
     /**
@@ -1282,7 +1288,7 @@ vst_vue_components.items = {
      */
     gui_entity_list_footer: Vue.component('gui_entity_list_footer', {
         mixins: [base_list_table_mixin],
-        props: ['data', 'view'],
+        props: ['data', 'view', 'opt'],
         template: "#template_entity_footer_list",
         computed: {
             schema() {
@@ -1296,11 +1302,14 @@ vst_vue_components.items = {
      */
     gui_list_table: Vue.component('gui_list_table', {
         mixins: [base_list_table_mixin],
-        props: ['instances', 'fields', 'view'],
+        props: ['instances', 'fields', 'view', 'opt'],
         template: "#template_list_table",
         computed: {
+            store_url() {
+              return this.opt.store_url;
+            },
             allSelected() {
-                let selections = this.$store.getters.getSelections(this.$route.path.replace(/^\/|\/$/g, ""));
+                let selections = this.$store.getters.getSelections(this.store_url);
                 for(let item in this.instances) {
                     let instance = this.instances[item];
                     if(!selections[instance.getPkValue()]) {
@@ -1324,7 +1333,7 @@ vst_vue_components.items = {
                     ids[instance.getPkValue()] = !this.allSelected;
                 }
                 this.$store.commit('setSelectionValuesByIds', {
-                    url: this.$route.path.replace(/^\/|\/$/g, ""),
+                    url: this.store_url,
                     ids: ids,
                 });
             },
@@ -1342,12 +1351,15 @@ vst_vue_components.items = {
      */
     gui_list_table_row: Vue.component('gui_list_table_row', {
         mixins: [base_list_table_mixin, table_row_mixin],
-        props: ['instance', 'fields', 'view'],
+        props: ['instance', 'fields', 'view', 'opt'],
         template: "#template_list_table_row",
         computed: {
+            store_url() {
+              return this.opt.store_url;
+            },
             selected: function(){
                 return this.$store.getters.getSelectionById({
-                    url: this.$route.path.replace(/^\/|\/$/g, ""),
+                    url: this.store_url,
                     id: this.instance.getPkValue(),
                 });
             },
@@ -1357,7 +1369,7 @@ vst_vue_components.items = {
                 for(let key in this.fields) {
                     let field = this.fields[key];
 
-                    if(field.options.format == 'choices' || field.options.type == 'choices') {
+                    if(field instanceof guiFields.choices) {
                         classes += " " + addCssClassesToElement(
                             'tr', this.instance.data[field.options.name], field.options.name,
                         );
@@ -1383,7 +1395,7 @@ vst_vue_components.items = {
         methods: {
             toggleSelection() {
                 this.$store.commit('toggleSelectionValue', {
-                    url: this.$route.path.replace(/^\/|\/$/g, ""),
+                    url: this.store_url,
                     id: this.instance.getPkValue(),
                 });
             },
@@ -1610,6 +1622,12 @@ vst_vue_components.items = {
         },
         computed: {
             /**
+             * Property, that returns data of instance.
+             */
+            instance_data() {
+                return this.instance.data
+            },
+            /**
              * Property, that returns fields of instance.
              */
             fields() {
@@ -1622,21 +1640,30 @@ vst_vue_components.items = {
                 return this.instance.queryset.url;
             },
             /**
-             * Property, that returns data, that should be represented in fields.
-             */
-            data_to_represent() {
-                // return this.instance.toRepresent();
-                return this.instance.data;
-            },
-            /**
              * Property, that is responsible for showing/hiding of <select>Add field</select>
              * with field names.
              */
             show_fields_select() {
+                if(this.opt.readOnly) {
+                    return false;
+                }
+
                 return this.opt.hideUnrequired;
             },
         },
         methods: {
+            /**
+             * Method, that defines: hide field or not.
+             * @param {object} field Field object.
+             * @return {boolean}
+             */
+            hideFieldOrNot(field) {
+                if(this.instance_data[field.options.name] !== undefined) {
+                    return false;
+                }
+
+                return this.hidden_store[field.options.name];
+            },
             /**
              * Method, that returns wrapper_opt prop for each field.
              * @param {object} field Field object.
@@ -1645,7 +1672,7 @@ vst_vue_components.items = {
                 let w_opt = $.extend(true, {}, this.opt, {qs_url: this.qs_url});
 
                 if(this.opt.hideUnrequired) {
-                    let hidden = this.hidden_store[field.options.name];
+                    let hidden = this.hideFieldOrNot(field);
                     return $.extend(true, {}, w_opt, {hidden: hidden, hidden_button: true, });
                 }
 
@@ -1678,7 +1705,7 @@ vst_vue_components.items = {
             },
 
             qs_url() {
-                return this.$route.path.replace(/^\/|\/$/g, "");
+                return this.opt.store_url;
             },
 
             data_to_represent() {

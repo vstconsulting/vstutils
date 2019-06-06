@@ -197,8 +197,8 @@ window.qunitTestsArray['guiFields[field].{toInner, toRepresent}()'] = {
                     {
                         input: {test_field: undefined},
                         output: {
-                            toInner: false,
-                            toRepresent: false,
+                            toInner: undefined,
+                            toRepresent: undefined,
                         }
                     },
                     {

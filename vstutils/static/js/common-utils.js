@@ -99,9 +99,6 @@ String.prototype.format = function() {
  */
 String.prototype.format_keys = function() {
     let thisObj = this;
-    //let regex = new RegExp("(?<={).+?(?=})", "g");
-    //let match = thisObj.match(regex)
-    //return match || [];
     let res = thisObj.match(/{([^\}]+)}/g);
 
     if(!res) {
@@ -111,66 +108,6 @@ String.prototype.format_keys = function() {
     return res.map((item) =>{ return item.slice(1, item.length - 1) });
 };
 
-// function addslashes(string) {
-//     return string.replace(/\\/g, '\\\\').
-//     replace(/\u0008/g, '\\b').
-//     replace(/\t/g, '\\t').
-//     replace(/\n/g, '\\n').
-//     replace(/\f/g, '\\f').
-//     //replace(/\r/g, '\\r').
-//     //replace(/\a/g, '\\a').
-//     replace(/\v/g, '\\v').
-//     //replace(/\e/g, '\\e').
-//     replace(/'/g, '\\\'').
-//     replace(/"/g, '\\"');
-// }
-//
-// function stripslashes (str) {
-//     //       discuss at: http://locutus.io/php/stripslashes/
-//     //      original by: Kevin van Zonneveld (http://kvz.io)
-//     //      improved by: Ates Goral (http://magnetiq.com)
-//     //      improved by: marrtins
-//     //      improved by: rezna
-//     //         fixed by: Mick@el
-//     //      bugfixed by: Onno Marsman (https://twitter.com/onnomarsman)
-//     //      bugfixed by: Brett Zamir (http://brett-zamir.me)
-//     //         input by: Rick Waldron
-//     //         input by: Brant Messenger (http://www.brantmessenger.com/)
-//     // reimplemented by: Brett Zamir (http://brett-zamir.me)
-//     //        example 1: stripslashes('Kevin\'s code')
-//     //        returns 1: "Kevin's code"
-//     //        example 2: stripslashes('Kevin\\\'s code')
-//     //        returns 2: "Kevin\'s code"
-//     return (str + '')
-//         .replace(/\\(.?)/g, function (s, n1) {
-//             switch (n1) {
-//                 case '\\':
-//                     return '\\'
-//                 case '0':
-//                     return '\u0000'
-//                 case 't':
-//                     return "\t"
-//                 case 'n':
-//                     return "\n"
-//                 case 'f':
-//                     return "\f"
-//                 //case 'e':
-//                 //  return "\e"
-//                 case 'v':
-//                     return "\v"
-//                 //case 'a':
-//                 //  return "\a"
-//                 case 'b':
-//                     return "\b"
-//                 //case 'r':
-//                 //  return "\r"
-//                 case '':
-//                     return ''
-//                 default:
-//                     return n1
-//             }
-//         })
-// }
 /**
  * Function, that removes spaces symbols from the begging and from the end of string.
  * @param {string} s.
@@ -857,7 +794,8 @@ function findClosestPath(paths, current_path) {
     }
 
     matches = matches.sort((a, b) => {
-        return a.match - b.match;
+        // return a.match - b.match;
+        return a.match - b.match + b.path.split("/").length - a.path.split("/").length;
     });
 
     if(matches.last && matches.last.path && matches.last.match > 0) {

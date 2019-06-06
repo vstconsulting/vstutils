@@ -256,7 +256,9 @@ guiFields.boolean = class BooleanField extends guiFields.base {
             return stringToBoolean(value);
         }
 
-        return Boolean(value);
+        if(typeof value == 'number') {
+            return Boolean(value);
+        }
     }
 
     /**
@@ -649,16 +651,25 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
             return;
         }
 
-        let val = Number(value);
-        if(isNaN(val)) {
-            throw "Error in time_interval.toInner()";
-        }
-
-        if(val / 1000 < 1 ) {
-            return val * 1000;
+        if(typeof value == 'object' && value.value) {
+            return value.value;
         }
 
         return value;
+    }
+    /**
+     * Method, that converse time in seconds to time in milliseconds.
+     * @param {object} data Object with fields values.
+     * @private
+     */
+    _toInner(data={}) {
+         let value = data[this.options.name];
+
+        if(!value) {
+            return;
+        }
+
+        return value * 1000;
     }
     /**
      * Redefinition of base guiField method toRepresent.
@@ -671,11 +682,11 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
             return;
         }
 
-        if(value / 1000 > 1 ) {
-            return value / 1000;
+        if(typeof value == 'object' && value.represent_value) {
+            return value.represent_value;
         }
 
-        return value;
+        return value / 1000;
     };
     /**
      * Redefinition of base guiField static property 'mixins'.

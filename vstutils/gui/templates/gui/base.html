@@ -415,7 +415,11 @@
 
                         <!-- Main Footer -->
                        <div id="main_footer_wrapper">
-                            <main_footer></main_footer>
+                            <main_footer>
+                                <template v-slot:footer_buttons>
+                                    {% block footer_buttons %}{% endblock %}
+                                </template>
+                            </main_footer>
                        </div>
                         <!-- /Main Footer -->
                     </div>
