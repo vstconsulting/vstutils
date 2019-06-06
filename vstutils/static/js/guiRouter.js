@@ -225,7 +225,7 @@ var page_with_data_mixin = {
          * @param {object} opt Object with arguments for current method.
          */
         getRedirectUrl(opt) {
-            return this.qs_url.split("/").slice(0, -1).join("/");
+            return this.url.replace("/edit", "").replace("/new", "").split("/").slice(0, -1).join("/");
         },
     },
 };
@@ -244,8 +244,24 @@ var editable_page_mixin = {
          * @param {string} url QuerySet URL.
          */
         setQuerySetInSandBox(view, url) {
-            let qs = this.getQuerySet(view, url);
-            let sandbox_qs = qs.copy();
+            let page_view = view;
+
+            try {
+                page_view = this.$store.getters.getViews[view.schema.path.replace('/edit', '')];
+            } catch(e) {}
+
+            let qs = this.getQuerySet(page_view, url);
+            let sandbox_qs;
+
+            if(qs.model.name == view.objects.model.name) {
+                sandbox_qs = qs.copy();
+            } else {
+                sandbox_qs = view.objects.clone({
+                    use_prefetch: true,
+                    url: url.replace(/^\/|\/$/g, ""),
+                });
+            }
+
             this.$store.commit('setQuerySetInSandBox', {
                 url: sandbox_qs.url,
                 queryset: sandbox_qs,
@@ -333,6 +349,10 @@ var editable_page_mixin = {
                     if(value !== undefined && value !== null) {
                         valid_data[key] = value;
                     }
+                }
+
+                if(this.getValidDataAdditional) {
+                    valid_data = this.getValidDataAdditional(valid_data);
                 }
 
                 return valid_data;
@@ -504,6 +524,14 @@ var routesComponentsTemplates = {
          */
         computed: {
             /**
+             * Property, that returns object with options for child components.
+             */
+            opt() {
+                return {
+                    store_url: this.qs_url.replace(/^\/|\/$/g, ""),
+                };
+            },
+            /**
              * Name of component, that represents page's content body.
              */
             content_body_component: function() {
@@ -632,11 +660,11 @@ var routesComponentsTemplates = {
 
                 // tries to find appropriate redirect path in internal paths
                 let paths = Object.values(app.views).filter(item => {
-                        if(item.schema.type == 'page' &&
-                            item.schema.path.replace(/^\/|\/$/g, "").split("/").last == "{" + pk_key + "}") {
-                            return item;
-                        }
-                    }).map(item => item.schema.path);
+                    if(item.schema.type == 'page' &&
+                        item.schema.path.replace(/^\/|\/$/g, "").split("/").last == "{" + pk_key + "}") {
+                        return item;
+                    }
+                }).map(item => item.schema.path);
 
 
                 redirect_path = findClosestPath(paths, this.$route.name);
@@ -657,7 +685,6 @@ var routesComponentsTemplates = {
                 }).map(item => item.schema.path)[0];
 
                 if(redirect_path) {
-                    // return redirect_path.format({pk: pk_value}).replace(/\/$/g, "");
                     let f_obj = {};
 
                     f_obj[path_pk_key] = pk_value;
@@ -1383,7 +1410,8 @@ var routesComponentsTemplates = {
              * @param {object} opt Object with arguments for current method.
              */
             getRedirectUrl(opt) {
-                return [this.qs_url, opt.instance.getPkValue()].join("/");
+                // return [this.qs_url, opt.instance.getPkValue()].join("/");
+                return [this.url.replace('/edit','').replace('/new', ''), opt.instance.getPkValue()].join("/");
             },
         },
     },
@@ -1435,12 +1463,9 @@ var routesComponentsTemplates = {
              */
             fetchData() {
                 this.initLoading();
-                this.getInstance(this.view, this.qs_url).then(instance => {
-                    this.setAndGetInstanceFromSandBox(this.view, this.qs_url).then(instance => {
-                        this.setLoadingSuccessful();
-                        this.data.instance = instance;
-
-                    });
+                this.setAndGetInstanceFromSandBox(this.view, this.qs_url).then(instance => {
+                    this.setLoadingSuccessful();
+                    this.data.instance = instance;
                 }).catch(error => {
                     this.setLoadingError(error);
                     debugger;
@@ -1453,7 +1478,6 @@ var routesComponentsTemplates = {
              * Method gets instance data, validates it and sends API request.
              */
             saveInstance() {
-                // debugger;
                 let data = this.getValidData();
                 if(!data) {
                     // the code line below is needed for tests.
@@ -1519,7 +1543,7 @@ var routesComponentsTemplates = {
              * @param {object} opt Object with arguments for current method.
              */
             getRedirectUrl(opt) {
-                let url_parts = this.qs_url.split("/");
+                let url_parts = this.url.replace("/edit", "").replace("/new", "").split("/");
                 url_parts[url_parts.length - 1] = opt.instance.getPkValue();
                 return url_parts.join("/");
             },
@@ -1586,7 +1610,7 @@ var routesComponentsTemplates = {
                 let parent_paths = this.getParentPaths(this.$route.name, this.url);
                 let view = this.$store.getters.getView(parent_paths[parent_paths.length - 1].path);
                 let instance = view.objects.model.getInstance(opt.data, view.objects);
-                let url_parts = this.qs_url.split("/").slice(0, -2);
+                let url_parts = this.url.replace("/edit", "").replace("/new", "").split("/").slice(0, -2);
                 url_parts.push(instance.getPkValue());
                 return url_parts.join("/");
             },

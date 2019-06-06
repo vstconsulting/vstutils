@@ -2122,6 +2122,31 @@ var gui_fields_mixins = {
             toggleValue() {
                 this.setValueInStore(!this.value);
             },
+            /**
+             * Method, that sets some value (default or false) to current boolean field,
+             * if it is not hidden and it's value === undefined.
+             * This is needed, because without this operation,
+             * user will see that value of field is 'false', but in store value will be equal to undefined.
+             */
+            initBooleanValue() {
+                if(!this.is_hidden && this.value === undefined) {
+                    let value = false;
+
+                    if(this.field.options.default !== undefined) {
+                        value = this.field.options.default;
+                    }
+
+                    this.setValueInStore(value);
+                }
+            },
+        },
+        mounted() {
+            this.initBooleanValue();
+        },
+        watch: {
+            'is_hidden': function(is_hidden) {
+                this.initBooleanValue();
+            }
         },
         components: {
             field_content_readonly: {
@@ -2762,6 +2787,25 @@ var gui_fields_mixins = {
     },
 
     time_interval: {
+        methods: {
+            /**
+             * Redefinition of 'handleValue' method of base guiField.
+             * @param {object} data Object with values of current field
+             * and fields from the same fields_wrapper.
+             */
+            handleValue(data={}) {
+                let value = data[this.field.options.name];
+
+                if(value === undefined) {
+                    return;
+                }
+
+                return {
+                    value: this.field._toInner(data),
+                    represent_value: value,
+                };
+            },
+        },
         components: {
             field_content_edit: {
                 mixins: [base_field_content_edit_mixin, integer_field_content_mixin],

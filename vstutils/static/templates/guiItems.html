@@ -8,7 +8,6 @@
 
         <preloader :show="loading"></preloader>
 
-        <!--<div class="content-wrapper" v-if="error">-->
         <div class="content-wrapper-2" v-if="error">
             <section class="content-header">
                 <div class="container-fluid">
@@ -50,7 +49,6 @@
             </section>
         </div>
 
-        <!--<div class="content-wrapper" v-if="response">-->
         <div class="content-wrapper-2" v-if="response">
             <section class="content-header">
                 <div class="container-fluid">
@@ -73,7 +71,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-12">
-                            <gui_buttons_row :view="view" :data="data"></gui_buttons_row>
+                            <gui_buttons_row :view="view" :data="data" :opt="opt"></gui_buttons_row>
                         </div>
                     </div>
                     <br>
@@ -81,7 +79,7 @@
                         <section class="col-lg-12">
                             <div class="card card-info">
                                 <div class="card-header with-border" style="min-height: 50px;">
-                                    <component :is="content_header_component" :data="data" :view="view"></component>
+                                    <component :is="content_header_component" :data="data" :view="view" :opt="opt"></component>
 
                                     <div class="card-tools pull-right" v-if="card_collapsed_button">
                                         <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
@@ -93,16 +91,16 @@
                                 </div>
                                 <transition name="fade">
                                     <div class="card-body" v-show="!card_collapsed">
-                                        <component :is="content_body_component" :data="data" :view="view"></component>
+                                        <component :is="content_body_component" :data="data" :view="view" :opt="opt"></component>
                                     </div>
                                 </transition>
                                 <transition name="fade">
                                     <div class="card-footer clearfix" v-if="content_footer_component && !card_collapsed">
-                                        <component :is="content_footer_component" :data="data" :view="view"></component>
+                                        <component :is="content_footer_component" :data="data" :view="view" :opt="opt"></component>
                                     </div>
                                 </transition>
                             </div>
-                            <component :is="content_additional" :data="data" :view="view" v-if="content_additional">
+                            <component :is="content_additional" :data="data" :view="view" :opt="opt" v-if="content_additional">
                             </component>
                         </section>
                     </div>
@@ -487,7 +485,7 @@
             <p class="text-center">List is empty.</p>
         </template>
         <template v-else>
-            <gui_list_table :instances="data.instances" :fields="fields" :view="view"></gui_list_table>
+            <gui_list_table :instances="data.instances" :fields="fields" :view="view" :opt="opt"></gui_list_table>
         </template>
     </div>
 </script>
@@ -495,7 +493,7 @@
 <!-- Base template of content_component_footer (Vue component - <gui_entity_footer_list></gui_entity_footer_list>) of view with 'list' type -->
 <script type="text/x-template" id="template_entity_footer_list">
     <div>
-        <gui_multi_actions :instances="data.instances" :multi_actions="schema.multi_actions" v-if="multi_actions_exist"></gui_multi_actions>
+        <gui_multi_actions :instances="data.instances" :multi_actions="schema.multi_actions" :opt="opt" v-if="multi_actions_exist"></gui_multi_actions>
         <pagination :options="data.pagination"></pagination>
     </div>
 </script>
@@ -503,7 +501,7 @@
 <!-- Base component for content_header of list Views -->
 <script type="text/x-template" id="template_entity_header_list">
     <div>
-        <gui_filters_modal :opt="{store: 'filters'}" :view="view" :data="data"></gui_filters_modal>
+        <gui_filters_modal :opt="filters_opt" :view="view" :data="data"></gui_filters_modal>
         <pagination :options="data.pagination"></pagination>
     </div>
 </script>
@@ -567,7 +565,7 @@
         </tr>
         </thead>
         <tbody>
-        <gui_list_table_row v-for="instance in instances" :instance="instance" :fields="fields" :view="view"></gui_list_table_row>
+        <gui_list_table_row v-for="instance in instances" :instance="instance" :fields="fields" :view="view" :opt="opt"></gui_list_table_row>
         </tbody>
     </table>
 </script>
@@ -742,7 +740,6 @@
                     v-for="field in fields"
                     :field="field"
                     :is="'field_' + field.options.format"
-                    v-model="data_to_represent[field.options.name]"
                     v-if="!(opt.hideReadOnly && field.options.readOnly)"
                     :wrapper_opt="getFieldWrapperOpt(field)"
                     @toggleHidden="toggleHidden"

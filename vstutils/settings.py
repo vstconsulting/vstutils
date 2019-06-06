@@ -7,6 +7,7 @@ from warnings import warn
 from django.contrib import admin
 from django.utils.functional import lazy
 from drf_yasg import errors
+import rest_framework
 import pyximport
 pyximport.install()
 from .section import ConfigParser, Section, get_file_value
@@ -270,6 +271,7 @@ if BASE_DIR != VST_PROJECT_DIR:  # nocv
 STATIC_FILES_FOLDERS.append(os.path.join(VSTUTILS_DIR, 'static'))
 STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(admin.__file__), 'static'))
 STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(errors.__file__), 'static'))
+STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(rest_framework.__file__), 'static'))
 if LOCALRUN:
     STATICFILES_DIRS = STATIC_FILES_FOLDERS
 
