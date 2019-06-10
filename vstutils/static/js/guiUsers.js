@@ -198,3 +198,54 @@ tabSignal.connect('models[User].fields.beforeInit', fields => {
 });
 
 tabSignal.connect('allViews.inited', addProfileViews);
+
+/**
+ * Mixin for a view that is supposed to be used for creating/editing some user's password.
+ */
+var view_with_user_password_mixin = {
+    methods: {
+        /**
+         * Method, that generates random password and sets it to the 'password' and 'password2' fields.
+         */
+        generate_passwordInstance() {
+            let data = $.extend(true, {}, this.getQuerySetFromSandBox(this.view, this.qs_url).cache.data);
+            let password = randomString(8);
+
+            ['password', 'password2'].forEach(field => {
+                data[field] = password;
+            });
+
+            this.$store.commit('setViewInstanceData', {
+                store: 'sandbox',
+                url: this.qs_url.replace(/^\/|\/$/g, ""),
+                data: data,
+            });
+        },
+    },
+};
+
+/**
+ * Function, that creates signals, that add to the user views opportunity to generate random password.
+ * @param {string} path Path os user view.
+ */
+function addChangePasswordOperationToView(path) {
+    tabSignal.connect('views[' + path + '].afterInit', obj => {
+        obj.view.mixins.push(view_with_user_password_mixin);
+
+    });
+
+    tabSignal.connect("views[" + path + "].created", obj => {
+        obj.view.schema.operations.generate_password = {
+            name: 'generate_password',
+        };
+    });
+}
+
+/**
+ * Adds to following views opportunity to generate random users password.
+ */
+[
+    '/user/new/',
+    '/user/{' + path_pk_key + '}/change_password/',
+    '/profile/change_password/'
+].forEach(addChangePasswordOperationToView);
