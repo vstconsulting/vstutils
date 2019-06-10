@@ -8,6 +8,7 @@
 window.qunitTestsArray['guiViews[user]'] = {
     test: function() {
         let list_path = '/user/';
+        let page_path = list_path + '{' + path_pk_key +'}/';
         let instances_info = guiTests.getEmptyInstancesInfo();
 
         /////////////////////////////////////////////////////////////////
@@ -42,9 +43,9 @@ window.qunitTestsArray['guiViews[user]'] = {
         }, true);
 
         ////////////////////////////////////////////////////////////////////////////////
-        // Tests for /user/{pk}/copy/ views
+        // Tests for /user/{pk}/copy/ view
         ////////////////////////////////////////////////////////////////////////////////
-        guiTests.copyInstanceFromPageView(list_path + "{" + path_pk_key +"}/", instances_info, {
+        guiTests.copyInstanceFromPageView(page_path, instances_info, {
             is_valid: true,
             remove: true,
             data: {
@@ -52,6 +53,17 @@ window.qunitTestsArray['guiViews[user]'] = {
                 is_active: {value: true},
             }
         });
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Tests for /user/{pk}/change_password/ view
+        ////////////////////////////////////////////////////////////////////////////////
+        guiTests.openPage(page_path, instances_info.url_params, true);
+        guiTests.clickAndWaitRedirect('.btn-action-change_password', true);
+        guiTests.click(".btn-operation-generate_password");
+        guiTests.setValues(page_path + 'change_password/', {
+            old_password: {value: 'password'},
+        });
+        guiTests.clickAndWaitRedirect('.btn-operation-execute', true);
 
         ////////////////////////////////////////////////////////////////////////////////
         // Test, that deletes created during tests user instance.

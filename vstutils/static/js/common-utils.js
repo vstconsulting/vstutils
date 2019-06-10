@@ -410,6 +410,39 @@ function allPropertiesIsObjects(obj) {
     return true;
 }
 
+/**
+ * Function, that converts instance of Array​Buffer to Base64.
+ * @param {array} buffer Instance of Array​Buffer.
+ * @return {string}
+ */
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+
+    for(let i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+
+    return window.btoa( binary );
+}
+
+/**
+ * Function, that forms random string and returns it.
+ * @param {number} length String's length.
+ * @param {string} abc String with chars, that can be used in random string.
+ * @return {string}
+ */
+function randomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489") {
+    let res = "";
+
+    for(let i =0; i< length; i++) {
+        res += abc[Math.floor(Math.random()*abc.length)];
+    }
+
+    return res;
+}
+
 /*
  * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
  */
