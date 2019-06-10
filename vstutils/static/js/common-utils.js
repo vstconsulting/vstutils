@@ -410,6 +410,23 @@ function allPropertiesIsObjects(obj) {
     return true;
 }
 
+/**
+ * Function, that converts instance of Array​Buffer to Base64.
+ * @param {array} buffer Instance of Array​Buffer.
+ * @return {string}
+ */
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
+
+    for(let i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+
+    return window.btoa( binary );
+}
+
 /*
  * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
  */

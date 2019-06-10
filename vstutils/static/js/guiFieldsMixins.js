@@ -2274,26 +2274,54 @@ var gui_fields_mixins = {
     },
 
     file: {
+        data() {
+            return {
+                file_reader_method: 'readAsText',
+                file_obj: undefined,
+            };
+        },
+        created() {
+          this.file_obj = {};
+        },
         methods: {
+            cleanValue() {
+                this.setValueInStore();
+                this.file_obj = {};
+            },
             /**
              * Method, that reads content of selected file
              * and sets field value equal to this content.
              */
             readFile: function(event) {
-                for (let i = 0; i < event.target.files.length; i++) {
-                    if (event.target.files[i].size > 1024 * 1024) {
-                        guiPopUp.error("File is too large");
-                        console.log("File is too large " + event.target.files[i].size);
-                        continue;
-                    }
+                let file = event.target.files[0];
 
-                    let reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.setValueInStore(e.target.result);
-                        $("#file_reader_input").val("");
-                    };
-                    reader.readAsText(event.target.files[i]);
+                if(!file) {
+                    return;
                 }
+
+                if(file.size > 1024 * 1024) {
+                    guiPopUp.error("File is too large");
+                    console.log("File is too large " + file.size);
+                    return;
+                }
+
+                this.file_obj = file;
+
+                let reader = new FileReader();
+
+                reader.onload = this.readFileOnLoadCallback;
+
+                reader[this.file_reader_method](file);
+            },
+            /**
+             * Method - callback for onLoad event of FileReader.
+             * @param {object} event Event object.
+             */
+            readFileOnLoadCallback: function(event) {
+                this.setValueInStore(event.target.result);
+
+                let el = $(this.$el).find("#file_reader_input");
+                $(el).val("");
             },
         },
         components: {
@@ -2313,7 +2341,7 @@ var gui_fields_mixins = {
                         mixins: [base_field_button_mixin, file_field_button_mixin],
                         data() {
                             return {
-                                icon_classes: ['fa', 'fa-eye-slash'],
+                                icon_classes: ['fa', 'fa-minus'],
                                 event_handler: 'hideField',
                                 help_text: 'Hide field',
                             }
@@ -2334,6 +2362,72 @@ var gui_fields_mixins = {
                         },
                     }
                 }
+            },
+        },
+    },
+
+    base64file: {
+        data() {
+            return {
+                file_reader_method: 'readAsArrayBuffer',
+            };
+        },
+        watch: {
+            'file_obj': function(file) {
+                let el = $(this.$el).find("#file_path_input");
+
+                if(file && file.name) {
+                    $(el).text(file.name);
+                } else {
+                    $(el).text("No file selected");
+                }
+            }
+        },
+        methods: {
+            handleValue(data={}) {
+                return this.field.toBase64(data);
+            },
+        },
+        components: {
+            field_content_edit: {
+                mixins: [base_field_content_edit_mixin],
+                template: "#template_field_content_edit_base64file",
+                created() {
+                  this.styles_dict['minHeight'] = '38px';
+                },
+                components: {
+                    field_clear_button: {
+                        mixins: [base_field_button_mixin],
+                    },
+                    field_hidden_button: {
+                        mixins: [base_field_button_mixin],
+                        data() {
+                            return {
+                                icon_classes: ['fa', 'fa-minus'],
+                                event_handler: 'hideField',
+                                help_text: 'Hide field',
+                            }
+                        },
+                    },
+                    /**
+                     * Component for 'open file' button.
+                     */
+                    field_read_file_button: {
+                        mixins: [base_field_button_mixin],
+                        data() {
+                            return {
+                                wrapper_classes: ['input-group-append'],
+                                wrapper_styles: {},
+                                span_classes: ['btn', 'input-group-text', 'textfile'],
+                                icon_styles: {},
+                                icon_classes: ['fa', 'fa-file-text-o'],
+                                event_handler: 'readFile',
+                                help_text: 'Open file',
+                            }
+                        },
+                        template: "#template_field_part_button_readFile",
+                    },
+                },
             },
         },
     },

@@ -399,7 +399,6 @@ guiFields.password = class PasswordField extends guiFields.string {
 /**
  * File guiField class.
  */
-// guiFields.file = class FileField extends guiFields.base {
 guiFields.file = class FileField extends guiFields.textarea {
     /**
      * Redefinition of base guiField static property 'mixins'.
@@ -413,6 +412,33 @@ guiFields.file = class FileField extends guiFields.textarea {
  * Secretfile guiField class.
  */
 guiFields.secretfile = class SecretFileField extends guiFields.file {};
+
+/**
+ * Base64File guiField class.
+ */
+guiFields.base64file = class Base64FileField extends guiFields.file {
+    /**
+     * Redefinition of base guiField static property 'mixins'.
+     */
+    static get mixins() {
+        return super.mixins.concat(gui_fields_mixins.base64file);
+    }
+
+    /**
+     * Method, that converts field's value to base64.
+     * It's supposed that value of current field is an instance of ArrayBuffer.
+     * @param {object} data Object with values of current field
+     * and fields from the same fields wrapper.
+     * For example, from the same Model Instance.
+     */
+    toBase64(data={}) {
+        let value = data[this.options.name];
+
+        if(value !== undefined) {
+            return arrayBufferToBase64(value);
+        }
+    }
+};
 
 /**
  * Text paragraph guiField class.
@@ -663,7 +689,7 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
      * @private
      */
     _toInner(data={}) {
-         let value = data[this.options.name];
+        let value = data[this.options.name];
 
         if(!value) {
             return;
