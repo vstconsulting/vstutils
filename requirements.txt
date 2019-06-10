@@ -2,7 +2,7 @@
 configparser==3.7.4
 pytimeparse==1.1.8
 six==1.12
-pyyaml==3.13
+pyyaml>=3.13,<=5.2
 django-cors-headers==2.4.0
 
 # REST API packages
@@ -10,5 +10,5 @@ djangorestframework==3.9.3
 django-filter==2.1.0; python_version>'3.4'
 django-filter==1.1.0; python_version<'3.0'
 django-crispy-forms==1.7.2
-# uWSGI==2.0.17.1
+# uWSGI==2.0.18
 pyuwsgi==2.0.18

@@ -12,10 +12,10 @@ from ...utils import raise_context
 
 python_exec_dir = os.path.dirname(sys.executable)
 python_subexec_dir = '/usr/local/bin'
-_uwsgi_default_path = os.path.join(python_exec_dir, 'pyuwsgi')
-_uwsgi_default_path_alt = os.path.join(python_exec_dir, 'uwsgi')
-_uwsgi_default_path_alt2 = os.path.join(python_subexec_dir, 'pyuwsgi')
-_uwsgi_default_path_alt3 = os.path.join(python_subexec_dir, 'uwsgi')
+_uwsgi_default_path = os.path.join(python_exec_dir, 'uwsgi')
+_uwsgi_default_path_alt = os.path.join(python_exec_dir, 'pyuwsgi')
+_uwsgi_default_path_alt2 = os.path.join(python_subexec_dir, 'uwsgi')
+_uwsgi_default_path_alt3 = os.path.join(python_subexec_dir, 'pyuwsgi')
 if not os.path.exists(_uwsgi_default_path) and os.path.exists(_uwsgi_default_path_alt):
     _uwsgi_default_path = _uwsgi_default_path_alt
 elif os.path.exists(_uwsgi_default_path_alt2):
