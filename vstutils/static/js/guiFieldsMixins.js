@@ -214,7 +214,7 @@ var base_field_content_edit_mixin = {
             mixins: [base_field_button_mixin],
             data() {
                 return {
-                    icon_classes: ['fa', 'fa-eye-slash'],
+                    icon_classes: ['fa', 'fa-minus'],
                     event_handler: 'hideField',
                     help_text: 'Hide field',
                 }
@@ -2339,12 +2339,73 @@ var gui_fields_mixins = {
     },
 
     password: {
+        methods: {
+            copyValueToClipBoard() {
+                let value = this.value;
+                let field_name = this.field.options.title || this.field.options.name;
+
+                if(!value) {
+                    value = '';
+                }
+
+                try {
+                    navigator.clipboard.writeText(value).then(() => {
+                        guiPopUp.success("Value of <b>" + field_name + "</b> field was successfully copied to clipboard.");
+                    }).catch(error => {
+                        throw error;
+                    });
+                } catch(e) {
+                    console.error(e);
+                    guiPopUp.error("Value of <b>" + field_name + "</b> field was not copied to clipboard.");
+                }
+            },
+        },
         components: {
             field_content_readonly: {
                 mixins: [base_field_content_readonly_mixin, password_field_content_mixin],
             },
             field_content_edit: {
                 mixins: [base_field_content_edit_mixin, password_field_content_mixin],
+                template: '#template_field_content_edit_password',
+                methods: {
+                    showValue() {
+                        this.input_type = this.input_type == 'password' ? 'text' : 'password';
+                    },
+                },
+                components: {
+                    field_show_value_button: {
+                        mixins: [base_field_button_mixin],
+                        props: ['field', 'input_type'],
+                        data() {
+                            return {
+                                icon_classes: ['fa', 'fa-eye'],
+                                event_handler: 'showValue',
+                                help_text: "Show field's value",
+                            }
+                        },
+                        watch: {
+                            'input_type': function(type) {
+                                if(type == 'text') {
+                                    this.icon_classes = ['fa', 'fa-eye-slash'];
+                                    this.help_text = "Hide field's value";
+                                } else {
+                                    this.icon_classes = ['fa', 'fa-eye'];
+                                    this.help_text = "Show field's value";
+                                }
+                            }
+                        },
+                    },
+                    field_copy_value_button: {
+                        mixins: [base_field_button_mixin],
+                        data() {
+                            return {
+                                icon_classes: ['fa', 'fa-files-o'],
+                                event_handler: 'copyValueToClipBoard',
+                                help_text: "Copy field's value to clipboard",
+                            }
+                        },
+                    },
+                },
             },
         },
     },

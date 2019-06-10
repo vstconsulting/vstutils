@@ -1,19 +1,3 @@
-/**
- * Function, that forms random string and returns it.
- * @param {number} length String's length.
- * @param {string} abc String with chars, that can be used in random string.
- * @return {string}
- */
-function randomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489") {
-    let res = "";
-
-    for(let i =0; i< length; i++) {
-        res += abc[Math.floor(Math.random()*abc.length)];
-    }
-
-    return res;
-}
-
 guiLocalSettings.setAsTmp('page_update_interval', 600);
 // guiLocalSettings.get('guiApi.real_query_timeout', 1200)
 
