@@ -912,4 +912,4 @@ var current_view = new CurrentView();
  * - /user/{id}/.
  * It is supposed, that OpenAPI schema will use 'path_pk_key' value as pk_key for 3rd level paths.
  */
-var path_pk_key = 'pk';
+var path_pk_key = 'id';

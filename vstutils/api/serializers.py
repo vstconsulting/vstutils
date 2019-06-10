@@ -91,6 +91,7 @@ class UserSerializer(VSTSerializer):
                   'is_staff',
                   'email',)
         read_only_fields = ('is_superuser',)
+        ref_name = 'User'
 
     def create(self, data):
         if not self.context['request'].user.is_staff:
