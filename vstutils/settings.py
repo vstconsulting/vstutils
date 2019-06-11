@@ -309,6 +309,8 @@ class DBSectionConfig(BackendsSectionConfig):
     }
     types_map = {
         'conn_max_age': BackendsSectionConfig.int_seconds,
+        'atomic_requests': BackendsSectionConfig.bool,
+        'autocommit': BackendsSectionConfig.bool,
         'options.timeout': BackendsSectionConfig.int_seconds,
         'options.connect_timeout': BackendsSectionConfig.int_seconds,
         'options.read_timeout': BackendsSectionConfig.int_seconds,
