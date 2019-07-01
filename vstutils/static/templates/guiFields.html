@@ -5,7 +5,7 @@
 -->
 <!-- label of guiField -->
 <script type="text/x-template" id="template_field_part_label">
-    <label :class="classes" :style="styles">{{ field.options.title || field.options.name | capitalize | split }}</label>
+    <label :id="label_id" :class="classes" :style="styles">{{ field.options.title || field.options.name | capitalize | split }}</label>
 </script>
 
 <!-- base button of guiField -->
@@ -21,7 +21,7 @@
 <!-- default content (value input area) of base readOnly field -->
 <script type="text/x-template" id="template_field_content_readonly_base">
     <div class="input-group">
-        <input :type="input_type" :class="classes" :style="styles" :value="value" disabled>
+        <input :type="input_type" :class="classes" :style="styles" :value="value" disabled :aria-labelledby="label_id" :aria-label="aria_label">
     </div>
 </script>
 
@@ -32,6 +32,7 @@
                @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
                :min="attrs['min']" :max="attrs['max']" :required="attrs['required']"
                :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+               :aria-labelledby="label_id" :aria-label="aria_label"
         >
 
         <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
@@ -68,6 +69,7 @@
                @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
                :min="attrs['min']" :max="attrs['max']" :required="attrs['required']"
                :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+               :aria-labelledby="label_id" :aria-label="aria_label"
         >
 
         <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
@@ -97,6 +99,7 @@
          onselectstart="return false"
          onmousedown="return false"
          style="cursor: not-allowed!important; background-color: #eaedf0;"
+         :aria-labelledby="label_id" :aria-label="aria_label"
     >
         <div class="ico-on fa fa-toggle-on" style="cursor: not-allowed!important;" ></div>
         <div class="ico-off fa  fa-toggle-off" style="cursor: not-allowed!important;" ></div>
@@ -112,6 +115,7 @@
              onselectstart="return false"
              onmousedown="return false"
              style="cursor: pointer;"
+             :aria-labelledby="label_id" :aria-label="aria_label"
         >
             <div class="ico-on fa fa-toggle-on" ></div>
             <div class="ico-off fa  fa-toggle-off" ></div>
@@ -137,13 +141,13 @@
 -->
 <!-- content (value input area) of choices editable field -->
 <script type="text/x-template" id="template_field_content_edit_choices">
-    <select :class="classes" :style="styles" :value="value"></select>
+    <select :class="classes" :style="styles" :value="value" :aria-labelledby="label_id" :aria-label="aria_label"></select>
 </script>
 
 <!-- content (value input area) of choices readOnly field -->
 <script type="text/x-template" id="template_field_content_readonly_choices">
     <div class="input-group">
-        <input :type="input_type" :class="classes" :style="styles" :value="value" disabled>
+        <input :type="input_type" :class="classes" :style="styles" :value="value" disabled :aria-labelledby="label_id" :aria-label="aria_label">
     </div>
 </script>
 <!--
@@ -160,7 +164,8 @@
 <script type="text/x-template" id="template_field_content_edit_autocomplete">
     <div class="input-group">
         <input type="text" :class="classes" :style="styles"
-               :value="val" @blur="setValueByHandsInStore($event.target.value)">
+               :value="val" @blur="setValueByHandsInStore($event.target.value)"
+               :aria-labelledby="label_id" :aria-label="aria_label">
 
         <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
 
@@ -184,6 +189,7 @@
     <div class="input-group">
         <textarea :value="value" rows="3" cols="50"
                   :class="classes" :style="styles"  disabled
+                  :aria-labelledby="label_id" :aria-label="aria_label"
         ></textarea>
     </div>
 </script>
@@ -195,6 +201,7 @@
                   @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
                   rows="3" cols="50" :class="classes" :style="styles"
                   :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+                  :aria-labelledby="label_id" :aria-label="aria_label"
         ></textarea>
     </div>
 </script>
@@ -220,6 +227,7 @@
         <textarea :value="value" @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
                   placeholder='Enter value'  :class="classes" :style="styles"
                   :required="attrs['required']" :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
+                  :aria-labelledby="label_id" :aria-label="aria_label"
         ></textarea>
     </div>
 </script>
@@ -229,7 +237,7 @@
     <div :class="wrapper_classes" :style="wrapper_styles"
          data-toggle="tooltip" :title="help_text">
             <span :class="span_classes" :style="span_styles" @change="eventHandler">
-                <input type='file' class='input-file' id="file_reader_input">
+                <input type='file' class='input-file' id="file_reader_input" :aria-labelledby="label_id" :aria-label="aria_label">
                 <span :class="icon_classes" :style="icon_styles"></span>
             </span>
     </div>
@@ -246,7 +254,7 @@
 -->
 <script type="text/x-template" id="template_field_content_edit_base64file">
     <div class="input-group">
-        <p id="file_path_input" :class="classes" :style="styles"></p>
+        <p id="file_path_input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
 
         <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
 
@@ -268,7 +276,7 @@
 <!-- content (value input area) of text_paragraph readOnly field -->
 <script type="text/x-template" id="template_field_content_readonly_text_paragraph">
     <div :class="classes" :style="styles">
-        <p> {{ value }} </p>
+        <p :aria-labelledby="label_id" :aria-label="aria_label"> {{ value }} </p>
     </div>
 </script>
 <!--
@@ -283,7 +291,7 @@
 -->
 <!-- content (value input area) of plain_text readOnly field -->
 <script type="text/x-template" id="template_field_content_readonly_plain_text">
-    <div :class="classes" :style="styles" v-html="value"></div>
+    <div :class="classes" :style="styles" v-html="value" :aria-labelledby="label_id" :aria-label="aria_label"></div>
 </script>
 <!--
    EndBlock of PLAIN_TEXT guiField's components -
@@ -300,6 +308,7 @@
     <div class="input-group">
         <input type="text" :class="classes" :style="styles" :required="attrs['required']"
                :value="value" @blur="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
+               :aria-labelledby="label_id" :aria-label="aria_label"
         >
 
         <field_uptime_down_button :field="field" @callDoDecrease="$emit('proxyEvent', 'callDoDecrease')" @resetIncrement="$emit('proxyEvent', 'resetIncrement')"></field_uptime_down_button>
@@ -337,7 +346,7 @@
 <script type="text/x-template" id="template_field_crontab_form_element">
     <div class="form-group col-lg-3 col-xs-12 col-md-6 col-sm-6">
         <div class="btn-group" role="group" >
-            <button type="button"  class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <button type="button"  class="btn btn-default dropdown-toggle" :aria-label="options.title" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 {{ options.title | capitalize }}
                 <span class="caret"></span>
             </button>
@@ -353,7 +362,7 @@
 
         <div class="control-label " style="margin-top:15px;">
             <button class="btn btn-default" v-for="el in values" :class="is_selected(el)"
-                    :style="styles" @click="toggleModelValue(options.name, el.number)">
+                    :style="styles" @click="toggleModelValue(options.name, el.number)" :aria-label="getLabel(options, el)">
                 {{ getLabel(options, el) }}
             </button>
         </div>
@@ -367,6 +376,7 @@
                 <div class="input-group">
                     <input type="text" :class="classes" :style="styles" :required="attrs['required']"
                            :value="value" @blur="updateValue($event.target.value)"
+                           :aria-labelledby="label_id" :aria-label="aria_label"
                     >
 
                     <field_toggle_crontab_button :field="field" @toggleCrontab="toggleCrontab"></field_toggle_crontab_button>
@@ -395,7 +405,7 @@
 -->
 <!-- content (value input area) of json editable field -->
 <script type="text/x-template" id="template_field_content_readonly_json">
-    <div class="row">
+    <div class="row" :aria-labelledby="label_id" :aria-label="aria_label">
         <component v-for="item in realFields"
                    :is="'field_' + item.options.format" :field="item"
                    :prop_data="value"
@@ -419,6 +429,7 @@
         <input type="text" :required="attrs['required']" :disabled="disabled"
                :value="val" @input="setValueByHandsInStore($event.target.value)"
                :class="classes" :style="styles"
+               :aria-labelledby="label_id" :aria-label="aria_label"
         >
 
         <field_enable_button v-if="field.options.enable_button" :field="field" :disabled="disabled" @toggleEnableField="toggleEnableField"></field_enable_button>
@@ -466,12 +477,12 @@
                 </div>
             </template>
             <template v-slot:footer>
-                <button class="btn btn-default" @click="close">Cancel</button>
-                <button class="btn btn-primary" @click="setNewValue">Add selected</button>
+                <button class="btn btn-default" @click="close" aria-label="Cancel">Cancel</button>
+                <button class="btn btn-primary" @click="setNewValue" aria-label="Add selected">Add selected</button>
             </template>
         </gui_modal>
 
-        <div data-toggle="tooltip" title="Open modal window" class="input-group-append" @click="open">
+        <div data-toggle="tooltip" title="Open modal window" class="input-group-append" @click="open" role="button" aria-label="Open modal window">
             <span class="input-group-text" style="cursor: pointer;">
                 <span class="fa fa-chevron-down"></span>
             </span>
@@ -556,7 +567,7 @@
 <!-- content (value input area) of api_object editable field -->
 <script type="text/x-template" id="template_field_content_readonly_api_object">
     <div :class="classes" :style="styles" readonly disabled>
-        <a :href="href" @click.stop.prevent="goToHref" >{{ text }}</a>
+        <a :href="href" @click.stop.prevent="goToHref" :aria-labelledby="label_id" :aria-label="aria_label">{{ text }}</a>
     </div>
 </script>
 <!--
@@ -571,7 +582,7 @@
 -->
 <!-- content (value input area) of inner_api_object readOnly field -->
 <script type="text/x-template" id="template_field_content_readonly_inner_api_object">
-    <div class="row">
+    <div class="row" :aria-labelledby="label_id" :aria-label="aria_label">
         <template v-for="(item, index) in field.options.realFields">
             <template v-if="!more_than_one_field(item)">
                 <component
@@ -602,7 +613,7 @@
 
 <!-- content (value input area) of inner_api_object editable field -->
 <script type="text/x-template" id="template_field_content_edit_inner_api_object">
-    <div class="row">
+    <div class="row" :aria-labelledby="label_id" :aria-label="aria_label">
         <template v-for="(item, index) in field.options.realFields">
             <template v-if="!more_than_one_field(item)">
                 <component
@@ -767,7 +778,7 @@
     <div :class="wrapper_classes" :style="wrapper_styles" v-show="!is_hidden">
         <button class="btn btn-primary" data-toggle="tooltip"
                 :title="field.options.help || field.options.description"
-                @click="onClickHandler"
+                @click="onClickHandler" :aria-label="field.options.title || field.options.name"
         >
             {{ field.options.title || field.options.name | capitalize | split }}
         </button>

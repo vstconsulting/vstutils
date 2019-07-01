@@ -86,6 +86,12 @@ var base_field_content_mixin = {
 
             return attrs;
         },
+        /**
+         * Property, that returns value of 'aria-label' attribute.
+         */
+        aria_label() {
+          return this.field.options.title || this.field.options.name + 'field';
+        },
     },
     methods: {
         /**
@@ -144,10 +150,23 @@ var base_field_inner_component_mixin = {
 };
 
 /**
+ * Mixin, that contains 'label_id' computed property - value of 'id' attribute of field's label.
+ */
+var field_label_id_mixin = {
+    props: ['field', 'wrapper_opt', 'value', 'data'],
+    computed: {
+      label_id() {
+          let w = this.wrapper_opt.use_prop_data ? '-inner' : "";
+          return 'label-for-' + this.field.options.name + '-field' + w;
+      }
+    },
+};
+
+/**
  * Mixin for gui_field label component.
  */
 var base_field_label_mixin = {
-    mixins: [base_field_inner_component_mixin],
+    mixins: [base_field_inner_component_mixin, field_label_id_mixin],
     template: "#template_field_part_label",
     data() {
         return {
@@ -160,7 +179,7 @@ var base_field_label_mixin = {
  * Mixin for readOnly gui_fields' content(input value area).
  */
 var base_field_content_readonly_mixin = {
-    mixins: [base_field_content_mixin, base_field_inner_component_mixin],
+    mixins: [base_field_content_mixin, base_field_inner_component_mixin, field_label_id_mixin],
     template: "#template_field_content_readonly_base",
     data() {
         return {
@@ -173,7 +192,7 @@ var base_field_content_readonly_mixin = {
  * Mixin for editable gui_fields' content(input value area).
  */
 var base_field_content_edit_mixin = {
-    mixins: [base_field_content_mixin, base_field_inner_component_mixin],
+    mixins: [base_field_content_mixin, base_field_inner_component_mixin, field_label_id_mixin],
     template: "#template_field_content_edit_base",
     data() {
         return {
@@ -2597,10 +2616,12 @@ var gui_fields_mixins = {
             setLinksInsideField: function() {
                 let links_array = $(this.$el).find('a');
 
-                for(let i in links_array) {
+                for(let i = 0; i < links_array.length; i++) {
                     let link = links_array[i];
 
                     if(!(link['href'] && link['href'].search(window.hostname) != -1)) {
+                        link.setAttribute('target', '_blank');
+                        link.setAttribute('rel', 'noreferrer');
                         continue;
                     }
 

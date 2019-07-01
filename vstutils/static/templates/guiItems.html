@@ -83,7 +83,7 @@
 
                                     <div class="card-tools pull-right" v-if="card_collapsed_button">
                                         <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
-                                                @click="toggleCardCollapsed"
+                                                @click="toggleCardCollapsed" aria-label="toggle"
                                         >
                                             <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'"></i>
                                         </button>
@@ -144,9 +144,9 @@
     <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link" onclick="saveHideMenuSettings()" data-widget="pushmenu" href="#">
+                <span class="nav-link" onclick="saveHideMenuSettings()" data-widget="pushmenu">
                     <i class="fa fa-bars  ico-data-default"></i>
-                </a>
+                </span>
             </li>
             <template v-if="is_authenticated">
                 <li class="nav-item for-web api-link" >
@@ -171,7 +171,7 @@
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <template v-if="enable_gravatar">
                             <img :src="gravatar_img" class="img-circle elevation-1 gravatar-img"
-                                 @error="setDefaultGravatar($event.target)"
+                                 @error="setDefaultGravatar($event.target)" alt="User gravatar"
                             >
                         </template>
                         <template v-else>
@@ -201,9 +201,9 @@
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#">
+                    <span class="nav-link" data-widget="control-sidebar" data-slide="true">
                         <i class="fa fa-th-large ico-data-default"></i>
-                    </a>
+                    </span>
                 </li>
             </ul>
         </template>
@@ -222,7 +222,7 @@
 <script type="text/x-template" id="template_sidebar">
     <div class="sidebar">
         <nav class="mt-2 ">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <ul class="nav nav-pills nav-sidebar flex-column" >
                 <template v-for="item in menu_items">
                     <sidebar_link_wrapper :item="item" @hideSidebar="hideSidebar"></sidebar_link_wrapper>
                 </template>
@@ -233,7 +233,7 @@
 
 <!-- template of sidebar link -->
 <script type="text/x-template" id="template_sidebar_link">
-    <component :is="link_type" :[link_url_attr]="link_url" class="nav-link" :class="link_classes"
+    <component :is="link_type" :[link_url_attr]="link_url" class="nav-link" :class="link_classes" rel="noreferrer"
                @click="onLinkClickHandler" @click.native="onLinkClickHandler">
         <i class="nav-icon ico-menu" :class="icon_classes"></i>
         <p>
@@ -327,7 +327,8 @@
 <!-- template of button with drop-down buttons list (button 'Actions' in table list row, for example) -->
 <script type="text/x-template" id="template_buttons_list">
     <div class="btn-group" role="group">
-        <button type="button" class="btn dropdown-toggle highlight-tr-none gui-btn" :class="classes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn dropdown-toggle highlight-tr-none gui-btn" :class="classes"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :aria-label="text">
             {{ text | capitalize }}
             <span class="caret"></span>
         </button>
@@ -340,7 +341,8 @@
 <!-- template of multi-actions button with drop-down list -->
 <script type="text/x-template" id="template_multi_actions">
     <div class="btn-group" role="group" v-show="selected">
-        <button type="button" class="btn dropdown-toggle highlight-tr-none" :class="classes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="btn dropdown-toggle highlight-tr-none" :class="classes"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :aria-label="text">
             {{ text | capitalize | split }}
             <span class="caret"></span>
         </button>
@@ -357,7 +359,7 @@
        that calls some method of root component.
 -->
 <script type="text/x-template" id="template_button_common">
-    <button class="btn gui-btn" :class="classes" @click="onClickHandler" v-if="!options.hidden">
+    <button class="btn gui-btn" :class="classes" @click="onClickHandler" v-if="!options.hidden" :aria-label="title">
         <template v-if="icon_classes">
             <span :class="icon_classes"></span>
             <span :class="title_classes">{{ title | capitalize | split }}</span>
@@ -400,7 +402,7 @@
                     <div class="modal-footer text-data" v-if="with_footer">
                         <slot name="footer">
                             default footer
-                            <button class="modal-default-button" @click="$emit('close')">
+                            <button class="modal-default-button" @click="$emit('close')" aria-label="OK">
                                 OK
                             </button>
                         </slot>
@@ -430,12 +432,12 @@
                     <ul>
                         <template v-if="isArray(item)">
                             <li v-for="prop in item">
-                                <a :href="prop.url" target="_blank">{{prop.name}}</a>
+                                <a :href="prop.url" target="_blank" rel="noreferrer">{{prop.name}}</a>
                             </li>
                         </template>
                         <template v-else>
                             <li>
-                                <a :href="item.url" target="_blank">{{item.name}}</a>
+                                <a :href="item.url" target="_blank" rel="noreferrer">{{item.name}}</a>
                             </li>
                         </template>
                     </ul>
@@ -517,11 +519,11 @@
                 <filters_wrapper :opt="opt" :view="view" :filters_data="data.filters"></filters_wrapper>
             </template>
             <template v-slot:footer>
-                <button class="btn btn-default btn-close-filters-modal" @click="close">Cancel</button>
-                <button class="btn btn-primary btn-apply-filters" @click="filter">Filter</button>
+                <button class="btn btn-default btn-close-filters-modal" @click="close" aria-label="Cancel">Cancel</button>
+                <button class="btn btn-primary btn-apply-filters" @click="filter" aria-label="Filter">Filter</button>
             </template>
         </gui_modal>
-        <button class="btn btn-default btn-open-filters-modal" @click="open">
+        <button class="btn btn-default btn-open-filters-modal" @click="open" aria-label="Filters">
             <i class="fa fa-sliders" aria-hidden="true"></i>
             <span style="margin-left:5px;">Filters</span>
         </button>
@@ -634,11 +636,11 @@
                 </div>
             </template>
             <template v-slot:footer>
-                <button class="btn btn-default btn-operation-add-child-close" @click="close">Cancel</button>
-                <button class="btn btn-primary btn-operation-add-child-apply" @click="addSelected">Add selected</button>
+                <button class="btn btn-default btn-operation-add-child-close" @click="close" aria-label="Cancel">Cancel</button>
+                <button class="btn btn-primary btn-operation-add-child-apply" @click="addSelected" aria-label="Add selected">Add selected</button>
             </template>
         </gui_modal>
-        <button class="btn btn-primary btn-operation-add" @click="open">Add</button>
+        <button class="btn btn-primary btn-operation-add" @click="open" aria-label="Add">Add</button>
     </div>
 </script>
 
@@ -824,7 +826,7 @@
                 {{ item.title || item.name | capitalize }}
                 <div class="pull-right">
                     <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
-                            @click="toggleCollapsed"
+                            @click="toggleCollapsed" aria-label="toggle"
                     >
                         <i class="fa " :class="item.collapsed ? 'fa-plus' : 'fa-minus'"></i>
                     </button>
