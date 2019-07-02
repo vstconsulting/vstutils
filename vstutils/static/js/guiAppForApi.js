@@ -8,7 +8,6 @@ class AppForApi {
      */
     constructor(api_config) {
         this.api = new ApiConnector(api_config);
-        this.files_cache = window.guiFilesCache;
         this.error_handler = new ErrorHandler();
     }
     /**

@@ -276,8 +276,8 @@ if LOCALRUN:
     STATICFILES_DIRS = STATIC_FILES_FOLDERS
 
 STATICFILES_FINDERS = (
-  'django.contrib.staticfiles.finders.FileSystemFinder',
-  'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
 if not LOCALRUN:
@@ -489,8 +489,8 @@ BULK_OPERATION_TYPES = {
 LANGUAGE_CODE = 'en'
 
 LANGUAGES = (
-  ('ru', 'Russian'),
-  ('en', 'English'),
+    ('ru', 'Russian'),
+    ('en', 'English'),
 )
 
 TIME_ZONE = main.get("timezone", fallback="UTC")
@@ -640,6 +640,9 @@ VIEWS = {
     "MANIFEST": {
         "BACKEND": 'vstutils.gui.views.ManifestView'
     },
+    "SERVICE_WORKER": {
+        "BACKEND": 'vstutils.gui.views.SWView'
+    },
     "LOGIN": {
         "BACKEND": 'vstutils.gui.views.Login',
         "OPTIONS": {
@@ -657,6 +660,7 @@ VIEWS = {
 GUI_VIEWS = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
+    r'^service-worker.js$': 'SERVICE_WORKER',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT'
 }

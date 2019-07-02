@@ -29,8 +29,8 @@ class ManifestView(BaseView):
         "theme_color": "rgb(236,240,245)",
         "background_color": "rgb(236,240,245)",
         "display": "fullscreen",
-        "scope": "/#",
-        "start_url": "/#"
+        "scope": ".",
+        "start_url": "./"
     }
 
     def get_context_data(self, **kwargs):
@@ -39,6 +39,12 @@ class ManifestView(BaseView):
         manifest_data.update(getattr(settings, 'PWA_MANIFEST', {}))
         context['manifest_data'] = json.dumps(manifest_data, indent=4, skipkeys=True)
         return context
+
+
+class SWView(BaseView):
+    login_required = False
+    content_type = 'text/javascript'
+    template_name = "gui/service-worker.js"
 
 
 class Login(auth.LoginView):
