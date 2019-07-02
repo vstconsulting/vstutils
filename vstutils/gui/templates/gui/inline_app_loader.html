@@ -475,7 +475,7 @@
 
             let link = this.createFileDomElement("style", attributes, props);
 
-            document.getElementsByTagName("body")[0].appendChild(link);
+            document.getElementsByTagName("head")[0].appendChild(link);
         }
         /**
          * Method, that appends TPL type file to the page.
@@ -483,7 +483,7 @@
          * @param {string} content File's content.
          */
         appendFile_tpl(file, content) {
-            document.getElementsByTagName("body")[0].innerHTML += content;
+            document.getElementsByTagName("head")[0].innerHTML += content;
         }
         /**
          * Method checks, that all files were loaded with 200 status.
