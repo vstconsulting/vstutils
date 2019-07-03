@@ -643,6 +643,9 @@ VIEWS = {
     "SERVICE_WORKER": {
         "BACKEND": 'vstutils.gui.views.SWView'
     },
+    "OFFLINE": {
+        "BACKEND": 'vstutils.gui.views.OfflineView'
+    },
     "LOGIN": {
         "BACKEND": 'vstutils.gui.views.Login',
         "OPTIONS": {
@@ -661,6 +664,7 @@ GUI_VIEWS = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
+    r'^offline.html$': 'OFFLINE',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT'
 }

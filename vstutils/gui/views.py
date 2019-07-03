@@ -20,6 +20,11 @@ class GUIView(BaseView):
     template_name = "gui/gui.html"
 
 
+class OfflineView(BaseView):
+    login_required = False
+    template_name = "gui/offline.html"
+
+
 class ManifestView(BaseView):
     login_required = False
     template_name = "gui/manifest.json"

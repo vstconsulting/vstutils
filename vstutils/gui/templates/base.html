@@ -14,6 +14,10 @@
 
     {% block title %}<title>{% if name %}{{ name }} – {% endif %}{{ project_gui_name }}</title>{% endblock %}
 
+    {% block flavicon %}
+        <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
+    {% endblock %}
+
     {% block gui_init_scripts %}{% endblock %}
 
     {% block style %}
@@ -30,9 +34,6 @@
             {% block bootstrap_theme %}
             {% endblock %}
 
-            {% block flavicon %}
-                <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
-            {% endblock %}
 
             {% block custom_style %}
             {% endblock %}
@@ -48,17 +49,19 @@
     {% block common_sciprt %}
     {% endblock %}
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    <!-- Theme color for PWA -->
-    <meta name="theme-color" content="rgb(236,240,245)">
-    <!-- Registers Service Worker -->
-    <script>
-        // if browser supports Service Worker, code below register Service Worker instance.
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register("/service-worker.js");
-        }
-    </script>
+    {% block pwa_block %}
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="/manifest.json">
+        <!-- Theme color for PWA -->
+        <meta name="theme-color" content="rgb(236,240,245)">
+        <!-- Registers Service Worker -->
+        <script>
+            // if browser supports Service Worker, code below register Service Worker instance.
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register("/service-worker.js");
+            }
+        </script>
+    {% endblock %}
 </head>
 {% endblock %}
 
