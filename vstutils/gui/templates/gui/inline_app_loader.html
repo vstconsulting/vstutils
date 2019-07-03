@@ -275,12 +275,55 @@
              * there is no JQuery yet.
              */
             this.jq = jqConstructor;
+            /**
+             * Boolean property, that means is loader loading files right now or not?
+             */
+            this.loading = false;
+            /**
+             * Array, that collects errors occurred during files/app loading.
+             */
+            this.errors = [];
         }
         /**
-         * Method, that changes loading progress bar value.
+         * Method sets current loading operation on the app loading page.
+         * @param {string} operation String with name of loading operation.
+         */
+        setLoadingOperation(operation) {
+            let el = document.getElementById("LoadingProgressBarOperation");
+
+            if(!el) {
+                return;
+            }
+
+            el.innerText = operation;
+        }
+        /**
+         * Method shows animation during loading static files from server.
+         */
+        setFilesLoadingProgress() {
+            let elem = document.getElementById("LoadingProgressBarCount");
+
+            if(!elem) {
+                return;
+            }
+
+            if(elem.innerText.length == 3) {
+                elem.innerText = "";
+            }
+
+            elem.innerText += ".";
+
+            setTimeout(() => {
+                if(this.loading) {
+                    this.setFilesLoadingProgress();
+                }
+            }, 800);
+        }
+        /**
+         * Method, that changes app loading progress bar value.
          * @param {number} width Value of loading progress bar width.
          */
-        setLoadingProgress(width) {
+        setAppLoadingProgress(width) {
             let elem = document.getElementById("LoadingProgressBarLine");
 
             if(!elem) {
@@ -361,6 +404,8 @@
          * @param {object} extendData Additional logging message.
          */
         appendError(exception, extendData) {
+            this.errors.push(exception);
+
             try {
                 console.error(exception);
 
@@ -420,18 +465,23 @@
          * @param {number} index List index of element from files and response arrays.
          */
         appendFilesSync(files, response, index=0) {
+            if(this.errors.length > 0) {
+                return;
+            }
+
             let item = files[index];
             let handler = 'appendFile_' + item.type;
             if(this[handler]) {
                 response[index].text().then(content => {
                     this[handler](item, content);
+                    this.appendLog('File was appended to the page - "' + item.name +'"');
 
                     if(index + 1 == files.length) {
-                        this.setLoadingProgress(100);
+                        this.setAppLoadingProgress(100);
                         tabSignal.emit('resource.loaded');
                     } else {
                         let prog = Math.floor(index + 1/files.length * 100);
-                        this.setLoadingProgress(prog);
+                        this.setAppLoadingProgress(prog);
                         this.appendFilesSync(files, response, index + 1);
                     }
                 });
@@ -495,7 +545,7 @@
                 let item = response[index];
 
                 if (item.status != 200) {
-                    throw new Error(item.status + " error occurred during loading of " + item.url);
+                    throw new Error(item.status + ' error occurred during file loading - "' + item.url + '"');
                 }
             }
 
@@ -520,16 +570,22 @@
          */
         onReady() {
             console.log("onReady");
-            this.setLoadingProgress(0);
 
             this.sortFiles();
 
+            this.loading = true;
+            this.setLoadingOperation('loading files');
+            this.setFilesLoadingProgress();
+
             this.loadAllFiles().then(response => {
+                this.loading = false;
+                this.setLoadingOperation('loading app');
                 if(this.checkAllFilesLoaded(response)) {
                     this.appendLog('All static files were successfully loaded');
                     this.appendFilesSync(this.resource_list, response);
                 }
             }).catch(error => {
+                this.loading = false;
                 this.appendError(error);
                 throw error;
             });
