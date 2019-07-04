@@ -10,27 +10,7 @@ except ImportError:  # nocv
 from django.db.models.query import ModelIterable
 from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
 from .models import BQuerySet, BaseModel
-from .tools import get_file_value  # pylint: disable=import-error
-
-
-def multikeysort(items, columns, reverse=False):
-    if not isinstance(items, list):
-        items = list(items)  # nocv
-    if not isinstance(columns, list):
-        columns = list(columns)
-    columns.reverse()
-
-    for column in columns:
-        # pylint: disable=cell-var-from-loop
-        is_reverse = column.startswith('-')
-        if is_reverse:
-            column = column[1:]
-        items.sort(key=lambda row: row[column], reverse=is_reverse)
-
-    if reverse:
-        items.reverse()
-
-    return items
+from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 
 
 class Query(dict):

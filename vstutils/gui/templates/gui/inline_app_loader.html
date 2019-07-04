@@ -1,10 +1,19 @@
 <script type="text/javascript">
     /**
+     * Array with Cache names.
+     */
+    var cacheNames = [
+        project_gui_name + '-static-v' + gui_version,
+        project_gui_name + '-run-time-v' + gui_version,
+    ];
+    /**
      * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
      */
     function cleanCacheAndReloadPage() {
         if(window.caches && window.caches && typeof window.caches.delete == 'function') {
-            window.caches.delete('vst-cache-v1')
+            for(let index in cacheNames) {
+                window.caches.delete(cacheNames[index]);
+            }
         }
 
         if('serviceWorker' in navigator) {
@@ -350,26 +359,6 @@
             this.jq("#LoadingProgressBar").fadeOut();
         }
         /**
-         * Method, needed for sorting of files array.
-         * @param {object} a Array property 1
-         * @param {object} b Array property 2
-         */
-        _compareNumeric(a, b) {
-            if (!a.prioritet && a.prioritet !== 0) a.prioritet = 999;
-            if (!b.prioritet && b.prioritet !== 0) b.prioritet = 999;
-
-            if (a.prioritet > b.prioritet) return 1;
-            if (a.prioritet < b.prioritet) return -1;
-
-            return 0;
-        }
-        /**
-         * Method, that sorts files to load.
-         */
-        sortFiles() {
-            return this.resource_list.sort(this._compareNumeric);
-        }
-        /**
          * Method, that adds logs of files loading.
          * @param {object, string} data Logging message.
          * @param {object} extendData Additional logging message.
@@ -570,8 +559,6 @@
          */
         onReady() {
             console.log("onReady");
-
-            this.sortFiles();
 
             this.loading = true;
             this.setLoadingOperation('loading files');

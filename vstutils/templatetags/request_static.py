@@ -1,3 +1,4 @@
+import json
 from django.templatetags.static import template, StaticNode
 
 register = template.Library()
@@ -49,3 +50,8 @@ def do_static_origin(parser, token):
         {% static variable_with_path as varname %}
     """
     return StaticNode.handle_token(parser, token)
+
+
+@register.filter(is_safe=True)
+def jsonify(object):
+    return json.dumps(object)

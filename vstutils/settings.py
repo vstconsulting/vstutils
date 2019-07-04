@@ -253,6 +253,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'vstutils.gui.context.settings_constants',
                 'vstutils.gui.context.project_args',
+                'vstutils.gui.context.pwa_context',
                 'vstutils.gui.context.headers_context',
             ],
         },
@@ -681,6 +682,69 @@ PROJECT_GUI_MENU = [
                 'span_class': 'fa fa-user',
             },
         ]
+    },
+]
+
+SPA_STATIC = [
+    {'prioritet': 0, 'type': 'js', 'name': 'admin/js/vendor/jquery/jquery.min.js', 'spa': True, 'api': False},
+    {'prioritet': 1, 'type': 'js', 'name': 'js/libs/tabSignal.js', 'spa': True, 'api': False},
+    {'prioritet': 3, 'type': 'js', 'name': 'js/libs/md5.min.js', 'spa': True, 'api': True},
+    {'prioritet': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js', 'spa': True, 'api': True},
+    {'prioritet': 4, 'type': 'js', 'name': 'js/libs/visibility/visibility.core.js', 'spa': True, 'api': True},
+    {'prioritet': 4, 'type': 'js', 'name': 'js/libs/iziToast.min.js', 'spa': True, 'api': True},
+    {'prioritet': 4, 'type': 'js', 'name': 'js/libs/iziModal.min.js', 'spa': True, 'api': True},
+    {'prioritet': 4, 'type': 'js', 'name': 'js/libs/imask.js', 'spa': True, 'api': True},
+    {'prioritet': 9, 'type': 'js', 'name': 'js/guiCustomizer.js', 'spa': True, 'api': True},
+    {'prioritet': 4, 'type': 'js', 'name': 'plugins/fastclick/fastclick.min.js', 'spa': True, 'api': True},
+    {'prioritet': 11.5, 'type': 'js', 'name':'js/libs/xregexp-all.js', 'spa': True, 'api': True},
+    {'prioritet': 9, 'type': 'js', 'name': 'AdminLTE-3.0.0/min/js/adminlte.min.js', 'spa': True, 'api': True},
+    {'prioritet': 8, 'type': 'js', 'name': 'js/common-utils.js', 'spa': True, 'api': True},
+    {'prioritet': 110, 'type': 'js', 'name': 'js/libs/autocomplete.js', 'spa': True, 'api': True},
+    {'prioritet': 110, 'type': 'js', 'name': 'plugins/select2/select2.full.min.js', 'spa': True, 'api': True},
+    {'prioritet': 50, 'type': 'js', 'name': 'js/libs/moment.min.js', 'spa': True, 'api': True},
+    {'prioritet': 51, 'type': 'js', 'name': 'js/libs/moment-timezone.min.js', 'spa': True, 'api': True},
+    {'prioritet': 51, 'type': 'js', 'name': 'js/libs/Chart.min.js', 'spa': True, 'api': True},
+    {'prioritet': 50, 'type': 'js', 'name': 'js/libs/jquery.scrollTo.min.js', 'spa': True, 'api': True},
+    {'prioritet': 9, 'type': 'js', 'name': 'js/libs/axios.min.js', 'spa': True, 'api': True},
+    {'prioritet': 9, 'type': 'js', 'name': 'js/libs/vue/vue.min.js', 'spa': True, 'api': True},
+    {'prioritet': 9.1, 'type': 'js', 'name': 'js/libs/vue/vuex.min.js', 'spa': True, 'api': True},
+    {'prioritet': 9.2, 'type': 'js', 'name': 'js/libs/vue/vue-router.min.js', 'spa': True, 'api': True},
+    {'prioritet': 300, 'type': 'tpl', 'name': 'templates/guiFields.html', 'spa': True, 'api': True},
+    {'prioritet': 300, 'type': 'tpl', 'name': 'templates/guiItems.html', 'spa': True, 'api': True},
+    {'prioritet': 9.8, 'type': 'js', 'name': 'js/guiPopUp.js', 'spa': True, 'api': True},
+    {'prioritet': 9.9, 'type': 'js', 'name': 'js/guiFieldsMixins.js', 'spa': True, 'api': True},
+    {'prioritet': 10, 'type': 'js', 'name': 'js/guiFields.js', 'spa': True, 'api': True},
+    {'prioritet': 10.1, 'type': 'js', 'name': 'js/guiItems.js', 'spa': True, 'api': True},
+    {'prioritet': 10.2, 'type': 'js', 'name': 'js/guiModels.js', 'spa': True, 'api': False},
+    {'prioritet': 10.3, 'type': 'js', 'name': 'js/guiQuerySet.js', 'spa': True, 'api': False},
+    {'prioritet': 10.4, 'type': 'js', 'name': 'js/guiViews.js', 'spa': True, 'api': False},
+    {'prioritet': 10.5, 'type': 'js', 'name': 'js/guiStore.js', 'spa': True, 'api': False},
+    {'prioritet': 10.6, 'type': 'js', 'name': 'js/guiRouter.js', 'spa': True, 'api': False},
+    {'prioritet': 10.7, 'type': 'js', 'name': 'js/guiApi.js', 'spa': True, 'api': True},
+    {'prioritet': 10.9, 'type': 'js', 'name': 'js/guiApp.js', 'spa': True, 'api': False},
+    {'prioritet': 10.9, 'type': 'js', 'name': 'js/guiAppForApi.js', 'spa': False, 'api': True},
+    {'prioritet': 11, 'type': 'js', 'name': 'js/guiUsers.js', 'spa': True, 'api': True},
+    {'prioritet': 300, 'type': 'js', 'name': 'js/guiDashboard.js', 'spa': True, 'api': False},
+    {'prioritet': 102, 'type': 'css', 'name': 'css/iziToast.min.css', 'spa': True, 'api': True},
+    {'prioritet': 102, 'type': 'css', 'name': 'css/iziModal.min.css', 'spa': True, 'api': True},
+    {'prioritet': 105, 'type': 'css', 'name': 'AdminLTE-3.0.0/min/css/adminlte.min.css', 'spa': True, 'api': True},
+    {'prioritet': 108, 'type': 'css', 'name': 'css/gui.css', 'spa': True, 'api': True},
+    {'prioritet': 99, 'type': 'css', 'name': 'plugins/select2/select2.min.css', 'spa': True, 'api': True},
+    {
+        'prioritet': 4, 'type': 'js', 'name': 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js',
+        'spa': True, 'api': True
+    },
+    {
+        'prioritet': 5, 'type': 'js', 'name': 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js',
+        'spa': True, 'api': True
+    },
+    {
+        'prioritet': 101, 'type': 'css', 'name': 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css',
+        'spa': True, 'api': True
+    },
+    {
+        'prioritet': 103, 'type': 'css', 'name': 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css',
+        'spa': True, 'api': True
     },
 ]
 

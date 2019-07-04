@@ -1,40 +1,79 @@
+//{% load request_static %}
+//{% autoescape off %}
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
 
-// @todo remove this, after adding precaching of all static files
-workbox.precaching.precacheAndRoute(['/static/img/logo/vertical.png']);
-
 /**
- * Name of Cache for static files.
+ * Array of static files paths.
+ * These files will be added to the page by JS.
+ * They are not included in the page template as html tags.
  */
-const STATIC_CACHE = 'vst-cache-v1';
+const STATIC_FILES_LIST = [
+//{% for static_file in static_files_list %}
+    '{% static static_file.name %}?v={{ gui_version }}',
+//{% endfor %}
+];
 
 /**
- * Name of Cache for offline-fallback files.
- */
-const OFFLINE_CACHE = 'vst-offline-fallback';
-
-/**
- * Name of Offline fallback page.
+ * Path of Offline fallback page.
  */
 const OFFLINE_PAGE = '/offline.html';
 
 /**
- * List with offline fallback files - files, that should be precached and used during offline mode.
+ * Path to the favicon file.
  */
-const OFFLINE_FALLBACK_FILES_LIST = [
-    OFFLINE_PAGE,
-    '/static/img/logo/vertical.png',
-    '/static/img/logo/favicon.ico',
+const FAVICON = "{% static 'img/logo/favicon.ico' %}";
+
+/**
+ * Array with paths of additional files, that should precached.
+ */
+const ADDITIONAL_FILES_LIST = [
+    "{% static 'img/logo/vertical.png' %}",
 ];
 
 /**
- * Precaching of offline fallback files.
+ * Array, that store paths of files, that should be precached.
  */
-self.addEventListener('install', (event) => {
+const PRECACHE_LIST = [OFFLINE_PAGE, FAVICON].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST);
+
+/**
+ * Sets workbox cache names details.
+ * From these elements will be formed precache and runtime caches.
+ */
+workbox.core.setCacheNameDetails({
+    prefix: '{{ project_gui_name }}',
+    suffix: 'v{{gui_version}}',
+    precache: 'static',
+    runtime: 'run-time',
+});
+
+/**
+ * Adds precaching of PRECACHE_LIST.
+ */
+workbox.precaching.precacheAndRoute(PRECACHE_LIST);
+
+/**
+ * Adds caching of OpenAPI schema.
+ */
+workbox.routing.registerRoute(
+    /\/api\/openapi\/\?format=openapi/,
+    new workbox.strategies.CacheFirst({
+        cacheName: workbox.core.cacheNames.runtime,
+    }),
+);
+
+/**
+ * Deletes cache of previous (outdated) versions.
+ */
+self.addEventListener('activate', event => {
+    let cacheWhitelist = [workbox.core.cacheNames.precache, workbox.core.cacheNames.runtime];
     event.waitUntil(
-        caches
-            .open(OFFLINE_CACHE)
-            .then((cache) => cache.addAll(OFFLINE_FALLBACK_FILES_LIST))
+        caches.keys().then(keyList => {
+            return Promise.all(keyList.map(key => {
+                if (cacheWhitelist.indexOf(key) === -1) {
+                    return caches.delete(key);
+                }
+            }));
+        })
     );
 });
 
@@ -51,48 +90,9 @@ self.addEventListener('fetch', (event) => {
                     '[onfetch] Failed. Serving cached offline fallback ' +
                     error
                 );
-                return caches.open(OFFLINE_CACHE).then((cache) => {
-                    return cache.match(OFFLINE_PAGE);
-                });
+                return caches.match(OFFLINE_PAGE);
             })
         );
     }
 });
-
-// @todo uncomment this, after adding precaching of all static files
-// /**
-//  * Deletes cache of previous (outdated) versions.
-//  */
-// self.addEventListener('activate', event => {
-//     let cacheWhitelist = [STATIC_CACHE, OFFLINE_CACHE];
-//     event.waitUntil(
-//         caches.keys().then(keyList => {
-//             return Promise.all(keyList.map(key => {
-//                 if (cacheWhitelist.indexOf(key) === -1) {
-//                     return caches.delete(key);
-//                 }
-//             }));
-//         })
-//     );
-// });
-
-
-/**
- * Adds caching of all files from '/static/' directory.
- */
-workbox.routing.registerRoute(
-    /\/static\/.*/,
-    new workbox.strategies.CacheFirst({
-        cacheName: STATIC_CACHE,
-    }),
-);
-
-/**
- * Adds caching of OpenAPI schema.
- */
-workbox.routing.registerRoute(
-    /\/api\/openapi\/\?format=openapi/,
-    new workbox.strategies.CacheFirst({
-        cacheName: STATIC_CACHE,
-    }),
-);
+//{% endautoescape %}

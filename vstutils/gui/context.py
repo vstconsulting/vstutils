@@ -1,29 +1,34 @@
 from django.conf import settings
 from ..utils import import_class
+from ..tools import multikeysort
 from .. import __version__
 
+
 manifest_object = import_class(settings.MANIFEST_CLASS)()
+gui_version = "_".join(map(str, [
+    getattr(settings, 'PROJECT_VERSION', ''),
+    getattr(settings, 'PROJECT_LIB_VERSION', ''),
+    __version__
+]))
+static_path = getattr(settings, 'STATIC_URL', '/static/')
+static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['prioritet'])
 
 
 def settings_constants(request):
     # pylint: disable=unused-argument
-    data = {"login_url": getattr(settings, 'LOGIN_URL', '/login/'),
-            "logout_url": getattr(settings, 'LOGOUT_URL', '/logout/'),
-            "docs_url": getattr(settings, 'DOC_URL', '/docs/'),
-            "has_docs": getattr(settings, 'HAS_DOCS', False),
-            "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
-            "debug": getattr(settings, 'DEBUG', False)}
-    return data
+    return {
+        "login_url": getattr(settings, 'LOGIN_URL', '/login/'),
+        "logout_url": getattr(settings, 'LOGOUT_URL', '/logout/'),
+        "docs_url": getattr(settings, 'DOC_URL', '/docs/'),
+        "has_docs": getattr(settings, 'HAS_DOCS', False),
+        "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
+        "debug": getattr(settings, 'DEBUG', False)
+    }
 
 
 def project_args(request):
     host_url = request.build_absolute_uri('/')[:-1]
     ver_key = "{}_version".format(getattr(settings, 'VST_PROJECT', "vstutils"))
-    gui_version = "_".join(map(str, [
-        getattr(settings, 'PROJECT_VERSION', ''),
-        getattr(settings, 'PROJECT_LIB_VERSION', ''),
-        __version__
-    ]))
     return {
         "host_url": host_url,
         "gui_version": gui_version,
@@ -32,11 +37,18 @@ def project_args(request):
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
         "openapi_url": '/{}/openapi/'.format(settings.VST_API_URL),
+        "api_version": getattr(settings, 'VST_API_VERSION'),
         "api_url": '{}/{}/{}/'.format(
             host_url, settings.VST_API_URL, settings.VST_API_VERSION
         ),
         "enable_gravatar": settings.ENABLE_GRAVATAR,
-        "manifest_object": manifest_object
+    }
+
+
+def pwa_context(request):
+    return {
+        "manifest_object": manifest_object,
+        "static_files_list": static_list
     }
 
 
