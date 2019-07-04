@@ -53,7 +53,16 @@
         <!-- PWA Manifest -->
         <link rel="manifest" href="/manifest.json">
         <!-- Theme color for PWA -->
-        <meta name="theme-color" content="rgb(236,240,245)">
+        <meta name="theme-color" content="{{ manifest_object.data.theme_color }}">
+
+       {% block pwa_icons %}
+            <!-- Icons for PWA -->
+            {% for icon in manifest_object.data.icons %}
+                <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+                <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+            {% endfor %}
+        {% endblock %}
+
         <!-- Registers Service Worker -->
         <script>
             // if browser supports Service Worker, code below register Service Worker instance.

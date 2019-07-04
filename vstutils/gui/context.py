@@ -1,5 +1,8 @@
 from django.conf import settings
+from ..utils import import_class
 from .. import __version__
+
+manifest_object = import_class(settings.MANIFEST_CLASS)()
 
 
 def settings_constants(request):
@@ -33,6 +36,7 @@ def project_args(request):
             host_url, settings.VST_API_URL, settings.VST_API_VERSION
         ),
         "enable_gravatar": settings.ENABLE_GRAVATAR,
+        "manifest_object": manifest_object
     }
 
 

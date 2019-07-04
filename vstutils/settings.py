@@ -632,6 +632,7 @@ if RUN_WORKER:
 # View settings
 ##############################################################
 ENABLE_ADMIN_PANEL = main.getboolean('enable_admin_panel', False)
+MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
 
 VIEWS = {
     "GUI": {
