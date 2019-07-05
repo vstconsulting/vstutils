@@ -894,7 +894,7 @@ class ProjectTestCase(BaseTestCase):
 
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
-        self.assertEqual(result['name'], 'Example Project')
+        self.assertEqual(result['name'], 'Example project')
         self.assertEqual(result['short_name'], 'test_proj')
         self.assertEqual(result['display'], 'standalone')
 
