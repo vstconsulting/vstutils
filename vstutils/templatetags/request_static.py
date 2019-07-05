@@ -54,4 +54,4 @@ def do_static_origin(parser, token):
 
 @register.filter(is_safe=True)
 def jsonify(object):
-    return json.dumps(object)
+    return json.dumps(object)  # nocv
