@@ -56,29 +56,11 @@ class ApiConnector {
         });
     }
     /**
-     * Method, that gets OpeanApi schema from cache.
-     * @return {promise} Promise of getting OpenApi schema from Cache.
-     */
-    getSchemaFromCache() {
-        return app.files_cache.getFile('openapi').then(response => {
-            return this.openapi = JSON.parse(response.data);
-        }).catch(error => {
-            return this.loadSchema().then(openapi => {
-                app.files_cache.setFile('openapi', JSON.stringify(openapi));
-                return openapi;
-            });
-        });
-    }
-    /**
      * Method, that gets OpenApi schema.
      * @return {promise} Promise of getting OpenApi schema.
      */
     _getSchema() {
-        if(app && app.files_cache && app.files_cache.use_cache) {
-            return this.getSchemaFromCache();
-        } else {
             return this.loadSchema();
-        }
     }
     /**
      * Method, that gets OpenApi schema and emits "openapi.loaded" signal.

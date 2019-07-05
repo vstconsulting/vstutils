@@ -333,6 +333,7 @@ ext_list = [
     'vstutils.templatetags.request_static',
     'vstutils.gui.views',
     'vstutils.gui.context',
+    'vstutils.gui.pwa_manifest',
     'vstutils.api.base',
     'vstutils.api.decorators',
     'vstutils.api.fields',

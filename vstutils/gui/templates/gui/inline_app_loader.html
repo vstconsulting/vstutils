@@ -1,50 +1,29 @@
+{% load cache %}
+{% cache block_timeout inline_app_loader_block gui_version %}
 <script type="text/javascript">
     /**
-     * Function, that defines App's launch environment: Cordova or not.
-     * @return {boolean}
+     * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
      */
-    function isCordova() {
-        if(window.cordova) {
-            return true;
-        } else if(window.parent && window.parent.cordova) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Function, that turns load type of js files.
-     * loadType('js').
-     * loadType('eval').
-     * loadType('js-inline').
-     * @param {boolean} type
-     * @return {string}
-     */
-    function loadType(type) {
-        if(type !== undefined) {
-            window.localStorage['loadType'] = type;
+    function cleanCacheAndReloadPage() {
+        if('caches' in window) {
+            window.caches.keys().then(keyList => {
+                keyList.forEach(key => {
+                    window.caches.delete(key);
+                })
+            });
         }
 
-        return window.localStorage['loadType'];
-    }
-
-    /**
-     * Function, that turns use_cache modes (true/false).
-     * True - use_cache.
-     * False - no_cache.
-     * useCache(true).
-     * useCache(false).
-     * @param {boolean} mode
-     * @return {boolean}
-     */
-    function useCache(mode) {
-        if(mode !== undefined) {
-            loadType(mode ? 'inline-js': 'js');
-            window.localStorage['useCache'] = JSON.stringify(mode);
+        if('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => {
+                    registration.unregister().then(unregistered => {
+                        window.location.reload(true);
+                    });
+                })
+            })
+        } else {
+            window.location.reload(true);
         }
-
-        // return JSON.parse(window.localStorage['useCache']);
-        return window.localStorage['useCache'] == 'true';
     }
 
     /**
@@ -242,7 +221,7 @@
                         el.style.opacity = Number(el.style.opacity) + 0.1;
                     } else {
                         if(!(el.jq_props && el.jq_props.style &&
-                                el.jq_props.style.opacity)) {
+                            el.jq_props.style.opacity)) {
                             el.style.opacity = "";
                         }
                         clearInterval(interval_id);
@@ -286,199 +265,6 @@
     }
 
     /**
-     * Class, that creates FilesCache instances - Objects, that communicate with indexedDB.
-     * More about indexedDB:
-     * - https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Basic_Concepts_Behind_IndexedDB
-     * - https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-     */
-    class FilesCache {
-        /**
-         * Constructor of FilesCache class.
-         * @param {object} opt Object with options for FilesCache instance.
-         */
-        constructor(opt) {
-            this.indexed_db = window.indexedDB || window.mozIndexedDB ||
-                window.webkitIndexedDB || window.msIndexedDB;
-            // this.host_id = window.location.host;
-            this.host_id = "{{host_url}}".replace(/[^0-9A-z]/img, "_");
-            this.db_name = 'cache_' + this.host_id + "__";
-            this.db_version = 1;
-            this.store_name = 'cache_store';
-            this.use_cache = true;
-
-            for(let key in opt) {
-                this[key] = opt[key];
-            }
-        }
-        /**
-         * Method, that returns promise of connection to FilesCache indexedDB.
-         */
-        connectDB() {
-            return new Promise((resolve, reject) => {
-                let request = this.indexed_db.open(this.db_name, this.db_version);
-
-                request.onerror = (err) => {
-                    console.error("Error in FilesCache.connectDB().", err);
-                    reject(err);
-                };
-
-                request.onsuccess = (event) => {
-                    let db = event.target.result;
-
-                    db.onerror = function(event) {
-                        console.log('indexedDB - db.onerror ', event);
-                    };
-
-                    resolve(db);
-                };
-
-                request.onupgradeneeded = (event) => {
-                    let db = event.target.result;
-                    db.createObjectStore(
-                        this.store_name, { keyPath: "path", autoIncrement: true }
-                    );
-                    this.connectDB().then(resolve, reject)
-                }
-            })
-        }
-        /**
-         * Method, that returns promise to get file from FilesCache.
-         */
-        getFile(file_url) {
-            return new Promise((resolve, reject) => {
-                if(!this.use_cache) {
-                    reject();
-                }
-
-                this.connectDB().then(db => {
-                    let transaction = db.transaction([this.store_name], "readonly");
-                    let request = transaction.objectStore(this.store_name).get(file_url);
-
-                    transaction.oncomplete = function(event) {
-                        db.close();
-                    };
-
-                    request.onerror = (err) => {
-                        console.error("Error in FilesCache.getFile()", err);
-                        reject(err);
-                    };
-
-                    request.onsuccess = () => {
-                        if(!request.result) {
-                            reject();
-                            return;
-                        }
-
-                        resolve(request.result ? request.result : -1);
-                    }
-                }, reject);
-            });
-        }
-        /**
-         * Method, that returns promise to save file in FilesCache.
-         */
-        setFile(file_url, file_data) {
-            return new Promise((resolve, reject) => {
-                this.connectDB().then(db => {
-                    let transaction = db.transaction([this.store_name],"readwrite");
-                    transaction.oncomplete = (event) => {
-                        db.close();
-                    };
-
-                    transaction.onerror = (event) => {
-                        console.error("Error in FilesCache.setFile().", event);
-                    };
-
-                    let objectStore = transaction.objectStore(this.store_name);
-
-                    let request = objectStore.put({path: file_url, data: file_data});
-
-                    request.onerror = (err) => {
-                        console.error("Error in FilesCache.setFile()", err);
-                        reject(err);
-                    };
-
-                    request.onsuccess = () => {
-                        if(!request.result) {
-                            reject();
-                            return;
-                        }
-                        resolve(request.result ? request.result : -1);
-                    }
-                }, reject);
-            });
-        }
-        /**
-         * Method, that returns promise to delete file from FilesCache.
-         */
-        delFile(file_url) {
-            return new Promise((resolve, reject) => {
-                this.connectDB().then(db => {
-                    let transaction = db.transaction([this.store_name],"readwrite");
-                    transaction.oncomplete = (event) => {
-                        db.close();
-                    };
-
-                    transaction.onerror = (event) => {
-                        console.error("Error in FilesCache.delFile()", event);
-                    };
-
-                    let objectStore = transaction.objectStore(this.store_name);
-                    let request = objectStore.delete(file_url);
-
-                    request.onerror = (err) => {
-                        console.error("Error in FilesCache.detFile()", err);
-                        reject(err);
-                    };
-
-                    request.onsuccess = () => {
-                        resolve(true);
-                    }
-                }, reject);
-            });
-        }
-        /**
-         * Method, that returns promise to delete all file from FilesCache (delete FilesCache indexedDB).
-         */
-        deleteAllCache() {
-            return new Promise((resolve, reject) => {
-                let DBDeleteRequest = this.indexed_db.deleteDatabase(this.db_name);
-
-                DBDeleteRequest.onerror = (event) => {
-                    console.error("Error during 'deleteAllCache' method execution. ", event);
-                    reject(event);
-                };
-
-                DBDeleteRequest.onblocked = (event) => {
-                    console.error("Error during 'deleteAllCache' method execution. DB blocked ", event);
-                    reject(event);
-                };
-
-                DBDeleteRequest.onsuccess = (event) => {
-                    resolve(event);
-                };
-            });
-        }
-        /**
-         * Method, that returns promise to delete all file from FilesCache (delete FilesCache indexedDB)
-         * and after promise resolving/rejecting updates page.
-         */
-        deleteAllCacheAndUpdatePage() {
-            let callback = () => {
-                return setTimeout(() => {
-                    window.location.reload();
-                }, 500);
-            };
-
-            return this.deleteAllCache().then(response => {
-                callback();
-            }).catch(error => {
-                callback();
-            });
-        }
-    }
-
-    /**
      * Class, that manages loading static files (tpl, css, js, events)
      * and appending them to html document.
      */
@@ -486,43 +272,66 @@
         /**
          * Constructor of FilesLoader Class.
          */
-        constructor(files_cache, resource_list) {
-            /**
-             * Dict of JS objects - files, that should be loaded.
-             * File (JS object) has properties about it's type, source url,
-             * status (appended/appending), response status code (200, 404, and so on).
-             */
-            this.files_to_load = {};
-            /**
-             * Instance of FilesCache Class.
-             * This property communicates with indexedDB, where cache is stored.
-             */
-            this.files_cache = files_cache;
+        constructor(resource_list) {
             /**
              * Array of JS objects, that contain info about files, that should be loaded.
              */
             this.resource_list = resource_list;
-            /**
-             * Object, that contents properties about loading progress.
-             * steps_sum - amount of files to be loaded.
-             * step - number of loaded files.
-             */
-            this.loading_progress = {
-                step: 0,
-                steps_sum: 0,
-            };
             /**
              * Property - simple analog of JQuery.
              * FilesLoader use it, because at the moment of files loading
              * there is no JQuery yet.
              */
             this.jq = jqConstructor;
+            /**
+             * Boolean property, that means is loader loading files right now or not?
+             */
+            this.loading = false;
+            /**
+             * Array, that collects errors occurred during files/app loading.
+             */
+            this.errors = [];
         }
         /**
-         * Method, that changes loading progress bar value.
+         * Method sets current loading operation on the app loading page.
+         * @param {string} operation String with name of loading operation.
+         */
+        setLoadingOperation(operation) {
+            let el = document.getElementById("LoadingProgressBarOperation");
+
+            if(!el) {
+                return;
+            }
+
+            el.innerText = operation;
+        }
+        /**
+         * Method shows animation during loading static files from server.
+         */
+        setFilesLoadingProgress() {
+            let elem = document.getElementById("LoadingProgressBarCount");
+
+            if(!elem) {
+                return;
+            }
+
+            if(elem.innerText.length == 3) {
+                elem.innerText = "";
+            }
+
+            elem.innerText += ".";
+
+            setTimeout(() => {
+                if(this.loading) {
+                    this.setFilesLoadingProgress();
+                }
+            }, 800);
+        }
+        /**
+         * Method, that changes app loading progress bar value.
          * @param {number} width Value of loading progress bar width.
          */
-        setLoadingProgress(width) {
+        setAppLoadingProgress(width) {
             let elem = document.getElementById("LoadingProgressBarLine");
 
             if(!elem) {
@@ -547,216 +356,6 @@
             this.jq("#RealBody").show();
 
             this.jq("#LoadingProgressBar").fadeOut();
-        }
-        /**
-         * Method, needed for sorting of files array.
-         * @param {object} a Array property 1
-         * @param {object} b Array property 2
-         */
-        _compareNumeric(a, b) {
-            if (!a.prioritet && a.prioritet !== 0) a.prioritet = 999;
-            if (!b.prioritet && b.prioritet !== 0) b.prioritet = 999;
-
-            if (a.prioritet > b.prioritet) return 1;
-            if (a.prioritet < b.prioritet) return -1;
-
-            return 0;
-        }
-        /**
-         * Method, that returns array with sorted filed from this.files_to_load.
-         */
-        getSortedFiles() {
-            let files = [];
-
-            for(let item in this.files_to_load) {
-                files.push(this.files_to_load[item]);
-            }
-
-            return files.sort(this._compareNumeric);
-        }
-        /**
-         * Method, that creates DOM element for file content.
-         * @param {string} type Type (tag) of DOM element.
-         * @param {array} attributes Array of objects -
-         * DOM element attributes(key, value).
-         * @param {object} props Object with properties of DOM element.
-         */
-        createFileDomElement(type, attributes, props) {
-            let el = document.createElement(type);
-
-            attributes.forEach(attr => {
-                el.setAttribute(attr.key, attr.value);
-            });
-
-            for(let key in props) {
-                el[key] = props[key];
-            }
-
-            return el;
-        }
-        /**
-         *  Method, that inserts file content's DOM element into html document,
-         *  adds info about in to logs and changes file status.
-         *  @param {string} target Name of parent element - container of file DOM element.
-         *  @param {object} el File content's DOM element.
-         *  @param {object} file File object.
-         *  @param {string} file Message, that should be added into logs.
-         */
-        appendFileDomElement(target, el, file, log_msg) {
-            if(!log_msg) {
-                log_msg = "Appended " + file.url;
-            }
-            document.getElementsByTagName(target)[0].appendChild(el);
-            this.appendLog(log_msg);
-            file.appended = true;
-        }
-        /**
-         * Method, that adds TPL file content to html document.
-         * @param {object} file Object of TPL file.
-         */
-        addFileToPage_tpl(file) {
-            $("body").append(file.response);
-            file.appended = true;
-            this.appendLog("Appended "+file.url);
-            return this.addToPage();
-        }
-        /**
-         * Method, that adds JS file content to html document.
-         * @param {object} file Object of JS file.
-         */
-        addFileToPage_js(file) {
-            if(loadType() == 'js') {
-                let attributes = [
-                    {key: "type", value: "text/javascript"},
-                    {key: "src", value: file.url},
-                ];
-                let props = {
-                    onload: () => {
-                        file.appended = true;
-                        this.appendLog("Appended "+file.url);
-                        this.addToPage();
-                    }
-                };
-                let link = this.createFileDomElement("script", attributes, props);
-
-                document.getElementsByTagName("head")[0].appendChild(link);
-            } else {
-                let attributes = [
-                    {key: "type", value: "text/javascript"},
-                    {key: "data-url", value: file.url},
-                ];
-                let props = {
-                    innerHTML: file.response,
-                };
-                let link = this.createFileDomElement("script", attributes, props);
-
-                this.appendFileDomElement("head", link, file);
-
-                return this.addToPage();
-            }
-        }
-        /**
-         * Method, that adds CSS file content to html document.
-         * @param {object} file Object of CSS file.
-         */
-        addFileToPage_css(file) {
-            let attributes = [
-                {key: "rel", value: "stylesheet"}, {key: "type", value: "text/css"},
-                {key: "media", value: "text/css"}, {key: "data-url", value: file.url},
-
-            ];
-            let props = {
-                rel: 'stylesheet',
-                type: 'text/css',
-                media: 'all',
-                innerHTML: file.response.replace(
-                    /\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts"
-                ),
-            };
-            let link = this.createFileDomElement("style", attributes, props);
-
-            this.appendFileDomElement("body", link, file);
-
-            return this.addToPage();
-        }
-        /**
-         * Method, that emits EVENT, from EVENT file.
-         * @param {object} file Object of EVENT file.
-         */
-        addFileToPage_event(file) {
-            tabSignal.emit(file.name);
-            file.appended = true;
-            this.appendLog("Appended signal" + file.name);
-
-            return this.addToPage();
-        }
-        /**
-         * Method, that handles adding of file (of different types) to the html document.
-         * @param {object} file File, that should be added to the html document.
-         */
-        addFileToPage(file) {
-            try {
-                let handler = 'addFileToPage_' + file.type;
-                if(this[handler] && typeof this[handler] == 'function') {
-                    return this[handler](file);
-                }
-            }
-            catch (exception) {
-                this.appendError(exception, {name:file.url, type:'error'});
-                debugger;
-            }
-        }
-        /**
-         * Method, that adds sorted filed to the html documnet.
-         */
-        addToPage() {
-            let files = this.files_to_load_sorted;
-
-            if(!files) {
-                files = this.files_to_load_sorted = this.getSortedFiles();
-            }
-
-            let last_file;
-
-            for(let i in files) {
-                let file = files[i];
-
-                if(file.appended) {
-                    last_file = file;
-                    continue;
-                }
-
-                if(file.status!= 200) {
-                    return;
-                }
-
-                if(file.appending === true && !file.appended) {
-                    setTimeout(() => {
-                        this.addToPage();
-                    }, 200);
-                    return;
-                }
-
-                if(last_file && !last_file.appended) {
-                    setTimeout(() => {
-                        this.addToPage();
-                    }, 200);
-                    return;
-                }
-
-                if(file.status == 200) {
-                    if(file.appending === true && file.appended !== true) {
-                        setTimeout(() => {
-                            this.addToPage();
-                        }, 200);
-                        return;
-                    }
-
-                    file.appending = true;
-
-                    return this.addFileToPage(file);
-                }
-            }
         }
         /**
          * Method, that adds logs of files loading.
@@ -793,6 +392,8 @@
          * @param {object} extendData Additional logging message.
          */
         appendError(exception, extendData) {
+            this.errors.push(exception);
+
             try {
                 console.error(exception);
 
@@ -825,88 +426,175 @@
             }
         }
         /**
-         * Method, that gets file content (loads it or gets from cache).
-         * @param {object} item File object.
+         * Method, that creates DOM element for file content.
+         * @param {string} type Type (tag) of DOM element.
+         * @param {array} attributes Array of objects -
+         * DOM element attributes(key, value).
+         * @param {object} props Object with properties of DOM element.
          */
-        loadData(item) {
-            if(item.type == 'event') {
-                item.status = 200;
-                this.addToPage();
+        createFileDomElement(type, attributes, props) {
+            let el = document.createElement(type);
+
+            attributes.forEach(attr => {
+                el.setAttribute(attr.key, attr.value);
+            });
+
+            for(let key in props) {
+                el[key] = props[key];
+            }
+
+            return el;
+        }
+        /**
+         * Method, that appends files synchronously (in 'priority' order) to the page.
+         * Firstly, current method adds to the page file with '0' index, then it appends file with '1' index and so on.
+         * @param {array} files Resource list.
+         * @param {array} response List of responses of files loading.
+         * @param {number} index List index of element from files and response arrays.
+         */
+        appendFilesSync(files, response, index=0) {
+            if(this.errors.length > 0) {
                 return;
             }
 
-            if(!this.loading_progress.steps_sum) {
-                this.loading_progress.steps_sum = 0;
-                this.loading_progress.step = 0;
+            let item = files[index];
+            let handler = 'appendFile_' + item.type;
+            if(this[handler]) {
+                response[index].text().then(content => {
+                    this[handler](item, content);
+                    this.appendLog('File was appended to the page - "' + item.name +'"');
+
+                    if(index + 1 == files.length) {
+                        this.setAppLoadingProgress(100);
+                        tabSignal.emit('resource.loaded');
+
+                        tabSignal.connect('app.version.updated', () => {
+                            let text = 'Oops! It looks like version of current page has become outdated. Please, reload the page.';
+                            alert(text);
+                        });
+
+                        window.addEventListener('storage', function(e) {
+                            if(window.gui_version != localStorage.getItem('gui_version')) {
+                                tabSignal.emit('app.version.updated');
+                            }
+                        });
+                    } else {
+                        let prog = Math.floor(index + 1/files.length * 100);
+                        this.setAppLoadingProgress(prog);
+                        this.appendFilesSync(files, response, index + 1);
+                    }
+                });
+            }
+        }
+        /**
+         * Method, that appends JS type file to the page.
+         * @param {object} file Object with file properties (type, (name)url).
+         * @param {string} content File's content.
+         */
+        appendFile_js(file, content) {
+            let attributes = [
+                {key: "type", value: "text/javascript"},
+                {key: "data-url", value: file.name},
+            ];
+            let props = {
+                innerHTML: content,
+            };
+
+            let link = this.createFileDomElement("script", attributes, props);
+            document.getElementsByTagName("head")[0].appendChild(link);
+        }
+        /**
+         * Method, that appends CSS type file to the page.
+         * @param {object} file Object with file properties (type, (name)url).
+         * @param {string} content File's content.
+         */
+        appendFile_css(file, content) {
+            let attributes = [
+                {key: "rel", value: "stylesheet"}, {key: "type", value: "text/css"},
+                {key: "media", value: "text/css"}, {key: "data-url", value: file.name},
+            ];
+            let props = {
+                rel: 'stylesheet',
+                type: 'text/css',
+                media: 'all',
+                innerHTML: content.replace(
+                    /\.\.\/fonts/gmi, hostname + window.guiStaticPath + "fonts"
+                ),
+            };
+
+            let link = this.createFileDomElement("style", attributes, props);
+
+            document.getElementsByTagName("head")[0].appendChild(link);
+        }
+        /**
+         * Method, that appends TPL type file to the page.
+         * @param {object} file Object with file properties (type, (name)url).
+         * @param {string} content File's content.
+         */
+        appendFile_tpl(file, content) {
+            document.getElementsByTagName("head")[0].innerHTML += content;
+        }
+        /**
+         * Method checks, that all files were loaded with 200 status.
+         * @param {array} response Array with responses of files loading.
+         * @return {boolean}
+         */
+        checkAllFilesLoaded(response) {
+            for (let index in response) {
+                let item = response[index];
+
+                if (item.status != 200) {
+                    throw new Error(item.status + ' error occurred during file loading - "' + item.url + '"');
+                }
             }
 
-            this.loading_progress.steps_sum++;
+            return true;
+        }
+        /**
+         * Method, that loads all files form resource_list.
+         * Method returns promise of files loading.
+         */
+        loadAllFiles() {
+            let promises = [];
 
-            this.files_cache.getFile(item.url).then(file => {
-                console.log("use from cache");
-                item.response = file.data;
-                this.loading_progress.step++;
-                let prog = this.loading_progress.step/this.loading_progress.steps_sum;
-                this.setLoadingProgress(prog * 100);
-                item.status = 200;
-                this.addToPage();
-            }).catch(error => {
-                let request = new XMLHttpRequest();
+            for (let index in this.resource_list) {
+                let item = this.resource_list[index];
+                promises.push(fetch(item.name));
+            }
 
-                request.onreadystatechange = () => {
-                    if (!(request.readyState === 4 && request.status === 200)) {
-                        return;
-                    }
-
-                    item.response = request.responseText;
-                    this.loading_progress.step++;
-                    let prog = this.loading_progress.step/this.loading_progress.steps_sum;
-                    this.setLoadingProgress(prog * 100);
-                    item.status = request.status;
-                    this.addToPage();
-                    this.files_cache.setFile(item.url, request.responseText);
-                };
-
-                request.open("GET", item.url);
-
-                request.send();
-            });
+            return Promise.all(promises);
         }
         /**
          * Method, that init files loading.
          */
         onReady() {
             console.log("onReady");
-            this.setLoadingProgress(0);
 
-            this.resource_list.push(
-                {prioritet:10000, type:'event', name: "resource.loaded"}
-            );
+            this.loading = true;
+            this.setLoadingOperation('loading files');
+            this.setFilesLoadingProgress();
 
-            for(let i in this.resource_list) {
-                let item = Object.assign({}, this.resource_list[i]);
-
-                item.url = hostname + item.name;
-                item.status = 0;
-                item.index =+ i;
-
-                this.files_to_load[item.url] = item;
-            }
-
-            for(let i in this.files_to_load) {
-                this.loadData(this.files_to_load[i]);
-            }
+            this.loadAllFiles().then(response => {
+                this.loading = false;
+                this.setLoadingOperation('loading app');
+                if(this.checkAllFilesLoaded(response)) {
+                    this.appendLog('All static files were successfully loaded');
+                    this.appendFilesSync(this.resource_list, response);
+                }
+            }).catch(error => {
+                this.loading = false;
+                this.appendError(error);
+                throw error;
+            });
         }
     }
 
     ///////////////////////////////////code execution/////////////////////////////////////
-
-    window.guiFilesCache = new FilesCache({ use_cache: useCache() });
-    window.guiFilesLoader = new FilesLoader(window.guiFilesCache, window.resourceList);
+    window.guiFilesLoader = new FilesLoader(window.resourceList);
 
     if (localStorage['gui_version'] !== gui_version) {
         localStorage['gui_version'] = gui_version;
-        window.guiFilesCache.deleteAllCacheAndUpdatePage();
+        cleanCacheAndReloadPage();
     } else {
         localStorage['gui_version'] = gui_version;
 
@@ -915,3 +603,4 @@
         window.guiFilesLoader.onReady();
     }
 </script>
+{% endcache %}

@@ -1,18 +1,23 @@
 {% load request_static %}
 {% load i18n %}
+{% load cache %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 {% block head %}
 <head>
     {% block meta %}
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <meta name="robots" content="NONE,NOARCHIVE" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
     {% endblock %}
 
 
     {% block title %}<title>{% if name %}{{ name }} – {% endif %}{{ project_gui_name }}</title>{% endblock %}
+
+    {% block flavicon %}
+        <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
+    {% endblock %}
 
     {% block gui_init_scripts %}{% endblock %}
 
@@ -30,9 +35,6 @@
             {% block bootstrap_theme %}
             {% endblock %}
 
-            {% block flavicon %}
-                <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
-            {% endblock %}
 
             {% block custom_style %}
             {% endblock %}
@@ -46,6 +48,36 @@
     {% endblock %}
 
     {% block common_sciprt %}
+    {% endblock %}
+
+    {% block pwa_block %}
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="/manifest.json">
+        <!-- Theme color for PWA -->
+        <meta name="theme-color" content="{{ manifest_object.data.theme_color }}">
+
+       {% block pwa_icons %}
+            <!-- Icons for PWA -->
+            {% cache block_timeout pwa_icons_block gui_version %}
+            {% for icon in manifest_object.data.icons %}
+                <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+                <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+            {% endfor %}
+            {% endcache %}
+        {% endblock %}
+
+        <!-- Registers Service Worker -->
+        <script>
+            // if browser supports Service Worker, code below register Service Worker instance.
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register("/service-worker.js")
+                  .then(registration => {
+                  registration.update();
+              }).catch(error => {
+                 console.error('Service Worker registration failed with ' + error);
+              });
+            }
+        </script>
     {% endblock %}
 </head>
 {% endblock %}
