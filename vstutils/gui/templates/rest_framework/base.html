@@ -1,1 +1,16 @@
 {% extends "rest_framework/rest_base.html" %}
+{% load request_static %}
+
+{% block resource_list %}
+    <script src="{% static_path 'js/libs/tabSignal.js' %}?v={{gui_version}}"></script>
+
+    <script>
+        window.resourceList = [
+            {% for file in static_files_list %}
+                {% if file.api %}
+                    { prioritet: {{ file.prioritet }}, type: '{{ file.type }}', name: '{% static file.name %}?v={{gui_version}}'},
+                {% endif %}
+            {% endfor %}
+        ]
+    </script>
+{% endblock %}
