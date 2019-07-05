@@ -1,6 +1,6 @@
 from django.conf import settings
 from ..utils import import_class
-from ..tools import multikeysort
+from ..tools import multikeysort  # pylint: disable=import-error
 from .. import __version__
 
 
