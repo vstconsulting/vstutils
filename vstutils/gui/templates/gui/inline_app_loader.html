@@ -1,3 +1,5 @@
+{% load cache %}
+{% cache block_timeout inline_app_loader_block gui_version %}
 <script type="text/javascript">
     /**
      * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
@@ -444,7 +446,7 @@
             return el;
         }
         /**
-         * Method, that appends files synchronously (in 'prioritet' order) to the page.
+         * Method, that appends files synchronously (in 'priority' order) to the page.
          * Firstly, current method adds to the page file with '0' index, then it appends file with '1' index and so on.
          * @param {array} files Resource list.
          * @param {array} response List of responses of files loading.
@@ -601,3 +603,4 @@
         window.guiFilesLoader.onReady();
     }
 </script>
+{% endcache %}

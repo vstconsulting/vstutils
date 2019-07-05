@@ -11,7 +11,8 @@ gui_version = "_".join(map(str, [
     __version__
 ]))
 static_path = getattr(settings, 'STATIC_URL', '/static/')
-static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['prioritet'])
+static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['priority'])
+debug_enabled = getattr(settings, 'DEBUG', False)
 
 
 def settings_constants(request):
@@ -22,7 +23,7 @@ def settings_constants(request):
         "docs_url": getattr(settings, 'DOC_URL', '/docs/'),
         "has_docs": getattr(settings, 'HAS_DOCS', False),
         "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
-        "debug": getattr(settings, 'DEBUG', False)
+        "debug": debug_enabled
     }
 
 
@@ -48,7 +49,8 @@ def project_args(request):
 def pwa_context(request):
     return {
         "manifest_object": manifest_object,
-        "static_files_list": static_list
+        "static_files_list": static_list,
+        "block_timeout": 86400 if not debug_enabled else 1,
     }
 
 

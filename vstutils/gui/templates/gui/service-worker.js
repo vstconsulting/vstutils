@@ -1,4 +1,6 @@
 //{% load request_static %}
+//{% load cache %}
+//{% cache block_timeout service_worker_block gui_version %}
 //{% autoescape off %}
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
 
@@ -96,3 +98,4 @@ self.addEventListener('fetch', (event) => {
     }
 });
 //{% endautoescape %}
+//{% endcache %}

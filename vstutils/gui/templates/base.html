@@ -1,5 +1,6 @@
 {% load request_static %}
 {% load i18n %}
+{% load cache %}
 <!DOCTYPE html>
 <html lang="en">
 {% block head %}
@@ -57,10 +58,12 @@
 
        {% block pwa_icons %}
             <!-- Icons for PWA -->
+            {% cache block_timeout pwa_icons_block gui_version %}
             {% for icon in manifest_object.data.icons %}
                 <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
                 <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
             {% endfor %}
+            {% endcache %}
         {% endblock %}
 
         <!-- Registers Service Worker -->

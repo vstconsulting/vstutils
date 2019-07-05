@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load request_static %}
+{% load cache %}
 
 {% block gui_init_scripts %}
     {% if user.is_authenticated %}
@@ -59,6 +60,7 @@
 
 {% block style %}
     {% block gui_init_inline_styles %}
+        {% cache block_timeout files_loader_styles_block gui_version %}
         <style>
             #LoadingProgressBar *::-webkit-scrollbar {
                 width: 0px;
@@ -231,6 +233,7 @@
             }
 
         </style>
+        {% endcache %}
     {% endblock %}
 
     {% block bootstrap_theme %}
@@ -249,11 +252,13 @@
 {% block resource_list %}
     <script>
         window.resourceList = [
+            {% cache block_timeout static_files_spa_list_block gui_version %}
             {% for file in static_files_list %}
                 {% if file.spa %}
-                    { prioritet: {{ file.prioritet }}, type: '{{ file.type }}', name: '{% static file.name %}?v={{gui_version}}'},
+                    { priority: {{ file.priority }}, type: '{{ file.type }}', name: '{% static file.name %}?v={{gui_version}}'},
                 {% endif %}
             {% endfor %}
+            {% endcache %}
         ];
     </script>
 {% endblock %}
