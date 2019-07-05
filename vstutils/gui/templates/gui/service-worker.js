@@ -89,13 +89,7 @@ self.addEventListener('fetch', (event) => {
 
     if (request.method === 'GET' && request.headers.get('accept').includes('text/html')) {
         event.respondWith(
-            fetch(request).catch((error) =>{
-                console.error(
-                    '[onfetch] Failed. Serving cached offline fallback ' +
-                    error
-                );
-                return caches.match(OFFLINE_PAGE);
-            })
+            fetch(request).catch((error) => caches.match(OFFLINE_PAGE))
         );
     }
 });
