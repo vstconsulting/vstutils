@@ -67,7 +67,12 @@
         <script>
             // if browser supports Service Worker, code below register Service Worker instance.
             if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register("/service-worker.js");
+              navigator.serviceWorker.register("/service-worker.js")
+                  .then(registration => {
+                  registration.update();
+              }).catch(error => {
+                 console.error('Service Worker registration failed with ' + error);
+              });
             }
         </script>
     {% endblock %}

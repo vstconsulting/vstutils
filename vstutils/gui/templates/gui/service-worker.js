@@ -2,6 +2,8 @@
 //{% autoescape off %}
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
 
+workbox.core.skipWaiting();
+workbox.core.clientsClaim();
 /**
  * Array of static files paths.
  * These files will be added to the page by JS.

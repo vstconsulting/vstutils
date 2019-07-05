@@ -465,6 +465,17 @@
                     if(index + 1 == files.length) {
                         this.setAppLoadingProgress(100);
                         tabSignal.emit('resource.loaded');
+
+                        tabSignal.connect('app.version.updated', () => {
+                            let text = 'Oops! It looks like version of current page has become outdated. Please, reload the page.';
+                            alert(text);
+                        });
+
+                        window.addEventListener('storage', function(e) {
+                            if(window.gui_version != localStorage.getItem('gui_version')) {
+                                tabSignal.emit('app.version.updated');
+                            }
+                        });
                     } else {
                         let prog = Math.floor(index + 1/files.length * 100);
                         this.setAppLoadingProgress(prog);
