@@ -16,19 +16,23 @@ const STATIC_FILES_LIST = [
 /**
  * Path of Offline fallback page.
  */
+//{% block offline_page %}
 const OFFLINE_PAGE = '/offline.html';
+//{% endblock %}
 
 /**
  * Path to the favicon file.
  */
+//{% block favicon %}
 const FAVICON = "{% static 'img/logo/favicon.ico' %}";
+//{% endblock %}
 
 /**
  * Array with paths of additional files, that should precached.
  */
-const ADDITIONAL_FILES_LIST = [
-    "{% static 'img/logo/vertical.png' %}",
-];
+//{% block resource_list %}
+const ADDITIONAL_FILES_LIST = [];
+//{% endblock %}
 
 /**
  * Array, that store paths of files, that should be precached.
