@@ -1,0 +1,18 @@
+[run]
+source = {{project_name}}
+parallel = True
+concurrency =
+    thread
+    multiprocessing
+omit =
+    *.tox/*
+    *setup.py
+    test.py
+    */{{project_name}}/__main__.py
+    */{{project_name}}/wsgi.py
+
+[report]
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    nocv

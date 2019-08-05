@@ -1,2 +1,29 @@
 {{project_gui_name}}
 {{project_gui_name_head_lines}}
+
+
+GUI
+---
+
+* Run: `python -m {{project_name}} web`
+* Stop: `python -m {{project_name}} web stop=/tmp/{{project_name}}_web.pid`
+
+Before first run, you should run:
+
+* `python -m {{project_name}} migrate`
+* `python -m {{project_name}} createsuperuser`
+
+
+Tests
+-----
+
+Just run `tox` in project directory.
+Read more: `https://tox.readthedocs.io/en/latest/`_.
+
+
+Build
+-----
+
+* Install `vstutils`.
+* Run `python setup.py compile`.
+* Install or send to PyPI `.dist/{{project_name}}-[version].tar.gz`.

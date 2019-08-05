@@ -1,0 +1,25 @@
+[uwsgi]
+# You can setup some default uwsgi settings for project.
+# name of prject
+lib_name = {{project_name}}
+program_name = %(lib_name)
+
+# python module with Polemarch (should be in Python classpath)
+module = %(program_name).wsgi:application
+
+# number of workers
+processes = %k
+
+# number of threads per worker
+threads = 2
+
+# PID-file for service
+pidfile = /tmp/%(program_name)_web.pid
+
+# Fix mime types
+mimefile = /etc/mime.types
+
+# system settings.ini
+if-exists = /etc/%(program_name)/settings.ini
+ini = %(_)
+endif =

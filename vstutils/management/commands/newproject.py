@@ -19,15 +19,22 @@ class Command(BaseCommand):
         'project': [
             '__init__.py',
             '__main__.py',
-            'settings.py'
+            'settings.ini',
+            'settings.py',
+            'web.ini',
+            'wsgi.py',
         ],
         '': [
-            'test.py',
-            'setup.py',
-            'setup.cfg',
+            '.coveragerc',
+            '.pep8',
             'MANIFEST.in',
-            'requirements.txt',
             'README.rst',
+            'requirements.txt',
+            'requirements-test.txt',
+            'setup.cfg',
+            'setup.py',
+            'test.py',
+            'tox.ini',
         ]
     }
 

@@ -1,0 +1,3 @@
+[worker]
+logfile = /dev/null
+pidfile = /tmp/{{project_name}}_worker.pid
