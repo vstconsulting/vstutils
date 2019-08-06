@@ -43,66 +43,252 @@ function testdone(name, callback) {
 }
 
 /**
- * Function adds report about tests execution to the page.
- */
-function saveReport() {
-    $("body").html('<div id="qunit-saveReport"></div><div id="qunit">'+$("#qunit").html()+'</div>');
-    $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
-    console.log("saveReport()  was called.");
-}
-
-/**
  * Array, that stores qUnit tests of application.
  */
 window.qunitTestsArray = {};
 
 /**
- * Function adds qUnit to the page and starts tests execution.
+ * Class that stores data connected with test execution status.
  */
-function injectQunit() {
-    $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
-    $("body").append('<script src="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>');
-    $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>');
+class TestsRunner {
+    /**
+     * Constructor of 'TestsRunner' class.
+     */
+    constructor() {
+        /**
+         * Total amount of tests, that should be executed.
+         * @type {number}
+         */
+        this.amount = 0;
+        /**
+         * Array, that stores objects with info about test execution.
+         * One test - one object.
+         * @type {Array}
+         */
+        this.executed_tests = [];
+        /**
+         * Property, that means, that are tests running right now or not.
+         * @type {boolean}
+         */
+        this.running = false;
+    }
 
-    let intervalId = setInterval(function() {
-        if(!window.QUnit) {
-            return;
+    /**
+     * Method, that saves total amount of tests, that should be executed.
+     * @param {number} amount.
+     */
+    setAmount(amount) {
+        this.amount = amount;
+    }
+
+    /**
+     * Method, that saves test execution info.
+     * @param {object} result Object with info about test execution.
+     */
+    addTestResult(result) {
+        this.executed_tests.push(result);
+    }
+
+    /**
+     * Method, that sets running value.
+     * @param {boolean} value.
+     */
+    setRunning(value) {
+        this.running = value;
+    }
+
+    /**
+     * Method, that returns number of running test.
+     * @return {number}
+     */
+    numberOfRunningTest() {
+        return this.executed_tests.length;
+    }
+
+    /**
+     * Method, that returns amount of remain tests.
+     * @return {number}
+     */
+    amountOfRemainTests() {
+        return this.amount - this.executed_tests.length;
+    }
+
+    /**
+     * Method, that returns true if all tests were executed.
+     * @return {boolean}
+     */
+    allTestsRun() {
+        return this.amount == this.executed_tests.length;
+    }
+
+    /**
+     * Method, that returns true if all executed tests were passed.
+     * @return {boolean}
+     */
+    allTestsPassed() {
+        return !this.executed_tests.some(test => test.passed == false);
+    }
+
+    /**
+     * Method, that returns total runtime of executed tests.
+     * @return {number} Time in milliseconds.
+     */
+    getTotalRuntime() {
+        return this.executed_tests.reduce((counter, current) => {
+            return counter += current.runtime;
+        }, 0);
+    }
+
+    /**
+     * Method, that returns array with failed tests info objects.
+     * @return {array}
+     */
+    getFailedTests() {
+        return this.executed_tests.filter(test => !test.passed);
+    }
+
+    /**
+     * Method, that returns object with amount info about executed tests.
+     * returns following object {
+     *   total: {number},
+     *   passed: {number},
+     *   failed: {number},
+     * }.
+     */
+    getTestsAmountInfo() {
+        return this.executed_tests.reduce((counter, current) => {
+            counter.total ++;
+            counter[current.passed ? 'passed' : 'failed'] ++;
+            return counter;
+        }, {total: 0, passed: 0, failed: 0});
+    }
+
+    /**
+     * Method, that returns object with amount info about assertions made during executed tests.
+     * returns following object {
+     *   total: {number},
+     *   passed: {number},
+     *   failed: {number},
+     * }.
+     */
+    getAssertionsAmountInfo() {
+        return this.executed_tests.reduce((counter, current) => {
+            ['total', 'passed', 'failed'].forEach(prop => {counter[prop] += current.assertions[prop]});
+            return counter;
+        }, {total: 0, passed: 0, failed: 0});
+    }
+
+    /**
+     * Method, that returns current tests status. One of the ['WAITING', 'RUNNING', 'EXECUTED].
+     * @return {string}
+     */
+    getTestsStatus() {
+        if(this.running) {
+            return 'RUNNING';
         }
 
-        console.log("Start of qUnit tests.");
-        clearInterval(intervalId);
+        if(!this.running && this.executed_tests.length > 0) {
+            return 'EXECUTED';
+        }
 
-        QUnit.done(function( details ) {
-            console.log( "Total: "+ details.total+ " Failed: "+ details.failed+ " Passed: "+ details.passed+ " Runtime: "+ details.runtime );
-        });
+        return 'WAITING';
+    }
 
-        QUnit.testDone(function(details) {
-            let result = {
-                "Module name": details.module,
-                "Test name": details.name,
-                "Assertions": {
-                    "Total": details.total,
-                    "Passed": details.passed,
-                    "Failed": details.failed,
-                },
-                "Skipped": details.skipped,
-                "Runtime": details.runtime,
-            };
+    /**
+     * Method, that return reports about tests execution.
+     * @return {string}
+     */
+    getReport() {
+        let tests = this.getTestsAmountInfo();
+        let assertions = this.getAssertionsAmountInfo();
 
-            if(!syncQUnit.nextTest()) {
-                saveReport();
-                testdone("ok-done", window.close);
+        return 'Tests status: ' + this.getTestsStatus() + '. \n \n' +
+            'Test execution runtime: ' + this.getTotalRuntime() / 1000 + ' seconds. \n \n' +
+            'Total tests amount: ' + this.amount + '. \n \n' +
+            'Executed tests info: \n' +
+            '  - Total:  '  + tests.total + '. \n' +
+            '  - Passed: '  + tests.passed + '. \n' +
+            '  - Failed: '  + tests.failed + '. \n \n' +
+            'Executed assertions info: \n' +
+            '  - Total:  '  + assertions.total + '. \n' +
+            '  - Passed: '  + assertions.passed + '. \n' +
+            '  - Failed: '  + assertions.failed + '.';
+    }
+
+    /**
+     * Method, that loads qUnit lib files and runs tests execution.
+     */
+    runTests() {
+        console.log('Tests status: ' + this.getTestsStatus() + '.');
+
+        $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
+        $("body").append('<script src="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>');
+        $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>');
+
+        let intervalId = setInterval(() => {
+            if(!window.QUnit) {
+                return;
             }
-        });
 
-        for(let i in window.qunitTestsArray) {
-            window.qunitTestsArray[i].test.call();
+            console.log("Start of qUnit tests.");
+            clearInterval(intervalId);
+
+            QUnit.done(details => {
+                this.setRunning(false);
+                console.log(this.getReport());
+            });
+
+            QUnit.testDone(details => {
+                let result = {
+                    module_name: details.module,
+                    test_name: details.name,
+                    assertions: {
+                        total: details.total,
+                        passed: details.passed,
+                        failed: details.failed,
+                    },
+                    skipped: details.skipped,
+                    runtime: details.runtime,
+                    passed: details.total == details.passed,
+                };
+
+                this.addTestResult(result);
+
+                if(!syncQUnit.nextTest()) {
+                    this.showReport();
+                    testdone("ok-done", window.close);
+                }
+            });
+
+            for(let i in window.qunitTestsArray) {
+                window.qunitTestsArray[i].test.call();
+            }
+
+            this.setAmount(syncQUnit.testsArray.length);
+
+            this.setRunning(true);
+
+            syncQUnit.nextTest();
+
+            console.log('Tests status: ' + this.getTestsStatus()+ '.');
+
+        }, 1000);
+    }
+
+    /**
+     * Method, that adds report about tests execution to the page.
+     */
+    showReport() {
+        $("body").html('<div id="qunit-saveReport"></div><div id="qunit">'+$("#qunit").html()+'</div>');
+        $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
+        document.getElementById("qunit-urlconfig-hidepassed").onclick = function() {
+            let elements = Array.from(document.getElementById('qunit-tests').getElementsByClassName('pass'));
+            elements.forEach(el => {el.hidden = this.checked});
         }
-
-        syncQUnit.nextTest();
-
-    }, 1000);
+    }
 }
+
+var _guiTestsRunner = new TestsRunner();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

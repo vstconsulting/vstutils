@@ -139,11 +139,28 @@ img {
     font-size: 24px;
 }
 
-.section h2 {
+.section h2, .section h3, section h4, section h5, section h6 {
     font-size: 22px;
     font-weight: 600;
     margin-top: 20px;
 }
+
+.section h3 {
+    font-size: 20px;
+}
+
+.section h4 {
+    font-size: 18px;
+}
+
+.section h5 {
+    font-size: 16px;
+}
+
+.section h6 {
+    font-size: 14px;
+}
+
 
 .highlight pre {
     background-color: #f7f7f9;

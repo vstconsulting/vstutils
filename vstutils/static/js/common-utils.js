@@ -1,3 +1,46 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+// Block of code for tests.
+//////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Class, that loads Tests files.
+ */
+class TestsFilesLoader extends FilesLoader {
+    appendFilesSync(files, response, index=0) {
+        let item = files[index];
+        let handler = 'appendFile_' + item.type;
+        if(this[handler]) {
+            response[index].text().then(content => {
+                this[handler](item, content);
+
+                if(index + 1 == files.length) {
+                    window._guiTestsRunner.runTests();
+                } else {
+                    this.appendFilesSync(files, response, index + 1);
+                }
+            });
+        }
+    }
+
+    onReady() {
+        this.loadAllFiles().then(response => {
+            if(this.checkAllFilesLoaded(response)) {
+                this.appendFilesSync(this.resource_list, response);
+            }
+        }).catch(error => {
+            throw error;
+        });
+    }
+}
+
+// Function, that loads tests files and runs tests execution.
+function loadQUnitTests() {
+    return new TestsFilesLoader(
+        window.guiTestsFiles.map((url, index) => {
+            return {name: url + '?r=' + Math.random(), priority: index, type: 'js'};
+        })
+    ).onReady();
+}
+
 // List of Gui Testing Files
 if(!window.guiTestsFiles) {
     window.guiTestsFiles = [];
@@ -10,60 +53,9 @@ window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiFields.
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiSignals.js');
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiTests.js');
 window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js');
-
-// Runs tests
-function loadQUnitTests() {
-    loadAllUnitTests(window.guiTestsFiles);
-}
-
-// Loads and runs tests in strict order.
-function loadAllUnitTests(urls) {
-    let promises = [];
-
-    for(let index in urls) {
-        let promise_callbacks = {
-            resolve: undefined,
-            reject: undefined,
-        };
-
-        promises.push(
-            new Promise((resolve, reject) => {
-                promise_callbacks.resolve = resolve;
-                promise_callbacks.reject = reject;
-            })
-        );
-
-        let link = document.createElement("script");
-        link.setAttribute("type", "text/javascript");
-        link.setAttribute("src", urls[index] + '?r=' + Math.random());
-
-        link.onload = function(promise_callbacks) {
-            return function() {
-                promise_callbacks.resolve();
-            }
-        }(promise_callbacks);
-
-        document.getElementsByTagName("head")[0].appendChild(link);
-
-
-        break;
-    }
-
-    //@todo think about current function.
-    Promise.all(promises).then(() => {
-        // injectQunit();
-        if(urls.length == 1) {
-            return injectQunit();
-        }
-
-
-        urls.splice(0, 1);
-        loadAllUnitTests(urls);
-    });
-}
-
-
-
+//////////////////////////////////////////////////////////////////////////////////////////
+// EndBlock of code for tests.
+//////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Function to replace {.+?} in string to variables sended to this function,

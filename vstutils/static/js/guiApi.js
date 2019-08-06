@@ -126,7 +126,7 @@ class ApiConnector {
      * @return {promise} Promise of getting bulk request response.
      */
     sendBulk() {
-        let url = "/v2/_bulk/";
+        let url = "/" + api_version + "/_bulk/";
         let collector = $.extend(true, {}, this.bulk_collector);
         this.bulk_collector.bulk_parts = [];
         let bulk_data = [];
