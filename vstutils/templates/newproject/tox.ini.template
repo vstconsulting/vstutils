@@ -1,5 +1,5 @@
 [tox]
-envlist = py{36,37}-{coverage,install}
+envlist = flake,py{36,37}-{coverage,install}
 skipsdist = True
 whitelist_externals =
     rm

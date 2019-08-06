@@ -1517,10 +1517,8 @@ table{
     overflow: hidden;
 }
 
-.iziToast,
-.iziModal .iziModal-header-subtitle,
-.iziModal .iziModal-header-title {
-    font-family: 'Source Sans Pro','Lato',Tahoma,Arial;
+.iziToast, .iziModal {
+    font-family: inherit;
 }
 
 .content-wrapper, .right-side {
@@ -2151,7 +2149,6 @@ input[type=color]{
     background-color: var(--modal-bg-color);
     box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
     transition: all .3s ease;
-    font-family: Helvetica, Arial, sans-serif;
     overflow-y: auto;
     max-height: 100vh;
 }
