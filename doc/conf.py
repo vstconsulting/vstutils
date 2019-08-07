@@ -19,12 +19,10 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
-import django
 from vstutils.environment import prepare_environment
 
 
 prepare_environment()
-django.setup()
 
 # -- Project information -----------------------------------------------------
 
@@ -216,4 +214,4 @@ if os.path.exists(_mermaid_cmd):
     mermaid_pdfcrop = 'pdfcrop'
     mermaid_output_format = 'png'
 
-autodoc_mock_imports = ["django"]
+autodoc_mock_imports = ["django", "vstutils.tools"]

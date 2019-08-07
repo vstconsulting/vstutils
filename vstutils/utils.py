@@ -574,7 +574,7 @@ class model_lock_decorator(__LockAbstractDecorator):
         return super(model_lock_decorator, self).execute(func, *args, **kwargs)
 
 
-class Paginator(BasePaginator, BaseVstObject):
+class Paginator(BasePaginator):
     """
     Class for fragmenting the query for small queries.
     """
@@ -586,7 +586,7 @@ class Paginator(BasePaginator, BaseVstObject):
         :param chunk_size: -- size of the fragments.
         :type chunk_size: int
         """
-        chunk_size = chunk_size or self.get_django_settings("PAGE_LIMIT", None)
+        chunk_size = chunk_size or BaseVstObject().get_django_settings("PAGE_LIMIT", None)
         super(Paginator, self).__init__(qs, chunk_size)
 
     def __iter__(self):
