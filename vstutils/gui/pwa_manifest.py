@@ -13,10 +13,10 @@ class PWAManifest(object):
         "start_url": "./",
         "icons": []
     }
+    default_pwa_manifest.update(getattr(settings, 'PWA_MANIFEST', {}))
 
     def __init__(self, override_defaults=None):
-        self.manifest_data = dict(**self.default_pwa_manifest)
-        self.manifest_data.update(getattr(settings, 'PWA_MANIFEST', {}))
+        self.manifest_data = self.default_pwa_manifest.copy()
         self.manifest_data.update(override_defaults or {})
 
     @property
