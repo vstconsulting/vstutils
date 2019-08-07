@@ -74,6 +74,21 @@ def nested_action(name, arg=None, methods=None, manager_name=None, *args, **kwar
 
 
 def subaction(*args, **kwargs):
+    """
+    Decorator which wrap object method to subaction of viewset.
+
+    :param methods: -- List of allowed HTTP-request methods.
+    :type methods: list
+    :param detail: -- Flag which signalizing that this method is over one instance.
+    :type detail: bool
+    :param serializer_class: -- Serializer for this action.
+    :type serializer_class: vstutils.api.serializers.VSTSerializer
+    :param permission_classes: -- Tuple or list permission classes.
+    :param url_path: -- API-path name for this action.
+    :type url_path: str
+    :param description: -- Description for this action in OpenAPI.
+    :type description: str
+    """
     operation_description = kwargs.pop('description', None)
     response_code = kwargs.pop('response_code', None)
     response_serializer = kwargs.pop(
@@ -243,6 +258,61 @@ class BaseClassDecorator(object):
 
 
 class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
+    """
+    By default DRF does not support nested views.
+    This decorator solves this problem.
+
+    You need two or more models with nested relationship (Many-to-Many or Many-to-One)
+    and two viewsets. Decorator setups nested viewset to parent viesetclass and
+    generate paths in API.
+
+    :param name: -- Name of nested path. Also used as default name for related queryset.
+    :type name: str
+    :param arg: -- Name of nested primary key field.
+    :type arg: str
+    :param view: -- Nested viewset class.
+    :type view:
+        vstutils.api.base.ModelViewSetSet,
+        vstutils.api.base.HistoryModelViewSet,
+        vstutils.api.base.ReadOnlyModelViewSet
+    :param allow_append: -- Flag for allowing to append existed instances.
+    :type allow_append: bool
+    :param manager_name: -- Name of model-object attr which contains nested queryset.
+    :type manager_name: str
+    :param methods: -- List of allowed methods to nested view endpoints.
+    :type methods: list
+    :param subs: -- List of allowed subviews or actions to nested view endpoints.
+    :type subs: list,None
+
+
+    Example:
+
+        .. sourcecode:: python
+
+            from vstutils.api.decorators import nested_view
+            from vstutils.api.base import ModelViewSetSet
+            from . import serializers as sers
+
+
+            class StageViewSet(ModelViewSetSet):
+                model = sers.models.Stage
+                serializer_class = sers.StageSerializer
+
+
+            nested_view('stages', 'id', view=StageViewSet)
+            class TaskViewSet(ModelViewSetSet):
+                model = sers.models.Task
+                serializer_class = sers.TaskSerializer
+
+
+        This code generates api paths:
+
+         * `/tasks/` - GET,POST
+         * `/tasks/{id}/` - GET,PUT,PATCH,DELETE
+         * `/tasks/{id}/stages/` - GET,POST
+         * `/tasks/{id}/stages/{stages_id}/` - GET,PUT,PATCH,DELETE
+
+    """
     __slots__ = (
         'view',
         'allowed_subs',

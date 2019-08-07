@@ -1,4 +1,10 @@
 # pylint: disable=no-member,unused-argument
+"""
+Default serializer classes for web-api.
+Read more in Django REST Framework documentation for
+`Serializers <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_.
+"""
+
 from __future__ import unicode_literals
 
 import json
@@ -15,7 +21,11 @@ class BaseSerializer(serializers.Serializer):
 
 
 class VSTSerializer(serializers.ModelSerializer):
+    """
+    Default model serializer based on rest_framework.serializers.ModelSerializer.
+    """
     # pylint: disable=abstract-method
+
     serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
     serializer_field_mapping.update({
         models.CharField: fields.VSTCharField,
@@ -24,6 +34,7 @@ class VSTSerializer(serializers.ModelSerializer):
 
 
 class EmptySerializer(serializers.Serializer):
+    """ Default serializer for empty responses. """
 
     def create(self, validated_data):  # nocv
         return validated_data
@@ -94,12 +105,18 @@ class UserSerializer(VSTSerializer):
         ref_name = 'User'
 
     def create(self, data):
+        """ Create user from validated data. """
+
         if not self.context['request'].user.is_staff:
             raise exceptions.PermissionDenied  # nocv
-        valid_fields = ['username', 'password', 'is_active', 'is_staff',
-                        "email", "first_name", "last_name"]
-        creditals = {d: data[d] for d in valid_fields
-                     if data.get(d, None) is not None}
+        valid_fields = [
+            'username', 'password', 'is_active', 'is_staff',
+            "email", "first_name", "last_name"
+        ]
+        creditals = {
+            d: data[d] for d in valid_fields
+            if data.get(d, None) is not None
+        }
         raw_passwd = self.initial_data.get("raw_password", "False")
         user = super(UserSerializer, self).create(creditals)
         if not raw_passwd == "True":

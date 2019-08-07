@@ -1,3 +1,7 @@
+"""
+Default ViewSets for web-api.
+"""
+
 import sys
 import logging
 import traceback
@@ -254,8 +258,13 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
 
 class CopyMixin(GenericViewSet):
+    """ Mixin for viewsets which adds `copy` endpoint to view. """
+
+    #: Value of prefix which will be added to new instance name.
     copy_prefix = 'copy-'
+    #: Name of field which will get a prefix.
     copy_field_name = 'name'
+    #: List of related names which will be copied to new instance.
     copy_related = []
 
     def copy_instance(self, instance):
@@ -277,7 +286,7 @@ class CopyMixin(GenericViewSet):
     def copy(self, request, **kwargs):
         # pylint: disable=unused-argument
         '''
-        Copy instance with deps.
+        Endpoint which copy instance with deps.
         '''
         instance = self.copy_instance(self.get_object())
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -288,6 +297,44 @@ class CopyMixin(GenericViewSet):
 
 class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
     # pylint: disable=useless-super-delegation
+
+    """
+    A viewset that provides default `create()`, `retrieve()`, `update()`,
+    `partial_update()`, `destroy()` and `list()` actions under model.
+
+    :param model: -- DB model with data.
+    :type model: vstutils.model.BModel
+    :param serializer_class: -- Serializer for view of Model data.
+    :type serializer_class: vstutils.api.serializers.VSTSerializer
+    :param serializer_class_one: -- Serializer for view one instance of Model data.
+    :type serializer_class_one: vstutils.api.serializers.VSTSerializer
+    :param serializer_class_[endpoint]: -- Serializer for view of any endpoint like `.create`.
+    :type serializer_class_[endpoint]: vstutils.api.serializers.VSTSerializer
+
+
+    Examples:
+        .. sourcecode:: python
+
+            from vstutils.api.base import ModelViewSetSet
+            from . import serializers as sers
+
+
+            class StageViewSet(ModelViewSetSet):
+                # This is difference with DRF:
+                # we use model instead of queryset
+                model = sers.models.Stage
+                # Serializer for list view (view for a list of Model instances
+                serializer_class = sers.StageSerializer
+                # Serializer for page view (view for one Model instance).
+                # This property is not required, if its value is the same as `serializer_class`.
+                serializer_class_one = sers.StageSerializer
+                # Allowed to set decorator to custom endpoint like this:
+                # serializer_class_create - for create method
+                # serializer_class_copy - for detail endpoint `copy`.
+                # etc...
+
+    """
+
     def create(self, request, *args, **kwargs):
         return super(ModelViewSetSet, self).create(request, *args, **kwargs)
 
@@ -335,8 +382,11 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
-    pass
+    """ Default viewset like vstutils.api.base.ModelViewSetSet for readonly models. """
 
 
 class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
-    pass
+    """
+    Default viewset like ReadOnlyModelViewSet but for historical data
+    (allow to delete, but cannt create and update).
+    """

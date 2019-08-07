@@ -29,7 +29,7 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 
 def get_render(name, data, trans='en'):
     """
-    Render string based on template
+    Render string from template.
 
     :param name: -- full template name
     :type name: str,unicode
@@ -77,6 +77,25 @@ class ClassPropertyDescriptor(object):
 
 
 def classproperty(func):
+    """
+    Decorator which makes class method as class property.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import classproperty
+
+            class SomeClass:
+                some_value = None
+
+                @classproperty
+                def value(cls):
+                    return cls.some_value
+
+                @value.setter
+                def value(cls, new_value):
+                    cls.some_value = new_value
+    """
     if not isinstance(func, (classmethod, staticmethod)):
         func = classmethod(func)
     return ClassPropertyDescriptor(func)
@@ -116,6 +135,11 @@ class redirect_stdany(object):
 
 
 class Dict(collections.OrderedDict):
+    """
+    Wrapper over `collections.OrderedDict` which
+    return JSON on conversion to string.
+    """
+
     def __repr__(self):  # nocv
         return self.__str__()
 
@@ -188,7 +212,7 @@ class tmp_file_context(object):
     """
     Context object for work with tmp_file.
     Auto close on exit from context and
-    remove if file stil exist.
+    remove if file still exist.
     """
     __slots__ = ('tmp',)
 
@@ -205,9 +229,6 @@ class tmp_file_context(object):
 
 
 class assertRaises(object):
-    """
-    Context for exclude rises
-    """
 
     def __init__(self, *args, **kwargs):
         """
@@ -235,6 +256,9 @@ class assertRaises(object):
 
 # noinspection PyUnreachableCode
 class raise_context(assertRaises):
+    """
+    Context for exclude exceptions.
+    """
 
     def execute(self, func, *args, **kwargs):
         with self.__class__(self._excepts, **self._kwargs):
@@ -265,6 +289,9 @@ class exception_with_traceback(raise_context):
 
 
 class BaseVstObject(object):
+    """
+    Default mixin-class for custom objects which needed to get settings and cache.
+    """
 
     @classmethod
     def get_django_settings(cls, name, default=None):
@@ -294,7 +321,7 @@ class BaseVstObject(object):
 
 class Executor(BaseVstObject):
     """
-    Command executor with realtime output write
+    Command executor with realtime output write.
     """
     __slots__ = 'output', '_stdout', '_stderr', 'env'
 
@@ -368,7 +395,7 @@ class Executor(BaseVstObject):
 
     def execute(self, cmd, cwd):
         """
-        Execute commands and output this
+        Execute commands and output this.
 
         :param cmd: -- list of cmd command and arguments
         :type cmd: list
@@ -681,6 +708,40 @@ class ModelHandlers(BaseVstObject):
 
 
 class ObjectHandlers(ModelHandlers):
+    """
+    Handlers wrapper for get objects from some settings structure.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import ObjectHandlers
+
+            '''
+            In `settings.py` you should write some structure:
+
+            SOME_HANDLERS = {
+                "one": {
+                    "BACKEND": "full.python.path.to.module.SomeClass"
+                },
+                "two": {
+                    "BACKEND": "full.python.path.to.module.SomeAnotherClass",
+                    "OPTIONS": {
+                        "some_named_arg": "value"
+                    }
+                }
+            }
+            '''
+
+            handlers = ObjectHandlers('SOME_HANDLERS')
+
+            # Get class handler for 'one'
+            one_backend_class = handlers['one']
+            # Get object of backend 'two'
+            two_obj = handlers.get_object()
+            # Get object of backend 'two' with overriding constructor named arg
+            two_obj_overrided = handlers.get_object(some_named_arg='another_value')
+
+    """
     def get_object(self, name, *args, **kwargs):
         opts = self.opts(name)
         opts.update(kwargs)
@@ -688,6 +749,7 @@ class ObjectHandlers(ModelHandlers):
 
 
 class URLHandlers(ObjectHandlers):
+    """ Object handler for GUI views. Uses `GUI_VIEWS` from settings.py. """
     settings_urls = ['LOGIN_URL', 'LOGOUT_URL']  # type: list
 
     def __init__(self, tp='GUI_VIEWS', *args, **kwargs):
@@ -717,7 +779,7 @@ class URLHandlers(ObjectHandlers):
 
     def get_object(self, name, *argv, **kwargs):
         """
-        Get url object tuple for url
+        Get url object tuple for urls.py
 
         :param name: url regexp from
         :type name: str

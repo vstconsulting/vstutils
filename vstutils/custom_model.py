@@ -147,6 +147,26 @@ class CustomQuerySet(BQuerySet):
 
 
 class ListModel(BaseModel):
+    """
+    Simple custom model which uses attribute `ListModel.data`
+    with dicts of models data. Usefull when you have simple list of data.
+
+    Examples:
+        .. sourcecode:: python
+
+            from vstutils.custom_model import ListModel, CharField
+
+
+            class Authors(ListModel):
+                name = CharField(max_length=512)
+
+                data = [
+                    {"name": "Sergey Klyuykov"},
+                    {"name": "Roman Akhmadullin"},
+                ]
+    """
+
+    #: List with data dicts. Empty by default.
     data = []
     objects = CustomQuerySet.as_manager()
 
@@ -160,6 +180,32 @@ class ListModel(BaseModel):
 
 
 class FileModel(ListModel):
+    """
+    Simple custom model which load data from YAML-file.
+    Path to the file stored in `FileModel.file_path` attribute.
+
+
+    Examples:
+        Source file stored in `/etc/authors.yaml` with content:
+
+        .. sourcecode:: YAML
+
+            - name: "Sergey Klyuykov"
+            - name: "Roman Akhmadullin"
+
+        Correct usage will be:
+
+        .. sourcecode:: python
+
+            from vstutils.custom_model import FileModel, CharField
+
+
+            class Authors(FileModel):
+                name = CharField(max_length=512)
+
+                file_path = '/etc/authors.yaml'
+
+    """
 
     class Meta:
         abstract = True

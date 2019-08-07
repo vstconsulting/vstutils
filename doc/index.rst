@@ -20,6 +20,7 @@ and also you will know how you can redefine some standard models, views and fiel
    :caption: Contents:
 
    quickstart
+   backend
    front-end
    redefine-front-end
    functions

@@ -1,3 +1,7 @@
+"""
+Additionals serializers fields for generating OpenAPI and GUI.
+"""
+
 import json
 import six
 from rest_framework.serializers import CharField, IntegerField
@@ -17,12 +21,14 @@ class VSTCharField(CharField):
 class FileInStringField(CharField):
     '''
     File type which saves as string.
+    Take effect only in GUI.
     '''
 
 
 class SecretFileInString(FileInStringField):
     '''
     File type which saves as string and should be hidden.
+    Take effect only in GUI.
     '''
     def __init__(self, **kwargs):
         kwargs['style'] = {'input_type': 'password'}
@@ -32,6 +38,7 @@ class SecretFileInString(FileInStringField):
 class AutoCompletionField(CharField):
     '''
     Field with autocomplite from list of objects.
+    Take effect only in GUI.
     '''
     __slots__ = 'autocomplete', 'autocomplete_property'
 
@@ -47,6 +54,7 @@ class AutoCompletionField(CharField):
 class DependEnumField(CharField):
     '''
     Field based on another field.
+    Take effect only in GUI.
     '''
     __slots__ = 'field', 'choices', 'types'
 
@@ -65,19 +73,22 @@ class DependEnumField(CharField):
 
 class TextareaField(CharField):
     '''
-    Field contained multiline string
+    Field contained multiline string.
+    Take effect only in GUI.
     '''
 
 
 class HtmlField(CharField):
     '''
-    Field contained html-text and marked as format:html
+    Field contained html-text and marked as format:html.
+    Take effect only in GUI.
     '''
 
 
 class FkField(IntegerField):
     '''
     Field what means where we got list.
+    Take effect only in GUI.
     '''
     __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent'
 
@@ -91,12 +102,14 @@ class FkField(IntegerField):
 class UptimeField(IntegerField):
     '''
     Field for some uptime(time duration), in seconds, for example.
+    Take effect only in GUI.
     '''
 
 
 class RedirectIntegerField(IntegerField):
     '''
-    Field for redirect by id
+    Field for redirect by id.
+    Take effect only in GUI.
     '''
 
     redirect = True
@@ -104,7 +117,8 @@ class RedirectIntegerField(IntegerField):
 
 class RedirectCharField(CharField):
     '''
-    Field for redirect by string
+    Field for redirect by string.
+    Take effect only in GUI.
     '''
 
     redirect = True

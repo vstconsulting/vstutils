@@ -19,6 +19,12 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
+import django
+from vstutils.environment import prepare_environment
+
+
+prepare_environment()
+django.setup()
 
 # -- Project information -----------------------------------------------------
 
@@ -45,6 +51,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autodoc',
     'sphinxcontrib.mermaid',
     'sphinxcontrib.httpdomain',
     'vstutils.api.doc_generator'
@@ -208,3 +215,5 @@ if os.path.exists(_mermaid_cmd):
     mermaid_cmd = _mermaid_cmd
     mermaid_pdfcrop = 'pdfcrop'
     mermaid_output_format = 'png'
+
+autodoc_mock_imports = ["django"]

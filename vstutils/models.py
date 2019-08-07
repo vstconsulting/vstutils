@@ -1,4 +1,8 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
+"""
+Default Django model classes overrided in `vstutils.models` module.
+"""
+
 from __future__ import unicode_literals
 import inspect
 from django.db import models
@@ -6,9 +10,11 @@ from .utils import Paginator
 
 
 class BQuerySet(models.QuerySet):  # noprj
-    '''
-    QuerySet class with basic operations.
-    '''
+    """
+    Represent a lazy database lookup for a set of objects.
+    Allows to override default iterable class by `custom_iterable_class` attr.
+    """
+
     use_for_related_fields = True
 
     @property
@@ -29,12 +35,20 @@ class BQuerySet(models.QuerySet):  # noprj
         del self.__iterable_class__
 
     def paged(self, *args, **kwargs):
+        """
+        Returns paginated data with custom Paginator-class.
+        By default, uses `PAGE_LIMIT` from global settings.
+        """
         return self.get_paginator(*args, **kwargs).items()
 
     def get_paginator(self, *args, **kwargs):
         return Paginator(self.filter(), *args, **kwargs)
 
     def cleared(self):
+        """
+        Filter queryset for models with attribute 'hidden' and
+        exclude all hidden objects.
+        """
         return (
             self.filter(hidden=False) if hasattr(self.model, "hidden")
             else self
@@ -57,15 +71,12 @@ class BQuerySet(models.QuerySet):  # noprj
 
 
 class BaseManager(models.Manager):  # noprj
-    '''
-    Base Manager class created from queryset
-    '''
 
     @classmethod
     def _get_queryset_methods(cls, queryset_class):
-        '''
+        """
         Django overrloaded method for add cyfunction.
-        '''
+        """
         def create_method(name, method):
             def manager_method(self, *args, **kwargs):
                 return getattr(self.get_queryset(), name)(*args, **kwargs)
@@ -90,9 +101,10 @@ class BaseManager(models.Manager):  # noprj
 
 
 class Manager(BaseManager.from_queryset(BQuerySet)):
-    '''
-    Default VSTUtils manager
-    '''
+    """
+    Default VSTUtils manager. Used by `BaseModel` and `BModel`.
+    Allows to use managers and querysets with cyfunctions-members.
+    """
 
 
 class BaseModel(models.Model):  # noprj
@@ -112,7 +124,33 @@ class BaseModel(models.Model):  # noprj
 
 
 class BModel(BaseModel):  # noprj
+    """
+    Default model class with usefull attributes.
+
+    Examples:
+        .. sourcecode:: python
+
+            from django.db import models
+            from vstutils.models import BModel
+
+
+            class Stage(BModel):
+                name = models.CharField(max_length=256)
+                order = models.IntegerField(default=0)
+
+                class Meta:
+                    default_related_name = "stage"
+                    ordering = ('order', 'id',)
+
+
+            class Task(BModel):
+                name = models.CharField(max_length=256)
+                stages = models.ManyToManyField(Stage)
+    """
+
+    #: Primary field for select and search in API.
     id         = models.AutoField(primary_key=True, max_length=20)
+    #: Usefull field for hidden data.
     hidden     = models.BooleanField(default=False)
 
     class Meta:
