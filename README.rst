@@ -9,11 +9,18 @@ and also provides the ability to generate documentation for the API based on the
 Quickstart
 ----------
 
-Read the docs (https://vstutils.readthedocs.io/en/latest/quickstart.html).
+Read the docs (https://vstutils.vstconsulting.net/).
 
-.. image:: https://readthedocs.org/projects/vstutils/badge/?version=latest
-    :target: https://vstutils.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+.. image:: https://gitlab.com/vstconsulting/vstutils/badges/master/pipeline.svg
+    :target: https://gitlab.com/vstconsulting/vstutils/commits/master
+    :alt: Pipeline status
+
+.. image:: https://gitlab.com/vstconsulting/vstutils/badges/master/coverage.svg
+    :target: https://gitlab.com/vstconsulting/vstutils/pipelines
+    :alt: Coverage report
+
+.. image:: https://badge.fury.io/py/vstutils.svg
+    :target: https://badge.fury.io/py/vstutils
 
 
 Projects
