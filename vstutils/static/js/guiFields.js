@@ -199,8 +199,9 @@ guiFields.integer = class IntegerField extends guiFields.base {
         let val = Number(value);
 
         if(isNaN(val)) {
-            throw "Error in integer.toInner()";
-        }
+            console.error( "Error in integer.toInner()");
+            return;
+         }
 
         return val;
     }
@@ -329,7 +330,7 @@ guiFields.choices = class ChoicesField extends guiFields.string {
             return value;
         }
 
-        throw "There is no appropriate choice in enum list";
+        console.error("There is no appropriate choice in enum list");
     };
     /**
      * Redefinition of string guiField method toInner.

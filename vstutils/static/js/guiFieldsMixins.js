@@ -3652,6 +3652,10 @@ var gui_fields_mixins = {
                  */
                 realField: undefined,
                 /**
+                 * Property, that stores previous instance of real field of current dynamic field.
+                 */
+                previous_realField: undefined,
+                /**
                  * Property, that stores previous parent values.
                  * It's needed for optimization of realField regeneration.
                  */
@@ -3672,11 +3676,17 @@ var gui_fields_mixins = {
                 for(let key in this.parent_values) {
                     if(data[key] !== this.parent_values[key]) {
                         this.parent_values = this.field._getParentValues(data);
+                        this.previous_realField = this.realField;
                         this.realField = this.field.getRealField(data);
 
-                        if(this.realField.options && this.value &&
-                            this.realField.options.save_value !== true) {
-                            this.cleanValue();
+                         if(this.realField.options && this.value !== undefined) {
+                             if(this.realField.options.save_value === false) {
+                                 this.cleanValue();
+                             } else if(this.realField.options.save_value === true) {
+
+                             } else if(this.previous_realField.options && this.realField.options.format !== this.previous_realField.options.format) {
+                                  this.cleanValue();
+                             }
                         }
                     }
                 }
