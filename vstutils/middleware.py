@@ -1,12 +1,52 @@
 import time
 import logging
 from django.conf import settings
+from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
 
 
-class BaseMiddleware(object):
+class BaseMiddleware(BaseVstObject):
+    """
+    Middleware base class for handling:
+
+    * Incoming requests by `.request_handler()`;
+    * Outgoing response before any calling on server by `.get_response_handler()`;
+    * Outgoing responses by `.handler()`.
+
+    Middleware must be added to `MIDDLEWARE` list in settings.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.middleware import BaseMiddleware
+            from django.http import HttpResponse
+
+
+            class CustomMiddleware(BaseMiddleware):
+                def request_handler(self, request):
+                    # Add header to request
+                    request.headers['User-Agent'] = 'Mozilla/5.0'
+                    return request
+
+                def get_response_handler(self, request):
+                    if not request.user.is_stuff:
+                        # Return 403 HTTP status for non-stuff users.
+                        # This request never gets in any view.
+                        return HttpResponse(
+                            "Access denied!",
+                            content_type="text/plain",
+                            status_code=403
+                        )
+                    return super(CustomMiddleware, self).get_response_handler(request)
+
+                def handler(self, request, response):
+                    # Add header to response
+                    response['Custom-Header'] = 'Some value'
+                    return response
+
+    """
     __slots__ = 'get_response', 'logger'
 
     def __init__(self, get_response):
@@ -15,22 +55,50 @@ class BaseMiddleware(object):
         super(BaseMiddleware, self).__init__()
 
     def get_setting(self, value):
-        '''
-        Return django setting or None
-        :param value: setting name
-        :return: django setting or None
-        '''
-        return getattr(settings, value, None)
+        return self.get_django_settings(value)
 
     def handler(self, request, response):  # nocv
         # pylint: disable=unused-argument
+
+        """
+        The response handler. Here, all the magic of
+        processing the response sent, insertion of headers to response, etc.
+
+        :param request: HTTP-request object.
+        :param response: HTTP-response object which will be sended to client.
+        :return: Handled response object.
+        """
+
         return response
 
+    def request_handler(self, request):
+        # pylint: disable=unused-argument
+
+        """
+        The request handler. Called before request will be handled by any view.
+
+        :param request: HTTP-request object which is wrapped from client request.
+        :return: Handled request object.
+        """
+
+        return request
+
     def get_response_handler(self, request):
+        """
+        Entrypoint for breaking or continuing request handling.
+        This function should return `django.http.HttpResponse` object
+        or result of parent class calling.
+
+        :param request: HTTP-request object which is wrapped from client request.
+        :return: `django.http.HttpResponse` object
+        """
         return self.get_response(request)
 
     def __call__(self, request):
-        return self.handler(request, self.get_response_handler(request))
+        return self.handler(
+            self.request_handler(request),
+            self.get_response_handler(request)
+        )
 
 
 class TimezoneHeadersMiddleware(BaseMiddleware):

@@ -49,3 +49,15 @@ Views
 
 .. automodule:: vstutils.api.decorators
     :members: nested_view,subaction
+
+
+Middlewares
+~~~~~~~~~~~
+
+By default, the Django `assumes <https://docs.djangoproject.com/en/2.2/topics/http/middleware/#writing-your-own-middleware>`_
+that the developer will develop itself Middleware class, but it is not always convenient.
+The vstutils library offers a convenient request handler class for elegant OOP development.
+Middlewares is needed to process incoming requests and sent responses before they reach the final destination.
+
+.. automodule:: vstutils.middleware
+    :members: BaseMiddleware

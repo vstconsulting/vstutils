@@ -2,6 +2,7 @@
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth
+from django.conf import settings
 
 
 class BaseView(TemplateView):
@@ -40,4 +41,4 @@ class Login(auth.LoginView):
 
 
 class Logout(auth.LogoutView):
-    next_page = '/login/'
+    next_page = settings.LOGIN_URL
