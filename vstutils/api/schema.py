@@ -232,9 +232,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
         return nested_view_obj
 
-    def get_operation_id(self, operation_keys):
+    def get_operation_id(self, operation_keys=None):
         new_operation_keys = []
-        for key in operation_keys:
+        for key in operation_keys or []:
             previous = None if not len(new_operation_keys) else new_operation_keys[-1]
             new_operation_keys.append(key.replace('{}_'.format(previous), ''))
         return super(VSTAutoSchema, self).get_operation_id(tuple(new_operation_keys))
