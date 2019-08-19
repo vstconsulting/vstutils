@@ -14,3 +14,7 @@ pylint_*
 .idea/*
 test_screenshot.png
 .coverage.*
+.env
+.venv
+*.sqlite3
+*.bak
