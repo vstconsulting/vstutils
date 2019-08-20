@@ -10,9 +10,13 @@ from __future__ import unicode_literals
 import json
 import six
 
-from django.contrib.auth.models import User, models
+from django.db import models
+from django.contrib.auth import get_user_model
 from rest_framework import serializers, exceptions
 from . import fields
+
+
+User = get_user_model()
 
 
 class BaseSerializer(serializers.Serializer):

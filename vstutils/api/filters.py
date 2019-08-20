@@ -1,9 +1,10 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django_filters import rest_framework as filters
 from django_filters import CharFilter, BooleanFilter
 
 id_help = 'A unique integer value (or comma separated list) identifying this instance.'
 name_help = 'A name string value (or comma separated list) of instance.'
+User = get_user_model()
 
 
 def _extra_search(queryset, field, value, stype):
