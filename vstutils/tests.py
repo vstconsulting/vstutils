@@ -8,13 +8,16 @@ import uuid
 import six
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 try:
     from mock import patch
 except ImportError:  # nocv
     from unittest.mock import patch
 from .utils import import_class
+
+
+User = get_user_model()
 
 
 class BaseTestCase(TestCase):
