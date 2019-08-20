@@ -2,7 +2,11 @@
 //{% load cache %}
 //{% cache block_timeout service_worker_block gui_version %}
 //{% autoescape off %}
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
+importScripts("{% static 'js/libs/workbox/workbox-sw.js' %}");
+
+workbox.setConfig({
+  modulePathPrefix: "{% static 'js/libs/workbox/' %}",
+});
 
 workbox.core.skipWaiting();
 workbox.core.clientsClaim();

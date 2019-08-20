@@ -50,7 +50,7 @@ def pwa_context(request):
     return {
         "manifest_object": manifest_object,
         "static_files_list": static_list,
-        "block_timeout": 86400 if not debug_enabled else 1,
+        "block_timeout": 86400 if not debug_enabled else 0,
     }
 
 
