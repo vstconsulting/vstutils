@@ -347,7 +347,9 @@ class ViewsTestCase(BaseTestCase):
         self.assertTrue(checked, "Not registered!")
 
     def test_settings_api(self):
-        result = self.get_result('get', '/api/v1/settings/')
+        test_user = self._create_user(False)
+        with self.user_as(self, test_user):
+            result = self.get_result('get', '/api/v1/settings/')
         self.assertIn('system', result)
         self.assertIn('localization', result)
         self.details_test(

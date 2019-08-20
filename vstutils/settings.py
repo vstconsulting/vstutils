@@ -463,9 +463,6 @@ API_CREATE_SCHEMA = True
 
 API = {
     VST_API_VERSION: {
-        r'settings': {
-            'view': 'vstutils.api.views.SettingsViewSet', 'op_types': ['get', 'mod']
-        },
         r'user': {
             'view': 'vstutils.api.views.UserViewSet'
         },

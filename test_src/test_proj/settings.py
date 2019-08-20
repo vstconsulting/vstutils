@@ -5,6 +5,9 @@ INSTALLED_APPS += [
     'test_proj',
 ]
 
+API[VST_API_VERSION][r'settings'] = dict(
+    view='vstutils.api.views.SettingsViewSet', op_types=['get', 'mod']
+)
 API[VST_API_VERSION][r'hosts'] = dict(
     view='test_proj.views.HostGroupViewSet'
 )

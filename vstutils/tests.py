@@ -25,6 +25,25 @@ class BaseTestCase(TestCase):
     models = None
     std_codes = dict(get=200, post=201, patch=200, delete=204)
 
+    class user_as(object):
+        # pylint: disable=invalid-name
+        '''
+        Context for do something as another user in TestCase
+        '''
+
+        def __init__(self, testcase, user):
+            self.testcase = testcase
+            self.user = user
+
+        def __enter__(self):
+            self.old_user = self.testcase.user
+            self.testcase.user = self.user
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self.testcase.user = self.old_user
+
+
     def setUp(self):
         from django.conf import settings
         self.settings_obj = settings
