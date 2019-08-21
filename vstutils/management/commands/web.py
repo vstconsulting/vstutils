@@ -94,7 +94,13 @@ class Command(BaseCommand):
 
     def handle(self, *uwsgi_args, **opts):
         super(Command, self).handle(*uwsgi_args, **opts)
-        cmd = [opts['script'], '--enable-threads', '--master']
+        cmd = [
+            opts['script'],
+            '--enable-threads',
+            '--master',
+            '--offload-threads=%k',
+            '--static-gzip-all'
+        ]
         cmd += ['--http={}'.format(opts['addrport'])]
         cmd += [
             '--{}'.format(arg) for arg in self._get_uwsgi_args(*uwsgi_args)
