@@ -70,7 +70,7 @@ class ProfileViewConsctuctor {
         return {
             computed: {
                 url() {
-                    return path.replace('{' + path_pk_key +'}', my_user_id);
+                    return path.replace('{' + path_pk_key +'}', my_user_id).format(this.$route.params).replace(/\/$/g, "");
                 }
             },
             methods: {

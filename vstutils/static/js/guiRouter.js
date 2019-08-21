@@ -1410,7 +1410,6 @@ var routesComponentsTemplates = {
              * @param {object} opt Object with arguments for current method.
              */
             getRedirectUrl(opt) {
-                // return [this.qs_url, opt.instance.getPkValue()].join("/");
                 return [this.url.replace('/edit','').replace('/new', ''), opt.instance.getPkValue()].join("/");
             },
         },
@@ -1543,9 +1542,7 @@ var routesComponentsTemplates = {
              * @param {object} opt Object with arguments for current method.
              */
             getRedirectUrl(opt) {
-                let url_parts = this.url.replace("/edit", "").replace("/new", "").split("/");
-                url_parts[url_parts.length - 1] = opt.instance.getPkValue();
-                return url_parts.join("/");
+                return this.url.replace("/edit", "");
             },
         },
     },
