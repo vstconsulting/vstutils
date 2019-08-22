@@ -10,6 +10,7 @@ import tempfile
 import time
 import traceback
 import subprocess
+from pathlib import Path
 from threading import Thread
 
 import six
@@ -47,7 +48,7 @@ def get_render(name, data, trans='en'):
     return result
 
 
-class ClassPropertyDescriptor(object):
+class ClassPropertyDescriptor:
     __slots__ = 'fget', 'fset'
 
     def __init__(self, fget, fset=None):
@@ -101,7 +102,7 @@ def classproperty(func):
     return ClassPropertyDescriptor(func)
 
 
-class redirect_stdany(object):
+class redirect_stdany:
     """
     Context for redirect any output to own stream.
 
@@ -110,6 +111,7 @@ class redirect_stdany(object):
         - On exit return old streams
     """
     __slots__ = 'stream', 'streams', '_old_streams'
+
     _streams = ["stdout", "stderr"]  # type: list
 
     def __init__(self, new_stream=six.StringIO(), streams=None):
@@ -150,12 +152,12 @@ class Dict(collections.OrderedDict):
         return json.dumps(self)
 
 
-class tmp_file(object):
+class tmp_file:
     """
     Temporary file with name
     generated and auto removed on close.
     """
-    __slots__ = ('fd',)
+    __slots__ = ('fd', 'path',)
 
     def __init__(self, data="", mode="w", bufsize=0, **kwargs):
         """
@@ -172,6 +174,7 @@ class tmp_file(object):
         kw = not six.PY3 and {"bufsize": bufsize} or {}
         kwargs.update(kw)
         self.fd = tempfile.NamedTemporaryFile(mode, **kwargs)
+        self.path = Path(self.fd.name)
         if data:
             self.write(data)
 
@@ -208,7 +211,7 @@ class tmp_file(object):
             return False
 
 
-class tmp_file_context(object):
+class tmp_file_context:
     """
     Context object for work with tmp_file.
     Auto close on exit from context and
@@ -224,11 +227,11 @@ class tmp_file_context(object):
 
     def __exit__(self, type_e, value, tb):
         self.tmp.close()
-        if os.path.exists(self.tmp.name):
-            os.remove(self.tmp.name)
+        if self.tmp.path.exists():
+            self.tmp.path.unlink()
 
 
-class assertRaises(object):
+class assertRaises:
 
     def __init__(self, *args, **kwargs):
         """
@@ -288,7 +291,7 @@ class exception_with_traceback(raise_context):
             six.reraise(exc_type, exc_val, exc_tb)
 
 
-class BaseVstObject(object):
+class BaseVstObject:
     """
     Default mixin-class for custom objects which needed to get settings and cache.
     """
@@ -329,7 +332,7 @@ class Executor(BaseVstObject):
     newlines = ['\n', '\r\n', '\r']  # type: list
     STDOUT = subprocess.PIPE
     STDERR = subprocess.STDOUT
-    DEVNULL = getattr(subprocess, 'DEVNULL', -3)
+    DEVNULL = subprocess.DEVNULL
     CalledProcessError = subprocess.CalledProcessError
 
     def __init__(self, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
@@ -407,12 +410,6 @@ class Executor(BaseVstObject):
         self.output = ""
         env = os.environ.copy()
         env.update(self.env)
-        if six.PY2:  # nocv
-            # Ugly hack because python 2.7.
-            if self._stdout == self.DEVNULL:
-                self._stdout = open(os.devnull, 'w+b')
-            if self._stderr == self.DEVNULL:
-                self._stderr = open(os.devnull, 'w+b')
         proc = subprocess.Popen(
             cmd, stdout=self._stdout, stderr=self._stderr,
             bufsize=0, universal_newlines=True,
@@ -536,7 +533,7 @@ class Lock(KVExchanger):
         self.release()
 
 
-class __LockAbstractDecorator(object):
+class __LockAbstractDecorator:
     _err = "Wait until the end."
     _lock_key = None
 
@@ -601,19 +598,39 @@ class Paginator(BasePaginator):
                 yield obj
 
 
-class ModelHandlers(BaseVstObject):
+class ObjectHandlers(BaseVstObject):
     """
-    Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
-    All handlers backends get by first argument model object.
+    Handlers wrapper for get objects from some settings structure.
 
-    **Attributes**:
+    Example:
+        .. sourcecode:: python
 
-    :param objects: -- dict of objects like: ``{<name>: <backend_class>}``
-    :type objects: dict
-    :param keys: -- names of supported backends
-    :type keys: list
-    :param values: -- supported backends classes
-    :type values: list
+            from vstutils.utils import ObjectHandlers
+
+            '''
+            In `settings.py` you should write some structure:
+
+            SOME_HANDLERS = {
+                "one": {
+                    "BACKEND": "full.python.path.to.module.SomeClass"
+                },
+                "two": {
+                    "BACKEND": "full.python.path.to.module.SomeAnotherClass",
+                    "OPTIONS": {
+                        "some_named_arg": "value"
+                    }
+                }
+            }
+            '''
+
+            handlers = ObjectHandlers('SOME_HANDLERS')
+
+            # Get class handler for 'one'
+            one_backend_class = handlers['one']
+            # Get object of backend 'two'
+            two_obj = handlers.get_object()
+            # Get object of backend 'two' with overriding constructor named arg
+            two_obj_overrided = handlers.get_object(some_named_arg='another_value')
 
     """
 
@@ -695,6 +712,27 @@ class ModelHandlers(BaseVstObject):
     def opts(self, name):
         return self.get_backend_data(name).get('OPTIONS', {})
 
+    def get_object(self, name, *args, **kwargs):
+        opts = self.opts(name)
+        opts.update(kwargs)
+        return self[name](*args, **opts)
+
+
+class ModelHandlers(ObjectHandlers):
+    """
+    Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
+    All handlers backends get by first argument model object.
+
+    **Attributes**:
+
+    :param objects: -- dict of objects like: ``{<name>: <backend_class>}``
+    :type objects: dict
+    :param keys: -- names of supported backends
+    :type keys: list
+    :param values: -- supported backends classes
+    :type values: list
+    """
+
     def get_object(self, name, obj):
         """
         :param name: -- string name of backend
@@ -707,49 +745,10 @@ class ModelHandlers(BaseVstObject):
         return self[name](obj, **self.opts(name))
 
 
-class ObjectHandlers(ModelHandlers):
-    """
-    Handlers wrapper for get objects from some settings structure.
-
-    Example:
-        .. sourcecode:: python
-
-            from vstutils.utils import ObjectHandlers
-
-            '''
-            In `settings.py` you should write some structure:
-
-            SOME_HANDLERS = {
-                "one": {
-                    "BACKEND": "full.python.path.to.module.SomeClass"
-                },
-                "two": {
-                    "BACKEND": "full.python.path.to.module.SomeAnotherClass",
-                    "OPTIONS": {
-                        "some_named_arg": "value"
-                    }
-                }
-            }
-            '''
-
-            handlers = ObjectHandlers('SOME_HANDLERS')
-
-            # Get class handler for 'one'
-            one_backend_class = handlers['one']
-            # Get object of backend 'two'
-            two_obj = handlers.get_object()
-            # Get object of backend 'two' with overriding constructor named arg
-            two_obj_overrided = handlers.get_object(some_named_arg='another_value')
-
-    """
-    def get_object(self, name, *args, **kwargs):
-        opts = self.opts(name)
-        opts.update(kwargs)
-        return self[name](*args, **opts)
-
-
 class URLHandlers(ObjectHandlers):
     """ Object handler for GUI views. Uses `GUI_VIEWS` from settings.py. """
+    __slots__ = ('additional_handlers', '__handlers__')
+
     settings_urls = ['LOGIN_URL', 'LOGOUT_URL']  # type: list
 
     def __init__(self, tp='GUI_VIEWS', *args, **kwargs):

@@ -15,7 +15,7 @@ UserModel = get_user_model()
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
 
 
-class BaseAuthBackend(object):
+class BaseAuthBackend:
     def authenticate(self, request, username=None, password=None):
         raise NotImplementedError  # nocv
 

@@ -25,7 +25,7 @@ class BaseTestCase(TestCase):
     models = None
     std_codes = dict(get=200, post=201, patch=200, delete=204)
 
-    class user_as(object):
+    class user_as:
         # pylint: disable=invalid-name
         '''
         Context for do something as another user in TestCase

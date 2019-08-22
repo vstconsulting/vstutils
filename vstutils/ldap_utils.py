@@ -17,7 +17,7 @@ def json_default(obj):  # nocv
         raise error_obj
 
 
-class LDAP(object):
+class LDAP:
     # pylint: disable=no-member
     __slots__ = (
         'settings',

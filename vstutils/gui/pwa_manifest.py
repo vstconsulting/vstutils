@@ -2,7 +2,7 @@ import json
 from django.conf import settings
 
 
-class PWAManifest(object):
+class PWAManifest:
     default_pwa_manifest = {
         "name": settings.PROJECT_GUI_NAME.capitalize(),
         "short_name": settings.VST_PROJECT.capitalize(),

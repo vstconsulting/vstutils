@@ -1,5 +1,5 @@
 # Call standart filtering
-class VSTFilterBackend(object):
+class VSTFilterBackend:
     __slots__ = ()
     required = False
 

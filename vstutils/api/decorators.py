@@ -135,7 +135,7 @@ def get_action_name(master_view, method):
     return action_name
 
 
-class NestedViewMixin(object):
+class NestedViewMixin:
 
     def _check_permission_obj(self, objects):
         for obj in objects:
@@ -237,7 +237,7 @@ def nested_view_function(master_view, view, view_request, *args, **kw):
     return view_obj.dispatch_route(nested_sub)
 
 
-class BaseClassDecorator(object):
+class BaseClassDecorator:
     __slots__ = 'name', 'arg', 'request_arg', 'args', 'kwargs'
 
     def __init__(self, name, arg, *args, **kwargs):
