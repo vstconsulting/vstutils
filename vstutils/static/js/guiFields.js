@@ -513,7 +513,7 @@ guiFields.date = class DateField extends guiFields.base {
             return;
         }
 
-        return moment(value).tz(window.timeZone).format("YYYY/MM/DD");
+        return moment(value).tz(window.timeZone).format("YYYY-MM-DD");
     }
     /**
      * Redefinition of base guiField method toRepresent.
