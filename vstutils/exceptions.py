@@ -9,7 +9,7 @@ class VSTUtilsException(Exception):
 
     def __init__(self, *args, **kwargs):
         self.msg = (list(args)[0:1]+[""])[0]
-        super(VSTUtilsException, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return str(self.msg)
@@ -22,7 +22,7 @@ class UnknownTypeException(VSTUtilsException):
     def __init__(self, tp, msg=None):
         self._def_message = msg or self._def_message
         msg = self._def_message.format(tp)
-        super(UnknownTypeException, self).__init__(msg)
+        super().__init__(msg)
 
 
 class NotApplicable(VSTUtilsException):

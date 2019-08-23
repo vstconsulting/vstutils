@@ -6,7 +6,7 @@ register = template.Library()
 
 class StaticTag(StaticNode):
     def render(self, context):
-        original_static = super(StaticTag, self).render(context)
+        original_static = super().render(context)
         host = context.get('host_url', '')
         return (
             '{host}{static}'.format(host=host, static=original_static)

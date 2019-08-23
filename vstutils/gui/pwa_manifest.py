@@ -3,6 +3,7 @@ from django.conf import settings
 
 
 class PWAManifest:
+    __slots__ = ('manifest_data',)
     default_pwa_manifest = {
         "name": settings.PROJECT_GUI_NAME.capitalize(),
         "short_name": settings.VST_PROJECT.capitalize(),

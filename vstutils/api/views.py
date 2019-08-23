@@ -33,7 +33,7 @@ class UserViewSet(base.ModelViewSetSet):
         user = self.get_object()
         if user == request.user:
             return base.Response("Could not remove youself.", 409).resp
-        return super(UserViewSet, self).destroy(request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)
 
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):

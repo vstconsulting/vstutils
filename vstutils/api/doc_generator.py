@@ -49,7 +49,7 @@ class VSTOpenApiBase(Directive):
     )
 
     def __init__(self, *args, **kwargs):
-        super(VSTOpenApiBase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.__view_list = ViewList()
         self.spec = {}
         self.paths = {}

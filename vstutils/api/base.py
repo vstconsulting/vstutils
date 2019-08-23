@@ -88,7 +88,7 @@ def exception_handler(exc, context):
 class Response(_ResponseClass):
 
     def _asdict(self):
-        data = super(Response, self)._asdict()
+        data = super()._asdict()
         data["status"] = data.get("status", status.HTTP_200_OK)
         if isinstance(data["data"], (six.string_types, six.text_type)):
             data["data"] = dict(detail=self.data)
@@ -114,7 +114,7 @@ class AutoSchema(DRFAutoSchema):
         if method_obj.__doc__:
             return method_obj.__doc__.strip()
         if not method_view:
-            return super(AutoSchema, self).get_description(path, method)
+            return super().get_description(path, method)
 
         method_view_obj = method_view()
         action = path.split('/')[-2]
@@ -141,6 +141,7 @@ class QuerySetMixin(rvs.APIView):
     '''
     Instance REST operations.
     '''
+    __slots__ = ()
     _queryset = None
     model = None
 
@@ -186,7 +187,7 @@ class QuerySetMixin(rvs.APIView):
 
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
-    # lookup_field = 'id'
+    __slots__ = ()
     _serializer_class_one = None
     model = None
     action_serializers = {}
@@ -200,7 +201,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 self.filter_for_filter_backends,
                 self.filter_backends
             ))
-        return super(GenericViewSet, self).filter_queryset(queryset)
+        return super().filter_queryset(queryset)
 
     @classproperty
     def serializer_class_one(self):
@@ -219,7 +220,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         # Get 'serializer_class_one' for detail operations
         if self.request and (lookup_field_data or self.action in detail_actions):
             return self.serializer_class_one
-        return super(GenericViewSet, self).get_serializer_class()
+        return super().get_serializer_class()
 
     def nested_allow_check(self):
         '''
@@ -250,16 +251,17 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     @classmethod
     def get_extra_actions(cls):
-        return super(GenericViewSet, cls).get_extra_actions()
+        return super().get_extra_actions()
 
     @classmethod
     def as_view(cls, actions=None, **initkwargs):
-        return super(GenericViewSet, cls).as_view(actions, **initkwargs)
+        return super().as_view(actions, **initkwargs)
 
 
 class CopyMixin(GenericViewSet):
     """ Mixin for viewsets which adds `copy` endpoint to view. """
 
+    __slots__ = ()
     #: Value of prefix which will be added to new instance name.
     copy_prefix = 'copy-'
     #: Name of field which will get a prefix.
@@ -335,23 +337,26 @@ class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
 
     """
 
+    __slots__ = ()
+
     def create(self, request, *args, **kwargs):
-        return super(ModelViewSetSet, self).create(request, *args, **kwargs)
+        return super().create(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
-        return super(ModelViewSetSet, self).retrieve(request, *args, **kwargs)
+        return super().retrieve(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):  # nocv
-        return super(ModelViewSetSet, self).update(request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):  # nocv
-        return super(ModelViewSetSet, self).partial_update(request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        return super(ModelViewSetSet, self).destroy(request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)
 
 
 class NonModelsViewSet(GenericViewSet):
+    __slots__ = ()
     base_name = None
 
     def get_queryset(self):
@@ -360,6 +365,7 @@ class NonModelsViewSet(GenericViewSet):
 
 class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
     # pylint: disable=abstract-method
+    __slots__ = ()
     schema = None
 
     @property
@@ -383,6 +389,7 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
     """ Default viewset like vstutils.api.base.ModelViewSetSet for readonly models. """
+    __slots__ = ()
 
 
 class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
@@ -390,3 +397,4 @@ class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
     Default viewset like ReadOnlyModelViewSet but for historical data
     (allow to delete, but cannt create and update).
     """
+    __slots__ = ()

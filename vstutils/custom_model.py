@@ -17,7 +17,7 @@ class Query(dict):
     distinct_fields = False
 
     def __init__(self, queryset, *args, **kwargs):
-        super(Query, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.queryset = queryset
         self['standard_ordering'] = True
 
@@ -123,7 +123,7 @@ class CustomQuerySet(BQuerySet):
     def __init__(self, model=None, query=None, using=None, hints=None):
         if query is None:
             query = Query(self)
-        super(CustomQuerySet, self).__init__(model=model, query=query, using=using, hints=hints)
+        super().__init__(model=model, query=query, using=using, hints=hints)
 
     def _filter_or_exclude(self, is_exclude, *args, **kwargs):
         clone = self._clone()

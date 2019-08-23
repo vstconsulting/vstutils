@@ -8,7 +8,7 @@ class SuperUserPermission(permissions.IsAuthenticated):
 
     def has_permission(self, request, view):
         if request.user.is_staff or request.method in permissions.SAFE_METHODS:
-            return super(SuperUserPermission, self).has_permission(request, view)
+            return super().has_permission(request, view)
         obj = None
         with raise_context():
             obj = view.get_object() or obj

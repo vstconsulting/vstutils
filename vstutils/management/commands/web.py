@@ -38,7 +38,7 @@ class Command(BaseCommand):
     default_addrport = settings.WEB_ADDRPORT
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.add_argument(
             'args',
             metavar='uwsgi_arg=value', nargs='*',
@@ -93,7 +93,7 @@ class Command(BaseCommand):
         return cmd
 
     def handle(self, *uwsgi_args, **opts):
-        super(Command, self).handle(*uwsgi_args, **opts)
+        super().handle(*uwsgi_args, **opts)
         cmd = [
             opts['script'],
             '--enable-threads',

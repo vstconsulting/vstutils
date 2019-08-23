@@ -16,7 +16,7 @@ class _AbstractRouter(routers.DefaultRouter):
         self.custom_urls = list()
         self.permission_classes = kwargs.pop("perms", None)
         self.create_schema = kwargs.pop('create_schema', False)
-        super(_AbstractRouter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _get_custom_lists(self):
         return self.custom_urls
@@ -47,7 +47,7 @@ class _AbstractRouter(routers.DefaultRouter):
             return model._meta.object_name.lower()
         # can't be tested because this initialization takes place before any
         # test code can be run
-        return super(_AbstractRouter, self).get_default_base_name(viewset)  # nocv
+        return super().get_default_base_name(viewset)  # nocv
 
     def register_view(self, prefix, view, name=None):
         if getattr(view, 'as_view', None):
@@ -88,7 +88,7 @@ class APIRouter(_AbstractRouter):
     root_view_name = 'v1'
 
     def __init__(self, *args, **kwargs):
-        super(APIRouter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.create_schema:
             self.__register_schema()
 
@@ -125,7 +125,7 @@ class APIRouter(_AbstractRouter):
         return API.as_view(api_root_dict=api_root_dict)
 
     def get_urls(self):
-        urls = super(APIRouter, self).get_urls()
+        urls = super().get_urls()
         for prefix, view, _ in self.custom_urls:  # nocv
             view = view.as_view() if getattr(view, 'as_view', None) else view
             urls.append(url("^{}/$".format(prefix), view))
@@ -150,7 +150,7 @@ class MainRouter(_AbstractRouter):
         )
 
     def _get_custom_lists(self):
-        return super(MainRouter, self)._get_custom_lists() + self.routers
+        return super()._get_custom_lists() + self.routers
 
     def get_api_root_view(self, *args, **kwargs):
         list_name = self.routes[0].name
@@ -182,7 +182,7 @@ class MainRouter(_AbstractRouter):
         self.routers = self._unreg(prefix, self.routers)  # nocv
 
     def get_urls(self):
-        urls = super(MainRouter, self).get_urls()
+        urls = super().get_urls()
         for prefix, router, _ in self.routers:
             urls.append(url(prefix, include(router.urls)))
         for prefix, view, _ in self.custom_urls:  # nocv

@@ -23,7 +23,7 @@ class BaseCommand(_BaseCommand):
         pass
 
     def add_arguments(self, parser):
-        super(BaseCommand, self).add_arguments(parser)
+        super().add_arguments(parser)
         parser.fromfile_prefix_chars = '@'
         parser.add_argument(
             '-l', '--log-level',
@@ -49,7 +49,7 @@ class BaseCommand(_BaseCommand):
         return getattr(settings, value, default)
 
     def _get_versions(self):
-        versions = OrderedDict(django=super(BaseCommand, self).get_version())
+        versions = OrderedDict(django=super().get_version())
         versions[self._settings('VST_PROJECT')] = self._settings('PROJECT_VERSION')
         if self._settings('VST_PROJECT') != self._settings('VST_PROJECT_LIB'):
             versions[self._settings('VST_PROJECT_LIB')] = self._settings(

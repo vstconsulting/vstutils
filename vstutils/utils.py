@@ -12,6 +12,7 @@ import traceback
 import subprocess
 from pathlib import Path
 from threading import Thread
+import typing as tp
 
 import six
 from django.core.cache import caches, InvalidCacheBackendError
@@ -28,7 +29,7 @@ logger = logging.getLogger('vstutils')
 ON_POSIX = 'posix' in sys.builtin_module_names
 
 
-def get_render(name, data, trans='en'):
+def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     """
     Render string from template.
 
@@ -51,7 +52,7 @@ def get_render(name, data, trans='en'):
 class ClassPropertyDescriptor:
     __slots__ = 'fget', 'fset'
 
-    def __init__(self, fget, fset=None):
+    def __init__(self, fget: tp.Callable, fset: tp.Callable = None):
         self.fget = fget
         self.fset = fset
 
@@ -62,7 +63,7 @@ class ClassPropertyDescriptor:
             klass = type(obj)  # noce
         return self.fget.__get__(obj, klass)()
 
-    def __set__(self, obj, value):  # noce
+    def __set__(self, obj: tp.Any, value: tp.Any):  # noce
         if not self.fset:
             raise AttributeError("can't set attribute")
         if obj is not None:
@@ -70,14 +71,14 @@ class ClassPropertyDescriptor:
         type_ = type(obj)
         return self.fset.__get__(obj, type_)(value)
 
-    def setter(self, func):  # noce
+    def setter(self, func: tp.Callable):  # noce
         if not isinstance(func, (classmethod, staticmethod)):
             func = classmethod(func)
         self.fset = func
         return self
 
 
-def classproperty(func):
+def classproperty(func: tp.Callable) -> tp.Any:
     """
     Decorator which makes class method as class property.
 
@@ -159,7 +160,7 @@ class tmp_file:
     """
     __slots__ = ('fd', 'path',)
 
-    def __init__(self, data="", mode="w", bufsize=0, **kwargs):
+    def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = 0, **kwargs):
         """
         tmp_file constructor
 
@@ -178,7 +179,7 @@ class tmp_file:
         if data:
             self.write(data)
 
-    def write(self, wr_string):
+    def write(self, wr_string: tp.Text):
         """
         Write to file and flush
 
@@ -191,7 +192,7 @@ class tmp_file:
         self.fd.flush()
         return result
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: tp.Text):
         return getattr(self.fd, name)
 
     def __del__(self):
@@ -220,7 +221,7 @@ class tmp_file_context:
     __slots__ = ('tmp',)
 
     def __init__(self, *args, **kwargs):
-        self.tmp = tmp_file(*args, **kwargs)
+        self.tmp = tmp_file(*args, **kwargs)  # type: tempfile.NamedTemporaryFile
 
     def __enter__(self):
         return self.tmp
@@ -263,7 +264,7 @@ class raise_context(assertRaises):
     Context for exclude exceptions.
     """
 
-    def execute(self, func, *args, **kwargs):
+    def execute(self, func: tp.Callable, *args, **kwargs):
         with self.__class__(self._excepts, **self._kwargs):
             return func(*args, **kwargs)
         type, value, traceback_obj = sys.exc_info()
@@ -274,7 +275,7 @@ class raise_context(assertRaises):
     def __enter__(self):
         return self.execute
 
-    def __call__(self, original_function):
+    def __call__(self, original_function: tp.Callable):
         def wrapper(*args, **kwargs):
             return self.execute(original_function, *args, **kwargs)
 
@@ -283,7 +284,7 @@ class raise_context(assertRaises):
 
 class exception_with_traceback(raise_context):
     def __init__(self, *args, **kwargs):
-        super(exception_with_traceback, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_val is not None:
@@ -297,7 +298,7 @@ class BaseVstObject:
     """
 
     @classmethod
-    def get_django_settings(cls, name, default=None):
+    def get_django_settings(cls, name: tp.Text, default: tp.Any = None):
         # pylint: disable=access-member-before-definition
         """
         Get params from Django settings.
@@ -315,7 +316,7 @@ class BaseVstObject:
         return cls.get_django_settings(name)
 
     @classmethod
-    def get_django_cache(cls, cache_name='default'):
+    def get_django_cache(cls, cache_name: tp.Text = 'default'):
         try:
             return caches[cache_name]
         except InvalidCacheBackendError:  # nocv
@@ -346,7 +347,7 @@ class Executor(BaseVstObject):
         self._stderr = stderr
         self.env = {}
 
-    def write_output(self, line):
+    def write_output(self, line: tp.Text):
         """
         :param line: -- line from command output
         :type line: str
@@ -355,12 +356,12 @@ class Executor(BaseVstObject):
         """
         self.output += str(line)
 
-    def _handle_process(self, proc, stream):
+    def _handle_process(self, proc: subprocess.Popen, stream: tp.Text):
         while not getattr(proc, stream).closed:
             self.working_handler(proc)
             time.sleep(0.1)
 
-    def working_handler(self, proc):
+    def working_handler(self, proc: subprocess.Popen):
         # pylint: disable=unused-argument
         """
         Additional handler for executions.
@@ -368,7 +369,7 @@ class Executor(BaseVstObject):
         :type proc: subprocess.Popen
         """
 
-    def _unbuffered(self, proc, stream='stdout'):
+    def _unbuffered(self, proc: subprocess.Popen, stream: tp.Text = 'stdout'):
         """
         Unbuffered output handler.
 
@@ -386,7 +387,7 @@ class Executor(BaseVstObject):
         finally:
             out.close()
 
-    def line_handler(self, line):
+    def line_handler(self, line: tp.Text):
         """
         Per line handler.
 
@@ -396,14 +397,14 @@ class Executor(BaseVstObject):
             with raise_context():
                 self.write_output(line)
 
-    def execute(self, cmd, cwd):
+    def execute(self, cmd, cwd: tp.Union[tp.Text, Path]):
         """
         Execute commands and output this.
 
         :param cmd: -- list of cmd command and arguments
         :type cmd: list
         :param cwd: -- workdir for executions
-        :type cwd: str,unicode
+        :type cwd: str
         :return: -- string with full output
         :rtype: str
         """
@@ -413,7 +414,7 @@ class Executor(BaseVstObject):
         proc = subprocess.Popen(
             cmd, stdout=self._stdout, stderr=self._stderr,
             bufsize=0, universal_newlines=True,
-            cwd=cwd, env=env,
+            cwd=str(cwd), env=env,
             close_fds=ON_POSIX
         )
         for line in self._unbuffered(proc):
@@ -506,7 +507,7 @@ class Lock(KVExchanger):
         :param err_msg: -- message for AcquireLockException error.
         :type err_msg: str
         """
-        super(Lock, self).__init__(id, timeout)
+        super().__init__(id, timeout)
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
             if self.send(payload):
@@ -568,7 +569,7 @@ class model_lock_decorator(__LockAbstractDecorator):
 
     def execute(self, func, *args, **kwargs):
         self._lock_key = kwargs.get('pk', None)
-        return super(model_lock_decorator, self).execute(func, *args, **kwargs)
+        return super().execute(func, *args, **kwargs)
 
 
 class Paginator(BasePaginator):
@@ -584,7 +585,7 @@ class Paginator(BasePaginator):
         :type chunk_size: int
         """
         chunk_size = chunk_size or BaseVstObject().get_django_settings("PAGE_LIMIT", None)
-        super(Paginator, self).__init__(qs, chunk_size)
+        super().__init__(qs, chunk_size)
 
     def __iter__(self):
         for page in range(1, self.num_pages + 1):
@@ -636,13 +637,13 @@ class ObjectHandlers(BaseVstObject):
 
     __slots__ = 'type', 'err_message', '_list', '_loaded_backends'
 
-    def __init__(self, tp, err_message=None):
+    def __init__(self, type_name: tp.Text, err_message: tp.Text = None):
         """
-        :param tp: -- type name for backends.Like name in dict.
-        :type tp: str,unicode
+        :param type_name: -- type name for backends.Like name in dict.
+        :type type_name: str
         """
-        self.type = tp
-        self.err_message = err_message
+        self.type = type_name  # type: tp.Text
+        self.err_message = err_message  # type: tp.Text
         self._list = None
         self._loaded_backends = dict()
 
@@ -665,16 +666,16 @@ class ObjectHandlers(BaseVstObject):
     def __dict__(self):  # pragma: no cover
         return self.items()
 
-    def keys(self):
+    def keys(self) -> tp.Iterable[tp.Text]:
         return self.objects.keys()
 
-    def values(self):  # pragma: no cover
+    def values(self) -> tp.Iterable:  # pragma: no cover
         return dict(self).values()
 
     def items(self):
         return self.objects.items()
 
-    def list(self):
+    def list(self) -> tp.Dict[tp.Text, tp.Dict[tp.Text, tp.Any]]:
         if self._list is None:
             self._list = self.get_django_settings(self.type, {})
         return self._list
@@ -685,13 +686,13 @@ class ObjectHandlers(BaseVstObject):
         self._loaded_backends[backend] = import_class(backend)
         return self._loaded_backends[backend]
 
-    def get_backend_data(self, name):
+    def get_backend_data(self, name: tp.Text):
         return self.list()[name]
 
-    def get_backend_handler_path(self, name):
+    def get_backend_handler_path(self, name: tp.Text):
         return self.get_backend_data(name).get('BACKEND', None)
 
-    def backend(self, name):
+    def backend(self, name: tp.Text):
         """
         Get backend class
 
@@ -709,10 +710,10 @@ class ObjectHandlers(BaseVstObject):
             msg = "{} ({})".format(name, self.err_message) if self.err_message else name
             raise ex.UnknownTypeException(msg)
 
-    def opts(self, name):
+    def opts(self, name: tp.Text):
         return self.get_backend_data(name).get('OPTIONS', {})
 
-    def get_object(self, name, *args, **kwargs):
+    def get_object(self, name: tp.Text, *args, **kwargs):
         opts = self.opts(name)
         opts.update(kwargs)
         return self[name](*args, **opts)
@@ -733,7 +734,7 @@ class ModelHandlers(ObjectHandlers):
     :type values: list
     """
 
-    def get_object(self, name, obj):
+    def get_object(self, name: tp.Text, obj):
         """
         :param name: -- string name of backend
         :param name: str
@@ -751,9 +752,9 @@ class URLHandlers(ObjectHandlers):
 
     settings_urls = ['LOGIN_URL', 'LOGOUT_URL']  # type: list
 
-    def __init__(self, tp='GUI_VIEWS', *args, **kwargs):
-        self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [tp]
-        super(URLHandlers, self).__init__(tp, *args, **kwargs)
+    def __init__(self, type_name: tp.Text = 'GUI_VIEWS', *args, **kwargs):
+        self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [type_name]
+        super().__init__(type_name, *args, **kwargs)
 
     @property
     def view_handlers(self):
@@ -764,8 +765,8 @@ class URLHandlers(ObjectHandlers):
                 self.__handlers__.append(handler_class(handler_settings_name))
         return self.__handlers__
 
-    def get_backend_data(self, name):
-        data = super(URLHandlers, self).get_backend_data(name)
+    def get_backend_data(self, name: tp.Text):
+        data = super().get_backend_data(name)
         if isinstance(data, (six.string_types, six.text_type)):
             for handler in self.view_handlers:
                 try:
@@ -776,7 +777,7 @@ class URLHandlers(ObjectHandlers):
                     return handler_data
         return data
 
-    def get_object(self, name, *argv, **kwargs):
+    def get_object(self, name: tp.Text, *argv, **kwargs):
         """
         Get url object tuple for urls.py
 
@@ -804,6 +805,6 @@ class URLHandlers(ObjectHandlers):
             result = url(regexp, include(view_class))
         return result
 
-    def urls(self):
+    def urls(self) -> tp.Iterable:
         for regexp in self.list():
             yield self.get_object(regexp)

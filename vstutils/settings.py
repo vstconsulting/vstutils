@@ -63,7 +63,7 @@ class SectionConfig(Section):
 class BackendsSectionConfig(SectionConfig):
 
     def key_handler(self, key):
-        return super(BackendsSectionConfig, self).key_handler(key).upper()
+        return super().key_handler(key).upper()
 
 
 main = SectionConfig('main')
@@ -322,7 +322,7 @@ class DBSectionConfig(BackendsSectionConfig):
     def key_handler(self, key):
         if not (self._current_section == self.section or key == self._current_section):
             return key  # nocv
-        return super(DBSectionConfig, self).key_handler(key)
+        return super().key_handler(key)
 
 
 DATABASES = {
@@ -620,7 +620,7 @@ class WorkerSectionConfig(SectionConfig):
 
     def get_from_section(self, section, option=None):
         result = self.get_default_data_from_section(option)
-        data = super(WorkerSectionConfig, self).get_from_section(section, option)
+        data = super().get_from_section(section, option)
         result.update(data)
         return result
 

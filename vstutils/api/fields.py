@@ -15,7 +15,7 @@ class VSTCharField(CharField):
             if not isinstance(data, allowed_types):
                 data = json.dumps(data)
         data = str(data)
-        return super(VSTCharField, self).to_internal_value(data)
+        return super().to_internal_value(data)
 
 
 class FileInStringField(CharField):
@@ -32,7 +32,7 @@ class SecretFileInString(FileInStringField):
     '''
     def __init__(self, **kwargs):
         kwargs['style'] = {'input_type': 'password'}
-        super(SecretFileInString, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class AutoCompletionField(CharField):
@@ -48,7 +48,7 @@ class AutoCompletionField(CharField):
         if not isinstance(self.autocomplete, (list, tuple)):
             self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
             self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
-        super(AutoCompletionField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class DependEnumField(CharField):
@@ -62,7 +62,7 @@ class DependEnumField(CharField):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', dict())
         self.types = kwargs.pop('types', dict())
-        super(DependEnumField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def to_internal_value(self, data):
         return data
@@ -96,7 +96,7 @@ class FkField(IntegerField):
         self.select_model = kwargs.pop('select')
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
         self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
-        super(FkField, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class UptimeField(IntegerField):

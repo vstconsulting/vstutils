@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from ._base import BaseCommand
 from ...utils import get_render
 from ... import __version__
@@ -39,7 +40,7 @@ class Command(BaseCommand):
     }
 
     def add_arguments(self, parser):
-        super(Command, self).add_arguments(parser)
+        super().add_arguments(parser)
         for name, data in self._values_parser.items():
             kwargs = dict(**data)
             if not kwargs.get('help', None):
@@ -48,17 +49,20 @@ class Command(BaseCommand):
                 '--{}'.format(name), dest=name, **data
             )
 
-    def get_path(self, *path):
-        directory = os.path.expandvars('/'.join(path))
-        directory = os.path.expanduser(directory)
-        return directory
+    def get_path(self, *path) -> Path:
+        # directory = os.path.expandvars('/'.join(path))
+        # directory = os.path.expanduser(directory)
+        # return directory
+        return Path(os.path.expandvars('/'.join(path))).expanduser()
 
     def create_dir(self, *path):
         dir_path = self.get_path(*path)
-        os.makedirs(dir_path)
+        dir_path.mkdir(parents=True)
+        # os.makedirs(dir_path)
 
     def create_file(self, render_path, *path, **render_data):
-        with open(os.path.join(*path), 'w') as fd:
+        # with open(os.path.join(*path), 'w') as fd:
+        with self.get_path(*path).open('w') as fd:
             fd.write(get_render(render_path + '.template', render_data))
 
     def _from_user(self, name, options, default=None):
@@ -106,7 +110,7 @@ class Command(BaseCommand):
                 )
 
     def handle(self, *args, **options):
-        super(Command, self).handle(*args, **options)
+        super().handle(*args, **options)
         opts = self.get_render_kwargs(options)
         self.make_dirs(**opts)
         self.make_files(**opts)

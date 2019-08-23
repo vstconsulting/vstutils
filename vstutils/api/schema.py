@@ -158,7 +158,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
         nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
         filter_class = getattr(self.view, 'filter_class', None)
         self.view.filter_class = nested_view_filter_class
-        result = super(NestedFilterInspector, self).get_filter_parameters(filter_backend)
+        result = super().get_filter_parameters(filter_backend)
         self.view.filter_class = filter_class
         return result
 
@@ -173,7 +173,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     def __init__(self, *args, **kwargs):
-        super(VSTAutoSchema, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._sch = args[0].schema
         self._sch.view = args[0]
 
@@ -237,10 +237,10 @@ class VSTAutoSchema(SwaggerAutoSchema):
         for key in operation_keys or []:
             previous = None if not len(new_operation_keys) else new_operation_keys[-1]
             new_operation_keys.append(key.replace('{}_'.format(previous), ''))
-        return super(VSTAutoSchema, self).get_operation_id(tuple(new_operation_keys))
+        return super().get_operation_id(tuple(new_operation_keys))
 
     def get_response_schemas(self, response_serializers):
-        responses = super(VSTAutoSchema, self).get_response_schemas(response_serializers)
+        responses = super().get_response_schemas(response_serializers)
         for response in responses:
             if not responses[response].description:
                 responses[response].description = 'Action accepted.'
@@ -272,7 +272,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
             result = getattr(schema, func_name)(*args, **kwargs)
             if result:
                 return result
-        return getattr(super(VSTAutoSchema, self), func_name)(*args, **kwargs)
+        return getattr(super(), func_name)(*args, **kwargs)
 
     def get_view_serializer(self, *args, **kwargs):
         return self.__perform_with_nested('get_view_serializer', *args, **kwargs)
@@ -335,7 +335,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         return self._update_param_model(param, model, query_name=manager_name)
 
     def get_path_parameters(self, path, view_cls):
-        parameters = super(VSTSchemaGenerator, self).get_path_parameters(path, view_cls)
+        parameters = super().get_path_parameters(path, view_cls)
         queryset = getattr(view_cls, 'queryset', None)
         for param in parameters:
             model, model_field = field_insp.get_queryset_field(queryset, param['name'])
@@ -346,7 +346,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         return parameters
 
     def get_operation_keys(self, subpath, method, view):
-        keys = super(VSTSchemaGenerator, self).get_operation_keys(subpath, method, view)
+        keys = super().get_operation_keys(subpath, method, view)
         subpath_keys = list(filter(bool, subpath.split('/')))
         r_type, gist = keys[-1], keys[-2]
         if method.upper() == 'GET' and '_detail' in r_type:

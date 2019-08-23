@@ -152,7 +152,7 @@ class NestedViewMixin:
         return get_action_name(self.master_view, self.request.method)
 
     def get_serializer_context(self):
-        context = super(NestedViewMixin, self).get_serializer_context()
+        context = super().get_serializer_context()
         return context
 
     def perform_destroy(self, instance):
@@ -220,7 +220,7 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
         not_created = filter(
             lambda data: data.get(nested_append_arg, None) not in id_list, request_data
         )
-        id_list += super(NestedWithAppendMixin, self)._data_create(
+        id_list += super()._data_create(
             not_created, nested_append_arg
         )
         return id_list
@@ -330,7 +330,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         self.view = kwargs.pop('view', None)
         self.allowed_subs = kwargs.pop('subs', [])
         self.queryset_filters = kwargs.pop('queryset_filters', [])
-        super(nested_view, self).__init__(name, arg, *args, **kwargs)
+        super().__init__(name, arg, *args, **kwargs)
         self._subs = self.get_subs()
         if self.view is None:
             raise self.NoView()

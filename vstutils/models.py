@@ -113,7 +113,7 @@ class BaseModel(models.Model):  # noprj
     objects    = Manager()
 
     def __init__(self, *args, **kwargs):  # nocv
-        super(BaseModel, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.no_signal = False
 
     class Meta:

@@ -39,7 +39,7 @@ class BaseMiddleware(BaseVstObject):
                             content_type="text/plain",
                             status_code=403
                         )
-                    return super(CustomMiddleware, self).get_response_handler(request)
+                    return super().get_response_handler(request)
 
                 def handler(self, request, response):
                     # Add header to response
@@ -52,7 +52,7 @@ class BaseMiddleware(BaseVstObject):
     def __init__(self, get_response):
         self.get_response = get_response
         self.logger = logger
-        super(BaseMiddleware, self).__init__()
+        super().__init__()
 
     def get_setting(self, value):
         return self.get_django_settings(value)
@@ -111,6 +111,6 @@ class TimezoneHeadersMiddleware(BaseMiddleware):
 class ExecuteTimeHeadersMiddleware(BaseMiddleware):
     def get_response_handler(self, request):
         start_time = time.time()
-        resonse = super(ExecuteTimeHeadersMiddleware, self).get_response_handler(request)
+        resonse = super().get_response_handler(request)
         resonse['ResponseTime'] = time.time() - start_time
         return resonse

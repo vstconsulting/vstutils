@@ -122,7 +122,7 @@ class UserSerializer(VSTSerializer):
             if data.get(d, None) is not None
         }
         raw_passwd = self.initial_data.get("raw_password", "False")
-        user = super(UserSerializer, self).create(creditals)
+        user = super().create(creditals)
         if not raw_passwd == "True":
             user.set_password(creditals['password'])
             user.save()
@@ -136,7 +136,7 @@ class UserSerializer(VSTSerializer):
                 raise self.UserExist({'username': ["Already exists."]})
             except User.DoesNotExist:
                 pass
-        return super(UserSerializer, self).is_valid(raise_exception)
+        return super().is_valid(raise_exception)
 
     def update(self, instance, validated_data):
         if not self.context['request'].user.is_staff and instance.id != self.context['request'].user.id:
@@ -176,7 +176,7 @@ class CreateUserSerializer(OneUserSerializer):
         fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']
 
     def run_validation(self, data=serializers.empty):
-        validated_data = super(CreateUserSerializer, self).run_validation(data)
+        validated_data = super().run_validation(data)
         if validated_data['password'] != validated_data.pop('password2', None):
             raise exceptions.ValidationError('Passwords do not match.')
         return validated_data
