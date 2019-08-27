@@ -1,5 +1,6 @@
 # pylint: disable=unused-import
 from __future__ import unicode_literals
+import typing as _t
 import json  # noqa: F401
 import random
 import string
@@ -43,6 +44,57 @@ class BaseTestCase(TestCase):
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.testcase.user = self.old_user
 
+
+    def _create_user(self, is_super_user=True):
+        username = self.random_name()
+        email = username + '@gmail.com'
+        password = username.upper()
+        if is_super_user:
+            user = User.objects.create_superuser(username=username,
+                                                 password=password,
+                                                 email=email)
+        else:
+            user = User.objects.create_user(username=username,
+                                            password=password,
+                                            email=email)
+        user.data = {'username': username, 'password': password}
+        return user
+
+    def _login(self):
+        client = self.client
+        client.force_login(self.user)
+        return client
+
+    def _logout(self, client):
+        self.assertEqual(client.get(self.logout_url).status_code, 302)
+
+    def _check_update(self, url, data, **fields):
+        '''
+        Test update instance of model
+        :param url: - url to instance
+        :param data: - update fields
+        :param fields: - checking resulted fields as named args
+        :return: None
+        '''
+        self.get_result(fields.pop('method', 'patch'), url, data=json.dumps(data))
+        result = self.get_result("get", url)
+        self.assertTrue(isinstance(result, dict))
+        for field, value in fields.items():
+            self.assertEqual(result[field], value)
+
+    def __get_rendered(self, response):
+        try:
+            rendered_content = (
+                getattr(response, "rendered_content", False) or response.content
+            )
+            if getattr(rendered_content, 'decode', False):
+                rendered_content = str(rendered_content.decode('utf-8'))
+            try:
+                return json.loads(rendered_content)
+            except:
+                return str(rendered_content)
+        except ValueError:  # nocv
+            return None
 
     def setUp(self):
         from django.conf import settings
@@ -93,48 +145,14 @@ class BaseTestCase(TestCase):
         self.user = self._create_user(is_super_user)
         return old_user
 
-    def _create_user(self, is_super_user=True):
-        username = self.random_name()
-        email = username + '@gmail.com'
-        password = username.upper()
-        if is_super_user:
-            user = User.objects.create_superuser(username=username,
-                                                 password=password,
-                                                 email=email)
-        else:
-            user = User.objects.create_user(username=username,
-                                            password=password,
-                                            email=email)
-        user.data = {'username': username, 'password': password}
-        return user
-
-    def _login(self):
-        client = self.client
-        client.force_login(self.user)
-        return client
-
-    def _logout(self, client):
-        self.assertEqual(client.get(self.logout_url).status_code, 302)
-
-    def __get_rendered(self, response):
-        try:
-            rendered_content = (
-                getattr(response, "rendered_content", False) or response.content
-            )
-            if getattr(rendered_content, 'decode', False):
-                rendered_content = str(rendered_content.decode('utf-8'))
-            try:
-                return json.loads(rendered_content)
-            except:
-                return str(rendered_content)
-        except ValueError:  # nocv
-            return None
+    def render_api_response(self, response):
+        return self.__get_rendered(response)
 
     @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, secure=True, *args, **kwargs)
         self.assertRCode(response, code, url)
-        return self.__get_rendered(response)
+        return self.render_api_response(response)
 
     def assertCount(self, list, count):
         self.assertEqual(len(list), count)
@@ -170,7 +188,7 @@ class BaseTestCase(TestCase):
     def post_result(self, url, code=None, *args, **kwargs):
         return self.get_result("post", url, code, *args, **kwargs)
 
-    def get_result(self, rtype, url, code=None, *args, **kwargs):
+    def get_result(self, rtype, url, code=None, *args, **kwargs) -> _t.Union[_t.Dict, _t.Sequence]:
         '''
         Test request with returning result of request
         :param rtype:  - request type (methods from Client cls): get, post etc
@@ -236,20 +254,6 @@ class BaseTestCase(TestCase):
         self.assertTrue(isinstance(result, dict))
         for key, value in kwargs.items():
             self.assertEqual(result[key], value)
-
-    def _check_update(self, url, data, **fields):
-        '''
-        Test update instance of model
-        :param url: - url to instance
-        :param data: - update fields
-        :param fields: - checking resulted fields as named args
-        :return: None
-        '''
-        self.get_result(fields.pop('method', 'patch'), url, data=json.dumps(data))
-        result = self.get_result("get", url)
-        self.assertTrue(isinstance(result, dict))
-        for field, value in fields.items():
-            self.assertEqual(result[field], value)
 
     def get_bulk(self, item, data, type, **kwargs):
         return dict(type=type, item=item, data=data, **kwargs)

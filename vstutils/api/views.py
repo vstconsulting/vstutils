@@ -12,7 +12,7 @@ try:
 except ImportError:  # nocv
     from queue import Queue
 from . import base, serializers, permissions, filters, decorators as deco
-from ..utils import Dict
+from ..utils import Dict, import_class
 
 
 class UserViewSet(base.ModelViewSetSet):
@@ -320,3 +320,11 @@ class BulkViewSet(base.rvs.APIView):
             "operations_types": self.op_types.keys(),
         }
         return base.Response(response, 200).resp
+
+
+class HealthView(base.ListNonModelViewSet):
+    authentication_classes = ()
+    health_backend = import_class(settings.HEALTH_BACKEND_CLASS)()
+
+    def list(self, request, *args, **kwargs):
+        return base.Response(*self.health_backend.get()).resp

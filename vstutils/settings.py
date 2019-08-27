@@ -100,6 +100,7 @@ try:
     has_django_celery_beat = True
 except ImportError:  # nocv
     pass
+RPC_ENABLED = has_django_celery_beat
 
 # :docs:
 HAS_DOCS = False
@@ -480,6 +481,7 @@ BULK_OPERATION_TYPES = {
     "mod": "get"
 }
 
+HEALTH_BACKEND_CLASS = 'vstutils.api.health.DefaultBackend'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
