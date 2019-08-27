@@ -982,3 +982,38 @@ class ToolsTestCase(BaseTestCase):
             with open(tmp_fd.name, 'rb') as fd1:
                 self.assertEqual(fd1.read().decode('utf-8'), test_data_text)
             del fd
+
+    def test_health_page(self):
+        result = self.get_result('get', '/api/health/')
+        self.assertIn('db', result)
+        self.assertIn('cache', result)
+        self.assertIn('rpc', result)
+        self.assertEqual(result['db'], 'ok')
+        self.assertEqual(result['cache'], 'ok')
+        self.assertEqual(result['rpc'], 'ok')
+
+        with self.patch('django.db.backends.base.base.BaseDatabaseWrapper.ensure_connection') as mock:
+
+            def error_in_connection(*args, **kwargs):
+                raise Exception('test')
+
+            mock.side_effect = error_in_connection
+            response = self.client.get('/api/health/')
+            self.assertRCode(response, 500)
+            result = self.render_api_response(response)
+            self.assertNotEqual(result['db'], 'ok')
+            self.assertEqual(result['db'], 'test')
+
+        with self.patch('vstutils.utils.BaseVstObject.get_django_settings') as mock:
+
+            def get_django_settings_mock(name, default=None):
+                if name != 'RPC_ENABLED':
+                    return self._settings(name, default)
+                return False
+
+            mock.side_effect = get_django_settings_mock
+            response = self.client.get('/api/health/')
+            self.assertRCode(response, 200)
+            result = self.render_api_response(response)
+            self.assertNotEqual(result['rpc'], 'ok')
+            self.assertEqual(result['rpc'], 'disabled')

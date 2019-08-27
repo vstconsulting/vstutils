@@ -6,6 +6,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from rest_framework import permissions
 from .api.routers import MainRouter
 from .utils import URLHandlers
+from .api.views import HealthView
 
 
 # Main router for all APIs versions
@@ -14,6 +15,7 @@ router = MainRouter(
     create_schema=settings.API_CREATE_SCHEMA,
 )
 router.generate_routers(settings.API)
+router.register_view('health', HealthView.as_view({'get': 'list'}), 'health')
 
 
 admin.site.site_header = 'Admin panel'
