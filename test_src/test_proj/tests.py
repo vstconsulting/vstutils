@@ -1,6 +1,7 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
 import os
 import shutil
+import re
 
 import pyximport
 
@@ -15,6 +16,7 @@ except ImportError:  # nocv
 from fakeldap import MockLDAP
 from django.test import Client
 from django.core.management import call_command
+from django.core import mail
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 from vstutils.tests import BaseTestCase, json, override_settings
@@ -477,6 +479,27 @@ class ViewsTestCase(BaseTestCase):
         )
         gravatar_of_nonexistent_user = get_user_gravatar(123321)
         self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
+
+
+    def test_reset_password(self):
+        test_user = self._create_user(is_super_user=False)
+        client = self.client_class()
+        response = client.post('/login/', {'username': test_user.username, 'password': test_user.password})
+        self.assertEqual(response.status_code, 200)
+        response = client.post('/logout/')
+        self.assertEqual(response.status_code, 302)
+        response = client.post('/password_reset/', {'email': 'error@error.error'})
+        self.assertEqual(response.status_code, 302)
+        self.assertCount(mail.outbox, 0)
+        response = client.post('/password_reset/', {'email': test_user.email})
+        self.assertEqual(response.status_code, 302)
+        regex = r"^http(s)?:\/\/.*$"
+        match = re.search(regex, mail.outbox[-1].body, re.MULTILINE)
+        href = match.group(0)
+        response = client.post(href, {'new_password1': 'newpass', 'new_password2': 'newpass'})
+        self.assertEqual(response.status_code, 302)
+        response = client.post('/login/', {'username': test_user.username, 'password': 'newpass'})
+        self.assertEqual(response.status_code, 200)
 
 
 class DefaultBulkTestCase(BaseTestCase):
