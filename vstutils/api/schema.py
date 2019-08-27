@@ -14,6 +14,7 @@ from . import fields, serializers
 FORMAT_FILE = openapi.TYPE_FILE
 FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
+FORMAT_MULTISELECT = 'multiselect'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
 FORMAT_TEXTAREA = 'textarea'
@@ -144,6 +145,29 @@ class FkFieldInspector(FieldInspector):  # nocv
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
+class CommaMultiSelectFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.CommaMultiSelect):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_MULTISELECT)
+        kwargs['additionalProperties'] = dict(
+            model = openapi.SchemaRef(
+                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                field.select_model, ignore_unresolved=True
+            ),
+            value_field=field.select_property,
+            view_field=field.select_represent,
+            view_separator=field.select_separator
+        )
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
 class NestedFilterInspector(CoreAPICompatInspector):
     def get_filter_parameters(self, filter_backend):  # nocv
         subaction_list_actions = [
@@ -165,6 +189,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
+        CommaMultiSelectFieldInspector,
         FkFieldInspector, DependEnumFieldInspector,
         AutoCompletionFieldInspector, VSTFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS

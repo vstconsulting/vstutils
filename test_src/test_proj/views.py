@@ -24,6 +24,7 @@ class HostGroupFilter(filters.DefaultIDFilter):
 
 
 class FileSerializer(VSTSerializer):
+    name = fields.CommaMultiSelect(select='HostGroup')
 
     class Meta:
         model = File
