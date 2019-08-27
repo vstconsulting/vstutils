@@ -1,7 +1,7 @@
 """
 Additionals serializers fields for generating OpenAPI and GUI.
 """
-
+import typing
 import json
 import six
 from rest_framework.serializers import CharField, IntegerField
@@ -49,6 +49,31 @@ class AutoCompletionField(CharField):
             self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
             self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
         super().__init__(**kwargs)
+
+
+class CommaMultiSelect(CharField):
+    '''
+    Comma (or specified) separated list of values field.
+    Gets list of values from another model or custom list.
+    Take effect only in GUI.
+    '''
+
+    def __init__(self, **kwargs):
+        self.select_model = kwargs.pop('select')
+        self.select_separator = kwargs.pop('select_separator', ',')  # type: typing.Text
+        self.select_property = None
+        if not isinstance(self.select_model, (list, tuple)):
+            self.select_property = kwargs.pop('select_property', 'name')
+            self.select_represent = kwargs.pop('select_represent', 'name')
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data: typing.Union[typing.Text, typing.Sequence]) -> typing.Text:
+        return self.to_representation(data)  # nocv
+
+    def to_representation(self, data: typing.Union[typing.Text, typing.Sequence]) -> typing.Text:
+        if isinstance(data, six.string_types):
+            data = map(str, filter(bool, data.split(self.select_separator)))
+        return self.select_separator.join(data)
 
 
 class DependEnumField(CharField):

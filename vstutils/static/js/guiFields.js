@@ -1168,6 +1168,56 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
 };
 
 /**
+ * MULTISELECT guiField class.
+ * FK field, that allows to select several objects ta once.
+ */
+guiFields.multiselect = class MultiSelect extends guiFields.fk {
+    /**
+     * Redefinition of base guiField static property 'mixins'.
+     */
+    static get mixins() {
+        return super.mixins.concat(gui_fields_mixins.multiselect);
+    }
+    /**
+     * Redefinition of 'prefetchDataOrNot' method of FK guiField.
+     * @param {object} data
+     */
+    prefetchDataOrNot(data={}) {
+        return false;
+    }
+    /**
+     * Redefinition of 'toInner' method of base guiField.
+     * @param {object} data
+     */
+    toInner(data={}) {
+        let value = data[this.options.name];
+
+        if(value && typeof value == "object" && Array.isArray(value)) {
+            return value.map(item => {
+                return item.value;
+            }).join(this.options.additionalProperties.view_separator);
+        }
+
+        return value;
+    }
+    /**
+     * Redefinition of 'toRepresent' method of base guiField.
+     * @param {object} data
+     */
+    toRepresent(data={}) {
+        let value = data[this.options.name];
+
+        if(value && typeof value == "object" && Array.isArray(value)) {
+            return value.map(item => {
+                return item.prefetch_value;
+            }).join(this.options.additionalProperties.view_separator);
+        }
+
+        return value;
+    }
+};
+
+/**
  * FK_autocomplete guiField class.
  */
 guiFields.fk_autocomplete = class FkAutocompleteField extends guiFields.fk {

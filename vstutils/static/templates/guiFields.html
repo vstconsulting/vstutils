@@ -686,6 +686,25 @@
     - elements of base guiField structure
 -->
 
+<!--
+   Block of MULTISELECT guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of multiselect base readOnly field -->
+<script type="text/x-template" id="template_field_content_readonly_multiselect">
+    <div class="input-group">
+        <input :type="input_type" :class="classes" :style="styles" :value="text" disabled :aria-labelledby="label_id" :aria-label="aria_label">
+    </div>
+</script>
+
+<!-- content (value input area) of multiselect editable field -->
+<script type="text/x-template" id="template_field_content_edit_multiselect">
+    <select name="values[]" :class="classes" :style="styles" ></select>
+</script>
+<!--
+   EndBlock of MULTISELECT guiField's components -
+    - elements of base guiField structure
+-->
 
 <!--
    Block of STRING_ARRAY guiField's components -

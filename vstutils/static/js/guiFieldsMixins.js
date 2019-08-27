@@ -90,7 +90,7 @@ var base_field_content_mixin = {
          * Property, that returns value of 'aria-label' attribute.
          */
         aria_label() {
-          return this.field.options.title || this.field.options.name + 'field';
+            return this.field.options.title || this.field.options.name + 'field';
         },
     },
     methods: {
@@ -155,10 +155,10 @@ var base_field_inner_component_mixin = {
 var field_label_id_mixin = {
     props: ['field', 'wrapper_opt', 'value', 'data'],
     computed: {
-      label_id() {
-          let w = this.wrapper_opt.use_prop_data ? '-inner' : "";
-          return 'label-for-' + this.field.options.name + '-field' + w;
-      }
+        label_id() {
+            let w = this.wrapper_opt.use_prop_data ? '-inner' : "";
+            return 'label-for-' + this.field.options.name + '-field' + w;
+        }
     },
 };
 
@@ -1891,6 +1891,135 @@ var field_fk_content_readonly_mixin = {
     },
 };
 
+var field_fk_content_editable_mixin = {
+    mixins: [base_field_content_edit_mixin, field_fk_content_mixin],
+    template: "#template_field_content_edit_fk",
+    data() {
+        return {
+            class_list: ["form-control", "select2", "select2-field-select"],
+        };
+    },
+    mounted() {
+        this.select_el = $(this.$el);
+
+        this.initSelect2();
+
+        if(this.value) {
+            this.setValue(this.value);
+        }
+    },
+    watch: {
+        value(value) {
+            this.setValue(value);
+        },
+    },
+    methods: {
+        /**
+         * Method, that mounts select2 to current field's select.
+         */
+        initSelect2() {
+            $(this.select_el).select2({
+                width: '100%',
+                ajax: {
+                    delay: 350,
+                    transport: (params, success, failure) => {
+                        this.transport(params, success, failure);
+                    },
+                },
+            }).on('change', (event) => {
+                let data = $(this.select_el).select2('data')[0];
+                let val_obj = {};
+
+                if(data) {
+                    val_obj['value'] = data.id;
+                    val_obj['prefetch_value'] = data.text;
+                } else {
+                    val_obj['value'] = event.target.value;
+                    val_obj['prefetch_value'] = event.target.value;
+                }
+
+                if(!deepEqual(val_obj, this.value)){
+                    this.$emit('proxyEvent', 'setValueInStore', val_obj);
+
+                }
+            });
+        },
+
+        setValue(value) {
+            if(!value) {
+                return $(this.select_el).val(null).trigger('change');
+            }
+
+            if(typeof value !== 'object') {
+                value = {
+                    value: value,
+                    prefetch_value: value,
+                }
+            }
+
+            let result = {
+                id: value.value,
+                text: value.prefetch_value,
+            };
+
+            let newOption = new Option(
+                result.text, result.id, false, true,
+            );
+
+            $(this.select_el).append(newOption).trigger('change');
+        },
+
+        transport(params, success, failure) {
+            let search_str = trim(params.data.term);
+            let props = this.field.options.additionalProperties;
+            let filters = {
+                limit: guiLocalSettings.get('page_size') || 20,
+            };
+
+            filters[props.view_field] = search_str;
+
+            let p = this.querysets.map(qs => qs.filter(filters).items());
+
+            Promise.all(p).then(response => {
+                let results = [];
+
+                if(this.field.options.default !== undefined) {
+                    if(typeof this.field.options.default !== 'object') {
+                        results.push({
+                            id: this.field.options.default,
+                            text: this.field.options.default,
+                        });
+                    } else {
+                        results.push(this.field.options.default);
+                    }
+                }
+
+                response.forEach(instances => {
+                    instances.forEach(instance => {
+                        results.push({
+                            id: instance.data[props.value_field],
+                            text: instance.data[props.view_field],
+                        });
+                    });
+                });
+
+                success({results:results});
+
+            }).catch(error => {
+                console.error(error);
+
+                let results = [];
+
+                if(props.default_value) {
+                    results.push(props.default_value);
+                }
+
+                failure(results);
+            })
+        },
+    }
+}
+
 /**
  * Mixin for editable fk_autocomplete gui_field(input value area).
  */
@@ -2300,7 +2429,7 @@ var gui_fields_mixins = {
             };
         },
         created() {
-          this.file_obj = {};
+            this.file_obj = {};
         },
         methods: {
             cleanValue() {
@@ -2412,7 +2541,7 @@ var gui_fields_mixins = {
                 mixins: [base_field_content_edit_mixin],
                 template: "#template_field_content_edit_base64file",
                 created() {
-                  this.styles_dict['minHeight'] = '38px';
+                    this.styles_dict['minHeight'] = '38px';
                 },
                 components: {
                     field_clear_button: {
@@ -3082,27 +3211,37 @@ var gui_fields_mixins = {
                 }
             },
             field_content_edit: {
-                mixins: [base_field_content_edit_mixin, field_fk_content_mixin],
-                template: "#template_field_content_edit_fk",
-                data() {
-                    return {
-                        class_list: ["form-control", "select2", "select2-field-select"],
-                    };
-                },
-                mounted() {
-                    this.select_el = $(this.$el);
+                mixins: [field_fk_content_editable_mixin],
+            },
+        },
+    },
 
-                    this.initSelect2();
-
-                    if(this.value) {
-                        this.setValue(this.value);
-                    }
-                },
-                watch: {
-                    value(value) {
-                        this.setValue(value);
+    multiselect: {
+        components: {
+            field_list_view: {
+                mixins: [base_field_content_readonly_mixin, field_fk_content_mixin],
+                template: "#template_field_part_list_view_fk",
+                computed: {
+                    with_link() {
+                        return false;
+                    },
+                    text() {
+                        return this.field.toRepresent(this.data);
                     },
                 },
+            },
+            field_content_readonly: {
+                mixins: [base_field_content_readonly_mixin, field_fk_content_mixin],
+                template: "#template_field_content_readonly_multiselect",
+                computed: {
+                    text() {
+                        return this.field.toRepresent(this.data);
+                    },
+                },
+            },
+            field_content_edit: {
+                mixins: [field_fk_content_editable_mixin],
+                template: "#template_field_content_edit_multiselect",
                 methods: {
                     /**
                      * Method, that mounts select2 to current field's select.
@@ -3110,6 +3249,7 @@ var gui_fields_mixins = {
                     initSelect2() {
                         $(this.select_el).select2({
                             width: '100%',
+                            multiple: true,
                             ajax: {
                                 delay: 350,
                                 transport: (params, success, failure) => {
@@ -3117,20 +3257,20 @@ var gui_fields_mixins = {
                                 },
                             },
                         }).on('change', (event) => {
-                            let data = $(this.select_el).select2('data')[0];
-                            let val_obj = {};
+                            let data = $(this.select_el).select2('data');
+                            let val_arr = [];
 
                             if(data) {
-                                val_obj['value'] = data.id;
-                                val_obj['prefetch_value'] = data.text;
-                            } else {
-                                val_obj['value'] = event.target.value;
-                                val_obj['prefetch_value'] = event.target.value;
+                                val_arr = data.map(item => {
+                                    return {
+                                        value: item.id,
+                                        prefetch_value: item.text,
+                                    };
+                                })
                             }
 
-                            if(!deepEqual(val_obj, this.value)){
-                                this.$emit('proxyEvent', 'setValueInStore', val_obj);
-
+                            if(!deepEqual(val_arr, this.value)){
+                                this.$emit('proxyEvent', 'setValueInStore', val_arr);
                             }
                         });
                     },
@@ -3140,75 +3280,29 @@ var gui_fields_mixins = {
                             return $(this.select_el).val(null).trigger('change');
                         }
 
-                        if(typeof value !== 'object') {
-                            value = {
-                                value: value,
-                                prefetch_value: value,
-                            }
+                        let val = value;
+
+                        if(typeof val == 'string') {
+                            val = val.split(this.field.options.additionalProperties.view_separator);
                         }
 
-                        let result = {
-                            id: value.value,
-                            text: value.prefetch_value,
-                        };
+                        if(Array.isArray(val)) {
+                            $(this.select_el).html(null);
 
-                        let newOption = new Option(
-                            result.text, result.id, false, true,
-                        );
-
-                        $(this.select_el).append(newOption).trigger('change');
-                    },
-
-                    transport(params, success, failure) {
-                        let search_str = trim(params.data.term);
-                        let props = this.field.options.additionalProperties;
-                        let filters = {
-                            limit: guiLocalSettings.get('page_size') || 20,
-                        };
-
-                        filters[props.view_field] = search_str;
-
-                        let p = this.querysets.map(qs => qs.filter(filters).items());
-
-                        Promise.all(p).then(response => {
-                            let results = [];
-
-                            if(this.field.options.default !== undefined) {
-                                if(typeof this.field.options.default !== 'object') {
-                                    results.push({
-                                        id: this.field.options.default,
-                                        text: this.field.options.default,
-                                    });
+                            val.forEach(item => {
+                                if(typeof item == 'object') {
+                                    $(this.select_el).append(new Option(item.prefetch_value, item.value, false, true));
                                 } else {
-                                    results.push(this.field.options.default);
+                                    $(this.select_el).append(new Option(item, item, false, true));
                                 }
-                            }
-
-                            response.forEach(instances => {
-                                instances.forEach(instance => {
-                                    results.push({
-                                        id: instance.data[props.value_field],
-                                        text: instance.data[props.view_field],
-                                    });
-                                });
                             });
 
-                            success({results:results});
-
-                        }).catch(error => {
-                            console.error(error);
-
-                            let results = [];
-
-                            if(props.default_value) {
-                                results.push(props.default_value);
-                            }
-
-                            failure(results);
-                        })
+                            $(this.select_el).trigger('change');
+                        }
                     },
+
                 }
-            },
+            }
         },
     },
 
@@ -3679,14 +3773,14 @@ var gui_fields_mixins = {
                         this.previous_realField = this.realField;
                         this.realField = this.field.getRealField(data);
 
-                         if(this.realField.options && this.value !== undefined) {
-                             if(this.realField.options.save_value === false) {
-                                 this.cleanValue();
-                             } else if(this.realField.options.save_value === true) {
+                        if(this.realField.options && this.value !== undefined) {
+                            if(this.realField.options.save_value === false) {
+                                this.cleanValue();
+                            } else if(this.realField.options.save_value === true) {
 
-                             } else if(this.previous_realField.options && this.realField.options.format !== this.previous_realField.options.format) {
-                                  this.cleanValue();
-                             }
+                            } else if(this.previous_realField.options && this.realField.options.format !== this.previous_realField.options.format) {
+                                this.cleanValue();
+                            }
                         }
                     }
                 }
