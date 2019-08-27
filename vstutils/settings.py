@@ -659,6 +659,30 @@ VIEWS = {
             'view_args': [{'next_page': '/'}]
         }
     },
+    "PASSWORD_RESET": {
+        "BACKEND": 'django.contrib.auth.views.PasswordResetView',
+        "OPTIONS": {
+            'name': 'password_reset'
+        }
+    },
+    "PASSWORD_RESET_CONFIRM": {
+        "BACKEND": 'django.contrib.auth.views.PasswordResetConfirmView',
+        "OPTIONS": {
+            'name': 'password_reset_confirm'
+        }
+    },
+    "PASSWORD_RESET_DONE": {
+        "BACKEND": 'django.contrib.auth.views.PasswordResetDoneView',
+        "OPTIONS": {
+            'name': 'password_reset_done'
+        }
+    },
+    "PASSWORD_RESET_COMPLETE": {
+        "BACKEND": 'django.contrib.auth.views.PasswordResetCompleteView',
+        "OPTIONS": {
+            'name': 'password_reset_complete'
+        }
+    },
 }
 
 GUI_VIEWS = {
@@ -667,7 +691,11 @@ GUI_VIEWS = {
     r'^service-worker.js$': 'SERVICE_WORKER',
     r'^offline.html$': 'OFFLINE',
     'LOGIN_URL': 'LOGIN',
-    'LOGOUT_URL': 'LOGOUT'
+    'LOGOUT_URL': 'LOGOUT',
+    r'^password_reset/$': 'PASSWORD_RESET',
+    r'^password_reset_done/$': 'PASSWORD_RESET_DONE',
+    r'^password_reset_complete/$': 'PASSWORD_RESET_COMPLETE',
+    r'^password_reset_confirm/(?P<uidb64>.*)/(?P<token>.*)/$': 'PASSWORD_RESET_CONFIRM',
 }
 
 PROJECT_GUI_MENU = [
