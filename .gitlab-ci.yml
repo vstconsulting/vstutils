@@ -24,7 +24,7 @@ stages:
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
   script:
-   - tox -e $TOX_ENVS $TOX_ARGS -p 3 -o
+   - tox -e $TOX_ENVS $TOX_ARGS
   except:
     refs:
     - tags
