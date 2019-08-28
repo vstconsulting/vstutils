@@ -22,11 +22,14 @@ def multikeysort(items, columns, reverse=False):
     return items
 
 
-def get_file_value(filename, default='', raise_error=False, strip=True):
+def get_file_value(filename, default='', raise_error=False, strip=True, encoding=b'utf-8'):
     result = default
 
     try:
-        result = File(filename.encode('utf-8')).read().decode('utf-8')
+        result = File(
+            filename=filename.encode('utf-8'),
+            encoding=encoding
+        ).read()
         if strip:
             result = result.strip()
     except IOError:
@@ -37,15 +40,18 @@ def get_file_value(filename, default='', raise_error=False, strip=True):
 
 
 cdef class File:
-    cdef FILE* file
-    cdef char* buff
-    cdef long int _size
-    cdef const char* filename
-    cdef const char* mode
+    cdef:
+        FILE* file
+        char* buff
+        long int _size
+        const char* filename
+        const char* mode
+        const char* encoding
 
-    def __cinit__(self, const char* filename, const char* mode = 'r'):
+    def __cinit__(self, const char* filename, const char* mode = 'r', const char* encoding = NULL):
         self.filename = filename
         self.mode = mode
+        self.encoding = encoding
         self.file = self._open()
 
     cdef allowed(self):
@@ -65,7 +71,7 @@ cdef class File:
                 rewind(self.file)
             return self._size - 1
 
-    cdef _read(self):
+    cdef char* _read(self):
         if not self.allowed():
             raise IOError('File is not found.')
 
@@ -84,7 +90,9 @@ cdef class File:
         return self.buff[:size]
 
     def read(self):
-        return self._read()
+        if self.encoding == NULL:
+            return self._read()
+        return self._read().decode(self.encoding.decode('utf-8'))
 
     cdef void _write(self, const char* value):
         if self.mode == b'r':
