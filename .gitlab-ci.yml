@@ -112,8 +112,8 @@ release:
       - $PYPI_UPLOAD_NAME
   script:
    - tox -c tox_build.ini -e ${CI_BUILD_NAME},auditwheel
-  after_script:
-    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
+   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
+    # - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
   allow_failure: true
 
 py35-build:
