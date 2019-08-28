@@ -24,7 +24,7 @@ stages:
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
   script:
-   - tox -e $TOX_ENVS $TOX_ARGS
+   - tox -e $TOX_ENVS $TOX_ARGS -p 3 -o
   except:
     refs:
     - tags
@@ -55,28 +55,11 @@ code_style:
     TOX_ENVS: "flake,pylint"
   allow_failure: true
 
-#py27-django111-coverage:
-#  <<: *branch_tests
-#  variables:
-#    TOX_ENVS: "$CI_BUILD_NAME"
-
-# Python 2.7 and Django 1.11 deprecated
-#py27-django111-install:
-#  <<: *branch_tests
-#  variables:
-#    TOX_ENVS: "$CI_BUILD_NAME"
-
 py36-django22-install:
   <<: *branch_tests
   image: onegreyonewhite/tox:ubuntu
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
-
-#py37-django111-install:
-#  <<: *branch_tests
-#  image: onegreyonewhite/tox:centos6
-#  variables:
-#    TOX_ENVS: "$CI_BUILD_NAME"
 
 py36-django22-coverage:
   <<: *branch_tests
@@ -119,7 +102,7 @@ release:
   script:
     - bash autorelease.sh
 
-release_pypi:
+.release_pypi_template: &release_pypi
   stage: release
   only:
     refs:
@@ -128,6 +111,19 @@ release_pypi:
       - $PYPI_UPLOAD_PASSWORD
       - $PYPI_UPLOAD_NAME
   script:
-   - tox -e build
-   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
+   - tox -c tox_build.ini -e ${CI_BUILD_NAME},auditwheel
+  after_script:
+    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
   allow_failure: true
+
+py35-build:
+  <<: *release_pypi
+
+py35-wheel:
+  <<: *release_pypi
+
+py36-wheel:
+  <<: *release_pypi
+
+py37-wheel:
+  <<: *release_pypi
