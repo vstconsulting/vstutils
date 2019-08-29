@@ -521,6 +521,19 @@ class ViewsTestCase(BaseTestCase):
         response = client.post('/login/', {'username': test_user.username, 'password': 'newpass'})
         self.assertEqual(response.status_code, 200)
 
+    def test_register_new_user(self):
+        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
+        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com')
+        client = self.client_class()
+        response = client.post('/login/', {'username': user['username'], 'password': user['password1']})
+        self.assertEqual(response.status_code, 200)
+        response = client.post('/registration/', data=user_fail)
+        self.assertEqual(response.status_code, 200)
+        response = client.post('/registration/', data=user)
+        self.assertRedirects(response, '/login/')
+        response = client.post('/login/', {'username': user['username'], 'password': user['password2']})
+        self.assertRedirects(response, '/')
+
 
 class DefaultBulkTestCase(BaseTestCase):
 

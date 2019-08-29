@@ -3,6 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.urls import reverse_lazy
+from .forms import RegistrationForm
+
+UserModel = get_user_model()
 
 
 class BaseView(TemplateView):
@@ -42,3 +47,13 @@ class Login(auth.LoginView):
 
 class Logout(auth.LogoutView):
     next_page = settings.LOGIN_URL
+
+
+class Registration(auth.FormView, BaseView):
+    template_name = 'registration/user_registration.html'
+    success_url = reverse_lazy('login')
+    form_class = RegistrationForm
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)

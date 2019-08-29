@@ -4,14 +4,15 @@
 
 {% block login_body %}
      <div class="login-box-body rounded">
-        <p class="login-box-msg">Sign in to start your session</p>
+        <p class="login-box-msg">Sign in to start your session {% block session_message_suffix %}{% endblock %}</p>
 
         <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;">
             {% csrf_token %}
-
+            {% block auth_key %}
             <div class="form-group has-feedback">
                 <input type="text" class="form-control" placeholder="Username" name='{{ form.username.name }}' id="{{ form.username.name }}" maxlength="254"  required autofocus>
             </div>
+            {% endblock %}
             <div class="form-group has-feedback">
                 <input type="password" class="form-control" placeholder="Password" name='{{ form.password.name }}' id="{{ form.password.name }}">
             </div>
@@ -28,8 +29,10 @@
                         </div>
                     {% else %}
                         <div class="col-xs-4">
-                            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px" id="login_button">Sign In</button>
-                            <a href="/password_reset">Forgot password?</a>
+                            <button type="submit" class="btn btn-primary btn-block" style="margin-bottom: 5px" id="login_button">Sign In</button>
+                            {% block additional_link %}
+                                <a style="margin-bottom: 10px" href="/password_reset">Forgot password?</a>
+                            {% endblock %}
                         </div>
                     {% endif %}
                 </div>

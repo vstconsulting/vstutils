@@ -42,8 +42,7 @@
     {% endblock %}
     {% block resource_list %}
         <script>
-            window.resourceList = [
-            ]
+            window.resourceList = []
         </script>
     {% endblock %}
 
@@ -93,28 +92,8 @@
 
             <!-- /.login-logo -->
             {% block login_body %}
-                <div class="login-box-body">
-                    <p class="login-box-msg">Sign in to start your session</p>
-
-                    <form action="{% url 'login' %}" method="post">
-                        {% csrf_token %}
-                        <div class="form-group has-feedback">
-                            <input type="text" class="form-control" placeholder="Username" name="username">
-                        </div>
-                        <div class="form-group has-feedback">
-                            <input type="password" class="form-control" placeholder="Password" name="password">
-                        </div>
-                        {% block button %}
-                            <div class="row">
-                                <div class="col-xs-4">
-                                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-                                </div>
-                            </div>
-                        {% endblock %}
-                    </form>
                     {% block alter_auth %}
                     {% endblock %}
-                </div>
             {% endblock %}
           <!-- /.login-box-body -->
         </div>
