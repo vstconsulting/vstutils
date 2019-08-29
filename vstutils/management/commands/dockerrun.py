@@ -1,11 +1,10 @@
-import configparser
 import os
-import io
 import sys
 import time
 import traceback
 from subprocess import check_call
 from ._base import BaseCommand
+from ...section import ConfigParser  # pylint: disable=import-error
 
 
 class Command(BaseCommand):
@@ -24,11 +23,9 @@ class Command(BaseCommand):
         super().handle(*args, **options)
         self.prefix = self._settings('VST_PROJECT_LIB', 'vstutils').upper()
         project_name = self._settings('VST_PROJECT', 'vstutils')
-        fp = io.StringIO()
         config = self.prepare_config()
-        config.write(fp)
         env = dict()
-        env[self._settings('CONFIG_ENV_DATA_NAME')] = fp.getvalue()
+        env[self._settings('CONFIG_ENV_DATA_NAME')] = config.generate_config_string()
 
         success = False
         error = 'Unknown error.'
@@ -74,8 +71,8 @@ class Command(BaseCommand):
         )
 
         # Start configuring config file
-        config = configparser.ConfigParser()
-        self.config = config
+        self.config = ConfigParser()
+        config = self.config
 
         # Set log level
         log_level = os.getenv('{}_LOG_LEVEL'.format(prefix), 'WARNING')

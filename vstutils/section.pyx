@@ -3,6 +3,7 @@ from cpython.dict cimport (
     PyDict_Update, PyDict_SetItemString, PyDict_SetItem
 )
 import os
+import io
 from configparser import ConfigParser as BaseConfigParser
 import six
 import pytimeparse
@@ -159,3 +160,8 @@ class ConfigParser(BaseConfigParser):
                 filename = os.fspath(filename)
             read_ok.append(filename)
         return read_ok
+
+    def generate_config_string(self):
+        fp = io.StringIO()
+        self.write(fp)
+        return fp.getvalue()
