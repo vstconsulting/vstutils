@@ -685,6 +685,12 @@ VIEWS = {
             'name': 'password_reset_complete'
         }
     },
+    "USER_REGISTRATION": {
+        "BACKEND": 'vstutils.gui.views.Registration',
+        "OPTIONS": {
+            'name': 'user_registration'
+        }
+    }
 }
 
 GUI_VIEWS = {

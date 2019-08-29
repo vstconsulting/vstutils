@@ -32,6 +32,7 @@ GUI_VIEWS[r'^csrf_disable_gui/$'] = {
 GUI_VIEWS[r'^suburls/'] = {
     'BACKEND': 'test_proj.suburls.urlpatterns'
 }
+GUI_VIEWS[r'^registration/$'] = VIEWS['USER_REGISTRATION']
 
 DEBUG = True
 PWA_MANIFEST = {
