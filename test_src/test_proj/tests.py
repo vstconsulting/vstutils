@@ -1,5 +1,6 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
 import os
+import sys
 import shutil
 import re
 
@@ -98,6 +99,25 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.remove_project_place(self.project_place)
         with self.assertRaises(Exception):
             call_command('newproject', '--name', 'test_project', dir=None, interactive=0)
+
+    def test_dockerrun(self):
+        with self.patch('subprocess.check_call') as mock_obj:
+            mock_obj.side_effect = lambda *args, **kwargs: 'OK'
+            call_command('dockerrun')
+            self.maxDiff = 1024*100
+            self.assertEqual(mock_obj.call_count, 2)
+            self.assertEqual(
+                mock_obj.call_args[0][0],
+                [sys.executable, '-m', 'test_proj', 'web']
+            )
+            mock_obj.reset_mock()
+
+            def check_call_error(*args, **kwargs):
+                raise Exception('Test exception.')
+
+            mock_obj.side_effect = check_call_error
+            with self.assertRaises(SystemExit):
+                call_command('dockerrun', attempts=1)
 
 
 class VSTUtilsTestCase(BaseTestCase):

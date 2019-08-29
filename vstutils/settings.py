@@ -48,10 +48,12 @@ CONFIG_FILE = os.getenv(
     "{}_SETTINGS_FILE".format(ENV_NAME),
     "/etc/{}/settings.ini".format(VST_PROJECT_LIB)
 )
+CONFIG_ENV_DATA_NAME = "{}_SETTINGS_DATA".format(ENV_NAME)
 config = ConfigParser(
     default_section='defaults'
 )
 config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
+config.read_string(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 
 
 class SectionConfig(Section):
