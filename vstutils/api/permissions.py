@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from rest_framework import permissions
 from ..utils import raise_context
 
@@ -12,14 +12,14 @@ class SuperUserPermission(permissions.IsAuthenticated):
         obj = None
         with raise_context():
             obj = view.get_object() or obj
-        if isinstance(obj, get_user_model()) and obj == request.user:
+        if isinstance(obj, AbstractUser) and obj == request.user:
             return True
         return False
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        elif isinstance(obj, get_user_model()) and obj == request.user:
+        elif isinstance(obj, AbstractUser) and obj == request.user:
             return True
         return False
 
