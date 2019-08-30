@@ -956,6 +956,15 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(result['short_name'], 'Test_proj')
         self.assertEqual(result['display'], 'fullscreen')
 
+    def test_model_fk_field(self):
+        bulk_data = [
+            dict(data_type=['subhosts'], method='post', data={'name': 'tt_name'}),
+            dict(data_type=['testfk'], method='post', data={'some_fk': '<0[data][id]>'}),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data']['some_fk'], results[0]['data']['id'])
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):

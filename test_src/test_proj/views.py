@@ -3,7 +3,7 @@ from vstutils.api.base import ModelViewSetSet, Response, CopyMixin, ReadOnlyMode
 from vstutils.api.decorators import nested_view, subaction, action
 from vstutils.api import filters
 from vstutils.api import fields
-from .models import Host, HostGroup, File
+from .models import Host, HostGroup, File, ModelWithFK
 
 
 class HostFilter(filters.DefaultIDFilter):
@@ -172,3 +172,19 @@ class FilesViewSet(ReadOnlyModelViewSet):
     model = File
     serializer_class = FileSerializer
     filter_class = FileFilter
+
+
+class ModelWithFKSerializer(VSTSerializer):
+    some_fk = fields.FkModelField(select=HostSerializer)
+
+    class Meta:
+        model = ModelWithFK
+        fields = (
+            'id',
+            'some_fk'
+        )
+
+
+class TestFkViewSet(ModelViewSetSet):
+    model = ModelWithFK
+    serializer_class = ModelWithFKSerializer
