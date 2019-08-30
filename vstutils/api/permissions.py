@@ -12,9 +12,10 @@ class SuperUserPermission(permissions.IsAuthenticated):
         obj = None
         with raise_context():
             obj = view.get_object() or obj
-        if isinstance(obj, AbstractUser) and obj == request.user:
+        is_openapi = request.path.startswith('/api/openapi/')
+        if (isinstance(obj, AbstractUser) and obj == request.user) or is_openapi:
             return True
-        return False
+        return is_openapi
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
