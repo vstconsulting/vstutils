@@ -1,6 +1,9 @@
 import time
 import logging
+import typing as _t
 from django.conf import settings
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from .utils import BaseVstObject
 
 
@@ -49,15 +52,15 @@ class BaseMiddleware(BaseVstObject):
     """
     __slots__ = 'get_response', 'logger'
 
-    def __init__(self, get_response):
+    def __init__(self, get_response: _t.Callable):
         self.get_response = get_response
         self.logger = logger
         super().__init__()
 
-    def get_setting(self, value):
+    def get_setting(self, value: _t.Text):
         return self.get_django_settings(value)
 
-    def handler(self, request, response):  # nocv
+    def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:  # nocv
         # pylint: disable=unused-argument
 
         """
@@ -71,7 +74,7 @@ class BaseMiddleware(BaseVstObject):
 
         return response
 
-    def request_handler(self, request):
+    def request_handler(self, request: HttpRequest) -> HttpRequest:
         # pylint: disable=unused-argument
 
         """
@@ -83,7 +86,7 @@ class BaseMiddleware(BaseVstObject):
 
         return request
 
-    def get_response_handler(self, request):
+    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         """
         Entrypoint for breaking or continuing request handling.
         This function should return `django.http.HttpResponse` object
@@ -94,7 +97,7 @@ class BaseMiddleware(BaseVstObject):
         """
         return self.get_response(request)
 
-    def __call__(self, request):
+    def __call__(self, request: HttpRequest) -> HttpResponse:
         return self.handler(
             self.request_handler(request),
             self.get_response_handler(request)
@@ -102,14 +105,14 @@ class BaseMiddleware(BaseVstObject):
 
 
 class TimezoneHeadersMiddleware(BaseMiddleware):
-    def handler(self, request, response):
+    def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
         response['Server-Timezone'] = self.get_setting('TIME_ZONE')
         response['VSTutils-Version'] = self.get_setting('VSTUTILS_VERSION')
         return response
 
 
 class ExecuteTimeHeadersMiddleware(BaseMiddleware):
-    def get_response_handler(self, request):
+    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         start_time = time.time()
         resonse = super().get_response_handler(request)
         resonse['ResponseTime'] = time.time() - start_time

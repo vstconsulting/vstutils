@@ -1,5 +1,6 @@
 # pylint: disable=unused-import
 from __future__ import unicode_literals
+import typing as _t
 from copy import deepcopy
 from six import with_metaclass
 from yaml import load
@@ -22,7 +23,7 @@ class Query(dict):
         self['standard_ordering'] = True
 
     @property
-    def model(self):
+    def model(self) -> BaseModel:
         return self.queryset.model
 
     @property
@@ -99,12 +100,12 @@ class Query(dict):
 
 
 class CustomModelIterable(ModelIterable):
-    def __iter__(self):
+    def __iter__(self) -> _t.Iterable:
         # pylint: disable=protected-access
         queryset = self.queryset
         model = queryset.model
         query = queryset.query
-        model_data = model._get_data(chunked_fetch=self.chunked_fetch)
+        model_data = model._get_data(chunked_fetch=self.chunked_fetch)  # type: _t.Sequence[_t.Dict]
         model_data = list(filter(query.check_in_query, model_data))
         ordering = query.get('ordering', [])
         if ordering:
@@ -119,10 +120,11 @@ class CustomModelIterable(ModelIterable):
 
 class CustomQuerySet(BQuerySet):
     custom_iterable_class = CustomModelIterable
+    custom_query_class = Query
 
     def __init__(self, model=None, query=None, using=None, hints=None):
         if query is None:
-            query = Query(self)
+            query = self.custom_query_class(self)
         super().__init__(model=model, query=query, using=using, hints=hints)
 
     def _filter_or_exclude(self, is_exclude, *args, **kwargs):
@@ -135,12 +137,12 @@ class CustomQuerySet(BQuerySet):
         clone.query[filter_type].update(kwargs)
         return clone
 
-    def last(self):
+    def last(self) -> _t.Union[BaseModel, _t.NoReturn]:
         data = list(self)[-1:]
         if data:
             return data[0]
 
-    def first(self):
+    def first(self) -> _t.Union[BaseModel, _t.NoReturn]:
         data = list(self[:1])
         if data:
             return data[0]

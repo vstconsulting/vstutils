@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
+import typing as _t
 import logging
 import traceback
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.http.request import HttpRequest
 from .utils import ObjectHandlers, raise_context
 try:
     from .ldap_utils import LDAP as _LDAP
@@ -16,10 +18,10 @@ logger = logging.getLogger(settings.VST_PROJECT_LIB)
 
 
 class BaseAuthBackend:
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request: HttpRequest, username=None, password=None):
         raise NotImplementedError  # nocv
 
-    def user_can_authenticate(self, user):
+    def user_can_authenticate(self, user: UserModel) -> bool:
         """
         Reject users with is_active=False. Custom user models that don't have
         that attribute are allowed.
@@ -27,7 +29,7 @@ class BaseAuthBackend:
         is_active = getattr(user, 'is_active', None)
         return is_active or is_active is None
 
-    def get_user(self, user_id):
+    def get_user(self, user_id: int) -> _t.Union[UserModel, _t.NoReturn]:
         # pylint: disable=protected-access
         try:
             user = UserModel._default_manager.get(pk=user_id)
@@ -51,7 +53,7 @@ class LdapBackend(BaseAuthBackend):
     def server(self):
         return settings.LDAP_SERVER
 
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> UserModel:
         # pylint: disable=protected-access,unused-argument
         try:
             backend = LDAP(self.server, username, password, self.domain)
@@ -60,7 +62,7 @@ class LdapBackend(BaseAuthBackend):
             user = UserModel._default_manager.get_by_natural_key(backend.domain_user)
             if self.user_can_authenticate(user) and backend.isAuth():
                 return user
-        except Exception:
+        except:
             logger.info(traceback.format_exc())
             return
 
@@ -70,11 +72,11 @@ class AuthPluginsBackend(BaseAuthBackend):
     auth_header = 'HTTP_X_AUTH_PLUGIN'
 
     @raise_context()
-    def auth_with_plugin(self, plugin, request, username, password):
+    def auth_with_plugin(self, plugin: _t.Text, request: HttpRequest, username: _t.Text, password: _t.Text) -> bool:
         return self.auth_handlers.get_object(plugin).authenticate(request, username, password)
 
     @raise_context()
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> bool:
         # pylint: disable=protected-access,unused-argument
         if request and self.auth_header in request.META:
             return self.auth_with_plugin(
