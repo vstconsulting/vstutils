@@ -1,4 +1,6 @@
+from typing import Dict
 from django.conf import settings
+from django.http.request import HttpRequest
 from ..utils import import_class
 from ..tools import multikeysort  # pylint: disable=import-error
 from .. import __version__
@@ -15,7 +17,7 @@ static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['priority'])
 debug_enabled = getattr(settings, 'DEBUG', False)
 
 
-def settings_constants(request):
+def settings_constants(request: HttpRequest) -> Dict:
     # pylint: disable=unused-argument
     return {
         "login_url": getattr(settings, 'LOGIN_URL', '/login/'),
@@ -27,7 +29,7 @@ def settings_constants(request):
     }
 
 
-def project_args(request):
+def project_args(request: HttpRequest) -> Dict:
     host_url = request.build_absolute_uri('/')[:-1]
     ver_key = "{}_version".format(getattr(settings, 'VST_PROJECT', "vstutils"))
     return {
@@ -46,7 +48,7 @@ def project_args(request):
     }
 
 
-def pwa_context(request):
+def pwa_context(request: HttpRequest) -> Dict:
     return {
         "manifest_object": manifest_object,
         "static_files_list": static_list,
@@ -54,7 +56,7 @@ def pwa_context(request):
     }
 
 
-def headers_context(request):
+def headers_context(request: HttpRequest) -> Dict:
     result = dict(request.META)
     result['HTTP_X_APP'] = result.get('HTTP_X_APP', 'browser')
     return dict(metadata=result)

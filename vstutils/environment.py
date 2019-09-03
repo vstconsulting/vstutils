@@ -1,6 +1,7 @@
 # pylint: disable=django-not-available
 import os
 import sys
+import typing as _t
 import warnings
 import six
 
@@ -15,7 +16,7 @@ _default_settings = {
 }
 
 
-def prepare_environment(default_settings=_default_settings, **kwargs):
+def prepare_environment(default_settings: _t.Dict = None, **kwargs) -> _t.NoReturn:
     # pylint: disable=unused-argument
     '''
     Prepare ENV for web-application
@@ -24,6 +25,7 @@ def prepare_environment(default_settings=_default_settings, **kwargs):
     :param kwargs: other overrided settings
     :rtype: None
     '''
+    default_settings = _default_settings if default_settings is None else default_settings
     for key, value in default_settings.items():
         os.environ.setdefault(key, value)
     os.environ.update(kwargs)
@@ -34,7 +36,7 @@ def prepare_environment(default_settings=_default_settings, **kwargs):
         )
 
 
-def cmd_execution(*args, **kwargs):
+def cmd_execution(*args, **kwargs) -> _t.NoReturn:
     # pylint: disable=unused-variable
     '''
     Main function to executes from cmd. Emulates django-admin.py execution.
@@ -48,7 +50,7 @@ def cmd_execution(*args, **kwargs):
     execute_from_command_line(args or sys.argv)
 
 
-def get_celery_app(name=None, **kwargs):  # nocv
+def get_celery_app(name: _t.Text = None, **kwargs) -> object:  # nocv
     # pylint: disable=import-error
     '''
     Function to return celery-app. Works only if celery installed.

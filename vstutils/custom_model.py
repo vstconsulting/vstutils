@@ -17,7 +17,7 @@ from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 class Query(dict):
     distinct_fields = False
 
-    def __init__(self, queryset, *args, **kwargs):
+    def __init__(self, queryset: BQuerySet, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset = queryset
         self['standard_ordering'] = True
@@ -40,7 +40,7 @@ class Query(dict):
     def clone(self):
         return deepcopy(self)
 
-    def _check_data(self, check_type, data):
+    def _check_data(self, check_type: _t.Text, data: _t.Dict):
         # pylint: disable=protected-access
         if getattr(self, 'empty', False):
             return False
@@ -71,31 +71,31 @@ class Query(dict):
                 return False
         return True
 
-    def check_in_query(self, data):
+    def check_in_query(self, data: _t.Dict):
         return self._check_data('filter', data) and not self._check_data('exclude', data)
 
-    def set_empty(self):
+    def set_empty(self) -> _t.NoReturn:
         self.empty = True
 
-    def set_limits(self, low=None, high=None):
+    def set_limits(self, low: int = None, high: int = None):
         self['low_mark'], self['high_mark'] = low, high
 
-    def has_results(self, *args, **kwargs):
+    def has_results(self, *args, **kwargs) -> bool:
         # pylint: disable=unused-argument
         return bool(self.queryset.all()[:2])
 
-    def get_count(self, using):
+    def get_count(self, using) -> int:
         # pylint: disable=unused-argument
         return len(self.queryset.all())
 
-    def can_filter(self):
+    def can_filter(self) -> bool:
         return self.get('low_mark', None) is None and self.get('high_mark', None) is None
 
-    def clear_ordering(self, *args, **kwargs):
+    def clear_ordering(self, *args, **kwargs) -> _t.NoReturn:
         # pylint: disable=unused-argument
         self['ordering'] = []
 
-    def add_ordering(self, *ordering):
+    def add_ordering(self, *ordering) -> _t.NoReturn:
         self['ordering'] = ordering
 
 
@@ -122,12 +122,12 @@ class CustomQuerySet(BQuerySet):
     custom_iterable_class = CustomModelIterable
     custom_query_class = Query
 
-    def __init__(self, model=None, query=None, using=None, hints=None):
+    def __init__(self, model: BaseModel = None, query: Query = None, using: _t.Text = None, hints: _t.Any = None):
         if query is None:
             query = self.custom_query_class(self)
         super().__init__(model=model, query=query, using=using, hints=hints)
 
-    def _filter_or_exclude(self, is_exclude, *args, **kwargs):
+    def _filter_or_exclude(self, is_exclude, *args, **kwargs) -> BQuerySet:
         clone = self._clone()
         if is_exclude:
             filter_type = 'exclude'

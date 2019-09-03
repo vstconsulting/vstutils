@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+from typing import NoReturn, Text
 from collections import OrderedDict as odict
 import traceback
 import logging
@@ -38,7 +39,7 @@ class LDAP:
     class InvalidDomainName(ldap.INVALID_CREDENTIALS):
         pass
 
-    def __init__(self, connection_string, username=None, password=None, domain=None):
+    def __init__(self, connection_string: Text, username: Text = None, password: Text = None, domain: Text = None):
         '''
         LDAP constructor
 
@@ -71,12 +72,14 @@ class LDAP:
             )
         self.auth(self.username, self.password)
 
-    def auth(self, username=None, password=None):
-        username = username or self.username
-        password = password or self.password
-        self.__conn = self.__authenticate(self.connection_string, username, password)
+    def auth(self, username: Text = None, password: Text = None) -> NoReturn:
+        self.__conn = self.__authenticate(
+            self.connection_string,
+            username or self.username,
+            password or self.password
+        )
 
-    def __prepare_user_with_domain(self, username):
+    def __prepare_user_with_domain(self, username: Text) -> Text:
         user = str(username).split('@')[0]
         domain = str(self.domain)
         if len(str(username).split('@')) > 1:
@@ -88,7 +91,7 @@ class LDAP:
         self.logger.debug('Trying auth in ldap with user "{}"'.format(user))
         return user
 
-    def __authenticate(self, ad, username, password):
+    def __authenticate(self, ad: Text, username: Text, password: Text) -> ldap.functions.LDAPObject:
         '''
         Active Directory auth function
 
@@ -125,14 +128,14 @@ class LDAP:
         return data_list
 
     @property
-    def domain_user(self):
+    def domain_user(self) -> Text:
         return self.__get_user_data()[0].split('\\')[-1]
 
     @property
-    def domain_name(self):
+    def domain_name(self) -> Text:
         return self.__get_user_data()[1]
 
-    def isAuth(self):
+    def isAuth(self) -> bool:
         '''
         Indicates that object auth worked
         :return: True or False
@@ -153,7 +156,7 @@ class LDAP:
         )
         return base_dn, ldap.SCOPE_SUBTREE, s_filter, self.fields
 
-    def group_list(self, *args):
+    def group_list(self, *args) -> Text:
         if not self.isAuth():
             raise self.NotAuth("Invalid auth.")
         try:

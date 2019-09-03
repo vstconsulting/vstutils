@@ -9,7 +9,7 @@ from django.utils.functional import lazy
 from drf_yasg import errors
 import rest_framework
 import pyximport
-pyximport.install()
+pyximport.install(language_level=3)
 from .section import ConfigParser, Section, get_file_value
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
