@@ -2243,3 +2243,7 @@ input[type=color]{
     transform: translateX(10px);
     opacity: 0;
 }
+
+.title-for-btn {
+    margin-left: 5px;
+}

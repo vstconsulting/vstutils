@@ -525,7 +525,7 @@
         </gui_modal>
         <button class="btn btn-default btn-open-filters-modal" @click="open" aria-label="Filters">
             <i class="fa fa-sliders" aria-hidden="true"></i>
-            <span style="margin-left:5px;">Filters</span>
+            <span class="d-none d-lg-inline-block title-for-btn">Filters</span>
         </button>
     </div>
 </script>
@@ -640,7 +640,10 @@
                 <button class="btn btn-primary btn-operation-add-child-apply" @click="addSelected" aria-label="Add selected">Add selected</button>
             </template>
         </gui_modal>
-        <button class="btn btn-primary btn-operation-add" @click="open" aria-label="Add">Add</button>
+        <button class="btn btn-primary btn-operation-add" @click="open" aria-label="Add">
+            <span class="fa fa-folder-open"></span>
+            <span class="d-none d-lg-inline-block title-for-btn">Add</span>
+        </button>
     </div>
 </script>
 
@@ -724,7 +727,7 @@
      container for guiFields on pages with ['page', 'page_new', 'page_edit', 'action'] type
 -->
 <script type="text/x-template" id="template_fields_wrapper">
-    <div class="container-fluid">
+    <div class="container-fluid fields-wrapper">
         <div class="row">
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6" v-if="show_fields_select">
                 <label class="control-label">Add field</label>

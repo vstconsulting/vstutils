@@ -285,7 +285,7 @@ window.qunitTestsArray['guiFields[field].{toInner, toRepresent}()'] = {
                     {
                         input: {test_field: '2020-12-27'},
                         output: {
-                            toInner: '2020/12/27',
+                            toInner: '2020-12-27',
                             toRepresent: '2020-12-27',
                         },
                     },

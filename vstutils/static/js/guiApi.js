@@ -60,7 +60,7 @@ class ApiConnector {
      * @return {promise} Promise of getting OpenApi schema.
      */
     _getSchema() {
-            return this.loadSchema();
+        return this.loadSchema();
     }
     /**
      * Method, that gets OpenApi schema and emits "openapi.loaded" signal.
@@ -217,7 +217,7 @@ var openapi_dictionary = {
                 remove: {
                     name: 'remove',
                     title: 'Remove',
-                    icon_classes: ['fa', 'fa-times'],
+                    icon_classes: ['fa', 'fa-trash'],
                     title_classes: ['d-none', 'd-lg-inline-block'],
                     classes: ['btn-danger', 'danger-right'],
                 },
@@ -226,6 +226,8 @@ var openapi_dictionary = {
                 new: {
                     name: 'new',
                     title: 'Create',
+                    icon_classes: ['fa', 'fa-plus'],
+                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
                 add: {
                     name: 'add',
@@ -237,28 +239,38 @@ var openapi_dictionary = {
                 edit: {
                     name: 'edit',
                     title: 'Edit',
+                    icon_classes: ['fa', 'fa-pencil-square-o'],
+                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
             },
             page_new: {
                 save_new: {
                     name: 'save',
                     title: 'Save',
+                    icon_classes: ['fa', 'fa-floppy-o'],
+                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
             },
             page_edit: {
                 save: {
                     name: 'save',
                     title: 'Save',
+                    icon_classes: ['fa', 'fa-floppy-o'],
+                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
                 reload: {
                     name: 'reload',
                     title: 'Reload',
+                    icon_classes: ['fa', ' fa-refresh'],
+                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
             },
             action: {
                 execute: {
                     name: 'execute',
-                    title: 'Execute',
+                    title: 'Send',
+                    icon_classes: ['fa', 'fa-upload'],
+                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 }
             },
         },
