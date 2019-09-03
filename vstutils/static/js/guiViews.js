@@ -333,19 +333,18 @@ class ViewConstructor extends BaseEntityConstructor {
         return bool;
     }
 
-    /**
+     /**
      * Method, that returns extension from opeanapi_dictionary for current link obj.
-     * @param {string} name Name of a link.
-     * @param {string} path Path of a link.
-     * @param {object} path_obj View object for a link path.
-     * @param {string} type Type of link object (child_links, actions, operations, sublinks).
+     * @param {string} link_name Name of a link.
+     * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
+     * @param {object} path_obj View object for a path (object FROM which link wll be formed).
      */
-    getInternalLinkObj_extension(name, path, path_obj, type){
+    getInternalLinkObj_extension(link_name, link_type, path_obj){
         let obj = {};
         let dict = this.dictionary.paths;
         ['base', path_obj.schema.type].forEach(path_type => {
-            if(dict && dict[type] && dict[type][path_type] && dict[type][path_type][name]){
-                obj = $.extend(true, obj, dict[type][path_type][name]);
+            if(dict && dict[link_type] && dict[link_type][path_type] && dict[link_type][path_type][link_name]){
+                obj = $.extend(true, obj, dict[link_type][path_type][link_name]);
             }
         });
         return obj;
@@ -364,29 +363,29 @@ class ViewConstructor extends BaseEntityConstructor {
         return isEmptyObject(path_obj.objects.model.fields);
     }
 
-    /**
+     /**
      * Method, that returns object for a current link.
-     * @param {string} name Name of a link.
-     * @param {string} path Path of a link.
-     * @param {object} path_obj View object for a link path.
-     * @param {string} type Type of link object (child_links, actions, operations, sublinks).
+     * @param {string} link_name Name of a link.
+     * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
+     * @param {object} link_obj View object for a link (object TO which link will be formed).
+     * @param {object} path_obj View object for a path (object FROM which link wll be formed).
      */
-    getInternalLinkObj(name, path, path_obj, type) {
+    getInternalLinkObj(link_name, link_type, link_obj, path_obj) {
         let obj = {
-            name: name,
+            name: link_name,
         };
 
-        if(!(path_obj.schema.hidden) && path) {
-            obj.path = path;
+        if(!(link_obj.schema.hidden) && link_obj.schema.path) {
+            obj.path = link_obj.schema.path;
         }
 
-        if(this.isPathObjSchemaEmpty(path_obj)) {
+        if(this.isPathObjSchemaEmpty(link_obj)) {
             obj.empty = true;
-            obj.query_type = path_obj.schema.query_type;
+            obj.query_type = link_obj.schema.query_type;
         }
 
         obj = $.extend(
-            true, obj, this.getInternalLinkObj_extension(name, path, path_obj, type),
+            true, obj, this.getInternalLinkObj_extension(link_name, link_type, path_obj),
         );
 
         return obj;
@@ -446,7 +445,7 @@ class ViewConstructor extends BaseEntityConstructor {
             }
 
             if(link_type) {
-                links[link_type][link_name] = this.getInternalLinkObj(link_name, link, views[link], link_type);
+                links[link_type][link_name] = this.getInternalLinkObj(link_name, link_type, views[link], views[path]);
             }
         }
 

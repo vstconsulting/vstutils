@@ -69,6 +69,18 @@ class RouterConstructor {
             });
         }
 
+        for(let item in this.custom_components_templates) {
+            if(['home', '404'].includes(item)) {
+                continue;
+            }
+
+            this.routes.push({
+                name: item,
+                path: item.replace(/\{/g, ":").replace(/\}/g, ""),
+                component: this.custom_components_templates[item],
+            });
+        }
+
         this.routes.push({
             name: '404',
             path: '*',
@@ -1668,7 +1680,7 @@ var customRoutesComponentsTemplates = {
             }
         },
     },
-    404: {
+    '404': {
         mixins: [the_basest_view_mixin],
         template: "#template_custom_view",
         data() {
