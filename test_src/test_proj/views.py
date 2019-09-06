@@ -1,8 +1,7 @@
 from vstutils.api.serializers import VSTSerializer, EmptySerializer
 from vstutils.api.base import ModelViewSetSet, Response, CopyMixin, ReadOnlyModelViewSet
 from vstutils.api.decorators import nested_view, subaction, action
-from vstutils.api import filters
-from vstutils.api import fields
+from vstutils.api import filters, fields, responses
 from .models import Host, HostGroup, File, ModelWithFK
 
 
@@ -95,12 +94,12 @@ class HostViewSet(ModelViewSetSet):
         description='Some desc'
     )
     def test(self, request, *args, **kwargs):
-        return Response("OK", 200).resp
+        return responses.HTTP_200_OK('OK')
 
     @subaction(detail=True, serializer_class=HostSerializer)
     def test2(self, request, *args, **kwargs):
         self.get_object()
-        return Response("OK", 201).resp
+        return responses.Response201("OK")
 
     @action(detail=True, serializer_class=HostSerializer)
     def test3(self, request, *args, **kwargs):

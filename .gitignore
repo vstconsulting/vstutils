@@ -18,3 +18,4 @@ test_screenshot.png
 .venv
 *.sqlite3
 *.bak
+.mypy_cache

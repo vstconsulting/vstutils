@@ -6,12 +6,12 @@ from django.conf import settings
 from django.test import Client
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
-from rest_framework import permissions as rest_permissions, status
+from rest_framework import permissions as rest_permissions
 try:
     from Queue import Queue
 except ImportError:  # nocv
     from queue import Queue
-from . import base, serializers, permissions, filters, decorators as deco
+from . import base, serializers, permissions, filters, decorators as deco, responses
 from ..utils import Dict, import_class
 
 
@@ -48,14 +48,14 @@ class UserViewSet(base.ModelViewSetSet):
             raise Exception("Invalid data was sended.")
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        return base.Response(serializer.data, 200).resp
+        return responses.HTTP_200_OK(serializer.data)
 
     @deco.action(["post"], detail=True, permission_classes=(rest_permissions.IsAuthenticated,))
     def change_password(self, request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return base.Response(serializer.data, status.HTTP_201_CREATED).resp
+        return responses.HTTP_201_CREATED(serializer.data)
 
 
 class SettingsViewSet(base.ListNonModelViewSet):
@@ -86,14 +86,14 @@ class SettingsViewSet(base.ListNonModelViewSet):
         '''
         Return localization settings.
         '''
-        return base.Response(self._get_localization_settings(), 200).resp
+        return responses.HTTP_200_OK(self._get_localization_settings())
 
     @deco.action(methods=['get'], detail=False)
     def system(self, request):
         '''
         Return system settings like interpreter or libs version.
         '''
-        return base.Response(self._get_system_settings(), 200).resp
+        return responses.HTTP_200_OK(self._get_system_settings())
 
 
 class BulkViewSet(base.rvs.APIView):
@@ -305,7 +305,7 @@ class BulkViewSet(base.rvs.APIView):
         self.client = Client(**self.original_environ_data())
         self.client.force_login(request.user)
         self._operates(operations, allow_fail)
-        return base.Response(self.results, 200).resp
+        return responses.HTTP_200_OK(self.results)
 
     @transaction.atomic()
     def post(self, request, *args, **kwargs):
@@ -319,7 +319,7 @@ class BulkViewSet(base.rvs.APIView):
             "allowed_types": self.allowed_types,
             "operations_types": self.op_types.keys(),
         }
-        return base.Response(response, 200).resp
+        return responses.HTTP_200_OK(response)
 
 
 class HealthView(base.ListNonModelViewSet):

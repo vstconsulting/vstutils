@@ -9,6 +9,7 @@ include requirements-rpc.txt
 include requirements-coreapi.txt
 include requirements-ldap.txt
 include requirements-prod.txt
+include vstutils/api/responses.pyi
 recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *
 recursive-include vstutils/static *

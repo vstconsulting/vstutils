@@ -344,6 +344,7 @@ ext_list = [
     'vstutils.api.filter_backends',
     'vstutils.api.filters',
     'vstutils.api.permissions',
+    'vstutils.api.responses',
     'vstutils.api.routers',
     'vstutils.api.schema',
     'vstutils.api.serializers',
