@@ -125,7 +125,7 @@ class PopUp {
 
         let options = {
             buttons: buttons,
-            onClosed: (instance, toast, closedBy) => {
+            onClosed: (instance, toast, closedBy) => { /* jshint unused: false */
                 if(answer_buttons.includes(closedBy)) {
                     return success(closedBy);
                 }
@@ -145,12 +145,12 @@ class PopUp {
 /**
  * Global variable, that stores main PopUp class instance.
  */
-var guiPopUp = new PopUp();
+let guiPopUp = new PopUp();
 
 /**
  * Dictionary with pop up messages samples.
  */
-var pop_up_msg = {
+let pop_up_msg = { /* jshint unused: false */
     instance: {
         success: {
             add: 'Child "<b>{0}</b>" instance was successfully added to parent list.',
@@ -194,7 +194,7 @@ var pop_up_msg = {
  * Class, that handles errors.
  * Class can transform error to string add show error message to user.
  */
-class ErrorHandler {
+class ErrorHandler { /* jshint unused: false */
     /**
      * Constructor of ErrorHandler.
      */
@@ -242,10 +242,12 @@ class ErrorHandler {
         }
 
         for(let key in error) {
-            let item = error[key];
+            if(error.hasOwnProperty(key)) {
+                let item = error[key];
 
-            if(key == 'detail' || key.indexOf('error') != -1 || typeof item == 'object') {
-                str = this.errorToString(item);
+                if (key == 'detail' || key.indexOf('error') != -1 || typeof item == 'object') {
+                    str = this.errorToString(item);
+                }
             }
         }
 

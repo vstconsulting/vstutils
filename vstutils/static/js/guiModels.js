@@ -5,7 +5,7 @@
  * This Model can create Model instances (also JS Objects),
  * that aimed to be something similar to Django Model instances.
  */
-var guiModels = {};
+let guiModels = {};
 
 /**
  * Class of Base Model.
@@ -24,7 +24,7 @@ guiModels.Model = class Model {
             }
             this.view_name = 'name';
         }
-    };
+    }
     /**
      * Method, that convert data from 'gui view' format into format, appropriate for API.
      * @param {object} form_data  Data from GUI form.
@@ -37,7 +37,7 @@ guiModels.Model = class Model {
             }
         }
         return data;
-    };
+    }
     /**
      * Method, that convert data from API format into format, appropriate for 'gui view'.
      * @param {object} api_data Data from API.
@@ -50,13 +50,13 @@ guiModels.Model = class Model {
             }
         }
         return data;
-    };
+    }
     /**
      * Method, that returns instance's value of PK field.
      */
     getPkValue() {
         return this.data[this.pk_name];
-    };
+    }
     /**
      * Method, that returns instance's value of view field.
      */
@@ -77,7 +77,7 @@ guiModels.Model = class Model {
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Method, that saves Model instance's changes.
      */
@@ -88,7 +88,7 @@ guiModels.Model = class Model {
             debugger;
             throw error;
         });
-    };
+    }
     /**
      * Method, that returns Model instance.
      * @param {object} data  Data of Model instance's fields.
@@ -101,14 +101,16 @@ guiModels.Model = class Model {
         };
 
         for(let key in this) {
-            if(!this.non_instance_attr.includes(key)) {
-                instance[key] = this[key];
+            if(this.hasOwnProperty(key)) {
+                if (!this.non_instance_attr.includes(key)) {
+                    instance[key] = this[key];
+                }
             }
         }
 
-        let methods = obj_prop_retriever.getPrototypeNonenumerables(this, false);
+        let methods = obj_prop_retriever.getPrototypeNonenumerables(this, false); /* globals obj_prop_retriever */
 
-        for(let index in methods) {
+        for(let index =0; index < methods.length; index++) {
             let key = methods[index];
             if(!this.non_instance_attr.includes(key)) {
                 instance[key] = this[key];
@@ -126,10 +128,12 @@ guiModels.Model = class Model {
         let fields = [];
 
         for(let key in this.fields) {
-            let field = this.fields[key];
+            if(this.fields.hasOwnProperty(key)) {
+                let field = this.fields[key];
 
-            if(field instanceof guiFields.fk) {
-                fields.push(key);
+                if (field instanceof guiFields.fk) {
+                    fields.push(key);
+                }
             }
         }
 
@@ -140,7 +144,7 @@ guiModels.Model = class Model {
 /**
  * Class, that manages creation of guiModels.
  */
-class ModelConstructor extends BaseEntityConstructor {
+class ModelConstructor extends BaseEntityConstructor { /* jshint unused: false */
     /**
      * Redefinition of BaseEntityConstructor class.
      * @param {object} openapi_dictionary.
@@ -206,17 +210,19 @@ class ModelConstructor extends BaseEntityConstructor {
         tabSignal.emit("models[" + model_name + "].fields.beforeInit", fields);
 
         for(let field in fields){
-            let format = this.getModelFieldFormat(fields[field]);
-            let opt = {
-                name: field,
-                format: format,
-            };
+            if(fields.hasOwnProperty(field)) {
+                let format = this.getModelFieldFormat(fields[field]);
+                let opt = {
+                    name: field,
+                    format: format,
+                };
 
-            if(this.pk_names.includes(field)){
-                opt.is_pk = true;
+                if (this.pk_names.includes(field)) {
+                    opt.is_pk = true;
+                }
+
+                f_obj[field] = new guiFields[format]($.extend(true, {}, fields[field], opt));
             }
-
-            f_obj[field] = new guiFields[format]($.extend(true, {}, fields[field], opt));
         }
 
         tabSignal.emit("models[" + model_name + "].fields.afterInit", f_obj);
@@ -233,7 +239,7 @@ class ModelConstructor extends BaseEntityConstructor {
             return this.classes[model + "Model"];
         }
 
-        return this.classes['Model'];
+        return this.classes.Model;
     }
 
     /**
@@ -246,17 +252,19 @@ class ModelConstructor extends BaseEntityConstructor {
         let models = this.getModelsList(openapi_schema);
 
         for(let model in models){
-            let constructor = this.getModelsConstructor(model);
+            if(models.hasOwnProperty(model)) {
+                let constructor = this.getModelsConstructor(model);
 
-            store[model] = new constructor(
-                model, this.generateModelFields(models[model], model),
-            );
+                store[model] = new constructor(
+                    model, this.generateModelFields(models[model], model),
+                );
 
-            tabSignal.emit("models[" + model + "].created", {model: store[model]});
+                tabSignal.emit("models[" + model + "].created", {model: store[model]});
+            }
         }
 
         tabSignal.emit("allModels.created", {models: store});
 
         return store;
     }
-};
+}

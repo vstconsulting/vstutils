@@ -4,7 +4,7 @@
  * In current realization, Store is Vuex Store.
  * More about Vuex - https://vuex.vuejs.org/.
  */
-class StoreConstructor {
+class StoreConstructor { /* jshint unused: false */
     /**
      * Constructor of StoreConstructor class.
      * @param {object} views Dict with Views objects.
@@ -171,7 +171,7 @@ class StoreConstructor {
             setWidgets(state, obj) {
                 state.widgets[obj.url] = obj.data;
             },
-        }
+        };
     }
     /**
      * Method, that forms store getters - properties/methods, that return data from store.
@@ -257,19 +257,19 @@ class StoreConstructor {
             getWidgets: state => url => {
                 return state.widgets[url];
             },
-        }
+        };
     }
     /**
      * Method, that forms store actions - asynchronous operations.
      * More about action - https://vuex.vuejs.org/guide/actions.html.
      */
     getStore_actions() {
-        return {}
+        return {};
     }
     /**
      * Method, that returns App store.
      */
     getStore() {
-        return new Vuex.Store(this.store);
+        return new Vuex.Store(this.store); /* globals Vuex */
     }
 }

@@ -15,7 +15,7 @@ class AppForApi {
      * Method gets openapi_schema, inits models, inits views and mount application to DOM.
      */
     start() {
-        return this.api.getSchema().then(openapi_schema => {
+        return this.api.getSchema().then(openapi_schema => { /* jshint unused: false */
             fieldsRegistrator.registerAllFieldsComponents();
             this.mountApplication();
         }).catch(error => {
@@ -30,7 +30,7 @@ class AppForApi {
         tabSignal.emit('app.beforeInit', {app: this});
 
         function setOriginalLinks(menu) {
-            for(let index in menu) {
+            for(let index = 0; index < menu.length; index++) {
                 let item = menu[index];
 
                 if(item.url) {
@@ -80,7 +80,8 @@ class AppForApi {
 /**
  * Creates AppForApi instance and saves in app variable.
  */
-var app = new AppForApi(api_connector_config);
+/* jshint latedef: false */
+let app = new AppForApi(api_connector_config);
 
 /**
  * Launches our app work.

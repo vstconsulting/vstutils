@@ -4,7 +4,7 @@
 /**
  * Class, that loads Tests files.
  */
-class TestsFilesLoader extends FilesLoader {
+class TestsFilesLoader extends FilesLoader { /* globals FilesLoader */
     appendFilesSync(files, response, index=0) {
         let item = files[index];
         let handler = 'appendFile_' + item.type;
@@ -33,7 +33,7 @@ class TestsFilesLoader extends FilesLoader {
 }
 
 // Function, that loads tests files and runs tests execution.
-function loadQUnitTests() {
+function loadQUnitTests() { /* jshint unused: false */
     return new TestsFilesLoader(
         window.guiTestsFiles.map((url, index) => {
             return {name: url + '?r=' + Math.random(), priority: index, type: 'js'};
@@ -64,6 +64,8 @@ window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.j
  * @param {*} takes array, associative array or single variable and insert it
  * @return {string} - return string with inserted arguments
  */
+/*jshint freeze: false */
+
 String.prototype.format = function() {
     let obj = this.toString();
     let arg_list;
@@ -89,6 +91,7 @@ String.prototype.format = function() {
  * Function search and return all `{key}` in string.
  * @return {array} array of {key} in string.
  */
+/*jshint freeze: false */
 String.prototype.format_keys = function() {
     let thisObj = this;
     let res = thisObj.match(/{([^\}]+)}/g);
@@ -97,15 +100,19 @@ String.prototype.format_keys = function() {
         return [];
     }
 
-    return res.map((item) =>{ return item.slice(1, item.length - 1) });
+    return res.map((item) =>{
+        return item.slice(1, item.length - 1);
+    });
 };
 
 /**
  * Function, that removes spaces symbols from the begging and from the end of string.
  * @param {string} s.
  */
-function trim(s) {
-    if(s) return s.replace(/^ */g, "").replace(/ *$/g, "");
+function trim(s) { /* jshint unused: false */
+    if(s) {
+        return s.replace(/^ */g, "").replace(/ *$/g, "");
+    }
     return '';
 }
 
@@ -115,7 +122,7 @@ function trim(s) {
  * @param {string} string String, that should be capitalized.
  * @return {string}
  */
-function capitalizeString(string) {
+function capitalizeString(string) { /* jshint unused: false */
     if(!string) {
         return "";
     }
@@ -129,7 +136,7 @@ function capitalizeString(string) {
  * @param {number} valid_length Max length of string.
  * @return {string}
  */
-function sliceLongString(string="", valid_length=100) {
+function sliceLongString(string="", valid_length=100) { /* jshint unused: false */
     if(typeof string != "string") {
         return sliceLongString("" + string, valid_length);
     }
@@ -148,7 +155,7 @@ function sliceLongString(string="", valid_length=100) {
  * @param {object} obj Object, that should be checked.
  * @returns {boolean}
  */
-function isEmptyObject(obj) {
+function isEmptyObject(obj) { /* jshint unused: false */
     for(let key in obj) {
         if (obj.hasOwnProperty(key)) {
             return false;
@@ -164,7 +171,7 @@ function isEmptyObject(obj) {
  * @param {string} type Type of element.
  * @return {string} String with CSS classes names.
  */
-function addCssClassesToElement(element="", title, type) {
+function addCssClassesToElement(element="", title='', type='') {
     element = element.replace(/[\s\/]+/g,'_');
 
     let class_list = element + " ";
@@ -181,39 +188,6 @@ function addCssClassesToElement(element="", title, type) {
     }
 
     return class_list.toLowerCase();
-}
-
-/**
- * Callback for window.onresize event.
- */
-window.onresize = function() {
-    if(window.innerWidth > 991) {
-        if(guiLocalSettings.get('hideMenu')) {
-            $("body").addClass('sidebar-collapse');
-        }
-
-        if($("body").hasClass('sidebar-open')) {
-            $("body").removeClass('sidebar-open');
-        }
-    } else {
-        if($("body").hasClass('sidebar-collapse')) {
-            $("body").removeClass('sidebar-collapse');
-        }
-    }
-};
-
-/**
- * Function saves 'hideMenu' options to guiLocalSettings.
- * Function is supposed to be called when push-menu button was clicked.
- */
-function saveHideMenuSettings() {
-    if(window.innerWidth > 991) {
-        if($('body').hasClass('sidebar-collapse')) {
-            guiLocalSettings.set('hideMenu', false);
-        } else {
-            guiLocalSettings.set('hideMenu', true);
-        }
-    }
 }
 
 /**
@@ -328,7 +302,40 @@ class LocalSettings {
 /**
  * Object, that manages manipulations with Local Storage.
  */
-var guiLocalSettings = new LocalSettings('guiLocalSettings');
+let guiLocalSettings = new LocalSettings('guiLocalSettings');
+
+/**
+ * Callback for window.onresize event.
+ */
+window.onresize = function() {
+    if(window.innerWidth > 991) {
+        if(guiLocalSettings.get('hideMenu')) {
+            $("body").addClass('sidebar-collapse');
+        }
+
+        if($("body").hasClass('sidebar-open')) {
+            $("body").removeClass('sidebar-open');
+        }
+    } else {
+        if($("body").hasClass('sidebar-collapse')) {
+            $("body").removeClass('sidebar-collapse');
+        }
+    }
+};
+
+/**
+ * Function saves 'hideMenu' options to guiLocalSettings.
+ * Function is supposed to be called when push-menu button was clicked.
+ */
+function saveHideMenuSettings() { /* jshint unused: false */
+    if(window.innerWidth > 991) {
+        if($('body').hasClass('sidebar-collapse')) {
+            guiLocalSettings.set('hideMenu', false);
+        } else {
+            guiLocalSettings.set('hideMenu', true);
+        }
+    }
+}
 
 /**
  * https://stackoverflow.com/a/25456134/7835270
@@ -336,7 +343,7 @@ var guiLocalSettings = new LocalSettings('guiLocalSettings');
  * @param {type} y
  * @returns {Boolean}
  */
-function deepEqual(x, y) {
+function deepEqual(x, y) { /* jshint unused: false */
     if((typeof x == "object" && x != null) && (typeof y == "object" && y != null)) {
         if(Object.keys(x).length != Object.keys(y).length) {
             return false;
@@ -365,7 +372,7 @@ function deepEqual(x, y) {
  * @param {string} string - string, which we want to check on boolean value
  * @returns {Boolean}
  */
-function stringToBoolean(string){
+function stringToBoolean(string){ /* jshint unused: false */
     if(string == null) {
         return false;
     }
@@ -389,7 +396,7 @@ function oneCharNumberToTwoChar(n) {
  * @param {object} obj Some object.
  * @return {boolean}.
  */
-function allPropertiesIsObjects(obj) {
+function allPropertiesIsObjects(obj) { /* jshint unused: false */
     for(let prop in obj) {
         if(typeof obj[prop] != 'object') {
             return false;
@@ -407,7 +414,7 @@ function allPropertiesIsObjects(obj) {
  * @param {array} buffer Instance of Array​Buffer.
  * @return {string}
  */
-function arrayBufferToBase64(buffer) {
+function arrayBufferToBase64(buffer) { /* jshint unused: false */
     let binary = '';
     let bytes = new Uint8Array(buffer);
     let len = bytes.byteLength;
@@ -425,7 +432,7 @@ function arrayBufferToBase64(buffer) {
  * @param {string} abc String with chars, that can be used in random string.
  * @return {string}
  */
-function randomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489") {
+function randomString(length, abc = "qwertyuiopasdfghjklzxcvbnm012364489") { /* jshint unused: false */
     let res = "";
 
     for(let i =0; i< length; i++) {
@@ -449,7 +456,7 @@ $(".navbar").hover(function() {
 /**
  * Function converts color from hex to rgba.
  */
-function hexToRgbA(hex, alpha) {
+function hexToRgbA(hex, alpha) { /* jshint unused: false */
     if(alpha === undefined) {
         alpha = 1;
     }
@@ -486,7 +493,7 @@ function hexToRgbA(hex, alpha) {
  * Function returns time in uptime format.
  * @param time {number} - time in seconds.
  */
-function getTimeInUptimeFormat(time) {
+function getTimeInUptimeFormat(time) { /* jshint unused: false */
     if(isNaN(time)) {
         return "00:00:00";
     }
@@ -582,7 +589,7 @@ class ObjectPropertyRetriever {
      * @returns {boolean}
      * @private
      */
-    _enumerableAndNotEnumerable(obj, prop) {
+    _enumerableAndNotEnumerable(obj, prop) { /* jshint unused: false */
         return true;
     }
     /**
@@ -596,13 +603,15 @@ class ObjectPropertyRetriever {
     _getPropertyNames(obj, iterateSelfBool, iteratePrototypeBool, includePropCb) {
         let props = [];
 
+        function func(prop) {
+            if (props.indexOf(prop) === -1 && includePropCb(obj, prop)) {
+                props.push(prop);
+            }
+        }
+
         do {
             if(iterateSelfBool) {
-                Object.getOwnPropertyNames(obj).forEach(function (prop) {
-                    if (props.indexOf(prop) === -1 && includePropCb(obj, prop)) {
-                        props.push(prop);
-                    }
-                });
+                Object.getOwnPropertyNames(obj).forEach(func);
             }
 
             if(!iteratePrototypeBool) {
@@ -610,8 +619,13 @@ class ObjectPropertyRetriever {
             }
 
             iterateSelfBool = true;
+            obj = Object.getPrototypeOf(obj);
+            if (!obj)
+            {
+                break;
+            }
 
-        } while (obj = Object.getPrototypeOf(obj));
+        } while (true);
 
         return props;
     }
@@ -713,7 +727,7 @@ class ObjectPropertyRetriever {
      * @param {object} obj Object, that we want to check.
      * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
      */
-    getOwnAndPrototypeEnumerablesAndNonenumerables(obj) {
+    getOwnAndPrototypeEnumerablesAndNonenumerables(obj, obj_proto=true) {
         let props = this._getPropertyNames(obj, true, true, this._enumerableAndNotEnumerable);
 
         if(!obj_proto) {
@@ -729,12 +743,12 @@ class ObjectPropertyRetriever {
 /**
  * Instance of ObjectPropertyRetriever class.
  */
-var obj_prop_retriever = new ObjectPropertyRetriever();
+let obj_prop_retriever = new ObjectPropertyRetriever(); /* jshint unused: false */
 
 /**
  * Class with common methods for ModelConstructor and ViewConstructor classes.
  */
-class BaseEntityConstructor {
+class BaseEntityConstructor { /* jshint unused: false */
     /**
      * Constructor of BaseEntityConstructor class.
      * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
@@ -765,7 +779,7 @@ class BaseEntityConstructor {
             return field.format;
         }
 
-        if(field.enum && guiFields['choices']){
+        if(field.enum && guiFields.choices){
             return "choices";
         }
 
@@ -793,12 +807,12 @@ class BaseEntityConstructor {
  * @param {array} paths Array with paths({string}).
  * @param {string} current_path Path, based on which function makes search.
  */
-function findClosestPath(paths, current_path) {
+function findClosestPath(paths, current_path) { /* jshint unused: false */
     let c_p_parts = current_path.replace(/^\/|\/$/g, "").split("/");
 
     let matches = [];
 
-    for(let index in paths) {
+    for(let index = 0; index < paths.length; index++) {
         let path = paths[index];
         let path_paths = path.replace(/^\/|\/$/g, "").split("/");
 
@@ -807,7 +821,7 @@ function findClosestPath(paths, current_path) {
             match: 0,
         });
 
-        for(let num in c_p_parts) {
+        for(let num = 0; num < c_p_parts.length; num++) {
             let item = c_p_parts[num];
 
             if(item == path_paths[num]) {
@@ -927,7 +941,7 @@ class CurrentView {
 /**
  * Instance of CurrentView class, that is used in gui tests.
  */
-var current_view = new CurrentView();
+let current_view = new CurrentView(); /* jshint unused: false */
 
 /**
  * Variable, that is responsible for 3rd level path keys.
@@ -937,4 +951,4 @@ var current_view = new CurrentView();
  * - /user/{id}/.
  * It is supposed, that OpenAPI schema will use 'path_pk_key' value as pk_key for 3rd level paths.
  */
-var path_pk_key = 'id';
+let path_pk_key = 'id'; /* jshint unused: false */

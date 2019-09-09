@@ -1,7 +1,7 @@
 /**
  * Mixin for buttons, that are not link_buttons.
  */
-var base_button_mixin = {
+const base_button_mixin = {
     props: ['type', 'options', 'look'],
     template: "#template_button_common",
     computed: {
@@ -56,7 +56,7 @@ var base_button_mixin = {
             this.$router.push({
                 name: path_name,
                 params: this.getPathParams(path_name),
-            })
+            });
         },
 
         doAction(instance_id){
@@ -100,8 +100,8 @@ var base_button_mixin = {
 /**
  * Mixin for gui_list_table and gui_list_table_row.
  */
-var base_list_table_mixin = {
-    mixins: [hide_field_in_table_mixin],
+const base_list_table_mixin = {
+    mixins: [hide_field_in_table_mixin], /* globals hide_field_in_table_mixin */
     computed: {
         child_actions_exist: function() {
             return this.doesPropertyExist(this.schema, 'child_links');
@@ -135,7 +135,7 @@ var base_list_table_mixin = {
 /**
  * Mixin for gui_entity_{page, page_new, pade_edit, action} components.
  */
-var base_page_type_mixin = {
+const base_page_type_mixin = {
     props: ['data', 'view', 'opt'],
     template: "#template_entity_page",
     data() {
@@ -143,7 +143,7 @@ var base_page_type_mixin = {
             options: {
                 store: 'objects',
             }
-        }
+        };
     },
     computed: {
         instance() {
@@ -155,21 +155,21 @@ var base_page_type_mixin = {
 /**
  * Mixin for gui_entity_{page_new, action} components.
  */
-var page_new_and_action_type_mixin = {
+const page_new_and_action_type_mixin = {
     data() {
         return {
             options: {
                 hideReadOnly: true,
                 store: 'sandbox',
             }
-        }
+        };
     },
 };
 
 /**
  * Mixin for gui_entity_action components.
  */
-var action_type_mixin = {
+const action_type_mixin = {
     data() {
         let hideUnrequired = false;
 
@@ -183,14 +183,14 @@ var action_type_mixin = {
             options: {
                 hideUnrequired: hideUnrequired,
             }
-        }
+        };
     },
 };
 
 /**
  * Mixin for modal window table, table row mixin.
  */
-var base_instances_table_and_table_row_mixin = {
+const base_instances_table_and_table_row_mixin = {
     computed: {
         /**
          * Boolean property, that means is there actions row in the table.
@@ -224,7 +224,7 @@ var base_instances_table_and_table_row_mixin = {
 /**
  * Mixin for modal window table.
  */
-var base_instances_table_mixin = {
+const base_instances_table_mixin = {
     mixins: [base_list_table_mixin, base_instances_table_and_table_row_mixin],
     props: {
         instances: {
@@ -270,8 +270,8 @@ var base_instances_table_mixin = {
         allSelected() {
             let selections = this.getSelections();
 
-            for(let item in this.instances) {
-                let instance = this.instances[item];
+            for(let index = 0; index < this.instances.length; index++) {
+                let instance = this.instances[index];
 
                 if(!selections[instance.getPkValue()]) {
                     return false;
@@ -287,8 +287,8 @@ var base_instances_table_mixin = {
          */
         changeAllRowsSelection(){
             let ids = {};
-            for(let item in this.instances) {
-                let instance = this.instances[item];
+            for(let index = 0; index < this.instances.length; index++) {
+                let instance = this.instances[index];
                 ids[instance.getPkValue()] = !this.allSelected;
             }
             this.setSelections(ids);
@@ -326,7 +326,7 @@ var base_instances_table_mixin = {
                 fields: this.fields,
                 url: this.list_url,
                 selected: this.opt.selections[instance.getPkValue()],
-            }
+            };
         },
     },
 };
@@ -334,7 +334,7 @@ var base_instances_table_mixin = {
 /**
  * Mixin for modal window table row.
  */
-var base_instances_table_row_mixin =  {
+const base_instances_table_row_mixin =  {
     mixins: [
         base_list_table_mixin, table_row_mixin, base_instances_table_and_table_row_mixin,
     ],
@@ -370,12 +370,14 @@ var base_instances_table_row_mixin =  {
             let classes = this.selected ? 'selected' : '';
 
             for(let key in this.fields) {
-                let field = this.fields[key];
+                if(this.fields.hasOwnProperty(key)) {
+                    let field = this.fields[key];
 
-                if(field.options.format == 'choices' || field.options.type == 'choices') {
-                    classes += " " + addCssClassesToElement(
-                        'tr', this.instance.data[field.options.name], field.options.name,
-                    );
+                    if (field.options.format == 'choices' || field.options.type == 'choices') {
+                        classes += " " + addCssClassesToElement(
+                            'tr', this.instance.data[field.options.name], field.options.name,
+                        );
+                    }
                 }
             }
 
@@ -408,7 +410,7 @@ var base_instances_table_row_mixin =  {
 /**
  * Mixin for sidebar_link and sidebar_link_wrapper components.
  */
-var sidebar_link_mixin = {
+const sidebar_link_mixin = {
     computed: {
         /**
          * Property, that returns url of current page.
@@ -444,7 +446,7 @@ var sidebar_link_mixin = {
     },
 };
 
-var base_widget_mixin = {
+const base_widget_mixin = {
     props: {
         /**
          * Property, that stores widget object - object with widget settings.
@@ -462,7 +464,7 @@ var base_widget_mixin = {
 /**
  * Base mixin for 'content_body' component - child component of line_chart component.
  */
-var w_line_chart_content_body_mixin = {
+const w_line_chart_content_body_mixin = {
     mixins: [base_widget_mixin],
     template: "#template_w_line_chart_content_body",
     data() {
@@ -474,11 +476,11 @@ var w_line_chart_content_body_mixin = {
         };
     },
     watch: {
-        'value': function(value) {
+        'value': function(value) { /* jshint unused: false */
             this.generateChart();
         },
         'item.lines': {
-            handler(value) {
+            handler(value) { /* jshint unused: false */
                 this.generateChart();
             },
             deep: true,
@@ -509,7 +511,7 @@ var w_line_chart_content_body_mixin = {
 /**
  * Base mixin for line_chart components.
  */
-var w_line_chart_mixin = {
+const w_line_chart_mixin = {
     template: '#template_w_line_chart',
     mixins: [base_widget_mixin],
     data() {
@@ -544,7 +546,7 @@ var w_line_chart_mixin = {
     },
 };
 
-var vst_vue_components = {};
+let vst_vue_components = {};
 
 vst_vue_components.items = {
     ////////////////////////////////////////////////////////////////////////////////////
@@ -574,7 +576,7 @@ vst_vue_components.items = {
         },
         data() {
             return {
-                gravatar: new Gravatar(),
+                gravatar: new Gravatar(), /* globals Gravatar */
             };
         },
         computed: {
@@ -596,10 +598,10 @@ vst_vue_components.items = {
             user() {
                 return {
                     id: my_user_id,
-                    email: my_user_email || "",
-                    first_name: my_user_first_name || "",
-                    last_name: my_user_last_name || "",
-                }
+                    email: my_user_email || "", /* globals my_user_email */
+                    first_name: my_user_first_name || "", /* globals my_user_first_name */
+                    last_name: my_user_last_name || "", /* globals my_user_last_name */
+                };
             },
             /**
              * Property, that returns URL to user's gravatar.
@@ -770,7 +772,7 @@ vst_vue_components.items = {
             };
         },
         watch: {
-            'page_url': function(path) {
+            'page_url': function(path) { /* jshint unused: false */
                 if(!this.are_sublinks_active && this.menu_open) {
                     this.menu_open = false;
                 }
@@ -812,7 +814,7 @@ vst_vue_components.items = {
                     return false;
                 }
 
-                for(let index in this.item.sublinks) {
+                for(let index = 0; index < this.item.sublinks.length; index++) {
                     let sublink = this.item.sublinks[index];
 
                     if(this.is_link_active(sublink, this.page_url)) {
@@ -984,12 +986,12 @@ vst_vue_components.items = {
         data: function() {
             return {
                 window_width: window.innerWidth,
-            }
+            };
         },
         mounted () {
             window.addEventListener('resize', () => {
                 this.window_width = window.innerWidth;
-            })
+            });
         },
         computed: {
             groupButtonsOrNot() {
@@ -1042,8 +1044,8 @@ vst_vue_components.items = {
             classes(){
                 let classes = [];
 
-                if(this.look && this.look['classes']){
-                    classes = this.look['classes'];
+                if(this.look && this.look.classes){
+                    classes = this.look.classes;
                 }
                 return classes;
 
@@ -1074,7 +1076,7 @@ vst_vue_components.items = {
             },
             selected() {
                 let count = 0;
-                for(let i in this.instances) {
+                for(let i = 0; i < this.instances.length; i++) {
                     let instance = this.instances[i];
                     if(this.selections[instance.getPkValue()]){
                         count++;
@@ -1177,7 +1179,7 @@ vst_vue_components.items = {
         data() {
             return {
                 info: app.api.openapi.info,
-            }
+            };
         },
         methods: {
             isArray(item) {
@@ -1190,8 +1192,8 @@ vst_vue_components.items = {
         template: "#template_gui_customizer",
         data() {
             return {
-                customizer: guiCustomizer,
-            }
+                customizer: guiCustomizer, /* globals guiCustomizer */
+            };
         },
 
         created() {
@@ -1310,8 +1312,8 @@ vst_vue_components.items = {
             },
             allSelected() {
                 let selections = this.$store.getters.getSelections(this.store_url);
-                for(let item in this.instances) {
-                    let instance = this.instances[item];
+                for(let index = 0; index < this.instances.length; index++) {
+                    let instance = this.instances[index];
                     if(!selections[instance.getPkValue()]) {
                         return false;
                     }
@@ -1328,8 +1330,8 @@ vst_vue_components.items = {
         methods: {
             changeAllRowsSelection(){
                 let ids = {};
-                for(let item in this.instances) {
-                    let instance = this.instances[item];
+                for(let index = 0; index < this.instances.length; index++) {
+                    let instance = this.instances[index];
                     ids[instance.getPkValue()] = !this.allSelected;
                 }
                 this.$store.commit('setSelectionValuesByIds', {
@@ -1343,7 +1345,7 @@ vst_vue_components.items = {
      * Component for pagination.
      */
     pagination: Vue.component('pagination', {
-        mixins: [main_pagination_mixin],
+        mixins: [main_pagination_mixin], /* globals main_pagination_mixin */
     }),
     /**
      * Child component of 'gui_list_table' component.
@@ -1367,12 +1369,14 @@ vst_vue_components.items = {
                 let classes = this.selected ? 'selected' : '';
 
                 for(let key in this.fields) {
-                    let field = this.fields[key];
+                    if(this.fields.hasOwnProperty(key)) {
+                        let field = this.fields[key];
 
-                    if(field instanceof guiFields.choices) {
-                        classes += " " + addCssClassesToElement(
-                            'tr', this.instance.data[field.options.name], field.options.name,
-                        );
+                        if (field instanceof guiFields.choices) {
+                            classes += " " + addCssClassesToElement(
+                                'tr', this.instance.data[field.options.name], field.options.name,
+                            );
+                        }
                     }
                 }
 
@@ -1421,7 +1425,7 @@ vst_vue_components.items = {
      * that can be added to the parents list.
      */
     gui_add_child_modal: Vue.component('gui_add_child_modal', {
-        mixins: [base_modal_window_for_instance_list_mixin],
+        mixins: [base_modal_window_for_instance_list_mixin], /* globals base_modal_window_for_instance_list_mixin */
         props:['options'],
         template: "#template_add_child_modal",
         data() {
@@ -1496,13 +1500,15 @@ vst_vue_components.items = {
              */
             addSelected() {
                 for(let id in this.selections) {
-                    let val = this.selections[id];
+                    if(this.selections.hasOwnProperty(id)) {
+                        let val = this.selections[id];
 
-                    if(!val) {
-                        continue;
+                        if (!val) {
+                            continue;
+                        }
+
+                        this.addChildToParent(id);
                     }
-
-                    this.addChildToParent(id);
                 }
 
                 this.close();
@@ -1587,7 +1593,7 @@ vst_vue_components.items = {
                 options: {
                     readOnly: true,
                 },
-            }
+            };
         }
     }),
     /**
@@ -1612,10 +1618,12 @@ vst_vue_components.items = {
         created() {
             if(this.opt.hideUnrequired) {
                 for(let key in this.instance.fields) {
-                    if(!this.instance.fields[key].options.required) {
-                        this.hidden_store[key] = true;
-                    } else {
-                        this.hidden_store[key] = false;
+                    if(this.instance.fields.hasOwnProperty(key)) {
+                        if (!this.instance.fields[key].options.required) {
+                            this.hidden_store[key] = true;
+                        } else {
+                            this.hidden_store[key] = false;
+                        }
                     }
                 }
             }
@@ -1625,7 +1633,7 @@ vst_vue_components.items = {
              * Property, that returns data of instance.
              */
             instance_data() {
-                return this.instance.data
+                return this.instance.data;
             },
             /**
              * Property, that returns fields of instance.
@@ -1749,7 +1757,7 @@ vst_vue_components.items = {
                 options: {
                     store: 'sandbox',
                 },
-            }
+            };
         }
     }),
     ////////////////////////////////////////////////////////////////////////////////////

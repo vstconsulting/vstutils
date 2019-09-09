@@ -23,7 +23,7 @@ class App {
      * Method gets openapi_schema, inits models, inits views and mount application to DOM.
      */
     start() {
-        return this.api.getSchema().then(openapi_schema => {
+        return this.api.getSchema().then(openapi_schema => { /* jshint unused: false */
             fieldsRegistrator.registerAllFieldsComponents();
             this.initModels();
             this.initViews();
@@ -43,7 +43,7 @@ class App {
      * Method, that generates Models Objects, based on openapi_schema.
      */
     generateModels() {
-        let models_constructor = new ModelConstructor(openapi_dictionary, guiModels);
+        let models_constructor = new ModelConstructor(openapi_dictionary, guiModels); /* globals ModelConstructor, guiModels */
         return models_constructor.generateModels(this.api.openapi);
     }
     /**
@@ -66,15 +66,19 @@ class App {
      */
     prepareViewsModelsFields() {
         for(let path in this.views) {
-            let view = this.views[path];
+            if (this.views.hasOwnProperty(path)) {
+                let view = this.views[path];
 
-            for(let key in view.objects.model.fields) {
-                let field = view.objects.model.fields[key];
+                for (let key in view.objects.model.fields) {
+                    if(view.objects.model.fields.hasOwnProperty(key)) {
+                        let field = view.objects.model.fields[key];
 
-                if(field.constructor.prepareField) {
-                    let prepared = field.constructor.prepareField(field, path);
+                        if (field.constructor.prepareField) {
+                            let prepared = field.constructor.prepareField(field, path);
 
-                    view.objects.model.fields[key] = prepared;
+                            view.objects.model.fields[key] = prepared;
+                        }
+                    }
                 }
             }
         }
@@ -85,8 +89,9 @@ class App {
     mountApplication() {
         tabSignal.emit('app.beforeInit', {app: this});
 
-        let store_constructor = new StoreConstructor(this.views);
-        let routerConstructor = new RouterConstructor(
+        let store_constructor = new StoreConstructor(this.views);  /* globals StoreConstructor*/
+        let routerConstructor = new RouterConstructor( /* globals RouterConstructor */
+             /* globals routesComponentsTemplates, customRoutesComponentsTemplates */
             this.views, routesComponentsTemplates, customRoutesComponentsTemplates,
         );
 
@@ -125,7 +130,8 @@ class App {
 /**
  * Creates App instance and saves it app variable.
  */
-var app = new App(api_connector_config);
+/* jshint latedef: false */
+let app = new App(api_connector_config);
 
 /**
  * Launches our app work.

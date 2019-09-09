@@ -2,7 +2,7 @@
  * Mixin for field buttons (cleanValue, defaultValue, hideField).
  * Mixin - extension for several Vue components with common data/methods/props/template and so on.
  */
-var base_field_button_mixin = {
+const base_field_button_mixin = {
     props: ['field'],
     template: "#template_field_part_button_base",
     data() {
@@ -15,7 +15,7 @@ var base_field_button_mixin = {
             icon_styles: {},
             help_text: 'Clean value',
             event_handler: 'cleanValue',
-        }
+        };
     },
     methods: {
         eventHandler(e) {
@@ -27,7 +27,7 @@ var base_field_button_mixin = {
 /**
  * Mixin for file field buttons (cleanValue, readFile, hideField).
  */
-var file_field_button_mixin = {
+const file_field_button_mixin = {
     data() {
         return {
             wrapper_classes: [],
@@ -35,14 +35,14 @@ var file_field_button_mixin = {
             span_classes: ['btn', 'btn-default', 'btn-right', 'textfile'],
             span_styles: {'float': 'right', 'marginLeft': '10px',  'marginBottom': '10px'},
             icon_styles: {},
-        }
+        };
     },
 };
 
 /**
  * Mixin for gui_fields' content(input value area).
  */
-var base_field_content_mixin = {
+const base_field_content_mixin = {
     data() {
         return {
             /**
@@ -102,13 +102,13 @@ var base_field_content_mixin = {
             let attrs = {};
 
             for(let key in this.attrs_names) {
-                if(prop[key] === undefined) {
-                    continue;
-                }
+                if(this.attrs_names.hasOwnProperty(key)) {
+                    if (prop[key] === undefined) {
+                        continue;
+                    }
 
-                this.attrs_names[key].forEach(attr => {
-                    attrs[attr] = prop[key];
-                });
+                    this.attrs_names[key].forEach(attr => {attrs[attr] = prop[key];});
+                }
             }
 
             return attrs;
@@ -119,7 +119,7 @@ var base_field_content_mixin = {
 /**
  * Mixin for some inner component of gui_field.
  */
-var base_field_inner_component_mixin = {
+const base_field_inner_component_mixin = {
     props: ['field', 'wrapper_opt', 'value', 'data'],
     data() {
         return {
@@ -152,7 +152,7 @@ var base_field_inner_component_mixin = {
 /**
  * Mixin, that contains 'label_id' computed property - value of 'id' attribute of field's label.
  */
-var field_label_id_mixin = {
+const field_label_id_mixin = {
     props: ['field', 'wrapper_opt', 'value', 'data'],
     computed: {
         label_id() {
@@ -165,7 +165,7 @@ var field_label_id_mixin = {
 /**
  * Mixin for gui_field label component.
  */
-var base_field_label_mixin = {
+const base_field_label_mixin = {
     mixins: [base_field_inner_component_mixin, field_label_id_mixin],
     template: "#template_field_part_label",
     data() {
@@ -178,7 +178,7 @@ var base_field_label_mixin = {
 /**
  * Mixin for readOnly gui_fields' content(input value area).
  */
-var base_field_content_readonly_mixin = {
+const base_field_content_readonly_mixin = {
     mixins: [base_field_content_mixin, base_field_inner_component_mixin, field_label_id_mixin],
     template: "#template_field_content_readonly_base",
     data() {
@@ -191,7 +191,7 @@ var base_field_content_readonly_mixin = {
 /**
  * Mixin for editable gui_fields' content(input value area).
  */
-var base_field_content_edit_mixin = {
+const base_field_content_edit_mixin = {
     mixins: [base_field_content_mixin, base_field_inner_component_mixin, field_label_id_mixin],
     template: "#template_field_content_edit_base",
     data() {
@@ -236,7 +236,7 @@ var base_field_content_edit_mixin = {
                     icon_classes: ['fa', 'fa-minus'],
                     event_handler: 'hideField',
                     help_text: 'Hide field',
-                }
+                };
             },
         },
         /**
@@ -249,7 +249,7 @@ var base_field_content_edit_mixin = {
                     icon_classes: ['fa', 'fa-repeat'],
                     event_handler: 'valueToDefault',
                     help_text: 'Set default value',
-                }
+                };
             },
         },
     }
@@ -258,7 +258,7 @@ var base_field_content_edit_mixin = {
 /**
  * Mixin for gui_field description component.
  */
-var base_field_description_mixin = {
+const base_field_description_mixin = {
     mixins: [base_field_inner_component_mixin],
     template: "#template_field_part_description",
     data() {
@@ -271,7 +271,7 @@ var base_field_description_mixin = {
 /**
  * Mixin for gui_field list_view component.
  */
-var base_field_list_view_mixin ={
+const base_field_list_view_mixin ={
     mixins: [base_field_inner_component_mixin],
     template: "#template_field_part_list_view",
     data() {
@@ -284,7 +284,7 @@ var base_field_list_view_mixin ={
 /**
  * Mixin for integer field content.
  */
-var integer_field_content_mixin = {
+const integer_field_content_mixin = {
     data() {
         return {
             input_type: 'number',
@@ -295,7 +295,7 @@ var integer_field_content_mixin = {
 /**
  * Mixin for boolean gui_field content(input value area).
  */
-var boolean_field_content_mixin = {
+const boolean_field_content_mixin = {
     data() {
         return {
             class_list: ["form-control", "boolean-select"],
@@ -315,7 +315,7 @@ var boolean_field_content_mixin = {
 /**
  * Mixin for readOnly choices field content(input value area).
  */
-var choices_field_content_readonly_mixin = {
+const choices_field_content_readonly_mixin = {
     mixins: [base_field_content_readonly_mixin],
     template: "#template_field_content_readonly_choices",
     computed: {
@@ -331,7 +331,7 @@ var choices_field_content_readonly_mixin = {
 /**
  * Mixin for editable autocomplete field content(input value area).
  */
-var autocomplete_field_content_edit_mixin = {
+const autocomplete_field_content_edit_mixin = {
     template: "#template_field_content_edit_autocomplete",
     data() {
         return {
@@ -359,7 +359,7 @@ var autocomplete_field_content_edit_mixin = {
          * Method, that mounts autocomplete to current field's input.
          */
         initAutoComplete() {
-            return new autoComplete({
+            return new autoComplete({ /* globals autoComplete */
                 selector: this.ac,
                 minChars: 0,
                 delay:350,
@@ -375,7 +375,7 @@ var autocomplete_field_content_edit_mixin = {
                 source: (search_input, response) =>  {
                     return this._source(search_input, response);
                 }
-            })
+            });
         },
         /**
          * Method callback for autoComplete.renderItem() method.
@@ -383,7 +383,7 @@ var autocomplete_field_content_edit_mixin = {
          * @param {string} search.
          * @private
          */
-        _renderItem(item, search) {
+        _renderItem(item, search) { /* jshint unused: false */
             return '<div class="autocomplete-suggestion"' +
                 ' data-value="' + item + '" >' + item + '</div>';
         },
@@ -394,7 +394,7 @@ var autocomplete_field_content_edit_mixin = {
          * @param {object} item DOM element of selected option.
          * @private
          */
-        _onSelect(event, term, item) {
+        _onSelect(event, term, item) { /* jshint unused: false */
             let value = this._getAutocompleteValue(item);
 
             this.$emit('proxyEvent', 'setValueInStore', value);
@@ -471,7 +471,7 @@ var autocomplete_field_content_edit_mixin = {
 /**
  * Mixin for password gui_field content(input value area).
  */
-var password_field_content_mixin = {
+const password_field_content_mixin = {
     data() {
         return {
             input_type: 'password',
@@ -482,7 +482,7 @@ var password_field_content_mixin = {
 /**
  * Mixin for date gui_field content(input value area).
  */
-var date_field_content_mixin = {
+const date_field_content_mixin = {
     data() {
         return {
             input_type: 'date',
@@ -493,7 +493,7 @@ var date_field_content_mixin = {
 /**
  * Mixin for date_time gui_field content(input value area).
  */
-var date_time_field_content_mixin = {
+const date_time_field_content_mixin = {
     data() {
         return {
             input_type: 'datetime-local',
@@ -504,7 +504,7 @@ var date_time_field_content_mixin = {
 /**
  * Mixin for color gui_field content(input value area).
  */
-var color_field_content_mixin = {
+const color_field_content_mixin = {
     data() {
         return {
             input_type: 'color',
@@ -515,7 +515,7 @@ var color_field_content_mixin = {
 /**
  * Mixin for editable crontab gui_field(input value area).
  */
-var crontab_field_content_edit_mixin = {
+const crontab_field_content_edit_mixin = {
     data() {
         return {
             /**
@@ -628,7 +628,7 @@ var crontab_field_content_edit_mixin = {
              * crontab elements' strings.
              */
             model: {},
-        }
+        };
     },
     template: "#template_field_content_edit_crontab",
     components: {
@@ -642,7 +642,7 @@ var crontab_field_content_edit_mixin = {
                     icon_classes: ['fa', 'fa-pencil'],
                     event_handler: 'toggleCrontab',
                     help_text: 'Crontab form',
-                }
+                };
             },
         },
         /**
@@ -735,10 +735,12 @@ var crontab_field_content_edit_mixin = {
     created() {
         // inits properties for models and strings of crontab elements.
         for(let key in this.crontab_elements) {
-            let el = this.crontab_elements[key];
+            if(this.crontab_elements.hasOwnProperty(key)) {
+                let el = this.crontab_elements[key];
 
-            this.model[el.name] = {};
-            this.model[el.name + "Str"] = "*";
+                this.model[el.name] = {};
+                this.model[el.name + "Str"] = "*";
+            }
         }
     },
     mounted() {
@@ -767,7 +769,7 @@ var crontab_field_content_edit_mixin = {
                 resArr[i] = false;
             }
 
-            for(let i in resArr) {
+            for(let i =0; i < resArr.length; i++) {
                 resArr[i] = false;
             }
 
@@ -864,17 +866,21 @@ var crontab_field_content_edit_mixin = {
             }
 
             for(let key in this.crontab_elements) {
-                let el = this.crontab_elements[key];
+                if(this.crontab_elements.hasOwnProperty(key)) {
+                    let el = this.crontab_elements[key];
 
-                this.model[el.name + "Str"] = string[el.order];
+                    this.model[el.name + "Str"] = string[el.order];
+                }
             }
 
             for(let key in this.crontab_elements) {
-                let el = this.crontab_elements[key];
+                if(this.crontab_elements.hasOwnProperty(key)) {
+                    let el = this.crontab_elements[key];
 
-                this.parseItem(
-                    this.model[el.name], this.model[el.name + "Str"], el.start, el.end,
-                );
+                    this.parseItem(
+                        this.model[el.name], this.model[el.name + "Str"], el.start, el.end,
+                    );
+                }
             }
         },
 
@@ -900,14 +906,16 @@ var crontab_field_content_edit_mixin = {
          */
         calculateValue() {
             for(let key in this.crontab_elements) {
-                this._calculateValue_handle(this.crontab_elements[key]);
+                if(this.crontab_elements.hasOwnProperty(key)) {
+                    this._calculateValue_handle(this.crontab_elements[key]);
+                }
             }
 
-            this.val =  this.model.MinutesStr
-                + " " + this.model.HoursStr
-                + " " + this.model.DayOfMonthStr
-                + " " + this.model.MonthsStr
-                + " " + this.model.DaysOfWeekStr;
+            this.val =  this.model.MinutesStr +
+                " " + this.model.HoursStr +
+                " " + this.model.DayOfMonthStr +
+                " " + this.model.MonthsStr +
+                " " + this.model.DaysOfWeekStr;
 
             this.model = { ...this.model};
         },
@@ -967,6 +975,7 @@ var crontab_field_content_edit_mixin = {
          * @param {number} maxInt
          * @return {string}
          */
+        // TODO Move same code to function(may be) in lines 1045 and 1065
         compileItem(resArr, minInt, maxInt) {
             let itemResults = [];
             itemResults.push(resArr.join(","));
@@ -1007,7 +1016,7 @@ var crontab_field_content_edit_mixin = {
                 let exclude = [];
                 let includeParts = [];
 
-                for(let i in division) {
+                for(let i = 0; i < division.length; i++) {
                     for(let j=minInt; j<maxInt; j+=division[i]) {
                         exclude.push(j);
                     }
@@ -1017,7 +1026,7 @@ var crontab_field_content_edit_mixin = {
                 let lastVal = -1;
                 let range = [];
 
-                for(let i in resArr) {
+                for(let i = 0; i < resArr.length; i++) {
                     if(exclude.indexOf(resArr[i]) != -1) {
                         continue;
                     }
@@ -1028,7 +1037,7 @@ var crontab_field_content_edit_mixin = {
                         if(range.length > 2) {
                             includeParts.push(range[0] + "-" + range[range.length-1]);
                         } else if(range.length) {
-                            for(let l in range) {
+                            for(let l = 0; l < range.length; l++) {
                                 includeParts.push(range[l]);
                             }
                         }
@@ -1041,7 +1050,7 @@ var crontab_field_content_edit_mixin = {
                 if(range.length > 2) {
                     includeParts.push(range[0] + "-" + range[range.length-1]);
                 } else if(range.length) {
-                    for(let l in range) {
+                    for(let l = 0; l < range.length; l++) {
                         includeParts.push(range[l]);
                     }
                 }
@@ -1054,14 +1063,14 @@ var crontab_field_content_edit_mixin = {
                 let includeParts = [];
                 let range = [];
 
-                for(let i in resArr) {
+                for(let i = 0; i < resArr.length; i++) {
                     if(lastVal + 1 == resArr[i]) {
                         range.push(resArr[i]);
                     } else {
                         if(range.length > 2) {
                             includeParts.push(range[0] + "-" + range[range.length-1]);
                         } else if(range.length) {
-                            for(let l in range) {
+                            for(let l = 0; l < range.length; l++) {
                                 includeParts.push(range[l]);
                             }
                         }
@@ -1075,7 +1084,7 @@ var crontab_field_content_edit_mixin = {
                 if(range.length > 2) {
                     includeParts.push(range[0] + "-" + range[range.length-1]);
                 } else if(range.length) {
-                    for(let l in range) {
+                    for(let l = 0; l < range.length; l++) {
                         includeParts.push(range[l]);
                     }
                 }
@@ -1101,7 +1110,7 @@ var crontab_field_content_edit_mixin = {
 /**
  * Mixin for read only json gui_field.
  */
-var json_field_content_read_only_mixin = {
+const json_field_content_read_only_mixin = {
     template: "#template_field_content_readonly_json",
     computed: {
         realFields() {
@@ -1113,7 +1122,7 @@ var json_field_content_read_only_mixin = {
 /**
  * Mixin for content components of api_object field.
  */
-var field_content_api_object_mixin = {
+const field_content_api_object_mixin = {
     mixins: [base_field_content_readonly_mixin],
     template: "#template_field_content_readonly_api_object",
     data() {
@@ -1181,7 +1190,7 @@ var field_content_api_object_mixin = {
 /**
  * Mixin, that adds hideField method, that is used in tables.
  */
-var hide_field_in_table_mixin = {
+const hide_field_in_table_mixin = {
     methods: {
         /**
          * Method, that returns true, if field should be hidden.
@@ -1205,7 +1214,7 @@ var hide_field_in_table_mixin = {
 /**
  * Mixin for vue components, that have modal window and button, that opens it.
  */
-var modal_window_and_button_mixin = {
+const modal_window_and_button_mixin = {
     data() {
         return {
             /**
@@ -1246,7 +1255,7 @@ var modal_window_and_button_mixin = {
 /**
  * Mixin with common methods of different table_row components.
  */
-var table_row_mixin = {
+const table_row_mixin = {
     methods: {
         /**
          * Method handles click on table row (<tr>),
@@ -1317,7 +1326,7 @@ var table_row_mixin = {
 /**
  * Mixin for table row of table, that is used in fk_multi_autocomplete modal.
  */
-var fma_table_row_mixin = {
+const fma_table_row_mixin = {
     mixins: [hide_field_in_table_mixin, table_row_mixin],
     props: ['qs', 'instance', 'fields', 'field_props', 'field_value'],
     template: "#template_fk_multi_autocomplete_modal_table_row",
@@ -1366,7 +1375,7 @@ var fma_table_row_mixin = {
 /**
  * Mixin for table, that is used in fk_multi_autocomplete modal.
  */
-var fma_table_mixin = {
+const fma_table_mixin = {
     mixins: [hide_field_in_table_mixin],
     props: ['instances', 'qs', 'field_props', 'field_value'],
     template: "#template_fk_multi_autocomplete_modal_table",
@@ -1390,7 +1399,7 @@ var fma_table_mixin = {
 /**
  * Mixin for search input in fk_multi_autocomplete modal.
  */
-var fma_search_input_mixin = {
+const fma_search_input_mixin = {
     props: ['field_props'],
     template: "#template_fk_multi_autocomplete_modal_search_input",
     data() {
@@ -1399,7 +1408,7 @@ var fma_search_input_mixin = {
              * Property for storing value of search input.
              */
             search_input: undefined,
-        }
+        };
     },
     methods: {
         /**
@@ -1438,7 +1447,7 @@ var fma_search_input_mixin = {
 /**
  * Main mixin for pagination components.
  */
-var main_pagination_mixin = {
+const main_pagination_mixin = {
     props: ['options'],
     template: "#template_pagination",
     computed: {
@@ -1492,7 +1501,7 @@ var main_pagination_mixin = {
 
         styles(number) {
             if(number == this.current_page) {
-                return "background-color: #d2d6de;"
+                return "background-color: #d2d6de;";
             }
             return "";
         },
@@ -1508,7 +1517,7 @@ var main_pagination_mixin = {
 /**
  * Mixin for modal windows with instances list.
  */
-var base_modal_window_for_instance_list_mixin ={
+const base_modal_window_for_instance_list_mixin ={
     mixins: [modal_window_and_button_mixin],
     props: ['options'],
     template: "#template_fk_multi_autocomplete_modal",
@@ -1531,7 +1540,7 @@ var base_modal_window_for_instance_list_mixin ={
                     page_number: 1,
                 }
             },
-        }
+        };
     },
     computed: {
         /**
@@ -1593,6 +1602,7 @@ var base_modal_window_for_instance_list_mixin ={
          * Method - callback for updateInstances method.
          * @param {object} qs Updated QuerySet.
          */
+        /* jshint unused: false */
         onUpdateInstances(qs) {},
         /**
          * Method, that generates filters for qs.
@@ -1684,7 +1694,7 @@ var base_modal_window_for_instance_list_mixin ={
 /**
  * Mixin for content components of inner_api_objec field.
  */
-var field_inner_api_object_content_mixin = {
+const field_inner_api_object_content_mixin = {
     methods: {
         /**
          * Property, that returns true if item, stores more, than 1 field.
@@ -1698,13 +1708,13 @@ var field_inner_api_object_content_mixin = {
          * @param {object} item Fields collector.
          * @param {object} field RealField.
          */
-        realFieldValue(item, field) {
+        realFieldValue(item, field) { /* jshint unused: false */
             if(this.value === undefined) {
                 return;
             }
 
             if(this.value[item] !== undefined) {
-                return this.value[item]
+                return this.value[item];
             }
         },
     },
@@ -1713,7 +1723,7 @@ var field_inner_api_object_content_mixin = {
 /**
  * Mixin for content components of FK field.
  */
-var field_fk_content_mixin = {
+const field_fk_content_mixin = {
     data() {
         return {
             /**
@@ -1729,7 +1739,7 @@ var field_fk_content_mixin = {
              * Property, that stores cached values.
              */
             values_cache: {},
-        }
+        };
     },
     created() {
         let props = this.field.options.additionalProperties;
@@ -1834,7 +1844,7 @@ var field_fk_content_mixin = {
 /**
  * Mixin for list_view, readOnly content components of FK field.
  */
-var field_fk_content_readonly_mixin = {
+const field_fk_content_readonly_mixin = {
     mixins: [field_fk_content_mixin],
     computed: {
         /**
@@ -1891,7 +1901,7 @@ var field_fk_content_readonly_mixin = {
     },
 };
 
-var field_fk_content_editable_mixin = {
+const field_fk_content_editable_mixin = {
     mixins: [base_field_content_edit_mixin, field_fk_content_mixin],
     template: "#template_field_content_edit_fk",
     data() {
@@ -1931,11 +1941,11 @@ var field_fk_content_editable_mixin = {
                 let val_obj = {};
 
                 if(data) {
-                    val_obj['value'] = data.id;
-                    val_obj['prefetch_value'] = data.text;
+                    val_obj.value = data.id;
+                    val_obj.prefetch_value = data.text;
                 } else {
-                    val_obj['value'] = event.target.value;
-                    val_obj['prefetch_value'] = event.target.value;
+                    val_obj.value = event.target.value;
+                    val_obj.prefetch_value = event.target.value;
                 }
 
                 if(!deepEqual(val_obj, this.value)){
@@ -1954,7 +1964,7 @@ var field_fk_content_editable_mixin = {
                 value = {
                     value: value,
                     prefetch_value: value,
-                }
+                };
             }
 
             let result = {
@@ -2015,15 +2025,15 @@ var field_fk_content_editable_mixin = {
                 }
 
                 failure(results);
-            })
+            });
         },
     }
-}
+};
 
 /**
  * Mixin for editable fk_autocomplete gui_field(input value area).
  */
-var field_fk_autocomplete_edit_content_mixin = {
+const field_fk_autocomplete_edit_content_mixin = {
     computed: {
         /**
          * Property, that returns value to represent.
@@ -2069,7 +2079,7 @@ var field_fk_autocomplete_edit_content_mixin = {
     }
 };
 
-var gui_fields_mixins = {
+const gui_fields_mixins = { /* jshint unused: false */
     base: {
         props: {
             field: Object,
@@ -2086,7 +2096,7 @@ var gui_fields_mixins = {
                 },
                 wrapper_styles_list: {},
                 hidden: this.field.options.hidden || false,
-            }
+            };
         },
         template: '#template_field_base',
         watch: {
@@ -2126,7 +2136,9 @@ var gui_fields_mixins = {
                 let list = "";
 
                 for (let cl in this.wrapper_classes_list) {
-                    list += this.wrapper_classes_list[cl] + " ";
+                    if(this.wrapper_classes_list.hasOwnProperty(cl)) {
+                        list += this.wrapper_classes_list[cl] + " ";
+                    }
                 }
 
                 return list;
@@ -2188,7 +2200,7 @@ var gui_fields_mixins = {
                     field: this.field.options.name,
                     value: this.handleValue(val),
                     store: this.wrapper_opt.store,
-                })
+                });
             },
             /**
              * Method, that cleans field's value (sets field value to undefined).
@@ -2292,7 +2304,7 @@ var gui_fields_mixins = {
             this.initBooleanValue();
         },
         watch: {
-            'is_hidden': function(is_hidden) {
+            'is_hidden': function(is_hidden) { /* jshint unused: false */
                 this.initBooleanValue();
             }
         },
@@ -2492,7 +2504,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-minus'],
                                 event_handler: 'hideField',
                                 help_text: 'Hide field',
-                            }
+                            };
                         },
                     },
                     /**
@@ -2506,7 +2518,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-file-text-o'],
                                 event_handler: 'readFile',
                                 help_text: 'Open file',
-                            }
+                            };
                         },
                     }
                 }
@@ -2541,7 +2553,7 @@ var gui_fields_mixins = {
                 mixins: [base_field_content_edit_mixin],
                 template: "#template_field_content_edit_base64file",
                 created() {
-                    this.styles_dict['minHeight'] = '38px';
+                    this.styles_dict.minHeight = '38px';
                 },
                 components: {
                     field_clear_button: {
@@ -2554,7 +2566,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-minus'],
                                 event_handler: 'hideField',
                                 help_text: 'Hide field',
-                            }
+                            };
                         },
                     },
                     /**
@@ -2571,7 +2583,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-file-text-o'],
                                 event_handler: 'readFile',
                                 help_text: 'Open file',
-                            }
+                            };
                         },
                         template: "#template_field_part_button_readFile",
                     },
@@ -2623,7 +2635,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-eye'],
                                 event_handler: 'showValue',
                                 help_text: "Show field's value",
-                            }
+                            };
                         },
                         watch: {
                             'input_type': function(type) {
@@ -2644,7 +2656,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-files-o'],
                                 event_handler: 'copyValueToClipBoard',
                                 help_text: "Copy field's value to clipboard",
-                            }
+                            };
                         },
                     },
                 },
@@ -2661,7 +2673,7 @@ var gui_fields_mixins = {
                     ),
                     grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
                 },
-            }
+            };
         },
         components: {
             field_content_readonly: {
@@ -2690,7 +2702,7 @@ var gui_fields_mixins = {
                     ),
                     grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
                 },
-            }
+            };
         },
         components: {
             field_content_readonly: {
@@ -2710,7 +2722,7 @@ var gui_fields_mixins = {
         data: function () {
             return {
                 link_path: "",
-            }
+            };
         },
         components: {
             field_content_readonly: {
@@ -2748,15 +2760,15 @@ var gui_fields_mixins = {
                 for(let i = 0; i < links_array.length; i++) {
                     let link = links_array[i];
 
-                    if(!(link['href'] && link['href'].search(window.hostname) != -1)) {
+                    if(!(link.href && link.href.search(window.hostname) != -1)) {
                         link.setAttribute('target', '_blank');
                         link.setAttribute('rel', 'noreferrer');
                         continue;
                     }
 
-                    let match = link['href'].match(/#([A-z0-9,\-]+)$/);
+                    let match = link.href.match(/#([A-z0-9,\-]+)$/);
 
-                    if(match && link['href'].search(window.location.href) == -1 &&
+                    if(match && link.href.search(window.location.href) == -1 &&
                         $('*').is(match[0])) {
                         link.onclick = function() {
                             $('body,html').animate({
@@ -2768,9 +2780,9 @@ var gui_fields_mixins = {
                         continue;
                     }
 
-                    if(link['href'].search(window.location.href) == -1) {
-                        link['href'] = window.location.href + this.link_path +
-                            link['href'].split(window.hostname)[1];
+                    if(link.href.search(window.location.href) == -1) {
+                        link.href = window.location.href + this.link_path +
+                            link.href.split(window.hostname)[1];
                     }
                 }
             }
@@ -2821,7 +2833,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-chevron-left'],
                                 event_handler: 'callDoDecrease',
                                 help_text: 'Decrease value',
-                            }
+                            };
                         },
                     },
                     // button, that increases field's value
@@ -2833,7 +2845,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-chevron-right'],
                                 event_handler: 'callDoIncrease',
                                 help_text: 'Increase value',
-                            }
+                            };
                         },
                     },
                 }
@@ -2966,7 +2978,7 @@ var gui_fields_mixins = {
                         },
                     ],
                 },
-            }
+            };
         },
         mounted() {
             if(!this.field.options.readOnly) {
@@ -3132,7 +3144,7 @@ var gui_fields_mixins = {
                     ),
                     grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
                 },
-            }
+            };
         },
         components: {
             field_content_edit: {
@@ -3152,7 +3164,7 @@ var gui_fields_mixins = {
                     ),
                     grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
                 },
-            }
+            };
         },
         components: {
             field_content_readonly: {
@@ -3256,7 +3268,7 @@ var gui_fields_mixins = {
                                     this.transport(params, success, failure);
                                 },
                             },
-                        }).on('change', (event) => {
+                        }).on('change', (event) => { /* jshint unused: false */
                             let data = $(this.select_el).select2('data');
                             let val_arr = [];
 
@@ -3266,7 +3278,7 @@ var gui_fields_mixins = {
                                         value: item.id,
                                         prefetch_value: item.text,
                                     };
-                                })
+                                });
                             }
 
                             if(!deepEqual(val_arr, this.value)){
@@ -3320,7 +3332,7 @@ var gui_fields_mixins = {
                      * Redefinition of '_renderItem' method
                      * of autocomplete_field_content_edit_mixin.
                      */
-                    _renderItem(item, search) {
+                    _renderItem(item, search) { /* jshint unused: false */
                         return '<div class="autocomplete-suggestion" data-value="' +
                             item.value_field + '" >' + item.view_field + '</div>';
                     },
@@ -3455,7 +3467,7 @@ var gui_fields_mixins = {
                         return {
                             value_field: this.field.options.additionalProperties.value_field,
                             view_field: this.field.options.additionalProperties.view_field,
-                        }
+                        };
                     },
                     /**
                      * Property that contains tmp values of value_field and view_field.
@@ -3587,7 +3599,7 @@ var gui_fields_mixins = {
                                 icon_classes: ['fa', 'fa-power-off'],
                                 event_handler: 'toggleEnableField',
                                 help_text: 'Enable/disable field',
-                            }
+                            };
                         },
                         created() {
                             this.handleDisabled(this.disabled);
@@ -3604,9 +3616,9 @@ var gui_fields_mixins = {
                              */
                             handleDisabled(disabled) {
                                 if(disabled) {
-                                    this.icon_styles['color'] = '#00c0ef';
+                                    this.icon_styles.color = '#00c0ef';
                                 } else {
-                                    delete this.icon_styles['color'];
+                                    delete this.icon_styles.color;
                                 }
 
                                 this.icon_styles = { ...this.icon_styles };
@@ -3705,7 +3717,7 @@ var gui_fields_mixins = {
                     ),
                     grid: "col-lg-12 col-xs-12 col-sm-12 col-md-12",
                 },
-            }
+            };
         },
         components: {
             field_content_readonly: {
@@ -3886,7 +3898,9 @@ var gui_fields_mixins = {
  * Setting of global Vue filter - capitalize.
  */
 Vue.filter('capitalize', function (value) {
-    if (!value) return '';
+    if (!value) {
+        return '';
+    }
     value = value.toString();
     return value.charAt(0).toUpperCase() + value.slice(1);
 });
@@ -3894,6 +3908,8 @@ Vue.filter('capitalize', function (value) {
  * Setting of global Vue filter - split - replacing "_" on " ".
  */
 Vue.filter('split', function (value) {
-    if (!value) return '';
+    if (!value) {
+        return '';
+    }
     return value.replace(/_/g, " ");
 });

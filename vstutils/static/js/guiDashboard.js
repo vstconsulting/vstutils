@@ -1,7 +1,7 @@
 /**
  * Object, that contains Widgets classes.
  */
-var guiWidgets = {};
+let guiWidgets = {};
 
 /**
  * Class of base widget.
@@ -89,7 +89,7 @@ guiWidgets.line_chart = class LineChartWidget extends guiWidgets.base {
      * @return {Array}
      * @private
      */
-    _formChartDataLabels(raw_data) {
+    _formChartDataLabels(raw_data) { /* jshint unused: false */
         return [];
     }
 
@@ -103,10 +103,12 @@ guiWidgets.line_chart = class LineChartWidget extends guiWidgets.base {
     _formChartDataDatasets(raw_data, labels) {
         let datasets = [];
 
-        for(let index in this.lines) {
+        for(let index =0; index < this.lines.length; index++) {
             let line = this.lines[index];
 
-            if(!line.active) continue;
+            if(!line.active) {
+                continue;
+            }
 
             datasets.push({
                 label: line.title || line.name,
@@ -126,7 +128,7 @@ guiWidgets.line_chart = class LineChartWidget extends guiWidgets.base {
      * @return {Array}
      * @private
      */
-    _formChartDataDatasets_oneLine(line, raw_data, labels) {
+    _formChartDataDatasets_oneLine(line, raw_data, labels) { /* jshint unused: false */
         return [];
     }
     /**
@@ -160,10 +162,10 @@ guiWidgets.line_chart = class LineChartWidget extends guiWidgets.base {
      * @param {object} chart_data Object with data for ChartJS instance.
      */
     generateChart(el, chart_data) {
-        return new Chart(el, chart_data);
+        return new Chart(el, chart_data); /* globals Chart */
     }
 };
 
-var guiDashboard = {
+let guiDashboard = { /* jshint unused: false */
     widgets: {},
 };

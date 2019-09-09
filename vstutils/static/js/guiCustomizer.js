@@ -1,7 +1,7 @@
 /**
  * Object, that stores application skins settings.
  */
-var guiSkins = {};
+let guiSkins = {};
 
 /**
  * Default skin.
@@ -408,7 +408,7 @@ guiSkins.default = {
 /**
  * Mixin with default colors for dark skin.
  */
-var skinDarkMixin = {
+const skinDarkMixin = {
     menu_active_bg_color: {
         default: "#0ca4ba",
     },
@@ -606,7 +606,7 @@ class GuiCustomizer {
                 // priority: 903,
                 onclick:() => {
                     this.saveSkinSettings();
-                    guiPopUp.success("Skin's settings were successfully saved.")
+                    guiPopUp.success("Skin's settings were successfully saved.");
                 },
             },
         };
@@ -732,17 +732,20 @@ class GuiCustomizer {
      */
     applySkinDefaultSettings() {
         for(let key in this.form) {
-            let val;
+            if (this.form.hasOwnProperty(key)) {
+                let val;
 
-            if(this.form[key]) {
-                val = this.form[key].default;
+                if (this.form[key]) {
+                    val = this.form[key].default;
+                }
+
+                this.skin.settings[key] = val;
+                this.formField.options.form[key].default = val;
+
+
+                this.skin.settings = {...this.skin.settings};
             }
-
-            this.skin.settings[key] = val;
-            this.formField.options.form[key].default = val;
         }
-
-        this.skin.settings = { ...this.skin.settings };
     }
 
     /**
@@ -843,7 +846,7 @@ class GuiCustomizer {
 /**
  * Instance of GuiCustomizer class.
  */
-var guiCustomizer = new GuiCustomizer(
+let guiCustomizer = new GuiCustomizer( /* jshint unused: false */
     {
         name: guiLocalSettings.get('skin') || 'default',
         settings: {},
