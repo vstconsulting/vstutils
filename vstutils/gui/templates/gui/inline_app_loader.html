@@ -15,11 +15,20 @@
 
         if('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
+                if(registrations.length == 0) {
+                    window.location.reload(true);
+                }
+
+                let promises = [];
+
                 registrations.forEach(registration => {
-                    registration.unregister().then(unregistered => {
-                        window.location.reload(true);
-                    });
-                })
+                    promises.push(registration.unregister());
+                });
+
+                Promise.all(promises).then(response => {
+                    window.location.reload(true);
+                });
+
             })
         } else {
             window.location.reload(true);
