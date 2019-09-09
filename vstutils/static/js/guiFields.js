@@ -201,7 +201,7 @@ guiFields.integer = class IntegerField extends guiFields.base {
         if(isNaN(val)) {
             console.error( "Error in integer.toInner()");
             return;
-         }
+        }
 
         return val;
     }
@@ -503,30 +503,31 @@ guiFields.html = class HtmlField extends guiFields.plain_text {
  */
 guiFields.date = class DateField extends guiFields.base {
     /**
-     * Redefinition of base guiField method toInner.
+     * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    toInner(data={}) {
+    _getValue(data={}) {
         let value = data[this.options.name];
 
         if(!value) {
             return;
         }
 
-        return moment(value).tz(window.timeZone).format("YYYY-MM-DD");
+        return moment(value).format("YYYY-MM-DD");
+    }
+    /**
+     * Redefinition of base guiField method toInner.
+     * @param {object} data
+     */
+    toInner(data={}) {
+        return this._getValue(data);
     }
     /**
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
     toRepresent(data={}) {
-        let value = data[this.options.name];
-
-        if(!value) {
-            return;
-        }
-
-        return moment(value).tz(window.timeZone).format("YYYY-MM-DD");
+        return this._getValue(data);
     };
     /**
      * Redefinition of base guiField static property 'mixins'.
@@ -564,8 +565,9 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
             return;
         }
 
-        return moment(value).tz(window.timeZone).format("YYYY-MM-DD") +
-            'T' + moment(value).tz(window.timeZone).format("HH:mm");
+        let m = moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess());
+
+        return m.format("YYYY-MM-DD") + 'T' + m.format("HH:mm");
     };
     /**
      * Redefinition of base guiField static property 'mixins'.
