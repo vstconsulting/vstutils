@@ -2,7 +2,7 @@
  * Object, that contains QuerySet classes.
  * QuerySet - class, that manages filtering/getting/updating/deleting of Model instances.
  */
-var guiQuerySets = {};
+let guiQuerySets = {};
 
 /**
  * Base QuerySet class.
@@ -22,7 +22,7 @@ guiQuerySets.QuerySet = class QuerySet {
          * Property, that means, loads prefetch data or not.
          */
         this.use_prefetch = false;
-    };
+    }
 
     /**
      * Method, that converts 'this.query' object into 'filters' string,
@@ -32,10 +32,12 @@ guiQuerySets.QuerySet = class QuerySet {
     makeQueryString(query = this.query){
         let filters = [];
         for(let key in query){
-            filters.push([key, query[key]].join('='));
+            if(query.hasOwnProperty(key)) {
+                filters.push([key, query[key]].join('='));
+            }
         }
         return filters.join("&");
-    };
+    }
 
     /**
      * Method, that converts 'this.url' string into 'data_type' array,
@@ -43,7 +45,7 @@ guiQuerySets.QuerySet = class QuerySet {
      */
     getDataType(){
         return this.url.replace(/^\/|\/$/g, "").split("/");
-    };
+    }
 
     /**
      * Method, that forms body of bulk query.
@@ -67,7 +69,7 @@ guiQuerySets.QuerySet = class QuerySet {
         }
 
         return query;
-    };
+    }
 
     /**
      * Method, that forms bulk query and send it to API.
@@ -76,7 +78,7 @@ guiQuerySets.QuerySet = class QuerySet {
      */
     formQueryAndSend(method, data){
         return this.sendQuery(this.formBulkQuery(method, data));
-    };
+    }
 
     /**
      * Method, that sends bulk query to API.
@@ -94,10 +96,13 @@ guiQuerySets.QuerySet = class QuerySet {
      */
     clone(props={}, save_cache=false) {
         let clone = $.extend(true, {}, this);
+        /* jshint proto: true */
         clone.__proto__ = this.__proto__;
 
         for(let key in props) {
-            clone[key] = props[key];
+            if(props.hasOwnProperty(key)) {
+                clone[key] = props[key];
+            }
         }
 
         if(!save_cache) {
@@ -105,7 +110,7 @@ guiQuerySets.QuerySet = class QuerySet {
         }
 
         return clone;
-    };
+    }
 
     /**
      * Method, that returns copy (new QuerySet instance) of current QuerySet,
@@ -122,7 +127,7 @@ guiQuerySets.QuerySet = class QuerySet {
      */
     all() {
         return this.clone();
-    };
+    }
 
     /**
      * Method, that returns new QuerySet with new filters, that will be saved in 'query' property.
@@ -133,7 +138,7 @@ guiQuerySets.QuerySet = class QuerySet {
         return this.clone({
             query: $.extend(true, {}, this.query, filters),
         });
-    };
+    }
 
     /**
      * Method, that returns new QuerySet with new filters, that will be saved in 'query' property.
@@ -143,11 +148,13 @@ guiQuerySets.QuerySet = class QuerySet {
     exclude(filters) {
         let ecd_filters = {};
         for(let key in filters) {
-            let ecd_key = key.indexOf("__not") == -1 ? key + "__not" : key;
-            ecd_filters[ecd_key] = filters[key];
+            if(filters.hasOwnProperty(key)) {
+                let ecd_key = key.indexOf("__not") == -1 ? key + "__not" : key;
+                ecd_filters[ecd_key] = filters[key];
+            }
         }
         return this.clone({query: ecd_filters});
-    };
+    }
 
     /**
      * Method, that returns new QuerySet with new value of 'use_prefetch' property.
@@ -165,7 +172,7 @@ guiQuerySets.QuerySet = class QuerySet {
         }
 
         return qs;
-    };
+    }
 
     /**
      * Method, that sends to API get request for getting list of Model instances,
@@ -182,9 +189,9 @@ guiQuerySets.QuerySet = class QuerySet {
             let data = response.data.results;
             let prefetch_fields = this._getPrefetchFields();
 
-            for(let item in data){
+            for(let index = 0; index < data.length; index++){
                 instances.push(
-                    this.model.getInstance(data[item], this.clone())
+                    this.model.getInstance(data[index], this.clone())
                 );
             }
 
@@ -204,8 +211,8 @@ guiQuerySets.QuerySet = class QuerySet {
         }).catch(error => {
             debugger;
             throw error;
-        })
-    };
+        });
+    }
 
     /**
      * Method, that sends query to API for creation of new Model instance
@@ -219,7 +226,7 @@ guiQuerySets.QuerySet = class QuerySet {
             debugger;
             throw error;
         });
-    };
+    }
 
 
     /**
@@ -233,12 +240,12 @@ guiQuerySets.QuerySet = class QuerySet {
         this.items().then(instances => {
             instances.forEach(instance => {
                 instance.delete();
-            })
+            });
         }).catch(error => {
             debugger;
             throw error;
-        })
-    };
+        });
+    }
 
     /**
      * Method, that returns promise, that returns Model instance with 'this.url' URI,
@@ -267,7 +274,7 @@ guiQuerySets.QuerySet = class QuerySet {
             debugger;
             throw error;
         });
-    };
+    }
 
     /**
      * Method, that cleans QuerySet cache.
@@ -297,14 +304,14 @@ guiQuerySets.QuerySet = class QuerySet {
     _getBulkDataForPrefetch(prefetch_fields, instances) {
         let bulk_data = {};
 
-        for(let index in instances) {
+        for(let index = 0; index < instances.length; index++) {
             let instance = instances[index];
 
             this._getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data);
         }
 
         return bulk_data;
-    };
+    }
 
     /**
      * Method, that forms prefetch bulk_data for one instance.
@@ -315,50 +322,52 @@ guiQuerySets.QuerySet = class QuerySet {
      */
     _getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data) {
         for(let key in prefetch_fields) {
-            let field_name = prefetch_fields[key];
-            let field = this.model.fields[field_name];
-            let value = instance.data[field_name];
+            if(prefetch_fields.hasOwnProperty(key)) {
+                let field_name = prefetch_fields[key];
+                let field = this.model.fields[field_name];
+                let value = instance.data[field_name];
 
-            if(value == null || value == undefined) {
-                continue;
-            }
-
-            if(!field.prefetchDataOrNot(instance.data)) {
-                continue;
-            }
-
-            let obj = field.getObjectBulk(instance.data, this.url);
-
-            if(obj == undefined || typeof obj == 'string') {
-                continue;
-            }
-
-            if(!bulk_data[field_name]) {
-                bulk_data[field_name] = [];
-            }
-
-            let pushed = false;
-
-            for(let item in bulk_data[field_name]) {
-                if (deepEqual(bulk_data[field_name][item].data_type, obj.data_type)) {
-                    if (!bulk_data[field_name][item].filter_values.includes(obj.id)) {
-                        bulk_data[field_name][item].filter_values.push(obj.id);
-                    }
-                    pushed = true;
+                if (value == null || value == undefined) {
+                    continue;
                 }
-            }
 
-            if(!pushed) {
-                bulk_data[field_name].push({
-                    data_type: obj.data_type,
-                    filter_name: field.options.additionalProperties.value_field,
-                    filter_values: [obj.id],
-                });
+                if (!field.prefetchDataOrNot(instance.data)) {
+                    continue;
+                }
+
+                let obj = field.getObjectBulk(instance.data, this.url);
+
+                if (obj == undefined || typeof obj == 'string') {
+                    continue;
+                }
+
+                if (!bulk_data[field_name]) {
+                    bulk_data[field_name] = [];
+                }
+
+                let pushed = false;
+
+                for (let item in bulk_data[field_name]) {
+                    if (deepEqual(bulk_data[field_name][item].data_type, obj.data_type)) {
+                        if (!bulk_data[field_name][item].filter_values.includes(obj.id)) {
+                            bulk_data[field_name][item].filter_values.push(obj.id);
+                        }
+                        pushed = true;
+                    }
+                }
+
+                if (!pushed) {
+                    bulk_data[field_name].push({
+                        data_type: obj.data_type,
+                        filter_name: field.options.additionalProperties.value_field,
+                        filter_values: [obj.id],
+                    });
+                }
             }
         }
 
         return bulk_data;
-    };
+    }
 
     /**
      * Method, that loads prefetch info for instances,
@@ -372,30 +381,32 @@ guiQuerySets.QuerySet = class QuerySet {
         let bulk_data = this._getBulkDataForPrefetch(prefetch_fields, instances);
 
         for(let key in bulk_data) {
-            for(let index in bulk_data[key]) {
-                let item = bulk_data[key][index];
-                let filters = {};
+            if(bulk_data.hasOwnProperty(key)) {
+                for (let index = 0; index < bulk_data[key].length; index++) {
+                    let item = bulk_data[key][index];
+                    let filters = {};
 
-                filters[item.filter_name] = item.filter_values;
+                    filters[item.filter_name] = item.filter_values;
 
-                let bulk = {
-                    method: 'get',
-                    data_type: item.data_type,
-                    filters: this.makeQueryString(filters),
-                };
+                    let bulk = {
+                        method: 'get',
+                        data_type: item.data_type,
+                        filters: this.makeQueryString(filters),
+                    };
 
-                promises.push(
-                    this.sendQuery(bulk).then(res => {
-                        this._setPrefetchValue(res, bulk_data, instances, key);
-                    }).catch(error => {
+                    promises.push(
+                        this.sendQuery(bulk).then(res => {
+                            this._setPrefetchValue(res, bulk_data, instances, key);
+                        }).catch(error => { /* jshint unused: false */
                         debugger;
-                    })
-                );
+                        })
+                    );
+                }
             }
         }
 
         return Promise.all(promises);
-    };
+    }
 
     /**
      * Method, that adds loaded prefetch data to instances.
@@ -405,7 +416,7 @@ guiQuerySets.QuerySet = class QuerySet {
      * @param {string} field_name Name of model field.
      * @private
      */
-    _setPrefetchValue(res, bulk_data, instances, field_name) {
+    _setPrefetchValue(res, bulk_data, instances, field_name) { /* jshint unused: false */
         if(res.status != "200") {
             return;
         }
@@ -415,7 +426,8 @@ guiQuerySets.QuerySet = class QuerySet {
         let view_field = props.view_field;
         let value_field = props.value_field;
 
-        for(let index in instances) {
+        debugger;
+        for(let index =0; index < instances.length; index++) {
             let instance = instances[index];
 
             for(let j in prefetch_data) {
@@ -427,5 +439,5 @@ guiQuerySets.QuerySet = class QuerySet {
                 }
             }
         }
-    };
+    }
 };

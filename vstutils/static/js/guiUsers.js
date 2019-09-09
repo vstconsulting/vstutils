@@ -9,7 +9,7 @@ function getProfileString() {
 /**
  * Object with mixins for some profile pages.
  */
-var profile_mixins = {};
+let profile_mixins = {};
 profile_mixins['/user/{' + path_pk_key + '}/'] = {
     methods: {
         getBreadcrumbNameForCurrentPath: getProfileString,
@@ -51,9 +51,9 @@ class ProfileViewConsctuctor {
         }
 
         if (view.schema.type == 'page_edit') {
-            mixin.methods.getRedirectUrl = function (opt) {
+            mixin.methods.getRedirectUrl = function (opt) { /* jshint unused: false */
                 return this.$route.path.replace('/edit', "");
-            }
+            };
         }
 
         new_view.mixins = [...view.mixins];
@@ -90,7 +90,7 @@ class ProfileViewConsctuctor {
                     let inner_paths = this.getParentPaths(this.$route.name, this.$route.path);
                     let views = this.$store.getters.getViews;
 
-                    for(let index in inner_paths) {
+                    for(let index = 0; index < inner_paths.length; index++) {
                         let obj = inner_paths[index];
 
                         if(!this.loadParentInstanceOrNot(views, obj)) {
@@ -102,7 +102,7 @@ class ProfileViewConsctuctor {
                         this.getInstance(views[obj.path], url).then(instance => {
                             this.data.parent_instances[obj.url] = instance;
                             this.data.parent_instances = { ...this.data.parent_instances};
-                        }).catch(error => {
+                        }).catch(error => { /* jshint unused: false */
                             debugger;
                         });
                     }
@@ -112,7 +112,7 @@ class ProfileViewConsctuctor {
     }
 }
 
-var profile_constructor = new ProfileViewConsctuctor(profile_mixins);
+let profile_constructor = new ProfileViewConsctuctor(profile_mixins);
 
 /**
  * Function generates profile views.
@@ -134,7 +134,7 @@ function addProfileViews(obj) {
 /**
  * Class, that defines urls to users gravatars.
  */
-class Gravatar {
+class Gravatar { /* jshint unused: false */
     /**
      * Constructor of Gravatar class.
      * @param {object} opt Object with Gravatar object properties.
@@ -165,7 +165,7 @@ class Gravatar {
             return this.getDefaultGravatar();
         }
 
-        return this.base_url.format({hash:md5(email)});
+        return this.base_url.format({hash:md5(email)}); /* globals md5 */
     }
 }
 
@@ -177,7 +177,7 @@ function userModelHandler(obj) {
     obj.model.view_name = 'username';
 }
 
-var userModels = ['OneUser', 'User'];
+let userModels = ['OneUser', 'User'];
 userModels.forEach(model => {
     let signal = "models[{0}].created".format([model]);
     tabSignal.connect(signal, userModelHandler);
@@ -202,14 +202,14 @@ tabSignal.connect('allViews.inited', addProfileViews);
 /**
  * Mixin for a view that is supposed to be used for creating/editing some user's password.
  */
-var view_with_user_password_mixin = {
+const view_with_user_password_mixin = {
     methods: {
         /**
          * Method, that generates random password and sets it to the 'password' and 'password2' fields.
          */
         generate_passwordInstance() {
             let data = $.extend(true, {}, this.getQuerySetFromSandBox(this.view, this.qs_url).cache.data);
-            let password = randomString(8);
+            let password = randomString(8); /* globals randomString */
 
             ['password', 'password2'].forEach(field => {
                 data[field] = password;

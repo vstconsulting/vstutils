@@ -1,9 +1,32 @@
 guiLocalSettings.setIfNotExists('guiApi.real_query_timeout', 100);
 
 /**
+ * Class for Errors connected with API requests.
+ */
+class StatusError extends Error {
+    /**
+     * Constructor of StatusError class.
+     * @param {number} status Status of HTTP response.
+     * @param {string, object} data Error object.
+     */
+    constructor(status, data){
+        super();
+        this.status = status;
+        this.message = undefined;
+        if(typeof data == "string") {
+            this.message = data;
+        }
+        if(typeof data == "object" && data.detail){
+            this.message = data.detail;
+        }
+    }
+}
+
+
+/**
  * Class, that sends API requests.
  */
-class ApiConnector {
+class ApiConnector { /* jshint unused: false */
     /**
      * Constructor of ApiConnector class.
      * @param {object} config Object with config properties for Api connector.
@@ -16,7 +39,7 @@ class ApiConnector {
         /**
          * Object with methods for providing Api connection.
          */
-        this.api = axios.create(config);
+        this.api = axios.create(config); /* globals axios */
         /**
          * Property for collecting several bulk requests into one.
          */
@@ -49,7 +72,8 @@ class ApiConnector {
     loadSchema() {
         let schema_url = "/openapi/?format=openapi";
         return this.query('get', schema_url).then(response => {
-            return this.openapi = response.data;
+            this.openapi = response.data;
+            return this.openapi;
         }).catch(error => {
             debugger;
             throw new Error(error);
@@ -72,7 +96,7 @@ class ApiConnector {
             return openapi;
         }).catch(error => {
             throw error;
-        })
+        });
     }
     /**
      * Method, that sends API request.
@@ -126,19 +150,19 @@ class ApiConnector {
      * @return {promise} Promise of getting bulk request response.
      */
     sendBulk() {
-        let url = "/" + api_version + "/_bulk/";
+        let url = "/" + api_version + "/_bulk/"; /* globals api_version */
         let collector = $.extend(true, {}, this.bulk_collector);
         this.bulk_collector.bulk_parts = [];
         let bulk_data = [];
 
-        for(let item in collector.bulk_parts) {
-            bulk_data.push(collector.bulk_parts[item].data);
+        for(let index = 0; index < collector.bulk_parts.length; index++) {
+            bulk_data.push(collector.bulk_parts[index].data);
         }
 
         return this.query("put", url, bulk_data).then(response => {
             let result = response.data;
 
-            for(let index in result) {
+            for(let index = 0; index < result.length; index++) {
                 let item = result[index];
                 let method = "resolve";
 
@@ -158,34 +182,12 @@ class ApiConnector {
 }
 
 /**
- * Class for Errors connected with API requests.
- */
-class StatusError extends Error {
-    /**
-     * Constructor of StatusError class.
-     * @param {number} status Status of HTTP response.
-     * @param {string, object} data Error object.
-     */
-    constructor(status, data){
-        super();
-        this.status = status;
-        this.message;
-        if(typeof data == "string") {
-            this.message = data;
-        }
-        if(typeof data == "object" && data.detail){
-            this.message = data.detail;
-        }
-    }
-}
-
-/**
  * Config for instance of ApiConnector class.
  */
-var api_connector_config = {
+let api_connector_config = { /* jshint unused: false */
     headers: {
         'content-type': 'application/json',
-        'X-CSRFToken': csrf_data.token,
+        'X-CSRFToken': csrf_data.token, /* globals csrf_data */
     },
     baseURL: hostname + "/api",
 };
@@ -195,7 +197,7 @@ var api_connector_config = {
  * This dictionary is needed for easier updates of following opeanapi versions,
  * that can contain another attributes names.
  */
-var openapi_dictionary = {
+let openapi_dictionary = { /* jshint unused: false */
     models: {
         name: "definitions",
         fields: {

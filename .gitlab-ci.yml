@@ -20,7 +20,7 @@ stages:
   stage: test
   image: onegreyonewhite/tox:tox
   variables:
-    TOX_ENVS: "flake,pylint,py27-django-install,py35-django-install,py36-django-install"
+    TOX_ENVS: "flake,pylint,jshint,py27-django-install,py35-django-install,py36-django-install"
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_polemarchplus_${CI_BUILD_REF_NAME}"; fi
   script:
@@ -52,7 +52,7 @@ code_style:
   <<: *branch_tests
   stage: code_standarts
   variables:
-    TOX_ENVS: "flake,pylint"
+    TOX_ENVS: "flake,pylint,jshint"
   allow_failure: true
 
 py36-django22-install:

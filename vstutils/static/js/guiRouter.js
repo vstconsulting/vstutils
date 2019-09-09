@@ -3,7 +3,7 @@
  * In current realization, Router is Vue-Router.
  * More about Vue-Router - https://router.vuejs.org/.
  */
-class RouterConstructor {
+class RouterConstructor { /* jshint unused: false */
     /**
      * Constructor of RouterConstructor Class.
      * @param {object} views Dict with views objects.
@@ -31,7 +31,7 @@ class RouterConstructor {
             data: function () {
                 return {
                     view: view,
-                }
+                };
             },
         };
     }
@@ -43,7 +43,7 @@ class RouterConstructor {
      */
     getRouteComponentMixins(view) {
         return [
-            this.components_templates['base'],
+            this.components_templates.base,
             this.components_templates[view.schema.type],
         ].concat(view.mixins || []);
     }
@@ -57,28 +57,32 @@ class RouterConstructor {
             {
                 name: 'home',
                 path: '/',
-                component: this.custom_components_templates['home'] || {},
+                component: this.custom_components_templates.home || {},
             },
         ];
 
         for(let path in this.views){
-            this.routes.push({
-                name: path,
-                path: path.replace(/\{/g, ":").replace(/\}/g, ""),
-                component: this.getRouteComponent(this.views[path]),
-            });
+            if(this.views.hasOwnProperty(path)) {
+                this.routes.push({
+                    name: path,
+                    path: path.replace(/\{/g, ":").replace(/\}/g, ""),
+                    component: this.getRouteComponent(this.views[path]),
+                });
+            }
         }
 
         for(let item in this.custom_components_templates) {
-            if(['home', '404'].includes(item)) {
-                continue;
-            }
+            if(this.custom_components_templates.hasOwnProperty(item)) {
+                if (['home', '404'].includes(item)) {
+                    continue;
+                }
 
-            this.routes.push({
-                name: item,
-                path: item.replace(/\{/g, ":").replace(/\}/g, ""),
-                component: this.custom_components_templates[item],
-            });
+                this.routes.push({
+                    name: item,
+                    path: item.replace(/\{/g, ":").replace(/\}/g, ""),
+                    component: this.custom_components_templates[item],
+                });
+            }
         }
 
         this.routes.push({
@@ -95,7 +99,7 @@ class RouterConstructor {
      * @return {object} VueRouter.
      */
     getRouter() {
-        return new VueRouter({
+        return new VueRouter({ /* globals VueRouter */
             routes: this.getRoutes(),
         });
     }
@@ -105,7 +109,7 @@ class RouterConstructor {
  * Mixin for all types of views(list, page, page_new, page_edit, action)
  * and custom views, like home page and 404 page.
  */
-var the_basest_view_mixin = {
+const the_basest_view_mixin = {
     data() {
         return {
             /**
@@ -188,7 +192,7 @@ var the_basest_view_mixin = {
 /**
  * Mixin for views of page type, that have some data from API to represent.
  */
-var page_with_data_mixin = {
+const page_with_data_mixin = {
     computed: {
         /**
          * Redefinition of 'title' from base mixin.
@@ -245,7 +249,7 @@ var page_with_data_mixin = {
 /**
  * Mixin for a views, that allows to edit data from API.
  */
-var editable_page_mixin = {
+const editable_page_mixin = {
     methods: {
         /**
          * Method, that creates copy of current view's QuerySet and save it in sandbox store.
@@ -344,22 +348,26 @@ var editable_page_mixin = {
                 let toInnerData = {};
 
                 for(let key in this.data.instance.fields) {
-                    let field = this.data.instance.fields[key];
+                    if(this.data.instance.fields.hasOwnProperty(key)) {
+                        let field = this.data.instance.fields[key];
 
-                    toInnerData[key] = field.toInner(data);
+                        toInnerData[key] = field.toInner(data);
+                    }
                 }
 
                 for(let key in this.data.instance.fields) {
-                    let field = this.data.instance.fields[key];
+                    if(this.data.instance.fields.hasOwnProperty(key)) {
+                        let field = this.data.instance.fields[key];
 
-                    if(field.options.readOnly) {
-                        continue;
-                    }
+                        if (field.options.readOnly) {
+                            continue;
+                        }
 
-                    let value = field.validateValue(toInnerData);
+                        let value = field.validateValue(toInnerData);
 
-                    if(value !== undefined && value !== null) {
-                        valid_data[key] = value;
+                        if (value !== undefined && value !== null) {
+                            valid_data[key] = value;
+                        }
                     }
                 }
 
@@ -378,7 +386,7 @@ var editable_page_mixin = {
 /**
  * Mixin for views, that are able to send autoupdate requests.
  */
-var view_with_autoupdate_mixin = {
+const view_with_autoupdate_mixin = {
     data() {
         return {
             /**
@@ -394,7 +402,7 @@ var view_with_autoupdate_mixin = {
                  */
                 stop: false,
             },
-        }
+        };
     },
     /**
      * Vue Hook, that is called,
@@ -427,8 +435,8 @@ var view_with_autoupdate_mixin = {
             let update_interval = this.getAutoUpdateInterval();
             this.autoupdate.stop = false;
 
-            if(Visibility.state() == 'hidden') {
-                return setTimeout(() => {this.startAutoUpdate();}, update_interval)
+            if(Visibility.state() == 'hidden') { /* globals Visibility */
+                return setTimeout(() => {this.startAutoUpdate();}, update_interval);
             }
 
             this.autoupdate.timeout_id = setTimeout(() => {
@@ -456,8 +464,10 @@ var view_with_autoupdate_mixin = {
             return new_qs.get().then(instance => {
                 if(qs.cache.getPkValue() == instance.getPkValue()) {
                     for(let key in instance.data) {
-                        if(!deepEqual(instance.data[key], qs.cache.data[key])) {
-                            qs.cache.data[key] = instance.data[key];
+                        if(instance.data.hasOwnProperty(key)) {
+                            if (!deepEqual(instance.data[key], qs.cache.data[key])) {
+                                qs.cache.data[key] = instance.data[key];
+                            }
                         }
                     }
                     qs.cache.data = { ...qs.cache.data };
@@ -475,7 +485,7 @@ var view_with_autoupdate_mixin = {
 /**
  * Mixin for Vue templates with card-boxes, that could be collapsed.
  */
-var collapsable_card_mixin = {
+const collapsable_card_mixin = {
     data() {
         return {
             /**
@@ -501,14 +511,14 @@ var collapsable_card_mixin = {
 /**
  * Object with properties of list views.
  */
-var list_props = {
+let list_props = {
     page_size:20,
 };
 
 /**
  * Dict with mixins for Vue components, generated for guiViews.
  */
-var routesComponentsTemplates = {
+let routesComponentsTemplates = { /* jshint unused: false */
     /**
      * Base mixin - common mixin for all views types.
      */
@@ -529,7 +539,7 @@ var routesComponentsTemplates = {
                      */
                     parent_instances: {},
                 },
-            }
+            };
         },
         /**
          * Computed properties of Vue component.
@@ -866,7 +876,7 @@ var routesComponentsTemplates = {
                 let inner_paths = this.getParentPaths(this.$route.name, this.$route.path);
                 let views = this.$store.getters.getViews;
 
-                for(let index in inner_paths) {
+                for(let index = 0; index < inner_paths.length; index++) {
                     let obj = inner_paths[index];
 
                     if(!this.loadParentInstanceOrNot(views, obj)) {
@@ -920,8 +930,8 @@ var routesComponentsTemplates = {
                 let breadcrumb = [];
                 let parent_links = this.getParentPaths(this.$route.name, this.$route.path);
 
-                for(let item in parent_links) {
-                    let parent_link = parent_links[item];
+                for(let index = 0; index < parent_links.length; index++) {
+                    let parent_link = parent_links[index];
                     let name = parent_link.url.replace(/^\/|\/$/g, "").split("/").last;
                     let name_1;
 
@@ -963,14 +973,14 @@ var routesComponentsTemplates = {
                 // else defines filters and pagination
                 let filters = [];
                 let filters_keys = Object.keys(this.$route.query);
-                let page = this.$route.query["page"];
+                let page = this.$route.query.page;
 
                 if(page) {
                     filters_keys.splice(filters_keys.indexOf("page"), 1);
                 }
 
-                for(let item in filters_keys) {
-                    let key = filters_keys[item];
+                for(let index =0; index < filters_keys.length; index++) {
+                    let key = filters_keys[index];
                     filters.push([key, this.$route.query[key]].join('='));
                 }
 
@@ -1019,7 +1029,7 @@ var routesComponentsTemplates = {
                     instances: {},
                     parent_instances: {},
                 },
-            }
+            };
         },
         computed: {
             /**
@@ -1147,8 +1157,8 @@ var routesComponentsTemplates = {
                 let filters = this.getFilters(url).cache.data;
 
                 for(let key in filters) {
-                    if(!filters[key]){
-                        delete filters[key];
+                    if(filters.hasOwnProperty(key) && !filters[key]) {
+                            delete filters[key];
                     }
                 }
 
@@ -1183,7 +1193,7 @@ var routesComponentsTemplates = {
              */
             removeInstance(opt) {
                 let instance;
-                for(let index in this.data.instances) {
+                for(let index = 0; index < this.data.instances.length; index++) {
                     instance = this.data.instances[index];
 
                     if(instance.getPkValue() == opt.instance_id) {
@@ -1218,9 +1228,9 @@ var routesComponentsTemplates = {
                 );
 
                 for(let id in selections) {
-                    if(!selections[id]) continue;
-                    for(let item in this.data.instances) {
-                        let instance = this.data.instances[item];
+                    if(!selections[id]) { continue; }
+                    for(let index = 0; index < this.data.instances.length; index++) {
+                        let instance = this.data.instances[index];
                         if(id == instance.getPkValue()){
                             instance.delete().then(response => {
                                 this.removeInstances_callback(instance, response);
@@ -1269,7 +1279,7 @@ var routesComponentsTemplates = {
                     return;
                 }
 
-                for(let index in new_qs.cache) {
+                for(let index =0; index < new_qs.cache.length; index++) {
                     let list_instance = new_qs.cache[index];
 
                     if(list_instance.getPkValue() == instance.getPkValue()) {
@@ -1665,14 +1675,14 @@ var routesComponentsTemplates = {
 /**
  * Dict with mixins for Vue components for custom pages.
  */
-var customRoutesComponentsTemplates = {
+let customRoutesComponentsTemplates = { /* jshint unused: false */
     home: {
         mixins: [the_basest_view_mixin],
         template: "#template_custom_view",
         data() {
             return {
                 message: "Homepage content"
-            }
+            };
         },
         computed: {
             title() {
@@ -1686,7 +1696,7 @@ var customRoutesComponentsTemplates = {
         data() {
             return {
                 message: "Page with current URL was not found."
-            }
+            };
         },
         computed: {
             title() {

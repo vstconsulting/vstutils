@@ -1,7 +1,7 @@
 /**
  * Object, that contains guiFields classes.
  */
-var guiFields = {};
+let guiFields = {};
 
 /**
  * Base guiField class.
@@ -254,7 +254,7 @@ guiFields.boolean = class BooleanField extends guiFields.base {
         }
 
         if(typeof value == 'string') {
-            return stringToBoolean(value);
+            return stringToBoolean(value); /* globals stringToBoolean */
         }
 
         if(typeof value == 'number') {
@@ -275,7 +275,7 @@ guiFields.boolean = class BooleanField extends guiFields.base {
      */
     toRepresent(data={}) {
         return this._getValue(data);
-    };
+    }
     /**
      * Redefinition of base guiField method _insertTestValue.
      */
@@ -331,7 +331,7 @@ guiFields.choices = class ChoicesField extends guiFields.string {
         }
 
         console.error("There is no appropriate choice in enum list");
-    };
+    }
     /**
      * Redefinition of string guiField method toInner.
      * @param {object} data
@@ -345,7 +345,7 @@ guiFields.choices = class ChoicesField extends guiFields.string {
      */
     toRepresent(data={}) {
         return this._getValue(data);
-    };
+    }
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.
      */
@@ -436,7 +436,7 @@ guiFields.base64file = class Base64FileField extends guiFields.file {
         let value = data[this.options.name];
 
         if(value !== undefined) {
-            return arrayBufferToBase64(value);
+            return arrayBufferToBase64(value); /* globals arrayBufferToBase64 */
         }
     }
 };
@@ -482,7 +482,7 @@ guiFields.plain_text = class PlainTextField extends guiFields.textarea {
      * Redefinition of textarea guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(gui_fields_mixins.plain_text)
+        return super.mixins.concat(gui_fields_mixins.plain_text);
     }
 };
 
@@ -528,7 +528,7 @@ guiFields.date = class DateField extends guiFields.base {
      */
     toRepresent(data={}) {
         return this._getValue(data);
-    };
+    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
@@ -568,7 +568,7 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
         let m = moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess());
 
         return m.format("YYYY-MM-DD") + 'T' + m.format("HH:mm");
-    };
+    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
@@ -619,20 +619,20 @@ guiFields.uptime = class UptimeField extends guiFields.base {
 
         let uptime_in_seconds = 0;
 
-        for(let item in this.reg_exp_arr) {
-            let time_parts = XRegExp.exec(value, this.reg_exp_arr[item]);
+        for(let index = 0; index < this.reg_exp_arr.length; index++) {
+            let time_parts = XRegExp.exec(value, this.reg_exp_arr[index]);
 
             if(!time_parts) {
                 continue;
             }
 
             let duration_obj = {
-                seconds: Number(time_parts['ss']),
-                minutes:  Number(time_parts['mm']),
-                hours:  Number(time_parts['hh']),
-                days: Number(time_parts['d'] || 0),
-                months: Number(time_parts['m'] || 0),
-                years: Number(time_parts['y'] || 0),
+                seconds: Number(time_parts.ss),
+                minutes:  Number(time_parts.mm),
+                hours:  Number(time_parts.hh),
+                days: Number(time_parts.d || 0),
+                months: Number(time_parts.m || 0),
+                years: Number(time_parts.y || 0),
             };
 
             uptime_in_seconds = moment.duration(duration_obj).asSeconds();
@@ -647,8 +647,8 @@ guiFields.uptime = class UptimeField extends guiFields.base {
      * @param {object} data
      */
     toRepresent(data={}) {
-        return getTimeInUptimeFormat(data[this.options.name]);
-    };
+        return getTimeInUptimeFormat(data[this.options.name]); /* globals getTimeInUptimeFormat */
+    }
     /**
      * Redefinition of base guiField method _insertTestValue_imitateEvent.
      */
@@ -716,7 +716,7 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
         }
 
         return value / 1000;
-    };
+    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
@@ -741,7 +741,7 @@ guiFields.crontab = class CrontabField extends guiFields.base {
         }
 
         return value;
-    };
+    }
     /**
      * Redefinition of base guiField method toInner.
      * @param {object} data
@@ -755,7 +755,7 @@ guiFields.crontab = class CrontabField extends guiFields.base {
      */
     toRepresent(data={}) {
         return this._getValue(data);
-    };
+    }
     /**
      * Redefinition of base guiField method _insertTestValue_imitateEvent.
      */
@@ -781,19 +781,21 @@ guiFields.json = class JsonField extends guiFields.base {
         let realFields = {};
 
         for(let field in value) {
-            let opt = {
-                name: field,
-                readOnly: this.options.readOnly || false,
-                title: field,
-                format: 'string',
-            };
+            if(value.hasOwnProperty(field)) {
+                let opt = {
+                    name: field,
+                    readOnly: this.options.readOnly || false,
+                    title: field,
+                    format: 'string',
+                };
 
 
-            if(typeof value[field] == 'boolean') {
-                opt.format = 'boolean';
+                if (typeof value[field] == 'boolean') {
+                    opt.format = 'boolean';
+                }
+
+                realFields[field] = new guiFields[opt.format](opt);
             }
-
-            realFields[field] = new guiFields[opt.format](opt);
         }
 
         return realFields;
@@ -811,7 +813,7 @@ guiFields.json = class JsonField extends guiFields.base {
  * Mixin for fk and api_object guiFields classes.
  * @param Class_name
  */
-var fk_and_api_object_mixin = (Class_name) => class extends Class_name {
+let fk_and_api_object_mixin = (Class_name) => class extends Class_name {
     /**
      * Static method, that finds queryset by model's name in views of second nesting level.
      * @param {string} model_name Name Model to which autocomplete field links.
@@ -826,8 +828,8 @@ var fk_and_api_object_mixin = (Class_name) => class extends Class_name {
             })
             .sort((a, b) => { return b.length - a.length;});
 
-        for(let key in paths) {
-            let p = paths[key];
+        for(let index = 0; index < paths.length; index++) {
+            let p = paths[index];
             if(views[p].objects.model.name == model_name) {
                 return views[p].objects.clone();
             }
@@ -886,7 +888,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {object} data Object with instance data.
      * @returns {boolean}
      */
-    prefetchDataOrNot(data) {
+    prefetchDataOrNot(data) { /* jshint unused: false */
         return true;
     }
     /**
@@ -894,7 +896,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {object} data Object with instance data.
      * @returns {boolean}
      */
-    makeLinkOrNot(data) {
+    makeLinkOrNot(data) { /* jshint unused: false */
         return true;
     }
     /**
@@ -902,7 +904,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {object} raw_data Object with instance data, before loading prefetch data.
      * @param {string} qs_url Queryset url.
      */
-    getObjectBulk(raw_data, qs_url) {
+    getObjectBulk(raw_data, qs_url) { /* jshint unused: false */
         let dt = this.getQuerySetFormattedUrl(raw_data).replace(/^\/|\/$/g, "").split('/');
 
         return {
@@ -915,7 +917,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param data {object} Object with instance data.
      * @param querysets {array} Array with field QuerySets.
      */
-    getAppropriateQuerySet(data, querysets) {
+    getAppropriateQuerySet(data, querysets) { /* jshint unused: false */
         let qs = querysets;
 
         if(!qs) {
@@ -948,7 +950,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param data {object} Object with instance data.
      * @param params {object} Object with URL params of current path.
      */
-    formatQuerySetUrl(url="", data={}, params) {
+    formatQuerySetUrl(url="", data={}, params={}) {
         if(url.indexOf('{') == -1) {
             return url;
         }
@@ -961,8 +963,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param data {object} Object with instance data.
      * @param params {object} Object with URL params of current path.
      */
-    getUrlParams(url, data, params) {
-        if(params) {
+    getUrlParams(url, data, params) { /* jshint unused: false */
+        if(Object.entries(params).length !== 0 && params.constructor !== Object) {
             return params;
         }
 
@@ -1013,7 +1015,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
             value = {
                 value: value,
                 prefetch_value: value,
-            }
+            };
         }
 
         let newOption = new Option(value.prefetch_value, value.value, false, false);
@@ -1061,8 +1063,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
         if(props.list_paths) {
             props.querysets = [];
 
-            for(let key in props.list_paths) {
-                props.querysets.push(this.getQuerySetByPath(props.list_paths[key]));
+            for(let index =0; index < props.list_paths.length; index++) {
+                props.querysets.push(this.getQuerySetByPath(props.list_paths[index]));
             }
 
             return field;
@@ -1140,25 +1142,27 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
         // let level = views[path].schema.level + 2;
         let level = views[path].schema.level;
         let path1 = path.split("/").slice(0, -2).join("/") + "/";
+        function func(item){
+            if(item.indexOf(path1) != -1 &&
+                views[item].schema.type == "list" &&
+                views[item].schema.level <= level) {
+                return item;
+            }
+        }
+        function func1(item){
+            if(views[item].objects.model.name == model_name) {
+                return item;
+            }
+        }
 
-        for(let index = num; num > 0; num--) {
+        for(num; num > 0; num--) {
             path1 = path1.split("/").slice(0, -2).join("/") + "/";
 
             let paths = Object.keys(views)
-                .filter(item => {
-                    if(item.indexOf(path1) != -1 &&
-                        views[item].schema.type == "list" &&
-                        views[item].schema.level <= level) {
-                        return item;
-                    }
-                })
+                .filter(func)
                 .sort((a, b) => { return b.length - a.length;});
 
-            let paths_with_model = paths.filter(item => {
-                if(views[item].objects.model.name == model_name) {
-                    return item;
-                }
-            });
+            let paths_with_model = paths.filter(func1);
 
             let closest_path = findClosestPath(paths_with_model, path);
 
@@ -1184,7 +1188,7 @@ guiFields.multiselect = class MultiSelect extends guiFields.fk {
      * Redefinition of 'prefetchDataOrNot' method of FK guiField.
      * @param {object} data
      */
-    prefetchDataOrNot(data={}) {
+    prefetchDataOrNot(data={}) { /* jshint unused: false */
         return false;
     }
     /**
@@ -1332,7 +1336,7 @@ guiFields.inner_api_object = class InnerApiObjectField extends guiFields.base {
      * @param {object} field Inner_api_object field instance.
      * @param {string} path Name of View path.
      */
-    static prepareField(field, path) {
+    static prepareField(field, path) { /* jshint unused: false */
         let model = this.getModel(field);
 
         if(!model) {
@@ -1344,23 +1348,25 @@ guiFields.inner_api_object = class InnerApiObjectField extends guiFields.base {
         let realFields = {};
 
         for(let key in model.fields) {
-            let inner_field = model.fields[key];
-            let inner_model = this.getModel(inner_field);
-            realFields[key] = {};
+            if(model.fields.hasOwnProperty(key)) {
+                let inner_field = model.fields[key];
+                let inner_model = this.getModel(inner_field);
+                realFields[key] = {};
 
-            for(let item in inner_model.fields) {
-                if(Object.keys(inner_model.fields).length == 1) {
-                    let f = inner_model.fields[item];
-                    let opt = $.extend(
-                        true, {required: field.options.required}, f.options, {title: '{0} - {1}'.format(key, item)},
-                    );
+                for (let item in inner_model.fields) {
+                    if (Object.keys(inner_model.fields).length == 1) {
+                        let f = inner_model.fields[item];
+                        let opt = $.extend(
+                            true, {required: field.options.required}, f.options, {title: '{0} - {1}'.format(key, item)},
+                        );
 
-                    realFields[key][item] = new guiFields[f.options.format](opt);
-                } else {
-                    realFields[key][item] = inner_model.fields[item];
-                    realFields[key][item].options = $.extend(
-                        true, {required: field.options.required}, inner_model.fields[item].options,
-                    );
+                        realFields[key][item] = new guiFields[f.options.format](opt);
+                    } else {
+                        realFields[key][item] = inner_model.fields[item];
+                        realFields[key][item].options = $.extend(
+                            true, {required: field.options.required}, inner_model.fields[item].options,
+                        );
+                    }
                 }
             }
         }
@@ -1377,10 +1383,15 @@ guiFields.inner_api_object = class InnerApiObjectField extends guiFields.base {
         let valid = {};
 
         for(let key in this.options.realFields) {
-            valid[key] = {};
+            if(this.options.realFields.hasOwnProperty(key)) {
+                valid[key] = {};
 
-            for(let item in this.options.realFields[key])
-                valid[key][item] = this.options.realFields[key][item].validateValue(val[key]);
+                for (let item in this.options.realFields[key]) {
+                    if(this.options.realFields[key].hasOwnProperty(item)) {
+                        valid[key][item] = this.options.realFields[key][item].validateValue(val[key]);
+                    }
+                }
+            }
         }
 
         return valid;
@@ -1503,36 +1514,42 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
         };
 
         for(let key in parent_values) {
-            let item = parent_types[parent_values[key]];
-            if(item !== undefined) {
-                opt.format = item;
+            if(parent_values.hasOwnProperty(key)) {
+                let item = parent_types[parent_values[key]];
+                if (item !== undefined) {
+                    opt.format = item;
+                }
             }
         }
 
         for(let key in parent_values) {
-            let item = parent_choices[parent_values[key]];
-            if(item !== undefined && Array.isArray(item)) {
-                let bool_values = item.some((val) => {
-                    if(typeof val == 'boolean') {
-                        return val;
-                    }
-                });
+            if(parent_values.hasOwnProperty(key)) {
+                let item = parent_choices[parent_values[key]];
+                if (item !== undefined && Array.isArray(item)) {
+                    let bool_values = item.some((val) => {
+                        if (typeof val == 'boolean') {
+                            return val;
+                        }
+                    });
 
-                if(bool_values) {
-                    opt.format = 'boolean';
-                } else {
-                    opt.enum = item;
-                    opt.format = 'choices';
+                    if (bool_values) {
+                        opt.format = 'boolean';
+                    } else {
+                        opt.enum = item;
+                        opt.format = 'choices';
+                    }
                 }
             }
         }
 
         for(let key in this.options) {
-            if(['format', 'additionalProperties'].includes(key)) {
-                continue;
-            }
+            if(this.options.hasOwnProperty(key)) {
+                if (['format', 'additionalProperties'].includes(key)) {
+                    continue;
+                }
 
-            opt[key] = this.options[key];
+                opt[key] = this.options[key];
+            }
         }
 
         let callback_opt = {};
@@ -1585,16 +1602,18 @@ guiFields.form = class FormField extends guiFields.base {
      * @param {string} method Method, that will called.
      * @private
      */
-    _getValue(data={}, method) {
+    _getValue(data, method) {
         let val = {};
 
         let realFields = this.generateRealFields();
 
         for(let key in realFields) {
-            let real_value = realFields[key][method](data[this.options.name]);
+            if(realFields.hasOwnProperty(key)) {
+                let real_value = realFields[key][method](data[this.options.name]);
 
-            if(real_value !== undefined) {
-                val[key] = real_value;
+                if (real_value !== undefined) {
+                    val[key] = real_value;
+                }
             }
         }
 
@@ -1631,12 +1650,14 @@ guiFields.form = class FormField extends guiFields.base {
             let constructor = new BaseEntityConstructor(openapi_dictionary);
 
             for(let key in this.options.form) {
-                let field = this.options.form[key];
-                field.name = key;
+                if(this.options.form.hasOwnProperty(key)) {
+                    let field = this.options.form[key];
+                    field.name = key;
 
-                field.format = constructor.getFieldFormat(field);
+                    field.format = constructor.getFieldFormat(field);
 
-                realFields[key] = this.generateRealField(field);
+                    realFields[key] = this.generateRealField(field);
+                }
             }
         }
 
@@ -1772,9 +1793,11 @@ class GuiFieldComponentRegistrator {
      */
     registerAllFieldsComponents() {
         for(let key in this.fields) {
-            this.registerFieldComponent(key, this.fields[key].mixins);
+            if(this.fields.hasOwnProperty(key)) {
+                this.registerFieldComponent(key, this.fields[key].mixins);
+            }
         }
     }
 }
 
-var fieldsRegistrator = new GuiFieldComponentRegistrator(guiFields);
+let fieldsRegistrator = new GuiFieldComponentRegistrator(guiFields); /* jshint unused: false */
