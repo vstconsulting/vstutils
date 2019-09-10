@@ -441,6 +441,15 @@ guiFields.base64file = class Base64FileField extends guiFields.file {
     }
 };
 
+guiFields.image = class ImageField extends guiFields.base64file {
+     /**
+     * Redefinition of base guiField static property 'mixins'.
+     */
+    static get mixins() {
+        return super.mixins.concat(gui_fields_mixins.image);
+    }
+};
+
 /**
  * Text paragraph guiField class.
  */

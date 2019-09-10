@@ -426,8 +426,7 @@ guiQuerySets.QuerySet = class QuerySet {
         let view_field = props.view_field;
         let value_field = props.value_field;
 
-        debugger;
-        for(let index =0; index < instances.length; index++) {
+        for(let index = 0; index < instances.length; index++) {
             let instance = instances[index];
 
             for(let j in prefetch_data) {

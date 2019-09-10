@@ -171,3 +171,10 @@ class RedirectCharField(CharField):
     '''
 
     redirect = True
+
+
+class ImageField(CharField):
+    '''
+    Field that takes base64 string as input value .
+    Take effect only in GUI.
+    '''

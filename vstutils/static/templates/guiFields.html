@@ -252,6 +252,7 @@
     Block of BASE64FILE guiField's components -
     - elements of base guiField structure
 -->
+<!-- content (value input area) of editable base64 field -->
 <script type="text/x-template" id="template_field_content_edit_base64file">
     <div class="input-group">
         <p id="file_path_input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
@@ -265,6 +266,66 @@
 </script>
 <!--
     EndBlock of BASE64FILE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of IMAGE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of readonly image field -->
+<script type="text/x-template" id="template_field_content_readonly_image">
+    <div>
+        <div class="image-field-content-wrapper">
+            <img :src="'data:image/gif;base64,' + value" :alt="field.options.title || field.options.name "
+                 class="image-field-content" @click="openImage">
+
+            <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
+                <template v-slot:header>
+                    <h3>{{ field.options.title || field.options.name }}</h3>
+                </template>
+                <template v-slot:body>
+                    <img :src="'data:image/gif;base64,' + value" alt="field.options.title || field.options.name"
+                         class="image-field-content">
+                </template>
+            </gui_modal>
+        </div>
+    </div>
+</script>
+<!-- content (value input area) of editable image field -->
+<script type="text/x-template" id="template_field_content_edit_image">
+    <div>
+        <template v-if="value !== undefined">
+            <div class="image-field-content-wrapper">
+                <img :src="'data:image/gif;base64,' + value" :alt="field.options.title || field.options.name" class="image-field-content"
+                     @click="openImage">
+
+                <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
+                    <template v-slot:header>
+                        <h3>{{ field.options.title || field.options.name }}</h3>
+                    </template>
+                    <template v-slot:body>
+                        <img :src="'data:image/gif;base64,' + value" alt="field.options.title || field.options.name"
+                             class="image-field-content">
+                    </template>
+                </gui_modal>
+            </div>
+        </template>
+        <div class="input-group">
+
+            <p id="file_path_input" style="overflow: hidden;" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
+
+            <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
+
+            <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+            <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+        </div>
+    </div>
+</script>
+<!--
+    EndBlock of IMAGE guiField's components -
     - elements of base guiField structure
 -->
 

@@ -2079,6 +2079,69 @@ const field_fk_autocomplete_edit_content_mixin = {
     }
 };
 
+/**
+ * Mixin for editable base64 field (input value area).
+ */
+const field_base64_edit_content_mixin = {
+    mixins: [base_field_content_edit_mixin],
+    template: "#template_field_content_edit_base64file",
+    created() {
+        this.styles_dict.minHeight = '38px';
+    },
+    components: {
+        field_clear_button: {
+            mixins: [base_field_button_mixin],
+        },
+        field_hidden_button: {
+            mixins: [base_field_button_mixin],
+            data() {
+                return {
+                    icon_classes: ['fa', 'fa-minus'],
+                    event_handler: 'hideField',
+                    help_text: 'Hide field',
+                };
+            },
+        },
+        /**
+         * Component for 'open file' button.
+         */
+        field_read_file_button: {
+            mixins: [base_field_button_mixin],
+            data() {
+                return {
+                    wrapper_classes: ['input-group-append'],
+                    wrapper_styles: {},
+                    span_classes: ['btn', 'input-group-text', 'textfile'],
+                    icon_styles: {},
+                    icon_classes: ['fa', 'fa-file-text-o'],
+                    event_handler: 'readFile',
+                    help_text: 'Open file',
+                };
+            },
+            template: "#template_field_part_button_readFile",
+        },
+    },
+};
+
+/**
+ * Mixin for readonly and editable image field.
+ */
+const field_image_content_mixin = {
+    data() {
+        return {
+            show_modal: false,
+        }
+    },
+    methods: {
+        openImage() {
+            this.show_modal = true;
+        },
+        closeImage() {
+            this.show_modal = false;
+        },
+    },
+};
+
 const gui_fields_mixins = { /* jshint unused: false */
     base: {
         props: {
@@ -2459,11 +2522,11 @@ const gui_fields_mixins = { /* jshint unused: false */
                     return;
                 }
 
-                if(file.size > 1024 * 1024) {
-                    guiPopUp.error("File is too large");
-                    console.log("File is too large " + file.size);
-                    return;
-                }
+                // if(file.size > 1024 * 1024) {
+                //     guiPopUp.error("File is too large");
+                //     console.log("File is too large " + file.size);
+                //     return;
+                // }
 
                 this.file_obj = file;
 
@@ -2550,46 +2613,77 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
         components: {
             field_content_edit: {
-                mixins: [base_field_content_edit_mixin],
-                template: "#template_field_content_edit_base64file",
-                created() {
-                    this.styles_dict.minHeight = '38px';
-                },
-                components: {
-                    field_clear_button: {
-                        mixins: [base_field_button_mixin],
-                    },
-                    field_hidden_button: {
-                        mixins: [base_field_button_mixin],
-                        data() {
-                            return {
-                                icon_classes: ['fa', 'fa-minus'],
-                                event_handler: 'hideField',
-                                help_text: 'Hide field',
-                            };
-                        },
-                    },
-                    /**
-                     * Component for 'open file' button.
-                     */
-                    field_read_file_button: {
-                        mixins: [base_field_button_mixin],
-                        data() {
-                            return {
-                                wrapper_classes: ['input-group-append'],
-                                wrapper_styles: {},
-                                span_classes: ['btn', 'input-group-text', 'textfile'],
-                                icon_styles: {},
-                                icon_classes: ['fa', 'fa-file-text-o'],
-                                event_handler: 'readFile',
-                                help_text: 'Open file',
-                            };
-                        },
-                        template: "#template_field_part_button_readFile",
-                    },
-                },
+                mixins: [field_base64_edit_content_mixin],
             },
         },
+    },
+
+    image: {
+        // methods: {
+        //   handleValue(data={}) {
+        //         return this.field.toBase64(data);
+        //     },
+        // },
+        watch: {
+            'file_obj': {
+                deep: true,
+                handler: function(file) {
+                    let el = $(this.$el).find("#file_path_input");
+
+                    // if(file && file.name) {
+                    //     $(el).text(file.name);
+                    // } else {
+                    //     $(el).text("No file selected");
+                    // }
+
+                    if(file && file.name) {
+                        debugger;
+                        $(el).text(file.name);
+                    } else if(file && this.value !== undefined) {
+                        debugger;
+                        $(el).text("Selected earlier file");
+                    } else {
+                        $(el).text("No file selected");
+                    }
+                }
+            },
+            'value': function(value) {
+                // debugger;
+                if(this.value != this.file_obj.value) {
+                    debugger;
+                    delete this.file_obj['name'];
+                    delete this.file_obj['value'];
+                    this.file_obj = { ...this.file_obj };
+                }
+            }
+
+        },
+
+        methods: {
+            readFileOnLoadCallback: function(event) {
+                // debugger;
+                this.setValueInStore(event.target.result);
+                // debugger;
+                let d = {};
+                d[this.field.options.name] = event.target.result;
+                this.file_obj.value = this.handleValue(d);
+                // debugger;
+                //
+                // let el = $(this.$el).find("#file_reader_input");
+                // $(el).val("");
+            },
+        },
+
+        components: {
+            field_content_readonly: {
+                mixins: [base_field_content_readonly_mixin, field_image_content_mixin],
+                template: '#template_field_content_readonly_image',
+            },
+            field_content_edit: {
+                mixins: [field_base64_edit_content_mixin, field_image_content_mixin],
+                template: '#template_field_content_edit_image',
+            },
+        }
     },
 
     password: {
