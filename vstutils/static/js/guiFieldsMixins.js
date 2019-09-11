@@ -2080,6 +2080,26 @@ const field_fk_autocomplete_edit_content_mixin = {
 };
 
 /**
+ * Mixin for read file button of base64file field.
+ */
+const field_base64_readfile_button_mixin = {
+    mixins: [base_field_button_mixin],
+    data() {
+        return {
+            wrapper_classes: ['input-group-append'],
+            wrapper_styles: {},
+            span_classes: ['btn', 'input-group-text', 'textfile'],
+            icon_styles: {},
+            icon_classes: ['fa', 'fa-file-text-o'],
+            event_handler: 'readFile',
+            help_text: 'Open file',
+            accept: '*',
+        };
+    },
+    template: "#template_field_part_button_readFile",
+};
+
+/**
  * Mixin for editable base64 field (input value area).
  */
 const field_base64_edit_content_mixin = {
@@ -2106,20 +2126,7 @@ const field_base64_edit_content_mixin = {
          * Component for 'open file' button.
          */
         field_read_file_button: {
-            mixins: [base_field_button_mixin],
-            data() {
-                return {
-                    wrapper_classes: ['input-group-append'],
-                    wrapper_styles: {},
-                    span_classes: ['btn', 'input-group-text', 'textfile'],
-                    icon_styles: {},
-                    icon_classes: ['fa', 'fa-file-text-o'],
-                    event_handler: 'readFile',
-                    help_text: 'Open file',
-                    accept: '*',
-                };
-            },
-            template: "#template_field_part_button_readFile",
+            mixins: [field_base64_readfile_button_mixin],
         },
     },
 };
@@ -2150,18 +2157,41 @@ const field_binfile_content_mixin = {
 const field_binimage_content_mixin = {
     data() {
         return {
-            show_modal: false,
             title_for_empty_value: 'No image selected',
 
         }
     },
-    methods: {
-        openImage() {
-            this.show_modal = true;
-        },
-        closeImage() {
-            this.show_modal = false;
-        },
+    components: {
+        image_block: {
+            mixins: [base_field_inner_component_mixin],
+            template: '#template_field_content_binimage_image_block',
+            data() {
+                return {
+                    show_modal: false,
+                    modal_opt: {
+                        footer: false,
+                    }
+                };
+            },
+            computed: {
+                img_src() {
+                    if(this.value.content) {
+                        return 'data:image/gif;base64,' + this.value.content;
+                    }
+                },
+                img_alt() {
+                    return this.field.options.title || this.field.options.name;
+                }
+            },
+            methods: {
+                openImage() {
+                    this.show_modal = true;
+                },
+                closeImage() {
+                    this.show_modal = false;
+                },
+            },
+        }
     },
 };
 
@@ -2675,20 +2705,13 @@ const gui_fields_mixins = { /* jshint unused: false */
                 template: '#template_field_content_edit_binimage',
                 components: {
                     field_read_file_button: {
-                        mixins: [base_field_button_mixin],
+                        mixins: [field_base64_readfile_button_mixin],
                         data() {
                             return {
-                                wrapper_classes: ['input-group-append'],
-                                wrapper_styles: {},
-                                span_classes: ['btn', 'input-group-text', 'textfile'],
-                                icon_styles: {},
-                                icon_classes: ['fa', 'fa-file-text-o'],
-                                event_handler: 'readFile',
-                                help_text: 'Open file',
                                 accept: 'image/*',
+                                help_text: 'Open image',
                             };
                         },
-                        template: "#template_field_part_button_readFile",
                     },
                 }
             },

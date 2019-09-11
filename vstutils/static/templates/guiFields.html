@@ -303,25 +303,26 @@
     Block of BINIMAGE guiField's components -
     - elements of base guiField structure
 -->
+<!-- template of image_block component - child component of readonly and editable binimage fields -->
+<script type="text/x-template" id="template_field_content_binimage_image_block">
+    <div class="image-field-content-wrapper">
+        <img :src="img_src" :alt="img_alt" class="image-field-content" @click="openImage">
+        <gui_modal v-show="show_modal" @close="closeImage" :opt="modal_opt">
+            <template v-slot:header>
+                <h3>{{ img_alt | capitalize | split }}</h3>
+            </template>
+            <template v-slot:body>
+                <img :src="img_src" :alt="img_alt" class="image-field-content">
+            </template>
+        </gui_modal>
+    </div>
+</script>
 <!-- content (value input area) of readonly binimage field -->
 <script type="text/x-template" id="template_field_content_readonly_binimage">
     <div>
-         <template v-if="value && value.content">
-            <div class="image-field-content-wrapper">
-                <img :src="'data:image/gif;base64,' + value.content" :alt="field.options.title || field.options.name "
-                     class="image-field-content" @click="openImage">
-
-                <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
-                    <template v-slot:header>
-                        <h3>{{ field.options.title || field.options.name }}</h3>
-                    </template>
-                    <template v-slot:body>
-                        <img :src="'data:image/gif;base64,' + value.content" alt="field.options.title || field.options.name"
-                             class="image-field-content">
-                    </template>
-                </gui_modal>
-            </div>
-         </template>
+        <template v-if="value && value.content">
+            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
+        </template>
         <template v-else>
             <input :class="classes" :styles="styles" disabled :value="val">
         </template>
@@ -331,20 +332,7 @@
 <script type="text/x-template" id="template_field_content_edit_binimage">
     <div>
         <template v-if="value && value.content">
-            <div class="image-field-content-wrapper">
-                <img :src="'data:image/gif;base64,' + value.content" :alt="field.options.title || field.options.name" class="image-field-content"
-                     @click="openImage">
-
-                <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
-                    <template v-slot:header>
-                        <h3>{{ field.options.title || field.options.name }}</h3>
-                    </template>
-                    <template v-slot:body>
-                        <img :src="'data:image/gif;base64,' + value.content" alt="field.options.title || field.options.name"
-                             class="image-field-content">
-                    </template>
-                </gui_modal>
-            </div>
+            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
         </template>
         <div class="input-group">
             <p class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label">{{ val }}</p>
