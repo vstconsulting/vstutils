@@ -441,12 +441,33 @@ guiFields.base64file = class Base64FileField extends guiFields.file {
     }
 };
 
-guiFields.image = class ImageField extends guiFields.base64file {
+/**
+ * BinFile guiField class.
+ * This field takes and returns JSON with 2 properties:
+ * - name - string - name of file;
+ * - content - base64 string - content of file.
+ */
+guiFields.binfile = class BinFileField extends guiFields.base64file {
+    /**
+     * Redefinition of base guiField static property 'mixins'.
+     */
+    static get mixins() {
+        return super.mixins.concat(gui_fields_mixins.binfile);
+    }
+};
+
+/**
+ * BinImage guiField class.
+ * This field takes and returns JSON with 2 properties:
+ * - name - string - name of image;
+ * - content - base64 string - content of image.
+ */
+guiFields.binimage = class BinImageField extends guiFields.binfile {
      /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(gui_fields_mixins.image);
+        return super.mixins.concat(gui_fields_mixins.binimage);
     }
 };
 

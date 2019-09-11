@@ -237,7 +237,7 @@
     <div :class="wrapper_classes" :style="wrapper_styles"
          data-toggle="tooltip" :title="help_text">
             <span :class="span_classes" :style="span_styles" @change="eventHandler">
-                <input type='file' class='input-file' id="file_reader_input">
+                <input type='file' class='input-file' id="file_reader_input" :accept="accept">
                 <span :class="icon_classes" :style="icon_styles"></span>
             </span>
     </div>
@@ -255,7 +255,7 @@
 <!-- content (value input area) of editable base64 field -->
 <script type="text/x-template" id="template_field_content_edit_base64file">
     <div class="input-group">
-        <p id="file_path_input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
+        <p id="file_path_input" class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
 
         <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
 
@@ -271,34 +271,68 @@
 
 
 <!--
-    Block of IMAGE guiField's components -
+    Block of BINFILE guiField's components -
     - elements of base guiField structure
 -->
-<!-- content (value input area) of readonly image field -->
-<script type="text/x-template" id="template_field_content_readonly_image">
+<!-- content (value input area) of readonly binfile field -->
+<script type="text/x-template" id="template_field_content_readonly_binfile">
     <div>
-        <div class="image-field-content-wrapper">
-            <img :src="'data:image/gif;base64,' + value" :alt="field.options.title || field.options.name "
-                 class="image-field-content" @click="openImage">
-
-            <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
-                <template v-slot:header>
-                    <h3>{{ field.options.title || field.options.name }}</h3>
-                </template>
-                <template v-slot:body>
-                    <img :src="'data:image/gif;base64,' + value" alt="field.options.title || field.options.name"
-                         class="image-field-content">
-                </template>
-            </gui_modal>
-        </div>
+        <input :class="classes" :styles="styles" disabled :value="val">
     </div>
 </script>
-<!-- content (value input area) of editable image field -->
-<script type="text/x-template" id="template_field_content_edit_image">
+
+<!-- content (value input area) of editable binfile field -->
+<script type="text/x-template" id="template_field_content_edit_binfile">
+    <div class="input-group">
+        <p class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label">{{ val }}</p>
+
+        <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
+
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+    </div>
+</script>
+<!--
+    EndBlock of BINFILE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of BINIMAGE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of readonly binimage field -->
+<script type="text/x-template" id="template_field_content_readonly_binimage">
     <div>
-        <template v-if="value !== undefined">
+         <template v-if="value && value.content">
             <div class="image-field-content-wrapper">
-                <img :src="'data:image/gif;base64,' + value" :alt="field.options.title || field.options.name" class="image-field-content"
+                <img :src="'data:image/gif;base64,' + value.content" :alt="field.options.title || field.options.name "
+                     class="image-field-content" @click="openImage">
+
+                <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
+                    <template v-slot:header>
+                        <h3>{{ field.options.title || field.options.name }}</h3>
+                    </template>
+                    <template v-slot:body>
+                        <img :src="'data:image/gif;base64,' + value.content" alt="field.options.title || field.options.name"
+                             class="image-field-content">
+                    </template>
+                </gui_modal>
+            </div>
+         </template>
+        <template v-else>
+            <input :class="classes" :styles="styles" disabled :value="val">
+        </template>
+    </div>
+</script>
+<!-- content (value input area) of editable binimage field -->
+<script type="text/x-template" id="template_field_content_edit_binimage">
+    <div>
+        <template v-if="value && value.content">
+            <div class="image-field-content-wrapper">
+                <img :src="'data:image/gif;base64,' + value.content" :alt="field.options.title || field.options.name" class="image-field-content"
                      @click="openImage">
 
                 <gui_modal v-show="show_modal" @close="closeImage" :opt="{footer:false}">
@@ -306,15 +340,14 @@
                         <h3>{{ field.options.title || field.options.name }}</h3>
                     </template>
                     <template v-slot:body>
-                        <img :src="'data:image/gif;base64,' + value" alt="field.options.title || field.options.name"
+                        <img :src="'data:image/gif;base64,' + value.content" alt="field.options.title || field.options.name"
                              class="image-field-content">
                     </template>
                 </gui_modal>
             </div>
         </template>
         <div class="input-group">
-
-            <p id="file_path_input" style="overflow: hidden;" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
+            <p class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label">{{ val }}</p>
 
             <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
 
@@ -325,7 +358,7 @@
     </div>
 </script>
 <!--
-    EndBlock of IMAGE guiField's components -
+    EndBlock of BINIMAGE guiField's components -
     - elements of base guiField structure
 -->
 

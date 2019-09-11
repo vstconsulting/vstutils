@@ -173,8 +173,22 @@ class RedirectCharField(CharField):
     redirect = True
 
 
-class ImageField(CharField):
+class FileInJsonField(VSTCharField):
     '''
-    Field that takes base64 string as input value .
+    Field that takes JSON with properties:
+    * name - string - name of file;
+    * content - base64 string - content of file.
+    Take effect only in GUI.
+    '''
+
+    def to_representation(self, value):
+        return json.loads(value)
+
+
+class ImageInJsonField(FileInJsonField):
+    '''
+    Field that takes JSON with properties:
+    * name - string - name of image;
+    * content - base64 string - content of image.
     Take effect only in GUI.
     '''

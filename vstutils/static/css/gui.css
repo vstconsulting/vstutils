@@ -1192,6 +1192,11 @@ img.image-field-content {
     cursor: pointer;
 }
 
+.p-as-input {
+    overflow: hidden;
+    word-break: break-all;
+}
+
 
 /**
  * Фильтры для формы поиска
