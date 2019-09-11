@@ -13,6 +13,8 @@ from . import fields, serializers
 # Extra formats
 FORMAT_FILE = openapi.TYPE_FILE
 FORMAT_SECRET_FILE = 'secretfile'
+FORMAT_BIN_FILE = 'binfile'
+FORMAT_BIN_IMAGE = 'binimage'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_MULTISELECT = 'multiselect'
 FORMAT_HTML = 'html'
@@ -30,6 +32,12 @@ basic_type_info[fields.FileInStringField] = dict(
 )
 basic_type_info[fields.SecretFileInString] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_SECRET_FILE
+)
+basic_type_info[fields.BinaryFileInJsonField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_BIN_FILE
+)
+basic_type_info[fields.BinaryImageInJsonField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_BIN_IMAGE
 )
 basic_type_info[fields.HtmlField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_HTML

@@ -2,7 +2,7 @@ from vstutils.api.serializers import VSTSerializer, EmptySerializer
 from vstutils.api.base import ModelViewSetSet, Response, CopyMixin, ReadOnlyModelViewSet
 from vstutils.api.decorators import nested_view, subaction, action
 from vstutils.api import filters, fields, responses
-from .models import Host, HostGroup, File, ModelWithFK
+from .models import Host, HostGroup, File, ModelWithFK, ModelWithBinaryFiles
 
 
 class HostFilter(filters.DefaultIDFilter):
@@ -187,3 +187,21 @@ class ModelWithFKSerializer(VSTSerializer):
 class TestFkViewSet(ModelViewSetSet):
     model = ModelWithFK
     serializer_class = ModelWithFKSerializer
+    
+
+class ModelWithBinaryFilesSerializer(VSTSerializer):
+    some_binfile = fields.BinaryFileInJsonField(required=False)
+    some_binimage = fields.BinaryImageInJsonField(required=False)
+
+    class Meta:
+        model = ModelWithBinaryFiles
+        fields = (
+            'id',
+            'some_binfile',
+            'some_binimage'
+        )
+
+
+class TestBinaryFilesViewSet(ModelViewSetSet):
+    model = ModelWithBinaryFiles
+    serializer_class = ModelWithBinaryFilesSerializer

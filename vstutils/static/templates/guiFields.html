@@ -237,7 +237,7 @@
     <div :class="wrapper_classes" :style="wrapper_styles"
          data-toggle="tooltip" :title="help_text">
             <span :class="span_classes" :style="span_styles" @change="eventHandler">
-                <input type='file' class='input-file' id="file_reader_input">
+                <input type='file' class='input-file' id="file_reader_input" :accept="accept">
                 <span :class="icon_classes" :style="icon_styles"></span>
             </span>
     </div>
@@ -252,9 +252,10 @@
     Block of BASE64FILE guiField's components -
     - elements of base guiField structure
 -->
+<!-- content (value input area) of editable base64 field -->
 <script type="text/x-template" id="template_field_content_edit_base64file">
     <div class="input-group">
-        <p id="file_path_input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
+        <p id="file_path_input" class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label"></p>
 
         <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
 
@@ -265,6 +266,87 @@
 </script>
 <!--
     EndBlock of BASE64FILE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of BINFILE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- content (value input area) of readonly binfile field -->
+<script type="text/x-template" id="template_field_content_readonly_binfile">
+    <div>
+        <input :class="classes" :styles="styles" disabled :value="val">
+    </div>
+</script>
+
+<!-- content (value input area) of editable binfile field -->
+<script type="text/x-template" id="template_field_content_edit_binfile">
+    <div class="input-group">
+        <p class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label">{{ val }}</p>
+
+        <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
+
+        <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+    </div>
+</script>
+<!--
+    EndBlock of BINFILE guiField's components -
+    - elements of base guiField structure
+-->
+
+
+<!--
+    Block of BINIMAGE guiField's components -
+    - elements of base guiField structure
+-->
+<!-- template of image_block component - child component of readonly and editable binimage fields -->
+<script type="text/x-template" id="template_field_content_binimage_image_block">
+    <div class="image-field-content-wrapper">
+        <img :src="img_src" :alt="img_alt" class="image-field-content" @click="openImage">
+        <gui_modal v-show="show_modal" @close="closeImage" :opt="modal_opt">
+            <template v-slot:header>
+                <h3>{{ img_alt | capitalize | split }}</h3>
+            </template>
+            <template v-slot:body>
+                <img :src="img_src" :alt="img_alt" class="image-field-content">
+            </template>
+        </gui_modal>
+    </div>
+</script>
+<!-- content (value input area) of readonly binimage field -->
+<script type="text/x-template" id="template_field_content_readonly_binimage">
+    <div>
+        <template v-if="value && value.content">
+            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
+        </template>
+        <template v-else>
+            <input :class="classes" :styles="styles" disabled :value="val">
+        </template>
+    </div>
+</script>
+<!-- content (value input area) of editable binimage field -->
+<script type="text/x-template" id="template_field_content_edit_binimage">
+    <div>
+        <template v-if="value && value.content">
+            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
+        </template>
+        <div class="input-group">
+            <p class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label">{{ val }}</p>
+
+            <field_read_file_button :field="field" @readFile="$emit('proxyEvent', 'readFile', $event)"></field_read_file_button>
+
+            <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
+
+            <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+        </div>
+    </div>
+</script>
+<!--
+    EndBlock of BINIMAGE guiField's components -
     - elements of base guiField structure
 -->
 

@@ -2079,6 +2079,122 @@ const field_fk_autocomplete_edit_content_mixin = {
     }
 };
 
+/**
+ * Mixin for read file button of base64file field.
+ */
+const field_base64_readfile_button_mixin = {
+    mixins: [base_field_button_mixin],
+    data() {
+        return {
+            wrapper_classes: ['input-group-append'],
+            wrapper_styles: {},
+            span_classes: ['btn', 'input-group-text', 'textfile'],
+            icon_styles: {},
+            icon_classes: ['fa', 'fa-file-text-o'],
+            event_handler: 'readFile',
+            help_text: 'Open file',
+            accept: '*',
+        };
+    },
+    template: "#template_field_part_button_readFile",
+};
+
+/**
+ * Mixin for editable base64 field (input value area).
+ */
+const field_base64_edit_content_mixin = {
+    mixins: [base_field_content_edit_mixin],
+    template: "#template_field_content_edit_base64file",
+    created() {
+        this.styles_dict.minHeight = '38px';
+    },
+    components: {
+        field_clear_button: {
+            mixins: [base_field_button_mixin],
+        },
+        field_hidden_button: {
+            mixins: [base_field_button_mixin],
+            data() {
+                return {
+                    icon_classes: ['fa', 'fa-minus'],
+                    event_handler: 'hideField',
+                    help_text: 'Hide field',
+                };
+            },
+        },
+        /**
+         * Component for 'open file' button.
+         */
+        field_read_file_button: {
+            mixins: [field_base64_readfile_button_mixin],
+        },
+    },
+};
+
+/**
+ * Mixin for readonly and editable binfile image.
+ */
+const field_binfile_content_mixin = {
+    data() {
+        return {
+            title_for_empty_value: 'No file selected',
+        };
+    },
+    computed: {
+        val() {
+            if(this.value && typeof this.value == "object" && this.value.name) {
+                return this.value.name;
+            }
+
+            return this.title_for_empty_value;
+        }
+    },
+};
+
+/**
+ * Mixin for readonly and editable binimage field.
+ */
+const field_binimage_content_mixin = {
+    data() {
+        return {
+            title_for_empty_value: 'No image selected',
+
+        };
+    },
+    components: {
+        image_block: {
+            mixins: [base_field_inner_component_mixin],
+            template: '#template_field_content_binimage_image_block',
+            data() {
+                return {
+                    show_modal: false,
+                    modal_opt: {
+                        footer: false,
+                    }
+                };
+            },
+            computed: {
+                img_src() {
+                    if(this.value && this.value.content) {
+                        return 'data:image/png;base64,' + this.value.content;
+                    }
+                },
+                img_alt() {
+                    return this.field.options.title || this.field.options.name;
+                }
+            },
+            methods: {
+                openImage() {
+                    this.show_modal = true;
+                },
+                closeImage() {
+                    this.show_modal = false;
+                },
+            },
+        }
+    },
+};
+
 const gui_fields_mixins = { /* jshint unused: false */
     base: {
         props: {
@@ -2445,8 +2561,20 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
         methods: {
             cleanValue() {
-                this.setValueInStore();
                 this.file_obj = {};
+                this.setValueInStore();
+            },
+            /**
+             * Method, returns false, if file's size is invalid (too large).
+             * Otherwise, it returns true.
+             * @param file_size {number} File's size.
+             * @return {boolean}
+             */
+            isFileSizeValid(file_size) {
+              if(this.field.options.max_size !== undefined) {
+                  return this.field.options.max_size <= file_size;
+              }
+              return true;
             },
             /**
              * Method, that reads content of selected file
@@ -2459,7 +2587,7 @@ const gui_fields_mixins = { /* jshint unused: false */
                     return;
                 }
 
-                if(file.size > 1024 * 1024) {
+                if(!this.isFileSizeValid(file.size)) {
                     guiPopUp.error("File is too large");
                     console.log("File is too large " + file.size);
                     return;
@@ -2518,6 +2646,7 @@ const gui_fields_mixins = { /* jshint unused: false */
                                 icon_classes: ['fa', 'fa-file-text-o'],
                                 event_handler: 'readFile',
                                 help_text: 'Open file',
+                                accept: '*',
                             };
                         },
                     }
@@ -2550,46 +2679,55 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
         components: {
             field_content_edit: {
-                mixins: [base_field_content_edit_mixin],
-                template: "#template_field_content_edit_base64file",
-                created() {
-                    this.styles_dict.minHeight = '38px';
-                },
-                components: {
-                    field_clear_button: {
-                        mixins: [base_field_button_mixin],
-                    },
-                    field_hidden_button: {
-                        mixins: [base_field_button_mixin],
-                        data() {
-                            return {
-                                icon_classes: ['fa', 'fa-minus'],
-                                event_handler: 'hideField',
-                                help_text: 'Hide field',
-                            };
-                        },
-                    },
-                    /**
-                     * Component for 'open file' button.
-                     */
-                    field_read_file_button: {
-                        mixins: [base_field_button_mixin],
-                        data() {
-                            return {
-                                wrapper_classes: ['input-group-append'],
-                                wrapper_styles: {},
-                                span_classes: ['btn', 'input-group-text', 'textfile'],
-                                icon_styles: {},
-                                icon_classes: ['fa', 'fa-file-text-o'],
-                                event_handler: 'readFile',
-                                help_text: 'Open file',
-                            };
-                        },
-                        template: "#template_field_part_button_readFile",
-                    },
-                },
+                mixins: [field_base64_edit_content_mixin],
             },
         },
+    },
+
+    binfile: {
+        methods: {
+            handleValue(data={}) {
+                return {
+                    name: this.file_obj.name || null,
+                    content: this.field.toBase64(data) || null,
+                };
+            },
+        },
+        components: {
+            field_content_readonly: {
+                mixins: [base_field_content_readonly_mixin, field_binfile_content_mixin],
+                template: '#template_field_content_readonly_binfile',
+
+            },
+            field_content_edit: {
+                mixins: [field_base64_edit_content_mixin, field_binfile_content_mixin],
+                template: '#template_field_content_edit_binfile',
+            },
+        }
+    },
+
+    binimage: {
+        components: {
+            field_content_readonly: {
+                mixins: [base_field_content_readonly_mixin, field_binfile_content_mixin, field_binimage_content_mixin],
+                template: '#template_field_content_readonly_binimage',
+            },
+            field_content_edit: {
+                mixins: [field_base64_edit_content_mixin, field_binfile_content_mixin, field_binimage_content_mixin],
+                template: '#template_field_content_edit_binimage',
+                components: {
+                    field_read_file_button: {
+                        mixins: [field_base64_readfile_button_mixin],
+                        data() {
+                            return {
+                                accept: 'image/*',
+                                help_text: 'Open image',
+                            };
+                        },
+                    },
+                }
+            },
+        }
     },
 
     password: {

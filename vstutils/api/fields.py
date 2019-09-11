@@ -171,3 +171,40 @@ class RedirectCharField(CharField):
     '''
 
     redirect = True
+
+
+class BinaryFileInJsonField(VSTCharField):
+    '''
+    Field that takes JSON with properties:
+    * name - string - name of file;
+    * content - base64 string - content of file.
+    Take effect only in GUI.
+    '''
+
+    __valid_keys = ['name', 'content']
+
+    def to_internal_value(self, data):
+        if data is not None:
+            if not isinstance(data, dict):
+                self.fail('not a JSON')
+            invalid_keys = list(k for k in data.keys() if k not in self.__valid_keys)
+            if invalid_keys:
+                self.fail('invalid key {}'.format(invalid_keys[0]))
+            for key in self.__valid_keys:
+                if key not in data:
+                    self.fail('"{}" is not set'.format(key))
+        return super().to_internal_value(data)
+
+    def to_representation(self, value):
+        with raise_context():
+            return json.loads(value)
+        return dict(name=None, content=None)
+
+
+class BinaryImageInJsonField(BinaryFileInJsonField):
+    '''
+    Field that takes JSON with properties:
+    * name - string - name of image;
+    * content - base64 string - content of image.
+    Take effect only in GUI.
+    '''
