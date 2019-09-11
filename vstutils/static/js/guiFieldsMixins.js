@@ -2176,7 +2176,7 @@ const field_binimage_content_mixin = {
             computed: {
                 img_src() {
                     if(this.value && this.value.content) {
-                        return 'data:image/gif;base64,' + this.value.content;
+                        return 'data:image/png;base64,' + this.value.content;
                     }
                 },
                 img_alt() {
@@ -2565,6 +2565,18 @@ const gui_fields_mixins = { /* jshint unused: false */
                 this.setValueInStore();
             },
             /**
+             * Method, returns false, if file's size is invalid (too large).
+             * Otherwise, it returns true.
+             * @param file_size {number} File's size.
+             * @return {boolean}
+             */
+            isFileSizeValid(file_size) {
+              if(this.field.options.max_size !== undefined) {
+                  return this.field.options.max_size <= file_size;
+              }
+              return true;
+            },
+            /**
              * Method, that reads content of selected file
              * and sets field value equal to this content.
              */
@@ -2575,11 +2587,11 @@ const gui_fields_mixins = { /* jshint unused: false */
                     return;
                 }
 
-                // if(file.size > 1024 * 1024) {
-                //     guiPopUp.error("File is too large");
-                //     console.log("File is too large " + file.size);
-                //     return;
-                // }
+                if(!this.isFileSizeValid(file.size)) {
+                    guiPopUp.error("File is too large");
+                    console.log("File is too large " + file.size);
+                    return;
+                }
 
                 this.file_obj = file;
 
