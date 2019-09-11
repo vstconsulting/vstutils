@@ -2138,11 +2138,11 @@ const field_binfile_content_mixin = {
     data() {
         return {
             title_for_empty_value: 'No file selected',
-        }
+        };
     },
     computed: {
         val() {
-            if(this.value && typeof this.value == "object" && this.value.name !== undefined) {
+            if(this.value && typeof this.value == "object" && this.value.name) {
                 return this.value.name;
             }
 
@@ -2159,7 +2159,7 @@ const field_binimage_content_mixin = {
         return {
             title_for_empty_value: 'No image selected',
 
-        }
+        };
     },
     components: {
         image_block: {
@@ -2175,7 +2175,7 @@ const field_binimage_content_mixin = {
             },
             computed: {
                 img_src() {
-                    if(this.value.content) {
+                    if(this.value && this.value.content) {
                         return 'data:image/gif;base64,' + this.value.content;
                     }
                 },
@@ -2676,8 +2676,8 @@ const gui_fields_mixins = { /* jshint unused: false */
         methods: {
             handleValue(data={}) {
                 return {
-                    name: this.file_obj.name,
-                    content: this.field.toBase64(data),
+                    name: this.file_obj.name || null,
+                    content: this.field.toBase64(data) || null,
                 };
             },
         },

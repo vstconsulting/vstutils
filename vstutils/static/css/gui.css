@@ -1195,6 +1195,7 @@ img.image-field-content {
 .p-as-input {
     overflow: hidden;
     word-break: break-all;
+    padding: 7px 12px;
 }
 
 

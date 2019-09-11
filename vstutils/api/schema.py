@@ -33,10 +33,10 @@ basic_type_info[fields.FileInStringField] = dict(
 basic_type_info[fields.SecretFileInString] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_SECRET_FILE
 )
-basic_type_info[fields.FileInJsonField] = dict(
+basic_type_info[fields.BinaryFileInJsonField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_BIN_FILE
 )
-basic_type_info[fields.ImageInJsonField] = dict(
+basic_type_info[fields.BinaryImageInJsonField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_BIN_IMAGE
 )
 basic_type_info[fields.HtmlField] = dict(

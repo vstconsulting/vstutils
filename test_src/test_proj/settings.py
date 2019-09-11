@@ -26,6 +26,9 @@ API[VST_API_VERSION][r'files'] = dict(
 API[VST_API_VERSION][r'testfk'] = dict(
     view='test_proj.views.TestFkViewSet'
 )
+API[VST_API_VERSION][r'testbinaryfiles'] = dict(
+    view='test_proj.views.TestBinaryFilesViewSet'
+)
 
 GUI_VIEWS[r'^gui/$'] = r'^$'
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
