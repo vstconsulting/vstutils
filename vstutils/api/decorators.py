@@ -172,9 +172,7 @@ class NestedViewMixin:
         else:
             self.action = self.get_nested_action_name()
         if self.action != 'list':
-            kwargs.update({
-                self.nested_append_arg: self.nested_id
-            })
+            kwargs[self.nested_append_arg] = self.nested_id
         return getattr(self, self.action)(self.request, **kwargs)
 
 

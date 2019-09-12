@@ -1,6 +1,7 @@
 from typing import Dict
 from django.conf import settings
 from django.http.request import HttpRequest
+from django.utils.functional import lazy
 from ..utils import import_class
 from ..tools import multikeysort  # pylint: disable=import-error
 from .. import __version__
@@ -17,6 +18,11 @@ static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['priority'])
 debug_enabled = getattr(settings, 'DEBUG', False)
 
 
+def lazy_decorator(func):
+    return lazy(func, dict)
+
+
+@lazy_decorator
 def settings_constants(request: HttpRequest) -> Dict:
     # pylint: disable=unused-argument
     return {
@@ -29,6 +35,7 @@ def settings_constants(request: HttpRequest) -> Dict:
     }
 
 
+@lazy_decorator
 def project_args(request: HttpRequest) -> Dict:
     host_url = request.build_absolute_uri('/')[:-1]
     ver_key = "{}_version".format(getattr(settings, 'VST_PROJECT', "vstutils"))
@@ -48,6 +55,7 @@ def project_args(request: HttpRequest) -> Dict:
     }
 
 
+@lazy_decorator
 def pwa_context(request: HttpRequest) -> Dict:
     return {
         "manifest_object": manifest_object,
@@ -56,6 +64,7 @@ def pwa_context(request: HttpRequest) -> Dict:
     }
 
 
+@lazy_decorator
 def headers_context(request: HttpRequest) -> Dict:
     result = dict(request.META)
     result['HTTP_X_APP'] = result.get('HTTP_X_APP', 'browser')
