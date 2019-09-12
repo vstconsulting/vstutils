@@ -377,16 +377,17 @@ class ViewConstructor extends BaseEntityConstructor {
      * Method, that returns object for a current link.
      * @param {string} link_name Name of a link.
      * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
+     * @param {string} link Real path of link_obj.
      * @param {object} link_obj View object for a link (object TO which link will be formed).
      * @param {object} path_obj View object for a path (object FROM which link wll be formed).
      */
-    getInternalLinkObj(link_name, link_type, link_obj, path_obj) {
+    getInternalLinkObj(link_name, link_type, link, link_obj, path_obj) {
         let obj = {
             name: link_name,
         };
 
-        if(!(link_obj.schema.hidden) && link_obj.schema.path) {
-            obj.path = link_obj.schema.path;
+        if(!(link_obj.schema.hidden) && link) {
+            obj.path = link;
         }
 
         if(this.isPathObjSchemaEmpty(link_obj)) {
@@ -456,7 +457,7 @@ class ViewConstructor extends BaseEntityConstructor {
                 }
 
                 if (link_type) {
-                    links[link_type][link_name] = this.getInternalLinkObj(link_name, link_type, views[link], views[path]);
+                    links[link_type][link_name] = this.getInternalLinkObj(link_name, link_type, link, views[link], views[path]);
                 }
             }
         }

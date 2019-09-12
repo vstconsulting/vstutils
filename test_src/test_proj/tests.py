@@ -965,7 +965,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[1]['data']['some_fk'], results[0]['data']['id'])
 
-    def test_model_binfile_field(self):
+    def test_model_namedbinfile_field(self):
         value = {'name': 'abc', 'content': '/4sdfsdf/'}
         bulk_data = [
             dict(data_type=['testbinaryfiles'], method='post', data={}),
@@ -973,34 +973,36 @@ class ProjectTestCase(BaseTestCase):
             dict(
                 data_type=['testbinaryfiles', '<0[data][id]>'],
                 method='put',
-                data=dict(some_binfile=value, some_binimage=value)
+                data=dict(some_namedbinfile=value, some_namedbinimage=value, some_binfile=value['content'])
             ),
             dict(data_type=['testbinaryfiles', '<0[data][id]>'], method='get'),
             dict(
                 data_type=['testbinaryfiles', '<0[data][id]>'],
                 method='patch',
-                data=dict(some_binfile={'name': 'qwe', 'content1': 123})
+                data=dict(some_namedbinfile={'name': 'qwe', 'content1': 123})
             ),
             dict(
                 data_type=['testbinaryfiles', '<0[data][id]>'],
                 method='patch',
-                data=dict(some_binfile={'name': 'qwe'})
+                data=dict(some_namedbinfile={'name': 'qwe'})
             ),
             dict(
                 data_type=['testbinaryfiles', '<0[data][id]>'],
                 method='patch',
-                data=dict(some_binfile=123)
+                data=dict(some_namedbinfile=123)
             ),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200)
-        self.assertEqual(results[1]['data']['some_binfile'], dict(name=None, content=None))
-        self.assertEqual(results[1]['data']['some_binimage'], dict(name=None, content=None))
+        self.assertEqual(results[1]['data']['some_binfile'], '')
+        self.assertEqual(results[1]['data']['some_namedbinfile'], dict(name=None, content=None))
+        self.assertEqual(results[1]['data']['some_namedbinimage'], dict(name=None, content=None))
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[3]['status'], 200)
-        self.assertEqual(results[3]['data']['some_binfile'], value)
-        self.assertEqual(results[3]['data']['some_binimage'], value)
+        self.assertEqual(results[3]['data']['some_binfile'], value['content'])
+        self.assertEqual(results[3]['data']['some_namedbinfile'], value)
+        self.assertEqual(results[3]['data']['some_namedbinimage'], value)
         self.assertEqual(results[4]['status'], 400)
         self.assertEqual(results[5]['status'], 400)
         self.assertEqual(results[6]['status'], 400)

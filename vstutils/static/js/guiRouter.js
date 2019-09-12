@@ -1405,7 +1405,12 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 let instance = qs.model.getInstance(data, qs);
 
                 let method = this.view.schema.query_type;
+
+                this.loading = true;
+
                 instance.save(method).then(instance => {
+                    this.loading = false;
+
                     let url = this.getRedirectUrl({instance: instance});
                     guiPopUp.success(pop_up_msg.instance.success.create.format(
                         [this.view.schema.name],
@@ -1414,6 +1419,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
                     this.deleteQuerySetFromSandBox(this.qs_url);
                     this.$router.push({path: url});
                 }).catch(error => {
+                    this.loading = false;
+
                     let str = app.error_handler.errorToString(error);
 
                     let srt_to_show = pop_up_msg.instance.error.create.format(
@@ -1508,7 +1515,9 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 let instance = this.data.instance;
                 instance.data = data;
                 let method = this.view.schema.query_type;
+                this.loading = true;
                 instance.save(method).then(instance => {
+                    this.loading = false;
                     let qs = this.getQuerySet(this.view, this.qs_url).clone();
                     qs.cache = instance;
                     this.setQuerySet(this.view, this.qs_url, qs);
@@ -1521,6 +1530,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
 
                     this.$router.push({path: url});
                 }).catch(error => {
+                    this.loading = false;
                     let str = app.error_handler.errorToString(error);
 
                     let srt_to_show = pop_up_msg.instance.error.save.format(
@@ -1647,7 +1657,9 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 }
                 let instance = this.data.instance;
                 let method = this.view.schema.query_type;
+                this.loading = true;
                 instance.queryset.formQueryAndSend(method, data).then(response => {
+                    this.loading = false;
                     guiPopUp.success(pop_up_msg.instance.success.execute.format(
                         [this.view.schema.name, instance.name.toLowerCase()]
                     ));
@@ -1656,6 +1668,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
                     let url = this.getRedirectUrl({data: data, response: response});
                     this.$router.push({path: url});
                 }).catch(error => {
+                    this.loading = false;
                     let str = app.error_handler.errorToString(error);
 
                     let srt_to_show = pop_up_msg.instance.error.execute.format(
