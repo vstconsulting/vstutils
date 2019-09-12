@@ -24,7 +24,7 @@ class VSTCharField(CharField):
 
 class FileInStringField(CharField):
     """
-    File type which saves as string.
+    Field, that saves file's content as string.
     Take effect only in GUI.
     """
 
@@ -33,7 +33,7 @@ class FileInStringField(CharField):
 
 class SecretFileInString(FileInStringField):
     """
-    File type which saves as string and should be hidden.
+    Field, that saves file's content as string and should be hidden.
     Take effect only in GUI.
     """
 
@@ -42,6 +42,15 @@ class SecretFileInString(FileInStringField):
     def __init__(self, **kwargs):
         kwargs['style'] = {'input_type': 'password'}
         super().__init__(**kwargs)
+
+
+class BinFileInStringField(FileInStringField):
+    """
+    Field, that saves file's content as base64 string.
+    Take effect only in GUI.
+    """
+
+    __slots__ = ()
 
 
 class AutoCompletionField(CharField):
@@ -193,7 +202,7 @@ class RedirectCharField(CharField):
     redirect = True
 
 
-class BinaryFileInJsonField(VSTCharField):
+class NamedBinaryFileInJsonField(VSTCharField):
     """
     Field that takes JSON with properties:
     * name - string - name of file;
@@ -222,7 +231,7 @@ class BinaryFileInJsonField(VSTCharField):
         return dict(name=None, content=None)
 
 
-class BinaryImageInJsonField(BinaryFileInJsonField):
+class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
     Field that takes JSON with properties:
     * name - string - name of image;

@@ -190,15 +190,17 @@ class TestFkViewSet(ModelViewSetSet):
     
 
 class ModelWithBinaryFilesSerializer(VSTSerializer):
-    some_binfile = fields.BinaryFileInJsonField(required=False)
-    some_binimage = fields.BinaryImageInJsonField(required=False)
+    some_binfile = fields.BinFileInStringField(required=False)
+    some_namedbinfile = fields.NamedBinaryFileInJsonField(required=False)
+    some_namedbinimage = fields.NamedBinaryImageInJsonField(required=False)
 
     class Meta:
         model = ModelWithBinaryFiles
         fields = (
             'id',
             'some_binfile',
-            'some_binimage'
+            'some_namedbinfile',
+            'some_namedbinimage',
         )
 
 

@@ -8,4 +8,5 @@ class ModelWithFK(BModel):
 
 class ModelWithBinaryFiles(BModel):
     some_binfile = models.TextField(default='')
-    some_binimage = models.TextField(default='')
+    some_namedbinfile = models.TextField(default='')
+    some_namedbinimage = models.TextField(default='')

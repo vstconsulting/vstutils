@@ -2080,9 +2080,9 @@ const field_fk_autocomplete_edit_content_mixin = {
 };
 
 /**
- * Mixin for read file button of base64file field.
+ * Mixin for read file button of binfile field.
  */
-const field_base64_readfile_button_mixin = {
+const field_binfile_readfile_button_mixin = {
     mixins: [base_field_button_mixin],
     data() {
         return {
@@ -2100,9 +2100,9 @@ const field_base64_readfile_button_mixin = {
 };
 
 /**
- * Mixin for editable base64 field (input value area).
+ * Mixin for editable binfile field (input value area).
  */
-const field_base64_edit_content_mixin = {
+const field_binfile_edit_content_mixin = {
     mixins: [base_field_content_edit_mixin],
     template: "#template_field_content_edit_base64file",
     created() {
@@ -2126,15 +2126,15 @@ const field_base64_edit_content_mixin = {
          * Component for 'open file' button.
          */
         field_read_file_button: {
-            mixins: [field_base64_readfile_button_mixin],
+            mixins: [field_binfile_readfile_button_mixin],
         },
     },
 };
 
 /**
- * Mixin for readonly and editable binfile image.
+ * Mixin for readonly and editable namedbinfile field.
  */
-const field_binfile_content_mixin = {
+const field_namedbinfile_content_mixin = {
     data() {
         return {
             title_for_empty_value: 'No file selected',
@@ -2152,9 +2152,9 @@ const field_binfile_content_mixin = {
 };
 
 /**
- * Mixin for readonly and editable binimage field.
+ * Mixin for readonly and editable namedbinimage field.
  */
-const field_binimage_content_mixin = {
+const field_namedbinimage_content_mixin = {
     data() {
         return {
             title_for_empty_value: 'No image selected',
@@ -2655,7 +2655,7 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
     },
 
-    base64file: {
+    binfile: {
         data() {
             return {
                 file_reader_method: 'readAsArrayBuffer',
@@ -2679,12 +2679,12 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
         components: {
             field_content_edit: {
-                mixins: [field_base64_edit_content_mixin],
+                mixins: [field_binfile_edit_content_mixin],
             },
         },
     },
 
-    binfile: {
+    namedbinfile: {
         methods: {
             handleValue(data={}) {
                 return {
@@ -2695,29 +2695,29 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
         components: {
             field_content_readonly: {
-                mixins: [base_field_content_readonly_mixin, field_binfile_content_mixin],
-                template: '#template_field_content_readonly_binfile',
+                mixins: [base_field_content_readonly_mixin, field_namedbinfile_content_mixin],
+                template: '#template_field_content_readonly_namedbinfile',
 
             },
             field_content_edit: {
-                mixins: [field_base64_edit_content_mixin, field_binfile_content_mixin],
-                template: '#template_field_content_edit_binfile',
+                mixins: [field_binfile_edit_content_mixin, field_namedbinfile_content_mixin],
+                template: '#template_field_content_edit_namedbinfile',
             },
         }
     },
 
-    binimage: {
+    namedbinimage: {
         components: {
             field_content_readonly: {
-                mixins: [base_field_content_readonly_mixin, field_binfile_content_mixin, field_binimage_content_mixin],
-                template: '#template_field_content_readonly_binimage',
+                mixins: [base_field_content_readonly_mixin, field_namedbinfile_content_mixin, field_namedbinimage_content_mixin],
+                template: '#template_field_content_readonly_namedbinimage',
             },
             field_content_edit: {
-                mixins: [field_base64_edit_content_mixin, field_binfile_content_mixin, field_binimage_content_mixin],
-                template: '#template_field_content_edit_binimage',
+                mixins: [field_binfile_edit_content_mixin, field_namedbinfile_content_mixin, field_namedbinimage_content_mixin],
+                template: '#template_field_content_edit_namedbinimage',
                 components: {
                     field_read_file_button: {
-                        mixins: [field_base64_readfile_button_mixin],
+                        mixins: [field_binfile_readfile_button_mixin],
                         data() {
                             return {
                                 accept: 'image/*',

@@ -274,15 +274,15 @@
     Block of BINFILE guiField's components -
     - elements of base guiField structure
 -->
-<!-- content (value input area) of readonly binfile field -->
-<script type="text/x-template" id="template_field_content_readonly_binfile">
+<!-- content (value input area) of readonly namedbinfile field -->
+<script type="text/x-template" id="template_field_content_readonly_namedbinfile">
     <div>
         <input :class="classes" :styles="styles" disabled :value="val">
     </div>
 </script>
 
-<!-- content (value input area) of editable binfile field -->
-<script type="text/x-template" id="template_field_content_edit_binfile">
+<!-- content (value input area) of editable namedbinfile field -->
+<script type="text/x-template" id="template_field_content_edit_namedbinfile">
     <div class="input-group">
         <p class="p-as-input" :class="classes" :style="styles" :aria-labelledby="label_id" :aria-label="aria_label">{{ val }}</p>
 
@@ -317,8 +317,8 @@
         </gui_modal>
     </div>
 </script>
-<!-- content (value input area) of readonly binimage field -->
-<script type="text/x-template" id="template_field_content_readonly_binimage">
+<!-- content (value input area) of readonly namedbinimage field -->
+<script type="text/x-template" id="template_field_content_readonly_namedbinimage">
     <div>
         <template v-if="value && value.content">
             <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
@@ -328,8 +328,8 @@
         </template>
     </div>
 </script>
-<!-- content (value input area) of editable binimage field -->
-<script type="text/x-template" id="template_field_content_edit_binimage">
+<!-- content (value input area) of editable namedbinimage field -->
+<script type="text/x-template" id="template_field_content_edit_namedbinimage">
     <div>
         <template v-if="value && value.content">
             <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>

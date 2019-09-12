@@ -415,14 +415,15 @@ guiFields.file = class FileField extends guiFields.textarea {
 guiFields.secretfile = class SecretFileField extends guiFields.file {};
 
 /**
- * Base64File guiField class.
+ * BinFile guiField class.
+ * Field takes file's content, converts it into base64 string and sends this string to API.
  */
-guiFields.base64file = class Base64FileField extends guiFields.file {
+guiFields.binfile = class BinFileField extends guiFields.file {
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(gui_fields_mixins.base64file);
+        return super.mixins.concat(gui_fields_mixins.binfile);
     }
 
     /**
@@ -442,32 +443,32 @@ guiFields.base64file = class Base64FileField extends guiFields.file {
 };
 
 /**
- * BinFile guiField class.
+ * NamedBinFile guiField class.
  * This field takes and returns JSON with 2 properties:
  * - name - string - name of file;
  * - content - base64 string - content of file.
  */
-guiFields.binfile = class BinFileField extends guiFields.base64file {
+guiFields.namedbinfile = class NamedBinFileField extends guiFields.binfile {
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(gui_fields_mixins.binfile);
+        return super.mixins.concat(gui_fields_mixins.namedbinfile);
     }
 };
 
 /**
- * BinImage guiField class.
+ * NamedBinImage guiField class.
  * This field takes and returns JSON with 2 properties:
  * - name - string - name of image;
  * - content - base64 string - content of image.
  */
-guiFields.binimage = class BinImageField extends guiFields.binfile {
+guiFields.namedbinimage = class NamedBinImageField extends guiFields.namedbinfile {
      /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(gui_fields_mixins.binimage);
+        return super.mixins.concat(gui_fields_mixins.namedbinimage);
     }
 };
 
@@ -994,7 +995,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param params {object} Object with URL params of current path.
      */
     getUrlParams(url, data, params) { /* jshint unused: false */
-        if(Object.entries(params).length !== 0 && params.constructor !== Object) {
+        if(Object.entries(params).length !== 0) {
             return params;
         }
 
