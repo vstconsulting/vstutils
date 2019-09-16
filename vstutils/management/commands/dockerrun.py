@@ -70,7 +70,7 @@ class Command(BaseCommand):
                     args.append(key)
                 else:
                     args.append('{}={}'.format(key, value))
-        return args
+        return args + list(uwsgi_args)
 
     def prepare_config(self):
         # pylint: disable=too-many-locals,too-many-branches,too-many-statements
