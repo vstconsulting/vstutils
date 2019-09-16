@@ -14,6 +14,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
+            'args',
+            metavar='uwsgi_arg=value', nargs='*',
+            help='Args "name=value" uwsgi server.',
+        )
+        parser.add_argument(
             '--migrate-attempts', '-a',
             default=60,
             dest='attempts', help='The number of attempts to migrate.',
@@ -45,7 +50,8 @@ class Command(BaseCommand):
         if success:
             try:
                 check_call(
-                    [sys.executable, '-m', project_name, self._settings('WEBSERVER_COMMAND', 'web')],
+                    [sys.executable, '-m', project_name, self._settings('WEBSERVER_COMMAND', 'web')] +
+                    self.__format_uwsgi_args(config, *args),
                     env=env, bufsize=0, universal_newlines=True,
                 )
             except KeyboardInterrupt:  # nocv
@@ -54,6 +60,17 @@ class Command(BaseCommand):
         else:
             self._print(error, 'ERROR')
             sys.exit(10)
+
+    def __format_uwsgi_args(self, config, *uwsgi_args):
+        args = []
+        disallowed_args = ['daemon']
+        for key, value in config['uwsgi'].items():
+            if key not in disallowed_args:
+                if value == 'true':
+                    args.append(key)
+                else:
+                    args.append('{}={}'.format(key, value))
+        return args
 
     def prepare_config(self):
         # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -154,8 +171,8 @@ class Command(BaseCommand):
         }
 
         config['uwsgi'] = {
-            'processes': os.getenv('{}_UWSGI_PROCESSES'.format(prefix), '4'),
-            'threads': os.getenv('{}_UWSGI_THREADS'.format(prefix), '4'),
+            'processes': os.getenv('{}_UWSGI_PROCESSES'.format(prefix), '%%k'),
+            'threads': os.getenv('{}_UWSGI_THREADS'.format(prefix), '%%k'),
             'thread-stacksize': os.getenv('{}_UWSGI_THREADSTACK'.format(prefix), '40960'),
             'max-requests': os.getenv('{}_UWSGI_MAXREQUESTS'.format(prefix), '50000'),
             'limit-as': os.getenv('{}_UWSGI_LIMITS'.format(prefix), '512'),
