@@ -455,6 +455,21 @@ guiFields.namedbinfile = class NamedBinFileField extends guiFields.binfile {
     static get mixins() {
         return super.mixins.concat(gui_fields_mixins.namedbinfile);
     }
+    /**
+     * Redefinition of 'validateValue' method of binfile guiField.
+     */
+    validateValue(data={}) {
+        let value = super.validateValue(data);
+
+        if(value && this.options.required && value.name === null && value.content === null) {
+            throw {
+                error: 'validation',
+                message: pop_up_msg.field.error.empty.format(this.options.title || this.options.name),
+            };
+        }
+
+        return value;
+    }
 };
 
 /**
