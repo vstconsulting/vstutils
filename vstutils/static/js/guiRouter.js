@@ -1157,8 +1157,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 let filters = this.getFilters(url).cache.data;
 
                 for(let key in filters) {
-                    if(filters.hasOwnProperty(key) && !filters[key]) {
-                            delete filters[key];
+                    if(filters.hasOwnProperty(key) && filters[key] === undefined) {
+                        delete filters[key];
                     }
                 }
 
