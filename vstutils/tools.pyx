@@ -1,4 +1,5 @@
-from libc.stdio cimport FILE, fopen, fread, fwrite, fflush, fclose, fseek, ftell, rewind, SEEK_END
+from libc.stdio cimport FILE, fopen, fread, fwrite, fflush, fclose
+from posix.stat cimport stat, struct_stat
 from libc.stdlib cimport malloc, free
 
 
@@ -37,15 +38,18 @@ def get_file_value(filename, default='', raise_error=False, strip=True):
 
 
 cdef class File:
-    cdef FILE* file
-    cdef char* buff
-    cdef long int _size
-    cdef const char* filename
-    cdef const char* mode
+    cdef:
+        FILE* file
+        char* buff
+        long int _size
+        const char* filename
+        const char* mode
+        struct_stat st
 
     def __cinit__(self, const char* filename, const char* mode = 'r'):
         self.filename = filename
         self.mode = mode
+        stat(self.filename, &self.st)
         self.file = self._open()
 
     cdef allowed(self):
@@ -59,11 +63,7 @@ cdef class File:
         if not self.allowed():
             raise IOError('File is not found.')
         with nogil:
-            if not self._size:
-                fseek(self.file, 0, SEEK_END)
-                self._size = ftell(self.file) + sizeof(char)
-                rewind(self.file)
-            return self._size - 1
+            return self.st.st_size
 
     cdef _read(self):
         if not self.allowed():
@@ -71,10 +71,9 @@ cdef class File:
 
         cdef long int size, typesize
 
-        size = self.size()
-        typesize = sizeof(char)
-
         with nogil:
+            size = self.st.st_size
+            typesize = sizeof(char)
             if self.buff == NULL:
                 self.buff = <char*> malloc(size * typesize)
                 if self.buff == NULL:
