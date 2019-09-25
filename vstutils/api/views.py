@@ -181,7 +181,7 @@ class BulkViewSet(base.rvs.APIView):
     def _get_obj_with_extra_data(self, data, inner=False):
         if isinstance(data, (dict, OrderedDict)):
             return self._json_dump({
-                k: self._get_obj_with_extra_data(v, True) for k,v in data.items()
+                k: self._get_obj_with_extra_data(v, True) for k, v in data.items()
             }, inner)
         elif isinstance(data, (list, tuple)):
             return self._json_dump([
@@ -275,7 +275,7 @@ class BulkViewSet(base.rvs.APIView):
             if allow_fail:
                 raise
             response = base.exception_handler(err, None)
-            kwargs= dict(error_type=err.__class__.__name__, message=str(err))
+            kwargs = dict(error_type=err.__class__.__name__, message=str(err))
             kwargs.update({'results': self.results} if isinstance(err, KeyError) else {})
             self.put_result(self.create_response(
                 response.status_code,

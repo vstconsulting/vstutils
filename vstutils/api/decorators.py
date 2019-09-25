@@ -19,6 +19,7 @@ def __get_nested_path(name: _t.Text, arg: _t.Text = None, arg_regexp: _t.Text = 
     ])
     return path
 
+
 def __get_nested_subpath(*args, **kwargs) -> _t.Text:
     sub_path = kwargs.pop('sub_path', None)
     path = __get_nested_path(*args, **kwargs)
@@ -324,7 +325,8 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'queryset_filters'
     )
 
-    filter_subs = ['filter',]
+    filter_subs = ['filter', ]
+
     class NoView(VSTUtilsException):
         msg = 'Argument "view" must be installed for `nested_view` decorator.'
 

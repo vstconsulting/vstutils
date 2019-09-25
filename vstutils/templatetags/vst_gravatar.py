@@ -7,6 +7,7 @@ from django.templatetags.static import static
 User = get_user_model()
 register = template.Library()
 
+
 @register.simple_tag
 def get_user_gravatar(user_id):
     """

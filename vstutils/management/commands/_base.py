@@ -4,7 +4,7 @@ import os
 import sys
 import logging
 from collections import OrderedDict
-from django.core.management.base import BaseCommand as _BaseCommand, CommandError
+from django.core.management.base import BaseCommand as _BaseCommand, CommandError as CmdError
 from django.conf import settings
 
 
@@ -19,7 +19,7 @@ class BaseCommand(_BaseCommand):
     stdout, stderr = sys.stdout, sys.stderr
     help = "Service command for web-application"
 
-    class CommandError(CommandError):
+    class CommandError(CmdError):
         pass
 
     def add_arguments(self, parser):
@@ -38,7 +38,6 @@ class BaseCommand(_BaseCommand):
                 action='store_false', dest='interactive', default=True,
                 help="Do NOT prompt the user for input of any kind.",
             )
-
 
     def _print(self, msg, style=None):
         style = style or 'HTTP_INFO'

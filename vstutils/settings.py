@@ -43,7 +43,7 @@ KWARGS = __kwargs
 # Get settings from config
 ##############################################################
 DEV_SETTINGS_FILE = os.getenv("{}_DEV_SETTINGS_FILE".format(ENV_NAME),
-                              os.path.join(BASE_DIR, os.getenv("VST_DEV_SETTINGS")))
+                              os.path.join(BASE_DIR, str(os.getenv("VST_DEV_SETTINGS"))))
 CONFIG_FILE = os.getenv(
     "{}_SETTINGS_FILE".format(ENV_NAME),
     "/etc/{}/settings.ini".format(VST_PROJECT_LIB)

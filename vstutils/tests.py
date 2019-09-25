@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 import typing as _t
 import json  # noqa: F401
-import random
-import string
+import random  # noqa: F401
+import string  # noqa: F401
 import os  # noqa: F401
 import uuid
 import six
@@ -43,7 +43,6 @@ class BaseTestCase(TestCase):
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.testcase.user = self.old_user
-
 
     def _create_user(self, is_super_user=True):
         username = self.random_name()

@@ -109,7 +109,7 @@ class Command(BaseCommand):
             config['main']['ldap-default-domain'] = ldap_default_domain
 
         # Set db config
-        if os.getenv('{}_DB_HOST'.format(prefix)) != None:  # nocv
+        if os.getenv('{}_DB_HOST'.format(prefix)) is not None:  # nocv
             try:
                 pm_type = os.getenv('{}_DB_TYPE'.format(prefix), 'mysql')
                 default_port = ''

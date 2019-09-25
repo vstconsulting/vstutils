@@ -47,7 +47,6 @@ class EmptySerializer(serializers.Serializer):
         return instance
 
 
-
 class DataSerializer(EmptySerializer):
     allowed_data_types = (
         six.string_types,

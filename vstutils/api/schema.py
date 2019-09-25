@@ -146,7 +146,7 @@ class FkFieldInspector(FieldInspector):  # nocv
         )
         kwargs = dict(type=openapi.TYPE_INTEGER, format=FORMAT_FK)
         kwargs['additionalProperties'] = dict(
-            model = openapi.SchemaRef(
+            model=openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                 field.select_model, ignore_unresolved=True
             ),
@@ -168,7 +168,7 @@ class CommaMultiSelectFieldInspector(FieldInspector):
         )
         kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_MULTISELECT)
         kwargs['additionalProperties'] = dict(
-            model = openapi.SchemaRef(
+            model=openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                 field.select_model, ignore_unresolved=True
             ),

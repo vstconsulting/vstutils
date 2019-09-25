@@ -6,7 +6,7 @@ from drf_yasg import openapi
 from .. import __version__ as vstutils_version
 
 
-x_versions = OrderedDict()
+x_versions = OrderedDict()  # type: OrderedDict
 x_versions['application'] = settings.PROJECT_VERSION
 x_versions['library'] = settings.PROJECT_LIB_VERSION
 x_versions['vstutils'] = vstutils_version

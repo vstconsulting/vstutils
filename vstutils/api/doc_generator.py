@@ -297,7 +297,7 @@ class VSTOpenApiBase(Directive):
         elif var_type in [None, 'object']:
             def_name = opt_values.get('$ref').split('/')[-1]
             result = self.get_object_example(def_name)
-        elif var_type =='select2':
+        elif var_type == 'select2':
             def_name = opt_values['additionalProperties']['model']['$ref'].split('/')[-1]
             value_field_name = opt_values['additionalProperties']['value_field']
             def_model = self.definitions[def_name].get('properties')

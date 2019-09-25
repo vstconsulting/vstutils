@@ -2,14 +2,13 @@
 from __future__ import unicode_literals
 import typing as _t
 from copy import deepcopy
-from six import with_metaclass
 from yaml import load
 try:
     from yaml import CSafeLoader as Loader
 except ImportError:  # nocv
     from yaml import SafeLoader as Loader
 from django.db.models.query import ModelIterable
-from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
+from django.db.models.fields import CharField, TextField, IntegerField, BooleanField    # noqa: F401
 from .models import BQuerySet, BaseModel
 from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 

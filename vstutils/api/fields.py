@@ -165,7 +165,7 @@ class FkModelField(FkField):
         super().__init__(**kwargs)
 
     def to_internal_value(self, data: int):
-        return self.model_class.objects.get(**{ self.autocomplete_property: data })
+        return self.model_class.objects.get(**{self.autocomplete_property: data})
 
     def to_representation(self, value: _t.Union[models.Model, int]) -> int:
         if isinstance(value, self.model_class):

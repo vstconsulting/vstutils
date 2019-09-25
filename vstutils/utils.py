@@ -172,7 +172,7 @@ class tmp_file:
         :type bufsize: int
         :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
         """
-        kw = not six.PY3 and {"bufsize": bufsize} or {}
+        kw = not six.PY3 and {"bufsize": bufsize} or {}  # type: tp.Dict[tp.Text, tp.Any]
         kwargs.update(kw)
         self.fd = tempfile.NamedTemporaryFile(mode, **kwargs)
         self.path = Path(self.fd.name)
@@ -643,9 +643,9 @@ class ObjectHandlers(BaseVstObject):
         :type type_name: str
         """
         self.type = type_name  # type: tp.Text
-        self.err_message = err_message  # type: tp.Text
-        self._list = None
-        self._loaded_backends = dict()
+        self.err_message = err_message  # type: tp.Optional[tp.Text]
+        self._list = None  # type: tp.Optional[tp.Dict[tp.Text, tp.Any]]
+        self._loaded_backends = dict()  # type: tp.Dict[tp.Text, tp.Any]
 
     @property
     def objects(self):
