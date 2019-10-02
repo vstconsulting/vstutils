@@ -31,6 +31,14 @@ class Command(BaseCommand):
         config = self.prepare_config()
         env = dict()
         env[self._settings('CONFIG_ENV_DATA_NAME')] = config.generate_config_string()
+        default_envs = {
+            'UWSGI_PROCESSES': 'UWSGI_WORKERS',
+            'UWSGI_THREADS': 'UWSGI_THREADS'
+        }
+        for key in default_envs:
+            value = os.environ.get("{}_{}".format(self.prefix, key), '')
+            if value:
+                env[default_envs[key]] = value  # nocv
 
         success = False
         error = 'Unknown error.'
@@ -171,8 +179,8 @@ class Command(BaseCommand):
         }
 
         config['uwsgi'] = {
-            'processes': os.getenv('{}_UWSGI_PROCESSES'.format(prefix), '%%k'),
-            'threads': os.getenv('{}_UWSGI_THREADS'.format(prefix), '%%k'),
+            # 'processes': os.getenv('{}_UWSGI_PROCESSES'.format(prefix), '%%k'),
+            # 'threads': os.getenv('{}_UWSGI_THREADS'.format(prefix), '%%k'),
             'thread-stacksize': os.getenv('{}_UWSGI_THREADSTACK'.format(prefix), '40960'),
             'max-requests': os.getenv('{}_UWSGI_MAXREQUESTS'.format(prefix), '50000'),
             'limit-as': os.getenv('{}_UWSGI_LIMITS'.format(prefix), '512'),

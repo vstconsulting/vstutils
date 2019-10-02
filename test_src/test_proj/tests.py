@@ -110,8 +110,8 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
                 mock_obj.call_args[0][0],
                 [
                     sys.executable, '-m', 'test_proj', 'web',
-                    'processes=%k',
-                    'threads=%k',
+                    # 'processes=%k',
+                    # 'threads=%k',
                     'thread-stacksize=40960',
                     'max-requests=50000',
                     'limit-as=512',

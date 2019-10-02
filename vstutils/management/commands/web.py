@@ -98,7 +98,7 @@ class Command(BaseCommand):
             opts['script'],
             '--enable-threads',
             '--master',
-            '--offload-threads=%k',
+            '--offload-threads=2',
             '--static-gzip-all'
         ]
         cmd += ['--http={}'.format(opts['addrport'])]
