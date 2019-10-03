@@ -324,7 +324,7 @@ ext_list = [
     'vstutils.environment',
     'vstutils.middleware',
     'vstutils.tests',
-    'vstutils.section',
+    # 'vstutils.section',
     'vstutils.config',
     'vstutils.tools',
     'vstutils.auth',

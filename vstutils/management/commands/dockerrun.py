@@ -4,7 +4,7 @@ import time
 import traceback
 from subprocess import check_call
 from ._base import BaseCommand
-from ...section import ConfigParser  # pylint: disable=import-error
+from ...config import ConfigParser  # pylint: disable=import-error
 
 
 class Command(BaseCommand):

@@ -116,6 +116,7 @@ cdef class File:
             char* line
             size_t count
         count = 0
+        line = NULL
         if getline(&line, &count, self.file) != -1:
             return line
         return ''

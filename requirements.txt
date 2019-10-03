@@ -1,5 +1,5 @@
 # Main packages
-# configparser==3.7.4
+configparser==3.7.4
 pytimeparse==1.1.8
 six==1.12
 pyyaml>=3.13,<=5.2

@@ -1,12 +1,16 @@
 # cython: c_string_type=str, c_string_encoding=utf8, linetrace=True, profile=True
 # distutils: define_macros=CYTHON_TRACE_NOGIL=1
 
-
 import typing as _t
 import re
+import os
+import io
 import json
 import pytimeparse
 from functools import reduce
+
+from configparser import ConfigParser as BaseConfigParser
+from .tools import get_file_value
 
 from libc.stdio cimport getline, FILE, fopen, fclose, printf, ftell
 from posix.stat cimport stat, struct_stat
@@ -416,6 +420,28 @@ cdef class Section(__BaseDict):
 
     def __str__(self):
         return json.dumps(self.all())
+
+
+class ConfigParser(BaseConfigParser):
+
+    def read(self, filenames, encoding=None):
+        if isinstance(filenames, (str, os.PathLike)):
+            filenames = [filenames]
+        read_ok = []
+        for filename in filenames:
+            data = get_file_value(filename, default='')
+            if not data:
+                continue
+            self.read_string(data, filename)
+            if isinstance(filename, os.PathLike):
+                filename = os.fspath(filename)
+            read_ok.append(filename)
+        return read_ok
+
+    def generate_config_string(self):
+        fp = io.StringIO()
+        self.write(fp)
+        return fp.getvalue()
 
 
 # Test used for get performance speed of config parser
