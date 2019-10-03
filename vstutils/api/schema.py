@@ -218,13 +218,18 @@ class VSTAutoSchema(SwaggerAutoSchema):
         # pylint: disable=protected-access
         if not hasattr(view_action_func, '_nested_name'):
             return nested_view
+
         nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
-        nested_view_class = getattr(view_action_func, '_nested_view', None)
+
         if nested_view is None:  # nocv
             return nested_view
+
+        nested_view_class = getattr(view_action_func, '_nested_view', None)
         view_action_func = getattr(nested_view_class, nested_action_name, None)
+
         if view_action_func is None:
             return nested_view
+
         return self._get_nested_view_class(nested_view_class, view_action_func)
 
     def __get_nested_view_obj(self, nested_view, view_action_func):
@@ -353,9 +358,9 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
 
     def _get_manager_name(self, param, view_cls):
         name, _ = self._get_subname(param['name'])
-        sub_view = getattr(view_cls, '{}_detail'.format(name), None)
-        if sub_view is None:
+        if not hasattr(view_cls, '{}_detail'.format(name)):
             return None
+        sub_view = getattr(view_cls, '{}_detail'.format(name), None)
         return getattr(sub_view, '_nested_manager', None)
 
     def _update_param_model(self, param, model, model_field=None, **kw):

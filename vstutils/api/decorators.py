@@ -348,9 +348,12 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def __get_serializers(self, kwargs):
         serializer_class = kwargs.pop('serializer_class', self.view.serializer_class)
-        serializer_class_one = kwargs.pop(
-            'serializer_class_one', getattr(self.view, 'serializer_class_one', None)
-        ) or serializer_class
+        if 'serializer_class_one' in kwargs:
+            serializer_class_one = kwargs.pop('serializer_class_one')
+        elif hasattr(self.view, 'serializer_class_one'):
+            serializer_class_one = self.view.serializer_class_one
+        else:
+            serializer_class_one = serializer_class
         return (serializer_class, serializer_class_one)
 
     def _get_subs_from_view(self) -> _t.Sequence:
@@ -382,7 +385,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     def get_view(self, name: _t.Text, **options):
         # pylint: disable=redefined-outer-name
         mixin_class = NestedViewMixin
-        if getattr(self.view, 'create', None) is not None:
+        if hasattr(self.view, 'create'):
             if self.kwargs.get('allow_append', False):
                 mixin_class = NestedWithAppendMixin
             else:

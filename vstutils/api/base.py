@@ -218,7 +218,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         if serializer_class:
             return serializer_class
         # Get 'serializer_class_one' for detail operations
-        if self.request and (lookup_field_data or self.action in detail_actions):
+        if self.request and (lookup_field_data or action_name in detail_actions):
             return self.serializer_class_one
         return super().get_serializer_class()
 

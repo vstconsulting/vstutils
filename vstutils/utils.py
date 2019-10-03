@@ -357,7 +357,8 @@ class Executor(BaseVstObject):
         self.output += str(line)
 
     def _handle_process(self, proc: subprocess.Popen, stream: tp.Text):
-        while not getattr(proc, stream).closed:
+        stream_object = getattr(proc, stream)
+        while not stream_object.closed:
             self.working_handler(proc)
             time.sleep(0.1)
 
