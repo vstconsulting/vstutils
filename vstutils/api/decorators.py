@@ -353,7 +353,8 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         elif hasattr(self.view, 'serializer_class_one'):
             serializer_class_one = self.view.serializer_class_one
         else:
-            serializer_class_one = serializer_class
+            # This option is deprecated because all viewsets return `serializer_class_one`
+            serializer_class_one = serializer_class  # nocv
         return (serializer_class, serializer_class_one)
 
     def _get_subs_from_view(self) -> _t.Sequence:

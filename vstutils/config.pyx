@@ -377,7 +377,7 @@ cdef class Section(__BaseDict):
             return self[key]
         except KeyError:
             if not isinstance(fallback, Empty):
-                return fallback
+                return self.config.format_string(fallback)
             raise
 
     def all(self):

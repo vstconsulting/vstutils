@@ -139,7 +139,7 @@ class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
     copy_related = ['hosts', 'subgroups']
 
 
-@nested_view('subdeephosts', 'id', view=HostGroupViewSet)
+@nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupSerializer)
 class _DeepHostGroupViewSet(_HostGroupViewSet, CopyMixin):
     def get_manager_subdeephosts(self, parent):
         return getattr(parent, 'subgroups')
