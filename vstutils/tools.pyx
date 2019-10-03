@@ -1,4 +1,4 @@
-from libc.stdio cimport FILE, fopen, fread, fwrite, fflush, fclose
+from libc.stdio cimport FILE, fopen, fread, fwrite, fflush, fclose, feof, getline
 from posix.stat cimport stat, struct_stat
 from libc.stdlib cimport malloc, free
 
@@ -104,6 +104,24 @@ cdef class File:
 
     def flush(self):
         return self._flush()
+
+    cdef int _feof(self):
+        return feof(self.file)
+
+    def feof(self):
+        return self._feof()
+
+    cdef char* _readline(self):
+        cdef:
+            char* line
+            size_t count
+        count = 0
+        if getline(&line, &count, self.file) != -1:
+            return line
+        return ''
+
+    def readline(self):
+        return self._readline()
 
     def __len__(self):
         return self.size()

@@ -2,7 +2,6 @@ import os
 import pwd
 import sys
 from collections import OrderedDict
-from warnings import warn
 
 from django.contrib import admin
 from django.utils.functional import lazy
@@ -10,7 +9,8 @@ from drf_yasg import errors
 import rest_framework
 import pyximport
 pyximport.install(language_level=3)
-from .section import ConfigParser, Section, get_file_value
+from .tools import get_file_value
+from . import config as cconfig
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables
@@ -49,27 +49,192 @@ CONFIG_FILE = os.getenv(
     "/etc/{}/settings.ini".format(VST_PROJECT_LIB)
 )
 CONFIG_ENV_DATA_NAME = "{}_SETTINGS_DATA".format(ENV_NAME)
-config = ConfigParser(
-    default_section='defaults'
+
+
+class BackendSection(cconfig.Section):
+
+    def key_handler_to_all(self, key):
+        return super().key_handler_to_all(key).upper()
+
+
+class BaseAppendSection(cconfig.Section):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for key, value in self.get_default_data().items():
+            if key not in self:
+                self[key] = value
+
+
+class MainSection(BaseAppendSection):
+    types_map = {
+        'debug': cconfig.BoolType(),
+        'enable_admin_panel': cconfig.BoolType(),
+        'allowed_hosts': cconfig.ListType(),
+    }
+
+
+class WebSection(BaseAppendSection):
+    types_map = {
+        'allow_cors': cconfig.BoolType(),
+        'session_timeout': cconfig.IntSecondsType(),
+        'page_limit': cconfig.IntType(),
+        'public_openapi': cconfig.BoolType(),
+        'openapi_cache_timeout': cconfig.IntType(),
+        'enable_gravatar': cconfig.BoolType(),
+        'rest_swagger': cconfig.BoolType()
+    }
+
+
+class DBSection(BackendSection):
+    types_map = {
+        'conn_max_age': cconfig.IntSecondsType(),
+        'atomic_requests': cconfig.BoolType(),
+        'autocommit': cconfig.BoolType(),
+    }
+
+
+class DBTestSection(BackendSection):
+    type_serialize = cconfig.BoolType()
+
+
+class DBOptionsSection(cconfig.Section):
+    types_map = {
+        'timeout': cconfig.IntSecondsType(),
+        'connect_timeout': cconfig.IntSecondsType(),
+        'read_timeout': cconfig.IntSecondsType(),
+        'write_timeout': cconfig.IntSecondsType(),
+    }
+
+
+class CacheSection(BackendSection):
+    types_map = {
+        'timeout': cconfig.IntSecondsType(),
+    }
+
+
+class MailSection(BaseAppendSection):
+    types_map = {
+        'port': cconfig.IntType(),
+        'tls': cconfig.BoolType(),
+    }
+
+
+class UWSGISection(cconfig.Section):
+    type_daemon = cconfig.BoolType()
+
+
+class RPCSection(BaseAppendSection):
+    type_map = {
+        'concurrency"': cconfig.IntType(),
+        'prefetch_multiplier"': cconfig.IntType(),
+        'max_tasks_per_child"': cconfig.IntType(),
+        'heartbeat"': cconfig.IntType(),
+        'results_expiry_days"': cconfig.IntType(),
+        'create_instance_attempts"': cconfig.IntType(),
+        'enable_worker"': cconfig.BoolType()
+    }
+
+
+class WorkerSection(BaseAppendSection):
+    types_map = {
+        'beat': cconfig.BoolType(),
+        'events': cconfig.BoolType(),
+        'task-events': cconfig.BoolType(),
+        'without-gossip': cconfig.BoolType(),
+        'without-mingle': cconfig.BoolType(),
+        'without-heartbeat': cconfig.BoolType(),
+        'purge': cconfig.BoolType(),
+        'discard': cconfig.BoolType(),
+    }
+
+
+config = cconfig.ConfigParserC(
+    format_kwargs=KWARGS,
+    section_defaults={
+        'main': {
+            'debug': False,
+            'allowed_hosts': ('*',),
+            'timezone': 'UTC',
+            'log_level': 'WARNING',
+            'enable_admin_panel': False,
+            'ldap-server': None,
+            'ldap-default-domain': '',
+            'ldap-auth_format': 'cn=<username>,<domain>',
+        },
+        'web': {
+            'allow_cors': False,
+            'session_timeout': '2w',
+            'static_files_url': '/static/',
+            'page_limit': 1000,
+            'rest_swagger_description': (vst_project_module.__doc__ or vst_lib_module.__doc__),
+            'public_openapi': False,
+            'openapi_cache_timeout': 120,
+            'enable_gravatar': True
+        },
+        'database': {
+            'engine': 'django.db.backends.sqlite3',
+            'name': '{PROG}/db.{PROG_NAME}.sqlite3',
+            'test': {
+                'serialize': 'false'
+            }
+        },
+        'cache': {
+            "backend": 'django.core.cache.backends.filebased.FileBasedCache',
+            'location': '/tmp/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
+            'timeout': '10m'
+        },
+        'mail': {
+            'port': 25,
+            'user': "",
+            'password': "",
+            'tls': False,
+            'host': None
+        },
+        'contact': {
+            'name': 'System Administrator'
+        },
+        'uwsgi': {
+            'daemon': True
+        },
+        'rpc': {
+            'concurrency': 4,
+            'prefetch_multiplier': 1,
+            'max_tasks_per_child': 1,
+            'heartbeat': 10,
+            'results_expiry_days': 1,
+            'create_instance_attempts': 10,
+        },
+        'worker': {
+            'app': '{PROG_NAME}.wapp:app',
+            'loglevel': '{this[main][log_level]}',
+            'logfile': '/var/log/{PROG_NAME}/worker.log',
+            'pidfile': '/run/{PROG_NAME}_worker.pid',
+            'autoscale': '{this[rpc][concurrency]},1',
+            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
+            'beat': True
+        }
+    },
+    section_overload={
+        'main': MainSection,
+        'web': WebSection,
+        'database': DBSection,
+        'database.options': DBOptionsSection,
+        'database.test': DBTestSection,
+        'worker': WorkerSection,
+        'cache': CacheSection,
+        'locks': CacheSection,
+        'session': CacheSection,
+        'mail': MailSection,
+        'uwsgi': UWSGISection,
+        'rpc': RPCSection,
+    }
 )
-config.read([CONFIG_FILE, DEV_SETTINGS_FILE])
-config.read_string(os.getenv(CONFIG_ENV_DATA_NAME, ''))
+config.parse_files([CONFIG_FILE, DEV_SETTINGS_FILE])
+config.parse_text(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 
-
-class SectionConfig(Section):
-    config = config
-    section = 'main'
-    kwargs = KWARGS
-
-
-class BackendsSectionConfig(SectionConfig):
-
-    def key_handler(self, key):
-        return super().key_handler(key).upper()
-
-
-main = SectionConfig('main')
-web = SectionConfig('web')
+main = config['main']
+web = config['web']
 
 # Secret file with key for hashing passwords
 SECRET_FILE = os.getenv(
@@ -89,8 +254,8 @@ SECRET_KEY = lazy(secret_key, str)()
 TESTS_RUN = any([True for i in sys.argv if i in ['testserver', 'test']])
 LOCALRUN = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
 TESTSERVER_RUN = 'testserver' in sys.argv
-DEBUG = os.getenv('DJANGO_DEBUG', main.getboolean("debug", False))
-ALLOWED_HOSTS = main.getlist("allowed_hosts", '*')
+DEBUG = os.getenv('DJANGO_DEBUG', main["debug"])
+ALLOWED_HOSTS = main["allowed_hosts"]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # Include some addons if packages exists in env
@@ -155,11 +320,11 @@ MIDDLEWARE = [
 MIDDLEWARE_CLASSES = MIDDLEWARE
 
 # Allow cross-domain access
-CORS_ORIGIN_ALLOW_ALL = web.getboolean('allow_cors', fallback=False)
+CORS_ORIGIN_ALLOW_ALL = web['allow_cors']
 
-LDAP_SERVER = main.get("ldap-server", fallback=None)
-LDAP_DOMAIN = main.get("ldap-default-domain", fallback='')
-LDAP_FORMAT = main.get("ldap-auth_format", fallback='cn=<username>,<domain>')
+LDAP_SERVER = main["ldap-server"]
+LDAP_DOMAIN = main["ldap-default-domain"]
+LDAP_FORMAT = main["ldap-auth_format"]
 
 DEFAULT_AUTH_PLUGINS = {
     'LDAP': {
@@ -191,7 +356,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Sessions settings
 # https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
-SESSION_COOKIE_AGE = web.getseconds("session_timeout", fallback='2w')
+SESSION_COOKIE_AGE = web["session_timeout"]
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS = 'session'
 
@@ -226,7 +391,7 @@ UWSGI_APPLICATION = '{module}:{app}'.format(
     module='.'.join(WSGI_APPLICATION.split('.')[:-1]), app=WSGI_APPLICATION.split('.')[-1]
 )
 
-uwsgi_settings = SectionConfig('uwsgi')
+uwsgi_settings = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
 WEB_DAEMON_LOGFILE = uwsgi_settings.get('log_file', fallback='/dev/null')
 WEB_ADDRPORT = uwsgi_settings.get('addrport', fallback=':8080')
@@ -267,7 +432,7 @@ TEMPLATES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
-STATIC_URL = web.get("static_files_url", fallback="/static/")
+STATIC_URL = web["static_files_url"]
 STATIC_FILES_FOLDERS = list()
 STATIC_FILES_FOLDERS.append(os.path.join(VST_PROJECT_DIR, 'static'))
 if BASE_DIR != VST_PROJECT_DIR:  # nocv
@@ -299,38 +464,10 @@ DOC_URL = "/docs/"
 # Database settings.
 # Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 ##############################################################
-class DBSectionConfig(BackendsSectionConfig):
-    section = 'database'
-    subsections = ['options', 'test']
-    section_defaults = {
-        '.': {
-            'engine': 'django.db.backends.sqlite3',
-            'name': '{PROG}/db.{PROG_NAME}.sqlite3'
-        },
-        'test': {
-            'serialize': 'false'
-        }
-    }
-    types_map = {
-        'conn_max_age': BackendsSectionConfig.int_seconds,
-        'atomic_requests': BackendsSectionConfig.bool,
-        'autocommit': BackendsSectionConfig.bool,
-        'options.timeout': BackendsSectionConfig.int_seconds,
-        'options.connect_timeout': BackendsSectionConfig.int_seconds,
-        'options.read_timeout': BackendsSectionConfig.int_seconds,
-        'options.write_timeout': BackendsSectionConfig.int_seconds,
-        'test.serialize': BackendsSectionConfig.bool,
-    }
-
-    def key_handler(self, key):
-        if not (self._current_section == self.section or key == self._current_section):
-            return key  # nocv
-        return super().key_handler(key)
-
-
 DATABASES = {
-    'default': DBSectionConfig().all()
+    'default': config['database'].all()
 }
+
 if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.mysql':  # nocv
     try:
         import mysql
@@ -348,32 +485,16 @@ if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.sqlite3':
     except:  # nocv
         pass
 
-
 # Cache settings.
 # Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#caches
 ##############################################################
-class CacheSectionConfig(BackendsSectionConfig):
-    section = 'cache'
-    subsections = ['options']
-    section_defaults = {
-        '.': {
-            "backend": 'django.core.cache.backends.filebased.FileBasedCache',
-            'location': '/tmp/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
-            'timeout': '10m'
-        }
-    }
-    types_map = {
-        'timeout': BackendsSectionConfig.int_seconds,
-    }
-
-
-default_cache = CacheSectionConfig('cache').all()
-session_cache = CacheSectionConfig('session', default=default_cache).all()
+default_cache = config['cache'].all()
+session_cache = config['session'].all() or default_cache
 session_cache['TIMEOUT'] = SESSION_COOKIE_AGE
 
 CACHES = {
     'default': default_cache,
-    "locks": CacheSectionConfig('locks').all(),
+    "locks": config['locks'].all() or default_cache,
     "session": session_cache,
 }
 
@@ -381,13 +502,13 @@ CACHES = {
 # E-Mail settings
 # https://docs.djangoproject.com/en/1.10/ref/settings/#email-host
 ##############################################################
-mail = SectionConfig('mail')
+mail = config['mail']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = mail.getint("port", fallback=25)
-EMAIL_HOST_USER = mail.get("user", fallback="")
-EMAIL_HOST_PASSWORD = mail.get("password", fallback="")
-EMAIL_USE_TLS = mail.getboolean("tls", fallback=False)
-EMAIL_HOST = mail.get("host", None)
+EMAIL_PORT = mail["port"]
+EMAIL_HOST_USER = mail["user"]
+EMAIL_HOST_PASSWORD = mail["password"]
+EMAIL_USE_TLS = mail["tls"]
+EMAIL_HOST = mail["host"]
 if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -395,7 +516,7 @@ if EMAIL_HOST is None:
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/
 ##############################################################
-PAGE_LIMIT = web.getint("page_limit", fallback=1000)
+PAGE_LIMIT = web["page_limit"]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
@@ -435,11 +556,11 @@ VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
 HAS_COREAPI = False
 API_CREATE_SWAGGER = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION = web.get('rest_swagger_description', fallback=vst_project_module.__doc__ or vst_lib_module.__doc__)
+SWAGGER_API_DESCRIPTION = web['rest_swagger_description']
 TERMS_URL = ''
-CONTACT = SectionConfig('contact').all() or dict(name='System Administrator')
-OPENAPI_PUBLIC = web.getboolean('public_openapi', fallback=False)
-SCHEMA_CACHE_TIMEOUT = web.getint('openapi_cache_timeout', fallback=120)
+CONTACT = config['contact'].all()
+OPENAPI_PUBLIC = web['public_openapi']
+SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
 
 OPENAPI_EXTRA_LINKS = {
     'vstutils': {
@@ -495,7 +616,7 @@ LANGUAGES = (
     ('en', 'English'),
 )
 
-TIME_ZONE = main.get("timezone", fallback="UTC")
+TIME_ZONE = main["timezone"]
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -503,7 +624,7 @@ USE_TZ = True
 
 # LOGGING settings
 ##############################################################
-LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', main.get("log_level", fallback="WARNING")).upper()
+LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', main["log_level"]).upper()
 LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
 LOG_DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
 
@@ -526,7 +647,7 @@ LOGGING = {
         'file': {
             'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
-            'filename': SectionConfig("uwsgi").get("log_file", fallback='/dev/null')
+            'filename': WEB_DAEMON_LOGFILE
         },
     },
     'loggers': {
@@ -565,7 +686,7 @@ SILENCED_SYSTEM_CHECKS = [
 # Celery broker settings
 # Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
 ##############################################################
-rpc = SectionConfig('rpc')
+rpc = config['rpc']
 __broker_url = rpc.get("connection", fallback="file:///tmp")
 if __broker_url.startswith("file://"):
     __broker_folder = __broker_url.split("://", 1)[1]
@@ -580,60 +701,30 @@ else:  # nocv
     CELERY_BROKER_URL = __broker_url
     CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback=CELERY_BROKER_URL)
 
-CELERY_WORKER_CONCURRENCY = rpc.getint("concurrency", fallback=4)
+CELERY_WORKER_CONCURRENCY = rpc["concurrency"]
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_TASK_IGNORE_RESULT = True
-CELERYD_PREFETCH_MULTIPLIER = rpc.getint("prefetch_multiplier", fallback=1)
-CELERYD_MAX_TASKS_PER_CHILD = rpc.getint("max_tasks_per_child", fallback=1)
-CELERY_BROKER_HEARTBEAT = rpc.getint("heartbeat", fallback=10)
+CELERYD_PREFETCH_MULTIPLIER = rpc["prefetch_multiplier"]
+CELERYD_MAX_TASKS_PER_CHILD = rpc["max_tasks_per_child"]
+CELERY_BROKER_HEARTBEAT = rpc["heartbeat"]
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_EXPIRES = rpc.getint("results_expiry_days", fallback=1)
+CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
 CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
 CELERY_TASK_CREATE_MISSING_QUEUES = True
 
 CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
-CONCURRENCY = rpc.getint("concurrency", fallback=4)
+CONCURRENCY = rpc["concurrency"]
 WORKER_QUEUES = ['celery']
 RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
 
 
-class WorkerSectionConfig(SectionConfig):
-    section = 'worker'
-    section_defaults = {
-        '.': {
-            'app': '{PROG_NAME}.wapp:app',
-            'loglevel': LOG_LEVEL,
-            'logfile': '/var/log/{PROG_NAME}/worker.log',
-            'pidfile': '/run/{PROG_NAME}_worker.pid',
-            'autoscale': '{},1'.format(CONCURRENCY),
-            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
-            'beat': True
-        }
-    }
-    types_map = {
-        'beat': SectionConfig.bool,
-        'events': SectionConfig.bool,
-        'task-events': SectionConfig.bool,
-        'without-gossip': SectionConfig.bool,
-        'without-mingle': SectionConfig.bool,
-        'without-heartbeat': SectionConfig.bool,
-        'purge': SectionConfig.bool,
-        'discard': SectionConfig.bool,
-    }
-
-    def get_from_section(self, section, option=None):
-        result = self.get_default_data_from_section(option)
-        data = super().get_from_section(section, option)
-        result.update(data)
-        return result
-
 if RUN_WORKER:
-    WORKER_OPTIONS = WorkerSectionConfig().all() if has_django_celery_beat else {}
+    WORKER_OPTIONS = config['worker'].all() if has_django_celery_beat else {}
 
 # View settings
 ##############################################################
-ENABLE_ADMIN_PANEL = main.getboolean('enable_admin_panel', False)
+ENABLE_ADMIN_PANEL = main['enable_admin_panel']
 MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
 
 VIEWS = {
@@ -804,4 +895,4 @@ if not TESTSERVER_RUN and TESTS_RUN:
 
 # User settings
 ##############################################################
-ENABLE_GRAVATAR = web.get("enable_gravatar", fallback=True)
+ENABLE_GRAVATAR = web["enable_gravatar"]

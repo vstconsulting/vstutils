@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import re
+import pwd
 
 import pyximport
 
@@ -18,6 +19,7 @@ from fakeldap import MockLDAP
 from django.test import Client
 from django.core.management import call_command
 from django.core import mail
+from django.conf import settings
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 from vstutils.tests import BaseTestCase, json, override_settings
@@ -28,6 +30,7 @@ from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tools import get_file_value, File as ToolsFile
+from vstutils.config import ConfigParserC, Section, IntType, BoolType, IntSecondsType, ListType, JsonType, StrType, ConfigParserException
 from .models import Host, HostGroup, File, List
 
 
@@ -1134,3 +1137,261 @@ class ToolsTestCase(BaseTestCase):
             result = self.render_api_response(response)
             self.assertNotEqual(result['rpc'], 'ok')
             self.assertEqual(result['rpc'], 'disabled')
+
+
+class ConfigParserCTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        self._maxDiff = self.maxDiff
+        self.maxDiff = 2048
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        self.maxDiff = self._maxDiff
+
+    def test_file_reader(self):
+
+        class TestFirstSection(Section):
+            types_map = {
+                'key3': BoolType(), 'sec': IntSecondsType(), 'lst': ListType(), 'emptylst': ListType(),
+                'lstdot': ListType(separator='.'), 'tostr': StrType()
+            }
+            type_key2 = IntType()
+            type_jsonkey = JsonType()
+            type_keyint1 = IntType()
+            type_keyint2 = IntType()
+            type_keyint3 = IntType()
+
+        class TestSecondSection(Section):
+            pass
+
+        class TestThirdSection(Section):
+            pass
+
+        class TestSectionFunctional(Section):
+            pass
+
+        class TestKeyHandler(Section):
+            def key_handler_to_all(self, key):
+                return super().key_handler_to_all(key).upper()
+
+        class TestDefaultSettings(Section):
+            type_default2 = IntType()
+
+
+        class TestConfigParserC(ConfigParserC):
+            section_class_another = TestSecondSection
+            section_overload = {
+                'another.sub': TestThirdSection,
+                'another.keyhandler': TestKeyHandler,
+                'add_item.subs': TestFirstSection,
+            }
+            defaults = {
+                'withdefault': {
+                    'default1': 'default_value1',
+                    'default2': '159',
+                    'default3': True,
+                    'default4': 1209600,
+                    'default5': ('one', 'two', 'three'),
+                    'defaultsub': {
+                        'default_subs_key': 'default_subs_value'
+                    }
+                }
+            }
+
+
+        format_kwargs = dict(
+            INTEGER=22, STRING='kwargs_str'
+        )
+        test_parser = TestConfigParserC(section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional, withdefault=TestDefaultSettings), format_kwargs=format_kwargs)
+        files_list = ['test_conf.ini', 'test_conf2.ini']
+        files_list = map(lambda x: os.path.join(os.path.dirname(__file__), x), files_list)
+        config_text = '[another]\nanother_key1 = some_new_value'
+
+        self.assertEqual(list(test_parser.keys()), ['withdefault'])
+
+        config_data = {
+            'main': {
+                'key1': 'value4',
+                'key2': 251,
+                'key3': True,
+                'keyint1': 2000,
+                'keyint2': 2000000,
+                'keyint3': 2000000000,
+                'sec': 1209600,
+                'lst': ('test', '2', '5', 'str'),
+                'lstdot': ('test', '2', '5', 'str'),
+                'emptylst': (),
+                'key22': '/tmp/kwargs_str',
+                'jsonkey': [{"jkey": "jvalue"}],
+                'formatstr': 'value4',
+                'formatint': '251'
+            },
+            'to_json': {
+                'jkey': 'jvalue'
+            },
+            'another': {
+                'another_key1': 'some_new_value',
+                'another_key2': 'another_value2',
+                'another_key3': 'another_value3',
+                'keyhandler': {
+                    'handler': 'work'
+                },
+                'sub': {
+                    'another_key1': 'another_value2',
+                    'another_key2': 'another_value2'
+                }
+            },
+            'withdefault': {
+                'default1': 'default_value1',
+                'default2': 159,
+                'default3': True,
+                'default4': 1209600,
+                'default5': ('one', 'two', 'three'),
+                'defaultsub': {
+                    'default_subs_key': 'default_subs_value'
+                }
+            },
+            'gettype': {
+                'toint': '257',
+                'tobool': 'False',
+                'tolist': 'first,second,third',
+                'tointsec': '2w',
+                'tojson': '{"jsonkey": "jsonvalue"}'
+            }
+        }
+
+        # Parse files and text
+        test_parser.parse_files(files_list)
+        test_parser.parse_text(config_text)
+
+        # Check is filled config
+        self.assertTrue(test_parser)
+
+        # Compare sections classes, with setuped
+        self.assertTrue(isinstance(test_parser['main'], TestFirstSection))
+        self.assertTrue(isinstance(test_parser['another']['keyhandler'], TestKeyHandler))
+        self.assertTrue(isinstance(test_parser['another'], TestSecondSection))
+        self.assertTrue(isinstance(test_parser['another']['sub'], TestThirdSection))
+
+        # Compare data
+        self.assertDictEqual(test_parser, config_data)
+
+        # Test method `all()` for config and compare with data
+        self.assertDictEqual(test_parser['main'].all(), config_data['main'])
+
+        # Check types for vars, that was setup
+        self.assertTrue(isinstance(test_parser['main']['key2'], int))
+        self.assertTrue(isinstance(test_parser['main']['key3'], bool))
+        self.assertTrue(isinstance(test_parser['main']['sec'], int))
+        self.assertTrue(isinstance(test_parser['main']['lst'], tuple))
+        self.assertTrue(isinstance(test_parser['main']['emptylst'], tuple))
+
+        # Check __setitem__ and __getitem__ for config
+        test_parser['add_item'] = dict()
+        test_parser['add_item']['subs'] = dict()
+        self.assertTrue(isinstance(test_parser['add_item'], TestSectionFunctional))
+        self.assertTrue(isinstance(test_parser['add_item']['subs'], TestFirstSection))
+        self.assertDictEqual(test_parser['add_item'], {'subs': {}})
+
+
+        # Make manual typeconversation, and two times conversation same value
+        self.assertEqual(test_parser['main'].getint('key2'), 251)
+        self.assertEqual(test_parser['gettype'].getint('toint'), 257)
+        self.assertTrue(isinstance(test_parser['gettype'].getint('toint'), int))
+
+        self.assertEqual(test_parser['main'].getboolean('key3'), True)
+        self.assertEqual(test_parser['gettype'].getboolean('tobool'), False)
+        self.assertTrue(isinstance(test_parser['gettype'].getboolean('tobool'), bool))
+
+        self.assertEqual(test_parser['main'].getseconds('sec'), 1209600)
+        self.assertEqual(test_parser['gettype'].getseconds('tointsec'), 1209600)
+        self.assertTrue(isinstance(test_parser['gettype'].getseconds('tointsec'), int))
+
+        self.assertEqual(test_parser['gettype'].getlist('tolist'), ('first', 'second', 'third'))
+        self.assertTrue(isinstance(test_parser['gettype'].getlist('tolist'), tuple))
+        self.assertEqual(test_parser['main'].getlist('lstdot', '.'), ('test', '2', '5', 'str'))
+        self.assertEqual(test_parser['main'].getlist('key1', '.'), ('value4',))
+        self.assertEqual(test_parser['main'].getlist('key2', '.'), (251,))
+
+        self.assertDictEqual(test_parser['gettype'].getjson('tojson'), {'jsonkey': 'jsonvalue'})
+        self.assertEqual(test_parser['main'].getjson('key2'), 251)
+        self.assertDictEqual(test_parser['another'].getjson('keyhandler'), {'handler': 'work'})
+
+        test_parser['add_item']['subs']['tostr'] = 25
+        self.assertEqual(test_parser['add_item']['subs']['tostr'], '25')
+
+        # Test `get()` method of config
+        self.assertEqual(test_parser.get('main').get('key1'), 'value4')
+
+        # Check file exist handler
+        test_parser.parse_file('123.txt')
+
+        # Check parser exception handler
+        with self.assertRaises(ConfigParserException):
+            test_parser.parse_text('qwerty')
+
+        # CHECK SETTINGS FROM CONFIG FILE
+        db_default_val = {
+            'OPTIONS': {'timeout': 20},
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'file:memorydb_default?mode=memory&cache=shared',
+            'TEST': {
+                'SERIALIZE': False, 'CHARSET': None, 'COLLATION': None, 'NAME': None,
+                'MIRROR': None
+            },
+            'ATOMIC_REQUESTS': False, 'AUTOCOMMIT': True, 'CONN_MAX_AGE': 0,
+            'TIME_ZONE': None, 'USER': '', 'PASSWORD': '', 'HOST': '', 'PORT': ''
+        }
+
+        self.assertEqual(settings.ALLOWED_HOSTS, ['*', 'testserver'])
+
+        self.assertEqual(settings.LDAP_SERVER, None)
+        self.assertEqual(settings.LDAP_DOMAIN, '')
+        self.assertEqual(settings.LDAP_FORMAT, 'cn=<username>,<domain>')
+        self.assertEqual(settings.TIME_ZONE, "UTC")
+        self.assertEqual(settings.ENABLE_ADMIN_PANEL, False)
+
+
+        self.assertEqual(settings.SESSION_COOKIE_AGE, 1209600)
+        self.assertEqual(settings.STATIC_URL, '/static/')
+        self.assertEqual(settings.PAGE_LIMIT, 1000)
+        self.assertEqual(settings.SWAGGER_API_DESCRIPTION, None)
+        self.assertEqual(settings.OPENAPI_PUBLIC, False)
+        self.assertEqual(settings.SCHEMA_CACHE_TIMEOUT, 120)
+        self.assertEqual(settings.ENABLE_GRAVATAR, True)
+
+        self.assertEqual(settings.WEB_DAEMON, True)
+        self.assertEqual(settings.WEB_DAEMON_LOGFILE, '/dev/null')
+        self.assertEqual(settings.WEB_ADDRPORT, ':8080')
+
+        for key in db_default_val.keys():
+            self.assertEqual(settings.DATABASES['default'][key], db_default_val[key])
+
+        self.assertEqual(settings.EMAIL_PORT, 25)
+        self.assertEqual(settings.EMAIL_HOST_USER, "")
+        self.assertEqual(settings.EMAIL_HOST_PASSWORD, "")
+        self.assertEqual(settings.EMAIL_USE_TLS, False)
+        self.assertEqual(settings.EMAIL_HOST, None)
+
+        self.assertEqual(settings.REST_FRAMEWORK['PAGE_SIZE'], 1000)
+
+        self.assertEqual(settings.CELERY_BROKER_URL, "filesystem://")
+        self.assertEqual(settings.CELERY_WORKER_CONCURRENCY, 4)
+        self.assertEqual(settings.CELERYD_PREFETCH_MULTIPLIER, 1)
+        self.assertEqual(settings.CELERYD_MAX_TASKS_PER_CHILD, 1)
+        self.assertEqual(settings.CELERY_BROKER_HEARTBEAT, 10)
+        self.assertEqual(settings.CELERY_RESULT_EXPIRES, 1)
+        self.assertEqual(settings.CREATE_INSTANCE_ATTEMPTS, 10)
+        self.assertEqual(settings.CONCURRENCY, 4)
+
+        worker_options = {
+            'app': 'test_proj.wapp:app',
+            'loglevel': 'WARNING',
+            'logfile': '/var/log/test_proj2/worker.log',
+            'pidfile': '/run/test_proj_worker.pid',
+            'autoscale': '4,1',
+            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
+            'beat': True
+        }
+        self.assertDictEqual(worker_options, settings.WORKER_OPTIONS)
