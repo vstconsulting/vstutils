@@ -153,7 +153,7 @@ guiQuerySets.QuerySet = class QuerySet {
                 ecd_filters[ecd_key] = filters[key];
             }
         }
-        return this.clone({query: ecd_filters});
+        return this.clone({query: $.extend(true, {}, this.query, ecd_filters)});
     }
 
     /**

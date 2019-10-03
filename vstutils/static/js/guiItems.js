@@ -41,6 +41,10 @@ const base_button_mixin = {
         },
 
         onClickHandler(instance_id){
+            if(this.options.method) {
+                return this.doMethod(this.options, instance_id);
+            }
+
             if(this.options.empty) {
                 return this.doEmptyAction(this.options, instance_id);
             }
@@ -50,6 +54,13 @@ const base_button_mixin = {
             }
 
             return this.doAction(instance_id);
+        },
+
+        doMethod(options, instance_id) {
+            this.$root.$emit(
+                'eventHandler-' + this.$root.$children.last._uid, this.options.method,
+                $.extend(true, {instance_id:instance_id}, options)
+            );
         },
 
         goToPath(path_name) {
@@ -1060,7 +1071,7 @@ vst_vue_components.items = {
         template: "#template_multi_actions",
         computed: {
             store_url() {
-              return this.opt.store_url;
+                return this.opt.store_url;
             },
             current_path() {
                 return this.$route.name;
@@ -1281,7 +1292,7 @@ vst_vue_components.items = {
                 return this.view.schema.filters;
             },
             filters_opt() {
-              return $.extend(true, {}, this.opt, {store: 'filters'});
+                return $.extend(true, {}, this.opt, {store: 'filters'});
             },
         },
     }),
@@ -1308,7 +1319,7 @@ vst_vue_components.items = {
         template: "#template_list_table",
         computed: {
             store_url() {
-              return this.opt.store_url;
+                return this.opt.store_url;
             },
             allSelected() {
                 let selections = this.$store.getters.getSelections(this.store_url);
@@ -1357,7 +1368,7 @@ vst_vue_components.items = {
         template: "#template_list_table_row",
         computed: {
             store_url() {
-              return this.opt.store_url;
+                return this.opt.store_url;
             },
             selected: function(){
                 return this.$store.getters.getSelectionById({
