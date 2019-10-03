@@ -325,6 +325,7 @@ ext_list = [
     'vstutils.middleware',
     'vstutils.tests',
     'vstutils.section',
+    'vstutils.config',
     'vstutils.tools',
     'vstutils.auth',
     'vstutils.urls',
