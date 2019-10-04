@@ -2094,6 +2094,7 @@ const field_binfile_readfile_button_mixin = {
             event_handler: 'readFile',
             help_text: 'Open file',
             accept: '*',
+            multiple: false,
         };
     },
     template: "#template_field_part_button_readFile",
@@ -2192,6 +2193,66 @@ const field_namedbinimage_content_mixin = {
                 },
             },
         }
+    },
+};
+
+/**
+ * Mixin for readonly and editable multiplenamedbinfile field.
+ */
+const field_multiplenamedbinfile_content_mixin = {
+    mixins: [field_namedbinfile_content_mixin],
+    data() {
+        return {
+            type_in_singal: 'file',
+            type_in_plural: 'files',
+        };
+    },
+    computed: {
+        val() {
+            if(this.value && Array.isArray(this.value) && this.value.length > 0) {
+                return this.value.length + " " + (this.value.length === 1 ? this.type_in_singal : this.type_in_plural) +" selected";
+            }
+
+            return this.title_for_empty_value;
+        },
+    },
+};
+
+
+/**
+ * Mixin for readonly and editable multiplenamedbinimage field.
+ */
+const field_multiplenamedbinimage_content_mixin = {
+    mixins: [field_multiplenamedbinfile_content_mixin, field_namedbinimage_content_mixin],
+    data() {
+        return {
+            type_in_singal: 'image',
+            type_in_plural: 'images',
+        };
+    },
+};
+
+/**
+ * Mixin for editable multiplenamedbinfile field.
+ */
+const field_multiplenamedbinfile_edit_content_mixin = {
+    methods: {
+        removeFile(index) {
+            let v = this.value ? [...this.value] : [];
+            v.splice(index, 1);
+            this.$emit('proxyEvent', 'setValueInStore', v);
+        },
+    },
+    components: {
+        field_read_file_button: {
+            mixins: [field_binfile_readfile_button_mixin],
+            data() {
+                return {
+                    help_text: 'Open files',
+                    multiple: true,
+                };
+            },
+        },
     },
 };
 
@@ -2571,10 +2632,10 @@ const gui_fields_mixins = { /* jshint unused: false */
              * @return {boolean}
              */
             isFileSizeValid(file_size) {
-              if(this.field.options.max_size !== undefined) {
-                  return this.field.options.max_size <= file_size;
-              }
-              return true;
+                if(this.field.options.max_size !== undefined) {
+                    return this.field.options.max_size <= file_size;
+                }
+                return true;
             },
             /**
              * Method, that reads content of selected file
@@ -2697,7 +2758,6 @@ const gui_fields_mixins = { /* jshint unused: false */
             field_content_readonly: {
                 mixins: [base_field_content_readonly_mixin, field_namedbinfile_content_mixin],
                 template: '#template_field_content_readonly_namedbinfile',
-
             },
             field_content_edit: {
                 mixins: [field_binfile_edit_content_mixin, field_namedbinfile_content_mixin],
@@ -2728,6 +2788,102 @@ const gui_fields_mixins = { /* jshint unused: false */
                 }
             },
         }
+    },
+
+    multiplenamedbinfile: {
+        computed: {
+            val() {
+                return this.value === undefined ? [] : this.value;
+            }
+        },
+        methods: {
+            handleValue(data={}) {
+                return data[this.field.options.name];
+            },
+
+            readOneFile(file) {
+                if(!file) {
+                    return;
+                }
+
+                if(!this.isFileSizeValid(file.size)) {
+                    guiPopUp.error('File "' + file.name + '" is too large.');
+                    console.log('File "' + file.name + '" is too large.');
+                    return;
+                }
+
+                let reader = new FileReader();
+
+                reader.onload = (event) => {return this.readFileOnLoadCallback(event, file);};
+
+                reader[this.file_reader_method](file);
+            },
+
+            readFileOnLoadCallback(event, file) {
+                let files = [...this.val];
+                let obj = {};
+                obj[this.field.options.name] = event.target.result;
+                files.push({
+                    name: file.name,
+                    content: this.field.toBase64(obj),
+                });
+                this.setValueInStore(files);
+            },
+
+            readFile: function(event) {
+                let files = event.target.files;
+
+                for(let index = 0; index < files.length; index++) {
+                    this.readOneFile(files[index]);
+                }
+            },
+        },
+        components: {
+            field_content_readonly: {
+                mixins: [
+                    base_field_content_readonly_mixin,
+                    field_multiplenamedbinfile_content_mixin,
+                ],
+                template: '#template_field_content_readonly_mutiplenamedbinfile',
+            },
+            field_content_edit: {
+                mixins: [
+                    field_binfile_edit_content_mixin,
+                    field_multiplenamedbinfile_content_mixin,
+                    field_multiplenamedbinfile_edit_content_mixin,
+                ],
+                template: '#template_field_content_edit_mutiplenamedbinfile',
+            },
+        },
+    },
+
+    multiplenamedbinimage: {
+        components: {
+            field_content_readonly: {
+                mixins: [base_field_content_readonly_mixin, field_multiplenamedbinimage_content_mixin],
+                template: '#template_field_content_readonly_mutiplenamedbinimage',
+            },
+            field_content_edit: {
+                mixins: [
+                    field_binfile_edit_content_mixin,
+                    field_multiplenamedbinimage_content_mixin,
+                    field_multiplenamedbinfile_edit_content_mixin,
+                ],
+                template: '#template_field_content_edit_mutiplenamedbinimage',
+                components: {
+                    field_read_file_button: {
+                        mixins: [field_binfile_readfile_button_mixin],
+                        data() {
+                            return {
+                                accept: 'image/*',
+                                help_text: 'Open images',
+                                multiple: true,
+                            };
+                        },
+                    },
+                }
+            },
+        },
     },
 
     password: {

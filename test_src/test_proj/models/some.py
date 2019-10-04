@@ -10,3 +10,5 @@ class ModelWithBinaryFiles(BModel):
     some_binfile = models.TextField(default='')
     some_namedbinfile = models.TextField(default='')
     some_namedbinimage = models.TextField(default='')
+    some_multiplenamedbinfile = models.TextField(default='')
+    some_multiplenamedbinimage = models.TextField(default='')

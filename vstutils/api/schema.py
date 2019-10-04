@@ -16,6 +16,8 @@ FORMAT_SECRET_FILE = 'secretfile'
 FORMAT_BIN_FILE = 'binfile'
 FORMAT_NAMED_BIN_FILE = 'namedbinfile'
 FORMAT_NAMED_BIN_IMAGE = 'namedbinimage'
+FORMAT_MULTIPLE_NAMED_BIN_FILE = 'multiplenamedbinfile'
+FORMAT_MULTIPLE_NAMED_BIN_IMAGE = 'multiplenamedbinimage'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_MULTISELECT = 'multiselect'
 FORMAT_HTML = 'html'
@@ -42,6 +44,12 @@ basic_type_info[fields.NamedBinaryFileInJsonField] = dict(
 )
 basic_type_info[fields.NamedBinaryImageInJsonField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_NAMED_BIN_IMAGE
+)
+basic_type_info[fields.MultipleNamedBinaryFileInJsonField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_MULTIPLE_NAMED_BIN_FILE
+)
+basic_type_info[fields.MultipleNamedBinaryImageInJsonField] = dict(
+    type=openapi.TYPE_STRING, format=FORMAT_MULTIPLE_NAMED_BIN_IMAGE
 )
 basic_type_info[fields.HtmlField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_HTML
