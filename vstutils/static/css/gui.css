@@ -1198,94 +1198,50 @@ img.image-field-content {
     padding: 7px 12px;
 }
 
-
-/**
- * Фильтры для формы поиска
- **/
-.search-form{
-    width: 100%;
-    display: flex;
+.break-word {
+    word-break: break-all;
+    word-break: break-word;
 }
 
-.filtered-search-vars{
-    width: 100%;
-    display: inline-block;
-}
+.cursor-pointer {}
 
-.filtered-search-value{
-    margin-bottom: 7px;
-    display: inline-flex;
-    max-width: 210px;
-    width: auto;
-}
-
-.filtered-search-form{
-    display: inline-flex;
-}
-
-.filtered-search-input{
-    min-width: 300px;
-    height: 38px;
-    padding-left: 0px;
-}
-
-.input-filter-inner{
-    display: inline-block;
-    float: left;
-    border-right: 1px solid #ccc;
-    height: 100%;
-    width: calc(100% - 40px);
-}
-
-.filtered-search-vars .input-value{
-    border: 0px;
-    display: none;
-}
-
-.filtered-search-vars .show-input-text .value{
-    display: none;
-}
-
-.filtered-search-vars .show-input-text .input-value{
-    display: inline-block;
-}
-
-
-.filtered-search-vars .name{
-}
-
-.filtered-search-vars .value{
-    color: #131313;
-    border-radius: 0 2px 2px 0;
-    margin-right: 5px;
-    float: left;
-}
-
-.filtered-search-vars .selectable{
-    display: flex;
+.cursor-pointer:hover {
     cursor: pointer;
 }
 
-.filtered-search-vars .active-filter{
-    max-width: 80px;
+.multiple-files-list {
+    padding-left: 30px;
 }
 
-@media (max-width: 768px) {
-    .search-form{
-        display: block;
-    }
-
-    .filtered-search-input{
-        margin-bottom: 7px;
-        padding-right: 0px;
-        min-width: 100%;
-    }
-
-    .filtered-search-form{
-        width: 100%;
-    }
+.multiple-files-list li div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 13px;
 }
 
+.multiple-images-list-item {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    display: grid;
+    grid-template-columns: 40px 1fr 38px;
+    align-items: center;
+}
+
+.multiple-images-list-item .file-name {
+    padding: 0 5px;
+}
+
+.multiple-images-list-item .remove-file {
+    justify-self: center;
+}
+
+.guifield-multiplenamedbinimage .image-field-content-wrapper {
+    height: 30px;
+}
 
 /* Styles for html field */
 

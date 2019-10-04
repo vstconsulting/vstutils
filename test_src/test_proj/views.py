@@ -193,6 +193,8 @@ class ModelWithBinaryFilesSerializer(VSTSerializer):
     some_binfile = fields.BinFileInStringField(required=False)
     some_namedbinfile = fields.NamedBinaryFileInJsonField(required=False)
     some_namedbinimage = fields.NamedBinaryImageInJsonField(required=False)
+    some_multiplenamedbinfile = fields.MultipleNamedBinaryFileInJsonField(required=False)
+    some_multiplenamedbinimage = fields.MultipleNamedBinaryImageInJsonField(required=False)
 
     class Meta:
         model = ModelWithBinaryFiles
@@ -201,6 +203,8 @@ class ModelWithBinaryFilesSerializer(VSTSerializer):
             'some_binfile',
             'some_namedbinfile',
             'some_namedbinimage',
+            'some_multiplenamedbinfile',
+            'some_multiplenamedbinimage',
         )
 
 

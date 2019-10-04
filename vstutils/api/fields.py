@@ -213,16 +213,19 @@ class NamedBinaryFileInJsonField(VSTCharField):
     __slots__ = ()
     __valid_keys = ['name', 'content']
 
+    def validate_value(self, data: _t.Dict):
+        if not isinstance(data, dict):
+            self.fail('not a JSON')
+        invalid_keys = list(k for k in data.keys() if k not in self.__valid_keys)
+        if invalid_keys:
+            self.fail('invalid key {}'.format(invalid_keys[0]))
+        for key in self.__valid_keys:
+            if key not in data:
+                self.fail('"{}" is not set'.format(key))
+
     def to_internal_value(self, data: _t.Dict) -> _t.Text:
         if data is not None:
-            if not isinstance(data, dict):
-                self.fail('not a JSON')
-            invalid_keys = list(k for k in data.keys() if k not in self.__valid_keys)
-            if invalid_keys:
-                self.fail('invalid key {}'.format(invalid_keys[0]))
-            for key in self.__valid_keys:
-                if key not in data:
-                    self.fail('"{}" is not set'.format(key))
+            self.validate_value(data)
         return super().to_internal_value(data)
 
     def to_representation(self, value) -> _t.Dict[_t.Text, _t.Any]:
@@ -234,6 +237,41 @@ class NamedBinaryFileInJsonField(VSTCharField):
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
     Field that takes JSON with properties:
+    * name - string - name of image;
+    * content - base64 string - content of image.
+    Take effect only in GUI.
+    """
+
+    __slots__ = ()
+
+
+class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
+    """
+    Field that takes JSON with array, that consists of objects with properties:
+    * name - string - name of file;
+    * content - base64 string - content of file.
+    Take effect only in GUI.
+    """
+
+    __slots__ = ()
+
+    def to_internal_value(self, data: _t.List) -> _t.Text:
+        if data is not None:
+            if not isinstance(data, list):
+                self.fail('not a list')
+            for file in data:
+                self.validate_value(file)
+        return VSTCharField.to_internal_value(self, data)
+
+    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:
+        with raise_context():
+            return json.loads(value)
+        return list()
+
+
+class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
+    """
+    Field that takes JSON with array, that consists of objects with properties:
     * name - string - name of image;
     * content - base64 string - content of image.
     Take effect only in GUI.

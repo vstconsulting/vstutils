@@ -979,7 +979,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['data']['some_fk'], results[0]['data']['id'])
 
     def test_model_namedbinfile_field(self):
-        value = {'name': 'abc', 'content': '/4sdfsdf/'}
+        value = {'name': 'abc.png', 'content': '/4sdfsdf/'}
         bulk_data = [
             dict(data_type=['testbinaryfiles'], method='post', data={}),
             dict(data_type=['testbinaryfiles', '<0[data][id]>'], method='get'),
@@ -1004,6 +1004,120 @@ class ProjectTestCase(BaseTestCase):
                 method='patch',
                 data=dict(some_namedbinfile=123)
             ),
+            # Tests for 'multiplenamedbinfile' field
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=123)
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile={})
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=[])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=[123])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=[value])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=[value, 123])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=[value, {"name1": "invalid", "content": "123"}])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinfile=[value, value])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            # Tests for 'multiplenamedbinimage' field
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=123)
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage={})
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=[])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=[123])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=[value])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=[value, 123])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=[value, {"name1": "invalid", "content": "123"}])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='patch',
+                data=dict(some_multiplenamedbinimage=[value, value])
+            ),
+            dict(
+                data_type=['testbinaryfiles', '<0[data][id]>'],
+                method='get',
+            ),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 201)
@@ -1019,6 +1133,40 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[4]['status'], 400)
         self.assertEqual(results[5]['status'], 400)
         self.assertEqual(results[6]['status'], 400)
+
+        self.assertEqual(results[7]['status'], 200)
+        self.assertEqual(results[7]['data']['some_multiplenamedbinfile'], [])
+        self.assertEqual(results[8]['status'], 400)
+        self.assertEqual(results[9]['status'], 400)
+        self.assertEqual(results[10]['status'], 200)
+        self.assertEqual(results[11]['status'], 200)
+        self.assertEqual(results[11]['data']['some_multiplenamedbinfile'], [])
+        self.assertEqual(results[12]['status'], 400)
+        self.assertEqual(results[13]['status'], 200)
+        self.assertEqual(results[14]['status'], 200)
+        self.assertEqual(results[14]['data']['some_multiplenamedbinfile'], [value])
+        self.assertEqual(results[15]['status'], 400)
+        self.assertEqual(results[16]['status'], 400)
+        self.assertEqual(results[17]['status'], 200)
+        self.assertEqual(results[18]['status'], 200)
+        self.assertEqual(results[18]['data']['some_multiplenamedbinfile'], [value, value])
+
+        self.assertEqual(results[19]['status'], 200)
+        self.assertEqual(results[19]['data']['some_multiplenamedbinimage'], [])
+        self.assertEqual(results[20]['status'], 400)
+        self.assertEqual(results[21]['status'], 400)
+        self.assertEqual(results[22]['status'], 200)
+        self.assertEqual(results[23]['status'], 200)
+        self.assertEqual(results[23]['data']['some_multiplenamedbinimage'], [])
+        self.assertEqual(results[24]['status'], 400)
+        self.assertEqual(results[25]['status'], 200)
+        self.assertEqual(results[26]['status'], 200)
+        self.assertEqual(results[26]['data']['some_multiplenamedbinimage'], [value])
+        self.assertEqual(results[27]['status'], 400)
+        self.assertEqual(results[28]['status'], 400)
+        self.assertEqual(results[29]['status'], 200)
+        self.assertEqual(results[30]['status'], 200)
+        self.assertEqual(results[30]['data']['some_multiplenamedbinimage'], [value, value])
 
 
 class CustomModelTestCase(BaseTestCase):
