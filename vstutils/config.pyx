@@ -17,7 +17,13 @@ from posix.stat cimport stat, struct_stat
 from posix.stdio cimport fmemopen
 from libc.stdlib cimport free
 from libc.string cimport strlen
-from cpython.dict cimport PyDict_GetItem, PyDict_Contains
+from cpython.dict cimport PyDict_GetItem, PyDict_Contains, PyDict_SetItem, PyDict_New
+
+
+cdef dict __get_dict_from_dict_for_reduce(dict collect, str key):
+    if PyDict_Contains(collect, key) == 1:
+        return <dict>PyDict_GetItem(collect, key)
+    return PyDict_New()
 
 
 cdef class Empty:
@@ -47,19 +53,21 @@ cdef class StrType(BaseType):
 
 cdef class IntType(BaseType):
     def convert(self, value):
+        replace = str.replace
         if not isinstance(value, str):
             value = str(value)
-        value = value.replace('K', '0' * 3)
-        value = value.replace('M', '0' * 6)
-        value = value.replace('G', '0' * 9)
+        value = replace(value, 'K', '0' * 3)
+        value = replace(value, 'M', '0' * 6)
+        value = replace(value, 'G', '0' * 9)
         return int(float(value))
 
 
 cdef class BoolType(BaseType):
     def convert(self, value):
+        replace = str.replace
         if isinstance(value, str):
-            value = value.replace('False', '')
-            value = value.replace('false', '')
+            value = replace(value, 'False', '')
+            value = replace(value, 'false', '')
         return bool(value)
 
 
@@ -176,48 +184,48 @@ cdef class ConfigParserC(__BaseDict):
     def get_section_class(self, section_name):
         if isinstance(section_name, bytes):
             section_name = section_name.decode('utf-8')
-        return self.__sections_map.get(
-            section_name,
-            getattr(self, 'section_class_{}'.format(section_name), Section)
-        )
+        if section_name in self.__sections_map:
+            return self.__sections_map[section_name]
+        elif hasattr(self, 'section_class_' + section_name):
+            return getattr(self, 'section_class_' + section_name, Section)
+        return Section
 
-    cdef char* _parse_section(self, char *line):
+    cdef object _parse_section(self, str line):
         if '[' in line and ']' in line:
             match = self.section_regex.match(line)
             if match is not None:
-                return match.group('section').encode('utf-8')
-        return b''
+                return match.group('section')
 
-    cdef (char *, char *) _parse_pair(self, char* line):
+    cdef object _parse_pair(self, str line):
         cdef:
-            (char*, char*) result
             str key, value
             object match
 
-        result = (b'', b'')
         match = self.pair_regex.match(line)
         if match is not None:
             key = match.group('key')
             if not key:
-                return result
-            value = match.group('value') or ''
-            return key.encode('utf-8'), value.encode('utf-8')
-        return result
+                return
+            value = match.group('value')
+            return key, value
 
-    cdef object _add_section(self, char *section_name):
+    cdef object _add_section(self, str section_name):
         cdef:
             object dict_ptr
             unsigned long long section_name_len
+            str section
 
         section_name_len = 0
-        full_section_name = section_name.encode('utf-8')
+        full_section_name = section_name
         dict_ptr = self
+        get_section_instance = self.get_section_instance
+
         for section in section_name.split('.'):
-            section_name_len += strlen(section.encode('utf-8'))
+            section_name_len += len(section)
             section_name_curr = full_section_name[:section_name_len]
 
             if PyDict_Contains(dict_ptr, section) == 0:
-                dict_ptr[section] = self.get_section_instance(section_name_curr)
+                PyDict_SetItem(dict_ptr, section, get_section_instance(section_name_curr))
 
             dict_ptr = <object>PyDict_GetItem(dict_ptr, section)
             section_name_len += 1
@@ -226,11 +234,11 @@ cdef class ConfigParserC(__BaseDict):
 
     cdef int _parse_file(self, FILE *config_file, unsigned long long config_file_size):
         cdef:
-            char *section_name
-            char *key
-            char *value
+            str section_name
             char *line
             size_t count
+            object result
+            Section current_section
         count = 0
         current_section = None
         strip = str.strip
@@ -245,7 +253,7 @@ cdef class ConfigParserC(__BaseDict):
                 continue
 
             section_name = self._parse_section(line)
-            if section_name != '':
+            if section_name is not None:
                 current_section = self._add_section(section_name)
                 with nogil:
                     free(line)
@@ -254,9 +262,9 @@ cdef class ConfigParserC(__BaseDict):
                 free(line)
                 return -1
 
-            key, value = self._parse_pair(line)
-            if key != '':
-                current_section[key] = value
+            result = self._parse_pair(line)
+            if result is not None:
+                current_section[result[0]] = result[1]
             else:
                 free(line)
                 return -1
@@ -322,34 +330,46 @@ cdef class Section(__BaseDict):
             name = name.decode('utf-8')
         self.name = name
         self.config = config
+
         self.__type_map = {}
         prefix = 'type_'
+
         if hasattr(self, 'types_map') and self.types_map:
             self.__type_map.update(self.types_map)
         if type_map:
             self.__type_map.update(type_map)
+
         if default and isinstance(default, dict):
-            defaults = default
+            super().__init__(default)
         else:
-            defaults = dict()
-        super().__init__(defaults)
+            super().__init__()
 
     def _get_subsection_name(self, key):
         return self.name + '.' + key
 
     def __setitem__(self, key, value):
+        format_string = self.config.format_string
+        key = format_string(key, self.name)
         if isinstance(value, dict) and not isinstance(value, Section):
             value = self.config.get_section_instance(self._get_subsection_name(key), value)
-        key = self.config.format_string(key, self.name)
-        value = self.config.format_string(value, self.name)
-        value = self.type_conversation(key, value)
-        super().__setitem__(key, value)
+        else:
+            value = format_string(value, self.name)
+        super().__setitem__(key, self.type_conversation(key, value))
+
+    cdef dict __get_default_data(self):
+        cdef:
+            dict section_defaults
+        section_defaults = self.config.section_defaults
+
+        if section_defaults:
+            return reduce(__get_dict_from_dict_for_reduce, self.name.split('.'), section_defaults)
+        return {}
 
     def get_default_data(self):
-        return reduce(lambda c, k: c.get(k, {}), self.name.split('.'), self.config.section_defaults)
+        return self.__get_default_data()
 
     def __get_default_value(self, item):
-        section_defaults = self.get_default_data()
+        section_defaults = self.__get_default_data()
         if section_defaults and item in section_defaults:
             value = section_defaults[item]
             if isinstance(value, dict):
@@ -396,9 +416,10 @@ cdef class Section(__BaseDict):
         if conv_class is not None:
             conversation_cls = conv_class
         else:
-            conversation_cls = self.__type_map.get(key, None)
-            if conversation_cls is None:
-                conversation_cls = getattr(self, 'type_{}'.format(key), BaseType())
+            if PyDict_Contains(self.__type_map, key) == 1:
+                conversation_cls = self.__type_map[key]
+            else:
+                conversation_cls = getattr(self, 'type_'+key, BaseType())
         return conversation_cls(value)
 
     def getboolean(self, option, fallback=None):
