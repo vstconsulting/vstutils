@@ -304,12 +304,12 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertTrue(not exchenger.get())
 
     def test_locks(self):
-        @utils.model_lock_decorator()
+        @utils.model_lock_decorator(repeat=0.01)
         def method(pk):
             # pylint: disable=unused-argument
             pass
 
-        @utils.model_lock_decorator()
+        @utils.model_lock_decorator(repeat=0.01)
         def method2(pk):
             method(pk=pk)
 

@@ -1,4 +1,5 @@
 import os
+import gc
 import pwd
 import sys
 from collections import OrderedDict
@@ -7,9 +8,14 @@ from django.contrib import admin
 from django.utils.functional import lazy
 from drf_yasg import errors
 import rest_framework
-import pyximport
-pyximport.install(language_level=3)
-from .tools import get_file_value
+
+try:
+    from .tools import get_file_value
+except ImportError:
+    import pyximport
+    pyximport.install(language_level=3)
+    from .tools import get_file_value
+
 from . import config as cconfig
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
@@ -877,6 +883,7 @@ SPA_STATIC = [
 # Test settings for speedup tests
 ##############################################################
 if TESTS_RUN:
+    gc.disable()
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher',]
