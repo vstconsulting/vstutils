@@ -1376,7 +1376,7 @@ class ConfigParserCTestCase(BaseTestCase):
                 'formatint': '251'
             },
             'to_json': {
-                'jkey': 'jvalue'
+                "jkey": "jvalue"
             },
             'another': {
                 'another_key1': 'some_new_value',
@@ -1417,7 +1417,7 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertTrue(test_parser)
 
         # Compare sections classes, with setuped
-        self.assertTrue(isinstance(test_parser['main'], TestFirstSection))
+        self.assertTrue(isinstance(test_parser['main'], TestFirstSection), type(test_parser['main']))
         self.assertTrue(isinstance(test_parser['another']['keyhandler'], TestKeyHandler))
         self.assertTrue(isinstance(test_parser['another'], TestSecondSection))
         self.assertTrue(isinstance(test_parser['another']['sub'], TestThirdSection))

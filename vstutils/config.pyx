@@ -45,6 +45,33 @@ cdef bint __is_section(object obj):
 cdef str __get_section_subname(Section section):
     return section.get_name().split('.')[-1]
 
+cdef object __get_or_create_section_recursive(list section_name_list, str full_name, object dict_ptr, object config, int carret_pos = 0):
+    cdef:
+        str key
+        object section
+        unsigned long name_len
+        unsigned long key_len
+
+    key = section_name_list[0]
+
+    if key == '':
+        return dict_ptr
+
+    name_len = len(section_name_list)
+    key_len = len(key)
+
+    if PyDict_Contains(dict_ptr, key) == 0:
+        section = config.get_section_instance(full_name[:carret_pos + key_len])
+        PyDict_SetItem(dict_ptr, key, section)
+    else:
+        section = <object>PyDict_GetItem(dict_ptr, key)
+
+    if name_len > 1:
+        return __get_or_create_section_recursive(section_name_list[1:], full_name, section, config, carret_pos + key_len + 1)
+
+    return section
+
+
 
 cdef class Empty:
     pass
@@ -188,7 +215,7 @@ cdef class ConfigParserC(__BaseDict):
             if (not section or only_subsections) and isinstance(section, Section) and item in self.section_defaults:
                 section = section.copy()
                 for key, value in self.section_defaults[item].copy().items():
-                    if key not in subsections_names:
+                    if key not in subsections_names and key not in section:
                         section[key] = value
 
         return section
@@ -258,20 +285,7 @@ cdef class ConfigParserC(__BaseDict):
         return <object>PyDict_GetItem(dict_ptr, section)
 
     cdef object _add_section(self, str section_name):
-        cdef:
-            object dict_ptr
-            unsigned long long section_name_len
-            str section
-
-        section_name_len = 0
-        dict_ptr = self
-
-        for section in section_name.split('.'):
-            section_name_len += len(section)
-            dict_ptr = self.__get_or_create_section(dict_ptr, section, section_name[:section_name_len])
-            section_name_len += 1
-
-        return dict_ptr
+        return __get_or_create_section_recursive(section_name.split('.'), section_name, self, self)
 
     cdef int _parse_file(self, FILE *config_file, unsigned long long config_file_size):
         cdef:
@@ -299,7 +313,7 @@ cdef class ConfigParserC(__BaseDict):
                 current_section = self._add_section(section_name)
                 with nogil:
                     free(line)
-                    continue
+                continue
             elif current_section is None:
                 free(line)
                 return -1
@@ -360,6 +374,15 @@ cdef class ConfigParserC(__BaseDict):
         error = self._parse_text(text.encode('utf-8'))
         if error:
             raise ParseError('Couldnt parse config string without section and key-value in text.')
+
+    def all(self):
+        data = dict()
+        for key in self:
+            data[key] = self[key].all()
+        return data
+
+    def __repr__(self):
+        return repr(self.all())
 
 
 cdef class Section(__BaseDict):
@@ -493,8 +516,10 @@ cdef class Section(__BaseDict):
             if PyDict_Contains(self.__type_map, key) == 1:
                 conversation_cls = self.__type_map[key]
             else:
-                conversation_cls = getattr(self, 'type_'+key, BaseType())
-        return conversation_cls(value)
+                conversation_cls = getattr(self, 'type_'+key, None)
+        if conversation_cls is not None:
+            return conversation_cls(value)
+        return value
 
     def getboolean(self, option, fallback=None):
         return self.type_conversation(None, self.get(option, fallback), BoolType())

@@ -120,16 +120,13 @@ class Command(BaseCommand):
         if os.getenv('{}_DB_HOST'.format(prefix)) is not None:  # nocv
             try:
                 pm_type = os.getenv('{}_DB_TYPE'.format(prefix), 'mysql')
+
                 default_port = ''
-                config['database.options'] = {
-                    'connect_timeout': os.getenv('{}_DB_CONNECT_TIMEOUT'.format(prefix), '20'),
-                }
                 if pm_type == 'mysql':
                     default_port = '3306'
-                    config['database.options']['init_command'] = os.getenv('DB_INIT_CMD',
-                                                                           '')
                 elif pm_type == 'postgresql':
                     default_port = '5432'
+
                 config['database'] = {
                     'engine': 'django.db.backends.{}'.format(pm_type),
                     'name': os.environ['{}_DB_NAME'.format(prefix)],
@@ -138,6 +135,11 @@ class Command(BaseCommand):
                     'host': os.environ['{}_DB_HOST'.format(prefix)],
                     'port': os.getenv('{}_DB_PORT'.format(prefix), default_port),
                 }
+                config['database.options'] = {
+                    'connect_timeout': os.getenv('{}_DB_CONNECT_TIMEOUT'.format(prefix), '20'),
+                }
+                if pm_type == 'mysql':
+                    config['database.options']['init_command'] = os.getenv('DB_INIT_CMD', '')
             except KeyError:
                 raise Exception('Not enough variables for connect to  SQL server.')
         else:
