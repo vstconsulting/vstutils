@@ -199,7 +199,7 @@ class Command(BaseCommand):
             config['worker'] = {
                 'loglevel': log_level,
                 'logfile': '/tmp/{}_worker.log'.format(prefix.lower()),
-                'pidfile': '/run/worker.pid',
+                'pidfile': '/tmp/{}_worker.pid'.format(prefix.lower()),
                 'beat': os.getenv('{}_SCHEDULER_ENABLE'.format(prefix), 'true')
             }
 
