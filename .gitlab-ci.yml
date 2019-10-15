@@ -53,7 +53,16 @@ code_style:
   stage: code_standarts
   variables:
     TOX_ENVS: "flake,pylint,jshint"
-  allow_failure: true
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - vstutils/**/*
+      - tox.ini
+      - .pep8
+      - .pylintrc
+      - .gitlab-ci.yml
 
 py36-django22-install:
   <<: *branch_tests
