@@ -398,6 +398,42 @@ guiFields.password = class PasswordField extends guiFields.string {
 };
 
 /**
+ * Email guiField class.
+ */
+guiFields.email = class EmailField extends guiFields.string {
+    /**
+     * Redefinition of string guiField static property 'mixins'.
+     */
+    static get mixins() {
+        return super.mixins.concat(gui_fields_mixins.email);
+    }
+
+    /**
+     * Static property, that returns regExp for email string validation.
+     * @return {RegExp}
+     */
+    static get validation_reg_exp() {
+        return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    }
+
+    /**
+     * Redefinition of 'validateValue' method of string guiField.
+     */
+    validateValue(data={}) {
+        let value = super.validateValue(data);
+
+        if(this.options.required && !this.constructor.validation_reg_exp.test(String(value))) {
+            throw {
+                error: 'validation',
+                message: '<b>"' + (this.options.title || this.options.name) + '"</b> field should be written in <b>"example@mail.com"</b> format.',
+            };
+        }
+
+        return value;
+    }
+};
+
+/**
  * File guiField class.
  */
 guiFields.file = class FileField extends guiFields.textarea {
@@ -479,7 +515,7 @@ guiFields.namedbinfile = class NamedBinFileField extends guiFields.binfile {
  * - content - base64 string - content of image.
  */
 guiFields.namedbinimage = class NamedBinImageField extends guiFields.namedbinfile {
-     /**
+    /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {

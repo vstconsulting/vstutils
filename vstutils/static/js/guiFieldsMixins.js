@@ -2999,6 +2999,19 @@ const gui_fields_mixins = { /* jshint unused: false */
         },
     },
 
+    email: {
+        components: {
+            field_content_edit: {
+                mixins: [base_field_content_edit_mixin],
+                data() {
+                    return {
+                        input_type: 'email',
+                    };
+                },
+            },
+        },
+    },
+
     text_paragraph: {
         data: function () {
             return {
