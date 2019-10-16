@@ -297,7 +297,7 @@ class CopyMixin(GenericViewSet):
         return Response(serializer.data, status.HTTP_201_CREATED).resp
 
 
-class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
+class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
     # pylint: disable=useless-super-delegation
 
     """
@@ -353,6 +353,9 @@ class ModelViewSetSet(GenericViewSet, vsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+
+
+ModelViewSetSet = ModelViewSet
 
 
 class NonModelsViewSet(GenericViewSet):

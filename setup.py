@@ -385,9 +385,10 @@ kwargs = dict(
         'console_scripts': ['vstutilsctl=vstutils.__main__:cmd_execution']
     },
     project_urls={
-        "Issue Tracker": "https://github.com/vstconsulting/vstutils/issues",
-        "Source Code": "https://github.com/vstconsulting/vstutils",
+        "Issue Tracker": "https://gitlab.com/vstconsulting/vstutils/issues",
+        "Source Code": "https://gitlab.com/vstconsulting/vstutils",
         "Releases": "https://pypi.org/project/vstutils/#history",
+        "Documentation": "https://vstutils.vstconsulting.net/",
     },
 )
 
