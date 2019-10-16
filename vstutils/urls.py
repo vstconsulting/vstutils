@@ -3,10 +3,15 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.generic.base import RedirectView
 from rest_framework import permissions
 from .api.routers import MainRouter
 from .utils import URLHandlers
 from .api.views import HealthView
+
+
+class AdminLoginLogoutRedirectView(RedirectView):
+    query_string = True
 
 
 # Main router for all APIs versions
@@ -22,6 +27,8 @@ admin.site.site_header = 'Admin panel'
 admin.site.site_title = settings.VST_PROJECT
 admin.site.index_title = "{} Settings Panel".format(settings.VST_PROJECT.upper())
 admin.site.site_url = "/"
+admin.site.login = AdminLoginLogoutRedirectView.as_view(url='/login')
+admin.site.logout = AdminLoginLogoutRedirectView.as_view(url='/logout')
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
 urlpatterns = list(URLHandlers().urls())
