@@ -23,7 +23,6 @@ from cpython.dict cimport PyDict_GetItem, PyDict_Contains, PyDict_SetItem, PyDic
 cdef extern from '_config.h' nogil:
     int __has_only_whitespaces(char*)
 
-
 cdef dict __get_dict_from_dict_for_reduce(dict collect, str key):
     if PyDict_Contains(collect, key) == 1:
         return <dict>PyDict_GetItem(collect, key)
@@ -169,7 +168,7 @@ cdef class ConfigParserC(__BaseDict):
     """
 
     section_regex = re.compile(r"^\[(?P<section>(.+))\].*$", re.MULTILINE)
-    pair_regex = re.compile(r"^(?P<key>(.+?))[\s]{0,}=[\s]{0,}(?P<value>(.*?))[\s]{0,}$", re.MULTILINE)
+    pair_regex = re.compile(r"^(?P<key>([^\s]+?))[\s]{0,}=[\s]{0,}(?P<value>(.*?))[\s]{0,}$", re.MULTILINE)
 
     cdef:
         dict __sections_map
@@ -200,13 +199,13 @@ cdef class ConfigParserC(__BaseDict):
         else:
             section = super().__getitem__(item)
 
-            subsections_names = section.subsections_names
-            only_subsections = frozenset(subsections_names).intersection(section.keys())
+            subsections_names = list(section.subsections_names)
+            only_subsections = not frozenset(subsections_names).symmetric_difference(section.keys())
 
             if (not section or only_subsections) and isinstance(section, Section) and item in self.section_defaults:
                 section = section.copy()
                 for key, value in self.section_defaults[item].copy().items():
-                    if key not in subsections_names and key not in section:
+                    if key not in subsections_names:
                         section[key] = value
 
         return section
@@ -263,17 +262,6 @@ cdef class ConfigParserC(__BaseDict):
                 return
             value = match.group('value')
             return key, value
-
-    cdef object __get_or_create_section(self, object dict_ptr, str section, str full_section_name):
-        cdef:
-            object current_section
-
-        if PyDict_Contains(dict_ptr, section) == 0:
-            current_section = self.get_section_instance(full_section_name)
-            PyDict_SetItem(dict_ptr, section, current_section)
-            return current_section
-
-        return <object>PyDict_GetItem(dict_ptr, section)
 
     cdef object _add_section(self, str section_name):
         return __get_or_create_section_recursive(section_name.split('.'), section_name, self, self)
@@ -345,7 +333,7 @@ cdef class ConfigParserC(__BaseDict):
             size = strlen(text) * sizeof(char)
             fd = fmemopen(text, size, 'r')
         if fd == NULL:
-            printf('Failed to open memory stream\n')
+            printf('Failed to open memory stream for text - `%s`; size - %ll\n', text, size)
             return err
         err = self._parse_file(fd, size)
         fclose(fd)
@@ -354,7 +342,7 @@ cdef class ConfigParserC(__BaseDict):
     def parse_file(self, filename):
         error = self._parse_file_by_name(filename.encode('utf-8'))
         if error:
-            raise ParseError('Couldnt parse config string without section and key-value in file `{}`.'.format(filename))
+            raise ParseError('Couldnt parse config string without section or key-value in file `{}`.'.format(filename))
 
     def parse_files(self, filename_array: _t.Sequence):
         for filepath in list(filter(bool, filename_array))[::-1]:
@@ -457,10 +445,9 @@ cdef class Section(__BaseDict):
             value = <object>PyDict_GetItem(section_defaults, item)
 
             if isinstance(value, dict):
-                value = self.config.get_section_instance(self._get_subsection_name(item), section_defaults)
+                value = self.config.get_section_instance(self._get_subsection_name(item), section_defaults[item])
 
             return value
-
         return super(Section, self).__getitem__(item)
 
     def get_default_data(self):
