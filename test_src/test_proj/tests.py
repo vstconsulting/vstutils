@@ -6,7 +6,6 @@ import re
 import pwd
 
 import pyximport
-
 pyximport.install()
 
 import six
@@ -30,7 +29,7 @@ from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tools import get_file_value, File as ToolsFile
-from vstutils.config import ConfigParserC, Section, IntType, BoolType, IntSecondsType, ListType, JsonType, StrType, ConfigParserException
+from vstutils.config import ConfigParserC, Section, IntType, BoolType, IntSecondsType, ListType, JsonType, StrType, ConfigParserException, ParseError
 from .models import Host, HostGroup, File, List
 
 
@@ -1291,7 +1290,7 @@ class ConfigParserCTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self._maxDiff = self.maxDiff
-        self.maxDiff = 2048
+        self.maxDiff = 4096
 
     def tearDown(self) -> None:
         super().tearDown()
@@ -1326,6 +1325,8 @@ class ConfigParserCTestCase(BaseTestCase):
         class TestDefaultSettings(Section):
             type_default2 = IntType()
 
+        class DBDefaultSettings(Section):
+            type_port = IntType()
 
         class TestConfigParserC(ConfigParserC):
             section_class_another = TestSecondSection
@@ -1333,6 +1334,7 @@ class ConfigParserCTestCase(BaseTestCase):
                 'another.sub': TestThirdSection,
                 'another.keyhandler': TestKeyHandler,
                 'add_item.subs': TestFirstSection,
+                'db': DBDefaultSettings,
             }
             defaults = {
                 'withdefault': {
@@ -1344,6 +1346,22 @@ class ConfigParserCTestCase(BaseTestCase):
                     'defaultsub': {
                         'default_subs_key': 'default_subs_value'
                     }
+                },
+                'another': {
+                    't1': 't2'
+                },
+                'db': {
+                    'engine': 'django.db.backends.sqlite3',
+                    'name': 'db.test.sqlite3',
+                    'test': {
+                        'serialize': 'false'
+                    }
+                },
+                'subdef': {
+                    'default': {
+                        'def1': 'test',
+                        'def2': 'test2',
+                    }
                 }
             }
 
@@ -1351,12 +1369,16 @@ class ConfigParserCTestCase(BaseTestCase):
         format_kwargs = dict(
             INTEGER=22, STRING='kwargs_str'
         )
-        test_parser = TestConfigParserC(section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional, withdefault=TestDefaultSettings), format_kwargs=format_kwargs)
-        files_list = ['test_conf.ini', 'test_conf2.ini']
+        test_parser = TestConfigParserC(
+            section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional, withdefault=TestDefaultSettings),
+            format_kwargs=format_kwargs
+        )
+        files_list = ['test_conf.ini', 'test_conf2.ini', 'test_conf3.ini']
         files_list = map(lambda x: os.path.join(os.path.dirname(__file__), x), files_list)
         config_text = '[another]\nanother_key1 = some_new_value'
+        config_test_default = '[db]\nengine = django.db.backends.mysql\nname = vsttest\nuser = vsttest\npassword = vsttest\nhost = localhost\nport = 3306\n[db.options]\ninit_command = some_command'
 
-        self.assertEqual(list(test_parser.keys()), ['withdefault'])
+        self.assertEqual(list(test_parser.keys()), ['withdefault', 'another', 'db', 'subdef'])
 
         config_data = {
             'main': {
@@ -1388,7 +1410,8 @@ class ConfigParserCTestCase(BaseTestCase):
                 'sub': {
                     'another_key1': 'another_value2',
                     'another_key2': 'another_value2'
-                }
+                },
+                'empty': {},
             },
             'withdefault': {
                 'default1': 'default_value1',
@@ -1406,13 +1429,45 @@ class ConfigParserCTestCase(BaseTestCase):
                 'tolist': 'first,second,third',
                 'tointsec': '2w',
                 'tojson': '{"jsonkey": "jsonvalue"}'
+            },
+            'db': {
+                'engine': 'django.db.backends.mysql',
+                'name': 'vsttest',
+                'user': 'vsttest',
+                'password': 'vsttest',
+                'host': 'localhost',
+                'port': 3306,
+                'options': {
+                    'init_command': 'some_command'
+                }
+            },
+            'onlysubs': {
+                'sub1': {},
+                'sub2': {},
+                'sub3': {},
+            },
+            'withoutsubs': {
+                'withoutsubs1': 'val1',
+                'withoutsubs2': 'val2',
+                'withoutsubs3': 'val3',
+            },
+            'subdef': {
+                'default': {
+                    'def1': 'test',
+                    'def2': 'test2',
+                }
+            },
+            'test': {
+                'rec': {
+                    'recurs_key': 'recurseval'
+                }
             }
         }
 
         # Parse files and text
         test_parser.parse_files(files_list)
         test_parser.parse_text(config_text)
-
+        test_parser.parse_text(config_test_default)
         # Check is filled config
         self.assertTrue(test_parser)
 
@@ -1424,9 +1479,11 @@ class ConfigParserCTestCase(BaseTestCase):
 
         # Compare data
         self.assertDictEqual(test_parser, config_data)
+        self.assertEqual(len(str(test_parser)), len(str(config_data)))
 
         # Test method `all()` for config and compare with data
         self.assertDictEqual(test_parser['main'].all(), config_data['main'])
+
 
         # Check types for vars, that was setup
         self.assertTrue(isinstance(test_parser['main']['key2'], int))
@@ -1478,6 +1535,24 @@ class ConfigParserCTestCase(BaseTestCase):
         # Check parser exception handler
         with self.assertRaises(ConfigParserException):
             test_parser.parse_text('qwerty')
+
+        with self.assertRaises(ConfigParserException):
+            test_parser.parse_file(os.path.join(os.path.dirname(__file__), 'test_conf_err.ini'))
+
+        with self.assertRaises(ParseError):
+            test_parser.parse_file(os.path.join(os.path.dirname(__file__), 'test_conf_err2.ini'))
+
+        with self.assertRaises(ConfigParserException):
+            test_parser.parse_text('[another]\nanother_key1')
+
+        with self.assertRaises(ConfigParserException):
+            test_parser.parse_text('[another]\n=another_key1')
+
+        with self.assertRaises(ConfigParserException):
+            test_parser.parse_text('[another]\n =another_key1')
+
+        with self.assertRaises(ConfigParserException):
+            test_parser.parse_text('[another]\n  =another_key1')
 
         # CHECK SETTINGS FROM CONFIG FILE
         db_default_val = {
@@ -1543,3 +1618,17 @@ class ConfigParserCTestCase(BaseTestCase):
             'beat': True
         }
         self.assertDictEqual(worker_options, settings.WORKER_OPTIONS)
+
+        self.assertTrue(not(test_parser['main'] == 'str'))
+        self.assertTrue(not(test_parser['main'] == {'key': 'val'}))
+        self.assertTrue(not(test_parser['to_json'] == {'jkey': 'val'}))
+        self.assertDictEqual(test_parser.get('test_get'.encode('utf-8'), {'test': 'get'}), {'test': 'get'})
+
+        conf_empty_default = ConfigParserC()
+        test_sect = Section('test_sect_name', conf_empty_default, type_map={'test_key': 'test_val'})
+        test_parser.parse_text('\0')
+        with self.assertRaises(KeyError):
+            test_sect['kk']
+        with self.assertRaises(KeyError):
+            test_sect.get('kk')
+
