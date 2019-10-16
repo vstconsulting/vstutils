@@ -13,7 +13,13 @@ try:
     from .tools import get_file_value
 except ImportError:
     import pyximport
-    pyximport.install(language_level=3)
+    pyximport.install(
+        language_level=3,
+        setup_args={'include_dirs': [
+            '/'.join([os.path.dirname(os.path.dirname(__file__)), 'include']),
+            '/'.join([os.path.dirname(__file__), 'include']),
+        ]}
+    )
     from .tools import get_file_value
 
 from . import config as cconfig

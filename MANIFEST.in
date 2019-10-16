@@ -13,4 +13,5 @@ include vstutils/api/responses.pyi
 recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *
 recursive-include vstutils/static *
+recursive-include include *
 recursive-include vstutils/doc_themes *

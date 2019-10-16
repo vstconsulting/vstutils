@@ -20,16 +20,8 @@ from libc.string cimport strlen
 from cpython.dict cimport PyDict_GetItem, PyDict_Contains, PyDict_SetItem, PyDict_New
 
 
-cdef extern from '<ctype.h>' nogil:
-    int isspace(int)
-
-
-cdef int __has_only_whitespaces(char* s):
-    with nogil:
-        for i in range(strlen(s)):
-            if isspace(s[i]) == 0:
-                return 0
-        return 1
+cdef extern from '_config.h' nogil:
+    int __has_only_whitespaces(char*)
 
 
 cdef dict __get_dict_from_dict_for_reduce(dict collect, str key):
@@ -70,7 +62,6 @@ cdef object __get_or_create_section_recursive(list section_name_list, str full_n
         return __get_or_create_section_recursive(section_name_list[1:], full_name, section, config, carret_pos + key_len + 1)
 
     return section
-
 
 
 cdef class Empty:
