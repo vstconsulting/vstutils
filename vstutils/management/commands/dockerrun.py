@@ -4,7 +4,7 @@ import time
 import traceback
 from subprocess import check_call
 from ._base import BaseCommand
-from ...config import ConfigParser  # pylint: disable=import-error
+from ...config import ConfigParserC  # pylint: disable=import-error
 
 
 class Command(BaseCommand):
@@ -96,7 +96,7 @@ class Command(BaseCommand):
         )
 
         # Start configuring config file
-        self.config = ConfigParser()
+        self.config = ConfigParserC()
         config = self.config
 
         # Set log level

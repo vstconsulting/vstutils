@@ -79,6 +79,9 @@ cdef class BaseType:
     def convert(self, value):
         return value
 
+    def str_convert(self, value):
+        return value
+
     def __call__(self, value):
         return self.convert(value)
 
@@ -138,12 +141,18 @@ cdef class ListType(BaseType):
             return value,
         return tuple(value)
 
+    def str_convert(self, value):
+        return self.separator.join(value)
+
 
 cdef class JsonType(BaseType):
     def convert(self, value):
         if not isinstance(value, str):
             value = json.dumps(value)
         return json.loads(value)
+
+    def str_convert(self, value):
+        return json.dumps(value)
 
 
 cdef class __BaseDict(dict):
@@ -360,6 +369,9 @@ cdef class ConfigParserC(__BaseDict):
             data[key] = self[key].all()
         return data
 
+    def generate_config_string(self):
+        return ''.join([self[key].generate_section_string() for key in self])
+
     def __repr__(self):
         return repr(self.all())
 
@@ -485,19 +497,44 @@ cdef class Section(__BaseDict):
     def key_handler_to_all(self, key):
         return key
 
+    cdef object get_type_conversation_instance(self, str key, object default=BaseType()):
+        if PyDict_Contains(self.__type_map, key) == 1:
+            return <object>PyDict_GetItem(self.__type_map, key)
+        return getattr(self, 'type_'+key, default)
+
     cdef object type_conversation(self, str key, object value, BaseType conv_class=None):
         cdef BaseType conversation_cls
 
         if conv_class is not None:
             conversation_cls = conv_class
         else:
-            if PyDict_Contains(self.__type_map, key) == 1:
-                conversation_cls = self.__type_map[key]
-            else:
-                conversation_cls = getattr(self, 'type_'+key, None)
+           conversation_cls = self.get_type_conversation_instance(key)
         if conversation_cls is not None:
             return conversation_cls(value)
         return value
+
+    def generate_section_string(self):
+        section_str = '[' + self.get_name() + ']\n'
+        subs_names = list(self.subsections_names)
+
+        for key in self.keys():
+            if key not in subs_names:
+                section_str += self.to_str(key) + '\n'
+
+        section_str += '\n'
+        for sub_name in subs_names:
+            section_str += self[sub_name].generate_section_string()
+
+        return section_str
+
+    def to_str(self, key):
+        conversation_class = self.get_type_conversation_instance(key)
+        return '{} = {}'.format(
+            key,
+            conversation_class.str_convert(self[key])
+        ).replace('{', '{{').replace('}', '}}')
+
+
 
     def getboolean(self, option, fallback=None):
         return self.type_conversation(None, self.get(option, fallback), BoolType())

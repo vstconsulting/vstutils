@@ -1339,10 +1339,10 @@ class ConfigParserCTestCase(BaseTestCase):
             defaults = {
                 'withdefault': {
                     'default1': 'default_value1',
-                    'default2': '159',
-                    'default3': True,
-                    'default4': 1209600,
-                    'default5': ('one', 'two', 'three'),
+                    'default2': 159,
+                    'default3': 'True',
+                    'default4': '1209600',
+                    'default5': '("one", "two", "three")',
                     'defaultsub': {
                         'default_subs_key': 'default_subs_value'
                     }
@@ -1416,9 +1416,9 @@ class ConfigParserCTestCase(BaseTestCase):
             'withdefault': {
                 'default1': 'default_value1',
                 'default2': 159,
-                'default3': True,
-                'default4': 1209600,
-                'default5': ('one', 'two', 'three'),
+                'default3': 'True',
+                'default4': '1209600',
+                'default5': '("one", "two", "three")',
                 'defaultsub': {
                     'default_subs_key': 'default_subs_value'
                 }
@@ -1631,4 +1631,11 @@ class ConfigParserCTestCase(BaseTestCase):
             test_sect['kk']
         with self.assertRaises(KeyError):
             test_sect.get('kk')
+
+        parser_from_out_str = TestConfigParserC(
+            section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional, withdefault=TestDefaultSettings),
+            format_kwargs=format_kwargs
+        )
+        parser_from_out_str.parse_text(test_parser.generate_config_string())
+        self.assertDictEqual(parser_from_out_str.all(), test_parser.all())
 
