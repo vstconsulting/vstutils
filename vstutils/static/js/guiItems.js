@@ -979,10 +979,14 @@ vst_vue_components.items = {
             sublinks() {
                 return this.getButtons('sublinks');
             },
+
+            filters_opt() {
+                return $.extend(true, {}, this.opt, {store: 'filters'});
+            },
         },
         methods: {
             getButtons(buttons_name) {
-                return this.view.getViewSublinkButtons(buttons_name, this.view.schema[buttons_name], this.data.instance);
+                return this.view.getViewSublinkButtons(buttons_name, this.schema[buttons_name], this.data.instance);
             }
         },
     }),
@@ -1281,23 +1285,7 @@ vst_vue_components.items = {
         },
     }),
     /**
-     *
-     */
-    gui_entity_list_header: Vue.component('gui_entity_list_header', {
-        props: ['data', 'view', 'opt'],
-        template: "#template_entity_header_list",
-        computed: {
-            filters() {
-                console.log('filters', this.view.schema.filters);
-                return this.view.schema.filters;
-            },
-            filters_opt() {
-                return $.extend(true, {}, this.opt, {store: 'filters'});
-            },
-        },
-    }),
-    /**
-     * Base component for content_footer part of 'list' views.
+     * Base component for multi_actions_button_component part of 'list' views.
      */
     gui_entity_list_footer: Vue.component('gui_entity_list_footer', {
         mixins: [base_list_table_mixin],

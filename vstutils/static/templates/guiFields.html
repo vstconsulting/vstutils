@@ -641,13 +641,9 @@
                 <h3>{{ qs.model.name | capitalize }}</h3>
             </template>
             <template v-slot:body>
-                <div class="card card-info">
-                    <div class="card-header with-border">
                         <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
                         </current_search_input>
                         <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
-                    </div>
-                    <div class="card-body">
                         <template v-if="is_empty">
                             <p class="text-center">List is empty.</p>
                         </template>
@@ -656,8 +652,6 @@
                                            :field_value="field_value" @changeValue="changeValue"
                             ></current_table>
                         </template>
-                    </div>
-                </div>
             </template>
             <template v-slot:footer>
                 <button class="btn btn-default" @click="close" aria-label="Cancel">Cancel</button>

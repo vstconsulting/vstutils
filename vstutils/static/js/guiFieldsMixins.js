@@ -2749,6 +2749,7 @@ const gui_fields_mixins = { /* jshint unused: false */
                                 event_handler: 'readFile',
                                 help_text: 'Open file',
                                 accept: '*',
+                                multiple: false,
                             };
                         },
                     }

@@ -30,20 +30,10 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-12">
-                        </div>
-                    </div>
-                    <br>
-                    <div class="row">
-                        <section class="col-lg-12">
-                            <div class="card card-info">
-                                <div class="card-header with-border">
-                                    <br>
-                                </div>
-                                <div class="card-body">
-                                    {{ error_data }}
-                                </div>
+                            <div class="error-text-wrapper">
+                                <p class="text-center error-p">{{ error_data }}</p>
                             </div>
-                        </section>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -70,38 +60,41 @@
             <section class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-lg-12">
+                        <div class="col-lg-12 buttons-row-wrapper">
                             <gui_buttons_row :view="view" :data="data" :opt="opt"></gui_buttons_row>
                         </div>
                     </div>
-                    <br>
                     <div class="row">
                         <section class="col-lg-12">
-                            <div class="card card-info">
-                                <div class="card-header with-border" style="min-height: 50px;">
-                                    <component :is="content_header_component" :data="data" :view="view" :opt="opt"></component>
-
-                                    <div class="card-tools pull-right" v-if="card_collapsed_button">
-                                        <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
-                                                @click="toggleCardCollapsed" aria-label="toggle"
-                                        >
-                                            <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'"></i>
-                                        </button>
+                            <template v-if="view.schema.type == 'list'">
+                                <component :is="content_body_component" :data="data" :view="view" :opt="opt"></component>
+                                <template v-if="multi_actions_button_component">
+                                    <component :is="multi_actions_button_component" :data="data" :view="view" :opt="opt"></component>
+                                </template>
+                            </template>
+                            <template v-else>
+                                <div class="card card-info">
+                                    <div class="card-header with-border card-header-custom">
+                                        <component :is="content_header_component" :data="data" :view="view" :opt="opt"></component>
+                                            <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon btn-right"
+                                                    @click="toggleCardCollapsed" aria-label="toggle" v-if="card_collapsed_button"
+                                            >
+                                                <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'"></i>
+                                            </button>
                                     </div>
+                                    <transition name="fade">
+                                        <div class="card-body card-body-custom" :class="'card-body-' + view.schema.type" v-show="!card_collapsed">
+                                            <component :is="content_body_component" :data="data" :view="view" :opt="opt"></component>
+                                        </div>
+                                    </transition>
+                                    <transition name="fade">
+                                        <div class="card-footer clearfix" v-if="content_footer_component && !card_collapsed">
+                                            <component :is="content_footer_component" :data="data" :view="view" :opt="opt"></component>
+                                        </div>
+                                    </transition>
                                 </div>
-                                <transition name="fade">
-                                    <div class="card-body" v-show="!card_collapsed">
-                                        <component :is="content_body_component" :data="data" :view="view" :opt="opt"></component>
-                                    </div>
-                                </transition>
-                                <transition name="fade">
-                                    <div class="card-footer clearfix" v-if="content_footer_component && !card_collapsed">
-                                        <component :is="content_footer_component" :data="data" :view="view" :opt="opt"></component>
-                                    </div>
-                                </transition>
-                            </div>
-                            <component :is="content_additional" :data="data" :view="view" :opt="opt" v-if="content_additional">
-                            </component>
+                                <component :is="content_additional" :data="data" :view="view" :opt="opt" v-if="content_additional"></component>
+                            </template>
                         </section>
                     </div>
                 </div>
@@ -307,6 +300,11 @@
         <gui_group_of_buttons type="sublink" title="sublinks" classes="btn-default" :buttons="sublinks"></gui_group_of_buttons>
 
         <gui_group_of_buttons type="action" title="actions" classes="btn-warning" :buttons="actions"></gui_group_of_buttons>
+
+        <template v-if="view.schema.type == 'list'">
+            <gui_filters_modal :opt="filters_opt" :view="view" :data="data"></gui_filters_modal>
+            <pagination :options="data.pagination"></pagination>
+        </template>
     </div>
 </script>
 
@@ -341,7 +339,7 @@
 <!-- template of multi-actions button with drop-down list -->
 <script type="text/x-template" id="template_multi_actions">
     <div class="btn-group" role="group" v-show="selected">
-        <button type="button" class="btn dropdown-toggle highlight-tr-none" :class="classes"
+        <button type="button" class="btn gui-btn dropdown-toggle highlight-tr-none" :class="classes"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :aria-label="text">
             {{ text | capitalize | split }}
             <span class="caret"></span>
@@ -482,9 +480,9 @@
 -->
 <!-- Base template of content_component (Vue component - <gui_entity_list></gui_entity_list>) of view with 'list' type -->
 <script type="text/x-template" id="template_entity_list">
-    <div>
+    <div class="list-content-component">
         <template v-if="is_empty">
-            <p class="text-center">List is empty.</p>
+            <p class="text-center empty-list-p">List is empty.</p>
         </template>
         <template v-else>
             <gui_list_table :instances="data.instances" :fields="fields" :view="view" :opt="opt"></gui_list_table>
@@ -494,16 +492,8 @@
 
 <!-- Base template of content_component_footer (Vue component - <gui_entity_footer_list></gui_entity_footer_list>) of view with 'list' type -->
 <script type="text/x-template" id="template_entity_footer_list">
-    <div>
+    <div class="list-footer-btns-wrapper">
         <gui_multi_actions :instances="data.instances" :multi_actions="schema.multi_actions" :opt="opt" v-if="multi_actions_exist"></gui_multi_actions>
-        <pagination :options="data.pagination"></pagination>
-    </div>
-</script>
-
-<!-- Base component for content_header of list Views -->
-<script type="text/x-template" id="template_entity_header_list">
-    <div>
-        <gui_filters_modal :opt="filters_opt" :view="view" :data="data"></gui_filters_modal>
         <pagination :options="data.pagination"></pagination>
     </div>
 </script>
@@ -523,7 +513,7 @@
                 <button class="btn btn-primary btn-apply-filters" @click="filter" aria-label="Filter">Filter</button>
             </template>
         </gui_modal>
-        <button class="btn btn-default btn-open-filters-modal" @click="open" aria-label="Filters">
+        <button class="btn gui-btn btn-default btn-open-filters-modal" @click="open" aria-label="Filters">
             <i class="fa fa-sliders" aria-hidden="true"></i>
             <span class="d-none d-lg-inline-block title-for-btn">Filters</span>
         </button>
@@ -551,7 +541,7 @@
 
 <!-- template of <gui_list_table></gui_list_table> component -->
 <script type="text/x-template" id="template_list_table">
-    <table class="table table-bordered multiple-select">
+    <table class="table table-bordered table-bordered-custom multiple-select">
         <thead>
         <tr :class="classes">
             <th style="width: 50px" @click="changeAllRowsSelection" class="global-select td_select_btn" v-if="multi_actions_exist">
@@ -563,7 +553,7 @@
                 {{ field.options.title || field.options.name | capitalize | split }}
             </th>
 
-            <th style="width: 120px;" :class="td_classes('column', 'actions')" v-if="child_actions_exist">Actions</th>
+            <th style="width: 60px;" :class="td_classes('column', 'actions')" v-if="child_actions_exist"></th>
         </tr>
         </thead>
         <tbody>
@@ -588,10 +578,10 @@
                        :wrapper_opt="{list_view: true, use_prop_data: true}"
             ></component>
         </td>
-        <td :class="td_classes('column', 'actions')" v-if="child_actions_exist">
+        <td :class="td_classes('column', 'actions')" v-if="child_actions_exist" style="text-align: center;">
             <div class="btn-group" role="group">
                 <gui_buttons_list :instance_id="instance.getPkValue()" :buttons="child_links_buttons"
-                                  type="child_link" text="actions" :look="{classes: ['btn-primary']}"
+                                  type="child_link" text="" :look="{classes: ['btn-primary']}"
                 ></gui_buttons_list>
             </div>
         </td>
@@ -600,7 +590,7 @@
 
 <!-- template of <pagination></pagination> component  -->
 <script type="text/x-template" id="template_pagination">
-    <ul class="pagination pagination-sm no-margin pull-right" style="margin-top: 5px;" v-if="pages_amount > 1">
+    <ul class="pagination pagination-sm no-margin pull-right" v-if="pages_amount > 1">
         <li class="page-item pagination-page" v-for="item in items">
             <a class="page-link" :style="styles(item.number)"  @click.stop.prevent="goToPage(item.number)">{{ item.text }}</a>
         </li>
@@ -618,22 +608,16 @@
                 <h3>Add child instances</h3>
             </template>
             <template v-slot:body>
-                <div class="card card-info">
-                    <div class="card-header with-border">
-                        <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
-                        </current_search_input>
-                        <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
-                    </div>
-                    <div class="card-body">
-                        <template v-if="is_empty">
-                            <p class="text-center">List is empty.</p>
-                        </template>
-                        <template v-else>
-                            <current_table :instances="instances" :opt="opt" @changeValue="changeValue" @setSelections="setSelections" @toggleSelection="toggleSelection">
-                            </current_table>
-                        </template>
-                    </div>
-                </div>
+                <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
+                </current_search_input>
+                <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
+                <template v-if="is_empty">
+                    <p class="text-center">List is empty.</p>
+                </template>
+                <template v-else>
+                    <current_table :instances="instances" :opt="opt" @changeValue="changeValue" @setSelections="setSelections" @toggleSelection="toggleSelection">
+                    </current_table>
+                </template>
             </template>
             <template v-slot:footer>
                 <button class="btn btn-default btn-operation-add-child-close" @click="close" aria-label="Cancel">Cancel</button>
@@ -768,9 +752,9 @@
     <div class="content-wrapper-2">
         <section class="content-header">
             <h1>
-                    <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
-                        <span class="fa fa-arrow-left"></span>
-                    </span>
+                <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
+                    <span class="fa fa-arrow-left"></span>
+                </span>
                 <span class="h1-header" > {{ title }} </span>
             </h1>
         </section>
@@ -778,7 +762,9 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h2>{{ message }}</h2>
+                        <div class="error-text-wrapper">
+                            <p class="text-center error-p"> {{ message }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
