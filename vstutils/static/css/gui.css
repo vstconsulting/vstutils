@@ -1574,7 +1574,7 @@ a.multiaction-button{
 
 .btn-icon {
     width:30px;
-    height: 31px;
+    height: 30px;
     padding: 0px;
     text-align: center;
 }
@@ -2102,8 +2102,7 @@ input[type=color]{
 .modal-mask {
     color: #333;
     position: fixed;
-    /*z-index: 9998;*/
-    z-index: 1000;
+    z-index: 1110;
     top: 0;
     left: 0;
     width: 100%;
@@ -2222,4 +2221,67 @@ input[type=color]{
 
 .title-for-btn {
     margin-left: 5px;
+}
+
+.buttons-row-wrapper {
+    margin-bottom: 0;
+    padding-bottom: 15px;
+}
+
+.pagination {
+    margin-bottom: 2px;
+    margin-top: 2px;
+    float: right;
+}
+
+.pagination .page-link {
+    padding: 6px 8px;
+}
+
+.list-footer-btns-wrapper {
+    display: inline-block;
+    width: 100%;
+    padding-bottom: 15px;
+}
+
+.card-body-custom {
+    padding: 10px 0;
+}
+
+.card-body-list {
+    padding: 0;
+}
+
+.table-bordered-custom {
+    margin: 0;
+    padding: 0;
+    border: none;
+    max-width: none;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 991px) {
+    .breadcrumb {
+        margin-top: 0;
+    }
+
+    .btn-previous-page,
+    .h1-header {
+        display: none;
+    }
+}
+
+.card-header-custom {
+    height: 40px;
+    line-height: 30px;
+    padding: 5px 0.5rem;
+}
+
+.list-content-component, .error-text-wrapper {
+    background-color: var(--card-body-bg-color);
+    color: var(--text-color);
+}
+
+.empty-list-p, .error-p {
+    padding: 15px;
 }

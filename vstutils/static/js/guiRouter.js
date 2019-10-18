@@ -1033,16 +1033,11 @@ let routesComponentsTemplates = { /* jshint unused: false */
         },
         computed: {
             /**
-             * Redefinition of 'content_header_component' from base mixin.
+             * Component with multi-actions button and bottom pagination.
+             * @return {string}
              */
-            content_header_component: function() {
-                return "gui_entity_" + this.view.schema.type + "_header";
-            },
-            /**
-             * Redefinition of 'content_footer_component' from base mixin.
-             */
-            content_footer_component: function() {
-                return "gui_entity_" + this.view.schema.type + "_footer";
+            multi_actions_button_component() {
+                 return "gui_entity_" + this.view.schema.type + "_footer";
             },
         },
         methods: {
