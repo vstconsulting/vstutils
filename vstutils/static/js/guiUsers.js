@@ -196,6 +196,40 @@ tabSignal.connect('models[User].fields.beforeInit', fields => {
         });
     });
 });
+/**
+ * Signal adds custom redirect methods, that should be executed after user password was changed.
+ */
+tabSignal.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit', obj => {
+    obj.view.mixins.push({
+        methods: {
+            getRedirectUrl(opt) {
+                return this.$route.path.replace('/change_password', '');
+            },
+            openRedirectUrl(options) {
+                let reload_page = false;
+
+                if(this.$route.path.indexOf('/profile') === 0) {
+                    reload_page = true;
+                }
+
+                if(this.$route.path.indexOf('/user') === 0 && this.$route.params[path_pk_key] === my_user_id) {
+                    reload_page = true;
+                }
+
+                if(this.$route.path.indexOf('/user') !== 0 && this.$route.path.indexOf('/user') !== -1 &&
+                    this.$route.params.user_id === my_user_id) {
+                    reload_page = true;
+                }
+
+                this.openPage(options);
+
+                if(reload_page) {
+                    window.location.reload();
+                }
+            },
+        },
+    });
+});
 
 tabSignal.connect('allViews.inited', addProfileViews);
 
