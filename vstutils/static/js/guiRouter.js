@@ -219,10 +219,9 @@ const page_with_data_mixin = {
                 guiPopUp.success(pop_up_msg.instance.success.remove.format(
                     [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name]
                 ));
-                let redirect = this.getRedirectUrl();
                 this.deleteQuerySet(this.qs_url);
                 this.deleteQuerySetFromSandBox(this.qs_url);
-                this.$router.push({path: redirect});
+                this.openRedirectUrl({path: this.getRedirectUrl()});
             }).catch(error => {
                 let str = app.error_handler.errorToString(error);
 
@@ -643,6 +642,20 @@ let routesComponentsTemplates = { /* jshint unused: false */
          */
         methods: {
             /**
+             * Method, that opens some page.
+             * @param {object} options Options for router for new page opening.
+             */
+            openPage(options={}) {
+                this.$router.push(options);
+            },
+            /**
+             * Method, that makes redirect to some page.
+             * @param {object} options Options for router for redirect page opening.
+             */
+            openRedirectUrl(options={}) {
+                this.openPage(options);
+            },
+            /**
              * Method, that calls from created() Hook.
              */
             onCreatedHandler() {
@@ -739,7 +752,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
                             let redirect_path = this._getRedirectUrlFromResponse(response.data);
 
                             if(redirect_path) {
-                                this.$router.push({path: redirect_path});
+                                this.openRedirectUrl({path: redirect_path});
                             }
 
                         } catch(e) {}
@@ -1173,7 +1186,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
                     }
                 }
 
-                this.$router.push({
+                this.openPage({
                     name: this.$route.name,
                     params: this.$route.params,
                     query: filters,
@@ -1405,14 +1418,11 @@ let routesComponentsTemplates = { /* jshint unused: false */
 
                 instance.save(method).then(instance => {
                     this.loading = false;
-
-                    let url = this.getRedirectUrl({instance: instance});
                     guiPopUp.success(pop_up_msg.instance.success.create.format(
                         [this.view.schema.name],
                     ));
-
                     this.deleteQuerySetFromSandBox(this.qs_url);
-                    this.$router.push({path: url});
+                    this.openRedirectUrl({path: this.getRedirectUrl({instance: instance})});
                 }).catch(error => {
                     this.loading = false;
 
@@ -1521,9 +1531,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
                         [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name],
                     ));
 
-                    let url = this.getRedirectUrl({instance:instance});
-
-                    this.$router.push({path: url});
+                    this.openRedirectUrl({path: this.getRedirectUrl({instance:instance})});
                 }).catch(error => {
                     this.loading = false;
                     let str = app.error_handler.errorToString(error);
@@ -1660,8 +1668,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
                     ));
                     this.deleteQuerySetFromSandBox(this.qs_url);
                     let data = response.data;
-                    let url = this.getRedirectUrl({data: data, response: response});
-                    this.$router.push({path: url});
+                    this.openRedirectUrl({path: this.getRedirectUrl({data: data, response: response})});
                 }).catch(error => {
                     this.loading = false;
                     let str = app.error_handler.errorToString(error);
