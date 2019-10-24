@@ -359,6 +359,8 @@ cdef class ConfigParserC(__BaseDict):
                 self.parse_file(filepath)
 
     def parse_text(self, text):
+        if not text:
+            return 
         error = self._parse_text(text.encode('utf-8'))
         if error:
             raise ParseError('Couldnt parse config string without section and key-value in text.')
