@@ -334,7 +334,7 @@ cdef class ConfigParserC(__BaseDict):
     cdef _parse_text(self, char* text):
         cdef:
             FILE *fd
-            unsigned long long size
+            size_t size
             int err
 
         with nogil:
@@ -342,7 +342,7 @@ cdef class ConfigParserC(__BaseDict):
             size = strlen(text) * sizeof(char)
             fd = fmemopen(text, size, 'r')
         if fd == NULL:
-            printf('Failed to open memory stream for text - `%s`; size - %ll\n', text, size)
+            printf('Failed to open memory stream for text - `%s`; size - %zu\n', text, size)
             return err
         err = self._parse_file(fd, size)
         fclose(fd)
