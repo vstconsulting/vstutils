@@ -724,6 +724,7 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
 CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
 CELERY_TASK_CREATE_MISSING_QUEUES = True
+CELERY_TIMEZONE = TIME_ZONE
 
 CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
 CONCURRENCY = rpc["concurrency"]
