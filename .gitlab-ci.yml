@@ -90,9 +90,6 @@ pages:
   only:
     refs:
       - master
-    changes:
-      - doc/*
-      - vstutils/doc_themes/*
 
 release:
   stage: release
@@ -122,7 +119,6 @@ release:
   script:
    - tox -c tox_build.ini -e ${CI_BUILD_NAME},auditwheel
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
-    # - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} dist/*.tar.gz dist/*.whl
   allow_failure: true
 
 py35-build:

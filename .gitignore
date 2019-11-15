@@ -16,6 +16,7 @@ test_screenshot.png
 .coverage.*
 .env
 .venv
+venv
 *.sqlite3
 *.bak
 .mypy_cache
