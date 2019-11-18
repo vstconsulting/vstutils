@@ -3,7 +3,6 @@ Additionals serializers fields for generating OpenAPI and GUI.
 """
 import typing as _t
 import json
-import six
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from django.db import models
 from ..utils import raise_context
@@ -14,9 +13,8 @@ class VSTCharField(CharField):
     __slots__ = ()
 
     def to_internal_value(self, data):
-        allowed_types = six.string_types, six.text_type
         with raise_context():
-            if not isinstance(data, allowed_types):
+            if not isinstance(data, str):
                 data = json.dumps(data)
         data = str(data)
         return super().to_internal_value(data)
@@ -91,7 +89,7 @@ class CommaMultiSelect(CharField):
         return self.to_representation(data)  # nocv
 
     def to_representation(self, data: _t.Union[_t.Text, _t.Sequence]) -> _t.Text:
-        if isinstance(data, six.string_types):
+        if isinstance(data, str):
             data = map(str, filter(bool, data.split(self.select_separator)))
         return self.select_separator.join(data)
 

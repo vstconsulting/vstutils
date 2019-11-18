@@ -8,7 +8,6 @@ Read more in Django REST Framework documentation for
 from __future__ import unicode_literals
 
 import json
-import six
 
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -49,8 +48,7 @@ class EmptySerializer(serializers.Serializer):
 
 class DataSerializer(EmptySerializer):
     allowed_data_types = (
-        six.string_types,
-        six.text_type,
+        str,
         dict,
         list,
         tuple

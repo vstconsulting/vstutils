@@ -1,6 +1,10 @@
 from rest_framework import status, response
 
 
+def __status_name_filter(name):
+    return name.startswith('HTTP_')
+
+
 class BaseResponseClass(response.Response):
     """
     API response class with default status code.
@@ -14,7 +18,7 @@ class BaseResponseClass(response.Response):
             self.data = dict(detail=self.data)
 
 
-for __status_name in filter(lambda x: x.startswith('HTTP_'), dir(status)):
+for __status_name in filter(__status_name_filter, dir(status)):
     __status_code = getattr(status, __status_name)
     __response_name = 'Response{}'.format(__status_code)
     __http_response_name = __status_name
