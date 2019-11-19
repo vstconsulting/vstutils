@@ -375,7 +375,7 @@ _setPrefetchValue(res, bulk_data, instances, field_name)
 **Arguments:**
 
 * res: {object} - Prefetch API response.
-* bulk_data: {object} - Object with bulk bodies for prefetch request.
+* bulk_data_item: {object} - Object bulk data for prefetch request.
 * instances: {array} - Array with instances.
 * field_name: {string} - Name of model field.
 

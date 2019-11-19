@@ -352,12 +352,17 @@ guiQuerySets.QuerySet = class QuerySet {
                         if (!bulk_data[field_name][item].filter_values.includes(obj.id)) {
                             bulk_data[field_name][item].filter_values.push(obj.id);
                         }
+                        if (!bulk_data[field_name][item].instances_ids.includes(instance.getPkValue())) {
+                            bulk_data[field_name][item].instances_ids.push(instance.getPkValue());
+                        }
+
                         pushed = true;
                     }
                 }
 
                 if (!pushed) {
                     bulk_data[field_name].push({
+                        instances_ids: [instance.getPkValue()],
                         data_type: obj.data_type,
                         filter_name: field.options.additionalProperties.value_field,
                         filter_values: [obj.id],
@@ -396,9 +401,9 @@ guiQuerySets.QuerySet = class QuerySet {
 
                     promises.push(
                         this.sendQuery(bulk).then(res => {
-                            this._setPrefetchValue(res, bulk_data, instances, key);
+                            this._setPrefetchValue(res, item, instances, key);
                         }).catch(error => { /* jshint unused: false */
-                        debugger;
+                            debugger;
                         })
                     );
                 }
@@ -411,12 +416,12 @@ guiQuerySets.QuerySet = class QuerySet {
     /**
      * Method, that adds loaded prefetch data to instances.
      * @param {object} res Prefetch API response.
-     * @param {object} bulk_data Object with bulk bodies for prefetch request.
+     * @param {object} bulk_data_item Object bulk data for prefetch request.
      * @param {array} instances Array with instances.
      * @param {string} field_name Name of model field.
      * @private
      */
-    _setPrefetchValue(res, bulk_data, instances, field_name) { /* jshint unused: false */
+    _setPrefetchValue(res, bulk_data_item, instances, field_name) { /* jshint unused: false */
         if(res.status != "200") {
             return;
         }
@@ -429,8 +434,13 @@ guiQuerySets.QuerySet = class QuerySet {
         for(let index = 0; index < instances.length; index++) {
             let instance = instances[index];
 
+            if(!bulk_data_item.instances_ids.includes(instance.getPkValue())) {
+                continue;
+            }
+
             for(let j in prefetch_data) {
                 if(prefetch_data[j][value_field] == instance.data[field_name]) {
+
                     instance.data[field_name] = {
                         value: instance.data[field_name],
                         prefetch_value: prefetch_data[j][view_field],
