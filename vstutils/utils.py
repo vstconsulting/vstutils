@@ -793,12 +793,13 @@ class URLHandlers(ObjectHandlers):
         options = self.opts(regexp)
         options.update(kwargs)
         args = options.pop('view_args', argv)
+        view_kwargs = options.pop('view_kwargs', {})
         csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
         if regexp in self.settings_urls:
             regexp = r'^{}'.format(self.get_django_settings(regexp)[1:])
         view_class = self[name]
         if hasattr(view_class, 'as_view'):
-            view = view_class.as_view()
+            view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
                 view = csrf_exempt(view)
             result = url(regexp, view, *args, **options)
