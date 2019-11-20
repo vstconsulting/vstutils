@@ -129,6 +129,7 @@ class MailSection(BaseAppendSection):
     types_map = {
         'port': cconfig.IntType(),
         'tls': cconfig.BoolType(),
+        'ssl': cconfig.BoolType(),
     }
 
 
@@ -518,8 +519,12 @@ mail = config['mail']
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = mail["port"]
 EMAIL_HOST_USER = mail["user"]
+EMAIL_FROM_ADDRESS = mail.get("from_address", EMAIL_HOST_USER)
 EMAIL_HOST_PASSWORD = mail["password"]
-EMAIL_USE_TLS = mail["tls"]
+if mail.get('tls', None) is not None:
+    EMAIL_USE_TLS = mail['tls']  # nocv
+if mail.get('ssl', None) is not None:
+    EMAIL_USE_SSL = mail['ssl']  # nocv
 EMAIL_HOST = mail["host"]
 if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -768,7 +773,10 @@ VIEWS = {
     "PASSWORD_RESET": {
         "BACKEND": 'django.contrib.auth.views.PasswordResetView',
         "OPTIONS": {
-            'name': 'password_reset'
+            'name': 'password_reset',
+            'view_kwargs': {
+                'from_email': EMAIL_FROM_ADDRESS
+            }
         }
     },
     "PASSWORD_RESET_CONFIRM": {
