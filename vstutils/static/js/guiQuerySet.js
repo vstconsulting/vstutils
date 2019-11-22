@@ -364,7 +364,7 @@ guiQuerySets.QuerySet = class QuerySet {
                     bulk_data[field_name].push({
                         instances_ids: [instance.getPkValue()],
                         data_type: obj.data_type,
-                        filter_name: field.options.additionalProperties.value_field,
+                        filter_name: field.getPrefetchFilterName(instance.data),
                         filter_values: [obj.id],
                     });
                 }
@@ -427,9 +427,7 @@ guiQuerySets.QuerySet = class QuerySet {
         }
 
         let prefetch_data = res.data.results;
-        let props = this.model.fields[field_name].options.additionalProperties;
-        let view_field = props.view_field;
-        let value_field = props.value_field;
+        let field = this.model.fields[field_name];
 
         for(let index = 0; index < instances.length; index++) {
             let instance = instances[index];
@@ -438,13 +436,9 @@ guiQuerySets.QuerySet = class QuerySet {
                 continue;
             }
 
-            for(let j in prefetch_data) {
-                if(prefetch_data[j][value_field] == instance.data[field_name]) {
-
-                    instance.data[field_name] = {
-                        value: instance.data[field_name],
-                        prefetch_value: prefetch_data[j][view_field],
-                    };
+            for(let num = 0; num < prefetch_data.length; num++) {
+                if(prefetch_data[num][field.getPrefetchFilterName(instance.data)] == instance.data[field_name]) {
+                    instance.data[field_name] = field.getPrefetchValue(instance.data, prefetch_data[num]);
                 }
             }
         }
