@@ -1727,40 +1727,12 @@ const field_fk_content_mixin = {
     data() {
         return {
             /**
-             * Property, that stores the most appropriate queryset for current field.
-             */
-            queryset: undefined,
-            /**
-             * Property, that stores all querysets for current field.
-             */
-            querysets: undefined,
-
-            /**
              * Property, that stores cached values.
              */
             values_cache: {},
         };
     },
     created() {
-        let props = this.field.options.additionalProperties;
-        let params = props.url_params || {};
-
-        this.querysets = [];
-        if(props.querysets) {
-            this.querysets = props.querysets.map(qs => {
-                let clone = qs.clone();
-
-                clone.url = this.field.getQuerySetFormattedUrl(
-                    this.data, $.extend(true, {}, this.$route.params, params), clone,
-                );
-
-                return clone;
-            });
-
-            this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
-        }
-
-
         if(this.value !== undefined && typeof this.value != 'object') {
             if(this.values_cache[this.value]) {
                 return this.$emit(
@@ -1811,29 +1783,51 @@ const field_fk_content_mixin = {
             this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
         },
     },
+    computed: {
+        /**
+         * Property, that stores all querysets for current field.
+         */
+        querysets() {
+            let props = this.field.options.additionalProperties;
+
+            if(!props.querysets) {
+                return [];
+            }
+
+            return props.querysets.map(qs => {
+                return qs.clone({
+                    url: this.field.getQuerySetFormattedUrl(
+                        this.data, $.extend(true, {}, this.$route.params, props.url_params || {}), qs,
+                    ),
+                });
+            });
+        },
+
+        /**
+         * Property, that stores the most appropriate queryset for current field.
+         */
+        queryset() {
+            return this.field.getAppropriateQuerySet(this.data, this.querysets);
+        }
+    },
     methods: {
         /**
          * Method, that loads prefetch_value.
          * @param {string, number} value.
          */
         prefetchValue(value) {
-            let props = this.field.options.additionalProperties;
-            let filters = {limit:1};
-            filters[props.value_field] = value;
-            let qs = this.queryset.filter(filters);
+            let filters = {
+                limit: 1,
+                [this.field.getPrefetchFilterName(this.data)]: value,
+            };
 
-            qs.items().then(instances => {
+            this.queryset.filter(filters).items().then(instances => {
                 let instance = instances[0];
 
                 if(instance && instance.data) {
-                    let obj = {
-                        value: value,
-                        prefetch_value: instance.data[props.view_field],
-                    };
+                    this.values_cache[value] = this.field.getPrefetchValue(this.data, instance.data);
 
-                    this.values_cache[value] = obj;
-
-                    this.$emit('proxyEvent', 'setValueInStore', obj);
+                    this.$emit('proxyEvent', 'setValueInStore', this.values_cache[value]);
                 }
             });
         },

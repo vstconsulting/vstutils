@@ -1101,6 +1101,29 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
 
         return {};
     }
+
+    /**
+     * Method returns object with 2 properties:
+     * - value - value of 'value_field' - value, that should be saved in DB.
+     * - prefetch_value - value of 'view_field' - value, that should be displayed for user.
+     * @param data {object} Object with instance data.
+     * @param prefetch_data {object} Object with data, that was prefetch for current field.
+     * @return {{value: *, prefetch_value: *}}
+     */
+    getPrefetchValue(data={}, prefetch_data={}) {
+        return {
+            value: data[this.options.name],
+            prefetch_value: prefetch_data[this.options.additionalProperties.view_field],
+        };
+    }
+
+    /**
+     * Method returns filter (name of field), that should be used during prefetch request.
+     * @param data {object} Object with instance data.
+     */
+    getPrefetchFilterName(data={}) { /* jshint unused: false */
+        return this.options.additionalProperties.value_field;
+    }
     /**
      * Redefinition of 'toInner' method of base guiField.
      * @param {object} data
