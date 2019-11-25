@@ -1268,7 +1268,8 @@ const table_row_mixin = {
             if(!this.blockTrLink(event.target, 'tr', 'highlight-tr-none')) {
                 let href;
                 if(event.target.hasAttribute('href')) {
-                    href = event.target.getAttribute('href');
+                    event.preventDefault();
+                    return;
                 } else if (event.currentTarget) {
                     href = event.currentTarget.getAttribute('data-href');
                 } else {
@@ -1868,6 +1869,8 @@ const field_fk_content_readonly_mixin = {
             if(this.fk && this.queryset) {
                 return this.queryset.url + this.fk;
             }
+
+            return "";
         },
         /**
          * Text of link.
@@ -1977,6 +1980,7 @@ const field_fk_content_editable_mixin = {
             let props = this.field.options.additionalProperties;
             let filters = {
                 limit: guiLocalSettings.get('page_size') || 20,
+                [this.field.getAutocompleteFilterName(this.data)]: search_str,
             };
 
 
@@ -1994,8 +1998,6 @@ const field_fk_content_editable_mixin = {
                 }
                 return field_dependence_name_array.join(',');
             }
-
-            filters[props.view_field] = search_str;
             let field_dependence_data = getDependenceValueAsString(this.$parent.data, props.field_dependence_name);
 
             let format_data = {
@@ -2041,9 +2043,10 @@ const field_fk_content_editable_mixin = {
 
                 response.forEach(instances => {
                     instances.forEach(instance => {
+                        let a_data = this.field.getAutocompleteValue(this.data, instance.data);
                         results.push({
-                            id: instance.data[props.value_field],
-                            text: instance.data[props.view_field],
+                            id: a_data.value_field,
+                            text: a_data.view_field,
                         });
                     });
                 });
@@ -3699,9 +3702,8 @@ const gui_fields_mixins = { /* jshint unused: false */
                         let props = this.field.options.additionalProperties;
                         let filters = {
                             limit: guiLocalSettings.get('page_size') || 20,
+                            [this.field.getAutocompleteFilterName(this.data)]: search_input,
                         };
-
-                        filters[props.view_field] = search_input;
 
                         function getDependenceValueAsString(parent_data_object, field_name)
                         {
@@ -3761,10 +3763,7 @@ const gui_fields_mixins = { /* jshint unused: false */
 
                             results.forEach(instances => {
                                 instances.forEach(instance => {
-                                    matches.push({
-                                        value_field: instance.data[props.value_field],
-                                        view_field: instance.data[props.view_field],
-                                    });
+                                    matches.push(this.field.getAutocompleteValue(this.data, instance.data));
                                 });
                             });
 
@@ -3848,8 +3847,8 @@ const gui_fields_mixins = { /* jshint unused: false */
                      */
                     field_props() {
                         return {
-                            value_field: this.field.options.additionalProperties.value_field,
-                            view_field: this.field.options.additionalProperties.view_field,
+                            value_field: this.field.getValueField(this.data),
+                            view_field: this.field.getViewField(this.data),
                         };
                     },
                     /**
