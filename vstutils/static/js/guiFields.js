@@ -1103,9 +1103,38 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
     }
 
     /**
+     * Method returns string - name of 'value_field'.
+     * @param data {object} Object with instance data.
+     */
+    getValueField(data={}) { /* jshint unused: false */
+        return this.options.additionalProperties.value_field;
+    }
+
+    /**
+     * Method returns string - name of 'view_field'.
+     * @param data {object} Object with instance data.
+     */
+    getViewField(data={}) { /* jshint unused: false */
+        return this.options.additionalProperties.view_field;
+    }
+
+    /**
+     * Method returns true if prefetch_data is intended for current field (data),
+     * otherwise, it returns false.
+     * @param data {object} Object with instance data.
+     * @param prefetch_data {object} Object with data, that was prefetch for current field.
+     * @return {boolean}
+     */
+    isPrefetchDataForMe(data={}, prefetch_data={}) {
+        return data[this.options.name] == prefetch_data[this.getPrefetchFilterName(data)];
+    }
+
+    /**
      * Method returns object with 2 properties:
      * - value - value of 'value_field' - value, that should be saved in DB.
      * - prefetch_value - value of 'view_field' - value, that should be displayed for user.
+     * This method is supposed to be used during prefetch request -
+     * request, that will be done during initial loading of field's (instance's) data.
      * @param data {object} Object with instance data.
      * @param prefetch_data {object} Object with data, that was prefetch for current field.
      * @return {{value: *, prefetch_value: *}}
@@ -1113,16 +1142,44 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
     getPrefetchValue(data={}, prefetch_data={}) {
         return {
             value: data[this.options.name],
-            prefetch_value: prefetch_data[this.options.additionalProperties.view_field],
+            prefetch_value: prefetch_data[this.getViewField()],
         };
     }
 
     /**
-     * Method returns filter (name of field), that should be used during prefetch request.
+     * Method returns object with 2 properties:
+     * - value_field - value of 'value_field' - value, that should be saved in DB.
+     * - view_field - value of 'view_field' - value, that should be displayed for user.
+     * This method is supposed to be used in edit mode,
+     * when user selects one of the available values from autocomplete list.
+     * @param data {object} Object with instance data.
+     * @param autocomplete_data Object with data, that was loaded from API for current field's autocomplete list.
+     * @returns {{view_field: *, value_field: *}}
+     */
+    getAutocompleteValue(data={}, autocomplete_data={}) {
+        return {
+            value_field: autocomplete_data[this.getValueField(data)],
+            view_field: autocomplete_data[this.getViewField(data)],
+        };
+    }
+
+    /**
+     * Method returns filter (name of field), that should be used during prefetch request -
+     * request, that will be done during initial loading of field's (instance's) data.
      * @param data {object} Object with instance data.
      */
     getPrefetchFilterName(data={}) { /* jshint unused: false */
-        return this.options.additionalProperties.value_field;
+        return this.getValueField(data);
+    }
+
+    /**
+     * Method returns filter (name of field), that should be used during autocomplete request -
+     * request that will be done during edit mode, when user selects one of the available values
+     * from autocomplete list.
+     * @param data {object} Object with instance data.
+     */
+    getAutocompleteFilterName(data={}) {
+        return this.getViewField(data);
     }
     /**
      * Redefinition of 'toInner' method of base guiField.

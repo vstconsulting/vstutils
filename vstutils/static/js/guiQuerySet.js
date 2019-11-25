@@ -437,7 +437,7 @@ guiQuerySets.QuerySet = class QuerySet {
             }
 
             for(let num = 0; num < prefetch_data.length; num++) {
-                if(prefetch_data[num][field.getPrefetchFilterName(instance.data)] == instance.data[field_name]) {
+                if(field.isPrefetchDataForMe(instance.data, prefetch_data[num])) {
                     instance.data[field_name] = field.getPrefetchValue(instance.data, prefetch_data[num]);
                 }
             }

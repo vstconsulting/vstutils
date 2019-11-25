@@ -744,7 +744,7 @@
 <!-- content (value input area) of api_object editable field -->
 <script type="text/x-template" id="template_field_content_readonly_api_object">
     <div :class="classes" :style="styles" readonly disabled>
-        <a :href="href" @click.stop.prevent="goToHref" :aria-labelledby="label_id" :aria-label="aria_label">{{ text }}</a>
+       <router-link :to="href" :aria-labelledby="label_id" :aria-label="aria_label">{{ text }}</router-link>
     </div>
 </script>
 <!--
@@ -834,7 +834,7 @@
 <script type="text/x-template" id="template_field_part_list_view_fk">
     <div :class="classes" :style="styles">
         <template v-if="with_link">
-            <a :href="href"  @click.stop.prevent="goToHref" >{{ text }}</a>
+            <router-link :to="href">{{ text }}</router-link>
         </template>
         <template v-else>
             {{ text }}
@@ -846,7 +846,7 @@
 <script type="text/x-template" id="template_field_content_readonly_fk">
     <div :class="classes" :style="styles" readonly disabled >
         <template v-if="with_link">
-            <a :href="href" @click.stop.prevent="goToHref" >{{ text }}</a>
+            <router-link :to="href">{{ text }}</router-link>
         </template>
         <template v-else>
             {{ text }}
