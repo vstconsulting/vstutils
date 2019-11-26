@@ -5,7 +5,6 @@ import time
 from subprocess import CalledProcessError
 import subprocess
 import signal
-import six
 from django.conf import settings
 from ._base import BaseCommand
 from ...utils import raise_context
@@ -61,7 +60,7 @@ class Command(BaseCommand):
         )
 
     def _get_uwsgi_arg(self, arg):
-        return arg if isinstance(arg, six.string_types) else None
+        return arg if isinstance(arg, str) else None
 
     def _get_uwsgi_args(self, *uwsgi_args):
         args = []

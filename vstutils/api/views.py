@@ -1,7 +1,6 @@
 # pylint: disable=unused-argument
 from collections import OrderedDict
 import json
-import six
 from django.conf import settings
 from django.test import Client
 from django.db import transaction
@@ -168,7 +167,7 @@ class BulkViewSet(base.rvs.APIView):
             return param
 
     def _get_obj_with_extra(self, param):
-        if isinstance(param, (six.text_type, six.string_types)):
+        if isinstance(param, str):
             if not ('{' in param and '}' in param):
                 param = param.replace('<', '{').replace('>', '}')
                 param = param.format(*self.results)
@@ -187,7 +186,7 @@ class BulkViewSet(base.rvs.APIView):
             return self._json_dump([
                 self._get_obj_with_extra_data(v, True) for v in data
             ], inner)
-        elif isinstance(data, (six.string_types, six.text_type)):
+        elif isinstance(data, str):
             return self._get_obj_with_extra(data)
         return self._json_dump(data, inner)  # nocv
 

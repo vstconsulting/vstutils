@@ -5,6 +5,7 @@ import collections
 import json
 import logging
 import os
+import io
 import sys
 import tempfile
 import time
@@ -14,7 +15,6 @@ from pathlib import Path
 from threading import Thread
 import typing as tp
 
-import six
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.conf.urls import url, include
@@ -115,7 +115,7 @@ class redirect_stdany:
 
     _streams = ["stdout", "stderr"]  # type: list
 
-    def __init__(self, new_stream=six.StringIO(), streams=None):
+    def __init__(self, new_stream=io.StringIO(), streams=None):
         """
         :param new_stream: -- stream where redirects all
         :type new_stream: object
@@ -160,7 +160,7 @@ class tmp_file:
     """
     __slots__ = ('fd', 'path',)
 
-    def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = 0, **kwargs):
+    def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = -1, **kwargs):
         """
         tmp_file constructor
 
@@ -172,9 +172,7 @@ class tmp_file:
         :type bufsize: int
         :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
         """
-        kw = not six.PY3 and {"bufsize": bufsize} or {}  # type: tp.Dict[tp.Text, tp.Any]
-        kwargs.update(kw)
-        self.fd = tempfile.NamedTemporaryFile(mode, **kwargs)
+        self.fd = tempfile.NamedTemporaryFile(mode, buffering=bufsize, **kwargs)
         self.path = Path(self.fd.name)
         if data:
             self.write(data)
@@ -289,7 +287,8 @@ class exception_with_traceback(raise_context):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_val is not None:
             exc_val.traceback = traceback.format_exc()
-            six.reraise(exc_type, exc_val, exc_tb)
+            # six.reraise(exc_type, exc_val, exc_tb)
+            raise exc_val.with_traceback(exc_tb)
 
 
 class BaseVstObject:
@@ -375,7 +374,7 @@ class Executor(BaseVstObject):
         Unbuffered output handler.
 
         :type proc: subprocess.Popen
-        :type stream: six.text_types
+        :type stream: str
         :return:
         """
         if self.working_handler is not None:
@@ -771,7 +770,7 @@ class URLHandlers(ObjectHandlers):
 
     def get_backend_data(self, name: tp.Text):
         data = super().get_backend_data(name)
-        if isinstance(data, (six.string_types, six.text_type)):
+        if isinstance(data, str):
             for handler in self.view_handlers:
                 try:
                     handler_data = handler.get_backend_data(data)

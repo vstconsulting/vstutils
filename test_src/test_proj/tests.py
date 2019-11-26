@@ -3,12 +3,12 @@ import os
 import sys
 import shutil
 import re
+import io
 import pwd
 
 import pyximport
 pyximport.install()
 
-import six
 try:
     from mock import patch
 except ImportError:  # nocv
@@ -74,7 +74,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
     def test_startproject(self):
         # Easy create
-        out = six.StringIO()
+        out = io.StringIO()
         call_command(
             'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
         )
@@ -914,7 +914,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[19]['status'], 201)
 
     def test_coreapi_schema(self):
-        stdout = six.StringIO()
+        stdout = io.StringIO()
         call_command(
             'generate_swagger', '--url', 'http://localhost:8080/',
             format='json', stdout=stdout

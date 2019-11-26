@@ -3,7 +3,6 @@ import os
 import sys
 import typing as _t
 import warnings
-import six
 
 _default_settings = {
     # vstutils settings for generate settings
@@ -29,9 +28,9 @@ def prepare_environment(default_settings: _t.Dict = None, **kwargs) -> _t.NoRetu
     for key, value in default_settings.items():
         os.environ.setdefault(key, value)
     os.environ.update(kwargs)
-    if six.PY2:  # nocv
+    if sys.version_info.major == 3 and sys.version_info.minor < 6:  # nocv
         warnings.warn(
-            'Python 2.7 is deprecated and will dropped in 2.0, use Python >3.5',
+            'Python 3.5 is deprecated and will dropped in 3.0, use Python >=3.6',
             DeprecationWarning
         )
 

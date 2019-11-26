@@ -4,7 +4,6 @@ from collections import OrderedDict as odict
 import traceback
 import logging
 import json
-import six
 import ldap
 
 
@@ -12,7 +11,7 @@ def json_default(obj):  # nocv
     error_obj = TypeError("{} is not JSON serializable".format(type(obj)))
     try:
         if isinstance(obj, bytes):
-            return obj.decode("utf-8") if six.PY3 else str(obj)
+            return obj.decode("utf-8")
         raise error_obj
     except:
         raise error_obj

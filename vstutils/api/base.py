@@ -7,7 +7,6 @@ import logging
 import traceback
 from collections import namedtuple
 from copy import deepcopy
-import six
 from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404
@@ -90,7 +89,7 @@ class Response(_ResponseClass):
     def _asdict(self):
         data = super()._asdict()
         data["status"] = data.get("status", status.HTTP_200_OK)
-        if isinstance(data["data"], (six.string_types, six.text_type)):
+        if isinstance(data["data"], str):
             data["data"] = dict(detail=self.data)
         return data
 
@@ -273,7 +272,7 @@ class CopyMixin(GenericViewSet):
         new_instance = deepcopy(instance)
         new_instance.pk = None
         name = getattr(instance, self.copy_field_name, None)
-        if isinstance(name, (six.string_types, six.text_type)):
+        if isinstance(name, str):
             name = '{}{}'.format(self.copy_prefix, name)
         setattr(new_instance, self.copy_field_name, name)
         new_instance.save()

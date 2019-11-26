@@ -6,7 +6,6 @@ import random  # noqa: F401
 import string  # noqa: F401
 import os  # noqa: F401
 import uuid
-import six
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -127,7 +126,7 @@ class BaseTestCase(TestCase):
         return patch(*args, **kwargs)
 
     def get_model_class(self, model):
-        if isinstance(model, (six.text_type, six.string_types)):
+        if isinstance(model, str):
             model_string = str(model)
             model = getattr(self.models, model_string, None)
             model = import_class(model_string) if model is None else model
@@ -201,7 +200,7 @@ class BaseTestCase(TestCase):
         request = getattr(client, rtype)
         code = code or self.std_codes.get(rtype, 200)
         if kwargs.get("data", False):
-            if isinstance(kwargs["data"], (six.string_types, six.text_type)):
+            if isinstance(kwargs["data"], str):
                 kwargs["content_type"] = "application/json"
         result = self.result(request, url, code=code, *args, **kwargs)
         self._logout(client)
