@@ -83,6 +83,7 @@ class MainSection(BaseAppendSection):
         'debug': cconfig.BoolType(),
         'enable_admin_panel': cconfig.BoolType(),
         'allowed_hosts': cconfig.ListType(),
+        'first_day_of_week': cconfig.IntType()
     }
 
 
@@ -94,7 +95,17 @@ class WebSection(BaseAppendSection):
         'public_openapi': cconfig.BoolType(),
         'openapi_cache_timeout': cconfig.IntType(),
         'enable_gravatar': cconfig.BoolType(),
-        'rest_swagger': cconfig.BoolType()
+        'rest_swagger': cconfig.BoolType(),
+        'request_max_size': cconfig.BytesType(),
+        'x_frame_options': cconfig.StrType(),
+        'use_x_forwarded_host': cconfig.BoolType(),
+        'use_x_forwarded_port': cconfig.BoolType(),
+        'password_reset_timeout_days': cconfig.IntType(),
+        'secure_browser_xss_filter': cconfig.BoolType(),
+        'secure_content_type_nosniff': cconfig.BoolType(),
+        'secure_hsts_include_subdomains': cconfig.BoolType(),
+        'secure_hsts_preload': cconfig.BoolType(),
+        'secure_hsts_seconds': cconfig.IntType()
     }
 
 
@@ -169,6 +180,7 @@ config = cconfig.ConfigParserC(
             'debug': False,
             'allowed_hosts': ('*',),
             'timezone': 'UTC',
+            'first_day_of_week': 0,
             'log_level': 'WARNING',
             'enable_admin_panel': False,
             'ldap-server': None,
@@ -183,7 +195,17 @@ config = cconfig.ConfigParserC(
             'rest_swagger_description': (vst_project_module.__doc__ or vst_lib_module.__doc__),
             'public_openapi': False,
             'openapi_cache_timeout': 120,
-            'enable_gravatar': True
+            'enable_gravatar': True,
+            'request_max_size': 2621440,
+            'x_frame_options': 'SAMEORIGIN',
+            'use_x_forwarded_host': False,
+            'use_x_forwarded_port': False,
+            'password_reset_timeout_days': 1,
+            'secure_browser_xss_filter': False,
+            'secure_content_type_nosniff': False,
+            'secure_hsts_include_subdomains': False,
+            'secure_hsts_preload': False,
+            'secure_hsts_seconds': 0,
         },
         'database': {
             'engine': 'django.db.backends.sqlite3',
@@ -329,8 +351,6 @@ MIDDLEWARE = [
     'vstutils.middleware.TimezoneHeadersMiddleware',
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
 ]
-# Fix for django 1.8-9
-MIDDLEWARE_CLASSES = MIDDLEWARE
 
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL = web['allow_cors']
@@ -372,6 +392,14 @@ AUTHENTICATION_BACKENDS = [
 SESSION_COOKIE_AGE = web["session_timeout"]
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS = 'session'
+SESSION_COOKIE_DOMAIN = os.getenv(
+    'DJANGO_SESSION_COOKIE_DOMAIN',
+    web.get('session_cookie_domain', fallback=None)
+)
+
+CSRF_COOKIE_AGE = SESSION_COOKIE_AGE
+CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
+CSRF_TRUSTED_ORIGINS = web.getlist('csrf_trusted_origins', fallback='')
 
 
 # Password validation
@@ -391,6 +419,7 @@ LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
 
+PASSWORD_RESET_TIMEOUT_DAYS = web['password_reset_timeout_days']
 
 # Main controller settings
 ##############################################################
@@ -408,6 +437,11 @@ uwsgi_settings = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
 WEB_DAEMON_LOGFILE = uwsgi_settings.get('log_file', fallback='/dev/null')
 WEB_ADDRPORT = uwsgi_settings.get('addrport', fallback=':8080')
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
+X_FRAME_OPTIONS = web['x_frame_options']
+USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
+USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
 
 # Templates settings
 ##############################################################
@@ -637,6 +671,7 @@ TIME_ZONE = main["timezone"]
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+FIRST_DAY_OF_WEEK = main['first_day_of_week']
 
 
 # LOGGING settings

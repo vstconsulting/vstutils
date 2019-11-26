@@ -111,6 +111,34 @@ cdef class IntType(BaseType):
         return int(value)
 
 
+class BytesType(IntType):
+    _kb = 1024
+    _mb = _kb * 1024
+    _gb = _mb * 1024
+    _tb = _gb * 1024
+
+    def _convert(self, value):
+        if not isinstance(value, str):
+            value = str(value)
+
+        if value[-1] in ['\t', '\n', ' ']:
+            value = value.strip()
+
+        multiplier = 1
+
+        if value[-1] in ['B', 'b']:
+            value = value[:-1]
+            multiplier_suffix = '_' + value[-2].lower() + 'b'
+            multiplier = getattr(self, multiplier_suffix, multiplier)
+        if value[-1].upper() in ['K', 'M', 'G', 'T']:
+            value = value[:-2]
+
+        if '.' in value:
+            value = float(value)
+        value = value * multiplier
+        return int(value)
+
+
 cdef class BoolType(BaseType):
     def convert(self, value):
         replace = str.replace
@@ -536,8 +564,6 @@ cdef class Section(__BaseDict):
             conversation_class.str_convert(self[key])
         ).replace('{', '{{').replace('}', '}}')
 
-
-
     def getboolean(self, option, fallback=None):
         return self.type_conversation(None, self.get(option, fallback), BoolType())
 
@@ -547,6 +573,9 @@ cdef class Section(__BaseDict):
 
     def getseconds(self, option, fallback=None):
         return self.type_conversation(None, self.get(option, str(fallback)), IntSecondsType())
+
+    def getbytes(self, option, fallback=None):
+        return self.type_conversation(None, self.get(option, str(fallback)), BytesType())
 
     def getlist(self, option, fallback=None, separator=','):
         fallback = fallback or ''
