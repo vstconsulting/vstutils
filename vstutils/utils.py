@@ -383,8 +383,11 @@ class Executor(BaseVstObject):
             t.start()
         out = getattr(proc, stream)
         try:
-            for line in iter(out.readline, ""):
-                yield line.rstrip()
+            retcode = None
+            while retcode is None:
+                for line in iter(out.readline, ""):
+                    yield line.rstrip()
+                retcode = proc.poll()
         finally:
             out.close()
 
