@@ -765,11 +765,7 @@ const crontab_field_content_edit_mixin = {
          * @return {array}
          */
         parseItem(resArr, str, minInt, maxInt) {
-            for(let i = minInt; i < maxInt; i++) {
-                resArr[i] = false;
-            }
-
-            for(let i =0; i < resArr.length; i++) {
+            for(let i = minInt; i <= maxInt; i++) {
                 resArr[i] = false;
             }
 
@@ -783,7 +779,7 @@ const crontab_field_content_edit_mixin = {
                 if(/^\*$/.test(Parts[i])) {
                     if(minInt < maxInt) {
                         for(let j = minInt; j <= maxInt; j++) {
-                            resArr[j] = true;
+                            resArr[j] = false;
                         }
                     }
                 } else if(/^\*\/([0-9]+)$/.test(Parts[i])) {
