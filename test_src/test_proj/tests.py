@@ -29,7 +29,7 @@ from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tools import get_file_value, File as ToolsFile
-from vstutils.config import ConfigParserC, Section, IntType, BytesType, BoolType, IntSecondsType, ListType, JsonType, StrType, ConfigParserException, ParseError
+from vstutils.config import ConfigParserC, Section, IntType, BytesSizeType, BoolType, IntSecondsType, ListType, JsonType, StrType, ConfigParserException, ParseError
 from .models import Host, HostGroup, File, List
 
 
@@ -1308,10 +1308,10 @@ class ConfigParserCTestCase(BaseTestCase):
             type_keyint1 = IntType()
             type_keyint2 = IntType()
             type_keyint3 = IntType()
-            type_keybytes1 = BytesType()
-            type_keybytes2 = BytesType()
-            type_keybytes3 = BytesType()
-            type_keybytes4 = BytesType()
+            type_keybytes1 = BytesSizeType()
+            type_keybytes2 = BytesSizeType()
+            type_keybytes3 = BytesSizeType()
+            type_keybytes4 = BytesSizeType()
 
         class TestSecondSection(Section):
             pass
@@ -1389,10 +1389,10 @@ class ConfigParserCTestCase(BaseTestCase):
                 'key1': 'value4',
                 'key2': 251,
                 'key3': True,
-                # 'keybytes1': 2560,
-                # 'keybytes2': 3221225472,
-                # 'keybytes3': 2,
-                # 'keybytes4': 18,
+                'keybytes1': 2560,
+                'keybytes2': 3221225472,
+                'keybytes3': 2,
+                'keybytes4': 18,
                 'keyint1': 2000,
                 'keyint2': 2000000,
                 'keyint3': 2000000000,

@@ -96,7 +96,7 @@ class WebSection(BaseAppendSection):
         'openapi_cache_timeout': cconfig.IntType(),
         'enable_gravatar': cconfig.BoolType(),
         'rest_swagger': cconfig.BoolType(),
-        'request_max_size': cconfig.BytesType(),
+        'request_max_size': cconfig.BytesSizeType(),
         'x_frame_options': cconfig.StrType(),
         'use_x_forwarded_host': cconfig.BoolType(),
         'use_x_forwarded_port': cconfig.BoolType(),

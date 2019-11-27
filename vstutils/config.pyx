@@ -111,32 +111,26 @@ cdef class IntType(BaseType):
         return int(value)
 
 
-class BytesType(IntType):
+cdef class BytesSizeType(BaseType):
+    re_size = re.compile(r"(?P<val>[\d\.]+)(?P<mul>[KMGTkmgt]{0,1})[bB]{0,1}")
     _kb = 1024
     _mb = _kb * 1024
     _gb = _mb * 1024
     _tb = _gb * 1024
 
-    def _convert(self, value):
+    def convert(self, value):
         if not isinstance(value, str):
             value = str(value)
 
-        if value[-1] in ['\t', '\n', ' ']:
-            value = value.strip()
-
         multiplier = 1
 
-        if value[-1] in ['B', 'b']:
-            value = value[:-1]
-            multiplier_suffix = '_' + value[-2].lower() + 'b'
-            multiplier = getattr(self, multiplier_suffix, multiplier)
-        if value[-1].upper() in ['K', 'M', 'G', 'T']:
-            value = value[:-2]
+        match = self.re_size.match(value)
+        value = match.group('val')
+        mul = match.group('mul')
+        if mul:
+            multiplier = getattr(self, '_' + mul.lower() + 'b', multiplier)
 
-        if '.' in value:
-            value = float(value)
-        value = value * multiplier
-        return int(value)
+        return (int(float(value) * multiplier))
 
 
 cdef class BoolType(BaseType):
@@ -575,7 +569,7 @@ cdef class Section(__BaseDict):
         return self.type_conversation(None, self.get(option, str(fallback)), IntSecondsType())
 
     def getbytes(self, option, fallback=None):
-        return self.type_conversation(None, self.get(option, str(fallback)), BytesType())
+        return self.type_conversation(None, self.get(option, str(fallback)), BytesSizeType())
 
     def getlist(self, option, fallback=None, separator=','):
         fallback = fallback or ''
