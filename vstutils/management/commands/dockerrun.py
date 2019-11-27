@@ -106,7 +106,11 @@ class Command(BaseCommand):
             'debug': os.getenv('{}_DEBUG'.format(prefix), 'false'),
             'log_level': log_level,
             'timezone': os.getenv('{}_TIMEZONE'.format(prefix), 'UTC'),
-            'enable_admin_panel': os.getenv('{}_ENABLE_ADMIN_PANEL'.format(prefix), 'false')
+            'enable_admin_panel': os.getenv('{}_ENABLE_ADMIN_PANEL'.format(prefix), 'false'),
+            'first_day_of_week': os.getenv(
+                '{}_FIRST_DAY_OF_WEEK'.format(prefix),
+                self._settings('FIRST_DAY_OF_WEEK')
+            )
         }
         # ldap-server, ldap-default-domain if exist
         ldap_server = os.getenv('{}_LDAP_CONNECTION'.format(prefix), None)
@@ -157,6 +161,8 @@ class Command(BaseCommand):
             cache_engine = 'django.core.cache.backends.memcached.MemcachedCache'
         elif cache_type == 'redis':  # nocv
             cache_engine = 'django_redis.cache.RedisCache'
+        else:  # nocv
+            raise Exception('Unknown cache type `{}`.'.format(cache_type))
 
         config['cache'] = config['locks'] = {
             'backend': cache_engine,
@@ -177,7 +183,47 @@ class Command(BaseCommand):
         config['web'] = {
             'session_timeout': os.getenv('{}_SESSION_TIMEOUT'.format(prefix), '2w'),
             'rest_page_limit': os.getenv('{}_WEB_REST_PAGE_LIMIT'.format(prefix), '100'),
-            'enable_gravatar': os.getenv('{}_WEB_GRAVATAR'.format(prefix), 'true')
+            'enable_gravatar': os.getenv('{}_WEB_GRAVATAR'.format(prefix), 'true'),
+            'request_max_size': os.getenv(
+                '{}_REQUEST_MAX_SIZE'.format(prefix),
+                self._settings('DATA_UPLOAD_MAX_MEMORY_SIZE')
+            ),
+            'x_frame_options': os.getenv(
+                '{}_X_FRAME_OPTIONS'.format(prefix),
+                self._settings('X_FRAME_OPTIONS')
+            ),
+            'use_x_forwarded_host': os.getenv(
+                '{}_USE_X_FORWARDED_HOST'.format(prefix),
+                self._settings('USE_X_FORWARDED_HOST')
+            ),
+            'use_x_forwarded_port': os.getenv(
+                '{}_USE_X_FORWARDED_PORT'.format(prefix),
+                self._settings('USE_X_FORWARDED_PORT')
+            ),
+            'password_reset_timeout_days': os.getenv(
+                '{}_PASSWORD_RESET_TIMEOUT_DAYS'.format(prefix),
+                self._settings('PASSWORD_RESET_TIMEOUT_DAYS')
+            ),
+            'secure_browser_xss_filter': os.getenv(
+                '{}_SECURE_BROWSER_XSS_FILTER'.format(prefix),
+                self._settings('SECURE_BROWSER_XSS_FILTER')
+            ),
+            'secure_content_type_nosniff': os.getenv(
+                '{}_SECURE_CONTENT_TYPE_NOSNIFF'.format(prefix),
+                self._settings('SECURE_CONTENT_TYPE_NOSNIFF')
+            ),
+            'secure_hsts_include_subdomains': os.getenv(
+                '{}_SECURE_HSTS_INCLUDE_SUBDOMAINS'.format(prefix),
+                self._settings('SECURE_HSTS_INCLUDE_SUBDOMAINS')
+            ),
+            'secure_hsts_preload': os.getenv(
+                '{}_SECURE_HSTS_PRELOAD'.format(prefix),
+                self._settings('SECURE_HSTS_PRELOAD')
+            ),
+            'secure_hsts_seconds': os.getenv(
+                '{}_SECURE_HSTS_SECONDS'.format(prefix),
+                self._settings('SECURE_HSTS_SECONDS')
+            ),
         }
 
         config['uwsgi'] = {

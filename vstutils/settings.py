@@ -401,6 +401,12 @@ CSRF_COOKIE_AGE = SESSION_COOKIE_AGE
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
 CSRF_TRUSTED_ORIGINS = web.getlist('csrf_trusted_origins', fallback='')
 
+SECURE_BROWSER_XSS_FILTER = web['secure_browser_xss_filter']
+SECURE_CONTENT_TYPE_NOSNIFF = web['secure_content_type_nosniff']
+SECURE_HSTS_INCLUDE_SUBDOMAINS = web['secure_hsts_include_subdomains']
+SECURE_HSTS_PRELOAD = web['secure_hsts_preload']
+SECURE_HSTS_SECONDS = web['secure_hsts_seconds']
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
