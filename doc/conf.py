@@ -17,12 +17,14 @@
 from __future__ import unicode_literals
 import os
 import sys
+from django import setup
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
 from vstutils.environment import prepare_environment
 
 
 prepare_environment()
+setup()
 
 # -- Project information -----------------------------------------------------
 
