@@ -2,12 +2,18 @@
 from warnings import warn
 from collections import OrderedDict
 
-from django.conf.urls import include, url
+from django.urls.conf import include, re_path
 from django.conf import settings
-from rest_framework import routers, permissions
+from rest_framework import routers, permissions, versioning
+from drf_yasg.views import get_schema_view
 
 from .base import Response
 from ..utils import import_class
+
+
+class ProjectApiVersionVersioning(versioning.BaseVersioning):
+    def determine_version(self, request, *args, **kwargs):
+        return settings.VST_API_VERSION
 
 
 class _AbstractRouter(routers.DefaultRouter):
@@ -78,7 +84,7 @@ class _AbstractRouter(routers.DefaultRouter):
             args = [prefix, import_class(options['view']), options.get('name', None)]
             if options.get('type', 'viewset') == 'viewset':
                 self.register(*args)
-            elif options.get('type', 'viewset') == 'view':
+            elif options.get('type', 'viewset') == 'view':  # nocv
                 self.register_view(*args)
             else:  # nocv
                 raise Exception('Unknown type of view')
@@ -113,6 +119,12 @@ class APIRouter(_AbstractRouter):
                 permission_classes = self.permission_classes
             custom_urls = self.custom_urls
 
+            class versioning_class(versioning.BaseVersioning):
+                # pylint: disable=invalid-name,no-self-argument
+
+                def determine_version(self_ver, request, *args, **kwargs):
+                    return self.root_view_name
+
             def get_view_name(self): return self.root_view_name
 
             def get(self_inner, request, *args, **kwargs):
@@ -128,8 +140,16 @@ class APIRouter(_AbstractRouter):
         urls = super().get_urls()
         for prefix, view, _ in self.custom_urls:  # nocv
             view = view.as_view() if hasattr(view, 'as_view') else view
-            urls.append(url("^{}/$".format(prefix), view))
+            urls.append(re_path("^{}/$".format(prefix), view))
         return urls
+
+    def generate(self, views_list):
+        super().generate(views_list)
+
+        if r'_bulk' not in views_list:
+            view_class = import_class('vstutils.api.views.BulkViewSet')
+            view_class.root_view_name = self.root_view_name
+            self.register_view(r'_bulk', view_class, '_bulk')
 
 
 class MainRouter(_AbstractRouter):
@@ -137,7 +157,6 @@ class MainRouter(_AbstractRouter):
 
     def __register_openapi(self):
         # pylint: disable=import-error
-        from drf_yasg.views import get_schema_view
         view_kwargs = dict(public=settings.OPENAPI_PUBLIC)
         if view_kwargs['public']:  # nocv
             view_kwargs['permission_classes'] = (permissions.AllowAny,)
@@ -145,6 +164,7 @@ class MainRouter(_AbstractRouter):
         swagger_kwargs = dict()
         cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
         swagger_kwargs['cache_timeout'] = 0 if settings.DEBUG else cache_timeout
+        schema_view.versioning_class = ProjectApiVersionVersioning
         self.register_view(
             'openapi', schema_view.with_ui('swagger', **swagger_kwargs), name='openapi'
         )
@@ -162,6 +182,7 @@ class MainRouter(_AbstractRouter):
                 permission_classes = self.permission_classes
             routers = self.routers
             custom_urls = self.custom_urls
+            versioning_class = ProjectApiVersionVersioning
 
             def get_view_name(self): return "API"
 
@@ -184,12 +205,18 @@ class MainRouter(_AbstractRouter):
     def get_urls(self):
         urls = super().get_urls()
         for prefix, router, _ in self.routers:
-            urls.append(url(prefix, include(router.urls)))
+            urls.append(re_path(
+                prefix,
+                include(
+                    (router.urls, settings.VST_PROJECT),
+                    namespace=router.root_view_name
+                )
+            ))
         for prefix, view, _ in self.custom_urls:  # nocv
             # can't be tested because this initialization takes place before
             # any test code can be run
             view = view.as_view() if hasattr(view, 'as_view') else view
-            urls.append(url("^{}/$".format(prefix), view))
+            urls.append(re_path("^{}/$".format(prefix), view))
         return urls
 
     def generate_routers(self, api, create_schema=None, create_swagger=None):

@@ -570,42 +570,6 @@ if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
-# Rest Api settings
-# http://www.django-rest-framework.org/api-guide/settings/
-##############################################################
-PAGE_LIMIT = web["page_limit"]
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-        'rest_framework.renderers.MultiPartRenderer',
-    ),
-    'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.OrderingFilter',
-        'vstutils.api.filter_backends.HideHiddenFilterBackend',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
-    'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
-    'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
-    'SCHEMA_COERCE_PATH_PK': False,
-    'SCHEMA_COERCE_METHOD_NAMES': {
-        'create': 'add',
-        'list': 'list',
-        'retrieve': 'get',
-        'update': 'update',
-        'partial_update': 'edit',
-        'destroy': 'remove',
-    }
-}
-
 # API settings
 ##############################################################
 VST_API_URL = os.getenv("VST_API_URL", "api")
@@ -647,9 +611,6 @@ API = {
         r'user': {
             'view': 'vstutils.api.views.UserViewSet'
         },
-        r'_bulk': {
-            'view': 'vstutils.api.views.BulkViewSet', 'type': 'view', "name": "_bulk"
-        },
     }
 }
 
@@ -662,6 +623,45 @@ BULK_OPERATION_TYPES = {
 }
 
 HEALTH_BACKEND_CLASS = 'vstutils.api.health.DefaultBackend'
+
+
+# Rest Api settings
+# http://www.django-rest-framework.org/api-guide/settings/
+##############################################################
+PAGE_LIMIT = web["page_limit"]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.MultiPartRenderer',
+    ),
+    'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'vstutils.api.filter_backends.HideHiddenFilterBackend',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
+    'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
+    'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'SCHEMA_COERCE_PATH_PK': False,
+    'SCHEMA_COERCE_METHOD_NAMES': {
+        'create': 'add',
+        'list': 'list',
+        'retrieve': 'get',
+        'update': 'update',
+        'partial_update': 'edit',
+        'destroy': 'remove',
+    }
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/

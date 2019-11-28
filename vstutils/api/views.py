@@ -115,17 +115,19 @@ class BulkViewSet(base.rvs.APIView):
         "HTTP_HOST",
         "HTTP_USER_AGENT",
     ]
-    api_version = settings.VST_API_VERSION
+    default_version = settings.VST_API_VERSION
+    api_url = settings.API_URL
     schema = None
 
     op_types = settings.BULK_OPERATION_TYPES
     type_to_bulk = {}
 
-    @property
-    def allowed_types(self):
+    def set_allowed_types(self, request):
+        self.api_version = request.version or self.default_version
+
         _allowed_types_default = {
             view: data.get('op_types', settings.BULK_OPERATION_TYPES.keys())
-            for view, data in settings.API[settings.VST_API_VERSION].items()
+            for view, data in settings.API[self.api_version].items()
             if data.get('type', None) != 'view'
         }
         _allowed_types_typed = {
@@ -136,7 +138,8 @@ class BulkViewSet(base.rvs.APIView):
         allowed_types = OrderedDict()
         allowed_types.update(_allowed_types_default)
         allowed_types.update(_allowed_types_typed)
-        return allowed_types
+
+        self.allowed_types = allowed_types
 
     def _create_results_if_not_exists(self):
         if not hasattr(self, '_results'):
@@ -200,9 +203,12 @@ class BulkViewSet(base.rvs.APIView):
             url += "{}/".format(self._get_obj_with_extra(data_type)) if data_type else ''
         if filter_set is not None:
             url += "?{}".format(self._get_obj_with_extra(filter_set))
-        return "/{}/{}/{}/{}".format(
-            settings.API_URL, self.api_version, self.type_to_bulk.get(item, item), url
-        )
+        return '/' + '/'.join([
+            self.api_url,
+            self.api_version,
+            self.type_to_bulk.get(item, item),
+            url
+        ])
 
     def get_method_type(self, op_type, operation):
         if op_type != 'mod':
@@ -284,8 +290,7 @@ class BulkViewSet(base.rvs.APIView):
 
     def original_environ_data(self, *args):
         # pylint: disable=protected-access
-        orig_environ = self.request._request.environ
-        get_environ = orig_environ.get
+        get_environ = self.request._request.environ.get
         kwargs = dict()
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
@@ -319,6 +324,10 @@ class BulkViewSet(base.rvs.APIView):
             "operations_types": self.op_types.keys(),
         }
         return responses.HTTP_200_OK(response)
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        self.set_allowed_types(request)
 
 
 class HealthView(base.ListNonModelViewSet):

@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 from django.conf import settings
-from django.conf.urls import url, include
+from django.urls.conf import include, re_path
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
@@ -34,10 +34,10 @@ doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 urlpatterns = list(URLHandlers().urls())
 
 urlpatterns += [
-    url(r'^admin/', admin.site.urls),
+    re_path(r'^admin/', admin.site.urls),
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
-urlpatterns += [url(r'^{}/'.format(settings.API_URL), include(router.urls))]
+urlpatterns += [re_path(r'^{}/'.format(settings.API_URL), include(router.urls))]
 urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 if 'docs' in settings.INSTALLED_APPS:  # nocv
-    urlpatterns += [url(r'^{}'.format(doc_url), include('docs.urls'))]
+    urlpatterns += [re_path(r'^{}'.format(doc_url), include(('docs.urls', settings.VST_PROJECT), namespace='docs'))]
