@@ -6,6 +6,7 @@ importScripts("{% static 'js/libs/workbox/workbox-sw.js' %}");
 
 workbox.setConfig({
   modulePathPrefix: "{% static 'js/libs/workbox/' %}",
+  debug: false,
 });
 
 workbox.core.skipWaiting();

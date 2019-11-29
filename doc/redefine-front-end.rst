@@ -227,6 +227,24 @@ where views - object with fully created View Instances.
 **Description:** This signal will be emitted after creation of all fully View Instances,
 with set actions / child_links / multi_actions / operations / sublinks properties.
 
+routes[name].created
+~~~~~~~~~~~~~~~~~~~~
+**Signal name:** "routes[" + name + "].created". For example, for ``/user/`` view: "routes[/user/].created".
+
+**Context argument:** route - {object} - Object with following structure: {name: name, path: path, component: component},
+where name - name of route, path - template of route's path, component - component, that will be rendered for current route.
+
+**Description:** This signal will be emitted after route was formed and added to routes list.
+
+allRoutes.created
+~~~~~~~~~~~~~~~~~
+**Signal name:** "allRoutes.created".
+
+**Context argument:** routes - {array} - Array with route objects with following structure: {name: name, path: path, component: component},
+where name - name of route, path - template of route's path, component - component, that will be rendered for current route.
+
+**Description:** This signal will be emitted after all routes was formed and added to routes list.
+
 LocalSettings.property
 ~~~~~~~~~~~~~~~~~~~~~~
 **Signal name:** LocalSettings.name + "." + property.

@@ -34,6 +34,15 @@ class View {
     }
 
     /**
+     * Method returns string with template of route path for current view.
+     * @param {string} path View path.
+     * @return {string}
+     */
+    getPathTemplateForRouter(path="") {
+        return path.replace(/\{/g, ":").replace(/\}/g, "");
+    }
+
+    /**
      * Method, that returns QuerySet constructor for view.
      * @param {object} model Model object.
      */

@@ -49,49 +49,112 @@ class RouterConstructor { /* jshint unused: false */
     }
 
     /**
-     * Method, that forms array of possible routes of App.
+     * Method, that returns array of possible routes of App.
      * @return {array} Routes Array.
      */
     getRoutes() {
-        this.routes = [
+        this.routes = this.formAllRoutes();
+        return this.routes;
+    }
+
+    /**
+     * Method, that forms array of ALL possible routes of App.
+     * @return {array} Routes Array.
+     */
+    formAllRoutes() {
+        let routes = [
             {
                 name: 'home',
                 path: '/',
                 component: this.custom_components_templates.home || {},
-            },
+            }
         ];
 
-        for(let path in this.views){
-            if(this.views.hasOwnProperty(path)) {
-                this.routes.push({
-                    name: path,
-                    path: path.replace(/\{/g, ":").replace(/\}/g, ""),
-                    component: this.getRouteComponent(this.views[path]),
-                });
+        this.emitSignalAboutRouteCreation(routes.last);
+
+        routes = routes.concat(
+            this.formRoutesBasedOnViews(),
+            this.formRoutesBasedOnCustomComponents(),
+            {
+                name: '404',
+                path: '*',
+                component: this.custom_components_templates['404'] || {},
+            },
+        );
+
+        this.emitSignalAboutRouteCreation(routes.last);
+
+        tabSignal.emit('allRoutes.created', routes);
+
+        return routes;
+    }
+
+    /**
+     * Method, that forms array of possible routes of App based on App views (this.views).
+     * @return {array} Routes Array.
+     */
+    formRoutesBasedOnViews() {
+        let routes = [];
+
+        for (let path in this.views) {
+            if (!this.views.hasOwnProperty(path)) {
+                continue;
             }
+
+            routes.push({
+                name: path,
+                path: this.views[path].getPathTemplateForRouter(path),
+                component: this.getRouteComponent(this.views[path]),
+            });
+
+            this.emitSignalAboutRouteCreation(routes.last);
         }
 
-        for(let item in this.custom_components_templates) {
-            if(this.custom_components_templates.hasOwnProperty(item)) {
-                if (['home', '404'].includes(item)) {
-                    continue;
-                }
+        return routes;
+    }
 
-                this.routes.push({
-                    name: item,
-                    path: item.replace(/\{/g, ":").replace(/\}/g, ""),
-                    component: this.custom_components_templates[item],
-                });
+    /**
+     * Method, that forms array of possible routes of App based on App custom views components
+     * (this.custom_components_templates).
+     * @return {array} Routes Array.
+     */
+    formRoutesBasedOnCustomComponents() {
+        let routes = [];
+
+        for (let item in this.custom_components_templates) {
+            if (!this.custom_components_templates.hasOwnProperty(item)) {
+                continue;
             }
+
+            if (['home', '404'].includes(item)) {
+                continue;
+            }
+
+            let path_template = item.replace(/\{/g, ":").replace(/\}/g, "");
+
+            if(this.custom_components_templates[item].getPathTemplateForRouter &&
+                typeof this.custom_components_templates[item].getPathTemplateForRouter === 'function') {
+                path_template = this.custom_components_templates[item].getPathTemplateForRouter(item);
+            }
+
+            routes.push({
+                name: item,
+                path: path_template,
+                component: this.custom_components_templates[item],
+            });
+
+            this.emitSignalAboutRouteCreation(routes.last);
         }
 
-        this.routes.push({
-            name: '404',
-            path: '*',
-            component: this.custom_components_templates['404'] || {},
-        });
+        return routes;
+    }
 
-        return this.routes;
+    /**
+     * Method emits signal: "route was created".
+     * @param {object} route Object with route properties (name, path, component).
+     */
+    emitSignalAboutRouteCreation(route) {
+        tabSignal.emit('routes[' + route.name + '].created', route);
     }
 
     /**
@@ -1050,7 +1113,7 @@ let routesComponentsTemplates = { /* jshint unused: false */
              * @return {string}
              */
             multi_actions_button_component() {
-                 return "gui_entity_" + this.view.schema.type + "_footer";
+                return "gui_entity_" + this.view.schema.type + "_footer";
             },
         },
         methods: {
