@@ -2244,7 +2244,7 @@ input[type=color]{
     padding-bottom: 15px;
 }
 
-.card-body-custom {
+.card-body-custom, .card-footer-custom {
     padding: 10px 0;
 }
 
