@@ -121,6 +121,7 @@ class BulkViewSet(base.rvs.APIView):
 
     op_types = settings.BULK_OPERATION_TYPES
     type_to_bulk = {}
+    session_cookie_name = settings.SESSION_COOKIE_NAME
 
     def set_allowed_types(self, request):
         self.api_version = request.version or self.default_version
@@ -307,7 +308,8 @@ class BulkViewSet(base.rvs.APIView):
         self.is_secure = request._request.is_secure()
         operations = request.data
         self.client = Client(**self.original_environ_data())
-        self.client.force_login(request.user)
+        # self.client.force_login(request.user)
+        self.client.cookies[self.session_cookie_name] = request.session.session_key
         self._operates(operations, allow_fail)
         return responses.HTTP_200_OK(self.results)
 
