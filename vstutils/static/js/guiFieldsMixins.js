@@ -2569,8 +2569,10 @@ const gui_fields_mixins = { /* jshint unused: false */
 
                     if(this.value) {
                         this.setValue(this.value);
+                    } else if(this.field.options.default) {
+                        this.setValue(this.field.options.default);
                     } else {
-                        $(this.s2).trigger('change');
+                        this.setValue(this.field.options.enum[0]);
                     }
                 },
                 watch: {
