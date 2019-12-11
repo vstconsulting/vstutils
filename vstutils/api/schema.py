@@ -349,9 +349,12 @@ class EndpointEnumerator(generators.EndpointEnumerator):
     def get_api_endpoints(self, *args, **kwargs):
         prefix = kwargs.get('prefix', '')
         namespace = kwargs.get('namespace', None)
-        if (self.api_url_prifix != prefix and
+        is_api_to_ignore = (
+            self.api_url_prifix != prefix and
             prefix.startswith(self.api_url_prifix) and
-            namespace != self.api_version):
+            namespace != self.api_version
+        )
+        if is_api_to_ignore:
             return []
         return super().get_api_endpoints(*args, **kwargs)
 
