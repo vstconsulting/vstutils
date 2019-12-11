@@ -1,5 +1,6 @@
 from copy import copy
 from collections import OrderedDict
+from django.conf import settings
 from rest_framework import status
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg import openapi, utils, generators
@@ -340,7 +341,28 @@ class VSTAutoSchema(SwaggerAutoSchema):
         return self.__perform_with_nested('get_responses', *args, **kwargs)
 
 
+class EndpointEnumerator(generators.EndpointEnumerator):
+    api_version = settings.VST_API_VERSION
+    api_url = settings.VST_API_URL
+    api_url_prifix = '^{}/'.format(api_url)
+
+    def get_api_endpoints(self, *args, **kwargs):
+        prefix = kwargs.get('prefix', '')
+        namespace = kwargs.get('namespace', None)
+        if (self.api_url_prifix != prefix and
+            prefix.startswith(self.api_url_prifix) and
+            namespace != self.api_version):
+            return []
+        return super().get_api_endpoints(*args, **kwargs)
+
+
 class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
+    endpoint_enumerator_class = EndpointEnumerator
+
+    def __init__(self, *args, **kwargs):
+        kwargs['version'] = settings.VST_API_VERSION
+        super().__init__(*args, **kwargs)
+
     def _get_subname(self, name):
         names = name.split('_')
         return ['_'.join(names[0:-1]), names[-1]]

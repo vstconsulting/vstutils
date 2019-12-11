@@ -4,7 +4,8 @@ from vstutils.settings import *
 INSTALLED_APPS += [
     'test_proj',
 ]
-
+API['v2'] = {}
+API['v3'] = {}
 API[VST_API_VERSION][r'settings'] = dict(
     view='vstutils.api.views.SettingsViewSet', op_types=['get', 'mod']
 )
@@ -27,6 +28,12 @@ API[VST_API_VERSION][r'testfk'] = dict(
     view='test_proj.views.TestFkViewSet'
 )
 API[VST_API_VERSION][r'testbinaryfiles'] = dict(
+    view='test_proj.views.TestBinaryFilesViewSet'
+)
+API['v2'][r'testbinaryfiles2'] = dict(
+    view='test_proj.views.TestBinaryFilesViewSet'
+)
+API['v3'][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
 

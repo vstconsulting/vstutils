@@ -350,9 +350,15 @@ class ViewsTestCase(BaseTestCase):
         self.get_result('post', '/login/', 302)
         self.get_result('get', '/login/', 302)
         # API
-        keys = list(self.get_result('get', '/api/').keys())
-        for key in ['openapi', 'v1']:
-            self.assertIn(key, keys)
+        api = self.get_result('get', '/api/')
+        print(api)
+        self.assertEqual(api['description'], 'Example Project REST API')
+        self.assertEqual(api['current_version'], 'https://vstutilstestserver/api/v1/')
+        self.assertIn('v1', api['available_versions'])
+        self.assertIn('v2', api['available_versions'])
+        self.assertEqual(api['available_versions']['v1'], api['current_version'])
+        self.assertEqual(api['openapi'], 'https://vstutilstestserver/api/openapi')
+        self.assertEqual(api['health'], 'https://vstutilstestserver/api/health')
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
             list(self.settings_obj.API[self.settings_obj.VST_API_VERSION].keys()).sort()
@@ -659,10 +665,10 @@ class CoreApiTestCase(BaseTestCase):
         )
         client.session.headers.update({'x-test': 'true'})
         schema = client.get('http://testserver/api/v1/schema/')
-        result = client.action(schema, ['user', 'list'])
+        result = client.action(schema, ['v1', 'user', 'list'])
         self.assertEqual(result['count'], 1)
         create_data = dict(username='test', password='123', password2='123')
-        result = client.action(schema, ['user', 'add'], create_data)
+        result = client.action(schema, ['v1', 'user', 'add'], create_data)
         self.assertEqual(result['username'], create_data['username'])
         self.assertFalse(result['is_staff'])
         self.assertTrue(result['is_active'])
@@ -961,6 +967,92 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(hostgroup_props['file']['format'], 'file')
         self.assertEqual(hostgroup_props['secret_file']['type'], 'string')
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
+
+        urls = [
+            '/deephosts/',
+            '/deephosts/{id}/',
+            '/deephosts/{id}/copy/',
+            '/deephosts/{id}/subdeephosts/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/copy/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hosts/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/test3/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/shost/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/shost/{shost_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/shost/{shost_id}/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/shost/{shost_id}/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/shost_all/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/shost_all/{shost_all_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subgroups/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subgroups/{subgroups_id}/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
+            '/deephosts/{id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
+            '/deephosts/{id}/subsubhosts/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/copy/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/copy/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/test/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/test2/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/{hosts_id}/test3/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/{shost_id}/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/{shost_id}/test/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/{shost_id}/test2/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost_all/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost_all/{shost_all_id}/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/{subgroups_id}/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test2/',
+            '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subhosts/test3/',
+            '/hosts/',
+            '/hosts/{id}/',
+            '/hosts/{id}/copy/',
+            '/hosts/{id}/hosts/',
+            '/hosts/{id}/hosts/{hosts_id}/',
+            '/hosts/{id}/hosts/{hosts_id}/test/',
+            '/hosts/{id}/hosts/{hosts_id}/test2/',
+            '/hosts/{id}/hosts/{hosts_id}/test3/',
+            '/hosts/{id}/shost/',
+            '/hosts/{id}/shost/{shost_id}/',
+            '/hosts/{id}/shost/{shost_id}/test/',
+            '/hosts/{id}/shost/{shost_id}/test2/',
+            '/hosts/{id}/shost_all/',
+            '/hosts/{id}/shost_all/{shost_all_id}/',
+            '/hosts/{id}/subgroups/',
+            '/hosts/{id}/subgroups/{subgroups_id}/',
+            '/hosts/{id}/subhosts/',
+            '/hosts/{id}/subhosts/test/',
+            '/hosts/{id}/subhosts/test2/',
+            '/hosts/{id}/subhosts/test3/',
+            '/subhosts/',
+            '/subhosts/{id}/',
+            '/subhosts/{id}/test/',
+            '/subhosts/{id}/test2/',
+            '/subhosts/{id}/test3/',
+            '/testbinaryfiles/',
+            '/testbinaryfiles/{id}/',
+            '/testfk/',
+            '/testfk/{id}/',
+            '/user/',
+            '/user/{id}/',
+            '/user/{id}/change_password/'
+        ]
+
+        for url in urls:
+            self.assertIn(url, data['paths'])
+
+        self.assertNotIn('/testbinaryfiles2/', data['paths'])
 
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')

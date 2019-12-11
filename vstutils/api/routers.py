@@ -183,14 +183,27 @@ class MainRouter(_AbstractRouter):
             routers = self.routers
             custom_urls = self.custom_urls
             versioning_class = ProjectApiVersionVersioning
+            view_name = '{} REST API'.format(settings.PROJECT_GUI_NAME)
 
-            def get_view_name(self): return "API"
+            def get_view_name(self): return 'REST API'
 
             def get(self_inner, request, *args, **kwargs):
                 # pylint: disable=no-self-argument,protected-access
-                data = self._get_views_custom_list(
+                links = self._get_views_custom_list(
                     request, super(API, self_inner).get(request, *args, **kwargs)
                 )
+                data = {
+                    'description': self_inner.view_name,
+                    'current_version': links[settings.VST_API_VERSION],
+                    'available_versions': {
+                        name: links[name]
+                        for name in links
+                        if name in settings.API
+                    }
+                }
+                for link in links:
+                    if link not in data['available_versions']:
+                        data[link] = links[link]
                 return Response(data, 200).resp
 
         return API.as_view(api_root_dict=api_root_dict)
