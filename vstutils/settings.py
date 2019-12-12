@@ -591,10 +591,9 @@ OPENAPI_EXTRA_LINKS = {
 }
 
 SWAGGER_SETTINGS = {
-    'DEFAULT_INFO': 'vstutils.api.swagger.api_info',
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.VSTAutoSchema',
-    'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.VSTSchemaGenerator',
-    # 'DEFAULT_API_URL': 'http://localhost:8080/',
+    'DEFAULT_INFO': 'vstutils.api.schema.info.api_info',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.schema.VSTAutoSchema',
+    'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.generators.VSTSchemaGenerator',
     'DEEP_LINKING': True,
     'SECURITY_DEFINITIONS': {
         'basic': {

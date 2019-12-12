@@ -347,7 +347,7 @@ ext_list = [
     # 'vstutils.gui.pwa_manifest',
     # 'vstutils.api.decorators',
     'vstutils.api.routers',
-    'vstutils.api.schema',
+    # 'vstutils.api.schema',
     'vstutils.api.views',
 ]
 
