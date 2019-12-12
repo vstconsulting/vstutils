@@ -332,22 +332,12 @@ def make_setup(**opts):
 # end block
 
 ext_list = [
-    # 'vstutils.settings',
-    # 'vstutils.environment',
-    # 'vstutils.middleware',
     'vstutils.config',
     'vstutils.tools',
     'vstutils.auth',
     'vstutils.models',
     'vstutils.custom_model',
-    # 'vstutils.templatetags.vstconfigs',
-    # 'vstutils.templatetags.vst_gravatar',
-    # 'vstutils.templatetags.request_static',
-    # 'vstutils.gui.context',
-    # 'vstutils.gui.pwa_manifest',
-    # 'vstutils.api.decorators',
     'vstutils.api.routers',
-    # 'vstutils.api.schema',
     'vstutils.api.views',
 ]
 

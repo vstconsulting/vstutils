@@ -1,6 +1,5 @@
 # pylint: disable=unused-import
 from __future__ import unicode_literals
-import typing as _t
 from copy import deepcopy
 from yaml import load
 try:
@@ -16,13 +15,13 @@ from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 class Query(dict):
     distinct_fields = False
 
-    def __init__(self, queryset: BQuerySet, *args, **kwargs):
+    def __init__(self, queryset, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset = queryset
         self['standard_ordering'] = True
 
     @property
-    def model(self) -> BaseModel:
+    def model(self):
         return self.queryset.model
 
     @property
@@ -39,7 +38,7 @@ class Query(dict):
     def clone(self):
         return deepcopy(self)
 
-    def _check_data(self, check_type: _t.Text, data: _t.Dict):
+    def _check_data(self, check_type, data):
         # pylint: disable=protected-access
         if getattr(self, 'empty', False):
             return False
@@ -70,41 +69,41 @@ class Query(dict):
                 return False
         return True
 
-    def check_in_query(self, data: _t.Dict):
+    def check_in_query(self, data):
         return self._check_data('filter', data) and not self._check_data('exclude', data)
 
-    def set_empty(self) -> _t.NoReturn:
+    def set_empty(self):
         self.empty = True
 
     def set_limits(self, low: int = None, high: int = None):
         self['low_mark'], self['high_mark'] = low, high
 
-    def has_results(self, *args, **kwargs) -> bool:
+    def has_results(self, *args, **kwargs):
         # pylint: disable=unused-argument
         return bool(self.queryset.all()[:2])
 
-    def get_count(self, using) -> int:
+    def get_count(self, using):
         # pylint: disable=unused-argument
         return len(self.queryset.all())
 
-    def can_filter(self) -> bool:
+    def can_filter(self):
         return self.get('low_mark', None) is None and self.get('high_mark', None) is None
 
-    def clear_ordering(self, *args, **kwargs) -> _t.NoReturn:
+    def clear_ordering(self, *args, **kwargs):
         # pylint: disable=unused-argument
         self['ordering'] = []
 
-    def add_ordering(self, *ordering) -> _t.NoReturn:
+    def add_ordering(self, *ordering):
         self['ordering'] = ordering
 
 
 class CustomModelIterable(ModelIterable):
-    def __iter__(self) -> _t.Iterable:
+    def __iter__(self):
         # pylint: disable=protected-access
         queryset = self.queryset
         model = queryset.model
         query = queryset.query
-        model_data = model._get_data(chunked_fetch=self.chunked_fetch)  # type: _t.Sequence[_t.Dict]
+        model_data = model._get_data(chunked_fetch=self.chunked_fetch)
         model_data = list(filter(query.check_in_query, model_data))
         ordering = query.get('ordering', [])
         if ordering:
@@ -121,12 +120,12 @@ class CustomQuerySet(BQuerySet):
     custom_iterable_class = CustomModelIterable
     custom_query_class = Query
 
-    def __init__(self, model: BaseModel = None, query: Query = None, using: _t.Text = None, hints: _t.Any = None):
+    def __init__(self, model=None, query=None, using=None, hints=None):
         if query is None:
             query = self.custom_query_class(self)
         super().__init__(model=model, query=query, using=using, hints=hints)
 
-    def _filter_or_exclude(self, is_exclude, *args, **kwargs) -> BQuerySet:
+    def _filter_or_exclude(self, is_exclude, *args, **kwargs):
         clone = self._clone()
         if is_exclude:
             filter_type = 'exclude'
@@ -136,12 +135,12 @@ class CustomQuerySet(BQuerySet):
         clone.query[filter_type].update(kwargs)
         return clone
 
-    def last(self) -> _t.Union[BaseModel, _t.NoReturn]:
+    def last(self):
         data = list(self)[-1:]
         if data:
             return data[0]
 
-    def first(self) -> _t.Union[BaseModel, _t.NoReturn]:
+    def first(self):
         data = list(self[:1])
         if data:
             return data[0]
