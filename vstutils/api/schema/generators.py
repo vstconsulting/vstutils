@@ -68,7 +68,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
     def _update_param_view(self, param, model, view_cls):
         manager_name = self._get_manager_name(param, view_cls)
         if manager_name is None:
-            return None  # nocv
+            return None
         return self._update_param_model(param, model, query_name=manager_name)
 
     def get_path_parameters(self, path, view_cls):

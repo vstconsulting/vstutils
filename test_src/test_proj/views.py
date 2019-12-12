@@ -5,6 +5,16 @@ from vstutils.api import filters, fields, responses
 from .models import Host, HostGroup, File, ModelWithFK, ModelWithBinaryFiles
 
 
+class TestFilterBackend:
+    required = True
+
+    def filter_queryset(self, request, queryset, view):
+        return queryset
+
+    def get_schema_fields(self, view):
+        return []
+
+
 class HostFilter(filters.DefaultIDFilter):
     class Meta:
         model = Host
@@ -88,6 +98,7 @@ class HostViewSet(ModelViewSetSet):
         'create': CreateHostSerializer
     }
     filter_class = HostFilter
+    filter_backends = list(ModelViewSetSet.filter_backends) + [TestFilterBackend]
 
     @subaction(
         response_code=200, response_serializer=EmptySerializer, detail=True,
@@ -141,6 +152,7 @@ class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
 
 @nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupSerializer)
 class _DeepHostGroupViewSet(_HostGroupViewSet, CopyMixin):
+
     def get_manager_subdeephosts(self, parent):
         return getattr(parent, 'subgroups')
 
@@ -211,3 +223,10 @@ class ModelWithBinaryFilesSerializer(VSTSerializer):
 class TestBinaryFilesViewSet(ModelViewSetSet):
     model = ModelWithBinaryFiles
     serializer_class = ModelWithBinaryFilesSerializer
+
+    @action(methods=['get'], detail=True)
+    def test_nested_view_inspection(self, *args, **kwargs):
+        raise Exception
+
+    test_nested_view_inspection._nested_view = None
+    test_nested_view_inspection._nested_name = ''

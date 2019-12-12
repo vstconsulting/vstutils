@@ -1,4 +1,5 @@
 from copy import copy
+from warnings import warn
 from rest_framework import status
 from drf_yasg.inspectors import SwaggerAutoSchema, swagger_settings
 from drf_yasg import openapi, utils
@@ -36,7 +37,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
         nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
 
-        if nested_view is None:  # nocv
+        if nested_view is None:
             return nested_view
 
         nested_view_class = getattr(view_action_func, '_nested_view', None)
@@ -77,7 +78,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
             nested_view_obj.action = 'update'
         elif method == 'patch' and is_detail:
             nested_view_obj.action = 'partial_update'
-        elif method == 'delete' and is_detail:  # nocv
+        elif method == 'delete' and is_detail:
             nested_view_obj.action = 'destroy'
         else:
             nested_view_obj.action = action_suffix
@@ -125,10 +126,16 @@ class VSTAutoSchema(SwaggerAutoSchema):
         sub_action = getattr(self.view, self.view.action, None)
         if hasattr(sub_action, '_nested_view'):
             schema = copy(self)
-            schema.view = self.__get_nested_view_obj(sub_action._nested_view, sub_action)
-            result = getattr(schema, func_name)(*args, **kwargs)
-            if result:
-                return result
+            try:
+                schema.view = self.__get_nested_view_obj(sub_action._nested_view, sub_action)
+                result = getattr(schema, func_name)(*args, **kwargs)
+                if result:
+                    return result
+            except Exception as err:
+                warn(
+                    "Error in parse '{self.view.action}'."
+                    " Using default inspection. Err: {err}".format(self=self, err=err)
+                )
         return getattr(super(), func_name)(*args, **kwargs)
 
     def get_view_serializer(self, *args, **kwargs):

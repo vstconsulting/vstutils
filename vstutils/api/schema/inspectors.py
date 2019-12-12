@@ -99,11 +99,11 @@ class VSTFieldInspector(FieldInspector):
 
 class AutoCompletionFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
-        # pylint: disable=unused-variable,invalid-name
+        # pylint: disable=invalid-name
         if not isinstance(field, fields.AutoCompletionField):
             return NotHandled
 
-        SwaggerType, ChildSwaggerType = self._get_partial_types(
+        SwaggerType, _ = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
         kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE)
@@ -140,7 +140,7 @@ class DependEnumFieldInspector(FieldInspector):
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
-class FkFieldInspector(FieldInspector):  # nocv
+class FkFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
         if not isinstance(field, fields.FkField):
