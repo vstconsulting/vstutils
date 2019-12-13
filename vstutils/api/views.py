@@ -367,6 +367,7 @@ class LangViewSet(base.ReadOnlyModelViewSet):
     model = models.Language
     serializer_class = LanguageSerializer
     serializer_class_one = OneLanguageSerializer
+    permission_classes = (rest_permissions.IsAuthenticatedOrReadOnly,)
 
     def get_object(self):
         try:
