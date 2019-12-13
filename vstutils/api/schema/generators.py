@@ -25,7 +25,11 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
     endpoint_enumerator_class = EndpointEnumerator
 
     def __init__(self, *args, **kwargs):
-        kwargs['version'] = settings.VST_API_VERSION
+        args = list(args)
+        if len(args) >= 2:
+            args[1] = settings.VST_API_VERSION  # nocv
+        else:
+            kwargs['version'] = settings.VST_API_VERSION
         super().__init__(*args, **kwargs)
 
     def _get_subname(self, name):

@@ -253,10 +253,12 @@ class VSTUtilsTestCase(BaseTestCase):
         test_obj.test = 'test'
         self.assertEqual(test_obj.val, 'test')
 
-
     def test_paginator(self):
         qs = self.get_model_filter('django.contrib.auth.models.User').order_by('email')
         for _ in utils.Paginator(qs, chunk_size=1).items():
+            pass
+
+        for _ in Host.objects.paged(chunk_size=1):
             pass
 
     def test_render_and_file(self):
@@ -732,6 +734,7 @@ class ProjectTestCase(BaseTestCase):
         Host.objects.create(name=self.random_name(), hidden=True)
         self.assertEqual(Host.objects.all().count(), 2)
         self.assertEqual(Host.objects.all().cleared().count(), 1)
+        self.assertTrue(hasattr(Host.objects, 'test_filter'))
 
     def _check_subhost(self, id, *args, **kwargs):
         suburls = '/'.join(['{}/{}'.format(s, i) for s, i in args])

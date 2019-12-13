@@ -9,7 +9,11 @@ from django.db import models
 from .utils import Paginator
 
 
-class BQuerySet(models.QuerySet):  # noprj
+def is_class_method_or_function(obj):
+    return inspect.isfunction(obj) or inspect.ismethod(obj)
+
+
+class BQuerySet(models.QuerySet):
     """
     Represent a lazy database lookup for a set of objects.
     Allows to override default iterable class by `custom_iterable_class` attr.
@@ -31,7 +35,7 @@ class BQuerySet(models.QuerySet):  # noprj
             self.__iterable_class__ = value
 
     @_iterable_class.deleter
-    def _iterable_class(self):
+    def _iterable_class(self):  # nocv
         del self.__iterable_class__
 
     def paged(self, *args, **kwargs):
@@ -41,10 +45,10 @@ class BQuerySet(models.QuerySet):  # noprj
         """
         return self.get_paginator(*args, **kwargs).items()
 
-    def get_paginator(self, *args, **kwargs) -> Paginator:
+    def get_paginator(self, *args, **kwargs):
         return Paginator(self.filter(), *args, **kwargs)
 
-    def cleared(self) -> models.QuerySet:
+    def cleared(self):
         """
         Filter queryset for models with attribute 'hidden' and
         exclude all hidden objects.
@@ -54,7 +58,7 @@ class BQuerySet(models.QuerySet):  # noprj
             else self
         )
 
-    def _find(self, field_name, tp_name, *args, **kwargs) -> models.QuerySet:
+    def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
         field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
         if field is None:
             return self
@@ -62,7 +66,7 @@ class BQuerySet(models.QuerySet):  # noprj
             return getattr(self, tp_name)(**{field_name+"__in": field})
         return getattr(self, tp_name)(**{field_name: field})
 
-    def as_manager(cls) -> models.Manager:
+    def as_manager(cls):
         manager = BaseManager.from_queryset(cls)()
         manager._built_with_as_manager = True
         return manager
@@ -70,14 +74,14 @@ class BQuerySet(models.QuerySet):  # noprj
     as_manager = classmethod(as_manager)
 
 
-class BaseManager(models.Manager):  # noprj
+class BaseManager(models.Manager):
 
     @classmethod
     def _get_queryset_methods(cls, queryset_class):
         """
         Django overrloaded method for add cyfunction.
         """
-        def create_method(name, method):
+        def create_method(name, method):  # nocv
             def manager_method(self, *args, **kwargs):
                 return getattr(self.get_queryset(), name)(*args, **kwargs)
 
@@ -87,8 +91,7 @@ class BaseManager(models.Manager):  # noprj
 
         orig_method = models.Manager._get_queryset_methods
         new_methods = orig_method(queryset_class)
-        inspect_func = inspect.isfunction
-        for name, method in inspect.getmembers(queryset_class, predicate=inspect_func):
+        for name, method in inspect.getmembers(queryset_class, predicate=is_class_method_or_function):
             # Only copy missing methods.
             if hasattr(cls, name) or name in new_methods:
                 continue
@@ -96,7 +99,7 @@ class BaseManager(models.Manager):  # noprj
             if queryset_only or (queryset_only is None and name.startswith('_')):
                 continue
             # Copy the method onto the manager.
-            new_methods[name] = create_method(name, method)
+            new_methods[name] = create_method(name, method)  # nocv
         return new_methods
 
 
@@ -107,23 +110,23 @@ class Manager(BaseManager.from_queryset(BQuerySet)):
     """
 
 
-class BaseModel(models.Model):  # noprj
+class BaseModel(models.Model):
     # pylint: disable=no-member
     __slots__ = ('no_signal',)
     objects    = Manager()
 
-    def __init__(self, *args, **kwargs):  # nocv
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.no_signal = False
 
     class Meta:
         abstract = True
 
-    def __str__(self):  # nocv
+    def __str__(self):
         return self.__unicode__()
 
 
-class BModel(BaseModel):  # noprj
+class BModel(BaseModel):
     """
     Default model class with usefull attributes.
 
@@ -156,5 +159,5 @@ class BModel(BaseModel):  # noprj
     class Meta:
         abstract = True
 
-    def __unicode__(self):  # nocv
+    def __unicode__(self):
         return "<{}>".format(self.id)
