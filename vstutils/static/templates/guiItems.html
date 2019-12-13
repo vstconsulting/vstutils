@@ -17,7 +17,7 @@
                         <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
                             <span class="fa fa-arrow-left"></span>
                         </span>
-                                <span class="h1-header" > Error {{ error.status }} </span>
+                                <span class="h1-header" > {{ $t('error') | capitalize }} {{ error.status }} </span>
                             </h1>
                         </div>
                         <div class="col-lg-6">
@@ -48,7 +48,7 @@
                                 <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
                                     <span class="fa fa-arrow-left"></span>
                                 </span>
-                                <span class="h1-header" > {{ title  | capitalize | split }} </span>
+                                <span class="h1-header" > {{ $t(title.toLowerCase())  | capitalize | split }} </span>
                             </h1>
                         </div>
                         <div class="col-lg-6" >
@@ -116,17 +116,22 @@
 <script type="text/x-template" id="template_breadcrumbs">
     <ol class="breadcrumb float-sm-right">
         <li
-                v-for="breadcrumb in breadcrumbs"
+                v-for="(breadcrumb, index) in breadcrumbs"
                 class="breadcrumb-item"
                 :class="{'active': !breadcrumb.link}"
         >
             <template v-if="breadcrumb.link">
                 <router-link :to="breadcrumb.link">
-                    {{ breadcrumb.name }}
+                    <template v-if="index">
+                        {{ $t(breadcrumb.name.toLowerCase()) }}
+                    </template>
+                    <template v-else>
+                        {{ $t(breadcrumb.name.toLowerCase()) | capitalize }}
+                    </template>
                 </router-link>
             </template>
             <template v-else>
-                {{ breadcrumb.name }}
+                {{ $t(breadcrumb.name.toLowerCase()) }}
             </template>
         </li>
     </ol>
@@ -152,7 +157,7 @@
                 <li class="nav-item for-web login-link">
                     <a class="nav-link" :href="login_url">
                         <i class="fa fa-sign-out text-data"></i>
-                        <span>Login</span>
+                        <span>{{ $t('login') | capitalize }}</span>
                     </a>
                 </li>
             </template>
@@ -177,19 +182,19 @@
 
                     <div class="dropdown-menu dropdown-menu-xs dropdown-menu-right profile-menu background-default">
                         <component :is="link_component" :[link_attr]="profile_url" class="dropdown-item text-data">
-                            <i class="fa fa-id-card-o mr-2 ico-data-default"></i> Profile
+                            <i class="fa fa-id-card-o mr-2 ico-data-default"></i> {{ $t('profile') | capitalize }}
                         </component>
 
                         <div class="dropdown-divider"></div>
 
                         <component :is="link_component" :[link_attr]="profile_settings_url" class="dropdown-item text-data">
-                            <i class="fa fa-cogs mr-2 ico-data-default"></i> Settings
+                            <i class="fa fa-cogs mr-2 ico-data-default"></i> {{ $t('settings') | capitalize }}
                         </component>
 
                         <div class="dropdown-divider for-web"></div>
 
                         <a :href="logout_url" class="dropdown-item for-web text-data">
-                            <i class="fa fa-sign-out mr-2 ico-data-default"></i> Logout
+                            <i class="fa fa-sign-out mr-2 ico-data-default"></i> {{ $t('logout') | capitalize }}
                         </a>
                     </div>
                 </li>
@@ -207,7 +212,7 @@
 <script type="text/x-template" id="template_logo">
     <a href="/" class="logo-link nav-link brand-link logo">
         <i class="nav-icon fa fa-globe mr-2" style="margin-left: 20px;"></i>
-        <span class="brand-text font-weight-light">{{ title | capitalize }}</span>
+        <span class="brand-text font-weight-light">{{ $t(title.toLowerCase()) | capitalize }}</span>
     </a>
 </script>
 
@@ -231,7 +236,7 @@
         <i class="nav-icon ico-menu" :class="icon_classes"></i>
         <p>
             <span class="li-header-span">
-                <i class="li-header-span-i-none menu-text-data">{{ item.name | capitalize }}</i>
+                <i class="li-header-span-i-none menu-text-data">{{ $t(item.name.toLowerCase()) | capitalize }}</i>
             </span>
             <template v-if="item.sublinks">
                 <i class="right fa fa-angle-left ico-menu" @click.stop.prevent="onToggleIconClickHandler"></i>
@@ -264,7 +269,7 @@
         <slot name="footer_buttons"></slot>
 
         <div class="pull-right d-none d-sm-block" style="margin-right: 0px;">
-            <b>Version</b> {{ project_version }}
+            <b>{{ $tc('version', 1) | capitalize }}</b> {{ project_version }}
         </div>
 
         <template v-if="is_debug">
@@ -279,7 +284,7 @@
         <div class="pull-right">
             <a href="#" class="help-text-data"
                onclick="cleanCacheAndReloadPage(); return false;"
-            >Reload cache</a>
+            >{{ ($t('reload') + ' ' + $t('cache')) | capitalize }}</a>
         </div>
         <br>
     </footer>
@@ -297,9 +302,9 @@
             </template>
         </template>
 
-        <gui_group_of_buttons type="sublink" title="sublinks" classes="btn-default" :buttons="sublinks"></gui_group_of_buttons>
+        <gui_group_of_buttons type="sublink" :title="$t('sublinks')" classes="btn-default" :buttons="sublinks"></gui_group_of_buttons>
 
-        <gui_group_of_buttons type="action" title="actions" classes="btn-warning" :buttons="actions"></gui_group_of_buttons>
+        <gui_group_of_buttons type="action" :title="$t('actions')" classes="btn-warning" :buttons="actions"></gui_group_of_buttons>
 
         <template v-if="view.schema.type == 'list'">
             <gui_filters_modal :opt="filters_opt" :view="view" :data="data"></gui_filters_modal>
@@ -327,7 +332,7 @@
     <div class="btn-group" role="group">
         <button type="button" class="btn dropdown-toggle highlight-tr-none gui-btn" :class="classes"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :aria-label="text">
-            {{ text | capitalize }}
+            {{ $t(text.toLowerCase()) | capitalize }}
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
@@ -416,26 +421,26 @@
     <div style="display: inline-block;">
         <gui_modal v-show="show_modal" @close="close" :opt="{footer:false}">
             <template v-slot:header>
-                <h3>{{ info.title }}</h3>
+                <h3>{{ $t(info.title.toLowerCase()) | capitalize }}</h3>
             </template>
             <template v-slot:body>
-                <h4 class="with_bottom_border">Versions</h4>
+                <h4 class="with_bottom_border">{{ $tc('version', 2) | capitalize }}</h4>
                 <ul>
                     <li v-for="(item, index) in info['x-versions']">
-                        <b>{{index}}:</b> {{item}}
+                        <b>{{$t(index).toLowerCase()}}:</b> {{item}}
                     </li>
                 </ul>
                 <template v-for="(item, index) in info['x-links']">
-                    <h4 class="with_bottom_border" style="margin-top:20px;">{{index}}</h4>
+                    <h4 class="with_bottom_border" style="margin-top:20px;">{{ $t(index.toLowerCase()) | capitalize }}</h4>
                     <ul>
                         <template v-if="isArray(item)">
                             <li v-for="prop in item">
-                                <a :href="prop.url" target="_blank" rel="noreferrer">{{prop.name}}</a>
+                                <a :href="prop.url" target="_blank" rel="noreferrer">{{ $t(prop.name.toLowerCase()) | capitalize }}</a>
                             </li>
                         </template>
                         <template v-else>
                             <li>
-                                <a :href="item.url" target="_blank" rel="noreferrer">{{item.name}}</a>
+                                <a :href="item.url" target="_blank" rel="noreferrer">{{ $t(item.name.toLowerCase()) | capitalize }}</a>
                             </li>
                         </template>
                     </ul>
@@ -443,7 +448,7 @@
             </template>
         </gui_modal>
         <a href="#" @click.stop.prevent="open" class="help-text-data">
-            <span class="fa fa-question-circle"></span> About
+            <span class="fa fa-question-circle"></span> {{ $t('app info') | capitalize }}
         </a>
     </div>
 </script>
@@ -451,7 +456,7 @@
 <!-- template of gui_customizer -->
 <script type="text/x-template" id="template_gui_customizer">
     <div class="p-3 customizer-options">
-        <h5>Customize application styles</h5>
+        <h5>{{ $t('customize application styles') | capitalize }}</h5>
         <hr class="mb-2">
         <field_choices :field="skinField" :wrapper_opt="{use_prop_data: true}"
                        :prop_data="{skin_name: skin_name}"
@@ -482,7 +487,7 @@
 <script type="text/x-template" id="template_entity_list">
     <div class="list-content-component">
         <template v-if="is_empty">
-            <p class="text-center empty-list-p">List is empty.</p>
+            <p class="text-center empty-list-p">{{ $t('list is empty')  | capitalize }}</p>
         </template>
         <template v-else>
             <gui_list_table :instances="data.instances" :fields="fields" :view="view" :opt="opt"></gui_list_table>
@@ -503,19 +508,19 @@
     <div style="display: inline-block;">
         <gui_modal v-show="show_modal" @close="close">
             <template v-slot:header>
-                <h3>Filters</h3>
+                <h3>{{ $t('filters') | capitalize }}</h3>
             </template>
             <template v-slot:body>
                 <filters_wrapper :opt="opt" :view="view" :filters_data="data.filters"></filters_wrapper>
             </template>
             <template v-slot:footer>
-                <button class="btn btn-default btn-close-filters-modal" @click="close" aria-label="Cancel">Cancel</button>
-                <button class="btn btn-primary btn-apply-filters" @click="filter" aria-label="Filter">Filter</button>
+                <button class="btn btn-default btn-close-filters-modal" @click="close" aria-label="Cancel">{{ $t('cancel') | capitalize }}</button>
+                <button class="btn btn-primary btn-apply-filters" @click="filter" aria-label="Filter">{{ $t('apply') | capitalize }}</button>
             </template>
         </gui_modal>
         <button class="btn gui-btn btn-default btn-open-filters-modal" @click="open" aria-label="Filters">
             <i class="fa fa-sliders" aria-hidden="true"></i>
-            <span class="d-none d-lg-inline-block title-for-btn">Filters</span>
+            <span class="d-none d-lg-inline-block title-for-btn">{{ $t('filters') | capitalize }}</span>
         </button>
     </div>
 </script>
@@ -550,7 +555,7 @@
             </th>
 
             <th v-for="field in fields" v-if="!hideField(field)" :class="td_classes('td', field.options.name)">
-                {{ field.options.title || field.options.name | capitalize | split }}
+                {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
             </th>
 
             <th style="width: 60px;" :class="td_classes('column', 'actions')" v-if="child_actions_exist"></th>
@@ -605,14 +610,14 @@
 
         <gui_modal v-show="show_modal" @close="close">
             <template v-slot:header>
-                <h3>Add child instances</h3>
+                <h3>{{ ($t('add') + ' ' + $t('child instances'))| capitalize }}</h3>
             </template>
             <template v-slot:body>
                 <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
                 </current_search_input>
                 <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
                 <template v-if="is_empty">
-                    <p class="text-center">List is empty.</p>
+                    <p class="text-center">{{ $t('list is empty')  | capitalize }}</p>
                 </template>
                 <template v-else>
                     <current_table :instances="instances" :opt="opt" @changeValue="changeValue" @setSelections="setSelections" @toggleSelection="toggleSelection">
@@ -620,13 +625,13 @@
                 </template>
             </template>
             <template v-slot:footer>
-                <button class="btn btn-default btn-operation-add-child-close" @click="close" aria-label="Cancel">Cancel</button>
-                <button class="btn btn-primary btn-operation-add-child-apply" @click="addSelected" aria-label="Add selected">Add selected</button>
+                <button class="btn btn-default btn-operation-add-child-close" @click="close" aria-label="Cancel">{{ $t('cancel') | capitalize }}</button>
+                <button class="btn btn-primary btn-operation-add-child-apply" @click="addSelected" aria-label="Add selected">{{ $t('add') | capitalize }}</button>
             </template>
         </gui_modal>
         <button class="btn btn-primary btn-operation-add" @click="open" aria-label="Add">
             <span class="fa fa-folder-open"></span>
-            <span class="d-none d-lg-inline-block title-for-btn">Add</span>
+            <span class="d-none d-lg-inline-block title-for-btn">{{ $t('add') | capitalize }}</span>
         </button>
     </div>
 </script>
@@ -642,10 +647,10 @@
             </th>
 
             <th v-for="field in fields" v-if="!hideField(field)" :class="td_classes('td', field.options.name)">
-                {{ field.options.title || field.options.name | capitalize | split }}
+               {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
             </th>
 
-            <th style="width: 120px;" :class="td_classes('column', 'actions')" v-if="with_actions">Actions</th>
+            <th style="width: 120px;" :class="td_classes('column', 'actions')" v-if="with_actions">{{ $t('actions') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -714,13 +719,13 @@
     <div class="container-fluid fields-wrapper">
         <div class="row">
             <div class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6" v-if="show_fields_select">
-                <label class="control-label">Add field</label>
+                <label class="control-label">{{ ($t('add') + ' ' + $t('field')) | capitalize }}</label>
                 <select class="form-control" id="show_not_required_fields_select"
                         @change="addFieldHandler($event.target.value); $event.target.selectedIndex = 0; return false;"
                 >
-                    <option disabled selected >Select field</option>
+                    <option disabled selected >{{ ($t('select') + ' ' + $t('field')) | capitalize }}</option>
                     <option v-for="field in fields" :value="field.options.name" :disabled="field.options.required">
-                        {{ field.options.title  || field.options.name | capitalize | split }}
+                        {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
                     </option>
                 </select>
             </div>
@@ -755,7 +760,7 @@
                 <span @click="goToHistoryRecord(-1)" class="btn btn-default btn-previous-page">
                     <span class="fa fa-arrow-left"></span>
                 </span>
-                <span class="h1-header" > {{ title }} </span>
+                <span class="h1-header">{{ $t(title.toLowerCase()) | capitalize }}</span>
             </h1>
         </section>
         <section class="content">
@@ -763,7 +768,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="error-text-wrapper">
-                            <p class="text-center error-p"> {{ message }}</p>
+                            <p class="text-center error-p">{{ $t(message.toLowerCase()) | capitalize }}</p>
                         </div>
                     </div>
                 </div>
@@ -789,14 +794,14 @@
                         <h3>{{ value }}&nbsp;</h3>
                     </div>
                 </transition>
-                <p>{{ item.title || item.name | capitalize }}</p>
+                <p>{{ $tc((item.title || item.name).toLowerCase(), value) | capitalize }}</p>
             </div>
             <div class="icon hidden-xs" style="top: 0px;">
                 <i class="fa fa-cog"></i>
             </div>
             <template v-if="item.url">
                 <router-link :to="item.url" class="small-box-footer">
-                    More info <i class="fa fa-arrow-circle-right"></i>
+                    {{ $t('more info') | capitalize }} <i class="fa fa-arrow-circle-right"></i>
                 </router-link>
             </template>
             <template v-else>
@@ -812,7 +817,7 @@
         <!--<div class="col-lg-12 col-12 dnd-block">-->
         <div class="card card-info">
             <div class="card-header ui-sortable-handle cursor-move1">
-                {{ item.title || item.name | capitalize }}
+                {{ $t((item.title || item.name).toLowerCase()) | capitalize }}
                 <div class="pull-right">
                     <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
                             @click="toggleCollapsed" aria-label="toggle"

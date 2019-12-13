@@ -2112,6 +2112,10 @@ input[type=color]{
     transition: opacity .3s ease;
 }
 
+.select2-dropdown {
+    z-index: 1160;
+}
+
 .modal-wrapper {
     display: table-cell;
     vertical-align: middle;

@@ -5,7 +5,7 @@
 -->
 <!-- label of guiField -->
 <script type="text/x-template" id="template_field_part_label">
-    <label :id="label_id" :class="classes" :style="styles">{{ field.options.title || field.options.name | capitalize | split }}</label>
+    <label :id="label_id" :class="classes" :style="styles">{{ label | capitalize | split }}</label>
 </script>
 
 <!-- base button of guiField -->
@@ -45,7 +45,7 @@
 
 <!-- description (help text) of guiField -->
 <script type="text/x-template" id="template_field_part_description">
-    <div :class="classes" :style="styles">{{ field.options.description || field.options.help }}</div>
+    <div :class="classes" :style="styles">{{ description }}</div>
 </script>
 
 <!-- list_view of guiField -->
@@ -103,7 +103,7 @@
     >
         <div class="ico-on fa fa-toggle-on" style="cursor: not-allowed!important;" ></div>
         <div class="ico-off fa  fa-toggle-off" style="cursor: not-allowed!important;" ></div>
-        <div class="boolean-title" style="cursor: not-allowed!important;">Boolean value</div>
+        <div class="boolean-title" style="cursor: not-allowed!important;">{{ $t('boolean value') | capitalize }}</div>
     </div>
 </script>
 
@@ -119,7 +119,7 @@
         >
             <div class="ico-on fa fa-toggle-on" ></div>
             <div class="ico-off fa  fa-toggle-off" ></div>
-            <div class="boolean-title" >Boolean value</div>
+            <div class="boolean-title" >{{ $t('boolean value') | capitalize }}</div>
         </div>
         <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
     </div>
@@ -225,7 +225,7 @@
         <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
 
         <textarea :value="value" @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
-                  placeholder='Enter value'  :class="classes" :style="styles"
+                  :placeholder="$t('enter value') | capitalize"  :class="classes" :style="styles"
                   :required="attrs['required']" :minlength="attrs['minlength']" :maxlength="attrs['maxlength']"
                   :aria-labelledby="label_id" :aria-label="aria_label"
         ></textarea>
@@ -309,7 +309,7 @@
         <img :src="img_src" :alt="img_alt" class="image-field-content" @click="openImage">
         <gui_modal v-show="show_modal" @close="closeImage" :opt="modal_opt">
             <template v-slot:header>
-                <h3>{{ img_alt | capitalize | split }}</h3>
+                <h3>{{ $t(img_alt.toLowerCase()) | capitalize | split }}</h3>
             </template>
             <template v-slot:body>
                 <img :src="img_src" :alt="img_alt" class="image-field-content">
@@ -638,14 +638,14 @@
 
         <gui_modal v-show="show_modal" @close="close">
             <template v-slot:header>
-                <h3>{{ qs.model.name | capitalize }}</h3>
+                <h3>{{ $t(qs.model.name.toLowerCase()) | capitalize }}</h3>
             </template>
             <template v-slot:body>
                         <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems">
                         </current_search_input>
                         <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
                         <template v-if="is_empty">
-                            <p class="text-center">List is empty.</p>
+                            <p class="text-center">{{ $t('list is empty')  | capitalize }}</p>
                         </template>
                         <template v-else>
                             <current_table :instances="instances" :qs="qs" :field_props="field_props"
@@ -654,8 +654,8 @@
                         </template>
             </template>
             <template v-slot:footer>
-                <button class="btn btn-default" @click="close" aria-label="Cancel">Cancel</button>
-                <button class="btn btn-primary" @click="setNewValue" aria-label="Add selected">Add selected</button>
+                <button class="btn btn-default" @click="close" aria-label="Cancel">{{ $t('cancel') | capitalize }}</button>
+                <button class="btn btn-primary" @click="setNewValue" aria-label="Add selected">{{ $t('add') | capitalize }}</button>
             </template>
         </gui_modal>
 
@@ -676,7 +676,7 @@
             </th>
 
             <th v-for="field in fields" v-if="!hideField(field)">
-                {{ field.options.title || field.options.name | capitalize | split }}
+                {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
             </th>
         </tr>
         </thead>
@@ -713,11 +713,11 @@
 <script type="text/x-template" id="template_fk_multi_autocomplete_modal_search_input">
     <div class="input-group mb-3">
         <div class="input-group-prepend hidden-360">
-            <span class="input-group-text" >{{ field_props.view_field | capitalize }}</span>
+            <span class="input-group-text" >{{ $t(field_props.view_field.toLowerCase()) | capitalize }}</span>
         </div>
         <input type="text" class="form-control rounded-360 modal-list-search-input"
                :value="search_input" @input="changeSearchInput($event.target.value)" @keypress="keyPressHandler"
-               :placeholder="'Search by ' + field_props.view_field"
+               :placeholder="($t('search by') + ' ' + $t(field_props.view_field.toLowerCase())) | capitalize"
         >
         <div class="input-group-append modal-list-search-apply" @click="filterQuerySetItems">
             <span class="input-group-text" >
@@ -772,7 +772,7 @@
             </template>
             <template v-else>
                 <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                    <label class="control-label">{{ index | capitalize | split }}</label>
+                    <label class="control-label">{{ $t(index.toLowerCase()) | capitalize | split }}</label>
                     <div class="row">
                         <component
                                 v-for="real_field in item"
@@ -804,7 +804,7 @@
             </template>
             <template v-else>
                 <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
-                    <label class="control-label">{{ index | capitalize}}</label>
+                    <label class="control-label">{{ $t(index.toLowerCase()) | capitalize}}</label>
                     <div class="row">
                         <component
                                 v-for="real_field in item"
@@ -976,7 +976,7 @@
                 :title="field.options.help || field.options.description"
                 @click="onClickHandler" :aria-label="field.options.title || field.options.name"
         >
-            {{ field.options.title || field.options.name | capitalize | split }}
+            {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
         </button>
     </div>
 </script>

@@ -144,6 +144,11 @@ class APIRouter(_AbstractRouter):
         return urls
 
     def generate(self, views_list):
+        if r'_lang' not in views_list:
+            views_list['_lang'] = {
+                'view': 'vstutils.api.views.LangViewSet'
+            }
+
         super().generate(views_list)
 
         if r'_bulk' not in views_list:

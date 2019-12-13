@@ -72,8 +72,7 @@ class ApiConnector { /* jshint unused: false */
     loadSchema() {
         let schema_url = "/openapi/?format=openapi";
         return this.query('get', schema_url).then(response => {
-            this.openapi = response.data;
-            return this.openapi;
+            return response.data;
         }).catch(error => {
             debugger;
             throw new Error(error);
@@ -85,8 +84,7 @@ class ApiConnector { /* jshint unused: false */
      */
     getSchemaFromCache() {
         return app.files_cache.getFile('openapi').then(response => {
-            this.openapi = JSON.parse(response.data);
-            return this.openapi;
+            return JSON.parse(response.data);
         }).catch(error => {
             return this.loadSchema().then(openapi => {
                 app.files_cache.setFile('openapi', JSON.stringify(openapi));
@@ -112,12 +110,89 @@ class ApiConnector { /* jshint unused: false */
      */
     getSchema() {
         return this._getSchema().then(openapi => {
+            this.openapi = openapi;
             tabSignal.emit("openapi.loaded", openapi);
             return openapi;
         }).catch(error => {
             throw error;
         });
     }
+
+    /**
+     * Method, that loads list of App languages from API.
+     * @return {promise} Promise of getting list of App languages from API.
+     */
+    loadLanguages() {
+        return this.bulkQuery({data_type: ['_lang'], method: 'get'}).then(response => {
+            return response.data.results;
+        });
+    }
+
+    /**
+     * Method, that gets list of App languages from cache.
+     * @return {promise} Promise of getting list of App languages from Cache.
+     */
+    getLanguagesFromCache() {
+        return app.files_cache.getFile('languages').then(response => {
+            return JSON.parse(response.data);
+        }).catch(error => {
+            return this.loadLanguages().then(languages => {
+                app.files_cache.setFile('languages', JSON.stringify(languages));
+                return languages;
+            });
+        });
+    }
+
+    /**
+     * Method, that gets list of App languages.
+     * @return {promise} Promise of getting list of App languages.
+     */
+    getLanguages() {
+        if(app && app.files_cache) {
+            return this.getLanguagesFromCache();
+        }
+        return this.loadLanguages();
+    }
+
+    /**
+     * Method, that loads translations for some language from API.
+     * @param {string} lang Code of language, translations of which to load.
+     * @return {promise} Promise of getting translations for some language from API.
+     */
+    loadTranslations(lang) {
+        return this.bulkQuery({data_type: ['_lang', lang], method: 'get'}).then(response => {
+            return response.data.translations;
+        });
+    }
+
+    /**
+     * Method, that gets translations for some language from cache.
+     * @param {string} lang Code of language, translations of which to load.
+     * @return {promise} Promise of getting translations for some language from Cache.
+     */
+    getTranslationsFromCache(lang) {
+        return app.files_cache.getFile('translations.' + lang).then(response => {
+            return JSON.parse(response.data);
+        }).catch(error => {
+            return this.loadTranslations(lang).then(translations => {
+                app.files_cache.setFile('translations.' + lang, JSON.stringify(translations));
+                return translations;
+            });
+        });
+    }
+
+    /**
+     * Method, that gets translations for some language.
+     * @param {string} lang Code of language, translations of which to load.
+     * @return {promise} Promise of getting translations for some language.
+     */
+    getTranslations(lang) {
+        if(app && app.files_cache) {
+            return this.getTranslationsFromCache(lang);
+        }
+        return this.loadTranslations(lang);
+    }
+
     /**
      * Method, that sends API request.
      * @param {string} method Method of HTTP request.
@@ -238,7 +313,7 @@ let openapi_dictionary = { /* jshint unused: false */
             base: {
                 remove: {
                     name: 'remove',
-                    title: 'Remove',
+                    title: 'remove',
                     icon_classes: ['fa', 'fa-trash'],
                     title_classes: ['d-none', 'd-lg-inline-block'],
                     classes: ['btn-danger', 'danger-right'],
@@ -247,20 +322,20 @@ let openapi_dictionary = { /* jshint unused: false */
             list: {
                 new: {
                     name: 'new',
-                    title: 'Create',
+                    title: 'create',
                     icon_classes: ['fa', 'fa-plus'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
                 add: {
                     name: 'add',
-                    title: 'Add',
+                    title: 'add',
                     component: 'gui_add_child_modal',
                 },
             },
             page: {
                 edit: {
                     name: 'edit',
-                    title: 'Edit',
+                    title: 'edit',
                     icon_classes: ['fa', 'fa-pencil-square-o'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
@@ -268,7 +343,7 @@ let openapi_dictionary = { /* jshint unused: false */
             page_new: {
                 save_new: {
                     name: 'save',
-                    title: 'Save',
+                    title: 'save',
                     icon_classes: ['fa', 'fa-floppy-o'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
@@ -276,13 +351,13 @@ let openapi_dictionary = { /* jshint unused: false */
             page_edit: {
                 save: {
                     name: 'save',
-                    title: 'Save',
+                    title: 'save',
                     icon_classes: ['fa', 'fa-floppy-o'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
                 reload: {
                     name: 'reload',
-                    title: 'Reload',
+                    title: 'reload',
                     icon_classes: ['fa', ' fa-refresh'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
@@ -290,7 +365,7 @@ let openapi_dictionary = { /* jshint unused: false */
             action: {
                 execute: {
                     name: 'execute',
-                    title: 'Send',
+                    title: 'send',
                     icon_classes: ['fa', 'fa-upload'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 }

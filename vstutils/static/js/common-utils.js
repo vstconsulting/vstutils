@@ -939,6 +939,20 @@ class CurrentView {
 }
 
 /**
+ * Function, that returns translation of string.
+ * @param {string} str - String to translate.
+ * @return {string}
+ * @private
+ */
+function _translate(str) {
+    if(app && app.application && app.application.$t) {
+        return app.application.$t(str);
+    }
+
+    return str;
+}
+
+/**
  * Instance of CurrentView class, that is used in gui tests.
  */
 let current_view = new CurrentView(); /* jshint unused: false */

@@ -173,6 +173,13 @@ const base_field_label_mixin = {
             class_list: ['control-label'],
         };
     },
+    computed: {
+        label() {
+            return this.$t(
+                (this.field.options.title || this.field.options.name).toLowerCase()
+            );
+        },
+    },
 };
 
 /**
@@ -265,6 +272,13 @@ const base_field_description_mixin = {
         return {
             class_list: ['help-block'],
         };
+    },
+    computed: {
+        description() {
+            return this.$t(
+                (this.field.options.description || this.field.options.help || "").toLowerCase()
+            );
+        },
     },
 };
 
@@ -2172,10 +2186,14 @@ const field_binfile_edit_content_mixin = {
 const field_namedbinfile_content_mixin = {
     data() {
         return {
-            title_for_empty_value: 'No file selected',
+            translate_string: 'file n selected',
         };
     },
     computed: {
+        title_for_empty_value() {
+            return this.$options.filters.capitalize(this.$tc(this.translate_string, 0));
+        },
+
         val() {
             if(this.value && typeof this.value == "object" && this.value.name) {
                 return this.value.name;
@@ -2192,8 +2210,7 @@ const field_namedbinfile_content_mixin = {
 const field_namedbinimage_content_mixin = {
     data() {
         return {
-            title_for_empty_value: 'No image selected',
-
+            translate_string: 'image n selected',
         };
     },
     components: {
@@ -2235,16 +2252,10 @@ const field_namedbinimage_content_mixin = {
  */
 const field_multiplenamedbinfile_content_mixin = {
     mixins: [field_namedbinfile_content_mixin],
-    data() {
-        return {
-            type_in_singal: 'file',
-            type_in_plural: 'files',
-        };
-    },
     computed: {
         val() {
             if(this.value && Array.isArray(this.value) && this.value.length > 0) {
-                return this.value.length + " " + (this.value.length === 1 ? this.type_in_singal : this.type_in_plural) +" selected";
+                return this.$options.filters.capitalize(this.$tc(this.translate_string, this.value.length));
             }
 
             return this.title_for_empty_value;
@@ -2258,12 +2269,6 @@ const field_multiplenamedbinfile_content_mixin = {
  */
 const field_multiplenamedbinimage_content_mixin = {
     mixins: [field_multiplenamedbinfile_content_mixin, field_namedbinimage_content_mixin],
-    data() {
-        return {
-            type_in_singal: 'image',
-            type_in_plural: 'images',
-        };
-    },
 };
 
 /**
@@ -2766,7 +2771,7 @@ const gui_fields_mixins = { /* jshint unused: false */
                 if(file && file.name) {
                     $(el).text(file.name);
                 } else {
-                    $(el).text("No file selected");
+                    $(el).text(this.$options.filters.capitalize(this.$t('no file selected')));
                 }
             }
         },
@@ -4293,3 +4298,64 @@ Vue.filter('split', function (value) {
     }
     return value.replace(/_/g, " ");
 });
+
+/**
+ * Setting of global Vue filter - lower - returns string in lower case.
+ */
+Vue.filter('lower', function (value) {
+    if (!value) {
+        return '';
+    }
+    value = value.toString();
+    return value.toLowerCase();
+});
+
+/**
+ * Setting of global Vue filter - upper - returns string in upper case.
+ */
+Vue.filter('upper', function (value) {
+    if (!value) {
+        return '';
+    }
+    value = value.toString();
+    return value.toUpperCase();
+});
+
+/**
+ * Saving default 'getChoiceIndex' method to defGetChoiceIndex.
+ * @type {VueI18n.getChoiceIndex|*}
+ */
+VueI18n.prototype.defGetChoiceIndex = VueI18n.prototype.getChoiceIndex;
+
+/**
+ * Customization of getChoiceIndex method.
+ * @param choice
+ * @param choicesLength
+ * @return {number}
+ */
+VueI18n.prototype.getChoiceIndex = function (choice, choicesLength) {
+    if (this.locale !== 'ru') {
+        this.defGetChoiceIndex(choice, choicesLength);
+    }
+
+    if (choice === 0) {
+        return 0;
+    }
+
+    if(choice > 100) {
+        choice = Number(choice.toString().slice(-2));
+    }
+
+    const teen = choice > 10 && choice < 20;
+    const endsWithOne = choice % 10 === 1;
+
+    if (!teen && endsWithOne) {
+        return 1;
+    }
+
+    if (!teen && choice % 10 >= 2 && choice % 10 <= 4) {
+        return 2;
+    }
+
+    return (choicesLength < 4) ? 2 : 3;
+};

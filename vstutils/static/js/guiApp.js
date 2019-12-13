@@ -24,7 +24,19 @@ class App {
      * Method gets openapi_schema, inits models, inits views and mount application to DOM.
      */
     start() {
-        return this.api.getSchema().then(openapi_schema => { /* jshint unused: false */
+        let LANG = guiLocalSettings.get('lang') || 'en';
+        let promises = [
+            this.api.getSchema(),
+            this.api.getLanguages(),
+            this.api.getTranslations(LANG),
+        ];
+
+        return Promise.all(promises).then(response => {
+            this.languages = response[1];
+            this.translations = {
+                [LANG]: response[2],
+            };
+
             fieldsRegistrator.registerAllFieldsComponents();
             this.initModels();
             this.initViews();
@@ -84,6 +96,51 @@ class App {
             }
         }
     }
+
+    /**
+     * Method returns a promise of applying some language to app interface.
+     * This method is supposed to be called after app was mounted.
+     * @param {string} lang Code of language, that should be set as current App language.
+     * @return {Promise}
+     */
+    setLanguage(lang) {
+        return this._prefetchTranslation(lang).then(lang => {
+            this.application.$i18n.locale = lang;
+            guiLocalSettings.set('lang', lang);
+            tabSignal.emit('app.language.changed', {lang: lang});
+            return lang;
+        });
+    }
+
+    /**
+     * Method returns a promise of checking that current language exists and translations for language is loaded.
+     * This method is supposed to be called after app was mounted and only from this.setLanguage(lang) method.
+     * @param {string} lang Code of language, that should be prefetched.
+     * @return {Promise}
+     */
+    _prefetchTranslation(lang) {
+        if(!Object.values(this.languages).map(item => item.code).includes(lang)) {
+            return Promise.reject(false);
+        }
+
+        if(this.translations[lang]) {
+            return Promise.resolve(lang);
+        }
+
+        return this.api.getTranslations(lang).then(transitions => {
+            this.translations = {
+                ...this.translations,
+                [lang]: transitions,
+            };
+
+            this.application.$i18n.setLocaleMessage(lang, transitions);
+            return lang;
+        }).catch(error => {
+            debugger;
+            throw error;
+        });
+    }
+
     /**
      * Method, that creates store and router for an application and mounts it to DOM.
      */
@@ -92,9 +149,14 @@ class App {
 
         let store_constructor = new StoreConstructor(this.views);  /* globals StoreConstructor*/
         let routerConstructor = new RouterConstructor( /* globals RouterConstructor */
-             /* globals routesComponentsTemplates, customRoutesComponentsTemplates */
+            /* globals routesComponentsTemplates, customRoutesComponentsTemplates */
             this.views, routesComponentsTemplates, customRoutesComponentsTemplates,
         );
+
+        let i18n = new VueI18n({
+            locale: guiLocalSettings.get('lang') || 'en',
+            messages: this.translations,
+        });
 
         this.application = new Vue({
             data: {
@@ -116,6 +178,7 @@ class App {
             },
             router: routerConstructor.getRouter(),
             store: store_constructor.getStore(),
+            i18n: i18n,
         }).$mount('#RealBody');
 
         // Removes onLoadingErrorHandler,

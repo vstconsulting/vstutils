@@ -4,14 +4,36 @@ import json
 from django.conf import settings
 from django.test import Client
 from django.db import transaction
+from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework import permissions as rest_permissions
 try:
     from Queue import Queue
 except ImportError:  # nocv
     from queue import Queue
-from . import base, serializers, permissions, filters, decorators as deco, responses
+from . import base, serializers, permissions, filters, decorators as deco, responses, models
 from ..utils import Dict, import_class
+
+
+class LanguageSerializer(serializers.VSTSerializer):
+    class Meta:
+        model = models.Language
+        fields = (
+            'code',
+            'name'
+        )
+
+
+class OneLanguageSerializer(serializers.VSTSerializer):
+    translations = serializers.DataSerializer(read_only=True)
+
+    class Meta:
+        model = models.Language
+        fields = (
+            'code',
+            'name',
+            'translations'
+        )
 
 
 class UserViewSet(base.ModelViewSetSet):
@@ -338,3 +360,30 @@ class HealthView(base.ListNonModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return base.Response(*self.health_backend.get()).resp
+
+
+class LangViewSet(base.ReadOnlyModelViewSet):
+    schema = None
+    model = models.Language
+    serializer_class = LanguageSerializer
+    serializer_class_one = OneLanguageSerializer
+
+    def get_object(self):
+        try:
+            return super().get_object()
+        except Http404:
+            # Perform the lookup filtering.
+            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+            assert lookup_url_kwarg in self.kwargs, (
+                    'Expected view %s to be called with a URL keyword argument '
+                    'named "%s". Fix your URL conf, or set the `.lookup_field` '
+                    'attribute on the view correctly.' %
+                    (self.__class__.__name__, lookup_url_kwarg)
+            )
+
+            obj_kwargs = {
+                self.lookup_field: self.kwargs[lookup_url_kwarg],
+                'name': self.kwargs[lookup_url_kwarg],
+            }
+            return self.model(**obj_kwargs)

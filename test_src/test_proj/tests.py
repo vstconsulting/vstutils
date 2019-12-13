@@ -658,6 +658,37 @@ class DefaultBulkTestCase(BaseTestCase):
         self.assertEqual(result[1]['data']['username'], test_user['username'])
 
 
+class LangTestCase(BaseTestCase):
+
+    def test_lang(self):
+        bulk_data = [
+            {'data_type': ['_lang'], 'method': 'get'},
+            {'data_type': ['_lang', 'ru'], 'method': 'get'},
+            {'data_type': ['_lang', 'en'], 'method': 'get'},
+            {'data_type': ['_lang', 'unkn'], 'method': 'get'},
+            {'data_type': ['_lang', 'e_list'], 'method': 'get'},
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], 3)
+
+        self.assertEqual(results[1]['data']['code'], 'ru')
+        self.assertEqual(results[1]['data']['name'], 'Russian')
+        self.assertEqual(results[1]['data']['translations']['Hello world!'], 'Привет мир!')
+        self.assertFalse('Unknown string' in results[1]['data']['translations'])
+
+        self.assertEqual(results[2]['data']['code'], 'en')
+        self.assertEqual(results[2]['data']['name'], 'English')
+
+        self.assertFalse('Hello world!' in results[3]['data']['translations'])
+
+        self.assertEqual(results[4]['data']['code'], 'e_list')
+        self.assertEqual(results[4]['data']['name'], 'Empty list')
+        self.assertEqual(results[4]['data']['translations'], {})
+
+
+
+
 class CoreApiTestCase(BaseTestCase):
 
     def test_coreapi(self):
