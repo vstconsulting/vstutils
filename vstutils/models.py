@@ -10,7 +10,9 @@ from .utils import Paginator
 
 
 def is_class_method_or_function(obj):
-    return inspect.isfunction(obj) or inspect.ismethod(obj)
+    return inspect.isfunction(obj) or \
+           inspect.ismethod(obj) or \
+           isinstance(obj, type(is_class_method_or_function))
 
 
 class BQuerySet(models.QuerySet):
