@@ -279,17 +279,19 @@ const page_with_data_mixin = {
         removeInstance() {
             let instance = this.data.instance;
             instance.delete().then(response => {
-                guiPopUp.success(pop_up_msg.instance.success.remove.format(
-                    [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name]
-                ));
+                guiPopUp.success(
+                    this.$t(pop_up_msg.instance.success.remove).format(
+                        [instance.getViewFieldValue() || instance.getPkValue(), this.$t(this.view.schema.name)]
+                    )
+                );
                 this.deleteQuerySet(this.qs_url);
                 this.deleteQuerySetFromSandBox(this.qs_url);
                 this.openRedirectUrl({path: this.getRedirectUrl()});
             }).catch(error => {
                 let str = app.error_handler.errorToString(error);
 
-                let srt_to_show = pop_up_msg.instance.error.remove.format(
-                    [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name, str],
+                let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format(
+                    [instance.getViewFieldValue() || instance.getPkValue(), this.$t(this.view.schema.name), str],
                 );
 
                 app.error_handler.showError(srt_to_show, str);
@@ -806,9 +808,11 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 let qs = this.getQuerySet(this.view, this.qs_url).clone({url: url});
 
                 qs.formQueryAndSend(method).then(response => {
-                    guiPopUp.success(pop_up_msg.instance.success.execute.format(
-                        [opt.name, this.view.schema.name]
-                    ));
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.execute).format(
+                            [this.$t(opt.name), this.$t(this.view.schema.name)]
+                        )
+                    );
 
                     if(response && response.data) {
                         try {
@@ -824,8 +828,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 }).catch(error => {
                     let str = app.error_handler.errorToString(error);
 
-                    let srt_to_show = pop_up_msg.instance.error.execute.format(
-                        [opt.name, this.view.schema.name, str],
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format(
+                        [this.$t(opt.name), this.$t(this.view.schema.name), str],
                     );
 
                     app.error_handler.showError(srt_to_show, str);
@@ -1281,8 +1285,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 }).catch(error => {
                     let str = app.error_handler.errorToString(error);
 
-                    let srt_to_show = pop_up_msg.instance.error.remove.format(
-                        [instance.getViewFieldValue(), this.view.schema.name, str],
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format(
+                        [instance.getViewFieldValue(), this.$t(this.view.schema.name), str],
                     );
 
                     app.error_handler.showError(srt_to_show, str);
@@ -1308,8 +1312,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
                             }).catch(error => {
                                 let str = app.error_handler.errorToString(error);
 
-                                let srt_to_show = pop_up_msg.instance.error.remove.format(
-                                    [instance.getViewFieldValue(), this.view.schema.name, str],
+                                let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format(
+                                    [instance.getViewFieldValue(), this.$t(this.view.schema.name), str],
                                 );
 
                                 app.error_handler.showError(srt_to_show, str);
@@ -1326,9 +1330,11 @@ let routesComponentsTemplates = { /* jshint unused: false */
              * @param {object} response API response.
              */
             removeInstances_callback(instance, response) {
-                guiPopUp.success(pop_up_msg.instance.success.remove.format(
-                    [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name]
-                ));
+                guiPopUp.success(
+                    this.$t(pop_up_msg.instance.success.remove).format(
+                        [instance.getViewFieldValue() || instance.getPkValue(), this.$t(this.view.schema.name)]
+                    )
+                );
 
                 let url = this.qs_url.replace(/^\/|\/$/g, "") + "/" +
                     instance.getPkValue();
@@ -1403,14 +1409,16 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 let qs = this.getQuerySet(this.view, this.qs_url).clone();
                 qs.query = {};
                 qs.formQueryAndSend('post', opt.data).then(response => {
-                    guiPopUp.success(pop_up_msg.instance.success.add.format(
-                        [this.view.schema.name],
-                    ));
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.add).format(
+                            [this.$t(this.view.schema.name)],
+                        )
+                    );
                 }).catch(error => {
                     let str = app.error_handler.errorToString(error);
 
-                    let srt_to_show = pop_up_msg.instance.error.add.format(
-                        [this.view.schema.name, str],
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.add).format(
+                        [this.$t(this.view.schema.name), str],
                     );
 
                     app.error_handler.showError(srt_to_show, str);
@@ -1481,9 +1489,11 @@ let routesComponentsTemplates = { /* jshint unused: false */
 
                 instance.save(method).then(instance => {
                     this.loading = false;
-                    guiPopUp.success(pop_up_msg.instance.success.create.format(
-                        [this.view.schema.name],
-                    ));
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.create).format(
+                            [this.$t(this.view.schema.name)],
+                        )
+                    );
                     this.deleteQuerySetFromSandBox(this.qs_url);
                     this.openRedirectUrl({path: this.getRedirectUrl({instance: instance})});
                 }).catch(error => {
@@ -1491,8 +1501,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
 
                     let str = app.error_handler.errorToString(error);
 
-                    let srt_to_show = pop_up_msg.instance.error.create.format(
-                        [this.view.schema.name, str],
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.create).format(
+                        [this.$t(this.view.schema.name), str],
                     );
 
                     app.error_handler.showError(srt_to_show, str);
@@ -1590,17 +1600,19 @@ let routesComponentsTemplates = { /* jshint unused: false */
                     qs.cache = instance;
                     this.setQuerySet(this.view, this.qs_url, qs);
 
-                    guiPopUp.success(pop_up_msg.instance.success.save.format(
-                        [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name],
-                    ));
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.save).format(
+                            [instance.getViewFieldValue() || instance.getPkValue(), this.view.schema.name],
+                        )
+                    );
 
                     this.openRedirectUrl({path: this.getRedirectUrl({instance:instance})});
                 }).catch(error => {
                     this.loading = false;
                     let str = app.error_handler.errorToString(error);
 
-                    let srt_to_show = pop_up_msg.instance.error.save.format(
-                        [instance.getViewFieldValue(), this.view.schema.name, str],
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.save).format(
+                        [instance.getViewFieldValue(), this.$t(this.view.schema.name), str],
                     );
 
                     app.error_handler.showError(srt_to_show, str);
@@ -1726,9 +1738,11 @@ let routesComponentsTemplates = { /* jshint unused: false */
                 this.loading = true;
                 instance.queryset.formQueryAndSend(method, data).then(response => {
                     this.loading = false;
-                    guiPopUp.success(pop_up_msg.instance.success.execute.format(
-                        [this.view.schema.name, instance.name.toLowerCase()]
-                    ));
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.execute).format(
+                            [this.$t(this.view.schema.name), instance.name.toLowerCase()]
+                        )
+                    );
                     this.deleteQuerySetFromSandBox(this.qs_url);
                     let data = response.data;
                     this.openRedirectUrl({path: this.getRedirectUrl({data: data, response: response})});
@@ -1736,8 +1750,8 @@ let routesComponentsTemplates = { /* jshint unused: false */
                     this.loading = false;
                     let str = app.error_handler.errorToString(error);
 
-                    let srt_to_show = pop_up_msg.instance.error.execute.format(
-                        [this.view.schema.name, instance.name.toLowerCase(), str],
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format(
+                        [this.view.schema.name, this.$t(instance.name.toLowerCase()), str],
                     );
 
                     app.error_handler.showError(srt_to_show, str);

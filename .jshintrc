@@ -17,6 +17,7 @@
   "devel": true,
 
   "globals": {
+    "_translate": true,
     "addCssClassesToElement": true,
     "ApiConnector": true,
     "api_connector_config": true,
@@ -30,6 +31,7 @@
     "guiFields": true,
     "guiLocalSettings": true,
     "guiPopUp": true,
+    "guiTranslation": true,
     "gui_fields_mixins": true,
     "guiQuerySets": true,
     "hostname": true,
@@ -49,6 +51,7 @@
     "View": true,
     "ViewConstructor": true,
     "Vue": true,
+    "VueI18n": true,
     "XRegExp": true,
     "$": true
   }

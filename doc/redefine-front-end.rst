@@ -128,6 +128,14 @@ app.afterInit
 
 **Description:** This signal will be emitted after app was mounted to the page.
 
+app.language.changed
+~~~~~~~~~~~~~~~~~~~~
+**Signal name:** "app.language.changed".
+
+**Context argument:** obj - {object} - Object with following structure: {lang: lang}, where lang is an code of applied language.
+
+**Description:** This signal will be emitted after app interface language was changed.
+
 models[model_name].fields.beforeInit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 **Signal name:** "models[" + model_name + "].fields.beforeInit". For example, for User model: "models[User].fields.beforeInit".

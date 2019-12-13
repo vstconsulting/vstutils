@@ -65,7 +65,7 @@ guiSkins.default = {
     },
     breadcrumb_bg_color:{
         color_var:"--breadcrumb-bg-color",
-        title:'Customizer sidebar background',
+        title:'Breadcrumbs background',
         format:'color',
         default:"#d2d6de",
         // priority: 8,
@@ -305,7 +305,7 @@ guiSkins.default = {
     },
     background_passiv_color:{
         color_var:"--background-passiv-color",
-        title:'Background active color',
+        title:'Background passive color',
         format:'color',
         default:"#3d434a",
         // priority: 37,
@@ -596,7 +596,7 @@ class GuiCustomizer {
                 // priority: 902,
                 onclick:() => {
                     this.resetSkinSettingsAndUpdateCss();
-                    guiPopUp.success("Skin's settings were successfully reset to default.");
+                    guiPopUp.success(_translate('Skin settings were successfully reset to default.'));
                 },
             },
             saveSkin:{
@@ -606,7 +606,7 @@ class GuiCustomizer {
                 // priority: 903,
                 onclick:() => {
                     this.saveSkinSettings();
-                    guiPopUp.success("Skin's settings were successfully saved.");
+                    guiPopUp.success(_translate('Skin settings were successfully saved'));
                 },
             },
         };

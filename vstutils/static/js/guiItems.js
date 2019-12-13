@@ -6,7 +6,8 @@ const base_button_mixin = {
     template: "#template_button_common",
     computed: {
         title() {
-            return this.options.title || this.options.name;
+            // return this.options.title || this.options.name;
+            return this.$t(this.options.title || this.options.name);
         },
         classes() {
             return this.getRepresentationProperty('classes');
@@ -1081,7 +1082,7 @@ vst_vue_components.items = {
                 return this.$route.name;
             },
             text() {
-                return "Actions on " + this.selected + " items";
+                return this.$t('actions on') + " " + this.selected + " " + this.$tc('on item', this.selected);
             },
             classes() {
                 return ['btn-primary'];

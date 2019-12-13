@@ -50,7 +50,8 @@ guiFields.base = class BaseField {
         let value = data[this.options.name];
         let value_length = 0;
         let samples = pop_up_msg.field.error;
-        let title = this.options.title || this.options.name;
+        let title = (this.options.title || this.options.name).toLowerCase();
+        let $t = _translate;
 
         if(value) {
             value_length = value.toString().length;
@@ -59,7 +60,7 @@ guiFields.base = class BaseField {
         if(this.options.maxLength && value_length > this.options.maxLength) {
             throw {
                 error: 'validation',
-                message: samples.maxLength.format([title, this.options.maxLength]),
+                message: $t(samples.maxLength).format([$t(title), this.options.maxLength]),
             };
         }
 
@@ -71,14 +72,14 @@ guiFields.base = class BaseField {
 
                 throw {
                     error: 'validation',
-                    message: samples.empty.format([title]),
+                    message: $t(samples.empty).format([$t(title)]),
                 };
             }
 
             if(value_length < this.options.minLength) {
                 throw {
                     error: 'validation',
-                    message: samples.minLength.format([title, this.options.minLength]),
+                    message: $t(samples.minLength).format([$t(title), this.options.minLength]),
                 };
             }
         }
@@ -86,14 +87,14 @@ guiFields.base = class BaseField {
         if(this.options.max && value > this.options.max) {
             throw {
                 error: 'validation',
-                message: samples.max.format([title, this.options.max]),
+                message: $t(samples.max).format([$t(title), this.options.max]),
             };
         }
 
         if(this.options.min && value < this.options.min) {
             throw {
                 error: 'validation',
-                message: samples.min.format([title, this.options.min]),
+                message: $t(samples.min).format([$t(title), this.options.min]),
             };
         }
 
@@ -104,7 +105,7 @@ guiFields.base = class BaseField {
         if(value === undefined && this.options.required && !this.options.default) {
             throw {
                 error: 'validation',
-                message: samples.required.format([title]),
+                message: $t(samples.required).format([$t(title)]),
             };
         }
 
@@ -423,9 +424,14 @@ guiFields.email = class EmailField extends guiFields.string {
         let value = super.validateValue(data);
 
         if(this.options.required && !this.constructor.validation_reg_exp.test(String(value))) {
+            let title = (this.options.title || this.options.name).toLowerCase();
+            let $t = _translate;
+
+            let err_msg = '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.';
+
             throw {
                 error: 'validation',
-                message: '<b>"' + (this.options.title || this.options.name) + '"</b> field should be written in <b>"example@mail.com"</b> format.',
+                message: $t(err_msg).format([$t(title)]),
             };
         }
 
@@ -498,9 +504,12 @@ guiFields.namedbinfile = class NamedBinFileField extends guiFields.binfile {
         let value = super.validateValue(data);
 
         if(value && this.options.required && value.name === null && value.content === null) {
+            let title = (this.options.title || this.options.name).toLowerCase();
+            let $t = _translate;
+
             throw {
                 error: 'validation',
-                message: pop_up_msg.field.error.empty.format(this.options.title || this.options.name),
+                message: $t(pop_up_msg.field.error.empty).format($t(title)),
             };
         }
 
@@ -543,9 +552,12 @@ guiFields.multiplenamedbinfile = class MultipleNamedBinFileField extends guiFiel
         let value = super.validateValue(data);
 
         if(value && this.options.required && Array.isArray(value) && value.length === 0) {
+            let title = (this.options.title || this.options.name).toLowerCase();
+            let $t = _translate;
+
             throw {
                 error: 'validation',
-                message: pop_up_msg.field.error.empty.format(this.options.title || this.options.name),
+                message: $t(pop_up_msg.field.error.empty).format($t(title)),
             };
         }
 
@@ -1931,13 +1943,14 @@ guiFields.string_id = class StringIdField extends guiFields.string {
     validateValueCustom(data={}) {
         let value = data[this.options.name];
         let samples = pop_up_msg.field.error;
-        let title = this.options.title || this.options.name;
+        let title = (this.options.title || this.options.name).toLowerCase();
         let exclude_values = ['new', 'edit', 'remove'];
+        let $t = _translate;
 
         if(value && exclude_values.includes(value)) {
             throw {
                 error: 'validation',
-                message: samples.invalid.format([value, title]),
+                message: $t(samples.invalid).format([value, $t(title)]),
             };
         }
 

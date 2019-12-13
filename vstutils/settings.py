@@ -333,7 +333,10 @@ INSTALLED_APPS += [
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
 INSTALLED_APPS += ['drf_yasg']
 
-ADDONS = ['vstutils', ]
+ADDONS = [
+    'vstutils',
+    'vstutils.api.apps.VSTUtilsAppConfig'
+]
 
 INSTALLED_APPS += ADDONS
 
@@ -896,6 +899,7 @@ SPA_STATIC = [
     {'priority': 9, 'type': 'js', 'name': 'js/libs/vue/vue.min.js', 'spa': True, 'api': True},
     {'priority': 9.1, 'type': 'js', 'name': 'js/libs/vue/vuex.min.js', 'spa': True, 'api': True},
     {'priority': 9.2, 'type': 'js', 'name': 'js/libs/vue/vue-router.min.js', 'spa': True, 'api': True},
+    {'priority': 9.3, 'type': 'js', 'name': 'js/libs/vue/vue-i18n.min.js', 'spa': True, 'api': True},
     {'priority': 300, 'type': 'tpl', 'name': 'templates/guiFields.html', 'spa': True, 'api': True},
     {'priority': 300, 'type': 'tpl', 'name': 'templates/guiItems.html', 'spa': True, 'api': True},
     {'priority': 9.8, 'type': 'js', 'name': 'js/guiPopUp.js', 'spa': True, 'api': True},

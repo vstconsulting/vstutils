@@ -271,6 +271,7 @@ function addChangePasswordOperationToView(path) {
     tabSignal.connect("views[" + path + "].created", obj => {
         obj.view.schema.operations.generate_password = {
             name: 'generate_password',
+            title: 'generate password',
         };
     });
 }

@@ -51,3 +51,5 @@ DEBUG = True
 PWA_MANIFEST = {
     'display': 'fullscreen'
 }
+
+LANGUAGES += (('e_list', 'Empty list'),)
