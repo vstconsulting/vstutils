@@ -98,12 +98,11 @@
     <div :class="classes" :style="styles"
          onselectstart="return false"
          onmousedown="return false"
-         style="cursor: not-allowed!important; background-color: #eaedf0;"
          :aria-labelledby="label_id" :aria-label="aria_label"
     >
-        <div class="ico-on fa fa-toggle-on" style="cursor: not-allowed!important;" ></div>
-        <div class="ico-off fa  fa-toggle-off" style="cursor: not-allowed!important;" ></div>
-        <div class="boolean-title" style="cursor: not-allowed!important;">{{ $t('boolean value') | capitalize }}</div>
+        <div class="ico-on fa fa-toggle-on"></div>
+        <div class="ico-off fa  fa-toggle-off"></div>
+        <div class="boolean-title">{{ ($t(text)) | capitalize }}</div>
     </div>
 </script>
 
@@ -114,12 +113,11 @@
              @click="$emit('proxyEvent','toggleValue')"
              onselectstart="return false"
              onmousedown="return false"
-             style="cursor: pointer;"
              :aria-labelledby="label_id" :aria-label="aria_label"
         >
-            <div class="ico-on fa fa-toggle-on" ></div>
-            <div class="ico-off fa  fa-toggle-off" ></div>
-            <div class="boolean-title" >{{ $t('boolean value') | capitalize }}</div>
+            <div class="ico-on fa fa-toggle-on"></div>
+            <div class="ico-off fa  fa-toggle-off"></div>
+            <div class="boolean-title">{{ $t(text) | capitalize }}</div>
         </div>
         <field_hidden_button v-if="with_hidden_button" :field="field" @hideField="$emit('proxyEvent', 'hideField')"></field_hidden_button>
     </div>

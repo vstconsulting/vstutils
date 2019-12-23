@@ -375,6 +375,17 @@ let openapi_dictionary = { /* jshint unused: false */
         types_operations_always_to_add: ['page_new', 'page_edit', 'action'],
     },
     schema_types: {
+        /**
+         * Description of possible properties of some schema type:
+         * 'some_schema_type': {
+         *     query_type: "post|get|put|patch|delete",         // method of http request, that will be used for API request from view instance
+         *     url_postfix: "{string}",                         // postfix, that will be added to view instance URL
+         *     type: "{string}",                                // type of view, that will be added to the view's schema
+         *     autoupdate: "{boolean}",                         // if true, view instance will automatically send API requests for getting fresh data
+         *     hidden: "{boolean}",                             // if true, it means, that views of this type should not be added to the final views dict (they will be removed)
+         *     do_not_connect_with_another_views: "{boolean}",  // if true, it means, that views of this type should not be added as sublinks or actions to another views.
+         * }
+         */
         "_add": {
             query_type: "post",
             url_postfix: "new/",
@@ -383,6 +394,7 @@ let openapi_dictionary = { /* jshint unused: false */
         "_list": {
             query_type: "get",
             url_postfix: "",
+            // name of property from OpenAPI schema, where filters can be find.
             filters: {name: "parameters"},
             type: "list",
             autoupdate: true,

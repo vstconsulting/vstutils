@@ -505,7 +505,7 @@
 
 <!-- Component for a modal window with filter fields -->
 <script type="text/x-template" id="template_filters_modal">
-    <div style="display: inline-block;">
+    <div style="display: inline-block;" v-if="is_there_any_filter_to_display">
         <gui_modal v-show="show_modal" @close="close">
             <template v-slot:header>
                 <h3>{{ $t('filters') | capitalize }}</h3>
