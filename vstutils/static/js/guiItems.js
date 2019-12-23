@@ -1412,6 +1412,11 @@ vst_vue_components.items = {
         mixins: [modal_window_and_button_mixin],
         props:['opt', 'view', 'data'],
         template: "#template_filters_modal",
+        computed: {
+            is_there_any_filter_to_display() {
+                return Object.values(this.view.schema.filters).some(filter => !filter.options.hidden);
+            },
+        },
         methods: {
             filter() {
                 this.$root.$emit(

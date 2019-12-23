@@ -347,55 +347,47 @@ div.spinner div.bar12 {
 .multiple-select .ico-off{
     display: block;
     font-size: 24px;
-    /* color: #f44;*/
     color: #c6c6c6;
 }
 
 .boolean-select {
     padding: .157rem .75rem;
+    cursor: pointer;
+}
+
+.boolean-select_disabled {
+    background-color: #eaedf0;
+    cursor: not-allowed;
 }
 
 .boolean-select.selected .ico-on{
     display: inline-block;
-    cursor: pointer;
 }
 
 .boolean-select.selected .ico-off{
     display: none;
-    cursor: pointer;
 }
 
-.boolean-select .ico-on{
+.boolean-select .ico-on {
     display: none;
     font-size: 24px;
     color: #128200;
     padding-top: 3px;
-    cursor: pointer;
 }
 
-.boolean-select .ico-off{
+.boolean-select .ico-off {
     display: inline-block;
     font-size: 24px;
-    /* color: #f44;*/
     color: #929292;
     padding-top: 3px;
-    cursor: pointer;
 }
+
 .boolean-title{
     display: inline-block;
     position: absolute;
-    padding-left: 28px;
+    padding-left: 10px;
     padding-top: 4px;
-    cursor: pointer;
 }
-
-/*.input-group>.custom-select:not(:first-child),*/
-/*!*.input-group>.form-control:not(:first-child),*!*/
-/*.input-group>.custom-select:not(:last-child) {*/
-/*!*.input-group>.form-control:not(:last-child){ *!*/
-/*border-top-left-radius: .25rem;*/
-/*border-bottom-left-radius: .25rem;*/
-/*}*/
 
 .no-left-border{
     border-top-left-radius: 0!important;

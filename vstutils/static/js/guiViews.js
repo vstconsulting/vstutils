@@ -352,7 +352,7 @@ class ViewConstructor extends BaseEntityConstructor {
         return bool;
     }
 
-     /**
+    /**
      * Method, that returns extension from opeanapi_dictionary for current link obj.
      * @param {string} link_name Name of a link.
      * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
@@ -382,7 +382,7 @@ class ViewConstructor extends BaseEntityConstructor {
         return isEmptyObject(path_obj.objects.model.fields);
     }
 
-     /**
+    /**
      * Method, that returns object for a current link.
      * @param {string} link_name Name of a link.
      * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
@@ -427,6 +427,10 @@ class ViewConstructor extends BaseEntityConstructor {
 
         for(let link in views){
             if(views.hasOwnProperty(link)) {
+                if(views[link].schema.do_not_connect_with_another_views) {
+                    continue;
+                }
+
                 if (link == path) {
                     continue;
                 }
@@ -492,7 +496,7 @@ class ViewConstructor extends BaseEntityConstructor {
             });
         }
 
-         if(views[path].schema.type == "list" && views[path].schema.level > 2 &&
+        if(views[path].schema.type == "list" && views[path].schema.level > 2 &&
             views["/" + views[path].schema.name + "/"]) {
             let dict = this.dictionary.paths;
             let list_op;
@@ -586,6 +590,7 @@ class ViewConstructor extends BaseEntityConstructor {
 
                 if (views[path].schema.hidden) {
                     delete views[path];
+                    continue;
                 }
 
                 tabSignal.emit("views[" + path + "].created", {view: views[path]});

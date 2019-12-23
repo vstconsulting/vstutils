@@ -320,8 +320,16 @@ const boolean_field_content_mixin = {
             return this.value ? 'selected' : '';
         },
 
+        text() {
+            return this.value ? 'yes' : 'no';
+        },
+
         classes() {
-            return [].concat(this.class_list, this.selected).join(" ");
+            return [].concat(this.class_list, this.selected, this.additional_classes);
+        },
+
+        additional_classes() {
+            return [];
         },
     },
 };
@@ -2528,6 +2536,11 @@ const gui_fields_mixins = { /* jshint unused: false */
             field_content_readonly: {
                 mixins: [base_field_content_readonly_mixin, boolean_field_content_mixin],
                 template: "#template_field_content_readonly_boolean",
+                computed: {
+                    additional_classes() {
+                        return ["boolean-select_disabled"];
+                    },
+                },
             },
             field_content_edit: {
                 mixins: [base_field_content_edit_mixin, boolean_field_content_mixin],
