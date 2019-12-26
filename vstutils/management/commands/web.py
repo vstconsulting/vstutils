@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 from __future__ import unicode_literals
 import os
 import sys
@@ -15,7 +16,7 @@ python_subexec_dir = Path('/usr/local/bin')
 _uwsgi_default_path = python_exec_dir / 'uwsgi'
 _uwsgi_default_path_alt = python_exec_dir / 'pyuwsgi'
 _uwsgi_default_path_alt2 = python_subexec_dir / 'uwsgi'
-_uwsgi_default_path_alt3 = python_subexec_dir /'pyuwsgi'
+_uwsgi_default_path_alt3 = python_subexec_dir / 'pyuwsgi'
 if not _uwsgi_default_path.exists() and _uwsgi_default_path_alt.exists():
     _uwsgi_default_path = _uwsgi_default_path_alt
 elif _uwsgi_default_path_alt2.exists():
