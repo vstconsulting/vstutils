@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import time
+from pathlib import Path
 from subprocess import CalledProcessError
 import subprocess
 import signal
@@ -9,17 +10,17 @@ from django.conf import settings
 from ._base import BaseCommand
 from ...utils import raise_context
 
-python_exec_dir = os.path.dirname(sys.executable)
-python_subexec_dir = '/usr/local/bin'
-_uwsgi_default_path = os.path.join(python_exec_dir, 'uwsgi')
-_uwsgi_default_path_alt = os.path.join(python_exec_dir, 'pyuwsgi')
-_uwsgi_default_path_alt2 = os.path.join(python_subexec_dir, 'uwsgi')
-_uwsgi_default_path_alt3 = os.path.join(python_subexec_dir, 'pyuwsgi')
-if not os.path.exists(_uwsgi_default_path) and os.path.exists(_uwsgi_default_path_alt):
+python_exec_dir = Path(os.path.dirname(sys.executable))
+python_subexec_dir = Path('/usr/local/bin')
+_uwsgi_default_path = python_exec_dir / 'uwsgi'
+_uwsgi_default_path_alt = python_exec_dir / 'pyuwsgi'
+_uwsgi_default_path_alt2 = python_subexec_dir / 'uwsgi'
+_uwsgi_default_path_alt3 = python_subexec_dir /'pyuwsgi'
+if not _uwsgi_default_path.exists() and _uwsgi_default_path_alt.exists():
     _uwsgi_default_path = _uwsgi_default_path_alt
-elif os.path.exists(_uwsgi_default_path_alt2):
+elif _uwsgi_default_path_alt2.exists():
     _uwsgi_default_path = _uwsgi_default_path_alt2
-elif os.path.exists(_uwsgi_default_path_alt3):
+elif _uwsgi_default_path_alt3.exists():
     _uwsgi_default_path = _uwsgi_default_path_alt3
 
 
@@ -34,6 +35,7 @@ def wait(proc, timeout=None, delay=0.1):
 class Command(BaseCommand):
     help = "Backend web-server."
     _uwsgi_default_path = _uwsgi_default_path
+    uwsgi_default_config = Path(os.path.dirname(__file__)).parent.parent / 'web.ini'
     default_addrport = settings.WEB_ADDRPORT
 
     def add_arguments(self, parser):
@@ -50,7 +52,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--uwsgi-config', '-c',
-            default='{}/web.ini'.format(settings.VST_PROJECT_DIR),
+            default=Path(settings.VST_PROJECT_DIR) / 'web.ini',
             dest='config', help='Specifies the uwsgi script.',
         )
         parser.add_argument(
@@ -93,24 +95,45 @@ class Command(BaseCommand):
 
     def handle(self, *uwsgi_args, **opts):
         super().handle(*uwsgi_args, **opts)
+        # Build default uwsgi-command options.
         cmd = [
-            opts['script'],
-            '--enable-threads',
-            '--master',
-            '--offload-threads=2',
-            '--static-gzip-all'
+            str(opts['script']),
+            '--set-ph=program_name={}'.format(settings.VST_PROJECT),
+            '--set-ph=lib_name={}'.format(settings.VST_PROJECT_LIB),
+            '--module={}'.format(settings.UWSGI_APPLICATION),
         ]
-        cmd += ['--http={}'.format(opts['addrport'])]
+        #  Setup http addr:port.
+        addrport = opts['addrport']
+        protocol = 'https' if len(addrport.split(',')) > 1 else 'http'
+        cmd += ['--{}={}'.format(protocol, addrport)]
+        # Import uwsgi-args from this command args (key=value).
         cmd += [
             '--{}'.format(arg) for arg in self._get_uwsgi_args(*uwsgi_args)
             if arg is not None
         ]
-        if not os.path.exists(opts['config']):
-            raise self.CommandError("Doesn't exists: {}.".format(opts['config']))
-        cmd += [opts['config']]
+        # Import config from project.
+        config = opts['config']
+        if config and config.exists():
+            cmd += ['--ini={}'.format(config)]
+
+        # Connect static files.
         for static_path in settings.STATIC_FILES_FOLDERS:
             if "/static={}".format(static_path) not in cmd:
                 cmd += ['--static-map', "/static={}".format(static_path)]
+
+        # Append uwsgi configs.
+        for cf in settings.VST_PROJECT_LIB, settings.VST_PROJECT:
+            config_file = Path('/etc/') / Path(cf) / 'settings.ini'
+            option = '--ini={}'.format(str(config_file))
+            if config_file.exists() and option not in cmd:
+                cmd.append(option)
+
+        if self.uwsgi_default_config.exists():
+            cmd.append(str(self.uwsgi_default_config))
+        else:
+            self._print('File {} doesnt exists.'.format(str(self.uwsgi_default_config)), 'ERROR')
+
+        # Attach worker.
         cmd += self._get_worker_options()
         try:
             self._print('Execute: ' + ' '.join(cmd))
