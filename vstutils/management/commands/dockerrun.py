@@ -58,8 +58,7 @@ class Command(BaseCommand):
         if success:
             try:
                 check_call(
-                    [sys.executable, '-m', project_name, self._settings('WEBSERVER_COMMAND', 'web')] +
-                    self.__format_uwsgi_args(config, *args),
+                    [sys.executable, '-m', project_name, self._settings('WEBSERVER_COMMAND', 'web')],
                     env=env, bufsize=0, universal_newlines=True,
                 )
             except KeyboardInterrupt:  # nocv
@@ -68,17 +67,6 @@ class Command(BaseCommand):
         else:
             self._print(error, 'ERROR')
             sys.exit(10)
-
-    def __format_uwsgi_args(self, config, *uwsgi_args):
-        args = []
-        disallowed_args = ['daemon']
-        for key, value in config['uwsgi'].items():
-            if key not in disallowed_args:
-                if value == 'true':
-                    args.append(key)
-                else:
-                    args.append('{}={}'.format(key, value))
-        return args + list(uwsgi_args)
 
     def prepare_config(self):
         # pylint: disable=too-many-locals,too-many-branches,too-many-statements

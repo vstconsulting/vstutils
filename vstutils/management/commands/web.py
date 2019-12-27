@@ -1,7 +1,6 @@
 # pylint: disable=no-member
 from __future__ import unicode_literals
 import os
-import sys
 import time
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -11,7 +10,7 @@ from django.conf import settings
 from ._base import BaseCommand
 from ...utils import raise_context
 
-python_exec_dir = Path(os.path.dirname(sys.executable))
+python_exec_dir = Path(os.path.dirname(settings.PYTHON_INTERPRETER))
 python_subexec_dir = Path('/usr/local/bin')
 _uwsgi_default_path = python_exec_dir / 'uwsgi'
 _uwsgi_default_path_alt = python_exec_dir / 'pyuwsgi'
@@ -38,6 +37,7 @@ class Command(BaseCommand):
     _uwsgi_default_path = _uwsgi_default_path
     uwsgi_default_config = Path(os.path.dirname(__file__)).parent.parent / 'web.ini'
     default_addrport = settings.WEB_ADDRPORT
+    prefix = getattr(settings, 'VST_PROJECT_LIB', 'vstutils').upper()
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -53,7 +53,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--uwsgi-config', '-c',
-            default=Path(settings.VST_PROJECT_DIR) / 'web.ini',
+            default=str(Path(settings.VST_PROJECT_DIR) / 'web.ini'),
             dest='config', help='Specifies the uwsgi script.',
         )
         parser.add_argument(
@@ -67,16 +67,27 @@ class Command(BaseCommand):
 
     def _get_uwsgi_args(self, *uwsgi_args):
         args = []
+
+        # Set `--daemonize` to logfile if `daemon = true`
         if settings.WEB_DAEMON:
             args.append('daemonize={}'.format(settings.WEB_DAEMON_LOGFILE))
+
+        # Parse command args and setup to uwsgi
         args += [self._get_uwsgi_arg(arg) for arg in uwsgi_args]
+
         return args
 
     def _get_worker_options(self):
         cmd = []
+
+        # Check that worker is enabled in settings.
         if not settings.RUN_WORKER:
             return cmd
+
+        # Get celery args from settings.
         worker_options = settings.WORKER_OPTIONS
+
+        # Format args string.
         options = ''
         for key, value in worker_options.items():
             is_boolean = isinstance(value, bool)
@@ -85,17 +96,23 @@ class Command(BaseCommand):
             if is_boolean:
                 continue
             options += "={}".format(value.replace(',', r'\,'))
+
+        # Add queues list to celery args
         if '--queues' not in options:
             options += ' --queues={}'.format(r'\,'.join(settings.WORKER_QUEUES))
-        cmd += ['--attach-daemon2']
+
+        # Add arguments to uwsgi cmd list.
+        cmd.append('--attach-daemon2')
         run = 'stopsignal=15,reloadsignal=1,'
         run += 'exec={} -m celery worker'.format(settings.PYTHON_INTERPRETER)
         run += options
-        cmd += [run]
+        cmd.append(run)
+
         return cmd
 
     def handle(self, *uwsgi_args, **opts):
         super().handle(*uwsgi_args, **opts)
+
         # Build default uwsgi-command options.
         cmd = [
             str(opts['script']),
@@ -105,17 +122,16 @@ class Command(BaseCommand):
         ]
         #  Setup http addr:port.
         addrport = opts['addrport']
-        protocol = 'https' if len(addrport.split(',')) > 1 else 'http'
-        cmd += ['--{}={}'.format(protocol, addrport)]
+        cmd += ['--{}={}'.format('https' if len(addrport.split(',')) > 1 else 'http', addrport)]
+
         # Import uwsgi-args from this command args (key=value).
         cmd += [
             '--{}'.format(arg) for arg in self._get_uwsgi_args(*uwsgi_args)
             if arg is not None
         ]
         # Import config from project.
-        config = opts['config']
-        if config and config.exists():
-            cmd += ['--ini={}'.format(config)]
+        if opts['config'] and Path(opts['config']).exists():
+            cmd += ['--ini={}'.format(opts['config'])]
 
         # Connect static files.
         for static_path in settings.STATIC_FILES_FOLDERS:
@@ -136,9 +152,19 @@ class Command(BaseCommand):
 
         # Attach worker.
         cmd += self._get_worker_options()
+
+        # Load config data from stdin.
+        cmd += ['--ini', '-']
+
+        # Get config from env
+        read, write = os.pipe()
+        os.write(write, os.environ.get(self._settings('CONFIG_ENV_DATA_NAME'), '').encode('utf-8'))
+        os.close(write)
+
+        # Run web server
         try:
             self._print('Execute: ' + ' '.join(cmd))
-            proc = subprocess.Popen(cmd, env=os.environ.copy())
+            proc = subprocess.Popen(cmd, env=os.environ.copy(), stdin=read)
             try:
                 wait(proc)
             except BaseException as exc:

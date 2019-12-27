@@ -110,17 +110,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             self.assertEqual(mock_obj.call_count, 2)
             self.assertEqual(
                 mock_obj.call_args[0][0],
-                [
-                    sys.executable, '-m', 'test_proj', 'web',
-                    # 'processes=%k',
-                    # 'threads=%k',
-                    'thread-stacksize=40960',
-                    'max-requests=50000',
-                    'limit-as=512',
-                    'harakiri=120',
-                    'vacuum',
-                    'pidfile=/run/web.pid'
-                ]
+                [sys.executable, '-m', 'test_proj', 'web']
             )
             mock_obj.reset_mock()
 
