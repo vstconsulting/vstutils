@@ -671,8 +671,8 @@ REST_FRAMEWORK = {
 LANGUAGE_CODE = 'en'
 
 LANGUAGES = (
-    ('ru', 'Russian'),
     ('en', 'English'),
+    ('ru', 'Russian'),
 )
 
 TIME_ZONE = main["timezone"]

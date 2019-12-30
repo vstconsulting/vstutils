@@ -811,26 +811,23 @@
     </div>
 </script>
 
-<!-- template of line chart widget -->
-<script type="text/x-template" id="template_w_line_chart">
-    <div class="col-lg-12 col-12 dnd-block" v-if="item.active">
-        <!--<div class="col-lg-12 col-12 dnd-block">-->
+<!-- template of card widget -->
+<script type="text/x-template" id="template_card_widget">
+    <div :class="wrapper_classes" v-if="item.active">
         <div class="card card-info">
-            <div class="card-header ui-sortable-handle cursor-move1">
+            <div class="card-header card-header-custom card-header_widget ui-sortable-handle cursor-move1">
                 {{ $t((item.title || item.name).toLowerCase()) | capitalize }}
-                <div class="pull-right">
-                    <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon"
-                            @click="toggleCollapsed" aria-label="toggle"
+                    <button type="button" class="btn btn-card-tool btn-sm btn-light btn-icon btn-right"
+                            @click="toggleCollapse" aria-label="toggle"
                     >
-                        <i class="fa " :class="item.collapsed ? 'fa-plus' : 'fa-minus'"></i>
-                    </button>
-                </div>
 
+                        <i class="fa " :class="item.collapse ? 'fa-plus' : 'fa-minus'"></i>
+                    </button>
                 <content_header :item="item" :value="value" v-if="with_content_header"></content_header>
 
             </div>
             <transition name="fade">
-                <div class="card-body border-radius-none" v-if="!item.collapsed">
+                <div class="card-body border-radius-none" v-if="!item.collapse">
                     <content_body :item="item" :value="value"></content_body>
                 </div>
             </transition>

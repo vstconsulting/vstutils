@@ -24,7 +24,7 @@ guiWidgets.base = class BaseWidget {
         /**
          * Property, that means, that current widget should be collapsed on the page.
          */
-        this.collapsed = false;
+        this.collapse = false;
         /**
          * Property, that means, that current widget could be collapsed on the page.
          */
@@ -38,7 +38,7 @@ guiWidgets.base = class BaseWidget {
          */
         this.title = options.title;
 
-        ['active', 'collapsed', 'sort'].forEach(key => {
+        ['active', 'collapse', 'sort'].forEach(key => {
             if(options[key] !== undefined) {
                 this[key] = options[key];
             }
@@ -63,9 +63,14 @@ guiWidgets.counter = class CounterWidget extends guiWidgets.base {
 };
 
 /**
+ * Class of card widget.
+ */
+guiWidgets.card = class CardWidget extends guiWidgets.base {};
+
+/**
  * Class of line chart widget.
  */
-guiWidgets.line_chart = class LineChartWidget extends guiWidgets.base {
+guiWidgets.line_chart = class LineChartWidget extends guiWidgets.card {
     constructor(options) {
         super(options);
         this.format = 'line_chart';

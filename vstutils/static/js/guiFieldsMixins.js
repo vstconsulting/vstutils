@@ -2564,6 +2564,19 @@ const gui_fields_mixins = { /* jshint unused: false */
 
     choices: {
         components: {
+            field_list_view: {
+                mixins: [base_field_list_view_mixin, choices_field_content_readonly_mixin],
+                template: "#template_field_part_list_view",
+
+                computed: {
+                    classes() {
+                        return [
+                            ...this.class_list,
+                            this.choices_classes,
+                        ];
+                    },
+                },
+            },
             field_content_readonly: {
                 mixins: [choices_field_content_readonly_mixin],
             },
@@ -4134,7 +4147,6 @@ const gui_fields_mixins = { /* jshint unused: false */
                 methods: {
                     setValueInStore(value, item, field) {
                         let new_value = $.extend(true, {}, this.value);
-
                         if(!new_value[item]) {
                             new_value[item] = {};
                         }
