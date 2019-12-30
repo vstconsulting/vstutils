@@ -295,7 +295,7 @@ class VSTOpenApiBase(Directive):
         elif var_type == 'autocomplete':
             result = opt_values.get('enum', list())[0]
         elif var_type in [None, 'object']:
-            def_name = opt_values.get('$ref').split('/')[-1]
+            def_name = (opt_values.get('$ref') or '').split('/')[-1]
             result = self.get_object_example(def_name)
         elif var_type == 'select2':
             def_name = opt_values['additionalProperties']['model']['$ref'].split('/')[-1]
