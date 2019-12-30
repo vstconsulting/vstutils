@@ -416,7 +416,6 @@ const base_instances_table_row_mixin =  {
             this.$emit('toggleSelection', {id: this.instance.getPkValue()});
         },
     },
-
 };
 
 /**
@@ -474,6 +473,59 @@ const base_widget_mixin = {
 };
 
 /**
+ * Base mixin for 'body' child component of 'card widget' components.
+ */
+const card_widget_body_mixin = {
+    mixins: [base_widget_mixin],
+};
+
+/**
+ * Base mixin for 'card widget' components.
+ */
+const card_widget_mixin = {
+    mixins: [base_widget_mixin],
+    template: '#template_card_widget',
+    data() {
+        return {
+            /**
+             * Property, that means use child content_header component or not.
+             */
+            with_content_header: false,
+        };
+    },
+    computed: {
+        /**
+         * CSS classes of widget DOM element's wrapper.
+         */
+        wrapper_classes() {
+            return ["col-lg-12", "col-12", "dnd-block"];
+        },
+    },
+    methods: {
+        /**
+         * Method, that toggles item.collapse value to opposite.
+         */
+        toggleCollapse() {
+            this.item.collapse = !this.item.collapse;
+        },
+        /**
+         * Method, that toggles item.active value to opposite.
+         */
+        toggleActive() {
+            this.item.active = !this.item.active;
+        },
+    },
+    components: {
+        /**
+         * Component, that is responsible for rendering of widgets body content.
+         */
+        content_body: {
+            mixins: [card_widget_body_mixin],
+        },
+    },
+};
+
+/**
  * Base mixin for 'content_body' component - child component of line_chart component.
  */
 const w_line_chart_content_body_mixin = {
@@ -524,30 +576,7 @@ const w_line_chart_content_body_mixin = {
  * Base mixin for line_chart components.
  */
 const w_line_chart_mixin = {
-    template: '#template_w_line_chart',
-    mixins: [base_widget_mixin],
-    data() {
-        return {
-            /**
-             * Property, that means use child content_header component or not.
-             */
-            with_content_header: false,
-        };
-    },
-    methods: {
-        /**
-         * Method, that toggles item.collapsed value to opposite.
-         */
-        toggleCollapsed() {
-            this.item.collapsed = !this.item.collapsed;
-        },
-        /**
-         * Method, that toggles item.active value to opposite.
-         */
-        toggleActive() {
-            this.item.active = !this.item.active;
-        },
-    },
+    mixins: [card_widget_mixin],
     components: {
         /**
          * Component, that is responsible for rendering of widgets body content.
@@ -1366,21 +1395,7 @@ vst_vue_components.items = {
                 });
             },
             classes: function() {
-                let classes = this.selected ? 'selected' : '';
-
-                for(let key in this.fields) {
-                    if(this.fields.hasOwnProperty(key)) {
-                        let field = this.fields[key];
-
-                        if (field instanceof guiFields.choices) {
-                            classes += " " + addCssClassesToElement(
-                                'tr', this.instance.data[field.options.name], field.options.name,
-                            );
-                        }
-                    }
-                }
-
-                return classes;
+                return this.selected ? 'selected' : '';
             },
             base_url: function() {
                 return this.$route.path.replace(/\/$/g, "");
