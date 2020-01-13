@@ -63,7 +63,7 @@ class LdapBackend(BaseAuthBackend):
             if self.user_can_authenticate(user) and backend.isAuth():
                 return user
         except:
-            logger.info(traceback.format_exc())
+            logger.debug(traceback.format_exc())
             return
 
 
