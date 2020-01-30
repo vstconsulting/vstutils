@@ -10,7 +10,7 @@ User = get_user_model()
 def _extra_search(queryset, field, value, stype):
     vals = field.split("__")
     field, tp = vals[0], (list(vals)[1:2] + [""])[0]
-    field += "__{}".format(stype)
+    field += f"__{stype}"
     value = value.split(",") if stype == "in" else value
     if tp.upper() == "NOT":
         return queryset.exclude(**{field: value})

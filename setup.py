@@ -35,7 +35,7 @@ is_help = any([a for a in ignored_keys if a in sys.argv])
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
-    with codecs.open("{}/{}".format(folder, file_path), 'r', encoding='utf-8') as readme:
+    with codecs.open(f"{folder}/{file_path}", 'r', encoding='utf-8') as readme:
         return readme.read()
 
 
@@ -69,12 +69,12 @@ def clear_old_extentions(extensions_list, packages):
         if os.path.isdir(_filename) or _f_ext not in ['.c', '.cpp']:
             continue
         has_py = (
-            os.path.exists('{}.py'.format(_filename)) or
-            os.path.exists('{}.pyx'.format(_filename))
+            os.path.exists(f'{_filename}.py') or
+            os.path.exists(f'{_filename}.pyx')
         )
 
         if has_py and filename.replace('/', '.').replace(_f_ext, '') in extensions_list:
-            print('Removing old extention [{}].'.format(filename))
+            print(f'Removing old extention [{filename}].')
             os.remove(filename)
 
 
@@ -175,9 +175,9 @@ def minify_static_files(base_dir, files, exclude=None):
                 with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
                     static_file_fd.write(minified)
                 with open(fext_file, 'rb') as f_in:
-                    with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
+                    with gzip.open(f"{fext_file}.gz", 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                print('Minfied file {}.'.format(fext_file))
+                print(f'Minfied file {fext_file}.')
 
 
 class _Compile(_sdist):
@@ -289,7 +289,7 @@ class install_lib(_install_lib):
         for source in filter(self._filter_files_with_ext, files):
             _source_name, _source_ext = os.path.splitext(source)
             if any(filter(lambda f: fnmatch.fnmatch(f, _source_name+"*.so"), so_extentions)):
-                print('Removing extention sources [{}].'.format(source))
+                print(f'Removing extention sources [{source}].')
                 os.remove(source)
         minify_static_files('', files, self.static_exclude)
         return result

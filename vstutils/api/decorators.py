@@ -36,7 +36,7 @@ def nested_action(name: _t.Text, arg: _t.Text = None, methods=None, manager_name
     methods = methods or (detail_methods if arg else list_methods)
     arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
     empty_arg = kwargs.pop('empty_arg', True)
-    request_arg = kwargs.pop('request_arg', '{}_{}'.format(name, arg))
+    request_arg = kwargs.pop('request_arg', f'{name}_{arg}')
     request_arg = request_arg if arg else None
     append_arg = kwargs.pop('append_arg', arg)
     sub_options = kwargs.pop('sub_opts', dict())
@@ -213,7 +213,7 @@ class NestedWithoutAppendMixin(NestedViewMixin):
 
 class NestedWithAppendMixin(NestedWithoutAppendMixin):
     def _data_create(self, request_data, nested_append_arg):
-        filter_arg = '{}__in'.format(nested_append_arg)
+        filter_arg = f'{nested_append_arg}__in'
         objects = self.get_queryset().model.objects.filter(**{
             filter_arg: map(lambda i: i.get(nested_append_arg), request_data)
         })
@@ -246,7 +246,7 @@ class BaseClassDecorator:
     def __init__(self, name: _t.Text, arg: _t.Text, *args, **kwargs):
         self.name = name
         self.arg = arg
-        self.request_arg = kwargs.pop('request_arg', '{}_{}'.format(self.name, self.arg))
+        self.request_arg = kwargs.pop('request_arg', f'{self.name}_{self.arg}')
         self.args = args
         self.kwargs = kwargs
 
@@ -419,7 +419,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
                 if hasattr(nested_parent_object, manager_name):
                     nested_manager = getattr(nested_parent_object, manager_name)
                 else:
-                    view_manager_function_name = 'get_manager_{}'.format(manager_name)
+                    view_manager_function_name = f'get_manager_{manager_name}'
                     nested_manager_func = getattr(view_obj, view_manager_function_name)
                     nested_manager = nested_manager_func(nested_parent_object)
 
@@ -450,7 +450,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return name, nested_view
 
     def get_view_type(self, type_name: _t.Text, **options):
-        return self.get_view('{}_{}'.format(self.name, type_name), **options)
+        return self.get_view(f'{self.name}_{type_name}', **options)
 
     def get_list_view(self, **options):
         return self.get_view_type('list', **options)
@@ -479,7 +479,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     def decorated(self, detail):
         name, view = self.get_detail_view() if detail else self.get_list_view()
         kwargs = dict(detail=detail)
-        kwargs['url_name'] = '{}-{}'.format(self.name, 'detail' if detail else 'list')
+        kwargs['url_name'] = f'{self.name}-{"detail" if detail else "list"}'
         if not detail:
             kwargs['suffix'] = 'List'
         if self.methods:
@@ -507,7 +507,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             sub_opts=dict(sub_path=sub_path),
             methods=sub_view.mapping or self.methods,
             serializer_class=sub_view.kwargs.get('serializer_class', self.serializer),
-            url_name='{}-{}'.format(self.name, sub_view.url_name),
+            url_name=f'{self.name}-{sub_view.url_name}',
             _nested_args=getattr(sub_view, '_nested_args', OrderedDict())
         )
         view = decorator(subaction_view)

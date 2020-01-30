@@ -94,7 +94,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         new_operation_keys = []
         for key in operation_keys or []:
             previous = None if not len(new_operation_keys) else new_operation_keys[-1]
-            new_operation_keys.append(key.replace('{}_'.format(previous), ''))
+            new_operation_keys.append(key.replace(f'{previous}_', ''))
         return super().get_operation_id(tuple(new_operation_keys))
 
     def get_response_schemas(self, response_serializers):
@@ -133,8 +133,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
                     return result
             except Exception as err:
                 warn(
-                    "Error in parse '{self.view.action}'."
-                    " Using default inspection. Err: {err}".format(self=self, err=err)
+                    f"Error in parse '{self.view.action}'."
+                    f" Using default inspection. Err: {err}"
                 )
         return getattr(super(), func_name)(*args, **kwargs)
 

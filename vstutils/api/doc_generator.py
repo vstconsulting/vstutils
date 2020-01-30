@@ -139,10 +139,10 @@ class VSTOpenApiBase(Directive):
         self.indent_depth += 1
         for i in self.definitions:
             def_name = i.split('/')[-1]
-            self.write('.. _{}:'.format(def_name))
+            self.write(f'.. _{def_name}:')
             self.write('')
-            self.write('{} Schema'.format(def_name))
-            self.write('{}'.format('`' * (len(def_name) + 7)))
+            self.write(f'{def_name} Schema')
+            self.write(f'{"`" * (len(def_name) + 7)}')
             self.write('')
             self.write('.. code-block:: json', self.indent_depth)
             self.indent_depth += 1
@@ -163,7 +163,7 @@ class VSTOpenApiBase(Directive):
         :type request_name: str, unicode
         :return:
         '''
-        main_title = '.. http:{}:: {}'.format(request_name, path_name)
+        main_title = f'.. http:{request_name}:: {path_name}'
         self.write(main_title)
         self.write('')
 
@@ -185,8 +185,8 @@ class VSTOpenApiBase(Directive):
             self.write('')
             self.write('.. code-block:: http', 1)
             self.write('')
-            self.write('HTTP/1.1 {} {}'.format(status_code, status), 2)
-            self.write('Vary: {}'.format(response_schema['description']), 2)
+            self.write(f'HTTP/1.1 {status_code} {status}', 2)
+            self.write(f'Vary: {response_schema["description"]}', 2)
             self.write('Content-Type: application/json', 2)
             self.write('')
 
@@ -215,7 +215,7 @@ class VSTOpenApiBase(Directive):
         json_dict = dict()
         for opt_name, opt_value in dict_for_render:
             var_type = opt_value.get('format', None) or opt_value.get('type', None) or 'object'
-            json_name = self.indent + ':jsonparameter {} {}:'.format(var_type, opt_name)
+            json_name = self.indent + f':jsonparameter {var_type} {opt_name}:'
             json_dict[json_name] = self.get_json_props_for_response(var_type, opt_value)
 
             answer_dict[opt_name] = self.get_response_example(opt_name, var_type, opt_value)
@@ -228,9 +228,7 @@ class VSTOpenApiBase(Directive):
 
         self.write('')
         for json_param_name, json_param_value in json_dict.items():
-            desc = '{}{}'.format(
-                json_param_value['title'], json_param_value['props_str']
-            ) or 'None'
+            desc = f'{json_param_value["title"]}{json_param_value["props_str"]}' or 'None'
             self.write(json_param_name + ' ' + desc)
 
     def get_json_props_for_response(self, var_type, option_value):
@@ -251,13 +249,13 @@ class VSTOpenApiBase(Directive):
             elif name in ['format', 'title', 'type']:
                 continue
             elif isinstance(value, dict) and value.get('$ref', None):
-                props.append(':ref:`{}`'.format(value['$ref'].split('/')[-1]))
+                props.append(f':ref:`{value["$ref"].split("/")[-1]}`')
             elif '$ref' in name:
-                props.append(':ref:`{}`'.format(value.split('/')[-1]))
+                props.append(f':ref:`{value.split("/")[-1]}`')
             elif var_type == 'autocomplete':
                 props.append('Example values: ' + ', '.join(value))
             else:
-                props.append('{}={}'.format(name, value))
+                props.append(f'{name}={value}')
 
         if len(props):
             props_str = '(' + ', '.join(props) + ')'
@@ -385,15 +383,15 @@ class VSTOpenApiBase(Directive):
             if elem.get('required', None):
                 name += '(required)'
             schema = elem.get('schema', None)
-            name = ':{} {} {}:'.format(name_request, request_type, name)
+            name = f':{name_request} {request_type} {name}:'
             if schema:
                 definition = schema['$ref'].split('/')[-1]
-                self.write(name + ' :ref:`{}`'.format(definition), 1)
+                self.write(name + f' :ref:`{definition}`', 1)
                 self.write('')
             else:
                 desc = elem.get('description', '')
                 self.write(name)
-                self.write('{}'.format(desc), self.indent_depth + 1)
+                self.write(f'{desc}', self.indent_depth + 1)
         self.write('')
 
     def get_description(self, request_value):

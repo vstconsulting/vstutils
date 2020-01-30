@@ -79,7 +79,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
         )
         self.assertIn(
-            'Project successfully created at {}.'.format(self.project_place),
+            f'Project successfully created at {self.project_place}.',
             out.getvalue()
         )
         self.assertTrue(os.path.exists(self.project_place))
@@ -394,10 +394,10 @@ class ViewsTestCase(BaseTestCase):
     def test_users_api(self):
         self.list_test('/api/v1/user/', 1)
         self.details_test(
-            '/api/v1/user/{}/'.format(self.user.id),
+            f'/api/v1/user/{self.user.id}/',
             username=self.user.username, id=self.user.id
         )
-        self.get_result('delete', '/api/v1/user/{}/'.format(self.user.id), 409)
+        self.get_result('delete', f'/api/v1/user/{self.user.id}/', 409)
 
         user_data = dict(
             username="test_user", first_name="some", last_name='test', email="1@test.ru"
@@ -411,15 +411,15 @@ class ViewsTestCase(BaseTestCase):
         post_data['password2'] = post_data['password']
         result = self.get_result('post', '/api/v1/user/', data=post_data)
         self.assertCheckDict(user_data, result)
-        result = self.get_result('get', '/api/v1/user/{}/'.format(result['id']))
+        result = self.get_result('get', f'/api/v1/user/{result["id"]}/')
         self.assertCheckDict(user_data, result)
         self.get_result('patch', '/api/v1/user/', 405, data=dict(email=""))
-        result = self.get_result('get', '/api/v1/user/{}/'.format(result['id']))
+        result = self.get_result('get', f'/api/v1/user/{result["id"]}/')
         self.assertCheckDict(user_data, result)
         user_data['first_name'] = 'new'
         post_data_dict = dict(partial=True, **user_data)
         self._check_update(
-            '/api/v1/user/{}/'.format(result['id']), post_data_dict,
+            f'/api/v1/user/{result["id"]}/', post_data_dict,
             method='put', **user_data
         )
         del post_data_dict['partial']
@@ -427,7 +427,7 @@ class ViewsTestCase(BaseTestCase):
         post_data_dict['password'] = "skldjfnlkjsdhfljks"
         post_data = json.dumps(post_data_dict)
         self.get_result(
-            'patch', '/api/v1/user/{}/'.format(result['id']), data=post_data, code=400
+            'patch', f'/api/v1/user/{result["id"]}/', data=post_data, code=400
         )
         self.get_result('delete', '/api/v1/user/{}/'.format(result['id']))
         user_data['email'] = 'invalid_email'
@@ -952,9 +952,7 @@ class ProjectTestCase(BaseTestCase):
         data = json.loads(stdout.getvalue())
         # Check default settings
         self.assertEqual(
-            data['basePath'], '/{}/{}'.format(
-                self._settings('VST_API_URL'), self._settings('VST_API_VERSION')
-            )
+            data['basePath'], f'/{self._settings("VST_API_URL")}/{self._settings("VST_API_VERSION")}'
         )
         self.assertEqual(
             data['info']['contact']['someExtraUrl'],
@@ -1738,7 +1736,7 @@ class ConfigParserCTestCase(BaseTestCase):
             'logfile': '/var/log/test_proj2/worker.log',
             'pidfile': '/run/test_proj_worker.pid',
             'autoscale': '4,1',
-            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
+            'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
             'beat': True
         }
         self.assertDictEqual(worker_options, settings.WORKER_OPTIONS)

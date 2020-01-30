@@ -1,5 +1,5 @@
 # Packages needed for delayed jobs.
-celery[redis]>=4.3.0,<4.3.1
+celery[redis]~=4.4.0
 kombu~=4.5.0
 django-celery-beat>=1.1.1,<=1.5.0
 redis==3.2.1
