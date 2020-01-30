@@ -23,7 +23,7 @@ class BaseResponseClass(response.Response):
 
 for __status_name in filter(__status_name_filter, dir(status)):
     __status_code = getattr(status, __status_name)
-    __response_name = 'Response{}'.format(__status_code)
+    __response_name = f'Response{__status_code}'
     __http_response_name = __status_name
     __globals[__response_name] = type(
         __response_name,

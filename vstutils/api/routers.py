@@ -33,7 +33,7 @@ class _AbstractRouter(routers.DefaultRouter):
         absolute_uri = view_request.build_absolute_uri(fpath[0])
         for prefix, _, name in self._get_custom_lists():
             path = ''.join([
-                absolute_uri, prefix, "?{}".format(fpath[1]) if len(fpath) > 1 else ""
+                absolute_uri, prefix, f'?{fpath[1]}' if len(fpath) > 1 else ""
             ])
             routers_list[name] = path
         routers_list.update(registers.data)
@@ -100,9 +100,9 @@ class APIRouter(_AbstractRouter):
 
     def __register_schema(self, name='schema'):
         try:
-            self.register_view(r'{}'.format(name), self._get_schema_view(), name)
+            self.register_view(rf'{name}', self._get_schema_view(), name)
         except BaseException as exc:  # nocv
-            warn("Couldn't attach schema view: {}".format(exc))
+            warn(f"Couldn't attach schema view: {exc}")
 
     def _get_schema_view(self):
         from rest_framework import schemas
@@ -140,7 +140,7 @@ class APIRouter(_AbstractRouter):
         urls = super().get_urls()
         for prefix, view, _ in self.custom_urls:  # nocv
             view = view.as_view() if hasattr(view, 'as_view') else view
-            urls.append(re_path("^{}/$".format(prefix), view))
+            urls.append(re_path(f"^{prefix}/$", view))
         return urls
 
     def generate(self, views_list):
@@ -188,7 +188,7 @@ class MainRouter(_AbstractRouter):
             routers = self.routers
             custom_urls = self.custom_urls
             versioning_class = ProjectApiVersionVersioning
-            view_name = '{} REST API'.format(settings.PROJECT_GUI_NAME)
+            view_name = f'{settings.PROJECT_GUI_NAME} REST API'
 
             def get_view_name(self): return 'REST API'
 
@@ -234,7 +234,7 @@ class MainRouter(_AbstractRouter):
             # can't be tested because this initialization takes place before
             # any test code can be run
             view = view.as_view() if hasattr(view, 'as_view') else view
-            urls.append(re_path("^{}/$".format(prefix), view))
+            urls.append(re_path(f"^{prefix}/$", view))
         return urls
 
     def generate_routers(self, api, create_schema=None, create_swagger=None):

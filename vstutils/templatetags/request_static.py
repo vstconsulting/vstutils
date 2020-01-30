@@ -9,8 +9,7 @@ class StaticTag(StaticNode):
         original_static = super().render(context)
         host = context.get('host_url', '')
         return (
-            '{host}{static}'.format(host=host, static=original_static)
-            if original_static else original_static
+            f'{host}{original_static}' if original_static else original_static
         )
 
 

@@ -212,7 +212,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         lookup_field_data = self.kwargs.get(lookup_field, False)
         action_name = getattr(self, 'action', None)
         # Try to get overloaded serializer from 'action_serializers' or from attrs
-        serializer_class = getattr(self, 'serializer_class_{}'.format(action_name), None)
+        serializer_class = getattr(self, f'serializer_class_{action_name}', None)
         serializer_class = serializer_class or self.action_serializers.get(action_name, None)
         if serializer_class:
             return serializer_class
@@ -273,7 +273,7 @@ class CopyMixin(GenericViewSet):
         new_instance.pk = None
         name = getattr(instance, self.copy_field_name, None)
         if isinstance(name, str):
-            name = '{}{}'.format(self.copy_prefix, name)
+            name = f'{self.copy_prefix}{name}'
         setattr(new_instance, self.copy_field_name, name)
         new_instance.save()
         for related_name in self.copy_related:
@@ -383,7 +383,7 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
     def list(self, request, *args, **kwargs):
         routes = {
-            method: reverse("{}-{}".format(self.base_name, method), request=request)
+            method: reverse(f"{self.base_name}-{method}", request=request)
             for method in self.methods
         }
         return Response(routes, status.HTTP_200_OK).resp

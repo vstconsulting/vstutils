@@ -38,7 +38,7 @@ def settings_constants(request: HttpRequest) -> Dict:
 @lazy_decorator
 def project_args(request: HttpRequest) -> Dict:
     host_url = request.build_absolute_uri('/')[:-1]
-    ver_key = "{}_version".format(getattr(settings, 'VST_PROJECT', "vstutils"))
+    ver_key = f'{getattr(settings, "VST_PROJECT", "vstutils")}_version'
     return {
         "host_url": host_url,
         "gui_version": gui_version,
@@ -46,11 +46,9 @@ def project_args(request: HttpRequest) -> Dict:
         ver_key: getattr(settings, 'PROJECT_VERSION', False),
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
-        "openapi_url": '/{}/openapi/'.format(settings.VST_API_URL),
+        "openapi_url": f'/{settings.VST_API_URL}/openapi/',
         "api_version": getattr(settings, 'VST_API_VERSION'),
-        "api_url": '{}/{}/{}/'.format(
-            host_url, settings.VST_API_URL, settings.VST_API_VERSION
-        ),
+        "api_url": f'{host_url}/{settings.VST_API_URL}/{settings.VST_API_VERSION}/',
         "enable_gravatar": settings.ENABLE_GRAVATAR,
     }
 

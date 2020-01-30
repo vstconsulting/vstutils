@@ -188,7 +188,7 @@ class CommaMultiSelectFieldInspector(FieldInspector):
 class NestedFilterInspector(CoreAPICompatInspector):
     def get_filter_parameters(self, filter_backend):  # nocv
         subaction_list_actions = [
-            '{}_list'.format(name)
+            f'{name}_list'
             for name in getattr(self.view, '_nested_args', {}).keys()
         ]
         if self.view.action not in subaction_list_actions:

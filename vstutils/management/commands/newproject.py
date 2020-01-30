@@ -46,7 +46,7 @@ class Command(BaseCommand):
             if not kwargs.get('help', None):
                 kwargs['help'] = self.default_help.format(name)
             parser.add_argument(
-                '--{}'.format(name), dest=name, **data
+                f'--{name}', dest=name, **data
             )
 
     def get_path(self, *path) -> Path:
@@ -69,10 +69,10 @@ class Command(BaseCommand):
         default = options.get(name, default)
         val_from_parser = self._values_parser.get(name, {})
         help_msg = val_from_parser.get('help', self.default_help.format(name))
-        help_msg += ' Default: [{}]'.format(default)
+        help_msg += f' Default: [{default}]'
         value = self.ask_user(help_msg, default)
         if value is None:
-            raise self.CommandError('Value --{} must be set.'.format(name))
+            raise self.CommandError(f'Value --{name} must be set.')
         return value
 
     def get_render_kwargs(self, options):
@@ -116,5 +116,5 @@ class Command(BaseCommand):
         self.make_files(**opts)
         project_dir = os.path.join(opts['project_place'], opts['project_name'])
         self._print(
-            'Project successfully created at {}.'.format(project_dir), 'SUCCESS'
+            f'Project successfully created at {project_dir}.', 'SUCCESS'
         )

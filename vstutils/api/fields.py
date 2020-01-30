@@ -216,10 +216,10 @@ class NamedBinaryFileInJsonField(VSTCharField):
             self.fail('not a JSON')
         invalid_keys = list(k for k in data.keys() if k not in self.__valid_keys)
         if invalid_keys:
-            self.fail('invalid key {}'.format(invalid_keys[0]))
+            self.fail(f'invalid key {invalid_keys[0]}')
         for key in self.__valid_keys:
             if key not in data:
-                self.fail('"{}" is not set'.format(key))
+                self.fail(f'"{key}" is not set')
 
     def to_internal_value(self, data: _t.Dict) -> _t.Text:
         if data is not None:

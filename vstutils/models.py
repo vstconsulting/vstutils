@@ -162,4 +162,4 @@ class BModel(BaseModel):
         abstract = True
 
     def __unicode__(self):
-        return "<{}>".format(self.id)
+        return f"<{self.id}>"

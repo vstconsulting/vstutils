@@ -445,7 +445,7 @@ class KVExchanger(BaseVstObject):
     @classproperty
     def PREFIX(cls):
         # pylint: disable=no-self-argument
-        return "{}_exchange_".format(cls.get_django_settings('VST_PROJECT_LIB'))
+        return f"{cls.get_django_settings('VST_PROJECT_LIB')}_exchange_"
 
     @classproperty
     def cache(cls):
@@ -497,7 +497,7 @@ class Lock(KVExchanger):
     @classproperty
     def PREFIX(cls):
         # pylint: disable=no-self-argument
-        return "{}_lock_".format(cls.get_django_settings('VST_PROJECT_LIB'))
+        return f"{cls.get_django_settings('VST_PROJECT_LIB')}_lock_"
 
     def __init__(self, id, payload=None, repeat=1, err_msg="", timeout=None):
         # pylint: disable=too-many-arguments
@@ -710,7 +710,7 @@ class ObjectHandlers(BaseVstObject):
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_baskend(backend)
         except KeyError or ImportError:
-            msg = "{} ({})".format(name, self.err_message) if self.err_message else name
+            msg = f"{name} ({self.err_message})" if self.err_message else name
             raise ex.UnknownTypeException(msg)
 
     def opts(self, name: tp.Text):
@@ -798,7 +798,7 @@ class URLHandlers(ObjectHandlers):
         view_kwargs = options.pop('view_kwargs', {})
         csrf_enable = self.get_backend_data(regexp).get('CSRF_ENABLE', True)
         if regexp in self.settings_urls:
-            regexp = r'^{}'.format(self.get_django_settings(regexp)[1:])
+            regexp = rf'^{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
         if hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)

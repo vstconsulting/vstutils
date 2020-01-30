@@ -13,7 +13,7 @@ class File(FileModel):
 
 class List(ListModel):
     data = [
-        dict(id=i, value='Some data {}'.format(i))
+        dict(id=i, value=f'Some data {i}')
         for i in range(100)
     ]
     id = models.IntegerField(primary_key=True)

@@ -6,7 +6,7 @@ from drf_yasg.inspectors import field as field_insp
 class EndpointEnumerator(generators.EndpointEnumerator):
     api_version = settings.VST_API_VERSION
     api_url = settings.VST_API_URL
-    api_url_prifix = '^{}/'.format(api_url)
+    api_url_prifix = f'^{api_url}/'
 
     def get_api_endpoints(self, *args, **kwargs):
         prefix = kwargs.get('prefix', '')
@@ -57,9 +57,9 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
 
     def _get_manager_name(self, param, view_cls):
         name, _ = self._get_subname(param['name'])
-        if not hasattr(view_cls, '{}_detail'.format(name)):
+        if not hasattr(view_cls, f'{name}_detail'):
             return None
-        sub_view = getattr(view_cls, '{}_detail'.format(name), None)
+        sub_view = getattr(view_cls, f'{name}_detail', None)
         return getattr(sub_view, '_nested_manager', None)
 
     def _update_param_model(self, param, model, model_field=None, **kw):
