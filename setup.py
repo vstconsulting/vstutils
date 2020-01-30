@@ -354,7 +354,7 @@ kwargs = dict(
         'vstutils/gui/templates/gui/service-worker.js',
     ],
     install_requires=[
-        "django>=2.2,<3.0;python_version>='3.5'",
+        "django>=2.2,<3.0;python_version>='3.6'",
         'cython>0.29,<0.30',
     ]
     + load_requirements('requirements.txt')
