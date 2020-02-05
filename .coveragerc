@@ -17,6 +17,7 @@ omit =
     */vstutils/wsgi.py
     */vstutils/auth.py
     */vstutils/compile.py
+    */vstutils/tasks.py
     */vstutils/api/doc_generator.py
     */test_proj/*
 
