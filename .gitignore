@@ -20,3 +20,8 @@ venv
 *.sqlite3
 *.bak
 .mypy_cache
+
+# Visual Studio Code
+.history
+.vscode/*
+!.vscode/launch.json

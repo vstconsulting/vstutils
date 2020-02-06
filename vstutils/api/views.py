@@ -195,7 +195,7 @@ class BulkViewSet(base.rvs.APIView):
     def _get_obj_with_extra(self, param):
         if isinstance(param, str):
             if not ('{' in param and '}' in param):
-                param = param.replace('<', '{').replace('>', '}')
+                param = param.replace('<<', '{').replace('>>', '}')
                 param = param.format(*self.results)
             return self._load_param(param)
         return param

@@ -636,8 +636,8 @@ class DefaultBulkTestCase(BaseTestCase):
             # Check 201 and username
             {'type': 'add', 'item': 'user', 'data': test_user},
             # Get details from link
-            {'type': 'get', 'item': 'user', 'pk': "<0[data][id]>"},
-            {'type': 'get', 'item': 'user', 'filters': 'id=<1[data][id]>'}
+            {'type': 'get', 'item': 'user', 'pk': "<<0[data][id]>>"},
+            {'type': 'get', 'item': 'user', 'filters': 'id=<<1[data][id]>>'}
         ]
         result = self.get_result(
             "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
@@ -705,43 +705,43 @@ class ProjectTestCase(BaseTestCase):
             Host.objects.create(name='test_{}'.format(i))
         self.objects_bulk_data = [
             self.get_bulk('hosts', dict(name='a'), 'add'),
-            self.get_mod_bulk('hosts', '<0[data][id]>', dict(name='b'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<1[data][id]>', dict(name='c'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='d'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<0[data][id]>', dict(name='aa'), 'hosts'),
-            self.get_mod_bulk('hosts', '<1[data][id]>', dict(name='ba'), 'hosts'),
-            self.get_mod_bulk('hosts', '<2[data][id]>', dict(name='ca'), 'hosts'),
-            self.get_mod_bulk('hosts', '<3[data][id]>', dict(name='da'), 'hosts'),
+            self.get_mod_bulk('hosts', '<<0[data][id]>>', dict(name='b'), 'subgroups'),
+            self.get_mod_bulk('hosts', '<<1[data][id]>>', dict(name='c'), 'subgroups'),
+            self.get_mod_bulk('hosts', '<<2[data][id]>>', dict(name='d'), 'subgroups'),
+            self.get_mod_bulk('hosts', '<<0[data][id]>>', dict(name='aa'), 'hosts'),
+            self.get_mod_bulk('hosts', '<<1[data][id]>>', dict(name='ba'), 'hosts'),
+            self.get_mod_bulk('hosts', '<<2[data][id]>>', dict(name='ca'), 'hosts'),
+            self.get_mod_bulk('hosts', '<<3[data][id]>>', dict(name='da'), 'hosts'),
         ]
 
     def test_deep_host_create(self):
         bulk_data = [
             self.get_bulk('deephosts', dict(name='level1'), 'add'),
             self.get_mod_bulk(
-                'deephosts', '<0[data][id]>', dict(name='level2'), 'subsubhosts'
+                'deephosts', '<<0[data][id]>>', dict(name='level2'), 'subsubhosts'
             ),
             self.get_mod_bulk(
-                'deephosts', '<0[data][id]>', dict(name='level3'),
-                'subsubhosts/<1[data][id]>/subdeephosts'
+                'deephosts', '<<0[data][id]>>', dict(name='level3'),
+                'subsubhosts/<<1[data][id]>>/subdeephosts'
             ),
             self.get_mod_bulk(
-                'deephosts', '<0[data][id]>', dict(name='level4'),
-                'subsubhosts/<1[data][id]>/subdeephosts/<2[data][id]>/shost'
+                'deephosts', '<<0[data][id]>>', dict(name='level4'),
+                'subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/shost'
             ),
             self.get_mod_bulk(
-                'deephosts', '<0[data][id]>', {},
-                'subsubhosts/<1[data][id]>/subdeephosts/<2[data][id]>/hosts/<3[data][id]>',
+                'deephosts', '<<0[data][id]>>', {},
+                'subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/hosts/<<3[data][id]>>',
                 method='get'
             ),
             self.get_mod_bulk(
-                'deephosts', '<0[data][id]>', {},
-                'subsubhosts/<1[data][id]>/subdeephosts/<2[data][id]>/hosts',
+                'deephosts', '<<0[data][id]>>', {},
+                'subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/hosts',
                 method='get'
             ),
         ]
         results = self.make_bulk(bulk_data, 'put')
         for result in results[:-2]:
-            self.assertEqual(result['status'], 201)
+            self.assertEqual(result['status'], 201, f"Current result number is `{result}`")
         self.assertEqual(results[-2]['status'], 200)
         self.assertEqual(results[-2]['data']['name'], 'level4')
         self.assertEqual(results[-1]['status'], 200)
@@ -769,10 +769,10 @@ class ProjectTestCase(BaseTestCase):
         HostGroup.objects.all().delete()
         bulk_data = list(self.objects_bulk_data)
         bulk_data.append(
-            self.get_mod_bulk('hosts', '<1[data][id]>', {'name': 'copied'}, 'copy')
+            self.get_mod_bulk('hosts', '<<1[data][id]>>', {'name': 'copied'}, 'copy')
         )
         bulk_data.append(
-            self.get_mod_bulk('hosts', '<1[data][id]>', {}, 'copy')
+            self.get_mod_bulk('hosts', '<<1[data][id]>>', {}, 'copy')
         )
         results = self.make_bulk(bulk_data)
         self.assertNotEqual(results[-2]['data']['id'], results[1]['data']['id'])
@@ -807,10 +807,10 @@ class ProjectTestCase(BaseTestCase):
             for i in range(size)
         ]
         bulk_data += [
-            self.get_mod_bulk('hosts', '<0[data][id]>', [
-                '<{}[data]>'.format(i+1) for i in range(size)
+            self.get_mod_bulk('hosts', '<<0[data][id]>>', [
+                '<<{}[data]>>'.format(i+1) for i in range(size)
             ], 'shost'),
-            self.get_mod_bulk('hosts', '<0[data][id]>', {}, 'shost', method='get'),
+            self.get_mod_bulk('hosts', '<<0[data][id]>>', {}, 'shost', method='get'),
         ]
         results = self.make_bulk(bulk_data)
         self.assertEqual(results[-1]['data']['count'], size)
@@ -892,26 +892,26 @@ class ProjectTestCase(BaseTestCase):
             ),
             self.get_mod_bulk('hosts', host_group_id, {'name': 'some'}, 'shost'),
             self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<10[data][id]>', 'delete'
+                'hosts', host_group_id, {}, 'shost/<<10[data][id]>>', 'delete'
             ),
             self.get_mod_bulk(
                 'hosts', host_group_id, {}, 'hosts', 'get', filters='offset=10'
             ),
             self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<24[data][id]>', 'get'
+                'hosts', host_group_id, {}, 'shost/<<24[data][id]>>', 'get'
             ),
             self.get_mod_bulk('hosts', host_group_id, {'name': 'some_other'}, 'shost'),
             self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<14[data][id]>/test', 'get'
+                'hosts', host_group_id, {}, 'shost/<<14[data][id]>>/test', 'get'
             ),
             self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<14[data][id]>/test2', 'get'
+                'hosts', host_group_id, {}, 'shost/<<14[data][id]>>/test2', 'get'
             ),
             self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<14[data][id]>/test3', 'get'
+                'hosts', host_group_id, {}, 'shost/<<14[data][id]>>/test3', 'get'
             ),
-            self.get_mod_bulk('hosts', host_group_id, {}, 'shost/<14[data][id]>', 'delete'),
-            self.get_mod_bulk('hosts', host_group_id, dict(id='<14[data][id]>'), 'shost'),
+            self.get_mod_bulk('hosts', host_group_id, {}, 'shost/<<14[data][id]>>', 'delete'),
+            self.get_mod_bulk('hosts', host_group_id, dict(id='<<14[data][id]>>'), 'shost'),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertCount(hg.hosts.all(), 1)
@@ -1085,7 +1085,7 @@ class ProjectTestCase(BaseTestCase):
     def test_model_fk_field(self):
         bulk_data = [
             dict(data_type=['subhosts'], method='post', data={'name': 'tt_name'}),
-            dict(data_type=['testfk'], method='post', data={'some_fk': '<0[data][id]>'}),
+            dict(data_type=['testfk'], method='post', data={'some_fk': '<<0[data][id]>>'}),
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[1]['status'], 201)
@@ -1095,140 +1095,140 @@ class ProjectTestCase(BaseTestCase):
         value = {'name': 'abc.png', 'content': '/4sdfsdf/'}
         bulk_data = [
             dict(data_type=['testbinaryfiles'], method='post', data={}),
-            dict(data_type=['testbinaryfiles', '<0[data][id]>'], method='get'),
+            dict(data_type=['testbinaryfiles', '<<0[data][id]>>'], method='get'),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='put',
                 data=dict(some_namedbinfile=value, some_namedbinimage=value, some_binfile=value['content'])
             ),
-            dict(data_type=['testbinaryfiles', '<0[data][id]>'], method='get'),
+            dict(data_type=['testbinaryfiles', '<<0[data][id]>>'], method='get'),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_namedbinfile={'name': 'qwe', 'content1': 123})
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_namedbinfile={'name': 'qwe'})
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_namedbinfile=123)
             ),
             # Tests for 'multiplenamedbinfile' field
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=123)
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile={})
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value, 123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value, {"name1": "invalid", "content": "123"}])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value, value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             # Tests for 'multiplenamedbinimage' field
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=123)
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage={})
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[value, 123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[value, {"name1": "invalid", "content": "123"}])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[value, value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<0[data][id]>'],
+                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
         ]
