@@ -25,6 +25,11 @@ api_info_dict = OrderedDict(
         'x-docs': OrderedDict(
             has_docs='docs' in settings.INSTALLED_APPS,
             docs_url=getattr(settings, 'DOC_URL', '/docs/'),
+        ),
+        'x-settings': OrderedDict(
+            static_path=settings.STATIC_URL,
+            enable_gravatar=settings.ENABLE_GRAVATAR,
+            time_zone=settings.TIME_ZONE
         )
     }
 )

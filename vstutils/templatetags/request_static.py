@@ -48,7 +48,7 @@ def do_static_origin(parser, token):
         {% static "myapp/css/base.css" as admin_base_css %}
         {% static variable_with_path as varname %}
     """
-    return StaticNode.handle_token(parser, token)
+    return StaticNode.handle_token(parser, token)  # nocv
 
 
 @register.filter(is_safe=True)

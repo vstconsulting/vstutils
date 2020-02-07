@@ -70,7 +70,7 @@ class ProfileViewConsctuctor {
         return {
             computed: {
                 url() {
-                    return path.replace('{' + path_pk_key +'}', my_user_id).format(this.$route.params).replace(/\/$/g, "");
+                    return path.replace('{' + path_pk_key +'}', app.api.getUserId()).format(this.$route.params).replace(/\/$/g, "");
                 }
             },
             methods: {
@@ -97,7 +97,7 @@ class ProfileViewConsctuctor {
                             continue;
                         }
 
-                        let url = obj.url.replace('profile', 'user/' + my_user_id);
+                        let url = obj.url.replace('profile', 'user/' + app.api.getUserId());
 
                         this.getInstance(views[obj.path], url).then(instance => {
                             this.data.parent_instances[obj.url] = instance;
@@ -146,7 +146,7 @@ class Gravatar { /* jshint unused: false */
             this.base_url = opt.base_url;
         }
 
-        this.default_gravatar = window.guiStaticPath + 'img/anonymous.png';
+        this.default_gravatar = app.api.openapi.info['x-settings'].static_path + 'img/anonymous.png';
     }
     /**
      * Method, that returns url of default gravatar image.
@@ -212,12 +212,12 @@ tabSignal.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit
                     reload_page = true;
                 }
 
-                if(this.$route.path.indexOf('/user') === 0 && this.$route.params[path_pk_key] === my_user_id) {
+                if(this.$route.path.indexOf('/user') === 0 && this.$route.params[path_pk_key] === app.api.getUserId()) {
                     reload_page = true;
                 }
 
                 if(this.$route.path.indexOf('/user') !== 0 && this.$route.path.indexOf('/user') !== -1 &&
-                    this.$route.params.user_id === my_user_id) {
+                    this.$route.params.user_id === app.api.getUserId()) {
                     reload_page = true;
                 }
 

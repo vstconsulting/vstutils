@@ -691,7 +691,7 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
             return;
         }
 
-        return moment(value).tz(window.timeZone).format();
+        return moment(value).tz(app.api.getTimeZone()).format();
     }
     /**
      * Redefinition of base guiField method toRepresent.
@@ -704,7 +704,7 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
             return;
         }
 
-        let m = moment(moment.tz(value, window.timeZone)).tz(moment.tz.guess());
+        let m = moment(moment.tz(value, app.api.getTimeZone())).tz(moment.tz.guess());
 
         return m.format("YYYY-MM-DD") + 'T' + m.format("HH:mm");
     }

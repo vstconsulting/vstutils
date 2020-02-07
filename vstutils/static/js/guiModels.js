@@ -55,13 +55,19 @@ guiModels.Model = class Model {
      * Method, that returns instance's value of PK field.
      */
     getPkValue() {
-        return this.data[this.pk_name];
+        // return this.data[this.pk_name];
+        if(this.fields[this.pk_name]) {
+            return this.fields[this.pk_name].toInner(this.data);
+        }
     }
     /**
      * Method, that returns instance's value of view field.
      */
     getViewFieldValue() {
-        return this.data[this.view_name];
+        // return this.data[this.view_name];
+        if(this.fields[this.view_name]) {
+             return this.fields[this.view_name].toRepresent(this.data);
+        }
     }
     /**
      * Method, that deletes Model instance.
@@ -165,7 +171,7 @@ class ModelConstructor extends BaseEntityConstructor { /* jshint unused: false *
     }
 
     /**
-     * Method, that returns list of field for current model.
+     * Method, that returns list of fields for current model.
      * @param {object} model OpenApi's Model schema.
      */
     getModelFieldsList(model) {
@@ -193,7 +199,7 @@ class ModelConstructor extends BaseEntityConstructor { /* jshint unused: false *
      * Method, that defines format of current field.
      * @param {object} field Field from OpenApi's Model schema.
      */
-    getModelFieldFormat(field){
+    getModelFieldFormat(field) {
         return this.getFieldFormat(field);
     }
 
@@ -243,7 +249,8 @@ class ModelConstructor extends BaseEntityConstructor { /* jshint unused: false *
     }
 
     /**
-     * Method, that generates Models according to OpenApi schema.
+     * Method, that generates Models objects based on OpenApi schema.
+     * Method returns dict with generating models.
      * @param {object} openapi_schema OpenApi Schema.
      * @return {object} Models store - object, that contains generated Models.
      */

@@ -4,16 +4,8 @@
 
 {% block resource_list %}
     <script src="{% static_path 'js/libs/tabSignal.js' %}?v={{gui_version}}"></script>
+{% endblock %}
 
-    <script>
-        window.resourceList = [
-            {% cache block_timeout static_files_list_api_block gui_version %}
-            {% for file in static_files_list %}
-                {% if file.api %}
-                    { priority: {{ file.priority }}, type: '{{ file.type }}', name: '{% static file.name %}?v={{gui_version}}'},
-                {% endif %}
-            {% endfor %}
-            {% endcache %}
-        ]
-    </script>
+{% block app_loader %}
+    <script src="/app-for-api-loader.js"></script>
 {% endblock %}

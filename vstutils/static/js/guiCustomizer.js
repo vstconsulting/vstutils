@@ -541,7 +541,7 @@ const skinDarkMixin = {
 guiSkins.dark = $.extend(true, {}, guiSkins.default, skinDarkMixin);
 
 /**
- * Class, that is responsible for changing GUI skins and for changing skins' settings.
+ * Class, that is responsible for changing GUI skins (themes) and for changing skins' settings.
  */
 class GuiCustomizer {
     /**

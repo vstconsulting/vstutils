@@ -1,3 +1,4 @@
+from rest_framework import request as drf_request
 from django.conf import settings
 from drf_yasg import generators
 from drf_yasg.inspectors import field as field_insp
@@ -96,3 +97,8 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             if any([f for f in dir(view) if f.endswith('_'.join([gist, 'list']))]):
                 keys[-1] = 'list'
         return keys
+
+    def get_schema(self, request: drf_request.Request = None, *args, **kwargs):
+        result = super().get_schema(request, *args, **kwargs)
+        result['info']['x-user-id'] = request.user.id
+        return result

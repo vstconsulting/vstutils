@@ -946,7 +946,9 @@ class ProjectTestCase(BaseTestCase):
     def test_coreapi_schema(self):
         stdout = io.StringIO()
         call_command(
-            'generate_swagger', '--url', 'http://localhost:8080/',
+            'generate_swagger',
+            '--url', 'http://localhost:8080/',
+            '--user', self.user.username,
             format='json', stdout=stdout
         )
         data = json.loads(stdout.getvalue())

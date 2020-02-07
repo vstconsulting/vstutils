@@ -1,5 +1,5 @@
 TRANSLATION = {
-    'version': 'version | versions',
+    'version': 'versions | version | versions',
     'app info': 'about',
     'on item': 'items | item | items',
     'file n selected': 'no file selected | 1 file selected | {n} files selected',

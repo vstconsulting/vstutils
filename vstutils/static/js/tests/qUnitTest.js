@@ -221,8 +221,8 @@ class TestsRunner {
     runTests() {
         console.log('Tests status: ' + this.getTestsStatus() + '.');
 
-        $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
-        $("body").append('<script src="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>');
+        $("body").append('<link rel="stylesheet" href="' + app.api.getHostUrl() + app.api.getStaticPath() + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
+        $("body").append('<script src="' + app.api.getHostUrl() + app.api.getStaticPath() + 'js/tests/phantomjs/qunit/qunit-2.2.1.js"></script>');
         $("body").append('<div id="qunit"></div><div id="qunit-fixture"></div>');
 
         let intervalId = setInterval(() => {
@@ -280,7 +280,7 @@ class TestsRunner {
      */
     showReport() {
         $("body").html('<div id="qunit-saveReport"></div><div id="qunit">'+$("#qunit").html()+'</div>');
-        $("body").append('<link rel="stylesheet" href="' + hostname + window.guiStaticPath + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
+        $("body").append('<link rel="stylesheet" href="' + app.api.getHostUrl() + app.api.getStaticPath() + 'js/tests/phantomjs/qunit/qunit-2.2.1.css">');
         document.getElementById("qunit-urlconfig-hidepassed").onclick = function() {
             let elements = Array.from(document.getElementById('qunit-tests').getElementsByClassName('pass'));
             elements.forEach(el => {el.hidden = this.checked});
