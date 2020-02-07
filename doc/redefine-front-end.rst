@@ -1,27 +1,38 @@
-Redefinition of VSTUtils front-end
-==================================
-VSTUtils is rather flexible framework, so if you need to redefine some base front-end
+Redefinition of VST Utils front-end
+===================================
+VST Utils is rather flexible framework, so if you need to redefine some base front-end
 functionality in your project you can do it in 2 ways:
 
-* **signals** - appropriate for situations, when you need to add some additional functionality to the base one
-  or when you need to redefine some parts of entity's structure
-  (for example, add some additional field to Model or change Model's field format);
-* **class inheritance** - appropriate for situations, when you need to redefine some part of functionality
-  of such base entities as Model class, QuerySet class, Fields Classes.
+* :ref:`signals-section` - appropriate for situations, when you need to add some additional functionality to the base one
+  or when you need to redefine some parts of entity's structure. For example:
+
+    * add some additional field to :ref:`Model object <model-class>`;
+    * change :ref:`Model object's <model-class>` field format;
+    * change template of some :ref:`View object <view-class>`;
+    * change something in :ref:`View object's <view-class>` schema;
+    * extend or redefine behavior of the :ref:`View object's <view-class>` Vue component via mixins;
+    * and so on.
+
+* :ref:`class-inheritance-section` - appropriate for situations, when you need to redefine some part of functionality (methods, properties)
+  of such base entities as :ref:`model-class`, :ref:`queryset-class`, :ref:`fields-classes`.
 
 
 Let's look closely on both ways of functionality redefinition.
 
+
+.. _signals-section:
+
+
 Signals
 -------
-System of signals is a mechanism, that VSTUtils uses for app customization.
+System of signals is a mechanism, that VST Utils uses for app customization.
 
 Let's look how it works.
 
 Very often you need to modify something after some event has occurred.
 But how can you know about this event? And what if you need to know about this event in several blocks of code?
 
-To solve this problem VSTUtils uses system of signals, where:
+To solve this problem VST Utils uses system of signals, where:
 
 * you can emit some signal, which tells all subscribers, that some event has occurred,
   and pass some data/variables from the context, where this event has occurred;
@@ -63,27 +74,27 @@ To connect to some signal you need to write following in you code:
 where:
 
 * **name_of_signal** - string, which stores name of signal (event);
-* **callback** - function, that can do something with context of event, that will be passed to this callback.
+* **callback** - function, that can do something with variables, which will be passed from event's context to this callback as arguments.
 
 Example of connecting to signal:
 
 .. sourcecode:: javascript
 
     /* ... */
-    let callback = (app) => {
+    function callback(app) {
         app.title = 'example of app title';
-    };
+    }
 
     tabSignal.connect('app.created', callback);
     /* ... */
 
-Signals available in VSTUtils
------------------------------
-VSTUtils has some signals, that are emitting during application work.
+Signals available in VST Utils
+------------------------------
+VST Utils has some signals, that are emitting during application work.
 If you need to customize/redefine something in you project you can subscribe to these signals and do some code with those context.
 Also you can emit you own signals in your project, if you need.
 
-Let's look what signals are used in VSTUtils.
+Let's look what signals are used in VST Utils.
 
 openapi.loaded
 ~~~~~~~~~~~~~~
@@ -108,7 +119,7 @@ app.version.updated
 
 **Context argument:** None.
 
-**Description:** This signal will be emitted during app loading if VSTUtils detects,
+**Description:** This signal will be emitted during app loading if VST Utils detects,
 that version of your project was updated.
 
 app.beforeInit
@@ -311,18 +322,21 @@ GuiCustomizer.skin.settings.changed
 
 **Description:** This signal will be executed after changing of current GuiCustomizer skin's settings.
 
+.. _class-inheritance-section:
 
 Class inheritance
 -----------------
-If you need to redefine some functionality of such base entities as Model class, QuerySet class, Fields Classes,
+If you need to redefine some functionality of such base entities as :ref:`model-class`, :ref:`queryset-class`, :ref:`fields-classes`,
 you can use JavaScript class inheritance for this purposes. You can create new class,
-that will be inherited from some base VSTUtils class and contain some new functionality.
+that will be inherited from some base VST Utils class and contain some new functionality.
 
 Let's look on the examples.
 
+.. _creation_of_custom_model_or_queryset_class:
+
 Creation of custom Model or QuerySet class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-There is only one base class for models (Class Model) and one base class for querysets (Class QuerySet) in VSTUtils.
+There is only one base class for models (Class Model) and one base class for querysets (Class QuerySet) in VST Utils.
 These classes are stored in following variables:
 
 * **guiModels** - {object} - variable for storing model classes (base Class Model available as guiModels.Model);
@@ -365,9 +379,9 @@ So if you model name is "User", then key for guiModels should be equal to the "U
 If model name is "Abc", key - "AbcModel" and so on.
 
 Names of those keys are so important, because during parsing of OpenAPI schema
-and creation of base entities (models and querysets) VSTUtils will automatically checks
+and creation of base entities (models and querysets) VST Utils will automatically checks
 is there some custom class for this entity in classes store objects (guiModels and guiQuerySets).
-If there is some relative class for this entity, VSTUtils will use it for creation of new model/queryset, otherwise,
+If there is some relative class for this entity, VST Utils will use it for creation of new model/queryset, otherwise,
 it will use base class (guiModels.Model and guiQuerySets.QuerySet).
 
 The same principle works and for custom QuerySets. For example, if you want to create custom QuerySet,
@@ -389,7 +403,7 @@ All Fields classes are stored in **guiFields** object, so if you want to add som
 
 .. sourcecode:: javascript
 
-    guiFields.custom_field = class CustomField extends guiFields.base {};
+    guiFields.custom_field = class CustomField extends guiFields.base {
         /*
             some code here
         */
@@ -406,7 +420,7 @@ But if you want to change some view properties of you field, you should write so
         */
     };
 
-    guiFields.custom_field = class CustomField extends guiFields.base {};
+    guiFields.custom_field = class CustomField extends guiFields.base {
         /*
             some code here
         */

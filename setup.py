@@ -352,6 +352,8 @@ kwargs = dict(
         'vstutils/static/js/libs/markdown.js',
         'vstutils/static/js/libs/xregexp-all.js',
         'vstutils/gui/templates/gui/service-worker.js',
+        'vstutils/gui/templates/gui/app-loader.js',
+        'vstutils/gui/templates/rest_framework/app-for-api-loader.js',
     ],
     install_requires=[
         "django>=2.2,<3.0;python_version>='3.6'",

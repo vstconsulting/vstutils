@@ -107,7 +107,7 @@ class ViewConstructor extends BaseEntityConstructor {
      * Method, that returns base options of view schema.
      * @param {string} path Key of path object, from OpenApi's path dict.
      */
-    getViewSchema_baseOptions(path){
+    getViewSchema_baseOptions(path) {
         return {
             name: this.getViewSchema_name(path),
             level: (path.match(/\//g) || []).length,
@@ -119,7 +119,7 @@ class ViewConstructor extends BaseEntityConstructor {
      * @param {object} operation_id_filters Filters property from operation_id_options.
      * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
      */
-    getViewSchema_filters(operation_id_filters, path_obj_prop){
+    getViewSchema_filters(operation_id_filters, path_obj_prop) {
         let filters = $.extend(true, {}, path_obj_prop[operation_id_filters.name]);
         for(let filter in filters) {
             if(this.dictionary.models.filters_to_delete.includes(filters[filter].name)) {
@@ -174,7 +174,7 @@ class ViewConstructor extends BaseEntityConstructor {
      * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
      * @return {object} operation_id_options Operation_id options for view schema.
      */
-    getViewSchema_operationIdOptions(operation_id, path, path_obj_prop){
+    getViewSchema_operationIdOptions(operation_id, path, path_obj_prop) {
         let opt = {
             operation_id: operation_id,
         };
@@ -205,7 +205,7 @@ class ViewConstructor extends BaseEntityConstructor {
      * @param {number} max_level Max level of inner recursion.
      * @param {number} level Current level of recursion.
      */
-    getModelNameLink(obj, max_level = 0, level = 0) {
+    getModelNameLink(obj, max_level=0, level=0) {
         if(!obj) {
             return;
         }
@@ -283,7 +283,7 @@ class ViewConstructor extends BaseEntityConstructor {
 
     /**
      * Method, that creates views based on OpenApi schema.
-     * @param {class} constructor View class - constructor, that return View object.
+     * @param {class} constructor View class - constructor, that returns View object.
      * @param {object} openapi_schema OpenApi Schema.
      * @return {object} views Dict of views objects.
      */
@@ -358,7 +358,7 @@ class ViewConstructor extends BaseEntityConstructor {
      * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
      * @param {object} path_obj View object for a path (object FROM which link wll be formed).
      */
-    getInternalLinkObj_extension(link_name, link_type, path_obj){ /* jshint unused: false */
+    getInternalLinkObj_extension(link_name, link_type, path_obj) { /* jshint unused: false */
         let obj = {};
         let dict = this.dictionary.paths;
         ['base', path_obj.schema.type].forEach(path_type => {
@@ -560,7 +560,7 @@ class ViewConstructor extends BaseEntityConstructor {
     /**
      * Method, that returns dict with views, ready to use.
      * Method creates views, sets internal links for them and so on.
-     * @param {class} constructor View class - constructor, that return View object.
+     * @param {class} constructor View class - constructor, that returns View object.
      * @param {object} openapi_schema OpenApi Schema.
      * @return {object} Views Dict of views objects, ready for usage.
      */
@@ -613,7 +613,7 @@ class ViewConstructor extends BaseEntityConstructor {
  * - /bar/;
  * - /bar/{pk}/.
  *
- * And we do not have follow paths in API:
+ * And we do not have following paths in API:
  * - /foo/{pk}/bar/;
  * - /foo/{pk}/bar/{bar_id}/.
  *

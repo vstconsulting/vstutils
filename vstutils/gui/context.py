@@ -39,9 +39,11 @@ def settings_constants(request: HttpRequest) -> Dict:
 def project_args(request: HttpRequest) -> Dict:
     host_url = request.build_absolute_uri('/')[:-1]
     ver_key = f'{getattr(settings, "VST_PROJECT", "vstutils")}_version'
+    request_gui_version = f'{gui_version}_{str(request.user.id or 0)}'
     return {
         "host_url": host_url,
         "gui_version": gui_version,
+        "gui_user_version": request_gui_version,
         "project_version": getattr(settings, 'PROJECT_VERSION', ''),
         ver_key: getattr(settings, 'PROJECT_VERSION', False),
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),

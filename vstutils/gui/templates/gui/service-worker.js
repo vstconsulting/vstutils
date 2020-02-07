@@ -37,6 +37,20 @@ const FAVICON = "{% static 'img/logo/favicon.ico' %}";
 //{% endblock %}
 
 /**
+ * Path to the app loader file.
+ */
+//{% block app_loader %}
+const APP_LOADER = "/app-loader.js";
+//{% endblock %}
+
+/**
+ * Path to the app for api loader file.
+ */
+//{% block app_for_api_loader %}
+const APP_FOR_API_LOADER = "/app-for-api-loader.js";
+//{% endblock %}
+
+/**
  * Array with paths of additional files, that should precached.
  */
 //{% block resource_list %}
@@ -46,7 +60,10 @@ const ADDITIONAL_FILES_LIST = [];
 /**
  * Array, that store paths of files, that should be precached.
  */
-const PRECACHE_LIST = [OFFLINE_PAGE, FAVICON].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST);
+const PRECACHE_LIST = [
+    OFFLINE_PAGE, FAVICON,
+    APP_LOADER, APP_FOR_API_LOADER,
+].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST);
 
 /**
  * Sets workbox cache names details.
@@ -63,16 +80,6 @@ workbox.core.setCacheNameDetails({
  * Adds precaching of PRECACHE_LIST.
  */
 workbox.precaching.precacheAndRoute(PRECACHE_LIST);
-
-/**
- * Adds caching of OpenAPI schema.
- */
-workbox.routing.registerRoute(
-    /\/api\/openapi\/\?format=openapi/,
-    new workbox.strategies.CacheFirst({
-        cacheName: workbox.core.cacheNames.runtime,
-    }),
-);
 
 /**
  * Deletes cache of previous (outdated) versions.

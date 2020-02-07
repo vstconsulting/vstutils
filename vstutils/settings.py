@@ -796,6 +796,12 @@ VIEWS = {
     "SERVICE_WORKER": {
         "BACKEND": 'vstutils.gui.views.SWView'
     },
+    "APP_LOADER": {
+        "BACKEND": 'vstutils.gui.views.AppLoaderView'
+    },
+    "APP_FOR_API_LOADER": {
+        "BACKEND": 'vstutils.gui.views.AppForApiLoaderView'
+    },
     "OFFLINE": {
         "BACKEND": 'vstutils.gui.views.OfflineView'
     },
@@ -850,6 +856,8 @@ GUI_VIEWS = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
+    r'^app-loader.js$': 'APP_LOADER',
+    r'^app-for-api-loader.js$': 'APP_FOR_API_LOADER',
     r'^offline.html$': 'OFFLINE',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',
@@ -925,14 +933,6 @@ SPA_STATIC = [
     },
     {
         'priority': 5, 'type': 'js', 'name': 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js',
-        'spa': True, 'api': True
-    },
-    {
-        'priority': 101, 'type': 'css', 'name': 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css',
-        'spa': True, 'api': True
-    },
-    {
-        'priority': 103, 'type': 'css', 'name': 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css',
         'spa': True, 'api': True
     },
 ]
