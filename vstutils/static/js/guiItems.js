@@ -677,24 +677,19 @@ vst_vue_components.items = {
              * Boolean property, that returns true if user is authorized.
              */
             is_authenticated() {
-                return window.is_authenticated;
+                return Boolean(app.api.getUserId());
             },
             /**
              * Boolean property, that returns true if gravatar_mode is activated.
              */
             enable_gravatar() {
-                return window.enable_gravatar;
+                return app.api.openapi.info['x-settings'].enable_gravatar;
             },
             /**
              * Property, that returns object with properties of current application user.
              */
             user() {
-                return {
-                    id: my_user_id,
-                    email: my_user_email || "", /* globals my_user_email */
-                    first_name: my_user_first_name || "", /* globals my_user_first_name */
-                    last_name: my_user_last_name || "", /* globals my_user_last_name */
-                };
+                return app.user;
             },
             /**
              * Property, that returns URL to user's gravatar.
@@ -708,7 +703,7 @@ vst_vue_components.items = {
             profile_url() {
                 let url = '/profile';
                 if(this.a_links) {
-                    return window.hostname + "/#" + url;
+                    return app.api.getHostUrl() + "/#" + url;
                 }
 
                 return url;
@@ -719,7 +714,7 @@ vst_vue_components.items = {
             profile_settings_url() {
                 let url = '/profile/settings';
                 if(this.a_links) {
-                    return window.hostname + "/#" + url;
+                    return app.api.getHostUrl() + "/#" + url;
                 }
 
                 return url;
@@ -748,13 +743,13 @@ vst_vue_components.items = {
              * Property, that returns URL to openapi.
              */
             openapi_url() {
-                return window.openapi_url;
+                return window.openapi_path;
             },
             /**
              * Property, that returns logout URL.
              */
             logout_url() {
-                return window.gui_logout_url;
+                return app.api.getHostUrl() + '/logout';
             },
             /**
              * Property, that returns login URL.
@@ -811,7 +806,7 @@ vst_vue_components.items = {
             menu_items() {
                 let url_prefix = "";
                 if(this.a_links) {
-                    url_prefix = hostname;
+                    url_prefix = app.api.getHostUrl();
                 }
 
                 let items = [

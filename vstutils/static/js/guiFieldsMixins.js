@@ -2572,6 +2572,7 @@ const gui_fields_mixins = { /* jshint unused: false */
                     classes() {
                         return [
                             ...this.class_list,
+                            "text-data",
                             this.choices_classes,
                         ];
                     },
@@ -3135,7 +3136,7 @@ const gui_fields_mixins = { /* jshint unused: false */
                 for(let i = 0; i < links_array.length; i++) {
                     let link = links_array[i];
 
-                    if(!(link.href && link.href.search(window.hostname) != -1)) {
+                    if(!(link.href && link.href.search(app.api.getHostUrl()) != -1)) {
                         link.setAttribute('target', '_blank');
                         link.setAttribute('rel', 'noreferrer');
                         continue;
@@ -3157,7 +3158,7 @@ const gui_fields_mixins = { /* jshint unused: false */
 
                     if(link.href.search(window.location.href) == -1) {
                         link.href = window.location.href + this.link_path +
-                            link.href.split(window.hostname)[1];
+                            link.href.split(app.api.getHostUrl())[1];
                     }
                 }
             }

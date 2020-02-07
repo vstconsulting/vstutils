@@ -54,13 +54,13 @@ KWARGS = __kwargs
 
 # Get settings from config
 ##############################################################
-DEV_SETTINGS_FILE = os.getenv("{}_DEV_SETTINGS_FILE".format(ENV_NAME),
+DEV_SETTINGS_FILE = os.getenv(f"{ENV_NAME}_DEV_SETTINGS_FILE",
                               os.path.join(BASE_DIR, str(os.getenv("VST_DEV_SETTINGS"))))
 CONFIG_FILE = os.getenv(
-    "{}_SETTINGS_FILE".format(ENV_NAME),
-    "/etc/{}/settings.ini".format(VST_PROJECT_LIB)
+    f"{ENV_NAME}_SETTINGS_FILE",
+    f"/etc/{VST_PROJECT_LIB}/settings.ini"
 )
-CONFIG_ENV_DATA_NAME = "{}_SETTINGS_DATA".format(ENV_NAME)
+CONFIG_ENV_DATA_NAME = f"{ENV_NAME}_SETTINGS_DATA"
 
 
 class BackendSection(cconfig.Section):
@@ -246,7 +246,7 @@ config = cconfig.ConfigParserC(
             'logfile': '/var/log/{PROG_NAME}/worker.log',
             'pidfile': '/run/{PROG_NAME}_worker.pid',
             'autoscale': '{this[rpc][concurrency]},1',
-            'hostname': '{}@%h'.format(pwd.getpwuid(os.getuid()).pw_name),
+            'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
             'beat': True
         }
     },
@@ -273,7 +273,7 @@ web = config['web']
 
 # Secret file with key for hashing passwords
 SECRET_FILE = os.getenv(
-    "{}_SECRET_FILE".format(ENV_NAME), "/etc/{}/secret".format(VST_PROJECT_LIB)
+    f"{ENV_NAME}_SECRET_FILE", f"/etc/{VST_PROJECT_LIB}/secret"
 )
 
 def secret_key():
@@ -433,14 +433,12 @@ PASSWORD_RESET_TIMEOUT_DAYS = web['password_reset_timeout_days']
 # Main controller settings
 ##############################################################
 # Module with urls
-ROOT_URLCONF = os.getenv('VST_ROOT_URLCONF', '{}.urls'.format(VST_PROJECT))
+ROOT_URLCONF = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 
 # wsgi appilcation settings
-WSGI = os.getenv('VST_WSGI', '{}.wsgi'.format(VST_PROJECT))
-WSGI_APPLICATION = "{}.application".format(WSGI)
-UWSGI_APPLICATION = '{module}:{app}'.format(
-    module='.'.join(WSGI_APPLICATION.split('.')[:-1]), app=WSGI_APPLICATION.split('.')[-1]
-)
+WSGI = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
+WSGI_APPLICATION = f"{WSGI}.application"
+UWSGI_APPLICATION = f'{WSGI}:application'
 
 uwsgi_settings = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
@@ -798,6 +796,12 @@ VIEWS = {
     "SERVICE_WORKER": {
         "BACKEND": 'vstutils.gui.views.SWView'
     },
+    "APP_LOADER": {
+        "BACKEND": 'vstutils.gui.views.AppLoaderView'
+    },
+    "APP_FOR_API_LOADER": {
+        "BACKEND": 'vstutils.gui.views.AppForApiLoaderView'
+    },
     "OFFLINE": {
         "BACKEND": 'vstutils.gui.views.OfflineView'
     },
@@ -852,6 +856,8 @@ GUI_VIEWS = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
+    r'^app-loader.js$': 'APP_LOADER',
+    r'^app-for-api-loader.js$': 'APP_FOR_API_LOADER',
     r'^offline.html$': 'OFFLINE',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',
@@ -927,14 +933,6 @@ SPA_STATIC = [
     },
     {
         'priority': 5, 'type': 'js', 'name': 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js',
-        'spa': True, 'api': True
-    },
-    {
-        'priority': 101, 'type': 'css', 'name': 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css',
-        'spa': True, 'api': True
-    },
-    {
-        'priority': 103, 'type': 'css', 'name': 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css',
         'spa': True, 'api': True
     },
 ]

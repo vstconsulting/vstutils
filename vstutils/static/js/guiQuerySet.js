@@ -158,7 +158,7 @@ guiQuerySets.QuerySet = class QuerySet {
 
     /**
      * Method, that returns new QuerySet with new value of 'use_prefetch' property.
-     * @param {boolean, array} instances If boolean - means - Use prefetch or not,
+     * @param {boolean | array} instances If boolean - means - Use prefetch or not,
      * otherwise, means array with names of model fields,
      * that should be used as prefetch field.
      */

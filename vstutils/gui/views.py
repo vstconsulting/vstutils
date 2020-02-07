@@ -40,6 +40,18 @@ class SWView(BaseView):
     template_name = "gui/service-worker.js"
 
 
+class AppLoaderView(BaseView):
+    login_required = False
+    content_type = 'text/javascript'
+    template_name = "gui/app-loader.js"
+
+
+class AppForApiLoaderView(BaseView):
+    login_required = False
+    content_type = 'text/javascript'
+    template_name = "rest_framework/app-for-api-loader.js"
+
+
 class Login(auth.LoginView):
     template_name = 'auth/login.html'
     redirect_authenticated_user = True

@@ -198,4 +198,6 @@ TRANSLATION = {
     'which field to use when ordering the results.': 'поле по которому производить сортировку результатов.',
     'a unique integer value (or comma separated list) identifying this instance.': 'уникальное числовое значение (или их последовательность разделенная запятой) идентифицирующая данный объект.',
     'a name string value (or comma separated list) of instance.': 'имя объекта - строковое значение (или их последовательность разделенная запятой).',
+
+    'page matching current url was not found': 'страница, соответствующая данному url, не была найдена',
 }

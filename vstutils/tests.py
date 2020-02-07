@@ -113,12 +113,10 @@ class BaseTestCase(TestCase):
         return str(uuid.uuid1())
 
     def get_url(self, item=None, pk=None, sub=None):
-        url = '/{}/{}/'.format(
-            self._settings('VST_API_URL'), self._settings('VST_API_VERSION')
-        )
-        url += "{}/".format(item) if item else ''
-        url += "{}/".format(pk) if pk else ''
-        url += '{}/'.format(sub) if sub else ''
+        url = f'/{self._settings("VST_API_URL")}/{self._settings("VST_API_VERSION")}/'
+        url += f"{item}/" if item else ''
+        url += f"{pk}/" if pk else ''
+        url += f'{sub}/' if sub else ''
         return url
 
     @classmethod

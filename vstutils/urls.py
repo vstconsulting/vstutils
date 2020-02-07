@@ -25,7 +25,7 @@ router.register_view('health', HealthView.as_view({'get': 'list'}), 'health')
 
 admin.site.site_header = 'Admin panel'
 admin.site.site_title = settings.VST_PROJECT
-admin.site.index_title = "{} Settings Panel".format(settings.VST_PROJECT.upper())
+admin.site.index_title = f"{settings.VST_PROJECT.upper()} Settings Panel"
 admin.site.site_url = "/"
 admin.site.login = AdminLoginLogoutRedirectView.as_view(url=settings.LOGIN_URL)
 admin.site.logout = AdminLoginLogoutRedirectView.as_view(url=settings.LOGOUT_URL)
@@ -37,7 +37,7 @@ urlpatterns += [
     re_path(r'^admin/', admin.site.urls),
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
-urlpatterns += [re_path(r'^{}/'.format(settings.API_URL), include(router.urls))]
+urlpatterns += [re_path(rf'^{settings.API_URL}/', include(router.urls))]
 urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 if 'docs' in settings.INSTALLED_APPS:  # nocv
-    urlpatterns += [re_path(r'^{}'.format(doc_url), include(('docs.urls', settings.VST_PROJECT), namespace='docs'))]
+    urlpatterns += [re_path(rf'^{doc_url}', include(('docs.urls', settings.VST_PROJECT), namespace='docs'))]

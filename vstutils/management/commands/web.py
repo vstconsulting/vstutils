@@ -70,7 +70,7 @@ class Command(BaseCommand):
 
         # Set `--daemonize` to logfile if `daemon = true`
         if settings.WEB_DAEMON:
-            args.append('daemonize={}'.format(settings.WEB_DAEMON_LOGFILE))
+            args.append(f'daemonize={settings.WEB_DAEMON_LOGFILE}')
 
         # Parse command args and setup to uwsgi
         args += [self._get_uwsgi_arg(arg) for arg in uwsgi_args]
@@ -92,7 +92,7 @@ class Command(BaseCommand):
         for key, value in worker_options.items():
             is_boolean = isinstance(value, bool)
             if (is_boolean and value) or value:
-                options += ' --{}'.format(key)
+                options += f' --{key}'
             if is_boolean:
                 continue
             options += "={}".format(value.replace(',', r'\,'))
@@ -104,7 +104,7 @@ class Command(BaseCommand):
         # Add arguments to uwsgi cmd list.
         cmd.append('--attach-daemon2')
         run = 'stopsignal=15,reloadsignal=1,'
-        run += 'exec={} -m celery worker'.format(settings.PYTHON_INTERPRETER)
+        run += f'exec={settings.PYTHON_INTERPRETER} -m celery worker'
         run += options
         cmd.append(run)
 
@@ -116,39 +116,39 @@ class Command(BaseCommand):
         # Build default uwsgi-command options.
         cmd = [
             str(opts['script']),
-            '--set-ph=program_name={}'.format(settings.VST_PROJECT),
-            '--set-ph=lib_name={}'.format(settings.VST_PROJECT_LIB),
-            '--module={}'.format(settings.UWSGI_APPLICATION),
+            f'--set-ph=program_name={settings.VST_PROJECT}',
+            f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
+            f'--module={settings.UWSGI_APPLICATION}',
         ]
         #  Setup http addr:port.
         addrport = opts['addrport']
-        cmd += ['--{}={}'.format('https' if len(addrport.split(',')) > 1 else 'http', addrport)]
+        cmd += [f'--{"https" if len(addrport.split(",")) > 1 else "http"}={addrport}']
 
         # Import uwsgi-args from this command args (key=value).
         cmd += [
-            '--{}'.format(arg) for arg in self._get_uwsgi_args(*uwsgi_args)
+            f'--{arg}' for arg in self._get_uwsgi_args(*uwsgi_args)
             if arg is not None
         ]
         # Import config from project.
         if opts['config'] and Path(opts['config']).exists():
-            cmd += ['--ini={}'.format(opts['config'])]
+            cmd += [f'--ini={opts["config"]}']
 
         # Connect static files.
         for static_path in settings.STATIC_FILES_FOLDERS:
-            if "/static={}".format(static_path) not in cmd:
-                cmd += ['--static-map', "/static={}".format(static_path)]
+            if f"/static={static_path}" not in cmd:
+                cmd += ['--static-map', f"/static={static_path}"]
 
         # Append uwsgi configs.
         for cf in settings.VST_PROJECT_LIB, settings.VST_PROJECT:
             config_file = Path('/etc/') / Path(cf) / 'settings.ini'
-            option = '--ini={}'.format(str(config_file))
+            option = f'--ini={str(config_file)}'
             if config_file.exists() and option not in cmd:
                 cmd.append(option)
 
         if self.uwsgi_default_config.exists():
             cmd.append(str(self.uwsgi_default_config))
         else:
-            self._print('File {} doesnt exists.'.format(str(self.uwsgi_default_config)), 'ERROR')
+            self._print(f'File {str(self.uwsgi_default_config)} doesnt exists.', 'ERROR')
 
         # Attach worker.
         cmd += self._get_worker_options()

@@ -60,7 +60,7 @@ class BaseCommand(_BaseCommand):
 
     def get_version(self):
         return ' '.join([
-            '{}={}'.format(k.title(), v) for k, v in self._get_versions().items()
+            f'{k.title()}={v}' for k, v in self._get_versions().items()
         ])
 
     def ask_user(self, message, default=None):

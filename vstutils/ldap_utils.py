@@ -8,7 +8,7 @@ import ldap
 
 
 def json_default(obj):  # nocv
-    error_obj = TypeError("{} is not JSON serializable".format(type(obj)))
+    error_obj = TypeError(f"{type(obj)} is not JSON serializable")
     try:
         if isinstance(obj, bytes):
             return obj.decode("utf-8")
@@ -67,7 +67,7 @@ class LDAP:
                 )
         if len(self.domain.split('.')) <= 1:
             raise self.InvalidDomainName(
-                "Invalid name {}. Should be [full.domain.name]".format(domain)
+                f"Invalid name {domain}. Should be [full.domain.name]"
             )
         self.auth(self.username, self.password)
 
@@ -85,9 +85,9 @@ class LDAP:
             domain = str(username).split('@')[-1]
         domain = domain.lower()
         if domain != user:
-            domain = ','.join(['dc={}'.format(d) for d in domain.split('.') if d])
+            domain = ','.join([f'dc={d}' for d in domain.split('.') if d])
         user = self.user_format.format(username=user, domain=domain)
-        self.logger.debug('Trying auth in ldap with user "{}"'.format(user))
+        self.logger.debug(f'Trying auth in ldap with user "{user}"')
         return user
 
     def __authenticate(self, ad: Text, username: Text, password: Text) -> ldap.functions.LDAPObject:
@@ -104,19 +104,19 @@ class LDAP:
         conn.protocol_version = 3
         conn.set_option(ldap.OPT_REFERRALS, 0)
         user = self.__prepare_user_with_domain(username)
-        self.logger.debug("Trying to auth with user '{}' to {}".format(user, ad))
+        self.logger.debug(f"Trying to auth with user '{user}' to {ad}")
         try:
             conn.simple_bind_s(user, password)
             result = conn
             self.username, self.password = username, password
-            self.logger.debug("Successfull login as {}".format(username))
+            self.logger.debug(f"Successfull login as {username}")
         except ldap.INVALID_CREDENTIALS:
             result = False
             self.logger.debug(traceback.format_exc())
             self.logger.debug("Invalid ldap-creds.")
         except Exception as ex:  # nocv
             self.logger.debug(traceback.format_exc())
-            self.logger.debug("Unknown error: {}".format(str(ex)))
+            self.logger.debug(f"Unknown error: {str(ex)}")
 
         return result
 
@@ -144,14 +144,12 @@ class LDAP:
         return False
 
     def __ldap_filter(self, *filters):
-        dc_list = ["dc={}".format(i) for i in self.domain_name.split('.') if i]
-        additinal_filter = "".join(["({})".format(i) for i in filters if i])
-        s_filter = '(&(objectCategory=user){})'.format(additinal_filter)
-        base_dn = "{}".format(",".join(dc_list))
+        dc_list = [f"dc={i}" for i in self.domain_name.split('.') if i]
+        additinal_filter = "".join([f"({i})" for i in filters if i])
+        s_filter = f'(&(objectCategory=user){additinal_filter})'
+        base_dn = f"{','.join(dc_list)}"
         self.logger.debug(
-            'Search in LDAP: {}'.format(
-                json.dumps(odict(BASE_DN=base_dn, FILTER=s_filter, FIELDS=self.fields))
-            )
+            f'Search in LDAP: {json.dumps(odict(BASE_DN=base_dn, FILTER=s_filter, FIELDS=self.fields))}'
         )
         return base_dn, ldap.SCOPE_SUBTREE, s_filter, self.fields
 
@@ -175,7 +173,7 @@ class LDAP:
 
     def __str__(self):  # nocv
         msg = 'authorized' if self.isAuth() else "unauthorized"
-        return '[ {} {} -> {} ]'.format(msg, self.connection_string, self.username)
+        return f'[ {msg} {self.connection_string} -> {self.username} ]'
 
     def __del__(self):
         if isinstance(getattr(self, '__conn', None), ldap.ldapobject.LDAPObject):

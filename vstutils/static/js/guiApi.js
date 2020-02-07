@@ -30,12 +30,22 @@ class ApiConnector { /* jshint unused: false */
     /**
      * Constructor of ApiConnector class.
      * @param {object} config Object with config properties for Api connector.
+     * @param {object} openapi Object with OpenAPI schema.
+     * @param {object} cache Object, that manages api responses cache operations.
      */
-    constructor(config){
+    constructor(config, openapi, cache) {
         /**
          * Object with config properties for Api connector.
          */
         this.config = config;
+        /**
+         * Object with OpenAPI schema.
+         */
+        this.openapi = openapi;
+        /**
+         * Object, that manages api responses cache operations.
+         */
+        this.cache = cache;
         /**
          * Object with methods for providing Api connection.
          */
@@ -65,134 +75,6 @@ class ApiConnector { /* jshint unused: false */
             bulk_parts: [],
         };
     }
-    /**
-     * Method, that loads OpeanApi schema from API.
-     * @return {promise} Promise of getting OpenApi schema from API.
-     */
-    loadSchema() {
-        let schema_url = "/openapi/?format=openapi";
-        return this.query('get', schema_url).then(response => {
-            return response.data;
-        }).catch(error => {
-            debugger;
-            throw new Error(error);
-        });
-    }
-    /**
-     * Method, that gets OpeanApi schema from cache.
-     * @return {promise} Promise of getting OpenApi schema from Cache.
-     */
-    getSchemaFromCache() {
-        return app.files_cache.getFile('openapi').then(response => {
-            return JSON.parse(response.data);
-        }).catch(error => {
-            return this.loadSchema().then(openapi => {
-                app.files_cache.setFile('openapi', JSON.stringify(openapi));
-                return openapi;
-            });
-        });
-    }
-    /**
-     * Method, that gets OpenApi schema.
-     * @return {promise} Promise of getting OpenApi schema.
-     */
-    _getSchema() {
-        if(app && app.files_cache) {
-            return this.getSchemaFromCache();
-        } else {
-            return this.loadSchema();
-        }
-    }
-
-    /**
-     * Method, that gets OpenApi schema and emits "openapi.loaded" signal.
-     * @return {promise} Promise of getting OpenApi schema.
-     */
-    getSchema() {
-        return this._getSchema().then(openapi => {
-            this.openapi = openapi;
-            tabSignal.emit("openapi.loaded", openapi);
-            return openapi;
-        }).catch(error => {
-            throw error;
-        });
-    }
-
-    /**
-     * Method, that loads list of App languages from API.
-     * @return {promise} Promise of getting list of App languages from API.
-     */
-    loadLanguages() {
-        return this.bulkQuery({data_type: ['_lang'], method: 'get'}).then(response => {
-            return response.data.results;
-        });
-    }
-
-    /**
-     * Method, that gets list of App languages from cache.
-     * @return {promise} Promise of getting list of App languages from Cache.
-     */
-    getLanguagesFromCache() {
-        return app.files_cache.getFile('languages').then(response => {
-            return JSON.parse(response.data);
-        }).catch(error => {
-            return this.loadLanguages().then(languages => {
-                app.files_cache.setFile('languages', JSON.stringify(languages));
-                return languages;
-            });
-        });
-    }
-
-    /**
-     * Method, that gets list of App languages.
-     * @return {promise} Promise of getting list of App languages.
-     */
-    getLanguages() {
-        if(app && app.files_cache) {
-            return this.getLanguagesFromCache();
-        }
-        return this.loadLanguages();
-    }
-
-    /**
-     * Method, that loads translations for some language from API.
-     * @param {string} lang Code of language, translations of which to load.
-     * @return {promise} Promise of getting translations for some language from API.
-     */
-    loadTranslations(lang) {
-        return this.bulkQuery({data_type: ['_lang', lang], method: 'get'}).then(response => {
-            return response.data.translations;
-        });
-    }
-
-    /**
-     * Method, that gets translations for some language from cache.
-     * @param {string} lang Code of language, translations of which to load.
-     * @return {promise} Promise of getting translations for some language from Cache.
-     */
-    getTranslationsFromCache(lang) {
-        return app.files_cache.getFile('translations.' + lang).then(response => {
-            return JSON.parse(response.data);
-        }).catch(error => {
-            return this.loadTranslations(lang).then(translations => {
-                app.files_cache.setFile('translations.' + lang, JSON.stringify(translations));
-                return translations;
-            });
-        });
-    }
-
-    /**
-     * Method, that gets translations for some language.
-     * @param {string} lang Code of language, translations of which to load.
-     * @return {promise} Promise of getting translations for some language.
-     */
-    getTranslations(lang) {
-        if(app && app.files_cache) {
-            return this.getTranslationsFromCache(lang);
-        }
-        return this.loadTranslations(lang);
-    }
-
     /**
      * Method, that sends API request.
      * @param {string} method Method of HTTP request.
@@ -245,7 +127,7 @@ class ApiConnector { /* jshint unused: false */
      * @return {promise} Promise of getting bulk request response.
      */
     sendBulk() {
-        let url = "/" + api_version + "/_bulk/"; /* globals api_version */
+        let url = "/" + this.openapi.info.version + "/_bulk/"; /* globals api_version */
         let collector = $.extend(true, {}, this.bulk_collector);
         this.bulk_collector.bulk_parts = [];
         let bulk_data = [];
@@ -274,6 +156,112 @@ class ApiConnector { /* jshint unused: false */
             throw new StatusError(error.status, error.data);
         });
     }
+    /**
+     * Method returns URL of API host (server).
+     * @return {string}
+     */
+    getHostUrl() {
+        return this.openapi.schemes[0] + "://" + this.openapi.host;
+    }
+    /**
+     * Method returns string, containing time zone of API host.
+     * @return {string}
+     */
+    getTimeZone() {
+        return this.openapi.info['x-settings'].time_zone;
+    }
+    /**
+     * Method returns relative path (from host url) to the directory with static path.
+     * @return {string}
+     */
+    getStaticPath() {
+        return this.openapi.info['x-settings'].static_path;
+    }
+    /**
+     * Method returns id of user, that is now authorized and uses application.
+     * @return {number | string}
+     */
+    getUserId() {
+        return this.openapi.info["x-user-id"];
+    }
+    /**
+     * Method, that loads data of authorized user.
+     * @return {Promise} Promise of getting data of authorized user.
+     */
+    loadUser() {
+        return this.bulkQuery({data_type: ['user', this.getUserId()], method: 'get'}).then(response => {
+            return response.data;
+        });
+    }
+    /**
+     * Method, that loads list of App languages from API.
+     * @return {promise} Promise of getting list of App languages from API.
+     */
+    loadLanguages() {
+        return this.bulkQuery({data_type: ['_lang'], method: 'get'}).then(response => {
+            return response.data.results;
+        });
+    }
+    /**
+     * Method, that gets list of App languages from cache.
+     * @return {promise} Promise of getting list of App languages from Cache.
+     */
+    getLanguagesFromCache() {
+        return this.cache.getFile('languages').then(response => {
+            return JSON.parse(response.data);
+        }).catch(error => {
+            return this.loadLanguages().then(languages => {
+                this.cache.setFile('languages', JSON.stringify(languages));
+                return languages;
+            });
+        });
+    }
+    /**
+     * Method, that gets list of App languages.
+     * @return {promise} Promise of getting list of App languages.
+     */
+    getLanguages() {
+        if(this.cache) {
+            return this.getLanguagesFromCache();
+        }
+        return this.loadLanguages();
+    }
+    /**
+     * Method, that loads translations for some language from API.
+     * @param {string} lang Code of language, translations of which to load.
+     * @return {promise} Promise of getting translations for some language from API.
+     */
+    loadTranslations(lang) {
+        return this.bulkQuery({data_type: ['_lang', lang], method: 'get'}).then(response => {
+            return response.data.translations;
+        });
+    }
+    /**
+     * Method, that gets translations for some language from cache.
+     * @param {string} lang Code of language, translations of which to load.
+     * @return {promise} Promise of getting translations for some language from Cache.
+     */
+    getTranslationsFromCache(lang) {
+        return this.cache.getFile('translations.' + lang).then(response => {
+            return JSON.parse(response.data);
+        }).catch(error => {
+            return this.loadTranslations(lang).then(translations => {
+                this.cache.setFile('translations.' + lang, JSON.stringify(translations));
+                return translations;
+            });
+        });
+    }
+    /**
+     * Method, that gets translations for some language.
+     * @param {string} lang Code of language, translations of which to load.
+     * @return {promise} Promise of getting translations for some language.
+     */
+    getTranslations(lang) {
+        if(this.cache) {
+            return this.getTranslationsFromCache(lang);
+        }
+        return this.loadTranslations(lang);
+    }
 }
 
 /**
@@ -282,9 +270,9 @@ class ApiConnector { /* jshint unused: false */
 let api_connector_config = { /* jshint unused: false */
     headers: {
         'content-type': 'application/json',
-        'X-CSRFToken': csrf_data.token, /* globals csrf_data */
+        'X-CSRFToken': getCookie('csrftoken'),
     },
-    baseURL: hostname + "/api",
+    baseURL: openapi_path.replace("/openapi/", "") + "/api",
 };
 
 /**

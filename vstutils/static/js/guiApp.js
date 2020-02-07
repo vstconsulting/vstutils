@@ -1,41 +1,67 @@
 /**
  * Class for a App object.
- * App object - JS object, that has all properties, needed for an application work:
- * - api - object, that manages connection with API (load openapi_schema, send API requests).
- * - models - dict, that has all parsed models from openapi_schema.
- * - views - dict, that has all views, generated for all paths from openapi_schema.
- * - application - object, in this realization it is root Vue component of application,
- *   that has store and router in himself.
- * - files_cache - object, that manages files cache operations.
- * - error_handler - object, that handles errors.
+ * App object - JS object, that has all properties, needed for an application work.
  */
-class App {
+class App { /* jshint unused: false */
     /**
      * Constructor of App class.
      * @param {object} api_config Dict with options for ApiConnector constructor.
+     * @param {object} openapi Object with OpenAPI schema.
+     * @param {object} cache Cache instance (is supposed to be instance of FilesCache class).
      */
-    constructor(api_config) {
-        this.api = new ApiConnector(api_config);
-        this.files_cache = window.guiFilesCache;
+    constructor(api_config, openapi, cache) {
+        /**
+         * Object, that manages connection with API (sends API requests).
+         */
+        this.api = new ApiConnector(api_config, openapi, cache);
+        /**
+         * Object, that handles errors.
+         */
         this.error_handler = new ErrorHandler();
+        /**
+         * Dict, that stores all parsed models from OpenAPI schema.
+         */
+        this.models = null;
+        /**
+         * Dict, that stores all views, generated for all paths from OpenAPI schema.
+         */
+        this.views = null;
+        /**
+         * Array, that stores objects, containing language's name and code.
+         */
+        this.languages = null;
+        /**
+         * Dict, that stores translations for each language.
+         */
+        this.translations = null;
+        /**
+         * Object, that stores data of authorized user.
+         */
+        this.user = null;
+        /**
+         * Main(root) Vue instance for current application, that has access to the app store and app router.
+         */
+        this.application = null;
     }
     /**
      * Method, that starts work of app.
-     * Method gets openapi_schema, inits models, inits views and mount application to DOM.
+     * Method gets languages and translations from API, inits models, inits views and mounts application to DOM.
      */
     start() {
         let LANG = guiLocalSettings.get('lang') || 'en';
         let promises = [
-            this.api.getSchema(),
             this.api.getLanguages(),
             this.api.getTranslations(LANG),
+            this.api.loadUser(),
         ];
 
         return Promise.all(promises).then(response => {
-            this.languages = response[1];
+            this.languages = response[0];
             this.translations = {
-                [LANG]: response[2],
+                [LANG]: response[1],
             };
+
+            this.user = response[2];
 
             fieldsRegistrator.registerAllFieldsComponents();
             this.initModels();
@@ -160,9 +186,9 @@ class App {
 
         this.application = new Vue({
             data: {
-                info: app.api.openapi.info,
-                x_menu: app.api.openapi.info['x-menu'],
-                x_docs: app.api.openapi.info['x-docs'],
+                info: this.api.openapi.info,
+                x_menu: this.api.openapi.info['x-menu'],
+                x_docs: this.api.openapi.info['x-docs'],
                 a_links: false,
             },
             computed: {
@@ -181,25 +207,6 @@ class App {
             i18n: i18n,
         }).$mount('#RealBody');
 
-        // Removes onLoadingErrorHandler,
-        // because App does not need it after successful Files Loading.
-        window.removeEventListener('error', onLoadingErrorHandler);
-
-        window.guiFilesLoader.hideLoadingProgress();
-
         tabSignal.emit('app.afterInit', {app: this});
     }
 }
-
-/**
- * Creates App instance and saves it app variable.
- */
-/* jshint latedef: false */
-let app = new App(api_connector_config);
-
-/**
- * Launches our app work.
- */
-tabSignal.connect("resource.loaded", () => {
-    app.start();
-});

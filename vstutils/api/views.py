@@ -99,7 +99,7 @@ class SettingsViewSet(base.ListNonModelViewSet):
         return {
             "PY": settings.PY_VER,
             "VSTUTILS_VERSION": settings.VSTUTILS_VERSION,
-            "{}_VERSION".format(settings.ENV_NAME): settings.PROJECT_VERSION
+            f"{settings.ENV_NAME}_VERSION": settings.PROJECT_VERSION
         }
 
     @deco.action(methods=['get'], detail=False)
@@ -195,7 +195,7 @@ class BulkViewSet(base.rvs.APIView):
     def _get_obj_with_extra(self, param):
         if isinstance(param, str):
             if not ('{' in param and '}' in param):
-                param = param.replace('<', '{').replace('>', '}')
+                param = param.replace('<<', '{').replace('>>', '}')
                 param = param.format(*self.results)
             return self._load_param(param)
         return param
@@ -219,13 +219,13 @@ class BulkViewSet(base.rvs.APIView):
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
         if pk is not None:
-            url += "{}/".format(self._get_obj_with_extra(pk))
+            url += f"{self._get_obj_with_extra(pk)}/"
         if data_type is not None:
             if isinstance(data_type, (list, tuple)):
                 data_type = '/'.join([str(i) for i in data_type])
-            url += "{}/".format(self._get_obj_with_extra(data_type)) if data_type else ''
+            url += f"{self._get_obj_with_extra(data_type)}/" if data_type else ''
         if filter_set is not None:
-            url += "?{}".format(self._get_obj_with_extra(filter_set))
+            url += f"?{self._get_obj_with_extra(filter_set)}"
         return '/' + '/'.join([
             self.api_url,
             self.api_version,

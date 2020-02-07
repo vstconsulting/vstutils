@@ -54,7 +54,7 @@ class PopUp {
      * @param {object} opt Object with custom pop up notification's settings.
      * @private
      */
-    _generatePopUp(type='show', message='', opt={}) {
+    _generatePopUp(type="show", message="", opt={}) {
         opt.message = message;
         return this._showPopUp(type, this._getPopUpSettings(type, opt));
     }
@@ -63,40 +63,40 @@ class PopUp {
      * @param {string} message Body text of pop up notification.
      * @param {object} opt Object with custom settings for pop up notification.
      */
-    default(message = "", opt={}) {
-        return this._generatePopUp('show', message, opt);
+    default(message="", opt={}) {
+        return this._generatePopUp("show", message, opt);
     }
     /**
      * Method, that generates info pop up notification.
      * @param {string} message Body text of pop up notification.
      * @param {object} opt Object with custom settings for pop up notification.
      */
-    info(message = "", opt={}) {
-        return this._generatePopUp('info', message, opt);
+    info(message="", opt={}) {
+        return this._generatePopUp("info", message, opt);
     }
     /**
      * Method, that generates success pop up notification.
      * @param {string} message Body text of pop up notification.
      * @param {object} opt Object with custom settings for pop up notification.
      */
-    success(message = "", opt={}) {
-        return this._generatePopUp('success', message, opt);
+    success(message="", opt={}) {
+        return this._generatePopUp("success", message, opt);
     }
     /**
      * Method, that generates warning pop up notification.
      * @param {string} message Body text of pop up notification.
      * @param {object} opt Object with custom settings for pop up notification.
      */
-    warning(message = "", opt={}) {
-        return this._generatePopUp('warning', message, opt);
+    warning(message="", opt={}) {
+        return this._generatePopUp("warning", message, opt);
     }
     /**
      * Method, that generates error pop up notification.
      * @param {string} message Body text of pop up notification.
      * @param {object} opt Object with custom settings for pop up notification.
      */
-    error(message = "", opt={}) {
-        return this._generatePopUp('error', message, opt);
+    error(message="", opt={}) {
+        return this._generatePopUp("error", message, opt);
     }
     /**
      * Method, that generates question pop up.
@@ -106,7 +106,7 @@ class PopUp {
      * @param {object} opt Object with custom settings for question pop up.
      * @return {promise}.
      */
-    question(message = "", answer_buttons = [], opt={}) {
+    question(message="", answer_buttons = [], opt={}) {
         let buttons = [];
         let success, fail;
         let answer = new Promise((resolve, reject) => {
@@ -118,7 +118,7 @@ class PopUp {
             buttons.push([
                 '<button>' + button + '</button>',
                 (instance, toast) => {
-                    instance.hide({ transitionOut: 'fadeOut' }, toast, button);
+                    instance.hide({ transitionOut: "fadeOut" }, toast, button);
                 },
             ]);
         });
@@ -136,7 +136,7 @@ class PopUp {
 
         options = Object.assign(options, opt);
 
-        this._generatePopUp('question', message, options);
+        this._generatePopUp("question", message, options);
 
         return answer;
     }
@@ -200,7 +200,7 @@ class ErrorHandler { /* jshint unused: false */
      */
     constructor() {}
     /**
-     * Method, that transform error to string.
+     * Method, that transforms error to string.
      * @param {*} error.
      */
     errorToString(error) {
@@ -267,7 +267,7 @@ class ErrorHandler { /* jshint unused: false */
         console.error(to_console);
     }
     /**
-     * Method, that transform error into string and shows ot to user.
+     * Method, that transforms error into string and shows ot to user.
      * @param {*} error
      */
     defineErrorAndShow(error) {

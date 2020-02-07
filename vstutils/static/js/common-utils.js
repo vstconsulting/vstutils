@@ -4,7 +4,7 @@
 /**
  * Class, that loads Tests files.
  */
-class TestsFilesLoader extends FilesLoader { /* globals FilesLoader */
+class TestsFilesLoader extends StaticFilesLoader { /* globals StaticFilesLoader */
     appendFilesSync(files, response, index=0) {
         let item = files[index];
         let handler = 'appendFile_' + item.type;
@@ -36,23 +36,26 @@ class TestsFilesLoader extends FilesLoader { /* globals FilesLoader */
 function loadQUnitTests() { /* jshint unused: false */
     return new TestsFilesLoader(
         window.guiTestsFiles.map((url, index) => {
-            return {name: url + '?r=' + Math.random(), priority: index, type: 'js'};
+            return {
+                name: app.api.getHostUrl() + app.api.getStaticPath()+ url + '?r=' + Math.random(),
+                priority: index,
+                type: 'js',
+            };
         })
     ).onReady();
 }
 
 // List of Gui Testing Files
 if(!window.guiTestsFiles) {
-    window.guiTestsFiles = [];
+    window.guiTestsFiles = [
+        'js/tests/qUnitTest.js',
+        'js/tests/guiCommon.js',
+        'js/tests/guiFields.js',
+        'js/tests/guiSignals.js',
+        'js/tests/guiTests.js',
+        'js/tests/guiUsers.js',
+    ];
 }
-
-// Adds files with tests to common list.
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/qUnitTest.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiCommon.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiFields.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiSignals.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiTests.js');
-window.guiTestsFiles.push(hostname + window.guiStaticPath + 'js/tests/guiUsers.js');
 //////////////////////////////////////////////////////////////////////////////////////////
 // EndBlock of code for tests.
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +174,7 @@ function isEmptyObject(obj) { /* jshint unused: false */
  * @param {string} type Type of element.
  * @return {string} String with CSS classes names.
  */
-function addCssClassesToElement(element="", title='', type='') {
+function addCssClassesToElement(element="", title="", type="") {
     element = element.replace(/[\s\/]+/g,'_');
 
     let class_list = element + " ";
@@ -191,22 +194,45 @@ function addCssClassesToElement(element="", title='', type='') {
 }
 
 /**
+ * Function returns value of cookie, is it exists.
+ * @param {string} name Name of cookie.
+ * @return {string|null}
+ */
+function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1,c.length);
+        }
+        if (c.indexOf(nameEQ) === 0) {
+            return c.substring(nameEQ.length,c.length);
+        }
+    }
+    return null;
+}
+
+/**
  * Class, that manages manipulations with Local Storage.
  * It is used for saving some users local settings to the one property(object) of Local Storage.
  */
 class LocalSettings {
     /**
      * Constructor of LocalSettings Class.
-     * @param {string} name Key of current LocalSettings, that will be used in Local Storage.
+     * @param {string} name Key name of Local Storage's property to which Local Settings will be saved.
      */
     constructor(name) {
+        /**
+         * Key name of Local Storage's property to which Local Settings will be saved.
+         */
         this.name = name;
         /**
          * Property for storing current settings (including tmpSettings).
          */
         this.__settings = {};
         /**
-         * Property for storing tmpSettings.
+         * Property for storing temporary settings.
          */
         this.__tmpSettings = {};
         /**
@@ -455,12 +481,10 @@ $(".navbar").hover(function() {
 
 /**
  * Function converts color from hex to rgba.
+ * @param {string} hex String with hex color (#fefefe).
+ * @param {number} alpha Opacity amount in rgba color (0-1).
  */
-function hexToRgbA(hex, alpha) { /* jshint unused: false */
-    if(alpha === undefined) {
-        alpha = 1;
-    }
-
+function hexToRgbA(hex, alpha=1) { /* jshint unused: false */
     if(typeof(alpha) != "number") {
         alpha = Number(alpha);
         if(isNaN(alpha)) {
@@ -770,7 +794,7 @@ class BaseEntityConstructor { /* jshint unused: false */
      * Method, that defines format of current field.
      * @param {object} field Object with field options.
      */
-    getFieldFormat(field){
+    getFieldFormat(field) {
         // if(field.enum && guiFields['choices']){
         //     return "choices";
         // }
