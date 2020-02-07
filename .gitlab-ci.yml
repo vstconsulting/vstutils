@@ -121,10 +121,7 @@ release:
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
   allow_failure: true
 
-py35-build:
-  <<: *release_pypi
-
-py35-wheel:
+py37-build:
   <<: *release_pypi
 
 py36-wheel:
