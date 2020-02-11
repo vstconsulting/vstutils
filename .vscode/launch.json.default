@@ -4,6 +4,9 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        /*
+        *   Skills Checked configuration
+        */
         {
             "name": "Web",
             "type": "python",
@@ -14,6 +17,30 @@
                 "web"
             ]
         },
+        {
+            "name": "Runserver",
+            "type": "python",
+            "request": "launch",
+            "module": "vstutils",
+            "console": "integratedTerminal",
+            "args": [
+                "runserver", "--insecure", "0.0.0.0:8080"
+            ]
+        },
+        {
+            "name": "Debug test",
+            "type": "python",
+            "request": "launch",
+            "module": "test_proj",
+            "console": "integratedTerminal",
+            "args": [
+                "test", "-v2", "--failfast"
+            ],
+            "cwd": "${workspaceFolder}/test_src"
+        },
+        /*
+        *    Tox configurations
+        */
         {
             "name": "flake",
             "type": "python",
