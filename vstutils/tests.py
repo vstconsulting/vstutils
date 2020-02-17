@@ -150,8 +150,8 @@ class BaseTestCase(TestCase):
         self.assertRCode(response, code, url)
         return self.render_api_response(response)
 
-    def assertCount(self, list, count):
-        self.assertEqual(len(list), count)
+    def assertCount(self, list, count, msg=None):
+        self.assertEqual(len(list), count, msg)
 
     def assertRCode(self, resp, code=200, *additional_info):
         '''

@@ -361,6 +361,12 @@ class ViewsTestCase(BaseTestCase):
         self.get_result('get', '/api/user/', code=404)
         self.get_result('get', '/api/v1/user/1000/', code=404)
 
+        # Test js urls minification
+        for js_url in ['service-worker.js', 'app-loader.js', 'app-for-api-loader.js']:
+            response = self.get_result('get', f'/{js_url}')
+            self.assertCount(str(response).split('\n'), 1, f'{js_url} is longer than 1 string.')
+        
+
     def test_uregister(self):
         router_v1 = router.routers[0][1]
         router_v1.unregister("user")
@@ -1365,6 +1371,10 @@ class ToolsTestCase(BaseTestCase):
             with open(tmp_fd.name, 'rb') as fd1:
                 self.assertEqual(fd1.read().decode('utf-8'), test_data_text)
             del fd
+
+        with utils.tmp_file_context(test_data, mode='w+') as tmp_fd:
+            with ToolsFile(tmp_fd.name.encode('utf-8')) as fd:
+                self.assertEqual(list(fd.readlines('utf-8')), test_data.split('\n'))
 
     def test_health_page(self):
         result = self.get_result('get', '/api/health/')

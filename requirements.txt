@@ -10,3 +10,4 @@ django-filter==2.2.0
 django-crispy-forms==1.7.2
 # uWSGI==2.0.18
 pyuwsgi==2.0.18
+jsmin==2.2.2

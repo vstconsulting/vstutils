@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator && (!localStorage['gui_version'] || localStorag
         }).catch(error => {
         console.error('Service Worker registration failed with ' + error);
     });
-}
+};
 
 /**
  * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
@@ -28,36 +28,36 @@ function cleanAllCacheAndReloadPage() {
             window.caches.keys().then(keyList => {
                 keyList.forEach(key => {
                     window.caches.delete(key);
-                })
+                });
             });
-        }
+        };
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 if (registrations.length == 0) {
                     window.location.reload(true);
-                }
+                };
 
                 let promises = registrations.map(registration => registration.unregister());
 
                 Promise.all(promises).finally(response => {
                     window.location.reload(true);
                 });
-            })
+            });
         } else {
             window.location.reload(true);
-        }
-    }
+        };
+    };
 
     guiCache.deleteAllCache().finally(res => cleanServiceWorkerCache());
-}
+};
 
 /**
  * Function, that removes OpenAPI schema from gui cache and reloads page.
  */
 function cleanOpenApiCacheAndReloadPage() {
     guiCache.delFile("openapi").finally(res => {window.location.reload(true)});
-}
+};
 
 /**
  * Handler for window.onerror event, that should be called during app dependencies loading,
@@ -71,7 +71,7 @@ function onLoadingErrorHandler(event) {
     } else {
         throw event.error;
     }
-}
+};
 
 /**
  * Function creates DOM element and sets it attributes and props.
@@ -92,16 +92,16 @@ function createDomElement(type, attributes, props) {
             for(let stl in props[key]) {
                 if(!props[key].hasOwnProperty(stl)) {
                     continue;
-                }
+                };
                 el[key][stl] = props[key][stl];
-            }
+            };
         } else {
             el[key] = props[key];
-        }
-    }
+        };
+    };
 
     return el;
-}
+};
 
 /**
  * Function saves to the Local Storage values of global gui versions variables.
@@ -109,7 +109,7 @@ function createDomElement(type, attributes, props) {
 function updateGuiVersionsInLocalStorage() {
     localStorage['gui_version'] = gui_version;
     localStorage['gui_user_version'] = gui_user_version;
-}
+};
 
 /**
  * Class, that is responsible for setting/getting files' content (strings, json - transformed to string) to/from cache.
@@ -132,8 +132,8 @@ class FilesCache {
 
         for(let key in opt) {
             this[key] = opt[key];
-        }
-    }
+        };
+    };
     /**
      * Method, that returns promise of getting connection to FilesCache instance's database.
      */
@@ -162,9 +162,9 @@ class FilesCache {
                     this.store_name, { keyPath: "path", autoIncrement: true }
                 );
                 this.connectDB().then(resolve, reject)
-            }
-        })
-    }
+            };
+        });
+    };
     /**
      * Method, that returns promise to get file from FilesCache instance's database.
      * @param {string} file_name Name of file.
@@ -188,13 +188,13 @@ class FilesCache {
                     if(!request.result) {
                         reject();
                         return;
-                    }
+                    };
 
                     resolve(request.result ? request.result : -1);
-                }
+                };
             });
         });
-    }
+    };
     /**
      * Method, that returns promise to save file in FilesCache instance's database.
      * @param {string} file_name Name of file.
@@ -225,12 +225,12 @@ class FilesCache {
                     if(!request.result) {
                         reject();
                         return;
-                    }
+                    };
                     resolve(request.result ? request.result : -1);
-                }
+                };
             });
         });
-    }
+    };
     /**
      * Method, that returns promise to delete file from FilesCache instance's database.
      */
@@ -259,7 +259,7 @@ class FilesCache {
                 }
             });
         });
-    }
+    };
     /**
      * Method, that returns promise to delete all files from FilesCache instance's database
      * (delete FilesCache instance's database).
@@ -281,8 +281,8 @@ class FilesCache {
                 resolve(event);
             };
         });
-    }
-}
+    };
+};
 
 /**
  * Class, that is responsible for loading of App dependencies (OpenAPI schema, static files) and appending them to the page.
@@ -311,7 +311,7 @@ class AppDependenciesLoader {
          * Array, that collects errors occurred during files/app loading.
          */
         this.errors = [];
-    }
+    };
     /**
      * Method creates and adds to the page root DOM element,
      * that will show loading status and collect loading logs.
@@ -347,7 +347,7 @@ class AppDependenciesLoader {
 
         loaderBlock.appendChild(this.formLogsWrapper());
         document.body.appendChild(loaderBlock);
-    }
+    };
     /**
      * Method, that forms DOM elements, which will store loading logs.
      * @returns {HTMLElement}
@@ -360,7 +360,7 @@ class AppDependenciesLoader {
         wrapper.appendChild(this.formProjectInfoTable());
         wrapper.appendChild(createDomElement("h5", [], {innerText: "Logs"}));
         return wrapper;
-    }
+    };
     /**
      * Method forms DOM element - table, that stores info about project.
      * @returns {HTMLElement}
@@ -412,10 +412,10 @@ class AppDependenciesLoader {
             row.appendChild(createDomElement("th", [], {innerText: item.title}));
             row.appendChild(createDomElement("td", [], {innerText: item.value}));
             table.appendChild(row);
-        }
+        };
 
         return table;
-    }
+    };
     /**
      * Method sets current loading operation to one of the children DOM elements of Loader block.
      * @param {string} operation String with name of loading operation.
@@ -425,10 +425,10 @@ class AppDependenciesLoader {
 
         if(!el) {
             return;
-        }
+        };
 
         el.innerText = operation;
-    }
+    };
     /**
      * Method shows loading animation while some dependencies are loading from server.
      */
@@ -437,11 +437,11 @@ class AppDependenciesLoader {
 
         if(!elem) {
             return;
-        }
+        };
 
         if(elem.innerText.length == 3) {
             elem.innerText = "";
-        }
+        };
 
         elem.innerText += ".";
 
@@ -450,7 +450,7 @@ class AppDependenciesLoader {
                 this.showLoadingAnimation();
             }
         }, 800);
-    }
+    };
     /**
      * Method, that changes loading progress bar value.
      * @param {number} width Value of loading progress bar width.
@@ -460,7 +460,7 @@ class AppDependenciesLoader {
 
         if(!elem) {
             return;
-        }
+        };
 
         let w = Math.ceil(width) + '%';
 
@@ -470,11 +470,11 @@ class AppDependenciesLoader {
 
         if(!elem) {
             return;
-        }
+        };
 
         elem.style.width = w;
         elem.innerHTML = w;
-    }
+    };
     /**
      * Method, that firstly hides loader block and then removes it from the DOM.
      */
@@ -482,7 +482,7 @@ class AppDependenciesLoader {
         function fadeOutAndRemove(el) {
             if(!el.style.opacity) {
                 el.style.opacity = 1;
-            }
+            };
 
             let interval_id = setInterval(() => {
                 if (el.style.opacity > 0) {
@@ -495,11 +495,11 @@ class AppDependenciesLoader {
                     }, 1000);
                 }
             }, 30);
-        }
+        };
 
         document.querySelector("#RealBody").style.display = "block";
         fadeOutAndRemove(document.querySelector("#LoadingProgressBar"));
-    }
+    };
     /**
      * Method, that adds logs of files loading.
      * @param {object | string} data Logging message.
@@ -511,25 +511,25 @@ class AppDependenciesLoader {
 
             if(!extendData) {
                 extendData = {type:'Log', name:""};
-            }
+            };
 
             text += "Type:"+extendData.type+"\t";
 
-            if(extendData.name) text += "Name:"+extendData.name+"\t";
+            if(extendData.name) { text += "Name:"+extendData.name+"\t" };
 
             if(typeof data == "string") {
                 text += data;
             } else {
                 text += "JSON:"+JSON.stringify(data);
-            }
+            };
 
             let pre = createDomElement('pre', [], {className: "LoadingProgressBar-success", innerText: text});
             document.querySelector('.LoadingProgressBar-logger-wrapper').appendChild(pre);
 
         } catch(e) {
             this.appendError(e);
-        }
-    }
+        };
+    };
     /**
      * Method, that adds to the html document info about file loading error.
      * @param {object, string} exception Error object or string.
@@ -545,17 +545,17 @@ class AppDependenciesLoader {
 
             if(!extendData) {
                 extendData = {type:'Error', name:""};
-            }
+            };
 
             text += "Type:"+extendData.type+"\t";
 
-            if(extendData.name) text += "Name:"+extendData.name+"\n";
+            if(extendData.name) { text += "Name:"+extendData.name+"\n" };
 
             if(exception && exception.message) {
                 text += exception.message + "\nstack:\n"+exception.stack;
             } else {
                 text += "JSON exeption:\n"+JSON.stringify(exception);
-            }
+            };
 
             let pre = createDomElement('pre', [], {className: 'LoadingProgressBar-error', innerText: text});
             let wrapper = document.querySelector('.LoadingProgressBar-logger-wrapper');
@@ -567,8 +567,8 @@ class AppDependenciesLoader {
             debugger;
             console.error(e);
             alert("Oops, some error occurred! Check out DevTools console!")
-        }
-    }
+        };
+    };
     /**
      * Method shows message about updating of app version.
      */
@@ -577,7 +577,7 @@ class AppDependenciesLoader {
         this.addLoaderBlockToPage();
         this.setLoadingOperation('updating app version');
         this.showLoadingAnimation();
-    }
+    };
     /**
      * Method returns promise to load all dependencies and append them to the page.
      * Main method of current class.
@@ -599,7 +599,7 @@ class AppDependenciesLoader {
             this.appendError(error);
             throw error;
         });
-    }
+    };
     /**
      * Method returns promise to load all app's dependencies.
      * @return {Promise<any[]>}
@@ -609,7 +609,7 @@ class AppDependenciesLoader {
             this.openApiLoader.loadSchema(),
             this.filesLoader.loadAllFiles(),
         ]);
-    }
+    };
     /**
      * Method returns promise to append all dependencies(static files) to the page.
      * @param {array} dependencies Response array, connecting loaded OpenAPI schema and files.
@@ -619,7 +619,7 @@ class AppDependenciesLoader {
         if(!this.filesLoader.checkAllFilesLoaded(files)) {
             // throw new Error();
             return;
-        }
+        };
 
         this.appendLog('All static files were successfully loaded');
 
@@ -639,14 +639,14 @@ class AppDependenciesLoader {
         return this.filesLoader.appendFilesSync(files, 0, callbacks).then(() => {
             if(this.errors.length) {
                 throw new Error("Some error occurred during files loading.");
-            }
+            };
 
             tabSignal.emit("openapi.loaded",  openapi);
             tabSignal.emit('resource.loaded');
             return {openapi: openapi};
         });
-    }
-}
+    };
+};
 
 /**
  * Class, that is responsible for loading of OpenAPI schema.
@@ -662,7 +662,7 @@ class OpenApiLoader {
          * Object, that methods for manipulating with indexedDB. Instance of FilesCache.
          */
         this.cache = cache;
-    }
+    };
     /**
      * Method, that promises to load OpenApi schema from API.
      * @return {promise} Promise of loading of OpenApi schema from API.
@@ -672,13 +672,13 @@ class OpenApiLoader {
             .then(res => {
                 if(!res.ok) {
                     throw new Error("API request for loading of OpenAPI schema failed.");
-                }
+                };
                 return res.json();
             })
             .then(openapi => {
                 return openapi;
             });
-    }
+    };
     /**
      * Method, that promises to load OpenApi schema from cache.
      * @return {promise} Promise of loading of OpenApi schema from Cache.
@@ -692,7 +692,7 @@ class OpenApiLoader {
                 return openapi;
             });
         });
-    }
+    };
     /**
      * Method, that promises to load OpenApi schema.
      * @return {promise} Promise of OpenApi schema loading.
@@ -705,8 +705,8 @@ class OpenApiLoader {
             console.error("Some error occurred during attempt of getting of OpenAPI schema.");
             throw error;
         });
-    }
-}
+    };
+};
 
 /**
  * Class, that is responsible for the loading of app's static files (js, css, tpl) and appending them to the DOM.
@@ -714,7 +714,7 @@ class OpenApiLoader {
 class StaticFilesLoader {
     constructor(resource_list) {
         this.resource_list = resource_list;
-    }
+    };
     /**
      * Method, that appends JS type file to the page.
      * @param {object} file Object with file properties (type, name(url)).
@@ -731,7 +731,7 @@ class StaticFilesLoader {
 
         let link = createDomElement("script", attributes, props);
         document.head.appendChild(link);
-    }
+    };
     /**
      * Method, that appends CSS type file to the page.
      * @param {object} file Object with file properties (type, name(url)).
@@ -751,7 +751,7 @@ class StaticFilesLoader {
 
         let link = createDomElement("style", attributes, props);
         document.head.appendChild(link);
-    }
+    };
     /**
      * Method, that appends TPL type file to the page.
      * @param {object} file Object with file properties (type, name(url)).
@@ -760,7 +760,7 @@ class StaticFilesLoader {
     appendFile_tpl(file, content) {
         let div = createDomElement("div", [], {innerHTML: content});
         document.body.appendChild(div);
-    }
+    };
     /**
      * Method, that appends files synchronously (in 'priority' order) to the page.
      * Firstly, current method adds to the page file with '0' index, then it appends file with '1' index and so on.
@@ -774,24 +774,24 @@ class StaticFilesLoader {
 
         if(!this[handler]) {
             return Promise.reject();
-        }
+        };
 
         return response[index].text().then(content => {
             this[handler](item, content);
             if(index + 1 !== this.resource_list.length) {
                 if(callbacks && callbacks.fileAppended) {
                     callbacks.fileAppended(item, content, index);
-                }
+                };
                 return this.appendFilesSync(response, index + 1, callbacks);
             } else {
                 if(callbacks && callbacks.allFilesAppended) {
                     callbacks.allFilesAppended();
-                }
+                };
 
                 return Promise.resolve(true);
-            }
+            };
         });
-    }
+    };
     /**
      * Method checks, that all files were loaded with 200 status.
      * @param {array} response Array with responses on files loading requests.
@@ -803,19 +803,19 @@ class StaticFilesLoader {
 
             if (item.status != 200) {
                 throw new Error(item.status + ' error occurred during file loading - "' + item.url + '"');
-            }
-        }
+            };
+        };
 
         return true;
-    }
+    };
     /**
      * Method, that loads all files form resource_list.
      * Method returns promise of files loading.
      */
     loadAllFiles() {
         return Promise.all(this.resource_list.map(item => fetch(item.name)));
-    }
-}
+    };
+};
 /////////////////////////////////////////////// Code execution ///////////////////////////////////////////////
 /**
  * Adds error handler, that should handle(catch) errors, occurred during app dependencies loading.
@@ -870,4 +870,4 @@ if(localStorage['gui_version'] !== gui_version) {
             depsLoader.appendError(e);
         });
     });
-}
+};

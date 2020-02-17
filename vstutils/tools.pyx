@@ -1,4 +1,5 @@
 from libc.stdio cimport FILE, fopen, fread, fwrite, fflush, fclose, feof, getline
+from libc.string cimport strlen
 from posix.stat cimport stat, struct_stat
 from libc.stdlib cimport malloc, free
 
@@ -111,18 +112,33 @@ cdef class File:
     def feof(self):
         return self._feof()
 
-    cdef char* _readline(self):
+    cdef char* _readline(self, int replace_newline = 0):
         cdef:
             char* line
             size_t count
         count = 0
         line = NULL
         if getline(&line, &count, self.file) != -1:
+            if replace_newline == 1:
+                line[strlen(line) - 1] = b'\0'
             return line
         return ''
 
     def readline(self):
         return self._readline()
+
+    def readlines(self, decode = '', replace_newline = 1):
+        while self._feof() != 1:
+            line = self._readline(replace_newline=replace_newline)
+            if decode:
+                line = line.decode(decode)
+            yield line
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        del self
 
     def __len__(self):
         return self.size()
