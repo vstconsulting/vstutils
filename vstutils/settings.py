@@ -924,7 +924,8 @@ SPA_STATIC = [
     {'priority': 300, 'type': 'js', 'name': 'js/guiDashboard.js', 'spa': True, 'api': False},
     {'priority': 102, 'type': 'css', 'name': 'css/iziToast.min.css', 'spa': True, 'api': True},
     {'priority': 102, 'type': 'css', 'name': 'css/iziModal.min.css', 'spa': True, 'api': True},
-    {'priority': 105, 'type': 'css', 'name': 'AdminLTE-3.0.0/min/css/adminlte.min.css', 'spa': True, 'api': True},
+    # Comment out because in page linked. But it will be back when staticfiles fixed with webpack.
+    # {'priority': 105, 'type': 'css', 'name': 'AdminLTE-3.0.0/min/css/adminlte.min.css', 'spa': True, 'api': True},
     {'priority': 108, 'type': 'css', 'name': 'css/gui.css', 'spa': True, 'api': True},
     {'priority': 99, 'type': 'css', 'name': 'plugins/select2/select2.min.css', 'spa': True, 'api': True},
     {
