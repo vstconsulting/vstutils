@@ -373,7 +373,7 @@ cdef class ConfigParserC(__BaseDict):
     def parse_file(self, filename):
         error = self._parse_file_by_name(filename.encode('utf-8'))
         if error:
-            raise ParseError('Couldnt parse config string without section or key-value in file `{}`.'.format(filename))
+            raise ParseError(f'Couldnt parse config string without section or key-value in file `{filename}`.')
 
     def parse_files(self, filename_array: _t.Sequence):
         for filepath in list(filter(bool, filename_array))[::-1]:
@@ -388,10 +388,10 @@ cdef class ConfigParserC(__BaseDict):
             raise ParseError('Couldnt parse config string without section and key-value in text.')
 
     def all(self):
-        data = dict()
-        for key in self:
-            data[key] = self[key].all()
-        return data
+        return {
+            key: self[key].all()
+            for key in self
+        }
 
     def generate_config_string(self):
         return ''.join([self[key].generate_section_string() for key in self])
@@ -553,10 +553,9 @@ cdef class Section(__BaseDict):
 
     def to_str(self, key):
         conversation_class = self.get_type_conversation_instance(key)
-        return '{} = {}'.format(
-            key,
-            conversation_class.str_convert(self[key])
-        ).replace('{', '{{').replace('}', '}}')
+        return f'{key} = {conversation_class.str_convert(self[key])}'\
+            .replace('{', '{{')\
+            .replace('}', '}}')
 
     def getboolean(self, option, fallback=None):
         return self.type_conversation(None, self.get(option, fallback), BoolType())

@@ -1,5 +1,4 @@
 #  pylint: disable=bad-super-call,unused-argument
-from jsmin import jsmin
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from django.template.response import TemplateResponse
@@ -7,16 +6,10 @@ from django.contrib.auth import views as auth
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
+from jsmin import jsmin
 from .forms import RegistrationForm
 
 UserModel = get_user_model()
-
-
-def jsminificator(response):
-    response.content = jsmin(
-        response.content.decode('utf-8'),
-        quote_chars="'\"`"
-    ).encode('utf-8')
 
 
 class BaseView(TemplateView):

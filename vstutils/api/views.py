@@ -7,10 +7,6 @@ from django.db import transaction
 from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework import permissions as rest_permissions
-try:
-    from Queue import Queue
-except ImportError:  # nocv
-    from queue import Queue
 from . import base, serializers, permissions, filters, decorators as deco, responses, models
 from ..utils import Dict, import_class
 
@@ -164,19 +160,6 @@ class BulkViewSet(base.rvs.APIView):
 
         self.allowed_types = allowed_types
 
-    def _create_results_if_not_exists(self):
-        if not hasattr(self, '_results'):
-            self._results = Queue()
-
-    @property
-    def results(self):
-        self._create_results_if_not_exists()
-        return list(self._results.queue)
-
-    def put_result(self, result):
-        self._create_results_if_not_exists()
-        self._results.put(result)
-
     def _check_type(self, op_type, item):
         allowed_types = self.allowed_types.get(item, None)
         if allowed_types is None:
@@ -194,7 +177,7 @@ class BulkViewSet(base.rvs.APIView):
 
     def _get_obj_with_extra(self, param):
         if isinstance(param, str):
-            if not ('{' in param and '}' in param):
+            if '<<' in param and '>>' in param and not ('{' in param and '}' in param):
                 param = param.replace('<<', '{').replace('>>', '}')
                 param = param.format(*self.results)
             return self._load_param(param)
@@ -214,7 +197,7 @@ class BulkViewSet(base.rvs.APIView):
             ], inner)
         elif isinstance(data, str):
             return self._get_obj_with_extra(data)
-        return self._json_dump(data, inner)  # nocv
+        return self._json_dump(data, inner)
 
     def get_url(self, item, pk=None, data_type=None, filter_set=None):
         url = ''
@@ -226,12 +209,7 @@ class BulkViewSet(base.rvs.APIView):
             url += f"{self._get_obj_with_extra(data_type)}/" if data_type else ''
         if filter_set is not None:
             url += f"?{self._get_obj_with_extra(filter_set)}"
-        return '/' + '/'.join([
-            self.api_url,
-            self.api_version,
-            self.type_to_bulk.get(item, item),
-            url
-        ])
+        return f'/{self.api_url}/{self.api_version}/{self.type_to_bulk.get(item, item)}/{url}'
 
     def get_method_type(self, op_type, operation):
         if op_type != 'mod':
@@ -274,8 +252,7 @@ class BulkViewSet(base.rvs.APIView):
         return Dict(dict(detail=str(res.content.decode('utf-8'))))
 
     def perform(self, operation):
-        kwargs = dict()
-        kwargs["content_type"] = "application/json"
+        kwargs = dict(content_type="application/json")
         response, url = self.get_operation(operation, kwargs)
         return self.create_response(
             response.status_code,
@@ -283,7 +260,7 @@ class BulkViewSet(base.rvs.APIView):
             operation, url=url
         )
 
-    @transaction.atomic()
+    # @transaction.atomic()
     def operate_handler(self, operation, allow_fail=True):
         try:
             op_type = operation.get("type", 'mod')
@@ -330,7 +307,6 @@ class BulkViewSet(base.rvs.APIView):
         self.is_secure = request._request.is_secure()
         operations = request.data
         self.client = Client(**self.original_environ_data())
-        # self.client.force_login(request.user)
         self.client.cookies[self.session_cookie_name] = request.session.session_key
         self._operates(operations, allow_fail)
         return responses.HTTP_200_OK(self.results)
@@ -352,6 +328,8 @@ class BulkViewSet(base.rvs.APIView):
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         self.set_allowed_types(request)
+        self.results = []
+        self.put_result = self.results.append
 
 
 class HealthView(base.ListNonModelViewSet):

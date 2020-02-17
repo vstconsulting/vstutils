@@ -55,6 +55,8 @@ class LdapBackend(BaseAuthBackend):
 
     def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> UserModel:
         # pylint: disable=protected-access,unused-argument
+        if not self.server:
+            return
         try:
             backend = LDAP(self.server, username, password, self.domain)
             if not backend.isAuth():
