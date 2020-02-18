@@ -133,6 +133,8 @@ class AutoSchema(DRFAutoSchema):
         elif method == 'DELETE':
             action = 'destroy'
         method_view_obj.action = action
+        if method_view_obj.schema is None:
+            return 'No description'  # nocv
         return method_view_obj.schema.get_description(path, method)
 
 

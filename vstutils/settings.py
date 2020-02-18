@@ -343,6 +343,8 @@ INSTALLED_APPS += ADDONS
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE = [
+    'htmlmin.middleware.HtmlMinifyMiddleware',
+    'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
