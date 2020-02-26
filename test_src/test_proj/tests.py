@@ -237,11 +237,18 @@ class VSTUtilsTestCase(BaseTestCase):
             def test(self, value):
                 self.val = value
 
+            @utils.classproperty
+            def test2(self):
+                return 'Some text'
+
+
         test_obj = TestClass()
         self.assertEqual(TestClass.test, "")
         self.assertEqual(test_obj.test, "init")
         test_obj.test = 'test'
         self.assertEqual(test_obj.val, 'test')
+        with self.assertRaises(AttributeError):
+            test_obj.test2 = 3
 
     def test_paginator(self):
         qs = self.get_model_filter('django.contrib.auth.models.User').order_by('email')

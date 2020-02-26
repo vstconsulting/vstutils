@@ -59,19 +59,16 @@ class ClassPropertyDescriptor:
     def __get__(self, obj, klass=None):
         if obj is not None:
             return self.fget.__get__(obj, obj)()
-        if klass is None:
-            klass = type(obj)  # noce
-        return self.fget.__get__(obj, klass)()
+        return self.fget.__get__(obj, type(obj) if klass is None else klass)()
 
-    def __set__(self, obj: tp.Any, value: tp.Any):  # noce
+    def __set__(self, obj: tp.Any, value: tp.Any):
         if not self.fset:
             raise AttributeError("can't set attribute")
         if obj is not None:
             return self.fset.__get__(obj, obj)(value)
-        type_ = type(obj)
-        return self.fset.__get__(obj, type_)(value)
+        return self.fset.__get__(obj, type(obj))(value)  # nocv
 
-    def setter(self, func: tp.Callable):  # noce
+    def setter(self, func: tp.Callable):
         if not isinstance(func, (classmethod, staticmethod)):
             func = classmethod(func)
         self.fset = func
