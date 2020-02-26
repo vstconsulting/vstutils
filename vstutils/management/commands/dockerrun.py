@@ -48,7 +48,7 @@ class Command(BaseCommand):
             if value:
                 env[default_envs[key]] = value  # nocv
 
-        if self._settings('DEBUG', False) or self._settings('TESTS_RUN', False):
+        if config['main']['debug'] or self._settings('TESTS_RUN', False):
             logger.debug(f'Env:\n{json.dumps(env, indent=4)}')
             logger.debug(f'Config:\n{env[self._settings("CONFIG_ENV_DATA_NAME")]}')
 
@@ -118,14 +118,14 @@ class Command(BaseCommand):
             config['main']['ldap-default-domain'] = ldap_default_domain
 
         # Set db config
-        if os.getenv(f'{prefix}_DB_HOST') is not None:  # nocv
+        if os.getenv(f'{prefix}_DB_HOST') is not None:
             try:
                 pm_type = os.getenv(f'{prefix}_DB_TYPE', 'mysql')
 
                 default_port = ''
                 if pm_type == 'mysql':
                     default_port = '3306'
-                elif pm_type == 'postgresql':
+                elif pm_type == 'postgresql':  # nocv
                     default_port = '5432'
 
                 config['database'] = {
@@ -133,17 +133,17 @@ class Command(BaseCommand):
                     'name': os.environ[f'{prefix}_DB_NAME'],
                     'user': os.environ[f'{prefix}_DB_USER'],
                     'password': os.environ[f'{prefix}_DB_PASSWORD'],
-                    'host': os.environ['f{prefix}_DB_HOST'],
-                    'port': os.getenv('f{prefix}_DB_PORT', default_port),
+                    'host': os.environ[f'{prefix}_DB_HOST'],
+                    'port': os.getenv(f'{prefix}_DB_PORT', default_port),
                 }
                 config['database.options'] = {
                     'connect_timeout': os.getenv(f'{prefix}_DB_CONNECT_TIMEOUT', '20'),
                 }
                 if pm_type == 'mysql':
                     config['database.options']['init_command'] = os.getenv('DB_INIT_CMD', '')
-            except KeyError:
+            except KeyError:  # nocv
                 raise Exception('Not enough variables for connect to  SQL server.')
-        else:
+        else:  # nocv
             config['database'] = {
                 'engine': 'django.db.backends.sqlite3',
                 'name': sqlite_db_path
