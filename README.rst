@@ -1,9 +1,11 @@
 VSTUtils Framework
 ==================
 
-Small framework for easy generates web-applications (SPA or Single Page Application).
+Small framework for easy generates web-applications
+(PWA/Progressive Web Application and SPA/Single Page Application).
 It uses OpenAPI schema for GUI rendering based over the REST API
 and also provides the ability to generate documentation for the API based on the schema.
+By default GUI based on AdminLTE dashboard and Vue templates.
 
 
 Quickstart

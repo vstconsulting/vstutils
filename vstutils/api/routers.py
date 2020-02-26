@@ -39,7 +39,7 @@ class _AbstractRouter(routers.DefaultRouter):
         routers_list.update(registers.data)
         return routers_list
 
-    def get_default_base_name(self, viewset):
+    def get_default_basename(self, viewset):
         base_name = getattr(viewset, 'base_name', None)
         if base_name is not None:
             return base_name  # nocv
@@ -53,7 +53,7 @@ class _AbstractRouter(routers.DefaultRouter):
             return model._meta.object_name.lower()
         # can't be tested because this initialization takes place before any
         # test code can be run
-        return super().get_default_base_name(viewset)  # nocv
+        return super().get_default_basename(viewset)
 
     def register_view(self, prefix, view, name=None):
         if getattr(view, 'as_view', None):
