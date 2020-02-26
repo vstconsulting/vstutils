@@ -1,10 +1,15 @@
 import os
 import sys
 import time
+import json
 import traceback
+import logging
 from subprocess import check_call
 from ._base import BaseCommand
 from ...config import ConfigParserC  # pylint: disable=import-error
+
+
+logger = logging.getLogger('vstutils')
 
 
 class Command(BaseCommand):
@@ -28,6 +33,9 @@ class Command(BaseCommand):
         super().handle(*args, **options)
         self.prefix = self._settings('VST_PROJECT_LIB', 'vstutils').upper()
         project_name = self._settings('VST_PROJECT', 'vstutils')
+
+        logger.debug(f'Prefix={self.prefix} | Project={project_name}')
+
         config = self.prepare_config()
         env = dict()
         env[self._settings('CONFIG_ENV_DATA_NAME')] = config.generate_config_string()
@@ -39,6 +47,10 @@ class Command(BaseCommand):
             value = os.environ.get(f"{self.prefix}_{key}", '')
             if value:
                 env[default_envs[key]] = value  # nocv
+
+        if self._settings('DEBUG', False) or self._settings('TESTS_RUN', False):
+            logger.debug(f'Env:\n{json.dumps(env, indent=4)}')
+            logger.debug(f'Config:\n{env[self._settings("CONFIG_ENV_DATA_NAME")]}')
 
         success = False
         error = 'Unknown error.'
