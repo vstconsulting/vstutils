@@ -224,7 +224,7 @@ class VSTUtilsTestCase(BaseTestCase):
             self.assertEqual(handler('User', self.user.id).id, self.user.id)
 
     def test_class_property(self):
-        class TestClass(object):
+        class TestClass(metaclass=utils.classproperty.meta):
             val = ''
             def __init__(self):
                 self.val = "init"
@@ -249,6 +249,9 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(test_obj.val, 'test')
         with self.assertRaises(AttributeError):
             test_obj.test2 = 3
+        with self.assertRaises(AttributeError):
+            TestClass.test2 = 3
+        TestClass.test3 = 3
 
     def test_paginator(self):
         qs = self.get_model_filter('django.contrib.auth.models.User').order_by('email')

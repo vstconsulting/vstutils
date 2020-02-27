@@ -49,12 +49,22 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     return result
 
 
+class ClassPropertyMeta(type):
+    def __setattr__(cls, key, value):
+        obj = cls.__dict__.get(key, None)
+        if isinstance(obj, ClassPropertyDescriptor):
+            return obj.__set__(cls, value)
+        return super().__setattr__(key, value)
+
+
 class ClassPropertyDescriptor:
     __slots__ = 'fget', 'fset'
 
+    meta = ClassPropertyMeta
+
     def __init__(self, fget: tp.Callable, fset: tp.Callable = None):
-        self.fget = fget
-        self.fset = fset
+        self.fget = self._fix_function(fget)
+        self.fset = self._fix_function(fset)
 
     def __get__(self, obj, klass=None):
         if obj is not None:
@@ -74,8 +84,16 @@ class ClassPropertyDescriptor:
         self.fset = func
         return self
 
+    @classmethod
+    def _fix_function(cls, func):
+        if func is None:
+            return func
+        if not isinstance(func, (classmethod, staticmethod)):
+            func = classmethod(func)
+        return func
 
-def classproperty(func: tp.Callable) -> tp.Any:
+
+class classproperty(ClassPropertyDescriptor):
     """
     Decorator which makes class method as class property.
 
@@ -84,7 +102,10 @@ def classproperty(func: tp.Callable) -> tp.Any:
 
             from vstutils.utils import classproperty
 
-            class SomeClass:
+            class SomeClass(metaclass=classproperty.meta):
+                # Metaclass is needed for set attrs in class
+                # instead of and not only object.
+
                 some_value = None
 
                 @classproperty
@@ -95,9 +116,6 @@ def classproperty(func: tp.Callable) -> tp.Any:
                 def value(cls, new_value):
                     cls.some_value = new_value
     """
-    if not isinstance(func, (classmethod, staticmethod)):
-        func = classmethod(func)
-    return ClassPropertyDescriptor(func)
 
 
 class redirect_stdany:
