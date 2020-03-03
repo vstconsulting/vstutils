@@ -169,7 +169,7 @@
 
         <field_default_value_button v-if="with_default_value" :field="field" @valueToDefault="$emit('proxyEvent', 'valueToDefault')"></field_default_value_button>
 
-        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue')"></field_clear_button>
+        <field_clear_button :field="field" @cleanValue="$emit('proxyEvent', 'cleanValue', '')"></field_clear_button>
     </div>
 </script>
 <!--

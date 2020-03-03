@@ -2096,14 +2096,18 @@ const field_fk_autocomplete_edit_content_mixin = {
          * @private
          */
         _val() {
+            // debugger;
             if(!this.value) {
                 return;
             }
 
-            if(typeof this.value == 'object' &&
-                this.value.prefetch_value !== undefined) {
-                return this.value.prefetch_value;
-            }
+            if(typeof this.value == 'object') { 
+                if (this.value.value !== undefined) {
+                    return this.value.value;
+                } else if (this.value.prefetch_value !== undefined) {
+                    return this.value.prefetch_value;
+                }
+        }
 
             return this.value;
         },
@@ -2429,8 +2433,8 @@ const gui_fields_mixins = { /* jshint unused: false */
             /**
              * Method, that cleans field's value (sets field value to undefined).
              */
-            cleanValue: function () {
-                this.setValueInStore();
+            cleanValue: function (opt) {
+                this.setValueInStore(opt);
             },
             /**
              * Method, that sets field's value equal to default.
