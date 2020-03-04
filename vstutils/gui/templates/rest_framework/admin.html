@@ -9,7 +9,7 @@
             <h1>{% if name %}{{ name }}{% endif %}{% block description %}{% block.super %}{% endblock %}</h1>
             <ol class="breadcrumb">
                 {% block breadcrumbs %}
-                <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+                <li><a href="/"><i class="fas fa-tachometer-alt"></i> Home</a></li>
                 {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
                     {% if forloop.last %}
                     <li class="active"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>

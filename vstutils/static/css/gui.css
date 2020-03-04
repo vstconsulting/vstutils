@@ -1961,7 +1961,17 @@ a.revers-color:hover{
     border-bottom: 1px solid var(--main-border-color) !important;
 }
 .main-footer{
+    display: flex;
+    justify-content: space-between;
     border-top: 1px solid var(--main-border-color) !important;
+}
+
+.main-footer .footer-section{
+    display: flex;
+}
+
+.main-footer .footer-section > *{
+    padding: 0 10px;
 }
 
 /* start of code highlighting in API */
@@ -2189,10 +2199,6 @@ input[type=color]{
 
 .input-group input {
     height: 38px;
-}
-
-.main-footer .pull-right {
-    margin-right: 15px;
 }
 
 .logo-link {

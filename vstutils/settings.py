@@ -276,10 +276,12 @@ SECRET_FILE = os.getenv(
     f"{ENV_NAME}_SECRET_FILE", f"/etc/{VST_PROJECT_LIB}/secret"
 )
 
+
 def secret_key():
     return get_file_value(
         SECRET_FILE, '*sg17)9wa_e+4$n%7n7r_(kqwlsc^^xdoc3&px$hs)sbz(-ml1'
     )
+
 
 SECRET_KEY = lazy(secret_key, str)()
 
@@ -372,6 +374,7 @@ DEFAULT_AUTH_PLUGINS = {
 
 DEFAULT_AUTH_PLUGIN_LIST = 'LDAP'
 
+
 def get_plugins():
     plugins = OrderedDict()
     for plugin_name in main.getlist('auth-plugins', fallback=DEFAULT_AUTH_PLUGIN_LIST):
@@ -384,6 +387,7 @@ def get_plugins():
                 'backend', '')
         plugins[name] = data
     return plugins
+
 
 AUTH_PLUGINS = lazy(get_plugins, OrderedDict)()
 
@@ -884,30 +888,17 @@ PROJECT_GUI_MENU = [
 ]
 
 SPA_STATIC = [
-    {'priority': 0, 'type': 'js', 'name': 'admin/js/vendor/jquery/jquery.min.js', 'spa': True, 'api': False},
-    {'priority': 1, 'type': 'js', 'name': 'js/libs/tabSignal.js', 'spa': True, 'api': False},
-    {'priority': 3, 'type': 'js', 'name': 'js/libs/md5.min.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'js/libs/visibility/visibility.core.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'js/libs/iziToast.min.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'js/libs/iziModal.min.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'js/libs/imask.js', 'spa': True, 'api': True},
+    # {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js', 'spa': True, 'api': True},  # not found in npm
+
+    # Load app bundle shared requirements (builded using webpack)
+    {'priority': 1, 'type': 'js', 'name': 'bundle/vendors~app~loginPage.js', 'spa': True, 'api': False},
+    {'priority': 2, 'type': 'js', 'name': 'bundle/vendors~app.js', 'spa': True, 'api': False},
+    # Load app bundle (builded using webpack)
+    {'priority': 3, 'type': 'js', 'name': 'bundle/app.js', 'spa': True, 'api': False},
+
+    # Load GUI code that not builded using webpack
     {'priority': 9, 'type': 'js', 'name': 'js/guiCustomizer.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'plugins/fastclick/fastclick.min.js', 'spa': True, 'api': True},
-    {'priority': 11.5, 'type': 'js', 'name':'js/libs/xregexp-all.js', 'spa': True, 'api': True},
-    {'priority': 9, 'type': 'js', 'name': 'AdminLTE-3.0.0/min/js/adminlte.min.js', 'spa': True, 'api': True},
     {'priority': 8, 'type': 'js', 'name': 'js/common-utils.js', 'spa': True, 'api': True},
-    {'priority': 110, 'type': 'js', 'name': 'js/libs/autocomplete.js', 'spa': True, 'api': True},
-    {'priority': 110, 'type': 'js', 'name': 'plugins/select2/select2.full.min.js', 'spa': True, 'api': True},
-    {'priority': 50, 'type': 'js', 'name': 'js/libs/moment.min.js', 'spa': True, 'api': True},
-    {'priority': 51, 'type': 'js', 'name': 'js/libs/moment-timezone.min.js', 'spa': True, 'api': True},
-    {'priority': 51, 'type': 'js', 'name': 'js/libs/Chart.min.js', 'spa': True, 'api': True},
-    {'priority': 50, 'type': 'js', 'name': 'js/libs/jquery.scrollTo.min.js', 'spa': True, 'api': True},
-    {'priority': 9, 'type': 'js', 'name': 'js/libs/axios.min.js', 'spa': True, 'api': True},
-    {'priority': 9, 'type': 'js', 'name': 'js/libs/vue/vue.min.js', 'spa': True, 'api': True},
-    {'priority': 9.1, 'type': 'js', 'name': 'js/libs/vue/vuex.min.js', 'spa': True, 'api': True},
-    {'priority': 9.2, 'type': 'js', 'name': 'js/libs/vue/vue-router.min.js', 'spa': True, 'api': True},
-    {'priority': 9.3, 'type': 'js', 'name': 'js/libs/vue/vue-i18n.min.js', 'spa': True, 'api': True},
     {'priority': 300, 'type': 'tpl', 'name': 'templates/guiFields.html', 'spa': True, 'api': True},
     {'priority': 300, 'type': 'tpl', 'name': 'templates/guiItems.html', 'spa': True, 'api': True},
     {'priority': 9.8, 'type': 'js', 'name': 'js/guiPopUp.js', 'spa': True, 'api': True},
@@ -924,20 +915,7 @@ SPA_STATIC = [
     {'priority': 10.9, 'type': 'js', 'name': 'js/guiAppForApi.js', 'spa': False, 'api': True},
     {'priority': 11, 'type': 'js', 'name': 'js/guiUsers.js', 'spa': True, 'api': True},
     {'priority': 300, 'type': 'js', 'name': 'js/guiDashboard.js', 'spa': True, 'api': False},
-    {'priority': 102, 'type': 'css', 'name': 'css/iziToast.min.css', 'spa': True, 'api': True},
-    {'priority': 102, 'type': 'css', 'name': 'css/iziModal.min.css', 'spa': True, 'api': True},
-    # Comment out because in page linked. But it will be back when staticfiles fixed with webpack.
-    # {'priority': 105, 'type': 'css', 'name': 'AdminLTE-3.0.0/min/css/adminlte.min.css', 'spa': True, 'api': True},
-    {'priority': 108, 'type': 'css', 'name': 'css/gui.css', 'spa': True, 'api': True},
-    {'priority': 99, 'type': 'css', 'name': 'plugins/select2/select2.min.css', 'spa': True, 'api': True},
-    {
-        'priority': 4, 'type': 'js', 'name': 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js',
-        'spa': True, 'api': True
-    },
-    {
-        'priority': 5, 'type': 'js', 'name': 'AdminLTE-3.0.0/plugins/slimScroll/jquery.slimscroll.min.js',
-        'spa': True, 'api': True
-    },
+    {'priority': 108, 'type': 'css', 'name': 'css/gui.css', 'spa': True, 'api': True}
 ]
 
 # Test settings for speedup tests
@@ -946,7 +924,7 @@ if TESTS_RUN:
     gc.disable()
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
-    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher',]
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher', ]
     CONTACT = dict(
         some_extra_url='https://pypi.org/project/vstutils/', **CONTACT
     )

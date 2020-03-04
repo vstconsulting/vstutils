@@ -7,14 +7,6 @@
 {% endblock %}
 
 {% block common_sciprt %}
-    <!-- jQuery 2.2.3 -->
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>-->
-    <script src="{% static_path 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"></script>
-    <script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
-
-    <!-- Bootstrap 3.3.6 -->
-    <!--<script defer src="{% static_path 'bootstrap/js/bootstrap.min.js' %}?v={{gui_version}}"></script>-->
-    <script defer src="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"></script>
 {% endblock %}
 
 {% block bootstrap_theme %}
@@ -28,6 +20,11 @@
     csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
             csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}"
     };</script>
+
+   <script src="{% static_path "bundle/vendors~app~loginPage.js" %}"></script>
+   <script src="{% static_path "bundle/vendors~app.js" %}"></script>
+   <script src="{% static_path "bundle/app.js" %}"></script>
+
     <script src="{% static_path "rest_framework/js/ajax-form.js" %}"></script>
     <script src="{% static_path "rest_framework/js/csrf.js" %}"></script>
     <script src="{% static_path "rest_framework/js/prettify-min.js" %}"></script>
@@ -95,7 +92,7 @@
                 <div class="col-lg-6">
                     <ol class="breadcrumb float-sm-right">
                         {% block breadcrumbs %}
-                        <li class="breadcrumb-item"><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+                        <li class="breadcrumb-item"><a href="/"><i class="fas fa-tachometer-alt"></i> Home</a></li>
                         {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
                             {% if forloop.last %}
                             <li class="breadcrumb-item active"><a href="{{ breadcrumb_url }}"> {{ breadcrumb_name }}</a></li>

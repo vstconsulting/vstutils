@@ -248,3 +248,5 @@ if(!tabSignal.init)
         } );
     }
 }
+
+window.tabSignal = tabSignal;

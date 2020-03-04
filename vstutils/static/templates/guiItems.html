@@ -156,7 +156,7 @@
             <template v-else>
                 <li class="nav-item for-web login-link">
                     <a class="nav-link" :href="login_url">
-                        <i class="fa fa-sign-out text-data"></i>
+                        <i class="fas fa-sign-out-alt text-data"></i>
                         <span>{{ $t('login') | capitalize }}</span>
                     </a>
                 </li>
@@ -194,7 +194,7 @@
                         <div class="dropdown-divider for-web"></div>
 
                         <a :href="logout_url" class="dropdown-item for-web text-data">
-                            <i class="fa fa-sign-out mr-2 ico-data-default"></i> {{ $t('logout') | capitalize }}
+                            <i class="fas fa-sign-out-alt mr-2 ico-data-default"></i> {{ $t('logout') | capitalize }}
                         </a>
                     </div>
                 </li>
@@ -264,29 +264,29 @@
 <!-- template of main footer -->
 <script type="text/x-template" id="template_main_footer">
     <footer class="main-footer">
-        <gui_help_modal></gui_help_modal>
+        <div class="footer-section">
+            <gui_help_modal></gui_help_modal>
 
-        <slot name="footer_buttons"></slot>
+            <slot name="footer_buttons"></slot>
 
-        <div class="pull-right d-none d-sm-block" style="margin-right: 0px;">
-            <b>{{ $tc('version', 1) | capitalize }}</b> {{ project_version }}
+            <div class="d-none d-sm-block" style="margin-right: 0px;">
+                <b>{{ $tc('version', 1) | capitalize }}</b> {{ project_version }}
+            </div>
         </div>
 
-        <template v-if="is_debug">
-            <div class="pull-right">
+        <div class="footer-section">
+            <template v-if="is_debug">
                 <b>
                     <a href="#" class="help-text-data"
-                       onclick="loadQUnitTests(); return false;" >Test qUnit</a>
+                    onclick="loadQUnitTests(); return false;" >Test qUnit</a>
                 </b>
-            </div>
-        </template>
+            </template>
 
-        <div class="pull-right">
             <a href="#" class="help-text-data"
-               onclick="cleanAllCacheAndReloadPage(); return false;"
+            onclick="cleanAllCacheAndReloadPage(); return false;"
             >{{ ($t('reload') + ' ' + $t('cache')) | capitalize }}</a>
         </div>
-        <br>
+        <!-- <br> -->
     </footer>
 </script>
 

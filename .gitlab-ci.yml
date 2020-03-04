@@ -69,6 +69,9 @@ py36-django22-install:
   image: onegreyonewhite/tox:ubuntu
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
+  cache:
+    paths:
+      - node_modules/
 
 py38-django22-coverage:
   <<: *branch_tests
@@ -110,6 +113,9 @@ release:
 
 .release_pypi_template: &release_pypi
   stage: release
+  cache:
+    paths:
+      - node_modules/  
   only:
     refs:
       - tags
