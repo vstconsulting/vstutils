@@ -1,3 +1,5 @@
+node_modules
+vstutils/static/bundle
 *.pyc
 *.c
 *.so
@@ -24,3 +26,4 @@ venv
 # Visual Studio Code
 .history
 .vscode/*
+yarn-error.log

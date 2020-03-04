@@ -32,6 +32,8 @@ except ImportError:
 
 ignored_keys = ['-h', '--help', '--version']
 is_help = any([a for a in ignored_keys if a in sys.argv])
+is_develop = 'develop' in sys.argv
+is_build = (any([a for a in ['compile', 'bdist_wheel', 'bdist'] if a in sys.argv]) or is_develop) and not is_help
 
 
 def get_discription(file_path='README.rst', folder=os.getcwd()):
@@ -326,6 +328,16 @@ def make_setup(**opts):
         cmdclass['build_sphinx'] = BuildDoc
     cmdclass['githubrelease'] = GithubRelease
     opts['cmdclass'] = cmdclass
+
+    webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
+    if os.path.exists(webpack_path) and is_build:
+        yarn_build_command = 'devBuild' if is_develop else 'build'
+        try:
+            os.system('yarn install')
+            os.system('yarn ' + yarn_build_command)
+        except Extension as err:
+            print(err)
+
     setup(**opts)
 
 ########################################################################################
@@ -348,9 +360,11 @@ kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
     static_exclude_min=[
-        'vstutils/static/js/libs/imask.js',
-        'vstutils/static/js/libs/markdown.js',
-        'vstutils/static/js/libs/xregexp-all.js',
+        'vstutils/static/bundle/app.js',
+        'vstutils/static/bundle/loginPage.js',
+        'vstutils/static/bundle/vendors~app.js',
+        'vstutils/static/bundle/vendors~app~loginPage.js',
+
         'vstutils/gui/templates/gui/service-worker.js',
         'vstutils/gui/templates/gui/app-loader.js',
         'vstutils/gui/templates/rest_framework/app-for-api-loader.js',

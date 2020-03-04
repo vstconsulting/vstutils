@@ -813,7 +813,7 @@ vst_vue_components.items = {
                     {
                         name: 'Home',
                         url: url_prefix + '/',
-                        span_class: "fa fa-dashboard",
+                        span_class: "fas fa-tachometer-alt",
                         origin_link: this.a_links,
                     }
                 ];

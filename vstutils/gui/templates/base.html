@@ -22,13 +22,7 @@
     {% block gui_init_scripts %}{% endblock %}
 
     {% block style %}
-        <!-- Bootstrap -->
-        <link rel="stylesheet" href="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css' %}?v={{gui_version}}">
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="{% static_path 'AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css' %}?v={{gui_version}}">
-        <!-- Theme style -->
-        <link rel="stylesheet" href="{% static_path 'AdminLTE-3.0.0/min/css/adminlte.min.css' %}?v={{gui_version}}">
-
+    
             {% block gui_init_inline_styles %}
             {% endblock %}
 
@@ -84,9 +78,6 @@
         <!-- /.login-box -->
 
         {% block script %}
-            <!-- jQuery -->
-            <script src="{% static_path 'admin/js/vendor/jquery/jquery.min.js' %}?v={{gui_version}}"></script>
-            <script defer src="{% static_path 'AdminLTE-3.0.0/plugins/bootstrap/js/bootstrap.bundle.min.js' %}?v={{gui_version}}"></script>
         {% endblock %}
     </body>
 {% endblock %}
