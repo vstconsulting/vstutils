@@ -1,7 +1,3 @@
-@import url(AdminLTE-3.0.0/plugins/bootstrap/css/bootstrap.min.css);
-@import url(AdminLTE-3.0.0/min/css/adminlte.min.css);
-@import url(AdminLTE-3.0.0/plugins/font-awesome/css/font-awesome.min.css);
-
 .admonition .admonition-title {
     color: #0000008a;
 }
