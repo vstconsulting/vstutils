@@ -12,7 +12,7 @@
     "@popperjs/core": "^2.0.6",
     "JavaScript-autoComplete": "https://github.com/Pixabay/JavaScript-autoComplete#1.0.4",
     "admin-lte": "3.0.0-alpha",
-    "axios": "0.18.0",
+    "axios": "0.18.1",
     "babel-core": "^6.26.3",
     "babel-loader": "7",
     "babel-minify-webpack-plugin": "^0.3.1",
