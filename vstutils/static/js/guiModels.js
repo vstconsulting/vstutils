@@ -67,6 +67,10 @@ guiModels.Model = class Model {
         // return this.data[this.view_name];
         if(this.fields[this.view_name]) {
              return this.fields[this.view_name].toRepresent(this.data);
+        } else if (this.fields.hasOwnProperty('username')) {
+            return this.fields.username.toRepresent(this.data);
+        } else if (this.fields.hasOwnProperty('email')) {
+            return this.fields.email.toRepresent(this.data);
         }
     }
     /**

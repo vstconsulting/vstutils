@@ -61,8 +61,6 @@ class UserViewSet(base.ModelViewSetSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        if not serializer.is_valid(raise_exception=False):
-            raise Exception("Invalid data was sended.")
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return responses.HTTP_200_OK(serializer.data)

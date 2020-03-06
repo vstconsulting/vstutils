@@ -155,21 +155,21 @@ let pop_up_msg = { /* jshint unused: false */
         success: {
             add: 'Child "<b>{0}</b>" instance was successfully added to parent list.',
             create: 'New "<b>{0}</b>" instance was successfully created.',
-            remove: '"<b>{0}</b>" {1} was successfully removed.',
-            save: 'Changes in "<b>{0}</b>" {1} were successfully saved.',
+            remove: '<b>{1}</b> "<b>{0}</b>" was successfully removed.',
+            save: 'Changes in <b>{1}</b> "<b>{0}</b>" were successfully saved.',
             execute: 'Action "<b>{0}</b>" was successfully executed' +
-            ' on "<b>{1}</b>" instance.',
+            ' on "<b>{1}</b>".',
         },
         error: {
             add: 'Some error occurred during adding of child "<b>{0}</b>" instance' +
             ' to parent list.' + '<br> Error details: {1}',
             create: 'Some error occurred during new "<b>{0}</b>" instance creation.' +
             '<br> Error details: {1}',
-            remove: 'Some error occurred during remove process of "<b>{0}</b>" {1}.' +
+            remove: 'Some error occurred during remove process of <b>{1}</b>  "<b>{0}</b>".' +
             '<br> Error details: {2}',
-            save: 'Some error occurred during saving process of "<b>{0}</b>" {1}.' +
+            save: 'Some error occurred during saving process of <b>{1}</b> "<b>{0}</b>".' +
             '<br> Error details: {2}',
-            execute: 'Some error occurred during "<b>{0}</b>" action execution on {1}.' +
+            execute: 'Some error occurred during "<b>{0}</b>" action execution on <b>{1}</b>.' +
             '<br> Error details: {2}',
         },
     },
@@ -199,60 +199,59 @@ class ErrorHandler { /* jshint unused: false */
      * Constructor of ErrorHandler.
      */
     constructor() {}
+
+    /**
+     * Method translate object data to string, used for error details.
+     * @param {*} detail 
+     */
+    errorDetailHandler(detail) {
+        let error_msg = "";                
+        for (let key in detail) {
+            if (detail.hasOwnProperty(key)){
+                let detail_msg = detail[key];
+                if (Array.isArray(detail_msg)) {
+                    detail_msg = detail_msg.join('<br>');
+                }
+                error_msg += "<b>{0}</b>:<br>{1}".format(key, detail_msg);
+            }
+        }
+        return error_msg;
+    }
+
     /**
      * Method, that transforms error to string.
      * @param {*} error.
      */
     errorToString(error) {
-        let base = "Unknown error";
+        let result = "Unknown error";
+        debugger;
 
-        if(!error) {
-            return base;
+        if (!error) {
+            return result;
         }
 
-        let str;
-
         if(typeof error == 'string') {
-            str = error;
+            return error;
         }
 
         if(typeof error == 'object' && error.message) {
-            str = error.message;
+            return error.message;
         }
 
-        if(typeof error == 'object' && error.other_errors) {
-            str = error.other_errors;
-
-            if(Array.isArray(str)) {
-                str = String(str);
+        if (typeof error == 'object' && error.data){
+            if (error.data.detail && typeof error.data.detail == "string"){
+                return error.data.detail;
+            } else if (error.data.detail && typeof error.data.detail == 'object'){
+                return this.errorDetailHandler(error.data.detail);
+            } else if (typeof error.data == 'object') {
+                return this.errorDetailHandler(error.data);
             }
         }
 
-        if(typeof error == 'object' && error.data && error.data.detail) {
-
-            if(typeof error.data.detail == 'object'){
-                str = this.errorToString(error.data.detail);
-            } else {
-                str = error.data.detail;
-            }
-        }
-
-        if(str && typeof str == "string") {
-            return str;
-        }
-
-        for(let key in error) {
-            if(error.hasOwnProperty(key)) {
-                let item = error[key];
-
-                if (key == 'detail' || key.indexOf('error') != -1 || typeof item == 'object') {
-                    str = this.errorToString(item);
-                }
-            }
-        }
-
-        return str || base;
+        return result;
     }
+
+    
     /**
      * Method, that shows error to user.
      * @param {string} to_pop_up String, that will be shown in pop up notification.
