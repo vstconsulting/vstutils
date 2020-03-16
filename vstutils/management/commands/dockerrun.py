@@ -221,6 +221,10 @@ class Command(BaseCommand):
                 f'{prefix}_SECURE_HSTS_SECONDS',
                 self._settings('SECURE_HSTS_SECONDS')
             ),
+            'health_throttle_rate': os.getenv(
+                f'{prefix}_HEALTH_THROTTLE_RATE',
+                self._settings('HEALTH_THROTTLE_RATE')
+            ),
         }
 
         config['uwsgi'] = {

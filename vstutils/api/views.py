@@ -6,7 +6,7 @@ from django.test import Client
 from django.db import transaction
 from django.http import Http404
 from rest_framework.exceptions import ValidationError
-from rest_framework import permissions as rest_permissions
+from rest_framework import permissions as rest_permissions, throttling
 from . import base, serializers, permissions, filters, decorators as deco, responses, models
 from ..utils import Dict, import_class
 
@@ -330,8 +330,16 @@ class BulkViewSet(base.rvs.APIView):
         self.put_result = self.results.append
 
 
+class HealthThrottle(throttling.AnonRateThrottle):
+    THROTTLE_RATES = {
+        'anon': settings.HEALTH_THROTTLE_RATE
+    }
+
+
 class HealthView(base.ListNonModelViewSet):
+    permission_classes = (rest_permissions.AllowAny,)
     authentication_classes = ()
+    throttle_classes = (HealthThrottle,)
     health_backend = import_class(settings.HEALTH_BACKEND_CLASS)()
 
     def list(self, request, *args, **kwargs):

@@ -105,7 +105,8 @@ class WebSection(BaseAppendSection):
         'secure_content_type_nosniff': cconfig.BoolType(),
         'secure_hsts_include_subdomains': cconfig.BoolType(),
         'secure_hsts_preload': cconfig.BoolType(),
-        'secure_hsts_seconds': cconfig.IntType()
+        'secure_hsts_seconds': cconfig.IntType(),
+        'health_throttle_rate': cconfig.IntType()
     }
 
 
@@ -206,6 +207,7 @@ config = cconfig.ConfigParserC(
             'secure_hsts_include_subdomains': False,
             'secure_hsts_preload': False,
             'secure_hsts_seconds': 0,
+            'health_throttle_rate': 60
         },
         'database': {
             'engine': 'django.db.backends.sqlite3',
@@ -589,6 +591,7 @@ TERMS_URL = ''
 CONTACT = config['contact'].all()
 OPENAPI_PUBLIC = web['public_openapi']
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
+HEALTH_THROTTLE_RATE = f"{web['health_throttle_rate']}/minute"
 
 OPENAPI_EXTRA_LINKS = {
     'vstutils': {
