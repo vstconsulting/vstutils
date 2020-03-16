@@ -2,7 +2,11 @@
   "name": "vstutils-frontend",
   "version": "0.1.0",
   "author": "VST Consulting",
-  "browserslist": "> 0.25%, not dead",
+  "browserslist": [
+    "> 0.25%",
+    "not dead",
+    "not IE 11 and not op_mini all"
+  ],
   "scripts": {
     "build": "APP_ENV=prod webpack",
     "buildAnalyze": "APP_ENV=prod BUNDLE_ANALYZER=true webpack",
@@ -15,7 +19,6 @@
     "JavaScript-autoComplete": "https://github.com/Pixabay/JavaScript-autoComplete#1.0.4",
     "admin-lte": "3.0.0-alpha",
     "axios": "0.18.1",
-    "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
     "babel-minify-webpack-plugin": "^0.3.1",
     "bootstrap": "4.4.1",

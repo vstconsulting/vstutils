@@ -12,6 +12,7 @@ const isProd = ENV === "prod";
 const enableAnalyzer = process.env.BUNDLE_ANALYZER === "true";
 
 const KB = 1024;
+const entrypoints_dir = __dirname + "/frontend_src";
 
 function setMode() {
   if (isProd) {
@@ -25,10 +26,10 @@ const config = {
   mode: setMode(),
   // devtool: isProd ? undefined : "source-map",
   entry: {
-    spa: __dirname + "/frontend_src/spa.js",
-    api: __dirname + "/frontend_src/api.js",
-    doc: __dirname + "/frontend_src/doc.js",
-    auth: __dirname + "/frontend_src/auth.js"
+    spa: entrypoints_dir + "/spa.js",
+    api: entrypoints_dir + "/api.js",
+    doc: entrypoints_dir + "/doc.js",
+    auth: entrypoints_dir + "/auth.js"
   },
   output: {
     path: __dirname + "/vstutils/static/bundle",
@@ -56,7 +57,12 @@ const config = {
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env"]
+            presets:  [
+                ["@babel/preset-env", {
+                  "debug": !isProd,
+                  // "useBuiltIns": "entry"
+                }]
+            ]
           }
         },
         exclude: [/node_modules/]
