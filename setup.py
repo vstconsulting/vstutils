@@ -360,10 +360,12 @@ kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
     static_exclude_min=[
-        'vstutils/static/bundle/app.js',
+        'vstutils/static/bundle/app.spa.js',
+        'vstutils/static/bundle/app.api.js',
         'vstutils/static/bundle/loginPage.js',
-        'vstutils/static/bundle/vendors~app.js',
-        'vstutils/static/bundle/vendors~app~loginPage.js',
+        'vstutils/static/bundle/app.api~app.spa.js',
+        'vstutils/static/bundle/vendors~app.api~app.spa.js',
+        'vstutils/static/bundle/vendors~app.api~app.spa~loginPage.js',
 
         'vstutils/gui/templates/gui/service-worker.js',
         'vstutils/gui/templates/gui/app-loader.js',

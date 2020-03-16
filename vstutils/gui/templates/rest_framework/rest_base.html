@@ -21,10 +21,7 @@
             csrfCookieName: "{{ csrf_cookie_name|default:'csrftoken' }}"
     };</script>
 
-   <script src="{% static_path "bundle/vendors~app~loginPage.js" %}"></script>
-   <script src="{% static_path "bundle/vendors~app.js" %}"></script>
-   <script src="{% static_path "bundle/app.js" %}"></script>
-
+    <!-- FIXME These libs appear on page before app.api.js but they require jquery so it is nit workink-->
     <script src="{% static_path "rest_framework/js/ajax-form.js" %}"></script>
     <script src="{% static_path "rest_framework/js/csrf.js" %}"></script>
     <script src="{% static_path "rest_framework/js/prettify-min.js" %}"></script>
