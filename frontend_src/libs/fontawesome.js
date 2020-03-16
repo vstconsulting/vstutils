@@ -1,0 +1,1 @@
+import "./fontawesome.scss";

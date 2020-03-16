@@ -893,32 +893,19 @@ PROJECT_GUI_MENU = [
 SPA_STATIC = [
     # {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js', 'spa': True, 'api': True},  # not found in npm
 
-    # Load app bundle shared requirements (builded using webpack)
-    {'priority': 1, 'type': 'js', 'name': 'bundle/vendors~app~loginPage.js', 'spa': True, 'api': False},
-    {'priority': 2, 'type': 'js', 'name': 'bundle/vendors~app.js', 'spa': True, 'api': False},
-    # Load app bundle (builded using webpack)
-    {'priority': 3, 'type': 'js', 'name': 'bundle/app.js', 'spa': True, 'api': False},
+    # Load common chunks
+    {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js', 'spa': True, 'api': True},
+    {'priority': 2, 'type': 'js', 'name': 'bundle/api~auth~doc~spa.chunk.js', 'spa': True, 'api': True},
+    {'priority': 3, 'type': 'js', 'name': 'bundle/api~auth~spa.chunk.js', 'spa': True, 'api': True},
+    {'priority': 4, 'type': 'js', 'name': 'bundle/api~spa.chunk.js', 'spa': True, 'api': True},
 
-    # Load GUI code that not builded using webpack
-    {'priority': 9, 'type': 'js', 'name': 'js/guiCustomizer.js', 'spa': True, 'api': True},
-    {'priority': 8, 'type': 'js', 'name': 'js/common-utils.js', 'spa': True, 'api': True},
+    # Load app
+    {'priority': 5, 'type': 'js', 'name': 'bundle/spa.js', 'spa': True, 'api': False},
+    {'priority': 5, 'type': 'js', 'name': 'bundle/api.js', 'spa': False, 'api': True},
+
+    # Load templates
     {'priority': 300, 'type': 'tpl', 'name': 'templates/guiFields.html', 'spa': True, 'api': True},
-    {'priority': 300, 'type': 'tpl', 'name': 'templates/guiItems.html', 'spa': True, 'api': True},
-    {'priority': 9.8, 'type': 'js', 'name': 'js/guiPopUp.js', 'spa': True, 'api': True},
-    {'priority': 9.9, 'type': 'js', 'name': 'js/guiFieldsMixins.js', 'spa': True, 'api': True},
-    {'priority': 10, 'type': 'js', 'name': 'js/guiFields.js', 'spa': True, 'api': True},
-    {'priority': 10.1, 'type': 'js', 'name': 'js/guiItems.js', 'spa': True, 'api': True},
-    {'priority': 10.2, 'type': 'js', 'name': 'js/guiModels.js', 'spa': True, 'api': False},
-    {'priority': 10.3, 'type': 'js', 'name': 'js/guiQuerySet.js', 'spa': True, 'api': False},
-    {'priority': 10.4, 'type': 'js', 'name': 'js/guiViews.js', 'spa': True, 'api': False},
-    {'priority': 10.5, 'type': 'js', 'name': 'js/guiStore.js', 'spa': True, 'api': False},
-    {'priority': 10.6, 'type': 'js', 'name': 'js/guiRouter.js', 'spa': True, 'api': False},
-    {'priority': 10.7, 'type': 'js', 'name': 'js/guiApi.js', 'spa': True, 'api': True},
-    {'priority': 10.9, 'type': 'js', 'name': 'js/guiApp.js', 'spa': True, 'api': False},
-    {'priority': 10.9, 'type': 'js', 'name': 'js/guiAppForApi.js', 'spa': False, 'api': True},
-    {'priority': 11, 'type': 'js', 'name': 'js/guiUsers.js', 'spa': True, 'api': True},
-    {'priority': 300, 'type': 'js', 'name': 'js/guiDashboard.js', 'spa': True, 'api': False},
-    {'priority': 108, 'type': 'css', 'name': 'css/gui.css', 'spa': True, 'api': True}
+    {'priority': 300, 'type': 'tpl', 'name': 'templates/guiItems.html', 'spa': True, 'api': True}
 ]
 
 # Test settings for speedup tests

@@ -38,7 +38,6 @@
     "hostname": true,
     "IMask": true,
     "isEmptyObject": true,
-    "iziToast": true,
     "modal_window_and_button_mixin": true,
     "moment": true,
     "my_user_id": true,
@@ -55,6 +54,7 @@
     "Vue": true,
     "VueI18n": true,
     "XRegExp": true,
-    "$": true
+    "$": true,
+    "require": true
   }
 }

@@ -23,14 +23,17 @@ function setMode() {
 
 const config = {
   mode: setMode(),
-  devtool: isProd ? "source-map": undefined,
+  // devtool: isProd ? undefined : "source-map",
   entry: {
-    app: __dirname + "/frontend_src/app.js",
-    loginPage: __dirname + "/frontend_src/loginPage.js"
+    spa: __dirname + "/frontend_src/spa.js",
+    api: __dirname + "/frontend_src/api.js",
+    doc: __dirname + "/frontend_src/doc.js",
+    auth: __dirname + "/frontend_src/auth.js"
   },
   output: {
     path: __dirname + "/vstutils/static/bundle",
     filename: "[name].js",
+    chunkFilename: "[name].chunk.js",
     publicPath: "/static/bundle/",
     library: "vstutilsLibs",
     libraryTarget: "var"
@@ -50,7 +53,12 @@ const config = {
     rules: [
       {
         test: /\.js$/,
-        use: "babel-loader",
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"]
+          }
+        },
         exclude: [/node_modules/]
       },
       {
@@ -78,8 +86,23 @@ const config = {
     ]
   },
   optimization: {
+    chunkIds: 'natural',
     splitChunks: {
-      chunks: "all"
+      chunks: "all",
+      maxInitialRequests: 10,
+      cacheGroups: {
+        default: {
+          automaticNamePrefix: "",
+          priority: 0
+        },
+        defaultVendors: false,
+        vstutils: {
+          name: "vstutils",
+          test: /frontend_src\/vstutils\//,
+          priority: 10,
+          enforce: true
+        }
+      }
     },
     minimize: true,
     minimizer: [

@@ -22,6 +22,7 @@ venv
 *.sqlite3
 *.bak
 .mypy_cache
+/stat.json
 
 # Visual Studio Code
 .history
