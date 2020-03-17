@@ -53,6 +53,7 @@ import { createPopper } from "@popperjs/core";
 window.createPopper = createPopper;
 
 import "./libs/bootstrap.js";
+import "./libs/bootstrap-select.js";
 import "./libs/adminlte.js";
 import "./libs/fontawesome.js";
 
