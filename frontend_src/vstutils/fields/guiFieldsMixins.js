@@ -2745,7 +2745,7 @@ const gui_fields_mixins = {
              */
             s2: undefined,
             class_list: ["form-control", "select2", "select2-field-select"],
-            enum: []
+            enum: this.field.options.enum || []
           };
         },
         mounted() {
@@ -2753,22 +2753,22 @@ const gui_fields_mixins = {
 
           this.initSelect2();
 
-          if (this.value) {
-            this.setValue(this.value);
-          } else if (this.field.options.default) {
-            this.setValue(this.field.options.default);
-          } else {
-            this.setValue(this.field.options.enum[0]);
-          }
-
           this.$watch(
             function() {
               return this.field.options.enum;
             },
             function(newVal, oldVal) {
               /* jshint unused: false */
-              this.enum = newVal;
+              this.enum = newVal || [];
               this.initSelect2();
+
+              if (this.value) {
+                this.setValue(this.value);
+              } else if (this.field.options.default) {
+                this.setValue(this.field.options.default);
+              } else {
+                this.setValue(this.enum.length > 0 ? this.enum[0] : null);
+              }
             }
           );
         },
@@ -2783,9 +2783,11 @@ const gui_fields_mixins = {
            */
           initSelect2() {
             $(this.s2)
+              .empty() // Remove all children (options)
               .select2({
                 width: "100%",
-                data: this.enum
+                data: this.enum,
+                disabled: this.field.options.disabled
               })
               .on("change", event => {
                 let value;
@@ -2795,6 +2797,10 @@ const gui_fields_mixins = {
                   value = data.id;
                 } else {
                   value = event.target.value;
+                }
+
+                if (!this.enum.includes(value)) {
+                  value = this.enum[0] || "";
                 }
 
                 this.$emit("proxyEvent", "setValueInStore", value);
