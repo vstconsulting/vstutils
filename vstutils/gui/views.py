@@ -14,6 +14,13 @@ UserModel = get_user_model()
 
 class BaseView(TemplateView):
     login_required = False
+    minify_response = True
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        if not self.minify_response:
+            response.minify_response = False
+        return response
 
     @classmethod
     def as_view(cls, *args, **kwargs):
@@ -32,6 +39,7 @@ class OfflineView(BaseView):
 
 
 class ManifestView(BaseView):
+    minify_response = False
     login_required = False
     template_name = "gui/manifest.json"
 
@@ -45,6 +53,7 @@ class JSMinTemplateResponse(TemplateResponse):
 
 class SWView(BaseView):
     login_required = False
+    minify_response = False
     content_type = 'text/javascript'
     template_name = "gui/service-worker.js"
     response_class = JSMinTemplateResponse
@@ -52,6 +61,7 @@ class SWView(BaseView):
 
 class AppLoaderView(BaseView):
     login_required = False
+    minify_response = False
     content_type = 'text/javascript'
     template_name = "gui/app-loader.js"
     response_class = JSMinTemplateResponse
@@ -59,6 +69,7 @@ class AppLoaderView(BaseView):
 
 class AppForApiLoaderView(BaseView):
     login_required = False
+    minify_response = False
     content_type = 'text/javascript'
     template_name = "rest_framework/app-for-api-loader.js"
     response_class = JSMinTemplateResponse
