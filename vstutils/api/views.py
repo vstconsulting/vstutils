@@ -258,7 +258,7 @@ class BulkViewSet(base.rvs.APIView):
             operation, url=url
         )
 
-    # @transaction.atomic()
+    @transaction.atomic()
     def operate_handler(self, operation, allow_fail=True):
         try:
             op_type = operation.get("type", 'mod')
