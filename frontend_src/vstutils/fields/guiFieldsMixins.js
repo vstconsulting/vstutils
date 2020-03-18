@@ -2761,14 +2761,6 @@ const gui_fields_mixins = {
               /* jshint unused: false */
               this.enum = newVal || [];
               this.initSelect2();
-
-              if (this.value) {
-                this.setValue(this.value);
-              } else if (this.field.options.default) {
-                this.setValue(this.field.options.default);
-              } else {
-                this.setValue(this.enum.length > 0 ? this.enum[0] : null);
-              }
             }
           );
         },
@@ -2805,6 +2797,15 @@ const gui_fields_mixins = {
 
                 this.$emit("proxyEvent", "setValueInStore", value);
               });
+
+            // Set initial value
+            if (this.value) {
+              this.setValue(this.value);
+            } else if (this.field.options.default) {
+              this.setValue(this.field.options.default);
+            } else {
+              this.setValue(this.enum.length > 0 ? this.enum[0] : null);
+            }
           },
           /**
            * Method, that sets value to select2 DOM element.
