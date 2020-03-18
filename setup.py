@@ -333,7 +333,7 @@ def make_setup(**opts):
     if os.path.exists(webpack_path) and is_build:
         yarn_build_command = 'devBuild' if is_develop else 'build'
         try:
-            os.system('yarn install')
+            os.system('yarn install --pure-lockfile')
             os.system('yarn ' + yarn_build_command)
         except Extension as err:
             print(err)
