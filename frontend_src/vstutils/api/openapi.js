@@ -58,7 +58,7 @@ export let openapi_dictionary = {
         edit: {
           name: "edit",
           title: "edit",
-          icon_classes: ["fa", "fa-pencil-square-o"],
+          icon_classes: ["fas", "fa-edit"],
           title_classes: ["d-none", "d-lg-inline-block", "title-for-btn"]
         }
       },
