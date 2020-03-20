@@ -360,9 +360,11 @@ if 'develop' in sys.argv:
 kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
-    static_exclude_min=
-        glob.glob('vstutils/static/bundle/**/*.js', recursive=True) +
-        glob.glob('vstutils/gui/templates/**/*.js', recursive=True),
+    static_exclude_min=[
+        'vstutils/gui/templates/gui/service-worker.js',
+        'vstutils/gui/templates/gui/app-loader.js',
+        'vstutils/gui/templates/rest_framework/app-for-api-loader.js',
+    ] + glob.glob('vstutils/static/bundle/*.js', recursive=True),
     install_requires=[
         "django>=2.2,<3.0;python_version>='3.6'",
         'cython>0.29,<0.30',
