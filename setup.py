@@ -165,15 +165,15 @@ def minify_static_files(base_dir, files, exclude=None):
     except:
         pass
 
-    regex_exclude = [re.compile(r) for r in exclude]
+    regex_exclude = [re.compile(r, re.MULTILINE) for r in exclude]
 
     for fnext, funcs in patterns.items():
         for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
             if fnmatch.fnmatch(fext_file, '*.min.*'):
                 continue
-            if any(filter(lambda fp: bool(fp.match(fext_file)), regex_exclude)):
-                continue
             fext_file = os.path.join(base_dir, fext_file)
+            if any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
+                continue
             if os.path.exists(fext_file):
                 func, subfunc = funcs
                 with codecs.open(fext_file, 'r', encoding='utf-8') as static_file_fd:
@@ -183,7 +183,7 @@ def minify_static_files(base_dir, files, exclude=None):
                 with open(fext_file, 'rb') as f_in:
                     with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                print('Minfied file {}.'.format(fext_file))
+                print(f'Minfied file {fext_file}.')
 
 
 class _Compile(_sdist):
