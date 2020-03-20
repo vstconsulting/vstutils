@@ -1,5 +1,6 @@
 # Compilation block
 ########################################################################################
+import re
 import os
 import sys
 import fnmatch
@@ -164,11 +165,13 @@ def minify_static_files(base_dir, files, exclude=None):
     except:
         pass
 
+    regex_exclude = [re.compile(r) for r in exclude]
+
     for fnext, funcs in patterns.items():
         for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
             if fnmatch.fnmatch(fext_file, '*.min.*'):
                 continue
-            if any(filter(lambda fp: fext_file.endswith(fp), exclude)):
+            if any(filter(lambda fp: bool(fp.match(fext_file)), regex_exclude)):
                 continue
             fext_file = os.path.join(base_dir, fext_file)
             if os.path.exists(fext_file):
@@ -361,10 +364,9 @@ kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
     static_exclude_min=[
-        'vstutils/gui/templates/gui/service-worker.js',
-        'vstutils/gui/templates/gui/app-loader.js',
-        'vstutils/gui/templates/rest_framework/app-for-api-loader.js',
-    ] + glob.glob('vstutils/static/bundle/*.js', recursive=True),
+        'vstutils/gui/templates/.*\.js$',
+        'vstutils/static/bundle/.*\.js$'
+    ],
     install_requires=[
         "django>=2.2,<3.0;python_version>='3.6'",
         'cython>0.29,<0.30',
