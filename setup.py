@@ -1,3 +1,5 @@
+from pathlib import Path
+
 # Compilation block
 ########################################################################################
 import os
@@ -356,21 +358,13 @@ ext_list = [
 if 'develop' in sys.argv:
     ext_list = []
 
+webpack_bundle_js_files = [str(f) for f in Path(".").glob("vstutils/static/bundle/**/*.js")]
+js_templates_files = [str(f) for f in Path(".").glob("vstutils/gui/templates/**/*.js")]
+
 kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
-    static_exclude_min=[
-        'vstutils/static/bundle/app.spa.js',
-        'vstutils/static/bundle/app.api.js',
-        'vstutils/static/bundle/loginPage.js',
-        'vstutils/static/bundle/app.api~app.spa.js',
-        'vstutils/static/bundle/vendors~app.api~app.spa.js',
-        'vstutils/static/bundle/vendors~app.api~app.spa~loginPage.js',
-
-        'vstutils/gui/templates/gui/service-worker.js',
-        'vstutils/gui/templates/gui/app-loader.js',
-        'vstutils/gui/templates/rest_framework/app-for-api-loader.js',
-    ],
+    static_exclude_min=webpack_bundle_js_files+js_templates_files,
     install_requires=[
         "django>=2.2,<3.0;python_version>='3.6'",
         'cython>0.29,<0.30',
