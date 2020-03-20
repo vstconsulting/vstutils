@@ -1,5 +1,3 @@
-from pathlib import Path
-
 # Compilation block
 ########################################################################################
 import os
@@ -7,6 +5,7 @@ import sys
 import fnmatch
 import codecs
 import gzip
+import glob
 import shutil
 
 # allow setup.py to be run from any path
@@ -358,13 +357,12 @@ ext_list = [
 if 'develop' in sys.argv:
     ext_list = []
 
-webpack_bundle_js_files = [str(f) for f in Path(".").glob("vstutils/static/bundle/**/*.js")]
-js_templates_files = [str(f) for f in Path(".").glob("vstutils/gui/templates/**/*.js")]
-
 kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
-    static_exclude_min=webpack_bundle_js_files+js_templates_files,
+    static_exclude_min=
+        glob.glob('vstutils/static/bundle/**/*.js', recursive=True) +
+        glob.glob('vstutils/gui/templates/**/*.js', recursive=True),
     install_requires=[
         "django>=2.2,<3.0;python_version>='3.6'",
         'cython>0.29,<0.30',
