@@ -223,7 +223,7 @@ class Command(BaseCommand):
             ),
             'health_throttle_rate': os.getenv(
                 f'{prefix}_HEALTH_THROTTLE_RATE',
-                self._settings('HEALTH_THROTTLE_RATE')
+                self._settings('HEALTH_THROTTLE_RATE').replace('/minute', '')
             ),
         }
 
