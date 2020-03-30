@@ -4,6 +4,7 @@ const BabelMinifyPlugin = require("babel-minify-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
 
 require("dotenv").config();
 const ENV = process.env.APP_ENV;
@@ -27,7 +28,6 @@ const config = {
   // devtool: isProd ? undefined : "source-map",
   entry: {
     spa: entrypoints_dir + "/spa.js",
-    api: entrypoints_dir + "/api.js",
     doc: entrypoints_dir + "/doc.js",
     auth: entrypoints_dir + "/auth.js"
   },
@@ -36,12 +36,13 @@ const config = {
     filename: "[name].js",
     chunkFilename: "[name].chunk.js",
     publicPath: "/static/bundle/",
-    library: "vstutilsLibs",
+    library: "[name]",
     libraryTarget: "var"
   },
   plugins: [
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new VueLoaderPlugin()
   ],
   resolve: {
     alias: {
@@ -57,11 +58,14 @@ const config = {
         use: {
           loader: "babel-loader",
           options: {
-            presets:  [
-                ["@babel/preset-env", {
-                  "debug": !isProd,
-                  // "useBuiltIns": "entry"
-                }]
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  corejs: 3,
+                  useBuiltIns: "usage"
+                }
+              ]
             ]
           }
         },
@@ -88,11 +92,15 @@ const config = {
             limit: 10 * KB
           }
         }
+      },
+      {
+        test: /\.vue$/,
+        loader: "vue-loader"
       }
     ]
   },
   optimization: {
-    chunkIds: 'natural',
+    chunkIds: "natural",
     splitChunks: {
       chunks: "all",
       maxInitialRequests: 10,

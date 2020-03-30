@@ -250,6 +250,15 @@ class Command(BaseCommand):
                 'beat': os.getenv(f'{prefix}_SCHEDULER_ENABLE', 'true')
             }
 
+        mail_parameters = ['port', 'user', 'password', 'tls']
+        mail_settings = dict(host=os.environ.get(f'{prefix}_MAIL_HOST'))
+        if mail_settings['host']:
+            for param in mail_parameters:
+                value = os.environ.get(f'{prefix}_MAIL_{param.upper()}')
+                if value:
+                    mail_settings[param] = value
+            config['mail'] = mail_settings
+
         # Set secret key
         os.environ.setdefault('SECRET_KEY', 'DISABLE')
         if os.environ['SECRET_KEY'] != 'DISABLE':  # nocv

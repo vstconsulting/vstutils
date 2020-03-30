@@ -1,4 +1,5 @@
-import Vuex from "vuex";
+import $ from 'jquery';
+import Vuex from 'vuex';
 
 /**
  * Class, that manages Store creation.
@@ -6,7 +7,7 @@ import Vuex from "vuex";
  * In current realization, Store is Vuex Store.
  * More about Vuex - https://vuex.vuejs.org/.
  */
-export default class StoreConstructor {
+export class StoreConstructor {
     /**
      * Constructor of StoreConstructor class.
      * @param {object} views Dict with Views objects.
@@ -83,7 +84,7 @@ export default class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             deleteQuerySet(state, obj) {
-                delete  state.objects[obj.url];
+                delete state.objects[obj.url];
             },
             /**
              * Mutation, that creates selection dict for a view with current URL.
@@ -101,12 +102,12 @@ export default class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             toggleSelectionValue(state, obj) {
-                if(state.selections[obj.url][obj.id] == undefined) {
+                if (state.selections[obj.url][obj.id] == undefined) {
                     state.selections[obj.url][obj.id] = true;
                 } else {
                     state.selections[obj.url][obj.id] = !state.selections[obj.url][obj.id];
                 }
-                state.selections = { ...state.selections};
+                state.selections = { ...state.selections };
             },
             /**
              * Mutation, that updates values of several selection dict records.
@@ -115,7 +116,7 @@ export default class StoreConstructor {
              */
             setSelectionValuesByIds(state, obj) {
                 state.selections[obj.url] = $.extend(true, {}, state.selections[obj.url], obj.ids);
-                state.selections = { ...state.selections};
+                state.selections = { ...state.selections };
             },
             /**
              * Mutation, that saves instance's field value or list's filter value in store.
@@ -124,7 +125,9 @@ export default class StoreConstructor {
              */
             setViewFieldValue(state, obj) {
                 state[obj.store][obj.url].cache.data[obj.field] = obj.value;
-                state[obj.store][obj.url].cache.data = { ...state[obj.store][obj.url].cache.data};
+                state[obj.store][obj.url].cache.data = {
+                    ...state[obj.store][obj.url].cache.data,
+                };
             },
             /**
              * Mutation, that saves instance's data in store.
@@ -133,7 +136,9 @@ export default class StoreConstructor {
              */
             setViewInstanceData(state, obj) {
                 state[obj.store][obj.url].cache.data = obj.data;
-                state[obj.store][obj.url].cache.data = {...state[obj.store][obj.url].cache.data};
+                state[obj.store][obj.url].cache.data = {
+                    ...state[obj.store][obj.url].cache.data,
+                };
             },
             /**
              * Mutation, that saves in state.sandbox current queryset
@@ -162,7 +167,7 @@ export default class StoreConstructor {
                 state.filters[obj.url] = {
                     cache: {
                         data: obj.filters,
-                    }
+                    },
                 };
             },
             /**
@@ -184,7 +189,7 @@ export default class StoreConstructor {
             /**
              * Getter, that returns dict with all views objects.
              */
-            getViews: state => {
+            getViews: (state) => {
                 return state.views;
             },
             /**
@@ -192,7 +197,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {string} path View' path.
              */
-            getView: state => path => {
+            getView: (state) => (path) => {
                 return state.views[path];
             },
             /**
@@ -200,7 +205,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {string} url View' url.
              */
-            getQuerySet: state => url => {
+            getQuerySet: (state) => (url) => {
                 return state.objects[url];
             },
             /**
@@ -208,7 +213,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {string} url View' url.
              */
-            getSelections: state => url => {
+            getSelections: (state) => (url) => {
                 return state.selections[url];
             },
             /**
@@ -216,7 +221,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {object} obj Object with arguments for this getter.
              */
-            getSelectionById: state => obj => {
+            getSelectionById: (state) => (obj) => {
                 return state.selections[obj.url][obj.id];
             },
             /**
@@ -224,7 +229,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {object} obj Object with arguments for this getter.
              */
-            getViewFieldValue: state => obj => {
+            getViewFieldValue: (state) => (obj) => {
                 return state[obj.store][obj.url].cache.data[obj.field];
             },
             /**
@@ -232,7 +237,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {object} obj Object with arguments for this getter.
              */
-            getViewInstanceData: state => obj => {
+            getViewInstanceData: (state) => (obj) => {
                 return state[obj.store][obj.url].cache.data;
             },
             /**
@@ -240,7 +245,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {string} url View' url.
              */
-            getQuerySetFromSandBox: state => url => {
+            getQuerySetFromSandBox: (state) => (url) => {
                 return state.sandbox[url];
             },
             /**
@@ -248,7 +253,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {string} url View' url.
              */
-            getFilters: state => url => {
+            getFilters: (state) => (url) => {
                 return state.filters[url];
             },
             /**
@@ -256,7 +261,7 @@ export default class StoreConstructor {
              * @param {string} state Current state.
              * @param {string} url View' url.
              */
-            getWidgets: state => url => {
+            getWidgets: (state) => (url) => {
                 return state.widgets[url];
             },
         };

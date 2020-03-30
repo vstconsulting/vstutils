@@ -44,13 +44,6 @@ const APP_LOADER = "/app-loader.js";
 //{% endblock %}
 
 /**
- * Path to the app for api loader file.
- */
-//{% block app_for_api_loader %}
-const APP_FOR_API_LOADER = "/app-for-api-loader.js";
-//{% endblock %}
-
-/**
  * Array with paths of additional files, that should precached.
  */
 //{% block resource_list %}
@@ -62,7 +55,7 @@ const ADDITIONAL_FILES_LIST = [];
  */
 const PRECACHE_LIST = [
     OFFLINE_PAGE, FAVICON,
-    APP_LOADER, APP_FOR_API_LOADER,
+    APP_LOADER,
 ].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST);
 
 /**

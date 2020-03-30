@@ -1,4 +1,6 @@
-import { BaseEntityConstructor } from "../utils";
+import $ from 'jquery';
+import { BaseEntityConstructor } from '../utils';
+import { guiFields } from '../fields';
 
 /**
  * Class, that manages creation of guiModels.
@@ -31,8 +33,8 @@ export default class ModelConstructor extends BaseEntityConstructor {
         let required_fields = this.getModelRequiredFieldsList(model);
         let fields = model[this.dictionary.models.fields.name];
 
-        for(let key in fields) {
-            if(required_fields.includes(key)) {
+        for (let key in fields) {
+            if (required_fields.includes(key)) {
                 fields[key].required = true;
             }
         }
@@ -66,10 +68,10 @@ export default class ModelConstructor extends BaseEntityConstructor {
         let f_obj = {};
         let fields = this.getModelFieldsList(model);
 
-        tabSignal.emit("models[" + model_name + "].fields.beforeInit", fields);
+        tabSignal.emit('models[' + model_name + '].fields.beforeInit', fields);
 
-        for(let field in fields){
-            if(fields.hasOwnProperty(field)) {
+        for (let field in fields) {
+            if (fields.hasOwnProperty(field)) {
                 let format = this.getModelFieldFormat(fields[field]);
                 let opt = {
                     name: field,
@@ -84,7 +86,7 @@ export default class ModelConstructor extends BaseEntityConstructor {
             }
         }
 
-        tabSignal.emit("models[" + model_name + "].fields.afterInit", f_obj);
+        tabSignal.emit('models[' + model_name + '].fields.afterInit', f_obj);
 
         return f_obj;
     }
@@ -94,8 +96,8 @@ export default class ModelConstructor extends BaseEntityConstructor {
      * @param {string} model Name of Model.
      */
     getModelsConstructor(model) {
-        if(this.classes[model + "Model"]) {
-            return this.classes[model + "Model"];
+        if (this.classes[model + 'Model']) {
+            return this.classes[model + 'Model'];
         }
 
         return this.classes.Model;
@@ -111,19 +113,19 @@ export default class ModelConstructor extends BaseEntityConstructor {
         let store = {};
         let models = this.getModelsList(openapi_schema);
 
-        for(let model in models){
-            if(models.hasOwnProperty(model)) {
+        for (let model in models) {
+            if (models.hasOwnProperty(model)) {
                 let constructor = this.getModelsConstructor(model);
 
-                store[model] = new constructor(
-                    model, this.generateModelFields(models[model], model),
-                );
+                store[model] = new constructor(model, this.generateModelFields(models[model], model));
 
-                tabSignal.emit("models[" + model + "].created", {model: store[model]});
+                tabSignal.emit('models[' + model + '].created', {
+                    model: store[model],
+                });
             }
         }
 
-        tabSignal.emit("allModels.created", {models: store});
+        tabSignal.emit('allModels.created', { models: store });
 
         return store;
     }

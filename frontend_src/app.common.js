@@ -1,74 +1,91 @@
 // TabSignal
-import "./libs/tabSignal.js";
+import './libs/tabSignal.js';
 
-import $ from "./libs/jquery.js";
+import $ from './libs/jquery.js';
 
-import "select2";
-import "select2/dist/css/select2.css";
+import 'select2';
+import 'select2/dist/css/select2.css';
 
-import "jquery.scrollto";
+import 'jquery.scrollto';
 
-require("jquery-slimscroll");
+require('jquery-slimscroll');
 
-import iziModal from "izimodal/js/iziModal";
+import iziModal from 'izimodal/js/iziModal';
 $.fn.iziModal = iziModal;
-import "izimodal/css/iziModal.css";
+import 'izimodal/css/iziModal.css';
 
-import "./libs/vue.js";
+import './libs/vue.js';
 
 // Other
-import moment from "moment";
+import moment from 'moment';
 window.moment = moment;
-import "moment-timezone/builds/moment-timezone-with-data-1970-2030.js";
+import 'moment-timezone/builds/moment-timezone-with-data-1970-2030.js';
 
-import md5 from "md5";
+import md5 from 'md5';
 window.md5 = md5;
 
-import Visibility from "visibilityjs";
+import Visibility from 'visibilityjs';
 window.Visibility = Visibility;
 
-import IMask from "imask";
+import IMask from 'imask';
 window.IMask = IMask;
 
-import iziToast from "izitoast";
-import "izitoast/dist/css/iziToast.css";
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.css';
 window.iziToast = iziToast;
 
-import XRegExp from "xregexp/lib/xregexp";
+import XRegExp from 'xregexp/lib/xregexp';
 window.XRegExp = XRegExp;
 
-import FastClick from "fastclick";
+import FastClick from 'fastclick';
 window.FastClick = FastClick;
 
-import autoComplete from "JavaScript-autoComplete/auto-complete";
+import autoComplete from 'JavaScript-autoComplete/auto-complete';
 window.autoComplete = autoComplete;
 
-import axios from "axios";
+import axios from 'axios';
 window.axios = axios;
 
-import Chart from "chart.js";
+import Chart from 'chart.js';
 window.Chart = Chart;
 
-import { createPopper } from "@popperjs/core";
+import { createPopper } from '@popperjs/core';
 window.createPopper = createPopper;
 
-import "./libs/bootstrap.js";
-import "./libs/bootstrap-select.js";
-import "./libs/adminlte.js";
-import "./libs/fontawesome.js";
+import './libs/bootstrap.js';
+import './libs/bootstrap-select.js';
+import './libs/adminlte.js';
+import './libs/fontawesome.js';
 
-import "./vstutils/utils";
-import "./vstutils/guiCustomizer";
-import "./vstutils/setupVue.js";
-import "./vstutils/popUp";
-import "./vstutils/fields";
-import "./vstutils/items";
-import "./vstutils/models";
-import "./vstutils/querySet";
-import "./vstutils/views";
-import "./vstutils/store";
-import "./vstutils/router";
-import "./vstutils/api";
-import "./vstutils/users";
+import * as utils from './vstutils/utils';
+import * as guiCustomizer from './vstutils/guiCustomizer';
+import * as setupVue from './vstutils/setupVue.js';
+import * as popUp from './vstutils/popUp';
+import * as fields from './vstutils/fields';
+import * as components from './vstutils/components';
+import * as models from './vstutils/models';
+import * as querySet from './vstutils/querySet';
+import * as views from './vstutils/views';
+import * as store from './vstutils/store';
+import * as router from './vstutils/router';
+import * as api from './vstutils/api';
+import * as users from './vstutils/users';
+export * from './vstutils/ComponentsRegistrator.js';
 
-import "./vstutils/gui.css";
+export {
+    utils,
+    guiCustomizer,
+    setupVue,
+    popUp,
+    fields,
+    components,
+    models,
+    querySet,
+    views,
+    store,
+    router,
+    api,
+    users,
+};
+
+import './vstutils/gui.css';

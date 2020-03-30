@@ -67,14 +67,6 @@ class AppLoaderView(BaseView):
     response_class = JSMinTemplateResponse
 
 
-class AppForApiLoaderView(BaseView):
-    login_required = False
-    minify_response = False
-    content_type = 'text/javascript'
-    template_name = "rest_framework/app-for-api-loader.js"
-    response_class = JSMinTemplateResponse
-
-
 class Login(auth.LoginView):
     template_name = 'auth/login.html'
     redirect_authenticated_user = True

@@ -1,7 +1,6 @@
-import View from "./View.js";
-import ViewConstructor from "./ViewConstructor.js";
-import SubViewWithOutApiPathConstructor from "./SubViewWithOutApiPathConstructor.js";
-
+import View from './View.js';
+import ViewConstructor from './ViewConstructor.js';
+import SubViewWithOutApiPathConstructor from './SubViewWithOutApiPathConstructor.js';
 
 window.View = View;
 window.ViewConstructor = ViewConstructor;

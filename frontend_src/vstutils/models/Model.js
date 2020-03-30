@@ -1,12 +1,15 @@
+import { guiFields } from '../fields';
+import { isEmptyObject } from '../utils';
+
 /**
  * Class of Base Model.
  */
 export default class Model {
-    constructor(name, fields){
+    constructor(name, fields) {
         this.name = name;
         this.fields = fields;
-        this.non_instance_attr = ['non_instance_attr','constructor', 'getInstance'];
-        if(!isEmptyObject(this.fields)) {
+        this.non_instance_attr = ['non_instance_attr', 'constructor', 'getInstance'];
+        if (!isEmptyObject(this.fields)) {
             this.pk_name = Object.keys(this.fields)[0];
             for (let field in this.fields) {
                 if (this.fields[field].options.is_pk) {
@@ -20,10 +23,10 @@ export default class Model {
      * Method, that convert data from 'gui view' format into format, appropriate for API.
      * @param {object} form_data  Data from GUI form.
      */
-    toInner(form_data = this.data){
+    toInner(form_data = this.data) {
         let data = {};
-        for(let item in form_data) {
-            if(this.fields[item]) {
+        for (let item in form_data) {
+            if (this.fields[item]) {
                 data[item] = this.fields[item].toInner(form_data);
             }
         }
@@ -35,8 +38,8 @@ export default class Model {
      */
     toRepresent(api_data = this.data) {
         let data = {};
-        for(let item in api_data) {
-            if(this.fields[item]) {
+        for (let item in api_data) {
+            if (this.fields[item]) {
                 data[item] = this.fields[item].toRepresent(api_data);
             }
         }
@@ -47,7 +50,7 @@ export default class Model {
      */
     getPkValue() {
         // return this.data[this.pk_name];
-        if(this.fields[this.pk_name]) {
+        if (this.fields[this.pk_name]) {
             return this.fields[this.pk_name].toInner(this.data);
         }
     }
@@ -56,8 +59,8 @@ export default class Model {
      */
     getViewFieldValue() {
         // return this.data[this.view_name];
-        if(this.fields[this.view_name]) {
-             return this.fields[this.view_name].toRepresent(this.data);
+        if (this.fields[this.view_name]) {
+            return this.fields[this.view_name].toRepresent(this.data);
         } else if (this.fields.hasOwnProperty('username')) {
             return this.fields.username.toRepresent(this.data);
         } else if (this.fields.hasOwnProperty('email')) {
@@ -67,53 +70,62 @@ export default class Model {
     /**
      * Method, that deletes Model instance.
      */
-    delete(){
+    delete() {
         let bulk = this.queryset.formBulkQuery('delete');
-        if(bulk.data_type[bulk.data_type.length - 1] != this.getPkValue()) {
+        if (bulk.data_type[bulk.data_type.length - 1] != this.getPkValue()) {
             bulk.data_type.push(this.getPkValue());
         }
-        return this.queryset.sendQuery(bulk).then(response => {
-            return response;
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
+        return this.queryset
+            .sendQuery(bulk)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
+            });
     }
     /**
      * Method, that saves Model instance's changes.
      */
-    save(method="patch"){
-        return this.queryset.formQueryAndSend(method, this.toInner(this.data)).then(response => {
-            return this.queryset.model.getInstance(response.data, this.queryset);
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
+    save(method = 'patch') {
+        return this.queryset
+            .formQueryAndSend(method, this.toInner(this.data))
+            .then((response) => {
+                return this.queryset.model.getInstance(response.data, this.queryset);
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
+            });
     }
     /**
      * Method, that returns Model instance.
      * @param {object} data  Data of Model instance's fields.
      * @param {object} queryset Queryset for current Model instance.
      */
-    getInstance(data, queryset){
+    getInstance(data, queryset) {
         let instance = {
             data: data,
             queryset: queryset,
         };
 
-        for(let key in this) {
-            if(this.hasOwnProperty(key)) {
+        for (let key in this) {
+            if (this.hasOwnProperty(key)) {
                 if (!this.non_instance_attr.includes(key)) {
                     instance[key] = this[key];
                 }
             }
         }
 
-        let methods = obj_prop_retriever.getPrototypeNonenumerables(this, false); /* globals obj_prop_retriever */
+        let methods = obj_prop_retriever.getPrototypeNonenumerables(
+            this,
+            false,
+        ); /* globals obj_prop_retriever */
 
-        for(let index =0; index < methods.length; index++) {
+        for (let index = 0; index < methods.length; index++) {
             let key = methods[index];
-            if(!this.non_instance_attr.includes(key)) {
+            if (!this.non_instance_attr.includes(key)) {
                 instance[key] = this[key];
             }
         }
@@ -128,8 +140,8 @@ export default class Model {
     getPrefetchFields() {
         let fields = [];
 
-        for(let key in this.fields) {
-            if(this.fields.hasOwnProperty(key)) {
+        for (let key in this.fields) {
+            if (this.fields.hasOwnProperty(key)) {
                 let field = this.fields[key];
 
                 if (field instanceof guiFields.fk) {

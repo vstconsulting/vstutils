@@ -1,3 +1,6 @@
+import $ from 'jquery';
+import { deepEqual } from '../utils';
+
 /**
  * Base QuerySet class.
  */
@@ -23,22 +26,22 @@ export default class QuerySet {
      * appropriate for bulk query.
      * @param {object} query Object with pairs of key, value for QuerySet filters.
      */
-    makeQueryString(query = this.query){
+    makeQueryString(query = this.query) {
         let filters = [];
-        for(let key in query){
-            if(query.hasOwnProperty(key)) {
+        for (let key in query) {
+            if (query.hasOwnProperty(key)) {
                 filters.push([key, query[key]].join('='));
             }
         }
-        return filters.join("&");
+        return filters.join('&');
     }
 
     /**
      * Method, that converts 'this.url' string into 'data_type' array,
      * appropriate for bulk query.
      */
-    getDataType(){
-        return this.url.replace(/^\/|\/$/g, "").split("/");
+    getDataType() {
+        return this.url.replace(/^\/|\/$/g, '').split('/');
     }
 
     /**
@@ -46,19 +49,19 @@ export default class QuerySet {
      * @param {string} method Method(get/delete/post/put/patch) of bulk query.
      * @param {object} data 'data' property for body of bulk query, data of Model instance.
      */
-    formBulkQuery(method, data){
+    formBulkQuery(method, data) {
         let query = {
             method: method,
             data_type: this.getDataType(),
         };
 
-        if(data) {
+        if (data) {
             query.data = data;
         }
 
         let filters = this.makeQueryString();
 
-        if(filters.length > 0) {
+        if (filters.length > 0) {
             query.filters = filters;
         }
 
@@ -70,7 +73,7 @@ export default class QuerySet {
      * @param {string} method Method(get/delete/post/put/patch) of bulk query.
      * @param {object} data 'data' property for body of bulk query, data of Model instance.
      */
-    formQueryAndSend(method, data){
+    formQueryAndSend(method, data) {
         return this.sendQuery(this.formBulkQuery(method, data));
     }
 
@@ -78,7 +81,7 @@ export default class QuerySet {
      * Method, that sends bulk query to API.
      * @param {object} bulk Object with properties of bulk data.
      */
-    sendQuery(bulk){
+    sendQuery(bulk) {
         return app.api.bulkQuery(bulk);
     }
 
@@ -88,18 +91,18 @@ export default class QuerySet {
      * @param {boolean} save_cache If true, cache of current QuerySet will be saved in clone.
      * @return {object} Clone - new QuerySet instance.
      */
-    clone(props={}, save_cache=false) {
+    clone(props = {}, save_cache = false) {
         let clone = $.extend(true, {}, this);
         /* jshint proto: true */
         clone.__proto__ = this.__proto__;
 
-        for(let key in props) {
-            if(props.hasOwnProperty(key)) {
+        for (let key in props) {
+            if (props.hasOwnProperty(key)) {
                 clone[key] = props[key];
             }
         }
 
-        if(!save_cache) {
+        if (!save_cache) {
             clone.clearCache();
         }
 
@@ -112,7 +115,7 @@ export default class QuerySet {
      * @param {object} props Object with properties, that should be rewritten in copy instance.
      * @return {object} Copy - new QuerySet instance.
      */
-    copy(props={}) {
+    copy(props = {}) {
         return this.clone(props, true);
     }
 
@@ -141,13 +144,13 @@ export default class QuerySet {
      */
     exclude(filters) {
         let ecd_filters = {};
-        for(let key in filters) {
-            if(filters.hasOwnProperty(key)) {
-                let ecd_key = key.indexOf("__not") == -1 ? key + "__not" : key;
+        for (let key in filters) {
+            if (filters.hasOwnProperty(key)) {
+                let ecd_key = key.indexOf('__not') == -1 ? key + '__not' : key;
                 ecd_filters[ecd_key] = filters[key];
             }
         }
-        return this.clone({query: $.extend(true, {}, this.query, ecd_filters)});
+        return this.clone({ query: $.extend(true, {}, this.query, ecd_filters) });
     }
 
     /**
@@ -156,10 +159,10 @@ export default class QuerySet {
      * otherwise, means array with names of model fields,
      * that should be used as prefetch field.
      */
-    prefetch(instances=true) {
+    prefetch(instances = true) {
         let qs = this.clone();
 
-        if(instances) {
+        if (instances) {
             qs.use_prefetch = instances;
         } else {
             qs.use_prefetch = false;
@@ -175,37 +178,37 @@ export default class QuerySet {
      * if api request was successful.
      */
     items() {
-        if(this.cache){
+        if (this.cache) {
             return Promise.resolve(this.cache);
         }
-        return this.formQueryAndSend('get').then(response => {
-            let instances = [];
-            let data = response.data.results;
-            let prefetch_fields = this._getPrefetchFields();
+        return this.formQueryAndSend('get')
+            .then((response) => {
+                let instances = [];
+                let data = response.data.results;
+                let prefetch_fields = this._getPrefetchFields();
 
-            for(let index = 0; index < data.length; index++){
-                instances.push(
-                    this.model.getInstance(data[index], this.clone())
-                );
-            }
+                for (let index = 0; index < data.length; index++) {
+                    instances.push(this.model.getInstance(data[index], this.clone()));
+                }
 
-            // if prefetch fields exist, loads prefetch data.
-            if(prefetch_fields && prefetch_fields.length > 0) {
-                return this._loadPrefetchData(prefetch_fields, instances).then(() => {
-                    this.api_count = response.data.count;
-                    this.cache = instances;
-                    return instances;
-                });
-            }
+                // if prefetch fields exist, loads prefetch data.
+                if (prefetch_fields && prefetch_fields.length > 0) {
+                    return this._loadPrefetchData(prefetch_fields, instances).then(() => {
+                        this.api_count = response.data.count;
+                        this.cache = instances;
+                        return instances;
+                    });
+                }
 
-            // otherwise returns instances.
-            this.api_count = response.data.count;
-            this.cache = instances;
-            return instances;
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
+                // otherwise returns instances.
+                this.api_count = response.data.count;
+                this.cache = instances;
+                return instances;
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
+            });
     }
 
     /**
@@ -214,14 +217,15 @@ export default class QuerySet {
      * @param {object} data Data of new Model instance.
      */
     create(data) {
-        return this.formQueryAndSend('post', data).then(response => {
-            return this.model.getInstance(response.data, this.clone());
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
+        return this.formQueryAndSend('post', data)
+            .then((response) => {
+                return this.model.getInstance(response.data, this.clone());
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
+            });
     }
-
 
     /**
      * Method, that deletes all Model instances, that this.items() returns.
@@ -231,14 +235,16 @@ export default class QuerySet {
      * This method should not be applied for querysets with 'page' type url.
      */
     delete() {
-        this.items().then(instances => {
-            instances.forEach(instance => {
-                instance.delete();
+        this.items()
+            .then((instances) => {
+                instances.forEach((instance) => {
+                    instance.delete();
+                });
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
             });
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
     }
 
     /**
@@ -246,28 +252,30 @@ export default class QuerySet {
      * if api query was successful.
      */
     get() {
-        if(this.cache) {
+        if (this.cache) {
             return Promise.resolve(this.cache);
         }
-        return this.formQueryAndSend('get').then(response => {
-            let instance = this.model.getInstance(response.data, this);
-            let prefetch_fields = this._getPrefetchFields();
+        return this.formQueryAndSend('get')
+            .then((response) => {
+                let instance = this.model.getInstance(response.data, this);
+                let prefetch_fields = this._getPrefetchFields();
 
-            // if prefetch fields exist, loads prefetch data.
-            if(prefetch_fields && prefetch_fields.length > 0) {
-                return this._loadPrefetchData(prefetch_fields, [instance]).then(() => {
-                    this.cache = instance;
-                    return instance;
-                });
-            }
+                // if prefetch fields exist, loads prefetch data.
+                if (prefetch_fields && prefetch_fields.length > 0) {
+                    return this._loadPrefetchData(prefetch_fields, [instance]).then(() => {
+                        this.cache = instance;
+                        return instance;
+                    });
+                }
 
-            // otherwise, returns instance.
-            this.cache = instance;
-            return instance;
-        }).catch(error => {
-            debugger;
-            throw error;
-        });
+                // otherwise, returns instance.
+                this.cache = instance;
+                return instance;
+            })
+            .catch((error) => {
+                debugger;
+                throw error;
+            });
     }
 
     /**
@@ -282,9 +290,9 @@ export default class QuerySet {
      * Method, that returns array with names of prefetch fields.
      */
     _getPrefetchFields() {
-        if(Array.isArray(this.use_prefetch)) {
+        if (Array.isArray(this.use_prefetch)) {
             return this.use_prefetch;
-        } else if(this.use_prefetch) {
+        } else if (this.use_prefetch) {
             return this.model.getPrefetchFields();
         }
     }
@@ -298,7 +306,7 @@ export default class QuerySet {
     _getBulkDataForPrefetch(prefetch_fields, instances) {
         let bulk_data = {};
 
-        for(let index = 0; index < instances.length; index++) {
+        for (let index = 0; index < instances.length; index++) {
             let instance = instances[index];
 
             this._getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data);
@@ -315,8 +323,8 @@ export default class QuerySet {
      * @private
      */
     _getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data) {
-        for(let key in prefetch_fields) {
-            if(prefetch_fields.hasOwnProperty(key)) {
+        for (let key in prefetch_fields) {
+            if (prefetch_fields.hasOwnProperty(key)) {
                 let field_name = prefetch_fields[key];
                 let field = this.model.fields[field_name];
                 let value = instance.data[field_name];
@@ -379,8 +387,8 @@ export default class QuerySet {
         let promises = [];
         let bulk_data = this._getBulkDataForPrefetch(prefetch_fields, instances);
 
-        for(let key in bulk_data) {
-            if(bulk_data.hasOwnProperty(key)) {
+        for (let key in bulk_data) {
+            if (bulk_data.hasOwnProperty(key)) {
                 for (let index = 0; index < bulk_data[key].length; index++) {
                     let item = bulk_data[key][index];
                     let filters = {};
@@ -394,11 +402,14 @@ export default class QuerySet {
                     };
 
                     promises.push(
-                        this.sendQuery(bulk).then(res => {
-                            this._setPrefetchValue(res, item, instances, key);
-                        }).catch(error => { /* jshint unused: false */
-                            debugger;
-                        })
+                        this.sendQuery(bulk)
+                            .then((res) => {
+                                this._setPrefetchValue(res, item, instances, key);
+                            })
+                            .catch((error) => {
+                                /* jshint unused: false */
+                                debugger;
+                            }),
                     );
                 }
             }
@@ -416,22 +427,22 @@ export default class QuerySet {
      * @private
      */
     _setPrefetchValue(res, bulk_data_item, instances, field_name) {
-        if(res.status != "200") {
+        if (res.status != '200') {
             return;
         }
 
         let prefetch_data = res.data.results;
         let field = this.model.fields[field_name];
 
-        for(let index = 0; index < instances.length; index++) {
+        for (let index = 0; index < instances.length; index++) {
             let instance = instances[index];
 
-            if(!bulk_data_item.instances_ids.includes(instance.getPkValue())) {
+            if (!bulk_data_item.instances_ids.includes(instance.getPkValue())) {
                 continue;
             }
 
-            for(let num = 0; num < prefetch_data.length; num++) {
-                if(field.isPrefetchDataForMe(instance.data, prefetch_data[num])) {
+            for (let num = 0; num < prefetch_data.length; num++) {
+                if (field.isPrefetchDataForMe(instance.data, prefetch_data[num])) {
                     instance.data[field_name] = field.getPrefetchValue(instance.data, prefetch_data[num]);
                 }
             }

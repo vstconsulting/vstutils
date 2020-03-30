@@ -1,3 +1,7 @@
+import $ from 'jquery';
+import ViewConstructor from './ViewConstructor.js';
+import View from './View.js';
+
 /**
  * Class, that manages creation of SubViews of guiViews - views, paths of which do not exist in API,
  * but they should be in GUI.
@@ -25,7 +29,7 @@ export default class SubViewWithOutApiPathConstructor {
      * @param {object} models Dict with Models.
      * @param {object} opt Object with class instance options.
      */
-    constructor(openapi_dictionary, models, opt={}) {
+    constructor(openapi_dictionary, models, opt = {}) {
         this.view_constr = new ViewConstructor(openapi_dictionary, models);
         this.path_prefix = opt.prefix;
     }
@@ -38,13 +42,11 @@ export default class SubViewWithOutApiPathConstructor {
     generateSubView(views, path, new_path) {
         let constr = this.view_constr;
         let view = views[path];
-        let new_view = new View(
-            view.objects.model, $.extend(true, {}, view.schema), view.template,
-        );
+        let new_view = new View(view.objects.model, $.extend(true, {}, view.schema), view.template);
         let mixin = this.getSubViewMixin();
 
         let url = new_path.replace(this.path_prefix, '');
-        new_view.objects = new_view.objects.clone({url: url});
+        new_view.objects = new_view.objects.clone({ url: url });
 
         new_view.schema.path = new_path;
         new_view.schema.level = constr.getViewSchema_baseOptions(new_path).level;
@@ -73,21 +75,23 @@ export default class SubViewWithOutApiPathConstructor {
                     let inner_paths = this.getParentPaths(this.$route.name, this.$route.path);
                     let views = this.$store.getters.getViews;
 
-                    for(let index = 0; index < inner_paths.length; index++) {
+                    for (let index = 0; index < inner_paths.length; index++) {
                         let obj = inner_paths[index];
 
-                        if(!this.loadParentInstanceOrNot(views, obj)) {
+                        if (!this.loadParentInstanceOrNot(views, obj)) {
                             continue;
                         }
 
                         let url = views[obj.path].objects.url.format(this.$route.params);
 
-                        this.getInstance(views[obj.path], url).then(instance => {
-                            this.data.parent_instances[obj.url] = instance;
-                            this.data.parent_instances = { ...this.data.parent_instances};
-                        }).catch(error => {
-                            debugger;
-                        });
+                        this.getInstance(views[obj.path], url)
+                            .then((instance) => {
+                                this.data.parent_instances[obj.url] = instance;
+                                this.data.parent_instances = { ...this.data.parent_instances };
+                            })
+                            .catch((error) => {
+                                debugger;
+                            });
                     }
                 },
             },

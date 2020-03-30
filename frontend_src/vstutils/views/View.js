@@ -1,3 +1,5 @@
+import { guiQuerySets } from '../querySet';
+
 /**
  * View class - constructor, that returns view object.
  */
@@ -9,7 +11,7 @@ export default class View {
      * that include settings for a view (internal links, view type and so on).
      * @param {string} template Id of script with template content.
      */
-    constructor(model, schema, template) {
+    constructor(model, schema, template, mixins = []) {
         let qs_constructor = this.constructor.getQuerySetConstructor(model);
 
         this.schema = schema;
@@ -19,7 +21,7 @@ export default class View {
          * Property, that stores extensions for components,
          * which would render current view.
          */
-        this.mixins = [];
+        this.mixins = mixins;
     }
 
     /**
@@ -29,7 +31,8 @@ export default class View {
      * @param {object} buttons Object with buttons options.
      * @param {object} instance Model instance connected with current view.
      */
-    getViewSublinkButtons(type, buttons, instance) { /* jshint unused: false */
+    getViewSublinkButtons(type, buttons, instance) {
+        /* jshint unused: false */
         return buttons;
     }
 
@@ -38,8 +41,8 @@ export default class View {
      * @param {string} path View path.
      * @return {string}
      */
-    getPathTemplateForRouter(path="") {
-        return path.replace(/\{/g, ":").replace(/\}/g, "");
+    getPathTemplateForRouter(path = '') {
+        return path.replace(/\{/g, ':').replace(/\}/g, '');
     }
 
     /**
@@ -47,7 +50,7 @@ export default class View {
      * @param {object} model Model object.
      */
     static getQuerySetConstructor(model) {
-        if(guiQuerySets[model.name + 'QuerySet']) {
+        if (guiQuerySets[model.name + 'QuerySet']) {
             return guiQuerySets[model.name + 'QuerySet'];
         }
 

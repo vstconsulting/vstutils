@@ -1,3 +1,12 @@
+import $ from 'jquery';
+import moment from 'moment';
+import XRegExp from 'xregexp';
+import { gui_fields_mixins } from './guiFieldsMixins.js';
+import { _translate, findClosestPath, BaseEntityConstructor } from '../utils';
+import { pop_up_msg } from '../popUp';
+import { ViewConstructor } from '../views';
+import { openapi_dictionary } from '../api';
+
 /**
  * Object, that contains guiFields classes.
  */
@@ -11,7 +20,7 @@ guiFields.base = class BaseField {
      * Constructor of base guiField class.
      * @param {object} options Object with field options.
      */
-    constructor(options={}) {
+    constructor(options = {}) {
         /**
          * Options - object with field options.
          */
@@ -27,7 +36,7 @@ guiFields.base = class BaseField {
      * and fields from the same fields wrapper.
      * For example, from the same Model Instance.
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return data[this.options.name];
     }
     /**
@@ -36,7 +45,7 @@ guiFields.base = class BaseField {
      * and fields from the same fields wrapper.
      * For example, from the same Model Instance.
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return data[this.options.name];
     }
     /**
@@ -46,25 +55,25 @@ guiFields.base = class BaseField {
      * and fields from the same fields wrapper.
      * For example, from the same Model Instance.
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         let value = data[this.options.name];
         let value_length = 0;
         let samples = pop_up_msg.field.error;
         let title = (this.options.title || this.options.name).toLowerCase();
         let $t = _translate;
 
-        if(value) {
+        if (value) {
             value_length = value.toString().length;
         }
 
-        if(this.options.maxLength && value_length > this.options.maxLength) {
+        if (this.options.maxLength && value_length > this.options.maxLength) {
             throw {
                 error: 'validation',
                 message: $t(samples.maxLength).format([$t(title), this.options.maxLength]),
             };
         }
 
-        if(this.options.minLength) {
+        if (this.options.minLength) {
             if (value_length == 0) {
                 if (!this.options.required) {
                     return;
@@ -76,7 +85,7 @@ guiFields.base = class BaseField {
                 };
             }
 
-            if(value_length < this.options.minLength) {
+            if (value_length < this.options.minLength) {
                 throw {
                     error: 'validation',
                     message: $t(samples.minLength).format([$t(title), this.options.minLength]),
@@ -84,32 +93,32 @@ guiFields.base = class BaseField {
             }
         }
 
-        if(this.options.max && value > this.options.max) {
+        if (this.options.max && value > this.options.max) {
             throw {
                 error: 'validation',
                 message: $t(samples.max).format([$t(title), this.options.max]),
             };
         }
 
-        if(this.options.min && value < this.options.min) {
+        if (this.options.min && value < this.options.min) {
             throw {
                 error: 'validation',
                 message: $t(samples.min).format([$t(title), this.options.min]),
             };
         }
 
-        if(value === undefined && this.options.required && this.options.default !== undefined) {
+        if (value === undefined && this.options.required && this.options.default !== undefined) {
             return this.options.default;
         }
 
-        if(value === undefined && this.options.required && !this.options.default) {
+        if (value === undefined && this.options.required && !this.options.default) {
             throw {
                 error: 'validation',
                 message: $t(samples.required).format([$t(title)]),
             };
         }
 
-        if(this.validateValueCustom && typeof this.validateValueCustom == 'function') {
+        if (this.validateValueCustom && typeof this.validateValueCustom == 'function') {
             return this.validateValueCustom(data);
         }
 
@@ -122,7 +131,7 @@ guiFields.base = class BaseField {
      * For example, from the same Model Instance.
      * @private
      */
-    _insertTestValue(data={}) {
+    _insertTestValue(data = {}) {
         let value = data[this.options.name];
         let format = this.options.format || this.options.type;
         let el = this._insertTestValue_getElement(format);
@@ -138,7 +147,7 @@ guiFields.base = class BaseField {
      * @private
      */
     _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name  + ' input';
+        let selector = '.guifield-' + format + '-' + this.options.name + ' input';
         return $(selector)[0];
     }
     /**
@@ -171,7 +180,7 @@ guiFields.textarea = class TextAreaField extends guiFields.base {
      * Redefinition of base guiField method '_insertTestValue_getElement'.
      */
     _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name  + ' textarea';
+        let selector = '.guifield-' + format + '-' + this.options.name + ' textarea';
         return $(selector)[0];
     }
     /**
@@ -190,17 +199,17 @@ guiFields.integer = class IntegerField extends guiFields.base {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(value === undefined) {
+        if (value === undefined) {
             return;
         }
 
         let val = Number(value);
 
-        if(isNaN(val)) {
-            console.error( "Error in integer.toInner()");
+        if (isNaN(val)) {
+            console.error('Error in integer.toInner()');
             return;
         }
 
@@ -247,18 +256,18 @@ guiFields.boolean = class BooleanField extends guiFields.base {
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    _getValue(data={}) {
+    _getValue(data = {}) {
         let value = data[this.options.name];
 
-        if(typeof value == 'boolean') {
+        if (typeof value == 'boolean') {
             return value;
         }
 
-        if(typeof value == 'string') {
+        if (typeof value == 'string') {
             return stringToBoolean(value); /* globals stringToBoolean */
         }
 
-        if(typeof value == 'number') {
+        if (typeof value == 'number') {
             return Boolean(value);
         }
     }
@@ -267,14 +276,14 @@ guiFields.boolean = class BooleanField extends guiFields.base {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data);
     }
     /**
@@ -287,7 +296,7 @@ guiFields.boolean = class BooleanField extends guiFields.base {
 
         this._insertTestValue_imitateEvent(el);
 
-        if($(el).hasClass('selected') == value) {
+        if ($(el).hasClass('selected') == value) {
             this._insertTestValue_imitateEvent(el);
         }
     }
@@ -295,7 +304,7 @@ guiFields.boolean = class BooleanField extends guiFields.base {
      * Redefinition of base guiField method '_insertTestValue_getElement'.
      */
     _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name  + ' .boolean-select';
+        let selector = '.guifield-' + format + '-' + this.options.name + ' .boolean-select';
         return $(selector)[0];
     }
     /**
@@ -320,38 +329,38 @@ guiFields.choices = class ChoicesField extends guiFields.string {
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    _getValue(data={}){
+    _getValue(data = {}) {
         let value = data[this.options.name];
 
-        if(!value){
+        if (!value) {
             return;
         }
 
-        if(this.options.enum && this.options.enum.includes(value)){
+        if (this.options.enum && this.options.enum.includes(value)) {
             return value;
         }
 
-        console.error("There is no appropriate choice in enum list");
+        console.error('There is no appropriate choice in enum list');
     }
     /**
      * Redefinition of string guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of string guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.
      */
     _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name  + ' select';
+        let selector = '.guifield-' + format + '-' + this.options.name + ' select';
         return $(selector)[0];
     }
     /**
@@ -420,10 +429,10 @@ guiFields.email = class EmailField extends guiFields.string {
     /**
      * Redefinition of 'validateValue' method of string guiField.
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         let value = super.validateValue(data);
 
-        if(this.options.required && !this.constructor.validation_reg_exp.test(String(value))) {
+        if (this.options.required && !this.constructor.validation_reg_exp.test(String(value))) {
             let title = (this.options.title || this.options.name).toLowerCase();
             let $t = _translate;
 
@@ -475,10 +484,10 @@ guiFields.binfile = class BinFileField extends guiFields.file {
      * and fields from the same fields wrapper.
      * For example, from the same Model Instance.
      */
-    toBase64(data={}) {
+    toBase64(data = {}) {
         let value = data[this.options.name];
 
-        if(value !== undefined) {
+        if (value !== undefined) {
             return arrayBufferToBase64(value); /* globals arrayBufferToBase64 */
         }
     }
@@ -500,10 +509,10 @@ guiFields.namedbinfile = class NamedBinFileField extends guiFields.binfile {
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         let value = super.validateValue(data);
 
-        if(value && this.options.required && value.name === null && value.content === null) {
+        if (value && this.options.required && value.name === null && value.content === null) {
             let title = (this.options.title || this.options.name).toLowerCase();
             let $t = _translate;
 
@@ -548,10 +557,10 @@ guiFields.multiplenamedbinfile = class MultipleNamedBinFileField extends guiFiel
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         let value = super.validateValue(data);
 
-        if(value && this.options.required && Array.isArray(value) && value.length === 0) {
+        if (value && this.options.required && Array.isArray(value) && value.length === 0) {
             let title = (this.options.title || this.options.name).toLowerCase();
             let $t = _translate;
 
@@ -587,16 +596,16 @@ guiFields.text_paragraph = class TextParagraphField extends guiFields.base {
     /**
      * Redefinition of 'toRepresent' method of base guiField.
      */
-    toRepresent(data={}){
+    toRepresent(data = {}) {
         let value = data[this.options.name];
 
-        if(value === undefined) {
+        if (value === undefined) {
             return this.options.default;
         }
 
-        if(typeof value == 'object') {
-            if(Array.isArray(value)) {
-                return value.join(" ");
+        if (typeof value == 'object') {
+            if (Array.isArray(value)) {
+                return value.join(' ');
             }
 
             return JSON.stringify(value);
@@ -645,27 +654,27 @@ guiFields.date = class DateField extends guiFields.base {
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    _getValue(data={}) {
+    _getValue(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
-        return moment(value).format("YYYY-MM-DD");
+        return moment(value).format('YYYY-MM-DD');
     }
     /**
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data);
     }
     /**
@@ -684,10 +693,10 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
@@ -697,16 +706,16 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
         let m = moment(moment.tz(value, app.api.getTimeZone())).tz(moment.tz.guess());
 
-        return m.format("YYYY-MM-DD") + 'T' + m.format("HH:mm");
+        return m.format('YYYY-MM-DD') + 'T' + m.format('HH:mm');
     }
     /**
      * Redefinition of base guiField static property 'mixins'.
@@ -726,14 +735,16 @@ guiFields.date_time = class DateTimeField extends guiFields.base {
  * - 99y 11m 30d 22:23:24
  */
 guiFields.uptime = class UptimeField extends guiFields.base {
-    constructor(options={}) {
+    constructor(options = {}) {
         super(options);
         /**
          * Array of regexps for current field.
          * These regexps are needed for converting value from seconds to uptime format.
          */
         this.reg_exp_arr = [
-            XRegExp(`(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
+            XRegExp(
+                `(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`,
+            ),
             XRegExp(`(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
             XRegExp(`(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
             XRegExp(`(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
@@ -743,32 +754,32 @@ guiFields.uptime = class UptimeField extends guiFields.base {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
         //@todo think about this 'if', during making decision about what type of data to save in store
         // toInner or to Represent.
-        if(!isNaN(Number(value))) {
+        if (!isNaN(Number(value))) {
             return Number(value);
         }
 
         let uptime_in_seconds = 0;
 
-        for(let index = 0; index < this.reg_exp_arr.length; index++) {
+        for (let index = 0; index < this.reg_exp_arr.length; index++) {
             let time_parts = XRegExp.exec(value, this.reg_exp_arr[index]);
 
-            if(!time_parts) {
+            if (!time_parts) {
                 continue;
             }
 
             let duration_obj = {
                 seconds: Number(time_parts.ss),
-                minutes:  Number(time_parts.mm),
-                hours:  Number(time_parts.hh),
+                minutes: Number(time_parts.mm),
+                hours: Number(time_parts.hh),
                 days: Number(time_parts.d || 0),
                 months: Number(time_parts.m || 0),
                 years: Number(time_parts.y || 0),
@@ -785,7 +796,7 @@ guiFields.uptime = class UptimeField extends guiFields.base {
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return getTimeInUptimeFormat(data[this.options.name]); /* globals getTimeInUptimeFormat */
     }
     /**
@@ -812,14 +823,14 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
-        if(typeof value == 'object' && value.value) {
+        if (typeof value == 'object' && value.value) {
             return value.value;
         }
 
@@ -830,10 +841,10 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
      * @param {object} data Object with fields values.
      * @private
      */
-    _toInner(data={}) {
+    _toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
@@ -843,14 +854,14 @@ guiFields.time_interval = class TimeIntervalField extends guiFields.integer {
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
+        if (!value) {
             return;
         }
 
-        if(typeof value == 'object' && value.represent_value) {
+        if (typeof value == 'object' && value.represent_value) {
             return value.represent_value;
         }
 
@@ -872,11 +883,11 @@ guiFields.crontab = class CrontabField extends guiFields.base {
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    _getValue(data={}){
+    _getValue(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
-            return "* * * * *";
+        if (!value) {
+            return '* * * * *';
         }
 
         return value;
@@ -885,14 +896,14 @@ guiFields.crontab = class CrontabField extends guiFields.base {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data);
     }
     /**
@@ -916,18 +927,17 @@ guiFields.json = class JsonField extends guiFields.base {
     /**
      * Method, that inits all real fields of json field.
      */
-    generateRealFields(value={}) {
+    generateRealFields(value = {}) {
         let realFields = {};
 
-        for(let field in value) {
-            if(value.hasOwnProperty(field)) {
+        for (let field in value) {
+            if (value.hasOwnProperty(field)) {
                 let opt = {
                     name: field,
                     readOnly: this.options.readOnly || false,
                     title: field,
                     format: 'string',
                 };
-
 
                 if (typeof value[field] == 'boolean') {
                     opt.format = 'boolean';
@@ -952,29 +962,32 @@ guiFields.json = class JsonField extends guiFields.base {
  * Mixin for fk and api_object guiFields classes.
  * @param Class_name
  */
-let fk_and_api_object_mixin = (Class_name) => class extends Class_name {
-    /**
-     * Static method, that finds queryset by model's name in views of second nesting level.
-     * @param {string} model_name Name Model to which autocomplete field links.
-     */
-    static findQuerySetSecondLevelPaths(model_name) {
-        let views = app.views;
-        let paths = Object.keys(views)
-            .filter(item => {
-                if(views[item].schema.level == 2) {
-                    return item;
-                }
-            })
-            .sort((a, b) => { return b.length - a.length;});
+let fk_and_api_object_mixin = (Class_name) =>
+    class extends Class_name {
+        /**
+         * Static method, that finds queryset by model's name in views of second nesting level.
+         * @param {string} model_name Name Model to which autocomplete field links.
+         */
+        static findQuerySetSecondLevelPaths(model_name) {
+            let views = app.views;
+            let paths = Object.keys(views)
+                .filter((item) => {
+                    if (views[item].schema.level == 2) {
+                        return item;
+                    }
+                })
+                .sort((a, b) => {
+                    return b.length - a.length;
+                });
 
-        for(let index = 0; index < paths.length; index++) {
-            let p = paths[index];
-            if(views[p].objects.model.name == model_name) {
-                return views[p].objects.clone();
+            for (let index = 0; index < paths.length; index++) {
+                let p = paths[index];
+                if (views[p].objects.model.name == model_name) {
+                    return views[p].objects.clone();
+                }
             }
         }
-    }
-};
+    };
 
 /**
  * Api_object guiField class.
@@ -995,24 +1008,24 @@ guiFields.api_object = class ApiObjectField extends fk_and_api_object_mixin(guiF
         let constructor = new ViewConstructor(openapi_dictionary, app.models);
         let model = constructor.getViewSchema_model(field.options);
 
-        if(!model) {
+        if (!model) {
             return field;
         }
 
         let new_format = 'api_' + model.name.toLowerCase();
 
-        if(guiFields[new_format]) {
-            let opt = $.extend(true, {}, field.options, {format: new_format});
+        if (guiFields[new_format]) {
+            let opt = $.extend(true, {}, field.options, { format: new_format });
             let new_field = new guiFields[new_format](opt);
 
-            if(guiFields[new_format].prepareField) {
+            if (guiFields[new_format].prepareField) {
                 return guiFields[new_format].prepareField(new_field, path);
             }
 
             return new_field;
         }
 
-        field.options.querysets = [ this.findQuerySetSecondLevelPaths(model.name) ];
+        field.options.querysets = [this.findQuerySetSecondLevelPaths(model.name)];
 
         return field;
     }
@@ -1027,7 +1040,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {object} data Object with instance data.
      * @returns {boolean}
      */
-    prefetchDataOrNot(data) { /* jshint unused: false */
+    prefetchDataOrNot(data) {
+        /* jshint unused: false */
         return true;
     }
     /**
@@ -1035,7 +1049,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {object} data Object with instance data.
      * @returns {boolean}
      */
-    makeLinkOrNot(data) { /* jshint unused: false */
+    makeLinkOrNot(data) {
+        /* jshint unused: false */
         return true;
     }
     /**
@@ -1043,8 +1058,11 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {object} raw_data Object with instance data, before loading prefetch data.
      * @param {string} qs_url Queryset url.
      */
-    getObjectBulk(raw_data, qs_url) { /* jshint unused: false */
-        let dt = this.getQuerySetFormattedUrl(raw_data).replace(/^\/|\/$/g, "").split('/');
+    getObjectBulk(raw_data, qs_url) {
+        /* jshint unused: false */
+        let dt = this.getQuerySetFormattedUrl(raw_data)
+            .replace(/^\/|\/$/g, '')
+            .split('/');
 
         return {
             data_type: dt,
@@ -1056,10 +1074,11 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param data {object} Object with instance data.
      * @param querysets {array} Array with field QuerySets.
      */
-    getAppropriateQuerySet(data, querysets) { /* jshint unused: false */
+    getAppropriateQuerySet(data, querysets) {
+        /* jshint unused: false */
         let qs = querysets;
 
-        if(!qs) {
+        if (!qs) {
             qs = this.options.additionalProperties.querysets;
         }
 
@@ -1072,7 +1091,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param queryset {object} Field QuerySet.
      */
     getQuerySetFormattedUrl(data, params, queryset) {
-        if(!queryset) {
+        if (!queryset) {
             queryset = this.getAppropriateQuerySet(data);
         }
 
@@ -1089,8 +1108,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param data {object} Object with instance data.
      * @param params {object} Object with URL params of current path.
      */
-    formatQuerySetUrl(url="", data={}, params={}) {
-        if(url.indexOf('{') == -1) {
+    formatQuerySetUrl(url = '', data = {}, params = {}) {
+        if (url.indexOf('{') == -1) {
             return url;
         }
 
@@ -1102,12 +1121,13 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param data {object} Object with instance data.
      * @param params {object} Object with URL params of current path.
      */
-    getUrlParams(url, data, params) { /* jshint unused: false */
-        if(Object.entries(params).length !== 0) {
+    getUrlParams(url, data, params) {
+        /* jshint unused: false */
+        if (Object.entries(params).length !== 0) {
             return params;
         }
 
-        if(app && app.application && app.application.$route) {
+        if (app && app.application && app.application.$route) {
             return app.application.$route.params || {};
         }
 
@@ -1118,7 +1138,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * Method returns string - name of 'value_field'.
      * @param data {object} Object with instance data.
      */
-    getValueField(data={}) { /* jshint unused: false */
+    getValueField(data = {}) {
+        /* jshint unused: false */
         return this.options.additionalProperties.value_field;
     }
 
@@ -1126,7 +1147,8 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * Method returns string - name of 'view_field'.
      * @param data {object} Object with instance data.
      */
-    getViewField(data={}) { /* jshint unused: false */
+    getViewField(data = {}) {
+        /* jshint unused: false */
         return this.options.additionalProperties.view_field;
     }
 
@@ -1137,7 +1159,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param prefetch_data {object} Object with data, that was prefetch for current field.
      * @return {boolean}
      */
-    isPrefetchDataForMe(data={}, prefetch_data={}) {
+    isPrefetchDataForMe(data = {}, prefetch_data = {}) {
         return data[this.options.name] == prefetch_data[this.getPrefetchFilterName(data)];
     }
 
@@ -1151,7 +1173,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param prefetch_data {object} Object with data, that was prefetch for current field.
      * @return {{value: *, prefetch_value: *}}
      */
-    getPrefetchValue(data={}, prefetch_data={}) {
+    getPrefetchValue(data = {}, prefetch_data = {}) {
         return {
             value: data[this.options.name],
             prefetch_value: prefetch_data[this.getViewField()],
@@ -1168,7 +1190,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param autocomplete_data Object with data, that was loaded from API for current field's autocomplete list.
      * @returns {{view_field: *, value_field: *}}
      */
-    getAutocompleteValue(data={}, autocomplete_data={}) {
+    getAutocompleteValue(data = {}, autocomplete_data = {}) {
         return {
             value_field: autocomplete_data[this.getValueField(data)],
             view_field: autocomplete_data[this.getViewField(data)],
@@ -1180,7 +1202,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * request, that will be done during initial loading of field's (instance's) data.
      * @param data {object} Object with instance data.
      */
-    getPrefetchFilterName(data={}) {
+    getPrefetchFilterName(data = {}) {
         return this.getValueField(data);
     }
 
@@ -1190,17 +1212,17 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * from autocomplete list.
      * @param data {object} Object with instance data.
      */
-    getAutocompleteFilterName(data={}) {
+    getAutocompleteFilterName(data = {}) {
         return this.getViewField(data);
     }
     /**
      * Redefinition of 'toInner' method of base guiField.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(value && typeof value == "object") {
+        if (value && typeof value == 'object') {
             return value.value;
         }
 
@@ -1210,10 +1232,10 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * Redefinition of 'toRepresent' method of base guiField.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         let value = data[this.options.name];
 
-        if(value && typeof value == "object") {
+        if (value && typeof value == 'object') {
             return value.prefetch_value;
         }
 
@@ -1222,13 +1244,13 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
     /**
      * Redefinition of '_insertTestValue' method of base guiField.
      */
-    _insertTestValue(data={}) {
+    _insertTestValue(data = {}) {
         let val = data[this.options.name];
         let value;
         let format = this.options.format || this.options.type;
         let el = this._insertTestValue_getElement(format);
 
-        if(val && val.prefetch_value && val.value) {
+        if (val && val.prefetch_value && val.value) {
             value = val;
         } else {
             value = {
@@ -1246,7 +1268,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * Redefinition of '_insertTestValue_getElement' method of base guiField.
      */
     _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name  + ' select';
+        let selector = '.guifield-' + format + '-' + this.options.name + ' select';
         return $(selector)[0];
     }
     /**
@@ -1271,36 +1293,36 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
     static prepareField(field, path) {
         let props = field.options.additionalProperties;
 
-        if(!props) {
+        if (!props) {
             return field;
         }
 
-        if(props.querysets) {
+        if (props.querysets) {
             return field;
         }
 
-        if(props.list_paths) {
+        if (props.list_paths) {
             props.querysets = [];
 
-            for(let index =0; index < props.list_paths.length; index++) {
+            for (let index = 0; index < props.list_paths.length; index++) {
                 props.querysets.push(this.getQuerySetByPath(props.list_paths[index]));
             }
 
             return field;
         }
 
-        if(!props.model) {
+        if (!props.model) {
             return field;
         }
 
         let constructor = new ViewConstructor(openapi_dictionary, app.models);
         let model = constructor.getViewSchema_model(props);
 
-        if(!model) {
+        if (!model) {
             return field;
         }
 
-        props.querysets = [ this.findQuerySet(path, model.name)];
+        props.querysets = [this.findQuerySet(path, model.name)];
 
         return field;
     }
@@ -1310,7 +1332,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {string} path Name of View path.
      */
     static getQuerySetByPath(path) {
-        if(!app.views[path]) {
+        if (!app.views[path]) {
             return;
         }
 
@@ -1325,13 +1347,13 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
     static findQuerySet(path, model_name) {
         let qs = this.findQuerySetInCurrentPath(path, model_name);
 
-        if(qs) {
+        if (qs) {
             return qs;
         }
 
         qs = this.findQuerySetInNeighbourPaths(path, model_name);
 
-        if(qs) {
+        if (qs) {
             return qs;
         }
 
@@ -1344,7 +1366,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      * @param {string} model_name Name Model to which fk field links.
      */
     static findQuerySetInCurrentPath(path, model_name) {
-        if(app.views[path] && app.views[path].objects.model.name == model_name) {
+        if (app.views[path] && app.views[path].objects.model.name == model_name) {
             return app.views[path].objects.clone();
         }
     }
@@ -1357,35 +1379,39 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
      */
     static findQuerySetInNeighbourPaths(path, model_name) {
         let views = app.views;
-        let num = path.replace(/^\/|\/$/g, "").split("/").length;
+        let num = path.replace(/^\/|\/$/g, '').split('/').length;
         // let level = views[path].schema.level + 2;
         let level = views[path].schema.level;
-        let path1 = path.split("/").slice(0, -2).join("/") + "/";
-        function func(item){
-            if(item.indexOf(path1) != -1 &&
-                views[item].schema.type == "list" &&
-                views[item].schema.level <= level) {
+        let path1 = path.split('/').slice(0, -2).join('/') + '/';
+        function func(item) {
+            if (
+                item.indexOf(path1) != -1 &&
+                views[item].schema.type == 'list' &&
+                views[item].schema.level <= level
+            ) {
                 return item;
             }
         }
-        function func1(item){
-            if(views[item].objects.model.name == model_name) {
+        function func1(item) {
+            if (views[item].objects.model.name == model_name) {
                 return item;
             }
         }
 
-        for(num; num > 0; num--) {
-            path1 = path1.split("/").slice(0, -2).join("/") + "/";
+        for (num; num > 0; num--) {
+            path1 = path1.split('/').slice(0, -2).join('/') + '/';
 
             let paths = Object.keys(views)
                 .filter(func)
-                .sort((a, b) => { return b.length - a.length;});
+                .sort((a, b) => {
+                    return b.length - a.length;
+                });
 
             let paths_with_model = paths.filter(func1);
 
             let closest_path = findClosestPath(paths_with_model, path);
 
-            if(closest_path) {
+            if (closest_path) {
                 return views[closest_path].objects.clone();
             }
         }
@@ -1407,20 +1433,23 @@ guiFields.multiselect = class MultiSelect extends guiFields.fk {
      * Redefinition of 'prefetchDataOrNot' method of FK guiField.
      * @param {object} data
      */
-    prefetchDataOrNot(data={}) { /* jshint unused: false */
+    prefetchDataOrNot(data = {}) {
+        /* jshint unused: false */
         return false;
     }
     /**
      * Redefinition of 'toInner' method of base guiField.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         let value = data[this.options.name];
 
-        if(value && typeof value == "object" && Array.isArray(value)) {
-            return value.map(item => {
-                return item.value;
-            }).join(this.options.additionalProperties.view_separator);
+        if (value && typeof value == 'object' && Array.isArray(value)) {
+            return value
+                .map((item) => {
+                    return item.value;
+                })
+                .join(this.options.additionalProperties.view_separator);
         }
 
         return value;
@@ -1429,13 +1458,15 @@ guiFields.multiselect = class MultiSelect extends guiFields.fk {
      * Redefinition of 'toRepresent' method of base guiField.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         let value = data[this.options.name];
 
-        if(value && typeof value == "object" && Array.isArray(value)) {
-            return value.map(item => {
-                return item.prefetch_value;
-            }).join(this.options.additionalProperties.view_separator);
+        if (value && typeof value == 'object' && Array.isArray(value)) {
+            return value
+                .map((item) => {
+                    return item.prefetch_value;
+                })
+                .join(this.options.additionalProperties.view_separator);
         }
 
         return value;
@@ -1449,7 +1480,7 @@ guiFields.fk_autocomplete = class FkAutocompleteField extends guiFields.fk {
     /**
      * Redefinition of fk guiField method _insertTestValue.
      */
-    _insertTestValue(data={}) {
+    _insertTestValue(data = {}) {
         let value = data[this.options.name];
         let format = this.options.format || this.options.type;
         let el = this._insertTestValue_getElement(format);
@@ -1462,7 +1493,7 @@ guiFields.fk_autocomplete = class FkAutocompleteField extends guiFields.fk {
      * Redefinition of fk guiField method _insertTestValue_getElement.
      */
     _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name  + ' input';
+        let selector = '.guifield-' + format + '-' + this.options.name + ' input';
         return $(selector)[0];
     }
     /**
@@ -1505,11 +1536,11 @@ guiFields.color = class ColorField extends guiFields.base {
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    _getValue(data={}) {
+    _getValue(data = {}) {
         let value = data[this.options.name];
 
-        if(!value) {
-            return "#000000";
+        if (!value) {
+            return '#000000';
         }
 
         return value;
@@ -1518,14 +1549,14 @@ guiFields.color = class ColorField extends guiFields.base {
      * Redefinition of base guiField method toInner.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of base guiField method toRepresent.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data);
     }
 };
@@ -1555,19 +1586,22 @@ guiFields.inner_api_object = class InnerApiObjectField extends guiFields.base {
      * @param {object} field Inner_api_object field instance.
      * @param {string} path Name of View path.
      */
-    static prepareField(field, path) { /* jshint unused: false */
+    static prepareField(field, path) {
+        /* jshint unused: false */
         let model = this.getModel(field);
 
-        if(!model) {
-            console.error("Model was not found in static method 'prepareField'" +
-                " of guiFields.inner_api_object class");
+        if (!model) {
+            console.error(
+                "Model was not found in static method 'prepareField'" +
+                    ' of guiFields.inner_api_object class',
+            );
             return field;
         }
 
         let realFields = {};
 
-        for(let key in model.fields) {
-            if(model.fields.hasOwnProperty(key)) {
+        for (let key in model.fields) {
+            if (model.fields.hasOwnProperty(key)) {
                 let inner_field = model.fields[key];
                 let inner_model = this.getModel(inner_field);
                 realFields[key] = {};
@@ -1575,15 +1609,17 @@ guiFields.inner_api_object = class InnerApiObjectField extends guiFields.base {
                 for (let item in inner_model.fields) {
                     if (Object.keys(inner_model.fields).length == 1) {
                         let f = inner_model.fields[item];
-                        let opt = $.extend(
-                            true, {required: field.options.required}, f.options, {title: '{0} - {1}'.format(key, item)},
-                        );
+                        let opt = $.extend(true, { required: field.options.required }, f.options, {
+                            title: '{0} - {1}'.format(key, item),
+                        });
 
                         realFields[key][item] = new guiFields[f.options.format](opt);
                     } else {
                         realFields[key][item] = inner_model.fields[item];
                         realFields[key][item].options = $.extend(
-                            true, {required: field.options.required}, inner_model.fields[item].options,
+                            true,
+                            { required: field.options.required },
+                            inner_model.fields[item].options,
                         );
                     }
                 }
@@ -1597,16 +1633,16 @@ guiFields.inner_api_object = class InnerApiObjectField extends guiFields.base {
     /**
      * Redefinition of base guiField static property 'validateValue'.
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         let val = data[this.options.name] || {};
         let valid = {};
 
-        for(let key in this.options.realFields) {
-            if(this.options.realFields.hasOwnProperty(key)) {
+        for (let key in this.options.realFields) {
+            if (this.options.realFields.hasOwnProperty(key)) {
                 valid[key] = {};
 
                 for (let item in this.options.realFields[key]) {
-                    if(this.options.realFields[key].hasOwnProperty(item)) {
+                    if (this.options.realFields[key].hasOwnProperty(item)) {
                         valid[key][item] = this.options.realFields[key][item].validateValue(val[key]);
                     }
                 }
@@ -1636,27 +1672,27 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
      * Redefinition of 'toInner' method of base guiField.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this.getRealField(data).toInner(data);
     }
     /**
      * Redefinition of 'toRepresent' method of base guiField.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this.getRealField(data).toRepresent(data);
     }
     /**
      * Redefinition of 'validateValue' method of base guiField.
      * @param {object} data
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         return this.getRealField(data).validateValue(data);
     }
     /**
      * Redefinition of base guiField method _insertTestValue.
      */
-    _insertTestValue(data={}) {
+    _insertTestValue(data = {}) {
         let real_field = this.getRealField(data);
         /**
          * Timeout is needed for adding some async,
@@ -1676,7 +1712,7 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
     _getParentFields() {
         let p_f = this.options.additionalProperties.field || [];
 
-        if(Array.isArray(p_f)) {
+        if (Array.isArray(p_f)) {
             return p_f;
         }
 
@@ -1706,12 +1742,12 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
      * and fields from the same fields wrapper.
      * @private
      */
-    _getParentValues(data={}) {
+    _getParentValues(data = {}) {
         let parent_fields = this._getParentFields();
 
         let parent_values = {};
 
-        parent_fields.forEach(item => {
+        parent_fields.forEach((item) => {
             parent_values[item] = data[item];
         });
 
@@ -1724,7 +1760,7 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
      * and fields from the same fields wrapper.
      * For example, from the same Model Instance.
      */
-    getRealField(data={}) {
+    getRealField(data = {}) {
         let parent_values = this._getParentValues(data);
         let parent_types = this._getParentTypes();
         let parent_choices = this._getParentChoices();
@@ -1732,8 +1768,8 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
             format: undefined,
         };
 
-        for(let key in parent_values) {
-            if(parent_values.hasOwnProperty(key)) {
+        for (let key in parent_values) {
+            if (parent_values.hasOwnProperty(key)) {
                 let item = parent_types[parent_values[key]];
                 if (item !== undefined) {
                     opt.format = item;
@@ -1741,8 +1777,8 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
             }
         }
 
-        for(let key in parent_values) {
-            if(parent_values.hasOwnProperty(key)) {
+        for (let key in parent_values) {
+            if (parent_values.hasOwnProperty(key)) {
                 let item = parent_choices[parent_values[key]];
                 if (item !== undefined && Array.isArray(item)) {
                     let bool_values = item.some((val) => {
@@ -1761,8 +1797,8 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
             }
         }
 
-        for(let key in this.options) {
-            if(this.options.hasOwnProperty(key)) {
+        for (let key in this.options) {
+            if (this.options.hasOwnProperty(key)) {
                 if (['format', 'additionalProperties'].includes(key)) {
                     continue;
                 }
@@ -1773,19 +1809,19 @@ guiFields.dynamic = class DynamicField extends guiFields.base {
 
         let callback_opt = {};
 
-        if(this.options.additionalProperties.callback) {
+        if (this.options.additionalProperties.callback) {
             callback_opt = this.options.additionalProperties.callback(parent_values);
         }
 
         opt = $.extend(true, opt, callback_opt);
 
-        if(!guiFields[opt.format]) {
+        if (!guiFields[opt.format]) {
             opt.format = 'string';
         }
 
         let real_field = new guiFields[opt.format](opt);
 
-        if(real_field.constructor.prepareField) {
+        if (real_field.constructor.prepareField) {
             real_field = real_field.constructor.prepareField(real_field, app.application.$route.name);
         }
 
@@ -1812,7 +1848,7 @@ guiFields.form = class FormField extends guiFields.base {
     /**
      * Redefinition of base guiField constructor.
      */
-    constructor(options={}) {
+    constructor(options = {}) {
         super(options);
     }
     /**
@@ -1826,8 +1862,8 @@ guiFields.form = class FormField extends guiFields.base {
 
         let realFields = this.generateRealFields();
 
-        for(let key in realFields) {
-            if(realFields.hasOwnProperty(key)) {
+        for (let key in realFields) {
+            if (realFields.hasOwnProperty(key)) {
                 let real_value = realFields[key][method](data[this.options.name]);
 
                 if (real_value !== undefined) {
@@ -1842,21 +1878,21 @@ guiFields.form = class FormField extends guiFields.base {
      * Redefinition of base guiField 'toInner' method.
      * @param {object} data
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data, 'toInner');
     }
     /**
      * Redefinition of base guiField 'toRepresent' method.
      * @param {object} data
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data, 'toInner');
     }
     /**
      * Redefinition of base guiField 'validateValue' method.
      * @param {object} data
      */
-    validateValue(data={}) {
+    validateValue(data = {}) {
         return this._getValue(data, 'validateValue');
     }
     /**
@@ -1865,11 +1901,11 @@ guiFields.form = class FormField extends guiFields.base {
     generateRealFields() {
         let realFields = {};
 
-        if(this.options.form) {
+        if (this.options.form) {
             let constructor = new BaseEntityConstructor(openapi_dictionary);
 
-            for(let key in this.options.form) {
-                if(this.options.form.hasOwnProperty(key)) {
+            for (let key in this.options.form) {
+                if (this.options.form.hasOwnProperty(key)) {
                     let field = this.options.form[key];
                     field.name = key;
 
@@ -1889,7 +1925,7 @@ guiFields.form = class FormField extends guiFields.base {
     generateRealField(options) {
         let field = new guiFields[options.format](options);
 
-        if(field.constructor.prepareField) {
+        if (field.constructor.prepareField) {
             field = field.constructor.prepareField(field, app.application.$route.name);
         }
 
@@ -1940,14 +1976,14 @@ guiFields.string_id = class StringIdField extends guiFields.string {
      * Custom method for validateValue method.
      * @param {object} data
      */
-    validateValueCustom(data={}) {
+    validateValueCustom(data = {}) {
         let value = data[this.options.name];
         let samples = pop_up_msg.field.error;
         let title = (this.options.title || this.options.name).toLowerCase();
         let exclude_values = ['new', 'edit', 'remove'];
         let $t = _translate;
 
-        if(value && exclude_values.includes(value)) {
+        if (value && exclude_values.includes(value)) {
             throw {
                 error: 'validation',
                 message: $t(samples.invalid).format([value, $t(title)]),
@@ -1960,23 +1996,23 @@ guiFields.string_id = class StringIdField extends guiFields.string {
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
-    _getValue(data={}) {
+    _getValue(data = {}) {
         let value = data[this.options.name];
 
-        if(value !== undefined && value !== null) {
+        if (value !== undefined && value !== null) {
             return String(value).replace(/-/g, '_');
         }
     }
     /**
      * Redefinition of 'toInner' method of string guiField.
      */
-    toInner(data={}) {
+    toInner(data = {}) {
         return this._getValue(data);
     }
     /**
      * Redefinition of 'toInner' method of string guiField.
      */
-    toRepresent(data={}) {
+    toRepresent(data = {}) {
         return this._getValue(data);
     }
 };
