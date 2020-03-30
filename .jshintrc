@@ -17,10 +17,10 @@
   "devel": true,
 
   "globals": {
+    "StaticFilesLoader": true,
     "_translate": true,
     "addCssClassesToElement": true,
     "ApiConnector": true,
-    "api_connector_config": true,
     "app": true,
     "BaseEntityConstructor": true,
     "current_view": true,
@@ -33,11 +33,11 @@
     "guiLocalSettings": true,
     "guiPopUp": true,
     "guiTranslation": true,
-    "gui_fields_mixins": true,
     "guiQuerySets": true,
     "hostname": true,
     "IMask": true,
     "isEmptyObject": true,
+    "iziToast": true,
     "modal_window_and_button_mixin": true,
     "moment": true,
     "my_user_id": true,
@@ -55,6 +55,7 @@
     "VueI18n": true,
     "XRegExp": true,
     "$": true,
-    "require": true
+    "require": true,
+    "spa": true
   }
 }

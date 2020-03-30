@@ -1,7 +1,9 @@
-import $ from "jquery";
-import LocalSettings from "./localSettings";
+import $ from 'jquery';
+import moment from 'moment';
+import { LocalSettings } from './localSettings';
+// import { guiFields } from "../fields"; FIXME circular dependency "Super expression must either be null or a function"
 
-export const guiLocalSettings = new LocalSettings("guiLocalSettings");
+export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
 /**
  * Function to replace {.+?} in string to variables sended to this function,
@@ -11,26 +13,25 @@ export const guiLocalSettings = new LocalSettings("guiLocalSettings");
  * @return {string} - return string with inserted arguments
  */
 /*jshint freeze: false */
+String.prototype.format = function () {
+    let obj = this.toString();
+    let arg_list;
 
-String.prototype.format = function() {
-  let obj = this.toString();
-  let arg_list;
-
-  if (typeof arguments[0] == "object") {
-    arg_list = arguments[0];
-  } else if (arguments.length >= 1) {
-    arg_list = Array.from(arguments);
-  }
-
-  for (let key of this.format_keys()) {
-    if (arg_list[key] != undefined) {
-      obj = obj.replace("{" + key + "}", arg_list[key]);
-    } else {
-      throw "String don't have '" + key + "' key";
+    if (typeof arguments[0] == 'object') {
+        arg_list = arguments[0];
+    } else if (arguments.length >= 1) {
+        arg_list = Array.from(arguments);
     }
-  }
 
-  return obj;
+    for (let key of this.format_keys()) {
+        if (arg_list[key] != undefined) {
+            obj = obj.replace('{' + key + '}', arg_list[key]);
+        } else {
+            throw "String don't have '" + key + "' key";
+        }
+    }
+
+    return obj;
 };
 
 /**
@@ -38,17 +39,17 @@ String.prototype.format = function() {
  * @return {array} array of {key} in string.
  */
 /*jshint freeze: false */
-String.prototype.format_keys = function() {
-  let thisObj = this;
-  let res = thisObj.match(/{([^\}]+)}/g);
+String.prototype.format_keys = function () {
+    let thisObj = this;
+    let res = thisObj.match(/{([^\}]+)}/g);
 
-  if (!res) {
-    return [];
-  }
+    if (!res) {
+        return [];
+    }
 
-  return res.map(item => {
-    return item.slice(1, item.length - 1);
-  });
+    return res.map((item) => {
+        return item.slice(1, item.length - 1);
+    });
 };
 
 /**
@@ -56,10 +57,10 @@ String.prototype.format_keys = function() {
  * @param {string} s.
  */
 export function trim(s) {
-  if (s) {
-    return s.replace(/^ */g, "").replace(/ *$/g, "");
-  }
-  return "";
+    if (s) {
+        return s.replace(/^ */g, '').replace(/ *$/g, '');
+    }
+    return '';
 }
 
 /**
@@ -68,11 +69,11 @@ export function trim(s) {
  * @return {string}
  */
 export function capitalizeString(string) {
-  if (!string) {
-    return "";
-  }
+    if (!string) {
+        return '';
+    }
 
-  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
 /**
@@ -81,18 +82,18 @@ export function capitalizeString(string) {
  * @param {number} valid_length Max length of string.
  * @return {string}
  */
-export function sliceLongString(string = "", valid_length = 100) {
-  if (typeof string != "string") {
-    return sliceLongString("" + string, valid_length);
-  }
+export function sliceLongString(string = '', valid_length = 100) {
+    if (typeof string != 'string') {
+        return sliceLongString('' + string, valid_length);
+    }
 
-  let str = string.slice(0, valid_length);
+    let str = string.slice(0, valid_length);
 
-  if (string.length > valid_length) {
-    str += "...";
-  }
+    if (string.length > valid_length) {
+        str += '...';
+    }
 
-  return str;
+    return str;
 }
 
 /**
@@ -101,12 +102,12 @@ export function sliceLongString(string = "", valid_length = 100) {
  * @returns {boolean}
  */
 export function isEmptyObject(obj) {
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      return false;
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 /**
@@ -116,23 +117,23 @@ export function isEmptyObject(obj) {
  * @param {string} type Type of element.
  * @return {string} String with CSS classes names.
  */
-export function addCssClassesToElement(element = "", title = "", type = "") {
-  element = element.replace(/[\s\/]+/g, "_");
+export function addCssClassesToElement(element = '', title = '', type = '') {
+    element = element.replace(/[\s\/]+/g, '_');
 
-  let class_list = element + " ";
+    let class_list = element + ' ';
 
-  if (title) {
-    title = title.replace(/[\s\/]+/g, "_");
-    class_list += element + "-" + title + " ";
-  }
+    if (title) {
+        title = title.replace(/[\s\/]+/g, '_');
+        class_list += element + '-' + title + ' ';
+    }
 
-  if (title && type) {
-    type = type.replace(/[\s\/]+/g, "_");
-    class_list += element + "-" + type + " ";
-    class_list += element + "-" + type + "-" + title;
-  }
+    if (title && type) {
+        type = type.replace(/[\s\/]+/g, '_');
+        class_list += element + '-' + type + ' ';
+        class_list += element + '-' + type + '-' + title;
+    }
 
-  return class_list.toLowerCase();
+    return class_list.toLowerCase();
 }
 
 /**
@@ -141,37 +142,37 @@ export function addCssClassesToElement(element = "", title = "", type = "") {
  * @return {string|null}
  */
 export function getCookie(name) {
-  let nameEQ = name + "=";
-  let ca = document.cookie.split(";");
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === " ") {
-      c = c.substring(1, c.length);
+    let nameEQ = name + '=';
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1, c.length);
+        }
+        if (c.indexOf(nameEQ) === 0) {
+            return c.substring(nameEQ.length, c.length);
+        }
     }
-    if (c.indexOf(nameEQ) === 0) {
-      return c.substring(nameEQ.length, c.length);
-    }
-  }
-  return null;
+    return null;
 }
 
 /**
  * Callback for window.onresize event.
  */
-window.onresize = function() {
-  if (window.innerWidth > 991) {
-    if (guiLocalSettings.get("hideMenu")) {
-      $("body").addClass("sidebar-collapse");
-    }
+window.onresize = function () {
+    if (window.innerWidth > 991) {
+        if (guiLocalSettings.get('hideMenu')) {
+            $('body').addClass('sidebar-collapse');
+        }
 
-    if ($("body").hasClass("sidebar-open")) {
-      $("body").removeClass("sidebar-open");
+        if ($('body').hasClass('sidebar-open')) {
+            $('body').removeClass('sidebar-open');
+        }
+    } else {
+        if ($('body').hasClass('sidebar-collapse')) {
+            $('body').removeClass('sidebar-collapse');
+        }
     }
-  } else {
-    if ($("body").hasClass("sidebar-collapse")) {
-      $("body").removeClass("sidebar-collapse");
-    }
-  }
 };
 
 /**
@@ -179,13 +180,13 @@ window.onresize = function() {
  * Function is supposed to be called when push-menu button was clicked.
  */
 export function saveHideMenuSettings() {
-  if (window.innerWidth > 991) {
-    if ($("body").hasClass("sidebar-collapse")) {
-      guiLocalSettings.set("hideMenu", false);
-    } else {
-      guiLocalSettings.set("hideMenu", true);
+    if (window.innerWidth > 991) {
+        if ($('body').hasClass('sidebar-collapse')) {
+            guiLocalSettings.set('hideMenu', false);
+        } else {
+            guiLocalSettings.set('hideMenu', true);
+        }
     }
-  }
 }
 
 /**
@@ -195,27 +196,27 @@ export function saveHideMenuSettings() {
  * @returns {Boolean}
  */
 export function deepEqual(x, y) {
-  if (typeof x == "object" && x != null && typeof y == "object" && y != null) {
-    if (Object.keys(x).length != Object.keys(y).length) {
-      return false;
-    }
-
-    for (let prop in x) {
-      if (y.hasOwnProperty(prop)) {
-        if (!deepEqual(x[prop], y[prop])) {
-          return false;
+    if (typeof x == 'object' && x != null && typeof y == 'object' && y != null) {
+        if (Object.keys(x).length != Object.keys(y).length) {
+            return false;
         }
-      } else {
-        return false;
-      }
-    }
 
-    return true;
-  } else if (x !== y) {
-    return false;
-  } else {
-    return true;
-  }
+        for (let prop in x) {
+            if (y.hasOwnProperty(prop)) {
+                if (!deepEqual(x[prop], y[prop])) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    } else if (x !== y) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -224,21 +225,21 @@ export function deepEqual(x, y) {
  * @returns {Boolean}
  */
 export function stringToBoolean(string) {
-  if (string == null) {
-    return false;
-  }
+    if (string == null) {
+        return false;
+    }
 
-  switch (string.toLowerCase().trim()) {
-    case "true":
-    case "yes":
-    case "1":
-      return true;
-    case "false":
-    case "no":
-    case "0":
-    case null:
-      return false;
-  }
+    switch (string.toLowerCase().trim()) {
+        case 'true':
+        case 'yes':
+        case '1':
+            return true;
+        case 'false':
+        case 'no':
+        case '0':
+        case null:
+            return false;
+    }
 }
 
 /**
@@ -246,7 +247,7 @@ export function stringToBoolean(string) {
  * @param n(number) - number
  */
 export function oneCharNumberToTwoChar(n) {
-  return n > 9 ? "" + n : "0" + n;
+    return n > 9 ? '' + n : '0' + n;
 }
 
 /**
@@ -255,16 +256,16 @@ export function oneCharNumberToTwoChar(n) {
  * @return {boolean}.
  */
 export function allPropertiesIsObjects(obj) {
-  for (let prop in obj) {
-    if (typeof obj[prop] != "object") {
-      return false;
-    } else {
-      if (Array.isArray(obj[prop])) {
-        return false;
-      }
+    for (let prop in obj) {
+        if (typeof obj[prop] != 'object') {
+            return false;
+        } else {
+            if (Array.isArray(obj[prop])) {
+                return false;
+            }
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 /**
@@ -273,15 +274,15 @@ export function allPropertiesIsObjects(obj) {
  * @return {string}
  */
 export function arrayBufferToBase64(buffer) {
-  let binary = "";
-  let bytes = new Uint8Array(buffer);
-  let len = bytes.byteLength;
+    let binary = '';
+    let bytes = new Uint8Array(buffer);
+    let len = bytes.byteLength;
 
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
 
-  return window.btoa(binary);
+    return window.btoa(binary);
 }
 
 /**
@@ -290,28 +291,25 @@ export function arrayBufferToBase64(buffer) {
  * @param {string} abc String with chars, that can be used in random string.
  * @return {string}
  */
-export function randomString(
-  length,
-  abc = "qwertyuiopasdfghjklzxcvbnm012364489"
-) {
-  let res = "";
+export function randomString(length, abc = 'qwertyuiopasdfghjklzxcvbnm012364489') {
+    let res = '';
 
-  for (let i = 0; i < length; i++) {
-    res += abc[Math.floor(Math.random() * abc.length)];
-  }
+    for (let i = 0; i < length; i++) {
+        res += abc[Math.floor(Math.random() * abc.length)];
+    }
 
-  return res;
+    return res;
 }
 
 /*
  * 2 handlers, that removes CSS-class 'hover-li' from menu elements, after losing focus on them.
  */
-$(".content-wrapper").hover(function() {
-  $(".hover-li").removeClass("hover-li");
+$('.content-wrapper').hover(function () {
+    $('.hover-li').removeClass('hover-li');
 });
 
-$(".navbar").hover(function() {
-  $(".hover-li").removeClass("hover-li");
+$('.navbar').hover(function () {
+    $('.hover-li').removeClass('hover-li');
 });
 
 /**
@@ -320,38 +318,32 @@ $(".navbar").hover(function() {
  * @param {number} alpha Opacity amount in rgba color (0-1).
  */
 export function hexToRgbA(hex, alpha = 1) {
-  if (typeof alpha != "number") {
-    alpha = Number(alpha);
-    if (isNaN(alpha)) {
-      alpha = 1;
-    }
-  }
-
-  if (alpha < 0 || alpha > 1) {
-    alpha = 1;
-  }
-
-  let c;
-
-  if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-    c = hex.substring(1).split("");
-
-    if (c.length == 3) {
-      c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+    if (typeof alpha != 'number') {
+        alpha = Number(alpha);
+        if (isNaN(alpha)) {
+            alpha = 1;
+        }
     }
 
-    c = "0x" + c.join("");
+    if (alpha < 0 || alpha > 1) {
+        alpha = 1;
+    }
 
-    return (
-      "rgba(" +
-      [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(",") +
-      "," +
-      alpha +
-      ")"
-    );
-  }
+    let c;
 
-  return;
+    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+        c = hex.substring(1).split('');
+
+        if (c.length == 3) {
+            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+
+        c = '0x' + c.join('');
+
+        return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',' + alpha + ')';
+    }
+
+    return;
 }
 
 /**
@@ -359,59 +351,51 @@ export function hexToRgbA(hex, alpha = 1) {
  * @param time {number} - time in seconds.
  */
 export function getTimeInUptimeFormat(time) {
-  if (isNaN(time)) {
-    return "00:00:00";
-  }
+    if (isNaN(time)) {
+        return '00:00:00';
+    }
 
-  let uptime = moment.duration(Number(time), "seconds")._data;
+    let uptime = moment.duration(Number(time), 'seconds')._data;
 
-  let n = oneCharNumberToTwoChar;
+    let n = oneCharNumberToTwoChar;
 
-  if (uptime.years > 0) {
-    return (
-      n(uptime.years) +
-      "y " +
-      n(uptime.months) +
-      "m " +
-      n(uptime.days) +
-      "d " +
-      n(uptime.hours) +
-      ":" +
-      n(uptime.minutes) +
-      ":" +
-      n(uptime.seconds)
-    );
-  } else if (uptime.months > 0) {
-    return (
-      n(uptime.months) +
-      "m " +
-      n(uptime.days) +
-      "d " +
-      n(uptime.hours) +
-      ":" +
-      n(uptime.minutes) +
-      ":" +
-      n(uptime.seconds)
-    );
-  } else if (uptime.days > 0) {
-    return (
-      n(uptime.days) +
-      "d " +
-      n(uptime.hours) +
-      ":" +
-      n(uptime.minutes) +
-      ":" +
-      n(uptime.seconds)
-    );
-  } else {
-    return n(uptime.hours) + ":" + n(uptime.minutes) + ":" + n(uptime.seconds);
-  }
+    if (uptime.years > 0) {
+        return (
+            n(uptime.years) +
+            'y ' +
+            n(uptime.months) +
+            'm ' +
+            n(uptime.days) +
+            'd ' +
+            n(uptime.hours) +
+            ':' +
+            n(uptime.minutes) +
+            ':' +
+            n(uptime.seconds)
+        );
+    } else if (uptime.months > 0) {
+        return (
+            n(uptime.months) +
+            'm ' +
+            n(uptime.days) +
+            'd ' +
+            n(uptime.hours) +
+            ':' +
+            n(uptime.minutes) +
+            ':' +
+            n(uptime.seconds)
+        );
+    } else if (uptime.days > 0) {
+        return n(uptime.days) + 'd ' + n(uptime.hours) + ':' + n(uptime.minutes) + ':' + n(uptime.seconds);
+    } else {
+        return n(uptime.hours) + ':' + n(uptime.minutes) + ':' + n(uptime.seconds);
+    }
 }
 
-Object.defineProperty(Array.prototype, "last", {
-  get: function() {
-    return this[this.length - 1];
-  }
+Object.defineProperty(Array.prototype, 'last', {
+    get: function () {
+        return this[this.length - 1];
+    },
 });
 
 /**
@@ -424,235 +408,212 @@ Object.defineProperty(Array.prototype, "last", {
  * prototypes.
  */
 export class ObjectPropertyRetriever {
-  /**
-   * Constructor of ObjectPropertyRetriever Class.
-   */
-  constructor() {
     /**
-     * This property, stores enumerable properties
+     * Constructor of ObjectPropertyRetriever Class.
+     */
+    constructor() {
+        /**
+         * This property, stores enumerable properties
+         * of Object Class constructor prototype.
+         */
+        this.ob_proto_attrs = this.constructor.getObjectConstructorProperties;
+        /**
+         * This property, stores non_enumerable properties
+         * of Object Class constructor prototype.
+         */
+        this.obj_proto_methods = this.constructor.getObjectConstructorMethods;
+    }
+    /**
+     * Static property, that returns enumerable properties
      * of Object Class constructor prototype.
      */
-    this.ob_proto_attrs = this.constructor.getObjectConstructorProperties;
+    static get getObjectConstructorMethods() {
+        return Object.getOwnPropertyNames({}.constructor.prototype);
+    }
     /**
-     * This property, stores non_enumerable properties
+     * Static property, that returns non_enumerable properties
      * of Object Class constructor prototype.
      */
-    this.obj_proto_methods = this.constructor.getObjectConstructorMethods;
-  }
-  /**
-   * Static property, that returns enumerable properties
-   * of Object Class constructor prototype.
-   */
-  static get getObjectConstructorMethods() {
-    return Object.getOwnPropertyNames({}.constructor.prototype);
-  }
-  /**
-   * Static property, that returns non_enumerable properties
-   * of Object Class constructor prototype.
-   */
-  static get getObjectConstructorProperties() {
-    return Object.keys({}.constructor.prototype);
-  }
-  /**
-   * Method, that returns true, if prop is enumerable property of obj.
-   * Otherwise, returns false.
-   * @param {object} obj Object, that we want to check.
-   * @param {string} prop Property, that we want to check.
-   * @returns {boolean}
-   * @private
-   */
-  _enumerable(obj, prop) {
-    return obj.propertyIsEnumerable(prop);
-  }
-  /**
-   * Method, that returns true, if prop is non_enumerable property of obj.
-   * Otherwise, returns false.
-   * @param {object} obj Object, that we want to check.
-   * @param {string} prop Property, that we want to check.
-   * @returns {boolean}
-   * @private
-   */
-  _notEnumerable(obj, prop) {
-    return !obj.propertyIsEnumerable(prop);
-  }
-  /**
-   * Method, that returns true, if prop is enumerable or non_enumerable property of obj.
-   * @param {object} obj Object, that we want to check.
-   * @param {string} prop Property, that we want to check.
-   * @returns {boolean}
-   * @private
-   */
-  _enumerableAndNotEnumerable(obj, prop) {
-    /* jshint unused: false */
-    return true;
-  }
-  /**
-   * Method, that returns names of object properties, that satisfy search arguments.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} iterateSelfBool Means, make search inside obj or not.
-   * @param {boolean} iteratePrototypeBool Means, make search inside obj prototypes or not.
-   * @param {function} includePropCb Method, that checks: property satisfies or not.
-   * @private
-   */
-  _getPropertyNames(obj, iterateSelfBool, iteratePrototypeBool, includePropCb) {
-    let props = [];
-
-    function func(prop) {
-      if (props.indexOf(prop) === -1 && includePropCb(obj, prop)) {
-        props.push(prop);
-      }
+    static get getObjectConstructorProperties() {
+        return Object.keys({}.constructor.prototype);
     }
-
-    do {
-      if (iterateSelfBool) {
-        Object.getOwnPropertyNames(obj).forEach(func);
-      }
-
-      if (!iteratePrototypeBool) {
-        break;
-      }
-
-      iterateSelfBool = true;
-      obj = Object.getPrototypeOf(obj);
-      if (!obj) {
-        break;
-      }
-    } while (true);
-
-    return props;
-  }
-  /**
-   * Method, that returns obj's own enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   */
-  getOwnEnumerables(obj) {
-    return this._getPropertyNames(obj, true, false, this._enumerable);
-  }
-  /**
-   * Method, that returns obj's own non_enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   */
-  getOwnNonenumerables(obj) {
-    return this._getPropertyNames(obj, true, false, this._notEnumerable);
-  }
-  /**
-   * Method, that returns obj's own enumerable and non_enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   */
-  getOwnEnumerablesAndNonenumerables(obj) {
-    return this._getPropertyNames(
-      obj,
-      true,
-      false,
-      this._enumerableAndNotEnumerable
-    );
-  }
-  /**
-   * Method, that returns obj's prototypes enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
-   */
-  getPrototypeEnumerables(obj, obj_proto = true) {
-    let props = this._getPropertyNames(obj, false, true, this._enumerable);
-
-    if (!obj_proto) {
-      return props.filter(item => !this.ob_proto_attrs.includes(item));
+    /**
+     * Method, that returns true, if prop is enumerable property of obj.
+     * Otherwise, returns false.
+     * @param {object} obj Object, that we want to check.
+     * @param {string} prop Property, that we want to check.
+     * @returns {boolean}
+     * @private
+     */
+    _enumerable(obj, prop) {
+        return obj.propertyIsEnumerable(prop);
     }
-
-    return props;
-  }
-  /**
-   * Method, that returns obj's prototypes non_enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
-   */
-  getPrototypeNonenumerables(obj, obj_proto = true) {
-    let props = this._getPropertyNames(obj, false, true, this._notEnumerable);
-
-    if (!obj_proto) {
-      return props.filter(item => !this.obj_proto_methods.includes(item));
+    /**
+     * Method, that returns true, if prop is non_enumerable property of obj.
+     * Otherwise, returns false.
+     * @param {object} obj Object, that we want to check.
+     * @param {string} prop Property, that we want to check.
+     * @returns {boolean}
+     * @private
+     */
+    _notEnumerable(obj, prop) {
+        return !obj.propertyIsEnumerable(prop);
     }
-
-    return props;
-  }
-  /**
-   * Method, that returns obj's prototypes enumerable and non_enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
-   */
-  getPrototypeEnumerablesAndNonenumerables(obj, obj_proto = true) {
-    let props = this._getPropertyNames(
-      obj,
-      false,
-      true,
-      this._enumerableAndNotEnumerable
-    );
-
-    if (!obj_proto) {
-      return props.filter(
-        item =>
-          !(
-            this.obj_proto_methods.includes(item) ||
-            this.ob_proto_attrs.includes(item)
-          )
-      );
+    /**
+     * Method, that returns true, if prop is enumerable or non_enumerable property of obj.
+     * @param {object} obj Object, that we want to check.
+     * @param {string} prop Property, that we want to check.
+     * @returns {boolean}
+     * @private
+     */
+    _enumerableAndNotEnumerable(obj, prop) {
+        /* jshint unused: false */
+        return true;
     }
+    /**
+     * Method, that returns names of object properties, that satisfy search arguments.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} iterateSelfBool Means, make search inside obj or not.
+     * @param {boolean} iteratePrototypeBool Means, make search inside obj prototypes or not.
+     * @param {function} includePropCb Method, that checks: property satisfies or not.
+     * @private
+     */
+    _getPropertyNames(obj, iterateSelfBool, iteratePrototypeBool, includePropCb) {
+        let props = [];
 
-    return props;
-  }
-  /**
-   * Method, that returns obj's own and prototypes enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
-   */
-  getOwnAndPrototypeEnumerables(obj, obj_proto = true) {
-    let props = this._getPropertyNames(obj, true, true, this._enumerable);
+        function func(prop) {
+            if (props.indexOf(prop) === -1 && includePropCb(obj, prop)) {
+                props.push(prop);
+            }
+        }
 
-    if (!obj_proto) {
-      return props.filter(item => !this.ob_proto_attrs.includes(item));
+        do {
+            if (iterateSelfBool) {
+                Object.getOwnPropertyNames(obj).forEach(func);
+            }
+
+            if (!iteratePrototypeBool) {
+                break;
+            }
+
+            iterateSelfBool = true;
+            obj = Object.getPrototypeOf(obj);
+            if (!obj) {
+                break;
+            }
+        } while (true);
+
+        return props;
     }
-
-    return props;
-  }
-  /**
-   * Method, that returns obj's own and prototypes non_enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
-   */
-  getOwnAndPrototypeNonenumerables(obj, obj_proto = true) {
-    let props = this._getPropertyNames(obj, true, true, this._notEnumerable);
-
-    if (!obj_proto) {
-      return props.filter(item => !this.obj_proto_methods.includes(item));
+    /**
+     * Method, that returns obj's own enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     */
+    getOwnEnumerables(obj) {
+        return this._getPropertyNames(obj, true, false, this._enumerable);
     }
-
-    return props;
-  }
-  /**
-   * Method, that returns obj's own and prototypes enumerable and non_enumerable properties.
-   * @param {object} obj Object, that we want to check.
-   * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
-   */
-  getOwnAndPrototypeEnumerablesAndNonenumerables(obj, obj_proto = true) {
-    let props = this._getPropertyNames(
-      obj,
-      true,
-      true,
-      this._enumerableAndNotEnumerable
-    );
-
-    if (!obj_proto) {
-      return props.filter(
-        item =>
-          !(
-            this.obj_proto_methods.includes(item) ||
-            this.ob_proto_attrs.includes(item)
-          )
-      );
+    /**
+     * Method, that returns obj's own non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     */
+    getOwnNonenumerables(obj) {
+        return this._getPropertyNames(obj, true, false, this._notEnumerable);
     }
+    /**
+     * Method, that returns obj's own enumerable and non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     */
+    getOwnEnumerablesAndNonenumerables(obj) {
+        return this._getPropertyNames(obj, true, false, this._enumerableAndNotEnumerable);
+    }
+    /**
+     * Method, that returns obj's prototypes enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getPrototypeEnumerables(obj, obj_proto = true) {
+        let props = this._getPropertyNames(obj, false, true, this._enumerable);
 
-    return props;
-  }
+        if (!obj_proto) {
+            return props.filter((item) => !this.ob_proto_attrs.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's prototypes non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getPrototypeNonenumerables(obj, obj_proto = true) {
+        let props = this._getPropertyNames(obj, false, true, this._notEnumerable);
+
+        if (!obj_proto) {
+            return props.filter((item) => !this.obj_proto_methods.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's prototypes enumerable and non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getPrototypeEnumerablesAndNonenumerables(obj, obj_proto = true) {
+        let props = this._getPropertyNames(obj, false, true, this._enumerableAndNotEnumerable);
+
+        if (!obj_proto) {
+            return props.filter(
+                (item) => !(this.obj_proto_methods.includes(item) || this.ob_proto_attrs.includes(item)),
+            );
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own and prototypes enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getOwnAndPrototypeEnumerables(obj, obj_proto = true) {
+        let props = this._getPropertyNames(obj, true, true, this._enumerable);
+
+        if (!obj_proto) {
+            return props.filter((item) => !this.ob_proto_attrs.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own and prototypes non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getOwnAndPrototypeNonenumerables(obj, obj_proto = true) {
+        let props = this._getPropertyNames(obj, true, true, this._notEnumerable);
+
+        if (!obj_proto) {
+            return props.filter((item) => !this.obj_proto_methods.includes(item));
+        }
+
+        return props;
+    }
+    /**
+     * Method, that returns obj's own and prototypes enumerable and non_enumerable properties.
+     * @param {object} obj Object, that we want to check.
+     * @param {boolean} obj_proto Means, include or not properties of Object Class prototype.
+     */
+    getOwnAndPrototypeEnumerablesAndNonenumerables(obj, obj_proto = true) {
+        let props = this._getPropertyNames(obj, true, true, this._enumerableAndNotEnumerable);
+
+        if (!obj_proto) {
+            return props.filter(
+                (item) => !(this.obj_proto_methods.includes(item) || this.ob_proto_attrs.includes(item)),
+            );
+        }
+
+        return props;
+    }
 }
 
 /**
@@ -664,55 +625,55 @@ export const obj_prop_retriever = new ObjectPropertyRetriever();
  * Class with common methods for ModelConstructor and ViewConstructor classes.
  */
 export class BaseEntityConstructor {
-  /**
-   * Constructor of BaseEntityConstructor class.
-   * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
-   * and some settings for views of different types.
-   */
-  constructor(openapi_dictionary) {
-    this.dictionary = openapi_dictionary;
-  }
-
-  /**
-   * Method, that returns array with properties names,
-   * that store reference to model.
-   */
-  getModelRefsProps() {
-    return this.dictionary.models.ref_names;
-  }
-
-  /**
-   * Method, that defines format of current field.
-   * @param {object} field Object with field options.
-   */
-  getFieldFormat(field) {
-    // if(field.enum && guiFields['choices']){
-    //     return "choices";
-    // }
-
-    if (guiFields[field.format]) {
-      return field.format;
+    /**
+     * Constructor of BaseEntityConstructor class.
+     * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
+     * and some settings for views of different types.
+     */
+    constructor(openapi_dictionary) {
+        this.dictionary = openapi_dictionary;
     }
 
-    if (field.enum && guiFields.choices) {
-      return "choices";
+    /**
+     * Method, that returns array with properties names,
+     * that store reference to model.
+     */
+    getModelRefsProps() {
+        return this.dictionary.models.ref_names;
     }
 
-    let props = Object.keys(field);
-    let refs = this.getModelRefsProps();
+    /**
+     * Method, that defines format of current field.
+     * @param {object} field Object with field options.
+     */
+    getFieldFormat(field) {
+        // if(field.enum && guiFields['choices']){
+        //     return "choices";
+        // }
 
-    for (let key in props) {
-      if (refs.includes(props[key])) {
-        return "api_object";
-      }
+        if (guiFields[field.format]) {
+            return field.format;
+        }
+
+        if (field.enum && guiFields.choices) {
+            return 'choices';
+        }
+
+        let props = Object.keys(field);
+        let refs = this.getModelRefsProps();
+
+        for (let key in props) {
+            if (refs.includes(props[key])) {
+                return 'api_object';
+            }
+        }
+
+        if (guiFields[field.type]) {
+            return field.type;
+        }
+
+        return 'string';
     }
-
-    if (guiFields[field.type]) {
-      return field.type;
-    }
-
-    return "string";
-  }
 }
 
 /**
@@ -723,40 +684,38 @@ export class BaseEntityConstructor {
  * @param {string} current_path Path, based on which function makes search.
  */
 export function findClosestPath(paths, current_path) {
-  let c_p_parts = current_path.replace(/^\/|\/$/g, "").split("/");
+    let c_p_parts = current_path.replace(/^\/|\/$/g, '').split('/');
 
-  let matches = [];
+    let matches = [];
 
-  for (let index = 0; index < paths.length; index++) {
-    let path = paths[index];
-    let path_paths = path.replace(/^\/|\/$/g, "").split("/");
+    for (let index = 0; index < paths.length; index++) {
+        let path = paths[index];
+        let path_paths = path.replace(/^\/|\/$/g, '').split('/');
 
-    matches.push({
-      path: path,
-      match: 0
+        matches.push({
+            path: path,
+            match: 0,
+        });
+
+        for (let num = 0; num < c_p_parts.length; num++) {
+            let item = c_p_parts[num];
+
+            if (item == path_paths[num]) {
+                matches.last.match++;
+            } else {
+                break;
+            }
+        }
+    }
+
+    matches = matches.sort((a, b) => {
+        // return a.match - b.match;
+        return a.match - b.match + b.path.split('/').length - a.path.split('/').length;
     });
 
-    for (let num = 0; num < c_p_parts.length; num++) {
-      let item = c_p_parts[num];
-
-      if (item == path_paths[num]) {
-        matches.last.match++;
-      } else {
-        break;
-      }
+    if (matches.last && matches.last.path && matches.last.match > 0) {
+        return matches.last.path;
     }
-  }
-
-  matches = matches.sort((a, b) => {
-    // return a.match - b.match;
-    return (
-      a.match - b.match + b.path.split("/").length - a.path.split("/").length
-    );
-  });
-
-  if (matches.last && matches.last.path && matches.last.match > 0) {
-    return matches.last.path;
-  }
 }
 
 /**
@@ -765,99 +724,94 @@ export function findClosestPath(paths, current_path) {
  * This class helps to determine, that page was loaded completely.
  */
 export class CurrentView {
-  /**
-   * Constructor of CurrentView class.
-   */
-  constructor() {
     /**
-     * Property, that means, that page is loading.
+     * Constructor of CurrentView class.
      */
-    this.loading = null;
-    /**
-     * Property, that means, that page was loaded successfully.
-     */
-    this.success = null;
-    /**
-     * Property, that means, that page was loaded with error.
-     * It stores error.
-     */
-    this.error = null;
-    /**
-     * Property, that stores promise, that current page will be loaded.
-     */
-    this.promise = null;
-    /**
-     * Property, that stores promise status.
-     */
-    this.promise_status = "";
-    /**
-     * Property, that stores promise callbacks.
-     */
-    this.promise_callbacks = {};
-  }
-
-  /**
-   * Method, that inits loading of current view.
-   */
-  initLoading() {
-    this.error = this.response = null;
-    this.loading = true;
-
-    this._initLoadingPromise();
-  }
-
-  /**
-   * Method, that is called when page was loaded successfully.
-   */
-  setLoadingSuccessful() {
-    this.loading = false;
-    this.success = true;
-    this.error = null;
-
-    return setTimeout(() => {
-      this.promise_callbacks.resolve();
-      this.promise_status = "resolved";
-    }, 10);
-  }
-
-  /**
-   * Method, that is called when page was loaded with error.
-   */
-  setLoadingError(error) {
-    this.loading = false;
-    this.success = null;
-    this.error = error;
-
-    return setTimeout(() => {
-      this.promise_callbacks.reject();
-      this.promise_status = "rejected";
-    }, 10);
-  }
-
-  /**
-   * Method, that inits new instance of promise.
-   * @private
-   */
-  _initLoadingPromise() {
-    if (
-      !(
-        this.promise &&
-        (this.promise_status == "" || this.promise_status == "pending")
-      )
-    ) {
-      this.promise_callbacks = {
-        resolve: undefined,
-        reject: undefined
-      };
-
-      this.promise = new Promise((resolve, reject) => {
-        this.promise_callbacks.resolve = resolve;
-        this.promise_callbacks.reject = reject;
-      });
-
-      this.promise_status = "pending";
+    constructor() {
+        /**
+         * Property, that means, that page is loading.
+         */
+        this.loading = null;
+        /**
+         * Property, that means, that page was loaded successfully.
+         */
+        this.success = null;
+        /**
+         * Property, that means, that page was loaded with error.
+         * It stores error.
+         */
+        this.error = null;
+        /**
+         * Property, that stores promise, that current page will be loaded.
+         */
+        this.promise = null;
+        /**
+         * Property, that stores promise status.
+         */
+        this.promise_status = '';
+        /**
+         * Property, that stores promise callbacks.
+         */
+        this.promise_callbacks = {};
     }
-  }
+
+    /**
+     * Method, that inits loading of current view.
+     */
+    initLoading() {
+        this.error = this.response = null;
+        this.loading = true;
+
+        this._initLoadingPromise();
+    }
+
+    /**
+     * Method, that is called when page was loaded successfully.
+     */
+    setLoadingSuccessful() {
+        this.loading = false;
+        this.success = true;
+        this.error = null;
+
+        return setTimeout(() => {
+            this.promise_callbacks.resolve();
+            this.promise_status = 'resolved';
+        }, 10);
+    }
+
+    /**
+     * Method, that is called when page was loaded with error.
+     */
+    setLoadingError(error) {
+        this.loading = false;
+        this.success = null;
+        this.error = error;
+
+        return setTimeout(() => {
+            this.promise_callbacks.reject();
+            this.promise_status = 'rejected';
+        }, 10);
+    }
+
+    /**
+     * Method, that inits new instance of promise.
+     * @private
+     */
+    _initLoadingPromise() {
+        if (!(this.promise && (this.promise_status == '' || this.promise_status == 'pending'))) {
+            this.promise_callbacks = {
+                resolve: undefined,
+                reject: undefined,
+            };
+
+            this.promise = new Promise((resolve, reject) => {
+                this.promise_callbacks.resolve = resolve;
+                this.promise_callbacks.reject = reject;
+            });
+
+            this.promise_status = 'pending';
+        }
+    }
 }
 
 /**
@@ -867,11 +821,11 @@ export class CurrentView {
  * @private
  */
 export function _translate(str) {
-  if (app && app.application && app.application.$t) {
-    return app.application.$t(str);
-  }
+    if (app && app.application && app.application.$t) {
+        return app.application.$t(str);
+    }
 
-  return str;
+    return str;
 }
 
 /**
@@ -887,4 +841,4 @@ export let current_view = new CurrentView();
  * - /user/{id}/.
  * It is supposed, that OpenAPI schema will use 'path_pk_key' value as pk_key for 3rd level paths.
  */
-export let path_pk_key = "id";
+export let path_pk_key = 'id';

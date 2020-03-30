@@ -1,4 +1,4 @@
-import QuerySet from "./QuerySet.js";
+import QuerySet from './QuerySet.js';
 
 /**
  * Object, that contains QuerySet classes.

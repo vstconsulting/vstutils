@@ -1,5 +1,5 @@
-import Model from "./Model.js";
-import ModelConstructor from "./ModelConstructor.js";
+import Model from './Model.js';
+import ModelConstructor from './ModelConstructor.js';
 
 /**
  * Object, that contains Models classes.

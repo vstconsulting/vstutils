@@ -692,6 +692,7 @@ FIRST_DAY_OF_WEEK = main['first_day_of_week']
 # LOGGING settings
 ##############################################################
 LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', main["log_level"]).upper()
+LOG_LEVEL = os.getenv(f'{VST_PROJECT_LIB.upper()}_LOG_LEVEL', LOG_LEVEL).upper()
 LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
 LOG_DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
 
@@ -808,9 +809,6 @@ VIEWS = {
     "APP_LOADER": {
         "BACKEND": 'vstutils.gui.views.AppLoaderView'
     },
-    "APP_FOR_API_LOADER": {
-        "BACKEND": 'vstutils.gui.views.AppForApiLoaderView'
-    },
     "OFFLINE": {
         "BACKEND": 'vstutils.gui.views.OfflineView'
     },
@@ -866,7 +864,6 @@ GUI_VIEWS = {
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
     r'^app-loader.js$': 'APP_LOADER',
-    r'^app-for-api-loader.js$': 'APP_FOR_API_LOADER',
     r'^offline.html$': 'OFFLINE',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',
@@ -891,21 +888,19 @@ PROJECT_GUI_MENU = [
 ]
 
 SPA_STATIC = [
-    # {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js', 'spa': True, 'api': True},  # not found in npm
+    # {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js'},  # not found in npm
 
     # Load common chunks
-    {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js', 'spa': True, 'api': True},
-    {'priority': 2, 'type': 'js', 'name': 'bundle/api~auth~doc~spa.chunk.js', 'spa': True, 'api': True},
-    {'priority': 3, 'type': 'js', 'name': 'bundle/api~auth~spa.chunk.js', 'spa': True, 'api': True},
-    {'priority': 4, 'type': 'js', 'name': 'bundle/api~spa.chunk.js', 'spa': True, 'api': True},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js'},
+    {'priority': 2, 'type': 'js', 'name': 'bundle/auth~doc~spa.chunk.js'},
+    {'priority': 3, 'type': 'js', 'name': 'bundle/auth~spa.chunk.js'},
+    {'priority': 4, 'type': 'js', 'name': 'bundle/vendors~spa.chunk.js'},
 
     # Load app
-    {'priority': 5, 'type': 'js', 'name': 'bundle/spa.js', 'spa': True, 'api': False},
-    {'priority': 5, 'type': 'js', 'name': 'bundle/api.js', 'spa': False, 'api': True},
+    {'priority': 5, 'type': 'js', 'name': 'bundle/spa.js'},
 
     # Load templates
-    {'priority': 300, 'type': 'tpl', 'name': 'templates/guiFields.html', 'spa': True, 'api': True},
-    {'priority': 300, 'type': 'tpl', 'name': 'templates/guiItems.html', 'spa': True, 'api': True}
+    {'priority': 300, 'type': 'tpl', 'name': 'templates/guiFields.html'}
 ]
 
 # Test settings for speedup tests

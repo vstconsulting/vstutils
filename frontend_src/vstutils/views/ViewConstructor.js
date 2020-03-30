@@ -1,3 +1,8 @@
+import $ from 'jquery';
+import { isEmptyObject, BaseEntityConstructor } from '../utils';
+import DefaultEntityView from './DefaultEntityView.vue';
+// import { guiFields } from "../fields"; FIXME circular dependency "Super expression must either be null or a function"
+
 /**
  * Class, that manages creation of guiViews.
  */
@@ -42,7 +47,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
      * @param {string} path Key of path object, from OpenApi's path dict.
      */
     getViewSchema_name(path) {
-        let path_parths = path.replace(/\/{[A-z]+}/g, "").split(/\//g);
+        let path_parths = path.replace(/\/{[A-z]+}/g, '').split(/\//g);
         return path_parths[path_parths.length - 2];
     }
 
@@ -64,8 +69,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     getViewSchema_filters(operation_id_filters, path_obj_prop) {
         let filters = $.extend(true, {}, path_obj_prop[operation_id_filters.name]);
-        for(let filter in filters) {
-            if(this.dictionary.models.filters_to_delete.includes(filters[filter].name)) {
+        for (let filter in filters) {
+            if (this.dictionary.models.filters_to_delete.includes(filters[filter].name)) {
                 delete filters[filter];
             }
         }
@@ -82,20 +87,18 @@ export default class ViewConstructor extends BaseEntityConstructor {
         let f_obj = {};
         let filters = this.getViewSchema_filters(operation_id_filters, path_obj_prop);
 
-        tabSignal.emit("views[" + path + "].filters.beforeInit", filters);
+        tabSignal.emit('views[' + path + '].filters.beforeInit', filters);
 
-        for(let filter in filters) {
-            if(filters.hasOwnProperty(filter)) {
+        for (let filter in filters) {
+            if (filters.hasOwnProperty(filter)) {
                 let format = this.getFilterFormat(filters[filter]);
-                let opt = {format: format};
+                let opt = { format: format };
 
-                f_obj[filters[filter].name] = new guiFields[format](
-                    $.extend(true, {}, filters[filter], opt)
-                );
+                f_obj[filters[filter].name] = new guiFields[format]($.extend(true, {}, filters[filter], opt));
             }
         }
 
-        tabSignal.emit("views[" + path + "].filters.afterInit", filters);
+        tabSignal.emit('views[' + path + '].filters.afterInit', filters);
 
         return f_obj;
     }
@@ -107,7 +110,6 @@ export default class ViewConstructor extends BaseEntityConstructor {
     getFilterFormat(filter) {
         return this.getFieldFormat(filter);
     }
-
 
     /**
      * Method, that return operation_id options for view schema.
@@ -122,8 +124,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
             operation_id: operation_id,
         };
 
-        for(let item in this.dictionary.schema_types){
-            if(this.dictionary.schema_types.hasOwnProperty(item)) {
+        for (let item in this.dictionary.schema_types) {
+            if (this.dictionary.schema_types.hasOwnProperty(item)) {
                 if (operation_id.indexOf(item) == -1) {
                     continue;
                 }
@@ -131,15 +133,17 @@ export default class ViewConstructor extends BaseEntityConstructor {
                 opt.path = path + opt.url_postfix;
                 delete opt.url_postfix;
                 if (opt.filters) {
-                    opt.filters = this.generateViewSchemaFilters(
-                        opt.filters, path_obj_prop, opt.path,
-                    );
+                    opt.filters = this.generateViewSchemaFilters(opt.filters, path_obj_prop, opt.path);
                 }
                 return opt;
             }
         }
 
-        return $.extend(true, opt, { query_type: "post", path: path, type: 'action'});
+        return $.extend(true, opt, {
+            query_type: 'post',
+            path: path,
+            type: 'action',
+        });
     }
 
     /**
@@ -148,29 +152,29 @@ export default class ViewConstructor extends BaseEntityConstructor {
      * @param {number} max_level Max level of inner recursion.
      * @param {number} level Current level of recursion.
      */
-    getModelNameLink(obj, max_level=0, level=0) {
-        if(!obj) {
+    getModelNameLink(obj, max_level = 0, level = 0) {
+        if (!obj) {
             return;
         }
 
-        if(max_level && max_level <= level) {
+        if (max_level && max_level <= level) {
             return;
         }
 
-        if(typeof obj == 'string') {
+        if (typeof obj == 'string') {
             let name = obj.match(/\/([A-z0-9]+)$/);
-            if(name && name[1]) {
+            if (name && name[1]) {
                 return obj;
             }
             return;
         }
 
-        if(typeof obj != 'object') {
+        if (typeof obj != 'object') {
             return;
         }
 
-        for(let prop in obj) {
-            if(obj.hasOwnProperty(prop)) {
+        for (let prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
                 if (this.dictionary.models.ref_names.includes(prop)) {
                     let name = obj[prop].match(/\/([A-z0-9]+)$/);
                     if (name && name[1]) {
@@ -194,7 +198,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     getModelName(path_obj_prop) {
         let model_link = this.getModelNameLink(path_obj_prop);
-        let model_name = model_link.split("/");
+        let model_name = model_link.split('/');
         return model_name[model_name.length - 1];
     }
 
@@ -213,13 +217,11 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     getViewTemplate(schema) {
         let template;
-        let base = "#template_view_";
+        let base = '#template_view_';
 
-        ["entity", schema.name].forEach(item => {
-            if($(base + item).length > 0){
-                template = base + item;
-            }
-        });
+        if ($(base + schema.name).length > 0) {
+            template = base + schema.name;
+        }
 
         return template;
     }
@@ -234,20 +236,24 @@ export default class ViewConstructor extends BaseEntityConstructor {
         let views = {};
         let paths = this.getPaths(openapi_schema);
 
-        for(let path in paths){
-            if(paths.hasOwnProperty(path)) {
+        for (let path in paths) {
+            if (paths.hasOwnProperty(path)) {
                 let path_obj = paths[path];
                 let base_options = this.getViewSchema_baseOptions(path);
 
                 for (let prop in path_obj) {
-                    if(path_obj.hasOwnProperty(prop)) {
+                    if (path_obj.hasOwnProperty(prop)) {
                         let operation_id = this.getPathOperationId(path_obj[prop]);
 
                         if (!operation_id) {
                             continue;
                         }
 
-                        let operation_id_options = this.getViewSchema_operationIdOptions(operation_id, path, path_obj[prop]);
+                        let operation_id_options = this.getViewSchema_operationIdOptions(
+                            operation_id,
+                            path,
+                            path_obj[prop],
+                        );
 
                         if (views[operation_id_options.path]) {
                             continue;
@@ -256,24 +262,32 @@ export default class ViewConstructor extends BaseEntityConstructor {
                         let schema = $.extend(true, {}, base_options, operation_id_options);
                         let model = this.getViewSchema_model(path_obj[prop]);
                         let template = this.getViewTemplate(schema);
+                        let mixins = [];
 
-                        tabSignal.emit("views[" + schema.path + "].beforeInit", {
+                        tabSignal.emit('views[' + schema.path + '].beforeInit', {
                             schema: schema,
                             model: model,
                             template: template,
+                            mixins: mixins,
                         });
 
-                        views[schema.path] = new constructor(model, schema, template);
+                        views[schema.path] = new constructor(model, schema, template, mixins);
 
-                        tabSignal.emit("views[" + schema.path + "].afterInit", {
+                        tabSignal.emit('views[' + schema.path + '].afterInit', {
                             view: views[schema.path],
                         });
+
+                        tabSignal.emit('views.afterInitEach', { views: views , path: schema.path });
+
+                        if (!views[schema.path].template) {
+                            views[schema.path].mixins.unshift(DefaultEntityView);
+                        }
                     }
                 }
             }
         }
 
-        tabSignal.emit("allViews.inited", {views: views});
+        tabSignal.emit('allViews.inited', { views: views });
 
         return views;
     }
@@ -286,9 +300,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     internalLinkIsOperation(name, path_obj) {
         let bool = false;
-        ['base', path_obj.schema.type].forEach(type => {
-            if(this.dictionary.paths.operations[type] &&
-                this.dictionary.paths.operations[type][name]){
+        ['base', path_obj.schema.type].forEach((type) => {
+            if (this.dictionary.paths.operations[type] && this.dictionary.paths.operations[type][name]) {
                 bool = true;
             }
         });
@@ -304,8 +317,13 @@ export default class ViewConstructor extends BaseEntityConstructor {
     getInternalLinkObj_extension(link_name, link_type, path_obj) {
         let obj = {};
         let dict = this.dictionary.paths;
-        ['base', path_obj.schema.type].forEach(path_type => {
-            if(dict && dict[link_type] && dict[link_type][path_type] && dict[link_type][path_type][link_name]){
+        ['base', path_obj.schema.type].forEach((path_type) => {
+            if (
+                dict &&
+                dict[link_type] &&
+                dict[link_type][path_type] &&
+                dict[link_type][path_type][link_name]
+            ) {
                 obj = $.extend(true, obj, dict[link_type][path_type][link_name]);
             }
         });
@@ -318,7 +336,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
      * @returns {boolean}
      */
     isPathObjSchemaEmpty(path_obj) {
-        if(path_obj.schema.empty) {
+        if (path_obj.schema.empty) {
             return true;
         }
 
@@ -338,18 +356,16 @@ export default class ViewConstructor extends BaseEntityConstructor {
             name: link_name,
         };
 
-        if(!(link_obj.schema.hidden) && link) {
+        if (!link_obj.schema.hidden && link) {
             obj.path = link;
         }
 
-        if(this.isPathObjSchemaEmpty(link_obj)) {
+        if (this.isPathObjSchemaEmpty(link_obj)) {
             obj.empty = true;
             obj.query_type = link_obj.schema.query_type;
         }
 
-        obj = $.extend(
-            true, obj, this.getInternalLinkObj_extension(link_name, link_type, path_obj),
-        );
+        obj = $.extend(true, obj, this.getInternalLinkObj_extension(link_name, link_type, path_obj));
 
         return obj;
     }
@@ -368,9 +384,9 @@ export default class ViewConstructor extends BaseEntityConstructor {
             child_links: {},
         };
 
-        for(let link in views){
-            if(views.hasOwnProperty(link)) {
-                if(views[link].schema.do_not_connect_with_another_views) {
+        for (let link in views) {
+            if (views.hasOwnProperty(link)) {
+                if (views[link].schema.do_not_connect_with_another_views) {
                     continue;
                 }
 
@@ -413,21 +429,27 @@ export default class ViewConstructor extends BaseEntityConstructor {
                 }
 
                 if (link_type) {
-                    links[link_type][link_name] = this.getInternalLinkObj(link_name, link_type, link, views[link], views[path]);
+                    links[link_type][link_name] = this.getInternalLinkObj(
+                        link_name,
+                        link_type,
+                        link,
+                        views[link],
+                        views[path],
+                    );
                 }
             }
         }
 
         // adds required links, that were not added before
         let types_to_add = this.getTypesOperationAlwaysToAdd();
-        if(types_to_add.includes(views[path].schema.type)) {
+        if (types_to_add.includes(views[path].schema.type)) {
             let dict = this.dictionary.paths;
             let path_type = views[path].schema.type;
 
-            Object.keys(links).forEach(link_type => {
-                if(dict && dict[link_type] && dict[link_type][path_type]) {
-                    for(let link in dict[link_type][path_type]) {
-                        if(dict[link_type][path_type].hasOwnProperty(link)) {
+            Object.keys(links).forEach((link_type) => {
+                if (dict && dict[link_type] && dict[link_type][path_type]) {
+                    for (let link in dict[link_type][path_type]) {
+                        if (dict[link_type][path_type].hasOwnProperty(link)) {
                             if (links[link_type][link]) {
                                 continue;
                             }
@@ -439,17 +461,20 @@ export default class ViewConstructor extends BaseEntityConstructor {
             });
         }
 
-        if(views[path].schema.type == "list" && views[path].schema.level > 2 &&
-            views["/" + views[path].schema.name + "/"]) {
+        if (
+            views[path].schema.type == 'list' &&
+            views[path].schema.level > 2 &&
+            views['/' + views[path].schema.name + '/']
+        ) {
             let dict = this.dictionary.paths;
             let list_op;
 
-            if(dict && dict.operations && dict.operations.list) {
+            if (dict && dict.operations && dict.operations.list) {
                 list_op = dict.operations.list;
 
                 //@todo add the nearest way.
                 let opt = {
-                    list_paths: ["/" + views[path].schema.name + "/"],
+                    list_paths: ['/' + views[path].schema.name + '/'],
                 };
                 links.operations.add = $.extend(true, {}, list_op.add, opt);
             }
@@ -469,17 +494,17 @@ export default class ViewConstructor extends BaseEntityConstructor {
         let multi_actions = {};
         let dict = this.dictionary.paths;
         let list = views[path];
-        if(!list.schema.page_path) {
+        if (!list.schema.page_path) {
             return;
         }
         let page = views[list.schema.page_path];
-        ['actions', 'operations'].forEach(op_type => {
-            if(!page.schema[op_type]) {
+        ['actions', 'operations'].forEach((op_type) => {
+            if (!page.schema[op_type]) {
                 return;
             }
-            for(let item in page.schema[op_type]){
-                if(dict && dict.multi_actions && dict.multi_actions.includes(item)){
-                    multi_actions[item] = $.extend(true, {multi_action: true,}, page.schema[op_type][item]);
+            for (let item in page.schema[op_type]) {
+                if (dict && dict.multi_actions && dict.multi_actions.includes(item)) {
+                    multi_actions[item] = $.extend(true, { multi_action: true }, page.schema[op_type][item]);
                 }
             }
         });
@@ -493,8 +518,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     connectPageAndListViews(views, page_path) {
         // let list_path = page_path.replace(/\{[A-z]+\}\/$/, "");
-        let list_path = page_path.replace(/\{[A-z0-9]+\}\/$/, "");
-        if(views[list_path]) {
+        let list_path = page_path.replace(/\{[A-z0-9]+\}\/$/, '');
+        if (views[list_path]) {
             views[page_path].schema.list_path = list_path;
             views[list_path].schema.page_path = page_path;
         }
@@ -510,7 +535,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
     generateViews(constructor, openapi_schema) {
         let views = this.getViews(constructor, openapi_schema);
 
-        for(let path in views){
+        for (let path in views) {
             if (views.hasOwnProperty(path)) {
                 let links = this.getViewInternalLinks(views, path);
                 for (let key in links) {
@@ -525,8 +550,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
             }
         }
 
-        for(let path in views){
-            if(views.hasOwnProperty((path))) {
+        for (let path in views) {
+            if (views.hasOwnProperty(path)) {
                 if (views[path].schema.type == 'list') {
                     views[path].schema.multi_actions = this.getViewMultiActions(views, path);
                 }
@@ -536,11 +561,11 @@ export default class ViewConstructor extends BaseEntityConstructor {
                     continue;
                 }
 
-                tabSignal.emit("views[" + path + "].created", {view: views[path]});
+                tabSignal.emit('views[' + path + '].created', { view: views[path] });
             }
         }
 
-        tabSignal.emit("allViews.created", {views: views});
+        tabSignal.emit('allViews.created', { views: views });
 
         return views;
     }

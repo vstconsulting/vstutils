@@ -2,9 +2,7 @@
 // {% block resource_list %}
 let resourceList = [
     // {% for file in static_files_list %}
-    // {% if file.spa %}
     { priority: Number('{{ file.priority }}'), type: '{{ file.type }}', name: '{% static file.name %}?v={{gui_version}}'},
-    // {% endif %}
     // {% endfor %}
 ];
 // {% endblock %}
@@ -849,7 +847,7 @@ if(localStorage['gui_version'] !== gui_version) {
     updateGuiVersionsInLocalStorage();
     depsLoader.loadAndAppendDependencies().then(deps => {
         // Creates App instance. App class is supposed to be appended to the page during app dependencies loading.
-        app = new App(api_connector_config, deps.openapi, guiCache);
+        app = new App(deps.openapi, guiCache);
         // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
         app.start().then(() => {
             tabSignal.connect('app.version.updated', () => {

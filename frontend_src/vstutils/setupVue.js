@@ -1,6 +1,5 @@
-import Vue from "vue";
-import VueI18n from "vue-i18n";
-
+import Vue from 'vue';
+import VueI18n from 'vue-i18n';
 
 /**
  * Setting of global Vue filter - capitalize.
@@ -19,7 +18,7 @@ Vue.filter('split', function (value) {
     if (!value) {
         return '';
     }
-    return value.replace(/_/g, " ");
+    return value.replace(/_/g, ' ');
 });
 
 /**
@@ -65,7 +64,7 @@ VueI18n.prototype.getChoiceIndex = function (choice, choicesLength) {
         return 0;
     }
 
-    if(choice > 100) {
+    if (choice > 100) {
         choice = Number(choice.toString().slice(-2));
     }
 
@@ -80,5 +79,5 @@ VueI18n.prototype.getChoiceIndex = function (choice, choicesLength) {
         return 2;
     }
 
-    return (choicesLength < 4) ? 2 : 3;
+    return choicesLength < 4 ? 2 : 3;
 };

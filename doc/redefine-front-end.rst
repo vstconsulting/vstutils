@@ -216,6 +216,15 @@ where view - created View Instance.
 **Description:** This signal will be emitted after creation of View Instance,
 but before setting actions / child_links / multi_actions / operations / sublinks properties.
 
+views.afterInitEach
+~~~~~~~~~~~~~~~~~~~
+**Signal name:** "views.afterInitEach".
+
+**Context argument:** obj - {object} - Object with following structure: { views, path }, where views - object with initialized 
+View Instances, path - path of view that was currently initialized.
+
+**Description:** This signal will be emitted after initialization of each view.
+
 allViews.inited
 ~~~~~~~~~~~~~~~
 **Signal name:** "allViews.inited".

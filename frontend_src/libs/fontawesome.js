@@ -1,1 +1,1 @@
-import "./fontawesome.scss";
+import './fontawesome.scss';
