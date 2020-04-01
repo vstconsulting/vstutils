@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load request_static %}
 
 {% block style %}
     {{ block.super }}
@@ -9,6 +10,12 @@
             }
         }
     </style>
+{% endblock %}
+
+{% block common_sciprt %}
+<script src="{% static_path 'bundle/auth~doc~spa.chunk.js' %}"></script>
+<script src="{% static_path 'bundle/auth~spa.chunk.js' %}"></script>
+<script src="{% static_path 'bundle/auth.js' %}"></script>
 {% endblock %}
 
 {% block body %}
