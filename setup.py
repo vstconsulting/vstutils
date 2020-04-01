@@ -172,18 +172,18 @@ def minify_static_files(base_dir, files, exclude=None):
             if fnmatch.fnmatch(fext_file, '*.min.*'):
                 continue
             fext_file = os.path.join(base_dir, fext_file)
-            if any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
-                continue
             if os.path.exists(fext_file):
-                func, subfunc = funcs
-                with codecs.open(fext_file, 'r', encoding='utf-8') as static_file_fd:
-                    minified = func(static_file_fd.read(), subfunc)
-                with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
-                    static_file_fd.write(minified)
+                if not any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
+                    func, subfunc = funcs
+                    with codecs.open(fext_file, 'r', encoding='utf-8') as static_file_fd:
+                        minified = func(static_file_fd.read(), subfunc)
+                    with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
+                        static_file_fd.write(minified)
+                    print(f'Minfied file {fext_file}.')
                 with open(fext_file, 'rb') as f_in:
                     with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                print(f'Minfied file {fext_file}.')
+                print(f'Compressed file {fext_file}.')
 
 
 class _Compile(_sdist):
