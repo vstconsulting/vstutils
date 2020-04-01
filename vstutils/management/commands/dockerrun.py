@@ -250,7 +250,7 @@ class Command(BaseCommand):
                 'beat': os.getenv(f'{prefix}_SCHEDULER_ENABLE', 'true')
             }
 
-        mail_parameters = ['port', 'user', 'password', 'tls']
+        mail_parameters = ['port', 'user', 'password', 'tls', 'ssl', 'from_address']
         mail_settings = dict(host=os.environ.get(f'{prefix}_MAIL_HOST'))
         if mail_settings['host']:
             for param in mail_parameters:
