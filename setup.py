@@ -179,11 +179,11 @@ def minify_static_files(base_dir, files, exclude=None):
                         minified = func(static_file_fd.read(), subfunc)
                     with codecs.open(fext_file, 'w', encoding='utf-8') as static_file_fd:
                         static_file_fd.write(minified)
-                    print(f'Minfied file {fext_file}.')
+                    print('Minfied file {fext_file}.'.format(fext_file=fext_file))
                 with open(fext_file, 'rb') as f_in:
                     with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
-                print(f'Compressed file {fext_file}.')
+                print('Compressed file {fext_file}.'.format(fext_file=fext_file))
 
 
 class _Compile(_sdist):
