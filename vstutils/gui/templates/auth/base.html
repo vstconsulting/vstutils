@@ -15,6 +15,15 @@
     <script>
     window.hostname = "{{host_url}}"
 
+    function loaderVisibility(hide)
+    {
+        if (hide) {
+            document.querySelector( "#login_wrapper").style.visibility = "hidden"; 
+        } else {
+            document.querySelector( "#login_wrapper").style.visibility = "visible"; 
+        }
+    }
+
     function appAjaxLogin()
     {
         var fields = document.querySelectorAll(".app-form-signin input")
@@ -41,18 +50,30 @@
                     }
                     else
                     {
-                        window.location.reload()
+                        let el = document.createElement( 'html' );
+                        el.innerHTML = request.responseText;
+                        debugger;
+                        let log_form = document.getElementById('login_form');
+                        if (log_form.lastChild.id === 'form_error')
+                        {
+                            log_form.removeChild(log_form.lastChild) 
+                        }
+                        log_form.appendChild(el.getElementsByTagName('ul').form_error);
+                        loaderVisibility(true);
                     }
                 }
                 else
                 { 
                     if(window.parent && window.parent.guiAppLogin && window.parent.guiAppLogin.onLoginError )
                     {
-                        window.parent.guiAppLogin.onLoginError(request.responseText)
+                        window.parent.guiAppLogin.onLoginError(request.responseText);
                     }
                     else
                     {
-                        window.location.reload()
+                        let el = document.createElement( 'html' );
+                        el.innerHTML = request.responseText;
+                        document.getElementById('login_form').appendChild(el.getElementsByTagName('ul').form_error);
+                        loaderVisibility(true);
                     }
                 }
             }
@@ -74,9 +95,12 @@
 
 {% block login_body %}
      <div class="login-box-body rounded">
+        <div class="overlay" id="login_wrapper">
+            <div id="loader" class="loader-center"></div> 
+        </div>
         <p class="login-box-msg">Sign in to start your session {% block session_message_suffix %}{% endblock %}</p>
 
-        <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;">
+        <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;" id="login_form">
             {% csrf_token %}
             {% block auth_key %}
             <div class="form-group has-feedback">
@@ -91,7 +115,7 @@
                 <div class="row">
                     {% if metadata.HTTP_X_CORDOVA_APP %}
                         <div class="col-xs-8">
-                            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block" id="login_button">Sign In</button>
                         </div>
 
                         <div class="col-xs-4 for-cordova">
@@ -99,7 +123,7 @@
                         </div>
                     {% else %}
                         <div class="col-xs-4">
-                            <button type="submit" class="btn btn-primary btn-block" style="margin-bottom: 5px" id="login_button">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-block" style="margin-bottom: 5px" id="login_button" onclick="loaderVisibility(false)">Sign In</button>
                             {% block additional_link %}
                                 <a style="margin-bottom: 10px" href="/password_reset">Forgot password?</a>
                             {% endblock %}
@@ -110,7 +134,7 @@
             <input type="hidden" name="next" value="{{ next }}" />
             {% if form.errors %}
                 {% if form.non_field_errors %}
-                    <ul class='form-errors'>
+                    <ul class='form-errors' id='form_error'>
                         {% for error in form.non_field_errors %}
                             <li style='color: red'>{{ error }}</li>
                         {% endfor %}
