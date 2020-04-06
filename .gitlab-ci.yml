@@ -18,7 +18,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: "flake,pylint,jshint,py36-django-install,py37-django-install"
   before_script:
@@ -66,7 +66,7 @@ code_style:
 
 py36-django22-install:
   <<: *branch_tests
-  image: onegreyonewhite/tox:ubuntu
+  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
   cache:
@@ -75,7 +75,7 @@ py36-django22-install:
 
 py38-django22-coverage:
   <<: *branch_tests
-  image: onegreyonewhite/tox:ubuntu
+  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
@@ -96,7 +96,7 @@ pages:
 
 release:
   stage: release
-  image: onegreyonewhite/tox:tox
+  image: vstconsulting/images:tox
   only:
     refs:
       - master
@@ -115,7 +115,7 @@ release:
   stage: release
   cache:
     paths:
-      - node_modules/  
+      - node_modules/
   only:
     refs:
       - tags

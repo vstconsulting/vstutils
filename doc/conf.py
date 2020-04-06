@@ -17,6 +17,7 @@
 from __future__ import unicode_literals
 import os
 import sys
+import datetime
 from django import setup
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
@@ -29,7 +30,7 @@ setup()
 # -- Project information -----------------------------------------------------
 
 project = 'VST Utils'
-copyright = '2018, VST Consulting'
+copyright = '2018-{}, VST Consulting'.format(datetime.datetime.now().year)
 author = 'VST Consulting'
 
 # The short X.Y version
