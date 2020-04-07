@@ -1,5 +1,5 @@
 default:
-  image: vstconsulting/images:build
+  image: vstconsulting/images:tox
 
 
 variables:
@@ -18,7 +18,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:build
+  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: "flake,pylint,jshint,py36-django-install,py37-django-install"
   before_script:
@@ -110,6 +110,7 @@ release:
 
 .release_pypi_template: &release_pypi
   stage: release
+  image: vstconsulting/images:build
   cache:
     paths:
       - node_modules/
