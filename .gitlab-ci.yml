@@ -1,5 +1,5 @@
-# set to local images because too long execution
-image: onegreyonewhite/tox:centos6
+default:
+  image: vstconsulting/images:build
 
 
 variables:
@@ -18,7 +18,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:tox
+  image: vstconsulting/images:build
   variables:
     TOX_ENVS: "flake,pylint,jshint,py36-django-install,py37-django-install"
   before_script:
@@ -66,7 +66,6 @@ code_style:
 
 py36-django22-install:
   <<: *branch_tests
-  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
   cache:
@@ -75,7 +74,6 @@ py36-django22-install:
 
 py38-django22-coverage:
   <<: *branch_tests
-  image: vstconsulting/images:tox
   variables:
     TOX_ENVS: "$CI_BUILD_NAME"
 
@@ -96,7 +94,6 @@ pages:
 
 release:
   stage: release
-  image: vstconsulting/images:tox
   only:
     refs:
       - master
