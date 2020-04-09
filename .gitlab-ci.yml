@@ -1,8 +1,9 @@
 default:
   image: vstconsulting/images:tox
-  cache:
+  cache: &global_cache
     paths:
       - node_modules/
+    policy: pull-push
 
 
 variables:
@@ -84,6 +85,9 @@ pages:
   stage: release
   variables:
     TOX_ENVS: "builddoc"
+  cache:
+    <<: *global_cache
+    policy: pull
   after_script:
     - mv doc/_build/html public
   artifacts:
@@ -95,6 +99,7 @@ pages:
 
 release:
   stage: release
+  cache: {}
   only:
     refs:
       - master
@@ -113,8 +118,8 @@ release:
   stage: release
   image: vstconsulting/images:build
   cache:
-    paths:
-      - node_modules/
+    <<: *global_cache
+    policy: pull
   only:
     refs:
       - tags
