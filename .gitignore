@@ -23,6 +23,7 @@ venv
 *.bak
 .mypy_cache
 /stat.json
+env
 
 # Visual Studio Code
 .history
