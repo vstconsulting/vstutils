@@ -1,5 +1,5 @@
 default:
-  image: vstconsulting/images:tox
+  image: vstconsulting/images:build
   cache: &global_cache
     paths:
       - node_modules/
@@ -22,7 +22,7 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:tox
+  image: vstconsulting/images:build
   variables:
     TOX_ENVS: "flake,pylint,jshint,py36-django-install,py37-django-install"
   before_script:
@@ -36,6 +36,7 @@ stages:
     refs:
       - master
       - merge_requests
+      - issue/build
     changes:
       - vstutils/*.{py,pyx}
       - vstutils/api/**
@@ -61,6 +62,7 @@ code_style:
     refs:
       - master
       - merge_requests
+      - issue/build
     changes:
       - vstutils/**/*
       - frontend_src/**/*
