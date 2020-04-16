@@ -3,8 +3,8 @@ import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings } from './vstutils/utils';
 import { View } from './vstutils/views';
-import { StoreConstructor } from "./vstutils/store";
-import { RouterConstructor, mixins as routerMixins } from "./vstutils/router";
+import { StoreConstructor } from './vstutils/store';
+import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 
 export * from './app.common.js';
 export * from './vstutils/dashboard';

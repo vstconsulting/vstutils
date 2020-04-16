@@ -49,6 +49,7 @@ def project_args(request: HttpRequest) -> Dict:
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
         "openapi_url": f'/{settings.VST_API_URL}/openapi/',
+        "endpoint_path": f'/{settings.VST_API_URL}/endpoint/',
         "api_version": getattr(settings, 'VST_API_VERSION'),
         "api_url": f'{host_url}/{settings.VST_API_URL}/{settings.VST_API_VERSION}/',
         "enable_gravatar": settings.ENABLE_GRAVATAR,

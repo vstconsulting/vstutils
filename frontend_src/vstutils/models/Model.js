@@ -72,8 +72,8 @@ export default class Model {
      */
     delete() {
         let bulk = this.queryset.formBulkQuery('delete');
-        if (bulk.data_type[bulk.data_type.length - 1] != this.getPkValue()) {
-            bulk.data_type.push(this.getPkValue());
+        if (bulk.path[bulk.path.length - 1] != this.getPkValue()) {
+            bulk.path.push(this.getPkValue());
         }
         return this.queryset
             .sendQuery(bulk)

@@ -39,7 +39,7 @@ export default class ApiConnector {
              * Example of this object.
              * {
              *   // Body of bulk query.
-             *   data: {method: get, data_type: []},
+             *   data: {method: get, path: []},
              *
              *   // Promise for bulk request.
              *   promise: new Promise(),
@@ -121,21 +121,16 @@ export default class ApiConnector {
      * @return {promise} Promise of getting bulk request response.
      */
     sendBulk() {
-        let url = '/' + this.openapi.info.version + '/_bulk/';
+        let url = window.endpoint_url;
         let collector = $.extend(true, {}, this.bulk_collector);
         this.bulk_collector.bulk_parts = [];
-        let bulk_data = [];
-
-        for (let index = 0; index < collector.bulk_parts.length; index++) {
-            bulk_data.push(collector.bulk_parts[index].data);
-        }
+        let bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
 
         return this.query('put', url, bulk_data)
             .then((response) => {
                 let result = response.data;
 
-                for (let index = 0; index < result.length; index++) {
-                    let item = result[index];
+                for (let [idx, item] of result.entries()) {
                     let method = 'resolve';
 
                     if (!(item.status >= 200 && item.status < 400)) {
@@ -143,7 +138,7 @@ export default class ApiConnector {
                         method = 'reject';
                     }
 
-                    collector.bulk_parts[index].callbacks[method](result[index]);
+                    collector.bulk_parts[idx].callbacks[method](item);
                 }
             })
             .catch((error) => {
@@ -185,7 +180,7 @@ export default class ApiConnector {
      */
     loadUser() {
         return this.bulkQuery({
-            data_type: ['user', this.getUserId()],
+            path: ['user', this.getUserId()],
             method: 'get',
         }).then((response) => {
             return response.data;
@@ -196,7 +191,7 @@ export default class ApiConnector {
      * @return {promise} Promise of getting list of App languages from API.
      */
     loadLanguages() {
-        return this.bulkQuery({ data_type: ['_lang'], method: 'get' }).then((response) => {
+        return this.bulkQuery({ path: '/_lang/', method: 'get' }).then((response) => {
             return response.data.results;
         });
     }
@@ -234,7 +229,7 @@ export default class ApiConnector {
      * @return {promise} Promise of getting translations for some language from API.
      */
     loadTranslations(lang) {
-        return this.bulkQuery({ data_type: ['_lang', lang], method: 'get' }).then((response) => {
+        return this.bulkQuery({ path: ['_lang', lang], method: 'get' }).then((response) => {
             return response.data.translations;
         });
     }

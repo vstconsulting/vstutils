@@ -1,8 +1,14 @@
-from vstutils.api.serializers import VSTSerializer, EmptySerializer
-from vstutils.api.base import ModelViewSetSet, Response, CopyMixin, ReadOnlyModelViewSet
-from vstutils.api.decorators import nested_view, subaction, action
-from vstutils.api import filters, fields, responses
-from .models import Host, HostGroup, File, ModelWithFK, ModelWithBinaryFiles
+import json
+
+from django.http.response import Http404, HttpResponse
+
+from vstutils.api import fields, filters, responses
+from vstutils.api.base import (CopyMixin, ModelViewSetSet, NonModelsViewSet,
+                               ReadOnlyModelViewSet, Response)
+from vstutils.api.decorators import action, nested_view, subaction
+from vstutils.api.serializers import EmptySerializer, VSTSerializer
+
+from .models import File, Host, HostGroup, ModelWithBinaryFiles, ModelWithFK
 
 
 class TestFilterBackend:
@@ -55,9 +61,10 @@ class FileFilter(filters.filters.FilterSet):
             'origin_pos',
         )
 
+
 class HostSerializer(VSTSerializer):
     id = fields.RedirectIntegerField(read_only=True)
-    name = fields.DependEnumField(field='id', choices={ 3: 'hello', 1: 'NOO!' })
+    name = fields.DependEnumField(field='id', choices={3: 'hello', 1: 'NOO!'})
 
     class Meta:
         model = Host
@@ -199,7 +206,7 @@ class ModelWithFKSerializer(VSTSerializer):
 class TestFkViewSet(ModelViewSetSet):
     model = ModelWithFK
     serializer_class = ModelWithFKSerializer
-    
+
 
 class ModelWithBinaryFilesSerializer(VSTSerializer):
     some_binfile = fields.BinFileInStringField(required=False)
@@ -230,3 +237,23 @@ class TestBinaryFilesViewSet(ModelViewSetSet):
 
     test_nested_view_inspection._nested_view = None
     test_nested_view_inspection._nested_name = ''
+
+
+class RequestInfoTestView(NonModelsViewSet):
+    base_name = 'request_info'
+
+    def list(self, request):
+        headers = request._request.META
+        # Don't send wsgi.* headers
+        headers = {k: v for k, v in headers.items() if not k.startswith('wsgi.')}
+
+        return responses.HTTP_200_OK(dict(
+            headers=headers,
+            query=request.query_params,
+            user_id=request.user.id
+        ))
+
+    def put(self, request):
+        data = request.data
+
+        return responses.HTTP_200_OK(data)

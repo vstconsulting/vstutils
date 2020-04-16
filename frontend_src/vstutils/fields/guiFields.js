@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import moment from 'moment';
-import XRegExp from 'xregexp';
 import { gui_fields_mixins } from './guiFieldsMixins.js';
 import { _translate, findClosestPath, BaseEntityConstructor } from '../utils';
 import { pop_up_msg } from '../popUp';
@@ -742,12 +741,10 @@ guiFields.uptime = class UptimeField extends guiFields.base {
          * These regexps are needed for converting value from seconds to uptime format.
          */
         this.reg_exp_arr = [
-            XRegExp(
-                `(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`,
-            ),
-            XRegExp(`(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
-            XRegExp(`(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
-            XRegExp(`(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)`),
+            /(?<y>[0-9]+)[y] (?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            /(?<m>[0-9]+)[m] (?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            /(?<d>[0-9]+)[d] (?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
+            /(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
         ];
     }
     /**
@@ -769,12 +766,13 @@ guiFields.uptime = class UptimeField extends guiFields.base {
 
         let uptime_in_seconds = 0;
 
-        for (let index = 0; index < this.reg_exp_arr.length; index++) {
-            let time_parts = XRegExp.exec(value, this.reg_exp_arr[index]);
-
-            if (!time_parts) {
+        for (const regexp of this.reg_exp_arr) {
+            const match = regexp.exec(value);
+            if (!match) {
                 continue;
             }
+
+            const time_parts = match.groups();
 
             let duration_obj = {
                 seconds: Number(time_parts.ss),
@@ -1054,7 +1052,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
         return true;
     }
     /**
-     * Method, that returns data_type for prefetch bulk request.
+     * Method, that returns path for prefetch bulk request.
      * @param {object} raw_data Object with instance data, before loading prefetch data.
      * @param {string} qs_url Queryset url.
      */
@@ -1065,7 +1063,7 @@ guiFields.fk = class FkField extends fk_and_api_object_mixin(guiFields.base) {
             .split('/');
 
         return {
-            data_type: dt,
+            path: dt,
             id: raw_data[this.options.name],
         };
     }
