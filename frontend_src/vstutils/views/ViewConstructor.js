@@ -277,7 +277,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
                             view: views[schema.path],
                         });
 
-                        tabSignal.emit('views.afterInitEach', { views: views , path: schema.path });
+                        tabSignal.emit('views.afterInitEach', { views: views, path: schema.path });
 
                         if (!views[schema.path].template) {
                             views[schema.path].mixins.unshift(DefaultEntityView);

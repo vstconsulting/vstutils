@@ -34,9 +34,6 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.css';
 window.iziToast = iziToast;
 
-import XRegExp from 'xregexp/lib/xregexp';
-window.XRegExp = XRegExp;
-
 import FastClick from 'fastclick';
 window.FastClick = FastClick;
 

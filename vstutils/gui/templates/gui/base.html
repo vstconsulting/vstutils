@@ -4,7 +4,8 @@
 
 {% block gui_init_scripts %}
     <script type="text/javascript">
-        var openapi_path = "{{host_url}}{{ openapi_url }}";
+        var endpoint_url = "{{ host_url }}{{ endpoint_path }}";
+        var openapi_path = endpoint_url;
         var gui_version = "{{gui_version}}";
         var gui_user_version = "{{gui_user_version}}";
         var isDebug = {% if debug %}true{% else %}false{% endif %};

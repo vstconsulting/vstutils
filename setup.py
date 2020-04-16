@@ -354,7 +354,6 @@ ext_list = [
     'vstutils.models',
     'vstutils.custom_model',
     'vstutils.api.routers',
-    'vstutils.api.views',
 ]
 
 if 'develop' in sys.argv:

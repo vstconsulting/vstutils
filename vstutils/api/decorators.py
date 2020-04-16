@@ -534,3 +534,20 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
                 setattr(view_class, sub_action_name, sub_action_view)
         setattr(view_class, *self.decorated_list())
         return view_class
+
+
+def cache_method_result(func):
+    """Decorator that caches return value of method based on args and kwargs,
+    cache value stored in the object instance"""
+    name = f'__cache_{func.__name__}'
+
+    def wrapper(self, *args, **kwargs):
+        result = getattr(self, name, None)
+
+        if result is None or result[0] != args or result[1] != kwargs:
+            result = (args, kwargs, func(self, *args, **kwargs))
+            setattr(self, name, result)
+
+        return result[2]
+
+    return wrapper

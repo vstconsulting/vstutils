@@ -51,7 +51,10 @@ class DataSerializer(EmptySerializer):
         str,
         dict,
         list,
-        tuple
+        tuple,
+        type(None),
+        int,
+        float
     )
 
     def to_internal_value(self, data):

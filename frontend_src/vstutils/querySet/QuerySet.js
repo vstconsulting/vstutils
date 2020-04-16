@@ -27,17 +27,13 @@ export default class QuerySet {
      * @param {object} query Object with pairs of key, value for QuerySet filters.
      */
     makeQueryString(query = this.query) {
-        let filters = [];
-        for (let key in query) {
-            if (query.hasOwnProperty(key)) {
-                filters.push([key, query[key]].join('='));
-            }
-        }
-        return filters.join('&');
+        return Object.entries(query)
+            .map(([k, v]) => `${k}=${v}`)
+            .join('&');
     }
 
     /**
-     * Method, that converts 'this.url' string into 'data_type' array,
+     * Method, that converts 'this.url' string into 'path' array,
      * appropriate for bulk query.
      */
     getDataType() {
@@ -52,17 +48,12 @@ export default class QuerySet {
     formBulkQuery(method, data) {
         let query = {
             method: method,
-            data_type: this.getDataType(),
+            path: this.getDataType(),
+            query: this.makeQueryString(),
         };
 
         if (data) {
             query.data = data;
-        }
-
-        let filters = this.makeQueryString();
-
-        if (filters.length > 0) {
-            query.filters = filters;
         }
 
         return query;
@@ -144,11 +135,9 @@ export default class QuerySet {
      */
     exclude(filters) {
         let ecd_filters = {};
-        for (let key in filters) {
-            if (filters.hasOwnProperty(key)) {
-                let ecd_key = key.indexOf('__not') == -1 ? key + '__not' : key;
-                ecd_filters[ecd_key] = filters[key];
-            }
+        for (let [key, value] of Object.entries(filters)) {
+            let ecd_key = key.indexOf('__not') == -1 ? key + '__not' : key;
+            ecd_filters[ecd_key] = value;
         }
         return this.clone({ query: $.extend(true, {}, this.query, ecd_filters) });
     }
@@ -323,53 +312,50 @@ export default class QuerySet {
      * @private
      */
     _getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data) {
-        for (let key in prefetch_fields) {
-            if (prefetch_fields.hasOwnProperty(key)) {
-                let field_name = prefetch_fields[key];
-                let field = this.model.fields[field_name];
-                let value = instance.data[field_name];
+        for (let field_name of prefetch_fields) {
+            let field = this.model.fields[field_name];
+            let value = instance.data[field_name];
 
-                if (value == null || value == undefined) {
-                    continue;
-                }
+            if (value == null || value == undefined) {
+                continue;
+            }
 
-                if (!field.prefetchDataOrNot(instance.data)) {
-                    continue;
-                }
+            if (!field.prefetchDataOrNot(instance.data)) {
+                continue;
+            }
 
-                let obj = field.getObjectBulk(instance.data, this.url);
+            let obj = field.getObjectBulk(instance.data, this.url);
 
-                if (obj == undefined || typeof obj == 'string') {
-                    continue;
-                }
+            if (obj == undefined || typeof obj == 'string') {
+                continue;
+            }
 
-                if (!bulk_data[field_name]) {
-                    bulk_data[field_name] = [];
-                }
+            if (!bulk_data[field_name]) {
+                bulk_data[field_name] = [];
+            }
 
-                let pushed = false;
+            let pushed = false;
 
-                for (let item in bulk_data[field_name]) {
-                    if (deepEqual(bulk_data[field_name][item].data_type, obj.data_type)) {
-                        if (!bulk_data[field_name][item].filter_values.includes(obj.id)) {
-                            bulk_data[field_name][item].filter_values.push(obj.id);
-                        }
-                        if (!bulk_data[field_name][item].instances_ids.includes(instance.getPkValue())) {
-                            bulk_data[field_name][item].instances_ids.push(instance.getPkValue());
-                        }
-
-                        pushed = true;
+            for (let item in bulk_data[field_name]) {
+                if (deepEqual(bulk_data[field_name][item].path, obj.path)) {
+                    if (!bulk_data[field_name][item].filter_values.includes(obj.id)) {
+                        bulk_data[field_name][item].filter_values.push(obj.id);
                     }
-                }
+                    if (!bulk_data[field_name][item].instances_ids.includes(instance.getPkValue())) {
+                        bulk_data[field_name][item].instances_ids.push(instance.getPkValue());
+                    }
 
-                if (!pushed) {
-                    bulk_data[field_name].push({
-                        instances_ids: [instance.getPkValue()],
-                        data_type: obj.data_type,
-                        filter_name: field.getPrefetchFilterName(instance.data),
-                        filter_values: [obj.id],
-                    });
+                    pushed = true;
                 }
+            }
+
+            if (!pushed) {
+                bulk_data[field_name].push({
+                    instances_ids: [instance.getPkValue()],
+                    path: obj.path,
+                    filter_name: field.getPrefetchFilterName(instance.data),
+                    filter_values: [obj.id],
+                });
             }
         }
 
@@ -386,7 +372,6 @@ export default class QuerySet {
     _loadPrefetchData(prefetch_fields, instances) {
         let promises = [];
         let bulk_data = this._getBulkDataForPrefetch(prefetch_fields, instances);
-
         for (let key in bulk_data) {
             if (bulk_data.hasOwnProperty(key)) {
                 for (let index = 0; index < bulk_data[key].length; index++) {
@@ -397,8 +382,8 @@ export default class QuerySet {
 
                     let bulk = {
                         method: 'get',
-                        data_type: item.data_type,
-                        filters: this.makeQueryString(filters),
+                        path: item.path,
+                        query: this.makeQueryString(filters),
                     };
 
                     promises.push(

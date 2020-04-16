@@ -33,6 +33,9 @@ API[VST_API_VERSION][r'testbinaryfiles'] = dict(
 API['v2'][r'testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
+API['v2'][r'request_info'] = dict(
+    view='test_proj.views.RequestInfoTestView'
+)
 API['v3'][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )

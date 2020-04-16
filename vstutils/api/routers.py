@@ -247,4 +247,7 @@ class MainRouter(_AbstractRouter):
             router.generate(views_list)
             self.register_router(version+'/', router)
 
+        # Register view for new bulk requests
+        self.register_view(r'endpoint', import_class('vstutils.api.endpoint.EndpointViewSet'), 'endpoint')
+
         self.__register_openapi()

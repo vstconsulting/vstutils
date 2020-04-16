@@ -14,24 +14,33 @@ try:
 except ImportError:  # nocv
     from unittest.mock import patch
 
-from fakeldap import MockLDAP
-from django.test import Client
-from django.core.management import call_command
-from django.core import mail
+from collections import OrderedDict
+
 from django.conf import settings
+from django.core import mail
+from django.core.management import call_command
+from django.test import Client
+from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
-from vstutils.tests import BaseTestCase, json, override_settings
-from vstutils.urls import router
-from vstutils.api.views import UserViewSet
+
 from vstutils import utils
+from vstutils.api.validators import RegularExpressionValidator
+from vstutils.api.views import UserViewSet
+from vstutils.config import (BoolType, BytesSizeType, ConfigParserC,
+                             ConfigParserException, IntSecondsType, IntType,
+                             JsonType, ListType, ParseError, Section, StrType)
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
-from vstutils.tools import get_file_value, File as ToolsFile
-from vstutils.config import ConfigParserC, Section, IntType, BytesSizeType, BoolType, IntSecondsType, ListType, JsonType, StrType, ConfigParserException, ParseError
-from .models import Host, HostGroup, File, List
+from vstutils.tests import BaseTestCase, json, override_settings
+from vstutils.tools import File as ToolsFile
+from vstutils.tools import get_file_value
+from vstutils.urls import router
 
+from .models import File, Host, HostGroup, List
+from rest_framework.exceptions import ValidationError
+from base64 import b64encode
 
 test_config = '''[main]
 test_key = test_value
@@ -44,6 +53,7 @@ test_handler_structure = {
         }
     }
 }
+
 
 class VSTUtilsCommandsTestCase(BaseTestCase):
 
@@ -226,6 +236,7 @@ class VSTUtilsTestCase(BaseTestCase):
     def test_class_property(self):
         class TestClass(metaclass=utils.classproperty.meta):
             val = ''
+
             def __init__(self):
                 self.val = "init"
 
@@ -240,7 +251,6 @@ class VSTUtilsTestCase(BaseTestCase):
             @utils.classproperty
             def test2(self):
                 return 'Some text'
-
 
         test_obj = TestClass()
         self.assertEqual(TestClass.test, "")
@@ -375,7 +385,6 @@ class ViewsTestCase(BaseTestCase):
         for js_url in ['service-worker.js', 'app-loader.js']:
             response = self.get_result('get', f'/{js_url}')
             self.assertCount(str(response).split('\n'), 1, f'{js_url} is longer than 1 string.')
-        
 
     def test_uregister(self):
         router_v1 = router.routers[0][1]
@@ -526,7 +535,6 @@ class ViewsTestCase(BaseTestCase):
         gravatar_of_nonexistent_user = get_user_gravatar(123321)
         self.assertEqual(default_gravatar, gravatar_of_nonexistent_user)
 
-
     def test_reset_password(self):
         test_user = self._create_user(is_super_user=False)
         client = self.client_class()
@@ -664,6 +672,325 @@ class DefaultBulkTestCase(BaseTestCase):
         self.assertEqual(result[1]['data']['username'], test_user['username'])
 
 
+class OpenapiEndpointTestCase(BaseTestCase):
+
+    def test_get_openapi(self):
+        api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+
+        self.assertEqual(api['info']['title'], 'Example Project')
+        self.assertTrue('basePath' in api, api.keys())
+        self.assertTrue('paths' in api, api.keys())
+        self.assertTrue('host' in api, api.keys())
+        self.assertTrue('definitions' in api, api.keys())
+        self.assertTrue('schemes' in api, api.keys())
+        self.assertTrue('application/json' in api['consumes'], api['consumes'])
+        self.assertTrue('application/json' in api['produces'], api['produces'])
+
+        client = self._login()
+        response = client.get('/api/endpoint/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'drf-yasg/swagger-ui.html')
+        with self.assertRaises(json.decoder.JSONDecodeError):
+            json.loads(response.content.decode('utf-8'))
+
+
+class EndpointTestCase(BaseTestCase):
+
+    def test_auth(self):
+        response = self.client_class().get('/api/endpoint/?format=openapi')
+        self.assertEqual(response.status_code, 200)
+
+        user = self._create_user()
+        auth_str = b64encode(f'{user.data["username"]}:{user.data["password"]}'.encode()).decode('ascii')
+        basic_client = self.client_class(HTTP_AUTHORIZATION=f'Basic {auth_str}')
+        response = basic_client.put('/api/endpoint/')
+        self.assertEqual(response.status_code, 200)
+
+        response = basic_client.put('/api/endpoint/', json.dumps([
+            {
+                'path': '/request_info/',
+                'version': 'v2',
+                'method': 'get'
+            }
+        ]), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.render_api_response(response)[0]['data']['user_id'], user.id)
+        
+    def test_simple_queries(self):
+        User = self.get_model_class('django.contrib.auth.models.User')
+        User.objects.exclude(pk=self.user.id).delete()
+
+        user1 = User.objects.first()
+
+        user_attrs_detail = ['email', 'first_name', 'id', 'is_active', 'is_staff', 'last_name', 'username']
+        user_attrs_list = ['email', 'id', 'is_active', 'is_staff', 'username']
+        user_from_db_to_user_from_api_detail = lambda db_user: {key: getattr(db_user, key) for key in user_attrs_detail}
+        user_from_db_to_user_from_api_list = lambda db_user: {key: getattr(db_user, key) for key in user_attrs_list}
+
+        # Get 1 user
+        request = [
+            {
+                'path': ['user', user1.id],
+                'method': 'get'
+            }
+        ]
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        self.assertEqual(len(request), len(response))
+        self.assertEqual('GET', response[0]['method'])
+        self.assertEqual('/api/v1/user/1/', response[0]['path'])
+        self.assertEqual(200, response[0]['status'])
+        self.assertEqual('v1', response[0]['version'])
+
+        expected_user = user_from_db_to_user_from_api_detail(user1)
+        actual_user = response[0]['data']
+        self.assertDictEqual(expected_user, actual_user)
+
+        # Create 2 users
+        request = [
+            dict(
+                path='/user/',
+                method='post',
+                data=dict(username=f'USER{i}', password='123', password2='123'),
+                version='v1'
+            ) for i in range(10)
+        ]
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        for idx, op in enumerate(request):
+            user = User.objects.filter(username=op['data']['username']).first()
+            self.assertEqual(201, response[idx]['status'])
+            self.assertDictEqual(
+                user_from_db_to_user_from_api_detail(user),
+                response[idx]['data']
+            )
+
+        # Get all users
+        request = [
+            {
+                'path': '/user/',
+                'method': 'get',
+                'query': 'limit=5'
+            }
+        ]
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        self.assertEqual(len(request), len(response))
+        self.assertEqual('GET', response[0]['method'])
+        self.assertEqual('/api/v1/user/?limit=5', response[0]['path'])
+        self.assertEqual(200, response[0]['status'])
+        self.assertEqual('v1', response[0]['version'])
+
+        response_users = response[0]['data']['results']
+
+        self.assertEqual(5, len(response_users))
+
+        for resp_user in response_users:
+            user = User.objects.filter(id=resp_user['id']).first()
+            self.assertDictEqual(
+                user_from_db_to_user_from_api_list(user),
+                resp_user
+            )
+
+        # Update user
+        request = [
+            dict(
+                path=f'/user/{response_users[0]["id"]}/',
+                method='patch',
+                data=dict(first_name='Name 1'),
+                version='v1'
+            ),
+            dict(
+                path=f'/user/{response_users[1]["id"]}/',
+                method='patch',
+                data=dict(last_name='Name 2')
+            )
+        ]
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        self.assertEqual(2, len(response))
+
+        for r in response:
+            user = User.objects.filter(id=r['data']['id']).first()
+            self.assertEqual(200, r['status'])
+            self.assertDictEqual(
+                user_from_db_to_user_from_api_detail(user),
+                r['data']
+            )
+
+        # Invalid request
+        request = [
+            dict(
+                path=f'/user/{response[0]["data"]["id"]}/',
+                method='patch',
+                data=dict(username=''),
+                version='v1'
+            ),
+            dict(
+                path=f'/user/{response[1]["data"]["id"]}/',
+                method='patch',
+                data=dict(last_name='Name'*40)  # More than 150 characters
+            ),
+        ]
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        self.assertEqual(2, len(response))
+        self.assertEqual(400, response[0]['status'])
+        self.assertEqual(400, response[1]['status'])
+
+        self.assertEqual(['This field may not be blank.'], response[0]['data']['username'])
+        self.assertEqual(['Ensure this field has no more than 150 characters.'], response[1]['data']['last_name'])
+
+        # Invalid bulk request
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps([{}]))
+        self.assertEqual(response[0]['status'], 500)
+        self.assertEqual(response[0]['path'], 'bulk')
+        self.assertEqual(
+            response[0]['info'],
+            {'path': ['This field is required.'], 'method': ['This field is required.']}
+        )
+
+        # Test text api response 404
+        request = [
+            {
+                'path': '/not_found/',
+                'method': 'get',
+            }
+        ]
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        self.assertEqual(response[0]['status'], 404, response[0])
+        self.assertTrue('<h1>Not Found</h1>' in response[0]['data']['detail'])
+
+    def test_param_templates(self):
+        Host.objects.all().delete()
+
+        for i in range(10):
+            Host.objects.create(name=f'test_{i}')
+
+        request = [
+            {
+                'path': 'subhosts',
+                'method': 'get'
+            },
+            # Template in path str
+            {
+                'path': ['/subhosts/<<0[data][results][9][id]>>/'],
+                'method': 'patch',
+                'data': {
+                    'name': '5'
+                }
+            },
+            {
+                'path': 'subhosts',
+                'method': 'get'
+            },
+            # Template in path list
+            {
+                'path': ['subhosts', '<<2[data][results][0][id]>>'],
+                'method': 'get'
+            },
+            # Template in data
+            {
+                'path': ['subhosts', '<<2[data][results][1][id]>>'],
+                'method': 'patch',
+                'data': {
+                    'name': '<<2[data][results][9][name]>>'
+                }
+            },
+            # Template in query
+            {
+                'path': 'subhosts',
+                'method': 'get',
+                'query': 'limit=<<2[data][results][9][name]>>'
+            },
+            # Template in headers
+            {
+                'path': 'request_info',
+                'method': 'get',
+                'headers': {
+                    'TEST_HEADER': '<<2[data][results][9][name]>>'
+                },
+                'version': 'v2'
+            },
+            # Non string data
+            {
+                'path': 'request_info',
+                'method': 'put',
+                'data': {
+                    'integer': 1,
+                    'float': 1.0,
+                    'none': None,
+                    'ordered': OrderedDict((('a', 1), ('b', 2))),
+                    'list': [1, 2.0, '3']
+                },
+                'version': 'v2'
+            }
+        ]
+
+        response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
+
+        self.assertEqual(response[1]['status'], 200)
+        self.assertEqual(response[3]['status'], 200)
+        self.assertEqual(response[3]['status'], 200)
+        self.assertEqual(response[4]['status'], 200)
+        self.assertEqual(response[4]['data'], {'id': 2, 'name': '5'})
+        self.assertEqual(len(response[5]['data']['results']), 5)
+        self.assertEqual(response[6]['data']['headers']['TEST_HEADER'], '5')
+        self.assertEqual(response[7]['data'], {
+            'integer': 1,
+            'float': 1.0,
+            'none': None,
+            'ordered': {'a': 1, 'b': 2},
+            'list': [1, 2.0, '3']
+        })
+
+    def test_transactional_bulk(self):
+        request = [
+            dict(
+                path='/user/',
+                method='post',
+                data=dict(username='USER_123', password='123', password2='123')
+            ),
+            dict(
+                path='/user/not_found_404',
+                method='get'
+            )
+        ]
+        response = self.get_result('post', '/api/endpoint/', 502, data=json.dumps(request))
+
+        self.assertEqual(response[0]['status'], 201)
+        self.assertEqual(response[0]['data']['username'], 'USER_123')
+        self.assertEqual(response[1]['status'], 404)
+        self.assertFalse(
+            self.get_model_filter(
+                'django.contrib.auth.models.User',
+                pk=response[0]['data']['id']
+            ).exists()
+        )
+
+        response = self.get_result('post', '/api/endpoint/', 200, data=json.dumps(request[:1]))
+        self.assertEqual(response[0]['status'], 201)
+        self.assertEqual(response[0]['data']['username'], 'USER_123')
+        self.assertTrue(
+            self.get_model_filter(
+                'django.contrib.auth.models.User',
+                pk=response[0]['data']['id']
+            ).exists()
+        )
+
+
+class ValidatorsTestCase(BaseTestCase):
+
+    def test_regexp_validator(self):
+        regexp_validator = RegularExpressionValidator(re.compile(r'^valid$'))
+
+        with self.assertRaises(ValidationError):
+            regexp_validator('not valid')
+
+        regexp_validator('valid')
+
+
 class LangTestCase(BaseTestCase):
 
     def test_lang(self):
@@ -691,8 +1018,6 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(results[4]['data']['code'], 'e_list')
         self.assertEqual(results[4]['data']['name'], 'Empty list')
         self.assertEqual(results[4]['data']['translations'], {})
-
-
 
 
 class CoreApiTestCase(BaseTestCase):
@@ -1505,12 +1830,12 @@ class ConfigParserCTestCase(BaseTestCase):
                 }
             }
 
-
         format_kwargs = dict(
             INTEGER=22, STRING='kwargs_str'
         )
         test_parser = TestConfigParserC(
-            section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional, withdefault=TestDefaultSettings),
+            section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional,
+                                  withdefault=TestDefaultSettings),
             format_kwargs=format_kwargs
         )
         files_list = ['test_conf.ini', 'test_conf2.ini', 'test_conf3.ini']
@@ -1628,7 +1953,6 @@ class ConfigParserCTestCase(BaseTestCase):
         # Test method `all()` for config and compare with data
         self.assertDictEqual(test_parser['main'].all(), config_data['main'])
 
-
         # Check types for vars, that was setup
         self.assertTrue(isinstance(test_parser['main']['key2'], int))
         self.assertTrue(isinstance(test_parser['main']['key3'], bool))
@@ -1642,7 +1966,6 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertTrue(isinstance(test_parser['add_item'], TestSectionFunctional))
         self.assertTrue(isinstance(test_parser['add_item']['subs'], TestFirstSection))
         self.assertDictEqual(test_parser['add_item'], {'subs': {}})
-
 
         # Make manual typeconversation, and two times conversation same value
         self.assertEqual(test_parser['main'].getint('key2'), 251)
@@ -1719,7 +2042,6 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertEqual(settings.TIME_ZONE, "UTC")
         self.assertEqual(settings.ENABLE_ADMIN_PANEL, False)
 
-
         self.assertEqual(settings.SESSION_COOKIE_AGE, 1209600)
         self.assertEqual(settings.STATIC_URL, '/static/')
         self.assertEqual(settings.PAGE_LIMIT, 1000)
@@ -1777,9 +2099,9 @@ class ConfigParserCTestCase(BaseTestCase):
             test_sect.get('kk')
 
         parser_from_out_str = TestConfigParserC(
-            section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional, withdefault=TestDefaultSettings),
+            section_overload=dict(main=TestFirstSection, add_item=TestSectionFunctional,
+                                  withdefault=TestDefaultSettings),
             format_kwargs=format_kwargs
         )
         parser_from_out_str.parse_text(test_parser.generate_config_string())
         self.assertDictEqual(parser_from_out_str.all(), test_parser.all())
-

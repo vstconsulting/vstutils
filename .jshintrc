@@ -53,7 +53,6 @@
     "ViewConstructor": true,
     "Vue": true,
     "VueI18n": true,
-    "XRegExp": true,
     "$": true,
     "require": true,
     "spa": true
