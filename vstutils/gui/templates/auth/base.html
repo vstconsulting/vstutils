@@ -12,85 +12,6 @@
     <script src="{% static_path 'bundle/auth~spa.chunk.js' %}"></script>
     <script src="{% static_path 'bundle/auth.js' %}"></script>
 
-    <script>
-    window.hostname = "{{host_url}}"
-
-    function loaderVisibility(hide)
-    {
-        if (hide) {
-            document.querySelector( "#login_wrapper").style.visibility = "hidden"; 
-        } else {
-            document.querySelector( "#login_wrapper").style.visibility = "visible"; 
-        }
-    }
-
-    function appAjaxLogin()
-    {
-        var fields = document.querySelectorAll(".app-form-signin input")
-
-        var fd = new FormData();
-        data = {}
-        for(var i = 0; i < fields.length; i++)
-        {
-            fd.append(fields[i].getAttribute('name'), fields[i].value);
-            data[fields[i].getAttribute('name')] = fields[i].value
-        }
-
-        var request = new XMLHttpRequest();
-
-        request.onreadystatechange = function()
-        {
-            if (request.readyState === 4 && request.status === 200)
-            {
-                if(request.responseText.indexOf("<!-- app-gui-page -->") != -1)
-                {
-                    if(window.parent && window.parent.guiAppLogin && window.parent.guiAppLogin.onLogin )
-                    {
-                        window.parent.guiAppLogin.onLogin(request.responseText)
-                    }
-                    else
-                    {
-                        let el = document.createElement( 'html' );
-                        el.innerHTML = request.responseText;
-                        debugger;
-                        let log_form = document.getElementById('login_form');
-                        if (log_form.lastChild.id === 'form_error')
-                        {
-                            log_form.removeChild(log_form.lastChild) 
-                        }
-                        log_form.appendChild(el.getElementsByTagName('ul').form_error);
-                        loaderVisibility(true);
-                    }
-                }
-                else
-                { 
-                    if(window.parent && window.parent.guiAppLogin && window.parent.guiAppLogin.onLoginError )
-                    {
-                        window.parent.guiAppLogin.onLoginError(request.responseText);
-                    }
-                    else
-                    {
-                        let el = document.createElement( 'html' );
-                        el.innerHTML = request.responseText;
-                        document.getElementById('login_form').appendChild(el.getElementsByTagName('ul').form_error);
-                        loaderVisibility(true);
-                    }
-                }
-            }
-        }
-
-        request.onerror =  function (data)
-        {
-            console.error(data)
-        };
-
-
-        request.open("POST", window.hostname+"/login/");
-        request.setRequestHeader("{{ csrf_header_name|default:'X-CSRFToken' }}", "{{ csrf_token }}")
-
-        request.send(fd);
-    }
-    </script>
 {% endblock %}
 
 {% block login_body %}
@@ -100,15 +21,27 @@
         </div>
         <p class="login-box-msg">Sign in to start your session {% block session_message_suffix %}{% endblock %}</p>
 
-        <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" onsubmit="appAjaxLogin(); return false;" id="login_form">
+        <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" id="login_form">
             {% csrf_token %}
             {% block auth_key %}
             <div class="form-group has-feedback">
-                <input type="text" class="form-control" placeholder="Username" name='{{ form.username.name }}' id="{{ form.username.name }}" maxlength="254"  required autofocus>
+                <input type="text" 
+                    class="form-control" 
+                    placeholder="Username" 
+                    name='{{ form.username.name }}' 
+                    id="{{ form.username.name }}" 
+                    maxlength="254"
+                    autocomplete="username"
+                    required autofocus>
             </div>
             {% endblock %}
             <div class="form-group has-feedback">
-                <input type="password" class="form-control" placeholder="Password" name='{{ form.password.name }}' id="{{ form.password.name }}">
+                <input type="password" 
+                    class="form-control" 
+                    placeholder="Password" 
+                    name='{{ form.password.name }}' 
+                    id="{{ form.password.name }}"
+                    autocomplete="current-password">
             </div>
 
             {% block button %}
@@ -131,7 +64,7 @@
                     {% endif %}
                 </div>
             {% endblock %}
-            <input type="hidden" name="next" value="{{ next }}" />
+            <input id="next" type="hidden" name="next" value="{{ next }}" />
             {% if form.errors %}
                 {% if form.non_field_errors %}
                     <ul class='form-errors' id='form_error'>
@@ -142,6 +75,13 @@
                 {% endif %}
             {% endif %}
         </form>
+        <script>
+            // Set form field next to current url for ?next= redirects
+            var match = /next=(?<next>[^&]+)/.exec(window.location.href);
+            if (match && match.groups.next) {
+                document.getElementById('next').value = match.groups.next
+            }
+        </script>
         {% block alter_auth %}
         {% endblock %}
     </div>
