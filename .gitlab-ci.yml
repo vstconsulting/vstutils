@@ -91,7 +91,7 @@ pages:
     <<: *global_cache
     policy: pull
   after_script:
-    - mv doc/_build/html public
+    - mv -v doc/_build/html public
   artifacts:
     paths:
     - public
