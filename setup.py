@@ -121,7 +121,7 @@ def make_extensions(extensions_list, packages):
         '-g0', '-ggdb1',
         "-fno-strict-aliasing",
         "-fno-var-tracking-assignments",
-        "-pipe", "-std=c99"
+        "-pipe", "-std=c99", '-Werror=sign-compare'
     ]
     ext_modules = list(
         make_extention(m, f, extra_compile_args)

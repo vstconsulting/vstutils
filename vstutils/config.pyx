@@ -18,6 +18,7 @@ from posix.stdio cimport fmemopen
 from libc.stdlib cimport free
 from libc.string cimport strlen
 from cpython.dict cimport PyDict_GetItem, PyDict_Contains, PyDict_SetItem, PyDict_New
+from cpython.unicode cimport PyUnicode_Replace
 
 
 cdef extern from '_config.h' nogil:
@@ -93,17 +94,16 @@ cdef class StrType(BaseType):
 
 cdef class IntType(BaseType):
     def convert(self, value):
-        replace = str.replace
 
         if not isinstance(value, str):
             value = str(value)
 
         if 'K' in value:
-            value = replace(value, 'K', '0' * 3)
+            value = PyUnicode_Replace(value, 'K', '000', 1)
         elif 'M' in value:
-            value = replace(value, 'M', '0' * 6)
+            value = PyUnicode_Replace(value, 'M', '000000', 1)
         elif 'G' in value:
-            value = replace(value, 'G', '0' * 9)
+            value = PyUnicode_Replace(value, 'G', '000000000', 1)
 
         if '.' in value:
             value = float(value)
@@ -135,12 +135,11 @@ cdef class BytesSizeType(BaseType):
 
 cdef class BoolType(BaseType):
     def convert(self, value):
-        replace = str.replace
         if isinstance(value, str):
             if 'False' in value:
-                value = replace(value, 'False', '')
+                value = PyUnicode_Replace(value, 'False', '', -1)
             elif 'false' in value:
-                value = replace(value, 'false', '')
+                value = PyUnicode_Replace(value, 'false', '', -1)
         return bool(value)
 
 
@@ -307,7 +306,7 @@ cdef class ConfigParserC(__BaseDict):
         count = 0
         current_section = None
 
-        while config_file_size > ftell(config_file):
+        while <long>config_file_size > ftell(config_file):
             line = NULL
             with nogil:
                 if getline(&line, &count, config_file) == -1:
