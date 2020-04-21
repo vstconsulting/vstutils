@@ -13,6 +13,7 @@ variables:
   DJANGO_LOG_LEVEL: 'CRITICAL'
   TOX_ARGS: "--workdir /cache/.tox_vstutils_${CI_BUILD_REF_NAME}"
   CC: "ccache gcc"
+  UWSGI_PROFILE: "minimal"
 
 stages:
   - code_standarts
