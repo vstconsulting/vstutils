@@ -27,7 +27,7 @@ stages:
     TOX_ENVS: "flake,pylint,jshint,py36-django-install,py37-django-install"
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}"; fi
-  script:
+  script: &build_default_script
    - tox -e $TOX_ENVS $TOX_ARGS
   except:
     refs:
@@ -90,7 +90,8 @@ pages:
   cache:
     <<: *global_cache
     policy: pull
-  after_script:
+  script:
+    <<: *build_default_script
     - mv -v doc/_build/html public
   artifacts:
     paths:
