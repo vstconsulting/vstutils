@@ -16,6 +16,7 @@ from .validators import UrlQueryStringValidator
 
 logger = logging.getLogger('vstutils')
 
+API_URL = settings.API_URL
 REST_METHODS = [
     'GET',
     'POST',
@@ -26,6 +27,7 @@ REST_METHODS = [
     'OPTIONS'
 ]
 
+append_to_list = list.append
 
 def _join_paths(*args):
     '''Join multiple path fragments into one
@@ -47,7 +49,8 @@ class FormatDataFieldMixin:
         if isinstance(result, str) \
                 and '<<' in result \
                 and '>>' in result \
-                and not ('{' in result and '}' in result):
+                and not ('{' in result and '}' in result \
+                and 'results' in self.context):
             result = result.replace('<<', '{').replace('>>', '}')
             return result.format(*self.context['results'])
         return result
@@ -61,8 +64,10 @@ class RequestDataField(FormatDataFieldMixin, DataSerializer):
     '''Field that can handle basic data types and recursise format template strings inside them'''
 
     def to_internal_value(self, data):
+        if isinstance(data, str):
+            pass
 
-        if isinstance(data, (list, tuple)):
+        elif isinstance(data, (list, tuple)):
             return [self.to_internal_value(i) for i in data]
 
         elif isinstance(data, (dict, OrderedDict)):
@@ -78,8 +83,7 @@ class MethodChoicesField(serializers.ChoiceField):
     '''Field for HTTP method'''
 
     def __init__(self, choices=None, **kwargs):
-        choices = choices or REST_METHODS
-        super().__init__(choices, **kwargs)
+        super().__init__(choices or REST_METHODS, **kwargs)
 
     def to_internal_value(self, data):
         return super(MethodChoicesField, self).to_internal_value(str(data).upper())
@@ -106,17 +110,16 @@ class OperationSerializer(serializers.Serializer):
     query = TemplateStringField(required=False, allow_blank=True, default='',
                                 validators=[UrlQueryStringValidator()], write_only=True)
     data = RequestDataField(required=False, default=None, allow_null=True)
-    version = serializers.ChoiceField(choices=list(settings.API.keys()), default=settings.VST_API_VERSION)
+    version = serializers.ChoiceField(choices=list(settings.API.keys()), default=settings.VST_API_VERSION, write_only=True)
     status = serializers.IntegerField(read_only=True)
     info = serializers.CharField(read_only=True)
 
-    def get_opertaion_method(self, method):
-        return getattr(self.context.get('client'), method)
+    def get_operation_method(self, method):
+        return getattr(self.context.get('client'), method.lower())
 
     def _get_rendered(self, response):
         try:
-            data = getattr(response, 'data')
-            return data
+            return response.data
         except:
             pass
         if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
@@ -125,8 +128,8 @@ class OperationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         # pylint: disable=protected-access
-        method = self.get_opertaion_method(validated_data['method'].lower())
-        url = f"/{settings.API_URL}/{validated_data['version']}/{validated_data['path']}/".replace('//', '/')
+        method = self.get_operation_method(validated_data['method'])
+        url = _join_paths(API_URL, validated_data['version'], validated_data['path'])
         query = validated_data['query']
         if query:
             url += '?' + query
@@ -198,6 +201,7 @@ class EndpointViewSet(views.APIView):
         kwargs['context'] = self.get_serializer_context(kwargs.get('context', {}))
         return serializer_class(*args, **kwargs)
 
+    @cache_method_result
     def get_serializer_class(self):
         """
         Return the class to use for the serializer.
@@ -225,14 +229,14 @@ class EndpointViewSet(views.APIView):
             'request': self.request,
             'view': self
         })
-        context['client'] = self.get_client()
-        context['results'] = self.results
+        if 'client' not in context:
+            context['client'] = self.get_client()
         return context
 
     @transaction.atomic()
-    def operate(self, operation_data):
+    def operate(self, operation_data, context):
         """Method used to handle one operation and return result of it"""
-        serializer = self.get_serializer(data=operation_data)
+        serializer = self.get_serializer(data=operation_data, context=context)
         try:
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -264,10 +268,14 @@ class EndpointViewSet(views.APIView):
             return responses.HTTP_502_BAD_GATEWAY(self.results)
 
     def put(self, request, allow_fail=True):
-        """Execute non transactionbal bulk request"""
+        """Execute non transaction bulk request"""
+        context = {
+            'client': self.get_client(),
+            'results': self.results
+        }
         for operation in request.data:
-            result = self.operate(operation)
-            self.results.append(result)
+            result = self.operate(operation, context)
+            append_to_list(self.results, result)
             if not allow_fail and not (100 <= result.get('status', 500) < 400):
                 raise Exception(f'Execute transaction stopped. Error message: {str(result)}')
         return responses.HTTP_200_OK(self.results)
