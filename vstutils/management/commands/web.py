@@ -1,6 +1,7 @@
 # pylint: disable=no-member
 from __future__ import unicode_literals
 import os
+import sys
 import time
 from pathlib import Path
 from subprocess import CalledProcessError
@@ -155,6 +156,10 @@ class Command(BaseCommand):
 
         # Load config data from stdin.
         cmd += ['--ini', '-']
+
+        # Check if it is run under virtualenv
+        if sys.prefix != sys.base_prefix:
+            cmd += [f'--virtualenv={sys.prefix}']
 
         # Get config from env
         read, write = os.pipe()
