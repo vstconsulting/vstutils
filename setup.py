@@ -350,10 +350,8 @@ def make_setup(**opts):
 ext_list = [
     'vstutils.config',
     'vstutils.tools',
-    'vstutils.auth',
-    'vstutils.models',
-    'vstutils.custom_model',
-    'vstutils.api.routers',
+    # 'vstutils.models',
+    # 'vstutils.custom_model',
 ]
 
 if 'develop' in sys.argv:
