@@ -5,9 +5,14 @@ from collections import OrderedDict
 
 from django.conf import settings
 from django.db import transaction
-from django.test import Client
+from django.test.client import Client, ClientHandler
 from drf_yasg.views import SPEC_RENDERERS
-from rest_framework import authentication, serializers, views
+from rest_framework import serializers, views
+from rest_framework.authentication import (
+    SessionAuthentication,
+    BasicAuthentication,
+    TokenAuthentication,
+)
 
 from . import responses
 from .decorators import cache_method_result
@@ -27,7 +32,17 @@ REST_METHODS = [
     'OPTIONS'
 ]
 
+default_authentication_classes = (
+    SessionAuthentication,
+    BasicAuthentication,
+    TokenAuthentication
+)
+
 append_to_list = list.append
+
+shared_client_handler = ClientHandler(enforce_csrf_checks=False)
+shared_client_handler.load_middleware()
+
 
 def _join_paths(*args):
     '''Join multiple path fragments into one
@@ -36,6 +51,24 @@ def _join_paths(*args):
     :returns: Path that starts and ends with
     '''
     return f"/{'/'.join(arg.strip('/') for arg in args)}/"
+
+
+class BulkClient(Client):
+    def __init__(self, enforce_csrf_checks=False, **defaults):
+        # pylint: disable=bad-super-call
+        super(Client, self).__init__(**defaults)
+        self.handler = shared_client_handler
+        self.exc_info = None
+
+    @cache_method_result
+    def _base_environ(self, **request):
+        return super()._base_environ(**request)
+
+    def request(self, **request):
+        response = self.handler(self._base_environ(**request))
+        if response.cookies:
+            self.cookies.update(response.cookies)
+        return response
 
 
 class FormatDataFieldMixin:
@@ -49,15 +82,15 @@ class FormatDataFieldMixin:
         if isinstance(result, str) \
                 and '<<' in result \
                 and '>>' in result \
-                and not ('{' in result and '}' in result \
-                and 'results' in self.context):
+                and not ('{' in result and '}' in result) \
+                and 'results' in self.context:
             result = result.replace('<<', '{').replace('>>', '}')
             return result.format(*self.context['results'])
         return result
 
 
 class TemplateStringField(FormatDataFieldMixin, serializers.CharField):
-    pass
+    '''Field that can format "<< >>" templates inside strings'''
 
 
 class RequestDataField(FormatDataFieldMixin, DataSerializer):
@@ -107,12 +140,17 @@ class OperationSerializer(serializers.Serializer):
     path = PathField(required=True)
     method = MethodChoicesField(required=True)
     headers = serializers.DictField(child=TemplateStringField(), default={}, write_only=True)
-    query = TemplateStringField(required=False, allow_blank=True, default='',
-                                validators=[UrlQueryStringValidator()], write_only=True)
     data = RequestDataField(required=False, default=None, allow_null=True)
-    version = serializers.ChoiceField(choices=list(settings.API.keys()), default=settings.VST_API_VERSION, write_only=True)
     status = serializers.IntegerField(read_only=True)
     info = serializers.CharField(read_only=True)
+    query = TemplateStringField(required=False,
+                                allow_blank=True,
+                                default='',
+                                validators=[UrlQueryStringValidator()],
+                                write_only=True)
+    version = serializers.ChoiceField(choices=list(settings.API.keys()),
+                                      default=settings.VST_API_VERSION,
+                                      write_only=True)
 
     def get_operation_method(self, method):
         return getattr(self.context.get('client'), method.lower())
@@ -161,30 +199,32 @@ class EndpointViewSet(views.APIView):
         "REMOTE_ADDR",
         "HTTP_X_FORWARDED_PROTOCOL",
         "HTTP_HOST",
-        "HTTP_USER_AGENT",
+        "HTTP_USER_AGENT"
     ]
 
     serializer_class = OperationSerializer
 
-    @cache_method_result
-    def get_client(self):
+    def get_client(self, request=None):
         """Returns test client and guarantees that if bulk request comes
         authenticated than test client will be authenticated with the same user
 
         :return: test client
         :rtype: django.test.Client
         """
-        client = Client(**self.original_environ_data())
-        if self.request.user.is_authenticated:
-            if isinstance(self.request.successful_authenticator, authentication.SessionAuthentication):
-                client.cookies[self.session_cookie_name] = self.request.session.session_key
+        if request is None:
+            request = self.request
+        client = BulkClient(**self.original_environ_data(request=request))
+        if request.user.is_authenticated:
+            if isinstance(request.successful_authenticator, SessionAuthentication):
+                client.defaults['HTTP_COOKIE'] = request.environ.get('HTTP_COOKIE')
+            elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
+                client.defaults['HTTP_AUTHORIZATION'] = request.environ.get('HTTP_AUTHORIZATION')
             else:
-                client.force_login(self.request.user)
+                client.force_login(request.user)  # nocv
         return client
 
-    def original_environ_data(self, *args):
-        # pylint: disable=protected-access
-        get_environ = self.request._request.environ.get
+    def original_environ_data(self, request, *args):
+        get_environ = request.environ.get
         kwargs = dict()
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
@@ -224,14 +264,14 @@ class EndpointViewSet(views.APIView):
         """
         Extra context provided to the serializer class.
         """
-        context = context.copy()
-        context.update({
-            'request': self.request,
-            'view': self
-        })
-        if 'client' not in context:
+        if 'client' not in context:  # nocv
+            context = context.copy()
             context['client'] = self.get_client()
-        return context
+        return {
+            'request': self.request,
+            'view': self,
+            **context
+        }
 
     @transaction.atomic()
     def operate(self, operation_data, context):
@@ -239,8 +279,7 @@ class EndpointViewSet(views.APIView):
         serializer = self.get_serializer(data=operation_data, context=context)
         try:
             serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return serializer.data
+            return serializer.to_representation(serializer.save())
         except Exception as err:
             return {
                 'path': 'bulk',
@@ -256,7 +295,7 @@ class EndpointViewSet(views.APIView):
         if request.query_params.get('format') == 'openapi':
             url += '?format=openapi'
 
-        return self.get_client().get(url, secure=request.is_secure())
+        return self.get_client(request).get(url, secure=request.is_secure())
 
     def post(self, request):
         """Execute transactional bulk request"""
@@ -270,7 +309,7 @@ class EndpointViewSet(views.APIView):
     def put(self, request, allow_fail=True):
         """Execute non transaction bulk request"""
         context = {
-            'client': self.get_client(),
+            'client': self.get_client(request),
             'results': self.results
         }
         for operation in request.data:
@@ -284,7 +323,7 @@ class EndpointViewSet(views.APIView):
         super().initial(request, *args, **kwargs)
         self.results = []
 
-    def finalize_response(self, *args, **kwargs):
-        if not isinstance(self.request.successful_authenticator, authentication.SessionAuthentication):
+    def finalize_response(self, request, *args, **kwargs):
+        if not isinstance(request.successful_authenticator, default_authentication_classes):
             self.get_client().logout()
-        return super().finalize_response(*args, **kwargs)
+        return super().finalize_response(request, *args, **kwargs)
