@@ -65,7 +65,6 @@ class BaseCommand(_BaseCommand):
 
     def ask_user(self, message, default=None):
         # pylint: disable=import-error
-        from django.utils.six.moves import input
         if getattr(self, 'interactive_mode', False):
             return input(message) or default
         return default

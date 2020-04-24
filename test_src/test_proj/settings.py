@@ -55,4 +55,4 @@ PWA_MANIFEST = {
     'display': 'fullscreen'
 }
 
-LANGUAGES += (('e_list', 'Empty list'),)
+LANGUAGES += (('uk', 'Empty list'),)

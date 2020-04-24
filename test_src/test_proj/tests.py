@@ -6,8 +6,11 @@ import re
 import io
 import pwd
 
-import pyximport
-pyximport.install()
+try:
+    import pyximport
+    pyximport.install()
+except ImportError:  # nocv
+    pass
 
 try:
     from mock import patch
@@ -1000,7 +1003,7 @@ class LangTestCase(BaseTestCase):
             {'data_type': ['_lang', 'ru'], 'method': 'get'},
             {'data_type': ['_lang', 'en'], 'method': 'get'},
             {'data_type': ['_lang', 'unkn'], 'method': 'get'},
-            {'data_type': ['_lang', 'e_list'], 'method': 'get'},
+            {'data_type': ['_lang', 'uk'], 'method': 'get'},
         ]
         results = self.make_bulk(bulk_data, 'put')
         self.assertEqual(results[0]['status'], 200)
@@ -1016,7 +1019,7 @@ class LangTestCase(BaseTestCase):
 
         self.assertFalse('Hello world!' in results[3]['data']['translations'])
 
-        self.assertEqual(results[4]['data']['code'], 'e_list')
+        self.assertEqual(results[4]['data']['code'], 'uk')
         self.assertEqual(results[4]['data']['name'], 'Empty list')
         self.assertEqual(results[4]['data']['translations'], {})
 

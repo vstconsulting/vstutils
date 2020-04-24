@@ -11,6 +11,7 @@ htmlcov
 build
 doc/_build
 *egg-info
+.eggs
 dist
 pylint_*
 .idea/*

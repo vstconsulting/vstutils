@@ -747,7 +747,8 @@ LOGGING = {
     }
 }
 SILENCED_SYSTEM_CHECKS = [
-    'fields.W342', 'urls.W001', '1_10.W001', "fields.W340", "urls.W005"
+    "urls.W005",
+    "fields.W122"
 ]
 
 

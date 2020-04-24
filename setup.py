@@ -334,7 +334,7 @@ def make_setup(**opts):
     opts['cmdclass'] = cmdclass
 
     webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
-    if os.path.exists(webpack_path) and is_build:
+    if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', ""):
         yarn_build_command = 'devBuild' if is_develop else 'build'
         try:
             os.system('yarn install --pure-lockfile')
@@ -350,8 +350,6 @@ def make_setup(**opts):
 ext_list = [
     'vstutils.config',
     'vstutils.tools',
-    # 'vstutils.models',
-    # 'vstutils.custom_model',
 ]
 
 if 'develop' in sys.argv:
@@ -365,8 +363,7 @@ kwargs = dict(
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
-        "django>=2.2,<3.0;python_version>='3.6'",
-        'cython>0.29,<0.30',
+        "django>=2.2,<=3.0.5;python_version>='3.6'",
     ]
     + load_requirements('requirements.txt')
     + load_requirements('requirements-doc.txt')

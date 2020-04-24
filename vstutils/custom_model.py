@@ -18,6 +18,9 @@ class Query(dict):
     def __init__(self, queryset, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset = queryset
+        self.combinator = None
+        self.is_sliced = False
+        self.select_for_update = False
         self['standard_ordering'] = True
 
     @property
@@ -77,6 +80,7 @@ class Query(dict):
 
     def set_limits(self, low: int = None, high: int = None):
         self['low_mark'], self['high_mark'] = low, high
+        self.is_sliced = True
 
     def has_results(self, *args, **kwargs):
         # pylint: disable=unused-argument
