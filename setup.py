@@ -334,7 +334,7 @@ def make_setup(**opts):
     opts['cmdclass'] = cmdclass
 
     webpack_path = os.path.join(os.getcwd(), 'webpack.config.js')
-    if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', ""):
+    if os.path.exists(webpack_path) and is_build and os.environ.get('DONT_YARN', "") == 'true':
         yarn_build_command = 'devBuild' if is_develop else 'build'
         try:
             os.system('yarn install --pure-lockfile')
