@@ -32,7 +32,7 @@ class OneLanguageSerializer(serializers.VSTSerializer):
         )
 
 
-class UserViewSet(base.ModelViewSetSet):
+class UserViewSet(base.ModelViewSet):
     '''
     API endpoint that allows users to be viewed or edited.
     '''

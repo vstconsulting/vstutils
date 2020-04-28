@@ -338,26 +338,6 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
 
     """
 
-    __slots__ = ()
-
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):  # nocv
-        return super().update(request, *args, **kwargs)
-
-    def partial_update(self, request, *args, **kwargs):  # nocv
-        return super().partial_update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
-
-
-ModelViewSetSet = ModelViewSet
-
 
 class NonModelsViewSet(GenericViewSet):
     __slots__ = ()

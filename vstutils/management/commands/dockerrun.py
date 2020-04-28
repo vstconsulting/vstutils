@@ -11,6 +11,13 @@ from ...config import ConfigParserC  # pylint: disable=import-error
 
 logger = logging.getLogger('vstutils')
 
+UWSGI_EXTRA_ARGS = [
+    'listen',
+    'disable-logging',
+    'log-4xx',
+    'log-5xx',
+]
+
 
 class Command(BaseCommand):
     interactive = True
@@ -228,8 +235,6 @@ class Command(BaseCommand):
         }
 
         config['uwsgi'] = {
-            # 'processes': os.getenv('{}_UWSGI_PROCESSES'.format(prefix), '%%k'),
-            # 'threads': os.getenv('{}_UWSGI_THREADS'.format(prefix), '%%k'),
             'thread-stacksize': os.getenv(f'{prefix}_UWSGI_THREADSTACK', '40960'),
             'max-requests': os.getenv(f'{prefix}_UWSGI_MAXREQUESTS', '50000'),
             'limit-as': os.getenv(f'{prefix}_UWSGI_LIMITS', '512'),
@@ -238,6 +243,10 @@ class Command(BaseCommand):
             'pidfile': os.getenv(f'{prefix}_UWSGI_PIDFILE', '/run/web.pid'),
             'daemon': 'false'
         }
+        for uwsgi_param in UWSGI_EXTRA_ARGS:
+            uwsgi_param_value = os.getenv(f'{prefix}_UWSGI_{uwsgi_param.upper()}', '')
+            if uwsgi_param_value != '':
+                config['uwsgi'][uwsgi_param] = uwsgi_param_value
 
         # Set worker settings
         config['rpc']['enable_worker'] = 'false'

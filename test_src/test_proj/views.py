@@ -3,7 +3,7 @@ import json
 from django.http.response import Http404, HttpResponse
 
 from vstutils.api import fields, filters, responses
-from vstutils.api.base import (CopyMixin, ModelViewSetSet, NonModelsViewSet,
+from vstutils.api.base import (CopyMixin, ModelViewSet, NonModelsViewSet,
                                ReadOnlyModelViewSet, Response)
 from vstutils.api.decorators import action, nested_view, subaction
 from vstutils.api.serializers import EmptySerializer, VSTSerializer
@@ -95,7 +95,7 @@ class HostGroupSerializer(VSTSerializer):
         )
 
 
-class HostViewSet(ModelViewSetSet):
+class HostViewSet(ModelViewSet):
     '''
     Hosts view
     '''
@@ -105,7 +105,7 @@ class HostViewSet(ModelViewSetSet):
         'create': CreateHostSerializer
     }
     filter_class = HostFilter
-    filter_backends = list(ModelViewSetSet.filter_backends) + [TestFilterBackend]
+    filter_backends = list(ModelViewSet.filter_backends) + [TestFilterBackend]
 
     @subaction(
         response_code=200, response_serializer=EmptySerializer, detail=True,
@@ -124,7 +124,7 @@ class HostViewSet(ModelViewSetSet):
         return Response("OK", 201).resp
 
 
-class _HostGroupViewSet(ModelViewSetSet):
+class _HostGroupViewSet(ModelViewSet):
     '''
     Host group opertaions.
     '''
@@ -203,7 +203,7 @@ class ModelWithFKSerializer(VSTSerializer):
         )
 
 
-class TestFkViewSet(ModelViewSetSet):
+class TestFkViewSet(ModelViewSet):
     model = ModelWithFK
     serializer_class = ModelWithFKSerializer
 
@@ -227,7 +227,7 @@ class ModelWithBinaryFilesSerializer(VSTSerializer):
         )
 
 
-class TestBinaryFilesViewSet(ModelViewSetSet):
+class TestBinaryFilesViewSet(ModelViewSet):
     model = ModelWithBinaryFiles
     serializer_class = ModelWithBinaryFilesSerializer
 
