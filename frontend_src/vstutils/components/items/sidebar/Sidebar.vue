@@ -2,8 +2,8 @@
     <div class="sidebar">
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column">
-                <template v-for="item in menu_items">
-                    <sidebar_link_wrapper :item="item" @hideSidebar="hideSidebar" />
+                <template v-for="(item, idx) in menu_items">
+                    <sidebar_link_wrapper :key="idx" :item="item" @hideSidebar="hideSidebar" />
                 </template>
             </ul>
         </nav>
@@ -11,6 +11,8 @@
 </template>
 
 <script>
+    import $ from 'jquery';
+
     export default {
         name: 'sidebar',
         props: {

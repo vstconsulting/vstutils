@@ -34,4 +34,35 @@
     };
 </script>
 
-<style scoped></style>
+<style scoped>
+    .breadcrumb {
+        font-size: 12px;
+    }
+
+    breadcrumb > li.active > a {
+        color: #777;
+    }
+
+    .breadcrumb > li.breadcrumb-item > a {
+        color: #444;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .breadcrumb > li.breadcrumb-item.active > a {
+        color: #777;
+    }
+
+    .breadcrumb > li.breadcrumb-item > a {
+        color: var(--text-header-color);
+    }
+
+    @media (max-width: 991px) {
+        .breadcrumb {
+            margin-top: 0;
+            width: 100%;
+            background-color: var(--breadcrumb-bg-color) !important;
+            padding: 5px 10px !important;
+        }
+    }
+</style>

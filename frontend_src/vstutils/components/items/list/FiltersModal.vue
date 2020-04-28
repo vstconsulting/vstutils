@@ -24,14 +24,14 @@
 </template>
 
 <script>
-    import { mixins } from '../../../fields';
+    import { ModalWindowAndButtonMixin } from '../../../fields';
 
     /**
      * Component for filter modal window and button, that opens it.
      */
     export default {
         name: 'gui_filters_modal',
-        mixins: [mixins.modal_window_and_button_mixin],
+        mixins: [ModalWindowAndButtonMixin],
         props: ['opt', 'view', 'data'],
         computed: {
             is_there_any_filter_to_display() {

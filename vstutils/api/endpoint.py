@@ -274,7 +274,10 @@ class EndpointViewSet(views.APIView):
         except Exception as err:
             return {
                 'path': 'bulk',
-                'info': getattr(serializer, '_errors', traceback.format_exc()),
+                'info': {
+                    'errors': getattr(serializer, '_errors', traceback.format_exc()),
+                    'operation_data': operation_data
+                },
                 'status': 500,
                 'data': dict(detail=f'Error in bulk request data. See info. Original message: {str(err)}')
             }

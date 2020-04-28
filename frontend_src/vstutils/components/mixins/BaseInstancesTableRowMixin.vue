@@ -38,7 +38,7 @@
 </template>
 
 <script>
-    import { mixins } from '../../fields';
+    import { TableRowMixin } from '../../fields';
     import BaseListTableMixin from './BaseListTableMixin.js';
     import BaseInstancesTableAndRowMixin from './BaseInstancesTableAndRowMixin.js';
 
@@ -47,7 +47,7 @@
      */
     export default {
         name: 'base_instances_table_row_mixin',
-        mixins: [BaseListTableMixin, mixins.table_row_mixin, BaseInstancesTableAndRowMixin],
+        mixins: [BaseListTableMixin, TableRowMixin, BaseInstancesTableAndRowMixin],
         props: {
             instance: {
                 type: Object,

@@ -67,6 +67,7 @@ import * as store from './vstutils/store';
 import * as router from './vstutils/router';
 import * as api from './vstutils/api';
 import * as users from './vstutils/users';
+import * as dashboard from './vstutils/dashboard';
 export * from './vstutils/ComponentsRegistrator.js';
 
 export {
@@ -83,6 +84,7 @@ export {
     router,
     api,
     users,
+    dashboard,
 };
 
 import './vstutils/gui.css';

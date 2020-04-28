@@ -59,8 +59,8 @@ export default class BaseApp {
                 };
                 this.user = response[2];
 
-                this.global_components.registerAll();
                 fieldsRegistrator.registerAllFieldsComponents();
+                this.global_components.registerAll();
 
                 this.afterInitialDataBeforeMount();
 

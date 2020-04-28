@@ -2,6 +2,7 @@ import { BaseWidgetMixin, CardWidgetBodyMixin } from './baseWidgetMixins.js';
 import ActionTypeMixin from './ActionTypeMixin.js';
 import BaseButtonMixin from './BaseButtonMixin.vue';
 import BaseInstancesTableAndRowMixin from './BaseInstancesTableAndRowMixin.js';
+import BaseInstancesTableMixin from './BaseInstancesTableMixin.vue';
 import BaseInstancesTableRowMixin from './BaseInstancesTableRowMixin.vue';
 import BaseListTableMixin from './BaseListTableMixin.js';
 import BasePageTypeMixin from './BasePageTypeMixin.vue';
@@ -15,6 +16,7 @@ export {
     ActionTypeMixin,
     BaseButtonMixin,
     BaseInstancesTableAndRowMixin,
+    BaseInstancesTableMixin,
     BaseInstancesTableRowMixin,
     BaseListTableMixin,
     BasePageTypeMixin,

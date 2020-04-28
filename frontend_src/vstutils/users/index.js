@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-import { path_pk_key } from '../utils';
+import { path_pk_key, randomString } from '../utils';
 import ProfileViewConsctuctor from './ProfileViewConsctuctor.js';
 
 import Gravatar from './Gravatar.js';
@@ -134,7 +134,7 @@ const view_with_user_password_mixin = {
          */
         generate_passwordInstance() {
             let data = $.extend(true, {}, this.getQuerySetFromSandBox(this.view, this.qs_url).cache.data);
-            let password = randomString(8); /* globals randomString */
+            let password = randomString(8);
 
             ['password', 'password2'].forEach((field) => {
                 data[field] = password;

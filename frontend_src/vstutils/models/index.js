@@ -8,8 +8,9 @@ import ModelConstructor from './ModelConstructor.js';
  * This Model can create Model instances (also JS Objects),
  * that aimed to be something similar to Django Model instances.
  */
-window.guiModels = { Model };
+const guiModels = { Model };
+window.guiModels = guiModels;
 
 window.ModelConstructor = ModelConstructor;
 
-export { Model, ModelConstructor };
+export { Model, ModelConstructor, guiModels };
