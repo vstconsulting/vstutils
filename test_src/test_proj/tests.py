@@ -1288,6 +1288,15 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[18]['status'], 204)
         self.assertEqual(results[19]['status'], 201)
 
+        bulk_data = [
+            dict(data_type=['hosts'], data=dict(name='level1'), method='post'),
+            dict(data_type=['subhosts'], data=dict(name='level1_subhost'), method='post'),
+            dict(data_type=['hosts', '<<0[data][id]>>', 'shost'], data='<<1[data]>>', method='post'),
+        ]
+        results = self.make_bulk(bulk_data, 'put')
+        self.assertEqual(results[-1]['status'], 201, results)
+
+
     def test_coreapi_schema(self):
         stdout = io.StringIO()
         call_command(
