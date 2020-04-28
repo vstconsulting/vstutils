@@ -1,8 +1,8 @@
-import { mixins } from '../../../fields';
+import { MainPagination } from '../../../fields';
 
 const Pagination = {
     name: 'pagination',
-    mixins: [mixins.main_pagination_mixin],
+    mixins: [MainPagination],
 };
 
 export default Pagination;

@@ -214,4 +214,20 @@
     };
 </script>
 
-<style scoped></style>
+<style scoped>
+    .gravatar-img {
+        width: 30px;
+        height: 30px;
+        margin-top: -5px;
+        margin-right: 5px;
+    }
+
+    .profile-menu {
+        margin-top: 8px;
+        border-radius: 0px;
+        border-top: 0px;
+        color: #fff;
+        box-shadow: 0 0 0 0;
+        border-color: #dfe3e7;
+    }
+</style>

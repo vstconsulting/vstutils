@@ -2,7 +2,7 @@
     <div class="container-fluid">
         <div class="row">
             <div
-                v-for="(field, idx) in fieldsToshow"
+                v-for="(field, idx) in fieldsToShow"
                 :key="idx"
                 :field="field"
                 :is="'field_' + field.options.format"
@@ -20,7 +20,7 @@
         name: 'filters_wrapper',
         props: ['view', 'opt', 'filters_data'],
         computed: {
-            fieldsToshow() {
+            fieldsToShow() {
                 return Object.values(this.filters).filter(
                     (field) => !(this.opt.hideReadOnly && field.options.readOnly),
                 );

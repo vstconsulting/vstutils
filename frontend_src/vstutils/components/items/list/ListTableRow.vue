@@ -39,7 +39,7 @@
 
 <script>
     import { BaseListTableMixin } from '../../mixins';
-    import { mixins } from '../../../fields';
+    import { TableRowMixin } from '../../../fields';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -47,7 +47,7 @@
      */
     export default {
         name: 'gui_list_table_row',
-        mixins: [BaseListTableMixin, mixins.table_row_mixin],
+        mixins: [BaseListTableMixin, TableRowMixin],
         props: ['instance', 'fields', 'view', 'opt'],
         computed: {
             fieldsToShow() {

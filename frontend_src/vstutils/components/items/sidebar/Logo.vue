@@ -11,8 +11,29 @@
      */
     export default {
         name: 'logo',
-        props: ['title'],
+        props: {
+            title: {
+                type: String,
+                default: () => '',
+            },
+        },
     };
 </script>
 
-<style scoped></style>
+<style scoped>
+    .logo-link {
+        padding: 0.8125rem 0.5rem !important;
+    }
+    .brand-link {
+        border-bottom-color: var(--left-sidebar-border-color) !important;
+        padding: 0.75rem 0.5rem;
+    }
+    .brand-link:hover {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+    @media (max-width: 767px) {
+        .logo {
+            display: none;
+        }
+    }
+</style>

@@ -1,12 +1,12 @@
 import { addCssClassesToElement } from '../../utils';
-import { mixins } from '../../fields';
+import { HideFieldInTableMixin } from '../../fields';
 
 /**
  * Mixin for gui_list_table and gui_list_table_row.
  */
 const BaseListTableMixin = {
     name: 'base_list_table_mixin',
-    mixins: [mixins.hide_field_in_table_mixin],
+    mixins: [HideFieldInTableMixin],
     computed: {
         child_actions_exist: function () {
             return this.doesPropertyExist(this.schema, 'child_links');

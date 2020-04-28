@@ -571,6 +571,19 @@ class ViewsTestCase(BaseTestCase):
         response = client.post('/login/', {'username': user['username'], 'password': user['password2']})
         self.assertRedirects(response, '/')
 
+    def test_login_redirects(self):
+        user = self._create_user(is_super_user=False)
+        client = self.client_class()
+        redirect_page = '/#/user/1/notification_settings'
+        
+        # Test that login POST handler redirects after successful login
+        response = client.post('/login/', {
+            'username': user.data['username'],
+            'password': user.data['password'],
+            'next': redirect_page
+        })
+        self.assertRedirects(response, redirect_page)
+
 
 class DefaultBulkTestCase(BaseTestCase):
 
@@ -719,7 +732,7 @@ class EndpointTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         result = self.render_api_response(response)
         self.assertEqual(result[0]['data']['user_id'], user.id, result)
-        
+
     def test_simple_queries(self):
         User = self.get_model_class('django.contrib.auth.models.User')
         User.objects.exclude(pk=self.user.id).delete()
@@ -851,7 +864,13 @@ class EndpointTestCase(BaseTestCase):
         self.assertEqual(response[0]['path'], 'bulk')
         self.assertEqual(
             response[0]['info'],
-            {'path': ['This field is required.'], 'method': ['This field is required.']}
+            {
+                'errors': {
+                    'path': ['This field is required.'],
+                    'method': ['This field is required.']
+                },
+                'operation_data': {}
+            }
         )
 
         # Test text api response 404

@@ -52,9 +52,6 @@
         mixins: [BaseListTableMixin],
         props: ['instances', 'fields', 'view', 'opt'],
         computed: {
-            fieldsToShow() {
-                return Object.values(this.fields).filter((field) => !this.hideField(field));
-            },
             store_url() {
                 return this.opt.store_url;
             },

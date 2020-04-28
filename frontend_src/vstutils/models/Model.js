@@ -1,5 +1,5 @@
 import { guiFields } from '../fields';
-import { isEmptyObject } from '../utils';
+import { isEmptyObject, obj_prop_retriever } from '../utils';
 
 /**
  * Class of Base Model.
@@ -118,10 +118,7 @@ export default class Model {
             }
         }
 
-        let methods = obj_prop_retriever.getPrototypeNonenumerables(
-            this,
-            false,
-        ); /* globals obj_prop_retriever */
+        let methods = obj_prop_retriever.getPrototypeNonenumerables(this, false);
 
         for (let index = 0; index < methods.length; index++) {
             let key = methods[index];

@@ -51,8 +51,8 @@
 </template>
 
 <script>
-    import { mixins } from '../../../fields';
-    import { BaseInstancesTableAndRowMixin, BaseInstancesTableRowMixin } from '../../mixins';
+    import { BaseInstancesTableMixin, BaseInstancesTableRowMixin } from '../../mixins';
+    import { BaseModalWindowForInstanceList } from '../../../fields';
 
     /**
      * Component for modal window with list of child instances,
@@ -60,7 +60,7 @@
      */
     export default {
         name: 'gui_add_child_modal',
-        mixins: [mixins.base_modal_window_for_instance_list_mixin],
+        mixins: [BaseModalWindowForInstanceList],
         props: ['options'],
         data() {
             return {
@@ -133,16 +133,11 @@
              * Method, that inits adding of selected child instances to parent list.
              */
             addSelected() {
-                for (let id in this.selections) {
-                    if (this.selections.hasOwnProperty(id)) {
-                        let val = this.selections[id];
-
-                        if (!val) {
-                            continue;
-                        }
-
-                        this.addChildToParent(id);
+                for (let [id, val] of Object.entries(this.selections)) {
+                    if (!val) {
+                        continue;
                     }
+                    this.addChildToParent(id);
                 }
 
                 this.close();
@@ -194,7 +189,7 @@
              * Modal window table.
              */
             current_table: {
-                mixins: [BaseInstancesTableAndRowMixin],
+                mixins: [BaseInstancesTableMixin],
                 watch: {
                     selections(selections) {
                         this.$emit('changeValue', { selections: selections });

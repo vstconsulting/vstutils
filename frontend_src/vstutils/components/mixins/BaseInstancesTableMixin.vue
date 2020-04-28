@@ -38,8 +38,8 @@
 </template>
 
 <script>
-    import BaseListTableMixin from './BaseListTableMixin.vue';
-    import BaseInstancesTableAndRowMixin from './BaseInstancesTableAndRowMixin.vue';
+    import BaseListTableMixin from './BaseListTableMixin.js';
+    import BaseInstancesTableAndRowMixin from './BaseInstancesTableAndRowMixin.js';
 
     /**
      * Mixin for modal window table.

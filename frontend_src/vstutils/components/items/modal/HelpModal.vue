@@ -43,11 +43,11 @@
 </template>
 
 <script>
-    import { mixins } from '../../../fields';
+    import { ModalWindowAndButtonMixin } from '../../../fields';
 
     export default {
         name: 'gui_help_modal',
-        mixins: [mixins.modal_window_and_button_mixin],
+        mixins: [ModalWindowAndButtonMixin],
         data() {
             return {
                 info: app.api.openapi.info,

@@ -2,8 +2,9 @@ import Vue from 'vue';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings } from './vstutils/utils';
-import { View } from './vstutils/views';
+import { View, ViewConstructor } from './vstutils/views';
 import { StoreConstructor } from './vstutils/store';
+import { ModelConstructor, guiModels } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 
 export * from './app.common.js';
@@ -49,10 +50,7 @@ export class App extends BaseApp {
      * Method, that generates Models Objects, based on openapi_schema.
      */
     generateModels() {
-        let models_constructor = new ModelConstructor(
-            openapi_dictionary,
-            guiModels,
-        ); /* globals ModelConstructor, guiModels */
+        let models_constructor = new ModelConstructor(openapi_dictionary, guiModels);
         return models_constructor.generateModels(this.api.openapi);
     }
     /**

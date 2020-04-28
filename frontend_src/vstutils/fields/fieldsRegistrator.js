@@ -1,5 +1,5 @@
-import Vue from 'vue';
-import guiFields from './guiFields.js';
+import { globalComponentsRegistrator } from '../ComponentsRegistrator.js';
+import { guiFields } from './fields.js';
 
 /**
  * Class, that registers Vue components for guiFields.
@@ -19,23 +19,14 @@ class GuiFieldComponentRegistrator {
      * @param {array} mixins guiField class mixins.
      */
     registerFieldComponent(format, mixins) {
-        let component = 'field_' + format;
-        if (Vue.options.components[component]) {
-            return;
-        }
-
-        Vue.component(component, {
-            mixins: mixins || [],
-        });
+        globalComponentsRegistrator.add({ mixins: mixins || [] }, 'field_' + format);
     }
     /**
      *  Method, that registers all guiFields.
      */
     registerAllFieldsComponents() {
-        for (let key in this.fields) {
-            if (this.fields.hasOwnProperty(key)) {
-                this.registerFieldComponent(key, this.fields[key].mixins);
-            }
+        for (let [key, val] of Object.entries(this.fields)) {
+            this.registerFieldComponent(key, val.mixins);
         }
     }
 }

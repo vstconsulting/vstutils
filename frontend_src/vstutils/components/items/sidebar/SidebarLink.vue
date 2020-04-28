@@ -5,8 +5,7 @@
         class="nav-link"
         :class="link_classes"
         rel="noreferrer"
-        @click="onLinkClickHandler"
-        @click.native="onLinkClickHandler"
+        v-bind="eventHandlers"
     >
         <i class="nav-icon ico-menu" :class="icon_classes"></i>
         <p>
@@ -30,6 +29,15 @@
         mixins: [SidebarLinkMixin],
         props: ['item'],
         computed: {
+            /**
+             * Property for dynamic binding event handlers so <a> tag would not recieve .native handler
+             */
+            eventHandlers() {
+                return {
+                    'v-on:click': this.onLinkClickHandler,
+                    'v-on:click.native': this.onLinkClickHandler,
+                };
+            },
             /**
              * Property, that returns icon classes for current sidebar_link.
              */

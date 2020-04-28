@@ -1,3 +1,5 @@
+import VueRouter from 'vue-router';
+
 /**
  * Class, that manages Router creation.
  * In current realization, Router is Vue-Router.
@@ -160,7 +162,6 @@ export default class RouterConstructor {
      */
     getRouter() {
         return new VueRouter({
-            /* globals VueRouter */
             routes: this.getRoutes(),
         });
     }
