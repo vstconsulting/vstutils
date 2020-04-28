@@ -281,7 +281,7 @@ class EndpointViewSet(views.APIView):
 
     def get(self, request, format=None) -> views.Response:
         """Returns response with swagger ui or openapi json schema if ?format=openapi"""
-        
+
         url = '/api/openapi/'
 
         if request.query_params.get('format') == 'openapi':
