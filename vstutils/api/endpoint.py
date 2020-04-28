@@ -22,15 +22,7 @@ from .validators import UrlQueryStringValidator
 logger = logging.getLogger('vstutils')
 
 API_URL = settings.API_URL
-REST_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'HEAD',
-    'OPTIONS'
-]
+REST_METHODS = list(m.upper() for m in views.APIView.http_method_names)
 
 default_authentication_classes = (
     SessionAuthentication,
@@ -54,10 +46,11 @@ def _join_paths(*args):
 
 
 class BulkClient(Client):
+    handler = shared_client_handler
+
     def __init__(self, enforce_csrf_checks=False, **defaults):
         # pylint: disable=bad-super-call
         super(Client, self).__init__(**defaults)
-        self.handler = shared_client_handler
         self.exc_info = None
 
     @cache_method_result
@@ -141,7 +134,7 @@ class OperationSerializer(serializers.Serializer):
     method = MethodChoicesField(required=True)
     headers = serializers.DictField(child=TemplateStringField(), default={}, write_only=True)
     data = RequestDataField(required=False, default=None, allow_null=True)
-    status = serializers.IntegerField(read_only=True)
+    status = serializers.IntegerField(read_only=True, default=500)
     info = serializers.CharField(read_only=True)
     query = TemplateStringField(required=False,
                                 allow_blank=True,
@@ -204,12 +197,10 @@ class EndpointViewSet(views.APIView):
 
     serializer_class = OperationSerializer
 
-    def get_client(self, request=None):
-        """Returns test client and guarantees that if bulk request comes
+    def get_client(self, request=None) -> BulkClient:
+        """
+        Returns test client and guarantees that if bulk request comes
         authenticated than test client will be authenticated with the same user
-
-        :return: test client
-        :rtype: django.test.Client
         """
         if request is None:
             request = self.request
@@ -223,7 +214,7 @@ class EndpointViewSet(views.APIView):
                 client.force_login(request.user)  # nocv
         return client
 
-    def original_environ_data(self, request, *args):
+    def original_environ_data(self, request, *args) -> dict:
         get_environ = request.environ.get
         kwargs = dict()
         for env_var in tuple(self.client_environ_keys_copy) + args:
@@ -232,7 +223,7 @@ class EndpointViewSet(views.APIView):
                 kwargs[env_var] = str(value)
         return kwargs
 
-    def get_serializer(self, *args, **kwargs):
+    def get_serializer(self, *args, **kwargs) -> OperationSerializer:
         """
         Return the serializer instance that should be used for validating and
         deserializing input, and for serializing output.
@@ -260,7 +251,7 @@ class EndpointViewSet(views.APIView):
 
         return self.serializer_class
 
-    def get_serializer_context(self, context):
+    def get_serializer_context(self, context) -> dict:
         """
         Extra context provided to the serializer class.
         """
@@ -274,7 +265,7 @@ class EndpointViewSet(views.APIView):
         }
 
     @transaction.atomic()
-    def operate(self, operation_data, context):
+    def operate(self, operation_data: dict, context: dict) -> dict:
         """Method used to handle one operation and return result of it"""
         serializer = self.get_serializer(data=operation_data, context=context)
         try:
@@ -288,8 +279,9 @@ class EndpointViewSet(views.APIView):
                 'data': dict(detail=f'Error in bulk request data. See info. Original message: {str(err)}')
             }
 
-    def get(self, request, format=None):
+    def get(self, request, format=None) -> views.Response:
         """Returns response with swagger ui or openapi json schema if ?format=openapi"""
+        
         url = '/api/openapi/'
 
         if request.query_params.get('format') == 'openapi':
@@ -297,7 +289,7 @@ class EndpointViewSet(views.APIView):
 
         return self.get_client(request).get(url, secure=request.is_secure())
 
-    def post(self, request):
+    def post(self, request) -> responses.BaseResponseClass:
         """Execute transactional bulk request"""
         try:
             with transaction.atomic():
@@ -306,7 +298,7 @@ class EndpointViewSet(views.APIView):
             logger.debug(traceback.format_exc())
             return responses.HTTP_502_BAD_GATEWAY(self.results)
 
-    def put(self, request, allow_fail=True):
+    def put(self, request, allow_fail=True) -> responses.BaseResponseClass:
         """Execute non transaction bulk request"""
         context = {
             'client': self.get_client(request),
