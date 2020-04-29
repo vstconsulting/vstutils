@@ -899,9 +899,6 @@ SPA_STATIC = [
 
     # Load app
     {'priority': 5, 'type': 'js', 'name': 'bundle/spa.js'},
-
-    # Load templates
-    {'priority': 300, 'type': 'tpl', 'name': 'templates/guiFields.html'}
 ]
 
 # Test settings for speedup tests
