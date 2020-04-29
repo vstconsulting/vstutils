@@ -279,7 +279,7 @@ class BulkViewSet(base.rvs.APIView):
                 raise
             response = base.exception_handler(err, None)
             kwargs = dict(error_type=err.__class__.__name__, message=str(err))
-            kwargs.update({'results': self.results} if isinstance(err, KeyError) else {})
+            kwargs.update({'results': self.results[:-1]} if isinstance(err, KeyError) else {})
             self.put_result(self.create_response(
                 response.status_code,
                 self._get_rendered(response),

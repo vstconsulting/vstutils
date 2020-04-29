@@ -220,11 +220,16 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
         self._check_permission_obj(objects)
         self.nested_manager.add(*objects)
         id_list = list(objects.values_list(nested_append_arg, flat=True))
-        not_created = filter(
-            lambda data: data.get(nested_append_arg, None) not in id_list, request_data
-        )
+        handler = self.get_serializer_class()().get_fields()[nested_append_arg].to_representation
+
+        def is_not_created(data):
+            try:
+                return handler(data.get(nested_append_arg, None)) not in id_list
+            except:
+                return True
+
         id_list += super()._data_create(
-            not_created, nested_append_arg
+            filter(is_not_created, request_data), nested_append_arg
         )
         return id_list
 
