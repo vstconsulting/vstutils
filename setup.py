@@ -186,6 +186,32 @@ def minify_static_files(base_dir, files, exclude=None):
                 print('Compressed file {fext_file}.'.format(fext_file=fext_file))
 
 
+def compile_py_func(fullname, compile_file_func):
+    if compile_file_func(fullname, ddir=os.path.dirname(fullname), legacy=True, optimize=0):
+        os.remove(fullname)
+
+
+def compile_python_sources(base_dir, files, exclude=None):
+    exclude = exclude or []
+    patterns = dict()
+    try:
+        from compileall import compile_file
+        patterns['*.py'] = (compile_py_func, compile_file)
+    except:
+        pass
+
+    regex_exclude = [re.compile(r, re.MULTILINE) for r in exclude]
+
+    for fnext, funcs in patterns.items():
+        for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
+            fext_file = os.path.join(base_dir, fext_file)
+            if os.path.exists(fext_file):
+                if not any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
+                    func, subfunc = funcs
+                    funcs[0](fext_file, funcs[1])
+                    print('Compiled {fext_file}.'.format(fext_file=fext_file))
+
+
 class _Compile(_sdist):
     extensions_dict = dict()
     static_exclude = []
@@ -281,6 +307,7 @@ class build_py(build_py_orig):
 class install_lib(_install_lib):
     exclude = []
     static_exclude = []
+    compile_exclude = []
 
     def _filter_files_with_ext(self, filename):
         _filename, _fext = os.path.splitext(filename)
@@ -298,6 +325,8 @@ class install_lib(_install_lib):
                 print('Removing extention sources [{}].'.format(source))
                 os.remove(source)
         minify_static_files('', files, self.static_exclude)
+        if os.getenv('BUILD_COMPILE', '') == 'true':
+            compile_python_sources('', files, self.compile_exclude)
         return result
 
 
@@ -323,6 +352,7 @@ def make_setup(**opts):
     if has_cython:
         build_py.exclude = ext_modules_list
         install_lib.static_exclude = static_exclude
+        install_lib.compile_exclude = opts.pop('compile_modules_exclude', list())
         cmdclass.update({
             'build_ext': _build_ext,
             'build_py': build_py,
