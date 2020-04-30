@@ -185,11 +185,11 @@ Then you need to add some code like this to ``views.py``:
 .. sourcecode:: python
 
     from vstutils.api import decorators as deco
-    from vstutils.api.base import ModelViewSetSet
+    from vstutils.api.base import ModelViewSet
     from . import serializers as sers
 
 
-    class StageViewSet(ModelViewSetSet):
+    class StageViewSet(ModelViewSet):
         model = sers.models.Stage
         # Serializer for list view (view for a list of Model instances
         serializer_class = sers.StageSerializer
@@ -204,7 +204,7 @@ Then you need to add some code like this to ``views.py``:
         * view - Nested view, that will be child view for decorated view
     '''
     @deco.nested_view('stages', 'id', view=StageViewSet)
-    class TaskViewSet(ModelViewSetSet):
+    class TaskViewSet(ModelViewSet):
         model = sers.models.Task
         serializer_class = sers.TaskSerializer
         serializer_class_one = sers.TaskSerializer

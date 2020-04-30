@@ -280,7 +280,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     :type arg: str
     :param view: -- Nested viewset class.
     :type view:
-        vstutils.api.base.ModelViewSetSet,
+        vstutils.api.base.ModelViewSet,
         vstutils.api.base.HistoryModelViewSet,
         vstutils.api.base.ReadOnlyModelViewSet
     :param allow_append: -- Flag for allowing to append existed instances.
@@ -298,17 +298,17 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         .. sourcecode:: python
 
             from vstutils.api.decorators import nested_view
-            from vstutils.api.base import ModelViewSetSet
+            from vstutils.api.base import ModelViewSet
             from . import serializers as sers
 
 
-            class StageViewSet(ModelViewSetSet):
+            class StageViewSet(ModelViewSet):
                 model = sers.models.Stage
                 serializer_class = sers.StageSerializer
 
 
             nested_view('stages', 'id', view=StageViewSet)
-            class TaskViewSet(ModelViewSetSet):
+            class TaskViewSet(ModelViewSet):
                 model = sers.models.Task
                 serializer_class = sers.TaskSerializer
 

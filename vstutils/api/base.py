@@ -318,11 +318,11 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
     Examples:
         .. sourcecode:: python
 
-            from vstutils.api.base import ModelViewSetSet
+            from vstutils.api.base import ModelViewSet
             from . import serializers as sers
 
 
-            class StageViewSet(ModelViewSetSet):
+            class StageViewSet(ModelViewSet):
                 # This is difference with DRF:
                 # we use model instead of queryset
                 model = sers.models.Stage
@@ -372,7 +372,7 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
-    """ Default viewset like vstutils.api.base.ModelViewSetSet for readonly models. """
+    """ Default viewset like vstutils.api.base.ModelViewSet for readonly models. """
     __slots__ = ()
 
 

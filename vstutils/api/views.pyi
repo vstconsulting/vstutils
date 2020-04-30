@@ -2,7 +2,7 @@ from typing import List, Dict
 from . import base
 
 
-class UserViewSet(base.ModelViewSetSet):
+class UserViewSet(base.ModelViewSet):
     ...
 
 
