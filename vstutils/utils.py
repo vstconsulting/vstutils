@@ -1,7 +1,6 @@
 # pylint: disable=django-not-available,invalid-name
 from __future__ import unicode_literals
 
-import collections
 import json
 import logging
 import os
@@ -152,7 +151,7 @@ class redirect_stdany:
             setattr(sys, stream, self._old_streams.pop(stream))
 
 
-class Dict(collections.OrderedDict):
+class Dict(dict):
     """
     Wrapper over `collections.OrderedDict` which
     return JSON on conversion to string.
@@ -161,11 +160,8 @@ class Dict(collections.OrderedDict):
     def __repr__(self):  # nocv
         return self.__str__()
 
-    def __str__(self):  # nocv
-        return self.__unicode__()
-
-    def __unicode__(self):  # nocv
-        return json.dumps(self)
+    def __str__(self):
+        return json.dumps(self.copy())
 
 
 class tmp_file:
