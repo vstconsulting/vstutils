@@ -1,7 +1,7 @@
 <template>
     <div :class="wrapper_classes" v-if="item.active">
         <div class="card card-info">
-            <div class="card-header card-header-custom card-header_widget ui-sortable-handle cursor-move1">
+            <div class="card-header card-header_widget ui-sortable-handle cursor-move1">
                 {{ $t((item.title || item.name).toLowerCase()) | capitalize }}
                 <button
                     type="button"
