@@ -37,7 +37,7 @@ class Command(BaseCommand):
         logger.debug(f'Prefix={self.prefix} | Project={project_name}')
 
         config = self.prepare_config()
-        env = dict()
+        env = os.environ.copy()
         env[self._settings('CONFIG_ENV_DATA_NAME')] = config.generate_config_string()
         default_envs = {
             'UWSGI_PROCESSES': 'UWSGI_WORKERS',
