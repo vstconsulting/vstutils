@@ -3,7 +3,8 @@
     color: #f77;
 }
 
-.paramTable {
+.pull-right {
+    float: right;
 }
 
 .paramTable td {
