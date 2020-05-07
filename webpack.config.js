@@ -25,7 +25,6 @@ function setMode() {
 
 const config = {
   mode: setMode(),
-  // devtool: isProd ? undefined : "source-map",
   entry: {
     spa: entrypoints_dir + "/spa.js",
     doc: entrypoints_dir + "/doc.js",

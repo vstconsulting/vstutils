@@ -1,10 +1,3 @@
-.history-stdout {
-    background-color: #000000;
-    color: #ECECEC;
-    font-weight: bold;
-    white-space: pre-wrap;
- }
-
 .ansi-black-fg { color: #000000; }
 .ansi-red-fg { color: #FF6060; }
 .ansi-green-fg { color: #60FF60; }
