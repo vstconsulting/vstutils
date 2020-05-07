@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import transaction
 from django.test.client import Client, ClientHandler
 from drf_yasg.views import SPEC_RENDERERS
-from rest_framework import serializers, views
+from rest_framework import serializers, views, versioning
 from rest_framework.authentication import (
     SessionAuthentication,
     BasicAuthentication,
@@ -181,6 +181,7 @@ class OperationSerializer(serializers.Serializer):
 
 class EndpointViewSet(views.APIView):
     schema = None
+    versioning_class = versioning.QueryParameterVersioning
     renderer_classes = list(views.APIView.renderer_classes) + list(SPEC_RENDERERS)
     session_cookie_name = settings.SESSION_COOKIE_NAME
     client_environ_keys_copy = [
@@ -285,7 +286,7 @@ class EndpointViewSet(views.APIView):
     def get(self, request, format=None) -> views.Response:
         """Returns response with swagger ui or openapi json schema if ?format=openapi"""
 
-        url = '/api/openapi/'
+        url = f'/api/{request.version or settings.VST_API_VERSION}/_openapi/'
 
         if request.query_params.get('format') == 'openapi':
             url += '?format=openapi'

@@ -584,6 +584,7 @@ if EMAIL_HOST is None:
 VST_API_URL = os.getenv("VST_API_URL", "api")
 VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
 API_URL = VST_API_URL
+ENDPOINT_VIEW_CLASS = 'vstutils.api.endpoint.EndpointViewSet'
 HAS_COREAPI = False
 API_CREATE_SWAGGER = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
 SWAGGER_API_DESCRIPTION = web['rest_swagger_description']
@@ -592,6 +593,7 @@ CONTACT = config['contact'].all()
 OPENAPI_PUBLIC = web['public_openapi']
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
 HEALTH_THROTTLE_RATE = f"{web['health_throttle_rate']}/minute"
+OPENAPI_VIEW_CLASS = 'vstutils.api.schema.views.OpenApiView'
 
 OPENAPI_EXTRA_LINKS = {
     'vstutils': {

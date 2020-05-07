@@ -372,7 +372,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertIn('v1', api['available_versions'])
         self.assertIn('v2', api['available_versions'])
         self.assertEqual(api['available_versions']['v1'], api['current_version'])
-        self.assertEqual(api['openapi'], 'https://vstutilstestserver/api/openapi')
+        self.assertEqual(api['endpoint'], 'https://vstutilstestserver/api/endpoint')
         self.assertEqual(api['health'], 'https://vstutilstestserver/api/health')
         self.assertEqual(
             list(self.get_result('get', '/api/v1/').keys()).sort(),
