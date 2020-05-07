@@ -1,4 +1,4 @@
-// TabSignal
+// Global libraries
 import './libs/tabSignal.js';
 
 import $ from './libs/jquery.js';
@@ -16,7 +16,6 @@ import 'izimodal/css/iziModal.css';
 
 import './libs/vue.js';
 
-// Other
 import moment from 'moment';
 window.moment = moment;
 import 'moment-timezone/builds/moment-timezone-with-data-1970-2030.js';
@@ -54,6 +53,12 @@ import './libs/bootstrap-select.js';
 import './libs/adminlte.js';
 import './libs/fontawesome.js';
 
+// Libraries in spa object
+import * as colors from './libs/colors.js';
+
+export { colors };
+
+// vstutils code
 import * as utils from './vstutils/utils';
 import * as guiCustomizer from './vstutils/guiCustomizer';
 import * as setupVue from './vstutils/setupVue.js';
@@ -87,4 +92,5 @@ export {
     dashboard,
 };
 
+// vstutils styles
 import './vstutils/gui.css';
