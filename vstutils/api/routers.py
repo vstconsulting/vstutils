@@ -5,15 +5,9 @@ from collections import OrderedDict
 from django.urls.conf import include, re_path
 from django.conf import settings
 from rest_framework import routers, permissions, versioning
-from drf_yasg.views import get_schema_view
 
 from .base import Response
 from ..utils import import_class
-
-
-class ProjectApiVersionVersioning(versioning.BaseVersioning):
-    def determine_version(self, request, *args, **kwargs):
-        return settings.VST_API_VERSION
 
 
 class _AbstractRouter(routers.DefaultRouter):
@@ -84,7 +78,7 @@ class _AbstractRouter(routers.DefaultRouter):
             args = [prefix, import_class(options['view']), options.get('name', None)]
             if options.get('type', 'viewset') == 'viewset':
                 self.register(*args)
-            elif options.get('type', 'viewset') == 'view':  # nocv
+            elif options.get('type', 'viewset') == 'view':
                 self.register_view(*args)
             else:  # nocv
                 raise Exception('Unknown type of view')
@@ -97,6 +91,19 @@ class APIRouter(_AbstractRouter):
         super().__init__(*args, **kwargs)
         if self.create_schema:
             self.__register_schema()
+        self.__register_openapi()
+
+    def __register_openapi(self):
+        schema_view = import_class(settings.OPENAPI_VIEW_CLASS)
+        cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
+        swagger_kwargs = dict(
+            cache_timeout=0 if settings.DEBUG else cache_timeout,
+        )
+        self.register_view(
+            '_openapi',
+            schema_view.with_ui('swagger', **swagger_kwargs),
+            name='_openapi'
+        )
 
     def __register_schema(self, name='schema'):
         try:
@@ -106,7 +113,10 @@ class APIRouter(_AbstractRouter):
 
     def _get_schema_view(self):
         from rest_framework import schemas
-        return schemas.get_schema_view(title=self.root_view_name)
+        return schemas.get_schema_view(
+            title=self.root_view_name,
+            version=self.root_view_name
+        )
 
     def get_api_root_view(self, *args, **kwargs):
         list_name = self.routes[0].name
@@ -149,30 +159,18 @@ class APIRouter(_AbstractRouter):
                 'view': 'vstutils.api.views.LangViewSet'
             }
 
-        super().generate(views_list)
-
         if r'_bulk' not in views_list:
-            view_class = import_class('vstutils.api.views.BulkViewSet')
-            view_class.root_view_name = self.root_view_name
-            self.register_view(r'_bulk', view_class, '_bulk')
+            views_list['_bulk'] = {
+                'view': 'vstutils.api.views.BulkViewSet',
+                'type': 'view',
+                'name': '_bulk'
+            }
+
+        super().generate(views_list)
 
 
 class MainRouter(_AbstractRouter):
     routers = []
-
-    def __register_openapi(self):
-        # pylint: disable=import-error
-        view_kwargs = dict(public=settings.OPENAPI_PUBLIC)
-        if view_kwargs['public']:  # nocv
-            view_kwargs['permission_classes'] = (permissions.AllowAny,)
-        schema_view = get_schema_view(**view_kwargs)
-        swagger_kwargs = dict()
-        cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
-        swagger_kwargs['cache_timeout'] = 0 if settings.DEBUG else cache_timeout
-        schema_view.versioning_class = ProjectApiVersionVersioning
-        self.register_view(
-            'openapi', schema_view.with_ui('swagger', **swagger_kwargs), name='openapi'
-        )
 
     def _get_custom_lists(self):
         return super()._get_custom_lists() + self.routers
@@ -187,7 +185,7 @@ class MainRouter(_AbstractRouter):
                 permission_classes = self.permission_classes
             routers = self.routers
             custom_urls = self.custom_urls
-            versioning_class = ProjectApiVersionVersioning
+            versioning_class = None
             view_name = f'{settings.PROJECT_GUI_NAME} REST API'
 
             def get_view_name(self): return 'REST API'
@@ -248,6 +246,8 @@ class MainRouter(_AbstractRouter):
             self.register_router(version+'/', router)
 
         # Register view for new bulk requests
-        self.register_view(r'endpoint', import_class('vstutils.api.endpoint.EndpointViewSet'), 'endpoint')
-
-        self.__register_openapi()
+        self.register_view(
+            r'endpoint',
+            import_class(settings.ENDPOINT_VIEW_CLASS),
+            'endpoint'
+        )

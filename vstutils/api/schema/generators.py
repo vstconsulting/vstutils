@@ -5,19 +5,10 @@ from drf_yasg.inspectors import field as field_insp
 
 
 class EndpointEnumerator(generators.EndpointEnumerator):
-    api_version = settings.VST_API_VERSION
-    api_url = settings.VST_API_URL
-    api_url_prifix = f'^{api_url}/'
+    api_url_prifix = f'^{settings.API_URL}/'
 
     def get_api_endpoints(self, *args, **kwargs):
-        prefix = kwargs.get('prefix', '')
-        namespace = kwargs.get('namespace', None)
-        is_api_to_ignore = (
-            self.api_url_prifix != prefix and
-            prefix.startswith(self.api_url_prifix) and
-            namespace != self.api_version
-        )
-        if is_api_to_ignore:
+        if 'prefix' in kwargs and (not kwargs['prefix'].startswith(self.api_url_prifix)):
             return []
         return super().get_api_endpoints(*args, **kwargs)
 
@@ -26,12 +17,9 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
     endpoint_enumerator_class = EndpointEnumerator
 
     def __init__(self, *args, **kwargs):
-        args = list(args)
-        if len(args) >= 2:
-            args[1] = settings.VST_API_VERSION  # nocv
-        else:
-            kwargs['version'] = settings.VST_API_VERSION
         super().__init__(*args, **kwargs)
+        if not self.version:
+            self.version = settings.VST_API_VERSION
 
     def _get_subname(self, name):
         names = name.split('_')
@@ -99,6 +87,8 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         return keys
 
     def get_schema(self, request: drf_request.Request = None, *args, **kwargs):
+        if not getattr(request, 'version', ''):
+            request.version = self.version
         result = super().get_schema(request, *args, **kwargs)
         result['info']['x-user-id'] = request.user.id
         return result
