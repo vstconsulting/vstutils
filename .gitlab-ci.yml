@@ -30,47 +30,20 @@ stages:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}"; fi
   script:
    - tox -e $TOX_ENVS $TOX_ARGS
-  except:
-    refs:
-    - tags
-  only:
-    refs:
-      - master
-      - merge_requests
-      - issue/build
-    changes:
-      - vstutils/*.{py,pyx}
-      - vstutils/api/**
-      - vstutils/gui/*
-      - vstutils/templatetags/*
-      - test_src/**/*
-      - .coveragerc
-      - .pep8
-      - .pylintrc
-      - .gitlab-ci.yml
-      - requirements*
-      - setup.{cfg,py}
-      - MANIFEST.in
-      - tox.ini
-
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "external_pull_request_event"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
 
 code_style:
   <<: *branch_tests
   stage: code_standarts
   variables:
     TOX_ENVS: "flake,pylint,jshint"
-  only:
-    refs:
-      - master
-      - merge_requests
-      - issue/build
-    changes:
-      - vstutils/**/*
-      - frontend_src/**/*
-      - tox.ini
-      - .pep8
-      - .pylintrc
-      - .gitlab-ci.yml
 
 py36-django30-install:
   <<: *branch_tests
@@ -98,19 +71,18 @@ pages:
   artifacts:
     paths:
     - public
-  only:
-    refs:
-      - master
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - when: never
 
 release:
   stage: release
   cache: {}
-  only:
-    refs:
-      - master
-    variables:
-      - $GIT_ACCESS_USER
-      - $GIT_ACCESS_PASSWORD
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: on_success
+    - when: never
   before_script:
     - url_host=`echo "${CI_REPOSITORY_URL}" | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`
     - git config user.name "${GITLAB_USER_NAME}"
@@ -125,12 +97,10 @@ release:
   cache:
     <<: *global_cache
     policy: pull
-  only:
-    refs:
-      - tags
-    variables:
-      - $PYPI_UPLOAD_PASSWORD
-      - $PYPI_UPLOAD_NAME
+  rules:
+    - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
+      when: on_success
+    - when: never
   script:
    - tox -c tox_build.ini -e ${CI_BUILD_NAME},auditwheel
    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
