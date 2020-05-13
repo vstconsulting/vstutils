@@ -5,8 +5,8 @@ import json
 import traceback
 import logging
 from subprocess import check_call
+from configparserc.config import ConfigParserC
 from ._base import BaseCommand
-from ...config import ConfigParserC  # pylint: disable=import-error
 
 
 logger = logging.getLogger('vstutils')

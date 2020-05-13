@@ -9,6 +9,8 @@ from django.utils.functional import lazy
 from drf_yasg import errors
 import rest_framework
 
+from configparserc import config as cconfig
+
 try:
     from .tools import get_file_value
 except ImportError:
@@ -22,7 +24,6 @@ except ImportError:
     )
     from .tools import get_file_value
 
-from . import config as cconfig
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 # MAIN Variables

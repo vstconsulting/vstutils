@@ -378,7 +378,6 @@ def make_setup(**opts):
 # end block
 
 ext_list = [
-    'vstutils.config',
     'vstutils.tools',
 ]
 
