@@ -10,19 +10,7 @@ from drf_yasg import errors
 import rest_framework
 
 from configparserc import config as cconfig
-
-try:
-    from .tools import get_file_value
-except ImportError:
-    import pyximport
-    pyximport.install(
-        language_level=3,
-        setup_args={'include_dirs': [
-            '/'.join([os.path.dirname(os.path.dirname(__file__)), 'include']),
-            '/'.join([os.path.dirname(__file__), 'include']),
-        ]}
-    )
-    from .tools import get_file_value
+from .tools import get_file_value
 
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
@@ -70,13 +58,8 @@ class BackendSection(cconfig.Section):
         return super().key_handler_to_all(key).upper()
 
 
-class BaseAppendSection(cconfig.Section):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for key, value in self.get_default_data().items():
-            if key not in self:
-                self[key] = value
+class BaseAppendSection(cconfig.AppendSection):
+    pass
 
 
 class MainSection(BaseAppendSection):

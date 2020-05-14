@@ -34,8 +34,6 @@ from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
-from vstutils.tools import File as ToolsFile
-from vstutils.tools import get_file_value
 from vstutils.urls import router
 
 from .models import File, Host, HostGroup, List
@@ -1714,32 +1712,6 @@ class CustomModelTestCase(BaseTestCase):
 
 
 class ToolsTestCase(BaseTestCase):
-    def test_get_file_value(self):
-        file_name = os.path.join(os.path.dirname(__file__), 'settings.ini')
-        with open(file_name, 'r') as fd:
-            test_data = fd.read()
-        self.assertEqual(get_file_value(file_name, strip=False), test_data)
-        self.assertEqual(get_file_value(file_name), test_data[:-1])
-
-        with utils.tmp_file_context(test_data) as tmp_fd:
-            fd = ToolsFile(tmp_fd.name.encode('utf-8'))
-            self.assertEqual(fd.read(), test_data.encode('utf-8'))
-            self.assertEqual(len(fd), len(test_data))
-            del fd
-
-        with utils.tmp_file_context(test_data, mode='w+') as tmp_fd:
-            fd = ToolsFile(tmp_fd.name.encode('utf-8'), b'wb')
-            test_data_text = 'some text data\n'*10
-            fd.write(test_data_text.encode('utf-8'))
-            fd.flush()
-            with open(tmp_fd.name, 'rb') as fd1:
-                self.assertEqual(fd1.read().decode('utf-8'), test_data_text)
-            del fd
-
-        with utils.tmp_file_context(test_data, mode='w+') as tmp_fd:
-            with ToolsFile(tmp_fd.name.encode('utf-8')) as fd:
-                self.assertEqual(list(fd.readlines('utf-8')), test_data.split('\n'))
-
     def test_health_page(self):
         result = self.get_result('get', '/api/health/')
         self.assertIn('db', result)

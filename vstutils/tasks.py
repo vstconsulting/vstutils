@@ -2,6 +2,7 @@ from celery.app.task import BaseTask
 
 
 class TaskClass(BaseTask):
+    # pylint: disable=abstract-method
 
     @property
     def name(self):
