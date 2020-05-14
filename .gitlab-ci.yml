@@ -91,7 +91,7 @@ release:
   script:
     - bash autorelease.sh
 
-.release_pypi_template: &release_pypi
+release_pypi:
   stage: release
   image: vstconsulting/images:build
   cache:
@@ -102,18 +102,6 @@ release:
       when: on_success
     - when: never
   script:
-   - tox -c tox_build.ini -e ${CI_BUILD_NAME},auditwheel
-   - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
+    - tox -e build
+    - twine upload -u ${PYPI_UPLOAD_NAME} -p ${PYPI_UPLOAD_PASSWORD} $(find dist/*.{tar.gz,whl})
   allow_failure: true
-
-py37-build:
-  <<: *release_pypi
-
-py36-wheel:
-  <<: *release_pypi
-
-py37-wheel:
-  <<: *release_pypi
-
-py38-wheel:
-  <<: *release_pypi
