@@ -6,6 +6,7 @@ import random  # noqa: F401
 import string  # noqa: F401
 import os  # noqa: F401
 import uuid
+
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -16,8 +17,10 @@ except ImportError:  # nocv
     from unittest.mock import patch
 from .utils import import_class
 
-
 User = get_user_model()
+
+BulkDataType = _t.List[_t.Dict[_t.Text, _t.Any]]
+ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence]
 
 
 class BaseTestCase(TestCase):
@@ -184,7 +187,7 @@ class BaseTestCase(TestCase):
     def post_result(self, url, code=None, *args, **kwargs):
         return self.get_result("post", url, code, *args, **kwargs)
 
-    def get_result(self, rtype, url, code=None, *args, **kwargs) -> _t.Union[_t.Dict, _t.Sequence]:
+    def get_result(self, rtype, url, code=None, *args, **kwargs) -> ApiResultType:
         '''
         Test request with returning result of request
         :param rtype:  - request type (methods from Client cls): get, post etc
@@ -207,6 +210,7 @@ class BaseTestCase(TestCase):
     def mass_create(self, url, data, *fields):
         '''
         Mass creation objects in api-abstration
+
         :param url: - url to abstract layer
         :param data: - fields of model
         :params fields: - list of fields to check
@@ -251,16 +255,42 @@ class BaseTestCase(TestCase):
         for key, value in kwargs.items():
             self.assertEqual(result[key], value)
 
-    def get_bulk(self, item, data, type, **kwargs):
-        return dict(type=type, item=item, data=data, **kwargs)
+    def endpoint_call(self, data: BulkDataType = None, method: str = 'get', code: int = 200) -> ApiResultType:
+        """
+        Make request to endpoint and assert response status code if specified
 
-    def get_mod_bulk(self, item, pk, data, mtype, method="POST", **kwargs):
-        return self.get_bulk(
-            item, data, 'mod',
-            pk=pk, data_type=mtype, method=method.upper(), **kwargs
-        )
+        :param data: request data
+        :param method: http request method
+        :param code: http status to assert
+        :return: bulk response
+        """
 
-    def make_bulk(self, data, method_type='post'):
+        if data is not None:
+            data = json.dumps(data)
+
         return self.get_result(
-            method_type, self.get_url('_bulk'), 200, data=json.dumps(data)
+            method,
+            f'/{self._settings("VST_API_URL")}/endpoint/',
+            data=data,
+            code=code
         )
+
+    def bulk(self, data: BulkDataType, code: int = 200) -> ApiResultType:
+        """
+        Make non transactional bulk request and assert status code (default is 200)
+
+        :param data: request data
+        :param code: http status to assert
+        :return: bulk response
+        """
+        return self.endpoint_call(data, method='put', code=code)
+
+    def bulk_transactional(self, data: BulkDataType, code: int = 200) -> ApiResultType:
+        """
+        Make transactional bulk request and assert status code (default is 200)
+
+        :param data: request data
+        :param code: http status to assert
+        :return: bulk response
+        """
+        return self.endpoint_call(data, method='post', code=code)

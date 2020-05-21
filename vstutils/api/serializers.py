@@ -13,6 +13,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from rest_framework import serializers, exceptions
 from . import fields
+from .. import utils
 
 
 User = get_user_model()
@@ -60,12 +61,13 @@ class DataSerializer(EmptySerializer):
     def to_internal_value(self, data):
         return data if isinstance(data, self.allowed_data_types) else self.fail("Unknown type.")
 
-    def to_representation(self, value):  # nocv
-        return (
-            json.loads(value)
-            if not isinstance(value, (dict, list))
-            else value
-        )
+    def to_representation(self, value):
+        if not isinstance(value, (dict, list)):
+            result = json.loads(value)
+            if isinstance(result, dict):
+                result = utils.Dict(result)
+            return result
+        return value
 
 
 class JsonObjectSerializer(DataSerializer):

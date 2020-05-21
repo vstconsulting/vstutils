@@ -1,22 +1,23 @@
 # pylint: disable=django-not-available,invalid-name
 from __future__ import unicode_literals
 
+import io
 import json
 import logging
 import os
-import io
+import subprocess
 import sys
 import tempfile
 import time
 import traceback
-import subprocess
+import typing as tp
+import warnings
 from pathlib import Path
 from threading import Thread
-import typing as tp
 
+from django.conf.urls import url, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
-from django.conf.urls import url, include
 from django.template import loader
 from django.utils import translation
 from django.utils.module_loading import import_string as import_class
@@ -26,6 +27,22 @@ from . import exceptions as ex
 
 logger = logging.getLogger('vstutils')
 ON_POSIX = 'posix' in sys.builtin_module_names
+
+
+def deprecated(func):
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used."""
+
+    def new_func(*args, **kwargs):  # nocv
+        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+        warnings.warn(f'Call to deprecated function {func.__name__}.',
+                      category=DeprecationWarning,
+                      stacklevel=2)
+        warnings.simplefilter('default', DeprecationWarning)  # reset filter
+        return func(*args, **kwargs)
+
+    return new_func
 
 
 def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:

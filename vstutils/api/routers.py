@@ -76,9 +76,10 @@ class _AbstractRouter(routers.DefaultRouter):
     def generate(self, views_list):
         for prefix, options in views_list.items():
             args = [prefix, import_class(options['view']), options.get('name', None)]
-            if options.get('type', 'viewset') == 'viewset':
+            view_type = options.get('type', 'viewset')
+            if view_type == 'viewset':
                 self.register(*args)
-            elif options.get('type', 'viewset') == 'view':
+            elif view_type == 'view':
                 self.register_view(*args)
             else:  # nocv
                 raise Exception('Unknown type of view')

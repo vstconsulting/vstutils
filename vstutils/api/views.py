@@ -1,14 +1,16 @@
 # pylint: disable=unused-argument
-from collections import OrderedDict
 import json
+from collections import OrderedDict
+
 from django.conf import settings
-from django.test import Client
 from django.db import transaction
 from django.http import Http404
-from rest_framework.exceptions import ValidationError
+from django.test import Client
 from rest_framework import permissions as rest_permissions, throttling
+from rest_framework.exceptions import ValidationError
+
 from . import base, serializers, permissions, filters, decorators as deco, responses, models
-from ..utils import Dict, import_class
+from ..utils import Dict, import_class, deprecated
 
 
 class LanguageSerializer(serializers.VSTSerializer):
@@ -111,7 +113,8 @@ class SettingsViewSet(base.ListNonModelViewSet):
         return responses.HTTP_200_OK(self._get_system_settings())
 
 
-class BulkViewSet(base.rvs.APIView):
+# TODO deprecated
+class BulkViewSet(base.rvs.APIView):  # nocv
     '''
     API endpoint for transactional operations with API methods.
     Supports detail and list sub-actions.
@@ -300,6 +303,7 @@ class BulkViewSet(base.rvs.APIView):
         for operation in operations:
             self.operate_handler(operation, allow_fail)
 
+    @deprecated
     def operate(self, request, allow_fail=True):
         # pylint: disable=protected-access
         self.is_secure = request._request.is_secure()
@@ -316,6 +320,7 @@ class BulkViewSet(base.rvs.APIView):
     def put(self, request, *args, **kwargs):
         return self.operate(request, allow_fail=False)
 
+    @deprecated
     def get(self, request):
         response = {
             "allowed_types": self.allowed_types,
