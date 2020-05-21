@@ -1,4 +1,5 @@
 # pylint: disable=protected-access
+import json
 import typing as _t
 from collections import OrderedDict
 from inspect import getmembers
@@ -8,6 +9,12 @@ from rest_framework import response, status
 from drf_yasg.utils import swagger_auto_schema
 from . import base
 from ..exceptions import VSTUtilsException
+
+
+def ensure_is_object(obj):
+    if isinstance(obj, str):
+        return json.loads(obj)
+    return obj
 
 
 def __get_nested_path(name: _t.Text, arg: _t.Text = None, arg_regexp: _t.Text = '[0-9]', empty_arg=True) -> _t.Text:
@@ -202,7 +209,7 @@ class NestedWithoutAppendMixin(NestedViewMixin):
         id_list = self._data_create(
             self.prepare_request_data(request_data, many), nested_append_arg
         )
-        qs_filter = {nested_append_arg+'__in': id_list}
+        qs_filter = {nested_append_arg + '__in': id_list}
         queryset = self.get_queryset().filter(**qs_filter)
         if not many:
             queryset = queryset.get()
@@ -214,6 +221,7 @@ class NestedWithoutAppendMixin(NestedViewMixin):
 class NestedWithAppendMixin(NestedWithoutAppendMixin):
     def _data_create(self, request_data, nested_append_arg):
         filter_arg = f'{nested_append_arg}__in'
+        request_data = [ensure_is_object(d) for d in request_data]
         objects = self.get_queryset().model.objects.filter(**{
             filter_arg: map(lambda i: i.get(nested_append_arg), request_data)
         })

@@ -26,6 +26,6 @@ class RegularExpressionValidator:
 
 
 class UrlQueryStringValidator(RegularExpressionValidator):
-    '''Class for validation url query string, for example a=&b=1'''
+    """Class for validation url query string, for example a=&b=1"""
 
-    regexp = re.compile(r'^(&?[\w,.-]+=[\w,.-]*)*$')
+    regexp = re.compile(r'^[^&?=].+=.*$')

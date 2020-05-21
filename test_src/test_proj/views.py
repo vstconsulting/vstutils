@@ -6,7 +6,7 @@ from vstutils.api import fields, filters, responses
 from vstutils.api.base import (CopyMixin, ModelViewSet, NonModelsViewSet,
                                ReadOnlyModelViewSet, Response)
 from vstutils.api.decorators import action, nested_view, subaction
-from vstutils.api.serializers import EmptySerializer, VSTSerializer
+from vstutils.api.serializers import EmptySerializer, VSTSerializer, DataSerializer
 
 from .models import File, Host, HostGroup, ModelWithBinaryFiles, ModelWithFK
 
@@ -246,12 +246,15 @@ class RequestInfoTestView(NonModelsViewSet):
         headers = request._request.META
         # Don't send wsgi.* headers
         headers = {k: v for k, v in headers.items() if not k.startswith('wsgi.')}
-
-        return responses.HTTP_200_OK(dict(
-            headers=headers,
-            query=request.query_params,
-            user_id=request.user.id
+        serializer = DataSerializer(data=json.dumps(
+            dict(
+                headers=headers,
+                query=request.query_params,
+                user_id=request.user.id
+            )
         ))
+        serializer.is_valid(raise_exception=True)
+        return responses.HTTP_200_OK(serializer.data)
 
     def put(self, request):
         data = request.data

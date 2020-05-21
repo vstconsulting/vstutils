@@ -114,7 +114,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         with self.patch('subprocess.check_call') as mock_obj:
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
             call_command('dockerrun')
-            self.maxDiff = 1024*100
+            self.maxDiff = 1024 * 100
             self.assertEqual(mock_obj.call_count, 2)
             self.assertEqual(
                 mock_obj.call_args[0][0],
@@ -586,10 +586,6 @@ class DefaultBulkTestCase(BaseTestCase):
         self.get_model_filter(
             'django.contrib.auth.models.User'
         ).exclude(pk=self.user.id).delete()
-        self.details_test(
-            '/api/v1/_bulk/',
-            operations_types=list(self.settings_obj.BULK_OPERATION_TYPES.keys())
-        )
         data = [
             dict(username="USER{}".format(i), password="123", password2='123')
             for i in range(10)
@@ -599,45 +595,36 @@ class DefaultBulkTestCase(BaseTestCase):
         userself_data = dict(first_name='me')
         bulk_request_data = [
             # Check code 204
-            {'type': 'del', 'item': 'user', 'pk': users_id[0]},
+            dict(method='delete', path=['user', users_id[0]]),
             # Check code 404
-            {'type': 'del', 'item': 'user', 'pk': 0},
+            dict(method='delete', path=['user', 0]),
             # Check 201 and username
-            {'type': 'add', 'item': 'user', 'data': test_user},
+            dict(method='post', path='user', data=test_user),
             # Check update first_name by self
-            {'type': 'set', 'item': 'user', 'pk': self.user.id, 'data': userself_data},
+            dict(method='patch', path=['user', self.user.id], data=userself_data),
             # Check mods to view detail
-            {
-                'type': 'mod', 'item': 'settings', "method": "get",
-                'data_type': ["system"]
-            },
+            dict(method="get", path=['settings', 'system']),
             # Check bulk-filters
-            {
-                'type': 'get', 'item': 'user',
-                'filters': 'id={}'.format(','.join([str(i) for i in users_id]))
-            },
+            dict(method='get', path='user', query='id=' + ','.join(str(i) for i in users_id)),
             # Check `__init__` mod as default
-            {"method": "get", 'data_type': ["settings", "system"]},
-            {"method": "get", 'data_type': ["user", self.user.id]},
-            {"method": "get", 'data_type': ["user"]},
+            dict(method="get", path=["settings", "system"]),
+            dict(method="get", path=["user", self.user.id]),
+            dict(method="get", path=["user"]),
             # Check json in data fields
-            {
-                'method': "post", 'data_type': ['user'],
-                'data': {
-                    "username": 'ttt',
-                    'password': 'ttt333',
-                    'password2': 'ttt333',
-                    'first_name': json.dumps({"some": 'json'})
-                }
-            },
-            {"method": 'get', 'data_type': ['usr', self.user.id]}
+            dict(
+                method="post",
+                path=['user'],
+                data=dict(
+                    username='ttt',
+                    password='ttt333',
+                    password2='ttt333',
+                    first_name=json.dumps(dict(some='json'))
+                )),
+            dict(method='get', path=['usr', self.user.id])
         ]
-        self.get_result(
-            "post", "/api/v1/_bulk/", 400, data=json.dumps(bulk_request_data)
-        )
-        result = self.get_result(
-            "put", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
-        )
+        self.bulk_transactional(bulk_request_data, 502)
+        result = self.bulk(bulk_request_data)
+
         self.assertEqual(result[0]['status'], 204)
         self.assertEqual(result[1]['status'], 404)
         self.assertEqual(result[2]['status'], 201)
@@ -647,7 +634,7 @@ class DefaultBulkTestCase(BaseTestCase):
         self.assertEqual(result[4]['status'], 200)
         self.assertEqual(result[4]['data']['PY'], self.settings_obj.PY_VER)
         self.assertEqual(result[5]['status'], 200)
-        self.assertEqual(result[5]['data']['count'], len(users_id)-1)
+        self.assertEqual(result[5]['data']['count'], len(users_id) - 1)
         self.assertEqual(result[6]['status'], 200)
         self.assertEqual(result[6]['data']['PY'], self.settings_obj.PY_VER)
         self.assertEqual(result[7]['status'], 200)
@@ -656,26 +643,19 @@ class DefaultBulkTestCase(BaseTestCase):
         self.assertEqual(result[9]['status'], 201, result[9])
         self.assertEqual(result[10]['status'], 404, result[10])
 
-        bulk_request_data = [
-            # Check unsupported media type
-            {'type': 'add', 'item': 'settings', 'data': dict()},
-        ]
-        self.get_result(
-            "post", "/api/v1/_bulk/", 415, data=json.dumps(bulk_request_data)
-        )
         # Test linked bulks
         self.get_model_filter(
             'django.contrib.auth.models.User'
         ).exclude(pk=self.user.id).delete()
         bulk_request_data = [
             # Check 201 and username
-            {'type': 'add', 'item': 'user', 'data': test_user},
+            dict(method='post', path='user', data=test_user),
             # Get details from link
-            {'type': 'get', 'item': 'user', 'pk': "<<0[data][id]>>"},
-            {'type': 'get', 'item': 'user', 'filters': 'id=<<1[data][id]>>'}
+            dict(method='get', path=['user', '<<0[data][id]>>']),
+            dict(method='get', path='user', query='id=<<1[data][id]>>')
         ]
         result = self.get_result(
-            "post", "/api/v1/_bulk/", 200, data=json.dumps(bulk_request_data)
+            "post", "/api/endpoint/", 200, data=json.dumps(bulk_request_data)
         )
         self.assertEqual(result[0]['status'], 201)
         self.assertEqual(result[0]['data']['username'], test_user['username'])
@@ -841,7 +821,7 @@ class EndpointTestCase(BaseTestCase):
             dict(
                 path=f'/user/{response[1]["data"]["id"]}/',
                 method='patch',
-                data=dict(last_name='Name'*40)  # More than 150 characters
+                data=dict(last_name='Name' * 40)  # More than 150 characters
             ),
         ]
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
@@ -952,9 +932,9 @@ class EndpointTestCase(BaseTestCase):
         self.assertEqual(response[3]['status'], 200)
         self.assertEqual(response[3]['status'], 200)
         self.assertEqual(response[4]['status'], 200)
-        self.assertEqual(response[4]['data'], {'id': 2, 'name': '5'})
+        self.assertEqual(response[4]['data'], {'id': 2, 'name': 5})
         self.assertEqual(len(response[5]['data']['results']), 5)
-        self.assertEqual(response[6]['data']['headers']['TEST_HEADER'], '5')
+        self.assertEqual(response[6]['data']['headers']['TEST_HEADER'], 5)
         self.assertEqual(response[7]['data'], {
             'integer': 1,
             'float': 1.0,
@@ -1013,13 +993,13 @@ class LangTestCase(BaseTestCase):
 
     def test_lang(self):
         bulk_data = [
-            {'data_type': ['_lang'], 'method': 'get'},
-            {'data_type': ['_lang', 'ru'], 'method': 'get'},
-            {'data_type': ['_lang', 'en'], 'method': 'get'},
-            {'data_type': ['_lang', 'unkn'], 'method': 'get'},
-            {'data_type': ['_lang', 'uk'], 'method': 'get'},
+            dict(path=['_lang'], method='get'),
+            dict(path=['_lang', 'ru'], method='get'),
+            dict(path=['_lang', 'en'], method='get'),
+            dict(path=['_lang', 'unkn'], method='get'),
+            dict(path=['_lang', 'uk'], method='get'),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[0]['data']['count'], 3)
 
@@ -1063,44 +1043,37 @@ class ProjectTestCase(BaseTestCase):
         for i in range(self.predefined_hosts_cnt):
             Host.objects.create(name='test_{}'.format(i))
         self.objects_bulk_data = [
-            self.get_bulk('hosts', dict(name='a'), 'add'),
-            self.get_mod_bulk('hosts', '<<0[data][id]>>', dict(name='b'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<<1[data][id]>>', dict(name='c'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<<2[data][id]>>', dict(name='d'), 'subgroups'),
-            self.get_mod_bulk('hosts', '<<0[data][id]>>', dict(name='aa'), 'hosts'),
-            self.get_mod_bulk('hosts', '<<1[data][id]>>', dict(name='ba'), 'hosts'),
-            self.get_mod_bulk('hosts', '<<2[data][id]>>', dict(name='ca'), 'hosts'),
-            self.get_mod_bulk('hosts', '<<3[data][id]>>', dict(name='da'), 'hosts'),
+            dict(method='post', path='hosts', data=dict(name='a')),
+            dict(method='post', path='hosts/<<0[data][id]>>/subgroups', data=dict(name='b')),
+            dict(method='post', path='hosts/<<1[data][id]>>/subgroups', data=dict(name='c')),
+            dict(method='post', path='hosts/<<2[data][id]>>/subgroups', data=dict(name='d')),
+            dict(method='post', path='hosts/<<0[data][id]>>/hosts', data=dict(name='aa')),
+            dict(method='post', path='hosts/<<1[data][id]>>/hosts', data=dict(name='ba')),
+            dict(method='post', path='hosts/<<2[data][id]>>/hosts', data=dict(name='ca')),
+            dict(method='post', path='hosts/<<3[data][id]>>/hosts', data=dict(name='da')),
         ]
 
     def test_deep_host_create(self):
         bulk_data = [
-            self.get_bulk('deephosts', dict(name='level1'), 'add'),
-            self.get_mod_bulk(
-                'deephosts', '<<0[data][id]>>', dict(name='level2'), 'subsubhosts'
-            ),
-            self.get_mod_bulk(
-                'deephosts', '<<0[data][id]>>', dict(name='level3'),
-                'subsubhosts/<<1[data][id]>>/subdeephosts'
-            ),
-            self.get_mod_bulk(
-                'deephosts', '<<0[data][id]>>', dict(name='level4'),
-                'subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/shost'
-            ),
-            self.get_mod_bulk(
-                'deephosts', '<<0[data][id]>>', {},
-                'subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/hosts/<<3[data][id]>>',
-                method='get'
-            ),
-            self.get_mod_bulk(
-                'deephosts', '<<0[data][id]>>', {},
-                'subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/hosts',
-                method='get'
-            ),
+            dict(method='post', path='deephosts', data={'name': 'level1'}),
+            dict(method='post', path=['deephosts', '<<0[data][id]>>', 'subsubhosts'], data={'name': 'level2'}),
+            dict(method='post',
+                 path=['deephosts', '<<0[data][id]>>', 'subsubhosts', '<<1[data][id]>>', 'subdeephosts'],
+                 data={'name': 'level3'}),
+            dict(method='post',
+                 path='deephosts/<<0[data][id]>>/subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/shost',
+                 data={'name': 'level4'}),
+            dict(method='get',
+                 path='deephosts/<<0[data][id]>>/subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/hosts/<<3['
+                      'data][id]>>',
+                 data={'name': 'level4'}),
+            dict(method='get',
+                 path='deephosts/<<0[data][id]>>/subsubhosts/<<1[data][id]>>/subdeephosts/<<2[data][id]>>/hosts',
+                 data={'name': 'level4'}),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk(bulk_data)
         for result in results[:-2]:
-            self.assertEqual(result['status'], 201, f"Current result number is `{result}`")
+            self.assertEqual(result['status'], 201, f'Current result number is `{result}`')
         self.assertEqual(results[-2]['status'], 200)
         self.assertEqual(results[-2]['data']['name'], 'level4')
         self.assertEqual(results[-1]['status'], 200)
@@ -1126,14 +1099,12 @@ class ProjectTestCase(BaseTestCase):
     def test_objects_copy(self):
         Host.objects.all().delete()
         HostGroup.objects.all().delete()
-        bulk_data = list(self.objects_bulk_data)
-        bulk_data.append(
-            self.get_mod_bulk('hosts', '<<1[data][id]>>', {'name': 'copied'}, 'copy')
-        )
-        bulk_data.append(
-            self.get_mod_bulk('hosts', '<<1[data][id]>>', {}, 'copy')
-        )
-        results = self.make_bulk(bulk_data)
+        bulk_data = [
+            *self.objects_bulk_data,
+            dict(method='post', path='hosts/<<1[data][id]>>/copy', data=dict(name='copied')),
+            dict(method='post', path='hosts/<<1[data][id]>>/copy'),
+        ]
+        results = self.bulk(bulk_data)
         self.assertNotEqual(results[-2]['data']['id'], results[1]['data']['id'])
         self.assertEqual(results[-2]['data']['name'], 'copied')
         self.assertNotEqual(results[-1]['data']['id'], results[1]['data']['id'])
@@ -1159,26 +1130,27 @@ class ProjectTestCase(BaseTestCase):
     def test_insert_into(self):
         size = 10
         bulk_data = [
-            self.get_bulk('hosts', dict(name='main'), 'add'),
+            dict(method='post', path='hosts', data=dict(name='main')),
+            *[dict(method='post', path='subhosts', data=dict(name=f'slave-{i}')) for i in range(size)],
+            dict(method='post', path='hosts/<<0[data][id]>>/shost', data=[f'<<{i + 1}[data]>>' for i in range(size)]),
+            dict(method='get', path='hosts/<<0[data][id]>>/shost')
         ]
-        bulk_data += [
-            self.get_bulk('subhosts', dict(name='slave-{}'.format(i)), 'add')
-            for i in range(size)
-        ]
-        bulk_data += [
-            self.get_mod_bulk('hosts', '<<0[data][id]>>', [
-                '<<{}[data]>>'.format(i+1) for i in range(size)
-            ], 'shost'),
-            self.get_mod_bulk('hosts', '<<0[data][id]>>', {}, 'shost', method='get'),
-        ]
-        results = self.make_bulk(bulk_data)
+        results = self.bulk(bulk_data)
         self.assertEqual(results[-1]['data']['count'], size)
+
+        results = self.bulk([
+            dict(method='get', path='hosts'),
+            dict(method='post', path='hosts/<<0[data][results][0][id]>>/shost', data=['{"name": "JsonString"}']),
+            dict(method='get', path='hosts/<<0[data][results][0][id]>>/shost')
+        ])
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual('JsonString', results[2]['data']['results'][-1]['name'])
 
     def test_hierarchy(self):
         Host.objects.all().delete()
         HostGroup.objects.all().delete()
         bulk_data = list(self.objects_bulk_data)
-        results = self.make_bulk(bulk_data)
+        results = self.bulk(bulk_data)
         for result in results:
             self.assertEqual(result['status'], 201, result)
             del result
@@ -1223,56 +1195,28 @@ class ProjectTestCase(BaseTestCase):
         host_id = results[4]['data']['id']
         hg = HostGroup.objects.get(pk=host_group_id)
         bulk_data = [
-            self.get_mod_bulk('hosts', host_group_id, {}, 'subgroups', 'get'),
-            self.get_mod_bulk('hosts', host_group_id, {}, 'hosts', 'get'),
-            self.get_mod_bulk(
-                'hosts', host_group_id, dict(name="test1"),
-                'hosts/{}'.format(host_id), 'patch'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'hosts/{}'.format(host_id), 'get'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, dict(name="test2"),
-                'hosts/{}'.format(host_id), 'put'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'hosts/{}'.format(host_id), 'get'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'hosts/{}'.format(999), 'get'
-            ),
-            self.get_mod_bulk('hosts', host_group_id, {}, 'subhosts', 'get'),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'hosts/{}'.format(host_id), 'delete'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {'name': ''}, 'hosts/{}'.format(host_id), 'patch'
-            ),
-            self.get_mod_bulk('hosts', host_group_id, {'name': 'some'}, 'shost'),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<<10[data][id]>>', 'delete'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'hosts', 'get', filters='offset=10'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<<24[data][id]>>', 'get'
-            ),
-            self.get_mod_bulk('hosts', host_group_id, {'name': 'some_other'}, 'shost'),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<<14[data][id]>>/test', 'get'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<<14[data][id]>>/test2', 'get'
-            ),
-            self.get_mod_bulk(
-                'hosts', host_group_id, {}, 'shost/<<14[data][id]>>/test3', 'get'
-            ),
-            self.get_mod_bulk('hosts', host_group_id, {}, 'shost/<<14[data][id]>>', 'delete'),
-            self.get_mod_bulk('hosts', host_group_id, dict(id='<<14[data][id]>>'), 'shost'),
+            dict(method='get', path=['hosts', host_group_id, 'subgroups']),
+            dict(method='get', path=['hosts', host_group_id, 'hosts']),
+            dict(method='patch', path=['hosts', host_group_id, 'hosts', host_id], data=dict(name='test1')),
+            dict(method='get', path=['hosts', host_group_id, 'hosts', host_id]),
+            dict(method='put', path=['hosts', host_group_id, 'hosts', host_id], data=dict(name='test2')),
+            dict(method='get', path=['hosts', host_group_id, 'hosts', host_id]),
+            dict(method='get', path=['hosts', host_group_id, 'hosts', 999]),
+            dict(method='get', path=['hosts', host_group_id, 'subhosts']),
+            dict(method='delete', path=['hosts', host_group_id, 'hosts', host_id]),
+            dict(method='patch', path=['hosts', host_group_id, 'hosts', host_id], data=dict(name='')),
+            dict(method='post', path=['hosts', host_group_id, 'shost'], data=dict(name='some')),
+            dict(method='delete', path=['hosts', host_group_id, 'shost', '<<10[data][id]>>']),
+            dict(method='get', path=['hosts', host_group_id, 'hosts'], query='offset=10'),
+            dict(method='get', path=['hosts', host_group_id, 'shost', '<<24[data][id]>>']),
+            dict(method='post', path=['hosts', host_group_id, 'shost'], data=dict(name='some_other')),
+            dict(method='get', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test']),
+            dict(method='get', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test2']),
+            dict(method='get', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test3']),
+            dict(method='delete', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>']),
+            dict(method='post', path=['hosts', host_group_id, 'shost'], data=dict(id='<<14[data][id]>>')),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk(bulk_data)
         self.assertCount(hg.hosts.all(), 1)
         self.assertEqual(results[0]['data']['count'], 1, results[0])
         self.assertEqual(results[1]['data']['count'], 1, results[1])
@@ -1292,8 +1236,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[11]['status'], 204)
         self.assertTrue(Host.objects.filter(pk=results[10]['data']['id']).exists())
         self.assertEqual(results[12]['data']['results'], [])
-        self.assertEqual(results[13]['status'], 400)
-        self.assertEqual(results[13]['data']['error_type'], "IndexError")
+        self.assertEqual(results[13]['status'], 500)
+        self.assertTrue('IndexError' in results[13]['info']['errors'])
         self.assertEqual(results[15]['status'], 200)
         self.assertEqual(results[15]['data']['detail'], "OK")
         self.assertEqual(results[16]['status'], 201)
@@ -1303,13 +1247,12 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[19]['status'], 201)
 
         bulk_data = [
-            dict(data_type=['hosts'], data=dict(name='level1'), method='post'),
-            dict(data_type=['subhosts'], data=dict(name='level1_subhost'), method='post'),
-            dict(data_type=['hosts', '<<0[data][id]>>', 'shost'], data='<<1[data]>>', method='post'),
+            dict(path=['hosts'], method='post', data=dict(name='level1')),
+            dict(path=['subhosts'], method='post', data=dict(name='level1_subhost')),
+            dict(path=['hosts', '<<0[data][id]>>', 'shost'], method='post', data='<<1[data]>>'),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk(bulk_data)
         self.assertEqual(results[-1]['status'], 201, results)
-
 
     def test_coreapi_schema(self):
         stdout = io.StringIO()
@@ -1454,155 +1397,155 @@ class ProjectTestCase(BaseTestCase):
 
     def test_model_fk_field(self):
         bulk_data = [
-            dict(data_type=['subhosts'], method='post', data={'name': 'tt_name'}),
-            dict(data_type=['testfk'], method='post', data={'some_fk': '<<0[data][id]>>'}),
+            dict(method='post', path='subhosts', data={'name': 'tt_name'}),
+            dict(method='post', path='testfk', data={'some_fk': '<<0[data][id]>>'}),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk(bulk_data)
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[1]['data']['some_fk'], results[0]['data']['id'])
 
     def test_model_namedbinfile_field(self):
         value = {'name': 'abc.png', 'content': '/4sdfsdf/'}
         bulk_data = [
-            dict(data_type=['testbinaryfiles'], method='post', data={}),
-            dict(data_type=['testbinaryfiles', '<<0[data][id]>>'], method='get'),
+            dict(method='post', path=['testbinaryfiles'], data={}),
+            dict(method='get', path=['testbinaryfiles', '<<0[data][id]>>']),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='put',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_namedbinfile=value, some_namedbinimage=value, some_binfile=value['content'])
             ),
-            dict(data_type=['testbinaryfiles', '<<0[data][id]>>'], method='get'),
+            dict(method='get', path=['testbinaryfiles', '<<0[data][id]>>']),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_namedbinfile={'name': 'qwe', 'content1': 123})
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_namedbinfile={'name': 'qwe'})
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_namedbinfile=123)
             ),
             # Tests for 'multiplenamedbinfile' field
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_multiplenamedbinfile=123)
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile={})
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value, 123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value, {"name1": "invalid", "content": "123"}])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinfile=[value, value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             # Tests for 'multiplenamedbinimage' field
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=123)
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage={})
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
                 data=dict(some_multiplenamedbinimage=[])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_multiplenamedbinimage=[123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_multiplenamedbinimage=[value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_multiplenamedbinimage=[value, 123])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_multiplenamedbinimage=[value, {"name1": "invalid", "content": "123"}])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='patch',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
                 data=dict(some_multiplenamedbinimage=[value, value])
             ),
             dict(
-                data_type=['testbinaryfiles', '<<0[data][id]>>'],
                 method='get',
+                path=['testbinaryfiles', '<<0[data][id]>>'],
             ),
         ]
-        results = self.make_bulk(bulk_data, 'put')
+        results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200)
         self.assertEqual(results[1]['data']['some_binfile'], '')
@@ -1691,11 +1634,11 @@ class CustomModelTestCase(BaseTestCase):
         self.assertTrue(File.objects.all()[1:2].query['high_mark'], 2)
 
     def test_custom(self):
-        results = self.make_bulk([
-            dict(data_type=['files'], method='get'),
-            dict(data_type=['files', 1], method='get'),
-            dict(data_type=['files'], method='get', filters='name=ToFilter'),
-        ], 'put')
+        results = self.bulk([
+            dict(method='get', path='files'),
+            dict(method='get', path=['files', 1]),
+            dict(method='get', path='files', query='name=ToFilter'),
+        ])
 
         for result in results:
             self.assertEqual(result['status'], 200, result)
@@ -1722,7 +1665,6 @@ class ToolsTestCase(BaseTestCase):
         self.assertEqual(result['rpc'], 'ok')
 
         with self.patch('django.db.backends.base.base.BaseDatabaseWrapper.ensure_connection') as mock:
-
             def error_in_connection(*args, **kwargs):
                 raise Exception('test')
 
@@ -1734,7 +1676,6 @@ class ToolsTestCase(BaseTestCase):
             self.assertEqual(result['db'], 'test')
 
         with self.patch('vstutils.utils.BaseVstObject.get_django_settings') as mock:
-
             def get_django_settings_mock(name, default=None):
                 if name != 'RPC_ENABLED':
                     return self._settings(name, default)

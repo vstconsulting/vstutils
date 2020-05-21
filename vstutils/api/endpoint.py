@@ -18,6 +18,7 @@ from . import responses
 from .decorators import cache_method_result
 from .serializers import DataSerializer
 from .validators import UrlQueryStringValidator
+from ..utils import Dict, raise_context
 
 logger = logging.getLogger('vstutils')
 
@@ -42,7 +43,7 @@ def _join_paths(*args):
     :param *args: List of items that can be anything like '/a/b/c', 'b/c/', 1, 'v1'
     :returns: Path that starts and ends with
     '''
-    return f"/{'/'.join(arg.strip('/') for arg in args)}/"
+    return f"/{'/'.join(str(arg).strip('/') for arg in args)}/"
 
 
 class BulkClient(Client):
@@ -77,8 +78,10 @@ class FormatDataFieldMixin:
                 and '>>' in result \
                 and not ('{' in result and '}' in result) \
                 and 'results' in self.context:
-            result = result.replace('<<', '{').replace('>>', '}')
-            return result.format(*self.context['results'])
+            result = result.replace('<<', '{').replace('>>', '}').format(*self.context['results'])
+            with raise_context():
+                return json.loads(result)
+
         return result
 
 
@@ -145,17 +148,22 @@ class OperationSerializer(serializers.Serializer):
                                       default=settings.VST_API_VERSION,
                                       write_only=True)
 
+    def to_representation(self, instance):
+        return Dict(super().to_representation(instance))
+
     def get_operation_method(self, method):
         return getattr(self.context.get('client'), method.lower())
 
     def _get_rendered(self, response):
         try:
-            return response.data
+            result = response.data
+            if isinstance(result, dict):
+                return Dict(result)
         except:
             pass
         if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
             return json.loads(response.rendered_content.decode())
-        return dict(detail=str(response.content.decode('utf-8')))
+        return Dict(detail=str(response.content.decode('utf-8')))
 
     def create(self, validated_data):
         # pylint: disable=protected-access
