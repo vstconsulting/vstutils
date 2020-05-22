@@ -1,5 +1,4 @@
 # Packages needed for compile documentation.
-watchdog<0.10.0
 sphinx==2.2.0
 sphinx-autobuild==0.7.1
 sphinxcontrib-httpdomain==1.7.0
