@@ -54,7 +54,7 @@ let guiFields = {
     integer: numbers.IntegerField,
     json: JSONField,
     multiplenamedbinfile: files.namedBinaryImage.NamedBinaryImageField,
-    multiplenamedbinimage: files.namedBinaryImage.NamedBinaryImageField,
+    multiplenamedbinimage: files.multipleNamedBinaryImage.MultipleNamedBinaryImageField,
     multiselect: MultiselectField,
     namedbinfile: files.namedBinaryFile.NamedBinaryFileField,
     namedbinimage: files.namedBinaryImage.NamedBinaryImageField,

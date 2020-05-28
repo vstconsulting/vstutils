@@ -1,5 +1,5 @@
 
-
+/* OLD STYLES TODO remove unused */
 html,
 body {
     height: 100%;
@@ -66,7 +66,7 @@ a:focus {
 }
 
 h1 {
-    font-family: "Circe";
+    /*font-family: "Circe";*/
     font-size: 36px;
     font-weight: normal;
     font-style: normal;
@@ -88,7 +88,7 @@ h2 {
 }
 
 h3 {
-    font-family: "Circe";
+    /*font-family: "Circe";*/
     font-size: 24px;
     font-weight: normal;
     font-style: normal;
@@ -125,7 +125,7 @@ h3 {
 
 .mobile-index-body-doctor {
     height: calc(100% - 305px);
-    background: url(ansible-logo.png) no-repeat center / contain;
+    /*background: url(ansible-logo.png) no-repeat center / contain;*/
 }
 
 .mobile-index-body-inner {
@@ -238,7 +238,7 @@ h3 {
 h1 {
     max-width: 850px;
 }
- 
+
 .logo-img {
     width:50%;
     margin-bottom:20px;
@@ -256,7 +256,7 @@ h1 {
     .logo-img {
         margin-top: 0vh;
     }
-} 
+}
 
 .overlay {
     background: #e9e9e9;
@@ -269,24 +269,60 @@ h1 {
     opacity: 0.5;
 }
 
-#loader { 
+#loader {
     background: #e9e9e9;
-    border: 12px solid #f3f3f3; 
-    border-radius: 50%; 
-    border-top: 12px solid #444444; 
-    width: 70px; 
-    height: 70px; 
+    border: 12px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 12px solid #444444;
+    width: 70px;
+    height: 70px;
     animation: spin 1s linear infinite;
-} 
-  
-@keyframes spin { 
-    100% { 
-        transform: rotate(360deg); 
-    } 
-} 
-  
-.loader-center { 
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-center {
     position: absolute;
     top: 40%;
     left: 45%;
-} 
+}
+
+/* NEW STYLES */
+form > .row {
+    margin: 0;
+}
+
+.main-header {
+    padding: 10px;
+}
+
+.login-box, .register-box {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 576px) {
+    .login-box, .register-box {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+.login-box-body, .register-box-body {
+    background: #ffffff;
+    padding: 20px;
+    border-top: 0;
+    color: #666;
+}
+
+.logo-img {
+    margin-top: 0;
+}
+
+.login-logo a {
+    color: inherit;
+}

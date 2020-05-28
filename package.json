@@ -20,7 +20,7 @@
     "@fortawesome/fontawesome-free": "^5.12.1",
     "@popperjs/core": "^2.0.6",
     "JavaScript-autoComplete": "https://github.com/Pixabay/JavaScript-autoComplete#1.0.4",
-    "admin-lte": "3.0.0-alpha",
+    "admin-lte": "3.0.5",
     "ansi_up": "^4.0.4",
     "axios": "0.18.1",
     "babel-loader": "^8.0.6",

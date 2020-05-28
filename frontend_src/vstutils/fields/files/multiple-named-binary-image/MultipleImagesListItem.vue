@@ -12,6 +12,7 @@
 
     export default {
         mixins: [BaseFieldInnerComponentMixin],
+        props: ['file'],
         components: {
             ImageBlock: ImageBlock,
         },
