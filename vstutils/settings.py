@@ -300,6 +300,14 @@ try:
 except ImportError:  # nocv
     pass
 
+# :websockets:
+try:
+    import channels
+    HAS_CHANNELS = True
+except ImportError:  # nocv
+    HAS_CHANNELS = False
+
+
 # Applications definition
 ##############################################################
 INSTALLED_APPS = [
@@ -320,6 +328,9 @@ INSTALLED_APPS += [
 ]
 INSTALLED_APPS += ['docs'] if HAS_DOCS else []
 INSTALLED_APPS += ['drf_yasg']
+
+if HAS_CHANNELS:
+    INSTALLED_APPS.append('channels')
 
 ADDONS = [
     'vstutils',
@@ -432,6 +443,8 @@ WSGI = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
 WSGI_APPLICATION = f"{WSGI}.application"
 UWSGI_APPLICATION = f'{WSGI}:application'
 
+ASGI_APPLICATION = "vstutils.ws:application"
+
 uwsgi_settings = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
 WEB_DAEMON_LOGFILE = uwsgi_settings.get('log_file', fallback='/dev/null')
@@ -441,6 +454,12 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
 X_FRAME_OPTIONS = web['x_frame_options']
 USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
 USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Templates settings
 ##############################################################
@@ -619,6 +638,11 @@ BULK_OPERATION_TYPES = {
 
 HEALTH_BACKEND_CLASS = 'vstutils.api.health.DefaultBackend'
 
+WS_CONSUMERS = {
+    'endpoint': {
+        "BACKEND": 'vstutils.ws.builtin.EndpointConsumer'
+    }
+}
 
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/
@@ -726,6 +750,11 @@ LOGGING = {
             'propagate': True,
         },
         'drf_yasg.generators': {
+            'handlers': ['console', 'file'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+        'daphne': {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
             'propagate': True,

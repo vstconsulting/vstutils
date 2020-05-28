@@ -120,7 +120,7 @@ class HostViewSet(ModelViewSet):
         return responses.Response201("OK")
 
     @action(detail=True, serializer_class=HostSerializer)
-    def test3(self, request, *args, **kwargs):
+    def test3(self, request, *args, **kwargs):  # nocv
         return Response("OK", 201).resp
 
 
@@ -171,7 +171,7 @@ class DeepHostGroupViewSet(_DeepHostGroupViewSet):
 
 try:
     @nested_view('subgroups', 'id')
-    class ErrorView(_HostGroupViewSet):
+    class ErrorView(_HostGroupViewSet):  # nocv
         pass
 except nested_view.NoView:
     pass
@@ -180,7 +180,7 @@ except nested_view.NoView:
 try:
     class ErrorView(_HostGroupViewSet):
         @subaction(response_code=200, detail=True)
-        def test_err(self, request, *args, **kwargs):
+        def test_err(self, request, *args, **kwargs):  # nocv
             return Response("OK", 200).resp
 except AssertionError:
     pass
@@ -233,7 +233,7 @@ class TestBinaryFilesViewSet(ModelViewSet):
 
     @action(methods=['get'], detail=True)
     def test_nested_view_inspection(self, *args, **kwargs):
-        raise Exception
+        raise Exception  # nocv
 
     test_nested_view_inspection._nested_view = None
     test_nested_view_inspection._nested_name = ''

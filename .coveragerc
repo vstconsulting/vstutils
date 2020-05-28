@@ -1,5 +1,7 @@
 [run]
-source = vstutils
+source =
+    vstutils
+    test_proj
 parallel = True
 concurrency =
     thread
@@ -19,7 +21,7 @@ omit =
     */vstutils/compile.py
     */vstutils/tasks.py
     */vstutils/api/doc_generator.py
-    */test_proj/*
+    # */test_proj/*
 
 [report]
 fail_under = 100

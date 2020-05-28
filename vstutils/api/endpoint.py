@@ -216,15 +216,15 @@ class EndpointViewSet(views.APIView):
         client = BulkClient(**self.original_environ_data(request=request))
         if request.user.is_authenticated:
             if isinstance(request.successful_authenticator, SessionAuthentication):
-                client.defaults['HTTP_COOKIE'] = request.environ.get('HTTP_COOKIE')
+                client.defaults['HTTP_COOKIE'] = request.META.get('HTTP_COOKIE')
             elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
-                client.defaults['HTTP_AUTHORIZATION'] = request.environ.get('HTTP_AUTHORIZATION')
+                client.defaults['HTTP_AUTHORIZATION'] = request.META.get('HTTP_AUTHORIZATION')
             else:
                 client.force_login(request.user)  # nocv
         return client
 
     def original_environ_data(self, request, *args) -> dict:
-        get_environ = request.environ.get
+        get_environ = request.META.get
         kwargs = dict()
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)

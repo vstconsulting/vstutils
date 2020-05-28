@@ -105,7 +105,7 @@ class Command(BaseCommand):
         # Add arguments to uwsgi cmd list.
         cmd.append('--attach-daemon2')
         run = 'stopsignal=15,reloadsignal=1,'
-        run += f'exec={settings.PYTHON_INTERPRETER} -m celery worker'
+        run += 'exec=celery worker'
         run += options
         cmd.append(run)
 
@@ -119,6 +119,9 @@ class Command(BaseCommand):
             str(opts['script']),
             f'--set-ph=program_name={settings.VST_PROJECT}',
             f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
+            f'--set-ph=asgi_app={settings.ASGI_APPLICATION}',
+            f'--set-ph=api_path={settings.API_URL}',
+            f'--set-ph=ws={"true" if settings.HAS_CHANNELS else "false"}',
             f'--module={settings.UWSGI_APPLICATION}',
         ]
         #  Setup http addr:port.

@@ -407,6 +407,7 @@ kwargs = dict(
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
+        'ws': ['channels~=2.4.0']
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
