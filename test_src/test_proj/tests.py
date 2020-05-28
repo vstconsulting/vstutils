@@ -19,15 +19,18 @@ except ImportError:  # nocv
 
 from collections import OrderedDict
 
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.core import mail
 from django.core.management import call_command
+from django.middleware.csrf import _get_new_csrf_token
 from django.test import Client
 from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
+from channels.testing import WebsocketCommunicator
 
-from vstutils import utils
+from vstutils import utils, __version__
 from vstutils.api.validators import RegularExpressionValidator
 from vstutils.api.views import UserViewSet
 from vstutils.exceptions import UnknownTypeException
@@ -35,6 +38,7 @@ from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.urls import router
+from vstutils.ws import application
 
 from .models import File, Host, HostGroup, List
 from rest_framework.exceptions import ValidationError
@@ -51,6 +55,10 @@ test_handler_structure = {
         }
     }
 }
+
+
+def async_test(coro):
+    return async_to_sync(coro, force_new_loop=True)
 
 
 class VSTUtilsCommandsTestCase(BaseTestCase):
@@ -258,7 +266,8 @@ class VSTUtilsTestCase(BaseTestCase):
         with self.assertRaises(AttributeError):
             test_obj.test2 = 3
         with self.assertRaises(AttributeError):
-            TestClass.test2 = 3
+            if TestClass.test2 == 'Some text':
+                TestClass.test2 = 3
         TestClass.test3 = 3
 
     def test_paginator(self):
@@ -266,8 +275,15 @@ class VSTUtilsTestCase(BaseTestCase):
         for _ in utils.Paginator(qs, chunk_size=1).items():
             pass
 
+        Host.objects.bulk_create([
+            Host(name=f'paged_test_host_{str(i)}')
+            for i in range(10)
+        ])
+
         for _ in Host.objects.paged(chunk_size=1):
             pass
+
+        Host.objects.filter(name__startswith="paged_test_host_").delete()
 
     def test_render_and_file(self):
         err_ini = utils.get_render('configs/config.ini', dict(config=dict(test=[])))
@@ -1763,3 +1779,98 @@ class ConfigParserCTestCase(BaseTestCase):
             'beat': True
         }
         self.assertDictEqual(worker_options, settings.WORKER_OPTIONS)
+
+
+class WebSocketTestCase(BaseTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.client = self._login()
+        self.cookie = f"{self.client.cookies.output(header='', sep='; ').strip()};"
+        self.cookie += f"csrftoken={_get_new_csrf_token()}"
+
+        self.headers_dict = {
+            'host': f'{self.server_name}',
+            'connection': 'Upgrade',
+            'pragma': 'no-cache',
+            'cache-control': 'no-cache',
+            'user-agent': ('Mozilla/5.0 (X11; Linux x86_64) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/81.0.4044.138 Safari/537.36'),
+            'upgrade': 'websocket',
+            'origin': f"https://{self.server_name}",
+            'sec-websocket-version': '13',
+            'accept-encoding': 'gzip, deflate, br',
+            'accept-language': 'en-US,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+            'sec-websocket-key': 'some_key',
+            'sec-websocket-extensions': 'permessage-deflate; client_max_window_bits'
+        }
+
+    @async_test
+    async def test_endpoint_requests(self):
+        headers = {
+            k.encode('utf-8'): v.encode('utf-8')
+            for k, v in self.headers_dict.items()
+        }
+        endpoint_communicator = WebsocketCommunicator(application, "/ws/endpoint/", headers=headers.items())
+        connected, subprotocol = await endpoint_communicator.connect()
+        self.assertFalse(connected)
+        self.assertEqual(subprotocol, 1008)
+        endpoint_communicator.stop()
+
+        headers[b'cookie'] = self.cookie.encode('utf-8')
+        endpoint_communicator = WebsocketCommunicator(application, "/ws/endpoint/", headers=headers.items())
+
+        def _default_manager_get(pk=None, *args, **kwargs):
+            if pk == self.user.id:
+                return self.user
+            raise self.user.DoesNotExists()  # nocv
+
+
+        with self.patch('vstutils.auth.UserModel._default_manager.get') as mock:
+            mock.side_effect = _default_manager_get
+            connected, _ = await endpoint_communicator.connect()
+            self.assertTrue(connected)
+            # initial message
+            response = await endpoint_communicator.receive_json_from(3)
+            self.assertEqual(response['type'], 'bootstrap')
+            self.assertEqual(response['data']['debug_mode'], settings.DEBUG)
+            self.assertEqual(
+                response['data']['version'],
+                f'1.0.0_1.0.0_{__version__}_{self.user.id}'
+            )
+            self.assertEqual(
+                response['data']['endpoint_path'],
+                f'http://{self.server_name}/api/endpoint/'
+            )
+            self.assertEqual(
+                response['data']['static'],
+                [
+                    {
+                        "priority": f.get('priority', 999999),
+                        "type": f['type'],
+                        "name": f"http://{self.server_name}/{f['name']}"
+                    }
+                    for f in settings.SPA_STATIC
+                ]
+            )
+
+            with self.patch('django.contrib.auth.models.User.objects.get') as mk:
+                mk.side_effect = _default_manager_get
+                await endpoint_communicator.send_json_to({
+                    "data": [
+                        {"method": "get", "path": ['user', self.user.id]}
+                    ],
+                    "handler_type": "put",
+                    "request_id": 123
+                })
+            response = await endpoint_communicator.receive_json_from(3)
+            self.assertEqual(response['status'], 200)
+            self.assertEqual(response['request_id'], 123)
+            await endpoint_communicator.send_json_to({"handler_type": "get"})
+            response = await endpoint_communicator.receive_json_from(3)
+            self.assertEqual(response['type'], 'schema')
+            self.assertTrue('swagger' in response['schema'], response['schema'])
+            self.assertEqual(response['schema']['swagger'], '2.0')
+            await endpoint_communicator.disconnect()
