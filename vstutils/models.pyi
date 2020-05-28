@@ -3,6 +3,11 @@ from django.db import models
 from .utils import Paginator
 
 
+class ObjectDoesNotExist(Exception):
+    """The requested object does not exist"""
+    silent_variable_failure = True
+
+
 class BQuerySet(models.QuerySet):
     use_for_related_fields: _t.ClassVar[bool] = True
     custom_iterable_class: _t.ClassVar[_t.Any]
@@ -28,13 +33,13 @@ class BaseManager(models.Manager):
     ...
 
 
-class Manager(BaseManager.from_queryset(BQuerySet)):
+class Manager(BaseManager):
     ...
 
 
 class BaseModel(models.Model):
     objects: Manager
-    DoesNotExist: models.ObjectDoesNotExist
+    DoesNotExist: ObjectDoesNotExist
 
     def __unicode__(self) -> _t.Text:
         ...

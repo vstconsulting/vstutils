@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
-from typing import NoReturn, Text
+from typing import Text
 from collections import OrderedDict as odict
 import traceback
 import logging
 import json
 import ldap
+from django.conf import settings
 
 
 def json_default(obj):  # nocv
@@ -38,7 +39,7 @@ class LDAP:
     class InvalidDomainName(ldap.INVALID_CREDENTIALS):
         pass
 
-    def __init__(self, connection_string: Text, username: Text = None, password: Text = None, domain: Text = None):
+    def __init__(self, connection_string: Text, username: Text = '', password: Text = None, domain: Text = None):
         '''
         LDAP constructor
 
@@ -48,7 +49,6 @@ class LDAP:
         :param password: auth password
         :param domain: domain for easy use users
         '''
-        from django.conf import settings
         self.settings = settings
         self.user_format = settings.LDAP_FORMAT.replace('<', "{").replace('>', '}')
         self.logger = logging.getLogger(settings.VST_PROJECT_LIB)
@@ -71,11 +71,11 @@ class LDAP:
             )
         self.auth(self.username, self.password)
 
-    def auth(self, username: Text = None, password: Text = None) -> NoReturn:
+    def auth(self, username: Text = None, password: Text = None) -> None:
         self.__conn = self.__authenticate(
             self.connection_string,
-            username or self.username,
-            password or self.password
+            str(username or self.username),
+            str(password or self.password)
         )
 
     def __prepare_user_with_domain(self, username: Text) -> Text:

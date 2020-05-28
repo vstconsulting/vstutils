@@ -1,16 +1,20 @@
 from __future__ import unicode_literals
 import typing as _t
 import logging
-from django.db.models import Model, ObjectDoesNotExist
+from django.db.models import Model
 from django.http.request import HttpRequest
 from .utils import ObjectHandlers
-try:
-    from .ldap_utils import LDAP as _LDAP
-except ImportError:
-    _LDAP = object
+from .ldap_utils import LDAP as __LDAP
 
+
+_LDAP: _t.Type[__LDAP]
 HAS_LDAP: bool
 logger: logging.Logger
+
+
+class ObjectDoesNotExist(Exception):
+    """The requested object does not exist"""
+    silent_variable_failure = True
 
 
 class UserModel(Model):
@@ -28,7 +32,7 @@ class BaseAuthBackend:
         ...
 
 
-class LDAP(_LDAP):
+class LDAP(__LDAP):
     ...
 
 

@@ -11,15 +11,12 @@ from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
 
-try:
-    from mock import patch
-except ImportError:  # nocv
-    from unittest.mock import patch
+from unittest.mock import patch
 from .utils import import_class
 
 User = get_user_model()
 
-BulkDataType = _t.List[_t.Dict[_t.Text, _t.Any]]
+BulkDataType = _t.Union[_t.List[_t.Dict[_t.Text, _t.Any]], str]
 ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence]
 
 
@@ -187,7 +184,7 @@ class BaseTestCase(TestCase):
     def post_result(self, url, code=None, *args, **kwargs):
         return self.get_result("post", url, code, *args, **kwargs)
 
-    def get_result(self, rtype, url, code=None, *args, **kwargs) -> ApiResultType:
+    def get_result(self, rtype, url, code: int = None, *args, **kwargs) -> ApiResultType:
         '''
         Test request with returning result of request
         :param rtype:  - request type (methods from Client cls): get, post etc
@@ -203,7 +200,8 @@ class BaseTestCase(TestCase):
         if kwargs.get("data", False):
             if isinstance(kwargs["data"], str):
                 kwargs["content_type"] = "application/json"
-        result = self.result(request, url, code=code, *args, **kwargs)
+        kwargs['code'] = code
+        result = self.result(request, url, *args, **kwargs)
         self._logout(client)
         return result
 

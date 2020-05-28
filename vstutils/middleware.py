@@ -114,6 +114,6 @@ class TimezoneHeadersMiddleware(BaseMiddleware):
 class ExecuteTimeHeadersMiddleware(BaseMiddleware):
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         start_time = time.time()
-        resonse = super().get_response_handler(request)
-        resonse['ResponseTime'] = time.time() - start_time
-        return resonse
+        response = super().get_response_handler(request)
+        response['ResponseTime'] = int(time.time() - start_time)
+        return response

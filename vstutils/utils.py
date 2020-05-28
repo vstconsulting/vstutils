@@ -94,7 +94,7 @@ class ClassPropertyDescriptor:
             return self.fset.__get__(obj, obj)(value)
         return self.fset.__get__(obj, type(obj))(value)  # nocv
 
-    def setter(self, func: tp.Callable):
+    def setter(self, func: tp.Union[tp.Callable, classmethod]):
         if not isinstance(func, (classmethod, staticmethod)):
             func = classmethod(func)
         self.fset = func
@@ -324,6 +324,8 @@ class BaseVstObject:
     Default mixin-class for custom objects which needed to get settings and cache.
     """
 
+    __django_settings__: tp.Any
+
     @classmethod
     def get_django_settings(cls, name: tp.Text, default: tp.Any = None):
         # pylint: disable=access-member-before-definition
@@ -460,7 +462,7 @@ class Executor(BaseVstObject):
 
 
 class UnhandledExecutor(Executor):
-    working_handler = None
+    working_handler = None  # type: ignore
 
 
 class KVExchanger(BaseVstObject):
@@ -765,7 +767,7 @@ class ModelHandlers(ObjectHandlers):
     :type values: list
     """
 
-    def get_object(self, name: tp.Text, obj):
+    def get_object(self, name: tp.Text, obj) -> tp.Any:  # type: ignore
         """
         :param name: -- string name of backend
         :param name: str

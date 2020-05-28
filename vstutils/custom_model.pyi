@@ -16,13 +16,13 @@ class CustomQuerySet(BQuerySet):
         ...
 
 class CustomModelIterable(ModelIterable):
-    def __iter__(self) -> _t.Iterable:
+    def __iter__(self) -> _t.Iterator[BaseModel]:
         ...
 
 
 class ListModel(BaseModel):
     data: _t.ClassVar[_t.List[_t.Dict]]
-    objects: _t.Union[Manager, CustomModelIterable]
+    objects: Manager
 
     def _get_data(self, chunked_fetch: bool = False) -> _t.List[_t.Dict]:
         ...
