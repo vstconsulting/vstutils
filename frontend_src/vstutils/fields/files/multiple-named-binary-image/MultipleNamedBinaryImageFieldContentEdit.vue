@@ -34,7 +34,7 @@
                     :field="field"
                     :wrapper_opt="wrapper_opt"
                     :data="data"
-                    :value="file"
+                    :file="file"
                 >
                     <span class="remove-file cursor-pointer fa fa-times" @click="removeFile(idx)"></span>
                 </MultipleImagesListItem>
@@ -45,14 +45,14 @@
 
 <script>
     import { BinaryFileFieldContentEdit, BinaryFileFieldReadFileButton } from '../binary-file';
-    import MultipleNamedBinaryImageFieldContentReadonly from './MultipleNamedBinaryImageFieldContentReadonly.vue';
     import { MultipleNamedBinaryFileFieldContentEdit } from '../multiple-named-binary-file';
     import MultipleImagesListItem from './MultipleImagesListItem.vue';
+    import MultipleNamedBinaryImageFieldContent from './MultipleNamedBinaryImageFieldContent';
 
     export default {
         mixins: [
             BinaryFileFieldContentEdit,
-            MultipleNamedBinaryImageFieldContentReadonly,
+            MultipleNamedBinaryImageFieldContent,
             MultipleNamedBinaryFileFieldContentEdit,
         ],
         components: {

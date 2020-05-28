@@ -43,18 +43,20 @@ class BaseTestCase(TestCase):
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.testcase.user = self.old_user
 
-    def _create_user(self, is_super_user=True):
-        username = self.random_name()
-        email = username + '@gmail.com'
-        password = username.upper()
+    def _create_user(self, is_super_user=True, **kwargs):
+        username = kwargs.pop('username', self.random_name())
+        email = kwargs.pop('email', username + '@gmail.com')
+        password = kwargs.pop('password', username.upper())
         if is_super_user:
             user = User.objects.create_superuser(username=username,
                                                  password=password,
-                                                 email=email)
+                                                 email=email,
+                                                 **kwargs)
         else:
             user = User.objects.create_user(username=username,
                                             password=password,
-                                            email=email)
+                                            email=email,
+                                            **kwargs)
         user.data = {'username': username, 'password': password}
         return user
 

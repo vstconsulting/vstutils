@@ -18,7 +18,7 @@ import './libs/vue.js';
 
 import moment from 'moment';
 window.moment = moment;
-import 'moment-timezone/builds/moment-timezone-with-data-1970-2030.js';
+import 'moment-timezone/builds/moment-timezone-with-data-2012-2022.js';
 
 import md5 from 'md5';
 window.md5 = md5;

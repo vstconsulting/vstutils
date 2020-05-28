@@ -10,7 +10,7 @@
                     :field="field"
                     :wrapper_opt="wrapper_opt"
                     :data="data"
-                    :value="file"
+                    :file="file"
                 />
             </template>
         </div>
