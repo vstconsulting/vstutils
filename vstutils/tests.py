@@ -7,11 +7,11 @@ import string  # noqa: F401
 import os  # noqa: F401
 import uuid
 
+from unittest.mock import patch
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
 
-from unittest.mock import patch
 from .utils import import_class
 
 User = get_user_model()
