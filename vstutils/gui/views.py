@@ -1,5 +1,6 @@
 #  pylint: disable=bad-super-call,unused-argument
 from django.contrib.auth.decorators import login_required
+from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.template.response import TemplateResponse
 from django.contrib.auth import views as auth
@@ -76,7 +77,7 @@ class Logout(auth.LogoutView):
     next_page = settings.LOGIN_URL
 
 
-class Registration(auth.FormView, BaseView):
+class Registration(FormView, BaseView):
     template_name = 'registration/user_registration.html'
     success_url = reverse_lazy('login')
     form_class = RegistrationForm

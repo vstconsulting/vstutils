@@ -3,9 +3,9 @@ import json
 import typing as _t
 from collections import OrderedDict
 from inspect import getmembers
-from django.db import transaction
+from django.db import transaction, models
 from rest_framework.decorators import action
-from rest_framework import response, status
+from rest_framework import response, request as drf_request, status
 from drf_yasg.utils import swagger_auto_schema
 from . import base
 from ..exceptions import VSTUtilsException
@@ -54,7 +54,8 @@ def nested_action(name: _t.Text, arg: _t.Text = None, methods=None, manager_name
     _nested_filter_class = kwargs.pop('filter_class', None)
 
     def decorator(func: _t.Callable):
-        def wrapper(view: _t.Type[base.GenericViewSet], request: _t.Type[base.RestResponse], *args, **kwargs):
+        # pylint: disable=used-before-assignment
+        def wrapper(view: NestedViewMixin, request: drf_request.Request, *args, **kwargs):
             # Nested name
             view.nested_name = name
             # Allow append to nested or only create
@@ -72,7 +73,7 @@ def nested_action(name: _t.Text, arg: _t.Text = None, methods=None, manager_name
         kwargs['detail'] = True
         kwargs['url_path'] = path
         kwargs['url_name'] = kwargs.pop('url_name', name)
-        view = action(*args, **kwargs)(wrapper)
+        view: NestedViewMixin = action(*args, **kwargs)(wrapper)  # type: ignore
         view._nested_args = _nested_args
         view._nested_manager = manager_name or name
         view._nested_filter_class = _nested_filter_class
@@ -119,8 +120,8 @@ def subaction(*args, **kwargs):
         if operation_description:
             override_kw['operation_description'] = operation_description
         else:
-            override_kw['operation_description'] = str(func.__doc__ or '').strip()
-        return swagger_auto_schema(**override_kw)(func_object)
+            override_kw['operation_description'] = str(func.__doc__ or '').strip()  # type: ignore
+        return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 
     return decorator
 
@@ -140,13 +141,26 @@ def get_action_name(master_view: _t.Type[base.GenericViewSet], method: _t.Text):
     elif method == 'delete':
         action_name = 'destroy'
     else:  # nocv
-        action_name = None
+        action_name = None  # type: ignore
 
     return action_name
 
 
 class NestedViewMixin:
     __slots__ = ('action',)
+    get_serializer: _t.Callable
+    check_object_permissions: _t.Callable
+    lookup_field: _t.Text
+    request: drf_request.Request
+    nested_name: _t.Text
+    nested_append_arg: _t.Text
+    nested_allow_append: bool
+    nested_arg: _t.Text
+    nested_id: _t.Union[_t.Text, int]
+    nested_view_object: _t.Optional[models.Model]
+    _nested_filter_class: _t.Any
+    _nested_args: _t.Dict[_t.Text, _t.Any]
+    _nested_manager: _t.Union[models.QuerySet, _t.Text]
 
     def _check_permission_obj(self, objects: _t.Iterable):
         for obj in objects:
@@ -163,7 +177,7 @@ class NestedViewMixin:
         return get_action_name(self.master_view, self.request.method)
 
     def get_serializer_context(self) -> _t.Dict:
-        context = super().get_serializer_context()
+        context = super().get_serializer_context()  # type: ignore
         return context
 
     def perform_destroy(self, instance):
@@ -187,7 +201,7 @@ class NestedViewMixin:
 class NestedWithoutAppendMixin(NestedViewMixin):
     __slots__ = ()
 
-    def create(self, request: _t.Type[base.RestResponse], *args, **kwargs):
+    def create(self, request: drf_request.Request, *args, **kwargs):
         # pylint: disable=unused-argument
         many = isinstance(request.data, (list, tuple))
         return self.perform_create_nested(request.data, self.lookup_field, many)
@@ -344,7 +358,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         msg = 'Argument "view" must be installed for `nested_view` decorator.'
 
     def __init__(self, name, arg=None, methods=None, *args, **kwargs):
-        self.view = kwargs.pop('view', None)
+        self.view: _t.Optional[_t.Union[NestedViewMixin, base.GenericViewSet]] = kwargs.pop('view', None)
         self.allowed_subs = kwargs.pop('subs', [])
         self.queryset_filters = kwargs.pop('queryset_filters', [])
         super().__init__(name, arg, *args, **kwargs)
@@ -385,7 +399,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             return []
         elif self.allowed_subs:
             allowed_subs = set(self.allowed_subs)
-            subs = allowed_subs.intersection(subs)
+            subs = list(allowed_subs.intersection(subs))
         return subs
 
     @property
@@ -459,7 +473,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         nested_view.__name__ = name
         nested_view.__doc__ = self.view.__doc__
-        nested_view._nested_view = self.view
+        nested_view._nested_view = self.view  # type: ignore
         return name, nested_view
 
     def get_view_type(self, type_name: _t.Text, **options):

@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 from django.conf import settings
 from django.db import transaction
+from django.http import HttpResponse
 from django.test.client import Client, ClientHandler
 from drf_yasg.views import SPEC_RENDERERS
 from rest_framework import serializers, views, versioning
@@ -136,7 +137,7 @@ class OperationSerializer(serializers.Serializer):
     path = PathField(required=True)
     method = MethodChoicesField(required=True)
     headers = serializers.DictField(child=TemplateStringField(), default={}, write_only=True)
-    data = RequestDataField(required=False, default=None, allow_null=True)
+    data = RequestDataField(required=False, default=None, allow_null=True)  # type: ignore
     status = serializers.IntegerField(read_only=True, default=500)
     info = serializers.CharField(read_only=True)
     query = TemplateStringField(required=False,
@@ -188,8 +189,8 @@ class OperationSerializer(serializers.Serializer):
 
 
 class EndpointViewSet(views.APIView):
-    schema = None
-    versioning_class = versioning.QueryParameterVersioning
+    schema = None  # type: ignore
+    versioning_class = versioning.QueryParameterVersioning  # type: ignore
     renderer_classes = list(views.APIView.renderer_classes) + list(SPEC_RENDERERS)
     session_cookie_name = settings.SESSION_COOKIE_NAME
     client_environ_keys_copy = [
@@ -291,7 +292,7 @@ class EndpointViewSet(views.APIView):
                 'data': dict(detail=f'Error in bulk request data. See info. Original message: {str(err)}')
             }
 
-    def get(self, request, format=None) -> views.Response:
+    def get(self, request, format=None) -> HttpResponse:
         """Returns response with swagger ui or openapi json schema if ?format=openapi"""
 
         url = f'/api/{request.version or settings.VST_API_VERSION}/_openapi/'

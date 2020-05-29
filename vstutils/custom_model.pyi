@@ -1,8 +1,24 @@
 import typing as _t
 from pathlib import Path
 from django.db.models.query import ModelIterable
-from django.db.models.fields import CharField, TextField, IntegerField, BooleanField
+from django.db.models.fields import CharField as cf, TextField as tf, IntegerField as intf, BooleanField as bf
 from .models import BQuerySet, BaseModel, Manager
+
+
+class CharField(cf):
+    ...
+
+
+class TextField(tf):
+    ...
+
+
+class IntegerField(intf):
+    ...
+
+
+class BooleanField(bf):
+    ...
 
 
 class CustomQuerySet(BQuerySet):
@@ -22,7 +38,6 @@ class CustomModelIterable(ModelIterable):
 
 class ListModel(BaseModel):
     data: _t.ClassVar[_t.List[_t.Dict]]
-    objects: Manager
 
     def _get_data(self, chunked_fetch: bool = False) -> _t.List[_t.Dict]:
         ...

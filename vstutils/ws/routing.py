@@ -1,4 +1,4 @@
-from django.conf.urls import re_path
+from django.conf.urls import re_path  # type: ignore
 from channels.routing import URLRouter
 from ..utils import ObjectHandlers
 

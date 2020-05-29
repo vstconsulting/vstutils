@@ -1,3 +1,4 @@
+import typing as _t
 import re
 
 from rest_framework import serializers
@@ -8,7 +9,7 @@ class RegularExpressionValidator:
 
     :raises serializers.ValidationError: in case value does not match regular expression
     '''
-    regexp = None
+    regexp: _t.Optional[_t.Pattern[_t.Text]] = None
 
     def __init__(self, regexp=None):
         '''

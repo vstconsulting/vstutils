@@ -8,7 +8,7 @@ Read more in Django REST Framework documentation for
 from __future__ import unicode_literals
 
 import json
-
+import typing as _t
 from django.db import models
 from django.contrib.auth import get_user_model
 from rest_framework import serializers, exceptions
@@ -85,7 +85,7 @@ class ErrorSerializer(DataSerializer):
 
 
 class ValidationErrorSerializer(ErrorSerializer):
-    detail = serializers.DictField(required=True)
+    detail = serializers.DictField(required=True)  # type: ignore
 
 
 class OtherErrorsSerializer(ErrorSerializer):
@@ -159,13 +159,15 @@ class OneUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ('id',
-                  'username',
-                  'is_active',
-                  'is_staff',
-                  'first_name',
-                  'last_name',
-                  'email',)
+        fields: _t.Union[_t.List[_t.Text], _t.Tuple] = (
+            'id',
+            'username',
+            'is_active',
+            'is_staff',
+            'first_name',
+            'last_name',
+            'email',
+        )
         read_only_fields = ('is_superuser',
                             'date_joined',)
 

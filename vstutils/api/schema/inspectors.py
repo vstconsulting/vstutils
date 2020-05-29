@@ -1,7 +1,9 @@
+from typing import Dict, Type, Text, Any
 from collections import OrderedDict
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg import openapi
-from drf_yasg.inspectors import CoreAPICompatInspector
+from drf_yasg.inspectors.query import CoreAPICompatInspector
+from rest_framework.fields import Field
 from .. import fields, serializers
 
 
@@ -26,7 +28,7 @@ FORMAT_UPTIME = 'uptime'
 
 
 # Base types
-basic_type_info = OrderedDict()
+basic_type_info: Dict[Type[Field], Dict[Text, Any]] = OrderedDict()
 basic_type_info[fields.FileInStringField] = dict(
     type=openapi.TYPE_STRING, format=FORMAT_FILE
 )

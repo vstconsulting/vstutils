@@ -88,7 +88,8 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
 
     def get_schema(self, request: drf_request.Request = None, *args, **kwargs):
         if not getattr(request, 'version', ''):
-            request.version = self.version
+            request.version = self.version  # type: ignore
         result = super().get_schema(request, *args, **kwargs)
-        result['info']['x-user-id'] = request.user.id
+        if request:
+            result['info']['x-user-id'] = request.user.id
         return result

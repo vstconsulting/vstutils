@@ -88,7 +88,7 @@ class CommaMultiSelect(CharField):
     def to_internal_value(self, data: _t.Union[_t.Text, _t.Sequence]) -> _t.Text:
         return self.to_representation(data)  # nocv
 
-    def to_representation(self, data: _t.Union[_t.Text, _t.Sequence]) -> _t.Text:
+    def to_representation(self, data: _t.Union[_t.Text, _t.Sequence, _t.Iterator]) -> _t.Text:
         if isinstance(data, str):
             data = map(str, filter(bool, data.split(self.select_separator)))
         return self.select_separator.join(data)
@@ -165,10 +165,12 @@ class FkModelField(FkField):
     def to_internal_value(self, data: int):
         return self.model_class.objects.get(**{self.autocomplete_property: data})
 
-    def to_representation(self, value: _t.Union[models.Model, int]) -> int:
+    def to_representation(self, value: _t.Union[int, models.Model]) -> int:
         if isinstance(value, self.model_class):
-            return getattr(value, self.autocomplete_property)
-        return value  # nocv
+            return int(getattr(value, self.autocomplete_property))
+        else:  # nocv
+            value = int(value)  # type: ignore
+            return value
 
 
 class UptimeField(IntegerField):
@@ -253,7 +255,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
 
     __slots__ = ()
 
-    def to_internal_value(self, data: _t.List) -> _t.Text:
+    def to_internal_value(self, data: _t.List) -> _t.Text:  # type: ignore
         if data is not None:
             if not isinstance(data, list):
                 self.fail('not a list')
@@ -261,7 +263,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
                 self.validate_value(file)
         return VSTCharField.to_internal_value(self, data)
 
-    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:
+    def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore
         with raise_context():
             return json.loads(value)
         return list()

@@ -5,13 +5,14 @@ Default ViewSets for web-api.
 import sys
 import logging
 import traceback
+import typing as _t
 from collections import namedtuple
 from copy import deepcopy
 from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404
 from django.db.models.query import QuerySet
-from django.db import transaction
+from django.db import transaction, models
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
@@ -20,7 +21,10 @@ from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
 from .serializers import (
-    ErrorSerializer, ValidationErrorSerializer, OtherErrorsSerializer
+    ErrorSerializer,
+    ValidationErrorSerializer,
+    OtherErrorsSerializer,
+    serializers
 )
 
 _ResponseClass = namedtuple("ResponseData", [
@@ -119,7 +123,7 @@ class AutoSchema(DRFAutoSchema):
         action = path.split('/')[-2]
         submethod = getattr(method_view, action, None)
         if submethod.__doc__:
-            return submethod.__doc__.strip()  # nocv
+            return str(submethod.__doc__).strip()  # nocv
         if method == 'GET' and '{' not in path[:-1].split('/')[-1]:
             action = 'list'
         elif method == 'POST':
@@ -139,22 +143,23 @@ class AutoSchema(DRFAutoSchema):
 
 
 class QuerySetMixin(rvs.APIView):
-    '''
+    """
     Instance REST operations.
-    '''
+    """
     __slots__ = ()
+    queryset: _t.Optional[models.QuerySet]
     _queryset = None
     model = None
 
-    @classproperty
+    @classproperty  # type: ignore
     def queryset(self):
-        # pylint: disable=method-hidden
+        # pylint: disable=method-hidden,function-redefined
         if self._queryset is not None:
             return getattr(self._queryset, 'cleared', self._queryset.all)()
         qs = self.model.objects.all()
         return getattr(qs, 'cleared', qs.all)()
 
-    @queryset.setter
+    @queryset.setter  # type: ignore
     def queryset(self, value):
         self._queryset = value
 
@@ -191,7 +196,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     __slots__ = ()
     _serializer_class_one = None
     model = None
-    action_serializers = {}
+    action_serializers: _t.Dict[_t.Text, serializers.Serializer] = {}
+    _nested_args: _t.Dict[_t.Text, _t.Any]
+    _nested_view: _t.ClassVar[_t.Union[QuerySetMixin, vsets.GenericViewSet]]
+    nested_detail: bool
 
     def filter_for_filter_backends(self, backend):
         return getattr(backend, 'required', False)
@@ -268,7 +276,7 @@ class CopyMixin(GenericViewSet):
     #: Name of field which will get a prefix.
     copy_field_name = 'name'
     #: List of related names which will be copied to new instance.
-    copy_related = []
+    copy_related: _t.List[_t.Text] = []
 
     def copy_instance(self, instance):
         new_instance = deepcopy(instance)
@@ -350,7 +358,7 @@ class NonModelsViewSet(GenericViewSet):
 class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
     # pylint: disable=abstract-method
     __slots__ = ()
-    schema = None
+    schema = None  # type: ignore
 
     @property
     def methods(self):

@@ -1,4 +1,4 @@
-from typing import Any, Text, Dict, List, ClassVar, NoReturn, Tuple, Union
+from typing import Any, Text, Dict, List, ClassVar, NoReturn, Tuple, Union, Type
 from rest_framework import routers, views, request
 
 
@@ -18,22 +18,22 @@ class _AbstractRouter(routers.DefaultRouter):
     permission_classes: List
     create_schema: bool
 
-    def register_view(self, prefix: PrefixType, view: views.APIView.as_view(), name: Text = None) -> NoReturn:
+    def register_view(self, prefix: PrefixType, view: views.APIView, name: Text = None) -> None:
         ...
 
-    def unregister_view(self, prefix: PrefixType) -> NoReturn:
+    def unregister_view(self, prefix: PrefixType) -> None:
         ...
 
-    def unregister(self, prefix: PrefixType) -> NoReturn:
+    def unregister(self, prefix: PrefixType) -> None:
         ...
 
-    def generate(self, views_list: Dict) -> NoReturn:
+    def generate(self, views_list: Dict) -> None:
         ...
 
     def _unreg(self, prefix: PrefixType, objects_list: UrlListType) -> UrlListType:
         ...
 
-    def _get_custom_lists(self) -> _AbstractRouter.custom_urls:
+    def _get_custom_lists(self) -> List:
         ...
 
     def _get_views_custom_list(self, view_request: request.Request, registers: Any) -> Dict[PrefixType, UrlType]:
@@ -43,21 +43,21 @@ class _AbstractRouter(routers.DefaultRouter):
 class APIRouter(_AbstractRouter):
     root_view_name: Text
 
-    def generate(self, views_list: ApiVersionStructureType) -> NoReturn:
+    def generate(self, views_list: ApiVersionStructureType) -> None:
         ...
 
 
 class MainRouter(_AbstractRouter):
     routers: ClassVar[UrlListType]
 
-    def __register_openapi(self) -> NoReturn:
+    def __register_openapi(self) -> None:
         ...
 
-    def register_router(self, prefix: PrefixType, router: APIRouter, name: Text = None) -> NoReturn:
+    def register_router(self, prefix: PrefixType, router: APIRouter, name: Text = None) -> None:
         ...
 
-    def unregister_router(self, prefix: PrefixType) -> NoReturn:
+    def unregister_router(self, prefix: PrefixType) -> None:
         ...
 
-    def generate_routers(self, api: ApiStructureType, create_schema: bool = None, create_swagger: bool = None) -> NoReturn:
+    def generate_routers(self, api: ApiStructureType, create_schema: bool = None, create_swagger: bool = None) -> None:
         ...

@@ -1,7 +1,8 @@
 from copy import copy
 from warnings import warn
 from rest_framework import status
-from drf_yasg.inspectors import SwaggerAutoSchema, swagger_settings
+from drf_yasg.inspectors.view import SwaggerAutoSchema
+from drf_yasg.app_settings import swagger_settings
 from drf_yasg import openapi, utils
 
 from .. import serializers

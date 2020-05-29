@@ -1,10 +1,12 @@
 # pylint: disable=abstract-method,unused-import,undefined-variable
 from __future__ import unicode_literals
 import os
-import sys
 import logging
 from collections import OrderedDict
-from django.core.management.base import BaseCommand as _BaseCommand, CommandError as CmdError
+from django.core.management.base import (
+    BaseCommand as _BaseCommand,
+    CommandError as CmdError,
+)
 from django.conf import settings
 
 
@@ -16,7 +18,6 @@ class BaseCommand(_BaseCommand):
     interactive = False
     requires_system_checks = False
     keep_base_opts = False
-    stdout, stderr = sys.stdout, sys.stderr
     help = "Service command for web-application"
 
     class CommandError(CmdError):
