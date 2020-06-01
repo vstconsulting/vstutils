@@ -1,8 +1,10 @@
+import typing as _t
 import os
 import gc
 import pwd
 import sys
 from collections import OrderedDict
+from tempfile import gettempdir
 
 from django.contrib import admin
 from django.utils.functional import lazy
@@ -14,42 +16,47 @@ from .tools import get_file_value
 
 from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
+
+SIMPLE_OBJECT_SETTINGS_TYPE = _t.Dict[_t.Text, _t.Dict[_t.Text, _t.Any]]
+
 # MAIN Variables
 ##############################################################
-interpreter_dir = os.path.dirname(sys.executable or 'python')
-PYTHON_INTERPRETER = '/'.join([interpreter_dir, 'python'] if interpreter_dir else 'python')
-VSTUTILS_DIR = os.path.dirname(os.path.abspath(vstutils_file))
-VST_PROJECT = os.getenv("VST_PROJECT", "vstutils")
-VST_PROJECT_LIB_NAME = os.getenv("VST_PROJECT_LIB_NAME", VST_PROJECT)
-VST_PROJECT_LIB = os.getenv("VST_PROJECT_LIB", VST_PROJECT_LIB_NAME)
-ENV_NAME = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
+interpreter_dir: _t.Text = os.path.dirname(sys.executable or 'python')
+PYTHON_INTERPRETER: _t.Text = '/'.join([interpreter_dir, 'python'] if interpreter_dir else 'python')
+VSTUTILS_DIR: _t.Text = os.path.dirname(os.path.abspath(vstutils_file))
+VST_PROJECT: _t.Text = os.getenv("VST_PROJECT", "vstutils")
+VST_PROJECT_LIB_NAME: _t.Text = os.getenv("VST_PROJECT_LIB_NAME", VST_PROJECT)
+VST_PROJECT_LIB: _t.Text = os.getenv("VST_PROJECT_LIB", VST_PROJECT_LIB_NAME)
+ENV_NAME: _t.Text = os.getenv("VST_PROJECT_ENV", VST_PROJECT_LIB.upper())
 vst_project_module = __import__(VST_PROJECT)
 vst_lib_module = __import__(VST_PROJECT_LIB_NAME) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
-PROJECT_LIB_VERSION = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
-PROJECT_VERSION = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
-PROJECT_GUI_NAME = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
+PROJECT_LIB_VERSION: _t.Text = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
+PROJECT_VERSION: _t.Text = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
+PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
 
-PY_VER = sys.version_info.major
-TMP_DIR = "/tmp"
-BASE_DIR = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
-VST_PROJECT_DIR = os.path.dirname(os.path.abspath(vst_project_module.__file__))
-__kwargs = dict(
+PY_VER: _t.SupportsInt = sys.version_info.major
+TMP_DIR: _t.Text = gettempdir() or '/tmp'
+BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
+VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))
+__kwargs: _t.Dict[_t.Text, _t.Any] = dict(
     PY=PY_VER, PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
     INTERPRETER=PYTHON_INTERPRETER, TMP=TMP_DIR, HOME=BASE_DIR,
     PROG=VST_PROJECT_DIR, LIB=BASE_DIR, VST=VSTUTILS_DIR,
     PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB_NAME
 )
-KWARGS = __kwargs
+KWARGS: _t.Dict[_t.Text, _t.Any] = __kwargs
 
 # Get settings from config
 ##############################################################
-DEV_SETTINGS_FILE = os.getenv(f"{ENV_NAME}_DEV_SETTINGS_FILE",
-                              os.path.join(BASE_DIR, str(os.getenv("VST_DEV_SETTINGS"))))
-CONFIG_FILE = os.getenv(
+DEV_SETTINGS_FILE: _t.Text = os.getenv(
+    f"{ENV_NAME}_DEV_SETTINGS_FILE",
+    os.path.join(BASE_DIR, str(os.getenv("VST_DEV_SETTINGS")))
+)
+CONFIG_FILE: _t.Text = os.getenv(
     f"{ENV_NAME}_SETTINGS_FILE",
     f"/etc/{VST_PROJECT_LIB}/settings.ini"
 )
-CONFIG_ENV_DATA_NAME = f"{ENV_NAME}_SETTINGS_DATA"
+CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
 
 class BackendSection(cconfig.Section):
@@ -59,7 +66,7 @@ class BackendSection(cconfig.Section):
 
 
 class BaseAppendSection(cconfig.AppendSection):
-    pass
+    get: _t.Callable[..., _t.Any]
 
 
 class MainSection(BaseAppendSection):
@@ -158,7 +165,7 @@ class WorkerSection(BaseAppendSection):
     }
 
 
-config = cconfig.ConfigParserC(
+config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     format_kwargs=KWARGS,
     section_defaults={
         'main': {
@@ -254,12 +261,13 @@ config = cconfig.ConfigParserC(
 config.parse_files([CONFIG_FILE, DEV_SETTINGS_FILE])
 config.parse_text(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 
-main = config['main']
-web = config['web']
+main: MainSection = config['main']
+web: WebSection = config['web']
 
 # Secret file with key for hashing passwords
 SECRET_FILE = os.getenv(
-    f"{ENV_NAME}_SECRET_FILE", f"/etc/{VST_PROJECT_LIB}/secret"
+    f"{ENV_NAME}_SECRET_FILE",
+    f"/etc/{VST_PROJECT_LIB}/secret"
 )
 
 
@@ -269,17 +277,17 @@ def secret_key():
     )
 
 
-SECRET_KEY = lazy(secret_key, str)()
+SECRET_KEY: _t.Text = lazy(secret_key, str)()
 
 # Main settings
 ##############################################################
 # SECURITY WARNING: don't run with debug turned on in production!
-TESTS_RUN = any([True for i in sys.argv if i in ['testserver', 'test']])
-LOCALRUN = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
-TESTSERVER_RUN = 'testserver' in sys.argv
-DEBUG = os.getenv('DJANGO_DEBUG', main["debug"])
-ALLOWED_HOSTS = main["allowed_hosts"]
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
+TESTS_RUN: bool = any([True for i in sys.argv if i in ['testserver', 'test']])
+LOCALRUN: bool = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
+TESTSERVER_RUN: bool = 'testserver' in sys.argv
+DEBUG: bool = os.getenv('DJANGO_DEBUG', main["debug"]) in [True, 'true', 'True', '1']
+ALLOWED_HOSTS: _t.Iterable = main["allowed_hosts"]
+SECURE_PROXY_SSL_HEADER: _t.Tuple[_t.Text, _t.Text] = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
 # Include some addons if packages exists in env
 ##############################################################
@@ -290,10 +298,10 @@ try:
     has_django_celery_beat = True
 except ImportError:  # nocv
     pass
-RPC_ENABLED = has_django_celery_beat
+RPC_ENABLED: bool = has_django_celery_beat
 
 # :docs:
-HAS_DOCS = False
+HAS_DOCS: bool = False
 try:
     import docs
     HAS_DOCS = True
@@ -303,14 +311,14 @@ except ImportError:  # nocv
 # :websockets:
 try:
     import channels
-    HAS_CHANNELS = True
+    HAS_CHANNELS: bool = True
 except ImportError:  # nocv
     HAS_CHANNELS = False
 
 
 # Applications definition
 ##############################################################
-INSTALLED_APPS = [
+INSTALLED_APPS: _t.List[_t.Text] = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -332,7 +340,7 @@ INSTALLED_APPS += ['drf_yasg']
 if HAS_CHANNELS:
     INSTALLED_APPS.append('channels')
 
-ADDONS = [
+ADDONS: _t.List[_t.Text] = [
     'vstutils',
     'vstutils.api.apps.VSTUtilsAppConfig'
 ]
@@ -341,7 +349,7 @@ INSTALLED_APPS += ADDONS
 
 # Additional middleware and auth
 ##############################################################
-MIDDLEWARE = [
+MIDDLEWARE: _t.List[_t.Text] = [
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -357,19 +365,19 @@ MIDDLEWARE = [
 ]
 
 # Allow cross-domain access
-CORS_ORIGIN_ALLOW_ALL = web['allow_cors']
+CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 
-LDAP_SERVER = main["ldap-server"]
-LDAP_DOMAIN = main["ldap-default-domain"]
-LDAP_FORMAT = main["ldap-auth_format"]
+LDAP_SERVER: _t.Optional[_t.Text] = main["ldap-server"]
+LDAP_DOMAIN: _t.Optional[_t.Text] = main["ldap-default-domain"]
+LDAP_FORMAT: _t.Text = main["ldap-auth_format"]
 
-DEFAULT_AUTH_PLUGINS = {
+DEFAULT_AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'LDAP': {
         "BACKEND": "vstutils.auth.LdapBackend"
     }
 }
 
-DEFAULT_AUTH_PLUGIN_LIST = 'LDAP'
+DEFAULT_AUTH_PLUGIN_LIST: _t.Text = 'LDAP'
 
 
 def get_plugins():
@@ -386,26 +394,26 @@ def get_plugins():
     return plugins
 
 
-AUTH_PLUGINS = lazy(get_plugins, OrderedDict)()
+AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = lazy(get_plugins, OrderedDict)()
 
-AUTHENTICATION_BACKENDS = [
+AUTHENTICATION_BACKENDS: _t.List[_t.Text] = [
     'vstutils.auth.AuthPluginsBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
 
 # Sessions settings
 # https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
-SESSION_COOKIE_AGE = web["session_timeout"]
-SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
-SESSION_CACHE_ALIAS = 'session'
-SESSION_COOKIE_DOMAIN = os.getenv(
+SESSION_COOKIE_AGE: int = web["session_timeout"]
+SESSION_ENGINE: _t.Text = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS: _t.Text = 'session'
+SESSION_COOKIE_DOMAIN: _t.Optional[_t.Text] = os.getenv(
     'DJANGO_SESSION_COOKIE_DOMAIN',
-    web.get('session_cookie_domain', fallback=None)
+    _t.cast(_t.Any, web.get('session_cookie_domain', fallback=None))
 )
 
-CSRF_COOKIE_AGE = SESSION_COOKIE_AGE
-CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN
-CSRF_TRUSTED_ORIGINS = web.getlist('csrf_trusted_origins', fallback='')
+CSRF_COOKIE_AGE: int = SESSION_COOKIE_AGE
+CSRF_COOKIE_DOMAIN:_t.Optional[_t.Text] = SESSION_COOKIE_DOMAIN
+CSRF_TRUSTED_ORIGINS: _t.List = web.getlist('csrf_trusted_origins', fallback='')
 
 SECURE_BROWSER_XSS_FILTER = web['secure_browser_xss_filter']
 SECURE_CONTENT_TYPE_NOSNIFF = web['secure_content_type_nosniff']
@@ -416,7 +424,7 @@ SECURE_HSTS_SECONDS = web['secure_hsts_seconds']
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS: _t.List[_t.Dict] = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
@@ -427,35 +435,35 @@ AUTH_PASSWORD_VALIDATORS = [
         },
     },
 ]
-LOGIN_URL = '/login/'
-LOGOUT_URL = '/logout/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL: _t.Text = '/login/'
+LOGOUT_URL: _t.Text = '/logout/'
+LOGIN_REDIRECT_URL: _t.Text = '/'
 
-PASSWORD_RESET_TIMEOUT_DAYS = web['password_reset_timeout_days']
+PASSWORD_RESET_TIMEOUT_DAYS: int = web['password_reset_timeout_days']
 
 # Main controller settings
 ##############################################################
 # Module with urls
-ROOT_URLCONF = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
+ROOT_URLCONF: _t.Text = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 
 # wsgi appilcation settings
-WSGI = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
-WSGI_APPLICATION = f"{WSGI}.application"
-UWSGI_APPLICATION = f'{WSGI}:application'
+WSGI: _t.Text = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
+WSGI_APPLICATION: _t.Text = f"{WSGI}.application"
+UWSGI_APPLICATION: _t.Text = f'{WSGI}:application'
 
-ASGI_APPLICATION = "vstutils.ws:application"
+ASGI_APPLICATION: _t.Text = "vstutils.ws:application"
 
-uwsgi_settings = config['uwsgi']
+uwsgi_settings: cconfig.Section = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)
-WEB_DAEMON_LOGFILE = uwsgi_settings.get('log_file', fallback='/dev/null')
-WEB_ADDRPORT = uwsgi_settings.get('addrport', fallback=':8080')
+WEB_DAEMON_LOGFILE: _t.Text = uwsgi_settings.get('log_file', fallback='/dev/null')  # type: ignore
+WEB_ADDRPORT: _t.Text = uwsgi_settings.get('addrport', fallback=':8080')  # type: ignore
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = web['request_max_size']
 X_FRAME_OPTIONS = web['x_frame_options']
 USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
 USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
 
-CHANNEL_LAYERS = {
+CHANNEL_LAYERS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
@@ -463,7 +471,7 @@ CHANNEL_LAYERS = {
 
 # Templates settings
 ##############################################################
-TEMPLATES = [
+TEMPLATES: _t.List[_t.Dict] = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
@@ -497,8 +505,8 @@ TEMPLATES = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
-STATIC_URL = web["static_files_url"]
-STATIC_FILES_FOLDERS = list()
+STATIC_URL: _t.Text = web["static_files_url"]
+STATIC_FILES_FOLDERS: _t.List[_t.Text] = list()
 STATIC_FILES_FOLDERS.append(os.path.join(VST_PROJECT_DIR, 'static'))
 if BASE_DIR != VST_PROJECT_DIR:  # nocv
     STATIC_FILES_FOLDERS.append(os.path.join(BASE_DIR, 'static'))
@@ -509,7 +517,7 @@ STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(rest_framework.__file__
 if LOCALRUN:
     STATICFILES_DIRS = STATIC_FILES_FOLDERS
 
-STATICFILES_FINDERS = (
+STATICFILES_FINDERS: _t.Tuple[_t.Text, _t.Text] = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
@@ -521,15 +529,15 @@ if not LOCALRUN:
 # Documentation files
 # http://django-docs.readthedocs.io/en/latest/#docs-access-optional
 ##############################################################
-DOCS_ROOT = os.path.join(BASE_DIR, 'doc/html')
-DOCS_ACCESS = 'public'
-DOC_URL = "/docs/"
+DOCS_ROOT: _t.Text = os.path.join(BASE_DIR, 'doc/html')
+DOCS_ACCESS: _t.Text = 'public'
+DOC_URL: _t.Text = "/docs/"
 
 
 # Database settings.
 # Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 ##############################################################
-DATABASES = {
+DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'default': config['database'].all()
 }
 
@@ -557,7 +565,7 @@ default_cache = config['cache'].all()
 session_cache = config['session'].all() or default_cache
 session_cache['TIMEOUT'] = SESSION_COOKIE_AGE
 
-CACHES = {
+CACHES: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'default': default_cache,
     "locks": config['locks'].all() or default_cache,
     "session": session_cache,
@@ -568,7 +576,7 @@ CACHES = {
 # https://docs.djangoproject.com/en/1.10/ref/settings/#email-host
 ##############################################################
 mail = config['mail']
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = mail["port"]
 EMAIL_HOST_USER = mail["user"]
 EMAIL_FROM_ADDRESS = mail.get("from_address", EMAIL_HOST_USER)
@@ -584,28 +592,28 @@ if EMAIL_HOST is None:
 
 # API settings
 ##############################################################
-VST_API_URL = os.getenv("VST_API_URL", "api")
-VST_API_VERSION = os.getenv("VST_API_VERSION", r'v1')
-API_URL = VST_API_URL
-ENDPOINT_VIEW_CLASS = 'vstutils.api.endpoint.EndpointViewSet'
-HAS_COREAPI = False
-API_CREATE_SWAGGER = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION = web['rest_swagger_description']
-TERMS_URL = ''
-CONTACT = config['contact'].all()
-OPENAPI_PUBLIC = web['public_openapi']
+VST_API_URL: _t.Text = os.getenv("VST_API_URL", "api")
+VST_API_VERSION: _t.Text = os.getenv("VST_API_VERSION", r'v1')
+API_URL: _t.Text = VST_API_URL
+ENDPOINT_VIEW_CLASS: _t.Text = 'vstutils.api.endpoint.EndpointViewSet'
+HAS_COREAPI: bool = False
+API_CREATE_SWAGGER: bool = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
+SWAGGER_API_DESCRIPTION: _t.Text = web['rest_swagger_description']
+TERMS_URL: _t.Text = ''
+CONTACT: _t.Dict = config['contact'].all()
+OPENAPI_PUBLIC: bool = web['public_openapi']
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
-HEALTH_THROTTLE_RATE = f"{web['health_throttle_rate']}/minute"
-OPENAPI_VIEW_CLASS = 'vstutils.api.schema.views.OpenApiView'
+HEALTH_THROTTLE_RATE: _t.Text = f"{web['health_throttle_rate']}/minute"
+OPENAPI_VIEW_CLASS: _t.Text = 'vstutils.api.schema.views.OpenApiView'
 
-OPENAPI_EXTRA_LINKS = {
+OPENAPI_EXTRA_LINKS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'vstutils': {
         'url': 'https://github.com/vstconsulting/vstutils.git',
         'name': 'VST Utils sources'
     }
 }
 
-SWAGGER_SETTINGS = {
+SWAGGER_SETTINGS: _t.Dict = {
     'DEFAULT_INFO': 'vstutils.api.schema.info.api_info',
     'DEFAULT_AUTO_SCHEMA_CLASS': 'vstutils.api.schema.schema.VSTAutoSchema',
     'DEFAULT_GENERATOR_CLASS': 'vstutils.api.schema.generators.VSTSchemaGenerator',
@@ -618,9 +626,9 @@ SWAGGER_SETTINGS = {
 }
 
 # Hardcoded because GUI based on OpenAPI
-API_CREATE_SCHEMA = True
+API_CREATE_SCHEMA: bool = True
 
-API = {
+API: SIMPLE_OBJECT_SETTINGS_TYPE = {
     VST_API_VERSION: {
         r'user': {
             'view': 'vstutils.api.views.UserViewSet'
@@ -628,7 +636,8 @@ API = {
     }
 }
 
-BULK_OPERATION_TYPES = {
+# deprecated
+BULK_OPERATION_TYPES: _t.Dict[_t.Text, _t.Text] = {
     "get": "get",
     "add": "post",
     "set": "patch",
@@ -636,9 +645,9 @@ BULK_OPERATION_TYPES = {
     "mod": "get"
 }
 
-HEALTH_BACKEND_CLASS = 'vstutils.api.health.DefaultBackend'
+HEALTH_BACKEND_CLASS: _t.Text = 'vstutils.api.health.DefaultBackend'
 
-WS_CONSUMERS = {
+WS_CONSUMERS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'endpoint': {
         "BACKEND": 'vstutils.ws.builtin.EndpointConsumer'
     }
@@ -647,8 +656,8 @@ WS_CONSUMERS = {
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/
 ##############################################################
-PAGE_LIMIT = web["page_limit"]
-REST_FRAMEWORK = {
+PAGE_LIMIT: int = web["page_limit"]
+REST_FRAMEWORK: _t.Dict = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -685,28 +694,28 @@ REST_FRAMEWORK = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 ##############################################################
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE: _t.Text = 'en'
 
-LANGUAGES = (
+LANGUAGES: _t.Tuple = (
     ('en', 'English'),
     ('ru', 'Russian'),
 )
 
-TIME_ZONE = main["timezone"]
-USE_I18N = True
-USE_L10N = True
-USE_TZ = True
+TIME_ZONE: _t.Text = main["timezone"]
+USE_I18N: bool = True
+USE_L10N: bool = True
+USE_TZ: bool = True
 FIRST_DAY_OF_WEEK = main['first_day_of_week']
 
 
 # LOGGING settings
 ##############################################################
-LOG_LEVEL = os.getenv('DJANGO_LOG_LEVEL', main["log_level"]).upper()
+LOG_LEVEL: _t.Text = os.getenv('DJANGO_LOG_LEVEL', main["log_level"]).upper()
 LOG_LEVEL = os.getenv(f'{VST_PROJECT_LIB.upper()}_LOG_LEVEL', LOG_LEVEL).upper()
-LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
-LOG_DATE_FORMAT = "%d/%b/%Y %H:%M:%S"
+LOG_FORMAT: _t.Text = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
+LOG_DATE_FORMAT: _t.Text = "%d/%b/%Y %H:%M:%S"
 
-LOGGING = {
+LOGGING: _t.Dict = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
@@ -761,7 +770,7 @@ LOGGING = {
         },
     }
 }
-SILENCED_SYSTEM_CHECKS = [
+SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
     "fields.W122"
 ]
@@ -770,7 +779,7 @@ SILENCED_SYSTEM_CHECKS = [
 # Celery broker settings
 # Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
 ##############################################################
-rpc = config['rpc']
+rpc: RPCSection = config['rpc']
 __broker_url = rpc.get("connection", fallback="file:///tmp")
 if __broker_url.startswith("file://"):
     __broker_folder = __broker_url.split("://", 1)[1]
@@ -812,7 +821,7 @@ if RUN_WORKER:
 ENABLE_ADMIN_PANEL = main['enable_admin_panel']
 MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
 
-VIEWS = {
+VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "GUI": {
         "BACKEND": 'vstutils.gui.views.GUIView'
     },
@@ -875,7 +884,7 @@ VIEWS = {
     }
 }
 
-GUI_VIEWS: dict = {
+GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
@@ -889,7 +898,7 @@ GUI_VIEWS: dict = {
     r'^password_reset_confirm/(?P<uidb64>.*)/(?P<token>.*)/$': 'PASSWORD_RESET_CONFIRM',
 }
 
-PROJECT_GUI_MENU = [
+PROJECT_GUI_MENU: _t.List[_t.Dict] = [
     {
         'name': 'System',
         'span_class': 'fa fa-cog',
@@ -903,7 +912,7 @@ PROJECT_GUI_MENU = [
     },
 ]
 
-SPA_STATIC = [
+SPA_STATIC: _t.List[_t.Dict] = [
     # {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js'},  # not found in npm
 
     # Load common chunks
@@ -938,4 +947,4 @@ if not TESTSERVER_RUN and TESTS_RUN:
 
 # User settings
 ##############################################################
-ENABLE_GRAVATAR = web["enable_gravatar"]
+ENABLE_GRAVATAR: bool = web["enable_gravatar"]
