@@ -16,10 +16,12 @@ from django.db import transaction, models
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
+from rest_framework.request import Request
 from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty
+from . import responses
 from .serializers import (
     ErrorSerializer,
     ValidationErrorSerializer,
@@ -27,45 +29,58 @@ from .serializers import (
     serializers
 )
 
-_ResponseClass = namedtuple("ResponseData", [
+_ResponseClass: _t.Type[_t.NamedTuple] = namedtuple("ResponseData", [
     "data", "status"
 ])
-default_methods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head']
-logger = logging.getLogger(settings.VST_PROJECT)
+default_methods: _t.List[_t.Text] = [
+    'get',
+    'post',
+    'put',
+    'patch',
+    'delete',
+    'options',
+    'head'
+]
+logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 
 
-def exception_handler(exc, context):
-    traceback_str = traceback.format_exc()
+def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]:
+    traceback_str: _t.Text = traceback.format_exc()
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
     serializer_class = ErrorSerializer
-    data = None
-    code = status.HTTP_400_BAD_REQUEST
+    data: _t.Optional[_t.Dict[_t.Text, _t.Any]] = None
+    code: _t.SupportsInt = status.HTTP_400_BAD_REQUEST
+
     if isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
         data = {"detail": str(exc)}
         code = status.HTTP_403_FORBIDDEN
         logger.debug(traceback_str)
+
     elif isinstance(exc, Http404):
         data = {"detail": getattr(exc, 'msg', str(exc))}
         code = status.HTTP_404_NOT_FOUND
         logger.debug(traceback_str)
+
     elif isinstance(exc, djexcs.ValidationError):  # nocv
         if hasattr(exc, 'error_dict'):
-            errors = dict(exc)
+            errors = dict(exc)  # type: ignore
         elif hasattr(exc, 'error_list'):
             errors = {'other_errors': list(exc)}
         else:
-            errors = {'other_errors': str(exc)}
+            errors = {'other_errors': str(exc)}  # type: ignore
         data = {"detail": errors}
         serializer_class = ValidationErrorSerializer
         logger.debug(traceback_str)
+
     elif isinstance(exc, VSTUtilsException):  # nocv
-        data = {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__}
+        data = {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__}  # type: ignore
         code = exc.status
         serializer_class = OtherErrorsSerializer
         logger.info(traceback_str)
+
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
         data = {
-            'detail': str(sys.exc_info()[1]), 'error_type': sys.exc_info()[0].__name__
+            'detail': str(sys.exc_info()[1]), 'error_type': sys.exc_info()[0].__name__  # type: ignore
         }
         serializer_class = OtherErrorsSerializer
         logger.debug(traceback_str)
@@ -77,13 +92,13 @@ def exception_handler(exc, context):
         except:  # nocv
             pass
         else:
-            return RestResponse(serializer.data, code)
+            return responses.BaseResponseClass(serializer.data, code)
 
     logger.info(traceback_str)
     default_response = rvs.exception_handler(exc, context)
 
     if isinstance(exc, exceptions.NotAuthenticated):  # nocv
-        default_response["X-Anonymous"] = "true"
+        default_response["X-Anonymous"] = "true"  # type: ignore
 
     return default_response
 
@@ -99,7 +114,7 @@ class Response(_ResponseClass):
 
     @property
     def resp(self):
-        return RestResponse(**self._asdict())
+        return responses.BaseResponseClass(**self._asdict())
 
     @property
     def resp_dict(self):  # nocv
@@ -108,11 +123,11 @@ class Response(_ResponseClass):
 
 class AutoSchema(DRFAutoSchema):
 
-    def get_description(self, path, method):
+    def get_description(self, path: _t.Text, method: _t.Text) -> _t.Text:
         # pylint: disable=simplifiable-if-statement,redefined-outer-name
-        method_name = getattr(self.view, 'action', method.lower())
-        method_obj = getattr(self.view, method_name, None)
-        method_view = getattr(method_obj, '_nested_view', None) if method_obj else None
+        method_name: _t.Text = getattr(self.view, 'action', method.lower())
+        method_obj: _t.Optional[_t.Callable] = getattr(self.view, method_name, None)
+        method_view: _t.Optional[_t.Type[rvs.APIView]] = getattr(method_obj, '_nested_view', None) if method_obj else None
 
         if method_obj.__doc__:
             return method_obj.__doc__.strip()
@@ -136,10 +151,10 @@ class AutoSchema(DRFAutoSchema):
             action = 'partial_update'
         elif method == 'DELETE':
             action = 'destroy'
-        method_view_obj.action = action
+        method_view_obj.action = action  # type: ignore
         if method_view_obj.schema is None:
             return 'No description'  # nocv
-        return method_view_obj.schema.get_description(path, method)
+        return method_view_obj.schema.get_description(path, method)  # type: ignore
 
 
 class QuerySetMixin(rvs.APIView):
@@ -147,12 +162,12 @@ class QuerySetMixin(rvs.APIView):
     Instance REST operations.
     """
     __slots__ = ()
-    queryset: _t.Optional[models.QuerySet]
-    _queryset = None
-    model = None
+    queryset: _t.Optional[QuerySet]
+    _queryset: _t.Optional[QuerySet] = None
+    model: _t.Optional[_t.Type[models.Model]] = None
 
     @classproperty  # type: ignore
-    def queryset(self):
+    def queryset(self) -> QuerySet:
         # pylint: disable=method-hidden,function-redefined
         if self._queryset is not None:
             return getattr(self._queryset, 'cleared', self._queryset.all)()
@@ -163,7 +178,7 @@ class QuerySetMixin(rvs.APIView):
     def queryset(self, value):
         self._queryset = value
 
-    def _base_get_queryset(self):
+    def _base_get_queryset(self) -> QuerySet:
         assert self.queryset is not None, (
             "'%s' should either include a `queryset` attribute, "
             "or override the `get_queryset()` method."
@@ -176,10 +191,10 @@ class QuerySetMixin(rvs.APIView):
             queryset = queryset.all()
         return queryset
 
-    def get_extra_queryset(self):
+    def get_extra_queryset(self) -> _t.Optional[QuerySet]:
         return self.queryset
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         if self.queryset is None:  # nocv
             assert self.model is not None, (
                 "'%s' should either include a `queryset` or `model` attribute,"
@@ -194,8 +209,9 @@ class QuerySetMixin(rvs.APIView):
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     __slots__ = ()
-    _serializer_class_one = None
-    model = None
+    serializer_class: _t.Type[serializers.Serializer]
+    _serializer_class_one: _t.Optional[_t.Type[serializers.Serializer]] = None
+    model: _t.Optional[_t.Type[models.Model]] = None
     action_serializers: _t.Dict[_t.Text, serializers.Serializer] = {}
     _nested_args: _t.Dict[_t.Text, _t.Any]
     _nested_view: _t.ClassVar[_t.Union[QuerySetMixin, vsets.GenericViewSet]]
@@ -204,7 +220,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     def filter_for_filter_backends(self, backend):
         return getattr(backend, 'required', False)
 
-    def filter_queryset(self, queryset):
+    def filter_queryset(self, queryset: QuerySet):
         if hasattr(self, 'nested_name'):
             self.filter_backends = list(filter(
                 self.filter_for_filter_backends,
@@ -239,7 +255,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         pass
 
     @classmethod
-    def get_view_methods(cls, detail=False):
+    def get_view_methods(cls, detail=False) -> _t.List[_t.Text]:
         attr_name = ''.join(['__', 'detail' if detail else 'list', 'http_methods', '__'])
         methods = getattr(cls, attr_name, None)
         if methods is not None:
@@ -294,7 +310,7 @@ class CopyMixin(GenericViewSet):
 
     @action(methods=['post'], detail=True)
     @transaction.atomic()
-    def copy(self, request, **kwargs):
+    def copy(self, request: Request, **kwargs) -> responses.BaseResponseClass:
         # pylint: disable=unused-argument
         '''
         Endpoint which copy instance with deps.
@@ -303,7 +319,7 @@ class CopyMixin(GenericViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid()
         serializer.save()
-        return Response(serializer.data, status.HTTP_201_CREATED).resp
+        return responses.HTTP_201_CREATED(serializer.data)
 
 
 class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
@@ -351,7 +367,7 @@ class NonModelsViewSet(GenericViewSet):
     __slots__ = ()
     base_name = None
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return QuerySet()  # nocv
 
 
@@ -361,7 +377,7 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
     schema = None  # type: ignore
 
     @property
-    def methods(self):
+    def methods(self) -> _t.List[_t.Text]:
         this_class_dict = ListNonModelViewSet.__dict__
         obj_class_dict = self.__class__.__dict__
         new_methods = list()
@@ -371,12 +387,12 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
                 new_methods.append(name.replace('_', "-"))
         return new_methods
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request: Request, *args, **kwargs) -> responses.BaseResponseClass:
         routes = {
             method: reverse(f"{self.base_name}-{method}", request=request)
             for method in self.methods
         }
-        return Response(routes, status.HTTP_200_OK).resp
+        return responses.HTTP_200_OK(routes)
 
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):

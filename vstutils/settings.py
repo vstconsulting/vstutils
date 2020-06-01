@@ -875,7 +875,7 @@ VIEWS = {
     }
 }
 
-GUI_VIEWS = {
+GUI_VIEWS: dict = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',

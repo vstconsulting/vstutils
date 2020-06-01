@@ -1,0 +1,5 @@
+django-stubs
+djangorestframework-stubs
+celery-stubs
+drf-yasg-stubs
+django-filter-stubs

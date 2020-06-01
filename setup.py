@@ -407,6 +407,7 @@ kwargs = dict(
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
+        'stubs': load_requirements('requirements-stubs.txt'),
         'ws': ['channels~=2.4.0']
     },
     dependency_links=[
@@ -419,7 +420,7 @@ kwargs = dict(
         "Source Code": "https://gitlab.com/vstconsulting/vstutils",
         "Releases": "https://pypi.org/project/vstutils/#history",
         "Documentation": "https://vstutils.vstconsulting.net/",
-    },
+    }
 )
 
 all_deps = []

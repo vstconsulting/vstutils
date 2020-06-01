@@ -1,4 +1,5 @@
 # pylint: disable=unused-argument
+import typing as _t
 import json
 from collections import OrderedDict
 
@@ -6,7 +7,8 @@ from django.conf import settings
 from django.db import transaction
 from django.http import Http404
 from django.test import Client
-from rest_framework import permissions as rest_permissions, throttling
+from django.contrib.auth.models import AbstractUser
+from rest_framework import permissions as rest_permissions, throttling, request as drf_request
 from rest_framework.exceptions import ValidationError
 
 from . import base, serializers, permissions, filters, decorators as deco, responses, models
@@ -15,19 +17,19 @@ from ..utils import Dict, import_class, deprecated
 
 class LanguageSerializer(serializers.VSTSerializer):
     class Meta:
-        model = models.Language
-        fields = (
+        model: _t.Type[models.Language] = models.Language
+        fields: _t.Tuple = (
             'code',
             'name'
         )
 
 
 class OneLanguageSerializer(serializers.VSTSerializer):
-    translations = serializers.DataSerializer(read_only=True)
+    translations: serializers.DataSerializer = serializers.DataSerializer(read_only=True)
 
     class Meta:
-        model = models.Language
-        fields = (
+        model: _t.Type[models.Language] = models.Language
+        fields: _t.Tuple = (
             'code',
             'name',
             'translations'
@@ -40,26 +42,26 @@ class UserViewSet(base.ModelViewSet):
     '''
     # pylint: disable=invalid-name
 
-    model = serializers.User
-    serializer_class = serializers.UserSerializer
-    serializer_class_one = serializers.OneUserSerializer
-    serializer_class_create = serializers.CreateUserSerializer
-    serializer_class_change_password = serializers.ChangePasswordSerializer
+    model: _t.Type[AbstractUser] = serializers.User
+    serializer_class: _t.Type[serializers.User] = serializers.UserSerializer
+    serializer_class_one: _t.Type[serializers.OneUserSerializer] = serializers.OneUserSerializer
+    serializer_class_create: _t.Type[serializers.CreateUserSerializer] = serializers.CreateUserSerializer
+    serializer_class_change_password: _t.Type[serializers.ChangePasswordSerializer] = serializers.ChangePasswordSerializer
     filter_class = filters.UserFilter
     permission_classes = (permissions.SuperUserPermission,)
 
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self, request: drf_request.Request, *args, **kwargs):
         user = self.get_object()
         if user == request.user:
             return base.Response("Could not remove youself.", 409).resp
         return super().destroy(request, *args, **kwargs)
 
     @transaction.atomic
-    def partial_update(self, request, *args, **kwargs):
+    def partial_update(self, request: drf_request.Request, *args, **kwargs):
         return self.update(request, partial=True)
 
     @transaction.atomic
-    def update(self, request, *args, **kwargs):
+    def update(self, request: drf_request.Request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -68,7 +70,7 @@ class UserViewSet(base.ModelViewSet):
         return responses.HTTP_200_OK(serializer.data)
 
     @deco.action(["post"], detail=True, permission_classes=(rest_permissions.IsAuthenticated,))
-    def change_password(self, request, *args, **kwargs):
+    def change_password(self, request: drf_request.Request, *args, **kwargs):
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -99,14 +101,14 @@ class SettingsViewSet(base.ListNonModelViewSet):
         }
 
     @deco.action(methods=['get'], detail=False)
-    def localization(self, request):
+    def localization(self, request: drf_request.Request):
         '''
         Return localization settings.
         '''
         return responses.HTTP_200_OK(self._get_localization_settings())
 
     @deco.action(methods=['get'], detail=False)
-    def system(self, request):
+    def system(self, request: drf_request.Request):
         '''
         Return system settings like interpreter or libs version.
         '''
@@ -353,10 +355,10 @@ class HealthView(base.ListNonModelViewSet):
 
 class LangViewSet(base.ReadOnlyModelViewSet):
     schema = None
-    model = models.Language
-    serializer_class = LanguageSerializer
-    serializer_class_one = OneLanguageSerializer
-    permission_classes = (rest_permissions.IsAuthenticatedOrReadOnly,)
+    model: _t.Type[models.Language] = models.Language
+    serializer_class: _t.Type[LanguageSerializer] = LanguageSerializer
+    serializer_class_one: _t.Type[OneLanguageSerializer] = OneLanguageSerializer
+    permission_classes: _t.Tuple[object] = (rest_permissions.IsAuthenticatedOrReadOnly,)
 
     def get_object(self):
         try:

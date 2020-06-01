@@ -5,10 +5,13 @@ from collections import OrderedDict
 from inspect import getmembers
 from django.db import transaction, models
 from rest_framework.decorators import action
-from rest_framework import response, request as drf_request, status
+from rest_framework import response, request as drf_request, status, views, serializers
 from drf_yasg.utils import swagger_auto_schema
 from . import base
 from ..exceptions import VSTUtilsException
+
+
+MasterViewType = _t.Type[base.GenericViewSet]
 
 
 def ensure_is_object(obj):
@@ -17,7 +20,11 @@ def ensure_is_object(obj):
     return obj
 
 
-def __get_nested_path(name: _t.Text, arg: _t.Text = None, arg_regexp: _t.Text = '[0-9]', empty_arg=True) -> _t.Text:
+def __get_nested_path(
+        name: _t.Text,
+        arg: _t.Text = None,
+        arg_regexp: _t.Text = '[0-9]',
+        empty_arg: bool = True) -> _t.Text:
     path = name
     if not arg:
         return path
@@ -36,13 +43,18 @@ def __get_nested_subpath(*args, **kwargs) -> _t.Text:
     return path
 
 
-def nested_action(name: _t.Text, arg: _t.Text = None, methods=None, manager_name=None, *args, **kwargs) -> _t.Callable:
+def nested_action(
+        name: _t.Text,
+        arg: _t.Text = None,
+        methods=None,
+        manager_name=None,
+        *args, **kwargs) -> _t.Callable:
     # pylint: disable=too-many-locals
-    list_methods = ['get', 'head', 'options', 'post']
-    detail_methods = ['get', 'head', 'options', 'put', 'patch', 'delete']
-    methods = methods or (detail_methods if arg else list_methods)
-    arg_regexp = kwargs.pop('arg_regexp', '[0-9]')
-    empty_arg = kwargs.pop('empty_arg', True)
+    list_methods: _t.List[_t.Text] = ['get', 'head', 'options', 'post']
+    detail_methods: _t.List[_t.Text] = ['get', 'head', 'options', 'put', 'patch', 'delete']
+    methods = list(methods or (detail_methods if arg else list_methods))
+    arg_regexp: _t.Text = kwargs.pop('arg_regexp', '[0-9]')
+    empty_arg: bool = kwargs.pop('empty_arg', True)
     request_arg = kwargs.pop('request_arg', f'{name}_{arg}')
     request_arg = request_arg if arg else None
     append_arg = kwargs.pop('append_arg', arg)
@@ -126,7 +138,7 @@ def subaction(*args, **kwargs):
     return decorator
 
 
-def get_action_name(master_view: _t.Type[base.GenericViewSet], method: _t.Text):
+def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Text:
     method = method.lower()
     if method == 'post':
         action_name = 'create'
@@ -158,30 +170,37 @@ class NestedViewMixin:
     nested_arg: _t.Text
     nested_id: _t.Union[_t.Text, int]
     nested_view_object: _t.Optional[models.Model]
+    nested_parent_object: _t.Optional[models.Model]
+    nested_detail: bool
     _nested_filter_class: _t.Any
     _nested_args: _t.Dict[_t.Text, _t.Any]
     _nested_manager: _t.Union[models.QuerySet, _t.Text]
+    nested_manager: _t.Union[models.Manager, models.QuerySet]
+    queryset_filters: _t.List
+    master_view: MasterViewType
+    kwargs: _t.Dict
+    get_view_methods: _t.ClassVar[_t.Callable]
 
     def _check_permission_obj(self, objects: _t.Iterable):
         for obj in objects:
             self.check_object_permissions(self.request, obj)
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         qs = self.nested_manager.all()
         for qs_filter in self.queryset_filters:
             if callable(qs_filter):
                 qs = qs_filter(self.nested_parent_object, qs)
         return qs
 
-    def get_nested_action_name(self):
-        return get_action_name(self.master_view, self.request.method)
+    def get_nested_action_name(self) -> _t.Text:
+        return get_action_name(self.master_view, str(self.request.method))
 
     def get_serializer_context(self) -> _t.Dict:
         context = super().get_serializer_context()  # type: ignore
         return context
 
     def perform_destroy(self, instance):
-        if self.master_view.nested_allow_append:
+        if self.master_view.nested_allow_append:  # type: ignore
             self.nested_manager.remove(instance)
         else:
             instance.delete()
@@ -256,19 +275,27 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
         return id_list
 
 
-def nested_view_function(master_view, view, view_request, *args, **kw) -> _t.Type[base.RestResponse]:
+def nested_view_function(
+        master_view: _t.Union[base.GenericViewSet, NestedViewMixin],
+        view: _t.Type[_t.Union[NestedViewMixin, base.GenericViewSet, views.APIView]],
+        view_request: drf_request.Request,
+        *args, **kw) -> base.RestResponse:
     # pylint: disable=unused-argument,unnecessary-lambda
     nested_sub = kw.get('nested_sub', None)
-    view_obj = view()
+    view_obj: _t.Union[NestedViewMixin, base.GenericViewSet, views.APIView] = view()
     view_obj.request = view_request
-    view_obj.kwargs = view_request.parser_context['kwargs']
-    master_view.nested_view_object = view_obj
-    master_view.nested_detail = view.nested_detail
-    return view_obj.dispatch_route(nested_sub)
+    view_obj.kwargs = view_request.parser_context['kwargs']  # type: ignore
+    master_view.nested_view_object = view_obj  # type: ignore
+    master_view.nested_detail = view_obj.nested_detail  # type: ignore
+    return view_obj.dispatch_route(nested_sub)  # type: ignore
 
 
 class BaseClassDecorator:
     __slots__ = 'name', 'arg', 'request_arg', 'args', 'kwargs'
+    name: _t.Text
+    request_arg: _t.Text
+    args: _t.Tuple
+    kwargs: _t.Dict[str, _t.Any]
 
     def __init__(self, name: _t.Text, arg: _t.Text, *args, **kwargs):
         self.name = name
@@ -351,6 +378,11 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'methods',
         'queryset_filters'
     )
+    view: _t.Optional[_t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]
+    allowed_subs: _t.List[_t.Text]
+    serializers: _t.Tuple[serializers.Serializer, serializers.Serializer]
+    methods: _t.Optional[_t.List[_t.Text]]
+    queryset_filters: _t.List
 
     filter_subs = ['filter', ]
 
@@ -358,7 +390,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         msg = 'Argument "view" must be installed for `nested_view` decorator.'
 
     def __init__(self, name, arg=None, methods=None, *args, **kwargs):
-        self.view: _t.Optional[_t.Union[NestedViewMixin, base.GenericViewSet]] = kwargs.pop('view', None)
+        self.view = kwargs.pop('view', None)
         self.allowed_subs = kwargs.pop('subs', [])
         self.queryset_filters = kwargs.pop('queryset_filters', [])
         super().__init__(name, arg, *args, **kwargs)
@@ -503,7 +535,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         allowed_methods = set(self.view.get_view_methods(detail))
         return allowed_methods.intersection(methods)
 
-    def decorated(self, detail):
+    def decorated(self, detail) -> _t.Tuple[_t.Text, _t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]:
         name, view = self.get_detail_view() if detail else self.get_list_view()
         kwargs = dict(detail=detail)
         kwargs['url_name'] = f'{self.name}-{"detail" if detail else "list"}'
@@ -512,7 +544,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         if self.methods:
             kwargs['methods'] = self._filter_methods(self.methods, detail=detail)
         else:
-            kwargs['methods'] = self.view.get_view_methods(detail)
+            kwargs['methods'] = self.view.get_view_methods(detail)  # type: ignore
         view_class = self.get_decorator(**kwargs)(view)
         view_class._nested_view = self.view
         view_class._nested_name = self.name
@@ -563,10 +595,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return view_class
 
 
-def cache_method_result(func):
+def cache_method_result(func: _t.Callable) -> _t.Callable:
     """Decorator that caches return value of method based on args and kwargs,
     cache value stored in the object instance"""
-    name = f'__cache_{func.__name__}'
+    name: _t.Text = f'__cache_{func.__name__}'
 
     def wrapper(self, *args, **kwargs):
         result = getattr(self, name, None)

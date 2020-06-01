@@ -1,1 +1,1 @@
-default_app_config = 'vstutils.api.apps.VSTUtilsAppConfig'
+default_app_config: str = 'vstutils.api.apps.VSTUtilsAppConfig'
