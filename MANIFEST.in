@@ -9,6 +9,7 @@ include requirements-rpc.txt
 include requirements-coreapi.txt
 include requirements-ldap.txt
 include requirements-prod.txt
+include requirements-stubs.txt
 include vstutils/api/views.pyi
 include vstutils/api/routers.pyi
 include vstutils/api/responses.pyi
