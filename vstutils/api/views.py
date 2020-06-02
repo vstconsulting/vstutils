@@ -46,7 +46,7 @@ class UserViewSet(base.ModelViewSet):
     serializer_class: _t.Type[serializers.User] = serializers.UserSerializer
     serializer_class_one: _t.Type[serializers.OneUserSerializer] = serializers.OneUserSerializer
     serializer_class_create: _t.Type[serializers.CreateUserSerializer] = serializers.CreateUserSerializer
-    serializer_class_change_password: _t.Type[serializers.ChangePasswordSerializer] = serializers.ChangePasswordSerializer
+    serializer_class_change_password: _t.Type[serializers.DataSerializer] = serializers.ChangePasswordSerializer
     filter_class = filters.UserFilter
     permission_classes = (permissions.SuperUserPermission,)
 

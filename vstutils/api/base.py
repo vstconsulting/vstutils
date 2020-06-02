@@ -127,7 +127,10 @@ class AutoSchema(DRFAutoSchema):
         # pylint: disable=simplifiable-if-statement,redefined-outer-name
         method_name: _t.Text = getattr(self.view, 'action', method.lower())
         method_obj: _t.Optional[_t.Callable] = getattr(self.view, method_name, None)
-        method_view: _t.Optional[_t.Type[rvs.APIView]] = getattr(method_obj, '_nested_view', None) if method_obj else None
+        method_view: _t.Optional[_t.Type[rvs.APIView]] = (
+            getattr(method_obj, '_nested_view', None)
+            if method_obj else None
+        )
 
         if method_obj.__doc__:
             return method_obj.__doc__.strip()

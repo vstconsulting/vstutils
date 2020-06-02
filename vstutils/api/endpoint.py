@@ -8,7 +8,6 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
 from django.test.client import Client, ClientHandler
-from django.contrib.auth.models import AbstractUser
 from drf_yasg.views import SPEC_RENDERERS
 from rest_framework import serializers, views, versioning, request as drf_request
 from rest_framework.authentication import (
@@ -55,6 +54,7 @@ def _join_paths(*args) -> _t.Text:
 
 
 class BulkRequestType(drf_request.Request, HttpRequest):
+    # pylint: disable=abstract-method
     data: _t.List[_t.Dict[_t.Text, _t.Any]]  # type: ignore
     version: _t.Optional[_t.Text]
     successful_authenticator: _t.Optional[BaseAuthentication]
