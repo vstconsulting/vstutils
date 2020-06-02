@@ -19,6 +19,7 @@ include vstutils/config.pyi
 include vstutils/custom_model.pyi
 include vstutils/models.pyi
 include vstutils/tools.pyi
+include vstutils/py.typed
 recursive-include vstutils/*/templates *
 recursive-include vstutils/templates *
 recursive-include vstutils/static *
