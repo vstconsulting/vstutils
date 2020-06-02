@@ -184,12 +184,11 @@ class FkModelField(FkField):
     def to_internal_value(self, data: int) -> _t.Union[models.Model, _t.NoReturn]:
         return self.model_class.objects.get(**{self.autocomplete_property: data})
 
-    def to_representation(self, value: _t.Union[int, models.Model]) -> int:
+    def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
         if isinstance(value, self.model_class):
-            return int(getattr(value, self.autocomplete_property))
+            return getattr(value, self.autocomplete_property)
         else:  # nocv
-            value = int(value)  # type: ignore
-            return value
+            return value  # type: ignore
 
 
 class UptimeField(IntegerField):
