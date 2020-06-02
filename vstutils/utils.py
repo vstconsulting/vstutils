@@ -25,11 +25,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from . import exceptions as ex
 
-logger = logging.getLogger('vstutils')
+logger: logging.Logger = logging.getLogger('vstutils')
 ON_POSIX = 'posix' in sys.builtin_module_names
 
 
-def deprecated(func):
+def deprecated(func: tp.Callable):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
     when the function is used."""
@@ -144,7 +144,7 @@ class redirect_stdany:
     """
     __slots__ = 'stream', 'streams', '_old_streams'
 
-    _streams = ["stdout", "stderr"]  # type: list
+    _streams: tp.ClassVar[tp.List[tp.Text]] = ["stdout", "stderr"]
 
     def __init__(self, new_stream=io.StringIO(), streams=None):
         """
@@ -247,7 +247,7 @@ class tmp_file_context:
     __slots__ = ('tmp',)
 
     def __init__(self, *args, **kwargs):
-        self.tmp = tmp_file(*args, **kwargs)  # type: tempfile.NamedTemporaryFile
+        self.tmp: tempfile.NamedTemporaryFile = tmp_file(*args, **kwargs)
 
     def __enter__(self):
         return self.tmp
@@ -315,7 +315,6 @@ class exception_with_traceback(raise_context):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_val is not None:
             exc_val.traceback = traceback.format_exc()
-            # six.reraise(exc_type, exc_val, exc_tb)
             raise exc_val.with_traceback(exc_tb)
 
 
@@ -358,12 +357,14 @@ class Executor(BaseVstObject):
     """
     __slots__ = 'output', '_stdout', '_stderr', 'env'
 
-    CANCEL_PREFIX = "CANCEL_EXECUTE_"  # type: str
-    newlines = ['\n', '\r\n', '\r']  # type: list
-    STDOUT = subprocess.PIPE
-    STDERR = subprocess.STDOUT
-    DEVNULL = subprocess.DEVNULL
-    CalledProcessError = subprocess.CalledProcessError
+    CANCEL_PREFIX: tp.ClassVar[tp.Text] = "CANCEL_EXECUTE_"
+    newlines: tp.ClassVar[tp.List[tp.Text]] = ['\n', '\r\n', '\r']
+    STDOUT: tp.ClassVar[int] = subprocess.PIPE
+    STDERR: tp.ClassVar[int] = subprocess.STDOUT
+    DEVNULL: tp.ClassVar[int] = subprocess.DEVNULL
+    CalledProcessError: tp.ClassVar[tp.Type[subprocess.CalledProcessError]] = subprocess.CalledProcessError
+
+    env: tp.Dict[tp.Text, tp.Text]
 
     def __init__(self, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
         """
@@ -376,7 +377,7 @@ class Executor(BaseVstObject):
         self._stderr = stderr
         self.env = {}
 
-    def write_output(self, line: tp.Text):
+    def write_output(self, line: tp.Text) -> None:
         """
         :param line: -- line from command output
         :type line: str
@@ -391,7 +392,7 @@ class Executor(BaseVstObject):
             self.working_handler(proc)
             time.sleep(0.1)
 
-    def working_handler(self, proc: subprocess.Popen):
+    def working_handler(self, proc: subprocess.Popen) -> None:
         # pylint: disable=unused-argument
         """
         Additional handler for executions.
@@ -420,7 +421,7 @@ class Executor(BaseVstObject):
         finally:
             out.close()
 
-    def line_handler(self, line: tp.Text):
+    def line_handler(self, line: tp.Text) -> None:
         """
         Per line handler.
 
@@ -430,7 +431,7 @@ class Executor(BaseVstObject):
             with raise_context():
                 self.write_output(line)
 
-    def execute(self, cmd, cwd: tp.Union[tp.Text, Path]):
+    def execute(self, cmd: tp.List[tp.Text], cwd: tp.Union[tp.Text, Path]) -> tp.Text:
         """
         Execute commands and output this.
 
@@ -470,7 +471,7 @@ class KVExchanger(BaseVstObject):
     Class for transmit data using key-value fast (cache-like) storage between
     services. Uses same cache-backend as Lock.
     """
-    TIMEOUT = 60  # type: int
+    TIMEOUT: tp.ClassVar[int] = 60
 
     @classproperty
     def PREFIX(cls):
@@ -517,9 +518,9 @@ class Lock(KVExchanger):
         - Used django.core.cache lib and settings in `settings.py`
         - Have Lock.SCHEDULER and Lock.GLOBAL id
     """
-    TIMEOUT = 60 * 60 * 24  # type: int
-    GLOBAL = "global-deploy"  # type: str
-    SCHEDULER = "celery-beat"  # type: str
+    TIMEOUT: tp.ClassVar[int] = 60 * 60 * 24
+    GLOBAL: tp.ClassVar[tp.Text] = "global-deploy"
+    SCHEDULER: tp.ClassVar[tp.Text] = "celery-beat"
 
     class AcquireLockException(Exception):
         pass
@@ -670,15 +671,18 @@ class ObjectHandlers(BaseVstObject):
 
     __slots__ = 'type', 'err_message', '_list', '_loaded_backends'
 
+    type: tp.Text
+    err_message: tp.Optional[tp.Text]
+
     def __init__(self, type_name: tp.Text, err_message: tp.Text = None):
         """
         :param type_name: -- type name for backends.Like name in dict.
         :type type_name: str
         """
-        self.type = type_name  # type: tp.Text
-        self.err_message = err_message  # type: tp.Optional[tp.Text]
-        self._list = None  # type: tp.Optional[tp.Dict[tp.Text, tp.Any]]
-        self._loaded_backends = dict()  # type: tp.Dict[tp.Text, tp.Any]
+        self.type = type_name
+        self.err_message = err_message
+        self._list: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
+        self._loaded_backends: tp.Dict[tp.Text, tp.Any] = dict()
 
     @property
     def objects(self):
@@ -690,7 +694,7 @@ class ObjectHandlers(BaseVstObject):
     def __iter__(self):
         return iter(self.items())
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: tp.Text) -> tp.Any:
         return self.backend(name)
 
     def __call__(self, name, obj):
@@ -783,7 +787,11 @@ class URLHandlers(ObjectHandlers):
     """ Object handler for GUI views. Uses `GUI_VIEWS` from settings.py. """
     __slots__ = ('additional_handlers', '__handlers__')
 
-    settings_urls = ['LOGIN_URL', 'LOGOUT_URL']  # type: list
+    settings_urls: tp.ClassVar[tp.List[tp.Text]] = [
+        'LOGIN_URL',
+        'LOGOUT_URL'
+    ]
+    additional_handlers: tp.List[tp.Text]
 
     def __init__(self, type_name: tp.Text = 'GUI_VIEWS', *args, **kwargs):
         self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [type_name]

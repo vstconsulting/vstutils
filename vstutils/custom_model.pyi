@@ -2,7 +2,7 @@ import typing as _t
 from pathlib import Path
 from django.db.models.query import ModelIterable
 from django.db.models.fields import CharField as cf, TextField as tf, IntegerField as intf, BooleanField as bf
-from .models import BQuerySet, BaseModel, Manager
+from .models import BQuerySet, BaseModel
 
 
 class CharField(cf):
@@ -30,6 +30,7 @@ class CustomQuerySet(BQuerySet):
 
     def first(self) -> _t.Union[BaseModel, _t.NoReturn]:
         ...
+
 
 class CustomModelIterable(ModelIterable):
     def __iter__(self) -> _t.Iterator[BaseModel]:

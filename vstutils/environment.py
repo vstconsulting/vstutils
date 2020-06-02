@@ -1,7 +1,6 @@
 # pylint: disable=django-not-available
 import os
 import sys
-import typing as _t
 
 _default_settings = {
     # vstutils settings for generate settings
@@ -14,7 +13,7 @@ _default_settings = {
 }
 
 
-def prepare_environment(default_settings: _t.Dict = None, **kwargs) -> None:
+def prepare_environment(default_settings=None, **kwargs):
     # pylint: disable=unused-argument
     '''
     Prepare ENV for web-application
@@ -29,7 +28,7 @@ def prepare_environment(default_settings: _t.Dict = None, **kwargs) -> None:
     os.environ.update(kwargs)
 
 
-def cmd_execution(*args, **kwargs) -> None:
+def cmd_execution(*args, **kwargs):
     # pylint: disable=unused-variable
     """
     Main function to executes from cmd. Emulates django-admin.py execution.
@@ -43,7 +42,7 @@ def cmd_execution(*args, **kwargs) -> None:
     execute_from_command_line(argv or sys.argv)
 
 
-def get_celery_app(name: _t.Text = None, **kwargs) -> object:  # nocv
+def get_celery_app(name=None, **kwargs):  # nocv
     # pylint: disable=import-error
     '''
     Function to return celery-app. Works only if celery installed.

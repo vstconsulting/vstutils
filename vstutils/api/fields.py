@@ -12,7 +12,7 @@ class VSTCharField(CharField):
 
     __slots__ = ()
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data) -> _t.Text:
         with raise_context():
             if not isinstance(data, str):
                 data = json.dumps(data)
@@ -56,11 +56,15 @@ class AutoCompletionField(CharField):
     Field with autocomplite from list of objects.
     Take effect only in GUI.
     """
-    __slots__ = 'autocomplete', 'autocomplete_property'
+    __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent'
+
+    autocomplete: _t.Text
+    autocomplete_property: _t.Text
+    autocomplete_represent: _t.Text
 
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
-        self.autocomplete_property = None
+        self.autocomplete_property = None  # type: ignore
         if not isinstance(self.autocomplete, (list, tuple)):
             self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
             self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
@@ -76,10 +80,15 @@ class CommaMultiSelect(CharField):
 
     __slots__ = ('select_model', 'select_separator', 'select_property', 'select_represent')
 
+    select_model: _t.Text
+    select_separator: _t.Text
+    select_property: _t.Text
+    select_represent: _t.Text
+
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
-        self.select_separator = kwargs.pop('select_separator', ',')  # type: _t.Text
-        self.select_property = None
+        self.select_separator = kwargs.pop('select_separator', ',')
+        self.select_property = None  # type: ignore
         if not isinstance(self.select_model, (list, tuple)):
             self.select_property = kwargs.pop('select_property', 'name')
             self.select_represent = kwargs.pop('select_represent', 'name')
@@ -100,6 +109,10 @@ class DependEnumField(CharField):
     Take effect only in GUI.
     """
     __slots__ = 'field', 'choices', 'types'
+
+    field: _t.Text
+    choices: _t.Dict
+    types: _t.Dict
 
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
@@ -139,6 +152,10 @@ class FkField(IntegerField):
     """
     __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent'
 
+    select_model: _t.Text
+    autocomplete_property: _t.Text
+    autocomplete_represent: _t.Text
+
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
@@ -154,6 +171,8 @@ class FkModelField(FkField):
 
     __slots__ = ('model_class',)
 
+    model_class: _t.Type[models.Model]
+
     def __init__(self, **kwargs):
         select = kwargs.pop('select')
         if not issubclass(select, ModelSerializer):  # nocv
@@ -162,7 +181,7 @@ class FkModelField(FkField):
         kwargs['select'] = select.__name__.replace('Serializer', '')
         super().__init__(**kwargs)
 
-    def to_internal_value(self, data: int):
+    def to_internal_value(self, data: int) -> _t.Union[models.Model, _t.NoReturn]:
         return self.model_class.objects.get(**{self.autocomplete_property: data})
 
     def to_representation(self, value: _t.Union[int, models.Model]) -> int:
@@ -189,7 +208,7 @@ class RedirectIntegerField(IntegerField):
     """
 
     __slots__ = ()
-    redirect = True
+    redirect: bool = True
 
 
 class RedirectCharField(CharField):
@@ -199,7 +218,7 @@ class RedirectCharField(CharField):
     """
 
     __slots__ = ()
-    redirect = True
+    redirect: bool = True
 
 
 class NamedBinaryFileInJsonField(VSTCharField):

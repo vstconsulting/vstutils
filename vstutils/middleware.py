@@ -52,6 +52,8 @@ class BaseMiddleware(BaseVstObject):
     """
     __slots__ = 'get_response', 'logger'
 
+    logger: logging.Logger
+
     def __init__(self, get_response: _t.Callable):
         self.get_response = get_response
         self.logger = logger
