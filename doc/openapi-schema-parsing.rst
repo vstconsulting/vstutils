@@ -2,7 +2,7 @@ Parsing of OpenAPI schema
 =========================
 OpenAPI schema stores info about API Models and Paths, where these models can be available (views).
 VST Utils parsers OpenAPI schema and generates based on it Models objects and Views objects,
-that can be used on client (front-end) for SPA generating.
+that can be used on client (frontend) for SPA generating.
 
 Parsing of OpenAPI schema for getting Models data is done via :ref:`model-constructor-class`.
 Generation of Models objects, on the final step of parsing, is done via :ref:`model-class` (or one of its :ref:`children <creation_of_custom_model_or_queryset_class>`).

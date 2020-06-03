@@ -21,9 +21,9 @@ and also you will know how you can redefine some standard models, views and fiel
 
    quickstart
    backend
-   front-end
-   redefine-front-end
+   frontend
+   redefine-frontend
    functions
-   app-loading-on-front-end
+   app-loading-on-frontend
    openapi-schema-parsing
    root-app-classes

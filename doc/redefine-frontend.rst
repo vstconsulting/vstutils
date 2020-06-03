@@ -1,6 +1,6 @@
-Redefinition of VST Utils front-end
+Redefinition of VST Utils frontend
 ===================================
-VST Utils is rather flexible framework, so if you need to redefine some base front-end
+VST Utils is rather flexible framework, so if you need to redefine some base frontend
 functionality in your project you can do it in 2 ways:
 
 * :ref:`signals-section` - appropriate for situations, when you need to add some additional functionality to the base one
@@ -443,4 +443,35 @@ But if you want to change some view properties of you field, you should write so
         static get mixins() {
             return super.mixins.concat(custom_field_mixin);
         }
-   }
+    }
+
+
+Customizing field's Vue component
+---------------------------------
+Fields' components are being rendered using ``Field.mixins()`` static method. You can append any mixins
+(Vue components) to returning array. To change field appearance mixin must define ``render`` method.
+
+
+Customizing field using ``dynamic`` format
+------------------------------------------
+Setting ``field.format`` to ``dynamic`` you can provide ``field.additionalProperties.callback``s and customize field on
+every rendering, for example:
+
+.. sourcecode:: javascript
+
+    function field1_callback(parent_values = {}) {
+        return {
+            format: someCondition(parent_values) ? 'string' : 'integer'
+        };
+    }
+
+    tabSignal.connect('models[Model1].fields.beforeInit', (fields) => {
+        if (fields.hasOwnProperty('field1')) {
+            fields.field1.format = 'dynamic';
+            fields.field1.additionalProperties.callback = field1_callback;
+        }
+    }
+
+
+Real field that will be displayed will receive options from ``DynamicField.options`` and data
+returned from ``field.options.additionalProperties.callback``.
