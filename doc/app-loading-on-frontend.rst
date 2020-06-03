@@ -1,4 +1,4 @@
-Application loading on front-end
+Application loading on frontend
 ================================
 Loading of VST Utils application on client is done by **app-loader.js** script.
 
@@ -12,7 +12,7 @@ To load application **app-loader.js** is going through following steps:
         * static files (JS, CSS, TPl);
     2. creating of app instance (:ref:`app-class`) and saving it to the global 'app' variable;
     3. invoking of :ref:`app.start() <app-class-start-method>` method.
-       This method initiates :doc:`parsing of OpenAPI schema and generating of front-end Models and Views </openapi-schema-parsing>`
+       This method initiates :doc:`parsing of OpenAPI schema and generating of frontend Models and Views </openapi-schema-parsing>`
        and mounts root Vue instance to the DOM, after all :ref:`Models objects <model-class>` and :ref:`Views objects <view-class>` was generated.
 
 Optimization of application loading
