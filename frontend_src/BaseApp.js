@@ -7,15 +7,14 @@ import { guiLocalSettings } from './vstutils/utils';
 export default class BaseApp {
     /**
      * Constructor of App class.
-     * @param {object} api_config Dict with options for ApiConnector constructor.
      * @param {object} openapi Object with OpenAPI schema.
      * @param {object} cache Object, that manages api responses cache operations.
      */
-    constructor(api_config, openapi, cache) {
+    constructor(openapi, cache) {
         /**
          * Object, that manages connection with API (sends API requests).
          */
-        this.api = new ApiConnector(api_config, openapi, cache);
+        this.api = new ApiConnector(openapi, cache);
         /**
          * Object, that handles errors.
          */

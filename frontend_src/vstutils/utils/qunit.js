@@ -1,3 +1,5 @@
+import { StaticFilesLoader } from '../../app_loader/StaticFilesLoader.js';
+
 /**
  * Class, that loads Tests files.
  */

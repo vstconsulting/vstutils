@@ -60,14 +60,6 @@ class SWView(BaseView):
     response_class = JSMinTemplateResponse
 
 
-class AppLoaderView(BaseView):
-    login_required = False
-    minify_response = False
-    content_type = 'text/javascript'
-    template_name = "gui/app-loader.js"
-    response_class = JSMinTemplateResponse
-
-
 class Login(auth.LoginView):
     template_name = 'auth/login.html'
     redirect_authenticated_user = True

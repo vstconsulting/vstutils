@@ -9,7 +9,6 @@ import { guiLocalSettings, getCookie } from '../utils';
 export default class ApiConnector {
     /**
      * Constructor of ApiConnector class.
-     * @param {object} config Object with config properties for Api connector.
      * @param {object} openapi Object with OpenAPI schema.
      * @param {object} cache Object, that manages api responses cache operations.
      */

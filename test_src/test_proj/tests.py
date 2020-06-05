@@ -396,7 +396,7 @@ class ViewsTestCase(BaseTestCase):
         self.get_result('get', '/api/v1/user/1000/', code=404)
 
         # Test js urls minification
-        for js_url in ['service-worker.js', 'app-loader.js']:
+        for js_url in ['service-worker.js']:
             response = self.get_result('get', f'/{js_url}')
             self.assertCount(str(response).split('\n'), 1, f'{js_url} is longer than 1 string.')
 
