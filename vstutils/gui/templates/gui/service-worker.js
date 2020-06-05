@@ -40,7 +40,7 @@ const FAVICON = "{% static 'img/logo/favicon.ico' %}";
  * Path to the app loader file.
  */
 //{% block app_loader %}
-const APP_LOADER = "/app-loader.js";
+const APP_LOADER = "{% static 'bundle/app_loader.js' %}";
 //{% endblock %}
 
 /**

@@ -17,12 +17,11 @@ export * from './vstutils/dashboard';
 export class App extends BaseApp {
     /**
      * Constructor of App class.
-     * @param {object} api_config Dict with options for ApiConnector constructor.
      * @param {object} openapi Object with OpenAPI schema.
      * @param {object} cache Cache instance (is supposed to be instance of FilesCache class).
      */
-    constructor(api_config, openapi, cache) {
-        super(api_config, openapi, cache);
+    constructor(openapi, cache) {
+        super(openapi, cache);
         /**
          * Dict, that stores all parsed models from OpenAPI schema.
          */

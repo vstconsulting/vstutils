@@ -831,9 +831,6 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "SERVICE_WORKER": {
         "BACKEND": 'vstutils.gui.views.SWView'
     },
-    "APP_LOADER": {
-        "BACKEND": 'vstutils.gui.views.AppLoaderView'
-    },
     "OFFLINE": {
         "BACKEND": 'vstutils.gui.views.OfflineView'
     },
@@ -888,7 +885,6 @@ GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     r'^$': 'GUI',
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
-    r'^app-loader.js$': 'APP_LOADER',
     r'^offline.html$': 'OFFLINE',
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',

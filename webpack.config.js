@@ -26,9 +26,10 @@ function setMode() {
 const config = {
   mode: setMode(),
   entry: {
-    spa: entrypoints_dir + "/spa.js",
-    doc: entrypoints_dir + "/doc.js",
-    auth: entrypoints_dir + "/auth.js"
+    'app_loader': entrypoints_dir + "/app_loader/index.js",
+    'spa': entrypoints_dir + "/spa.js",
+    'doc': entrypoints_dir + "/doc.js",
+    'auth': entrypoints_dir + "/auth.js"
   },
   output: {
     path: __dirname + "/vstutils/static/bundle",
@@ -94,14 +95,22 @@ const config = {
   optimization: {
     chunkIds: "natural",
     splitChunks: {
-      chunks: "all",
+      // Do not split app_loader
+      chunks: function(chunk) {
+        return chunk.name !== 'app_loader';
+      },
       maxInitialRequests: 10,
+      // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups
       cacheGroups: {
+        // Disable default vendors cache group
+        defaultVendors: false,
+        // Setup default cache group for everything
         default: {
           automaticNamePrefix: "",
           priority: 0
         },
-        defaultVendors: false,
+        // Setup cache group 'vstutils' with higher priority then 'default' group so
+        // everything under /frontend_src/vstutils/ will go in one 'vstutils.chunk.js' chunk.
         vstutils: {
           name: "vstutils",
           test: /frontend_src\/vstutils\//,
