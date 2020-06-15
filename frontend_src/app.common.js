@@ -5,6 +5,8 @@ import $ from './libs/jquery.js';
 
 import 'select2';
 import 'select2/dist/css/select2.css';
+import 'select2-theme-bootstrap4/dist/select2-bootstrap.css';
+$.fn.select2.defaults.set('theme', 'bootstrap');
 
 import 'jquery.scrollto';
 
@@ -42,14 +44,10 @@ window.autoComplete = autoComplete;
 import axios from 'axios';
 window.axios = axios;
 
-import Chart from 'chart.js';
-window.Chart = Chart;
-
 import { createPopper } from '@popperjs/core';
 window.createPopper = createPopper;
 
 import './libs/bootstrap.js';
-import './libs/bootstrap-select.js';
 import './libs/adminlte.js';
 import './libs/fontawesome.js';
 
@@ -72,7 +70,7 @@ import * as store from './vstutils/store';
 import * as router from './vstutils/router';
 import * as api from './vstutils/api';
 import * as users from './vstutils/users';
-import * as dashboard from './vstutils/dashboard';
+import * as dashboard from './vstutils/dashboard.js';
 export * from './vstutils/ComponentsRegistrator.js';
 
 export {

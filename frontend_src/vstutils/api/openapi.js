@@ -25,7 +25,7 @@ const openapi_dictionary = {
                 remove: {
                     name: 'remove',
                     title: 'remove',
-                    icon_classes: ['fa', 'fa-trash'],
+                    icon_classes: ['fas', 'fa-trash-alt'],
                     title_classes: ['d-none', 'd-lg-inline-block'],
                     classes: ['btn-danger', 'danger-right'],
                 },
@@ -34,7 +34,7 @@ const openapi_dictionary = {
                 new: {
                     name: 'new',
                     title: 'create',
-                    icon_classes: ['fa', 'fa-plus'],
+                    icon_classes: ['fas', 'fa-plus'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
                 add: {
@@ -69,7 +69,7 @@ const openapi_dictionary = {
                 reload: {
                     name: 'reload',
                     title: 'reload',
-                    icon_classes: ['fa', ' fa-refresh'],
+                    icon_classes: ['fas', 'fa-sync-alt'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
             },
@@ -77,7 +77,7 @@ const openapi_dictionary = {
                 execute: {
                     name: 'execute',
                     title: 'send',
-                    icon_classes: ['fa', 'fa-upload'],
+                    icon_classes: ['fas', 'fa-upload'],
                     title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                 },
             },
