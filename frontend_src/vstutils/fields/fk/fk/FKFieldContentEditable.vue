@@ -4,7 +4,7 @@
 
 <script>
     import $ from 'jquery';
-    import { deepEqual, trim, guiLocalSettings } from '../../../utils';
+    import { deepEqual, trim, guiLocalSettings, getDependenceValueAsString } from '../../../utils';
     import { BaseFieldContentEdit } from '../../base';
     import FKFieldContent from './FKFieldContent.js';
 
@@ -23,6 +23,10 @@
             if (this.value) {
                 this.setValue(this.value);
             }
+
+            this.pageSize = guiLocalSettings.get('page_size') || 20;
+            this.currentQuerysetIdx = 0;
+            this.currentQuerysetOffset = 0;
         },
         watch: {
             value(value) {
@@ -85,95 +89,100 @@
             },
 
             transport(params, success, failure) {
-                let search_str = trim(params.data.term);
-                let props = this.field.options.additionalProperties;
+                if (this.querysets.length === 0) {
+                    success({ results: [] });
+                    return;
+                }
+
+                const searchTerm = trim(params.data.term);
+
+                if (params.data._type === 'query') {
+                    this.currentQuerysetIdx = 0;
+                    this.currentQuerysetOffset = 0;
+                }
+
+                const queryset = this.querysets[this.currentQuerysetIdx];
+
+                this.getQuerysetResults(searchTerm, this.currentQuerysetOffset, queryset)
+                    .then(({ items, total }) => {
+                        // If we have no more items in current queryset
+                        if (this.currentQuerysetOffset + this.pageSize >= total) {
+                            // If we have no more querysets
+                            if (this.currentQuerysetIdx + 1 >= this.querysets.length) {
+                                success({ results: items });
+                            } else {
+                                this.currentQuerysetOffset = 0;
+                                this.currentQuerysetIdx += 1;
+                                success({ results: items, pagination: { more: true } });
+                            }
+                        } else {
+                            this.currentQuerysetOffset += this.pageSize;
+                            success({ results: items, pagination: { more: true } });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        const default_value = this.field.options.additionalProperties.default_value;
+                        failure(default_value ? [default_value] : []);
+                    });
+            },
+            /**
+             * Method to make query to one queryset with given search term and offset
+             *
+             * @param {string} searchTerm
+             * @param {number} offset
+             * @param {QuerySet} queryset
+             * @return {Promise<{items: Array, total: number}>}
+             */
+            getQuerysetResults(searchTerm, offset, queryset) {
+                const props = this.field.options.additionalProperties;
                 let filters = {
-                    limit: guiLocalSettings.get('page_size') || 20,
-                    [this.field.getAutocompleteFilterName(this.data)]: search_str,
+                    limit: this.pageSize,
+                    offset: offset,
+                    [this.field.getAutocompleteFilterName(this.data)]: searchTerm,
                 };
 
-                function getDependenceValueAsString(parent_data_object, field_name) {
-                    if (!field_name || !parent_data_object.hasOwnProperty(field_name)) {
-                        return undefined;
-                    }
-                    let field_dependence_name_array = [];
-                    let filds_data_obj = parent_data_object[field_name];
-                    for (let index = 0; index < filds_data_obj.length; index++) {
-                        field_dependence_name_array.push(filds_data_obj[index].value);
-                    }
-                    return field_dependence_name_array.join(',');
-                }
+                let signal_obj = {
+                    qs: queryset,
+                    filters: filters,
+                };
+
                 let field_dependence_data = getDependenceValueAsString(
                     this.$parent.data,
                     props.field_dependence_name,
                 );
+                if (field_dependence_data !== undefined) {
+                    signal_obj.field_dependence_name = props.field_dependence_name;
+                    signal_obj.filter_name = props.filter_name;
+                    signal_obj[props.field_dependence_name] = field_dependence_data;
+                }
 
-                let format_data = {
-                    fieldType: this.field.options.format,
-                    modelName: this.queryset.model.name,
-                    fieldName: this.field.options.name,
-                };
-                let p = this.querysets.map((qs) => {
-                    let signal_obj = {
-                        qs: qs,
-                        filters: filters,
-                    };
-                    if (field_dependence_data !== undefined) {
-                        signal_obj.field_dependence_name = props.field_dependence_name;
-                        signal_obj.filter_name = props.filter_name;
-                        signal_obj[props.field_dependence_name] = field_dependence_data;
-                    }
+                window.tabSignal.emit(
+                    `filter.${this.field.options.format}.${this.queryset.model.name}.${this.field.options.name}`,
+                    signal_obj,
+                );
 
-                    window.tabSignal.emit(
-                        'filter.{fieldType}.{modelName}.{fieldName}'.format(format_data),
-                        signal_obj,
-                    );
+                const req = signal_obj.nest_prom || queryset.filter(filters).items();
 
-                    if (!signal_obj.hasOwnProperty('nest_prom')) {
-                        return qs.filter(filters).items();
-                    } else {
-                        return signal_obj.nest_prom;
-                    }
-                });
-
-                Promise.all(p)
-                    .then((response) => {
-                        let results = [];
-
-                        if (this.field.options.default !== undefined) {
-                            if (typeof this.field.options.default !== 'object') {
-                                results.push({
-                                    id: this.field.options.default,
-                                    text: this.field.options.default,
-                                });
-                            } else {
-                                results.push(this.field.options.default);
-                            }
-                        }
-
-                        response.forEach((instances) => {
-                            instances.forEach((instance) => {
-                                let a_data = this.field.getAutocompleteValue(this.data, instance.data);
-                                results.push({
-                                    id: a_data.value_field,
-                                    text: a_data.view_field,
-                                });
-                            });
-                        });
-
-                        success({ results: results });
-                    })
-                    .catch((error) => {
-                        console.error(error);
-
-                        let results = [];
-
-                        if (props.default_value) {
-                            results.push(props.default_value);
-                        }
-
-                        failure(results);
+                return req.then((response) => {
+                    const items = response.map((instance) => {
+                        let a_data = this.field.getAutocompleteValue(this.data, instance.data);
+                        return { id: a_data.value_field, text: a_data.view_field };
                     });
+
+                    if (this.field.options.default !== undefined) {
+                        if (typeof this.field.options.default !== 'object') {
+                            items.push({
+                                id: this.field.options.default,
+                                text: this.field.options.default,
+                            });
+                        } else {
+                            items.push(this.field.options.default);
+                        }
+                    }
+
+                    return { items: items, total: response.total };
+                });
             },
         },
     };

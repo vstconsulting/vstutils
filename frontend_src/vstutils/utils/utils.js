@@ -842,3 +842,19 @@ export let current_view = new CurrentView();
  * It is supposed, that OpenAPI schema will use 'path_pk_key' value as pk_key for 3rd level paths.
  */
 export let path_pk_key = 'id';
+
+/**
+ * Returns joined dependence field values of parent_data_object for given field_name using separator
+ * or undefined if parent_data_object has no such field_name
+ *
+ * @param {Object} parent_data_object
+ * @param {string} field_name
+ * @param {string} separator
+ * @return {string | undefined}
+ */
+export function getDependenceValueAsString(parent_data_object, field_name, separator=',') {
+    if (!field_name || !parent_data_object.hasOwnProperty(field_name)) {
+        return undefined;
+    }
+    return parent_data_object[field_name].map((data) => data.value).join(separator);
+}

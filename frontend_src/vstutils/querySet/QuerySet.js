@@ -192,6 +192,7 @@ export default class QuerySet {
                 // otherwise returns instances.
                 this.api_count = response.data.count;
                 this.cache = instances;
+                instances.total = response.data.count;
                 return instances;
             })
             .catch((error) => {
@@ -326,7 +327,7 @@ export default class QuerySet {
 
             let obj = field.getObjectBulk(instance.data, this.url);
 
-            if (obj == undefined || typeof obj == 'string') {
+            if (obj === undefined || typeof obj == 'string') {
                 continue;
             }
 
@@ -336,13 +337,13 @@ export default class QuerySet {
 
             let pushed = false;
 
-            for (let item in bulk_data[field_name]) {
-                if (deepEqual(bulk_data[field_name][item].path, obj.path)) {
-                    if (!bulk_data[field_name][item].filter_values.includes(obj.id)) {
-                        bulk_data[field_name][item].filter_values.push(obj.id);
+            for (const item of bulk_data[field_name]) {
+                if (deepEqual(item.path, obj.path)) {
+                    if (!item.filter_values.includes(obj.id)) {
+                        item.filter_values.push(obj.id);
                     }
-                    if (!bulk_data[field_name][item].instances_ids.includes(instance.getPkValue())) {
-                        bulk_data[field_name][item].instances_ids.push(instance.getPkValue());
+                    if (!item.instances_ids.includes(instance.getPkValue())) {
+                        item.instances_ids.push(instance.getPkValue());
                     }
 
                     pushed = true;

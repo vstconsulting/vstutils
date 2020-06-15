@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { BaseFieldContentEdit } from '../../base';
-import { guiLocalSettings } from '../../../utils';
+import { getDependenceValueAsString, guiLocalSettings } from '../../../utils';
 import { AutocompleteFieldContentEditMixin } from '../../autocomplete';
 import { FKFieldContent } from '../fk';
 import FKAutocompleteFieldContentEdit from './FKAutocompleteFieldContentEdit.js';
@@ -51,18 +51,6 @@ const FKAutocompleteFieldMixin = {
                         limit: guiLocalSettings.get('page_size') || 20,
                         [this.field.getAutocompleteFilterName(this.data)]: search_input,
                     };
-
-                    function getDependenceValueAsString(parent_data_object, field_name) {
-                        if (!field_name || !parent_data_object.hasOwnProperty(field_name)) {
-                            return undefined;
-                        }
-                        let field_dependence_name_array = [];
-                        let filds_data_obj = parent_data_object[field_name];
-                        for (let index = 0; index < filds_data_obj.length; index++) {
-                            field_dependence_name_array.push(filds_data_obj[index].value);
-                        }
-                        return field_dependence_name_array.join(',');
-                    }
 
                     let field_dependence_data = getDependenceValueAsString(
                         this.$parent.data,
