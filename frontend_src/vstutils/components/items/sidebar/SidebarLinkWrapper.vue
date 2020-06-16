@@ -1,5 +1,5 @@
 <template>
-    <li class="nav-item" :class="wrapper_classes" :data-url="item.url">
+    <li class="nav-item" :class="wrapper_classes" :data-url="item.url" @click="hideSidebar">
         <sidebar_link :item="item" @toggleMenuOpen="toggleMenuOpen" @hideSidebar="hideSidebar" />
         <template v-if="item.sublinks">
             <ul class="menu-treeview-menu nav nav-treeview">
