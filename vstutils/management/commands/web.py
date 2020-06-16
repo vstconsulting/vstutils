@@ -163,6 +163,9 @@ class Command(BaseCommand):
         # Check if it is run under virtualenv
         if sys.prefix != sys.base_prefix:
             cmd += [f'--virtualenv={sys.prefix}']
+        elif sys.base_prefix not in sys.executable:
+            import pip  # type: ignore
+            cmd += [f'--virtualenv={Path(pip.__file__).parent.parent.parent.parent.parent}']
 
         # Get config from env
         read, write = os.pipe()
