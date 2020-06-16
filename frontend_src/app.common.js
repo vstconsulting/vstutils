@@ -47,8 +47,7 @@ window.axios = axios;
 import { createPopper } from '@popperjs/core';
 window.createPopper = createPopper;
 
-import './libs/bootstrap.js';
-import './libs/adminlte.js';
+import './libs/bootstrap-adminlte.js';
 import './libs/fontawesome.js';
 
 // Libraries in spa object
