@@ -114,6 +114,9 @@ class Command(BaseCommand):
     def handle(self, *uwsgi_args, **opts):
         super().handle(*uwsgi_args, **opts)
 
+        # Environment
+        env = os.environ.copy()
+
         # Build default uwsgi-command options.
         cmd = [
             str(opts['script']),
@@ -163,6 +166,8 @@ class Command(BaseCommand):
         # Check if it is run under virtualenv
         if sys.prefix != '/usr':
             cmd += [f'--virtualenv={sys.prefix}']
+            if sys.prefix not in env["PATH"]:
+                env['PATH'] = f'{sys.prefix}/bin:{env["PATH"]}'
 
         # Get config from env
         read, write = os.pipe()
@@ -172,7 +177,7 @@ class Command(BaseCommand):
         # Run web server
         try:
             self._print('Execute: ' + ' '.join(cmd))
-            proc = subprocess.Popen(cmd, env=os.environ.copy(), stdin=read)
+            proc = subprocess.Popen(cmd, env=env, stdin=read)
             try:
                 wait(proc)
             except BaseException as exc:
