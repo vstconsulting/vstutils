@@ -1964,3 +1964,8 @@ input[type='color'] {
 .card-header_widget {
     height: auto;
 }
+
+[class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active,
+[class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active:focus {
+    background-color: var(--background-passiv-color);
+}
