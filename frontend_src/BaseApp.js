@@ -3,6 +3,7 @@ import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js
 import { fieldsRegistrator } from './vstutils/fields';
 import { ErrorHandler } from './vstutils/popUp';
 import { guiLocalSettings } from './vstutils/utils';
+import AppRoot from './vstutils/AppRoot.vue';
 
 export default class BaseApp {
     /**
@@ -35,6 +36,10 @@ export default class BaseApp {
          * Object that stores Vue components which are must be registred globally
          */
         this.global_components = globalComponentsRegistrator;
+        /**
+         * Root Vue component
+         */
+        this.appRootComponent = AppRoot;
     }
     /**
      * Method that will be called in start() after loading of languages,
@@ -70,6 +75,23 @@ export default class BaseApp {
                 throw new Error(error);
             });
     }
+
+    /**
+     * Method can be used to change root VVueUE component
+     *
+     * @param component {object}
+     */
+    changeAppRootComponent(component) {
+        this.appRootComponent = component;
+    }
+
+    /**
+     * Method can be used to reset root Vue component to default value
+     */
+    resetAppRootComponent() {
+        this.appRootComponent = AppRoot;
+    }
+
     /**
      * Method, that creates store and router for an application and mounts it to DOM.
      */

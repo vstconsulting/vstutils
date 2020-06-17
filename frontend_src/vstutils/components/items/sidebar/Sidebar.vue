@@ -14,7 +14,7 @@
     import $ from 'jquery';
 
     export default {
-        name: 'sidebar',
+        name: 'Sidebar',
         props: {
             menu: Array,
             docs: Object,

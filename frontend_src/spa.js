@@ -160,22 +160,12 @@ export class App extends BaseApp {
         });
 
         this.application = new Vue({
-            data: {
+            mixins: [this.appRootComponent],
+            propsData: {
                 info: this.api.openapi.info,
                 x_menu: this.api.openapi.info['x-menu'],
                 x_docs: this.api.openapi.info['x-docs'],
                 a_links: false,
-            },
-            computed: {
-                realBodyClasses() {
-                    let cls = '';
-
-                    ['is_superuser', 'is_staff'].forEach((item) => {
-                        cls += window[item] ? item + ' ' : '';
-                    });
-
-                    return cls;
-                },
             },
             router: routerConstructor.getRouter(),
             store: store_constructor.getStore(),
