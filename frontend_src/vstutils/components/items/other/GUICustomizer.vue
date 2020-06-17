@@ -24,7 +24,7 @@
     import { guiCustomizer } from '../../../guiCustomizer';
 
     export default {
-        name: 'gui_customizer',
+        name: 'GUICustomizer',
         data() {
             return {
                 customizer: guiCustomizer,

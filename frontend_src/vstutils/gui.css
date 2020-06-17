@@ -1679,7 +1679,7 @@ a .url,
 
 a:hover,
 a:hover .url {
-    color: var(--a-color-hover) !important;
+    color: var(--a-color-hover);
 }
 
 a.revers-color {
@@ -1967,5 +1967,5 @@ input[type='color'] {
 
 [class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active,
 [class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active:focus {
-    background-color: var(--background-passiv-color);
+    background-color: var(--background-active-color);
 }

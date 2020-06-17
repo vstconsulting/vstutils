@@ -93,7 +93,7 @@
      * Component of top navigation menu.
      */
     export default {
-        name: 'top_nav',
+        name: 'TopNav',
         props: {
             /**
              * Property, that means what type of links to use:

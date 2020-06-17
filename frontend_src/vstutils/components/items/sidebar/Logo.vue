@@ -10,7 +10,7 @@
      * Logo component.
      */
     export default {
-        name: 'logo',
+        name: 'Logo',
         props: {
             title: {
                 type: String,

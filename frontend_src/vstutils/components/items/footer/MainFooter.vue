@@ -30,7 +30,7 @@
 
 <script>
     export default {
-        name: 'main_footer',
+        name: 'MainFooter',
         computed: {
             /**
              * Property, that returns project version.

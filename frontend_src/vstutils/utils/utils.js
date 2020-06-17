@@ -852,7 +852,7 @@ export let path_pk_key = 'id';
  * @param {string} separator
  * @return {string | undefined}
  */
-export function getDependenceValueAsString(parent_data_object, field_name, separator=',') {
+export function getDependenceValueAsString(parent_data_object, field_name, separator = ',') {
     if (!field_name || !parent_data_object.hasOwnProperty(field_name)) {
         return undefined;
     }
