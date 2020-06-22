@@ -395,18 +395,23 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         self.queryset_filters = kwargs.pop('queryset_filters', [])
         super().__init__(name, arg, *args, **kwargs)
         self._subs = self.get_subs()
+
         if self.view is None:
             raise self.NoView()
+
         self.serializers = self.__get_serializers(kwargs)
         self.methods = methods
+
         if self.arg is None:
             self.methods = methods or ['get']
+
         self.kwargs['empty_arg'] = self.kwargs.pop('empty_arg', False)
         self.kwargs['append_arg'] = self.arg
         self.kwargs['request_arg'] = self.request_arg
 
     def __get_serializers(self, kwargs):
         serializer_class = kwargs.pop('serializer_class', self.view.serializer_class)
+
         if 'serializer_class_one' in kwargs:
             serializer_class_one = kwargs.pop('serializer_class_one')
         elif hasattr(self.view, 'serializer_class_one'):
@@ -414,6 +419,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         else:
             # This option is deprecated because all viewsets return `serializer_class_one`
             serializer_class_one = serializer_class  # nocv
+
         return (serializer_class, serializer_class_one)
 
     def _get_subs_from_view(self) -> _t.Sequence:
@@ -427,11 +433,13 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def get_subs(self) -> _t.Sequence:
         subs = self._get_subs_from_view()
+
         if self.allowed_subs is None:
             return []
         elif self.allowed_subs:
             allowed_subs = set(self.allowed_subs)
             subs = list(allowed_subs.intersection(subs))
+
         return subs
 
     @property
@@ -444,7 +452,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def get_view(self, name: _t.Text, **options):
         # pylint: disable=redefined-outer-name
-        mixin_class = NestedViewMixin
+        mixin_class: _t.Type[NestedViewMixin] = NestedViewMixin
         if hasattr(self.view, 'create'):
             if self.kwargs.get('allow_append', False):
                 mixin_class = NestedWithAppendMixin
@@ -461,17 +469,27 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         manager_name = self.kwargs.get('manager_name', self.name)
 
-        def nested_view(view_obj, request, *args, **kwargs):
+        class NestedView(mixin_class, self.view):  # type: ignore
+            __slots__ = ('nested_detail',)
+            __doc__ = self.view.__doc__
+            format_kwarg = None
+            queryset_filters = self.queryset_filters
+
+        NestedView.__name__ = self.view.__name__  # type: ignore
+        NestedView.nested_detail = detail  # type: ignore
+
+        def nested_view_function_wrapper(view_obj, request, *args, **kwargs):
             kwargs.update(options)
             view_obj.nested_parent_object = view_obj.get_object()
-            nested_allow_append = view_obj.nested_allow_append
             nested_append_arg = view_obj.nested_append_arg
             nested_request_arg = view_obj.nested_arg
             nested_parent_object = view_obj.nested_parent_object
+
             if nested_append_arg:
                 nested_id = getattr(nested_parent_object, nested_append_arg, None)
             else:
                 nested_id = None
+
             if callable(manager_name):
                 nested_manager = manager_name(nested_parent_object)
             else:
@@ -482,18 +500,12 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
                     nested_manager_func = getattr(view_obj, view_manager_function_name)
                     nested_manager = nested_manager_func(nested_parent_object)
 
-            class NestedView(mixin_class, self.view):
-                __slots__ = ('nested_detail',)
-                __doc__ = self.view.__doc__
-                master_view = view_obj
-                lookup_field = nested_append_arg
-                lookup_url_kwarg = nested_request_arg
-                format_kwarg = None
-                queryset_filters = self.queryset_filters
-
             NestedView.__name__ = self.view.__name__
+            NestedView.master_view = view_obj
+            NestedView.lookup_field = nested_append_arg
+            NestedView.lookup_url_kwarg = nested_request_arg
             NestedView.nested_detail = detail
-            NestedView.nested_allow_append = nested_allow_append
+            NestedView.nested_allow_append = view_obj.nested_allow_append
             NestedView.nested_append_arg = nested_append_arg
             NestedView.nested_request_arg = nested_request_arg
             NestedView.nested_parent_object = nested_parent_object
@@ -503,10 +515,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
             getattr(view_obj, 'nested_allow_check', lambda *args, **kwargs: None)()
             return nested_view_function(view_obj, NestedView, request, *args, **kwargs)
 
-        nested_view.__name__ = name
-        nested_view.__doc__ = self.view.__doc__
-        nested_view._nested_view = self.view  # type: ignore
-        return name, nested_view
+        nested_view_function_wrapper.__name__ = name
+        nested_view_function_wrapper.__doc__ = self.view.__doc__
+        nested_view_function_wrapper._nested_view = self.view  # type: ignore
+        return name, nested_view_function_wrapper
 
     def get_view_type(self, type_name: _t.Text, **options):
         return self.get_view(f'{self.name}_{type_name}', **options)
