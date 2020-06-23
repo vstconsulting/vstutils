@@ -506,14 +506,16 @@ TEMPLATES: _t.List[_t.Dict] = [
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
 STATIC_URL: _t.Text = web["static_files_url"]
-STATIC_FILES_FOLDERS: _t.List[_t.Text] = list()
-STATIC_FILES_FOLDERS.append(os.path.join(VST_PROJECT_DIR, 'static'))
-if BASE_DIR != VST_PROJECT_DIR:  # nocv
-    STATIC_FILES_FOLDERS.append(os.path.join(BASE_DIR, 'static'))
-STATIC_FILES_FOLDERS.append(os.path.join(VSTUTILS_DIR, 'static'))
-STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(admin.__file__), 'static'))
-STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(errors.__file__), 'static'))
-STATIC_FILES_FOLDERS.append(os.path.join(os.path.dirname(rest_framework.__file__), 'static'))
+__STATIC_FILES_FOLDERS = (
+    os.path.join(VST_PROJECT_DIR, 'static'),
+    os.path.join(BASE_DIR, 'static') if BASE_DIR != VST_PROJECT_DIR else None,
+    os.path.join(VSTUTILS_DIR, 'static'),
+    os.path.join(os.path.dirname(admin.__file__), 'static'),
+    os.path.join(os.path.dirname(errors.__file__), 'static'),
+    os.path.join(os.path.dirname(rest_framework.__file__), 'static')
+)
+STATIC_FILES_FOLDERS = list(filter(bool, __STATIC_FILES_FOLDERS))
+
 if LOCALRUN:
     STATICFILES_DIRS = STATIC_FILES_FOLDERS
 

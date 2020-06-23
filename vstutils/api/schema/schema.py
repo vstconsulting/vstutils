@@ -3,9 +3,6 @@ from warnings import warn
 from rest_framework import status
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
-from drf_yasg import openapi, utils
-
-from .. import serializers
 from .inspectors import (
     CommaMultiSelectFieldInspector,
     FkFieldInspector,
@@ -25,6 +22,11 @@ class VSTAutoSchema(SwaggerAutoSchema):
     filter_inspectors = [
         NestedFilterInspector
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
+
+    default_status_messages: dict = {
+        s[1]: ' '.join(s[2:])
+        for s in map(lambda j: j.split('_'), filter(lambda x: x.startswith("HTTP_"), dir(status)))
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,33 +95,18 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
     def get_operation_id(self, operation_keys=None):
         new_operation_keys = []
+        append_new_operation_keys = new_operation_keys.append
+
         for key in operation_keys or []:
-            previous = None if not len(new_operation_keys) else new_operation_keys[-1]
-            new_operation_keys.append(key.replace(f'{previous}_', ''))
+            append_new_operation_keys(key.replace(f'{None if not new_operation_keys else new_operation_keys[-1]}_', ''))
+
         return super().get_operation_id(tuple(new_operation_keys))
 
     def get_response_schemas(self, response_serializers):
         responses = super().get_response_schemas(response_serializers)
-        for response in responses:
-            if not responses[response].description:
-                responses[response].description = 'Action accepted.'
-        error_serializer = utils.force_serializer_instance(serializers.ErrorSerializer)
-        responses[status.HTTP_400_BAD_REQUEST] = openapi.Response(
-            description='Validation error or some data error.',
-            schema=self.serializer_to_schema(error_serializer),
-        )
-        responses[status.HTTP_404_NOT_FOUND] = openapi.Response(
-            description='Not found error.',
-            schema=self.serializer_to_schema(error_serializer),
-        )
-        responses[status.HTTP_403_FORBIDDEN] = openapi.Response(
-            description='Permission denied error.',
-            schema=self.serializer_to_schema(error_serializer),
-        )
-        responses[status.HTTP_401_UNAUTHORIZED] = openapi.Response(
-            description='Unauthorized access error.',
-            schema=self.serializer_to_schema(error_serializer),
-        )
+        for response_code, response in responses.items():
+            if not response.description:
+                response.description = self.default_status_messages.get(response_code, 'Action accepted.')
         return responses
 
     def __perform_with_nested(self, func_name, *args, **kwargs):

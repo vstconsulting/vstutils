@@ -20,6 +20,12 @@ def ensure_is_object(obj):
     return obj
 
 
+def _create_with_iteration(get_serializer_func, nested_manager, data):
+    serializer = get_serializer_func(data=data)
+    serializer.is_valid(raise_exception=True)
+    return nested_manager.create(**serializer.validated_data)
+
+
 def __get_nested_path(
         name: _t.Text,
         arg: _t.Text = None,
@@ -229,14 +235,11 @@ class NestedWithoutAppendMixin(NestedViewMixin):
         return request_data if many else [request_data]
 
     def _data_create(self, request_data, nested_append_arg):
-        id_list = []
-        for data in request_data:
-            serializer = self.get_serializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            obj = self.nested_manager.create(**serializer.validated_data)
-            id_list.append(getattr(obj, nested_append_arg))
-
-        return id_list
+        get_serializer_func, nested_manager = self.get_serializer, self.nested_manager
+        return [
+            getattr(_create_with_iteration(get_serializer_func, nested_manager, d), nested_append_arg)
+            for d in request_data
+        ]
 
     def perform_create_nested(self, request_data, nested_append_arg, many) -> base.RestResponse:
         id_list = self._data_create(
