@@ -6,17 +6,18 @@ import { guiQuerySets } from '../querySet';
 export default class View {
     /**
      * Constructor of View class.
+     *
      * @param {object} model Model, with which this view is connected.
      * @param {object} schema Options of current view,
      * that include settings for a view (internal links, view type and so on).
      * @param {string} template Id of script with template content.
+     * @param mixins {Array.<Object>} Vue mixins for view component
      */
     constructor(model, schema, template, mixins = []) {
         let qs_constructor = this.constructor.getQuerySetConstructor(model);
 
         this.schema = schema;
         this.objects = new qs_constructor(model, this.schema.path);
-        this.template = template;
         /**
          * Property, that stores extensions for components,
          * which would render current view.
@@ -31,8 +32,8 @@ export default class View {
      * @param {object} buttons Object with buttons options.
      * @param {object} instance Model instance connected with current view.
      */
+    // eslint-disable-next-line no-unused-vars
     getViewSublinkButtons(type, buttons, instance) {
-        /* jshint unused: false */
         return buttons;
     }
 
@@ -42,7 +43,7 @@ export default class View {
      * @return {string}
      */
     getPathTemplateForRouter(path = '') {
-        return path.replace(/\{/g, ':').replace(/\}/g, '');
+        return path.replace(/{/g, ':').replace(/}/g, '');
     }
 
     /**

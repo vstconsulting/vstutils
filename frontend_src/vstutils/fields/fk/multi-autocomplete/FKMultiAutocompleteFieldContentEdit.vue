@@ -28,10 +28,10 @@
         <field_fk_multi_autocomplete_modal
             v-show="!disabled"
             :options="modal_options"
-            @cleanTmpValue="cleanTmpValue"
-            @changeValue="changeTmpValue"
-            @setNewValue="setValueInStore"
-            @updateQuerySet="updateQuerySet"
+            @clean-tmp-value="cleanTmpValue"
+            @change-value="changeTmpValue"
+            @set-new-value="setValueInStore"
+            @update-query-set="updateQuerySet"
         ></field_fk_multi_autocomplete_modal>
 
         <field_clear_button

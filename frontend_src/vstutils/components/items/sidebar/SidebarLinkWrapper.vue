@@ -30,7 +30,6 @@
         },
         watch: {
             page_url: function (path) {
-                /* jshint unused: false */
                 if (!this.are_sublinks_active && this.menu_open) {
                     this.menu_open = false;
                 }

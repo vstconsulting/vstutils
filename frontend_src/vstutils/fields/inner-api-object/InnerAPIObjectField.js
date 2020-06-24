@@ -20,7 +20,7 @@ class InnerAPIObjectField extends BaseField {
      * @param {object} field Inner_api_object field instance.
      */
     static getModel(field) {
-        let constructor = new ViewConstructor(openapi_dictionary, app.models);
+        let constructor = new ViewConstructor(openapi_dictionary, window.app.models);
         return constructor.getViewSchema_model(field.options);
     }
 
@@ -29,8 +29,8 @@ class InnerAPIObjectField extends BaseField {
      * @param {object} field Inner_api_object field instance.
      * @param {string} path Name of View path.
      */
+    // eslint-disable-next-line no-unused-vars
     static prepareField(field, path) {
-        /* jshint unused: false */
         let model = this.getModel(field);
 
         if (!model) {
@@ -48,13 +48,13 @@ class InnerAPIObjectField extends BaseField {
             realFields[key] = {};
 
             for (let item in inner_model.fields) {
-                if (Object.keys(inner_model.fields).length == 1) {
+                if (Object.keys(inner_model.fields).length === 1) {
                     let f = inner_model.fields[item];
                     let opt = $.extend(true, { required: field.options.required }, f.options, {
                         title: `${key} - ${item}`,
                     });
 
-                    realFields[key][item] = new window.guiFields[f.options.format](opt);
+                    realFields[key][item] = new window.spa.fields.guiFields[f.options.format](opt);
                 } else {
                     realFields[key][item] = inner_model.fields[item];
                     realFields[key][item].options = $.extend(

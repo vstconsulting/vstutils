@@ -9,10 +9,10 @@ const FKandAPIObjectMixin = (Class_name) =>
          * @param {string} model_name Name Model to which autocomplete field links.
          */
         static findQuerySetSecondLevelPaths(model_name) {
-            let views = app.views;
+            let views = window.app.views;
             let paths = Object.keys(views)
                 .filter((item) => {
-                    if (views[item].schema.level == 2) {
+                    if (views[item].schema.level === 2) {
                         return item;
                     }
                 })
@@ -22,7 +22,7 @@ const FKandAPIObjectMixin = (Class_name) =>
 
             for (let index = 0; index < paths.length; index++) {
                 let p = paths[index];
-                if (views[p].objects.model.name == model_name) {
+                if (views[p].objects.model.name === model_name) {
                     return views[p].objects.clone();
                 }
             }

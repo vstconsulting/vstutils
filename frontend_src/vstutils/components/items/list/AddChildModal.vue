@@ -20,7 +20,7 @@
                     <current_table
                         :instances="instances"
                         :opt="opt"
-                        @changeValue="changeValue"
+                        @change-value="changeValue"
                         @setSelections="setSelections"
                         @toggleSelection="toggleSelection"
                     ></current_table>
@@ -192,7 +192,7 @@
                 mixins: [BaseInstancesTableMixin],
                 watch: {
                     selections(selections) {
-                        this.$emit('changeValue', { selections: selections });
+                        this.$emit('change-value', { selections: selections });
                     },
                 },
                 components: {

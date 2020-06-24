@@ -41,6 +41,7 @@
     import { TableRowMixin } from '../../fields';
     import BaseListTableMixin from './BaseListTableMixin.js';
     import BaseInstancesTableAndRowMixin from './BaseInstancesTableAndRowMixin.js';
+    import { addCssClassesToElement } from '../../utils';
 
     /**
      * Mixin for modal window table row.

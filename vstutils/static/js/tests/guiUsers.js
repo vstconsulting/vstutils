@@ -8,7 +8,7 @@
 window.qunitTestsArray['guiViews[user]'] = {
     test: function() {
         let list_path = '/user/';
-        let page_path = list_path + '{' + path_pk_key +'}/';
+        let page_path = list_path + '{' + window.spa.utils.path_pk_key +'}/';
         let instances_info = guiTests.getEmptyInstancesInfo();
 
         /////////////////////////////////////////////////////////////////
@@ -19,12 +19,12 @@ window.qunitTestsArray['guiViews[user]'] = {
                 {
                     is_valid: true,
                     data:{
-                        username: {value: randomString(6)},
+                        username: {value: window.spa.utils.randomString(6)},
                         is_active: {value: true},
                         is_staff: {value: true},
-                        first_name: {value: randomString(6)},
-                        last_name: {value: randomString(6)},
-                        email: {value: randomString(6) + '@mail.com'},
+                        first_name: {value: window.spa.utils.randomString(6)},
+                        last_name: {value: window.spa.utils.randomString(6)},
+                        email: {value: window.spa.utils.randomString(6) + '@mail.com'},
                         password: {value: 'password'},
                         password2: {value: 'password'},
                     },
@@ -33,7 +33,7 @@ window.qunitTestsArray['guiViews[user]'] = {
             edit: [
                 {
                     is_valid: true,
-                    data: {username: {value: randomString(6) + randomString(6)}},
+                    data: {username: {value: window.spa.utils.randomString(6) + window.spa.utils.randomString(6)}},
                 },
                 {
                     is_valid: true,
@@ -49,7 +49,7 @@ window.qunitTestsArray['guiViews[user]'] = {
             is_valid: true,
             remove: true,
             data: {
-                username: {value: 'copied-' + randomString(6),},
+                username: {value: 'copied-' + window.spa.utils.randomString(6),},
                 is_active: {value: true},
             }
         });
@@ -68,7 +68,7 @@ window.qunitTestsArray['guiViews[user]'] = {
         ////////////////////////////////////////////////////////////////////////////////
         // Test, that deletes created during tests user instance.
         ////////////////////////////////////////////////////////////////////////////////
-        guiTests.testRemovePageViewInstance(list_path + "{" + path_pk_key +"}/", instances_info, true);
+        guiTests.testRemovePageViewInstance(list_path + "{" + window.spa.utils.path_pk_key +"}/", instances_info, true);
     },
 };
 

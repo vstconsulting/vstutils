@@ -3,6 +3,7 @@ import { guiLocalSettings } from '../utils';
 import { guiPopUp } from '../popUp';
 import { _translate } from '../utils';
 import { guiFields } from '../fields';
+import { signals } from '../../libs/TabSignal.js';
 
 /**
  * Class, that is responsible for changing GUI skins (themes) and for changing skins' settings.
@@ -92,7 +93,7 @@ export default class GuiCustomizer {
      * forms guiCustomizer form options.
      */
     init() {
-        tabSignal.emit('GuiCustomizer.beforeInit', this);
+        signals.emit('GuiCustomizer.beforeInit', this);
 
         // Creates skinField.
         this.skinField = new guiFields.choices({
@@ -112,7 +113,7 @@ export default class GuiCustomizer {
             form: this.form,
         });
 
-        tabSignal.emit('GuiCustomizer.afterInit', this);
+        signals.emit('GuiCustomizer.afterInit', this);
     }
 
     /**
@@ -194,7 +195,7 @@ export default class GuiCustomizer {
      */
     applySkinDefaultSettings() {
         for (let key in this.form) {
-            if (this.form.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.form, key)) {
                 let val;
 
                 if (this.form[key]) {
@@ -217,15 +218,9 @@ export default class GuiCustomizer {
     updateCssVariables() {
         this.replaceCss(this.formCss());
 
-        let str =
-            $('body')
-                .attr('class')
-                .replace(/gui-skin-[^ ]+/g, '') +
-            ' gui-skin-' +
-            this.skin.name +
-            ' ';
-
-        $('body').attr('class', str);
+        const body = $('body');
+        let str = body.attr('class').replace(/gui-skin-[^ ]+/g, '') + ' gui-skin-' + this.skin.name + ' ';
+        body.attr('class', str);
     }
 
     /**
@@ -240,7 +235,7 @@ export default class GuiCustomizer {
 
         guiLocalSettings.set('skins_settings', settings);
 
-        tabSignal.emit('GuiCustomizer.skins_custom_settings.reseted', this);
+        signals.emit('GuiCustomizer.skins_custom_settings.reseted', this);
     }
 
     /**
@@ -255,7 +250,7 @@ export default class GuiCustomizer {
 
         guiLocalSettings.set('skins_settings', settings);
 
-        tabSignal.emit('GuiCustomizer.skins_custom_settings.saved', this);
+        signals.emit('GuiCustomizer.skins_custom_settings.saved', this);
     }
 
     /**
@@ -292,7 +287,7 @@ export default class GuiCustomizer {
 
         guiLocalSettings.set('skin', skin);
 
-        tabSignal.emit('GuiCustomizer.skin.name.changed', this);
+        signals.emit('GuiCustomizer.skin.name.changed', this);
     }
 
     /**
@@ -305,6 +300,6 @@ export default class GuiCustomizer {
 
         this.updateCssVariables();
 
-        tabSignal.emit('GuiCustomizer.skin.settings.changed', this);
+        signals.emit('GuiCustomizer.skin.settings.changed', this);
     }
 }

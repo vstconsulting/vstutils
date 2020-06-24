@@ -17,13 +17,13 @@ const HTMLFieldMixin = {
         /**
          * Method, that adds handlers to links from html field value.
          */
-        setLinksInsideField: function () {
+        setLinksInsideField() {
             let links_array = $(this.$el).find('a');
 
             for (let i = 0; i < links_array.length; i++) {
                 let link = links_array[i];
 
-                if (!(link.href && link.href.search(app.api.getHostUrl()) != -1)) {
+                if (!(link.href && link.href.search(window.app.api.getHostUrl()) !== -1)) {
                     link.setAttribute('target', '_blank');
                     link.setAttribute('rel', 'noreferrer');
                     continue;
@@ -31,7 +31,7 @@ const HTMLFieldMixin = {
 
                 let match = link.href.match(/#([A-z0-9,-]+)$/);
 
-                if (match && link.href.search(window.location.href) == -1 && $('*').is(match[0])) {
+                if (match && link.href.search(window.location.href) === -1 && $('*').is(match[0])) {
                     link.onclick = function () {
                         $('body,html').animate(
                             {
@@ -45,9 +45,11 @@ const HTMLFieldMixin = {
                     continue;
                 }
 
-                if (link.href.search(window.location.href) == -1) {
+                if (link.href.search(window.location.href) === -1) {
                     link.href =
-                        window.location.href + this.link_path + link.href.split(app.api.getHostUrl())[1];
+                        window.location.href +
+                        this.link_path +
+                        link.href.split(window.app.api.getHostUrl())[1];
                 }
             }
         },

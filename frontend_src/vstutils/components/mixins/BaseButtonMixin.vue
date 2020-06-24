@@ -24,7 +24,6 @@
     export default {
         name: 'base_button_mixin',
         props: ['type', 'options', 'look'],
-        template: '#template_button_common',
         computed: {
             title() {
                 // return this.options.title || this.options.name;

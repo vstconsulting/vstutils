@@ -1,6 +1,8 @@
 import $ from 'jquery';
-import { BaseEntityConstructor } from '../utils';
+import BaseEntityConstructor from './BaseEntityConstructor.js';
 import { guiFields } from '../fields';
+import { signals } from '../../libs/TabSignal.js';
+import { StringField } from '../fields/text';
 
 /**
  * Class, that manages creation of guiModels.
@@ -62,16 +64,16 @@ export default class ModelConstructor extends BaseEntityConstructor {
      * Method, that returns object with guiFields for current Model.
      * Method defines appropriate guiField for every field from OpenApi's Model schema.
      * @param {object} model OpenApi's Model schema.
-     * @param {string} name Model name.
+     * @param {string} model_name Model name.
      */
     generateModelFields(model, model_name) {
         let f_obj = {};
         let fields = this.getModelFieldsList(model);
 
-        tabSignal.emit('models[' + model_name + '].fields.beforeInit', fields);
+        signals.emit('models[' + model_name + '].fields.beforeInit', fields);
 
         for (let field in fields) {
-            if (fields.hasOwnProperty(field)) {
+            if (Object.prototype.hasOwnProperty.call(fields, field)) {
                 let format = this.getModelFieldFormat(fields[field]);
                 let opt = {
                     name: field,
@@ -86,7 +88,7 @@ export default class ModelConstructor extends BaseEntityConstructor {
             }
         }
 
-        tabSignal.emit('models[' + model_name + '].fields.afterInit', f_obj);
+        signals.emit('models[' + model_name + '].fields.afterInit', f_obj);
 
         return f_obj;
     }
@@ -114,18 +116,29 @@ export default class ModelConstructor extends BaseEntityConstructor {
         let models = this.getModelsList(openapi_schema);
 
         for (let model in models) {
-            if (models.hasOwnProperty(model)) {
+            if (Object.prototype.hasOwnProperty.call(models, model)) {
                 let constructor = this.getModelsConstructor(model);
 
                 store[model] = new constructor(model, this.generateModelFields(models[model], model));
 
-                tabSignal.emit('models[' + model + '].created', {
+                signals.emit('models[' + model + '].created', {
                     model: store[model],
                 });
             }
         }
 
-        tabSignal.emit('allModels.created', { models: store });
+        signals.emit('allModels.created', { models: store });
+
+        let constructor = this.getModelsConstructor('NoModel');
+        store['NoModel'] = new constructor('NoModel', {
+            detail: new StringField({
+                format: 'string',
+                name: 'detail',
+                required: false,
+                title: 'Detail',
+                type: 'string',
+            }),
+        });
 
         return store;
     }

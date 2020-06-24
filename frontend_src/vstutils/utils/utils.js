@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import moment from 'moment';
 import { LocalSettings } from './localSettings';
-// import { guiFields } from "../fields"; FIXME circular dependency "Super expression must either be null or a function"
 
 export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
@@ -12,7 +11,6 @@ export const guiLocalSettings = new LocalSettings('guiLocalSettings');
  * @param {*} takes array, associative array or single variable and insert it
  * @return {string} - return string with inserted arguments
  */
-/*jshint freeze: false */
 String.prototype.format = function () {
     let obj = this.toString();
     let arg_list;
@@ -24,7 +22,7 @@ String.prototype.format = function () {
     }
 
     for (let key of this.format_keys()) {
-        if (arg_list[key] != undefined) {
+        if (arg_list[key] !== undefined) {
             obj = obj.replace('{' + key + '}', arg_list[key]);
         } else {
             throw "String don't have '" + key + "' key";
@@ -38,10 +36,9 @@ String.prototype.format = function () {
  * Function search and return all `{key}` in string.
  * @return {array} array of {key} in string.
  */
-/*jshint freeze: false */
 String.prototype.format_keys = function () {
     let thisObj = this;
-    let res = thisObj.match(/{([^\}]+)}/g);
+    let res = thisObj.match(/{([^}]+)}/g);
 
     if (!res) {
         return [];
@@ -103,7 +100,7 @@ export function sliceLongString(string = '', valid_length = 100) {
  */
 export function isEmptyObject(obj) {
     for (let key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
             return false;
         }
     }
@@ -118,17 +115,17 @@ export function isEmptyObject(obj) {
  * @return {string} String with CSS classes names.
  */
 export function addCssClassesToElement(element = '', title = '', type = '') {
-    element = element.replace(/[\s\/]+/g, '_');
+    element = element.replace(/[\s/]+/g, '_');
 
     let class_list = element + ' ';
 
     if (title) {
-        title = title.replace(/[\s\/]+/g, '_');
+        title = title.replace(/[\s/]+/g, '_');
         class_list += element + '-' + title + ' ';
     }
 
     if (title && type) {
-        type = type.replace(/[\s\/]+/g, '_');
+        type = type.replace(/[\s/]+/g, '_');
         class_list += element + '-' + type + ' ';
         class_list += element + '-' + type + '-' + title;
     }
@@ -160,17 +157,18 @@ export function getCookie(name) {
  * Callback for window.onresize event.
  */
 window.onresize = function () {
+    const body = $('body');
     if (window.innerWidth > 991) {
         if (guiLocalSettings.get('hideMenu')) {
-            $('body').addClass('sidebar-collapse');
+            body.addClass('sidebar-collapse');
         }
 
-        if ($('body').hasClass('sidebar-open')) {
-            $('body').removeClass('sidebar-open');
+        if (body.hasClass('sidebar-open')) {
+            body.removeClass('sidebar-open');
         }
     } else {
-        if ($('body').hasClass('sidebar-collapse')) {
-            $('body').removeClass('sidebar-collapse');
+        if (body.hasClass('sidebar-collapse')) {
+            body.removeClass('sidebar-collapse');
         }
     }
 };
@@ -191,18 +189,21 @@ export function saveHideMenuSettings() {
 
 /**
  * https://stackoverflow.com/a/25456134/7835270
- * @param {type} x
- * @param {type} y
+ * @param {Object} x
+ * @param {Object} y
  * @returns {Boolean}
  */
 export function deepEqual(x, y) {
+    if (x === y) {
+        return true;
+    }
     if (typeof x == 'object' && x != null && typeof y == 'object' && y != null) {
-        if (Object.keys(x).length != Object.keys(y).length) {
+        if (Object.keys(x).length !== Object.keys(y).length) {
             return false;
         }
 
         for (let prop in x) {
-            if (y.hasOwnProperty(prop)) {
+            if (Object.prototype.hasOwnProperty.call(y, prop)) {
                 if (!deepEqual(x[prop], y[prop])) {
                     return false;
                 }
@@ -210,13 +211,8 @@ export function deepEqual(x, y) {
                 return false;
             }
         }
-
         return true;
-    } else if (x !== y) {
-        return false;
-    } else {
-        return true;
-    }
+    } else return false;
 }
 
 /**
@@ -269,8 +265,8 @@ export function allPropertiesIsObjects(obj) {
 }
 
 /**
- * Function, that converts instance of Array​Buffer to Base64.
- * @param {array} buffer Instance of Array​Buffer.
+ * Function, that converts instance of ArrayBuffer to Base64.
+ * @param {array} buffer Instance of ArrayBuffer.
  * @return {string}
  */
 export function arrayBufferToBase64(buffer) {
@@ -334,7 +330,7 @@ export function hexToRgbA(hex, alpha = 1) {
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
         c = hex.substring(1).split('');
 
-        if (c.length == 3) {
+        if (c.length === 3) {
             c = [c[0], c[0], c[1], c[1], c[2], c[2]];
         }
 
@@ -342,8 +338,6 @@ export function hexToRgbA(hex, alpha = 1) {
 
         return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',' + alpha + ')';
     }
-
-    return;
 }
 
 /**
@@ -428,7 +422,7 @@ export class ObjectPropertyRetriever {
      * of Object Class constructor prototype.
      */
     static get getObjectConstructorMethods() {
-        return Object.getOwnPropertyNames({}.constructor.prototype);
+        return Object.getOwnPropertyNames(Object.constructor.prototype);
     }
     /**
      * Static property, that returns non_enumerable properties
@@ -446,7 +440,7 @@ export class ObjectPropertyRetriever {
      * @private
      */
     _enumerable(obj, prop) {
-        return obj.propertyIsEnumerable(prop);
+        return Object.prototype.propertyIsEnumerable.call(obj, prop);
     }
     /**
      * Method, that returns true, if prop is non_enumerable property of obj.
@@ -457,7 +451,7 @@ export class ObjectPropertyRetriever {
      * @private
      */
     _notEnumerable(obj, prop) {
-        return !obj.propertyIsEnumerable(prop);
+        return !Object.prototype.propertyIsEnumerable.call(obj, prop);
     }
     /**
      * Method, that returns true, if prop is enumerable or non_enumerable property of obj.
@@ -466,8 +460,8 @@ export class ObjectPropertyRetriever {
      * @returns {boolean}
      * @private
      */
+    // eslint-disable-next-line no-unused-vars
     _enumerableAndNotEnumerable(obj, prop) {
-        /* jshint unused: false */
         return true;
     }
     /**
@@ -498,10 +492,7 @@ export class ObjectPropertyRetriever {
 
             iterateSelfBool = true;
             obj = Object.getPrototypeOf(obj);
-            if (!obj) {
-                break;
-            }
-        } while (true);
+        } while (obj);
 
         return props;
     }
@@ -622,61 +613,6 @@ export class ObjectPropertyRetriever {
 export const obj_prop_retriever = new ObjectPropertyRetriever();
 
 /**
- * Class with common methods for ModelConstructor and ViewConstructor classes.
- */
-export class BaseEntityConstructor {
-    /**
-     * Constructor of BaseEntityConstructor class.
-     * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
-     * and some settings for views of different types.
-     */
-    constructor(openapi_dictionary) {
-        this.dictionary = openapi_dictionary;
-    }
-
-    /**
-     * Method, that returns array with properties names,
-     * that store reference to model.
-     */
-    getModelRefsProps() {
-        return this.dictionary.models.ref_names;
-    }
-
-    /**
-     * Method, that defines format of current field.
-     * @param {object} field Object with field options.
-     */
-    getFieldFormat(field) {
-        // if(field.enum && guiFields['choices']){
-        //     return "choices";
-        // }
-
-        if (guiFields[field.format]) {
-            return field.format;
-        }
-
-        if (field.enum && guiFields.choices) {
-            return 'choices';
-        }
-
-        let props = Object.keys(field);
-        let refs = this.getModelRefsProps();
-
-        for (let key in props) {
-            if (refs.includes(props[key])) {
-                return 'api_object';
-            }
-        }
-
-        if (guiFields[field.type]) {
-            return field.type;
-        }
-
-        return 'string';
-    }
-}
-
-/**
  * Function, that finds the most appropriate (closest) path from path array to current_path.
  * It's supposed, that values in 'paths' array' were previously sorted.
  * It's supposed, that 'paths' array does not contain all application paths.
@@ -700,7 +636,7 @@ export function findClosestPath(paths, current_path) {
         for (let num = 0; num < c_p_parts.length; num++) {
             let item = c_p_parts[num];
 
-            if (item == path_paths[num]) {
+            if (item === path_paths[num]) {
                 matches.last.match++;
             } else {
                 break;
@@ -798,7 +734,7 @@ export class CurrentView {
      * @private
      */
     _initLoadingPromise() {
-        if (!(this.promise && (this.promise_status == '' || this.promise_status == 'pending'))) {
+        if (!(this.promise && (this.promise_status === '' || this.promise_status === 'pending'))) {
             this.promise_callbacks = {
                 resolve: undefined,
                 reject: undefined,
@@ -821,8 +757,8 @@ export class CurrentView {
  * @private
  */
 export function _translate(str) {
-    if (app && app.application && app.application.$t) {
-        return app.application.$t(str);
+    if (window.app && window.app.application && window.app.application.$t) {
+        return window.app.application.$t(str);
     }
 
     return str;
@@ -853,7 +789,7 @@ export let path_pk_key = 'id';
  * @return {string | undefined}
  */
 export function getDependenceValueAsString(parent_data_object, field_name, separator = ',') {
-    if (!field_name || !parent_data_object.hasOwnProperty(field_name)) {
+    if (!field_name || !Object.prototype.hasOwnProperty.call(parent_data_object, field_name)) {
         return undefined;
     }
     return parent_data_object[field_name].map((data) => data.value).join(separator);

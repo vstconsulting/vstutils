@@ -1,3 +1,5 @@
+import { current_view } from '../../utils';
+
 /**
  * Mixin for all types of views(list, page, page_new, page_edit, action)
  * and custom views, like home page and 404 page.

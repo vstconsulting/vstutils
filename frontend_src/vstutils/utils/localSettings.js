@@ -2,6 +2,8 @@
  * Class, that manages manipulations with Local Storage.
  * It is used for saving some users local settings to the one property(object) of Local Storage.
  */
+import { signals } from '../../libs/TabSignal.js';
+
 export class LocalSettings {
     /**
      * Constructor of LocalSettings Class.
@@ -35,7 +37,9 @@ export class LocalSettings {
         if (window.localStorage[this.name]) {
             try {
                 this.__settings = JSON.parse(window.localStorage[this.name]);
-            } catch (e) {}
+            } catch (e) {
+                console.log(e);
+            }
         }
     }
 
@@ -56,7 +60,7 @@ export class LocalSettings {
         this.__removeTmpSettings();
         this.__settings[name] = value;
         window.localStorage[this.name] = JSON.stringify(this.__settings);
-        tabSignal.emit(this.name + '.' + name, { type: 'set', name: name, value: value });
+        signals.emit(this.name + '.' + name, { type: 'set', name: name, value: value });
     }
 
     /**
@@ -93,7 +97,7 @@ export class LocalSettings {
         }
         this.__settings[name] = value;
         this.__tmpSettings[name] = value;
-        tabSignal.emit(this.name + '.' + name, { type: 'set', name: name, value: value });
+        signals.emit(this.name + '.' + name, { type: 'set', name: name, value: value });
     }
 
     /**

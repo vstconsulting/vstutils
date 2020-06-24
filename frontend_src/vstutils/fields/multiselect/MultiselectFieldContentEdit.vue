@@ -26,7 +26,6 @@
                         },
                     })
                     .on('change', (event) => {
-                        /* jshint unused: false */
                         let data = $(this.select_el).select2('data');
                         let val_arr = [];
 

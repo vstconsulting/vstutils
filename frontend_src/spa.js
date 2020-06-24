@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import VueI18n from 'vue-i18n';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings } from './vstutils/utils';
@@ -72,11 +73,11 @@ export class App extends BaseApp {
      */
     prepareViewsModelsFields() {
         for (let path in this.views) {
-            if (this.views.hasOwnProperty(path)) {
+            if (Object.prototype.hasOwnProperty.call(this.views, path)) {
                 let view = this.views[path];
 
                 for (let key in view.objects.model.fields) {
-                    if (view.objects.model.fields.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(view.objects.model.fields, key)) {
                         let field = view.objects.model.fields[key];
 
                         if (field.constructor.prepareField) {
@@ -100,7 +101,7 @@ export class App extends BaseApp {
         return this._prefetchTranslation(lang).then((lang) => {
             this.application.$i18n.locale = lang;
             guiLocalSettings.set('lang', lang);
-            tabSignal.emit('app.language.changed', { lang: lang });
+            window.spa.signals.emit('app.language.changed', { lang: lang });
             return lang;
         });
     }
@@ -136,7 +137,6 @@ export class App extends BaseApp {
                 return lang;
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -145,7 +145,7 @@ export class App extends BaseApp {
      * Method, that creates store and router for an application and mounts it to DOM.
      */
     mountApplication() {
-        tabSignal.emit('app.beforeInit', { app: this });
+        window.spa.signals.emit('app.beforeInit', { app: this });
 
         let store_constructor = new StoreConstructor(this.views);
         let routerConstructor = new RouterConstructor(
@@ -172,7 +172,7 @@ export class App extends BaseApp {
             i18n: i18n,
         }).$mount('#RealBody');
 
-        tabSignal.emit('app.afterInit', { app: this });
+        window.spa.signals.emit('app.afterInit', { app: this });
     }
 }
 

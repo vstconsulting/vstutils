@@ -1,4 +1,5 @@
 import VueRouter from 'vue-router';
+import { signals } from '../../libs/TabSignal.js';
 
 /**
  * Class, that manages Router creation.
@@ -81,7 +82,7 @@ export default class RouterConstructor {
 
         this.emitSignalAboutRouteCreation(routes.last);
 
-        tabSignal.emit('allRoutes.created', routes);
+        signals.emit('allRoutes.created', routes);
 
         return routes;
     }
@@ -94,7 +95,7 @@ export default class RouterConstructor {
         let routes = [];
 
         for (let path in this.views) {
-            if (!this.views.hasOwnProperty(path)) {
+            if (!Object.prototype.hasOwnProperty.call(this.views, path)) {
                 continue;
             }
 
@@ -119,7 +120,7 @@ export default class RouterConstructor {
         let routes = [];
 
         for (let item in this.custom_components_templates) {
-            if (!this.custom_components_templates.hasOwnProperty(item)) {
+            if (!Object.prototype.hasOwnProperty.call(this.custom_components_templates, item)) {
                 continue;
             }
 
@@ -127,7 +128,7 @@ export default class RouterConstructor {
                 continue;
             }
 
-            let path_template = item.replace(/\{/g, ':').replace(/\}/g, '');
+            let path_template = item.replace(/{/g, ':').replace(/}/g, '');
 
             if (
                 this.custom_components_templates[item].getPathTemplateForRouter &&
@@ -153,7 +154,7 @@ export default class RouterConstructor {
      * @param {object} route Object with route properties (name, path, component).
      */
     emitSignalAboutRouteCreation(route) {
-        tabSignal.emit('routes[' + route.name + '].created', route);
+        signals.emit('routes[' + route.name + '].created', route);
     }
 
     /**

@@ -17,21 +17,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
     font-weight: 900;
 }
 
-// ./node_modules/@fortawesome/fontawesome-free/scss/brands.scss without svg, ttf, eot
-@font-face {
-    font-family: 'Font Awesome 5 Brands';
-    font-style: normal;
-    font-weight: 400;
-    font-display: $fa-font-display;
-    src: url('#{$fa-font-path}/fa-brands-400.woff2') format('woff2'),
-        url('#{$fa-font-path}/fa-brands-400.woff') format('woff');
-}
-
-.fab {
-    font-family: 'Font Awesome 5 Brands';
-    font-weight: 400;
-}
-
 // ./node_modules/@fortawesome/fontawesome-free/scss/regular.scss without svg, ttf, eot
 @font-face {
     font-family: 'Font Awesome 5 Free';

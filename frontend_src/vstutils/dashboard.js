@@ -1,13 +1,14 @@
 /**
  * Class of base widget.
  */
+import CounterWidgetComponent from './components/widgets/CounterWidgetComponent.vue';
+
 export class BaseWidget {
     constructor(options = {}) {
         /**
-         * Widget format - this property is used during choosing
-         * of appropriate Vue component for current widget rendering.
+         * Component name for widget to render
          */
-        this.format = 'base';
+        this.componentName = null;
         /**
          * Order number of current widget.
          */
@@ -48,7 +49,7 @@ export class CounterWidget extends BaseWidget {
     constructor(options = {}) {
         super(options);
 
-        this.format = 'counter';
+        this.componentName = CounterWidgetComponent.name;
         this.collapsable = false;
         /**
          * URL of page with which current widget is linked.

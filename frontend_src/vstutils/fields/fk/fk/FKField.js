@@ -15,8 +15,8 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param {object} data Object with instance data.
      * @returns {boolean}
      */
+    // eslint-disable-next-line no-unused-vars
     prefetchDataOrNot(data) {
-        /* jshint unused: false */
         return true;
     }
     /**
@@ -24,8 +24,8 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param {object} data Object with instance data.
      * @returns {boolean}
      */
+    // eslint-disable-next-line no-unused-vars
     makeLinkOrNot(data) {
-        /* jshint unused: false */
         return true;
     }
     /**
@@ -33,8 +33,8 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param {object} raw_data Object with instance data, before loading prefetch data.
      * @param {string} qs_url Queryset url.
      */
+    // eslint-disable-next-line no-unused-vars
     getObjectBulk(raw_data, qs_url) {
-        /* jshint unused: false */
         let dt = this.getQuerySetFormattedUrl(raw_data)
             .replace(/^\/|\/$/g, '')
             .split('/');
@@ -47,44 +47,30 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
     /**
      * Method, that selects one, the most appropriate queryset, from querysets array.
      * @param data {object} Object with instance data.
-     * @param querysets {array} Array with field QuerySets.
+     * @param querysets {array=} Array with field QuerySets.
      */
-    getAppropriateQuerySet(data, querysets) {
-        /* jshint unused: false */
-        let qs = querysets;
-
-        if (!qs) {
-            qs = this.options.additionalProperties.querysets;
-        }
-
-        return qs[0];
+    getAppropriateQuerySet(data, querysets = undefined) {
+        return (querysets || this.options.additionalProperties.querysets)[0];
     }
     /**
      * Method, that returns formatted url of current queryset.
      * @param data {object} Object with instance data.
-     * @param params {object} Object with URL params of current path.
-     * @param queryset {object} Field QuerySet.
+     * @param params {object=} Object with URL params of current path.
+     * @param queryset {object=} Field QuerySet.
      */
-    getQuerySetFormattedUrl(data, params, queryset) {
-        if (!queryset) {
-            queryset = this.getAppropriateQuerySet(data);
-        }
-
-        let url = queryset.url;
-
-        url = this.formatQuerySetUrl(url, data, params);
-
-        return url;
+    getQuerySetFormattedUrl(data, params = undefined, queryset = undefined) {
+        let url = (queryset || this.getAppropriateQuerySet(data)).url;
+        return this.formatQuerySetUrl(url, data, params);
     }
     /**
      * Method, that formats QuerySet's URL.
      * It changes path keys ("{pk}") on some values.
      * @param url {string} Field QuerySet's URL.
-     * @param data {object} Object with instance data.
-     * @param params {object} Object with URL params of current path.
+     * @param data {object=} Object with instance data.
+     * @param params {object=} Object with URL params of current path.
      */
     formatQuerySetUrl(url = '', data = {}, params = {}) {
-        if (url.indexOf('{') == -1) {
+        if (url.indexOf('{') === -1) {
             return url;
         }
 
@@ -97,13 +83,12 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param params {object} Object with URL params of current path.
      */
     getUrlParams(url, data, params) {
-        /* jshint unused: false */
         if (Object.entries(params).length !== 0) {
             return params;
         }
 
-        if (app && app.application && app.application.$route) {
-            return app.application.$route.params || {};
+        if (window.app && window.app.application && window.app.application.$route) {
+            return window.app.application.$route.params || {};
         }
 
         return {};
@@ -113,8 +98,8 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * Method returns string - name of 'value_field'.
      * @param data {object} Object with instance data.
      */
+    // eslint-disable-next-line no-unused-vars
     getValueField(data = {}) {
-        /* jshint unused: false */
         return this.options.additionalProperties.value_field;
     }
 
@@ -122,8 +107,8 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * Method returns string - name of 'view_field'.
      * @param data {object} Object with instance data.
      */
+    // eslint-disable-next-line no-unused-vars
     getViewField(data = {}) {
-        /* jshint unused: false */
         return this.options.additionalProperties.view_field;
     }
 
@@ -135,7 +120,7 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @return {boolean}
      */
     isPrefetchDataForMe(data = {}, prefetch_data = {}) {
-        return data[this.options.name] == prefetch_data[this.getPrefetchFilterName(data)];
+        return data[this.options.name] === prefetch_data[this.getPrefetchFilterName(data)];
     }
 
     /**
@@ -221,7 +206,7 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      */
     _insertTestValue(data = {}) {
         let val = data[this.options.name];
-        let value;
+        let value = undefined;
         let format = this.options.format || this.options.type;
         let el = this._insertTestValue_getElement(format);
 
@@ -290,7 +275,7 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
             return field;
         }
 
-        let constructor = new ViewConstructor(openapi_dictionary, app.models);
+        let constructor = new ViewConstructor(openapi_dictionary, window.app.models);
         let model = constructor.getViewSchema_model(props);
 
         if (!model) {
@@ -307,11 +292,11 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param {string} path Name of View path.
      */
     static getQuerySetByPath(path) {
-        if (!app.views[path]) {
+        if (!window.app.views[path]) {
             return;
         }
 
-        return app.views[path].objects.clone();
+        return window.app.views[path].objects.clone();
     }
 
     /**
@@ -341,8 +326,8 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param {string} model_name Name Model to which fk field links.
      */
     static findQuerySetInCurrentPath(path, model_name) {
-        if (app.views[path] && app.views[path].objects.model.name == model_name) {
-            return app.views[path].objects.clone();
+        if (window.app.views[path] && window.app.views[path].objects.model.name === model_name) {
+            return window.app.views[path].objects.clone();
         }
     }
 
@@ -353,22 +338,22 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @param {string} model_name Name Model to which fk field links.
      */
     static findQuerySetInNeighbourPaths(path, model_name) {
-        let views = app.views;
+        let views = window.app.views;
         let num = path.replace(/^\/|\/$/g, '').split('/').length;
         // let level = views[path].schema.level + 2;
         let level = views[path].schema.level;
         let path1 = path.split('/').slice(0, -2).join('/') + '/';
         function func(item) {
             if (
-                item.indexOf(path1) != -1 &&
-                views[item].schema.type == 'list' &&
+                item.indexOf(path1) !== -1 &&
+                views[item].schema.type === 'list' &&
                 views[item].schema.level <= level
             ) {
                 return item;
             }
         }
         function func1(item) {
-            if (views[item].objects.model.name == model_name) {
+            if (views[item].objects.model.name === model_name) {
                 return item;
             }
         }

@@ -1,9 +1,9 @@
 import { globalComponentsRegistrator } from '../../ComponentsRegistrator.js';
 
-import Counter from './Counter.vue';
-import LineChart from './LineChart.js';
+import CounterWidgetComponent from './CounterWidgetComponent.vue';
+import LineChartWidgetComponent from './LineChartWidgetComponent.js';
 
-globalComponentsRegistrator.add(Counter);
-globalComponentsRegistrator.add(LineChart);
+globalComponentsRegistrator.add(CounterWidgetComponent);
+globalComponentsRegistrator.add(LineChartWidgetComponent);
 
-export { Counter, LineChart };
+export { CounterWidgetComponent, LineChartWidgetComponent };

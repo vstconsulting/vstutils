@@ -1,12 +1,12 @@
 import $ from 'jquery';
 
+import { signals } from '../../libs/TabSignal.js';
 import { path_pk_key, randomString } from '../utils';
-import ProfileViewConsctuctor from './ProfileViewConsctuctor.js';
+import ProfileViewConstructor from './ProfileViewConstructor.js';
 
 import Gravatar from './Gravatar.js';
-window.Gravatar = Gravatar;
 
-export { Gravatar, ProfileViewConsctuctor };
+export { Gravatar, ProfileViewConstructor };
 
 /**
  * Function returns profile string.
@@ -34,7 +34,7 @@ profile_mixins['/user/{' + path_pk_key + '}/edit/'] = {
     },
 };
 
-let profile_constructor = new ProfileViewConsctuctor(profile_mixins);
+let profile_constructor = new ProfileViewConstructor(profile_mixins);
 
 /**
  * Function generates profile views.
@@ -44,12 +44,11 @@ let profile_constructor = new ProfileViewConsctuctor(profile_mixins);
 function addProfileViews(obj) {
     let str = '/user/{' + path_pk_key + '}/';
     let views = obj.views;
-    let paths_for_profile = Object.keys(views).filter((path) => path.indexOf(str) == 0);
+    let paths_for_profile = Object.keys(views).filter((path) => path.indexOf(str) === 0);
 
     paths_for_profile.forEach((path) => {
         let new_path = path.replace('user/{' + path_pk_key + '}', 'profile');
-        let new_view = profile_constructor.generateProfileView(views, path);
-        views[new_path] = new_view;
+        views[new_path] = profile_constructor.generateProfileView(views, path);
     });
 }
 
@@ -64,15 +63,15 @@ function userModelHandler(obj) {
 let userModels = ['OneUser', 'User'];
 userModels.forEach((model) => {
     let signal = 'models[{0}].created'.format([model]);
-    tabSignal.connect(signal, userModelHandler);
+    signals.connect(signal, userModelHandler);
 });
 
-tabSignal.connect('models[User].fields.beforeInit', (fields) => {
+signals.connect('models[User].fields.beforeInit', (fields) => {
     fields.email.hidden = true;
 });
 
 ['CreateUser', 'ChangePassword'].forEach((model) => {
-    tabSignal.connect('models[{0}].fields.beforeInit'.format([model]), (fields) => {
+    signals.connect('models[{0}].fields.beforeInit'.format([model]), (fields) => {
         ['old_password', 'password', 'password2'].forEach((field) => {
             if (fields[field]) {
                 fields[field].format = 'password';
@@ -83,11 +82,11 @@ tabSignal.connect('models[User].fields.beforeInit', (fields) => {
 /**
  * Signal adds custom redirect methods, that should be executed after user password was changed.
  */
-tabSignal.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit', (obj) => {
+signals.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit', (obj) => {
     obj.view.mixins.push({
         methods: {
+            // eslint-disable-next-line no-unused-vars
             getRedirectUrl(opt) {
-                /* jshint unused: false */
                 return this.$route.path.replace('/change_password', '');
             },
             openRedirectUrl(options) {
@@ -99,7 +98,7 @@ tabSignal.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit
 
                 if (
                     this.$route.path.indexOf('/user') === 0 &&
-                    this.$route.params[path_pk_key] === app.api.getUserId()
+                    this.$route.params[path_pk_key] === window.app.api.getUserId()
                 ) {
                     reload_page = true;
                 }
@@ -107,7 +106,7 @@ tabSignal.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit
                 if (
                     this.$route.path.indexOf('/user') !== 0 &&
                     this.$route.path.indexOf('/user') !== -1 &&
-                    this.$route.params.user_id === app.api.getUserId()
+                    this.$route.params.user_id === window.app.api.getUserId()
                 ) {
                     reload_page = true;
                 }
@@ -122,7 +121,7 @@ tabSignal.connect('views[/user/{' + path_pk_key + '}/change_password/].afterInit
     });
 });
 
-tabSignal.connect('allViews.inited', addProfileViews);
+signals.connect('allViews.inited', addProfileViews);
 
 /**
  * Mixin for a view that is supposed to be used for creating/editing some user's password.
@@ -154,11 +153,11 @@ const view_with_user_password_mixin = {
  * @param {string} path Path os user view.
  */
 export function addChangePasswordOperationToView(path) {
-    tabSignal.connect('views[' + path + '].afterInit', (obj) => {
+    signals.connect('views[' + path + '].afterInit', (obj) => {
         obj.view.mixins.push(view_with_user_password_mixin);
     });
 
-    tabSignal.connect('views[' + path + '].created', (obj) => {
+    signals.connect('views[' + path + '].created', (obj) => {
         obj.view.schema.operations.generate_password = {
             name: 'generate_password',
             title: 'generate password',

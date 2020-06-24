@@ -1,10 +1,11 @@
 import $ from 'jquery';
 import { path_pk_key } from '../utils';
 import { View } from '../views';
+import ViewWithParentInstancesForPath from '../views/ViewWithParentInstancesForPath.js';
 
-export default class ProfileViewConsctuctor {
+export default class ProfileViewConstructor {
     /**
-     * Constructor of ProfileViewConsctuctor.
+     * Constructor of ProfileViewConstructor.
      * @param {object} profile_mixins Object with props -
      * (key, value) of which equal to (profile_path, mixin).
      */
@@ -26,9 +27,9 @@ export default class ProfileViewConsctuctor {
             mixin = $.extend(true, mixin, this.mixins[path]);
         }
 
-        if (view.schema.type == 'page_edit') {
+        if (view.schema.type === 'page_edit') {
+            // eslint-disable-next-line no-unused-vars
             mixin.methods.getRedirectUrl = function (opt) {
-                /* jshint unused: false */
                 return this.$route.path.replace('/edit', '');
             };
         }
@@ -45,50 +46,27 @@ export default class ProfileViewConsctuctor {
      */
     getBaseProfileMixin(path) {
         return {
+            mixins: [ViewWithParentInstancesForPath],
             computed: {
                 url() {
                     return path
-                        .replace('{' + path_pk_key + '}', app.api.getUserId())
+                        .replace('{' + path_pk_key + '}', window.app.api.getUserId())
                         .format(this.$route.params)
                         .replace(/\/$/g, '');
                 },
             },
             methods: {
                 loadParentInstanceOrNot(views, obj) {
-                    if (views[obj.path] && views[obj.path].schema.type == 'list') {
+                    if (views[obj.path] && views[obj.path].schema.type === 'list') {
                         return false;
                     }
 
-                    if (obj.path == '/profile/') {
-                        return false;
-                    }
-
-                    return true;
+                    return obj.path !== '/profile/';
                 },
 
-                getParentInstancesForPath() {
-                    let inner_paths = this.getParentPaths(this.$route.name, this.$route.path);
-                    let views = this.$store.getters.getViews;
-
-                    for (let index = 0; index < inner_paths.length; index++) {
-                        let obj = inner_paths[index];
-
-                        if (!this.loadParentInstanceOrNot(views, obj)) {
-                            continue;
-                        }
-
-                        let url = obj.url.replace('profile', 'user/' + app.api.getUserId());
-
-                        this.getInstance(views[obj.path], url)
-                            .then((instance) => {
-                                this.data.parent_instances[obj.url] = instance;
-                                this.data.parent_instances = { ...this.data.parent_instances };
-                            })
-                            .catch((error) => {
-                                /* jshint unused: false */
-                                debugger;
-                            });
-                    }
+                // eslint-disable-next-line no-unused-vars
+                getSubViewUrl(innerPathObj, views) {
+                    return innerPathObj.url.replace('profile', 'user/' + window.app.api.getUserId());
                 },
             },
         };

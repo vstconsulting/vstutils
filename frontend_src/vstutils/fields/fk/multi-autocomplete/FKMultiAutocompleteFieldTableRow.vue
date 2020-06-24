@@ -71,7 +71,7 @@
                 let view_val = this.data_to_represent[this.field_props.view_field];
                 let value_val = this.data_to_represent[this.field_props.value_field];
 
-                this.$emit('changeValue', { view_val: view_val, value_val: value_val });
+                this.$emit('change-value', { view_val: view_val, value_val: value_val });
             },
         },
     };

@@ -7,14 +7,14 @@
  */
 function addTestForGuiFieldInstanceMethods(options, values) {
     syncQUnit.addTest('guiFields.' + options.format, function(assert) {
-        let field = new guiFields[options.format](options);
+        let field = new window.spa.fields.guiFields[options.format](options);
 
         for(let index in values) {
             let item = values[index];
 
             for(let method in item.output) {
                 assert.ok(
-                    deepEqual(field[method](item.input), item.output[method]) === true,
+                    window.spa.utils.deepEqual(field[method](item.input), item.output[method]) === true,
                     'guiFields.' + options.format + '.' + method + '()',
                 );
             }

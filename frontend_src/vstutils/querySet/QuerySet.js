@@ -45,7 +45,7 @@ export default class QuerySet {
      * @param {string} method Method(get/delete/post/put/patch) of bulk query.
      * @param {object} data 'data' property for body of bulk query, data of Model instance.
      */
-    formBulkQuery(method, data) {
+    formBulkQuery(method, data = undefined) {
         let query = {
             method: method,
             path: this.getDataType(),
@@ -64,7 +64,7 @@ export default class QuerySet {
      * @param {string} method Method(get/delete/post/put/patch) of bulk query.
      * @param {object} data 'data' property for body of bulk query, data of Model instance.
      */
-    formQueryAndSend(method, data) {
+    formQueryAndSend(method, data = undefined) {
         return this.sendQuery(this.formBulkQuery(method, data));
     }
 
@@ -73,22 +73,21 @@ export default class QuerySet {
      * @param {object} bulk Object with properties of bulk data.
      */
     sendQuery(bulk) {
-        return app.api.bulkQuery(bulk);
+        return window.app.api.bulkQuery(bulk);
     }
 
     /**
      * Method, that returns clone (new QuerySet instance) of current QuerySet.
      * @param {object} props Object with properties, that should be rewritten in clone.
      * @param {boolean} save_cache If true, cache of current QuerySet will be saved in clone.
-     * @return {object} Clone - new QuerySet instance.
+     * @return {QuerySet} Clone - new QuerySet instance.
      */
     clone(props = {}, save_cache = false) {
         let clone = $.extend(true, {}, this);
-        /* jshint proto: true */
         clone.__proto__ = this.__proto__;
 
         for (let key in props) {
-            if (props.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(props, key)) {
                 clone[key] = props[key];
             }
         }
@@ -136,7 +135,7 @@ export default class QuerySet {
     exclude(filters) {
         let ecd_filters = {};
         for (let [key, value] of Object.entries(filters)) {
-            let ecd_key = key.indexOf('__not') == -1 ? key + '__not' : key;
+            let ecd_key = key.indexOf('__not') === -1 ? key + '__not' : key;
             ecd_filters[ecd_key] = value;
         }
         return this.clone({ query: $.extend(true, {}, this.query, ecd_filters) });
@@ -196,7 +195,6 @@ export default class QuerySet {
                 return instances;
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -212,7 +210,6 @@ export default class QuerySet {
                 return this.model.getInstance(response.data, this.clone());
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -232,7 +229,6 @@ export default class QuerySet {
                 });
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -240,6 +236,8 @@ export default class QuerySet {
     /**
      * Method, that returns promise, that returns Model instance with 'this.url' URI,
      * if api query was successful.
+     *
+     * @return {Model}
      */
     get() {
         if (this.cache) {
@@ -263,7 +261,6 @@ export default class QuerySet {
                 return instance;
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -317,7 +314,7 @@ export default class QuerySet {
             let field = this.model.fields[field_name];
             let value = instance.data[field_name];
 
-            if (value == null || value == undefined) {
+            if (value === null || value === undefined) {
                 continue;
             }
 
@@ -366,15 +363,15 @@ export default class QuerySet {
     /**
      * Method, that loads prefetch info for instances,
      * which were loaded by current queryset.
-     * @param {array} prefetch_fields Array with names of prefetch fields.
-     * @param {object} instances Object with loaded model instances.
+     * @param {string[]} prefetch_fields Array with names of prefetch fields.
+     * @param {Model[]} instances Object with loaded model instances.
      * @private
      */
     _loadPrefetchData(prefetch_fields, instances) {
         let promises = [];
         let bulk_data = this._getBulkDataForPrefetch(prefetch_fields, instances);
         for (let key in bulk_data) {
-            if (bulk_data.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(bulk_data, key)) {
                 for (let index = 0; index < bulk_data[key].length; index++) {
                     let item = bulk_data[key][index];
                     let filters = {};
@@ -393,8 +390,7 @@ export default class QuerySet {
                                 this._setPrefetchValue(res, item, instances, key);
                             })
                             .catch((error) => {
-                                /* jshint unused: false */
-                                debugger;
+                                console.log(error);
                             }),
                     );
                 }
@@ -413,7 +409,7 @@ export default class QuerySet {
      * @private
      */
     _setPrefetchValue(res, bulk_data_item, instances, field_name) {
-        if (res.status != '200') {
+        if (res.status !== 200) {
             return;
         }
 

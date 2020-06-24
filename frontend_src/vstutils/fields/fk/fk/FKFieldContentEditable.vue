@@ -1,5 +1,5 @@
 <template>
-    <select :class="classes" :style="styles" :value="value"></select>
+    <select :class="classes" :style="styles" :value="value" />
 </template>
 
 <script>
@@ -7,6 +7,7 @@
     import { deepEqual, trim, guiLocalSettings, getDependenceValueAsString } from '../../../utils';
     import { BaseFieldContentEdit } from '../../base';
     import FKFieldContent from './FKFieldContent.js';
+    import { signals } from '../../../../libs/TabSignal.js';
 
     export default {
         mixins: [BaseFieldContentEdit, FKFieldContent],
@@ -14,6 +15,11 @@
             return {
                 class_list: ['form-control', 'select2', 'select2-field-select'],
             };
+        },
+        watch: {
+            value(value) {
+                this.setValue(value);
+            },
         },
         mounted() {
             this.select_el = $(this.$el);
@@ -27,11 +33,6 @@
             this.pageSize = guiLocalSettings.get('page_size') || 20;
             this.currentQuerysetIdx = 0;
             this.currentQuerysetOffset = 0;
-        },
-        watch: {
-            value(value) {
-                this.setValue(value);
-            },
         },
         methods: {
             /**
@@ -157,7 +158,7 @@
                     signal_obj[props.field_dependence_name] = field_dependence_data;
                 }
 
-                window.tabSignal.emit(
+                signals.emit(
                     `filter.${this.field.options.format}.${this.queryset.model.name}.${this.field.options.name}`,
                     signal_obj,
                 );

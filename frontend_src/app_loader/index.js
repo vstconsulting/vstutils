@@ -67,51 +67,63 @@ const errorEventHandler = (event) => depsLoader.appendError(event.error);
 window.addEventListener('error', errorEventHandler);
 
 function startApp() {
-    if (localStorage.gui_version !== window.gui_version) {
+    if (localStorage.gui_version !== undefined && localStorage.gui_version !== window.gui_version) {
         updateGuiVersionsInLocalStorage();
         depsLoader.showUpdatingAppVersionMessage();
         cleanAllCacheAndReloadPage();
-    } else if (localStorage.gui_user_version !== window.gui_user_version) {
+        return;
+    }
+
+    if (
+        localStorage.gui_user_version !== undefined &&
+        localStorage.gui_user_version !== window.gui_user_version
+    ) {
         updateGuiVersionsInLocalStorage();
         depsLoader.showUpdatingAppVersionMessage();
         cleanOpenApiCacheAndReloadPage();
-    } else {
-        updateGuiVersionsInLocalStorage();
-
-        const filesLoadPromise = getResourceList()
-            .then((resourceList) => new StaticFilesLoader(resourceList))
-            .then((filesLoader) => depsLoader.loadAndAppendDependencies(filesLoader));
-
-        Promise.all([openApiLoadPromise, filesLoadPromise]).then(([openapi, files]) => {  /* jshint unused: false */
-            tabSignal.emit('openapi.loaded', openapi);
-            // Creates App instance. App class is supposed to be appended to the page during app dependencies loading.
-            window.app = new window.App(openapi, guiCache);
-            // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
-            window.app
-                .start()
-                .then(() => {
-                    tabSignal.connect('app.version.updated', () => {
-                        alert(
-                            'Oops! It looks like version of current page has become outdated. Please, reload the page.',
-                        );
-                    });
-
-                    window.addEventListener('storage', function (e) {  /* jshint unused: false */
-                        if (window.gui_version !== localStorage.getItem('gui_version')) {
-                            tabSignal.emit('app.version.updated');
-                        }
-                    });
-
-                    // Removes onLoadingErrorHandler,
-                    // because App does not need it after successful app Loading.
-                    window.removeEventListener('error', errorEventHandler);
-                    depsLoader.hideLoaderBlock();
-                })
-                .catch((e) => {
-                    depsLoader.appendError(e);
-                });
-        });
+        return;
     }
+
+    updateGuiVersionsInLocalStorage();
+
+    const filesLoadPromise = getResourceList()
+        .then((resourceList) => new StaticFilesLoader(resourceList))
+        .then((filesLoader) => depsLoader.loadAndAppendDependencies(filesLoader));
+
+    // eslint-disable-next-line no-unused-vars
+    Promise.all([openApiLoadPromise, filesLoadPromise]).then(([openapi, files]) => {
+        // eslint-disable-next-line no-undef
+        window.spa.signals.emit('openapi.loaded', openapi);
+        // Creates App instance. App class is supposed to be appended to the page during app dependencies loading.
+        window.app = new window.App(openapi, guiCache);
+        // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
+        window.app
+            .start()
+            .then(() => {
+                // eslint-disable-next-line no-undef
+                window.spa.signals.connect('app.version.updated', () => {
+                    alert(
+                        'Oops! It looks like version of current page has become outdated. Please, reload the page.',
+                    );
+                });
+
+                // eslint-disable-next-line no-unused-vars
+                window.addEventListener('storage', function (e) {
+                    if (window.gui_version !== localStorage.getItem('gui_version')) {
+                        // eslint-disable-next-line no-undef
+                        window.spa.signals.emit('app.version.updated');
+                    }
+                });
+
+                // Removes onLoadingErrorHandler,
+                // because App does not need it after successful app Loading.
+                window.removeEventListener('error', errorEventHandler);
+                depsLoader.hideLoaderBlock();
+            })
+            .catch((e) => {
+                depsLoader.appendError(e);
+            });
+    });
 }
 
 guiCache.connected.then(startApp);

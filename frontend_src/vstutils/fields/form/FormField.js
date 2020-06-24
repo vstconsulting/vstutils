@@ -1,5 +1,5 @@
 import { BaseField } from '../base';
-import { BaseEntityConstructor } from '../../utils';
+import { BaseEntityConstructor } from '../../models';
 import { openapi_dictionary } from '../../api';
 import FormFieldMixin from './FormFieldMixin.vue';
 
@@ -15,7 +15,7 @@ class FormField extends BaseField {
     }
     /**
      * Method, that makes some manipulations with value.
-     * @param {object} value Field value.
+     * @param {object} data Field value.
      * @param {string} method Method, that will called.
      * @private
      */
@@ -25,7 +25,7 @@ class FormField extends BaseField {
         let realFields = this.generateRealFields();
 
         for (let key in realFields) {
-            if (realFields.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(realFields, key)) {
                 let real_value = realFields[key][method](data[this.options.name]);
 
                 if (real_value !== undefined) {
@@ -67,7 +67,7 @@ class FormField extends BaseField {
             let constructor = new BaseEntityConstructor(openapi_dictionary);
 
             for (let key in this.options.form) {
-                if (this.options.form.hasOwnProperty(key)) {
+                if (Object.prototype.hasOwnProperty.call(this.options.form, key)) {
                     let field = this.options.form[key];
                     field.name = key;
 
@@ -85,10 +85,10 @@ class FormField extends BaseField {
      * @param {object} options Options of real field.
      */
     generateRealField(options) {
-        let field = new window.guiFields[options.format](options);
+        let field = new window.spa.fields.guiFields[options.format](options);
 
         if (field.constructor.prepareField) {
-            field = field.constructor.prepareField(field, app.application.$route.name);
+            field = field.constructor.prepareField(field, window.app.application.$route.name);
         }
 
         return field;

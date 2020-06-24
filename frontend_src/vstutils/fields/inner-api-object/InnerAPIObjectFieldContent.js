@@ -1,5 +1,5 @@
 /**
- * Mixin for content components of inner_api_objec field.
+ * Mixin for content components of inner_api_object field.
  */
 const InnerAPIObjectFieldContent = {
     methods: {
@@ -13,10 +13,10 @@ const InnerAPIObjectFieldContent = {
         /**
          * Property, that returns value of realField.
          * @param {object} item Fields collector.
-         * @param {object} field RealField.
+         * @param {object=} field RealField.
          */
-        realFieldValue(item, field) {
-            /* jshint unused: false */
+        // eslint-disable-next-line no-unused-vars
+        realFieldValue(item, field = undefined) {
             if (this.value === undefined) {
                 return;
             }

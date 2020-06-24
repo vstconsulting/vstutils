@@ -1,5 +1,6 @@
 import Model from './Model.js';
 import ModelConstructor from './ModelConstructor.js';
+import BaseEntityConstructor from './BaseEntityConstructor.js';
 
 /**
  * Object, that contains Models classes.
@@ -9,8 +10,5 @@ import ModelConstructor from './ModelConstructor.js';
  * that aimed to be something similar to Django Model instances.
  */
 const guiModels = { Model };
-window.guiModels = guiModels;
 
-window.ModelConstructor = ModelConstructor;
-
-export { Model, ModelConstructor, guiModels };
+export { Model, ModelConstructor, guiModels, BaseEntityConstructor };

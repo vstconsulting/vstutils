@@ -21,7 +21,8 @@ function cleanAllCacheAndReloadPage() {
 
                 let promises = registrations.map((registration) => registration.unregister());
 
-                Promise.all(promises).finally((response) => {  /* jshint unused: false */
+                // eslint-disable-next-line no-unused-vars
+                Promise.all(promises).finally((response) => {
                     window.location.reload(true);
                 });
             });
@@ -37,7 +38,8 @@ function cleanAllCacheAndReloadPage() {
  * Function, that removes OpenAPI schema from gui cache and reloads page.
  */
 function cleanOpenApiCacheAndReloadPage() {
-    guiCache.delFile('openapi').finally((res) => {  /* jshint unused: false */
+    // eslint-disable-next-line no-unused-vars
+    guiCache.delFile('openapi').finally((res) => {
         window.location.reload(true);
     });
 }
