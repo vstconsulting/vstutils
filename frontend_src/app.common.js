@@ -1,5 +1,5 @@
 // Global libraries
-import './libs/tabSignal.js';
+import { TabSignal, signals } from './libs/TabSignal.js';
 
 import $ from './libs/jquery.js';
 
@@ -11,10 +11,6 @@ $.fn.select2.defaults.set('theme', 'bootstrap');
 import 'jquery.scrollto';
 
 require('jquery-slimscroll');
-
-import iziModal from 'izimodal/js/iziModal';
-$.fn.iziModal = iziModal;
-import 'izimodal/css/iziModal.css';
 
 import './libs/vue.js';
 
@@ -44,18 +40,16 @@ window.autoComplete = autoComplete;
 import axios from 'axios';
 window.axios = axios;
 
-import { createPopper } from '@popperjs/core';
-window.createPopper = createPopper;
-
 import './libs/bootstrap-adminlte.js';
 import './libs/fontawesome.js';
 
-// Libraries in spa object
-import * as colors from './libs/colors.js';
+export { TabSignal, signals };
 
+import * as colors from './libs/colors.js';
 export { colors };
 
 // vstutils code
+import AppRoot from './vstutils/AppRoot.vue';
 import * as utils from './vstutils/utils';
 import * as guiCustomizer from './vstutils/guiCustomizer';
 import * as setupVue from './vstutils/setupVue.js';
@@ -70,9 +64,11 @@ import * as router from './vstutils/router';
 import * as api from './vstutils/api';
 import * as users from './vstutils/users';
 import * as dashboard from './vstutils/dashboard.js';
+
 export * from './vstutils/ComponentsRegistrator.js';
 
 export {
+    AppRoot,
     utils,
     guiCustomizer,
     setupVue,

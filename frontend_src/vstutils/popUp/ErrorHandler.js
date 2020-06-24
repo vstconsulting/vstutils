@@ -17,7 +17,7 @@ export default class ErrorHandler {
     errorDetailHandler(detail) {
         let error_msg = '';
         for (let key in detail) {
-            if (detail.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(detail, key)) {
                 let detail_msg = detail[key];
                 if (Array.isArray(detail_msg)) {
                     detail_msg = detail_msg.join('<br>');
@@ -34,7 +34,6 @@ export default class ErrorHandler {
      */
     errorToString(error) {
         let result = 'Unknown error';
-        debugger;
 
         if (!error) {
             return result;
@@ -66,7 +65,7 @@ export default class ErrorHandler {
      * @param {string} to_pop_up String, that will be shown in pop up notification.
      * @param {string} to_console String, that will be logged into console.
      */
-    showError(to_pop_up, to_console) {
+    showError(to_pop_up, to_console = undefined) {
         if (!to_console) {
             to_console = to_pop_up;
         }

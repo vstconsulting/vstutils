@@ -27,12 +27,13 @@ class FilesCache {
         this.connected = new Promise((resolve, reject) => {
             let request = this.indexed_db.open(this.db_name, this.db_version);
 
-            request.onerror = (err) => {  /* jshint unused: false */
+            request.onerror = (err) => {
                 console.error('Error in FilesCache.connectDB().', err);
                 reject(err);
             };
 
-            request.onsuccess = (event) => {  /* jshint unused: false */
+            // eslint-disable-next-line no-unused-vars
+            request.onsuccess = (event) => {
                 const db = request.result;
 
                 db.onerror = function (event) {
@@ -42,7 +43,8 @@ class FilesCache {
                 resolve(db);
             };
 
-            request.onupgradeneeded = (event) => {  /* jshint unused: false */
+            // eslint-disable-next-line no-unused-vars
+            request.onupgradeneeded = (event) => {
                 const db = request.result;
                 db.createObjectStore(this.store_name, { keyPath: 'path', autoIncrement: true });
                 return this.connectDB().then(resolve, reject);

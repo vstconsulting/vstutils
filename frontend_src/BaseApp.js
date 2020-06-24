@@ -33,7 +33,7 @@ export default class BaseApp {
          */
         this.user = null;
         /**
-         * Object that stores Vue components which are must be registred globally
+         * Object that stores Vue components which are must be registered globally
          */
         this.global_components = globalComponentsRegistrator;
         /**
@@ -41,9 +41,10 @@ export default class BaseApp {
          */
         this.appRootComponent = AppRoot;
     }
+
     /**
      * Method that will be called in start() after loading of languages,
-     * translations, users and regiastration of components. And before
+     * translations, users and registration of components. And before
      * mounting of application.
      */
     afterInitialDataBeforeMount() {}
@@ -71,13 +72,12 @@ export default class BaseApp {
                 this.mountApplication();
             })
             .catch((error) => {
-                debugger;
                 throw new Error(error);
             });
     }
 
     /**
-     * Method can be used to change root VVueUE component
+     * Method can be used to change root Vue component
      *
      * @param component {object}
      */

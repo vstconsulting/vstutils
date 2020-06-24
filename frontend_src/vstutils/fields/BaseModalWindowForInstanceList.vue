@@ -21,11 +21,11 @@
                         :qs="qs"
                         :field_props="field_props"
                         :field_value="field_value"
-                        @changeValue="changeValue"
+                        @change-value="changeValue"
                     ></current_table>
                 </template>
             </template>
-            <template v-slot:footer>
+            <template #footer>
                 <button class="btn btn-default" @click="close" aria-label="Cancel">
                     {{ $t('cancel') | capitalize }}
                 </button>
@@ -139,7 +139,6 @@
              * Method - callback for updateInstances method.
              * @param {object} qs Updated QuerySet.
              */
-            /* jshint unused: false */
             onUpdateInstances(qs) {},
             /**
              * Method, that generates filters for qs.

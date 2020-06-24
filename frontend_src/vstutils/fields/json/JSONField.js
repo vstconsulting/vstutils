@@ -23,7 +23,7 @@ class JSONField extends BaseField {
                 opt.format = 'boolean';
             }
 
-            realFields[name] = new window.guiFields[opt.format](opt);
+            realFields[name] = new window.spa.fields.guiFields[opt.format](opt);
         }
 
         return realFields;

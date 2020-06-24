@@ -16,8 +16,8 @@ class MultiselectField extends FKField {
      * Redefinition of 'prefetchDataOrNot' method of FK guiField.
      * @param {object} data
      */
+    // eslint-disable-next-line no-unused-vars
     prefetchDataOrNot(data = {}) {
-        /* jshint unused: false */
         return false;
     }
     /**

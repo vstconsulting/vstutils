@@ -4,6 +4,7 @@ import { getDependenceValueAsString, guiLocalSettings } from '../../../utils';
 import { AutocompleteFieldContentEditMixin } from '../../autocomplete';
 import { FKFieldContent } from '../fk';
 import FKAutocompleteFieldContentEdit from './FKAutocompleteFieldContentEdit.js';
+import { signals } from '../../../../libs/TabSignal.js';
 
 const FKAutocompleteFieldMixin = {
     components: {
@@ -19,8 +20,8 @@ const FKAutocompleteFieldMixin = {
                  * Redefinition of '_renderItem' method
                  * of autocomplete_field_content_edit_mixin.
                  */
+                // eslint-disable-next-line no-unused-vars
                 _renderItem(item, search) {
-                    /* jshint unused: false */
                     return (
                         '<div class="autocomplete-suggestion" data-value="' +
                         item.value_field +
@@ -72,11 +73,11 @@ const FKAutocompleteFieldMixin = {
                             signal_obj.filter_name = props.filter_name;
                             signal_obj[props.field_dependence_name] = field_dependence_data;
                         }
-                        window.tabSignal.emit(
+                        signals.emit(
                             'filter.{fieldType}.{modelName}.{fieldName}'.format(format_data),
                             signal_obj,
                         );
-                        if (!signal_obj.hasOwnProperty('nest_prom')) {
+                        if (!Object.prototype.hasOwnProperty.call(signal_obj, 'nest_prom')) {
                             return qs.filter(filters).items();
                         } else {
                             return signal_obj.nest_prom;
@@ -107,7 +108,6 @@ const FKAutocompleteFieldMixin = {
                             response(matches);
                         })
                         .catch((error) => {
-                            debugger;
                             console.error(error);
                         });
                 },

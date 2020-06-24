@@ -308,7 +308,7 @@ syncQUnit.nextTest = function() {
 
     let test = syncQUnit.testsArray.shift();
 
-    guiPopUp.warning("Test " + test.name + ", " + syncQUnit.testsArray.length + " tests remain");
+    window.spa.popUp.guiPopUp.warning("Test " + test.name + ", " + syncQUnit.testsArray.length + " tests remain");
 
     QUnit.test(test.name, test.test);
 
@@ -325,15 +325,15 @@ window.qunitTestsArray['trim'] = {
     test: function() {
         syncQUnit.addTest('trim', function(assert) {
             let done = assert.async();
-            assert.equal(trim(''), '', 'Empty string');
-            assert.ok(trim('   ') === '', 'String with spaces symbols');
-            assert.equal(trim(), '', 'No argument was passed');
+            assert.equal(window.spa.utils.trim(''), '', 'Empty string');
+            assert.ok(window.spa.utils.trim('   ') === '', 'String with spaces symbols');
+            assert.equal(window.spa.utils.trim(), '', 'No argument was passed');
 
-            assert.equal(trim(' x'), 'x', 'Spaces at the beginning of string');
-            assert.equal(trim('x '), 'x', 'Spaces at the end of string');
-            assert.equal(trim(' x '), 'x', 'Spaces at the beginning and at the end of string');
-            assert.equal(trim('    x  '), 'x', 'Tabs');
-            assert.equal(trim('    x   y  '), 'x   y', 'Tabs and strings inside string');
+            assert.equal(window.spa.utils.trim(' x'), 'x', 'Spaces at the beginning of string');
+            assert.equal(window.spa.utils.trim('x '), 'x', 'Spaces at the end of string');
+            assert.equal(window.spa.utils.trim(' x '), 'x', 'Spaces at the beginning and at the end of string');
+            assert.equal(window.spa.utils.trim('    x  '), 'x', 'Tabs');
+            assert.equal(window.spa.utils.trim('    x   y  '), 'x   y', 'Tabs and strings inside string');
 
             testdone(done);
         });

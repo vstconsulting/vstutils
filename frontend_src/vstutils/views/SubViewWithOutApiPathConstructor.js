@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import ViewConstructor from './ViewConstructor.js';
 import View from './View.js';
+import ViewWithParentInstancesForPath from './ViewWithParentInstancesForPath.js';
 
 /**
  * Class, that manages creation of SubViews of guiViews - views, paths of which do not exist in API,
@@ -20,7 +21,6 @@ import View from './View.js';
  * Current class creates views for following paths.
  * All API requests from '/foo/{pk}/bar/{bar_id}/' view will be send to the '/bar/{pk}/' API path.
  */
-/* jshint unused: false */
 export default class SubViewWithOutApiPathConstructor {
     /**
      * Constructor of SubViewWithOutApiPathConstructor class.
@@ -62,37 +62,11 @@ export default class SubViewWithOutApiPathConstructor {
     getSubViewMixin() {
         let prefix = this.path_prefix;
         return {
+            mixins: [ViewWithParentInstancesForPath],
             computed: {
                 qs_url() {
-                    let sub_path = prefix;
-                    let sub_url = sub_path.format(this.$route.params);
-
+                    let sub_url = prefix.format(this.$route.params);
                     return this.$route.path.replace(sub_url, '').replace('/edit', '').replace('/new', '');
-                },
-            },
-            methods: {
-                getParentInstancesForPath() {
-                    let inner_paths = this.getParentPaths(this.$route.name, this.$route.path);
-                    let views = this.$store.getters.getViews;
-
-                    for (let index = 0; index < inner_paths.length; index++) {
-                        let obj = inner_paths[index];
-
-                        if (!this.loadParentInstanceOrNot(views, obj)) {
-                            continue;
-                        }
-
-                        let url = views[obj.path].objects.url.format(this.$route.params);
-
-                        this.getInstance(views[obj.path], url)
-                            .then((instance) => {
-                                this.data.parent_instances[obj.url] = instance;
-                                this.data.parent_instances = { ...this.data.parent_instances };
-                            })
-                            .catch((error) => {
-                                debugger;
-                            });
-                    }
                 },
             },
         };

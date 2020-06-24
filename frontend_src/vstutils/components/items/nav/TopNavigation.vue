@@ -2,7 +2,7 @@
     <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <span class="nav-link" onclick="saveHideMenuSettings()" data-widget="pushmenu">
+                <span class="nav-link" @click="saveHideMenuSettings" data-widget="pushmenu">
                     <i class="fa fa-bars ico-data-default"></i>
                 </span>
             </li>
@@ -88,6 +88,7 @@
 
 <script>
     import { Gravatar } from '../../../users';
+    import { saveHideMenuSettings } from '../../../utils';
 
     /**
      * Component of top navigation menu.
@@ -196,6 +197,9 @@
             },
         },
         methods: {
+            saveHideMenuSettings() {
+                saveHideMenuSettings();
+            },
             /**
              * Method, that returns URL to default gravatar img.
              */

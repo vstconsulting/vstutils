@@ -39,20 +39,20 @@ const FKMultiAutocompleteFieldModal = {
          * Method, that closes modal window.
          */
         close() {
-            this.$emit('cleanTmpValue');
+            this.$emit('clean-tmp-value');
             this.show_modal = false;
         },
         /**
          * Method, that emits changeValue event of parent component.
          */
         changeValue(opt) {
-            this.$emit('changeValue', opt);
+            this.$emit('change-value', opt);
         },
         /**
          * Method, that emits setNewValue event of parent component.
          */
         setNewValue() {
-            this.$emit('setNewValue');
+            this.$emit('set-new-value');
             this.close();
         },
         /**
@@ -60,7 +60,7 @@ const FKMultiAutocompleteFieldModal = {
          * @param {object} qs New QuerySet object.
          */
         onUpdateInstances(qs) {
-            this.$emit('updateQuerySet', qs);
+            this.$emit('update-query-set', qs);
         },
     },
 };

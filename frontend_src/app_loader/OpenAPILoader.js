@@ -37,17 +37,20 @@ class OpenAPILoader {
      * @return {promise} Promise of loading of OpenApi schema from Cache.
      */
     loadSchemaFromCache() {
-        return this.cache
-            .getFile('openapi')
-            .then((response) => {
-                return JSON.parse(response.data);
-            })
-            .catch((error) => {  /* jshint unused: false */
-                return this.loadSchemaFromApi().then((openapi) => {
-                    this.cache.setFile('openapi', JSON.stringify(openapi));
-                    return openapi;
-                });
-            });
+        return (
+            this.cache
+                .getFile('openapi')
+                .then((response) => {
+                    return JSON.parse(response.data);
+                })
+                // eslint-disable-next-line no-unused-vars
+                .catch((error) => {
+                    return this.loadSchemaFromApi().then((openapi) => {
+                        this.cache.setFile('openapi', JSON.stringify(openapi));
+                        return openapi;
+                    });
+                })
+        );
     }
 
     /**

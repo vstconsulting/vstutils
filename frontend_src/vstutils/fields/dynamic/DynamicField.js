@@ -113,7 +113,7 @@ class DynamicField extends BaseField {
         };
 
         for (let key in parent_values) {
-            if (parent_values.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(parent_values, key)) {
                 let item = parent_types[parent_values[key]];
                 if (item !== undefined) {
                     opt.format = item;
@@ -122,7 +122,7 @@ class DynamicField extends BaseField {
         }
 
         for (let key in parent_values) {
-            if (parent_values.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(parent_values, key)) {
                 let item = parent_choices[parent_values[key]];
                 if (item !== undefined && Array.isArray(item)) {
                     let bool_values = item.some((val) => {
@@ -142,7 +142,7 @@ class DynamicField extends BaseField {
         }
 
         for (let key in this.options) {
-            if (this.options.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.options, key)) {
                 if (['format', 'additionalProperties'].includes(key)) {
                     continue;
                 }
@@ -159,14 +159,14 @@ class DynamicField extends BaseField {
 
         opt = $.extend(true, opt, callback_opt);
 
-        if (!window.guiFields[opt.format]) {
+        if (!window.spa.fields.guiFields[opt.format]) {
             opt.format = 'string';
         }
 
-        let real_field = new window.guiFields[opt.format](opt);
+        let real_field = new window.spa.fields.guiFields[opt.format](opt);
 
         if (real_field.constructor.prepareField) {
-            real_field = real_field.constructor.prepareField(real_field, app.application.$route.name);
+            real_field = real_field.constructor.prepareField(real_field, window.app.application.$route.name);
         }
 
         return real_field;

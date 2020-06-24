@@ -1,357 +1,23 @@
 import $ from 'jquery';
-import Visibility from 'visibilityjs';
-import {
-    current_view,
-    path_pk_key,
-    deepEqual,
-    findClosestPath,
-    isEmptyObject,
-    guiLocalSettings,
-} from '../../utils';
+
+import { current_view, path_pk_key, deepEqual, findClosestPath, isEmptyObject } from '../../utils';
 import { pop_up_msg, guiPopUp } from '../../popUp';
+import ViewWithParentInstancesForPath from '../../views/ViewWithParentInstancesForPath.js';
+
+import { Home, NotFound } from '../customPages';
 
 import BasestViewMixin from './BasestViewMixin';
-export { BasestViewMixin };
-window.the_basest_view_mixin = BasestViewMixin;
+import PageWithDataMixin from './PageWithDataMixin.js';
+import EditablePageMixin from './EditablePageMixin.js';
+import ViewWithAutoUpdateMixin from './ViewWithAutoUpdateMixin.js';
+import CollapsibleCardMixin from './CollapsibleCardMixin.js';
 
-/**
- * Mixin for views of page type, that have some data from API to represent.
- */
-export const page_with_data_mixin = {
-    computed: {
-        /**
-         * Redefinition of 'title' from base mixin.
-         */
-        title: function () {
-            try {
-                return this.data.instance.getViewFieldValue() || this.view.schema.name;
-            } catch (e) {
-                return this.view.schema.name;
-            }
-        },
-    },
-    methods: {
-        /**
-         * Method, that deletes:
-         * - Model Instance;
-         * - QuerySet of current view from main QS Store;
-         * - QuerySet of current view from sandbox QS Store.
-         * @return {promise}
-         */
-        removeInstance() {
-            let instance = this.data.instance;
-            instance
-                .delete()
-                .then((response) => {
-                    /* jshint unused: false */
-                    guiPopUp.success(
-                        this.$t(pop_up_msg.instance.success.remove).format([
-                            instance.getViewFieldValue() || instance.getPkValue(),
-                            this.$t(this.view.schema.name),
-                        ]),
-                    );
-                    this.deleteQuerySet(this.qs_url);
-                    this.deleteQuerySetFromSandBox(this.qs_url);
-                    this.openRedirectUrl({ path: this.getRedirectUrl() });
-                })
-                .catch((error) => {
-                    let str = app.error_handler.errorToString(error);
-
-                    let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format([
-                        instance.getViewFieldValue() || instance.getPkValue(),
-                        this.$t(this.view.schema.name),
-                        str,
-                    ]);
-
-                    app.error_handler.showError(srt_to_show, str);
-
-                    debugger;
-                });
-        },
-        /**
-         * Method, that forms redirect URL,
-         * which will be opened after successful action execution.
-         * @param {object} opt Object with arguments for current method.
-         */
-        getRedirectUrl(opt) {
-            /* jshint unused: false */
-            return this.url.replace('/edit', '').replace('/new', '').split('/').slice(0, -1).join('/');
-        },
-    },
-};
-
-/**
- * Mixin for a views, that allows to edit data from API.
- */
-export const editable_page_mixin = {
-    methods: {
-        /**
-         * Method, that creates copy of current view's QuerySet and save it in sandbox store.
-         * Sandbox store is needed to have opportunity of:
-         *  - instance editing;
-         *  - saving previous instance data (in case, if user does not save his changes).
-         * @param {object} view JS object, with options for a current view.
-         * @param {string} url QuerySet URL.
-         */
-        setQuerySetInSandBox(view, url) {
-            let page_view = view;
-
-            try {
-                page_view = this.$store.getters.getViews[view.schema.path.replace('/edit', '')];
-            } catch (e) {}
-
-            let qs = this.getQuerySet(page_view, url);
-            let sandbox_qs;
-
-            if (qs.model.name == view.objects.model.name) {
-                sandbox_qs = qs.copy();
-            } else {
-                sandbox_qs = view.objects.clone({
-                    use_prefetch: true,
-                    url: url.replace(/^\/|\/$/g, ''),
-                });
-            }
-
-            this.$store.commit('setQuerySetInSandBox', {
-                url: sandbox_qs.url,
-                queryset: sandbox_qs,
-            });
-        },
-
-        /**
-         * Method, that returns QuerySet object from sandbox store.
-         * This QuerySet can be different from it's analog from objects store,
-         * because it can contains user's changes.
-         * @param {object} view JS object, with options for a current view.
-         * @param {string} url QuerySet URL.
-         * @return {object} QuerySet Object.
-         */
-        getQuerySetFromSandBox(view, url) {
-            let qs = this.$store.getters.getQuerySetFromSandBox(url.replace(/^\/|\/$/g, ''));
-
-            if (!qs) {
-                this.setQuerySetInSandBox(view, url);
-                return this.$store.getters.getQuerySetFromSandBox(url.replace(/^\/|\/$/g, ''));
-            }
-
-            return qs;
-        },
-
-        /**
-         * Method, that returns QuerySet object from sandbox store,
-         * that is equal to the QuerySet from objects store.
-         * @param {object} view JS object, with options for a current view.
-         * @param {string} url QuerySet URL.
-         * @return {object} QuerySet Object.
-         */
-        setAndGetQuerySetFromSandBox(view, url) {
-            this.setQuerySetInSandBox(view, url);
-            return this.$store.getters.getQuerySetFromSandBox(url.replace(/^\/|\/$/g, ''));
-        },
-
-        /**
-         * Method, that returns promise of getting Model instance from Sandbox QuerySet.
-         * @param {object} view JS object, with options for a current view.
-         * @param {string} url QuerySet URL.
-         * @return {promise}
-         */
-        setAndGetInstanceFromSandBox(view, url) {
-            return this.setAndGetQuerySetFromSandBox(view, url).get();
-        },
-
-        /**
-         * Method, that returns validated data of Model instance.
-         * @return {object} Validated data of model instance.
-         */
-        getValidData() {
-            try {
-                let valid_data = {};
-
-                //////////////////////////////////////////////////////////////////
-                // @todo
-                // think about following 2 variables.
-                // mb we should get data from data.instance.data, not from store,
-                // so, data.instance.data should be reactive
-                //////////////////////////////////////////////////////////////////
-                let url = this.qs_url.replace(/^\/|\/$/g, '');
-                let data = $.extend(
-                    true,
-                    {},
-                    this.$store.getters.getViewInstanceData({
-                        store: 'sandbox',
-                        url: url,
-                    }),
-                );
-
-                let toInnerData = {};
-
-                for (let key in this.data.instance.fields) {
-                    if (this.data.instance.fields.hasOwnProperty(key)) {
-                        let field = this.data.instance.fields[key];
-
-                        toInnerData[key] = field.toInner(data);
-                    }
-                }
-
-                for (let key in this.data.instance.fields) {
-                    if (this.data.instance.fields.hasOwnProperty(key)) {
-                        let field = this.data.instance.fields[key];
-
-                        if (field.options.readOnly) {
-                            continue;
-                        }
-
-                        let value = field.validateValue(toInnerData);
-
-                        if (value !== undefined && value !== null) {
-                            valid_data[key] = value;
-                        }
-                    }
-                }
-
-                if (this.getValidDataAdditional) {
-                    valid_data = this.getValidDataAdditional(valid_data);
-                }
-
-                return valid_data;
-            } catch (e) {
-                app.error_handler.defineErrorAndShow(e);
-            }
-        },
-    },
-};
-
-/**
- * Mixin for views, that are able to send autoupdate requests.
- */
-export const view_with_autoupdate_mixin = {
-    data() {
-        return {
-            /**
-             * Property with options for autoupdate.
-             */
-            autoupdate: {
-                /**
-                 * Timeout ID, that setTimeout() function returns.
-                 */
-                timeout_id: undefined,
-                /**
-                 * Boolean property, that means "autoupdate was stopped or not".
-                 */
-                stop: false,
-            },
-        };
-    },
-    /**
-     * Vue Hook, that is called,
-     * when openning page has the same route path template as current one.
-     */
-    beforeRouteUpdate(to, from, next) {
-        /* jshint unused: false */
-        this.stopAutoUpdate();
-        next();
-    },
-    /**
-     * Vue Hook, that is called,
-     * when openning page has different route path template from current one.
-     */
-    beforeRouteLeave(to, from, next) {
-        /* jshint unused: false */
-        this.stopAutoUpdate();
-        this.$destroy();
-        next();
-    },
-    methods: {
-        /**
-         * Method, that returns autoupdate interval for current view.
-         */
-        getAutoUpdateInterval() {
-            return guiLocalSettings.get('page_update_interval') || 5000;
-        },
-        /**
-         * Method, that starts sending Api request for data update.
-         */
-        startAutoUpdate() {
-            let update_interval = this.getAutoUpdateInterval();
-            this.autoupdate.stop = false;
-
-            if (Visibility.state() == 'hidden') {
-                return setTimeout(() => {
-                    this.startAutoUpdate();
-                }, update_interval);
-            }
-
-            this.autoupdate.timeout_id = setTimeout(() => {
-                this.updateData().then((response) => {
-                    /* jshint unused: false */
-                    if (!this.autoupdate.stop) {
-                        this.startAutoUpdate();
-                    }
-                });
-            }, update_interval);
-        },
-        /**
-         * Method, that stops sending Api request for data update.
-         */
-        stopAutoUpdate() {
-            this.autoupdate.stop = true;
-            clearTimeout(this.autoupdate.timeout_id);
-        },
-        /**
-         * Method, that sends Api request for data update.
-         */
-        updateData() {
-            let qs = this.getQuerySet(this.view, this.qs_url);
-            let new_qs = this.getQuerySet(this.view, this.qs_url).clone();
-
-            return new_qs
-                .get()
-                .then((instance) => {
-                    if (qs.cache.getPkValue() == instance.getPkValue()) {
-                        for (let key in instance.data) {
-                            if (instance.data.hasOwnProperty(key)) {
-                                if (!deepEqual(instance.data[key], qs.cache.data[key])) {
-                                    qs.cache.data[key] = instance.data[key];
-                                }
-                            }
-                        }
-                        qs.cache.data = { ...qs.cache.data };
-                    }
-
-                    return true;
-                })
-                .catch((error) => {
-                    /* jshint unused: false */
-                    debugger;
-                });
-        },
-    },
-};
-
-/**
- * Mixin for Vue templates with card-boxes, that could be collapsed.
- */
-export const collapsable_card_mixin = {
-    data() {
-        return {
-            /**
-             * Boolean property, that is responsible for showing/hiding of card-box.
-             */
-            card_collapsed: false,
-            /**
-             * Boolean property, that is responsible for showing/hiding collapse-button.
-             */
-            card_collapsed_button: false,
-        };
-    },
-    methods: {
-        /**
-         * Method, that toggles card_collapsed value.
-         */
-        toggleCardCollapsed() {
-            this.card_collapsed = !this.card_collapsed;
-        },
-    },
+export {
+    BasestViewMixin,
+    PageWithDataMixin,
+    EditablePageMixin,
+    ViewWithAutoUpdateMixin,
+    CollapsibleCardMixin,
 };
 
 /**
@@ -369,7 +35,7 @@ export let routesComponentsTemplates = {
      * Base mixin - common mixin for all views types.
      */
     base: {
-        mixins: [BasestViewMixin, collapsable_card_mixin],
+        mixins: [BasestViewMixin, CollapsibleCardMixin, ViewWithParentInstancesForPath],
         /**
          * Data property of Vue component.
          */
@@ -462,7 +128,7 @@ export let routesComponentsTemplates = {
                     return;
                 }
 
-                return app.error_handler.errorToString(this.error);
+                return window.app.error_handler.errorToString(this.error);
             },
         },
         /**
@@ -493,7 +159,12 @@ export let routesComponentsTemplates = {
              * @param {object} options Options for router for new page opening.
              */
             openPage(options = {}) {
-                this.$router.push(options);
+                this.$router.push(options).catch((error) => {
+                    // Allow to open route with the same path as current
+                    if (error.name !== 'NavigationDuplicated') {
+                        throw error;
+                    }
+                });
             },
             /**
              * Method, that makes redirect to some page.
@@ -541,11 +212,11 @@ export let routesComponentsTemplates = {
                 }
 
                 // tries to find appropriate redirect path in internal paths
-                let paths = Object.values(app.views)
+                let paths = Object.values(window.app.views)
                     .filter((item) => {
                         if (
-                            item.schema.type == 'page' &&
-                            item.schema.path.replace(/^\/|\/$/g, '').split('/').last == '{' + pk_key + '}'
+                            item.schema.type === 'page' &&
+                            item.schema.path.replace(/^\/|\/$/g, '').split('/').last === '{' + pk_key + '}'
                         ) {
                             return item;
                         }
@@ -564,12 +235,12 @@ export let routesComponentsTemplates = {
                 }
 
                 // tries to find appropriate redirect path in paths of 3rd level
-                redirect_path = Object.values(app.views)
+                redirect_path = Object.values(window.app.views)
                     .filter((item) => {
                         if (
                             item.schema.path.indexOf(pk_key.replace('_id', '')) !== -1 &&
-                            item.schema.type == 'page' &&
-                            item.schema.level == 3
+                            item.schema.type === 'page' &&
+                            item.schema.level === 3
                         ) {
                             return item;
                         }
@@ -615,11 +286,13 @@ export let routesComponentsTemplates = {
                                 if (redirect_path) {
                                     this.openRedirectUrl({ path: redirect_path });
                                 }
-                            } catch (e) {}
+                            } catch (e) {
+                                console.log(e);
+                            }
                         }
                     })
                     .catch((error) => {
-                        let str = app.error_handler.errorToString(error);
+                        let str = window.app.error_handler.errorToString(error);
 
                         let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
                             this.$t(opt.name),
@@ -627,9 +300,7 @@ export let routesComponentsTemplates = {
                             str,
                         ]);
 
-                        app.error_handler.showError(srt_to_show, str);
-
-                        debugger;
+                        window.app.error_handler.showError(srt_to_show, str);
                     });
             },
             /**
@@ -651,7 +322,7 @@ export let routesComponentsTemplates = {
              * @param {string} url QuerySet URL.
              * @param {object} qs QuerySet instance (not required argument).
              */
-            setQuerySet(view, url, qs) {
+            setQuerySet(view, url, qs = undefined) {
                 if (!qs) {
                     qs = view.objects.copy();
                     qs.use_prefetch = true;
@@ -667,7 +338,7 @@ export let routesComponentsTemplates = {
              * Method, that returns view's QuerySet from main QuerySet store.
              * @param {object} view JS object, with options for a current view.
              * @param {string} url QuerySet URL.
-             * @return {object} QuerySet.
+             * @return {QuerySet} QuerySet.
              */
             getQuerySet(view, url) {
                 let qs = this.$store.getters.getQuerySet(url.replace(/^\/|\/$/g, ''));
@@ -725,7 +396,7 @@ export let routesComponentsTemplates = {
                     let test_url = inner_url + url_parts[i] + '/';
 
                     if (views[test_path]) {
-                        if (test_path == this.$route.name) {
+                        if (test_path === this.$route.name) {
                             continue;
                         }
 
@@ -741,32 +412,9 @@ export let routesComponentsTemplates = {
 
                 return this.handleParentPaths(result);
             },
-            /**
-             * Method, that loads parent model instances from current view url.
-             * Method defines parents from URL, loads instances of those parents
-             * and saves them in this.data.parent_instances.
-             */
-            getParentInstancesForPath() {
-                let inner_paths = this.getParentPaths(this.$route.name, this.$route.path);
-                let views = this.$store.getters.getViews;
-
-                for (let index = 0; index < inner_paths.length; index++) {
-                    let obj = inner_paths[index];
-
-                    if (!this.loadParentInstanceOrNot(views, obj)) {
-                        continue;
-                    }
-
-                    this.getInstance(views[obj.path], obj.url)
-                        .then((instance) => {
-                            this.data.parent_instances[obj.url] = instance;
-                            this.data.parent_instances = { ...this.data.parent_instances };
-                        })
-                        .catch((error) => {
-                            /* jshint unused: false */
-                            debugger;
-                        });
-                }
+            // eslint-disable-next-line no-unused-vars
+            getSubViewUrl(innerPathObj, views) {
+                return innerPathObj.url;
             },
             /**
              * Method, that can change in some way parent_paths values.
@@ -884,7 +532,7 @@ export let routesComponentsTemplates = {
         },
     },
     list: {
-        mixins: [view_with_autoupdate_mixin],
+        mixins: [ViewWithAutoUpdateMixin],
         data: function () {
             return {
                 data: {
@@ -1032,7 +680,7 @@ export let routesComponentsTemplates = {
                 let filters = this.getFilters(url).cache.data;
 
                 for (let key in filters) {
-                    if (filters.hasOwnProperty(key) && filters[key] === undefined) {
+                    if (Object.prototype.hasOwnProperty.call(filters, key) && filters[key] === undefined) {
                         delete filters[key];
                     }
                 }
@@ -1060,18 +708,39 @@ export let routesComponentsTemplates = {
                 });
             },
             /**
+             * @param {Model} instance
+             */
+            _removeInstance(instance) {
+                instance
+                    .delete()
+                    .then((response) => {
+                        this.removeInstances_callback(instance, response);
+                    })
+                    .catch((error) => {
+                        let str = window.app.error_handler.errorToString(error);
+
+                        let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format([
+                            instance.getViewFieldValue(),
+                            this.$t(this.view.schema.name),
+                            str,
+                        ]);
+
+                        window.app.error_handler.showError(srt_to_show, str);
+                    });
+            },
+            /**
              * Method, that deletes one instance from list:
              * - Model Instance;
              * - QuerySet of current view from main QS Store;
              * - QuerySet of current view from sandbox QS Store.
              * @return {promise}
              */
-            removeInstance(opt) {
+            removeInstance({ instance_id }) {
                 let instance;
                 for (let index = 0; index < this.data.instances.length; index++) {
                     instance = this.data.instances[index];
 
-                    if (instance.getPkValue() == opt.instance_id) {
+                    if (instance.getPkValue() === instance_id) {
                         break;
                     }
                 }
@@ -1080,24 +749,7 @@ export let routesComponentsTemplates = {
                     return;
                 }
 
-                instance
-                    .delete()
-                    .then((response) => {
-                        this.removeInstances_callback(instance, response);
-                    })
-                    .catch((error) => {
-                        let str = app.error_handler.errorToString(error);
-
-                        let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format([
-                            instance.getViewFieldValue(),
-                            this.$t(this.view.schema.name),
-                            str,
-                        ]);
-
-                        app.error_handler.showError(srt_to_show, str);
-
-                        debugger;
-                    });
+                this._removeInstance(instance);
             },
             /**
              * Method, that removes instances from list.
@@ -1109,27 +761,11 @@ export let routesComponentsTemplates = {
                     if (!selections[id]) {
                         continue;
                     }
+
                     for (let index = 0; index < this.data.instances.length; index++) {
                         let instance = this.data.instances[index];
-                        if (id == instance.getPkValue()) {
-                            instance
-                                .delete()
-                                .then((response) => {
-                                    this.removeInstances_callback(instance, response);
-                                })
-                                .catch((error) => {
-                                    let str = app.error_handler.errorToString(error);
-
-                                    let srt_to_show = this.$t(pop_up_msg.instance.error.remove).format([
-                                        instance.getViewFieldValue(),
-                                        this.$t(this.view.schema.name),
-                                        str,
-                                    ]);
-
-                                    app.error_handler.showError(srt_to_show, str);
-
-                                    debugger;
-                                });
+                        if (id === '' + instance.getPkValue()) {
+                            this._removeInstance(instance);
                         }
                     }
                 }
@@ -1139,8 +775,8 @@ export let routesComponentsTemplates = {
              * @param {object} instance Instance, tht was removed in API.
              * @param {object} response API response.
              */
+            // eslint-disable-next-line no-unused-vars
             removeInstances_callback(instance, response) {
-                /* jshint unused: false */
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.remove).format([
                         instance.getViewFieldValue() || instance.getPkValue(),
@@ -1170,7 +806,7 @@ export let routesComponentsTemplates = {
                 for (let index = 0; index < new_qs.cache.length; index++) {
                     let list_instance = new_qs.cache[index];
 
-                    if (list_instance.getPkValue() == instance.getPkValue()) {
+                    if (list_instance.getPkValue() === instance.getPkValue()) {
                         new_qs.cache.splice(index, 1);
 
                         this.setQuerySet(this.view, this.qs_url, new_qs);
@@ -1200,8 +836,7 @@ export let routesComponentsTemplates = {
                         }
                     })
                     .catch((error) => {
-                        /* jshint unused: false */
-                        debugger;
+                        console.log(error);
                     });
             },
             /**
@@ -1223,29 +858,27 @@ export let routesComponentsTemplates = {
                 let qs = this.getQuerySet(this.view, this.qs_url).clone();
                 qs.query = {};
                 qs.formQueryAndSend('post', opt.data)
+                    // eslint-disable-next-line no-unused-vars
                     .then((response) => {
-                        /* jshint unused: false */
                         guiPopUp.success(
                             this.$t(pop_up_msg.instance.success.add).format([this.$t(this.view.schema.name)]),
                         );
                     })
                     .catch((error) => {
-                        let str = app.error_handler.errorToString(error);
+                        let str = window.app.error_handler.errorToString(error);
 
                         let srt_to_show = this.$t(pop_up_msg.instance.error.add).format([
                             this.$t(this.view.schema.name),
                             str,
                         ]);
 
-                        app.error_handler.showError(srt_to_show, str);
-
-                        debugger;
+                        window.app.error_handler.showError(srt_to_show, str);
                     });
             },
         },
     },
     page_new: {
-        mixins: [editable_page_mixin],
+        mixins: [EditablePageMixin],
         computed: {
             /**
              * Redefinition of 'qs_url' from base mixin.
@@ -1320,14 +953,14 @@ export let routesComponentsTemplates = {
                     .catch((error) => {
                         this.loading = false;
 
-                        let str = app.error_handler.errorToString(error);
+                        let str = window.app.error_handler.errorToString(error);
 
                         let srt_to_show = this.$t(pop_up_msg.instance.error.create).format([
                             this.$t(this.view.schema.name),
                             str,
                         ]);
 
-                        app.error_handler.showError(srt_to_show, str);
+                        window.app.error_handler.showError(srt_to_show, str);
 
                         // the code line below is needed for tests.
                         current_view.setLoadingError(error);
@@ -1346,7 +979,7 @@ export let routesComponentsTemplates = {
         },
     },
     page: {
-        mixins: [page_with_data_mixin, view_with_autoupdate_mixin],
+        mixins: [PageWithDataMixin, ViewWithAutoUpdateMixin],
         methods: {
             /**
              * Redefinition of 'fetchData()' from base mixin.
@@ -1363,7 +996,6 @@ export let routesComponentsTemplates = {
                         }
                     })
                     .catch((error) => {
-                        debugger;
                         this.setLoadingError(error);
                     });
 
@@ -1380,7 +1012,7 @@ export let routesComponentsTemplates = {
         },
     },
     page_edit: {
-        mixins: [page_with_data_mixin, editable_page_mixin],
+        mixins: [PageWithDataMixin, EditablePageMixin],
         computed: {
             /**
              * Redefinition of 'qs_url' from base mixin.
@@ -1402,7 +1034,6 @@ export let routesComponentsTemplates = {
                     })
                     .catch((error) => {
                         this.setLoadingError(error);
-                        debugger;
                     });
 
                 this.getParentInstancesForPath();
@@ -1443,7 +1074,7 @@ export let routesComponentsTemplates = {
                     })
                     .catch((error) => {
                         this.loading = false;
-                        let str = app.error_handler.errorToString(error);
+                        let str = window.app.error_handler.errorToString(error);
 
                         let srt_to_show = this.$t(pop_up_msg.instance.error.save).format([
                             instance.getViewFieldValue(),
@@ -1451,7 +1082,7 @@ export let routesComponentsTemplates = {
                             str,
                         ]);
 
-                        app.error_handler.showError(srt_to_show, str);
+                        window.app.error_handler.showError(srt_to_show, str);
 
                         // the code line below is needed for tests.
                         current_view.setLoadingError(error);
@@ -1487,14 +1118,14 @@ export let routesComponentsTemplates = {
              * which will be opened after successful action execution.
              * @param {object} opt Object with arguments for current method.
              */
+            // eslint-disable-next-line no-unused-vars
             getRedirectUrl(opt) {
-                /* jshint unused: false */
                 return this.url.replace('/edit', '');
             },
         },
     },
     action: {
-        mixins: [editable_page_mixin],
+        mixins: [EditablePageMixin],
         methods: {
             /**
              * Redefinition of 'fetchData()' from base mixin.
@@ -1592,7 +1223,7 @@ export let routesComponentsTemplates = {
                     })
                     .catch((error) => {
                         this.loading = false;
-                        let str = app.error_handler.errorToString(error);
+                        let str = window.app.error_handler.errorToString(error);
 
                         let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
                             this.view.schema.name,
@@ -1600,7 +1231,7 @@ export let routesComponentsTemplates = {
                             str,
                         ]);
 
-                        app.error_handler.showError(srt_to_show, str);
+                        window.app.error_handler.showError(srt_to_show, str);
 
                         // the code line below is needed for tests.
                         current_view.setLoadingError({});
@@ -1609,8 +1240,6 @@ export let routesComponentsTemplates = {
         },
     },
 };
-
-import { Home, NotFound } from '../customPages';
 
 /**
  * Dict with mixins for Vue components for custom pages.

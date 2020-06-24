@@ -1,10 +1,14 @@
-import { guiFields } from '../fields';
 import { isEmptyObject, obj_prop_retriever } from '../utils';
+import { FKField } from '../fields/fk/fk';
 
 /**
  * Class of Base Model.
  */
 export default class Model {
+    /**
+     * @param name {string}
+     * @param fields {Object.<string, BaseField>}
+     */
     constructor(name, fields) {
         this.name = name;
         this.fields = fields;
@@ -14,6 +18,7 @@ export default class Model {
             for (let field in this.fields) {
                 if (this.fields[field].options.is_pk) {
                     this.pk_name = field;
+                    break;
                 }
             }
             this.view_name = 'name';
@@ -49,7 +54,6 @@ export default class Model {
      * Method, that returns instance's value of PK field.
      */
     getPkValue() {
-        // return this.data[this.pk_name];
         if (this.fields[this.pk_name]) {
             return this.fields[this.pk_name].toInner(this.data);
         }
@@ -58,12 +62,11 @@ export default class Model {
      * Method, that returns instance's value of view field.
      */
     getViewFieldValue() {
-        // return this.data[this.view_name];
         if (this.fields[this.view_name]) {
             return this.fields[this.view_name].toRepresent(this.data);
-        } else if (this.fields.hasOwnProperty('username')) {
+        } else if (Object.prototype.hasOwnProperty.call(this.fields, 'username')) {
             return this.fields.username.toRepresent(this.data);
-        } else if (this.fields.hasOwnProperty('email')) {
+        } else if (Object.prototype.hasOwnProperty.call(this.fields, 'email')) {
             return this.fields.email.toRepresent(this.data);
         }
     }
@@ -72,7 +75,7 @@ export default class Model {
      */
     delete() {
         let bulk = this.queryset.formBulkQuery('delete');
-        if (bulk.path[bulk.path.length - 1] != this.getPkValue()) {
+        if ('' + bulk.path[bulk.path.length - 1] !== '' + this.getPkValue()) {
             bulk.path.push(this.getPkValue());
         }
         return this.queryset
@@ -81,7 +84,6 @@ export default class Model {
                 return response;
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -95,7 +97,6 @@ export default class Model {
                 return this.queryset.model.getInstance(response.data, this.queryset);
             })
             .catch((error) => {
-                debugger;
                 throw error;
             });
     }
@@ -111,10 +112,8 @@ export default class Model {
         };
 
         for (let key in this) {
-            if (this.hasOwnProperty(key)) {
-                if (!this.non_instance_attr.includes(key)) {
-                    instance[key] = this[key];
-                }
+            if (Object.prototype.hasOwnProperty.call(this, key) && !this.non_instance_attr.includes(key)) {
+                instance[key] = this[key];
             }
         }
 
@@ -132,16 +131,15 @@ export default class Model {
 
     /**
      * Method, that returns Array with prefetch fields' names of current model.
-     * @returns {array} fields Array with names of prefetch fields.
+     * @returns {string[]} fields Array with names of prefetch fields.
      */
     getPrefetchFields() {
         let fields = [];
 
         for (let key in this.fields) {
-            if (this.fields.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(this.fields, key)) {
                 let field = this.fields[key];
-
-                if (field instanceof guiFields.fk) {
+                if (field instanceof FKField) {
                     fields.push(key);
                 }
             }

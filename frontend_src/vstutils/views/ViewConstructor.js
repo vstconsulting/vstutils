@@ -1,7 +1,9 @@
 import $ from 'jquery';
-import { isEmptyObject, BaseEntityConstructor } from '../utils';
+import { isEmptyObject } from '../utils';
 import DefaultEntityView from './DefaultEntityView.vue';
-// import { guiFields } from "../fields"; FIXME circular dependency "Super expression must either be null or a function"
+import { signals } from '../../libs/TabSignal.js';
+import { guiFields } from '../fields';
+import { BaseEntityConstructor } from '../models';
 
 /**
  * Class, that manages creation of guiViews.
@@ -20,7 +22,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
 
     /**
      * Method, that returns paths list from OpenApi Schema.
-     * @param {object} openapi_schema OpenApi Schema.
+     * @param {Object} openapi_schema OpenApi Schema.
+     * @return {Object.<string,Object>}
      */
     getPaths(openapi_schema) {
         return openapi_schema[this.dictionary.paths.name];
@@ -47,8 +50,8 @@ export default class ViewConstructor extends BaseEntityConstructor {
      * @param {string} path Key of path object, from OpenApi's path dict.
      */
     getViewSchema_name(path) {
-        let path_parths = path.replace(/\/{[A-z]+}/g, '').split(/\//g);
-        return path_parths[path_parths.length - 2];
+        let path_parts = path.replace(/\/{[A-z]+}/g, '').split(/\//g);
+        return path_parts[path_parts.length - 2];
     }
 
     /**
@@ -68,13 +71,10 @@ export default class ViewConstructor extends BaseEntityConstructor {
      * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
      */
     getViewSchema_filters(operation_id_filters, path_obj_prop) {
-        let filters = $.extend(true, {}, path_obj_prop[operation_id_filters.name]);
-        for (let filter in filters) {
-            if (this.dictionary.models.filters_to_delete.includes(filters[filter].name)) {
-                delete filters[filter];
-            }
-        }
-        return filters;
+        const filtersCopy = $.extend(true, {}, path_obj_prop[operation_id_filters.name]);
+        return Object.values(filtersCopy).filter(
+            (f) => !this.dictionary.models.filters_to_delete.includes(f.name),
+        );
     }
 
     /**
@@ -87,18 +87,16 @@ export default class ViewConstructor extends BaseEntityConstructor {
         let f_obj = {};
         let filters = this.getViewSchema_filters(operation_id_filters, path_obj_prop);
 
-        tabSignal.emit('views[' + path + '].filters.beforeInit', filters);
+        signals.emit('views[' + path + '].filters.beforeInit', filters);
 
-        for (let filter in filters) {
-            if (filters.hasOwnProperty(filter)) {
-                let format = this.getFilterFormat(filters[filter]);
-                let opt = { format: format };
+        for (let filter of Object.values(filters)) {
+            let format = this.getFilterFormat(filter);
+            let opt = { format: format };
 
-                f_obj[filters[filter].name] = new guiFields[format]($.extend(true, {}, filters[filter], opt));
-            }
+            f_obj[filter.name] = new guiFields[format]($.extend(true, {}, filter, opt));
         }
 
-        tabSignal.emit('views[' + path + '].filters.afterInit', filters);
+        signals.emit('views[' + path + '].filters.afterInit', filters);
 
         return f_obj;
     }
@@ -123,20 +121,20 @@ export default class ViewConstructor extends BaseEntityConstructor {
         let opt = {
             operation_id: operation_id,
         };
-
         for (let item in this.dictionary.schema_types) {
-            if (this.dictionary.schema_types.hasOwnProperty(item)) {
-                if (operation_id.indexOf(item) == -1) {
-                    continue;
-                }
-                opt = $.extend(true, opt, this.dictionary.schema_types[item]);
-                opt.path = path + opt.url_postfix;
-                delete opt.url_postfix;
-                if (opt.filters) {
-                    opt.filters = this.generateViewSchemaFilters(opt.filters, path_obj_prop, opt.path);
-                }
-                return opt;
+            if (!Object.prototype.hasOwnProperty.call(this.dictionary.schema_types, item)) {
+                continue;
             }
+            if (operation_id.indexOf(item) === -1) {
+                continue;
+            }
+            opt = $.extend(true, opt, this.dictionary.schema_types[item]);
+            opt.path = path + opt.url_postfix;
+            delete opt.url_postfix;
+            if (opt.filters) {
+                opt.filters = this.generateViewSchemaFilters(opt.filters, path_obj_prop, opt.path);
+            }
+            return opt;
         }
 
         return $.extend(true, opt, {
@@ -174,7 +172,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
         }
 
         for (let prop in obj) {
-            if (obj.hasOwnProperty(prop)) {
+            if (Object.prototype.hasOwnProperty.call(obj, prop)) {
                 if (this.dictionary.models.ref_names.includes(prop)) {
                     let name = obj[prop].match(/\/([A-z0-9]+)$/);
                     if (name && name[1]) {
@@ -198,6 +196,9 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     getModelName(path_obj_prop) {
         let model_link = this.getModelNameLink(path_obj_prop);
+        if (!model_link) {
+            return 'NoModel';
+        }
         let model_name = model_link.split('/');
         return model_name[model_name.length - 1];
     }
@@ -235,59 +236,53 @@ export default class ViewConstructor extends BaseEntityConstructor {
     getViews(constructor, openapi_schema) {
         let views = {};
         let paths = this.getPaths(openapi_schema);
+        for (let [path, pathObj] of Object.entries(paths)) {
+            let base_options = this.getViewSchema_baseOptions(path);
 
-        for (let path in paths) {
-            if (paths.hasOwnProperty(path)) {
-                let path_obj = paths[path];
-                let base_options = this.getViewSchema_baseOptions(path);
+            for (let propValue of Object.values(pathObj)) {
+                let operation_id = this.getPathOperationId(propValue);
 
-                for (let prop in path_obj) {
-                    if (path_obj.hasOwnProperty(prop)) {
-                        let operation_id = this.getPathOperationId(path_obj[prop]);
+                if (!operation_id) {
+                    continue;
+                }
 
-                        if (!operation_id) {
-                            continue;
-                        }
+                let operation_id_options = this.getViewSchema_operationIdOptions(
+                    operation_id,
+                    path,
+                    propValue,
+                );
 
-                        let operation_id_options = this.getViewSchema_operationIdOptions(
-                            operation_id,
-                            path,
-                            path_obj[prop],
-                        );
+                if (views[operation_id_options.path]) {
+                    continue;
+                }
 
-                        if (views[operation_id_options.path]) {
-                            continue;
-                        }
+                let schema = $.extend(true, {}, base_options, operation_id_options);
+                let model = this.getViewSchema_model(propValue);
+                let template = this.getViewTemplate(schema);
+                let mixins = [];
 
-                        let schema = $.extend(true, {}, base_options, operation_id_options);
-                        let model = this.getViewSchema_model(path_obj[prop]);
-                        let template = this.getViewTemplate(schema);
-                        let mixins = [];
+                signals.emit(`views[${schema.path}].beforeInit`, {
+                    schema: schema,
+                    model: model,
+                    template: template,
+                    mixins: mixins,
+                });
 
-                        tabSignal.emit('views[' + schema.path + '].beforeInit', {
-                            schema: schema,
-                            model: model,
-                            template: template,
-                            mixins: mixins,
-                        });
+                views[schema.path] = new constructor(model, schema, template, mixins);
 
-                        views[schema.path] = new constructor(model, schema, template, mixins);
+                signals.emit(`views[${schema.path}].afterInit`, {
+                    view: views[schema.path],
+                });
 
-                        tabSignal.emit('views[' + schema.path + '].afterInit', {
-                            view: views[schema.path],
-                        });
+                signals.emit('views.afterInitEach', { views: views, path: schema.path });
 
-                        tabSignal.emit('views.afterInitEach', { views: views, path: schema.path });
-
-                        if (!views[schema.path].template) {
-                            views[schema.path].mixins.unshift(DefaultEntityView);
-                        }
-                    }
+                if (!views[schema.path].mixins.some((mixin) => mixin.render || mixin.template)) {
+                    views[schema.path].mixins.unshift(DefaultEntityView);
                 }
             }
         }
 
-        tabSignal.emit('allViews.inited', { views: views });
+        signals.emit('allViews.inited', { views: views });
 
         return views;
     }
@@ -385,58 +380,62 @@ export default class ViewConstructor extends BaseEntityConstructor {
         };
 
         for (let link in views) {
-            if (views.hasOwnProperty(link)) {
-                if (views[link].schema.do_not_connect_with_another_views) {
-                    continue;
-                }
+            if (!Object.prototype.hasOwnProperty.call(views, link)) {
+                continue;
+            }
 
-                if (link == path) {
-                    continue;
-                }
+            if (views[link].schema.do_not_connect_with_another_views) {
+                continue;
+            }
 
-                if (link.indexOf(path) != 0) {
-                    continue;
-                }
+            if (link === path) {
+                continue;
+            }
 
-                let link_name = link.match(/\/([A-z0-9]+)\/$/);
+            if (link.indexOf(path) !== 0) {
+                continue;
+            }
 
-                if (!link_name) {
-                    continue;
-                }
+            let link_name = link.match(/\/([A-z0-9]+)\/$/);
 
-                link_name = link_name[1];
+            if (
+                views[link].schema.do_not_connect_with_another_views ||
+                link === path ||
+                link.indexOf(path) !== 0 ||
+                !link_name
+            ) {
+                continue;
+            }
 
-                let dif = link.match(/\//g).length - path.match(/\//g).length;
-                let link_type;
+            link_name = link_name[1];
 
-                if (dif > 2) {
-                    continue;
-                }
+            let dif = link.match(/\//g).length - path.match(/\//g).length;
+            let link_type;
 
-                if (dif == 2) {
-                    // if(this.internalLinkIsOperation(link_name, views[path])){
-                    //     continue;
-                    // }
-                    link_type = 'child_links';
+            if (dif > 2) {
+                continue;
+            }
+
+            if (dif === 2) {
+                link_type = 'child_links';
+            } else {
+                if (views[link].schema.type === 'action') {
+                    link_type = 'actions';
+                } else if (this.internalLinkIsOperation(link_name, views[path])) {
+                    link_type = 'operations';
                 } else {
-                    if (views[link].schema.type == 'action') {
-                        link_type = 'actions';
-                    } else if (this.internalLinkIsOperation(link_name, views[path])) {
-                        link_type = 'operations';
-                    } else {
-                        link_type = 'sublinks';
-                    }
+                    link_type = 'sublinks';
                 }
+            }
 
-                if (link_type) {
-                    links[link_type][link_name] = this.getInternalLinkObj(
-                        link_name,
-                        link_type,
-                        link,
-                        views[link],
-                        views[path],
-                    );
-                }
+            if (link_type) {
+                links[link_type][link_name] = this.getInternalLinkObj(
+                    link_name,
+                    link_type,
+                    link,
+                    views[link],
+                    views[path],
+                );
             }
         }
 
@@ -448,21 +447,19 @@ export default class ViewConstructor extends BaseEntityConstructor {
 
             Object.keys(links).forEach((link_type) => {
                 if (dict && dict[link_type] && dict[link_type][path_type]) {
-                    for (let link in dict[link_type][path_type]) {
-                        if (dict[link_type][path_type].hasOwnProperty(link)) {
-                            if (links[link_type][link]) {
-                                continue;
-                            }
-
-                            links[link_type][link] = dict[link_type][path_type][link];
+                    for (let [link, linkObj] of Object.entries(dict[link_type][path_type])) {
+                        if (links[link_type][link]) {
+                            continue;
                         }
+
+                        links[link_type][link] = linkObj;
                     }
                 }
             });
         }
 
         if (
-            views[path].schema.type == 'list' &&
+            views[path].schema.type === 'list' &&
             views[path].schema.level > 2 &&
             views['/' + views[path].schema.name + '/']
         ) {
@@ -502,9 +499,9 @@ export default class ViewConstructor extends BaseEntityConstructor {
             if (!page.schema[op_type]) {
                 return;
             }
-            for (let item in page.schema[op_type]) {
+            for (let [item, itemObj] of Object.entries(page.schema[op_type])) {
                 if (dict && dict.multi_actions && dict.multi_actions.includes(item)) {
-                    multi_actions[item] = $.extend(true, { multi_action: true }, page.schema[op_type][item]);
+                    multi_actions[item] = $.extend(true, { multi_action: true }, itemObj);
                 }
             }
         });
@@ -518,7 +515,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
      */
     connectPageAndListViews(views, page_path) {
         // let list_path = page_path.replace(/\{[A-z]+\}\/$/, "");
-        let list_path = page_path.replace(/\{[A-z0-9]+\}\/$/, '');
+        let list_path = page_path.replace(/{[A-z0-9]+}\/$/, '');
         if (views[list_path]) {
             views[page_path].schema.list_path = list_path;
             views[list_path].schema.page_path = page_path;
@@ -535,37 +532,31 @@ export default class ViewConstructor extends BaseEntityConstructor {
     generateViews(constructor, openapi_schema) {
         let views = this.getViews(constructor, openapi_schema);
 
-        for (let path in views) {
-            if (views.hasOwnProperty(path)) {
-                let links = this.getViewInternalLinks(views, path);
-                for (let key in links) {
-                    if (links.hasOwnProperty(key)) {
-                        views[path].schema[key] = links[key];
-                    }
-                }
+        for (let [path, view] of Object.entries(views)) {
+            let links = this.getViewInternalLinks(views, path);
+            for (let [key, val] of Object.entries(links)) {
+                views[path].schema[key] = val;
+            }
 
-                if (views[path].schema.type == 'page') {
-                    this.connectPageAndListViews(views, path);
-                }
+            if (view.schema.type === 'page') {
+                this.connectPageAndListViews(views, path);
             }
         }
 
-        for (let path in views) {
-            if (views.hasOwnProperty(path)) {
-                if (views[path].schema.type == 'list') {
-                    views[path].schema.multi_actions = this.getViewMultiActions(views, path);
-                }
-
-                if (views[path].schema.hidden) {
-                    delete views[path];
-                    continue;
-                }
-
-                tabSignal.emit('views[' + path + '].created', { view: views[path] });
+        for (let [path, view] of Object.entries(views)) {
+            if (view.schema.type === 'list') {
+                view.schema.multi_actions = this.getViewMultiActions(views, path);
             }
+
+            if (view.schema.hidden) {
+                delete views[path];
+                continue;
+            }
+
+            signals.emit(`views[${path}].created`, { view: view });
         }
 
-        tabSignal.emit('allViews.created', { views: views });
+        signals.emit('allViews.created', { views: views });
 
         return views;
     }

@@ -21,7 +21,7 @@ class APIObjectField extends FKandAPIObjectMixin(BaseField) {
      * @param {string} path Name of View path.
      */
     static prepareField(field, path) {
-        let constructor = new ViewConstructor(openapi_dictionary, app.models);
+        let constructor = new ViewConstructor(openapi_dictionary, window.app.models);
         let model = constructor.getViewSchema_model(field.options);
 
         if (!model) {
@@ -30,12 +30,12 @@ class APIObjectField extends FKandAPIObjectMixin(BaseField) {
 
         let new_format = 'api_' + model.name.toLowerCase();
 
-        if (window.guiFields[new_format]) {
+        if (window.spa.fields.guiFields[new_format]) {
             let opt = $.extend(true, {}, field.options, { format: new_format });
-            let new_field = new window.guiFields[new_format](opt);
+            let new_field = new window.spa.fields.guiFields[new_format](opt);
 
-            if (window.guiFields[new_format].prepareField) {
-                return window.guiFields[new_format].prepareField(new_field, path);
+            if (window.spa.fields.guiFields[new_format].prepareField) {
+                return window.spa.fields.guiFields[new_format].prepareField(new_field, path);
             }
 
             return new_field;

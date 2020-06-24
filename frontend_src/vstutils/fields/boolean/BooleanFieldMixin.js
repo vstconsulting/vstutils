@@ -29,8 +29,8 @@ const BooleanFieldMixin = {
         this.initBooleanValue();
     },
     watch: {
+        // eslint-disable-next-line no-unused-vars
         is_hidden: function (is_hidden) {
-            /* jshint unused: false */
             this.initBooleanValue();
         },
     },

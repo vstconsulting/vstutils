@@ -18,7 +18,7 @@
                 :fields="fields"
                 :field_props="field_props"
                 :field_value="field_value"
-                @changeValue="changeValue"
+                @change-value="changeValue"
             ></fma_table_row>
         </tbody>
     </table>
@@ -41,7 +41,7 @@
         },
         methods: {
             changeValue(opt) {
-                this.$emit('changeValue', opt);
+                this.$emit('change-value', opt);
             },
         },
         components: {

@@ -34,7 +34,6 @@
                     return this.field.options.enum;
                 },
                 function (newVal, oldVal) {
-                    /* jshint unused: false */
                     this.enum = newVal || [];
                     this.initSelect2();
                 },

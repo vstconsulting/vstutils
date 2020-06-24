@@ -88,7 +88,6 @@
              * @private
              */
             _renderItem(item, search) {
-                /* jshint unused: false */
                 return (
                     '<div class="autocomplete-suggestion"' + ' data-value="' + item + '" >' + item + '</div>'
                 );
@@ -101,7 +100,6 @@
              * @private
              */
             _onSelect(event, term, item) {
-                /* jshint unused: false */
                 let value = this._getAutocompleteValue(item);
 
                 this.$emit('proxyEvent', 'setValueInStore', value);

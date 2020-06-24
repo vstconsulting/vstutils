@@ -3,28 +3,28 @@
         <template v-for="(item, itemIdx) in field.options.realFields">
             <template v-if="!more_than_one_field(item)">
                 <component
+                    :is="'field_' + real_field.options.format"
                     v-for="(real_field, idx) in item"
                     :key="`${itemIdx}-${idx}`"
-                    :is="'field_' + real_field.options.format"
                     :field="real_field"
                     :prop_data="realFieldValue(itemIdx)"
                     :wrapper_opt="{ use_prop_data: true }"
                     @setValueInStore="setValueInStore($event, itemIdx, real_field.options.name)"
-                ></component>
+                />
             </template>
             <template v-else>
-                <div class="col-lg-12 col-xs-12 col-sm-12 col-md-12" :key="itemIdx">
+                <div :key="itemIdx" class="col-lg-12 col-xs-12 col-sm-12 col-md-12">
                     <label class="control-label">{{ $t(itemIdx.toLowerCase()) | capitalize }}</label>
                     <div class="row">
                         <component
+                            :is="'field_' + real_field.options.format"
                             v-for="(real_field, idx) in item"
                             :key="`${itemIdx}-${idx}`"
-                            :is="'field_' + real_field.options.format"
                             :field="real_field"
                             :prop_data="realFieldValue(itemIdx)"
                             :wrapper_opt="{ use_prop_data: true }"
                             @setValueInStore="setValueInStore($event, itemIdx, real_field.options.name)"
-                        ></component>
+                        />
                     </div>
                 </div>
             </template>

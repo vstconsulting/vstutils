@@ -10,22 +10,22 @@ window.qunitTestsArray['stringToBoolean'] = {
         syncQUnit.addTest("stringToBoolean", function(assert) {
             let done = assert.async();
 
-            assert.ok(stringToBoolean("true"), 'stringToBoolean');
-            assert.ok(stringToBoolean("True"), 'stringToBoolean');
-            assert.ok(stringToBoolean("TRUE"), 'stringToBoolean');
-            assert.ok(stringToBoolean("yes"), 'stringToBoolean');
-            assert.ok(stringToBoolean("Yes"), 'stringToBoolean');
-            assert.ok(stringToBoolean("YES"), 'stringToBoolean');
-            assert.ok(stringToBoolean("1"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("true"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("True"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("TRUE"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("yes"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("Yes"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("YES"), 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("1"), 'stringToBoolean');
 
-            assert.ok(stringToBoolean("false") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean("False") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean("FALSE") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean("no") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean("No") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean("NO") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean("0") == false, 'stringToBoolean');
-            assert.ok(stringToBoolean(null) == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("false") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("False") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("FALSE") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("no") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("No") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("NO") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean("0") == false, 'stringToBoolean');
+            assert.ok(window.spa.utils.stringToBoolean(null) == false, 'stringToBoolean');
 
             testdone(done);
         });
@@ -65,37 +65,37 @@ window.qunitTestsArray['guiLocalSettings'] = {
 
             // checks setting and getting of value to guiLocalSettings
             for(let key in test_settings) {
-                guiLocalSettings.set(key, test_settings[key]);
+                spa.utils.guiLocalSettings.set(key, test_settings[key]);
                 assert.ok(
-                    deepEqual(guiLocalSettings.get(key), test_settings[key]),
+                    window.spa.utils.deepEqual(spa.utils.guiLocalSettings.get(key), test_settings[key]),
                     'guiLocalSettings.set & guiLocalSettings.get',
                 );
             }
 
             // checks setting as tmp values of existing before settings
             for(let key in test_tmp_settings_existing) {
-                guiLocalSettings.setAsTmp(key, test_tmp_settings_existing[key]);
+                spa.utils.guiLocalSettings.setAsTmp(key, test_tmp_settings_existing[key]);
                 assert.ok(
-                    deepEqual(guiLocalSettings.get(key), test_tmp_settings_existing[key]),
+                    window.spa.utils.deepEqual(window.spa.utils.guiLocalSettings.get(key), test_tmp_settings_existing[key]),
                     'guiLocalSettings.setAsTmp (existing settings) & guiLocalSettings.get',
                 );
             }
 
             // checks setting as tmp values of unexisting before settings
             for(let key in test_tmp_settings_unexisting) {
-                guiLocalSettings.setAsTmp(key, test_tmp_settings_unexisting[key]);
+                window.spa.utils.guiLocalSettings.setAsTmp(key, test_tmp_settings_unexisting[key]);
                 assert.ok(
-                    deepEqual(guiLocalSettings.get(key), test_tmp_settings_unexisting[key]),
+                    window.spa.utils.deepEqual(window.spa.utils.guiLocalSettings.get(key), test_tmp_settings_unexisting[key]),
                     'guiLocalSettings.setAsTmp (unexisting settings) & guiLocalSettings.get',
                 );
             }
 
-            guiLocalSettings.set('test_1',test_settings['test_1']);
+            window.spa.utils.guiLocalSettings.set('test_1',test_settings['test_1']);
 
             // checks that after guiLocalSettings.set() call non tmp values of settings were saved to local storage
             for(let key in test_settings) {
                 assert.ok(
-                    deepEqual(guiLocalSettings.get(key), test_settings[key]),
+                    window.spa.utils.deepEqual(window.spa.utils.guiLocalSettings.get(key), test_settings[key]),
                     'existing tmp settings were not added to LocalStorage after guiLocalSettings.set',
                 );
             }
@@ -103,30 +103,30 @@ window.qunitTestsArray['guiLocalSettings'] = {
             // checks that after guiLocalSettings.set() call tmp values of unexisting before settings were not saved to local storage
             for(let key in test_tmp_settings_unexisting) {
                 assert.ok(
-                    guiLocalSettings.get(key) === undefined,
+                    window.spa.utils.guiLocalSettings.get(key) === undefined,
                     'tmp unexisting wetting were not added to LocalStorage after guiLocalSettings.set',
                 );
             }
 
             // checks guiLocalSettings.delete
             for(let key in test_settings) {
-                guiLocalSettings.delete(key);
-                assert.ok(guiLocalSettings.get(key) === undefined, 'delete settings');
+                window.spa.utils.guiLocalSettings.delete(key);
+                assert.ok(window.spa.utils.guiLocalSettings.get(key) === undefined, 'delete settings');
             }
 
             for(let key in test_tmp_settings_unexisting) {
-                delete guiLocalSettings.__tmpSettings[key];
+                delete window.spa.utils.guiLocalSettings.__tmpSettings[key];
             }
 
             // checks guiLocalSettings.setIfNotExists for a new key
-            guiLocalSettings.setIfNotExists('q1w2e3r4t5y6', true);
-            assert.ok(guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - unexisting key');
+            window.spa.utils.guiLocalSettings.setIfNotExists('q1w2e3r4t5y6', true);
+            assert.ok(window.spa.utils.guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - unexisting key');
 
             // checks guiLocalSettings.setIfNotExists for existing key
-            guiLocalSettings.setIfNotExists('q1w2e3r4t5y6', false);
-            assert.ok(guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - existing key');
+            window.spa.utils.guiLocalSettings.setIfNotExists('q1w2e3r4t5y6', false);
+            assert.ok(window.spa.utils.guiLocalSettings.get('q1w2e3r4t5y6') === true, 'setIfNotExists - existing key');
 
-            guiLocalSettings.delete('q1w2e3r4t5y6');
+            window.spa.utils.guiLocalSettings.delete('q1w2e3r4t5y6');
 
             testdone(done);
         });
@@ -145,10 +145,10 @@ window.qunitTestsArray['capitalizeString'] = {
 
             let answer = 'Hello';
 
-            assert.ok(capitalizeString() == "", 'empty call of capitalizeString');
+            assert.ok(window.spa.utils.capitalizeString() == "", 'empty call of capitalizeString');
 
             strings.forEach(item => {
-                assert.ok(capitalizeString(item) == answer, 'capitalizeString()');
+                assert.ok(window.spa.utils.capitalizeString(item) == answer, 'capitalizeString()');
             });
 
             testdone(done);
@@ -175,11 +175,11 @@ window.qunitTestsArray['sliceLongString'] = {
             ];
 
             for(let i in arguments) {
-                assert.ok(sliceLongString(arguments[i]) == answer[i], 'sliceLongString');
+                assert.ok(window.spa.utils.sliceLongString(arguments[i]) == answer[i], 'sliceLongString');
             }
 
-            assert.ok(sliceLongString(short_string, 6) == short_string);
-            assert.ok(sliceLongString(short_string, 5) == 'strin...');
+            assert.ok(window.spa.utils.sliceLongString(short_string, 6) == short_string);
+            assert.ok(window.spa.utils.sliceLongString(short_string, 5) == 'strin...');
 
             testdone(done);
         });
@@ -199,14 +199,14 @@ window.qunitTestsArray['isEmptyObject'] = {
                 c: ['string', 2],
             };
 
-            assert.ok(isEmptyObject({}) === true, 'isEmptyObject');
-            assert.ok(isEmptyObject(obj) === false, 'isEmptyObject');
+            assert.ok(window.spa.utils.isEmptyObject({}) === true, 'isEmptyObject');
+            assert.ok(window.spa.utils.isEmptyObject(obj) === false, 'isEmptyObject');
 
             for(let i in obj) {
                 delete obj[i];
             }
 
-            assert.ok(isEmptyObject(obj) === true, 'isEmptyObject');
+            assert.ok(window.spa.utils.isEmptyObject(obj) === true, 'isEmptyObject');
 
             testdone(done);
         });
@@ -221,9 +221,9 @@ window.qunitTestsArray['addCssClassesToElement'] = {
         syncQUnit.addTest("addCssClassesToElement", function (assert) {
             let done = assert.async();
 
-            assert.ok(addCssClassesToElement('td'), 'td');
-            assert.ok(addCssClassesToElement('td', 'user'), 'td_user');
-            assert.ok(addCssClassesToElement('td', 'user', 'username'), 'td_user_username');
+            assert.ok(window.spa.utils.addCssClassesToElement('td'), 'td');
+            assert.ok(window.spa.utils.addCssClassesToElement('td', 'user'), 'td_user');
+            assert.ok(window.spa.utils.addCssClassesToElement('td', 'user', 'username'), 'td_user_username');
 
             testdone(done);
         });
@@ -243,15 +243,15 @@ window.qunitTestsArray['allPropertiesIsObjects'] = {
                 c: {},
             };
 
-            assert.ok(allPropertiesIsObjects(obj) === false, 'allPropertiesIsObjects');
+            assert.ok(window.spa.utils.allPropertiesIsObjects(obj) === false, 'allPropertiesIsObjects');
 
             obj['a'] = {d:5};
-            assert.ok(allPropertiesIsObjects(obj) === false, 'allPropertiesIsObjects');
+            assert.ok(window.spa.utils.allPropertiesIsObjects(obj) === false, 'allPropertiesIsObjects');
 
             obj['b'] = {};
-            assert.ok(allPropertiesIsObjects(obj) === true, 'allPropertiesIsObjects');
+            assert.ok(window.spa.utils.allPropertiesIsObjects(obj) === true, 'allPropertiesIsObjects');
 
-            assert.ok(allPropertiesIsObjects({}) === true, 'allPropertiesIsObjects');
+            assert.ok(window.spa.utils.allPropertiesIsObjects({}) === true, 'allPropertiesIsObjects');
 
             testdone(done);
         });
@@ -274,7 +274,7 @@ window.qunitTestsArray['hexToRgbA'] = {
             ];
 
             test_values.forEach(obj => {
-                assert.ok(hexToRgbA(obj.hex, obj.alpha) == obj.rgba, 'hexToRgbA()');
+                assert.ok(window.spa.utils.hexToRgbA(obj.hex, obj.alpha) == obj.rgba, 'hexToRgbA()');
             });
 
             testdone(done);

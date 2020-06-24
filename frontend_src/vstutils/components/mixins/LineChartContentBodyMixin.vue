@@ -27,12 +27,10 @@
         },
         watch: {
             value: function (value) {
-                /* jshint unused: false */
                 this.updateChartData();
             },
             'item.lines': {
                 handler(value) {
-                    /* jshint unused: false */
                     this.updateChartData();
                 },
                 deep: true,

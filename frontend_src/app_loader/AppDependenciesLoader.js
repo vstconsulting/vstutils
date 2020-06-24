@@ -311,7 +311,6 @@ class AppDependenciesLoader {
             document.querySelector('.LoadingProgressBar-error-msg').style.display = 'block';
             document.querySelector('.loadInfoWrapper').classList.add('need-reload');
         } catch (e) {
-            debugger;
             console.error(e);
             alert('Oops, some error occurred! Check out DevTools console!');
         }
@@ -339,7 +338,8 @@ class AppDependenciesLoader {
         this.setLoadingOperation('loading files');
         this.showLoadingAnimation();
 
-        return filesLoader.loadAllFiles()
+        return filesLoader
+            .loadAllFiles()
             .then((files) => {
                 this.loading = false;
                 this.setLoadingOperation('loading app');
@@ -367,7 +367,7 @@ class AppDependenciesLoader {
         this.appendLog('All static files were successfully loaded');
 
         let callbacks = {
-            fileAppended: (file, content, index) => {  /* jshint unused: false */
+            fileAppended: (file, content, index) => {
                 this.appendLog('File was appended to the page - "' + file.name + '"');
                 let prog = Math.floor(((index + 1) / files.length) * 100);
                 this.setLoadingProgress(prog);
@@ -383,7 +383,8 @@ class AppDependenciesLoader {
             if (this.errors.length) {
                 throw new Error('Some error occurred during files loading.');
             }
-            tabSignal.emit('resource.loaded');
+            // eslint-disable-next-line no-undef
+            spa.signals.emit('resource.loaded');
         });
     }
 }

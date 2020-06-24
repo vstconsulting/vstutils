@@ -1,5 +1,5 @@
 <template>
-    <div class="col-lg-2 col-6 dnd-block" v-if="item.active">
+    <div v-if="item.active" class="col-lg-2 col-6 dnd-block">
         <div class="small-box bg-info cursor-move1">
             <div class="inner">
                 <transition name="slide-fade" mode="out-in">
@@ -11,13 +11,13 @@
                     {{ $tc((item.title || item.name).toLowerCase(), value) | capitalize }}
                 </p>
             </div>
-            <div class="icon hidden-xs" style="top: 0px;">
-                <i class="fa fa-cog"></i>
+            <div class="icon hidden-xs" style="top: 0;">
+                <i class="fa fa-cog" />
             </div>
             <template v-if="item.url">
                 <router-link :to="item.url" class="small-box-footer">
                     {{ $t('more info') | capitalize }}
-                    <i class="fa fa-arrow-circle-right"></i>
+                    <i class="fa fa-arrow-circle-right" />
                 </router-link>
             </template>
             <template v-else>
@@ -29,10 +29,11 @@
 
 <script>
     export default {
-        name: 'w_counter',
+        name: 'CounterWidgetComponent',
         props: {
             item: Object,
             value: {
+                type: Number,
                 default: 0,
             },
         },

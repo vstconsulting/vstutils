@@ -15,7 +15,7 @@ function createDomElement(type, attributes, props) {
     for (let key in props) {
         if (typeof props[key] === 'object' && key === 'style') {
             for (let stl in props[key]) {
-                if (!props[key].hasOwnProperty(stl)) {
+                if (!Object.prototype.hasOwnProperty.call(props[key], stl)) {
                     continue;
                 }
 
@@ -83,7 +83,7 @@ class StaticFilesLoader {
      * @param {object} file Object with file properties (type, name(url)).
      * @param {string} content File's content.
      */
-    appendFile_tpl(file, content) {  /* jshint unused: false */
+    appendFile_tpl(file, content) {
         let div = createDomElement('div', [], { innerHTML: content });
         document.body.appendChild(div);
     }

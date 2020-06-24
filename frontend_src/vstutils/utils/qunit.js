@@ -11,7 +11,7 @@ class TestsFilesLoader extends StaticFilesLoader {
             response[index].text().then((content) => {
                 this[handler](item, content);
 
-                if (index + 1 == files.length) {
+                if (index + 1 === files.length) {
                     window._guiTestsRunner.runTests();
                 } else {
                     this.appendFilesSync(files, response, index + 1);
@@ -48,7 +48,12 @@ export function loadQUnitTests() {
     return new TestsFilesLoader(
         window.guiTestsFiles.map((url, index) => {
             return {
-                name: app.api.getHostUrl() + app.api.getStaticPath() + url + '?r=' + Math.random(),
+                name:
+                    window.app.api.getHostUrl() +
+                    window.app.api.getStaticPath() +
+                    url +
+                    '?r=' +
+                    Math.random(),
                 priority: index,
                 type: 'js',
             };

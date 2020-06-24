@@ -25,7 +25,7 @@ stages:
   stage: test
   image: vstconsulting/images:build
   variables:
-    TOX_ENVS: "flake,pylint,jshint,py36-django-install,py37-django-install"
+    TOX_ENVS: "flake,pylint,py36-django-install,py37-django-install"
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}"; fi
   script:
@@ -43,7 +43,7 @@ code_style:
   <<: *branch_tests
   stage: code_standarts
   variables:
-    TOX_ENVS: "flake,mypy,pylint,jshint"
+    TOX_ENVS: "flake,mypy,pylint"
 
 py36-django30-install:
   <<: *branch_tests

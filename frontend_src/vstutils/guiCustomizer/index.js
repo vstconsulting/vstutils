@@ -23,7 +23,4 @@ let guiCustomizer = new GuiCustomizer(
     guiLocalSettings.get('skins_settings') || {},
 );
 
-window.guiSkins = skins;
-window.guiCustomizer = guiCustomizer;
-
 export { GuiCustomizer, skins, guiCustomizer };

@@ -3,11 +3,6 @@ import mixins from './mixins.js';
 import gui_fields_mixins from './fieldsMixins';
 import fieldsRegistrator from './fieldsRegistrator.js';
 
-Object.assign(window, mixins);
-window.gui_fields_mixins = gui_fields_mixins;
-window.fieldsRegistrator = fieldsRegistrator;
-window.guiFields = guiFields;
-
 export { mixins, gui_fields_mixins, guiFields, fieldsRegistrator };
 
 import * as apiObject from './api-object';

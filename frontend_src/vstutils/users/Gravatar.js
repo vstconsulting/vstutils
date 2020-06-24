@@ -15,7 +15,7 @@ export default class Gravatar {
             this.base_url = opt.base_url;
         }
 
-        this.default_gravatar = app.api.openapi.info['x-settings'].static_path + 'img/anonymous.png';
+        this.default_gravatar = window.app.api.openapi.info['x-settings'].static_path + 'img/anonymous.png';
     }
     /**
      * Method, that returns url of default gravatar image.

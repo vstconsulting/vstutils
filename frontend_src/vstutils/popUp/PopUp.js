@@ -132,7 +132,6 @@ export class PopUp {
         let options = {
             buttons: buttons,
             onClosed: (instance, toast, closedBy) => {
-                /* jshint unused: false */
                 if (answer_buttons.includes(closedBy)) {
                     return success(closedBy);
                 }

@@ -6,17 +6,14 @@
             </p>
         </template>
         <template v-else>
-            <gui_list_table
-                :instances="data.instances"
-                :fields="fields"
-                :view="view"
-                :opt="opt"
-            ></gui_list_table>
+            <gui_list_table :instances="data.instances" :fields="fields" :view="view" :opt="opt" />
         </template>
     </div>
 </template>
 
 <script>
+    import { isEmptyObject } from '../../../utils';
+
     /**
      * Base component for content part (area for representation of view data) of 'list' views.
      */

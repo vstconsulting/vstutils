@@ -65,7 +65,7 @@ class BaseField {
         }
 
         if (this.options.minLength) {
-            if (value_length == 0) {
+            if (value_length === 0) {
                 if (!this.options.required) {
                     return;
                 }

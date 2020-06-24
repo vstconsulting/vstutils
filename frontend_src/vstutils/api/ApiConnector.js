@@ -133,7 +133,6 @@ export default class ApiConnector {
                     let method = 'resolve';
 
                     if (!(item.status >= 200 && item.status < 400)) {
-                        debugger;
                         method = 'reject';
                     }
 
@@ -141,7 +140,6 @@ export default class ApiConnector {
                 }
             })
             .catch((error) => {
-                debugger;
                 throw new StatusError(error.status, error.data);
             });
     }
@@ -199,18 +197,20 @@ export default class ApiConnector {
      * @return {promise} Promise of getting list of App languages from Cache.
      */
     getLanguagesFromCache() {
-        return this.cache
-            .getFile('languages')
-            .then((response) => {
-                return JSON.parse(response.data);
-            })
-            .catch((error) => {
-                /* jshint unused: false */
-                return this.loadLanguages().then((languages) => {
-                    this.cache.setFile('languages', JSON.stringify(languages));
-                    return languages;
-                });
-            });
+        return (
+            this.cache
+                .getFile('languages')
+                .then((response) => {
+                    return JSON.parse(response.data);
+                })
+                // eslint-disable-next-line no-unused-vars
+                .catch((error) => {
+                    return this.loadLanguages().then((languages) => {
+                        this.cache.setFile('languages', JSON.stringify(languages));
+                        return languages;
+                    });
+                })
+        );
     }
     /**
      * Method, that gets list of App languages.
@@ -238,18 +238,20 @@ export default class ApiConnector {
      * @return {promise} Promise of getting translations for some language from Cache.
      */
     getTranslationsFromCache(lang) {
-        return this.cache
-            .getFile('translations.' + lang)
-            .then((response) => {
-                return JSON.parse(response.data);
-            })
-            .catch((error) => {
-                /* jshint unused: false */
-                return this.loadTranslations(lang).then((translations) => {
-                    this.cache.setFile('translations.' + lang, JSON.stringify(translations));
-                    return translations;
-                });
-            });
+        return (
+            this.cache
+                .getFile('translations.' + lang)
+                .then((response) => {
+                    return JSON.parse(response.data);
+                })
+                // eslint-disable-next-line no-unused-vars
+                .catch((error) => {
+                    return this.loadTranslations(lang).then((translations) => {
+                        this.cache.setFile('translations.' + lang, JSON.stringify(translations));
+                        return translations;
+                    });
+                })
+        );
     }
     /**
      * Method, that gets translations for some language.
