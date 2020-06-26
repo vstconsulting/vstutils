@@ -37,7 +37,7 @@ const config = {
     chunkFilename: "[name].chunk.js",
     publicPath: "/static/bundle/",
     library: "[name]",
-    libraryTarget: "var"
+    libraryTarget: 'window'
   },
   plugins: [
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),

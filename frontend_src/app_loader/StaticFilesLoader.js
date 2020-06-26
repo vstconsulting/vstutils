@@ -1,147 +1,108 @@
 /**
- * Function creates DOM element and sets it attributes and props.
- * @param {string} type Type (tag) of DOM element.
- * @param {array} attributes Array of objects -
- * DOM element attributes(key, value).
- * @param {object} props Object with properties of DOM element.
+ * Groups list of objects by given key value
+ *
+ * @param {Object[]} objects
+ * @param {string} key
  */
-function createDomElement(type, attributes, props) {
-    let el = document.createElement(type);
-
-    attributes.forEach((attr) => {
-        el.setAttribute(attr.key, attr.value);
-    });
-
-    for (let key in props) {
-        if (typeof props[key] === 'object' && key === 'style') {
-            for (let stl in props[key]) {
-                if (!Object.prototype.hasOwnProperty.call(props[key], stl)) {
-                    continue;
-                }
-
-                el[key][stl] = props[key][stl];
-            }
-        } else {
-            el[key] = props[key];
-        }
-    }
-
-    return el;
+function groupBy(objects, key) {
+    return objects.reduce(function (rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(x);
+        return rv;
+    }, {});
 }
 
 /**
- * Class, that is responsible for the loading of app's static files (js, css, tpl) and appending them to the DOM.
+ * @name FileCallback
+ * @function
+ * @param {string} path - Path of file.
+ * @param {string} type - Type of file.
  */
-class StaticFilesLoader {
-    constructor(resource_list) {
-        this.resource_list = resource_list;
+
+/**
+ * Class that represents one file
+ */
+class StaticFile {
+    constructor(path, type = 'js', fileLoadedCallback = undefined, fileAddedToPageCallback = undefined) {
+        this.path = path;
+        this.type = type;
+        this.fileLoadedCallback = fileLoadedCallback;
+        this.fileAddedToPageCallback = fileAddedToPageCallback;
     }
 
-    /**
-     * Method, that appends JS type file to the page.
-     * @param {object} file Object with file properties (type, name(url)).
-     * @param {string} content File's content.
-     */
-    appendFile_js(file, content) {
-        let attributes = [
-            { key: 'type', value: 'text/javascript' },
-            { key: 'data-url', value: file.name },
-        ];
-        let props = {
-            innerHTML: content,
-        };
-
-        let link = createDomElement('script', attributes, props);
-        document.head.appendChild(link);
+    startLoading() {
+        this.loaded = fetch(this.path)
+            .then((r) => r.text())
+            .then((content) => {
+                if (this.fileLoadedCallback) this.fileLoadedCallback(this.path, this.type);
+                return content;
+            });
     }
 
-    /**
-     * Method, that appends CSS type file to the page.
-     * @param {object} file Object with file properties (type, name(url)).
-     * @param {string} content File's content.
-     */
-    appendFile_css(file, content) {
-        let attributes = [
-            { key: 'rel', value: 'stylesheet' },
-            { key: 'type', value: 'text/css' },
-            { key: 'media', value: 'text/css' },
-            { key: 'data-url', value: file.name },
-        ];
-        let props = {
-            rel: 'stylesheet',
-            type: 'text/css',
-            media: 'all',
-            innerHTML: content,
-        };
-
-        let link = createDomElement('style', attributes, props);
-        document.head.appendChild(link);
-    }
-
-    /**
-     * Method, that appends TPL type file to the page.
-     * @param {object} file Object with file properties (type, name(url)).
-     * @param {string} content File's content.
-     */
-    appendFile_tpl(file, content) {
-        let div = createDomElement('div', [], { innerHTML: content });
-        document.body.appendChild(div);
-    }
-
-    /**
-     * Method, that appends files synchronously (in 'priority' order) to the page.
-     * Firstly, current method adds to the page file with '0' index, then it appends file with '1' index and so on.
-     * @param {array} response List of responses on files loading requests.
-     * @param {number} index List index of element from files and response arrays.
-     * @param {object} callbacks Dict with callbacks.
-     */
-    appendFilesSync(response, index, callbacks) {
-        let item = this.resource_list[index];
-        let handler = 'appendFile_' + item.type;
-
-        if (!this[handler]) {
-            return Promise.reject();
-        }
-
-        return response[index].text().then((content) => {
-            this[handler](item, content);
-            if (index + 1 !== this.resource_list.length) {
-                if (callbacks && callbacks.fileAppended) {
-                    callbacks.fileAppended(item, content, index);
-                }
-
-                return this.appendFilesSync(response, index + 1, callbacks);
-            } else {
-                if (callbacks && callbacks.allFilesAppended) {
-                    callbacks.allFilesAppended();
-                }
-
-                return Promise.resolve(true);
-            }
+    startAddingToPageWhenLoaded() {
+        this.addedToPage = this.loaded.then((content) => {
+            this._addToPage(content);
+            if (this.fileAddedToPageCallback) this.fileAddedToPageCallback(this.path, this.type);
         });
     }
 
-    /**
-     * Method checks, that all files were loaded with 200 status.
-     * @param {array} response Array with responses on files loading requests.
-     * @return {boolean}
-     */
-    checkAllFilesLoaded(response) {
-        for (let item of response) {
-            if (item.status !== 200) {
-                throw new Error(`${item.status} error occurred during file loading - "${item.url}"`);
-            }
+    _addToPage(content) {
+        if (this.type === 'js') {
+            window.eval(content);
+        } else if (this.type === 'css') {
+            const style = document.createElement('style');
+            style.setAttribute('rel', 'stylesheet');
+            style.innerHTML = content;
+            style.dataset.url = this.path;
+            document.head.appendChild(style);
+        } else if (this.type === 'tpl') {
+            const div = document.createElement('div');
+            div.innerHTML = content;
+            document.body.appendChild(div);
         }
-        return true;
-    }
-
-    /**
-     * Method, that loads all files form resource_list.
-     * Method returns promise of files loading.
-     */
-    loadAllFiles() {
-        return Promise.all(this.resource_list.map((item) => fetch(item.name)));
     }
 }
 
-export { StaticFilesLoader, createDomElement };
+class StaticFilesLoader {
+    /**
+     * @param {Object[]} files
+     * @param {number} files[].priority - File priority (file with lower priority will be added on page first).
+     * @param {string} files[].type - File type (tpl, css, js).
+     * @param {string} files[].name - File path.
+     * @param {FileCallback=} fileLoadedCallback - Hook that will be called when file is loaded.
+     * @param {FileCallback=} fileAddedToPageCallback - Hook that will be called when file is added to page.
+     */
+    constructor(files, fileLoadedCallback = undefined, fileAddedToPageCallback = undefined) {
+        /**
+         * @type {StaticFile[][]}
+         */
+        this.buckets = [];
+        if (files.length === 0) {
+            return;
+        }
+
+        const rawBuckets = Object.entries(groupBy(files, 'priority'))
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
+            .map((entry) => entry[1]);
+
+        this.buckets = rawBuckets.map((rawBucket) =>
+            rawBucket.map(
+                (rawFile) =>
+                    new StaticFile(rawFile.name, rawFile.type, fileLoadedCallback, fileAddedToPageCallback),
+            ),
+        );
+    }
+
+    async loadAndAddToPageAllFiles() {
+        this.buckets.flat().forEach((file) => file.startLoading());
+
+        for (let bucket of this.buckets) {
+            bucket.forEach((file) => file.startAddingToPageWhenLoaded());
+
+            for (let file of bucket) {
+                await file.addedToPage;
+            }
+        }
+    }
+}
+
+export { StaticFilesLoader };

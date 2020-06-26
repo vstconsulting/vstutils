@@ -1,4 +1,35 @@
-import { createDomElement } from './StaticFilesLoader.js';
+import './style.css';
+
+/**
+ * Function creates DOM element and sets it attributes and props.
+ * @param {string} type Type (tag) of DOM element.
+ * @param {array} attributes Array of objects -
+ * DOM element attributes(key, value).
+ * @param {object} props Object with properties of DOM element.
+ */
+function createDomElement(type, attributes, props) {
+    let el = document.createElement(type);
+
+    attributes.forEach((attr) => {
+        el.setAttribute(attr.key, attr.value);
+    });
+
+    for (let key in props) {
+        if (typeof props[key] === 'object' && key === 'style') {
+            for (let stl in props[key]) {
+                if (!Object.prototype.hasOwnProperty.call(props[key], stl)) {
+                    continue;
+                }
+
+                el[key][stl] = props[key][stl];
+            }
+        } else {
+            el[key] = props[key];
+        }
+    }
+
+    return el;
+}
 
 /**
  * Class, that is responsible for loading of App dependencies (OpenAPI schema, static files) and appending them to the page.
@@ -6,11 +37,13 @@ import { createDomElement } from './StaticFilesLoader.js';
  * DOM element, that collects loading logs and shows status of app dependencies loading.
  * This class loads only app's dependencies, it does not create/load app instance.
  */
-class AppDependenciesLoader {
+class LoadingPageController {
     /**
      * Constructor of AppDependenciesLoader Class.
      */
-    constructor() {
+    constructor(totalFiles) {
+        this.totalFiles = totalFiles;
+        this.filesAddedToPageCount = 0;
         /**
          * Boolean property, that means is loader loading files right now or not?
          */
@@ -32,8 +65,6 @@ class AppDependenciesLoader {
      * - loading logs wrapper (will be shown only if some error occurs).
      */
     addLoaderBlockToPage() {
-        let styles =
-            "#LoadingProgressBar ::-webkit-scrollbar{width:0}#LoadingProgressBar{background:#ecf0f5;width:100%;height:100%;position:fixed;top:0;left:0;z-index:2000}#LoadingProgressBar .loadWrapper{width:200px;height:7px;position:absolute;top:155px;left:50%;transform:translate(-50%,-50%);background:#e0e0e0;border-radius:7px}#LoadingProgressBar .loadProgress{position:absolute;top:0;left:0;border-radius:7px;background:#3f51b5;height:100%;transition:all .1s ease-out}#LoadingProgressBar .operation,#LoadingProgressBar .status,#LoadingProgressBar .titleP,.LoadingProgressBar-logger-wrapper,.loadInfoWrapper a{position:absolute;left:50%;font-family:'Ubuntu Mono',monospace}#LoadingProgressBar .operation,#LoadingProgressBar .status{transform:translate(-50%,-45%);color:#607d8b}#LoadingProgressBar .operation{top:110px}#LoadingProgressBar .status{top:135px}#LoadingProgressBar .statusCont{font-family:'Ubuntu Mono',monospace}#LoadingProgressBar .titleP{top:30px;transform:translate(-50%,25%);color:#3f51b5;text-transform:uppercase;font-size:30px;margin-top:20px;margin-bottom:10px;font-weight:500;line-height:1.1;margin:.67em 0;box-sizing:border-box}.loadInfoWrapper a{border-radius:7px;padding:5px 15px;background-color:#e0e0e0;top:160px;transform:translate(-50%,25%);color:#3f51b5;text-transform:uppercase;text-decoration:none;box-sizing:border-box;font-weight:400;font-size:14px}.loadInfoWrapper a:hover{background-color:#d0d0d0}@media (max-width:360px){.loadInfoWrapper a{padding:7px 10px}}.LoadingProgressBar-logger-wrapper{top:230px;transform:translate(-50%,0);font-size:12px;font-weight:500;line-height:1.1;box-sizing:border-box;padding:0;margin:0 auto;width:90vw;height:calc(100vh - 256px);background-color:#dedede;overflow:scroll}.LoadingProgressBar-logger-wrapper h3{font-size:18px}.LoadingProgressBar-logger-wrapper h4{font-size:16px}.LoadingProgressBar-logger-wrapper h5{font-size:14px}.LoadingProgressBar-error{margin:0;padding:10px 0;color:#b53f3f;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word}.LoadingProgressBar-success{margin:0;padding:0;color:green;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word}.LoadingProgressBar-error-msg{color:#b53f3f}.loadInfoWrapper.need-reload span{animation-name:blinker;animation-iteration-count:infinite;animation-timing-function:cubic-bezier(1,-.75,0,2.08);animation-duration:1s;color:red;font-weight:700}@keyframes blinker{from{opacity:1}to{opacity:.3}}#loading_logs_table th{text-align:left}#loading_logs_table td{padding-left:10px}";
         let loaderBlock = createDomElement('div', [], { id: 'LoadingProgressBar' });
         let titleBlock = createDomElement('h1', [], {
             className: 'titleP',
@@ -62,7 +93,6 @@ class AppDependenciesLoader {
             }),
         );
 
-        loaderBlock.appendChild(createDomElement('style', [], { innerHTML: styles }));
         loaderBlock.appendChild(titleBlock);
         loaderBlock.appendChild(loadingOperation);
         loaderBlock.appendChild(loadingStatus);
@@ -159,11 +189,9 @@ class AppDependenciesLoader {
     setLoadingOperation(operation) {
         let el = document.getElementById('LoadingProgressBarOperation');
 
-        if (!el) {
-            return;
+        if (el) {
+            el.innerText = operation;
         }
-
-        el.innerText = operation;
     }
 
     /**
@@ -332,61 +360,35 @@ class AppDependenciesLoader {
      * This method creates and add to the page DOM element, that shows loading status and collects loading logs,
      * loads app dependencies(OpenAPI schema, static files) and appends them to the page.
      */
-    loadAndAppendDependencies(filesLoader) {
+    loadAndAppendDependencies() {
         this.loading = true;
         this.addLoaderBlockToPage();
         this.setLoadingOperation('loading files');
         this.showLoadingAnimation();
-
-        return filesLoader
-            .loadAllFiles()
-            .then((files) => {
-                this.loading = false;
-                this.setLoadingOperation('loading app');
-                return this.appendDependencies(files, filesLoader);
-            })
-            .catch((error) => {
-                this.loading = false;
-                this.appendError(error);
-                throw error;
-            });
     }
 
-    /**
-     * Method returns promise to append all dependencies(static files) to the page.
-     * @param {array} files Response array, connecting files.
-     * @param filesLoader
-     * @returns {Promise}
-     */
-    appendDependencies(files, filesLoader) {
-        if (!filesLoader.checkAllFilesLoaded(files)) {
-            // throw new Error();
-            return null;
-        }
+    fileLoadedCallback(path, type) {
+        console.log(`File loaded: ${path} (${type})`);
+    }
 
-        this.appendLog('All static files were successfully loaded');
+    fileAddedToPageCallback(path, type) {
+        this.filesAddedToPageCount += 1;
+        console.log(`File added to page: ${path} (${type})`);
+        this.appendLog(`File was appended to the page - ${path}`);
+        let progress = Math.floor(((this.filesAddedToPageCount + 1) / this.totalFiles) * 100);
+        this.setLoadingProgress(progress);
 
-        let callbacks = {
-            fileAppended: (file, content, index) => {
-                this.appendLog('File was appended to the page - "' + file.name + '"');
-                let prog = Math.floor(((index + 1) / files.length) * 100);
-                this.setLoadingProgress(prog);
-            },
+        if (this.filesAddedToPageCount === this.totalFiles) {
+            this.appendLog('All static files were successfully appended to the page.');
+            this.setLoadingProgress(100);
 
-            allFilesAppended: () => {
-                this.appendLog('All static files were successfully appended to the page.');
-                this.setLoadingProgress(100);
-            },
-        };
-
-        return filesLoader.appendFilesSync(files, 0, callbacks).then(() => {
             if (this.errors.length) {
                 throw new Error('Some error occurred during files loading.');
             }
-            // eslint-disable-next-line no-undef
-            spa.signals.emit('resource.loaded');
-        });
+
+            window.spa.signals.emit('resource.loaded');
+        }
     }
 }
 
-export default AppDependenciesLoader;
+export default LoadingPageController;

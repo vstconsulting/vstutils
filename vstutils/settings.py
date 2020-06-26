@@ -915,12 +915,12 @@ SPA_STATIC: _t.List[_t.Dict] = [
 
     # Load common chunks
     {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js'},
-    {'priority': 2, 'type': 'js', 'name': 'bundle/auth~doc~spa.chunk.js'},
-    {'priority': 3, 'type': 'js', 'name': 'bundle/auth~spa.chunk.js'},
-    {'priority': 4, 'type': 'js', 'name': 'bundle/vendors~spa.chunk.js'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/auth~doc~spa.chunk.js'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/auth~spa.chunk.js'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/vendors~spa.chunk.js'},
 
     # Load app
-    {'priority': 5, 'type': 'js', 'name': 'bundle/spa.js'},
+    {'priority': 2, 'type': 'js', 'name': 'bundle/spa.js'},
 ]
 
 # Test settings for speedup tests

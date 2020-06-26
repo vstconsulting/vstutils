@@ -25,6 +25,11 @@ Read the docs (https://vstutils.vstconsulting.net/).
     :target: https://badge.fury.io/py/vstutils
 
 
+Browser support
+---------------
+Supported `browserslist <https://browserl.ist/?q=%3E+0.25%25+and+not+dead+and+not+IE+11>`_.
+
+
 Projects
 --------
 

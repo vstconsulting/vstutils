@@ -1,0 +1,154 @@
+#LoadingProgressBar ::-webkit-scrollbar {
+    width: 0;
+}
+#LoadingProgressBar {
+    background: #ecf0f5;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+}
+#LoadingProgressBar .loadWrapper {
+    width: 200px;
+    height: 7px;
+    position: absolute;
+    top: 155px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #e0e0e0;
+    border-radius: 7px;
+}
+#LoadingProgressBar .loadProgress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 7px;
+    background: #3f51b5;
+    height: 100%;
+    transition: all 0.1s ease-out;
+}
+#LoadingProgressBar .operation,
+#LoadingProgressBar .status,
+#LoadingProgressBar .titleP,
+.LoadingProgressBar-logger-wrapper,
+.loadInfoWrapper a {
+    position: absolute;
+    left: 50%;
+    font-family: 'Ubuntu Mono', monospace;
+}
+#LoadingProgressBar .operation,
+#LoadingProgressBar .status {
+    transform: translate(-50%, -45%);
+    color: #607d8b;
+}
+#LoadingProgressBar .operation {
+    top: 110px;
+}
+#LoadingProgressBar .status {
+    top: 135px;
+}
+#LoadingProgressBar .statusCont {
+    font-family: 'Ubuntu Mono', monospace;
+}
+#LoadingProgressBar .titleP {
+    top: 30px;
+    transform: translate(-50%, 25%);
+    color: #3f51b5;
+    text-transform: uppercase;
+    font-size: 30px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin: 0.67em 0;
+    box-sizing: border-box;
+}
+.loadInfoWrapper a {
+    border-radius: 7px;
+    padding: 5px 15px;
+    background-color: #e0e0e0;
+    top: 160px;
+    transform: translate(-50%, 25%);
+    color: #3f51b5;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-sizing: border-box;
+    font-weight: 400;
+    font-size: 14px;
+}
+.loadInfoWrapper a:hover {
+    background-color: #d0d0d0;
+}
+@media (max-width: 360px) {
+    .loadInfoWrapper a {
+        padding: 7px 10px;
+    }
+}
+.LoadingProgressBar-logger-wrapper {
+    top: 230px;
+    transform: translate(-50%, 0);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.1;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0 auto;
+    width: 90vw;
+    height: calc(100vh - 256px);
+    background-color: #dedede;
+    overflow: scroll;
+}
+.LoadingProgressBar-logger-wrapper h3 {
+    font-size: 18px;
+}
+.LoadingProgressBar-logger-wrapper h4 {
+    font-size: 16px;
+}
+.LoadingProgressBar-logger-wrapper h5 {
+    font-size: 14px;
+}
+.LoadingProgressBar-error {
+    margin: 0;
+    padding: 10px 0;
+    color: #b53f3f;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+.LoadingProgressBar-success {
+    margin: 0;
+    padding: 0;
+    color: green;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+.LoadingProgressBar-error-msg {
+    color: #b53f3f;
+}
+.loadInfoWrapper.need-reload span {
+    animation-name: blinker;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(1, -0.75, 0, 2.08);
+    animation-duration: 1s;
+    color: red;
+    font-weight: 700;
+}
+@keyframes blinker {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.3;
+    }
+}
+#loading_logs_table th {
+    text-align: left;
+}
+#loading_logs_table td {
+    padding-left: 10px;
+}

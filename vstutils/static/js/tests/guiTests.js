@@ -906,8 +906,10 @@ class GuiTests {
   }
 }
 
+window.GuiTests = GuiTests;
+
 /**
  * Instance of GuiTests Class.
  * This instance is used for guiViews' tests creating.
  */
-var guiTests = new GuiTests();
+window.guiTests = new GuiTests();
