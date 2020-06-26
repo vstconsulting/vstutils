@@ -4,8 +4,7 @@
   "author": "VST Consulting",
   "license": "Apache-2.0",
   "browserslist": [
-    "> 0.25%",
-    "not dead"
+    "> 0.25% and not dead and not IE 11"
   ],
   "scripts": {
     "build": "APP_ENV=prod webpack",
