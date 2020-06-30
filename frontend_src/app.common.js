@@ -1,5 +1,6 @@
 // Global libraries
-import { TabSignal, signals } from './libs/TabSignal.js';
+import TabSignal from '@vstconsulting/tabsignal';
+import signals from './vstutils/signals.js';
 
 import $ from './libs/jquery.js';
 
@@ -11,6 +12,8 @@ $.fn.select2.defaults.set('theme', 'bootstrap');
 import 'jquery.scrollto';
 
 require('jquery-slimscroll');
+
+require('jquery-touchswipe/jquery.touchSwipe.js');
 
 import './libs/vue.js';
 
@@ -30,9 +33,6 @@ window.IMask = IMask;
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.css';
 window.iziToast = iziToast;
-
-import FastClick from 'fastclick';
-window.FastClick = FastClick;
 
 import autoComplete from 'JavaScript-autoComplete/auto-complete';
 window.autoComplete = autoComplete;

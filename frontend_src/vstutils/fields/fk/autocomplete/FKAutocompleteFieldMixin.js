@@ -4,7 +4,7 @@ import { getDependenceValueAsString, guiLocalSettings } from '../../../utils';
 import { AutocompleteFieldContentEditMixin } from '../../autocomplete';
 import { FKFieldContent } from '../fk';
 import FKAutocompleteFieldContentEdit from './FKAutocompleteFieldContentEdit.js';
-import { signals } from '../../../../libs/TabSignal.js';
+import signals from '../../../signals.js';
 
 const FKAutocompleteFieldMixin = {
     components: {

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { isEmptyObject } from '../utils';
 import DefaultEntityView from './DefaultEntityView.vue';
-import { signals } from '../../libs/TabSignal.js';
+import signals from '../signals.js';
 import { guiFields } from '../fields';
 import { BaseEntityConstructor } from '../models';
 

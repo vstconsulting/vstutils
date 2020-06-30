@@ -2,10 +2,12 @@
 //{% load cache %}
 //{% cache block_timeout service_worker_block gui_version %}
 //{% autoescape off %}
-importScripts("{% static 'js/libs/workbox/workbox-sw.js' %}");
+importScripts("{% static 'bundle/workbox/workbox-sw.js' %}");
+
+const GUI_VERSION = '{{ gui_version }}';
 
 workbox.setConfig({
-  modulePathPrefix: "{% static 'js/libs/workbox/' %}",
+  modulePathPrefix: "{% static 'bundle/workbox/' %}",
   debug: false,
 });
 
@@ -18,7 +20,7 @@ workbox.core.clientsClaim();
  */
 const STATIC_FILES_LIST = [
 //{% for static_file in static_files_list %}
-    '{% static static_file.name %}?v={{ gui_version }}',
+    '{% static static_file.name %}',
 //{% endfor %}
 ];
 
@@ -53,10 +55,8 @@ const ADDITIONAL_FILES_LIST = [];
 /**
  * Array, that store paths of files, that should be precached.
  */
-const PRECACHE_LIST = [
-    OFFLINE_PAGE, FAVICON,
-    APP_LOADER,
-].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST);
+const PRECACHE_LIST = [OFFLINE_PAGE, FAVICON, APP_LOADER].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST)
+    .map(filePath => ({ url: filePath, revision: GUI_VERSION }));
 
 /**
  * Sets workbox cache names details.

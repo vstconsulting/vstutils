@@ -1,5 +1,5 @@
 import VueRouter from 'vue-router';
-import { signals } from '../../libs/TabSignal.js';
+import signals from '../signals.js';
 
 /**
  * Class, that manages Router creation.

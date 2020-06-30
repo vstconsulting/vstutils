@@ -2,7 +2,7 @@
  * Class, that manages manipulations with Local Storage.
  * It is used for saving some users local settings to the one property(object) of Local Storage.
  */
-import { signals } from '../../libs/TabSignal.js';
+import signals from '../signals.js';
 
 export class LocalSettings {
     /**

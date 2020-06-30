@@ -918,8 +918,6 @@ PROJECT_GUI_MENU: _t.List[_t.Dict] = [
 ]
 
 SPA_STATIC: _t.List[_t.Dict] = [
-    # {'priority': 4, 'type': 'js', 'name': 'js/libs/touchwipe.js'},  # not found in npm
-
     # Load common chunks
     {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js'},
     {'priority': 1, 'type': 'js', 'name': 'bundle/auth~doc~spa.chunk.js'},

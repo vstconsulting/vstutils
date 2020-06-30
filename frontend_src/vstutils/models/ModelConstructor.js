@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import BaseEntityConstructor from './BaseEntityConstructor.js';
 import { guiFields } from '../fields';
-import { signals } from '../../libs/TabSignal.js';
+import signals from '../signals.js';
 import { StringField } from '../fields/text';
 
 /**
