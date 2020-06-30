@@ -3,7 +3,7 @@ import { guiLocalSettings } from '../utils';
 import { guiPopUp } from '../popUp';
 import { _translate } from '../utils';
 import { guiFields } from '../fields';
-import { signals } from '../../libs/TabSignal.js';
+import signals from '../signals.js';
 
 /**
  * Class, that is responsible for changing GUI skins (themes) and for changing skins' settings.

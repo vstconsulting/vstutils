@@ -60,14 +60,35 @@
                 return items;
             },
         },
+        mounted() {
+            $('body').swipe({
+                swipe: (event, direction) => {
+                    if (direction === 'right') {
+                        this.openSidebar();
+                    } else if (direction === 'left') {
+                        this.hideSidebar();
+                    }
+                    return true;
+                },
+                threshold: 35,
+                preventDefaultEvents: false,
+            });
+        },
         methods: {
             /**
              * Method, that hides sidebar.
              */
             hideSidebar() {
                 if (window.innerWidth <= 991) {
-                    $('body').removeClass('sidebar-open');
-                    $('body').addClass('sidebar-collapse');
+                    $('body').removeClass('sidebar-open').addClass('sidebar-collapse');
+                }
+            },
+            /**
+             * Method, that hides sidebar.
+             */
+            openSidebar() {
+                if (window.innerWidth <= 991) {
+                    $('body').addClass('sidebar-open').removeClass('sidebar-collapse');
                 }
             },
         },

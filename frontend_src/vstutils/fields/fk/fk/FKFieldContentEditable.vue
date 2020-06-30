@@ -7,7 +7,7 @@
     import { deepEqual, trim, guiLocalSettings, getDependenceValueAsString } from '../../../utils';
     import { BaseFieldContentEdit } from '../../base';
     import FKFieldContent from './FKFieldContent.js';
-    import { signals } from '../../../../libs/TabSignal.js';
+    import signals from '../../../signals.js';
 
     export default {
         mixins: [BaseFieldContentEdit, FKFieldContent],

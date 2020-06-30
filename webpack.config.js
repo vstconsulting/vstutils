@@ -5,6 +5,7 @@ const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 require("dotenv").config();
 const ENV = process.env.APP_ENV;
@@ -20,6 +21,13 @@ function setMode() {
     return "production";
   } else {
     return "development";
+  }
+}
+
+function workboxCopyPattern(moduleName) {
+  return {
+    from: `node_modules/${moduleName}/build/${moduleName}.prod.js`,
+    to: `workbox/${moduleName}.prod.js`
   }
 }
 
@@ -42,7 +50,16 @@ const config = {
   plugins: [
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new CleanWebpackPlugin(),
-    new VueLoaderPlugin()
+    new VueLoaderPlugin(),
+    new CopyPlugin({
+      patterns: [
+        { from: "node_modules/workbox-sw/build/workbox-sw.js", to: "workbox/workbox-sw.js" },
+        workboxCopyPattern("workbox-core"),
+        workboxCopyPattern("workbox-precaching"),
+        workboxCopyPattern("workbox-routing"),
+        workboxCopyPattern("workbox-strategies"),
+      ]
+    })
   ],
   resolve: {
     alias: {
