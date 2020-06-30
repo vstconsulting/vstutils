@@ -47,7 +47,7 @@ class UserViewSet(base.ModelViewSet):
     serializer_class_one: _t.Type[serializers.OneUserSerializer] = serializers.OneUserSerializer
     serializer_class_create: _t.Type[serializers.CreateUserSerializer] = serializers.CreateUserSerializer
     serializer_class_change_password: _t.Type[serializers.DataSerializer] = serializers.ChangePasswordSerializer
-    filter_class = filters.UserFilter
+    filterset_class = filters.UserFilter
     permission_classes = (permissions.SuperUserPermission,)
 
     def destroy(self, request: drf_request.Request, *args, **kwargs):

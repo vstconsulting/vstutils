@@ -111,7 +111,7 @@ class HostViewSet(ModelViewSet):
     action_serializers = {
         'create': CreateHostSerializer
     }
-    filter_class = HostFilter
+    filterset_class = HostFilter
     filter_backends = list(ModelViewSet.filter_backends) + [TestFilterBackend]
 
     @subaction(
@@ -124,11 +124,11 @@ class HostViewSet(ModelViewSet):
     @subaction(detail=True, serializer_class=HostSerializer)
     def test2(self, request, *args, **kwargs):
         self.get_object()
-        return responses.Response201("OK")
-
-    @action(detail=True, serializer_class=HostSerializer)
-    def test3(self, request, *args, **kwargs):  # nocv
         return Response("OK", 201).resp
+
+    @subaction(detail=True, serializer_class=HostSerializer)
+    def test3(self, request, *args, **kwargs):
+        return Response("OK", 201).resp  # nocv
 
 
 class _HostGroupViewSet(ModelViewSet):
@@ -138,7 +138,7 @@ class _HostGroupViewSet(ModelViewSet):
     model = HostGroup
     serializer_class = HostGroupSerializer
     serializer_class_one = HostGroupSerializer
-    filter_class = HostGroupFilter
+    filterset_class = HostGroupFilter
 
 
 def queryset_nested_filter(parent, qs):
@@ -196,7 +196,7 @@ except AssertionError:
 class FilesViewSet(ReadOnlyModelViewSet):
     model = File
     serializer_class = FileSerializer
-    filter_class = FileFilter
+    filterset_class = FileFilter
 
 
 class ModelWithFKSerializer(VSTSerializer):

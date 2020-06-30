@@ -34,12 +34,10 @@ def deprecated(func: tp.Callable):
     as deprecated. It will result in a warning being emitted
     when the function is used."""
 
-    def new_func(*args, **kwargs):  # nocv
-        warnings.simplefilter('always', DeprecationWarning)  # turn off filter
+    def new_func(*args, **kwargs):
         warnings.warn(f'Call to deprecated function {func.__name__}.',
                       category=DeprecationWarning,
                       stacklevel=2)
-        warnings.simplefilter('default', DeprecationWarning)  # reset filter
         return func(*args, **kwargs)
 
     return new_func

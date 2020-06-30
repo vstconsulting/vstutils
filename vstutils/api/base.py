@@ -104,9 +104,9 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
 
 
 # TODO deprecated
-class Response(_ResponseClass):  # nocv
+@deprecated
+class Response(_ResponseClass):
 
-    @deprecated
     def _asdict(self):
         data = super()._asdict()
         data["status"] = data.get("status", status.HTTP_200_OK)
@@ -120,7 +120,7 @@ class Response(_ResponseClass):  # nocv
 
     @property
     def resp_dict(self):
-        return self._asdict()
+        return self._asdict()  # nocv
 
 
 class AutoSchema(DRFAutoSchema):

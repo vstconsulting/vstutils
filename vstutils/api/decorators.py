@@ -86,7 +86,7 @@ def nested_action(
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
     _nested_args = kwargs.pop('_nested_args', OrderedDict())
-    _nested_filter_class = kwargs.pop('filter_class', None)
+    _nested_filter_class = kwargs.pop('filterset_class', None)
 
     def decorator(func: _t.Callable):
         # pylint: disable=used-before-assignment
@@ -559,7 +559,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         kwargs = dict(self.kwargs)
         kwargs['methods'] = self.methods
         kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
-        kwargs['filter_class'] = getattr(self.view, 'filter_class', [])
+        kwargs['filterset_class'] = getattr(self.view, 'filterset_class', getattr(self.view, 'filter_class', []))
         kwargs.update(options)
         return nested_action(*args, **kwargs)
 

@@ -199,7 +199,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
             return NotHandled
         nested_view = getattr(self.view, self.view.action, None)
         nested_view_filter_class = getattr(nested_view, '_nested_filter_class', None)
-        filter_class = getattr(self.view, 'filter_class', None)
+        filter_class = getattr(self.view, 'filterset_class', getattr(self.view, 'filter_class', None))
         self.view.filter_class = nested_view_filter_class
         result = super().get_filter_parameters(filter_backend)
         self.view.filter_class = filter_class
