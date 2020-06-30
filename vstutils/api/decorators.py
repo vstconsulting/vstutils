@@ -23,7 +23,24 @@ def ensure_is_object(obj):
 def _create_with_iteration(get_serializer_func, nested_manager, data):
     serializer = get_serializer_func(data=data)
     serializer.is_valid(raise_exception=True)
-    return nested_manager.create(**serializer.validated_data)
+
+    if hasattr(nested_manager, 'field'):
+        # on fk relations
+        serializer.validated_data[nested_manager.field.name] = nested_manager.instance
+        return serializer.create(serializer.validated_data)
+
+    elif hasattr(nested_manager, 'content_type_field_name'):
+        # on contenttype relations
+        content_type_field_name = nested_manager.content_type_field_name
+        serializer.validated_data[content_type_field_name] = getattr(nested_manager, content_type_field_name)
+        serializer.validated_data[nested_manager.object_id_field_name] = nested_manager.instance.id
+        return serializer.create(serializer.validated_data)
+
+    # other relations (many to many or custom with `.add()` method)
+    with transaction.atomic():
+        result = serializer.create(serializer.validated_data)
+        nested_manager.add(result)
+    return result
 
 
 def __get_nested_path(
@@ -235,9 +252,9 @@ class NestedWithoutAppendMixin(NestedViewMixin):
         return request_data if many else [request_data]
 
     def _data_create(self, request_data, nested_append_arg):
-        get_serializer_func, nested_manager = self.get_serializer, self.nested_manager
+        get_serializer_func, manager = self.get_serializer, self.nested_manager
         return [
-            getattr(_create_with_iteration(get_serializer_func, nested_manager, d), nested_append_arg)
+            getattr(_create_with_iteration(get_serializer_func, manager, d), nested_append_arg)
             for d in request_data
         ]
 

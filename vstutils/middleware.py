@@ -114,8 +114,25 @@ class TimezoneHeadersMiddleware(BaseMiddleware):
 
 
 class ExecuteTimeHeadersMiddleware(BaseMiddleware):
+    def __duration_handler(self, data):
+        key, value = data
+        if isinstance(value, (list, tuple, map, filter, _t.Generator)):
+            value = ''.join((self.__duration_handler(('', v)) for v in value))
+        elif isinstance(value, (int, float)):
+            value = f';dur={float(value) * 1000}'
+        elif isinstance(value, str) and value:
+            if ' ' in value:
+                value = f'"{value}"'
+            value = f';desc={value}'
+        elif not value:
+            value = ''
+        return f'{key}{value}'
+
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         start_time = time.time()
         response = super().get_response_handler(request)
-        response['ResponseTime'] = int(time.time() - start_time)
+        response_durations = getattr(response, 'timings', None)
+        if response_durations:
+            response_durations = f', {", ".join(map(self.__duration_handler, response_durations.items()))}'
+        response['Server-Timing'] = f'app;dur={float(time.time() - start_time)*1000}{response_durations or ""}'
         return response

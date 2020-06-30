@@ -13,9 +13,10 @@ class BaseResponseClass(response.Response):
     API response class with default status code.
     """
 
-    __slots__ = ('data',)
+    __slots__ = ('data', 'timings')
 
     def __init__(self, *args, **kwargs):
+        self.timings = kwargs.pop('timings', None)
         super().__init__(*args, **kwargs)
         if isinstance(self.data, str):
             self.data = dict(detail=self.data)

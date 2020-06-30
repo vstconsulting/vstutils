@@ -3,7 +3,6 @@ import os
 import gc
 import pwd
 import sys
-from collections import OrderedDict
 from tempfile import gettempdir
 
 from django.contrib import admin
@@ -58,6 +57,10 @@ CONFIG_FILE: _t.Text = os.getenv(
 )
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
+ConfigBoolType = cconfig.BoolType()
+ConfigIntType = cconfig.IntType()
+ConfigIntSecondsType = cconfig.IntSecondsType()
+
 
 class BackendSection(cconfig.Section):
 
@@ -71,97 +74,97 @@ class BaseAppendSection(cconfig.AppendSection):
 
 class MainSection(BaseAppendSection):
     types_map = {
-        'debug': cconfig.BoolType(),
-        'enable_admin_panel': cconfig.BoolType(),
+        'debug': ConfigBoolType,
+        'enable_admin_panel': ConfigBoolType,
         'allowed_hosts': cconfig.ListType(),
-        'first_day_of_week': cconfig.IntType()
+        'first_day_of_week': ConfigIntType
     }
 
 
 class WebSection(BaseAppendSection):
     types_map = {
-        'allow_cors': cconfig.BoolType(),
-        'session_timeout': cconfig.IntSecondsType(),
-        'page_limit': cconfig.IntType(),
-        'public_openapi': cconfig.BoolType(),
-        'openapi_cache_timeout': cconfig.IntType(),
-        'enable_gravatar': cconfig.BoolType(),
-        'rest_swagger': cconfig.BoolType(),
+        'allow_cors': ConfigBoolType,
+        'session_timeout': ConfigIntSecondsType,
+        'page_limit': ConfigIntType,
+        'public_openapi': ConfigBoolType,
+        'openapi_cache_timeout': ConfigIntType,
+        'enable_gravatar': ConfigBoolType,
+        'rest_swagger': ConfigBoolType,
         'request_max_size': cconfig.BytesSizeType(),
         'x_frame_options': cconfig.StrType(),
-        'use_x_forwarded_host': cconfig.BoolType(),
-        'use_x_forwarded_port': cconfig.BoolType(),
-        'password_reset_timeout_days': cconfig.IntType(),
-        'secure_browser_xss_filter': cconfig.BoolType(),
-        'secure_content_type_nosniff': cconfig.BoolType(),
-        'secure_hsts_include_subdomains': cconfig.BoolType(),
-        'secure_hsts_preload': cconfig.BoolType(),
-        'secure_hsts_seconds': cconfig.IntType(),
-        'health_throttle_rate': cconfig.IntType()
+        'use_x_forwarded_host': ConfigBoolType,
+        'use_x_forwarded_port': ConfigBoolType,
+        'password_reset_timeout_days': ConfigIntType,
+        'secure_browser_xss_filter': ConfigBoolType,
+        'secure_content_type_nosniff': ConfigBoolType,
+        'secure_hsts_include_subdomains': ConfigBoolType,
+        'secure_hsts_preload': ConfigBoolType,
+        'secure_hsts_seconds': ConfigIntType,
+        'health_throttle_rate': ConfigIntType
     }
 
 
 class DBSection(BackendSection):
     types_map = {
-        'conn_max_age': cconfig.IntSecondsType(),
-        'atomic_requests': cconfig.BoolType(),
-        'autocommit': cconfig.BoolType(),
+        'conn_max_age': ConfigIntSecondsType,
+        'atomic_requests': ConfigBoolType,
+        'autocommit': ConfigBoolType,
     }
 
 
 class DBTestSection(BackendSection):
-    type_serialize = cconfig.BoolType()
+    type_serialize = ConfigBoolType
 
 
 class DBOptionsSection(cconfig.Section):
     types_map = {
-        'timeout': cconfig.IntSecondsType(),
-        'connect_timeout': cconfig.IntSecondsType(),
-        'read_timeout': cconfig.IntSecondsType(),
-        'write_timeout': cconfig.IntSecondsType(),
+        'timeout': ConfigIntSecondsType,
+        'connect_timeout': ConfigIntSecondsType,
+        'read_timeout': ConfigIntSecondsType,
+        'write_timeout': ConfigIntSecondsType,
     }
 
 
 class CacheSection(BackendSection):
     types_map = {
-        'timeout': cconfig.IntSecondsType(),
+        'timeout': ConfigIntSecondsType,
     }
 
 
 class MailSection(BaseAppendSection):
     types_map = {
-        'port': cconfig.IntType(),
-        'tls': cconfig.BoolType(),
-        'ssl': cconfig.BoolType(),
+        'port': ConfigIntType,
+        'tls': ConfigBoolType,
+        'ssl': ConfigBoolType,
     }
 
 
 class UWSGISection(cconfig.Section):
-    type_daemon = cconfig.BoolType()
+    type_daemon = ConfigBoolType
 
 
 class RPCSection(BaseAppendSection):
     type_map = {
-        'concurrency"': cconfig.IntType(),
-        'prefetch_multiplier"': cconfig.IntType(),
-        'max_tasks_per_child"': cconfig.IntType(),
-        'heartbeat"': cconfig.IntType(),
-        'results_expiry_days"': cconfig.IntType(),
-        'create_instance_attempts"': cconfig.IntType(),
-        'enable_worker"': cconfig.BoolType()
+        'concurrency"': ConfigIntType,
+        'prefetch_multiplier"': ConfigIntType,
+        'max_tasks_per_child"': ConfigIntType,
+        'heartbeat"': ConfigIntType,
+        'results_expiry_days"': ConfigIntType,
+        'create_instance_attempts"': ConfigIntType,
+        'enable_worker"': ConfigBoolType
     }
 
 
 class WorkerSection(BaseAppendSection):
     types_map = {
-        'beat': cconfig.BoolType(),
-        'events': cconfig.BoolType(),
-        'task-events': cconfig.BoolType(),
-        'without-gossip': cconfig.BoolType(),
-        'without-mingle': cconfig.BoolType(),
-        'without-heartbeat': cconfig.BoolType(),
-        'purge': cconfig.BoolType(),
-        'discard': cconfig.BoolType(),
+        'beat': ConfigBoolType,
+        'events': ConfigBoolType,
+        'task-events': ConfigBoolType,
+        'without-gossip': ConfigBoolType,
+        'without-mingle': ConfigBoolType,
+        'without-heartbeat': ConfigBoolType,
+        'purge': ConfigBoolType,
+        'discard': ConfigBoolType,
     }
 
 
@@ -327,14 +330,20 @@ INSTALLED_APPS: _t.List[_t.Text] = [
     'django.contrib.staticfiles',
     'corsheaders',
 ]
-INSTALLED_APPS += ['django_celery_beat'] if has_django_celery_beat else []
+
+if has_django_celery_beat:
+    INSTALLED_APPS.append('django_celery_beat')
+
 INSTALLED_APPS += [
     'crispy_forms',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
 ]
-INSTALLED_APPS += ['docs'] if HAS_DOCS else []
+
+if HAS_DOCS:
+    INSTALLED_APPS.append('docs')
+
 INSTALLED_APPS += ['drf_yasg']
 
 if HAS_CHANNELS:
@@ -360,7 +369,6 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'vstutils.middleware.TimezoneHeadersMiddleware',
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
 ]
 
@@ -381,7 +389,7 @@ DEFAULT_AUTH_PLUGIN_LIST: _t.Text = 'LDAP'
 
 
 def get_plugins():
-    plugins = OrderedDict()
+    plugins = dict()
     for plugin_name in main.getlist('auth-plugins', fallback=DEFAULT_AUTH_PLUGIN_LIST):
         if plugin_name in DEFAULT_AUTH_PLUGINS:
             data = DEFAULT_AUTH_PLUGINS[plugin_name]
@@ -394,7 +402,7 @@ def get_plugins():
     return plugins
 
 
-AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = lazy(get_plugins, OrderedDict)()
+AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = lazy(get_plugins, dict)()
 
 AUTHENTICATION_BACKENDS: _t.List[_t.Text] = [
     'vstutils.auth.AuthPluginsBackend',
@@ -463,11 +471,12 @@ X_FRAME_OPTIONS = web['x_frame_options']
 USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
 USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
 
-CHANNEL_LAYERS: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+if HAS_CHANNELS:
+    CHANNEL_LAYERS: SIMPLE_OBJECT_SETTINGS_TYPE = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
     }
-}
 
 # Templates settings
 ##############################################################
@@ -514,10 +523,10 @@ __STATIC_FILES_FOLDERS = (
     os.path.join(os.path.dirname(errors.__file__), 'static'),
     os.path.join(os.path.dirname(rest_framework.__file__), 'static')
 )
-STATIC_FILES_FOLDERS = list(filter(bool, __STATIC_FILES_FOLDERS))
+STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, __STATIC_FILES_FOLDERS)), list)()
 
 if LOCALRUN:
-    STATICFILES_DIRS = STATIC_FILES_FOLDERS
+    STATICFILES_DIRS = list(STATIC_FILES_FOLDERS)
 
 STATICFILES_FINDERS: _t.Tuple[_t.Text, _t.Text] = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -627,8 +636,6 @@ SWAGGER_SETTINGS: _t.Dict = {
     },
 }
 
-# Hardcoded because GUI based on OpenAPI
-API_CREATE_SCHEMA: bool = True
 
 API: SIMPLE_OBJECT_SETTINGS_TYPE = {
     VST_API_VERSION: {
@@ -781,42 +788,42 @@ SILENCED_SYSTEM_CHECKS: _t.List = [
 # Celery broker settings
 # Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
 ##############################################################
-rpc: RPCSection = config['rpc']
-__broker_url = rpc.get("connection", fallback="file:///tmp")
-if __broker_url.startswith("file://"):
-    __broker_folder = __broker_url.split("://", 1)[1]
-    CELERY_BROKER_URL = "filesystem://"
-    CELERY_BROKER_TRANSPORT_OPTIONS = {
-        "data_folder_in": __broker_folder,
-        "data_folder_out": __broker_folder,
-        "data_folder_processed": __broker_folder,
-    }
-    CELERY_RESULT_BACKEND = __broker_url
-else:  # nocv
-    CELERY_BROKER_URL = __broker_url
-    CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback=CELERY_BROKER_URL)
+if has_django_celery_beat:
+    rpc: RPCSection = config['rpc']
+    __broker_url = rpc.get("connection", fallback="file:///tmp")
+    if __broker_url.startswith("file://"):
+        __broker_folder = __broker_url.split("://", 1)[1]
+        CELERY_BROKER_URL = "filesystem://"
+        CELERY_BROKER_TRANSPORT_OPTIONS = {
+            "data_folder_in": __broker_folder,
+            "data_folder_out": __broker_folder,
+            "data_folder_processed": __broker_folder,
+        }
+        CELERY_RESULT_BACKEND = __broker_url
+    else:  # nocv
+        CELERY_BROKER_URL = __broker_url
+        CELERY_RESULT_BACKEND = rpc.get("result_backend", fallback=CELERY_BROKER_URL)
 
-CELERY_WORKER_CONCURRENCY = rpc["concurrency"]
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False
-CELERY_TASK_IGNORE_RESULT = True
-CELERYD_PREFETCH_MULTIPLIER = rpc["prefetch_multiplier"]
-CELERYD_MAX_TASKS_PER_CHILD = rpc["max_tasks_per_child"]
-CELERY_BROKER_HEARTBEAT = rpc["heartbeat"]
-CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
-CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
-CELERY_TASK_CREATE_MISSING_QUEUES = True
-CELERY_TIMEZONE = TIME_ZONE
+    CELERY_WORKER_CONCURRENCY = rpc["concurrency"]
+    CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+    CELERY_TASK_IGNORE_RESULT = True
+    CELERYD_PREFETCH_MULTIPLIER = rpc["prefetch_multiplier"]
+    CELERYD_MAX_TASKS_PER_CHILD = rpc["max_tasks_per_child"]
+    CELERY_BROKER_HEARTBEAT = rpc["heartbeat"]
+    CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+    CELERY_TASK_SERIALIZER = 'pickle'
+    CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
+    CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
+    CELERY_TASK_CREATE_MISSING_QUEUES = True
+    CELERY_TIMEZONE = TIME_ZONE
 
-CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
-CONCURRENCY = rpc["concurrency"]
-WORKER_QUEUES = ['celery']
-RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
+    CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
+    CONCURRENCY = rpc["concurrency"]
+    WORKER_QUEUES = ['celery']
+    RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
 
-
-if RUN_WORKER:
-    WORKER_OPTIONS = config['worker'].all() if has_django_celery_beat else {}
+    if RUN_WORKER:
+        WORKER_OPTIONS = config['worker'].all() if has_django_celery_beat else {}
 
 # View settings
 ##############################################################

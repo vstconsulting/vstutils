@@ -1,5 +1,6 @@
 from typing import Any, Text, Dict, List, ClassVar, NoReturn, Tuple, Union, Type
 from rest_framework import routers, views, request
+from rest_framework.schemas import views as drf_views
 
 
 UrlType = Text
@@ -39,11 +40,17 @@ class _AbstractRouter(routers.DefaultRouter):
     def _get_views_custom_list(self, view_request: request.Request, registers: Any) -> Dict[PrefixType, UrlType]:
         ...
 
+    def _get_api_root_dict(self) -> Dict:
+        ...
+
 
 class APIRouter(_AbstractRouter):
     root_view_name: Text
 
     def generate(self, views_list: ApiVersionStructureType) -> None:
+        ...
+
+    def _get_schema_view(self) -> drf_views.SchemaView:
         ...
 
 
@@ -59,5 +66,5 @@ class MainRouter(_AbstractRouter):
     def unregister_router(self, prefix: PrefixType) -> None:
         ...
 
-    def generate_routers(self, api: ApiStructureType, create_schema: bool = None, create_swagger: bool = None) -> None:
+    def generate_routers(self, api: ApiStructureType) -> None:
         ...

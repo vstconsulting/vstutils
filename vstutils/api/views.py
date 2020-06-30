@@ -53,7 +53,7 @@ class UserViewSet(base.ModelViewSet):
     def destroy(self, request: drf_request.Request, *args, **kwargs):
         user = self.get_object()
         if user == request.user:
-            return base.Response("Could not remove youself.", 409).resp
+            return responses.HTTP_409_CONFLICT("Could not remove youself.")
         return super().destroy(request, *args, **kwargs)
 
     @transaction.atomic
@@ -350,7 +350,7 @@ class HealthView(base.ListNonModelViewSet):
     health_backend = import_class(settings.HEALTH_BACKEND_CLASS)()
 
     def list(self, request, *args, **kwargs):
-        return base.Response(*self.health_backend.get()).resp
+        return responses.HTTP_200_OK(*self.health_backend.get())
 
 
 class LangViewSet(base.ReadOnlyModelViewSet):

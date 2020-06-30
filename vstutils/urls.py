@@ -15,10 +15,7 @@ class AdminLoginLogoutRedirectView(RedirectView):
 
 
 # Main router for all APIs versions
-router = MainRouter(
-    perms=(permissions.IsAuthenticated,),
-    create_schema=settings.API_CREATE_SCHEMA,
-)
+router = MainRouter(perms=(permissions.IsAuthenticated,))
 router.generate_routers(settings.API)
 router.register_view('health', HealthView.as_view({'get': 'list'}), 'health')
 

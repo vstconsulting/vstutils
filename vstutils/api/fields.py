@@ -246,10 +246,11 @@ class NamedBinaryFileInJsonField(VSTCharField):
             self.validate_value(data)
         return super().to_internal_value(data)
 
-    def to_representation(self, value) -> _t.Dict[_t.Text, _t.Any]:
-        with raise_context():
+    def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
+        try:
             return json.loads(value)
-        return dict(name=None, content=None)
+        except Exception:
+            return dict(name=None, content=None)
 
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
@@ -282,9 +283,10 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
         return VSTCharField.to_internal_value(self, data)
 
     def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore
-        with raise_context():
+        try:
             return json.loads(value)
-        return list()
+        except Exception:
+            return list()
 
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
