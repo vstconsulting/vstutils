@@ -1610,6 +1610,18 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[30]['status'], 200)
         self.assertEqual(results[30]['data']['some_multiplenamedbinimage'], [value, value])
 
+    def test_contenttype_nested_views(self):
+        bulk_data = [
+            {'method': 'post', 'path': ['testcontenttype'], 'data': {'name': 'test'}},
+            {'method': 'post', 'path': ['testcontenttype', '<<0[data][id]>>', 'vars'], 'data': {'value': 'test_val'}},
+            {'method': 'get', 'path': ['testcontenttype', '<<0[data][id]>>', 'vars']},
+        ]
+        results = self.bulk(bulk_data)
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['count'], 1)
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):

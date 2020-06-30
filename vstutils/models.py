@@ -55,10 +55,9 @@ class BQuerySet(models.QuerySet):
         Filter queryset for models with attribute 'hidden' and
         exclude all hidden objects.
         """
-        return (
-            self.filter(hidden=False) if hasattr(self.model, "hidden")
-            else self
-        )
+        if hasattr(self.model, "hidden"):
+            return self.filter(hidden=False)
+        return self
 
     def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
         field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]

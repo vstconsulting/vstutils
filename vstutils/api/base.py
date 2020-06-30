@@ -20,7 +20,7 @@ from rest_framework.request import Request
 from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from ..exceptions import VSTUtilsException
-from ..utils import classproperty
+from ..utils import classproperty, deprecated
 from . import responses
 from .serializers import (
     ErrorSerializer,
@@ -103,8 +103,10 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
     return default_response
 
 
-class Response(_ResponseClass):
+# TODO deprecated
+class Response(_ResponseClass):  # nocv
 
+    @deprecated
     def _asdict(self):
         data = super()._asdict()
         data["status"] = data.get("status", status.HTTP_200_OK)
@@ -117,7 +119,7 @@ class Response(_ResponseClass):
         return responses.BaseResponseClass(**self._asdict())
 
     @property
-    def resp_dict(self):  # nocv
+    def resp_dict(self):
         return self._asdict()
 
 

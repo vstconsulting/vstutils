@@ -41,13 +41,22 @@ class BaseBackend(BaseVstObject):
 
 class DefaultBackend(BaseBackend):
     def check_health_db(self):
+        """
+        Checking if some database server is unavailable.
+        """
         for db_name in self.get_django_settings('DATABASES', {}).keys():
             connections[db_name].ensure_connection()
 
     def check_health_cache(self):
+        """
+        Checking ig some cache server is unavailable.
+        """
         for cache_name in self.get_django_settings('CACHES', {}).keys():
             self.get_django_cache(cache_name).get('test', 0)
 
     def check_health_rpc(self):
+        """
+        At now only checking that RPC enabled or not.
+        """
         if not self.get_django_settings('RPC_ENABLED'):
             return 'disabled'

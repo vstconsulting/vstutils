@@ -1,6 +1,5 @@
+import time
 import json
-
-from django.http.response import Http404, HttpResponse
 
 from vstutils.api import fields, filters, responses
 from vstutils.api.base import (CopyMixin, ModelViewSet, NonModelsViewSet,
@@ -8,7 +7,15 @@ from vstutils.api.base import (CopyMixin, ModelViewSet, NonModelsViewSet,
 from vstutils.api.decorators import action, nested_view, subaction
 from vstutils.api.serializers import EmptySerializer, VSTSerializer, DataSerializer
 
-from .models import File, Host, HostGroup, ModelWithBinaryFiles, ModelWithFK
+from .models import (
+    File,
+    Host,
+    HostGroup,
+    ModelWithBinaryFiles,
+    ModelWithFK,
+    VarBasedModel,
+    Variable
+)
 
 
 class TestFilterBackend:
@@ -243,6 +250,7 @@ class RequestInfoTestView(NonModelsViewSet):
     base_name = 'request_info'
 
     def list(self, request):
+        start_time = time.time()
         headers = request._request.META
         # Don't send wsgi.* headers
         headers = {k: v for k, v in headers.items() if not k.startswith('wsgi.')}
@@ -254,9 +262,46 @@ class RequestInfoTestView(NonModelsViewSet):
             )
         ))
         serializer.is_valid(raise_exception=True)
-        return responses.HTTP_200_OK(serializer.data)
+        return responses.HTTP_200_OK(
+            serializer.data,
+            timings=dict(
+                req=(i for i in ['test case', time.time() - start_time]),
+                miss=None
+            )
+        )
 
     def put(self, request):
         data = request.data
 
         return responses.HTTP_200_OK(data)
+
+
+class VariableSerializer(VSTSerializer):
+
+    class Meta:
+        model = Variable
+        fields = (
+            'id',
+            'value',
+        )
+
+
+class VarBasedSerializer(VSTSerializer):
+
+    class Meta:
+        model = VarBasedModel
+        fields = (
+            'id',
+            'name',
+        )
+
+
+class VariablesViewSet(ModelViewSet):
+    model = Variable
+    serializer_class = VariableSerializer
+
+
+@nested_view('vars', 'id', manager_name='variables', allow_append=False, view=VariablesViewSet)
+class VarBasedViewSet(ModelViewSet):
+    model = VarBasedModel
+    serializer_class = VarBasedSerializer

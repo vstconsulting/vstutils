@@ -4,6 +4,9 @@ from vstutils.settings import *
 INSTALLED_APPS += [
     'test_proj',
 ]
+
+MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
+
 API['v2'] = {}
 API['v3'] = {}
 API[VST_API_VERSION][r'settings'] = dict(
@@ -29,6 +32,9 @@ API[VST_API_VERSION][r'testfk'] = dict(
 )
 API[VST_API_VERSION][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
+)
+API[VST_API_VERSION][r'testcontenttype'] = dict(
+    view='test_proj.views.VarBasedViewSet'
 )
 API['v2'][r'testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'

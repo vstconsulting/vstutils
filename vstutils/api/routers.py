@@ -1,12 +1,11 @@
 # pylint: disable=no-member,redefined-outer-name,unused-argument
 from warnings import warn
-from collections import OrderedDict
 
 from django.urls.conf import include, re_path
 from django.conf import settings
-from rest_framework import routers, permissions, versioning
+from rest_framework import routers, permissions, versioning, schemas
 
-from .base import Response
+from . import responses
 from ..utils import import_class
 
 
@@ -15,14 +14,19 @@ class _AbstractRouter(routers.DefaultRouter):
     def __init__(self, *args, **kwargs):
         self.custom_urls = list()
         self.permission_classes = kwargs.pop("perms", None)
-        self.create_schema = kwargs.pop('create_schema', False)
         super().__init__(*args, **kwargs)
+
+    def _get_api_root_dict(self):
+        return dict((
+            (reg[0], self.routes[0].name.format(basename=reg[2]))
+            for reg in self.registry)
+        )
 
     def _get_custom_lists(self):
         return self.custom_urls
 
     def _get_views_custom_list(self, view_request, registers):
-        routers_list = OrderedDict()
+        routers_list = dict()
         fpath = view_request.get_full_path().split("?")
         absolute_uri = view_request.build_absolute_uri(fpath[0])
         for prefix, _, name in self._get_custom_lists():
@@ -36,7 +40,7 @@ class _AbstractRouter(routers.DefaultRouter):
     def get_default_basename(self, viewset):
         base_name = getattr(viewset, 'base_name', None)
         if base_name is not None:
-            return base_name  # nocv
+            return base_name
         queryset = getattr(viewset, 'queryset', None)
         model = getattr(viewset, 'model', None)
         if queryset is None:  # nocv
@@ -79,7 +83,7 @@ class _AbstractRouter(routers.DefaultRouter):
             view_type = options.get('type', 'viewset')
             if view_type == 'viewset':
                 self.register(*args)
-            elif view_type == 'view':
+            elif view_type == 'view':  # nocv
                 self.register_view(*args)
             else:  # nocv
                 raise Exception('Unknown type of view')
@@ -90,8 +94,7 @@ class APIRouter(_AbstractRouter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self.create_schema:
-            self.__register_schema()
+        self.__register_schema()
         self.__register_openapi()
 
     def __register_openapi(self):
@@ -113,16 +116,12 @@ class APIRouter(_AbstractRouter):
             warn(f"Couldn't attach schema view: {exc}")
 
     def _get_schema_view(self):
-        from rest_framework import schemas
         return schemas.get_schema_view(
             title=self.root_view_name,
             version=self.root_view_name
         )
 
     def get_api_root_view(self, *args, **kwargs):
-        list_name = self.routes[0].name
-        mapping = ((reg[0], list_name.format(basename=reg[2])) for reg in self.registry)
-        api_root_dict = OrderedDict(mapping)
 
         class API(self.APIRootView):
             root_view_name = self.root_view_name
@@ -143,13 +142,13 @@ class APIRouter(_AbstractRouter):
                 data = self._get_views_custom_list(
                     request, super(API, self_inner).get(request, *args, **kwargs)
                 )
-                return Response(data, 200).resp
+                return responses.HTTP_200_OK(data)
 
-        return API.as_view(api_root_dict=api_root_dict)
+        return API.as_view(api_root_dict=self._get_api_root_dict())
 
     def get_urls(self):
         urls = super().get_urls()
-        for prefix, view, _ in self.custom_urls:  # nocv
+        for prefix, view, _ in self.custom_urls:
             view = view.as_view() if hasattr(view, 'as_view') else view
             urls.append(re_path(f"^{prefix}/$", view))
         return urls
@@ -158,13 +157,6 @@ class APIRouter(_AbstractRouter):
         if r'_lang' not in views_list:
             views_list['_lang'] = {
                 'view': 'vstutils.api.views.LangViewSet'
-            }
-
-        if r'_bulk' not in views_list:
-            views_list['_bulk'] = {
-                'view': 'vstutils.api.views.BulkViewSet',
-                'type': 'view',
-                'name': '_bulk'
             }
 
         super().generate(views_list)
@@ -177,9 +169,6 @@ class MainRouter(_AbstractRouter):
         return super()._get_custom_lists() + self.routers
 
     def get_api_root_view(self, *args, **kwargs):
-        list_name = self.routes[0].name
-        mapping = ((reg[0], list_name.format(basename=reg[2])) for reg in self.registry)
-        api_root_dict = OrderedDict(mapping)
 
         class API(self.APIRootView):
             if self.permission_classes:
@@ -208,9 +197,9 @@ class MainRouter(_AbstractRouter):
                 for link in links:
                     if link not in data['available_versions']:
                         data[link] = links[link]
-                return Response(data, 200).resp
+                return responses.HTTP_200_OK(data)
 
-        return API.as_view(api_root_dict=api_root_dict)
+        return API.as_view(api_root_dict=self._get_api_root_dict())
 
     def register_router(self, prefix, router, name=None):
         name = name or router.root_view_name
@@ -229,19 +218,16 @@ class MainRouter(_AbstractRouter):
                     namespace=router.root_view_name
                 )
             ))
-        for prefix, view, _ in self.custom_urls:  # nocv
+        for prefix, view, _ in self.custom_urls:
             # can't be tested because this initialization takes place before
             # any test code can be run
             view = view.as_view() if hasattr(view, 'as_view') else view
             urls.append(re_path(f"^{prefix}/$", view))
         return urls
 
-    def generate_routers(self, api, create_schema=None, create_swagger=None):
+    def generate_routers(self, api):
         for version, views_list in api.items():
-            router = APIRouter(
-                perms=(permissions.IsAuthenticated,),
-                create_schema=create_schema or self.create_schema,
-            )
+            router = APIRouter(perms=(permissions.IsAuthenticated,))
             router.root_view_name = version
             router.generate(views_list)
             self.register_router(version+'/', router)
