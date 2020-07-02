@@ -119,7 +119,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
         if isinstance(value, (list, tuple, map, filter, _t.Generator)):
             value = ''.join((self.__duration_handler(('', v)) for v in value))
         elif isinstance(value, (int, float)):
-            value = f';dur={float(value) * 1000}'
+            value = f';dur={float(value)}'
         elif isinstance(value, str) and value:
             if ' ' in value:
                 value = f'"{value}"'
@@ -134,5 +134,8 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
         response_durations = getattr(response, 'timings', None)
         if response_durations:
             response_durations = f', {", ".join(map(self.__duration_handler, response_durations.items()))}'
-        response['Server-Timing'] = f'app;dur={float(time.time() - start_time)*1000}{response_durations or ""}'
+        total_time = round((time.time() - start_time)*1000, 2)
+        response['Server-Timing'] = f'total;dur={total_time}{response_durations or ""}'
+        if getattr(request, 'is_bulk', False):
+            response['Response-Time'] = str(total_time)
         return response

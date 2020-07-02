@@ -8,6 +8,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
 from django.test.client import Client, ClientHandler
+from django.test.utils import modify_settings
 from drf_yasg.views import SPEC_RENDERERS
 from rest_framework import serializers, views, versioning, request as drf_request
 from rest_framework.authentication import (
@@ -40,9 +41,6 @@ default_authentication_classes = (
 
 append_to_list = list.append
 
-shared_client_handler: ClientHandler = ClientHandler(enforce_csrf_checks=False)
-shared_client_handler.load_middleware()
-
 
 def _join_paths(*args) -> _t.Text:
     '''Join multiple path fragments into one
@@ -53,6 +51,31 @@ def _join_paths(*args) -> _t.Text:
     return f"/{'/'.join(str(arg).strip('/') for arg in args)}/"
 
 
+class ParseResponseDict(dict):
+    __slots__ = ('timing',)
+    timing: _t.SupportsFloat
+
+    def __init__(self, path: _t.Text, method: _t.Text, response: HttpResponse):
+        super().__init__(
+            path=path,
+            status=response.status_code,
+            data=self._get_rendered(response),
+            method=method
+        )
+        self.timing = float(response.get('Response-Time', '0.0'))
+
+    def _get_rendered(self, response: _t.Union[HttpResponse, responses.BaseResponseClass]):
+        try:
+            result = response.data  # type: ignore
+            if isinstance(result, dict):
+                return Dict(result)
+        except:
+            pass
+        if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
+            return json.loads(response.rendered_content.decode())  # type: ignore
+        return Dict(detail=str(response.content.decode('utf-8')))
+
+
 class BulkRequestType(drf_request.Request, HttpRequest):
     # pylint: disable=abstract-method
     data: _t.List[_t.Dict[_t.Text, _t.Any]]  # type: ignore
@@ -60,8 +83,28 @@ class BulkRequestType(drf_request.Request, HttpRequest):
     successful_authenticator: _t.Optional[BaseAuthentication]
 
 
+class BulkClientHandler(ClientHandler):
+
+    @modify_settings(MIDDLEWARE={
+        'remove': [
+            'corsheaders.middleware.CorsMiddleware',
+            'htmlmin.middleware.HtmlMinifyMiddleware',
+            'htmlmin.middleware.MarkRequestMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        ]
+    })
+    def __init__(self, *args, **kwargs):
+        super().__init__(enforce_csrf_checks=False, *args, **kwargs)
+        self.load_middleware()
+
+    def get_response(self, request: HttpRequest):
+        request.is_bulk = True  # type: ignore
+        return super().get_response(request)
+
+
 class BulkClient(Client):
-    handler: ClientHandler = shared_client_handler
+    handler: BulkClientHandler = BulkClientHandler()
 
     def __init__(self, enforce_csrf_checks=False, **defaults):
         # pylint: disable=bad-super-call
@@ -75,7 +118,7 @@ class BulkClient(Client):
     def request(self, **request):
         response = self.handler(self._base_environ(**request))
         if response.cookies:
-            self.cookies.update(response.cookies)
+            self.cookies.update(response.cookies)  # nocv
         return response
 
 
@@ -176,17 +219,6 @@ class OperationSerializer(serializers.Serializer):
     def get_operation_method(self, method: _t.Text) -> _t.Callable:
         return getattr(self.context.get('client'), method.lower())
 
-    def _get_rendered(self, response: _t.Union[HttpResponse, responses.BaseResponseClass]):
-        try:
-            result = response.data  # type: ignore
-            if isinstance(result, dict):
-                return Dict(result)
-        except:
-            pass
-        if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
-            return json.loads(response.rendered_content.decode())  # type: ignore
-        return Dict(detail=str(response.content.decode('utf-8')))
-
     def create(self, validated_data: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Mapping]]) -> _t.Dict[_t.Text, _t.Any]:
         # pylint: disable=protected-access
         method = self.get_operation_method(str(validated_data['method']))
@@ -194,18 +226,16 @@ class OperationSerializer(serializers.Serializer):
         query = validated_data['query']
         if query:
             url += '?' + str(query)
-        response: HttpResponse = method(  # type: ignore
-            url,
-            content_type='application/json',
-            secure=self.context['request']._request.is_secure(),
-            data=validated_data['data'],
-            **validated_data['headers']
-        )
-        return dict(
+        return ParseResponseDict(
             path=url,
-            status=response.status_code,
-            data=self._get_rendered(response),
-            method=validated_data['method']
+            method=str(validated_data['method']),
+            response=method(  # type: ignore
+                url,
+                content_type='application/json',
+                secure=self.context['request']._request.is_secure(),
+                data=validated_data['data'],
+                **validated_data['headers']
+            )
         )
 
 
@@ -295,12 +325,12 @@ class EndpointViewSet(views.APIView):
         }
 
     @transaction.atomic()
-    def operate(self, operation_data: _t.Dict, context: _t.Dict) -> _t.Dict:
+    def operate(self, operation_data: _t.Dict, context: _t.Dict) -> _t.Tuple[_t.Dict, _t.SupportsFloat]:
         """Method used to handle one operation and return result of it"""
         serializer = self.get_serializer(data=operation_data, context=context)
         try:
             serializer.is_valid(raise_exception=True)
-            return serializer.to_representation(serializer.save())
+            return serializer.to_representation(serializer.save()), serializer.instance.timing  # type: ignore
         except Exception as err:
             return {
                 'path': 'bulk',
@@ -310,7 +340,7 @@ class EndpointViewSet(views.APIView):
                 },
                 'status': 500,
                 'data': dict(detail=f'Error in bulk request data. See info. Original message: {str(err)}')
-            }
+            }, 0.0
 
     def get(self, request: BulkRequestType) -> HttpResponse:
         """Returns response with swagger ui or openapi json schema if ?format=openapi"""
@@ -337,12 +367,14 @@ class EndpointViewSet(views.APIView):
             'client': self.get_client(request),
             'results': self.results
         }
+        timings: _t.List = []
         for operation in request.data:  # type: ignore
-            result = self.operate(operation, context)  # type: ignore
+            result, timing = self.operate(operation, context)  # type: ignore
             append_to_list(self.results, result)
+            append_to_list(timings, timing)
             if not allow_fail and not (100 <= result.get('status', 500) < 400):
                 raise Exception(f'Execute transaction stopped. Error message: {str(result)}')
-        return responses.HTTP_200_OK(self.results)
+        return responses.HTTP_200_OK(self.results, timings={f'op{i}': float(j) for i, j in enumerate(timings)})
 
     def initial(self, request: drf_request.Request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
