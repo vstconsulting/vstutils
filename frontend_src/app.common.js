@@ -37,9 +37,6 @@ window.iziToast = iziToast;
 import autoComplete from 'JavaScript-autoComplete/auto-complete';
 window.autoComplete = autoComplete;
 
-import axios from 'axios';
-window.axios = axios;
-
 import './libs/bootstrap-adminlte.js';
 import './libs/fontawesome.js';
 

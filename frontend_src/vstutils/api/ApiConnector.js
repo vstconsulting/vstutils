@@ -1,7 +1,8 @@
 import $ from 'jquery';
-import axios from 'axios';
 import StatusError from './StatusError.js';
 import { guiLocalSettings, getCookie } from '../utils';
+
+const METHODS_WITH_DATA = ['post', 'put', 'patch'];
 
 /**
  * Class, that sends API requests.
@@ -21,10 +22,6 @@ export default class ApiConnector {
          * Object, that manages api responses cache operations.
          */
         this.cache = cache;
-        /**
-         * Object with methods for providing Api connection.
-         */
-        this.api = axios.create(this.create_axios_config(openapi));
         /**
          * Property for collecting several bulk requests into one.
          */
@@ -49,40 +46,35 @@ export default class ApiConnector {
              */
             bulk_parts: [],
         };
-    }
-    /**
-     * Method that creates config for axios instance.
-     * @param {object} openapi Object with OpenAPI schema.
-     */
-    create_axios_config(openapi) {
-        const schema = openapi.schemes[0];
-        const host = openapi.host;
+
         const version = openapi.info.version;
         // remove version and ending slash from path (/api/v1/)
         const path = openapi.basePath.replace(version, '').replace(/\/$/, '');
-        return {
-            headers: {
-                'content-type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            baseURL: `${schema}://${host}${path}`,
+
+        this.baseURL = `${openapi.schemes[0]}://${openapi.host}${path}`;
+        this.headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
         };
+
+        this.endpointURL = window.endpoint_url;
     }
     /**
      * Method, that sends API request.
-     * @param {string} method Method of HTTP request.
-     * @param {string} url Relative part of link, to which send API requests.
-     * @param {object} data Query body.
+     * @param {string} method - Method of HTTP request.
+     * @param {string=} url - Relative part of link including version (e.g.: 'v1/user/1/'),
+     * to which send API requests.
+     * @param {object=} data - Json query body.
      */
-    query(method, url = '', data = {}) {
-        let with_data_methods = ['post', 'put', 'patch'];
-        let without_data_methods = ['get', 'delete'];
-
-        if (with_data_methods.includes(method)) {
-            return this.api[method](url, data);
-        } else if (without_data_methods.includes(method)) {
-            return this.api[method](url);
+    apiQuery(method, url, data = {}) {
+        const fetchConfig = {
+            method: method,
+            headers: this.headers,
+        };
+        if (METHODS_WITH_DATA.includes(method.toLowerCase())) {
+            fetchConfig.data = data;
         }
+        return fetch(`${this.baseURL}/${url}`, fetchConfig);
     }
     /**
      * Method, that collects several bulk requests into one.
@@ -117,31 +109,33 @@ export default class ApiConnector {
     }
     /**
      * Method, that sends one big bulk request to API.
-     * @return {promise} Promise of getting bulk request response.
+     * @return {Promise} Promise of getting bulk request response.
      */
-    sendBulk() {
-        let url = window.endpoint_url;
+    async sendBulk() {
         let collector = $.extend(true, {}, this.bulk_collector);
         this.bulk_collector.bulk_parts = [];
         let bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
 
-        return this.query('put', url, bulk_data)
-            .then((response) => {
-                let result = response.data;
-
-                for (let [idx, item] of result.entries()) {
-                    let method = 'resolve';
-
-                    if (!(item.status >= 200 && item.status < 400)) {
-                        method = 'reject';
-                    }
-
-                    collector.bulk_parts[idx].callbacks[method](item);
-                }
-            })
-            .catch((error) => {
-                throw new StatusError(error.status, error.data);
+        try {
+            const request = await fetch(this.endpointURL, {
+                method: 'put',
+                headers: this.headers,
+                body: JSON.stringify(bulk_data),
             });
+            const result = await request.json();
+
+            for (let [idx, item] of result.entries()) {
+                let method = 'resolve';
+
+                if (!(item.status >= 200 && item.status < 400)) {
+                    method = 'reject';
+                }
+
+                collector.bulk_parts[idx].callbacks[method](item);
+            }
+        } catch (error) {
+            throw new StatusError(error.status, error.data);
+        }
     }
     /**
      * Method returns URL of API host (server).
