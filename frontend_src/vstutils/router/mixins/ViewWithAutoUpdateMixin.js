@@ -30,6 +30,9 @@ const ViewWithAutoUpdateMixin = {
         this.stopAutoUpdate();
         next();
     },
+    beforeDestroy() {
+        this.stopAutoUpdate();
+    },
     /**
      * Vue Hook, that is called,
      * when openning page has different route path template from current one.
@@ -57,6 +60,10 @@ const ViewWithAutoUpdateMixin = {
                 return setTimeout(() => {
                     this.startAutoUpdate();
                 }, update_interval);
+            }
+
+            if (this.autoupdate.timeout_id) {
+                clearTimeout(this.autoupdate.timeout_id);
             }
 
             this.autoupdate.timeout_id = setTimeout(() => {
