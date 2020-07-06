@@ -36,6 +36,9 @@ export let routesComponentsTemplates = {
      */
     base: {
         mixins: [BasestViewMixin, CollapsibleCardMixin, ViewWithParentInstancesForPath],
+        provide() {
+            return { getParentPaths: this.getParentPaths };
+        },
         /**
          * Data property of Vue component.
          */
@@ -379,11 +382,11 @@ export let routesComponentsTemplates = {
             /**
              * Method, that finds all inner paths in current path
              * and returns array, that contains objects with inner paths and inner urls.
-             * @param {string} path Path of current view.
-             * @param {string} url URL of current view.
+             * @param {string=} path Path of current view.
+             * @param {string=} url URL of current view.
              * @return {array}
              */
-            getParentPaths(path, url) {
+            getParentPaths(path = this.$route.name, url = this.$route.path) {
                 let result = [];
                 let views = this.$store.getters.getViews;
                 let inner_path = '/';

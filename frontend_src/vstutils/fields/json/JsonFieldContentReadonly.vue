@@ -1,26 +1,17 @@
 <template>
-    <div class="row" :aria-labelledby="label_id" :aria-label="aria_label">
+    <div class="json-field-readonly">
         <component
-            v-for="(item, idx) in realFields"
-            :key="idx"
-            :is="'field_' + item.options.format"
-            :field="item"
-            :prop_data="value"
-            :wrapper_opt="{ use_prop_data: true }"
+            :is="jsonMapper.getComponent(value)"
+            :value="value"
+            :levels="[0]"
+            :title="undefined"
         ></component>
     </div>
 </template>
 
 <script>
-    /**
-     * Mixin for read only json gui_field.
-     */
     export default {
-        computed: {
-            realFields() {
-                return this.field.generateRealFields(this.value);
-            },
-        },
+        inject: ['jsonMapper'],
     };
 </script>
 

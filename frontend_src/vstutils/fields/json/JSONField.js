@@ -1,32 +1,29 @@
 import { BaseField } from '../base';
 import JSONFieldMixin from './JSONFieldMixin.js';
+import JsonMapper from './JsonMapper.js';
 
 /**
  * JSON guiField class.
  */
 class JSONField extends BaseField {
-    /**
-     * Method, that inits all real fields of json field.
-     */
-    generateRealFields(value = {}) {
-        let realFields = {};
+    constructor(options = {}, jsonMapper = undefined) {
+        super(options);
+        this.jsonMapper = jsonMapper || new JsonMapper();
+    }
 
-        for (let [name, field] of Object.entries(value)) {
-            let opt = {
-                name: name,
-                readOnly: this.options.readOnly || false,
-                title: name,
-                format: 'string',
-            };
-
-            if (typeof field == 'boolean') {
-                opt.format = 'boolean';
-            }
-
-            realFields[name] = new window.spa.fields.guiFields[opt.format](opt);
+    toInner(data = {}) {
+        let value = super.toInner(data);
+        if (typeof value === 'string') {
+            return JSON.parse(value);
         }
+        return value;
+    }
 
-        return realFields;
+    toRepresent(data = {}) {
+        if (this.options.readOnly) {
+            return super.toRepresent(data);
+        }
+        return JSON.stringify(super.toRepresent(data));
     }
 
     /**

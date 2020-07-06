@@ -316,7 +316,7 @@ class VSTOpenApiBase(Directive):
         :return: example of object
         :rtype: dict
         '''
-        def_model = self.definitions[def_name]
+        def_model = self.definitions.get(def_name, {})
         example = dict()
         for opt_name, opt_value in def_model.get('properties', dict()).items():
             var_type = opt_value.get('format', None) or opt_value.get('type', None)
