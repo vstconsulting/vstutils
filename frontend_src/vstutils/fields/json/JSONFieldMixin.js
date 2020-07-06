@@ -1,6 +1,7 @@
 import { addCssClassesToElement } from '../../utils';
 import { BaseFieldContentReadonlyMixin } from '../base';
 import JsonFieldContentReadonly from './JsonFieldContentReadonly.vue';
+import { TextAreaFieldContentEdit } from '../text';
 
 const JSONFieldMixin = {
     data: function () {
@@ -17,9 +18,17 @@ const JSONFieldMixin = {
             },
         };
     },
+    provide() {
+        return {
+            jsonMapper: this.field.jsonMapper,
+        };
+    },
     components: {
         field_content_readonly: {
             mixins: [BaseFieldContentReadonlyMixin, JsonFieldContentReadonly],
+        },
+        field_content_edit: {
+            mixins: [TextAreaFieldContentEdit],
         },
     },
 };
