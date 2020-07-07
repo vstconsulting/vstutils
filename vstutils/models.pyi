@@ -1,6 +1,7 @@
 import typing as _t
 from django.db import models
 from .utils import Paginator
+from .api import base as api_base
 
 
 class ObjectDoesNotExist(Exception):
@@ -40,6 +41,7 @@ class Manager(BaseManager):
 class BaseModel(models.Model):
     objects: Manager
     DoesNotExist: ObjectDoesNotExist
+    generated_view: api_base.GenericViewSet
 
     def __unicode__(self) -> _t.Text:
         ...

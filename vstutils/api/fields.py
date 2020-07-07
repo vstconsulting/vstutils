@@ -176,7 +176,7 @@ class FkModelField(FkField):
     def __init__(self, **kwargs):
         select = kwargs.pop('select')
         if not issubclass(select, ModelSerializer):  # nocv
-            raise Exception('Argument "select" must be django.db.models.Model instance.')
+            raise Exception('Argument "select" must be rest_framework.serializers.ModelSerializer subclass.')
         self.model_class = select.Meta.model
         kwargs['select'] = select.__name__.replace('Serializer', '')
         super().__init__(**kwargs)

@@ -1,6 +1,7 @@
 import os
 from vstutils.models import models
 from vstutils.custom_model import ListModel, FileModel
+from vstutils.api import fields
 
 
 class File(FileModel):
@@ -9,6 +10,24 @@ class File(FileModel):
     for_order1 = models.IntegerField()
     for_order2 = models.IntegerField()
     origin_pos = models.IntegerField(primary_key=True)
+
+    class Meta:
+        _view_class = 'read_only'
+        _list_fields = (
+            'name',
+            'for_order1',
+            'for_order2',
+            'origin_pos',
+        )
+        _override_list_fields = {
+            'name': fields.CommaMultiSelect(select='HostGroup')
+        }
+        _filterset_fields = (
+            'name',
+            'for_order1',
+            'for_order2',
+            'origin_pos',
+        )
 
 
 class List(ListModel):

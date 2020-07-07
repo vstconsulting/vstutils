@@ -5,8 +5,27 @@ Default Django model classes overrided in `vstutils.models` module.
 
 from __future__ import unicode_literals
 import inspect
+from django_filters import rest_framework as filters
+from django.db.models.base import ModelBase, Model
 from django.db import models
-from .utils import Paginator
+from .utils import Paginator, import_class
+from .api import (
+    base as api_base,
+    filters as api_filters,
+    serializers as api_serializers
+)
+
+
+def _get_setting_for_view(metatype, metadata, views):
+    override = metadata[f'override_{metatype}']
+    metadataobject = metadata[metatype]
+    if override:
+        return metadataobject  # nocv
+    if metadataobject:
+        for view in views:
+            if hasattr(view, metatype):
+                return list(getattr(view, metatype)) + list(metadata[metatype])
+        return metadataobject  # nocv
 
 
 def is_class_method_or_function(obj):
@@ -111,20 +130,162 @@ class Manager(BaseManager.from_queryset(BQuerySet)):
     """
 
 
-class BaseModel(models.Model):
-    # pylint: disable=no-member
-    __slots__ = ('no_signal',)
-    objects    = Manager()
+class ModelBaseClass(ModelBase):
+    def __new__(mcs, name, bases, attrs, **kwargs) -> Model:
+        if "__slots__" not in attrs:
+            attrs['__slots__'] = tuple()
+        if "__unicode__" in attrs and '__str__' not in attrs:
+            attrs['__str__'] = lambda x: x.__unicode__()
+        extra_metadata: dict = {
+            # list or class which is base for view
+            "view_class": None,
+            # base class for serializers
+            "serializer_class": None,
+            # name of openapi model
+            "serializer_class_name": None,
+            # tuple or list of fields in list view
+            "list_fields": None,
+            # dict which override fields types of list view serializer
+            "override_list_fields": dict(),
+            # tuple or list of fields in detail view
+            "detail_fields": None,
+            # dict which override fields types of detail view serializer
+            "override_detail_fields": dict(),
+            # key-value of actions serializers (key - action, value - serializer class)
+            "extra_serializer_classes": dict(),
+            # tuple or list of filters on list
+            "filterset_fields": None,
+            # tuple or list of filter backends for queryset
+            "filter_backends": None,
+            # allow to full override of the filter backends default list
+            "override_filter_backends": False,
+            # tuple or list of permission_classes for the view
+            "permission_classes": None,
+            # allow to override the default permission_classes
+            "override_permission_classes": False,
+            # additional attrs which means that this view allowed to copy elements
+            "copy_attrs": dict(),
+            # TODO: key-value mapping with nested views (key - nested, value - model class)
+            # "nested": {}
+        }
+        if "Meta" in attrs:
+            meta = attrs['Meta'].__dict__
+            for extra_name in filter(lambda y: y in meta, map(lambda x: f'_{x}', extra_metadata.keys())):
+                extra_metadata[extra_name[1:]] = meta[extra_name]
+        attrs['__extra_metadata__'] = extra_metadata
+        model_class: Model = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
+        if hasattr(model_class, '__prepare_model__'):
+            model_class.__prepare_model__()
+        model_class.__extra_metadata__ = extra_metadata
+        model_objects = getattr(model_class, 'objects', None)
+        queryset_class = getattr(model_objects, '_queryset_class', None)
+        if queryset_class and not issubclass(queryset_class, BQuerySet):
+            manager = Manager()
+            manager.auto_created = True
+            model_class.add_to_class('objects', manager)
+        model_class.add_to_class('generated_view', model_class.get_view_class())
+        return model_class
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.no_signal = False
+    def get_serializer_class(cls, serializer_class, serializer_class_name=None, fields=None, field_overrides=None):
+        if serializer_class is None:
+            serializer_class = api_serializers.VSTSerializer
+
+        if serializer_class_name is None:
+            serializer_class_name = cls.__name__ + 'Serializer'
+
+        if fields:
+            fields = list(fields)
+        else:
+            fields = '__all__'
+
+        class SerializerClass(serializer_class):
+            class Meta:
+                model = cls
+                ref_name = serializer_class_name.replace('Serializer', '')
+
+        for attr_name, attr_value in field_overrides.items():
+            SerializerClass._declared_fields[attr_name] = attr_value
+
+        SerializerClass.__name__ = serializer_class_name
+        setattr(SerializerClass.Meta, 'fields', fields)
+
+        return SerializerClass
+
+    def get_view_class(cls):
+        metadata = cls.__extra_metadata__
+
+        view_attributes = dict(model=cls)
+
+        serializer_class = metadata['serializer_class']
+        serializers = dict(
+            serializer_class=cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
+                serializer_class=serializer_class,
+                serializer_class_name=metadata['serializer_class_name'],
+                fields=metadata['list_fields'],
+                field_overrides=metadata['override_list_fields']
+            )
+        )
+        detail_fields_override = metadata['override_detail_fields'] or None
+        if not detail_fields_override and not metadata['detail_fields']:
+            detail_fields_override = metadata['override_list_fields']
+
+        serializers['serializer_class_one'] = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
+            serializer_class=serializer_class,
+            serializer_class_name=f'One{serializers["serializer_class"].__name__}',
+            fields=metadata['detail_fields'] or metadata['list_fields'],
+            field_overrides=detail_fields_override
+        )
+        serializers.update(map(lambda k, v: (f'serializer_class_{k}', v), metadata['extra_serializer_classes'].items()))
+
+        view_class = metadata['view_class']
+        if view_class is None:
+            view_class = api_base.ModelViewSet
+        if view_class == 'read_only':
+            view_class = api_base.ReadOnlyModelViewSet
+        elif view_class == 'history':
+            view_class = api_base.HistoryModelViewSet  # nocv
+        elif isinstance(view_class, str):
+            view_class = import_class(view_class)
+
+        if not isinstance(view_class, (tuple, list)):
+            view_class = (view_class,)
+
+        view_class = list(view_class)
+
+        if metadata['copy_attrs']:
+            view_attributes.update(map(lambda r: (f'copy_{r[0]}', r[1]), metadata['copy_attrs'].items()))
+            view_class.append(api_base.CopyMixin)
+
+        filterset_fields = metadata['filterset_fields']
+        if filterset_fields == 'serializer':
+            filterset_fields = tuple(serializers['serializer_class']._declared_fields.keys())
+
+        if filterset_fields:
+            base_filter_class = api_filters.DefaultIDFilter if 'id' in filterset_fields else filters.FilterSet
+
+            class FilterSetClass(base_filter_class):
+                class Meta:
+                    model = cls
+                    fields = filterset_fields
+
+            view_attributes['filterset_class'] = FilterSetClass
+
+        for metatype in ['permission_classes', 'filter_backends']:
+            metaobject = _get_setting_for_view(metatype, metadata, view_class)
+            if metaobject:
+                view_attributes[metatype] = metaobject
+
+        return type(f'{cls.__name__}ViewSet', tuple(view_class), {**view_attributes, **serializers})
+
+
+class BaseModel(Model, metaclass=ModelBaseClass):
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return self.__unicode__()
+    @classmethod
+    def __prepare_model__(cls):
+        pass
 
 
 class BModel(BaseModel):

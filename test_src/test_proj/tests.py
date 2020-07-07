@@ -1563,7 +1563,7 @@ class ProjectTestCase(BaseTestCase):
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['status'], 200, results[0])
         self.assertEqual(results[1]['data']['some_binfile'], '')
         self.assertEqual(results[1]['data']['some_namedbinfile'], dict(name=None, content=None))
         self.assertEqual(results[1]['data']['some_namedbinimage'], dict(name=None, content=None))

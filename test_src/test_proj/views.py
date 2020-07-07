@@ -1,11 +1,10 @@
 import time
 import json
 
-from vstutils.api import fields, filters, responses
-from vstutils.api.base import (CopyMixin, ModelViewSet, NonModelsViewSet,
-                               ReadOnlyModelViewSet, Response)
+from vstutils.api import responses
+from vstutils.api.base import NonModelsViewSet, Response
 from vstutils.api.decorators import action, nested_view, subaction
-from vstutils.api.serializers import EmptySerializer, VSTSerializer, DataSerializer
+from vstutils.api.serializers import EmptySerializer, DataSerializer
 
 from .models import (
     File,
@@ -18,101 +17,17 @@ from .models import (
 )
 
 
-class TestFilterBackend:
-    required = True
-
-    def filter_queryset(self, request, queryset, view):
-        return queryset
-
-    def get_schema_fields(self, view):
-        return []
+class CreateHostSerializer(Host.generated_view.serializer_class):
+    pass
 
 
-class HostFilter(filters.DefaultIDFilter):
-    class Meta:
-        model = Host
-        fields = (
-            'id',
-            'name',
-        )
-
-
-class HostGroupFilter(filters.DefaultIDFilter):
-    class Meta:
-        model = HostGroup
-        fields = (
-            'id',
-        )
-
-
-class FileSerializer(VSTSerializer):
-    name = fields.CommaMultiSelect(select='HostGroup')
-
-    class Meta:
-        model = File
-        fields = (
-            'name',
-            'for_order1',
-            'for_order2',
-            'origin_pos',
-        )
-
-
-class FileFilter(filters.filters.FilterSet):
-    class Meta:
-        model = File
-        fields = (
-            'name',
-            'for_order1',
-            'for_order2',
-            'origin_pos',
-        )
-
-
-class HostSerializer(VSTSerializer):
-    id = fields.RedirectIntegerField(read_only=True)
-    name = fields.DependEnumField(field='id', choices={3: 'hello', 1: 'NOO!'})
-
-    class Meta:
-        model = Host
-        fields = (
-            'id',
-            'name',
-        )
-
-
-class CreateHostSerializer(HostSerializer):
-    name = fields.CharField(required=True)
-
-
-class HostGroupSerializer(VSTSerializer):
-    name = fields.AutoCompletionField(autocomplete=['Some', 'Another'])
-    parent = fields.AutoCompletionField(autocomplete='Host', required=False)
-    secret_file = fields.SecretFileInString(read_only=True)
-    file = fields.FileInStringField(read_only=True)
-
-    class Meta:
-        model = HostGroup
-        fields = (
-            'id',
-            'name',
-            'parent',
-            'file',
-            'secret_file',
-        )
-
-
-class HostViewSet(ModelViewSet):
+class HostViewSet(Host.generated_view):
     '''
     Hosts view
     '''
-    model = Host
-    serializer_class = HostSerializer
     action_serializers = {
         'create': CreateHostSerializer
     }
-    filterset_class = HostFilter
-    filter_backends = list(ModelViewSet.filter_backends) + [TestFilterBackend]
 
     @subaction(
         response_code=200, response_serializer=EmptySerializer, detail=True,
@@ -121,24 +36,20 @@ class HostViewSet(ModelViewSet):
     def test(self, request, *args, **kwargs):
         return responses.HTTP_200_OK('OK')
 
-    @subaction(detail=True, serializer_class=HostSerializer)
+    @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
     def test2(self, request, *args, **kwargs):
         self.get_object()
         return Response("OK", 201).resp
 
-    @subaction(detail=True, serializer_class=HostSerializer)
+    @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
     def test3(self, request, *args, **kwargs):
         return Response("OK", 201).resp  # nocv
 
 
-class _HostGroupViewSet(ModelViewSet):
+class _HostGroupViewSet(HostGroup.generated_view):
     '''
     Host group opertaions.
     '''
-    model = HostGroup
-    serializer_class = HostGroupSerializer
-    serializer_class_one = HostGroupSerializer
-    filterset_class = HostGroupFilter
 
 
 def queryset_nested_filter(parent, qs):
@@ -159,13 +70,12 @@ def queryset_nested_filter(parent, qs):
     manager_name='hosts', subs=None,
     view=HostViewSet, methods=['get']
 )
-class HostGroupViewSet(_HostGroupViewSet, CopyMixin):
-    serializer_class_one = HostGroupSerializer
+class HostGroupViewSet(_HostGroupViewSet):
     copy_related = ['hosts', 'subgroups']
 
 
-@nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupSerializer)
-class _DeepHostGroupViewSet(_HostGroupViewSet, CopyMixin):
+@nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupViewSet.serializer_class)
+class _DeepHostGroupViewSet(_HostGroupViewSet):
 
     def get_manager_subdeephosts(self, parent):
         return getattr(parent, 'subgroups')
@@ -193,51 +103,15 @@ except AssertionError:
     pass
 
 
-class FilesViewSet(ReadOnlyModelViewSet):
-    model = File
-    serializer_class = FileSerializer
-    filterset_class = FileFilter
+class FilesViewSet(File.generated_view):
+    pass
 
 
-class ModelWithFKSerializer(VSTSerializer):
-    some_fk = fields.FkModelField(select=HostSerializer)
-
-    class Meta:
-        model = ModelWithFK
-        fields = (
-            'id',
-            'some_fk'
-        )
+class TestFkViewSet(ModelWithFK.generated_view):
+    pass
 
 
-class TestFkViewSet(ModelViewSet):
-    model = ModelWithFK
-    serializer_class = ModelWithFKSerializer
-
-
-class ModelWithBinaryFilesSerializer(VSTSerializer):
-    some_binfile = fields.BinFileInStringField(required=False)
-    some_namedbinfile = fields.NamedBinaryFileInJsonField(required=False)
-    some_namedbinimage = fields.NamedBinaryImageInJsonField(required=False)
-    some_multiplenamedbinfile = fields.MultipleNamedBinaryFileInJsonField(required=False)
-    some_multiplenamedbinimage = fields.MultipleNamedBinaryImageInJsonField(required=False)
-
-    class Meta:
-        model = ModelWithBinaryFiles
-        fields = (
-            'id',
-            'some_binfile',
-            'some_namedbinfile',
-            'some_namedbinimage',
-            'some_multiplenamedbinfile',
-            'some_multiplenamedbinimage',
-        )
-
-
-class TestBinaryFilesViewSet(ModelViewSet):
-    model = ModelWithBinaryFiles
-    serializer_class = ModelWithBinaryFilesSerializer
-
+class TestBinaryFilesViewSet(ModelWithBinaryFiles.generated_view):
     @action(methods=['get'], detail=True)
     def test_nested_view_inspection(self, *args, **kwargs):
         raise Exception  # nocv
@@ -276,32 +150,6 @@ class RequestInfoTestView(NonModelsViewSet):
         return responses.HTTP_200_OK(data)
 
 
-class VariableSerializer(VSTSerializer):
-
-    class Meta:
-        model = Variable
-        fields = (
-            'id',
-            'value',
-        )
-
-
-class VarBasedSerializer(VSTSerializer):
-
-    class Meta:
-        model = VarBasedModel
-        fields = (
-            'id',
-            'name',
-        )
-
-
-class VariablesViewSet(ModelViewSet):
-    model = Variable
-    serializer_class = VariableSerializer
-
-
-@nested_view('vars', 'id', manager_name='variables', allow_append=False, view=VariablesViewSet)
-class VarBasedViewSet(ModelViewSet):
-    model = VarBasedModel
-    serializer_class = VarBasedSerializer
+@nested_view('vars', 'id', manager_name='variables', allow_append=False, view=Variable.generated_view)
+class VarBasedViewSet(VarBasedModel.generated_view):
+    pass
