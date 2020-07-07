@@ -96,7 +96,8 @@ class BulkClientHandler(ClientHandler):
     })
     def __init__(self, *args, **kwargs):
         super().__init__(enforce_csrf_checks=False, *args, **kwargs)
-        self.load_middleware()
+        if self.__class__.__name__ == 'BulkClientHandler':
+            self.load_middleware()
 
     def get_response(self, request: HttpRequest):
         request.is_bulk = True  # type: ignore
