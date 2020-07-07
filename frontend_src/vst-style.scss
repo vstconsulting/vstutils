@@ -1,0 +1,406 @@
+$admonition:
+    [".warning", ".important"] ("background-color": "#fff8a96b", "border": "1px solid lightgray", "padding-left": "10px"),
+    [".attention", ".caution", ".danger", ".error"] ("background-color": "#ff97976b", "border": "1px solid lightgray", "padding-left": "10px"),
+    [".admonition", ".hint", ".note", ".tip"] ("background-color": "#d3d3d36b", "border": "1px solid lightgray", "padding-left": "10px"),
+    [".attention", ".caution", ".danger", ".error .admonition-title"] ("color": "#c70413bd"),
+    [".important", ".warning .admonition-title"] ("color": "#ffa10abd"),
+    [" .admonition-title"] ("color": "#0000008a");
+
+@each $names, $styles in $admonition {
+    @each $name in $names {
+        .admonition#{$name} {
+            @each $key, $value in $styles {
+                #{$key}: #{$value},
+            };
+        }
+    }
+}
+
+$highlights:
+  [".comment", ".c"] ("color": "#408090", "font-style": "italic" ),
+  [".error" ".err"] ( "border": "1px solid #ff0000" ),
+  [".keyword", ".k"] ( "color": "#007020", "font-weight": "bold" ),
+  [".operator", ".o"] ( "color": "#666666" ),
+  [".comment.multiline", ".cm"] ( "color": "#408090", "font-style": "italic" ),
+  [".comment.preproc", ".cp"] ( "color": "#007020" ),
+  [".comment.single", ".c1"] ( "color": "#408090", "font-style": "italic" ),
+  [".comment.special", ".cs"] ( "color": "#408090", "background-color": "#fff0f0" ),
+  [".generic.deleted", ".gd"] ( "color": "#a00000" ),
+  [".generic.emph", ".ge"] ( "font-style": "italic" ),
+  [".generic.error", ".gr"] ( "color": "#ff0000" ),
+  [".generic.heading", ".gh"] ( "color": "#000080", "font-weight": "bold" ),
+  [".generic.inserted", ".gi"] ( "color": "#00a000" ),
+  [".generic.output", ".go"] ( "color": "#333333" ),
+  [".generic.prompt", ".gp"] ( "color": "#c65d09", "font-weight": "bold" ),
+  [".generic.strong", ".gs"] ( "font-weight": "bold" ),
+  [".generic.subheading", ".gu"] ( "color": "#800080", "font-weight": "bold" ),
+  [".generic.traceback", ".gt"] ( "color": "#0044dd" ),
+  [".keyword.constant", ".kc"] ( "color": "#007020", "font-weight": "bold" ),
+  [".keyword.declaration", ".kd"] ( "color": "#007020", "font-weight": "bold" ),
+  [".keyword.namespace", ".kn"] ( "color": "#007020", "font-weight": "bold" ),
+  [".keyword.pseudo", ".kp"] ( "color": "#007020" ),
+  [".keyword.reserved", ".kr"] ( "color": "#007020", "font-weight": "bold" ),
+  [".keyword.type", ".kt"] ( "color": "#902000" ),
+  [".literal.number", ".m"] ( "color": "#208050" ),
+  [".literal.string", ".s"] ( "color": "#4070a0" ),
+  [".name.attribute", ".na"] ( "color": "#4070a0" ),
+  [".name.builtin", ".nb"] ( "color": "#007020" ),
+  [".name.class", ".nc"] ( "color": "#0e84b5", "font-weight": "bold" ),
+  [".name.constant", ".no"] ( "color": "#60add5" ),
+  [".name.decorator", ".nd"] ( "color": "#555555", "font-weight": "bold" ),
+  [".name.entity", ".ni"] ( "color": "#d55537", "font-weight": "bold" ),
+  [".name.exception", ".ne"] ( "color": "#007020" ),
+  [".name.function", ".nf"] ( "color": "#06287e" ),
+  [".name.label", ".nl"] ( "color": "#002070", "font-weight": "bold" ),
+  [".name.namespace", ".nn"] ( "color": "#0e84b5", "font-weight": "bold" ),
+  [".name.tag", ".nt"] ( "color": "#062873", "font-weight": "bold" ),
+  [".name.variable", ".nv"] ( "color": "#bb60d5" ),
+  [".operator.word", ".ow"] ( "color": "#007020", "font-weight": "bold" ),
+  [".text.whitespace", ".w"] ( "color": "#bbbbbb" ),
+  [".literal.number.float", ".mf"] ( "color": "#208050" ),
+  [".literal.number.hex", ".mh"] ( "color": "#208050" ),
+  [".literal.number.integer", ".mi"] ( "color": "#208050" ),
+  [".literal.number.oct", ".mo"] ( "color": "#208050" ),
+  [".literal.string.backtick", ".sb"] ( "color": "#4070a0" ),
+  [".literal.string.char", ".sc"] ( "color": "#4070a0" ),
+  [".literal.string.doc", ".sd"] ( "color": "#4070a0", "font-style": "italic" ),
+  [".literal.string.double", ".s2"] ( "color": "#4070a0" ),
+  [".literal.string.escape", ".se"] ( "color": "#4070a0", "font-weight": "bold" ),
+  [".literal.string.heredoc", ".sh"] ( "color": "#4070a0" ),
+  [".literal.string.interpol", ".si"] ( "color": "#70a0d0", "font-style": "italic" ),
+  [".literal.string.other", ".sx"] ( "color": "#c65d09" ),
+  [".literal.string.regex", ".sr"] ( "color": "#235388" ),
+  [".literal.string.single", ".s1"] ( "color": "#4070a0" ),
+  [".literal.string.symbol", ".ss"] ( "color": "#517918" ),
+  [".name.builtin.pseudo", ".bp"] ( "color": "#007020" ),
+  [".name.variable.class", ".vc"] ( "color": "#bb60d5" ),
+  [".name.variable.global", ".vg"] ( "color": "#bb60d5" ),
+  [".name.variable.instance", ".vi"] ( "color": "#bb60d5" ),
+  [".literal.number.integer.long", ".il"] ( "color": "#208050" ),
+  [".l, .nn, .kr, .m"] ("color": "#195f91");
+
+@each $names, $style in $highlights {
+    @each $name in $names {
+        .highlight #{$name} {
+            @each $key, $value in $style {
+                #{$key}: #{$value},
+            };
+        }
+    }
+}
+
+
+.highlight .hll {
+  background-color: #ffffcc;
+}
+
+.highlight pre {
+  background-color: #f7f7f9;
+}
+.highlight pre p {
+  color: #333;
+}
+.highlight .mi {
+  color: #208050;
+}
+.highlight .s2 {
+  color: #D14;
+}
+.highlight .kc {
+  color: #000081;
+}
+.highlight .nf, .highlight .na {
+  font-weight: bold;
+}
+
+.sidebar-menu ul {
+    list-style: none;
+    margin: 0;
+    padding:0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.sidebar-menu ul li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu ul li  a
+{
+    font-weight: 600;
+    display:block;
+    padding: 12px 5px 12px 15px;
+}
+
+.sidebar-menu .caption {
+    display: none!important;
+}
+
+.sidebar-menu ul li  a:hover
+{
+    background-color: rgba(255,255,255,.1);
+}
+
+.sidebar-menu ul li ul {
+    margin: 0;
+}
+
+.sidebar-menu .nav-item.current a.current {
+    background-color: var(--menu-active-bg-color);
+    color: var(--menu-active-color) !important;
+}
+
+.sidebar-menu .nav-item.current .nav-treeview .toctree-l2 a{
+    background-color: var(--background-passiv-color);
+}
+
+.sidebar-menu .nav-item.current .nav-treeview .toctree-l2 a:hover {
+     background-color: rgba(255,255,255,.1);
+     color: var(--menu-active-color) !important;
+}
+
+
+
+.sidebar-menu ul li ul li a
+{
+    font-weight: 500;
+    display:block;
+    padding: 12px 5px 12px 25px;
+}
+
+.sidebar-menu,
+.main-sidebar .user-panel,
+.sidebar-menu > li.header {
+    white-space: normal!important;
+    overflow: visible!important;
+}
+
+.headerlink {
+    opacity:0;
+}
+
+.headerlink:hover {
+    opacity:1;
+}
+
+img {
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    img {
+        max-width: 650px;
+    }
+}
+
+.content-header h1 {
+    margin-left: 10px;
+}
+
+.section h1 {
+    margin-top: 0px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    font-size: 24px;
+}
+
+$sections:
+    "h2" "22",
+    "h3" "20",
+    "h4" "18",
+    "h5" "16",
+    "h6" "14";
+
+@each $name, $size in $sections {
+    .section #{$name} {
+        font-size: #{$size}px;
+        font-weight: 600;
+        margin-top: 20px;    
+    }
+}
+
+.sidebar h3, .sidebar p {
+    padding-left:15px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.sidebar h3 {
+    margin-top:20px;
+    color: #fff;
+}
+
+#search-documentation, #search-results h2{
+    font-size: 22px;
+}
+
+#search-documentation {
+    margin-top: 0px;
+    padding-top: 0px;
+    padding-bottom:7px;
+    border-bottom: 1px solid #eee;
+}
+
+#searchbox h3 {
+    font-weight: 600;
+    display:block;
+    padding-left:15px;
+    color: #fff;
+    font-size: 15px;
+}
+
+#search-results h2:first-child {
+    display: none;
+}
+
+.search-input-docs {
+    float:left;
+    border:1px solid #d2d6de;
+    height: 30px;
+    width: 170px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#big-search-input-docs {
+    width: 300px;
+}
+
+.search-button-wrapper {
+    position:relative;
+    float:left;
+    height: 30px;
+    width:30px;
+    border: 1px solid #d2d6de;
+    border-left:none;
+    background-color: #fff;
+}
+
+.search-button-icon {
+    position:absolute;
+    left: 7px;
+    top:5px;
+}
+
+.search-button-input {
+    height: 30px;
+    width:30px;
+    opacity:0;
+    z-index:10;
+}
+
+form.search {
+    padding-left:15px;
+}
+
+.logo-span-doc {
+    width: 190px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.fork-me img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+    width:130px;
+    height:130px;
+    z-index:2000;
+}
+
+/* beginning of styles for badge(label) with versions on Read The Docs */
+.rst-versions {
+    z-index: 3000!important;
+}
+
+.rst-current-version > span:first-child {
+    margin-top: 10px!important;
+}
+
+
+/* end of styles for badge(label) with versions on Read The Docs */
+
+
+/* beginning of styles for Notification field about current version */
+.body {
+    padding-top: 1px;
+}
+
+$nested_body_components:
+    ".warning" ("background-color": "#FCC", "border": "1px solid #FAA"),
+    ".admonition" ("padding": "7px", "margin-left": "15px", "margin-right": "15px", "border-radius": "3px", "margin-top": "19px"),
+    ".admonition p.admonition-title" ("font-weight": "normal", "font-size": "24px", "margin": "0 0 10px 0", "padding": "0", "line-height": "1"),
+    ".admonition p.last" ("margin-bottom": "0");
+
+@each $name, $styles in $nested_body_components {
+    .body > #{$name} {
+        @each $key, $value in $styles {
+            #{$key}: #{$value},
+        };
+    }
+}
+
+/* end of styles for Notification field about current version */
+
+/* styles for collapsed sidebar */
+.sidebar-collapse .sidebar-menu .toctree-l1.menu-open ul {
+    display: none!important;
+}
+
+.sidebar-collapse .main-sidebar:hover .sidebar-menu .toctree-l1.menu-open ul {
+    display: block!important;
+}
+
+.sidebar-collapse #searchbox,
+.sidebar-collapse .main-sidebar .sidebar h3,
+.sidebar-collapse .main-sidebar .sidebar p {
+    display: none;
+}
+
+.sidebar-collapse .main-sidebar:hover #searchbox,
+.sidebar-collapse .main-sidebar:hover   h3,
+.sidebar-collapse .main-sidebar:hover  p {
+    display: block;
+}
+
+.sidebar-collapse .main-sidebar .nav-icon {
+    display: block;
+}
+
+.main-sidebar .nav-icon,
+.sidebar-collapse .main-sidebar:hover .nav-icon {
+    display: none;
+}
+
+.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-link p {
+    display: inline-block;
+}
+
+/* end of styles for collapsed sidebar */
+
+
+@media (max-width: 767px) {
+
+    .fork-me img {
+        width:112px;
+        height:112px;
+    }
+
+    #big-search-input-docs {
+        width: 150px;
+    }
+}
+
+// SCSS cycle for create style for `sidebar-mini nav-sidebar`
+@each $name in ["", ".nav-link", "> .nav-header"] {
+    .sidebar-mini .nav-sidebar #{$name} {
+        overflow: hidden;
+    }
+}
+
+body {
+    background-color: var(--content-wrapper);
+}
