@@ -22,6 +22,10 @@ class PWAManifest:
         self.manifest_data.update(override_defaults or {})
 
     @property
+    def icons(self):
+        return tuple(self.manifest_data.get("icons", []))
+
+    @property
     def data(self) -> typing.Dict:
         return self.manifest_data
 
