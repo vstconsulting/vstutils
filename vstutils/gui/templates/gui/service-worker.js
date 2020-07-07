@@ -46,6 +46,15 @@ const APP_LOADER = "{% static 'bundle/app_loader.js' %}";
 //{% endblock %}
 
 /**
+ * Path to PWA icons.
+ */
+const PWA_ICONS_LIST = [
+// {% for icon in manifest_object.icons %}
+    "{{ icon.src }}",
+//{% endfor %}
+];
+
+/**
  * Array with paths of additional files, that should precached.
  */
 //{% block resource_list %}
@@ -55,7 +64,7 @@ const ADDITIONAL_FILES_LIST = [];
 /**
  * Array, that store paths of files, that should be precached.
  */
-const PRECACHE_LIST = [OFFLINE_PAGE, FAVICON, APP_LOADER].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST)
+const PRECACHE_LIST = [OFFLINE_PAGE, FAVICON, APP_LOADER].concat(STATIC_FILES_LIST, ADDITIONAL_FILES_LIST, PWA_ICONS_LIST)
     .map(filePath => ({ url: filePath, revision: GUI_VERSION }));
 
 /**
