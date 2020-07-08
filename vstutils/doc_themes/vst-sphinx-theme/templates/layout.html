@@ -30,7 +30,7 @@
    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
    <title>{{ project }} documentation</title>
     {%- block css %}
-        {{- css() }}
+        <!-- Additional css for page, that doesnt include in webpack bundle -->
     {%- endblock %}
    <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
     {%- block scripts %}
