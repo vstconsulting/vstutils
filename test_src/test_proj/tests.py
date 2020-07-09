@@ -32,7 +32,7 @@ from channels.testing import WebsocketCommunicator
 
 from vstutils import utils, __version__
 from vstutils.api.validators import RegularExpressionValidator
-from vstutils.api.views import UserViewSet
+from vstutils.api.auth import UserViewSet
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar

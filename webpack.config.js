@@ -1,6 +1,5 @@
 const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
-const BabelMinifyPlugin = require("babel-minify-webpack-plugin");
 const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -37,7 +36,8 @@ const config = {
     'app_loader': entrypoints_dir + "/app_loader/index.js",
     'spa': entrypoints_dir + "/spa.js",
     'doc': entrypoints_dir + "/doc.js",
-    'auth': entrypoints_dir + "/auth.js"
+    'auth': entrypoints_dir + "/auth.js",
+    'tests': entrypoints_dir + "/tests/index.js"
   },
   output: {
     path: __dirname + "/vstutils/static/bundle",
@@ -112,9 +112,9 @@ const config = {
   optimization: {
     chunkIds: "natural",
     splitChunks: {
-      // Do not split app_loader
+      // Do not split app_loader and tests
       chunks: function(chunk) {
-        return chunk.name !== 'app_loader';
+        return !['app_loader', 'tests'].includes(chunk.name);
       },
       maxInitialRequests: 10,
       // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups
@@ -141,7 +141,6 @@ const config = {
       new TerserPlugin({
         parallel: true
       }),
-      new BabelMinifyPlugin(),
       new OptimizeCSSAssetsPlugin()
     ]
   }
