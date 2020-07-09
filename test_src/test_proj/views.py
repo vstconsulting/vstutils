@@ -147,7 +147,3 @@ class RequestInfoTestView(NonModelsViewSet):
         data = request.data
 
         return responses.HTTP_200_OK(data)
-
-
-class VarBasedViewSet(VarBasedModel.generated_view):
-    pass

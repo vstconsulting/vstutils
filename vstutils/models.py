@@ -191,7 +191,7 @@ class ModelBaseClass(ModelBase):
             "override_permission_classes": False,
             # additional attrs which means that this view allowed to copy elements
             "copy_attrs": dict(),
-            # key-value mapping with nested views (key - nested, value - model class)
+            # key-value mapping with nested views (key - nested name, kwargs for nested decorator)
             "nested": {}
         }
         if "Meta" in attrs:
