@@ -1,5 +1,5 @@
-from vstutils.models import BQuerySet, BModel, Manager, models
-from vstutils.api import fields
+from vstutils.models import BQuerySet, BModel, Manager, models, register_view_action, register_view_method
+from vstutils.api import fields, responses, serializers, base
 
 
 class TestFilterBackend:
@@ -32,6 +32,21 @@ class Host(BModel):
         }
         _filterset_fields = 'serializer'
         _filter_backends = (TestFilterBackend,)
+
+    @register_view_action(
+        response_code=200,
+        response_serializer=serializers.EmptySerializer,
+        detail=True,
+        description='Some desc'
+    )
+    def test(self, request, *args, **kwargs):
+        return responses.HTTP_200_OK('OK')
+
+    @register_view_action(detail=True)
+    def test2(self, request, *args, **kwargs):
+        """ test description """
+        self.get_object()
+        return base.Response("OK", 201).resp
 
 
 class HostGroup(BModel):
@@ -68,3 +83,7 @@ class HostGroup(BModel):
     @property
     def secret_file(self):
         return "Some secret value"
+
+    @register_view_method()
+    def get_manager_subdeephosts(self, parent):
+        return getattr(parent, 'subgroups')

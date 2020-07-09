@@ -64,6 +64,28 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
 
 
 class apply_decorators:
+    """
+    Decorator which apply list of decorators on method or class.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import apply_decorators
+
+            def decorator_one(func):
+                print(f"Decorated {func.__name__} by first decorator.")
+                return func
+
+            def decorator_two(func):
+                print(f"Decorated {func.__name__} by second decorator.")
+                return func
+
+            @apply_decorators(decorator_one, decorator_two)
+            def decorated_function():
+                # Function decorated by both decorators.
+                print("Function call.")
+    """
+
     def __init__(self, *decorators):
         self.decorators = decorators
 

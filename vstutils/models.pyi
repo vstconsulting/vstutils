@@ -4,6 +4,26 @@ from .utils import Paginator
 from .api import base as api_base
 
 
+class register_view_decorator:
+    method_type: _t.Text
+
+    def __init__(self, method_type: _t.Text, *args, **kwargs):
+        ...
+
+    def __call__(self, func: _t.Callable) -> _t.Callable:
+        ...
+
+
+class register_view_action(register_view_decorator):
+    def __init__(self, *args, **kwargs):
+        super().__init__('action', *args, **kwargs)
+
+
+class register_view_method(register_view_decorator):
+    def __init__(self, *args, **kwargs):
+        super().__init__('override_method', *args, **kwargs)
+
+
 class ObjectDoesNotExist(Exception):
     """The requested object does not exist"""
     silent_variable_failure = True

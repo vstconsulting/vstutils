@@ -23,12 +23,11 @@ API[VST_API_VERSION][r'deephosts'] = dict(
 API[VST_API_VERSION][r'subhosts'] = dict(
     view='test_proj.views.HostViewSet'
 )
-
 API[VST_API_VERSION][r'files'] = dict(
-    view='test_proj.views.FilesViewSet'
+    model='test_proj.models.File'
 )
 API[VST_API_VERSION][r'testfk'] = dict(
-    view='test_proj.views.TestFkViewSet'
+    model='test_proj.models.ModelWithFK'
 )
 API[VST_API_VERSION][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'

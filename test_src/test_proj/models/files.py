@@ -23,6 +23,10 @@ class File(FileModel):
             'origin_pos',
         )
 
+    @classmethod
+    def __prepare_model__(cls):
+        pass
+
 
 class List(ListModel):
     data = [

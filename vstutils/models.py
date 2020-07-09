@@ -60,6 +60,43 @@ class ApplyNestedDecorators(apply_decorators):
         return api_decorators.nested_view(path, **deco_kwargs)
 
 
+class register_view_decorator:  # pylint: disable=invalid-name
+    __slots__ = ('method_type', 'args', 'kwargs')
+
+    def __init__(self, method_type, *args, **kwargs):
+        self.method_type = f'type_{method_type}'
+        assert hasattr(self, self.method_type), f'Invalid register type {method_type}.'
+        self.args = args
+        self.kwargs = kwargs
+
+    def type_action(self, func):
+        if func.__doc__ and 'description' not in self.kwargs:
+            self.kwargs['description'] = func.__doc__
+        return api_decorators.subaction(*self.args, **self.kwargs)(func)
+
+    def type_override_method(self, func):
+        return func
+
+    def __call__(self, func):
+        result = getattr(self, self.method_type)(func)
+        result._append_to_view = True
+        return result
+
+
+class register_view_action(register_view_decorator):  # pylint: disable=invalid-name
+    __slots__ = tuple()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__('action', *args, **kwargs)
+
+
+class register_view_method(register_view_decorator):  # pylint: disable=invalid-name
+    __slots__ = tuple()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__('override_method', *args, **kwargs)
+
+
 class BQuerySet(models.QuerySet):
     """
     Represent a lazy database lookup for a set of objects.
@@ -157,6 +194,8 @@ class Manager(BaseManager.from_queryset(BQuerySet)):
 
 
 class ModelBaseClass(ModelBase):
+    """Metaclass for all models."""
+
     def __new__(mcs, name, bases, attrs, **kwargs) -> Model:
         if "__slots__" not in attrs:
             attrs['__slots__'] = tuple()
@@ -200,14 +239,13 @@ class ModelBaseClass(ModelBase):
                 extra_metadata[extra_name[1:]] = meta[extra_name]
         attrs['__extra_metadata__'] = extra_metadata
         model_class: Model = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
-        if hasattr(model_class, '__prepare_model__'):
-            model_class.__prepare_model__()
-        model_class.__extra_metadata__ = extra_metadata
         queryset_class = getattr(getattr(model_class, 'objects', None), '_queryset_class', None)
         if queryset_class and not issubclass(queryset_class, BQuerySet):
             manager = Manager()
             manager.auto_created = True
             model_class.add_to_class('objects', manager)
+        if hasattr(model_class, '__prepare_model__'):
+            model_class.__prepare_model__()
         return model_class
 
     @classproperty
@@ -241,8 +279,11 @@ class ModelBaseClass(ModelBase):
 
         return SerializerClass
 
+    def get_extra_metadata(cls):
+        return cls.__extra_metadata__
+
     def get_view_class(cls):
-        metadata = cls.__extra_metadata__
+        metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
 
         view_attributes = dict(model=cls)
 
@@ -308,19 +349,22 @@ class ModelBaseClass(ModelBase):
         generated_view = type(
             f'{cls.__name__}ViewSet',
             tuple(view_class),
-            {**view_attributes, **serializers}
+            {
+                **view_attributes,
+                **serializers,
+                **dict(filter(lambda x: hasattr(x[1], '_append_to_view'), vars(cls).items()))
+            }
         )
-        return ApplyNestedDecorators(metadata['nested'])(generated_view)
+
+        return apply_decorators(
+            *getattr(cls, 'generated_view_decorators', [])
+        )(ApplyNestedDecorators(metadata['nested'])(generated_view))
 
 
 class BaseModel(Model, metaclass=ModelBaseClass):
 
     class Meta:
         abstract = True
-
-    @classmethod
-    def __prepare_model__(cls):
-        pass
 
 
 class BModel(BaseModel):

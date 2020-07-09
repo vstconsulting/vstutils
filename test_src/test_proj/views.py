@@ -6,14 +6,7 @@ from vstutils.api.base import NonModelsViewSet, Response
 from vstutils.api.decorators import action, nested_view, subaction
 from vstutils.api.serializers import EmptySerializer, DataSerializer
 
-from .models import (
-    File,
-    Host,
-    HostGroup,
-    ModelWithBinaryFiles,
-    ModelWithFK,
-    VarBasedModel
-)
+from .models import Host, HostGroup, ModelWithBinaryFiles
 
 
 class CreateHostSerializer(Host.generated_view.serializer_class):
@@ -27,18 +20,6 @@ class HostViewSet(Host.generated_view):
     action_serializers = {
         'create': CreateHostSerializer
     }
-
-    @subaction(
-        response_code=200, response_serializer=EmptySerializer, detail=True,
-        description='Some desc'
-    )
-    def test(self, request, *args, **kwargs):
-        return responses.HTTP_200_OK('OK')
-
-    @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
-    def test2(self, request, *args, **kwargs):
-        self.get_object()
-        return Response("OK", 201).resp
 
     @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
     def test3(self, request, *args, **kwargs):
@@ -75,9 +56,7 @@ class HostGroupViewSet(_HostGroupViewSet):
 
 @nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupViewSet.serializer_class)
 class _DeepHostGroupViewSet(_HostGroupViewSet):
-
-    def get_manager_subdeephosts(self, parent):
-        return getattr(parent, 'subgroups')
+    pass
 
 
 @nested_view('subsubhosts', 'id', manager_name='subgroups', view=_DeepHostGroupViewSet)
@@ -99,14 +78,6 @@ try:
         def test_err(self, request, *args, **kwargs):  # nocv
             return Response("OK", 200).resp
 except AssertionError:
-    pass
-
-
-class FilesViewSet(File.generated_view):
-    pass
-
-
-class TestFkViewSet(ModelWithFK.generated_view):
     pass
 
 
