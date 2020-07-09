@@ -134,8 +134,9 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      * @return {{value: *, prefetch_value: *}}
      */
     getPrefetchValue(data = {}, prefetch_data = {}) {
+        const value = data[this.options.name];
         return {
-            value: data[this.options.name],
+            value: typeof value === 'object' ? value.value : value,
             prefetch_value: prefetch_data[this.getViewField()],
         };
     }

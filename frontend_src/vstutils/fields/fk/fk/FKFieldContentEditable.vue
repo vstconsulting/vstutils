@@ -88,7 +88,6 @@
 
                 $(this.select_el).append(newOption).trigger('change');
             },
-
             transport(params, success, failure) {
                 if (this.querysets.length === 0) {
                     success({ results: [] });
@@ -181,8 +180,8 @@
                             items.push(this.field.options.default);
                         }
                     }
-
-                    return { items: items, total: response.total };
+                    const total = response.total !== undefined ? response.total : items.length;
+                    return { items: items, total };
                 });
             },
         },

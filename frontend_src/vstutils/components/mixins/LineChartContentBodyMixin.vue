@@ -9,7 +9,9 @@
 </template>
 
 <script>
+    import $ from 'jquery';
     import { BaseWidgetMixin } from './baseWidgetMixins.js';
+    import { deepEqual } from '../../utils';
 
     /**
      * Base mixin for 'content_body' component - child component of line_chart component.

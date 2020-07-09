@@ -7,11 +7,10 @@ from django.conf import settings
 from django.db import transaction
 from django.http import Http404
 from django.test import Client
-from django.contrib.auth.models import AbstractUser
 from rest_framework import permissions as rest_permissions, throttling, request as drf_request
 from rest_framework.exceptions import ValidationError
 
-from . import base, serializers, permissions, filters, decorators as deco, responses, models
+from . import base, serializers, decorators as deco, responses, models
 from ..utils import Dict, import_class, deprecated
 
 
@@ -34,47 +33,6 @@ class OneLanguageSerializer(serializers.VSTSerializer):
             'name',
             'translations'
         )
-
-
-class UserViewSet(base.ModelViewSet):
-    '''
-    API endpoint that allows users to be viewed or edited.
-    '''
-    # pylint: disable=invalid-name
-
-    model: _t.Type[AbstractUser] = serializers.User
-    serializer_class: _t.Type[serializers.User] = serializers.UserSerializer
-    serializer_class_one: _t.Type[serializers.OneUserSerializer] = serializers.OneUserSerializer
-    serializer_class_create: _t.Type[serializers.CreateUserSerializer] = serializers.CreateUserSerializer
-    serializer_class_change_password: _t.Type[serializers.DataSerializer] = serializers.ChangePasswordSerializer
-    filterset_class = filters.UserFilter
-    permission_classes = (permissions.SuperUserPermission,)
-
-    def destroy(self, request: drf_request.Request, *args, **kwargs):
-        user = self.get_object()
-        if user == request.user:
-            return responses.HTTP_409_CONFLICT("Could not remove youself.")
-        return super().destroy(request, *args, **kwargs)
-
-    @transaction.atomic
-    def partial_update(self, request: drf_request.Request, *args, **kwargs):
-        return self.update(request, partial=True)
-
-    @transaction.atomic
-    def update(self, request: drf_request.Request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return responses.HTTP_200_OK(serializer.data)
-
-    @deco.action(["post"], detail=True, permission_classes=(rest_permissions.IsAuthenticated,))
-    def change_password(self, request: drf_request.Request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object(), data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return responses.HTTP_201_CREATED(serializer.data)
 
 
 class SettingsViewSet(base.ListNonModelViewSet):

@@ -67,12 +67,19 @@ const ViewWithAutoUpdateMixin = {
             }
 
             this.autoupdate.timeout_id = setTimeout(() => {
-                // eslint-disable-next-line no-unused-vars
-                this.updateData().then((response) => {
-                    if (!this.autoupdate.stop) {
-                        this.startAutoUpdate();
-                    }
-                });
+                this.updateData()
+                    // eslint-disable-next-line no-unused-vars
+                    .then((response) => {
+                        if (!this.autoupdate.stop) {
+                            this.startAutoUpdate();
+                        }
+                    })
+                    .catch((error) => {
+                        if (error !== undefined && error.status === 404) {
+                            this.stopAutoUpdate();
+                        }
+                        console.warn(error);
+                    });
             }, update_interval);
         },
         /**
@@ -86,28 +93,26 @@ const ViewWithAutoUpdateMixin = {
          * Method, that sends Api request for data update.
          */
         updateData() {
+            if (this.autoupdate.stop) {
+                return Promise.reject();
+            }
+
             let qs = this.getQuerySet(this.view, this.qs_url);
             let new_qs = this.getQuerySet(this.view, this.qs_url).clone();
 
-            return new_qs
-                .get()
-                .then((instance) => {
-                    if (qs.cache.getPkValue() === instance.getPkValue()) {
-                        for (let key in instance.data) {
-                            if (Object.prototype.hasOwnProperty.call(instance.data, key)) {
-                                if (!deepEqual(instance.data[key], qs.cache.data[key])) {
-                                    qs.cache.data[key] = instance.data[key];
-                                }
+            return new_qs.get().then((instance) => {
+                if (qs.cache.getPkValue() === instance.getPkValue()) {
+                    for (let key in instance.data) {
+                        if (Object.prototype.hasOwnProperty.call(instance.data, key)) {
+                            if (!deepEqual(instance.data[key], qs.cache.data[key])) {
+                                qs.cache.data[key] = instance.data[key];
                             }
                         }
-                        qs.cache.data = { ...qs.cache.data };
                     }
-
-                    return true;
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+                    qs.cache.data = { ...qs.cache.data };
+                }
+                return true;
+            });
         },
     },
 };

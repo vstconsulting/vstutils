@@ -1,4 +1,5 @@
 export default class JsonMapper {
+    // eslint-disable-next-line no-unused-vars
     getComponent(value, name = undefined) {
         const type = typeof value;
         if (

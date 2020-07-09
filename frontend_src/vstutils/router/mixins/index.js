@@ -824,23 +824,21 @@ export let routesComponentsTemplates = {
              * Redefinition of 'updateData()' method from view_with_autoupdate_mixin.
              */
             updateData() {
+                if (this.autoupdate.stop) {
+                    return Promise.reject();
+                }
                 let new_qs = this.getQuerySet(this.view, this.qs_url).clone().prefetch();
-                return new_qs
-                    .items()
-                    .then((instances) => {
-                        if (deepEqual(this.getQuerySet(this.view, this.qs_url).query, new_qs.query)) {
-                            this.setQuerySet(this.view, this.qs_url, new_qs);
+                return new_qs.items().then((instances) => {
+                    if (deepEqual(this.getQuerySet(this.view, this.qs_url).query, new_qs.query)) {
+                        this.setQuerySet(this.view, this.qs_url, new_qs);
 
-                            this.setInstancesToData(instances);
+                        this.setInstancesToData(instances);
 
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
             },
             /**
              * Redefinition of base '_executeEmptyActionOnInstance_getUrl' method.

@@ -157,6 +157,7 @@ export class App extends BaseApp {
         let i18n = new VueI18n({
             locale: guiLocalSettings.get('lang') || 'en',
             messages: this.translations,
+            silentTranslationWarn: true,
         });
 
         this.application = new Vue({
