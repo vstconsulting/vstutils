@@ -8,7 +8,7 @@ from django.db import transaction
 from django.http import Http404
 from django.test import Client
 from rest_framework import permissions as rest_permissions, throttling, request as drf_request
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound, UnsupportedMediaType
 
 from . import base, serializers, decorators as deco, responses, models
 from ..utils import Dict, import_class, deprecated
@@ -124,9 +124,9 @@ class BulkViewSet(base.rvs.APIView):  # nocv
     def _check_type(self, op_type, item):
         allowed_types = self.allowed_types.get(item, None)
         if allowed_types is None:
-            raise serializers.exceptions.NotFound()
+            raise NotFound()
         if isinstance(allowed_types, (list, tuple)) and op_type not in allowed_types:
-            raise serializers.exceptions.UnsupportedMediaType(
+            raise UnsupportedMediaType(
                 media_type=op_type
             )
 

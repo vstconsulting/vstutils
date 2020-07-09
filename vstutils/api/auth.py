@@ -164,7 +164,7 @@ class UserViewSet(base.ModelViewSet):
         user = self.get_object()
         if user == request.user:
             return responses.HTTP_409_CONFLICT("Could not remove youself.")
-        return super().destroy(request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)  # pylint: disable=no-member
 
     @transaction.atomic
     def partial_update(self, request: drf_request.Request, *args, **kwargs):

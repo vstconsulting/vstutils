@@ -1,4 +1,4 @@
-# pylint: disable=django-not-available
+# pylint: disable=django-not-available,import-outside-toplevel
 import os
 import sys
 

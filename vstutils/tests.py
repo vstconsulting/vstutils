@@ -97,6 +97,7 @@ class BaseTestCase(TestCase):
             return None
 
     def setUp(self):
+        # pylint: disable=import-outside-toplevel
         from django.conf import settings
         self.settings_obj = settings
         client_kwargs = {

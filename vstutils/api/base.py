@@ -253,11 +253,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         return super().get_serializer_class()
 
     def nested_allow_check(self):
-        '''
+        """
         Just raise or pass
         :return:
-        '''
-        pass
+        """
 
     @classmethod
     def get_view_methods(cls, detail=False) -> _t.List[_t.Text]:

@@ -77,15 +77,14 @@ class VSTOpenApiBase(Directive):
         self.options.setdefault('uri', 'file://%s' % abspath)
 
     def write(self, value, indent_depth=0):
-        '''
+        """
         Add lines to ViewList, for further rendering.
         :param value: --line that would be added to render list
         :type value: str, unicode
         :param indent_depth: --value that show indent from left border
         :type indent_depth: integer
         :return:
-        '''
-        indent_depth = indent_depth
+        """
         self.__view_list.append(self.indent * indent_depth + value, '<openapi>')
 
     def run(self):
@@ -244,7 +243,7 @@ class VSTOpenApiBase(Directive):
         '''
         props = list()
         for name, value in option_value.items():
-            if var_type in ['dynamic', 'select2']:
+            if var_type in ['dynamic', 'select2']:  # pylint: disable=no-else-break
                 break
             elif name in ['format', 'title', 'type']:
                 continue

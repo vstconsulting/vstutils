@@ -1,4 +1,4 @@
-# pylint: disable=django-not-available,invalid-name
+# pylint: disable=django-not-available,invalid-name,import-outside-toplevel
 from __future__ import unicode_literals
 
 import io

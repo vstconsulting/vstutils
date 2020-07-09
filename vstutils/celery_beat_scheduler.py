@@ -1,4 +1,4 @@
-# pylint: disable=import-error
+# pylint: disable=import-error,signature-differs
 from django_celery_beat.schedulers import DatabaseScheduler
 
 from .utils import Lock

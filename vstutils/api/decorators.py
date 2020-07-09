@@ -471,7 +471,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return self.serializers[-1]
 
     def get_view(self, name: _t.Text, **options):
-        # pylint: disable=redefined-outer-name
+        # pylint: disable=redefined-outer-name,too-many-statements
         mixin_class: _t.Type[NestedViewMixin] = NestedViewMixin
         if hasattr(self.view, 'create'):
             if self.kwargs.get('allow_append', False):
@@ -490,7 +490,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         manager_name = self.kwargs.get('manager_name', self.name)
 
         class NestedView(mixin_class, self.view):  # type: ignore
-            __slots__ = ('nested_detail',)
+            __slots__ = ('nested_detail',)  # pylint: disable=class-variable-slots-conflict
             __doc__ = self.view.__doc__
             format_kwarg = None
             queryset_filters = self.queryset_filters
