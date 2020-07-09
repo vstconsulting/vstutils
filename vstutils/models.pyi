@@ -41,7 +41,7 @@ class Manager(BaseManager):
 class BaseModel(models.Model):
     objects: Manager
     DoesNotExist: ObjectDoesNotExist
-    generated_view: api_base.GenericViewSet
+    generated_view: _t.Type[api_base.GenericViewSet]
 
     def __unicode__(self) -> _t.Text:
         ...

@@ -5,14 +5,16 @@ Default Django model classes overrided in `vstutils.models` module.
 
 from __future__ import unicode_literals
 import inspect
+from functools import lru_cache
 from django_filters import rest_framework as filters
 from django.db.models.base import ModelBase, Model
 from django.db import models
-from .utils import Paginator, import_class
+from .utils import Paginator, import_class, apply_decorators, classproperty
 from .api import (
     base as api_base,
     filters as api_filters,
-    serializers as api_serializers
+    serializers as api_serializers,
+    decorators as api_decorators
 )
 
 
@@ -32,6 +34,30 @@ def is_class_method_or_function(obj):
     return inspect.isfunction(obj) or \
            inspect.ismethod(obj) or \
            isinstance(obj, type(is_class_method_or_function))
+
+
+class ApplyNestedDecorators(apply_decorators):
+    def __init__(self, nested: dict):
+        super().__init__(
+            *map(self.__get_decorator, nested.items())
+        )
+
+    def __get_decorator(self, data):
+        path, deco_kwargs = data
+
+        assert 'model' in deco_kwargs and 'view' not in deco_kwargs, (
+            "Invalid model configuration: "
+            f"Unable to set 'model' and 'view' at the same time for path [{path}]."
+        )
+        if 'model' in deco_kwargs:
+            model = deco_kwargs.pop('model')
+            assert isinstance(model, ModelBaseClass), (
+                f"Invalid model type {type(model)} for path [{path}]."
+            )
+            deco_kwargs['view'] = model.generated_view
+            if 'arg' not in deco_kwargs:
+                deco_kwargs['arg'] = model._meta.pk.name
+        return api_decorators.nested_view(path, **deco_kwargs)
 
 
 class BQuerySet(models.QuerySet):
@@ -154,7 +180,7 @@ class ModelBaseClass(ModelBase):
             # key-value of actions serializers (key - action, value - serializer class)
             "extra_serializer_classes": dict(),
             # tuple or list of filters on list
-            "filterset_fields": None,
+            "filterset_fields": 'serializer',
             # tuple or list of filter backends for queryset
             "filter_backends": None,
             # allow to full override of the filter backends default list
@@ -165,8 +191,8 @@ class ModelBaseClass(ModelBase):
             "override_permission_classes": False,
             # additional attrs which means that this view allowed to copy elements
             "copy_attrs": dict(),
-            # TODO: key-value mapping with nested views (key - nested, value - model class)
-            # "nested": {}
+            # key-value mapping with nested views (key - nested, value - model class)
+            "nested": {}
         }
         if "Meta" in attrs:
             meta = attrs['Meta'].__dict__
@@ -177,14 +203,18 @@ class ModelBaseClass(ModelBase):
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
         model_class.__extra_metadata__ = extra_metadata
-        model_objects = getattr(model_class, 'objects', None)
-        queryset_class = getattr(model_objects, '_queryset_class', None)
+        queryset_class = getattr(getattr(model_class, 'objects', None), '_queryset_class', None)
         if queryset_class and not issubclass(queryset_class, BQuerySet):
             manager = Manager()
             manager.auto_created = True
             model_class.add_to_class('objects', manager)
-        model_class.add_to_class('generated_view', model_class.get_view_class())
         return model_class
+
+    @classproperty
+    @lru_cache()
+    def generated_view(cls):
+        # pylint: disable=no-value-for-parameter
+        return cls.get_view_class()
 
     def get_serializer_class(cls, serializer_class, serializer_class_name=None, fields=None, field_overrides=None):
         if serializer_class is None:
@@ -275,7 +305,12 @@ class ModelBaseClass(ModelBase):
             if metaobject:
                 view_attributes[metatype] = metaobject
 
-        return type(f'{cls.__name__}ViewSet', tuple(view_class), {**view_attributes, **serializers})
+        generated_view = type(
+            f'{cls.__name__}ViewSet',
+            tuple(view_class),
+            {**view_attributes, **serializers}
+        )
+        return ApplyNestedDecorators(metadata['nested'])(generated_view)
 
 
 class BaseModel(Model, metaclass=ModelBaseClass):
@@ -314,9 +349,9 @@ class BModel(BaseModel):
     """
 
     #: Primary field for select and search in API.
-    id         = models.AutoField(primary_key=True, max_length=20)
-    #: Usefull field for hidden data.
-    hidden     = models.BooleanField(default=False)
+    id = models.AutoField(primary_key=True, max_length=20)
+    #: Useful field for hidden data.
+    hidden = models.BooleanField(default=False)
 
     class Meta:
         abstract = True

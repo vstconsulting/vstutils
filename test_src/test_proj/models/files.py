@@ -13,12 +13,6 @@ class File(FileModel):
 
     class Meta:
         _view_class = 'read_only'
-        _list_fields = (
-            'name',
-            'for_order1',
-            'for_order2',
-            'origin_pos',
-        )
         _override_list_fields = {
             'name': fields.CommaMultiSelect(select='HostGroup')
         }

@@ -63,6 +63,16 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     return result
 
 
+class apply_decorators:
+    def __init__(self, *decorators):
+        self.decorators = decorators
+
+    def __call__(self, func):
+        for decorator in self.decorators:
+            func = decorator(func)
+        return func
+
+
 class ClassPropertyMeta(type):
     def __setattr__(cls, key, value):
         obj = cls.__dict__.get(key, None)

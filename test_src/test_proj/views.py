@@ -12,8 +12,7 @@ from .models import (
     HostGroup,
     ModelWithBinaryFiles,
     ModelWithFK,
-    VarBasedModel,
-    Variable
+    VarBasedModel
 )
 
 
@@ -150,6 +149,5 @@ class RequestInfoTestView(NonModelsViewSet):
         return responses.HTTP_200_OK(data)
 
 
-@nested_view('vars', 'id', manager_name='variables', allow_append=False, view=Variable.generated_view)
 class VarBasedViewSet(VarBasedModel.generated_view):
     pass

@@ -29,3 +29,10 @@ class VarBasedModel(BModel):
             'id',
             'name',
         ]
+        _nested = {
+            'vars': {
+                'manager_name': 'variables',
+                'allow_append': False,
+                'model': Variable
+            }
+        }
