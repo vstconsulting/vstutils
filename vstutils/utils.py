@@ -297,13 +297,15 @@ class raise_context(assertRaises):
     """
     Context for exclude exceptions.
     """
-
     def execute(self, func: tp.Callable, *args, **kwargs):
         with self.__class__(self._excepts, **self._kwargs):
-            return func(*args, **kwargs)
-        type, value, traceback_obj = sys.exc_info()
-        if type is not None:  # nocv
-            logger.debug(traceback.format_exc())
+            try:
+                return func(*args, **kwargs)
+            except:
+                type, value, traceback_obj = sys.exc_info()
+                if type is not None:
+                    logger.debug(traceback.format_exc())
+                raise
         return type, value, traceback_obj
 
     def __enter__(self):
@@ -312,8 +314,44 @@ class raise_context(assertRaises):
     def __call__(self, original_function: tp.Callable):
         def wrapper(*args, **kwargs):
             return self.execute(original_function, *args, **kwargs)
-
         return wrapper
+
+
+class raise_context_decorator_with_default(raise_context):
+    """
+    Context for exclude errors and return default value.
+
+    Example:
+        .. sourcecode:: python
+
+            from yaml import load
+            from vstutils.utils import raise_context_decorator_with_default
+
+
+            @raise_context_decorator_with_default(default={})
+            def get_host_data(yaml_path, host):
+                with open(yaml_path, 'r') as fd:
+                    data = load(fd.read(), Loader=Loader)
+                return data[host]
+                # This decorator used when you must return some value even on error
+                # In log you also can see traceback for error if it occur
+
+            def clone_host_data(host):
+                bs_data = get_host_data('inventories/aws/hosts.yml', 'build_server')
+                ...
+
+    """
+    __slots__ = ('default_value',)
+
+    def __init__(self, *args, **kwargs):
+        self.default_value = kwargs.pop('default', None)
+        super().__init__(*args, **kwargs)
+
+    def execute(self, func: tp.Callable, *args, **kwargs):
+        result = super().execute(func, *args, **kwargs)
+        if isinstance(result, tuple) and result and issubclass(result[0], BaseException):
+            return self.default_value
+        return result
 
 
 class exception_with_traceback(raise_context):

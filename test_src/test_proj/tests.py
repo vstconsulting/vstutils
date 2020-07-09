@@ -366,6 +366,18 @@ class VSTUtilsTestCase(BaseTestCase):
         with self.assertRaises(Exception):
             ex_method()
 
+    def test_raise_context_with_default(self):
+        @utils.raise_context_decorator_with_default(default='default')
+        def get_value(t_dict):
+            return t_dict['context']
+
+        test = dict()
+        self.assertEqual(get_value(test), 'default')
+        test['some'] = 'key'
+        self.assertEqual(get_value(test), 'default')
+        test['context'] = 'custom'
+        self.assertEqual(get_value(test), 'custom')
+
 
 class ViewsTestCase(BaseTestCase):
 
@@ -1621,7 +1633,6 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['count'], 1)
-
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):

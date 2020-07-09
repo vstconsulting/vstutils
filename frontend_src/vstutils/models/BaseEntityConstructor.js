@@ -28,16 +28,12 @@ export default class BaseEntityConstructor {
      * @param {object} field Object with field options.
      */
     getFieldFormat(field) {
-        // if(field.enum && guiFields['choices']){
-        //     return "choices";
-        // }
-
         if (guiFields[field.format]) {
             return field.format;
         }
 
-        if (field.enum && guiFields.choices) {
-            return 'choices';
+        if (field.enum) {
+            return "choices";
         }
 
         let props = Object.keys(field);
