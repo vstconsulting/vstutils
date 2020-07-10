@@ -1,4 +1,4 @@
-import { guiCache } from './FilesCache.js';
+import { cachePromise } from './Cache.js';
 import LoadingPageController from './LoadingPageController.js';
 import { cleanAllCacheAndReloadPage, cleanOpenApiCacheAndReloadPage } from './cleanCacheHelpers.js';
 import { StaticFilesLoader } from './StaticFilesLoader.js';
@@ -6,8 +6,6 @@ import OpenAPILoader from './OpenAPILoader.js';
 
 window.cleanAllCacheAndReloadPage = cleanAllCacheAndReloadPage;
 window.cleanOpenApiCacheAndReloadPage = cleanOpenApiCacheAndReloadPage;
-
-const openApiLoadPromise = new OpenAPILoader(guiCache).loadSchema();
 
 // Registers Service Worker
 if (
@@ -43,12 +41,13 @@ function updateGuiVersionsInLocalStorage() {
 const errorEventHandler = (event) => pageController.appendError(event.error);
 window.addEventListener('error', errorEventHandler);
 
-async function startApp() {
+pageController.loadAndAppendDependencies();
+
+async function startApp(cache) {
     if (localStorage.gui_version !== undefined && localStorage.gui_version !== window.gui_version) {
         updateGuiVersionsInLocalStorage();
         pageController.showUpdatingAppVersionMessage();
-        cleanAllCacheAndReloadPage();
-        return;
+        return cleanAllCacheAndReloadPage();
     }
 
     if (
@@ -57,11 +56,12 @@ async function startApp() {
     ) {
         updateGuiVersionsInLocalStorage();
         pageController.showUpdatingAppVersionMessage();
-        cleanOpenApiCacheAndReloadPage();
-        return;
+        return cleanOpenApiCacheAndReloadPage();
     }
 
     updateGuiVersionsInLocalStorage();
+
+    const openApiLoadPromise = new OpenAPILoader(cache).loadSchema();
 
     const filesLoadPromise = new StaticFilesLoader(
         window.resourceList,
@@ -69,41 +69,38 @@ async function startApp() {
         (path, type) => pageController.fileAddedToPageCallback(path, type),
     ).loadAndAddToPageAllFiles();
 
-    pageController.loadAndAppendDependencies();
+    const openapi = (await Promise.all([openApiLoadPromise, filesLoadPromise]))[0];
 
+    window.spa.signals.emit('openapi.loaded', openapi);
+
+    window.app = new window.App(openapi, cache);
+
+    // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
+    await window.app.start();
+
+    cache.close();
+
+    window.spa.signals.connect('app.version.updated', () => {
+        alert('Oops! It looks like version of current page has become outdated. Please, reload the page.');
+    });
+
+    // eslint-disable-next-line no-unused-vars
+    window.addEventListener('storage', function (e) {
+        if (window.gui_version !== localStorage.getItem('gui_version')) {
+            window.spa.signals.emit('app.version.updated');
+        }
+    });
+
+    // Removes onLoadingErrorHandler,
+    // because App does not need it after successful app Loading.
+    window.removeEventListener('error', errorEventHandler);
+    pageController.hideLoaderBlock();
+}
+
+window.onload = () => {
     try {
-        // eslint-disable-next-line no-unused-vars
-        let [openapi, files] = await Promise.all([openApiLoadPromise, filesLoadPromise]);
-
-        window.spa.signals.emit('openapi.loaded', openapi);
-
-        window.app = new window.App(openapi, guiCache);
-
-        // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
-        await window.app.start();
-
-        // eslint-disable-next-line no-undef
-        window.spa.signals.connect('app.version.updated', () => {
-            alert(
-                'Oops! It looks like version of current page has become outdated. Please, reload the page.',
-            );
-        });
-
-        // eslint-disable-next-line no-unused-vars
-        window.addEventListener('storage', function (e) {
-            if (window.gui_version !== localStorage.getItem('gui_version')) {
-                // eslint-disable-next-line no-undef
-                window.spa.signals.emit('app.version.updated');
-            }
-        });
-
-        // Removes onLoadingErrorHandler,
-        // because App does not need it after successful app Loading.
-        window.removeEventListener('error', errorEventHandler);
-        pageController.hideLoaderBlock();
+        cachePromise.then((cache) => startApp(cache));
     } catch (e) {
         pageController.appendError(e);
     }
-}
-
-guiCache.connected.then(startApp);
+};
