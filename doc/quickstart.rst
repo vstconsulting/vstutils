@@ -39,29 +39,52 @@ New application creation
 
     .. sourcecode:: yaml
 
-       /{{app_dir}}/{{app_name}}/
-                                /MANIFEST.in
-                                /{{app_name}}/
-                                /README.rst
-                                /requirements-test.txt
-                                /requirements.txt
-                                /setup.cfg
-                                /setup.py
-                                /test.py
-                                /tox.ini
+       /{{app_dir}}/{{app_name}}
+        ├── .coveragerc
+        ├── frontend_src
+        │   ├── app
+        │   │   └── index
+        │   ├── .editorconfig
+        │   ├── .eslintrc.js
+        │   └── .prettierrc
+        ├── MANIFEST.in
+        ├── package.json
+        ├── .pep8
+        ├── README.rst
+        ├── requirements-test.txt
+        ├── requirements.txt
+        ├── setup.cfg
+        ├── setup.py
+        ├── {{app_name}}
+        │   ├── __init__.py
+        │   ├── __main__.py
+        │   ├── models
+        │   │   └── __init__.py
+        │   ├── settings.ini
+        │   ├── settings.py
+        │   ├── web.ini
+        │   └── wsgi.py
+        ├── test.py
+        ├── tox.ini
+        └── webpack.config.jsdefault
+
+
 
 
     where:
 
+    * **frontend_src** - directory that contains all sources for frontend;
     * **MANIFEST.in** - this file is used for building installation package;
     * **{{app_name}}** - directory with files of your application;
+    * **package.json** - this file contains list of frontend dependencies and commands to build;
     * **README.rst** - default README file for your application (this file includes base commands for starting/stopping your application);
     * **requirements-test.txt** - file with list of requirements for test environment;
     * **requirements.txt** - file with list of requirements for your application;
     * **setup.cfg** - this file is used for building installation package;
     * **setup.py** - this file is used for building installation package;
     * **test.py** - this file is used for tests creation;
-    * **tox.ini** - this file is used for tests execution.
+    * **tox.ini** - this file is used for tests execution;
+    * **webpack.config.js.default** - this file contain minimal script for webpack (replace '.default' if write smthg in 'app.js').
 
     All following commands you should execute from the ``/{{app_dir}}/{{app_name}}/`` directory.
 
@@ -103,9 +126,9 @@ Adding new models to application
 If you want to add some new entities to your application, you need to do following on the back-end:
 
  1. Create Model;
- 2. Create Serializer;
- 3. Create View;
- 4. Add created View to the API;
+ 2. Create Serializer (optional);
+ 3. Create View (optional);
+ 4. Add created Model or View to the API;
  5. Make migrations;
  6. Apply migrations;
  7. Restart your application.
@@ -118,66 +141,57 @@ Let't look how you can do it on the AppExample - application, that has 2 custom 
 
 Models creation
 ~~~~~~~~~~~~~~~
-Firstly, you need to create file ``models.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory.
+Firstly, you need to create file ``{{model_name}}.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/models`` directory.
 
-Then you need to add some code like this to ``models.py``:
+Let make out an example from **`BModel**:
 
-.. sourcecode:: python
-
-    from django.db import models
-    from vstutils.models import BModel
-
-
-    class Stage(BModel):
-        name = models.CharField(max_length=256)
-        order = models.IntegerField(default=0)
-
-        class Meta:
-            default_related_name = "stage"
-            ordering = ('order', 'id',)
-
-
-    class Task(BModel):
-        name = models.CharField(max_length=256)
-        stages = models.ManyToManyField(Stage)
+.. autoclass:: vstutils.models.BModel
+    :exclude-members:
+    
 
 
 More information about Models you can find in `Django Models documentation <https://docs.djangoproject.com/en/2.2/topics/db/models/>`_.
 
+If you don't need to create custom :ref:`serializers<SerializerCreateTag>` or :ref:`view sets<ViewSetCreateTag>`, you can go to this :ref:`sstage<AddModelsToApiTag>`.
 
+.. _SerializerCreateTag:
 Serializers creation
 ~~~~~~~~~~~~~~~~~~~~
+*Note - If you don't need custom serializer you can skip this section*
+
 Firstly, you need to create file ``serializers.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory.
 
 Then you need to add some code like this to ``serializers.py``:
 
 .. sourcecode:: python
 
+    from datetime import datetime
     from vstutils.api import serializers as vst_serializers
     from . import models as models
 
-
-    class StageSerializer(vst_serializers.VSTSerializer):
+    class StageSerializer(models.Stage.generated_view.serializer_class):
 
         class Meta:
             model = models.Stage
             fields = ('id',
-                      'name',
-                      'order',)
+                    'name',
+                    'order',)
 
+        def update(self, instance, validated_data):
+            # Put custom logic to serializer update
+            instance.last_update = datetime.utcnow()
+            super().update(instance, validated_data)
 
-    class TaskSerializer(vst_serializers.VSTSerializer):
-
-        class Meta:
-            model = models.Task
-            fields = ('id',
-                      'name')
 
 
 More information about Serializers you can find in `Django REST Framework documentation for Serializers <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_.
 
+
+.. _ViewSetCreateTag:
 Views creation
 ~~~~~~~~~~~~~~
+*Note - If you don't need custom view set you can skip this section*
+
 Firstly, you need to create file ``views.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory.
 
 Then you need to add some code like this to ``views.py``:
@@ -187,30 +201,32 @@ Then you need to add some code like this to ``views.py``:
     from vstutils.api import decorators as deco
     from vstutils.api.base import ModelViewSet
     from . import serializers as sers
-
-
-    class StageViewSet(ModelViewSet):
-        model = sers.models.Stage
-        # Serializer for list view (view for a list of Model instances
-        serializer_class = sers.StageSerializer
-        # Serializer for page view (view for one Model instance).
-        # This property is not required, if its value is the same as `serializer_class`.
+    from .models import Stage, Task
+    
+    
+    class StageViewSet(Stage.generated_view):
         serializer_class_one = sers.StageSerializer
+    
 
     '''
     Decorator, that allows to put one view into another
-        * 'stages' - Name of related QuerySet to the child model instances (we set it in Task model as "stages = models.ManyToManyField(Stage)")
-        * 'id' - Name of field, that is used as unique identifier in child model
-        * view - Nested view, that will be child view for decorated view
+        * 'tasks' - suburl for nested view
+        * 'methods=["get"]' - allowed methods for this view
+        * 'manager_name='hosts' - Name of related QuerySet to the child model instances (we set it in HostGroup model as "hosts = models.ManyToManyField(Host)")
+        *  'view=Task.generated_view' - Nested view, that will be child view for decorated view
     '''
-    @deco.nested_view('stages', 'id', view=StageViewSet)
-    class TaskViewSet(ModelViewSet):
-        model = sers.models.Task
-        serializer_class = sers.TaskSerializer
-        serializer_class_one = sers.TaskSerializer
+    @nested_view('stage', view=StageViewSet)
+    class TaskViewSet(Task.generated_view):
+        '''
+        Task operations.
+        '''
+
+
 
 More information about Views and ViewSets you can find in `Django REST Framework documentation for views <https://www.django-rest-framework.org/api-guide/viewsets/>`_.
 
+
+.. _AddModelsToApiTag:
 Adding Models to API
 ~~~~~~~~~~~~~~~~~~~~
 To add created Models to the API you need to write something like this at the end of your ``settings.py`` file:
@@ -230,6 +246,14 @@ To add created Models to the API you need to write something like this at the en
     API[VST_API_VERSION][r'task'] = {
         'view': 'newapp2.views.TaskViewSet'
     }
+    
+    '''
+    You can add model too.
+    All model generate base ViewSet with data that they have, if dont create custom ViewSet or Serializer
+    '''
+    API[VST_API_VERSION][r'task'] = dict(
+        model='newapp2.models.Task'
+    )
 
     # Adds link to the task view to the GUI menu
     PROJECT_GUI_MENU.insert(0, {

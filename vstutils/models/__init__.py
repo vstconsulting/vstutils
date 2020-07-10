@@ -27,8 +27,8 @@ class BModel(BaseModel):
         .. sourcecode:: python
 
             from django.db import models
+            from rest_framework.fields import ChoiceField
             from vstutils.models import BModel
-
 
             class Stage(BModel):
                 name = models.CharField(max_length=256)
@@ -37,11 +37,49 @@ class BModel(BaseModel):
                 class Meta:
                     default_related_name = "stage"
                     ordering = ('order', 'id',)
+                    # fields which would be showed on list.
+                    _list_fields = [
+                        'id',
+                        'name',
+                    ]
+                    # fields which would be showed on detail view and creation.
+                    _detail_fields = [
+                        'id',
+                        'name',
+                        'order'
+                    ]
+                    # make order as choices from 0 to 9
+                    _override_detail_fields = {
+                        'order': ChoiceField((str(i) for i in range(10)))
+                    }
+
 
 
             class Task(BModel):
                 name = models.CharField(max_length=256)
                 stages = models.ManyToManyField(Stage)
+
+                class Meta:
+                    # fields which would be showed.
+                    _list_fields = [
+                        'id',
+                        'name',
+                    ]
+                    # create nested views from models
+                    _nested = {
+                        'stage': {
+                            'allow_append': False,
+                            'model': Stage
+                        }
+                    }
+
+
+        In this case, you create models which could converted to simple view, where:
+
+        - ``POST``/``GET`` to ``/api/version/task/`` - creates new or get list of tasks
+        - ``PUT``/``PATCH``/``GET``/``DELETE`` to ``/api/version/task/:id/`` - updates, retrieves or removes instance of task
+        - ``POST``/``GET` to ``/api/version/task/:id/stage/`` - creates new or get list of stages in task
+        - ``PUT``/``PATCH``/``GET``/``DELETE`` to ``/api/version/task/:id/stage/:stage_id`` - updates, retrieves or removes instance of stage in task.
     """
 
     #: Primary field for select and search in API.

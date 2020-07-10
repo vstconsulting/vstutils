@@ -211,7 +211,6 @@ export default class ApiConnector {
      * @return {promise} Promise of getting list of App languages.
      */
     getLanguages() {
-        debugger;
         if (this.cache) {
             return this.getLanguagesFromCache();
         }

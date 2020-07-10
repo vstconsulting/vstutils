@@ -17,26 +17,37 @@ class Command(BaseCommand):
     }
 
     files_to_create = {
-        'project': [
-            '__init__.py',
-            '__main__.py',
-            'settings.ini',
-            'settings.py',
-            'web.ini',
-            'wsgi.py',
-        ],
-        '': [
-            '.coveragerc',
-            '.pep8',
-            'MANIFEST.in',
-            'README.rst',
-            'requirements.txt',
-            'requirements-test.txt',
-            'setup.cfg',
-            'setup.py',
-            'test.py',
-            'tox.ini',
-        ]
+        'frontend_src': {
+            'app': {
+                'index': Path('index.js')
+            },
+            '.editorconfig': Path('.editorconfig'),
+            '.eslintrc.js': Path('.eslintrc.js'),
+            '.prettierrc': Path('.prettierrc')
+        },
+        '{project_name}': {
+            'models': {
+                '__init__.py': Path('__init__.py')
+            },
+            '__init__.py': Path('__init__.py'),
+            '__main__.py': Path('__main__.py'),
+            'settings.ini': Path('settings.ini'),
+            'settings.py': Path('settings.py'),
+            'web.ini': Path('web.ini'),
+            'wsgi.py': Path('wsgi.py'),
+        },
+        '.coveragerc': Path('.coveragerc'),
+        '.pep8': Path('.pep8'),
+        'MANIFEST.in': Path('MANIFEST.in'),
+        'package.json': Path('package.json'),
+        'README.rst': Path('README.rst'),
+        'requirements.txt': Path('requirements.txt'),
+        'requirements-test.txt': Path('requirements-test.txt'),
+        'setup.cfg': Path('setup.cfg'),
+        'setup.py': Path('setup.py'),
+        'test.py': Path('test.py'),
+        'tox.ini': Path('tox.ini'),
+        'webpack.config.js.default': Path('webpack.config.js.default')
     }
 
     def add_arguments(self, parser):
@@ -49,21 +60,11 @@ class Command(BaseCommand):
                 f'--{name}', dest=name, **data
             )
 
-    def get_path(self, *path) -> Path:
-        # directory = os.path.expandvars('/'.join(path))
-        # directory = os.path.expanduser(directory)
-        # return directory
-        return Path(os.path.expandvars('/'.join(path))).expanduser()
+    def get_path(self, path, *paths) -> Path:
+        return Path(os.path.expandvars(os.path.join(path, *paths))).expanduser()
 
-    def create_dir(self, *path):
-        dir_path = self.get_path(*path)
-        dir_path.mkdir(parents=True)
-        # os.makedirs(dir_path)
-
-    def create_file(self, render_path, *path, **render_data):
-        # with open(os.path.join(*path), 'w') as fd:
-        with self.get_path(*path).open('w') as fd:
-            fd.write(get_render(render_path + '.template', render_data))
+    def create_file(self, render_path, path, **render_data):
+        path.write_text(get_render(render_path + '.template', render_data))
 
     def _from_user(self, name, options, default=None):
         default = options.get(name, default)
@@ -86,33 +87,36 @@ class Command(BaseCommand):
             project_gui_name_head_lines='=' * len(project_gui_name)
         )
 
-    def make_dirs(self, **render_vars):
-        self.create_dir(
-            render_vars['project_place'],
-            render_vars['project_name']
-        )
-        self.create_dir(
-            render_vars['project_place'],
-            render_vars['project_name'],
-            render_vars['project_name'],
-        )
+    def allow_create(self, path):
+        root_dir_path = self.get_path(*path) if not isinstance(path, Path) else path
+        if root_dir_path.exists() and len(list(root_dir_path.iterdir())) != 0:
+            raise Exception(f'{root_dir_path} is not empty')
+
+    def recursive_create(self, root, node, node_chain=None):
+        if node_chain is None:
+            node_chain = list()
+
+        for name, path_value in node.items():
+            real_name = name.format(**self.render_vars)
+
+            if not isinstance(path_value, Path):
+                new_root = root/Path(real_name)
+                new_root.mkdir()
+                self.recursive_create(new_root, path_value, node_chain + [name.replace('{', '').replace('}', '')])
+            else:
+                template_path = str(Path('newproject', *node_chain) / path_value)
+                self.create_file(template_path, root/real_name, **self.render_vars)
 
     def make_files(self, **render_vars):
-        for place, file_names in self.files_to_create.items():
-            path = [render_vars['project_place'], render_vars['project_name']]
-            template_place = 'newproject/' + place
-            if place == 'project':
-                path.append(render_vars['project_name'])
-                template_place += '/'
-            for file_name in file_names:
-                self.create_file(
-                    template_place + file_name, *(path + [file_name]), **render_vars
-                )
+        self.render_vars = render_vars
+        self.path = self.get_path(*[render_vars['project_place'], render_vars['project_name']])
+        self.allow_create(self.path)
+        self.path.mkdir(exist_ok=True)
+        self.recursive_create(self.path, self.files_to_create)
 
     def handle(self, *args, **options):
         super().handle(*args, **options)
         opts = self.get_render_kwargs(options)
-        self.make_dirs(**opts)
         self.make_files(**opts)
         project_dir = os.path.join(opts['project_place'], opts['project_name'])
         self._print(

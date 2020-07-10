@@ -5,6 +5,7 @@ import shutil
 import re
 import io
 import pwd
+from pathlib import Path
 
 try:
     import pyximport
@@ -56,6 +57,44 @@ test_handler_structure = {
     }
 }
 
+packaje_json_data = {
+    "name": "test_project",
+    "version": "1.0.0",
+    "browserslist": [
+        "> 0.25%",
+        "not dead"
+    ],
+    "scripts": {
+        "build": "APP_ENV=prod webpack",
+        "buildAnalyze": "APP_ENV=prod BUNDLE_ANALYZER=true webpack",
+        "buildJson": "APP_ENV=prod webpack --profile --json > stat.json",
+        "devBuild": "webpack",
+        "styleCheck": "prettier --check frontend_src/**",
+        "styleFix": "prettier --write frontend_src/**"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@babel/core": "^7.8.7",
+        "@babel/preset-env": "^7.8.7",
+        "babel-loader": "^8.1.0",
+        "core-js": "^3.6.4",
+        "css-loader": "^3.4.2",
+        "dotenv": "^8.2.0",
+        "file-loader": "^5.1.0",
+        "node-sass": "^4.13.1",
+        "optimize-css-assets-webpack-plugin": "^5.0.3",
+        "prettier": "^2.0.2",
+        "sass-loader": "^8.0.2",
+        "style-loader": "^1.1.3",
+        "url-loader": "^3.0.0",
+        "vue-loader": "^15.9.1",
+        "vue-template-compiler": "^2.6.11",
+        "webpack": "^4.42.1",
+        "webpack-bundle-analyzer": "^3.6.0",
+        "webpack-cli": "^3.3.11"
+    }
+}
+
 
 def async_test(coro):
     return async_to_sync(coro, force_new_loop=True)
@@ -91,6 +130,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
     def test_startproject(self):
         # Easy create
         out = io.StringIO()
+        utils.Executor(stderr=utils.Executor.DEVNULL).execute('mkdir /tmp/test_project'.split(' '), '/tmp')
         call_command(
             'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
         )
@@ -98,6 +138,10 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             f'Project successfully created at {self.project_place}.',
             out.getvalue()
         )
+        with self.assertRaises(Exception):
+            call_command(
+                'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
+            )   
         self.assertTrue(os.path.exists(self.project_place))
         self.assertTrue(os.path.isdir(self.project_place))
         self.assertTrue(os.path.exists(self.project_place + '/test_project'))
@@ -114,6 +158,8 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         self.assertTrue(os.path.isfile(self.project_place + '/README.rst'))
         self.assertTrue(os.path.isfile(self.project_place + '/MANIFEST.in'))
         self.assertTrue(os.path.isfile(self.project_place + '/test.py'))
+        self.assertDictEqual(json.loads(Path(self.project_place + '/package.json').read_text()), packaje_json_data)
+
         self.remove_project_place(self.project_place)
         with self.assertRaises(Exception):
             call_command('newproject', '--name', 'test_project', dir=None, interactive=0)
