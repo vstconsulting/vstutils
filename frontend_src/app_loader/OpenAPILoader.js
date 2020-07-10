@@ -39,14 +39,14 @@ class OpenAPILoader {
     loadSchemaFromCache() {
         return (
             this.cache
-                .getFile('openapi')
+                .get('openapi')
                 .then((response) => {
                     return JSON.parse(response.data);
                 })
                 // eslint-disable-next-line no-unused-vars
                 .catch((error) => {
                     return this.loadSchemaFromApi().then((openapi) => {
-                        this.cache.setFile('openapi', JSON.stringify(openapi));
+                        this.cache.set('openapi', JSON.stringify(openapi));
                         return openapi;
                     });
                 })

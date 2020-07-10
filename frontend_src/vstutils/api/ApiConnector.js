@@ -193,14 +193,14 @@ export default class ApiConnector {
     getLanguagesFromCache() {
         return (
             this.cache
-                .getFile('languages')
+                .get('languages')
                 .then((response) => {
                     return JSON.parse(response.data);
                 })
                 // eslint-disable-next-line no-unused-vars
                 .catch((error) => {
                     return this.loadLanguages().then((languages) => {
-                        this.cache.setFile('languages', JSON.stringify(languages));
+                        this.cache.set('languages', JSON.stringify(languages));
                         return languages;
                     });
                 })
@@ -211,6 +211,7 @@ export default class ApiConnector {
      * @return {promise} Promise of getting list of App languages.
      */
     getLanguages() {
+        debugger;
         if (this.cache) {
             return this.getLanguagesFromCache();
         }
@@ -234,14 +235,14 @@ export default class ApiConnector {
     getTranslationsFromCache(lang) {
         return (
             this.cache
-                .getFile('translations.' + lang)
+                .get('translations.' + lang)
                 .then((response) => {
                     return JSON.parse(response.data);
                 })
                 // eslint-disable-next-line no-unused-vars
                 .catch((error) => {
                     return this.loadTranslations(lang).then((translations) => {
-                        this.cache.setFile('translations.' + lang, JSON.stringify(translations));
+                        this.cache.set('translations.' + lang, JSON.stringify(translations));
                         return translations;
                     });
                 })

@@ -1,47 +1,43 @@
-import { guiCache } from './FilesCache.js';
+import { cachePromise } from './Cache.js';
 
 /**
  * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
  */
-function cleanAllCacheAndReloadPage() {
-    function cleanServiceWorkerCache() {
+async function cleanAllCacheAndReloadPage() {
+    async function cleanServiceWorkerCache() {
         if ('caches' in window) {
-            window.caches.keys().then((keyList) => {
-                keyList.forEach((key) => {
-                    window.caches.delete(key);
-                });
-            });
+            try {
+                const cachesKeys = await window.caches.keys();
+                await Promise.allSettled(cachesKeys.map((key) => window.caches.delete(key)));
+            } catch (e) {
+                console.log('Error while cleaning window.caches\n' + e);
+            }
         }
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then((registrations) => {
-                if (registrations.length === 0) {
-                    window.location.reload(true);
-                }
-
-                let promises = registrations.map((registration) => registration.unregister());
-
-                // eslint-disable-next-line no-unused-vars
-                Promise.all(promises).finally((response) => {
-                    window.location.reload(true);
-                });
-            });
-        } else {
-            window.location.reload(true);
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.allSettled(registrations.map((r) => r.unregister()));
         }
+
+        window.location.reload(true);
     }
 
-    guiCache.deleteAllCache().finally(cleanServiceWorkerCache);
+    try {
+        await (await cachePromise).clearAllCache();
+    } finally {
+        await cleanServiceWorkerCache();
+    }
 }
 
 /**
  * Function, that removes OpenAPI schema from gui cache and reloads page.
  */
-function cleanOpenApiCacheAndReloadPage() {
-    // eslint-disable-next-line no-unused-vars
-    guiCache.delFile('openapi').finally((res) => {
+async function cleanOpenApiCacheAndReloadPage() {
+    try {
+        await (await cachePromise).delete('openapi');
+    } finally {
         window.location.reload(true);
-    });
+    }
 }
 
 export { cleanAllCacheAndReloadPage, cleanOpenApiCacheAndReloadPage };
