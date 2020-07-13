@@ -141,7 +141,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         with self.assertRaises(Exception):
             call_command(
                 'newproject', '--name', 'test_project', interactive=0, dir='/tmp', stdout=out
-            )   
+            )
         self.assertTrue(os.path.exists(self.project_place))
         self.assertTrue(os.path.isdir(self.project_place))
         self.assertTrue(os.path.exists(self.project_place + '/test_project'))
@@ -771,13 +771,11 @@ class EndpointTestCase(BaseTestCase):
         response = basic_client.put('/api/endpoint/')
         self.assertEqual(response.status_code, 200)
 
-        response = basic_client.put('/api/endpoint/', json.dumps([
-            {
-                'path': '/request_info/',
-                'version': 'v2',
-                'method': 'get'
-            }
-        ]), content_type='application/json')
+        response = basic_client.put('/api/endpoint/', json.dumps({
+            'path': '/request_info/',
+            'version': 'v2',
+            'method': 'get'
+        }), content_type='application/json')
         self.assertEqual(response.status_code, 200)
         result = self.render_api_response(response)
         self.assertEqual(result[0]['data']['user_id'], user.id, result)

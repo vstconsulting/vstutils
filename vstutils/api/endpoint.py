@@ -2,6 +2,7 @@ import typing as _t
 import json
 import logging
 import traceback
+import functools
 from collections import OrderedDict
 
 from django.conf import settings
@@ -40,6 +41,22 @@ default_authentication_classes = (
 )
 
 append_to_list = list.append
+
+
+@functools.singledispatch
+def _get_request_data(request_data: _t.Iterable) -> _t.Union[_t.List, _t.Tuple]:
+    assert isinstance(request_data, (list, tuple)), 'Request data must be list or tuple.'
+    return request_data
+
+
+@_get_request_data.register(dict)
+def _get_request_data_dict(request_data):
+    return [request_data]
+
+
+@_get_request_data.register(str)
+def _get_request_data_str(request_data):
+    return _get_request_data(json.loads(request_data))  # nocv
 
 
 def _join_paths(*args) -> _t.Text:
@@ -369,7 +386,7 @@ class EndpointViewSet(views.APIView):
             'results': self.results
         }
         timings: _t.List = []
-        for operation in request.data:  # type: ignore
+        for operation in _get_request_data(request.data):  # type: ignore
             result, timing = self.operate(operation, context)  # type: ignore
             append_to_list(self.results, result)
             append_to_list(timings, timing)
