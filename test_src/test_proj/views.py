@@ -106,6 +106,7 @@ class RequestInfoTestView(NonModelsViewSet):
             )
         ))
         serializer.is_valid(raise_exception=True)
+        request._request.is_bulk = False
         return responses.HTTP_200_OK(
             serializer.data,
             timings=dict(

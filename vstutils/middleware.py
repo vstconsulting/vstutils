@@ -132,10 +132,11 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
         start_time = time.time()
         response = super().get_response_handler(request)
         response_durations = getattr(response, 'timings', None)
-        if response_durations:
-            response_durations = f', {", ".join(map(self.__duration_handler, response_durations.items()))}'
         total_time = round((time.time() - start_time)*1000, 2)
-        response['Server-Timing'] = f'total;dur={total_time}{response_durations or ""}'
         if getattr(request, 'is_bulk', False):
             response['Response-Time'] = str(total_time)
+        else:
+            if response_durations:
+                response_durations = f', {", ".join(map(self.__duration_handler, response_durations.items()))}'
+            response['Server-Timing'] = f'total;dur={total_time}{response_durations or ""}'
         return response

@@ -8,6 +8,7 @@ from collections import OrderedDict
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
+from django.contrib.auth.models import AbstractUser
 from django.test.client import Client, ClientHandler
 from django.test.utils import modify_settings
 from drf_yasg.views import SPEC_RENDERERS
@@ -101,7 +102,6 @@ class BulkRequestType(drf_request.Request, HttpRequest):
 
 
 class BulkClientHandler(ClientHandler):
-
     @modify_settings(MIDDLEWARE={
         'remove': [
             'corsheaders.middleware.CorsMiddleware',
@@ -109,6 +109,7 @@ class BulkClientHandler(ClientHandler):
             'htmlmin.middleware.MarkRequestMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.middleware.clickjacking.XFrameOptionsMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware'
         ]
     })
     def __init__(self, *args, **kwargs):
@@ -118,22 +119,29 @@ class BulkClientHandler(ClientHandler):
 
     def get_response(self, request: HttpRequest):
         request.is_bulk = True  # type: ignore
+        if 'user' in request.META:
+            request.user = request.META.pop('user')
+            # pylint: disable=protected-access
+            request._cached_user = request.user  # type: ignore
         return super().get_response(request)
 
 
 class BulkClient(Client):
     handler: BulkClientHandler = BulkClientHandler()
+    user: _t.Optional[AbstractUser]
 
     def __init__(self, enforce_csrf_checks=False, **defaults):
         # pylint: disable=bad-super-call
+        self.user = defaults.pop('user', None)
         super(Client, self).__init__(**defaults)
         self.exc_info = None
 
-    @cache_method_result
     def _base_environ(self, **request):
         return super()._base_environ(**request)
 
     def request(self, **request):
+        if self.user:
+            request['user'] = self.user
         response = self.handler(self._base_environ(**request))
         if response.cookies:
             self.cookies.update(response.cookies)  # nocv
@@ -281,24 +289,21 @@ class EndpointViewSet(views.APIView):
         Returns test client and guarantees that if bulk request comes
         authenticated than test client will be authenticated with the same user
         """
+        return BulkClient(**self.original_environ_data(request=request))
 
-        client = BulkClient(**self.original_environ_data(request=request))
-        if request.user.is_authenticated:
-            if isinstance(request.successful_authenticator, SessionAuthentication):
-                client.defaults['HTTP_COOKIE'] = str(request.META.get('HTTP_COOKIE'))
-            elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
-                client.defaults['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
-            else:
-                client.force_login(request.user)  # nocv
-        return client
-
-    def original_environ_data(self, request: BulkRequestType = None, *args) -> _t.Dict:
-        get_environ = (request or self.request).META.get
+    def original_environ_data(self, request: BulkRequestType, *args) -> _t.Dict:
+        get_environ = request.META.get
         kwargs = dict()
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
             if value:
                 kwargs[env_var] = str(value)
+        if request.user.is_authenticated:
+            if isinstance(request.successful_authenticator, SessionAuthentication):
+                kwargs['HTTP_COOKIE'] = str(request.META.get('HTTP_COOKIE'))
+            elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
+                kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
+            kwargs['user'] = request.user  # type: ignore
         return kwargs
 
     def get_serializer(self, *args, **kwargs) -> OperationSerializer:
