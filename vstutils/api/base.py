@@ -41,6 +41,12 @@ default_methods: _t.List[_t.Text] = [
     'options',
     'head'
 ]
+detail_actions: _t.List[_t.Text] = [
+    'create',
+    'retrieve',
+    'update',
+    'partial_update'
+]
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 
 
@@ -233,23 +239,25 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             ))
         return super().filter_queryset(queryset)
 
-    @classproperty
-    def serializer_class_one(self):
-        return self._serializer_class_one or self.serializer_class
-
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
-        detail_actions = ['create', 'retrieve', 'update', 'partial_update']
-        lookup_field_data = self.kwargs.get(lookup_field, False)
         action_name = getattr(self, 'action', None)
+
         # Try to get overloaded serializer from 'action_serializers' or from attrs
-        serializer_class = getattr(self, f'serializer_class_{action_name}', None)
-        serializer_class = serializer_class or self.action_serializers.get(action_name, None)
-        if serializer_class:
-            return serializer_class
+        if hasattr(self, f'serializer_class_{action_name}'):
+            serializer_class = getattr(self, f'serializer_class_{action_name}')
+            if serializer_class:
+                return serializer_class
+        if action_name in self.action_serializers:
+            serializer_class = self.action_serializers.get(action_name, None)
+            if serializer_class:
+                return serializer_class
+
         # Get 'serializer_class_one' for detail operations
-        if self.request and (lookup_field_data or action_name in detail_actions):
-            return self.serializer_class_one
+        if hasattr(self, 'serializer_class_one') and \
+           self.request and \
+           (self.kwargs.get(lookup_field, False) or action_name in detail_actions):
+            return self.serializer_class_one  # pylint: disable=no-member
         return super().get_serializer_class()
 
     def nested_allow_check(self):
