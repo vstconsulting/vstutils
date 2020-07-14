@@ -136,9 +136,6 @@ class BulkClient(Client):
         super(Client, self).__init__(**defaults)
         self.exc_info = None
 
-    def _base_environ(self, **request):
-        return super()._base_environ(**request)
-
     def request(self, **request):
         if self.user:
             request['user'] = self.user
