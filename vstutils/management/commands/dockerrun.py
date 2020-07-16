@@ -243,7 +243,6 @@ class Command(BaseCommand):
             config['rpc']['enable_worker'] = 'true'
             config['worker'] = {
                 'loglevel': log_level,
-                'logfile': f'/tmp/{prefix.lower()}_worker.log',
                 'pidfile': f'/tmp/{prefix.lower()}_worker.pid',
                 'beat': os.getenv(f'{prefix}_SCHEDULER_ENABLE', 'true')
             }
