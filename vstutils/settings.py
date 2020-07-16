@@ -239,7 +239,6 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'worker': {
             'app': '{PROG_NAME}.wapp:app',
             'loglevel': '{this[main][log_level]}',
-            'logfile': '/var/log/{PROG_NAME}/worker.log',
             'pidfile': '/run/{PROG_NAME}_worker.pid',
             'autoscale': '{this[rpc][concurrency]},1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
