@@ -190,7 +190,6 @@
                         this.show_loader = false;
                     })
                     .catch((error) => {
-                        debugger;
                         this.show_loader = false;
                         let str = app.error_handler.errorToString(error);
 

@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import { deepEqual } from '../utils';
+import { apiConnector } from '../api';
+import { Model } from '../models';
 
 /**
  * Base QuerySet class.
@@ -7,7 +9,7 @@ import { deepEqual } from '../utils';
 export default class QuerySet {
     /**
      * Constructor of QuerySet class.
-     * @param {object} model Model for which this QuerySet will be created.
+     * @param {Model} model Model for which this QuerySet will be created.
      * @param {string} url Current url of view.
      * @param {object} query Object, that stores current QuerySet filters.
      */
@@ -38,42 +40,6 @@ export default class QuerySet {
      */
     getDataType() {
         return this.url.replace(/^\/|\/$/g, '').split('/');
-    }
-
-    /**
-     * Method, that forms body of bulk query.
-     * @param {string} method Method(get/delete/post/put/patch) of bulk query.
-     * @param {object} data 'data' property for body of bulk query, data of Model instance.
-     */
-    formBulkQuery(method, data = undefined) {
-        let query = {
-            method: method,
-            path: this.getDataType(),
-            query: this.makeQueryString(),
-        };
-
-        if (data) {
-            query.data = data;
-        }
-
-        return query;
-    }
-
-    /**
-     * Method, that forms bulk query and send it to API.
-     * @param {string} method Method(get/delete/post/put/patch) of bulk query.
-     * @param {object} data 'data' property for body of bulk query, data of Model instance.
-     */
-    formQueryAndSend(method, data = undefined) {
-        return this.sendQuery(this.formBulkQuery(method, data));
-    }
-
-    /**
-     * Method, that sends bulk query to API.
-     * @param {object} bulk Object with properties of bulk data.
-     */
-    sendQuery(bulk) {
-        return window.app.api.bulkQuery(bulk);
     }
 
     /**
@@ -160,58 +126,109 @@ export default class QuerySet {
     }
 
     /**
+     * Method, that returns promise with Model instance.
+     *
+     * @return {Promise.<Model>}
+     */
+    async get() {
+        if (this.cache) {
+            return Promise.resolve(this.cache);
+        }
+
+        const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });
+
+        let instance = this.model.getInstance(response.data, this);
+        let prefetch_fields = this._getPrefetchFields();
+
+        // if prefetch fields exist, loads prefetch data.
+        if (prefetch_fields && prefetch_fields.length > 0) {
+            await this._loadPrefetchData(prefetch_fields, [instance]);
+        }
+
+        // otherwise, returns instance.
+        this.cache = instance;
+        return instance;
+    }
+
+    /**
      * Method, that sends to API get request for getting list of Model instances,
      * appropriate for filters from 'this.query' property.
      * Method, returns promise, that returns list of Model instances,
      * if api request was successful.
+     *
+     * @returns {Model[]}
      */
-    items() {
+    async items() {
         if (this.cache) {
-            return Promise.resolve(this.cache);
+            return this.cache;
         }
-        return this.formQueryAndSend('get')
-            .then((response) => {
-                let instances = [];
-                let data = response.data.results;
-                let prefetch_fields = this._getPrefetchFields();
+        const response = await this.execute({ method: 'get', path: this.url, query: this.query });
 
-                for (let index = 0; index < data.length; index++) {
-                    instances.push(this.model.getInstance(data[index], this.clone()));
-                }
+        this.api_count = response.data.count;
 
-                // if prefetch fields exist, loads prefetch data.
-                if (prefetch_fields && prefetch_fields.length > 0) {
-                    return this._loadPrefetchData(prefetch_fields, instances).then(() => {
-                        this.api_count = response.data.count;
-                        this.cache = instances;
-                        return instances;
-                    });
-                }
+        const instances = response.data.results.map((item) => this.model.getInstance(item, this.clone()));
 
-                // otherwise returns instances.
-                this.api_count = response.data.count;
-                this.cache = instances;
-                instances.total = response.data.count;
-                return instances;
-            })
-            .catch((error) => {
-                throw error;
-            });
+        const prefetch_fields = this._getPrefetchFields();
+        // if prefetch fields exist, loads prefetch data.
+        if (prefetch_fields && prefetch_fields.length > 0) {
+            await this._loadPrefetchData(prefetch_fields, instances);
+        }
+
+        this.cache = instances;
+        instances.total = response.data.count;
+        return instances;
     }
 
     /**
      * Method, that sends query to API for creation of new Model instance
      * and returns promise, that returns Model instance, if query response was successful.
-     * @param {object} data Data of new Model instance.
+     *
+     * @param {(Model|Object)} data - new model data.
+     * @param {string} method - Http method.
+     * @returns {Promise.<Model>}
      */
-    create(data) {
-        return this.formQueryAndSend('post', data)
-            .then((response) => {
-                return this.model.getInstance(response.data, this.clone());
-            })
-            .catch((error) => {
-                throw error;
+    async create(data, method = 'post') {
+        if (!(data instanceof Model)) {
+            data = this.model.getInstance(data, this);
+        }
+
+        const response = await this.execute({
+            method,
+            data,
+            path: this.url,
+            query: this.query,
+        });
+
+        return this.model.getInstance(response.data, this);
+    }
+
+    /**
+     * Method, that sends api request for model update
+     *
+     * @param {Model} newDataInstance - Model instance with new data.
+     * @param {Model[]=} instances - Model instances to apply update.
+     * @param {string} method - Http method.
+     * @returns {Promise.<Model[]>}
+     */
+    async update(newDataInstance, instances = undefined, method = 'patch') {
+        if (instances === undefined) {
+            instances = await this.items();
+        }
+
+        const updatePromises = instances.map(async (instance) => {
+            const path = instance.queryset.getDataType();
+
+            const response = await this.execute({
+                method,
+                data: newDataInstance,
+                path: path,
+                query: this.query,
             });
+
+            return this.model.getInstance(response.data, this);
+        });
+
+        return Promise.all(updatePromises);
     }
 
     /**
@@ -220,49 +237,66 @@ export default class QuerySet {
      * This method is expected to be called after instance filtering.
      * This method is only for querysets, that have 'url' of 'list' type.
      * This method should not be applied for querysets with 'page' type url.
+     *
+     * @param {Model[]=} instances
+     * @returns {Promise}
      */
-    delete() {
-        this.items()
-            .then((instances) => {
-                instances.forEach((instance) => {
-                    instance.delete();
-                });
-            })
-            .catch((error) => {
-                throw error;
+    async delete(instances = undefined) {
+        if (instances === undefined) {
+            instances = await this.items();
+        }
+
+        const deletePromises = instances.map(async (instance) => {
+            const pk = instance.getPkValue();
+            let path = this.getDataType();
+
+            if ('' + path[path.length - 1] !== '' + pk) {
+                path.push(pk);
+            }
+
+            return this.execute({
+                method: 'delete',
+                path: path,
+                query: this.query,
             });
+        });
+
+        return Promise.all(deletePromises);
     }
 
     /**
-     * Method, that returns promise, that returns Model instance with 'this.url' URI,
-     * if api query was successful.
+     * Method, that sends API request to ApiConnector.
      *
-     * @return {Model}
+     * @param {Object} req - Request parameters.
+     * @param {string} req.method - Http method.
+     * @param {string=} req.version - API version.
+     * @param {(string|string[])} req.path
+     * @param {(string|Object|URLSearchParams)=} req.query - URL query params.
+     * @param {(Model|Object)=} req.data
+     * @param {(string|Object)=} req.headers
+     * @returns {Promise.<APIResponse>}
      */
-    get() {
-        if (this.cache) {
-            return Promise.resolve(this.cache);
+    execute(req) {
+        let useBulk = this.model.methodsToBulk.includes(req.method);
+
+        let data;
+        if (req.data !== undefined) {
+            if (req.data instanceof Model) {
+                data = this.model.toInner(req.data.data);
+            } else {
+                data = req.data;
+            }
+
+            if (useBulk) {
+                data = JSON.stringify(data);
+            } else {
+                const formData = new FormData();
+                for (let [key, value] of Object.entries(data)) formData.append(key, value);
+                data = formData;
+            }
         }
-        return this.formQueryAndSend('get')
-            .then((response) => {
-                let instance = this.model.getInstance(response.data, this);
-                let prefetch_fields = this._getPrefetchFields();
 
-                // if prefetch fields exist, loads prefetch data.
-                if (prefetch_fields && prefetch_fields.length > 0) {
-                    return this._loadPrefetchData(prefetch_fields, [instance]).then(() => {
-                        this.cache = instance;
-                        return instance;
-                    });
-                }
-
-                // otherwise, returns instance.
-                this.cache = instance;
-                return instance;
-            })
-            .catch((error) => {
-                throw error;
-            });
+        return apiConnector.makeRequest({ ...req, data, useBulk });
     }
 
     /**
@@ -385,7 +419,8 @@ export default class QuerySet {
                     };
 
                     promises.push(
-                        this.sendQuery(bulk)
+                        apiConnector
+                            .bulkQuery(bulk)
                             .then((res) => {
                                 this._setPrefetchValue(res, item, instances, key);
                             })

@@ -19,7 +19,7 @@ export default class RouterConstructor {
         this.views = views;
         this.components_templates = components_templates;
         this.custom_components_templates = custom_components_templates;
-        this.routes = [];
+        this.routes = this.formAllRoutes();
     }
 
     /**
@@ -55,7 +55,6 @@ export default class RouterConstructor {
      * @return {array} Routes Array.
      */
     getRoutes() {
-        this.routes = this.formAllRoutes();
         return this.routes;
     }
 

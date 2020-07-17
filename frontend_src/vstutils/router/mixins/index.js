@@ -210,7 +210,7 @@ export let routesComponentsTemplates = {
                     }
                 }
 
-                if (!pk_key) {
+                if (!pk_key || pk_value === null) {
                     return;
                 }
 
@@ -263,7 +263,7 @@ export let routesComponentsTemplates = {
              * Method, that executes Empty action on instance.
              * @param {object} opt Object with properties for empty action execution.
              */
-            executeEmptyActionOnInstance(opt = {}) {
+            async executeEmptyActionOnInstance(opt = {}) {
                 let url = this._executeEmptyActionOnInstance_getUrl(opt);
 
                 if (!url) {
@@ -273,38 +273,38 @@ export let routesComponentsTemplates = {
                 let method = opt.query_type || 'post';
                 let qs = this.getQuerySet(this.view, this.qs_url).clone({ url: url });
 
-                qs.formQueryAndSend(method)
-                    .then((response) => {
-                        guiPopUp.success(
-                            this.$t(pop_up_msg.instance.success.execute).format([
-                                this.$t(opt.name),
-                                this.$t(this.view.schema.name),
-                            ]),
-                        );
+                try {
+                    const response = await qs.execute({ method, path: qs.getDataType(), query: qs.query });
 
-                        if (response && response.data) {
-                            try {
-                                let redirect_path = this._getRedirectUrlFromResponse(response.data);
-
-                                if (redirect_path) {
-                                    this.openRedirectUrl({ path: redirect_path });
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        }
-                    })
-                    .catch((error) => {
-                        let str = window.app.error_handler.errorToString(error);
-
-                        let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.execute).format([
                             this.$t(opt.name),
                             this.$t(this.view.schema.name),
-                            str,
-                        ]);
+                        ]),
+                    );
 
-                        window.app.error_handler.showError(srt_to_show, str);
-                    });
+                    if (response && response.data) {
+                        try {
+                            let redirect_path = this._getRedirectUrlFromResponse(response.data);
+
+                            if (redirect_path) {
+                                this.openRedirectUrl({ path: redirect_path });
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
+                } catch (error) {
+                    let str = window.app.error_handler.errorToString(error);
+
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
+                        this.$t(opt.name),
+                        this.$t(this.view.schema.name),
+                        str,
+                    ]);
+
+                    window.app.error_handler.showError(srt_to_show, str);
+                }
             },
             /**
              * Method, returns url for empty action QuerySet.
@@ -855,26 +855,21 @@ export let routesComponentsTemplates = {
              * Method, that adds child instance to parent list.
              * @param {object} opt
              */
-            addChildInstance(opt) {
-                let qs = this.getQuerySet(this.view, this.qs_url).clone();
-                qs.query = {};
-                qs.formQueryAndSend('post', opt.data)
-                    // eslint-disable-next-line no-unused-vars
-                    .then((response) => {
-                        guiPopUp.success(
-                            this.$t(pop_up_msg.instance.success.add).format([this.$t(this.view.schema.name)]),
-                        );
-                    })
-                    .catch((error) => {
-                        let str = window.app.error_handler.errorToString(error);
-
-                        let srt_to_show = this.$t(pop_up_msg.instance.error.add).format([
-                            this.$t(this.view.schema.name),
-                            str,
-                        ]);
-
-                        window.app.error_handler.showError(srt_to_show, str);
-                    });
+            async addChildInstance(opt) {
+                let qs = this.getQuerySet(this.view, this.qs_url);
+                try {
+                    await qs.execute({ method: 'post', path: qs.getDataType(), data: opt.data });
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.add).format([this.$t(this.view.schema.name)]),
+                    );
+                } catch (error) {
+                    let str = window.app.error_handler.errorToString(error);
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.add).format([
+                        this.$t(this.view.schema.name),
+                        str,
+                    ]);
+                    window.app.error_handler.showError(srt_to_show, str);
+                }
             },
         },
     },
@@ -929,16 +924,10 @@ export let routesComponentsTemplates = {
                     return;
                 }
 
-                let qs = this.getQuerySetFromSandBox(this.view, this.qs_url).clone();
-
-                let instance = qs.model.getInstance(data, qs);
-
-                let method = this.view.schema.query_type;
-
                 this.loading = true;
 
-                instance
-                    .save(method)
+                this.getQuerySetFromSandBox(this.view, this.qs_url)
+                    .create(data)
                     .then((instance) => {
                         this.loading = false;
                         guiPopUp.success(
@@ -1052,10 +1041,9 @@ export let routesComponentsTemplates = {
                 }
                 let instance = this.data.instance;
                 instance.data = data;
-                let method = this.view.schema.query_type;
                 this.loading = true;
                 instance
-                    .save(method)
+                    .update({ method: this.view.schema.query_type })
                     .then((instance) => {
                         this.loading = false;
                         let qs = this.getQuerySet(this.view, this.qs_url).clone();
@@ -1196,7 +1184,7 @@ export let routesComponentsTemplates = {
              * Method gets data from form, needed for action,
              * validates it and send API request for action execution.
              */
-            executeInstance() {
+            async executeInstance() {
                 let data = this.getValidData();
                 if (!data) {
                     // the code line below is needed for tests.
@@ -1206,37 +1194,38 @@ export let routesComponentsTemplates = {
                 let instance = this.data.instance;
                 let method = this.view.schema.query_type;
                 this.loading = true;
-                instance.queryset
-                    .formQueryAndSend(method, data)
-                    .then((response) => {
-                        this.loading = false;
-                        guiPopUp.success(
-                            this.$t(pop_up_msg.instance.success.execute).format([
-                                this.$t(this.view.schema.name),
-                                instance.name.toLowerCase(),
-                            ]),
-                        );
-                        this.deleteQuerySetFromSandBox(this.qs_url);
-                        let data = response.data;
-                        this.openRedirectUrl({
-                            path: this.getRedirectUrl({ data: data, response: response }),
-                        });
-                    })
-                    .catch((error) => {
-                        this.loading = false;
-                        let str = window.app.error_handler.errorToString(error);
-
-                        let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
-                            this.view.schema.name,
-                            this.$t(instance.name.toLowerCase()),
-                            str,
-                        ]);
-
-                        window.app.error_handler.showError(srt_to_show, str);
-
-                        // the code line below is needed for tests.
-                        current_view.setLoadingError({});
+                try {
+                    const response = await instance.queryset.execute({
+                        method,
+                        path: instance.queryset.getDataType(),
+                        data: data,
                     });
+                    this.loading = false;
+                    guiPopUp.success(
+                        this.$t(pop_up_msg.instance.success.execute).format([
+                            this.$t(this.view.schema.name),
+                            instance.name.toLowerCase(),
+                        ]),
+                    );
+                    this.deleteQuerySetFromSandBox(this.qs_url);
+                    this.openRedirectUrl({
+                        path: this.getRedirectUrl({ data: response.data, response: response }),
+                    });
+                } catch (error) {
+                    this.loading = false;
+                    let str = window.app.error_handler.errorToString(error);
+
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
+                        this.view.schema.name,
+                        this.$t(instance.name.toLowerCase()),
+                        str,
+                    ]);
+
+                    window.app.error_handler.showError(srt_to_show, str);
+
+                    // the code line below is needed for tests.
+                    current_view.setLoadingError({});
+                }
             },
         },
     },
