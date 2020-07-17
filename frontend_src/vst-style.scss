@@ -1,10 +1,10 @@
 $admonition:
-    [".warning", ".important"] ("background-color": "#fff8a96b", "border": "1px solid lightgray", "padding-left": "10px"),
-    [".attention", ".caution", ".danger", ".error"] ("background-color": "#ff97976b", "border": "1px solid lightgray", "padding-left": "10px"),
-    [".admonition", ".hint", ".note", ".tip"] ("background-color": "#d3d3d36b", "border": "1px solid lightgray", "padding-left": "10px"),
-    [".attention", ".caution", ".danger", ".error .admonition-title"] ("color": "#c70413bd"),
-    [".important", ".warning .admonition-title"] ("color": "#ffa10abd"),
-    [" .admonition-title"] ("color": "#0000008a");
+    (".warning", ".important") ("background-color": "#fff8a96b", "border": "1px solid lightgray", "padding-left": "10px"),
+    (".attention", ".caution", ".danger", ".error") ("background-color": "#ff97976b", "border": "1px solid lightgray", "padding-left": "10px"),
+    (".admonition", ".hint", ".note", ".tip") ("background-color": "#d3d3d36b", "border": "1px solid lightgray", "padding-left": "10px"),
+    (".attention", ".caution", ".danger", ".error .admonition-title") ("color": "#c70413bd"),
+    (".important", ".warning .admonition-title") ("color": "#ffa10abd"),
+    (" .admonition-title") ("color": "#0000008a");
 
 @each $names, $styles in $admonition {
     @each $name in $names {
@@ -17,67 +17,67 @@ $admonition:
 }
 
 $highlights:
-  [".comment", ".c"] ("color": "#408090", "font-style": "italic" ),
-  [".error" ".err"] ( "border": "1px solid #ff0000" ),
-  [".keyword", ".k"] ( "color": "#007020", "font-weight": "bold" ),
-  [".operator", ".o"] ( "color": "#666666" ),
-  [".comment.multiline", ".cm"] ( "color": "#408090", "font-style": "italic" ),
-  [".comment.preproc", ".cp"] ( "color": "#007020" ),
-  [".comment.single", ".c1"] ( "color": "#408090", "font-style": "italic" ),
-  [".comment.special", ".cs"] ( "color": "#408090", "background-color": "#fff0f0" ),
-  [".generic.deleted", ".gd"] ( "color": "#a00000" ),
-  [".generic.emph", ".ge"] ( "font-style": "italic" ),
-  [".generic.error", ".gr"] ( "color": "#ff0000" ),
-  [".generic.heading", ".gh"] ( "color": "#000080", "font-weight": "bold" ),
-  [".generic.inserted", ".gi"] ( "color": "#00a000" ),
-  [".generic.output", ".go"] ( "color": "#333333" ),
-  [".generic.prompt", ".gp"] ( "color": "#c65d09", "font-weight": "bold" ),
-  [".generic.strong", ".gs"] ( "font-weight": "bold" ),
-  [".generic.subheading", ".gu"] ( "color": "#800080", "font-weight": "bold" ),
-  [".generic.traceback", ".gt"] ( "color": "#0044dd" ),
-  [".keyword.constant", ".kc"] ( "color": "#007020", "font-weight": "bold" ),
-  [".keyword.declaration", ".kd"] ( "color": "#007020", "font-weight": "bold" ),
-  [".keyword.namespace", ".kn"] ( "color": "#007020", "font-weight": "bold" ),
-  [".keyword.pseudo", ".kp"] ( "color": "#007020" ),
-  [".keyword.reserved", ".kr"] ( "color": "#007020", "font-weight": "bold" ),
-  [".keyword.type", ".kt"] ( "color": "#902000" ),
-  [".literal.number", ".m"] ( "color": "#208050" ),
-  [".literal.string", ".s"] ( "color": "#4070a0" ),
-  [".name.attribute", ".na"] ( "color": "#4070a0" ),
-  [".name.builtin", ".nb"] ( "color": "#007020" ),
-  [".name.class", ".nc"] ( "color": "#0e84b5", "font-weight": "bold" ),
-  [".name.constant", ".no"] ( "color": "#60add5" ),
-  [".name.decorator", ".nd"] ( "color": "#555555", "font-weight": "bold" ),
-  [".name.entity", ".ni"] ( "color": "#d55537", "font-weight": "bold" ),
-  [".name.exception", ".ne"] ( "color": "#007020" ),
-  [".name.function", ".nf"] ( "color": "#06287e" ),
-  [".name.label", ".nl"] ( "color": "#002070", "font-weight": "bold" ),
-  [".name.namespace", ".nn"] ( "color": "#0e84b5", "font-weight": "bold" ),
-  [".name.tag", ".nt"] ( "color": "#062873", "font-weight": "bold" ),
-  [".name.variable", ".nv"] ( "color": "#bb60d5" ),
-  [".operator.word", ".ow"] ( "color": "#007020", "font-weight": "bold" ),
-  [".text.whitespace", ".w"] ( "color": "#bbbbbb" ),
-  [".literal.number.float", ".mf"] ( "color": "#208050" ),
-  [".literal.number.hex", ".mh"] ( "color": "#208050" ),
-  [".literal.number.integer", ".mi"] ( "color": "#208050" ),
-  [".literal.number.oct", ".mo"] ( "color": "#208050" ),
-  [".literal.string.backtick", ".sb"] ( "color": "#4070a0" ),
-  [".literal.string.char", ".sc"] ( "color": "#4070a0" ),
-  [".literal.string.doc", ".sd"] ( "color": "#4070a0", "font-style": "italic" ),
-  [".literal.string.double", ".s2"] ( "color": "#4070a0" ),
-  [".literal.string.escape", ".se"] ( "color": "#4070a0", "font-weight": "bold" ),
-  [".literal.string.heredoc", ".sh"] ( "color": "#4070a0" ),
-  [".literal.string.interpol", ".si"] ( "color": "#70a0d0", "font-style": "italic" ),
-  [".literal.string.other", ".sx"] ( "color": "#c65d09" ),
-  [".literal.string.regex", ".sr"] ( "color": "#235388" ),
-  [".literal.string.single", ".s1"] ( "color": "#4070a0" ),
-  [".literal.string.symbol", ".ss"] ( "color": "#517918" ),
-  [".name.builtin.pseudo", ".bp"] ( "color": "#007020" ),
-  [".name.variable.class", ".vc"] ( "color": "#bb60d5" ),
-  [".name.variable.global", ".vg"] ( "color": "#bb60d5" ),
-  [".name.variable.instance", ".vi"] ( "color": "#bb60d5" ),
-  [".literal.number.integer.long", ".il"] ( "color": "#208050" ),
-  [".l, .nn, .kr, .m"] ("color": "#195f91");
+  (".comment", ".c") ("color": "#408090", "font-style": "italic" ),
+  (".error" ".err") ( "border": "1px solid #ff0000" ),
+  (".keyword", ".k") ( "color": "#007020", "font-weight": "bold" ),
+  (".operator", ".o") ( "color": "#666666" ),
+  (".comment.multiline", ".cm") ( "color": "#408090", "font-style": "italic" ),
+  (".comment.preproc", ".cp") ( "color": "#007020" ),
+  (".comment.single", ".c1") ( "color": "#408090", "font-style": "italic" ),
+  (".comment.special", ".cs") ( "color": "#408090", "background-color": "#fff0f0" ),
+  (".generic.deleted", ".gd") ( "color": "#a00000" ),
+  (".generic.emph", ".ge") ( "font-style": "italic" ),
+  (".generic.error", ".gr") ( "color": "#ff0000" ),
+  (".generic.heading", ".gh") ( "color": "#000080", "font-weight": "bold" ),
+  (".generic.inserted", ".gi") ( "color": "#00a000" ),
+  (".generic.output", ".go") ( "color": "#333333" ),
+  (".generic.prompt", ".gp") ( "color": "#c65d09", "font-weight": "bold" ),
+  (".generic.strong", ".gs") ( "font-weight": "bold" ),
+  (".generic.subheading", ".gu") ( "color": "#800080", "font-weight": "bold" ),
+  (".generic.traceback", ".gt") ( "color": "#0044dd" ),
+  (".keyword.constant", ".kc") ( "color": "#007020", "font-weight": "bold" ),
+  (".keyword.declaration", ".kd") ( "color": "#007020", "font-weight": "bold" ),
+  (".keyword.namespace", ".kn") ( "color": "#007020", "font-weight": "bold" ),
+  (".keyword.pseudo", ".kp") ( "color": "#007020" ),
+  (".keyword.reserved", ".kr") ( "color": "#007020", "font-weight": "bold" ),
+  (".keyword.type", ".kt") ( "color": "#902000" ),
+  (".literal.number", ".m") ( "color": "#208050" ),
+  (".literal.string", ".s") ( "color": "#4070a0" ),
+  (".name.attribute", ".na") ( "color": "#4070a0" ),
+  (".name.builtin", ".nb") ( "color": "#007020" ),
+  (".name.class", ".nc") ( "color": "#0e84b5", "font-weight": "bold" ),
+  (".name.constant", ".no") ( "color": "#60add5" ),
+  (".name.decorator", ".nd") ( "color": "#555555", "font-weight": "bold" ),
+  (".name.entity", ".ni") ( "color": "#d55537", "font-weight": "bold" ),
+  (".name.exception", ".ne") ( "color": "#007020" ),
+  (".name.function", ".nf") ( "color": "#06287e" ),
+  (".name.label", ".nl") ( "color": "#002070", "font-weight": "bold" ),
+  (".name.namespace", ".nn") ( "color": "#0e84b5", "font-weight": "bold" ),
+  (".name.tag", ".nt") ( "color": "#062873", "font-weight": "bold" ),
+  (".name.variable", ".nv") ( "color": "#bb60d5" ),
+  (".operator.word", ".ow") ( "color": "#007020", "font-weight": "bold" ),
+  (".text.whitespace", ".w") ( "color": "#bbbbbb" ),
+  (".literal.number.float", ".mf") ( "color": "#208050" ),
+  (".literal.number.hex", ".mh") ( "color": "#208050" ),
+  (".literal.number.integer", ".mi") ( "color": "#208050" ),
+  (".literal.number.oct", ".mo") ( "color": "#208050" ),
+  (".literal.string.backtick", ".sb") ( "color": "#4070a0" ),
+  (".literal.string.char", ".sc") ( "color": "#4070a0" ),
+  (".literal.string.doc", ".sd") ( "color": "#4070a0", "font-style": "italic" ),
+  (".literal.string.double", ".s2") ( "color": "#4070a0" ),
+  (".literal.string.escape", ".se") ( "color": "#4070a0", "font-weight": "bold" ),
+  (".literal.string.heredoc", ".sh") ( "color": "#4070a0" ),
+  (".literal.string.interpol", ".si") ( "color": "#70a0d0", "font-style": "italic" ),
+  (".literal.string.other", ".sx") ( "color": "#c65d09" ),
+  (".literal.string.regex", ".sr") ( "color": "#235388" ),
+  (".literal.string.single", ".s1") ( "color": "#4070a0" ),
+  (".literal.string.symbol", ".ss") ( "color": "#517918" ),
+  (".name.builtin.pseudo", ".bp") ( "color": "#007020" ),
+  (".name.variable.class", ".vc") ( "color": "#bb60d5" ),
+  (".name.variable.global", ".vg") ( "color": "#bb60d5" ),
+  (".name.variable.instance", ".vi") ( "color": "#bb60d5" ),
+  (".literal.number.integer.long", ".il") ( "color": "#208050" ),
+  (".l, .nn, .kr, .m") ("color": "#195f91");
 
 @each $names, $style in $highlights {
     @each $name in $names {
@@ -217,7 +217,7 @@ $sections:
     .section #{$name} {
         font-size: #{$size}px;
         font-weight: 600;
-        margin-top: 20px;    
+        margin-top: 20px;
     }
 }
 
@@ -395,7 +395,7 @@ $nested_body_components:
 }
 
 // SCSS cycle for create style for `sidebar-mini nav-sidebar`
-@each $name in ["", ".nav-link", "> .nav-header"] {
+@each $name in ("", ".nav-link", "> .nav-header") {
     .sidebar-mini .nav-sidebar #{$name} {
         overflow: hidden;
     }
@@ -403,4 +403,10 @@ $nested_body_components:
 
 body {
     background-color: var(--content-wrapper);
+}
+
+@media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link p {
+        width: auto;
+  }
 }

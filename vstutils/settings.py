@@ -371,6 +371,8 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
 ]
 
+EXCLUDE_FROM_MINIFYING = []
+
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 
@@ -542,6 +544,9 @@ if not LOCALRUN:
 DOCS_ROOT: _t.Text = os.path.join(BASE_DIR, 'doc/html')
 DOCS_ACCESS: _t.Text = 'public'
 DOC_URL: _t.Text = "/docs/"
+
+if HAS_DOCS:
+    EXCLUDE_FROM_MINIFYING.append(DOC_URL.lstrip('/'))
 
 
 # Database settings.

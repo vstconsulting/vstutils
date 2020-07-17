@@ -11,9 +11,6 @@
       {%- endif %}
     {%- endfor %}
 {%- endmacro %}
-    <script type="text/javascript" src="{{ pathto('_static/bundle/vstutils.chunk.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/bundle/auth~doc~spa.chunk.js', 1) }}"></script>
-    <script type="text/javascript" src="{{ pathto('_static/bundle/doc.js', 1) }}"></script>
 {%- macro script() %}
     <script>
         window.hostname = window.location.origin || window.location.protocol + "//" + window.location.host
@@ -29,8 +26,11 @@
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
    <title>{{ project }} documentation</title>
+    <script type="text/javascript" src="{{ pathto('_static/bundle/vstutils.chunk.js', 1) }}"></script>
+    <script type="text/javascript" src="{{ pathto('_static/bundle/auth~doc~spa.chunk.js', 1) }}"></script>
+    <script type="text/javascript" src="{{ pathto('_static/bundle/doc.js', 1) }}"></script>
     {%- block css %}
-        <!-- Additional css for page, that doesnt include in webpack bundle -->
+        {{- css() }}
     {%- endblock %}
    <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
     {%- block scripts %}
