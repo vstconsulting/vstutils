@@ -22,6 +22,8 @@ export default class Model {
                 }
             }
             this.view_name = 'name';
+
+            this.methodsToBulk = ['get', 'delete', 'put', 'patch', 'post'];
         }
     }
     /**
@@ -70,45 +72,70 @@ export default class Model {
             return this.fields.email.toRepresent(this.data);
         }
     }
+
     /**
-     * Method, that deletes Model instance.
+     * Method to update model data
+     *
+     * @param {Model=} newDataInstance
+     * @param {string=} method
+     * @return {Promise.<Model>}
      */
-    delete() {
-        let bulk = this.queryset.formBulkQuery('delete');
-        if ('' + bulk.path[bulk.path.length - 1] !== '' + this.getPkValue()) {
-            bulk.path.push(this.getPkValue());
+    async update({ newDataInstance = this, method = undefined }) {
+        return (await this.queryset.update(newDataInstance, [this], method))[0];
+    }
+
+    /**
+     * Method, that sends api request to delete Model instance.
+     *
+     * @returns {Promise}
+     */
+    async delete() {
+        return (await this.queryset.delete([this]))[0];
+    }
+
+    /**
+     * Method, that returns model data, represented as FormData instance.
+     *
+     * @returns {FormData}
+     */
+    getFormData() {
+        const data = this.toInner(this.data);
+        const formData = new FormData();
+
+        for (let [key, value] of Object.entries(data)) formData.append(key, value);
+
+        return formData;
+    }
+
+    /**
+     * Method, that creates new Model instance.
+     *
+     * @returns {Promise.<Model>}
+     */
+    create(method = 'post') {
+        return this.queryset.create(this, method);
+    }
+
+    save(method = 'post') {
+        if (!this.getPkValue()) {
+            return this.create(method);
         }
-        return this.queryset
-            .sendQuery(bulk)
-            .then((response) => {
-                return response;
-            })
-            .catch((error) => {
-                throw error;
-            });
+        return this.update({ method });
     }
-    /**
-     * Method, that saves Model instance's changes.
-     */
-    save(method = 'patch') {
-        return this.queryset
-            .formQueryAndSend(method, this.toInner(this.data))
-            .then((response) => {
-                return this.queryset.model.getInstance(response.data, this.queryset);
-            })
-            .catch((error) => {
-                throw error;
-            });
-    }
+
     /**
      * Method, that returns Model instance.
      * @param {object} data  Data of Model instance's fields.
-     * @param {object} queryset Queryset for current Model instance.
+     * @param {QuerySet} queryset Queryset for current Model instance.
+     * @returns {Model}
      */
     getInstance(data, queryset) {
+        const qs = queryset.clone();
+        qs.query = {};
+
         let instance = {
             data: data,
-            queryset: queryset,
+            queryset: qs,
         };
 
         for (let key in this) {

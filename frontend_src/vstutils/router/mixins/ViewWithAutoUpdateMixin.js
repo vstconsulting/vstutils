@@ -1,4 +1,4 @@
-import { deepEqual, guiLocalSettings } from '../../utils';
+import { guiLocalSettings } from '../../utils';
 import Visibility from 'visibilityjs';
 
 /**
@@ -98,21 +98,16 @@ const ViewWithAutoUpdateMixin = {
             }
 
             let qs = this.getQuerySet(this.view, this.qs_url);
-            let new_qs = this.getQuerySet(this.view, this.qs_url).clone();
 
-            return new_qs.get().then((instance) => {
-                if (qs.cache.getPkValue() === instance.getPkValue()) {
-                    for (let key in instance.data) {
-                        if (Object.prototype.hasOwnProperty.call(instance.data, key)) {
-                            if (!deepEqual(instance.data[key], qs.cache.data[key])) {
-                                qs.cache.data[key] = instance.data[key];
-                            }
-                        }
+            return qs
+                .all()
+                .get()
+                .then((instance) => {
+                    if (qs.cache.getPkValue() === instance.getPkValue()) {
+                        qs.cache.data = { ...instance.data };
                     }
-                    qs.cache.data = { ...qs.cache.data };
-                }
-                return true;
-            });
+                    return true;
+                });
         },
     },
 };

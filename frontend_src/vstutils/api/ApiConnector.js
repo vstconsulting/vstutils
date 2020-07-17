@@ -2,26 +2,44 @@ import $ from 'jquery';
 import StatusError from './StatusError.js';
 import { guiLocalSettings, getCookie } from '../utils';
 
-const METHODS_WITH_DATA = ['post', 'put', 'patch'];
+class APIResponse {
+    constructor(status = undefined, data = undefined) {
+        this.constructor.checkStatus(status, data);
+        /**
+         * @type {number}
+         */
+        this.status = status;
+        /**
+         * @type {Object}
+         */
+        this.data = data;
+    }
+
+    static checkStatus(status, data) {
+        if (!(status >= 200 && status < 400)) {
+            throw new StatusError(status, data);
+        }
+    }
+}
+
+/**
+ * Represents one bulk response
+ *
+ * @typedef {Object} BulkResponse
+ * @property {string} method - Http method.
+ * @property {string} path - Request path.
+ * @property {any} data - Returned data.
+ * @property {number} status - Http status.
+ */
 
 /**
  * Class, that sends API requests.
  */
-export default class ApiConnector {
+class ApiConnector {
     /**
      * Constructor of ApiConnector class.
-     * @param {object} openapi Object with OpenAPI schema.
-     * @param {object} cache Object, that manages api responses cache operations.
      */
-    constructor(openapi, cache) {
-        /**
-         * Object with OpenAPI schema.
-         */
-        this.openapi = openapi;
-        /**
-         * Object, that manages api responses cache operations.
-         */
-        this.cache = cache;
+    constructor() {
         /**
          * Property for collecting several bulk requests into one.
          */
@@ -47,38 +65,112 @@ export default class ApiConnector {
             bulk_parts: [],
         };
 
-        const version = openapi.info.version;
-        // remove version and ending slash from path (/api/v1/)
-        const path = openapi.basePath.replace(version, '').replace(/\/$/, '');
+        this.endpointURL = window.endpoint_url;
 
-        this.baseURL = `${openapi.schemes[0]}://${openapi.host}${path}`;
         this.headers = {
-            'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken'),
         };
-
-        this.endpointURL = window.endpoint_url;
     }
+
+    get openapi() {
+        return window.app.schema;
+    }
+
+    get cache() {
+        return window.app.cache;
+    }
+
+    get defaultVersion() {
+        return this.openapi.info.version;
+    }
+
+    get baseURL() {
+        // remove version and ending slash from path (/api/v1/)
+        const path = this.openapi.basePath.replace(this.defaultVersion, '').replace(/\/$/, '');
+
+        return `${this.openapi.schemes[0]}://${this.openapi.host}${path}`;
+    }
+
+    /**
+     * Method, that converts query object into string
+     *
+     * @param {(string|object|URLSearchParams)=} query
+     * @param {boolean} useBulk - If false adds question mark (?) in front of string
+     * @returns {string}
+     */
+    makeQueryString(query = undefined, useBulk = false) {
+        let queryStr = '';
+        if (typeof query === 'string') {
+            queryStr = new URLSearchParams(query).toString();
+        } else if (typeof query === 'object') {
+            queryStr = new URLSearchParams(Object.entries(query)).toString();
+        } else if (query instanceof URLSearchParams) {
+            queryStr = query.toString();
+        }
+
+        if (!useBulk && queryStr !== '') queryStr = `?${queryStr}`;
+
+        return queryStr;
+    }
+
     /**
      * Method, that sends API request.
-     * @param {string} method - Method of HTTP request.
-     * @param {string=} url - Relative part of link including version (e.g.: 'v1/user/1/'),
-     * to which send API requests.
-     * @param {object=} data - Json query body.
+     *
+     * @param {Object} obj - Request parameters.
+     * @param {string} obj.method - Http method.
+     * @param {string=} obj.version - API version.
+     * @param {(string|string[])} obj.path
+     * @param {(string|Object|URLSearchParams)=} obj.query - URL query params.
+     * @param {(string|FormData)=} obj.data
+     * @param {(string|Object|URLSearchParams)=} obj.headers
+     * @param {boolean} useBulk - Make request using bulk request.
+     * @returns {Promise<APIResponse>}
      */
-    apiQuery(method, url, data = {}) {
-        const fetchConfig = {
-            method: method,
-            headers: this.headers,
-        };
-        if (METHODS_WITH_DATA.includes(method.toLowerCase())) {
-            fetchConfig.data = data;
+    async makeRequest({
+        method = method,
+        version = this.defaultVersion,
+        path = path,
+        query = undefined,
+        data = undefined,
+        headers = {},
+        useBulk = false,
+    }) {
+        if (useBulk) {
+            // TODO make fetch and bulk throw same things
+            const response = await this.bulkQuery({
+                method,
+                version,
+                path,
+                query: this.makeQueryString(query, useBulk),
+                data,
+                headers,
+            });
+            return new APIResponse(response.status, response.data);
+        } else {
+            let pathStr = Array.isArray(path) ? path.join('/') : path;
+            if (pathStr.startsWith('/')) pathStr = pathStr.substring(1);
+            if (pathStr.endsWith('/')) pathStr = pathStr.substring(0, pathStr.length - 1);
+
+            const fetchConfig = { method: method, headers: { ...this.headers, ...headers }, body: data };
+
+            const response = await fetch(
+                `${this.baseURL}/${version}/${pathStr}/${this.makeQueryString(query)}`,
+                fetchConfig,
+            );
+
+            let json;
+            try {
+                json = await response.json();
+                // eslint-disable-next-line no-empty
+            } catch (e) {}
+
+            return new APIResponse(response.status, json);
         }
-        return fetch(`${this.baseURL}/${url}`, fetchConfig);
     }
     /**
      * Method, that collects several bulk requests into one.
      * @param {object} data Body of bulk request.
+     * @returns {Promise.<BulkResponse>}
      */
     bulkQuery(data) {
         if (this.bulk_collector.timeout_id) {
@@ -119,19 +211,18 @@ export default class ApiConnector {
         try {
             const request = await fetch(this.endpointURL, {
                 method: 'put',
-                headers: this.headers,
+                headers: { ...this.headers, 'Content-Type': 'application/json' },
                 body: JSON.stringify(bulk_data),
             });
             const result = await request.json();
 
             for (let [idx, item] of result.entries()) {
-                let method = 'resolve';
-
-                if (!(item.status >= 200 && item.status < 400)) {
-                    method = 'reject';
+                try {
+                    APIResponse.checkStatus(item.status, item.data);
+                    collector.bulk_parts[idx].callbacks['resolve'](item);
+                } catch (e) {
+                    collector.bulk_parts[idx].callbacks['reject'](item);
                 }
-
-                collector.bulk_parts[idx].callbacks[method](item);
             }
         } catch (error) {
             throw new StatusError(error.status, error.data);
@@ -259,3 +350,12 @@ export default class ApiConnector {
         return this.loadTranslations(lang);
     }
 }
+
+/**
+ * ApiConnector instance
+ *
+ * @type {ApiConnector}
+ */
+const apiConnector = new ApiConnector();
+
+export { ApiConnector, apiConnector, APIResponse };

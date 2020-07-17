@@ -147,12 +147,17 @@ export class App extends BaseApp {
     mountApplication() {
         window.spa.signals.emit('app.beforeInit', { app: this });
 
-        let store_constructor = new StoreConstructor(this.views);
+        let storeConstructor = new StoreConstructor(this.views);
+
+        window.spa.signals.emit('app.beforeInitStore', { storeConstructor });
+
         let routerConstructor = new RouterConstructor(
             this.views,
             routerMixins.routesComponentsTemplates,
             routerMixins.customRoutesComponentsTemplates,
         );
+
+        window.spa.signals.emit('app.beforeInitRouter', { routerConstructor });
 
         let i18n = new VueI18n({
             locale: guiLocalSettings.get('lang') || 'en',
@@ -169,7 +174,7 @@ export class App extends BaseApp {
                 a_links: false,
             },
             router: routerConstructor.getRouter(),
-            store: store_constructor.getStore(),
+            store: storeConstructor.getStore(),
             i18n: i18n,
         }).$mount('#RealBody');
 
