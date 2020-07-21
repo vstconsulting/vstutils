@@ -1,7 +1,7 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from __future__ import unicode_literals
 from functools import lru_cache
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase, Model
 from ..utils import import_class, apply_decorators, classproperty
 from ..api import (
@@ -189,14 +189,23 @@ class ModelBaseClass(ModelBase):
             filterset_fields = tuple(serializers['serializer_class']._declared_fields.keys())
 
         if filterset_fields:
-            base_filter_class = api_filters.DefaultIDFilter if 'id' in filterset_fields else filters.FilterSet
 
-            class FilterSetClass(base_filter_class):
-                class Meta:
-                    model = cls
-                    fields = filterset_fields
+            if isinstance(filterset_fields, dict):
+                filterset_fields_list = tuple(filterset_fields.keys())
+                filterset_fields_types = filterset_fields
+            else:
+                filterset_fields_list = filterset_fields
+                filterset_fields_types = dict()
 
-            view_attributes['filterset_class'] = FilterSetClass
+            class Meta:
+                model = cls
+                fields = filterset_fields_list
+
+            view_attributes['filterset_class'] = filterset.FilterSetMetaclass(
+                'FilterSetClass',
+                (api_filters.DefaultIDFilter if 'id' in filterset_fields_list else filters.FilterSet,),
+                {'Meta': Meta, **filterset_fields_types}
+            )
 
         for metatype in ['permission_classes', 'filter_backends']:
             metaobject = _get_setting_for_view(metatype, metadata, view_class)

@@ -1,4 +1,6 @@
-from vstutils.models import BModel, models
+from django_filters import CharFilter
+from django.db import models
+from vstutils.models import BModel
 from vstutils.api import fields
 from .hosts import Host
 
@@ -40,3 +42,6 @@ class ModelWithBinaryFiles(BModel):
             some_multiplenamedbinfile=fields.MultipleNamedBinaryFileInJsonField(required=False),
             some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False)
         )
+        _filterset_fields = {
+            'some_binfile': CharFilter(label='Some label for binfile')
+        }
