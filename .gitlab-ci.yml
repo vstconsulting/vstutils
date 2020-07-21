@@ -82,6 +82,8 @@ release:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
       when: on_success
+    - if: '$CI_COMMIT_BRANCH =~ /^release_/ && $GIT_ACCESS_USER && $GIT_ACCESS_PASSWORD'
+      when: on_success
     - when: never
   before_script:
     - url_host=`echo "${CI_REPOSITORY_URL}" | sed -e "s/https:\/\/gitlab-ci-token:.*@//g"`

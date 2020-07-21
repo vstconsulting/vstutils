@@ -6,7 +6,6 @@ include requirements-git.txt
 include requirements-test.txt
 include requirements-doc.txt
 include requirements-rpc.txt
-include requirements-coreapi.txt
 include requirements-ldap.txt
 include requirements-prod.txt
 include requirements-stubs.txt

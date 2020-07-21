@@ -399,8 +399,7 @@ kwargs = dict(
         "django~=" + (os.environ.get('DJANGO_DEP', "") or "2.2.14"),
     ]
     + load_requirements('requirements.txt')
-    + load_requirements('requirements-doc.txt')
-    + load_requirements('requirements-coreapi.txt'),
+    + load_requirements('requirements-doc.txt'),
     extras_require={
         'test': load_requirements('requirements-test.txt'),
         'rpc': load_requirements('requirements-rpc.txt'),
