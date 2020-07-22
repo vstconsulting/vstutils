@@ -21,6 +21,7 @@ class Query(dict):
         self.combinator = None
         self.is_sliced = False
         self.select_for_update = False
+        self.select_related = False
         self['standard_ordering'] = True
 
     @property

@@ -27,9 +27,12 @@ class HostViewSet(Host.generated_view):
 
 
 class _HostGroupViewSet(HostGroup.generated_view):
-    '''
+    """
     Host group opertaions.
-    '''
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('parent')
 
 
 def queryset_nested_filter(parent, qs):
@@ -56,7 +59,7 @@ class HostGroupViewSet(_HostGroupViewSet):
 
 @nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupViewSet.serializer_class)
 class _DeepHostGroupViewSet(_HostGroupViewSet):
-    pass
+    select_related = False
 
 
 @nested_view('subsubhosts', 'id', manager_name='subgroups', view=_DeepHostGroupViewSet)

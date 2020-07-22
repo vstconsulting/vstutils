@@ -10,7 +10,8 @@ MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
 API['v2'] = {}
 API['v3'] = {}
 API[VST_API_VERSION][r'settings'] = dict(
-    view='vstutils.api.views.SettingsViewSet', op_types=['get', 'mod']
+    view='vstutils.api.views.SettingsViewSet', op_types=['get', 'mod'],
+    name='settings'
 )
 API[VST_API_VERSION][r'hosts'] = dict(
     view='test_proj.views.HostGroupViewSet'

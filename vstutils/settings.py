@@ -686,6 +686,7 @@ REST_FRAMEWORK: _t.Dict = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
         'vstutils.api.filter_backends.HideHiddenFilterBackend',
+        'vstutils.api.filter_backends.SelectRelatedFilterBackend',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),

@@ -83,7 +83,9 @@ class _AbstractRouter(routers.DefaultRouter):
                 view = import_class(options['view'])
             elif 'model' in options:
                 view = import_class(options['model']).generated_view
-            args = [prefix, view, options.get('name', None)]
+            args = [prefix, view]
+            if 'name' in options:
+                args.append(options['name'])
             view_type = options.get('type', 'viewset')
             if view_type == 'viewset':
                 self.register(*args)
