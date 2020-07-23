@@ -20,7 +20,7 @@ export default class ProfileViewConstructor {
      */
     generateProfileView(views, path) {
         let view = views[path];
-        let new_view = new View(view.objects.model, $.extend(true, {}, view.schema), view.template);
+        let new_view = new View(view.objects.model, $.extend(true, {}, view.schema));
         let mixin = this.getBaseProfileMixin(path);
 
         if (this.mixins[path]) {

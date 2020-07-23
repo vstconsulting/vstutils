@@ -74,6 +74,7 @@ export default class BaseApp {
                 this.mountApplication();
             })
             .catch((error) => {
+                console.error(error);
                 throw new Error(error);
             });
     }

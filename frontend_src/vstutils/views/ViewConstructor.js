@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import Vue from 'vue';
 import { isEmptyObject } from '../utils';
 import DefaultEntityView from './DefaultEntityView.vue';
 import signals from '../signals.js';
@@ -213,18 +214,43 @@ export default class ViewConstructor extends BaseEntityConstructor {
     }
 
     /**
-     * Method, that returns template for a current view schema.
-     * @param {object} schema View schema.
+     * Method, that returns mixin with compiled template for template with given name or undefined if
+     * template is not found.
+     * @param {object} templateName View schema.
+     * @return {(Object|undefined)}
      */
-    getViewTemplate(schema) {
-        let template;
-        let base = '#template_view_';
+    getViewTemplateMixin(templateName) {
+        const templateComponent = document.getElementById(`#template_view_${templateName}`);
 
-        if ($(base + schema.name).length > 0) {
-            template = base + schema.name;
+        if (templateComponent) {
+            return Vue.compile(templateComponent.textContent);
         }
+    }
 
-        return template;
+    /**
+     * @param {string} path
+     * @param {Object} schema
+     * @returns {Object.<string, Object>}
+     */
+    _getOperations(path, schema) {
+        const operations = {};
+        for (let operationSchema of Object.values(schema)) {
+            const operationId = this.getPathOperationId(operationSchema);
+            if (!operationId) {
+                continue;
+            }
+
+            const operationOptions = this.getViewSchema_operationIdOptions(
+                operationId,
+                path,
+                operationSchema,
+            );
+            operations[operationOptions.type] = [
+                operationSchema,
+                $.extend(true, {}, this.getViewSchema_baseOptions(path), operationOptions),
+            ];
+        }
+        return operations;
     }
 
     /**
@@ -236,48 +262,51 @@ export default class ViewConstructor extends BaseEntityConstructor {
     getViews(constructor, openapi_schema) {
         let views = {};
         let paths = this.getPaths(openapi_schema);
+        const editStyle = openapi_schema.info['x-edit-style'];
         for (let [path, pathObj] of Object.entries(paths)) {
-            let base_options = this.getViewSchema_baseOptions(path);
+            const signalObj = { schema: pathObj, editStyle };
+            signals.emit(`views.schema[${path}].beforeInit`, signalObj);
 
-            for (let propValue of Object.values(pathObj)) {
-                let operation_id = this.getPathOperationId(propValue);
+            const operations = this._getOperations(path, pathObj);
+            const availableOperations = Object.keys(operations);
 
-                if (!operation_id) {
-                    continue;
+            const editViewInsteadOfReadonly =
+                signalObj.editStyle &&
+                (availableOperations.includes('page_edit') || availableOperations.includes('page_update'));
+
+            for (let [opSchema, opOptions] of Object.values(operations)) {
+                if (views[opOptions.path]) continue;
+
+                if (editViewInsteadOfReadonly) {
+                    if (opOptions.type === 'page') {
+                        continue;
+                    } else {
+                        opOptions.path = opOptions.path.replace('/edit', '');
+                    }
                 }
 
-                let operation_id_options = this.getViewSchema_operationIdOptions(
-                    operation_id,
-                    path,
-                    propValue,
-                );
+                let model = this.getViewSchema_model(opSchema);
 
-                if (views[operation_id_options.path]) {
-                    continue;
-                }
-
-                let schema = $.extend(true, {}, base_options, operation_id_options);
-                let model = this.getViewSchema_model(propValue);
-                let template = this.getViewTemplate(schema);
                 let mixins = [];
+                let templateMixin = this.getViewTemplateMixin(opOptions.name);
+                if (templateMixin) mixins.push(templateMixin);
 
-                signals.emit(`views[${schema.path}].beforeInit`, {
-                    schema: schema,
+                signals.emit(`views[${opOptions.path}].beforeInit`, {
+                    schema: opOptions,
                     model: model,
-                    template: template,
                     mixins: mixins,
                 });
 
-                views[schema.path] = new constructor(model, schema, template, mixins);
+                views[opOptions.path] = new constructor(model, opOptions, templateMixin, mixins);
 
-                signals.emit(`views[${schema.path}].afterInit`, {
-                    view: views[schema.path],
+                signals.emit(`views[${opOptions.path}].afterInit`, {
+                    view: views[opOptions.path],
                 });
 
-                signals.emit('views.afterInitEach', { views: views, path: schema.path });
+                signals.emit('views.afterInitEach', { views: views, path: opOptions.path });
 
-                if (!views[schema.path].mixins.some((mixin) => mixin.render || mixin.template)) {
-                    views[schema.path].mixins.unshift(DefaultEntityView);
+                if (!views[opOptions.path].mixins.some((mixin) => mixin.render)) {
+                    views[opOptions.path].mixins.unshift(DefaultEntityView);
                 }
             }
         }
@@ -319,7 +348,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
                 dict[link_type][path_type] &&
                 dict[link_type][path_type][link_name]
             ) {
-                obj = $.extend(true, obj, dict[link_type][path_type][link_name]);
+                $.extend(true, obj, dict[link_type][path_type][link_name]);
             }
         });
         return obj;
@@ -360,7 +389,7 @@ export default class ViewConstructor extends BaseEntityConstructor {
             obj.query_type = link_obj.schema.query_type;
         }
 
-        obj = $.extend(true, obj, this.getInternalLinkObj_extension(link_name, link_type, path_obj));
+        $.extend(true, obj, this.getInternalLinkObj_extension(link_name, link_type, path_obj));
 
         return obj;
     }

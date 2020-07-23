@@ -162,7 +162,7 @@ export default class QuerySet {
         if (this.cache) {
             return this.cache;
         }
-        const response = await this.execute({ method: 'get', path: this.url, query: this.query });
+        const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });
 
         this.api_count = response.data.count;
 
