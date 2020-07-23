@@ -131,7 +131,7 @@ app.beforeInitStore
 **Description:** This signal will be emitted after creation of StoreConstructor instance and before app creation
 
 app.beforeInitRouter
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 **Signal name:** "app.beforeInitRouter".
 
 **Context argument:** obj - {object} - Object with following structure: {routerConstructor: RouterConstructor}, where routerConstructor is an instance of RouterConstructor.
@@ -196,6 +196,16 @@ allModels.created
 **Context argument:** obj - {object} - Object with following structure: {models: models}, where models is the object, storing Models objects.
 
 **Description:** This signal will be emitted after all models were created.
+
+views.schema[path].beforeInit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Signal name:** "views.schema[" + path + "].beforeInit".
+
+**Context argument:** obj - {object} - Object with following structure: {schema, editStyle}:
+**schema** - object with opeanpi schema that will be used for generating operations;
+**editStyle** - boolean that tells is edit only view should be generated, by default editStyle equals info['x-edit-style'] of openapi schema.
+
+**Description:** This signal will be emitted before generations of operations from opeanpi view. Allows you to change default behavior of editOnly views.
 
 views[path].filters.beforeInit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

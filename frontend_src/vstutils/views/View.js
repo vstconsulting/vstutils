@@ -10,10 +10,9 @@ export default class View {
      * @param {object} model Model, with which this view is connected.
      * @param {object} schema Options of current view,
      * that include settings for a view (internal links, view type and so on).
-     * @param {string} template Id of script with template content.
      * @param mixins {Array.<Object>} Vue mixins for view component
      */
-    constructor(model, schema, template, mixins = []) {
+    constructor(model, schema, mixins = []) {
         let qs_constructor = this.constructor.getQuerySetConstructor(model);
 
         this.schema = schema;

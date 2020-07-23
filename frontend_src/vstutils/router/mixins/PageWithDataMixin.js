@@ -9,11 +9,10 @@ const PageWithDataMixin = {
          * Redefinition of 'title' from base mixin.
          */
         title: function () {
-            try {
+            if (typeof this.data.instance.getViewFieldValue === 'function') {
                 return this.data.instance.getViewFieldValue() || this.view.schema.name;
-            } catch (e) {
-                return this.view.schema.name;
             }
+            return this.view.schema.name;
         },
     },
     methods: {
