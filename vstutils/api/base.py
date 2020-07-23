@@ -220,6 +220,7 @@ class QuerySetMixin(rvs.APIView):
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
     __slots__ = ()
+    select_related = False
     serializer_class: _t.Type[serializers.Serializer]
     _serializer_class_one: _t.Optional[_t.Type[serializers.Serializer]] = None
     model: _t.Optional[_t.Type[models.Model]] = None

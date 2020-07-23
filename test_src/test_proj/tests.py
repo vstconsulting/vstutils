@@ -187,7 +187,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 class VSTUtilsTestCase(BaseTestCase):
 
     def _get_test_ldap(self, client, data):
-        self.client.post('/login/', data=data)
+        self.client.post('/login/', data=data, HTTP_X_AUTH_PLUGIN='DJANGO')
         response = client.get('/api/v1/user/')
         self.assertNotEqual(response.status_code, 200)
         response = self.client.post("/logout/")

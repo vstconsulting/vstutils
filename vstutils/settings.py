@@ -77,7 +77,7 @@ class MainSection(BaseAppendSection):
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
         'allowed_hosts': cconfig.ListType(),
-        'first_day_of_week': ConfigIntType
+        'first_day_of_week': ConfigIntType,
     }
 
 
@@ -383,10 +383,13 @@ LDAP_FORMAT: _t.Text = main["ldap-auth_format"]
 DEFAULT_AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'LDAP': {
         "BACKEND": "vstutils.auth.LdapBackend"
-    }
+    },
+    'DJANGO': {
+        "BACKEND": "django.contrib.auth.backends.ModelBackend"
+    },
 }
 
-DEFAULT_AUTH_PLUGIN_LIST: _t.Text = 'LDAP'
+DEFAULT_AUTH_PLUGIN_LIST: _t.Text = 'DJANGO,LDAP'
 
 
 def get_plugins():
@@ -406,9 +409,9 @@ def get_plugins():
 AUTH_PLUGINS: SIMPLE_OBJECT_SETTINGS_TYPE = lazy(get_plugins, dict)()
 
 AUTHENTICATION_BACKENDS: _t.List[_t.Text] = [
-    'vstutils.auth.AuthPluginsBackend',
-    'django.contrib.auth.backends.ModelBackend'
+    'vstutils.auth.AuthPluginsBackend'
 ]
+CACHE_AUTH_USER = main.getboolean('auth-cache-user', fallback=False)
 
 # Sessions settings
 # https://docs.djangoproject.com/en/1.11/ref/settings/#sessions

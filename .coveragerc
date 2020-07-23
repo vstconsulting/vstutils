@@ -17,7 +17,6 @@ omit =
     */vstutils/__main__.py
     */vstutils/celery_beat_scheduler.py
     */vstutils/wsgi.py
-    */vstutils/auth.py
     */vstutils/compile.py
     */vstutils/tasks.py
     */vstutils/api/doc_generator.py

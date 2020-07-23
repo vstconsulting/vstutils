@@ -2,34 +2,57 @@ from __future__ import unicode_literals
 import typing as _t
 import logging
 import traceback
-from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.contrib.auth import get_user_model, backends
+from django.db.models import signals
+from django.dispatch import receiver
 from django.conf import settings
 from django.http.request import HttpRequest
 from .utils import ObjectHandlers, raise_context
 try:
     from .ldap_utils import LDAP as _LDAP
     HAS_LDAP = True
-except ImportError:
+except ImportError:  # nocv
     _LDAP = object
     HAS_LDAP = False
 
 UserModel = get_user_model()
+AuthRes = _t.Optional[UserModel]
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
+user_cache_prefix = 'auth_user_id_val'
 
 
-class BaseAuthBackend:
-    def authenticate(self, request: HttpRequest, username=None, password=None):
+if settings.CACHE_AUTH_USER:
+    @receiver(signals.post_save, sender=UserModel)
+    @receiver(signals.post_delete, sender=UserModel)
+    def invalidate_user_from_cache(instance: UserModel, created=False, *args, **kwargs):
+        if created:
+            return
+        cache.delete(f'{user_cache_prefix}_{instance.id}')
+
+
+def cache_user_decorator(func):
+    if not settings.CACHE_AUTH_USER:
+        return func  # nocv
+
+    def wrapper(backend, user_id: int):
+        cache_key = f'{user_cache_prefix}_{user_id}'
+        user = cache.get(cache_key)
+        if user is None:
+            user = func(backend, user_id)
+        if isinstance(user, UserModel):
+            cache.set(cache_key, user)
+        return user
+
+    return wrapper
+
+
+class BaseAuthBackend(backends.ModelBackend):
+    def authenticate(self, request: HttpRequest, username=None, password=None, **kwargs):
         raise NotImplementedError  # nocv
 
-    def user_can_authenticate(self, user: UserModel) -> bool:
-        """
-        Reject users with is_active=False. Custom user models that don't have
-        that attribute are allowed.
-        """
-        is_active = getattr(user, 'is_active', None)
-        return is_active or is_active is None
-
-    def get_user(self, user_id: int) -> _t.Union[UserModel, _t.NoReturn]:
+    @cache_user_decorator
+    def get_user(self, user_id: int) -> AuthRes:
         # pylint: disable=protected-access
         try:
             user = UserModel._default_manager.get(pk=user_id)
@@ -44,7 +67,7 @@ class LDAP(_LDAP):
     '''
 
 
-class LdapBackend(BaseAuthBackend):
+class LdapBackend(BaseAuthBackend):  # nocv
     @property
     def domain(self):
         return settings.LDAP_DOMAIN
@@ -53,7 +76,7 @@ class LdapBackend(BaseAuthBackend):
     def server(self):
         return settings.LDAP_SERVER
 
-    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> UserModel:
+    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> AuthRes:
         # pylint: disable=protected-access,unused-argument
         if not self.server or not HAS_LDAP:
             return
@@ -74,11 +97,11 @@ class AuthPluginsBackend(BaseAuthBackend):
     auth_header = 'HTTP_X_AUTH_PLUGIN'
 
     @raise_context()
-    def auth_with_plugin(self, plugin: _t.Text, request: HttpRequest, username: _t.Text, password: _t.Text) -> bool:
+    def auth_with_plugin(self, plugin: _t.Text, request: HttpRequest, username: _t.Text, password: _t.Text) -> AuthRes:
         return self.auth_handlers.get_object(plugin).authenticate(request, username, password)
 
     @raise_context()
-    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> bool:
+    def authenticate(self, request: HttpRequest, username: _t.Text = None, password: _t.Text = None) -> AuthRes:
         # pylint: disable=protected-access,unused-argument
         if request and self.auth_header in request.META:
             return self.auth_with_plugin(

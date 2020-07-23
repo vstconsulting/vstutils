@@ -20,6 +20,7 @@ class HostViewSet(Host.generated_view):
     action_serializers = {
         'create': CreateHostSerializer
     }
+    select_related = True
 
     @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
     def test3(self, request, *args, **kwargs):
@@ -30,6 +31,7 @@ class _HostGroupViewSet(HostGroup.generated_view):
     """
     Host group opertaions.
     """
+    select_related = True
 
     def get_queryset(self):
         return super().get_queryset().select_related('parent')
@@ -55,6 +57,7 @@ def queryset_nested_filter(parent, qs):
 )
 class HostGroupViewSet(_HostGroupViewSet):
     copy_related = ['hosts', 'subgroups']
+    select_related = True
 
 
 @nested_view('subdeephosts', 'id', view=HostGroupViewSet, serializer_class_one=HostGroupViewSet.serializer_class)
