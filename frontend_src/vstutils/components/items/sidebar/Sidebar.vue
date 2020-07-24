@@ -70,7 +70,7 @@
                     }
                     return true;
                 },
-                threshold: 35,
+                threshold: 90,
                 preventDefaultEvents: false,
             });
         },
