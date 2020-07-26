@@ -38,7 +38,7 @@
         {% block script %}{% endblock %}
 
         {% block app_loader %}
-            <script src="{% static 'bundle/app_loader.js' %}"></script>
+            <script src="{% static 'bundle/app_loader.js' %}?v={{ gui_version }}"></script>
         {% endblock %}
     </body>
 {% endblock %}
