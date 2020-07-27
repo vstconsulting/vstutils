@@ -684,6 +684,9 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'vstutils.api.permissions.IsAuthenticatedOpenApiRequest'
+    ],
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
