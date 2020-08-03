@@ -78,8 +78,7 @@
             },
 
             doMethod(options, instance_id) {
-                this.$root.$emit(
-                    'eventHandler-' + this.$root.$children.last._uid,
+                this.$root.$refs.currentViewComponent.eventHandler(
                     this.options.method,
                     $.extend(true, { instance_id: instance_id }, options),
                 );
@@ -94,29 +93,24 @@
 
             doAction(instance_id) {
                 if (this.options.multi_action) {
-                    this.$root.$emit(
-                        'eventHandler-' + this.$root.$children.last._uid,
-                        this.options.name + 'Instances',
-                    );
+                    this.$root.$refs.currentViewComponent.eventHandler(this.options.name + 'Instances');
                 } else {
-                    this.$root.$emit(
-                        'eventHandler-' + this.$root.$children.last._uid,
-                        this.options.name + 'Instance',
-                        { instance_id: instance_id },
-                    );
+                    this.$root.$refs.currentViewComponent.eventHandler(this.options.name + 'Instance', {
+                        instance_id: instance_id,
+                    });
                 }
             },
 
             doEmptyAction(options, instance_id) {
-                let opt = options;
-                if (typeof instance_id == 'number' || typeof instance_id == 'string') {
-                    opt = $.extend(true, { instance_id: instance_id }, options);
+                if (options.multi_action) {
+                    this.$root.$refs.currentViewComponent.executeEmptyActionOnInstances(options);
+                } else {
+                    let opt = options;
+                    if (typeof instance_id == 'number' || typeof instance_id == 'string') {
+                        opt = $.extend(true, { instance_id: instance_id }, options);
+                    }
+                    this.$root.$refs.currentViewComponent.executeEmptyActionOnInstance(opt);
                 }
-                this.$root.$emit(
-                    'eventHandler-' + this.$root.$children.last._uid,
-                    'executeEmptyActionOnInstance',
-                    opt,
-                );
             },
 
             getRepresentationProperty(name) {

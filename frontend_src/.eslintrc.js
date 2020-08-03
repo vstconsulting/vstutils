@@ -12,4 +12,7 @@ module.exports = {
         'vue/no-deprecated-filter': 'off',
         'vue/max-attributes-per-line': 'off',
     },
+    globals: {
+        app: 'readonly',
+    },
 };
