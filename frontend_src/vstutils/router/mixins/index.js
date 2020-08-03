@@ -840,6 +840,16 @@ export let routesComponentsTemplates = {
                     }
                 });
             },
+            executeEmptyActionOnInstances(opt = {}) {
+                const selectionUrl = this.qs_url.replace(/^\/|\/$/g, '');
+                const selected = Object.keys(this.$store.getters.getSelections(selectionUrl));
+
+                for (let instance_id of selected) {
+                    this.executeEmptyActionOnInstance({ ...opt, instance_id });
+                }
+
+                this.$store.commit('setSelection', selectionUrl);
+            },
             /**
              * Redefinition of base '_executeEmptyActionOnInstance_getUrl' method.
              * @param {object} opt Object with properties for empty action execution.

@@ -14,7 +14,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
             <gui_button_li
-                v-for="(button, idx) in multi_actions"
+                v-for="(button, idx) in multi_actions || viewMultiActions"
                 :key="idx"
                 type="multi_action"
                 :options="button"
@@ -29,10 +29,20 @@
      */
     export default {
         name: 'gui_multi_actions',
-        props: ['instances', 'multi_actions', 'opt'],
+        props: ['multi_actions', 'opt'],
         computed: {
+            viewMultiActions() {
+                const view = app.views[this.$route.path];
+                if (view) {
+                    return view.schema.multi_actions;
+                }
+                return {};
+            },
             store_url() {
-                return this.opt.store_url;
+                if (this.opt && this.opt.store_url) {
+                    return this.opt.store_url;
+                }
+                return this.$route.path.replace(/^\/|\/$/g, '');
             },
             current_path() {
                 return this.$route.name;
@@ -43,18 +53,12 @@
             classes() {
                 return ['btn-primary'];
             },
-            selections() {
-                return this.$store.getters.getSelections(this.store_url);
-            },
             selected() {
-                let count = 0;
-                for (let i = 0; i < this.instances.length; i++) {
-                    let instance = this.instances[i];
-                    if (this.selections[instance.getPkValue()]) {
-                        count++;
-                    }
+                const selection = this.$store.getters.getSelections(this.store_url);
+                if (selection) {
+                    return Object.values(selection).filter(Boolean).length;
                 }
-                return count;
+                return 0;
             },
         },
     };

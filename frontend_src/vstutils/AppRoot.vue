@@ -24,7 +24,7 @@
 
                 <!-- Content Wrapper. Contains page content -->
                 <div class="content-wrapper">
-                    <router-view></router-view>
+                    <router-view ref="currentViewComponent"></router-view>
                 </div>
                 <!-- /Content Wrapper. Contains page content -->
 

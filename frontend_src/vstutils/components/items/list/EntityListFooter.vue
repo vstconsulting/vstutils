@@ -1,7 +1,6 @@
 <template>
     <div class="list-footer-btns-wrapper">
         <gui_multi_actions
-            :instances="data.instances"
             :multi_actions="schema.multi_actions"
             :opt="opt"
             v-if="multi_actions_exist"

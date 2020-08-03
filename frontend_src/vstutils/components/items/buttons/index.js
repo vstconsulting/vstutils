@@ -14,4 +14,4 @@ globalComponentsRegistrator.add(ButtonsList);
 globalComponentsRegistrator.add(ButtonsRow);
 globalComponentsRegistrator.add(MultiActions);
 
-export { ButtonCommon, ButtonLi, ButtonsGroup, ButtonsList, ButtonsRow };
+export { ButtonCommon, ButtonLi, ButtonsGroup, ButtonsList, ButtonsRow, MultiActions };
