@@ -959,10 +959,10 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
-"@vstconsulting/tabsignal@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@vstconsulting/tabsignal/-/tabsignal-1.0.1.tgz#fc5644daf57cfb5e2484c217739603e78f33d578"
-  integrity sha512-5vij8xJDxjm0UeGhAnUnbRFUNFjenJAhKrroHuSrYpBbKV4OVw8LhqmlYcR2O6XFATmaIIxltCMiXSOXKshyYw==
+"@vstconsulting/tabsignal@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@vstconsulting/tabsignal/-/tabsignal-1.1.1.tgz#6fe00178c7b80f9bc53dbf8d7df827817b2e69c2"
+  integrity sha512-Xv/8BKxMlvPTVphiVEXONX66R88/HbOs5OMk626ixH3N2qTiYFzyfYQFs8ZqOVtsoSRDIDCuhuZB8wA7Vfd6rw==
 
 "@vue/component-compiler-utils@^3.1.0":
   version "3.1.2"
