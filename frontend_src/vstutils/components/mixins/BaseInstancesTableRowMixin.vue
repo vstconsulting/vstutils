@@ -5,7 +5,7 @@
         @click="goToTrLink($event, _blank)"
         @mousedown="onMouseDownHandler"
         :data-id="instance.getPkValue()"
-        :data-href="base_url + '/' + instance.getPkValue()"
+        :data-href="rowLink"
     >
         <td
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
@@ -107,6 +107,9 @@
 
             base_url() {
                 return this.list_url.replace(/\/$/g, '');
+            },
+            rowLink() {
+                return this.base_url + '/' + this.instance.getPkValue();
             },
             data_to_represent: function () {
                 return this.instance.data;

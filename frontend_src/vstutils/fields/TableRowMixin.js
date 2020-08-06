@@ -2,6 +2,13 @@
  * Mixin with common methods of different table_row components.
  */
 const TableRowMixin = {
+    computed: {
+        rowLink() {
+            if (this.view.schema.page_path) {
+                return this.base_url + '/' + this.instance.getPkValue();
+            }
+        },
+    },
     methods: {
         /**
          * Method handles click on table row (<tr>),
@@ -20,6 +27,10 @@ const TableRowMixin = {
                     href = event.currentTarget.getAttribute('data-href');
                 } else {
                     href = event.target.getAttribute('data-href');
+                }
+
+                if (!href) {
+                    return;
                 }
 
                 if (blank) {
