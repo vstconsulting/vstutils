@@ -97,8 +97,10 @@ class ModelBaseClass(ModelBase):
         attrs['__extra_metadata__'] = extra_metadata
         model_class: Model = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
         queryset_class = getattr(getattr(model_class, 'objects', None), '_queryset_class', None)
-        if queryset_class and not issubclass(queryset_class, BQuerySet):
-            manager = BaseManager.from_queryset(BQuerySet)()
+        if queryset_class and not issubclass(queryset_class, BQuerySet):  # nocv
+            #  TODO:
+            #    Resolve problem - when add to class `manager`, `manager` class changes from `BQuerySet` to `QuerySet`
+            manager = BaseManager.from_queryset(BQuerySet, 'Manager')()
             manager.auto_created = True
             model_class.add_to_class('objects', manager)
         if hasattr(model_class, '__prepare_model__'):
