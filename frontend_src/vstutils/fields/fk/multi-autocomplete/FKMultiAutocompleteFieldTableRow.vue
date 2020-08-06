@@ -3,7 +3,7 @@
         class="item-row item-row-id highlight-tr"
         :class="is_selected"
         @click="goToTrLink($event, true)"
-        :data-id="instance.getPkValue()"
+        :data-id="rowLink"
         :data-href="base_url + '/' + instance.getPkValue()"
     >
         <td
@@ -51,6 +51,9 @@
                 }
 
                 return false;
+            },
+            rowLink() {
+                return this.base_url + '/' + this.instance.getPkValue();
             },
             is_selected() {
                 if (this.selected) {

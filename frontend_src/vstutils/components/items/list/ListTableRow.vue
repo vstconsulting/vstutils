@@ -5,7 +5,7 @@
         @click="goToTrLink($event)"
         @mousedown="onMouseDownHandler"
         :data-id="instance.getPkValue()"
-        :data-href="base_url + '/' + instance.getPkValue()"
+        :data-href="rowLink"
     >
         <td
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
