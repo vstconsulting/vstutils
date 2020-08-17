@@ -3,6 +3,8 @@ import { deepEqual } from '../utils';
 import { apiConnector } from '../api';
 import { Model } from '../models';
 
+const NOT_PUT_IN_EXTRA = ['results'];
+
 /**
  * Base QuerySet class.
  */
@@ -174,6 +176,13 @@ export default class QuerySet {
         // if prefetch fields exist, loads prefetch data.
         if (prefetch_fields && prefetch_fields.length > 0) {
             await this._loadPrefetchData(prefetch_fields, instances);
+        }
+
+        instances.extra = {};
+        for (let key of Object.keys(response.data)) {
+            if (!NOT_PUT_IN_EXTRA.includes(key)) {
+                instances.extra[key] = response.data[key];
+            }
         }
 
         this.cache = instances;

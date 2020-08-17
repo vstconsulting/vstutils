@@ -99,6 +99,21 @@ export let routesComponentsTemplates = {
                 return this.view.schema.name;
             },
             /**
+             * Property that returns total number total number of instances, or -1 if
+             * instances has no count
+             * @returns {number}
+             */
+            totalNumberOfInstances() {
+                if (
+                    this.data.instances &&
+                    this.data.instances.extra &&
+                    this.data.instances.extra.count !== undefined
+                ) {
+                    return this.data.instances.extra.count;
+                }
+                return -1;
+            },
+            /**
              * Breadcrumbs of View.
              */
             breadcrumbs: function () {
