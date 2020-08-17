@@ -1,5 +1,5 @@
 import { addCssClassesToElement } from '../../utils';
-import { HideFieldInTableMixin } from '../../fields';
+import HideFieldInTableMixin from '../../fields/HideFieldInTableMixin.js';
 
 /**
  * Mixin for gui_list_table and gui_list_table_row.

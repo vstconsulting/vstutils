@@ -2,18 +2,18 @@
     <tr
         class="item-row item-row-id highlight-tr"
         :class="classes"
-        @click="goToTrLink($event)"
-        @mousedown="onMouseDownHandler"
         :data-id="instance.getPkValue()"
         :data-href="rowLink"
+        @click="goToTrLink($event, openInNewWindow)"
+        @mousedown="onMouseDownHandler"
     >
         <td
+            v-if="multi_actions_exist"
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
             @click="toggleSelection"
-            v-if="multi_actions_exist"
         >
-            <div class="ico-on fa fa-toggle-on"></div>
-            <div class="ico-off fa fa-toggle-off"></div>
+            <div class="ico-on fa fa-toggle-on" />
+            <div class="ico-off fa fa-toggle-off" />
         </td>
         <td v-for="(field, idx) in fieldsToShow" :key="idx" :class="td_classes('td', field.options.name)">
             <component
@@ -21,24 +21,24 @@
                 :prop_data="data_to_represent"
                 :field="field"
                 :wrapper_opt="{ list_view: true, use_prop_data: true }"
-            ></component>
+            />
         </td>
-        <td :class="td_classes('column', 'actions')" v-if="child_actions_exist" style="text-align: center;">
+        <td v-if="child_actions_exist" :class="td_classes('column', 'actions')" style="text-align: center;">
             <div class="btn-group" role="group">
                 <gui_buttons_list
+                    type="child_link"
+                    :text="actionButtonsText"
                     :instance_id="instance.getPkValue()"
                     :buttons="child_links_buttons"
-                    type="child_link"
-                    text=""
                     :look="{ classes: ['btn-primary'] }"
-                ></gui_buttons_list>
+                />
             </div>
         </td>
     </tr>
 </template>
 
 <script>
-    import { BaseListTableMixin } from '../../mixins';
+    import BaseListTableMixin from '../../mixins/BaseListTableMixin.js';
     import { TableRowMixin } from '../../../fields';
 
     /**
@@ -56,19 +56,19 @@
             store_url() {
                 return this.opt.store_url;
             },
-            selected: function () {
+            selected() {
                 return this.$store.getters.getSelectionById({
                     url: this.store_url,
                     id: this.instance.getPkValue(),
                 });
             },
-            classes: function () {
+            classes() {
                 return this.selected ? 'selected' : '';
             },
-            base_url: function () {
+            base_url() {
                 return this.$route.path.replace(/\/$/g, '');
             },
-            data_to_represent: function () {
+            data_to_represent() {
                 // return this.instance.toRepresent();
                 return this.instance.data;
             },
@@ -77,6 +77,12 @@
             },
             child_links_buttons() {
                 return this.view.getViewSublinkButtons('child_links', this.schema.child_links, this.instance);
+            },
+            openInNewWindow() {
+                return false;
+            },
+            actionButtonsText() {
+                return '';
             },
         },
         methods: {

@@ -11,13 +11,13 @@ const TableRowMixin = {
     },
     methods: {
         /**
-         * Method handles click on table row (<tr>),
+         * Method handles click on table row (`<tr>`),
          * and depending to the place of user's click
-         * it redirects user to <tr> link or to <td> link.
+         * it redirects user to `<tr>` link or to `<td>` link.
          * @param {object} event Click event.
-         * @param {boolean} blank If true, function opens link in new window.
+         * @param {boolean=} blank If true, function opens link in new window.
          */
-        goToTrLink(event, blank) {
+        goToTrLink(event, blank = false) {
             if (!this.blockTrLink(event.target, 'tr', 'highlight-tr-none')) {
                 let href;
                 if (event.target.hasAttribute('href')) {

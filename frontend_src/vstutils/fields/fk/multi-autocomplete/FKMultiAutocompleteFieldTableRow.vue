@@ -3,8 +3,8 @@
         class="item-row item-row-id highlight-tr"
         :class="is_selected"
         @click="goToTrLink($event, true)"
-        :data-id="rowLink"
-        :data-href="base_url + '/' + instance.getPkValue()"
+        :data-id="instance.getPkValue()"
+        :data-href="rowLink"
     >
         <td
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
