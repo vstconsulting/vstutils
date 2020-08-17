@@ -1,20 +1,18 @@
 <template>
-    <!--<div style="display: contents;">-->
     <div style="display: inline-block;">
-        <preloader :show="show_loader"></preloader>
+        <preloader :show="show_loader" />
 
         <gui_modal v-show="show_modal" @close="close">
-            <template v-slot:header>
+            <template #header>
                 <h3>{{ ($t('add') + ' ' + $t('child instances')) | capitalize }}</h3>
             </template>
-            <template v-slot:body>
-                <current_search_input
-                    :field_props="field_props"
-                    @filterQuerySetItems="filterQuerySetItems"
-                ></current_search_input>
-                <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
+            <template #body>
+                <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems" />
+                <current_pagination :options="data.pagination" @goToPage="goToPage" />
                 <template v-if="is_empty">
-                    <p class="text-center">{{ $t('list is empty') | capitalize }}</p>
+                    <p class="text-center">
+                        {{ $t('list is empty') | capitalize }}
+                    </p>
                 </template>
                 <template v-else>
                     <current_table
@@ -23,28 +21,28 @@
                         @change-value="changeValue"
                         @setSelections="setSelections"
                         @toggleSelection="toggleSelection"
-                    ></current_table>
+                    />
                 </template>
             </template>
-            <template v-slot:footer>
+            <template #footer>
                 <button
                     class="btn btn-default btn-operation-add-child-close"
-                    @click="close"
                     aria-label="Cancel"
+                    @click="close"
                 >
                     {{ $t('cancel') | capitalize }}
                 </button>
                 <button
                     class="btn btn-primary btn-operation-add-child-apply"
-                    @click="addSelected"
                     aria-label="Add selected"
+                    @click="addSelected"
                 >
                     {{ $t('add') | capitalize }}
                 </button>
             </template>
         </gui_modal>
-        <button class="btn btn-primary btn-operation-add" @click="open" aria-label="Add">
-            <span class="fa fa-folder-open"></span>
+        <button class="btn btn-primary btn-operation-add" aria-label="Add" @click="open">
+            <span class="fa fa-folder-open" />
             <span class="d-none d-lg-inline-block title-for-btn">{{ $t('add') | capitalize }}</span>
         </button>
     </div>
@@ -60,6 +58,22 @@
      */
     export default {
         name: 'gui_add_child_modal',
+        components: {
+            /**
+             * Modal window table.
+             */
+            current_table: {
+                mixins: [BaseInstancesTableMixin],
+                watch: {
+                    selections(selections) {
+                        this.$emit('change-value', { selections: selections });
+                    },
+                },
+                components: {
+                    current_table_row: BaseInstancesTableRowMixin,
+                },
+            },
+        },
         mixins: [BaseModalWindowForInstanceList],
         props: ['options'],
         data() {
@@ -74,10 +88,6 @@
                  */
                 selections: {},
             };
-        },
-        created() {
-            this.child_view = app.views[this.options.list_paths[0]];
-            this.qs = app.views[this.options.list_paths[0]].objects.clone();
         },
         computed: {
             /**
@@ -114,6 +124,10 @@
                 };
             },
         },
+        created() {
+            this.child_view = app.views[this.options.list_paths[0]];
+            this.qs = app.views[this.options.list_paths[0]].objects.clone();
+        },
         methods: {
             /**
              * Method, that opens modal window.
@@ -146,9 +160,7 @@
              * Method, that calls 'addChildInstance' method of parent view.
              */
             addChildToParent(id) {
-                this.$root.$emit('eventHandler-' + this.$root.$children.last._uid, 'addChildInstance', {
-                    data: { id: id },
-                });
+                this.$root.$refs.currentViewComponent.addChildInstance({ data: { id: id } });
             },
             /**
              * Redefinitions of base 'onClose' method.
@@ -182,24 +194,6 @@
              */
             onUpdateInstances(qs) {
                 this.qs = qs;
-            },
-        },
-        components: {
-            /**
-             * Modal window table.
-             */
-            current_table: {
-                mixins: [BaseInstancesTableMixin],
-                watch: {
-                    selections(selections) {
-                        this.$emit('change-value', { selections: selections });
-                    },
-                },
-                components: {
-                    current_table_row: {
-                        mixins: [BaseInstancesTableRowMixin],
-                    },
-                },
             },
         },
     };

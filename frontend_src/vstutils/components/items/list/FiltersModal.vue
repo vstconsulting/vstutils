@@ -40,7 +40,7 @@
         },
         methods: {
             filter() {
-                this.$root.$emit('eventHandler-' + this.$root.$children.last._uid, 'filterInstances');
+                this.$root.$refs.currentViewComponent.filterInstances();
             },
         },
     };

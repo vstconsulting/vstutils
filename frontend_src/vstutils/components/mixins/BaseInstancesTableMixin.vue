@@ -3,13 +3,13 @@
         <thead>
             <tr :class="header_tr_classes">
                 <th
-                    style="width: 50px;"
-                    @click="changeAllRowsSelection"
-                    class="global-select td_select_btn"
                     v-if="with_multiple_select"
+                    style="width: 50px;"
+                    class="global-select td_select_btn"
+                    @click="changeAllRowsSelection"
                 >
-                    <div class="ico-on fa fa-toggle-on"></div>
-                    <div class="ico-off fa fa-toggle-off"></div>
+                    <div class="ico-on fa fa-toggle-on" />
+                    <div class="ico-off fa fa-toggle-off" />
                 </th>
 
                 <th
@@ -20,7 +20,7 @@
                     {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
                 </th>
 
-                <th style="width: 120px;" :class="td_classes('column', 'actions')" v-if="with_actions">
+                <th v-if="with_actions" style="width: 120px;" :class="td_classes('column', 'actions')">
                     {{ $t('actions') }}
                 </th>
             </tr>
@@ -31,27 +31,30 @@
                 :key="idx"
                 :instance="instance"
                 :opt="row_opt(instance)"
+                :fields="fields"
+                :view="opt.view"
                 @toggleSelection="toggleSelection"
-            ></current_table_row>
+            />
         </tbody>
     </table>
 </template>
 
 <script>
     import BaseListTableMixin from './BaseListTableMixin.js';
-    import BaseInstancesTableAndRowMixin from './BaseInstancesTableAndRowMixin.js';
 
     /**
      * Mixin for modal window table.
      */
     export default {
         name: 'base_instances_table_mixin',
-        mixins: [BaseListTableMixin, BaseInstancesTableAndRowMixin],
+        mixins: [BaseListTableMixin],
         props: {
             instances: {
                 type: Array,
+                required: true,
             },
             opt: {
+                type: Object,
                 default: () => {},
             },
         },
@@ -62,6 +65,32 @@
             };
         },
         computed: {
+            /**
+             * Property, that returns fields of current instances list.
+             */
+            fields() {
+                return this.opt.fields;
+            },
+            /**
+             * Property, that returns schema of current instances list view.
+             */
+            schema() {
+                return this.opt.schema || {};
+            },
+            /**
+             * Property, that returns url for instances list.
+             */
+            list_url() {
+                return this.opt.url || this.$route.path;
+            },
+            /**
+             * Boolean property, that means is there actions row in the table.
+             */
+            with_actions() {
+                let p = 'enable_actions';
+
+                return this.opt[p] !== undefined ? this.opt[p] : this[p];
+            },
             /**
              * Filter columns with field that should be hidden.
              */
@@ -150,6 +179,7 @@
                     fields: this.fields,
                     url: this.list_url,
                     selected: this.opt.selections[instance.getPkValue()],
+                    with_actions: this.with_actions,
                 };
             },
         },
