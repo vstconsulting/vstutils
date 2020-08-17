@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from functools import lru_cache
 from django_filters import rest_framework as filters, filterset
-from django.db.models.base import ModelBase, Model
+from django.db.models.base import ModelBase
 from ..utils import import_class, apply_decorators, classproperty
 from ..api import (
     base as api_base,
@@ -10,8 +10,44 @@ from ..api import (
     serializers as api_serializers,
     decorators as api_decorators
 )
-from .queryset import BQuerySet
-from .manager import BaseManager
+
+
+default_extra_metadata: dict = {
+    # list or class which is base for view
+    "view_class": None,
+    # base class for serializers
+    "serializer_class": None,
+    # name of openapi model
+    "serializer_class_name": None,
+    # tuple or list of fields in list view
+    "list_fields": None,
+    # dict which override fields types of list view serializer
+    "override_list_fields": None,
+    # tuple or list of fields in detail view
+    "detail_fields": None,
+    # dict which override fields types of detail view serializer
+    "override_detail_fields": None,
+    # key-value of actions serializers (key - action, value - serializer class)
+    "extra_serializer_classes": None,
+    # tuple or list of filters on list
+    "filterset_fields": 'serializer',
+    # tuple or list of filter backends for queryset
+    "filter_backends": None,
+    # allow to full override of the filter backends default list
+    "override_filter_backends": False,
+    # tuple or list of permission_classes for the view
+    "permission_classes": None,
+    # allow to override the default permission_classes
+    "override_permission_classes": False,
+    # additional attrs which means that this view allowed to copy elements
+    "copy_attrs": None,
+    # key-value mapping with nested views (key - nested name, kwargs for nested decorator)
+    "nested": None
+}
+
+
+def _get_unicode(obj):
+    return obj.__unicode__()
 
 
 def _get_setting_for_view(metatype, metadata, views):
@@ -55,54 +91,17 @@ class ModelBaseClass(ModelBase):
 
     def __new__(mcs, name, bases, attrs, **kwargs):
         if "__slots__" not in attrs:
-            attrs['__slots__'] = tuple()
+            attrs['__slots__'] = ()
         if "__unicode__" in attrs and '__str__' not in attrs:
-            attrs['__str__'] = lambda x: x.__unicode__()
-        extra_metadata: dict = {
-            # list or class which is base for view
-            "view_class": None,
-            # base class for serializers
-            "serializer_class": None,
-            # name of openapi model
-            "serializer_class_name": None,
-            # tuple or list of fields in list view
-            "list_fields": None,
-            # dict which override fields types of list view serializer
-            "override_list_fields": dict(),
-            # tuple or list of fields in detail view
-            "detail_fields": None,
-            # dict which override fields types of detail view serializer
-            "override_detail_fields": dict(),
-            # key-value of actions serializers (key - action, value - serializer class)
-            "extra_serializer_classes": dict(),
-            # tuple or list of filters on list
-            "filterset_fields": 'serializer',
-            # tuple or list of filter backends for queryset
-            "filter_backends": None,
-            # allow to full override of the filter backends default list
-            "override_filter_backends": False,
-            # tuple or list of permission_classes for the view
-            "permission_classes": None,
-            # allow to override the default permission_classes
-            "override_permission_classes": False,
-            # additional attrs which means that this view allowed to copy elements
-            "copy_attrs": dict(),
-            # key-value mapping with nested views (key - nested name, kwargs for nested decorator)
-            "nested": {}
-        }
+            attrs['__str__'] = _get_unicode
+        extra_metadata: dict = {**default_extra_metadata}
         if "Meta" in attrs:
             meta = attrs['Meta'].__dict__
-            for extra_name in filter(lambda y: y in meta, map(lambda x: f'_{x}', extra_metadata.keys())):
-                extra_metadata[extra_name[1:]] = meta[extra_name]
+            if not meta.get('abstract', False):
+                for extra_name in filter(lambda y: y in meta, map(lambda x: f'_{x}', extra_metadata.keys())):
+                    extra_metadata[extra_name[1:]] = meta[extra_name]
         attrs['__extra_metadata__'] = extra_metadata
-        model_class: Model = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
-        queryset_class = getattr(getattr(model_class, 'objects', None), '_queryset_class', None)
-        if queryset_class and not issubclass(queryset_class, BQuerySet):  # nocv
-            #  TODO:
-            #    Resolve problem - when add to class `manager`, `manager` class changes from `BQuerySet` to `QuerySet`
-            manager = BaseManager.from_queryset(BQuerySet, 'Manager')()
-            manager.auto_created = True
-            model_class.add_to_class('objects', manager)
+        model_class = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
         return model_class
@@ -152,10 +151,10 @@ class ModelBaseClass(ModelBase):
                 serializer_class=serializer_class,
                 serializer_class_name=metadata['serializer_class_name'],
                 fields=metadata['list_fields'],
-                field_overrides=metadata['override_list_fields']
+                field_overrides=metadata['override_list_fields'] or {}
             )
         )
-        detail_fields_override = metadata['override_detail_fields'] or None
+        detail_fields_override = metadata['override_detail_fields']
         if not detail_fields_override and not metadata['detail_fields']:
             detail_fields_override = metadata['override_list_fields']
 
@@ -163,9 +162,12 @@ class ModelBaseClass(ModelBase):
             serializer_class=serializer_class,
             serializer_class_name=f'One{serializers["serializer_class"].__name__}',
             fields=metadata['detail_fields'] or metadata['list_fields'],
-            field_overrides=detail_fields_override
+            field_overrides=detail_fields_override or {}
         )
-        serializers.update(map(lambda k, v: (f'serializer_class_{k}', v), metadata['extra_serializer_classes'].items()))
+        serializers.update(map(
+            lambda k, v: (f'serializer_class_{k}', v),
+            (metadata['extra_serializer_classes'] or {}).items()
+        ))
 
         view_class = metadata['view_class']
         if view_class is None:
@@ -226,4 +228,4 @@ class ModelBaseClass(ModelBase):
 
         return apply_decorators(
             *getattr(cls, 'generated_view_decorators', [])
-        )(ApplyNestedDecorators(metadata['nested'])(generated_view))
+        )(ApplyNestedDecorators(metadata['nested'] or {})(generated_view))
