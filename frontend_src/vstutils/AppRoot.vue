@@ -46,8 +46,11 @@
     </div>
 </template>
 <script>
+    import AutoUpdateController from './autoupdate/AutoUpdateController.js';
+
     export default {
         name: 'AppRoot',
+        mixins: [AutoUpdateController],
         props: ['info', 'x_menu', 'x_docs', 'a_links'],
         computed: {
             classes() {

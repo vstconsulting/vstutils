@@ -34,6 +34,9 @@ const BasestViewMixin = {
         title() {
             return 'Default title';
         },
+        lastAutoUpdate() {
+            return -1;
+        },
     },
     methods: {
         /**

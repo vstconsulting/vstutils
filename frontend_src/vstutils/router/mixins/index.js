@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-import { current_view, path_pk_key, deepEqual, findClosestPath, isEmptyObject } from '../../utils';
+import { current_view, path_pk_key, findClosestPath, isEmptyObject } from '../../utils';
 import { pop_up_msg, guiPopUp } from '../../popUp';
 import ViewWithParentInstancesForPath from '../../views/ViewWithParentInstancesForPath.js';
 
@@ -121,7 +121,7 @@ export let routesComponentsTemplates = {
              * Current URL of view's QuerySet.
              */
             qs_url: function () {
-                return this.url;
+                return this.url.replace(/^\/|\/$/g, '');
             },
             /**
              * Property, that returns error data, if it exists.
@@ -823,22 +823,9 @@ export let routesComponentsTemplates = {
             /**
              * Redefinition of 'updateData()' method from view_with_autoupdate_mixin.
              */
-            updateData() {
-                if (this.autoupdate.stop) {
-                    return Promise.reject();
-                }
-                let new_qs = this.getQuerySet(this.view, this.qs_url).clone().prefetch();
-                return new_qs.items().then((instances) => {
-                    if (deepEqual(this.getQuerySet(this.view, this.qs_url).query, new_qs.query)) {
-                        this.setQuerySet(this.view, this.qs_url, new_qs);
-
-                        this.setInstancesToData(instances);
-
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
+            async updateData() {
+                const qs = this.getQuerySet(this.view, this.qs_url);
+                this.setInstancesToData(await qs.items(false));
             },
             executeEmptyActionOnInstances(opt = {}) {
                 const selectionUrl = this.qs_url.replace(/^\/|\/$/g, '');
@@ -890,7 +877,7 @@ export let routesComponentsTemplates = {
              * Redefinition of 'qs_url' from base mixin.
              */
             qs_url: function () {
-                return this.url.replace('/new', '');
+                return this.url.replace('/new', '').replace(/^\/|\/$/g, '');
             },
             /**
              * Redefinition of 'title' from base mixin.
@@ -981,6 +968,9 @@ export let routesComponentsTemplates = {
     page: {
         mixins: [PageWithDataMixin, ViewWithAutoUpdateMixin],
         methods: {
+            async updateData() {
+                this.data.instance = await this.getQuerySet(this.view, this.qs_url).get(false);
+            },
             /**
              * Redefinition of 'fetchData()' from base mixin.
              */
@@ -1018,7 +1008,7 @@ export let routesComponentsTemplates = {
              * Redefinition of 'qs_url' from base mixin.
              */
             qs_url: function () {
-                return this.url.replace('/edit', '');
+                return this.url.replace('/edit', '').replace(/^\/|\/$/g, '');
             },
         },
         methods: {
