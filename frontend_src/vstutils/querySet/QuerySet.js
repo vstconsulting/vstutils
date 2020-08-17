@@ -12,11 +12,13 @@ export default class QuerySet {
      * @param {Model} model Model for which this QuerySet will be created.
      * @param {string} url Current url of view.
      * @param {object} query Object, that stores current QuerySet filters.
+     * @param {boolean} many Is queryset has many items
      */
-    constructor(model, url, query = {}) {
+    constructor(model, url, query = {}, many = false) {
         this.model = model;
         this.url = url;
         this.query = query;
+        this.many = many;
         /**
          * Property, that means, loads prefetch data or not.
          */
@@ -130,9 +132,9 @@ export default class QuerySet {
      *
      * @return {Promise.<Model>}
      */
-    async get() {
-        if (this.cache) {
-            return Promise.resolve(this.cache);
+    async get(invalidateCache = true) {
+        if (!invalidateCache && this.cache) {
+            return this.cache;
         }
 
         const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });
@@ -158,8 +160,8 @@ export default class QuerySet {
      *
      * @returns {Model[]}
      */
-    async items() {
-        if (this.cache) {
+    async items(invalidateCache = true) {
+        if (!invalidateCache && this.cache) {
             return this.cache;
         }
         const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });

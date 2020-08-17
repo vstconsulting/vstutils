@@ -16,7 +16,7 @@ export default class View {
         let qs_constructor = this.constructor.getQuerySetConstructor(model);
 
         this.schema = schema;
-        this.objects = new qs_constructor(model, this.schema.path);
+        this.objects = new qs_constructor(model, this.schema.path, {}, schema.type === 'list');
         /**
          * Property, that stores extensions for components,
          * which would render current view.

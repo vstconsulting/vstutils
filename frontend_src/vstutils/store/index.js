@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import Vuex from 'vuex';
+import AutoUpdateStoreModule from '../autoupdate/AutoUpdateStoreModule.js';
 
 /**
  * Class, that manages Store creation.
@@ -19,6 +20,9 @@ export class StoreConstructor {
             mutations: this.getStore_mutations(),
             getters: this.getStore_getters(),
             actions: this.getStore_actions(),
+            modules: {
+                autoupdate: AutoUpdateStoreModule,
+            },
         };
     }
     /**
