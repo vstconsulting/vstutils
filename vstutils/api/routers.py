@@ -86,6 +86,8 @@ class _AbstractRouter(routers.DefaultRouter):
             args = [prefix, view]
             if 'name' in options:
                 args.append(options['name'])
+            elif getattr(view, 'base_name', None) is None:
+                args.append(prefix)
             view_type = options.get('type', 'viewset')
             if view_type == 'viewset':
                 self.register(*args)
