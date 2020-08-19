@@ -1,18 +1,26 @@
 import time
 import json
 
-from vstutils.api import responses
+from vstutils.api import responses, filter_backends
 from vstutils.api.base import NonModelsViewSet, Response
-from vstutils.api.decorators import action, nested_view, subaction
+from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import EmptySerializer, DataSerializer
 
 from .models import Host, HostGroup, ModelWithBinaryFiles
+
+
+class TestFilterBackend(filter_backends.VSTFilterBackend):
+    required = True
+
+    def filter_queryset(self, request, queryset, view):
+        return queryset.extra(select={'filter_applied': 1})
 
 
 class CreateHostSerializer(Host.generated_view.serializer_class):
     pass
 
 
+@extend_filterbackends([TestFilterBackend])
 class HostViewSet(Host.generated_view):
     '''
     Hosts view
@@ -27,6 +35,7 @@ class HostViewSet(Host.generated_view):
         return Response("OK", 201).resp  # nocv
 
 
+@extend_filterbackends(list(HostGroup.generated_view.filter_backends)+[TestFilterBackend], override=True)
 class _HostGroupViewSet(HostGroup.generated_view):
     """
     Host group opertaions.

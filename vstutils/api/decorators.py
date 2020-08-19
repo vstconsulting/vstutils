@@ -627,6 +627,23 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         return view_class
 
 
+def extend_viewset_attribute(name: _t.Text, override: bool = False, data: _t.Optional[_t.Any] = None) -> _t.Callable:
+
+    def wrapper(view_class: _t.Type[base.GenericViewSet]):
+        if not override:
+            attr_data = tuple(list(getattr(view_class, name, ())) + list(data or ()))
+        else:
+            attr_data = data  # type: ignore
+        setattr(view_class, name, attr_data)
+        return view_class
+
+    return wrapper
+
+
+def extend_filterbackends(backends: _t.Iterable, override: bool = False) -> _t.Callable:
+    return extend_viewset_attribute('filter_backends', override, backends)
+
+
 def cache_method_result(func: _t.Callable) -> _t.Callable:
     """Decorator that caches return value of method based on args and kwargs,
     cache value stored in the object instance"""

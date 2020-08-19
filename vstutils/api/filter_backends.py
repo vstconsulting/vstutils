@@ -7,6 +7,9 @@ class VSTFilterBackend:
     __slots__ = ()
     required = False
 
+    def filter_queryset(self, request, queryset, view):
+        raise NotImplementedError  # nocv
+
     def get_schema_fields(self, view):
         # pylint: disable=unused-argument
         return []
