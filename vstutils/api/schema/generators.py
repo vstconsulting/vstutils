@@ -86,7 +86,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                 keys[-1] = 'list'
         return keys
 
-    def get_schema(self, request: drf_request.Request = None, *args, **kwargs):
+    def get_schema(self, request: drf_request.Request = None, *args, **kwargs):  # type: ignore
         # pylint: disable=signature-differs
         if not getattr(request, 'version', ''):
             request.version = self.version  # type: ignore
