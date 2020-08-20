@@ -100,7 +100,8 @@ class WebSection(BaseAppendSection):
         'secure_hsts_include_subdomains': ConfigBoolType,
         'secure_hsts_preload': ConfigBoolType,
         'secure_hsts_seconds': ConfigIntType,
-        'health_throttle_rate': ConfigIntType
+        'health_throttle_rate': ConfigIntType,
+        'bulk_threads': ConfigIntType,
     }
 
 
@@ -201,7 +202,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'secure_hsts_include_subdomains': False,
             'secure_hsts_preload': False,
             'secure_hsts_seconds': 0,
-            'health_throttle_rate': 60
+            'health_throttle_rate': 60,
+            'bulk_threads': 3
         },
         'database': {
             'engine': 'django.db.backends.sqlite3',
@@ -623,6 +625,7 @@ OPENAPI_PUBLIC: bool = web['public_openapi']
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
 HEALTH_THROTTLE_RATE: _t.Text = f"{web['health_throttle_rate']}/minute"
 OPENAPI_VIEW_CLASS: _t.Text = 'vstutils.api.schema.views.OpenApiView'
+BULK_THREADS = web['bulk_threads']
 
 OPENAPI_EXTRA_LINKS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'vstutils': {
@@ -955,6 +958,7 @@ if TESTS_RUN:
         name: {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}
         for name in CACHES
     }
+    BULK_THREADS = 10
 
 if not TESTSERVER_RUN and TESTS_RUN:
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'

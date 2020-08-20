@@ -90,6 +90,8 @@ Bulk request allows you send multiple request to api at once, it accepts json li
 +-----------------------------------+--------------------+--------------------------+
 | ``POST /{API_URL}/endpoint/``     | YES                | YES                      |
 +-----------------------------------+--------------------+--------------------------+
+| ``PATCH /{API_URL}/endpoint/``    | NO                 | NO                       |
++-----------------------------------+--------------------+--------------------------+
 
 Parameters of one operation (:superscript:`*` means that parameter is required):
 

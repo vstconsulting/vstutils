@@ -1015,6 +1015,21 @@ class EndpointTestCase(BaseTestCase):
             'list': [1, 2.0, '3']
         })
 
+    def test_threaded_bulk(self):
+        request_data = [
+            {"method": "get", "path": ['user', self.user.id, 'test_bulk_perf'], 'version': 'v4'}
+            for i in range(10)
+        ]
+
+        def iteration(method):
+            results = self.endpoint_call(request_data, method=method)
+            self.assertFalse(any(filter(lambda r: r['status'] != 200, results)), results)
+            self.assertFalse(any(filter(lambda r: r['data']['id'] != self.user.id, results)))
+            return method, self.last_response._headers['server-timing'][1].split(', ')[0].split('=')[-1]
+
+        perf_results = '\n'.join(f'{k.upper()}: {v}ms' for k, v in map(iteration, ('post', 'put', 'patch')))
+        print(f"\nTimings for different methods:\n{perf_results}\n")
+
     def test_transactional_bulk(self):
         request = [
             dict(
@@ -1785,7 +1800,10 @@ class ConfigParserCTestCase(BaseTestCase):
     def test_file_reader(self):
         # CHECK SETTINGS FROM CONFIG FILE
         db_default_val = {
-            'OPTIONS': {'timeout': 20},
+            'OPTIONS': {
+                'timeout': 20,
+                # 'check_same_thread': True,
+            },
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': 'file:memorydb_default?mode=memory&cache=shared',
             'TEST': {

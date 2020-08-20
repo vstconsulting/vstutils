@@ -3,6 +3,7 @@ import json
 import logging
 import traceback
 import functools
+from concurrent.futures import ThreadPoolExecutor, Executor
 from collections import OrderedDict
 
 from django.conf import settings
@@ -29,6 +30,7 @@ from ..utils import Dict, raise_context
 RequestType = _t.Union[drf_request.Request, HttpRequest]
 logger: logging.Logger = logging.getLogger('vstutils')
 
+THREADS_COUNT = settings.BULK_THREADS
 API_URL: _t.Text = settings.API_URL
 DEFAULT_VERSION = settings.VST_API_VERSION
 REST_METHODS: _t.List[_t.Text] = list(
@@ -60,6 +62,16 @@ def _get_request_data_str(request_data):
     return _get_request_data(json.loads(request_data))  # nocv
 
 
+def _iter_request(request, operation_handler, context):
+    executor_class = _DummyExecutor
+    if request.method not in ('POST', 'PUT'):
+        executor_class = ThreadPoolExecutor if THREADS_COUNT else executor_class
+    handler = lambda o: operation_handler(o, context)
+    with executor_class(max_workers=THREADS_COUNT) as executor:
+        for operation_result in executor.map(handler, _get_request_data(request.data)):
+            yield operation_result
+
+
 def _join_paths(*args) -> _t.Text:
     '''Join multiple path fragments into one
 
@@ -67,6 +79,16 @@ def _join_paths(*args) -> _t.Text:
     :returns: Path that starts and ends with
     '''
     return f"/{'/'.join(str(arg).strip('/') for arg in args)}/"
+
+
+class _DummyExecutor(Executor):
+    # pylint: disable=abstract-method
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def map(self, fn, *iterables, timeout=None, chunksize=1):
+        return map(fn, *iterables)
 
 
 class ParseResponseDict(dict):
@@ -388,13 +410,15 @@ class EndpointViewSet(views.APIView):
             'results': self.results
         }
         timings: _t.List = []
-        for operation in _get_request_data(request.data):  # type: ignore
-            result, timing = self.operate(operation, context)  # type: ignore
+        for result, timing in _iter_request(request, self.operate, context):
             append_to_list(self.results, result)
             append_to_list(timings, timing)
             if not allow_fail and not (100 <= result.get('status', 500) < 400):
                 raise Exception(f'Execute transaction stopped. Error message: {str(result)}')
         return responses.HTTP_200_OK(self.results, timings={f'op{i}': float(j) for i, j in enumerate(timings)})
+
+    def patch(self, request: BulkRequestType) -> responses.BaseResponseClass:
+        return self.put(request)
 
     def initial(self, request: drf_request.Request, *args, **kwargs):
         super().initial(request, *args, **kwargs)

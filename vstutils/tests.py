@@ -108,6 +108,7 @@ class BaseTestCase(TestCase):
         self.user = self._create_user()
         self.login_url = getattr(self.settings_obj, 'LOGIN_URL', '/login/')
         self.logout_url = getattr(self.settings_obj, 'LOGOUT_URL', '/logout/')
+        self.last_response = None
 
     def _settings(self, item, default=None):
         return getattr(self.settings_obj, item, default)
@@ -150,6 +151,7 @@ class BaseTestCase(TestCase):
     @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, secure=True, *args, **kwargs)
+        setattr(self, 'last_response', response)
         self.assertRCode(response, code, url)
         return self.render_api_response(response)
 

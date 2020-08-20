@@ -9,6 +9,7 @@ MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
 
 API['v2'] = {}
 API['v3'] = {}
+API['v4'] = {}
 API[VST_API_VERSION][r'settings'] = dict(
     view='vstutils.api.views.SettingsViewSet', op_types=['get', 'mod'],
     name='settings'
@@ -44,6 +45,9 @@ API['v2'][r'request_info'] = dict(
 )
 API['v3'][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
+)
+API['v4'][r'user'] = dict(
+    view='test_proj.views.TestUserViewSet'
 )
 
 GUI_VIEWS[r'^gui/$'] = r'^$'

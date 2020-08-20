@@ -5,6 +5,7 @@ from vstutils.api import responses, filter_backends
 from vstutils.api.base import NonModelsViewSet, Response
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import EmptySerializer, DataSerializer
+from vstutils.api.auth import UserViewSet
 
 from .models import Host, HostGroup, ModelWithBinaryFiles
 
@@ -134,3 +135,10 @@ class RequestInfoTestView(NonModelsViewSet):
         data = request.data
 
         return responses.HTTP_200_OK(data)
+
+
+class TestUserViewSet(UserViewSet):
+    @action(methods=['get'], detail=True)
+    def test_bulk_perf(self, request, *args, **kwargs):
+        time.sleep(0.01)
+        return responses.HTTP_200_OK({'id': request.user.id})
