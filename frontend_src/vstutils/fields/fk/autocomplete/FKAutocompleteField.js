@@ -6,6 +6,12 @@ import FKAutocompleteFieldMixin from './FKAutocompleteFieldMixin.js';
  * FK_autocomplete guiField class.
  */
 class FKAutocompleteField extends FKField {
+    constructor(options) {
+        super(options);
+        this._usePrefetch = false;
+        this._fetchData = false;
+    }
+
     /**
      * Redefinition of fk guiField method _insertTestValue.
      */

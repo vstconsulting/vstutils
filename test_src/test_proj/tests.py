@@ -1476,6 +1476,21 @@ class ProjectTestCase(BaseTestCase):
 
         self.assertNotIn('/testbinaryfiles2/', data['paths'])
 
+        # Check useFetch and makeLink properties
+        definitions = data['definitions']
+
+        properties = definitions['OneModelWithFK']['properties']['some_fk']['additionalProperties']
+        self.assertEqual(properties['usePrefetch'], True)
+        self.assertEqual(properties['makeLink'], True)
+
+        properties = definitions['OneModelWithFK']['properties']['no_prefetch_and_link_fk']['additionalProperties']
+        self.assertEqual(properties['usePrefetch'], False)
+        self.assertEqual(properties['makeLink'], False)
+
+        properties = definitions['OneModelWithFK']['properties']['multiselect']['additionalProperties']
+        self.assertEqual(properties['usePrefetch'], False)
+        self.assertEqual(properties['makeLink'], True)
+
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')
         self.assertEqual(result['name'], 'Example project')

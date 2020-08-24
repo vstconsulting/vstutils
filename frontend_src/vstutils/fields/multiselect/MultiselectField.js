@@ -13,14 +13,6 @@ class MultiselectField extends FKField {
         return super.mixins.concat(MultiselectFieldMixin);
     }
     /**
-     * Redefinition of 'prefetchDataOrNot' method of FK guiField.
-     * @param {object} data
-     */
-    // eslint-disable-next-line no-unused-vars
-    prefetchDataOrNot(data = {}) {
-        return false;
-    }
-    /**
      * Redefinition of 'toInner' method of base guiField.
      * @param {object} data
      */

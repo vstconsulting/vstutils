@@ -18,9 +18,7 @@ const FKFieldContent = {
                 return this.$emit('proxyEvent', 'setValueInStore', this.values_cache[this.value]);
             }
 
-            if (this.field.prefetchDataOrNot(this.data)) {
-                this.prefetchValue(this.value);
-            }
+            this.fetchValue(this.value);
         }
     },
     watch: {
@@ -37,9 +35,7 @@ const FKFieldContent = {
                 return this.$emit('proxyEvent', 'setValueInStore', this.values_cache[value]);
             }
 
-            if (this.field.prefetchDataOrNot(this.data)) {
-                this.prefetchValue(value);
-            }
+            this.fetchValue(value);
         },
 
         'field.options.additionalProperties.querysets': function (querysets) {
@@ -95,7 +91,10 @@ const FKFieldContent = {
          * Method, that loads prefetch_value.
          * @param {string, number} value.
          */
-        prefetchValue(value) {
+        fetchValue(value) {
+            if (!this.field.fetchDataOrNot(this.data)) {
+                return;
+            }
             let filters = {
                 limit: 1,
                 [this.field.getPrefetchFilterName(this.data)]: value,

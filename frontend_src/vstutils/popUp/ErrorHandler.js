@@ -22,7 +22,7 @@ export default class ErrorHandler {
                 if (Array.isArray(detail_msg)) {
                     detail_msg = detail_msg.join('<br>');
                 }
-                error_msg += '<b>{0}</b>:<br>{1}'.format(key, detail_msg);
+                error_msg += `<br><b>${key}</b>: ${detail_msg}`;
             }
         }
         return error_msg;

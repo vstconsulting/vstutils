@@ -63,7 +63,7 @@ export default class Model {
     /**
      * Method, that returns instance's value of view field.
      */
-    getViewFieldValue() {
+    getViewFieldValue(defaultValue = '') {
         if (this.fields[this.view_name]) {
             return this.fields[this.view_name].toRepresent(this.data);
         } else if (Object.prototype.hasOwnProperty.call(this.fields, 'username')) {
@@ -71,6 +71,7 @@ export default class Model {
         } else if (Object.prototype.hasOwnProperty.call(this.fields, 'email')) {
             return this.fields.email.toRepresent(this.data);
         }
+        return defaultValue;
     }
 
     /**

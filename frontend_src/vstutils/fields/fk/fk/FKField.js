@@ -10,6 +10,16 @@ import FKFieldMixin from './FKFieldMixin.js';
  * FK guiField class.
  */
 class FKField extends FKandAPIObjectMixin(BaseField) {
+    constructor(options) {
+        super(options);
+        this._usePrefetch = options.additionalProperties.usePrefetch;
+        if (options.additionalProperties.fetchData !== undefined) {
+            this._fetchData = options.additionalProperties.fetchData;
+        } else {
+            this._fetchData = true;
+        }
+        this._makeLink = this.options.additionalProperties.makeLink;
+    }
     /**
      * Method, that defines should be prefetch value loaded for current field or not.
      * @param {object} data Object with instance data.
@@ -17,7 +27,16 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      */
     // eslint-disable-next-line no-unused-vars
     prefetchDataOrNot(data) {
-        return true;
+        return this._usePrefetch;
+    }
+    /**
+     * Method that decides if field need to fetch value
+     * @param {Object} data
+     * @returns {boolean}
+     */
+    // eslint-disable-next-line no-unused-vars
+    fetchDataOrNot(data) {
+        return this._fetchData;
     }
     /**
      * Method, that defines: render link to another object(value of current field is connected with) or not.
@@ -26,7 +45,7 @@ class FKField extends FKandAPIObjectMixin(BaseField) {
      */
     // eslint-disable-next-line no-unused-vars
     makeLinkOrNot(data) {
-        return true;
+        return this._makeLink;
     }
     /**
      * Method, that returns path for prefetch bulk request.
