@@ -792,5 +792,12 @@ export function getDependenceValueAsString(parent_data_object, field_name, separ
     if (!field_name || !Object.prototype.hasOwnProperty.call(parent_data_object, field_name)) {
         return undefined;
     }
-    return parent_data_object[field_name].map((data) => data.value).join(separator);
+
+    const data = parent_data_object[field_name];
+
+    if (Array.isArray(data)) {
+        return data.map((data) => data.value).join(separator);
+    } else if (typeof data === 'object' && data !== null && data.value !== undefined && data.value !== null) {
+        return data.value;
+    }
 }

@@ -158,7 +158,9 @@ class FkFieldInspector(FieldInspector):
                 field.select_model, ignore_unresolved=True
             ),
             value_field=field.autocomplete_property,
-            view_field=field.autocomplete_represent
+            view_field=field.autocomplete_represent,
+            usePrefetch=field.use_prefetch,
+            makeLink=field.make_link
         )
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -181,7 +183,9 @@ class CommaMultiSelectFieldInspector(FieldInspector):
             ),
             value_field=field.select_property,
             view_field=field.select_represent,
-            view_separator=field.select_separator
+            view_separator=field.select_separator,
+            usePrefetch=field.use_prefetch,
+            makeLink=field.make_link
         )
 
         return SwaggerType(**field_extra_handler(field, **kwargs))

@@ -52,9 +52,9 @@
                                 </span>
                                 <span class="h1-header">
                                     {{ $t(title.toLowerCase()) | capitalize | split }}
-                                </span>
-                                <span v-if="totalNumberOfInstances > -1" class="badge bg-info">
-                                    {{ totalNumberOfInstances }}
+                                    <span v-if="totalNumberOfInstances > -1" class="badge bg-info">
+                                        {{ totalNumberOfInstances }}
+                                    </span>
                                 </span>
                             </h1>
                         </div>

@@ -78,12 +78,14 @@ class CommaMultiSelect(CharField):
     Take effect only in GUI.
     """
 
-    __slots__ = ('select_model', 'select_separator', 'select_property', 'select_represent')
+    __slots__ = ('select_model', 'select_separator', 'select_property', 'select_represent', 'use_prefetch', 'make_link')
 
     select_model: _t.Text
     select_separator: _t.Text
     select_property: _t.Text
     select_represent: _t.Text
+    use_prefetch: bool
+    make_link: bool
 
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
@@ -92,6 +94,8 @@ class CommaMultiSelect(CharField):
         if not isinstance(self.select_model, (list, tuple)):
             self.select_property = kwargs.pop('select_property', 'name')
             self.select_represent = kwargs.pop('select_represent', 'name')
+        self.use_prefetch = kwargs.pop('use_prefetch', False)
+        self.make_link = kwargs.pop('make_link', True)
         super().__init__(**kwargs)
 
     def to_internal_value(self, data: _t.Union[_t.Text, _t.Sequence]) -> _t.Text:
@@ -150,16 +154,20 @@ class FkField(IntegerField):
     Field what means where we got list.
     Take effect only in GUI.
     """
-    __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent'
+    __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent', 'use_prefetch', 'make_link'
 
     select_model: _t.Text
     autocomplete_property: _t.Text
     autocomplete_represent: _t.Text
+    use_prefetch: bool
+    make_link: bool
 
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
         self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
         self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
+        self.use_prefetch = kwargs.pop('use_prefetch', True)
+        self.make_link = kwargs.pop('make_link', True)
         super().__init__(**kwargs)
 
 

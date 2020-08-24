@@ -10,7 +10,7 @@ const PageWithDataMixin = {
          */
         title: function () {
             if (typeof this.data.instance.getViewFieldValue === 'function') {
-                return this.data.instance.getViewFieldValue() || this.view.schema.name;
+                return this.data.instance.getViewFieldValue(this.view.schema.name);
             }
             return this.view.schema.name;
         },
