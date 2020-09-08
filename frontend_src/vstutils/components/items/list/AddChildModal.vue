@@ -8,7 +8,7 @@
             </template>
             <template #body>
                 <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems" />
-                <current_pagination :options="data.pagination" @goToPage="goToPage" />
+                <current_pagination :options="datastore.data.pagination" @goToPage="goToPage" />
                 <template v-if="is_empty">
                     <p class="text-center">
                         {{ $t('list is empty') | capitalize }}

@@ -5,7 +5,7 @@
             :opt="opt"
             v-if="multi_actions_exist"
         ></gui_multi_actions>
-        <pagination :options="data.pagination"></pagination>
+        <pagination :options="datastore.data.pagination"></pagination>
     </div>
 </template>
 
@@ -18,7 +18,7 @@
     export default {
         name: 'gui_entity_list_footer',
         mixins: [BaseListTableMixin],
-        props: ['data', 'view', 'opt'],
+        props: ['datastore', 'data', 'view', 'opt'],
         computed: {
             schema() {
                 return this.view.schema;

@@ -1,10 +1,15 @@
+import { COMPONENTS_MODULE_NAME, CREATE_COMPONENT_STATE, DESTROY_COMPONENT_STATE} from "../../store/components_state/mutation-types";
 import { current_view } from '../../utils';
+import ComponentIDMixin from "../../ComponentIDMixin";
+
+const stateMutationName = `${COMPONENTS_MODULE_NAME}/${CREATE_COMPONENT_STATE}`;
 
 /**
  * Mixin for all types of views(list, page, page_new, page_edit, action)
  * and custom views, like home page and 404 page.
  */
 const BasestViewMixin = {
+    mixins: [ComponentIDMixin],
     data() {
         return {
             /**
@@ -17,13 +22,41 @@ const BasestViewMixin = {
              */
             error: null,
             /**
-             * Boolean property, that means, that fetchData() execution was successful.
+             * Boolean property means that fetchData() execution was successful.
              */
             response: null,
+            /**
+             * Boolean property means that component should be active in modules.
+             */
+            activeComponent: false,
         };
     },
     created() {
         this.setDocumentTitle();
+
+        /**
+         * Register new module in store
+         */
+        if (this.componentId) {
+            this.$store.commit({
+                type: stateMutationName,
+                component: this,
+                module: {
+                    state: {
+                        data: this.data || null
+                    }
+                }
+            })
+        }
+    },
+    destroyed() {
+        /**
+         * Unregister module from store
+         */
+        if (this.componentId) {
+            this.$store.dispatch(`${COMPONENTS_MODULE_NAME}/${DESTROY_COMPONENT_STATE}`, {component: this})
+                .catch(reason => console.error(reason));
+        }
     },
     watch: {
         title() {
@@ -31,6 +64,12 @@ const BasestViewMixin = {
         },
     },
     computed: {
+        store_name() {
+            return `${COMPONENTS_MODULE_NAME}/${this.componentId}`;
+        },
+        datastore() {
+            return this.$store.state[this.store_name];
+        },
         title() {
             return 'Default title';
         },
@@ -39,6 +78,12 @@ const BasestViewMixin = {
         },
     },
     methods: {
+        sendCommitToState(type, value) {
+            this.$store.commit({
+                type: `${COMPONENTS_MODULE_NAME}/${this.componentId}/${type}`,
+                ...value
+            });
+        },
         /**
          * Method, that goes to n's Browser History record.
          * @param {number} n Number of Browser History record to go.

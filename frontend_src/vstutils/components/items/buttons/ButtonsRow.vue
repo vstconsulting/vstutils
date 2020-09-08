@@ -29,8 +29,8 @@
         ></gui_group_of_buttons>
 
         <template v-if="view.schema.type == 'list'">
-            <gui_filters_modal :opt="filters_opt" :view="view" :data="data"></gui_filters_modal>
-            <pagination :options="data.pagination"></pagination>
+            <gui_filters_modal :opt="filters_opt" :view="view" :data="data" :datastore="datastore"></gui_filters_modal>
+            <pagination :options="datastore.data.pagination"></pagination>
         </template>
     </div>
 </template>
@@ -43,7 +43,7 @@
      */
     export default {
         name: 'gui_buttons_row',
-        props: ['view', 'data', 'opt'],
+        props: ['view', 'data', 'opt', 'datastore'],
         computed: {
             schema() {
                 return this.view.schema;

@@ -8,6 +8,7 @@
                 :is="'field_' + field.options.format"
                 v-model="data_to_represent[field.options.name]"
                 :wrapper_opt="wrapper_opt"
+                :prop_data="data_to_represent"
             ></div>
         </div>
     </div>
@@ -39,7 +40,7 @@
             },
 
             wrapper_opt() {
-                return $.extend(true, {}, this.opt, { qs_url: this.qs_url });
+                return $.extend(true, {}, this.opt, { use_prop_data: true });
             },
         },
     };

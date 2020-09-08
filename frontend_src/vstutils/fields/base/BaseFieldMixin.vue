@@ -165,6 +165,7 @@
                 val[this.field.options.name] = value;
 
                 if (this.wrapper_opt.use_prop_data) {
+                    Vue.set(this.data, this.field.options.name, value)
                     return this.$emit('setValueInStore', this.handleValue(val));
                 }
 
