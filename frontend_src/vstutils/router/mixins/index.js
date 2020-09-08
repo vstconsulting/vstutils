@@ -1,5 +1,6 @@
 import $ from 'jquery';
 
+import { COMPONENTS_MODULE_NAME } from '../../store/components_state/mutation-types';
 import { current_view, path_pk_key, findClosestPath, isEmptyObject } from '../../utils';
 import { pop_up_msg, guiPopUp } from '../../popUp';
 import ViewWithParentInstancesForPath from '../../views/ViewWithParentInstancesForPath.js';
@@ -177,11 +178,12 @@ export let routesComponentsTemplates = {
              * @param {object} options Options for router for new page opening.
              */
             openPage(options = {}) {
-                this.$router.push(options).catch((error) => {
+                return this.$router.push(options).catch((error) => {
                     // Allow to open route with the same path as current
                     if (error.name !== 'NavigationDuplicated') {
                         throw error;
                     }
+                    return error;
                 });
             },
             /**
@@ -341,15 +343,10 @@ export let routesComponentsTemplates = {
              * @param {object} qs QuerySet instance (not required argument).
              */
             setQuerySet(view, url, qs = undefined) {
-                if (!qs) {
-                    qs = view.objects.copy();
-                    qs.use_prefetch = true;
-                }
-                qs.url = url.replace(/^\/|\/$/g, '');
-                this.$store.commit('setQuerySet', {
-                    url: qs.url,
-                    queryset: qs,
-                });
+                this.$store.commit(
+                    `${COMPONENTS_MODULE_NAME}/${this.componentId}/setQuerySet`,
+                    { view, url, qs }
+                    )
                 return this.getQuerySet(view, url);
             },
             /**
@@ -359,7 +356,7 @@ export let routesComponentsTemplates = {
              * @return {QuerySet} QuerySet.
              */
             getQuerySet(view, url) {
-                let qs = this.$store.getters.getQuerySet(url.replace(/^\/|\/$/g, ''));
+                let qs = this.$store.getters[`${COMPONENTS_MODULE_NAME}/${this.componentId}/queryset`]
 
                 if (qs) {
                     return qs;
@@ -582,6 +579,9 @@ export let routesComponentsTemplates = {
             multi_actions_button_component() {
                 return 'gui_entity_' + this.view.schema.type + '_footer';
             },
+            filters() {
+                return this.$store.getters[this.store_name + '/filters'];
+            }
         },
         methods: {
             /**
@@ -597,47 +597,23 @@ export let routesComponentsTemplates = {
             fetchData() {
                 this.initLoading();
 
-                this.setFilters(this.qs_url, this.generateBaseFilters());
-                this.data.filters = this.getFilters(this.qs_url);
-
-                let qs = this.setQuerySet(this.view, this.qs_url)
-                    .filter(this.getFiltersPrepared(this.qs_url))
-                    .prefetch();
-                this.setQuerySet(this.view, this.qs_url, qs);
-
-                this.getInstancesList(this.view, this.qs_url)
-                    .then((instances) => {
-                        this.setLoadingSuccessful();
-
-                        this.setInstancesToData(instances);
-
-                        if (this.view.schema.autoupdate) {
-                            this.startAutoUpdate();
-                        }
-                    })
-                    .catch((error) => {
-                        this.setLoadingError(error);
-                    });
+                this.$store.dispatch(
+                {
+                    type: `${this.store_name}/fetchData`,
+                    view: this.view,
+                    url: this.url,
+                    filters: this.generateBaseFilters(),
+                    many: true
+                }).then((instances) => {
+                    this.setLoadingSuccessful();
+                    if (this.view.schema.autoupdate) {
+                        this.startAutoUpdate();
+                    }
+                }).catch((error) => {
+                    this.setLoadingError(error);
+                })
 
                 this.getParentInstancesForPath();
-            },
-            /**
-             * Method, that sets instances to data.instances prop.
-             * @param {array} instances Array with instances.
-             */
-            setInstancesToData(instances) {
-                this.data.instances = instances;
-                this.data.pagination.count = this.getQuerySet(this.view, this.qs_url).api_count;
-                this.data.pagination.page_number = this.getFiltersPrepared(this.qs_url).page || 1;
-            },
-
-            /**
-             * Method, that returns promise to get view model instances.
-             * @param {object} view JS object, with options for a current view.
-             * @param {string} url QuerySet URL.
-             */
-            getInstancesList(view, url) {
-                return this.getQuerySet(view, url).items();
             },
             /**
              * Method, that creates object for saving info about
@@ -656,7 +632,7 @@ export let routesComponentsTemplates = {
              * @return {object}
              */
             generateBaseFilters() {
-                let limit = this.data.pagination.page_size;
+                let limit = this.datastore.data.pagination.page_size;
                 let page = this.$route.query.page || 1;
                 let query = {
                     limit: limit,
@@ -666,36 +642,11 @@ export let routesComponentsTemplates = {
                 return $.extend(true, query, this.$route.query);
             },
             /**
-             * Method, that saves object with values of QuerySet filters in store.
-             * @param {string} url QuerySet URL.
-             * @param {object} filters Values of QuerySet filters.
-             * @return {object}
-             */
-            setFilters(url, filters) {
-                url = url.replace(/^\/|\/$/g, '');
-                this.$store.commit('setFilters', {
-                    url: url,
-                    filters: filters,
-                });
-            },
-            /**
-             * Method, that returns object with object,
-             * that has values of QuerySet filters from store.
-             * This object has specific structure (cache.data).
-             * This was done to have opportunity of guiFields usage.
-             * @param {string} url QuerySet URL.
-             * @return {object}
-             */
-            getFilters(url) {
-                return this.$store.getters.getFilters(url.replace(/^\/|\/$/g, ''));
-            },
-            /**
              * Method, that returns object with values of QuerySet filters from store.
-             * @param {string} url QuerySet URL.
              * @return {object}
              */
-            getFiltersPrepared(url) {
-                let filters = this.getFilters(url).cache.data;
+            getFiltersPrepared() {
+                let filters = {...this.filters};
 
                 for (let key in filters) {
                     if (Object.prototype.hasOwnProperty.call(filters, key) && filters[key] === undefined) {
@@ -711,7 +662,7 @@ export let routesComponentsTemplates = {
              */
             filterInstances() {
                 let hidden_filters = ['offset', 'limit', 'page'];
-                let filters = this.getFiltersPrepared(this.qs_url);
+                let filters = this.getFiltersPrepared();
 
                 for (let filter in filters) {
                     if (hidden_filters.includes(filter)) {
@@ -719,7 +670,7 @@ export let routesComponentsTemplates = {
                     }
                 }
 
-                this.openPage({
+                return this.openPage({
                     name: this.$route.name,
                     params: this.$route.params,
                     query: filters,
@@ -755,8 +706,8 @@ export let routesComponentsTemplates = {
              */
             removeInstance({ instance_id }) {
                 let instance;
-                for (let index = 0; index < this.data.instances.length; index++) {
-                    instance = this.data.instances[index];
+                for (let index = 0; index < this.datastore.data.instances.length; index++) {
+                    instance = this.datastore.data.instances[index];
 
                     if (instance.getPkValue() === instance_id) {
                         break;
@@ -780,8 +731,8 @@ export let routesComponentsTemplates = {
                         continue;
                     }
 
-                    for (let index = 0; index < this.data.instances.length; index++) {
-                        let instance = this.data.instances[index];
+                    for (let index = 0; index < this.datastore.data.instances.length; index++) {
+                        let instance = this.datastore.data.instances[index];
                         if (id === '' + instance.getPkValue()) {
                             this._removeInstance(instance);
                         }
@@ -991,6 +942,21 @@ export let routesComponentsTemplates = {
              */
             fetchData() {
                 this.initLoading();
+                // this.$store.dispatch(
+                // {
+                //     type: `${this.store_name}/fetchData`,
+                //     view: this.view,
+                //     url: this.url,
+                //     many: false
+                // }).then((instances) => {
+                //     this.setLoadingSuccessful();
+                //     if (this.view.schema.autoupdate) {
+                //         this.startAutoUpdate();
+                //     }
+                // }).catch((error) => {
+                //     this.setLoadingError(error);
+                // })
+
                 this.getInstance(this.view, this.qs_url)
                     .then((instance) => {
                         this.setLoadingSuccessful();
@@ -1010,7 +976,7 @@ export let routesComponentsTemplates = {
              * Redefinition of 'getBreadcrumbNameForCurrentPath()' from base mixin.
              */
             getBreadcrumbNameForCurrentPath() {
-                if (!isEmptyObject(this.data.instance) && this.data.instance.data) {
+                if (!isEmptyObject(this.datatype.data.instance) && this.datatype.data.instance.data) {
                     return this.data.instance.getViewFieldValue();
                 }
             },

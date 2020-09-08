@@ -5,7 +5,7 @@
                 <h3>{{ $t('filters') | capitalize }}</h3>
             </template>
             <template v-slot:body>
-                <filters_wrapper :opt="opt" :view="view" :filters_data="data.filters"></filters_wrapper>
+                <filters_wrapper :opt="opt" :view="view" :filters_data="enteredFields"></filters_wrapper>
             </template>
             <template v-slot:footer>
                 <button class="btn btn-default btn-close-filters-modal" @click="close" aria-label="Cancel">
@@ -32,7 +32,15 @@
     export default {
         name: 'gui_filters_modal',
         mixins: [ModalWindowAndButtonMixin],
-        props: ['opt', 'view', 'data'],
+        props: ['opt', 'view', 'data', 'datastore'],
+        data: function () {
+            return {
+                'enteredFields': {}
+            }
+        },
+        created() {
+            this.enteredFields = {...this.datastore.data.filters};
+        },
         computed: {
             is_there_any_filter_to_display() {
                 return Object.values(this.view.schema.filters).some((filter) => !filter.options.hidden);
@@ -40,8 +48,17 @@
         },
         methods: {
             filter() {
-                this.$root.$refs.currentViewComponent.filterInstances();
-            },
+                this.$store.commit({
+                    type: this.datastore.statePath + '/setFilters',
+                    filters: this.enteredFields
+                });
+                this.$root.$refs.currentViewComponent.filterInstances()
+                    .then((error) => {
+                        if (error instanceof Error && error.name === 'NavigationDuplicated') {
+                            this.close();
+                        }
+                    });
+            }
         },
     };
 </script>

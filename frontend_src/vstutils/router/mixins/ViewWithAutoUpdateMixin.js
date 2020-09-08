@@ -1,12 +1,9 @@
-import ComponentIDMixin from '../../ComponentIDMixin.js';
-
 /**
  * Mixin for views, that are able to send autoupdate requests.
  *
  * @vue/component
  */
 const ViewWithAutoUpdateMixin = {
-    mixins: [ComponentIDMixin],
     data() {
         return {
             autoupdateQsUrl: null,

@@ -8,7 +8,7 @@
      */
     export default {
         name: 'base_page_type_mixin',
-        props: ['data', 'view', 'opt'],
+        props: ['datastore', 'data', 'view', 'opt'],
         data() {
             return {
                 options: {

@@ -1,6 +1,9 @@
 import $ from 'jquery';
 import Vuex from 'vuex';
+import Vue from 'vue';
 import AutoUpdateStoreModule from '../autoupdate/AutoUpdateStoreModule.js';
+import ComponentStoreModule from './components_state';
+import { COMPONENTS_MODULE_NAME } from './components_state/mutation-types'
 
 /**
  * Class, that manages Store creation.
@@ -22,6 +25,7 @@ export class StoreConstructor {
             actions: this.getStore_actions(),
             modules: {
                 autoupdate: AutoUpdateStoreModule,
+                [COMPONENTS_MODULE_NAME]: ComponentStoreModule,
             },
         };
     }
@@ -79,7 +83,7 @@ export class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             setQuerySet(state, obj) {
-                state.objects[obj.url] = obj.queryset;
+                Vue.set(state.objects, obj.url || obj.queryset.url, obj.queryset);
             },
             /**
              * Mutation, that deletes from state.objects current queryset
@@ -88,7 +92,7 @@ export class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             deleteQuerySet(state, obj) {
-                delete state.objects[obj.url];
+                Vue.delete(state.objects, obj.url)
             },
             /**
              * Mutation, that creates selection dict for a view with current URL.
@@ -96,7 +100,7 @@ export class StoreConstructor {
              * @param {string} url View's URL.
              */
             setSelection(state, url) {
-                state.selections[url] = {};
+                Vue.set(state.selections, url, {})
             },
             /**
              * Mutation, that changes selection dict record value to opposite.
@@ -151,7 +155,7 @@ export class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             setQuerySetInSandBox(state, obj) {
-                state.sandbox[obj.url] = obj.queryset;
+                Vue.set(state.sandbox, obj.url || obj.queryset.url, obj.queryset);
             },
             /**
              * Mutation, that deletes from state.sandbox current queryset
@@ -160,7 +164,7 @@ export class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             deleteQuerySetFromSandBox(state, obj) {
-                delete state.sandbox[obj.url];
+                Vue.delete(state.sandbox, obj.url)
             },
             /**
              * Mutation, that creates filters dict for view with current URL.
@@ -168,11 +172,11 @@ export class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             setFilters(state, obj) {
-                state.filters[obj.url] = {
+                Vue.set(state.filters, obj.url, {
                     cache: {
                         data: obj.filters,
-                    },
-                };
+                    }
+                })
             },
             /**
              * Mutation, that saves widgets data in store.
@@ -180,7 +184,7 @@ export class StoreConstructor {
              * @param {object} obj Object with arguments for this mutation.
              */
             setWidgets(state, obj) {
-                state.widgets[obj.url] = obj.data;
+                Vue.set(state.widgets, obj.url, obj.data);
             },
         };
     }

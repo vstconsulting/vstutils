@@ -68,7 +68,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-12 buttons-row-wrapper">
-                            <gui_buttons_row :view="view" :data="data" :opt="opt"></gui_buttons_row>
+                            <gui_buttons_row :view="view" :data="data" :opt="opt" :datastore="datastore"></gui_buttons_row>
                         </div>
                     </div>
                     <div class="row">
@@ -79,6 +79,7 @@
                                     :data="data"
                                     :view="view"
                                     :opt="opt"
+                                    :datastore="datastore"
                                 ></component>
                                 <template v-if="multi_actions_button_component">
                                     <component
@@ -86,6 +87,7 @@
                                         :data="data"
                                         :view="view"
                                         :opt="opt"
+                                        :datastore="datastore"
                                     ></component>
                                 </template>
                             </template>
@@ -97,6 +99,7 @@
                                             :data="data"
                                             :view="view"
                                             :opt="opt"
+                                            :datastore="datastore"
                                         ></component>
                                         <button
                                             type="button"
@@ -122,6 +125,7 @@
                                                 :data="data"
                                                 :view="view"
                                                 :opt="opt"
+                                                :datastore="datastore"
                                             ></component>
                                         </div>
                                     </transition>
@@ -135,6 +139,7 @@
                                                 :data="data"
                                                 :view="view"
                                                 :opt="opt"
+                                                :datastore="datastore"
                                             ></component>
                                         </div>
                                     </transition>
@@ -144,6 +149,7 @@
                                     :data="data"
                                     :view="view"
                                     :opt="opt"
+                                    :datastore="datastore"
                                     v-if="content_additional"
                                 ></component>
                             </template>

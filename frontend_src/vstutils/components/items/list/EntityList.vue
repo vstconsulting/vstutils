@@ -6,7 +6,7 @@
             </p>
         </template>
         <template v-else>
-            <gui_list_table :instances="data.instances" :fields="fields" :view="view" :opt="opt" />
+            <gui_list_table :instances="datastore.data.instances" :fields="fields" :view="view" :opt="opt" />
         </template>
     </div>
 </template>
@@ -19,13 +19,13 @@
      */
     export default {
         name: 'gui_entity_list',
-        props: ['data', 'view', 'opt'],
+        props: ['datastore', 'data', 'view', 'opt'],
         computed: {
             fields() {
                 return this.view.objects.model.fields;
             },
             is_empty() {
-                return isEmptyObject(this.data.instances);
+                return isEmptyObject(this.datastore.data.instances);
             },
         },
     };
