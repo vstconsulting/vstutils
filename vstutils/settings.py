@@ -375,6 +375,21 @@ MIDDLEWARE: _t.List[_t.Text] = [
 
 EXCLUDE_FROM_MINIFYING = []
 
+MIDDLEWARE_ENDPOINT_CONTROL = {
+    'remove': [
+        'corsheaders.middleware.CorsMiddleware',
+        'htmlmin.middleware.HtmlMinifyMiddleware',
+        'htmlmin.middleware.MarkRequestMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware'
+    ],
+    'prepend': [
+        'vstutils.api.endpoint.BulkMiddleware'
+    ],
+    'append': []
+}
+
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 

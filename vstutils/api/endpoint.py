@@ -26,6 +26,7 @@ from .decorators import cache_method_result
 from .serializers import DataSerializer
 from .validators import UrlQueryStringValidator
 from ..utils import Dict, raise_context
+from ..middleware import BaseMiddleware
 
 RequestType = _t.Union[drf_request.Request, HttpRequest]
 logger: logging.Logger = logging.getLogger('vstutils')
@@ -123,29 +124,22 @@ class BulkRequestType(drf_request.Request, HttpRequest):
     successful_authenticator: _t.Optional[BaseAuthentication]
 
 
-class BulkClientHandler(ClientHandler):
-    @modify_settings(MIDDLEWARE={
-        'remove': [
-            'corsheaders.middleware.CorsMiddleware',
-            'htmlmin.middleware.HtmlMinifyMiddleware',
-            'htmlmin.middleware.MarkRequestMiddleware',
-            'django.middleware.csrf.CsrfViewMiddleware',
-            'django.middleware.clickjacking.XFrameOptionsMiddleware',
-            'django.contrib.auth.middleware.AuthenticationMiddleware'
-        ]
-    })
-    def __init__(self, *args, **kwargs):
-        super().__init__(enforce_csrf_checks=False, *args, **kwargs)
-        if self.__class__.__name__ == 'BulkClientHandler':
-            self.load_middleware()
-
-    def get_response(self, request: HttpRequest):
+class BulkMiddleware(BaseMiddleware):
+    def request_handler(self, request: HttpRequest) -> HttpRequest:
         request.is_bulk = True  # type: ignore
         if 'user' in request.META:
             request.user = request.META.pop('user')
             # pylint: disable=protected-access
             request._cached_user = request.user  # type: ignore
-        return super().get_response(request)
+        return request
+
+
+class BulkClientHandler(ClientHandler):
+    @modify_settings(MIDDLEWARE=settings.MIDDLEWARE_ENDPOINT_CONTROL)
+    def __init__(self, *args, **kwargs):
+        super().__init__(enforce_csrf_checks=False, *args, **kwargs)
+        if self.__class__.__name__ == 'BulkClientHandler':
+            self.load_middleware()
 
 
 class BulkClient(Client):
