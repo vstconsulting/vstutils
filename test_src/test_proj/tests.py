@@ -1763,6 +1763,8 @@ class CustomModelTestCase(BaseTestCase):
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')
         self.assertEqual(response.status_code, 302)
+        response = self.client.get('/suburls_module/admin/login/')
+        self.assertEqual(response.status_code, 302)
         response = self.client.get('/suburls/login/')
         self.assertEqual(response.status_code, 302)
 

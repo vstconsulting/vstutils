@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import traceback
+import types
 import typing as tp
 import warnings
 from pathlib import Path
@@ -22,6 +23,7 @@ from django.template import loader
 from django.utils import translation
 from django.utils.module_loading import import_string as import_class
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import View
 
 from . import exceptions as ex
 
@@ -906,14 +908,20 @@ class URLHandlers(ObjectHandlers):
         if regexp in self.settings_urls:
             regexp = rf'^{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
-        if hasattr(view_class, 'as_view'):
+        namespace = view_kwargs.pop('namespace', 'gui')
+        if isinstance(view_class, View) or hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
                 view = csrf_exempt(view)
-            result = url(regexp, view, *args, **options)
+            return url(regexp, view, *args, **options)
+        elif (isinstance(view_class, types.ModuleType) and
+              hasattr(view_class, 'urlpatterns') and
+              hasattr(view_class, 'app_name')):
+            result = view_class
+            namespace = None
         else:
-            result = url(regexp, include(view_class))
-        return result
+            result = (view_class, 'gui')  # type: ignore
+        return url(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
     def urls(self) -> tp.Iterable:
         for regexp in self.list():

@@ -58,6 +58,17 @@ GUI_VIEWS[r'^csrf_disable_gui/$'] = {
 GUI_VIEWS[r'^suburls/'] = {
     'BACKEND': 'test_proj.suburls.urlpatterns'
 }
+GUI_VIEWS[r'^suburls_namespaced/'] = {
+    'BACKEND': 'test_proj.suburls.urlpatterns',
+    'OPTIONS': {
+        'view_kwargs': {
+            'namespace': 'suburls_namespaced'
+        }
+    }
+}
+GUI_VIEWS[r'^suburls_module/'] = {
+    'BACKEND': 'test_proj.suburls'
+}
 GUI_VIEWS[r'^registration/$'] = VIEWS['USER_REGISTRATION']
 
 DEBUG = True
