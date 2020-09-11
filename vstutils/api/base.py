@@ -4,6 +4,7 @@ Default ViewSets for web-api.
 
 import sys
 import logging
+import inspect
 import traceback
 import typing as _t
 from collections import namedtuple
@@ -390,19 +391,21 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
     schema = None  # type: ignore
 
     @property
-    def methods(self) -> _t.List[_t.Text]:
-        this_class_dict = ListNonModelViewSet.__dict__
-        obj_class_dict = self.__class__.__dict__
-        new_methods = list()
-        for name, attr in obj_class_dict.items():
-            detail = getattr(attr, 'detail', True)
-            if name not in this_class_dict and not detail:
-                new_methods.append(name.replace('_', "-"))
-        return new_methods
+    def methods(self) -> _t.Iterable[_t.Text]:
+        def is_list_action(attr):
+            if not inspect.isfunction(attr):
+                return False
+            elif not hasattr(attr, 'url_path'):
+                return False
+            elif getattr(attr, 'detail', True):
+                return False
+            return True
+
+        return map(lambda x: x[0].replace('_', "-"), inspect.getmembers(self.__class__, is_list_action))
 
     def list(self, request: Request, *args, **kwargs) -> responses.BaseResponseClass:
         routes = {
-            method: reverse(f"{self.base_name}-{method}", request=request)
+            method: reverse(f"{request.version}:{self.base_name}-{method}", request=request)
             for method in self.methods
         }
         return responses.HTTP_200_OK(routes)

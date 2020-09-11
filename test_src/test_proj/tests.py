@@ -487,6 +487,12 @@ class ViewsTestCase(BaseTestCase):
             TIME_ZONE=self.settings_obj.TIME_ZONE
         )
         self.details_test('/api/v1/settings/system/', PY=self.settings_obj.PY_VER)
+        with self.user_as(self, test_user):
+            result = self.get_result('get', '/api/v2/settings/')
+        self.assertIn('new-action', result)
+        self.assertNotIn('new-action-detail', result)
+        self.assertIn('system', result)
+        self.assertNotIn('localization', result)
 
     def test_users_api(self):
         self.list_test('/api/v1/user/', 1)

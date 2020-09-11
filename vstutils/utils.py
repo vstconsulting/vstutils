@@ -909,6 +909,7 @@ class URLHandlers(ObjectHandlers):
             regexp = rf'^{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
         namespace = view_kwargs.pop('namespace', 'gui')
+        result: tp.Union[tp.Tuple, types.ModuleType]
         if isinstance(view_class, View) or hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
@@ -920,7 +921,7 @@ class URLHandlers(ObjectHandlers):
             result = view_class
             namespace = None
         else:
-            result = (view_class, 'gui')  # type: ignore
+            result = (view_class, 'gui')
         return url(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
     def urls(self) -> tp.Iterable:
