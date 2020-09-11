@@ -8,7 +8,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 from django.conf import settings
 from django.http.request import HttpRequest
-from .utils import ObjectHandlers, raise_context
+from .utils import SecurePickling, ObjectHandlers, raise_context, raise_context_decorator_with_default
 try:
     from .ldap_utils import LDAP as _LDAP
     HAS_LDAP = True
@@ -20,6 +20,7 @@ UserModel = get_user_model()
 AuthRes = _t.Optional[UserModel]
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
 user_cache_prefix = 'auth_user_id_val'
+secure_serializer = SecurePickling()
 
 
 if settings.CACHE_AUTH_USER:
@@ -31,17 +32,31 @@ if settings.CACHE_AUTH_USER:
         cache.delete(f'{user_cache_prefix}_{instance.id}')
 
 
+@raise_context_decorator_with_default(default=None)
+def get_secured_cache(key) -> AuthRes:
+    user = cache.get(key)
+    if isinstance(user, UserModel):
+        return user  # nocv
+    elif isinstance(user, str):
+        return secure_serializer.loads(user)
+
+
+@raise_context()
+def set_secured_cache(key, value):
+    cache.set(key, secure_serializer.dumps(value))
+
+
 def cache_user_decorator(func):
     if not settings.CACHE_AUTH_USER:
         return func  # nocv
 
     def wrapper(backend, user_id: int):
         cache_key = f'{user_cache_prefix}_{user_id}'
-        user = cache.get(cache_key)
+        user = get_secured_cache(cache_key)
         if user is None:
             user = func(backend, user_id)
         if isinstance(user, UserModel):
-            cache.set(cache_key, user)
+            set_secured_cache(cache_key, user)
         return user
 
     return wrapper
