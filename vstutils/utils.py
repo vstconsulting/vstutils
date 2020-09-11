@@ -466,7 +466,25 @@ class BaseVstObject:
 
 class SecurePickling(BaseVstObject):
     """
-    Secured pickle wrapper.
+    Secured pickle wrapper by Vigenère cipher.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import SecurePickling
+
+
+            serializer = SecurePickling('password')
+
+            # Init secret object
+            a = {"key": "value"}
+            # Serialize object with secret key
+            pickled = serializer.dumps(a)
+            # Deserialize object
+            unpickled = serializer.loads(pickled)
+
+            # Check, that object is correct
+            assert a == unpickled
     """
     __slots__ = ('secure_key',)
 
@@ -474,7 +492,6 @@ class SecurePickling(BaseVstObject):
         """
         :param secure_key: Secret key for encoding.
         """
-
         if secure_key is None:
             secure_key = self.get_django_settings('SECRET_KEY')
         self.secure_key = str(secure_key)
