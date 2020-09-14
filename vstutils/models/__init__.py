@@ -6,13 +6,12 @@ from __future__ import unicode_literals
 from django.db import models
 
 from .base import ModelBaseClass
-from .manager import BaseManager
 from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
 
 
-class Manager(BaseManager.from_queryset(BQuerySet)):
+class Manager(models.Manager.from_queryset(BQuerySet)):
     """
     Default VSTUtils manager. Used by `BaseModel` and `BModel`.
     Allows to use managers and querysets with cyfunctions-members.

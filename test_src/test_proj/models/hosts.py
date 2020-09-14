@@ -17,6 +17,11 @@ class HostQuerySet(BQuerySet):
     def test_filter(self):
         return self.filter(name__startswith='test_')
 
+    def test_filter2(self):
+        return self.test_filter()
+
+    test_filter2.queryset_only = True
+
 
 class Host(BModel):
     objects = Manager.from_queryset(HostQuerySet)()

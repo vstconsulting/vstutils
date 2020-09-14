@@ -20,6 +20,10 @@ def ensure_is_object(obj):
     return obj
 
 
+def _is_extra_action(attr):
+    return hasattr(attr, 'mapping')
+
+
 def _create_with_iteration(get_serializer_func, nested_manager, data):
     serializer = get_serializer_func(data=data)
     serializer.is_valid(raise_exception=True)
@@ -399,7 +403,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'queryset_filters'
     )
     view: _t.Optional[_t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]
-    allowed_subs: _t.List[_t.Text]
+    allowed_subs: _t.Optional[_t.Union[_t.List[_t.Text], _t.Tuple]]
     serializers: _t.Tuple[serializers.Serializer, serializers.Serializer]
     methods: _t.Optional[_t.List[_t.Text]]
     queryset_filters: _t.List
@@ -411,10 +415,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def __init__(self, name, arg=None, methods=None, *args, **kwargs):
         self.view = kwargs.pop('view', None)
-        self.allowed_subs = kwargs.pop('subs', [])
+        self.allowed_subs = kwargs.pop('subs', ())
         self.queryset_filters = kwargs.pop('queryset_filters', [])
         super().__init__(name, arg, *args, **kwargs)
-        self._subs = self.get_subs()
+        self._subs = set(self.get_subs())
 
         if self.view is None:
             raise self.NoView()
@@ -442,23 +446,19 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         return (serializer_class, serializer_class_one)
 
-    def _get_subs_from_view(self) -> _t.Sequence:
+    def _get_subs_from_view(self) -> _t.Iterable:
         # pylint: disable=protected-access
-        def _is_extra_action(attr):
-            return hasattr(attr, 'mapping')
-
         extra_acts = map(lambda x: x[0], getmembers(self.view, _is_extra_action))
         filter_subs = self.filter_subs
-        return list(filter(lambda name: name not in filter_subs, extra_acts))
+        return filter(lambda name: name not in filter_subs, extra_acts)
 
-    def get_subs(self) -> _t.Sequence:
+    def get_subs(self) -> _t.Iterable:
         subs = self._get_subs_from_view()
 
         if self.allowed_subs is None:
             return []
         elif self.allowed_subs:
-            allowed_subs = set(self.allowed_subs)
-            subs = list(allowed_subs.intersection(subs))
+            return set(self.allowed_subs).intersection(subs)
 
         return subs
 
