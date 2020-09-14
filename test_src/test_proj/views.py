@@ -141,7 +141,7 @@ class RequestInfoTestView(NonModelsViewSet):
 class TestUserViewSet(UserViewSet):
     @action(methods=['get'], detail=True)
     def test_bulk_perf(self, request, *args, **kwargs):
-        time.sleep(0.01)
+        time.sleep(0.001)
         return responses.HTTP_200_OK({'id': request.user.id})
 
 

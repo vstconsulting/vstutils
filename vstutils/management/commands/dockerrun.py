@@ -28,6 +28,11 @@ class Command(BaseCommand):
             default=60,
             dest='attempts', help='The number of attempts to migrate.',
         )
+        parser.add_argument(
+            '--migrate-attempts-sleep-time', '-t',
+            default=1,
+            dest='attempts_timeout', help='The number of attempts to migrate.',
+        )
 
     def handle(self, *args, **options):
         super().handle(*args, **options)
@@ -63,7 +68,7 @@ class Command(BaseCommand):
             except:
                 error = traceback.format_exc()
                 self._print(f"Retry #{i}...", 'WARNING')
-                time.sleep(1)
+                time.sleep(options.get('attempts_timeout', 1))
             else:
                 success = True
                 break

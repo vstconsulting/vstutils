@@ -548,7 +548,7 @@ class Executor(BaseVstObject):
         stream_object = getattr(proc, stream)
         while not stream_object.closed:
             self.working_handler(proc)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
     def working_handler(self, proc: subprocess.Popen) -> None:
         # pylint: disable=unused-argument

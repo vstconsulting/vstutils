@@ -167,7 +167,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
     def test_dockerrun(self):
         with self.patch('subprocess.check_call') as mock_obj:
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
-            call_command('dockerrun')
+            call_command('dockerrun', attempts=4, attempts_timeout=0.01)
             self.maxDiff = 1024 * 100
             self.assertEqual(mock_obj.call_count, 2)
             self.assertEqual(
@@ -181,7 +181,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
             mock_obj.side_effect = check_call_error
             with self.assertRaises(SystemExit):
-                call_command('dockerrun', attempts=1)
+                call_command('dockerrun', attempts=1, attempts_timeout=0.0001)
 
 
 class VSTUtilsTestCase(BaseTestCase):
