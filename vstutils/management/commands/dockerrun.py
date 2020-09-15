@@ -241,6 +241,11 @@ class Command(BaseCommand):
             'pidfile': os.getenv(f'{prefix}_UWSGI_PIDFILE', '/run/web.pid'),
             'daemon': 'false'
         }
+        current_addr, current_port = self._settings('WEB_ADDRPORT').split(',')[0].split(':')
+        config['uwsgi']['addrport'] = (
+            f"{os.getenv(f'{prefix}_WEB_HOST', current_addr)}:"
+            f"{os.getenv(f'{prefix}_WEB_PORT', current_port)}"
+        )
 
         # Set worker settings
         config['rpc']['enable_worker'] = 'false'
