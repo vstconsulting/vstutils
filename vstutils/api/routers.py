@@ -26,7 +26,7 @@ class _AbstractRouter(routers.DefaultRouter):
         return self.custom_urls
 
     def _get_views_custom_list(self, view_request, registers):
-        routers_list = dict()
+        routers_list = {}
         fpath = view_request.get_full_path().split("?")
         absolute_uri = view_request.build_absolute_uri(fpath[0])
         for prefix, _, name in self._get_custom_lists():

@@ -840,7 +840,7 @@ class ObjectHandlers(BaseVstObject):
         self.type = type_name
         self.err_message = err_message
         self._list: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
-        self._loaded_backends: tp.Dict[tp.Text, tp.Any] = dict()
+        self._loaded_backends: tp.Dict[tp.Text, tp.Any] = {}
 
     @property
     def objects(self):

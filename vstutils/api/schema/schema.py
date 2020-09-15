@@ -43,8 +43,12 @@ class VSTAutoSchema(SwaggerAutoSchema):
         if nested_view is None:
             return nested_view
 
-        nested_view_class = getattr(view_action_func, '_nested_view', None)
-        view_action_func = getattr(nested_view_class, nested_action_name, None)
+        if hasattr(view_action_func, '_nested_view'):
+            nested_view_class = view_action_func._nested_view
+            view_action_func = getattr(nested_view_class, nested_action_name, None)
+        else:  # nocv
+            nested_view_class = None
+            view_action_func = None
 
         if view_action_func is None:
             return nested_view

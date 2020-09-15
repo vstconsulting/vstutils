@@ -85,7 +85,7 @@ def nested_action(
     request_arg = kwargs.pop('request_arg', f'{name}_{arg}')
     request_arg = request_arg if arg else None
     append_arg = kwargs.pop('append_arg', arg)
-    sub_options = kwargs.pop('sub_opts', dict())
+    sub_options = kwargs.pop('sub_opts', {})
     path = __get_nested_subpath(name, request_arg, arg_regexp, empty_arg, **sub_options)
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
@@ -151,7 +151,7 @@ def subaction(*args, **kwargs):
 
     def decorator(func: _t.Callable):
         func_object = action(*args, **kwargs)(func)
-        override_kw = dict()
+        override_kw = {}
         if response_code:
             override_kw['responses'] = {
                 response_code: response_serializer()
@@ -234,7 +234,7 @@ class NestedViewMixin:
 
     @transaction.atomic()
     def dispatch_route(self, nested_sub=None) -> base.RestResponse:
-        kwargs = dict()
+        kwargs = {}
         if nested_sub:
             self.action = nested_sub
         else:
@@ -559,7 +559,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         kwargs = dict(self.kwargs)
         kwargs['methods'] = self.methods
         kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
-        kwargs['filterset_class'] = getattr(self.view, 'filterset_class', getattr(self.view, 'filter_class', []))
+        kwargs['filterset_class'] = getattr(self.view, 'filterset_class', []) or getattr(self.view, 'filter_class', [])
         kwargs.update(options)
         return nested_action(*args, **kwargs)
 

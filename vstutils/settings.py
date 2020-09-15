@@ -410,7 +410,7 @@ DEFAULT_AUTH_PLUGIN_LIST: _t.Text = 'DJANGO,LDAP'
 
 
 def get_plugins():
-    plugins = dict()
+    plugins = {}
     for plugin_name in main.getlist('auth-plugins', fallback=DEFAULT_AUTH_PLUGIN_LIST):
         if plugin_name in DEFAULT_AUTH_PLUGINS:
             data = DEFAULT_AUTH_PLUGINS[plugin_name]

@@ -25,11 +25,9 @@ class SuperUserPermission(IsAuthenticatedOpenApiRequest):
         if request.user.is_staff or request.method in permissions.SAFE_METHODS:
             # pylint: disable=bad-super-call
             return super(IsAuthenticatedOpenApiRequest, self).has_permission(request, view)
-        obj = None
         with raise_context():
-            obj = view.get_object() or obj
-        if isinstance(obj, AbstractUser) and obj == request.user:
-            return True
+            return issubclass(view.get_queryset().model, AbstractUser)\
+                   and str(view.kwargs['pk']) == str(request.user.pk)
         return self.is_openapi(request)
 
     def has_object_permission(self, request, view, obj):

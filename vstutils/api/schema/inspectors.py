@@ -75,7 +75,7 @@ def field_have_redirect(field, **kwargs):
         return kwargs
 
     if kwargs.get('additionalProperties', None) is None:
-        kwargs['additionalProperties'] = dict()
+        kwargs['additionalProperties'] = {}
     kwargs['additionalProperties']['redirect'] = True
 
     return kwargs
