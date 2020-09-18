@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import $ from 'jquery';
 import moment from 'moment';
 import { LocalSettings } from './localSettings';
@@ -803,9 +802,10 @@ export function getDependenceValueAsString(parent_data_object, field_name, separ
         return data.map((data) => data.value).join(separator);
     } else if (typeof data === 'object' && data !== null && data.value !== undefined && data.value !== null) {
         return data.value;
+    } else if (typeof data === 'string') {
+        return data;
     }
 }
-
 
 /**
  * Simple object check.
@@ -813,13 +813,13 @@ export function getDependenceValueAsString(parent_data_object, field_name, separ
  * @returns {boolean}
  */
 export function isObject(item) {
-  return (item && typeof item === 'object' && !Array.isArray(item));
+    return item && typeof item === 'object' && !Array.isArray(item);
 }
 
 /**
- * Deep merge two objects.
- * @param { object } target
- * @param { ...object } sources
+ * Deep merge two objects, for arrays inside source objects shallow copy will be created.
+ * @param {Object} target
+ * @param {...Object} sources
  */
 export function mergeDeep(target, ...sources) {
     if (!sources.length) return target;
@@ -828,10 +828,12 @@ export function mergeDeep(target, ...sources) {
     if (isObject(target) && isObject(source)) {
         for (const key in source) {
             if (isObject(source[key])) {
-                if (!target[key]) Object.assign(target, {[key]: {}});
+                if (!target[key]) Object.assign(target, { [key]: {} });
                 mergeDeep(target[key], source[key]);
+            } else if (Array.isArray(source[key])) {
+                target[key] = source[key].slice();
             } else {
-                Object.assign(target, {[key]: source[key]});
+                Object.assign(target, { [key]: source[key] });
             }
         }
     }

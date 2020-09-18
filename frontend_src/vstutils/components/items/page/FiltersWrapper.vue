@@ -1,15 +1,15 @@
 <template>
     <div class="container-fluid">
         <div class="row">
-            <div
+            <component
+                :is="'field_' + field.options.format"
                 v-for="(field, idx) in fieldsToShow"
                 :key="idx"
-                :field="field"
-                :is="'field_' + field.options.format"
                 v-model="data_to_represent[field.options.name]"
+                :field="field"
                 :wrapper_opt="wrapper_opt"
                 :prop_data="data_to_represent"
-            ></div>
+            />
         </div>
     </div>
 </template>

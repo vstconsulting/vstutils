@@ -19,14 +19,17 @@ const ViewWithParentInstancesForPath = {
                     continue;
                 }
 
-                this.getInstance(views[obj.path], this.getSubViewUrl(obj, views))
-                    .then((instance) => {
-                        this.data.parent_instances[obj.url] = instance;
-                        this.data.parent_instances = { ...this.data.parent_instances };
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+                // TODO do something with breadcrumbs
+                // this.getInstance(views[obj.path], this.getSubViewUrl(obj, views))
+                //     .then((instance) => {
+                //         this.commitMutation('setParentInstances', {
+                //             ...this.datastore.data.parent_instances,
+                //             [obj.url]: instance,
+                //         });
+                //     })
+                //     .catch((error) => {
+                //         console.log(error);
+                //     });
             }
         },
     },

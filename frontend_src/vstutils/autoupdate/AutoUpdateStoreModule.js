@@ -6,43 +6,23 @@ import Vue from 'vue';
 export default {
     namespaced: true,
     state: () => ({
-        querysets: {},
-        lastUpdate: -1,
+        actionsToInvoke: [],
     }),
     mutations: {
-        subscribe({ querysets }, { queryset, subscriberID }) {
-            if (!queryset) {
-                return;
+        subscribe({ actionsToInvoke }, action) {
+            if (action && actionsToInvoke.indexOf(action) === -1) {
+                actionsToInvoke.push(action);
             }
-
-            if (querysets[queryset] && querysets[queryset].indexOf(subscriberID) !== -1) {
-                return;
-            }
-            if (!querysets[queryset]) {
-                Vue.set(querysets, queryset, []);
-            }
-            querysets[queryset].push(subscriberID);
         },
 
-        unsubscribe({ querysets }, { queryset, subscriberID }) {
-            if (!queryset) {
-                return;
-            }
+        unsubscribe({ actionsToInvoke }, action) {
+            if (action) {
+                const actionIndex = actionsToInvoke.indexOf(action);
 
-            if (querysets[queryset]) {
-                const subscriberIndex = querysets[queryset].indexOf(subscriberID);
-                if (subscriberIndex !== -1) {
-                    querysets[queryset].splice(subscriberIndex, 1);
+                if (actionIndex !== -1) {
+                    Vue.delete(actionsToInvoke, actionIndex);
                 }
             }
-
-            if (querysets[queryset] && querysets[queryset].length === 0) {
-                Vue.delete(querysets, queryset);
-            }
-        },
-
-        updateDate(state) {
-            state.lastUpdate = Date.now();
         },
     },
 };

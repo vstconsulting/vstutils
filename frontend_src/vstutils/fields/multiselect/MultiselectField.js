@@ -6,6 +6,11 @@ import MultiselectFieldMixin from './MultiselectFieldMixin.js';
  * FK field, that allows to select several objects ta once.
  */
 class MultiselectField extends FKField {
+    constructor(options) {
+        super(options);
+
+        this._fetchData = false;
+    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */

@@ -1,10 +1,30 @@
-import $ from 'jquery';
-
 /**
  * Mixin for a views, that allows to edit data from API.
+ *
+ * @vue/component
  */
 const EditablePageMixin = {
+    provide() {
+        return {
+            updateFieldValue: this.updateFieldValue,
+        };
+    },
+    computed: {
+        instance() {
+            return this.datastore.data.instance;
+        },
+    },
     methods: {
+        /**
+         * Updates field value in store
+         * @param {Object} obj
+         * @param {string} obj.field
+         * @param {any} obj.value
+         */
+        updateFieldValue(obj) {
+            this.commitMutation('setFieldValue', obj);
+        },
+
         /**
          * Method, that creates copy of current view's QuerySet and save it in sandbox store.
          * Sandbox store is needed to have opportunity of:
@@ -34,10 +54,7 @@ const EditablePageMixin = {
                 });
             }
 
-            this.$store.commit('setQuerySetInSandBox', {
-                url: sandbox_qs.url,
-                queryset: sandbox_qs,
-            });
+            return sandbox_qs;
         },
 
         /**
@@ -89,29 +106,14 @@ const EditablePageMixin = {
             try {
                 let valid_data = {};
 
-                //////////////////////////////////////////////////////////////////
-                // @todo
-                // think about following 2 variables.
-                // mb we should get data from data.instance.data, not from store,
-                // so, data.instance.data should be reactive
-                //////////////////////////////////////////////////////////////////
-                let url = this.qs_url.replace(/^\/|\/$/g, '');
-                let data = $.extend(
-                    true,
-                    {},
-                    this.$store.getters.getViewInstanceData({
-                        store: 'sandbox',
-                        url: url,
-                    }),
-                );
+                const data = this.datastore.data.sandbox;
+                const toInnerData = {};
 
-                let toInnerData = {};
-
-                for (let [key, field] of Object.entries(this.data.instance.fields)) {
+                for (let [key, field] of Object.entries(this.instance.fields)) {
                     toInnerData[key] = field.toInner(data);
                 }
 
-                for (let [key, field] of Object.entries(this.data.instance.fields)) {
+                for (let [key, field] of Object.entries(this.instance.fields)) {
                     if (field.options.readOnly) {
                         continue;
                     }
@@ -123,7 +125,7 @@ const EditablePageMixin = {
                     }
                 }
 
-                if (this.getValidDataAdditional) {
+                if (typeof this.getValidDataAdditional === 'function') {
                     valid_data = this.getValidDataAdditional(valid_data);
                 }
 

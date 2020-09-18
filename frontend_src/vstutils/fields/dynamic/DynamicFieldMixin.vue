@@ -1,16 +1,21 @@
 <template>
-    <div style="display: contents;" v-show="!is_hidden">
+    <div v-show="!is_hidden" style="display: contents;">
         <component
             :is="'field_' + realField.options.format"
             :field="realField"
-            :wrapper_opt="wrapper_opt"
-            :prop_data="prop_data"
-        ></component>
+            :prop_data="_prop_data"
+            :datastore="datastore"
+            :wrapper_opt="{ ...wrapper_opt, hidden }"
+            @toggleHidden="toggleHidden"
+            @update-value="updateFieldValue"
+        />
     </div>
 </template>
 
 <script>
     export default {
+        inject: { updateFieldValue: { default: () => () => {} } },
+        props: ['prop_data'],
         data() {
             return {
                 /**
@@ -26,11 +31,21 @@
                  * It's needed for optimization of realField regeneration.
                  */
                 parent_values: {},
+                hidden: false,
             };
         },
-        created() {
-            this.realField = this.field.getRealField(this.data);
-            this.parent_values = this.field._getParentValues(this.data);
+        computed: {
+            _prop_data() {
+                if (this.prop_data) {
+                    return this.prop_data;
+                }
+
+                if (this.datastore && this.datastore.data.sandbox) {
+                    return this.datastore.data.sandbox;
+                }
+
+                return undefined;
+            },
         },
         watch: {
             /**
@@ -59,6 +74,15 @@
                         }
                     }
                 }
+            },
+        },
+        created() {
+            this.realField = this.field.getRealField(this.data);
+            this.parent_values = this.field._getParentValues(this.data);
+        },
+        methods: {
+            toggleHidden() {
+                this.hidden = !this.hidden;
             },
         },
     };

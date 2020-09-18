@@ -2,16 +2,26 @@ import { guiPopUp, pop_up_msg } from '../../popUp';
 
 /**
  * Mixin for views of page type, that have some data from API to represent.
+ * @vue/component
  */
 const PageWithDataMixin = {
     computed: {
+        instance() {
+            if (this.datastore) {
+                return this.datastore.data.instance;
+            }
+            return undefined;
+        },
         /**
          * Redefinition of 'title' from base mixin.
          */
-        title: function () {
-            if (typeof this.data.instance.getViewFieldValue === 'function') {
-                return this.data.instance.getViewFieldValue(this.view.schema.name);
+        title() {
+            // When title needed, view may still not have Model instance in datastore
+            const instance = this.datastore && this.instance && this.instance;
+            if (instance && typeof instance.getViewFieldValue === 'function') {
+                return instance.getViewFieldValue(this.view.schema.name);
             }
+
             return this.view.schema.name;
         },
     },
@@ -24,7 +34,7 @@ const PageWithDataMixin = {
          * @return {promise}
          */
         removeInstance() {
-            let instance = this.data.instance;
+            let instance = this.instance;
             instance
                 .delete()
                 // eslint-disable-next-line no-unused-vars
@@ -35,8 +45,6 @@ const PageWithDataMixin = {
                             this.$t(this.view.schema.name),
                         ]),
                     );
-                    this.deleteQuerySet(this.qs_url);
-                    this.deleteQuerySetFromSandBox(this.qs_url);
                     this.openRedirectUrl({ path: this.getRedirectUrl() });
                 })
                 .catch((error) => {
@@ -51,6 +59,7 @@ const PageWithDataMixin = {
                     window.app.error_handler.showError(srt_to_show, str);
                 });
         },
+
         /**
          * Method, that forms redirect URL,
          * which will be opened after successful action execution.
