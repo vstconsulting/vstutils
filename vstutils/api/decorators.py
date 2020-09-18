@@ -1,5 +1,5 @@
 # pylint: disable=protected-access
-import json
+import ujson as json
 import typing as _t
 from collections import OrderedDict
 from inspect import getmembers

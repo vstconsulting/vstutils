@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import base64
 import codecs
 import io
-import json
+import ujson as json
 import logging
 import os
 import pickle

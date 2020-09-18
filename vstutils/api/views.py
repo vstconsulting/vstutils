@@ -1,6 +1,6 @@
 # pylint: disable=unused-argument
 import typing as _t
-import json
+import ujson as json
 from collections import OrderedDict
 
 from django.conf import settings

@@ -1,5 +1,5 @@
 import typing as _t
-import json
+import ujson as json
 import logging
 import traceback
 import functools

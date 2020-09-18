@@ -1,5 +1,5 @@
 import time
-import json
+import ujson as json
 
 from vstutils.api import responses, filter_backends
 from vstutils.api.views import SettingsViewSet

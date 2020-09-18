@@ -1,7 +1,7 @@
 # pylint: disable=unused-import
 from __future__ import unicode_literals
 import typing as _t
-import json  # noqa: F401
+import ujson as json  # noqa: F401
 import random  # noqa: F401
 import string  # noqa: F401
 import os  # noqa: F401

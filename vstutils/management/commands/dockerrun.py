@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import json
+import ujson as json
 import traceback
 import logging
 from subprocess import check_call
