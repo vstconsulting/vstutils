@@ -96,10 +96,10 @@ class ModelBaseClass(ModelBase):
             attrs['__str__'] = _get_unicode
         extra_metadata: dict = {**default_extra_metadata}
         if "Meta" in attrs:
-            meta = attrs['Meta'].__dict__
-            if not meta.get('abstract', False):
-                for extra_name in filter(lambda y: y in meta, map(lambda x: f'_{x}', extra_metadata.keys())):
-                    extra_metadata[extra_name[1:]] = meta[extra_name]
+            meta = attrs['Meta']
+            if not getattr(meta, 'abstract', False):
+                for extra_name in filter(lambda y: hasattr(meta, y), map(lambda x: f'_{x}', extra_metadata.keys())):
+                    extra_metadata[extra_name[1:]] = getattr(meta, extra_name)
         attrs['__extra_metadata__'] = extra_metadata
         model_class = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
         if hasattr(model_class, '__prepare_model__'):
