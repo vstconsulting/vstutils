@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import base64
 import codecs
 import io
-import ujson as json
 import logging
 import os
 import pickle
@@ -19,6 +18,7 @@ import warnings
 from pathlib import Path
 from threading import Thread
 
+import ujson as json
 from django.conf.urls import url, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator

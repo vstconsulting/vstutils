@@ -1,10 +1,10 @@
 import os
 import sys
 import time
-import ujson as json
 import traceback
 import logging
 from subprocess import check_call
+import ujson as json
 from configparserc.config import ConfigParserC
 from ._base import BaseCommand
 
