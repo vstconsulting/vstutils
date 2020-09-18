@@ -190,7 +190,9 @@ class ModelBaseClass(ModelBase):
 
         filterset_fields = metadata['filterset_fields']
         if filterset_fields == 'serializer':
-            filterset_fields = tuple(serializers['serializer_class'].Meta.fields)
+            filterset_fields = serializers['serializer_class'].Meta.fields
+            if not isinstance(filterset_fields, str):
+                filterset_fields = tuple(filterset_fields)
 
         if filterset_fields:
 
