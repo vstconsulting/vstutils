@@ -702,6 +702,11 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),
+    'DEFAULT_PARSER_CLASSES': (
+        'vstutils.api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
     'DEFAULT_PERMISSION_CLASSES': [
         'vstutils.api.permissions.IsAuthenticatedOpenApiRequest'
     ],
