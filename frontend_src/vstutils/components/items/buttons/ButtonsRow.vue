@@ -2,12 +2,12 @@
     <div>
         <template v-for="(item, idx) in operations">
             <template v-if="item.component">
-                <component :key="idx" :is="item.component" :options="item"></component>
+                <component :is="item.component" :key="idx" :options="item" />
             </template>
             <template v-else>
                 <gui_button_common
-                    type="operation"
                     :key="idx"
+                    type="operation"
                     :options="item"
                     :look="{ classes: ['btn-primary'] }"
                 />
@@ -19,18 +19,18 @@
             :title="$t('sublinks')"
             classes="btn-default"
             :buttons="sublinks"
-        ></gui_group_of_buttons>
+        />
 
         <gui_group_of_buttons
             type="action"
             :title="$t('actions')"
             classes="btn-warning"
             :buttons="actions"
-        ></gui_group_of_buttons>
+        />
 
-        <template v-if="view.schema.type == 'list'">
-            <gui_filters_modal :opt="filters_opt" :view="view" :data="data"></gui_filters_modal>
-            <pagination :options="data.pagination"></pagination>
+        <template v-if="view.schema.type === 'list'">
+            <gui_filters_modal :opt="filters_opt" :view="view" :datastore="datastore" />
+            <pagination :options="datastore.data.pagination" />
         </template>
     </div>
 </template>
@@ -43,7 +43,7 @@
      */
     export default {
         name: 'gui_buttons_row',
-        props: ['view', 'data', 'opt'],
+        props: ['view', 'opt', 'datastore'],
         computed: {
             schema() {
                 return this.view.schema;
@@ -70,7 +70,7 @@
                 return this.view.getViewSublinkButtons(
                     buttons_name,
                     this.schema[buttons_name],
-                    this.data.instance,
+                    this.datastore.data.instance,
                 );
             },
         },

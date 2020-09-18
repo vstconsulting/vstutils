@@ -1,21 +1,11 @@
 <template>
-    <div style="display: contents;" v-show="!is_hidden">
+    <div v-show="!is_hidden" style="display: contents;">
         <template v-if="wrapper_opt.list_view">
-            <field_list_view
-                :value="value"
-                :field="field"
-                :wrapper_opt="wrapper_opt"
-                :data="data"
-            ></field_list_view>
+            <field_list_view :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" />
         </template>
         <template v-else>
             <div :class="wrapper_classes" :style="wrapper_styles">
-                <field_label
-                    :value="value"
-                    :field="field"
-                    :wrapper_opt="wrapper_opt"
-                    :data="data"
-                ></field_label>
+                <field_label :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" />
                 <template v-if="field.options.readOnly || wrapper_opt.readOnly">
                     <field_content_readonly
                         :value="value"
@@ -23,7 +13,7 @@
                         :wrapper_opt="wrapper_opt"
                         :data="data"
                         @proxyEvent="proxyEvent"
-                    ></field_content_readonly>
+                    />
                 </template>
                 <template v-else>
                     <field_content_edit
@@ -32,14 +22,9 @@
                         :wrapper_opt="wrapper_opt"
                         :data="data"
                         @proxyEvent="proxyEvent"
-                    ></field_content_edit>
+                    />
                 </template>
-                <field_description
-                    :value="value"
-                    :field="field"
-                    :wrapper_opt="wrapper_opt"
-                    :data="data"
-                ></field_description>
+                <field_description :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" />
             </div>
         </template>
     </div>
@@ -56,11 +41,29 @@
 
     export default {
         name: 'BaseFieldMixin',
-        props: {
-            field: Object,
-            wrapper_opt: Object,
-            prop_data: { required: false, default: () => {} },
+        components: {
+            /**
+             * Component for label (title) of field.
+             */
+            field_label: BaseFieldLabel,
+            /**
+             * Component for area, that shows value of field with readOnly == true.
+             */
+            field_content_readonly: BaseFieldContentReadonlyMixin,
+            /**
+             * Component for area, that shows value of field with readOnly == false.
+             */
+            field_content_edit: BaseFieldContentEdit,
+            /**
+             * Component for description (help text) of field.
+             */
+            field_description: BaseFieldDescription,
+            /**
+             * Component for list_view of field.
+             */
+            field_list_view: BaseFieldListView,
         },
+        props: ['field', 'wrapper_opt', 'datastore', 'prop_data'],
         data: function () {
             return {
                 wrapper_classes_list: {
@@ -77,11 +80,6 @@
                 hidden: this.field.options.hidden || false,
             };
         },
-        watch: {
-            'field.options.hidden': function (value) {
-                this.hidden = value;
-            },
-        },
         computed: {
             /**
              * Property, that returns object with values of current field
@@ -89,23 +87,26 @@
              * For example, from the same Model Instance.
              * @return {object}
              */
-            data: function () {
+            data() {
                 if (this.wrapper_opt.use_prop_data) {
                     return this.prop_data;
                 }
 
-                return this.$store.getters.getViewInstanceData({
-                    url: this.wrapper_opt.qs_url,
-                    store: this.wrapper_opt.store,
-                });
+                if (this.datastore) {
+                    return this.datastore.data.instance.data;
+                }
+
+                return {};
             },
+
             /**
              * Property, that return value of current field.
              * @return {*}
              */
-            value: function () {
+            value() {
                 return this.getRepresentValue(this.data);
             },
+
             /**
              * Property, that returns string with classes of field wrapper.
              * @return {string}
@@ -137,6 +138,11 @@
                 return this.hidden;
             },
         },
+        watch: {
+            'field.options.hidden': function (value) {
+                this.hidden = value;
+            },
+        },
         methods: {
             /**
              * Method, that converts field value to appropriate type,
@@ -144,36 +150,29 @@
              * @param {object} data Object with values of current field
              * and fields from the same fields_wrapper.
              */
-            handleValue: function (data) {
-                return this.field.toInner(data);
+            handleValue(data) {
+                return data[this.field.options.name];
             },
+
             /**
              * Method, that returns value in representation format.
              * @param {object} data Object with values of current field
              * and fields from the same fields_wrapper.
              */
-            getRepresentValue: function (data) {
+            getRepresentValue(data) {
                 return this.field.toRepresent(data);
             },
+
             /**
              * Method, that saves field value into the Vuex store
              * (commits Vuex store state mutation).
              */
-            setValueInStore: function (value) {
+            setValueInStore(value) {
                 let val = $.extend(true, {}, this.data);
 
                 val[this.field.options.name] = value;
 
-                if (this.wrapper_opt.use_prop_data) {
-                    return this.$emit('setValueInStore', this.handleValue(val));
-                }
-
-                this.$store.commit('setViewFieldValue', {
-                    url: this.wrapper_opt.qs_url,
-                    field: this.field.options.name,
-                    value: this.handleValue(val),
-                    store: this.wrapper_opt.store,
-                });
+                this.$emit('update-value', { field: this.field.options.name, value: this.handleValue(val) });
             },
             /**
              * Method, that cleans field's value (sets field value to undefined).
@@ -207,28 +206,6 @@
                     this[callback_name](opt);
                 }
             },
-        },
-        components: {
-            /**
-             * Component for label (title) of field.
-             */
-            field_label: BaseFieldLabel,
-            /**
-             * Component for area, that shows value of field with readOnly == true.
-             */
-            field_content_readonly: BaseFieldContentReadonlyMixin,
-            /**
-             * Component for area, that shows value of field with readOnly == false.
-             */
-            field_content_edit: BaseFieldContentEdit,
-            /**
-             * Component for description (help text) of field.
-             */
-            field_description: BaseFieldDescription,
-            /**
-             * Component for list_view of field.
-             */
-            field_list_view: BaseFieldListView,
         },
     };
 </script>

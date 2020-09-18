@@ -9,6 +9,7 @@
      * Mixin for gui_field list_view component.
      */
     export default {
+        name: 'BaseFieldListView',
         mixins: [BaseFieldInnerComponentMixin],
         data() {
             return {

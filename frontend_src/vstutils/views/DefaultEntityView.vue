@@ -1,18 +1,18 @@
 <template>
     <div style="display: contents;">
-        <preloader :show="loading"></preloader>
+        <preloader :show="loading" />
 
-        <div class="content-wrapper-2" v-if="error">
+        <div v-if="error" class="content-wrapper-2">
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-6">
                             <h1>
                                 <span
-                                    @click="goToHistoryRecord(-1)"
                                     class="btn btn-default btn-previous-page"
+                                    @click="goToHistoryRecord(-1)"
                                 >
-                                    <span class="fa fa-arrow-left"></span>
+                                    <span class="fa fa-arrow-left" />
                                 </span>
                                 <span class="h1-header">
                                     {{ $t('error') | capitalize }} {{ error.status }}
@@ -20,7 +20,7 @@
                             </h1>
                         </div>
                         <div class="col-lg-6">
-                            <breadcrumbs :breadcrumbs="breadcrumbs"></breadcrumbs>
+                            <breadcrumbs :breadcrumbs="breadcrumbs" />
                         </div>
                     </div>
                 </div>
@@ -30,7 +30,9 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="error-text-wrapper">
-                                <p class="text-center error-p">{{ error_data }}</p>
+                                <p class="text-center error-p">
+                                    {{ error_data }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -38,17 +40,17 @@
             </section>
         </div>
 
-        <div class="content-wrapper-2" v-if="response">
+        <div v-if="response" class="content-wrapper-2">
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-6">
                             <h1>
                                 <span
-                                    @click="goToHistoryRecord(-1)"
                                     class="btn btn-default btn-previous-page"
+                                    @click="goToHistoryRecord(-1)"
                                 >
-                                    <span class="fa fa-arrow-left"></span>
+                                    <span class="fa fa-arrow-left" />
                                 </span>
                                 <span class="h1-header">
                                     {{ $t(title.toLowerCase()) | capitalize | split }}
@@ -59,7 +61,7 @@
                             </h1>
                         </div>
                         <div class="col-lg-6">
-                            <breadcrumbs :breadcrumbs="breadcrumbs"></breadcrumbs>
+                            <breadcrumbs :breadcrumbs="breadcrumbs" />
                         </div>
                     </div>
                 </div>
@@ -68,25 +70,25 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-12 buttons-row-wrapper">
-                            <gui_buttons_row :view="view" :data="data" :opt="opt"></gui_buttons_row>
+                            <gui_buttons_row :view="view" :opt="opt" :datastore="datastore" />
                         </div>
                     </div>
                     <div class="row">
                         <section class="col-lg-12">
-                            <template v-if="view.schema.type == 'list'">
+                            <template v-if="view.schema.type === 'list'">
                                 <component
                                     :is="content_body_component"
-                                    :data="data"
                                     :view="view"
                                     :opt="opt"
-                                ></component>
+                                    :datastore="datastore"
+                                />
                                 <template v-if="multi_actions_button_component">
                                     <component
                                         :is="multi_actions_button_component"
-                                        :data="data"
                                         :view="view"
                                         :opt="opt"
-                                    ></component>
+                                        :datastore="datastore"
+                                    />
                                 </template>
                             </template>
                             <template v-else>
@@ -94,58 +96,55 @@
                                     <div class="card-header with-border card-header-custom">
                                         <component
                                             :is="content_header_component"
-                                            :data="data"
                                             :view="view"
                                             :opt="opt"
-                                        ></component>
+                                            :datastore="datastore"
+                                        />
                                         <button
+                                            v-if="card_collapsed_button"
                                             type="button"
                                             class="btn btn-card-tool btn-sm btn-light btn-icon btn-right"
-                                            @click="toggleCardCollapsed"
                                             aria-label="toggle"
-                                            v-if="card_collapsed_button"
+                                            @click="toggleCardCollapsed"
                                         >
-                                            <i
-                                                class="fa"
-                                                :class="card_collapsed ? 'fa-plus' : 'fa-minus'"
-                                            ></i>
+                                            <i class="fa" :class="card_collapsed ? 'fa-plus' : 'fa-minus'" />
                                         </button>
                                     </div>
                                     <transition name="fade">
                                         <div
+                                            v-show="!card_collapsed"
                                             class="card-body card-body-custom"
                                             :class="'card-body-' + view.schema.type"
-                                            v-show="!card_collapsed"
                                         >
                                             <component
                                                 :is="content_body_component"
-                                                :data="data"
                                                 :view="view"
                                                 :opt="opt"
-                                            ></component>
+                                                :datastore="datastore"
+                                            />
                                         </div>
                                     </transition>
                                     <transition name="fade">
                                         <div
-                                            class="card-footer clearfix"
                                             v-if="content_footer_component && !card_collapsed"
+                                            class="card-footer clearfix"
                                         >
                                             <component
                                                 :is="content_footer_component"
-                                                :data="data"
                                                 :view="view"
                                                 :opt="opt"
-                                            ></component>
+                                                :datastore="datastore"
+                                            />
                                         </div>
                                     </transition>
                                 </div>
                                 <component
                                     :is="content_additional"
-                                    :data="data"
+                                    v-if="content_additional"
                                     :view="view"
                                     :opt="opt"
-                                    v-if="content_additional"
-                                ></component>
+                                    :datastore="datastore"
+                                />
                             </template>
                         </section>
                     </div>

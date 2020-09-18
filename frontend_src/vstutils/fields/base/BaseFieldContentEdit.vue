@@ -45,6 +45,7 @@
      * Mixin for editable gui_fields' content(input value area).
      */
     export default {
+        name: 'BaseFieldContentEdit',
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         data() {
             return {

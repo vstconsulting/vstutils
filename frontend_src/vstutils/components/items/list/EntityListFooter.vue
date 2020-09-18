@@ -1,11 +1,11 @@
 <template>
     <div class="list-footer-btns-wrapper">
         <gui_multi_actions
+            v-if="multi_actions_exist"
             :multi_actions="schema.multi_actions"
             :opt="opt"
-            v-if="multi_actions_exist"
-        ></gui_multi_actions>
-        <pagination :options="data.pagination"></pagination>
+        />
+        <pagination :options="datastore.data.pagination" />
     </div>
 </template>
 
@@ -18,7 +18,7 @@
     export default {
         name: 'gui_entity_list_footer',
         mixins: [BaseListTableMixin],
-        props: ['data', 'view', 'opt'],
+        props: ['datastore', 'view', 'opt'],
         computed: {
             schema() {
                 return this.view.schema;

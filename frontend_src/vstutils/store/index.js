@@ -1,6 +1,10 @@
 import $ from 'jquery';
 import Vuex from 'vuex';
+import Vue from 'vue';
 import AutoUpdateStoreModule from '../autoupdate/AutoUpdateStoreModule.js';
+import ComponentStoreModule from './components_state';
+
+export const COMPONENTS_MODULE_NAME = 'componentsStore';
 
 /**
  * Class, that manages Store creation.
@@ -22,6 +26,7 @@ export class StoreConstructor {
             actions: this.getStore_actions(),
             modules: {
                 autoupdate: AutoUpdateStoreModule,
+                [COMPONENTS_MODULE_NAME]: ComponentStoreModule,
             },
         };
     }
@@ -34,12 +39,6 @@ export class StoreConstructor {
              * Views - dict with all views objects.
              */
             views: this.views,
-            /**
-             * Objects - dict for storing querysets of readOnly views
-             * (list and page types).
-             * Key of this dict record is URL of page(view), Value - queryset.
-             */
-            objects: {},
             /**
              * Sandbox - dict for storing querysets of views,
              * that can be edited (page_new, page_edit, action types).
@@ -73,30 +72,12 @@ export class StoreConstructor {
     getStore_mutations() {
         return {
             /**
-             * Mutation, that saves in state.objects current queryset
-             * of view with current URL.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            setQuerySet(state, obj) {
-                state.objects[obj.url] = obj.queryset;
-            },
-            /**
-             * Mutation, that deletes from state.objects current queryset
-             * of view with current URL.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            deleteQuerySet(state, obj) {
-                delete state.objects[obj.url];
-            },
-            /**
              * Mutation, that creates selection dict for a view with current URL.
              * @param {object} state Current state.
              * @param {string} url View's URL.
              */
             setSelection(state, url) {
-                state.selections[url] = {};
+                Vue.set(state.selections, url, {});
             },
             /**
              * Mutation, that changes selection dict record value to opposite.
@@ -123,64 +104,12 @@ export class StoreConstructor {
                 state.selections = { ...state.selections };
             },
             /**
-             * Mutation, that saves instance's field value or list's filter value in store.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            setViewFieldValue(state, obj) {
-                state[obj.store][obj.url].cache.data[obj.field] = obj.value;
-                state[obj.store][obj.url].cache.data = {
-                    ...state[obj.store][obj.url].cache.data,
-                };
-            },
-            /**
-             * Mutation, that saves instance's data in store.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            setViewInstanceData(state, obj) {
-                state[obj.store][obj.url].cache.data = obj.data;
-                state[obj.store][obj.url].cache.data = {
-                    ...state[obj.store][obj.url].cache.data,
-                };
-            },
-            /**
-             * Mutation, that saves in state.sandbox current queryset
-             * of view with current URL.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            setQuerySetInSandBox(state, obj) {
-                state.sandbox[obj.url] = obj.queryset;
-            },
-            /**
-             * Mutation, that deletes from state.sandbox current queryset
-             * of view with current URL.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            deleteQuerySetFromSandBox(state, obj) {
-                delete state.sandbox[obj.url];
-            },
-            /**
-             * Mutation, that creates filters dict for view with current URL.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            setFilters(state, obj) {
-                state.filters[obj.url] = {
-                    cache: {
-                        data: obj.filters,
-                    },
-                };
-            },
-            /**
              * Mutation, that saves widgets data in store.
              * @param {object} state Current state.
              * @param {object} obj Object with arguments for this mutation.
              */
             setWidgets(state, obj) {
-                state.widgets[obj.url] = obj.data;
+                Vue.set(state.widgets, obj.url, obj.data);
             },
         };
     }
@@ -205,14 +134,6 @@ export class StoreConstructor {
                 return state.views[path];
             },
             /**
-             * Getter, that returns View's queryset from store.objects.
-             * @param {string} state Current state.
-             * @param {string} url View' url.
-             */
-            getQuerySet: (state) => (url) => {
-                return state.objects[url];
-            },
-            /**
              * Getter, that returns View's selections from store.selections.
              * @param {string} state Current state.
              * @param {string} url View' url.
@@ -227,38 +148,6 @@ export class StoreConstructor {
              */
             getSelectionById: (state) => (obj) => {
                 return state.selections[obj.url][obj.id];
-            },
-            /**
-             * Getter, that returns View's instance field value or view's filter value.
-             * @param {string} state Current state.
-             * @param {object} obj Object with arguments for this getter.
-             */
-            getViewFieldValue: (state) => (obj) => {
-                return state[obj.store][obj.url].cache.data[obj.field];
-            },
-            /**
-             * Getter, that returns View's instance data.
-             * @param {string} state Current state.
-             * @param {object} obj Object with arguments for this getter.
-             */
-            getViewInstanceData: (state) => (obj) => {
-                return state[obj.store][obj.url].cache.data;
-            },
-            /**
-             * Getter, that returns View's queryset from store.sandbox.
-             * @param {string} state Current state.
-             * @param {string} url View' url.
-             */
-            getQuerySetFromSandBox: (state) => (url) => {
-                return state.sandbox[url];
-            },
-            /**
-             * Getter, that returns View's filters object.
-             * @param {string} state Current state.
-             * @param {string} url View' url.
-             */
-            getFilters: (state) => (url) => {
-                return state.filters[url];
             },
             /**
              * Getter, that returns View's widgets data.

@@ -7,29 +7,18 @@ import ChoicesFieldMixin from './ChoicesFieldMixin.js';
  */
 class ChoicesField extends StringField {
     /**
-     * Custom method for toInner and toRepresent methods.
-     * @param {object} data
-     */
-    _getValue(data = {}) {
-        let value = data[this.options.name];
-
-        if (value && this.options.enum && this.options.enum.includes(value)) {
-            return value;
-        }
-    }
-    /**
      * Redefinition of string guiField method toInner.
      * @param {object} data
      */
     toInner(data = {}) {
-        return this._getValue(data);
+        return data[this.options.name];
     }
     /**
      * Redefinition of string guiField method toRepresent.
      * @param {object} data
      */
     toRepresent(data = {}) {
-        return this._getValue(data);
+        return data[this.options.name];
     }
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.

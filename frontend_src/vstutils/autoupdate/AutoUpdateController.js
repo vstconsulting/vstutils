@@ -51,17 +51,14 @@ export default {
             clearTimeout(this.autoupdate.timeoutId);
         },
         updateData() {
-            const storeQuerysets = this.$store.state.autoupdate.querysets;
-            const querysets = Object.keys(storeQuerysets).filter((qs) => storeQuerysets[qs].length > 0);
+            const promises = this.$store.state.autoupdate.actionsToInvoke.map((action) => {
+                try {
+                    return this.$store.dispatch(action);
+                    // eslint-disable-next-line no-empty
+                } catch (error) {}
+            });
 
-            const promises = [];
-            for (let qsUrl of querysets) {
-                const qs = this.$store.getters.getQuerySet(qsUrl);
-
-                promises.push(qs.many ? qs.items() : qs.get());
-            }
-
-            return Promise.all(promises).then(() => this.$store.commit('autoupdate/updateDate'));
+            return Promise.all(promises);
         },
     },
 };

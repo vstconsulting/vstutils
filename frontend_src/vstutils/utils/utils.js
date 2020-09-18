@@ -99,6 +99,9 @@ export function sliceLongString(string = '', valid_length = 100) {
  * @returns {boolean}
  */
 export function isEmptyObject(obj) {
+    if (Array.isArray(obj) && obj.length === 0) {
+        return true;
+    }
     for (let key in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, key)) {
             return false;
@@ -799,5 +802,41 @@ export function getDependenceValueAsString(parent_data_object, field_name, separ
         return data.map((data) => data.value).join(separator);
     } else if (typeof data === 'object' && data !== null && data.value !== undefined && data.value !== null) {
         return data.value;
+    } else if (typeof data === 'string') {
+        return data;
     }
+}
+
+/**
+ * Simple object check.
+ * @param item
+ * @returns {boolean}
+ */
+export function isObject(item) {
+    return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+/**
+ * Deep merge two objects, for arrays inside source objects shallow copy will be created.
+ * @param {Object} target
+ * @param {...Object} sources
+ */
+export function mergeDeep(target, ...sources) {
+    if (!sources.length) return target;
+    const source = sources.shift();
+
+    if (isObject(target) && isObject(source)) {
+        for (const key in source) {
+            if (isObject(source[key])) {
+                if (!target[key]) Object.assign(target, { [key]: {} });
+                mergeDeep(target[key], source[key]);
+            } else if (Array.isArray(source[key])) {
+                target[key] = source[key].slice();
+            } else {
+                Object.assign(target, { [key]: source[key] });
+            }
+        }
+    }
+
+    return mergeDeep(target, ...sources);
 }

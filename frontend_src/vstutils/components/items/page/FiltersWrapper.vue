@@ -1,14 +1,15 @@
 <template>
     <div class="container-fluid">
         <div class="row">
-            <div
+            <component
+                :is="'field_' + field.options.format"
                 v-for="(field, idx) in fieldsToShow"
                 :key="idx"
-                :field="field"
-                :is="'field_' + field.options.format"
                 v-model="data_to_represent[field.options.name]"
+                :field="field"
                 :wrapper_opt="wrapper_opt"
-            ></div>
+                :prop_data="data_to_represent"
+            />
         </div>
     </div>
 </template>
@@ -39,7 +40,7 @@
             },
 
             wrapper_opt() {
-                return $.extend(true, {}, this.opt, { qs_url: this.qs_url });
+                return $.extend(true, {}, this.opt, { use_prop_data: true });
             },
         },
     };
