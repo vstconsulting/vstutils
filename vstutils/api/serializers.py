@@ -7,7 +7,7 @@ Read more in Django REST Framework documentation for
 
 from __future__ import unicode_literals
 
-import json
+import ujson as json
 from django.db import models
 from rest_framework import serializers
 from . import fields

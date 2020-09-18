@@ -2,7 +2,7 @@
 Additionals serializers fields for generating OpenAPI and GUI.
 """
 import typing as _t
-import json
+import ujson as json
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from django.db import models
 from ..utils import raise_context
@@ -120,8 +120,8 @@ class DependEnumField(CharField):
 
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
-        self.choices = kwargs.pop('choices', dict())
-        self.types = kwargs.pop('types', dict())
+        self.choices = kwargs.pop('choices', {})
+        self.types = kwargs.pop('types', {})
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):

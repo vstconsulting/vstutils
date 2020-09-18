@@ -4,6 +4,7 @@ Default ViewSets for web-api.
 
 import sys
 import logging
+import inspect
 import traceback
 import typing as _t
 from collections import namedtuple
@@ -41,13 +42,20 @@ default_methods: _t.List[_t.Text] = [
     'options',
     'head'
 ]
-detail_actions: _t.List[_t.Text] = [
+detail_actions: _t.Tuple[_t.Text, _t.Text, _t.Text, _t.Text] = (
     'create',
     'retrieve',
     'update',
     'partial_update'
-]
+)
+main_actions: _t.Tuple[_t.Text, _t.Text, _t.Text, _t.Text, _t.Text] = ('list',) + detail_actions
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
+
+
+def _get_cleared(qs):
+    if hasattr(qs, 'cleared'):
+        return qs.cleared()
+    return qs
 
 
 def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]:
@@ -181,9 +189,8 @@ class QuerySetMixin(rvs.APIView):
     def queryset(self) -> QuerySet:
         # pylint: disable=method-hidden,function-redefined
         if self._queryset is not None:
-            return getattr(self._queryset, 'cleared', self._queryset.all)()
-        qs = self.model.objects.all()
-        return getattr(qs, 'cleared', qs.all)()
+            return _get_cleared(self._queryset)
+        return _get_cleared(self.model.objects.all())
 
     @queryset.setter  # type: ignore
     def queryset(self, value):
@@ -212,8 +219,7 @@ class QuerySetMixin(rvs.APIView):
                 " or override the `get_queryset()` method."
                 % self.__class__.__name__
             )
-            qs = self.model.objects.all()
-            self.queryset = getattr(qs, 'cleared', qs.all)()
+            self.queryset = _get_cleared(self.model.objects.all())
         self.queryset = self.get_extra_queryset()
         return self._base_get_queryset()
 
@@ -234,10 +240,10 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
 
     def filter_queryset(self, queryset: QuerySet):
         if hasattr(self, 'nested_name'):
-            self.filter_backends = list(filter(
+            self.filter_backends = filter(  # type: ignore
                 self.filter_for_filter_backends,
                 self.filter_backends
-            ))
+            )
         return super().filter_queryset(queryset)
 
     def get_serializer_class(self):
@@ -274,15 +280,15 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
         if methods is not None:
             return methods
         methods = []
-        if hasattr(cls, 'create') and not detail:
+        if not detail and hasattr(cls, 'create'):
             methods.append('post')
         if hasattr(cls, 'list') or hasattr(cls, 'retrieve'):
             methods.append('get')
-        if hasattr(cls, 'update') and detail:
+        if detail and hasattr(cls, 'update'):
             methods.append('put')
-        if hasattr(cls, 'partial_update') and detail:
+        if detail and hasattr(cls, 'partial_update'):
             methods.append('patch')
-        if hasattr(cls, 'destroy') and detail:
+        if detail and hasattr(cls, 'destroy'):
             methods.append('delete')
         setattr(cls, attr_name, methods)
         return methods
@@ -305,7 +311,7 @@ class CopyMixin(GenericViewSet):
     #: Name of field which will get a prefix.
     copy_field_name = 'name'
     #: List of related names which will be copied to new instance.
-    copy_related: _t.List[_t.Text] = []
+    copy_related: _t.Iterable[_t.Text] = ()
 
     def copy_instance(self, instance):
         new_instance = deepcopy(instance)
@@ -390,19 +396,21 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
     schema = None  # type: ignore
 
     @property
-    def methods(self) -> _t.List[_t.Text]:
-        this_class_dict = ListNonModelViewSet.__dict__
-        obj_class_dict = self.__class__.__dict__
-        new_methods = list()
-        for name, attr in obj_class_dict.items():
-            detail = getattr(attr, 'detail', True)
-            if name not in this_class_dict and not detail:
-                new_methods.append(name.replace('_', "-"))
-        return new_methods
+    def methods(self) -> _t.Iterable[_t.Text]:
+        def is_list_action(attr):
+            if not inspect.isfunction(attr):
+                return False
+            elif not hasattr(attr, 'url_path'):
+                return False
+            elif getattr(attr, 'detail', True):
+                return False
+            return True
+
+        return map(lambda x: x[0].replace('_', "-"), inspect.getmembers(self.__class__, is_list_action))
 
     def list(self, request: Request, *args, **kwargs) -> responses.BaseResponseClass:
         routes = {
-            method: reverse(f"{self.base_name}-{method}", request=request)
+            method: reverse(f"{request.version}:{self.base_name}-{method}", request=request)
             for method in self.methods
         }
         return responses.HTTP_200_OK(routes)

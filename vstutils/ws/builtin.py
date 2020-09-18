@@ -1,5 +1,5 @@
 import uuid
-import json
+import ujson as json
 from django.conf import settings
 from django.http.cookie import SimpleCookie
 from channels.generic.websocket import AsyncJsonWebsocketConsumer, StopConsumer
@@ -99,7 +99,7 @@ class EndpointConsumer(AsyncJsonWebsocketConsumer):
         request = HttpRequest()
         request.META.update(self.env)
         request.user = self.scope['user']
-        data = dict()
+        data = {}
         project_info = project_args(request)
         data['debug_mode'] = settings.DEBUG
         data['version'] = project_info['gui_user_version']

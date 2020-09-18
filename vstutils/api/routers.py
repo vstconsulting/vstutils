@@ -26,7 +26,7 @@ class _AbstractRouter(routers.DefaultRouter):
         return self.custom_urls
 
     def _get_views_custom_list(self, view_request, registers):
-        routers_list = dict()
+        routers_list = {}
         fpath = view_request.get_full_path().split("?")
         absolute_uri = view_request.build_absolute_uri(fpath[0])
         for prefix, _, name in self._get_custom_lists():
@@ -98,9 +98,11 @@ class _AbstractRouter(routers.DefaultRouter):
 
 
 class APIRouter(_AbstractRouter):
-    root_view_name = 'v1'
+    default_root_view_name = 'v1'
 
     def __init__(self, *args, **kwargs):
+        self.router_version_name = kwargs.pop('version', self.default_root_view_name)
+        self.root_view_name = self.router_version_name
         super().__init__(*args, **kwargs)
         self.__register_schema()
         self.__register_openapi()
@@ -125,14 +127,14 @@ class APIRouter(_AbstractRouter):
 
     def _get_schema_view(self):
         return schemas.get_schema_view(
-            title=self.root_view_name,
-            version=self.root_view_name
+            title=self.router_version_name,
+            version=self.router_version_name
         )
 
     def get_api_root_view(self, *args, **kwargs):
 
         class API(self.APIRootView):
-            root_view_name = self.root_view_name
+            root_view_name = self.router_version_name
             if self.permission_classes:
                 permission_classes = self.permission_classes
             custom_urls = self.custom_urls
@@ -141,7 +143,7 @@ class APIRouter(_AbstractRouter):
                 # pylint: disable=invalid-name,no-self-argument
 
                 def determine_version(self_ver, request, *args, **kwargs):
-                    return self.root_view_name
+                    return self.router_version_name
 
             def get_view_name(self): return self.root_view_name
 
@@ -210,7 +212,7 @@ class MainRouter(_AbstractRouter):
         return API.as_view(api_root_dict=self._get_api_root_dict())
 
     def register_router(self, prefix, router, name=None):
-        name = name or router.root_view_name
+        name = name or getattr(router, 'router_version_name', router.root_view_name)
         self.routers.append((prefix, router, name))
 
     def unregister_router(self, prefix):
@@ -218,12 +220,12 @@ class MainRouter(_AbstractRouter):
 
     def get_urls(self):
         urls = super().get_urls()
-        for prefix, router, _ in self.routers:
+        for prefix, router, name in self.routers:
             urls.append(re_path(
                 prefix,
                 include(
                     (router.urls, settings.VST_PROJECT),
-                    namespace=router.root_view_name
+                    namespace=getattr(router, 'router_version_name', name)
                 )
             ))
         for prefix, view, _ in self.custom_urls:
@@ -235,8 +237,7 @@ class MainRouter(_AbstractRouter):
 
     def generate_routers(self, api):
         for version, views_list in api.items():
-            router = APIRouter(perms=(permissions.IsAuthenticated,))
-            router.root_view_name = version
+            router = APIRouter(perms=(permissions.IsAuthenticated,), version=version)
             router.generate(views_list)
             self.register_router(version+'/', router)
 

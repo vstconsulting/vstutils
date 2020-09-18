@@ -3,7 +3,6 @@ from django.db import models
 from ..api import base as api_base
 from .queryset import BQuerySet as _BQuerySet
 from .decorators import register_view_action as view_action, register_view_method as view_method
-from .manager import BaseManager
 from .model import BaseModel as _BaseModel
 
 
@@ -19,7 +18,7 @@ class BQuerySet(_BQuerySet):
     ...
 
 
-class Manager(BaseManager):
+class Manager(models.Manager):
     ...
 
 

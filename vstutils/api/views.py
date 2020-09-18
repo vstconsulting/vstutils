@@ -1,8 +1,8 @@
 # pylint: disable=unused-argument
 import typing as _t
-import json
 from collections import OrderedDict
 
+import ujson as json
 from django.conf import settings
 from django.db import transaction
 from django.http import Http404
@@ -252,7 +252,7 @@ class BulkViewSet(base.rvs.APIView):  # nocv
     def original_environ_data(self, *args):
         # pylint: disable=protected-access
         get_environ = self.request._request.environ.get
-        kwargs = dict()
+        kwargs = {}
         for env_var in tuple(self.client_environ_keys_copy) + args:
             value = get_environ(env_var, None)
             if value:

@@ -1,5 +1,5 @@
-import json
 import typing
+import ujson as json
 from django.conf import settings
 
 
@@ -31,4 +31,4 @@ class PWAManifest:
 
     @property
     def json(self) -> typing.Text:
-        return json.dumps(self.data, indent=4, skipkeys=True)
+        return json.dumps(self.data, indent=4)

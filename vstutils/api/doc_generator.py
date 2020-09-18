@@ -2,7 +2,7 @@
 import collections
 import io
 import re
-import json
+import ujson as json
 import yaml
 from docutils.statemachine import ViewList
 from docutils.parsers.rst import Directive, directives

@@ -1,7 +1,6 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from django.db import models
 from ..utils import Paginator
-from .manager import BaseManager
 
 
 class BQuerySet(models.QuerySet):
@@ -55,10 +54,3 @@ class BQuerySet(models.QuerySet):
         if isinstance(field, list):
             return getattr(self, tp_name)(**{field_name+"__in": field})
         return getattr(self, tp_name)(**{field_name: field})
-
-    def as_manager(cls):
-        manager = BaseManager.from_queryset(cls)()
-        manager._built_with_as_manager = True
-        return manager
-    as_manager.queryset_only = True  # type: ignore
-    as_manager = classmethod(as_manager)  # type: ignore

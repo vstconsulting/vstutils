@@ -167,7 +167,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
     def test_dockerrun(self):
         with self.patch('subprocess.check_call') as mock_obj:
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
-            call_command('dockerrun')
+            call_command('dockerrun', attempts=4, attempts_timeout=0.01)
             self.maxDiff = 1024 * 100
             self.assertEqual(mock_obj.call_count, 2)
             self.assertEqual(
@@ -181,7 +181,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
             mock_obj.side_effect = check_call_error
             with self.assertRaises(SystemExit):
-                call_command('dockerrun', attempts=1)
+                call_command('dockerrun', attempts=1, attempts_timeout=0.0001)
 
 
 class VSTUtilsTestCase(BaseTestCase):
@@ -487,6 +487,12 @@ class ViewsTestCase(BaseTestCase):
             TIME_ZONE=self.settings_obj.TIME_ZONE
         )
         self.details_test('/api/v1/settings/system/', PY=self.settings_obj.PY_VER)
+        with self.user_as(self, test_user):
+            result = self.get_result('get', '/api/v2/settings/')
+        self.assertIn('new-action', result)
+        self.assertNotIn('new-action-detail', result)
+        self.assertIn('system', result)
+        self.assertNotIn('localization', result)
 
     def test_users_api(self):
         self.list_test('/api/v1/user/', 1)
@@ -755,7 +761,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         response = client.get('/api/endpoint/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'drf-yasg/swagger-ui.html')
-        with self.assertRaises(json.decoder.JSONDecodeError):
+        with self.assertRaises(ValueError):
             json.loads(response.content.decode('utf-8'))
 
 
@@ -1170,7 +1176,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(Host.objects.all().count(), self.predefined_hosts_cnt)
         Host.objects.all().delete()
         Host.objects.create(name='test_one')
-        self.assertEqual(Host.objects.test_filter().count(), 1)
+        self.assertEqual(Host.objects.all().test_filter2().count(), 1)
         Host.objects.create(name=self.random_name(), hidden=True)
         self.assertEqual(Host.objects.all().count(), 2)
         self.assertEqual(Host.objects.all().cleared().count(), 1)
@@ -1762,6 +1768,8 @@ class CustomModelTestCase(BaseTestCase):
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get('/suburls_module/admin/login/')
         self.assertEqual(response.status_code, 302)
         response = self.client.get('/suburls/login/')
         self.assertEqual(response.status_code, 302)

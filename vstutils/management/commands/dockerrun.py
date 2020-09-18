@@ -1,10 +1,10 @@
 import os
 import sys
 import time
-import json
 import traceback
 import logging
 from subprocess import check_call
+import ujson as json
 from configparserc.config import ConfigParserC
 from ._base import BaseCommand
 
@@ -27,6 +27,11 @@ class Command(BaseCommand):
             '--migrate-attempts', '-a',
             default=60,
             dest='attempts', help='The number of attempts to migrate.',
+        )
+        parser.add_argument(
+            '--migrate-attempts-sleep-time', '-t',
+            default=1,
+            dest='attempts_timeout', help='The number of attempts to migrate.',
         )
 
     def handle(self, *args, **options):
@@ -63,7 +68,7 @@ class Command(BaseCommand):
             except:
                 error = traceback.format_exc()
                 self._print(f"Retry #{i}...", 'WARNING')
-                time.sleep(1)
+                time.sleep(options.get('attempts_timeout', 1))
             else:
                 success = True
                 break
@@ -236,6 +241,11 @@ class Command(BaseCommand):
             'pidfile': os.getenv(f'{prefix}_UWSGI_PIDFILE', '/run/web.pid'),
             'daemon': 'false'
         }
+        current_addr, current_port = self._settings('WEB_ADDRPORT').split(',')[0].split(':')
+        config['uwsgi']['addrport'] = (
+            f"{os.getenv(f'{prefix}_WEB_HOST', current_addr)}:"
+            f"{os.getenv(f'{prefix}_WEB_PORT', current_port)}"
+        )
 
         # Set worker settings
         config['rpc']['enable_worker'] = 'false'

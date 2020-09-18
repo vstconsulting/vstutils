@@ -11,7 +11,8 @@ API['v2'] = {}
 API['v3'] = {}
 API['v4'] = {}
 API[VST_API_VERSION][r'settings'] = dict(
-    view='vstutils.api.views.SettingsViewSet', op_types=['get', 'mod'],
+    view='vstutils.api.views.SettingsViewSet',
+    op_types=['get', 'mod'],
     name='settings'
 )
 API[VST_API_VERSION][r'hosts'] = dict(
@@ -43,6 +44,11 @@ API['v2'][r'testbinaryfiles2'] = dict(
 API['v2'][r'request_info'] = dict(
     view='test_proj.views.RequestInfoTestView'
 )
+API['v2'][r'settings'] = dict(
+    view='test_proj.views.SettingsViewSetV2',
+    op_types=['get', 'mod'],
+    name='settings'
+)
 API['v3'][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
@@ -57,6 +63,17 @@ GUI_VIEWS[r'^csrf_disable_gui/$'] = {
 }
 GUI_VIEWS[r'^suburls/'] = {
     'BACKEND': 'test_proj.suburls.urlpatterns'
+}
+GUI_VIEWS[r'^suburls_namespaced/'] = {
+    'BACKEND': 'test_proj.suburls.urlpatterns',
+    'OPTIONS': {
+        'view_kwargs': {
+            'namespace': 'suburls_namespaced'
+        }
+    }
+}
+GUI_VIEWS[r'^suburls_module/'] = {
+    'BACKEND': 'test_proj.suburls'
 }
 GUI_VIEWS[r'^registration/$'] = VIEWS['USER_REGISTRATION']
 

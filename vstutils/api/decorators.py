@@ -1,8 +1,8 @@
 # pylint: disable=protected-access
-import json
 import typing as _t
 from collections import OrderedDict
 from inspect import getmembers
+import ujson as json
 from django.db import transaction, models
 from rest_framework.decorators import action
 from rest_framework import response, request as drf_request, status, views, serializers
@@ -18,6 +18,10 @@ def ensure_is_object(obj):
     if isinstance(obj, str):
         return json.loads(obj)
     return obj
+
+
+def _is_extra_action(attr):
+    return hasattr(attr, 'mapping')
 
 
 def _create_with_iteration(get_serializer_func, nested_manager, data):
@@ -81,7 +85,7 @@ def nested_action(
     request_arg = kwargs.pop('request_arg', f'{name}_{arg}')
     request_arg = request_arg if arg else None
     append_arg = kwargs.pop('append_arg', arg)
-    sub_options = kwargs.pop('sub_opts', dict())
+    sub_options = kwargs.pop('sub_opts', {})
     path = __get_nested_subpath(name, request_arg, arg_regexp, empty_arg, **sub_options)
     allow_append = bool(kwargs.pop('allow_append', False))
     manager_name = manager_name or name
@@ -147,7 +151,7 @@ def subaction(*args, **kwargs):
 
     def decorator(func: _t.Callable):
         func_object = action(*args, **kwargs)(func)
-        override_kw = dict()
+        override_kw = {}
         if response_code:
             override_kw['responses'] = {
                 response_code: response_serializer()
@@ -230,7 +234,7 @@ class NestedViewMixin:
 
     @transaction.atomic()
     def dispatch_route(self, nested_sub=None) -> base.RestResponse:
-        kwargs = dict()
+        kwargs = {}
         if nested_sub:
             self.action = nested_sub
         else:
@@ -399,7 +403,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         'queryset_filters'
     )
     view: _t.Optional[_t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]
-    allowed_subs: _t.List[_t.Text]
+    allowed_subs: _t.Optional[_t.Union[_t.List[_t.Text], _t.Tuple]]
     serializers: _t.Tuple[serializers.Serializer, serializers.Serializer]
     methods: _t.Optional[_t.List[_t.Text]]
     queryset_filters: _t.List
@@ -411,10 +415,10 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def __init__(self, name, arg=None, methods=None, *args, **kwargs):
         self.view = kwargs.pop('view', None)
-        self.allowed_subs = kwargs.pop('subs', [])
+        self.allowed_subs = kwargs.pop('subs', ())
         self.queryset_filters = kwargs.pop('queryset_filters', [])
         super().__init__(name, arg, *args, **kwargs)
-        self._subs = self.get_subs()
+        self._subs = set(self.get_subs())
 
         if self.view is None:
             raise self.NoView()
@@ -442,23 +446,19 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         return (serializer_class, serializer_class_one)
 
-    def _get_subs_from_view(self) -> _t.Sequence:
+    def _get_subs_from_view(self) -> _t.Iterable:
         # pylint: disable=protected-access
-        def _is_extra_action(attr):
-            return hasattr(attr, 'mapping')
-
         extra_acts = map(lambda x: x[0], getmembers(self.view, _is_extra_action))
         filter_subs = self.filter_subs
-        return list(filter(lambda name: name not in filter_subs, extra_acts))
+        return filter(lambda name: name not in filter_subs, extra_acts)
 
-    def get_subs(self) -> _t.Sequence:
+    def get_subs(self) -> _t.Iterable:
         subs = self._get_subs_from_view()
 
         if self.allowed_subs is None:
             return []
         elif self.allowed_subs:
-            allowed_subs = set(self.allowed_subs)
-            subs = list(allowed_subs.intersection(subs))
+            return set(self.allowed_subs).intersection(subs)
 
         return subs
 
@@ -559,7 +559,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         kwargs = dict(self.kwargs)
         kwargs['methods'] = self.methods
         kwargs['serializer_class'] = self.serializer_one if detail else self.serializer
-        kwargs['filterset_class'] = getattr(self.view, 'filterset_class', getattr(self.view, 'filter_class', []))
+        kwargs['filterset_class'] = getattr(self.view, 'filterset_class', []) or getattr(self.view, 'filter_class', [])
         kwargs.update(options)
         return nested_action(*args, **kwargs)
 

@@ -8,7 +8,7 @@ class BaseBackend(BaseVstObject):
     __slots__ = ('__health_methods',)
 
     def __init__(self):
-        self.__health_methods = dict()  # typing: Dict
+        self.__health_methods = {}  # typing: Dict
 
     def __health_method_wrapper(self, method: Callable):
         try:
@@ -30,7 +30,7 @@ class BaseBackend(BaseVstObject):
     def get(self) -> Tuple[Dict, int]:
         if not self.__health_methods:
             self.__health_methods = dict(self.__get_health_methods_iterator())
-        result, status = dict(), st.HTTP_200_OK
+        result, status = {}, st.HTTP_200_OK
         for key, method in self.__health_methods.items():
             method_result, method_status = self.__health_method_wrapper(method)
             result[key] = method_result

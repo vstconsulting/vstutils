@@ -46,6 +46,7 @@ class _AbstractRouter(routers.DefaultRouter):
 
 class APIRouter(_AbstractRouter):
     root_view_name: Text
+    router_version_name: Text
 
     def generate(self, views_list: ApiVersionStructureType) -> None:
         ...

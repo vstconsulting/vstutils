@@ -1,7 +1,8 @@
 import time
-import json
+import ujson as json
 
 from vstutils.api import responses, filter_backends
+from vstutils.api.views import SettingsViewSet
 from vstutils.api.base import NonModelsViewSet, Response
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import EmptySerializer, DataSerializer
@@ -140,5 +141,19 @@ class RequestInfoTestView(NonModelsViewSet):
 class TestUserViewSet(UserViewSet):
     @action(methods=['get'], detail=True)
     def test_bulk_perf(self, request, *args, **kwargs):
-        time.sleep(0.01)
+        time.sleep(0.001)
         return responses.HTTP_200_OK({'id': request.user.id})
+
+
+class SettingsViewSetV2(SettingsViewSet):
+    __slots__ = ()
+
+    @action(methods=['get'], detail=False)
+    def new_action(self, request, *args, **kwargs):
+        return responses.HTTP_200_OK('OK')  # nocv
+
+    @action(methods=['get'], detail=True)
+    def new_action_detail(self, request, *args, **kwargs):
+        return responses.HTTP_200_OK('OK')  # nocv
+
+    localization = None

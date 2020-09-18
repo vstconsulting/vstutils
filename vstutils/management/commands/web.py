@@ -25,7 +25,7 @@ elif _uwsgi_default_path_alt3.exists():
     _uwsgi_default_path = _uwsgi_default_path_alt3
 
 
-def wait(proc, timeout=None, delay=0.1):
+def wait(proc, timeout=None, delay=0.01):
     while proc.poll() is None and (timeout or timeout is None):
         time.sleep(delay)
         if timeout is not None:

@@ -375,6 +375,21 @@ MIDDLEWARE: _t.List[_t.Text] = [
 
 EXCLUDE_FROM_MINIFYING = []
 
+MIDDLEWARE_ENDPOINT_CONTROL = {
+    'remove': [
+        'corsheaders.middleware.CorsMiddleware',
+        'htmlmin.middleware.HtmlMinifyMiddleware',
+        'htmlmin.middleware.MarkRequestMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware'
+    ],
+    'prepend': [
+        'vstutils.api.endpoint.BulkMiddleware'
+    ],
+    'append': []
+}
+
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
 
@@ -395,7 +410,7 @@ DEFAULT_AUTH_PLUGIN_LIST: _t.Text = 'DJANGO,LDAP'
 
 
 def get_plugins():
-    plugins = dict()
+    plugins = {}
     for plugin_name in main.getlist('auth-plugins', fallback=DEFAULT_AUTH_PLUGIN_LIST):
         if plugin_name in DEFAULT_AUTH_PLUGINS:
             data = DEFAULT_AUTH_PLUGINS[plugin_name]
@@ -683,9 +698,14 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
+        'vstutils.api.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'vstutils.api.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'vstutils.api.permissions.IsAuthenticatedOpenApiRequest'

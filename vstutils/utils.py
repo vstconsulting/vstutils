@@ -1,20 +1,24 @@
-# pylint: disable=django-not-available,invalid-name,import-outside-toplevel
+# pylint: disable=django-not-available,invalid-name,import-outside-toplevel,too-many-lines
 from __future__ import unicode_literals
 
+import base64
+import codecs
 import io
-import json
 import logging
 import os
+import pickle
 import subprocess
 import sys
 import tempfile
 import time
 import traceback
+import types
 import typing as tp
 import warnings
 from pathlib import Path
 from threading import Thread
 
+import ujson as json
 from django.conf.urls import url, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
@@ -22,6 +26,7 @@ from django.template import loader
 from django.utils import translation
 from django.utils.module_loading import import_string as import_class
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import View
 
 from . import exceptions as ex
 
@@ -61,6 +66,47 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     result = config.render(data).replace('\r', '')
     translation.deactivate()
     return result
+
+
+def encode(key, clear):
+    """
+    Encode string by Vigenère cipher.
+
+    :param key: -- secret key for encoding
+    :type key: str
+    :param clear: -- clear value  for encoding
+    :type clear: str
+    :return: -- encoded string
+    :rtype: str
+    """
+    # pylint: disable=consider-using-enumerate
+
+    enc = []
+    for i in range(len(clear)):
+        key_c = key[i % len(key)]
+        enc.append(chr((ord(clear[i]) + ord(key_c)) % 256))
+    return base64.urlsafe_b64encode("".join(enc).encode()).decode()
+
+
+def decode(key, enc):
+    """
+    Decode string from encoded by Vigenère cipher.
+
+    :param key: -- secret key for encoding
+    :type key: str
+    :param enc: -- encoded string for decoding
+    :type enc: str
+    :return: -- decoded string
+    :rtype: str
+    """
+    # pylint: disable=consider-using-enumerate
+
+    dec = []
+    enc = base64.urlsafe_b64decode(enc).decode()
+    for i in range(len(enc)):
+        key_c = key[i % len(key)]
+        dec.append(chr((256 + ord(enc[i]) - ord(key_c)) % 256))
+    return "".join(dec)
 
 
 class apply_decorators:
@@ -109,8 +155,7 @@ class ClassPropertyDescriptor:
     meta = ClassPropertyMeta
 
     def __init__(self, fget: tp.Callable, fset: tp.Callable = None):
-        self.fget = self._fix_function(fget)
-        self.fset = self._fix_function(fset)
+        self.fget, self.fset = self._fix_function(fget), self._fix_function(fset)
 
     def __get__(self, obj, klass=None):
         if obj is not None:
@@ -419,6 +464,51 @@ class BaseVstObject:
             return caches['default']
 
 
+class SecurePickling(BaseVstObject):
+    """
+    Secured pickle wrapper by Vigenère cipher.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import SecurePickling
+
+
+            serializer = SecurePickling('password')
+
+            # Init secret object
+            a = {"key": "value"}
+            # Serialize object with secret key
+            pickled = serializer.dumps(a)
+            # Deserialize object
+            unpickled = serializer.loads(pickled)
+
+            # Check, that object is correct
+            assert a == unpickled
+    """
+    __slots__ = ('secure_key',)
+
+    def __init__(self, secure_key: tp.Optional[tp.Text] = None):
+        """
+        :param secure_key: Secret key for encoding.
+        """
+        if secure_key is None:
+            secure_key = self.get_django_settings('SECRET_KEY')
+        self.secure_key = str(secure_key)
+
+    def _encode(self, value: tp.Text):
+        return encode(self.secure_key, value)
+
+    def _decode(self, value: tp.Text):
+        return decode(self.secure_key, value)
+
+    def loads(self, value: tp.Any):
+        return pickle.loads(codecs.decode(self._decode(value).encode(), "base64"))
+
+    def dumps(self, value: tp.Any):
+        return self._encode(codecs.encode(pickle.dumps(value), "base64").decode())
+
+
 class Executor(BaseVstObject):
     """
     Command executor with realtime output write.
@@ -458,7 +548,7 @@ class Executor(BaseVstObject):
         stream_object = getattr(proc, stream)
         while not stream_object.closed:
             self.working_handler(proc)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
     def working_handler(self, proc: subprocess.Popen) -> None:
         # pylint: disable=unused-argument
@@ -750,7 +840,7 @@ class ObjectHandlers(BaseVstObject):
         self.type = type_name
         self.err_message = err_message
         self._list: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
-        self._loaded_backends: tp.Dict[tp.Text, tp.Any] = dict()
+        self._loaded_backends: tp.Dict[tp.Text, tp.Any] = {}
 
     @property
     def objects(self):
@@ -906,14 +996,21 @@ class URLHandlers(ObjectHandlers):
         if regexp in self.settings_urls:
             regexp = rf'^{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
-        if hasattr(view_class, 'as_view'):
+        namespace = view_kwargs.pop('namespace', 'gui')
+        result: tp.Union[tp.Tuple, types.ModuleType]
+        if isinstance(view_class, View) or hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
                 view = csrf_exempt(view)
-            result = url(regexp, view, *args, **options)
+            return url(regexp, view, *args, **options)
+        elif (isinstance(view_class, types.ModuleType) and
+              hasattr(view_class, 'urlpatterns') and
+              hasattr(view_class, 'app_name')):
+            result = view_class
+            namespace = None
         else:
-            result = url(regexp, include(view_class))
-        return result
+            result = (view_class, 'gui')
+        return url(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
     def urls(self) -> tp.Iterable:
         for regexp in self.list():
