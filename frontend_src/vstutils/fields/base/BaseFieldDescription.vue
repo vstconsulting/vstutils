@@ -9,6 +9,7 @@
     import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
 
     export default {
+        name: 'BaseFieldDescription',
         mixins: [BaseFieldInnerComponentMixin],
         data() {
             return {

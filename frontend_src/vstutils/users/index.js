@@ -132,17 +132,10 @@ const view_with_user_password_mixin = {
          * Method, that generates random password and sets it to the 'password' and 'password2' fields.
          */
         generate_passwordInstance() {
-            let data = $.extend(true, {}, this.getQuerySetFromSandBox(this.view, this.qs_url).cache.data);
-            let password = randomString(8);
+            const password = randomString(8);
 
             ['password', 'password2'].forEach((field) => {
-                data[field] = password;
-            });
-
-            this.$store.commit('setViewInstanceData', {
-                store: 'sandbox',
-                url: this.qs_url.replace(/^\/|\/$/g, ''),
-                data: data,
+                this.commitMutation('setFieldValue', { field, value: password });
             });
         },
     },

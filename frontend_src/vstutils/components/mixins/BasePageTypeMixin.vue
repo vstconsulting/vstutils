@@ -1,5 +1,5 @@
 <template>
-    <fields_wrapper :opt="options" :instance="instance"></fields_wrapper>
+    <fields_wrapper :opt="options" :datastore="datastore" />
 </template>
 
 <script>
@@ -8,18 +8,11 @@
      */
     export default {
         name: 'base_page_type_mixin',
-        props: ['datastore', 'data', 'view', 'opt'],
+        props: ['datastore', 'view', 'opt'],
         data() {
             return {
-                options: {
-                    store: 'objects',
-                },
+                options: {},
             };
-        },
-        computed: {
-            instance() {
-                return this.data.instance;
-            },
         },
     };
 </script>

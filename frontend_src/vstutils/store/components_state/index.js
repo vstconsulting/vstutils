@@ -1,12 +1,21 @@
-import actions from './actions';
-import mutations from './mutations';
-import * as getters from './getters';
-import state from './state';
+import Vue from 'vue';
 
 export default {
     namespaced: true,
-    mutations,
-    actions,
-    state,
-    getters,
+    state: {
+        modulesList: [],
+    },
+    mutations: {
+        addModule(state, moduleName) {
+            state.modulesList.push(moduleName);
+        },
+
+        removeModule(state, moduleName) {
+            const moduleIndex = state.modulesList.indexOf(moduleName);
+            if (moduleIndex !== -1) {
+                Vue.delete(state.modulesList, moduleIndex);
+            }
+        },
+    },
+    getters: {},
 };

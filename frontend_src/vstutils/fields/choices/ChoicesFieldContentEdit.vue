@@ -21,30 +21,72 @@
                  */
                 s2: undefined,
                 class_list: ['form-control', 'select2', 'select2-field-select'],
-                enum: this.field.options.enum || [],
+                enum: [],
             };
         },
-        mounted() {
-            this.s2 = $(this.$el);
-
-            this.initSelect2();
-
-            this.$watch(
-                function () {
-                    return this.field.options.enum;
-                },
-                function (newVal, oldVal) {
-                    this.enum = newVal || [];
-                    this.initSelect2();
-                },
-            );
+        computed: {
+            fieldForEnum() {
+                return (
+                    (this.field.options.additionalProperties &&
+                        this.field.options.additionalProperties.fieldForEnum) ||
+                    undefined
+                );
+            },
+            disableIfEmpty() {
+                if (
+                    this.field.options.additionalProperties &&
+                    this.field.options.additionalProperties.fieldForEnum !== undefined
+                ) {
+                    return this.field.options.additionalProperties.fieldForEnum;
+                }
+                return false;
+            },
         },
         watch: {
             value(value) {
                 this.setValue(value);
             },
         },
+        mounted() {
+            this.s2 = $(this.$el);
+
+            if (this.fieldForEnum) {
+                this.enum = this.prepareFieldData(this.data[this.fieldForEnum]);
+                this.$watch(
+                    function () {
+                        return this.data[this.fieldForEnum];
+                    },
+                    function (newVal) {
+                        this.enum = this.prepareFieldData(newVal);
+                        this.initSelect2();
+                    },
+                );
+            } else {
+                this.enum = this.field.options.enum;
+                this.$watch(
+                    function () {
+                        return this.field.options.enum;
+                    },
+                    function (newVal) {
+                        this.enum = newVal || [];
+                        this.initSelect2();
+                    },
+                );
+            }
+
+            this.initSelect2();
+        },
         methods: {
+            prepareFieldData(data) {
+                if (typeof data === 'string' && data.length > 0) {
+                    return data.split(',');
+                } else if (Array.isArray(data)) {
+                    return data.map((v) => (typeof v === 'object' ? v.value || v.prefetch_value : v));
+                } else if (typeof data === 'object') {
+                    return [data.value || data.prefetch_value];
+                }
+                return [];
+            },
             /**
              * Method, that mounts select2 to current field's select.
              */
@@ -54,7 +96,8 @@
                     .select2({
                         width: '100%',
                         data: this.enum,
-                        disabled: this.field.options.disabled,
+                        disabled:
+                            this.field.options.disabled || (this.disableIfEmpty && this.enum.length === 0),
                     })
                     .on('change', (event) => {
                         let value;
