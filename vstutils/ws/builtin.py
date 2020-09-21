@@ -1,5 +1,5 @@
 import uuid
-import ujson as json
+import json
 from django.conf import settings
 from django.http.cookie import SimpleCookie
 from channels.generic.websocket import AsyncJsonWebsocketConsumer, StopConsumer

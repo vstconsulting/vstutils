@@ -1,5 +1,5 @@
 import typing
-import ujson as json
+import json
 from django.conf import settings
 
 

@@ -698,12 +698,12 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'vstutils.api.renderers.JSONRenderer',
+        'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'vstutils.api.parsers.JSONParser',
+        'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),

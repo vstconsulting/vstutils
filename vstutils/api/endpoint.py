@@ -5,7 +5,7 @@ import functools
 from concurrent.futures import ThreadPoolExecutor, Executor
 from collections import OrderedDict
 
-import ujson as json
+import json
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest

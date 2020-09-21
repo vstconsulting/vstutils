@@ -2,7 +2,7 @@
 import typing as _t
 from collections import OrderedDict
 from inspect import getmembers
-import ujson as json
+import json
 from django.db import transaction, models
 from rest_framework.decorators import action
 from rest_framework import response, request as drf_request, status, views, serializers

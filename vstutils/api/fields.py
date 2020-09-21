@@ -2,7 +2,7 @@
 Additionals serializers fields for generating OpenAPI and GUI.
 """
 import typing as _t
-import ujson as json
+import json
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from django.db import models
 from ..utils import raise_context

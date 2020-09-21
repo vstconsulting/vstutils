@@ -18,7 +18,7 @@ import warnings
 from pathlib import Path
 from threading import Thread
 
-import ujson as json
+import json
 from django.conf.urls import url, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
