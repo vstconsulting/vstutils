@@ -62,14 +62,9 @@
         },
         methods: {
             getButtons(buttons_name) {
-                if (this.datastore.data.instance) {
-                    return this.view.getViewSublinkButtons(
-                        buttons_name,
-                        this.schema[buttons_name],
-                        this.datastore.data.instance,
-                    );
-                }
-                return [];
+                const instance =
+                    (this.datastore && this.datastore.data && this.datastore.data.instance) || {};
+                return this.view.getViewSublinkButtons(buttons_name, this.schema[buttons_name], instance);
             },
         },
     };
