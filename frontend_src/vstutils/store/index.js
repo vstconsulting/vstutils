@@ -3,6 +3,9 @@ import Vuex from 'vuex';
 import Vue from 'vue';
 import AutoUpdateStoreModule from '../autoupdate/AutoUpdateStoreModule.js';
 import ComponentStoreModule from './components_state';
+import * as modules from './components_state/commonStoreModules.js';
+
+export { modules };
 
 export const COMPONENTS_MODULE_NAME = 'componentsStore';
 
@@ -173,5 +176,3 @@ export class StoreConstructor {
         return new Vuex.Store(this.store);
     }
 }
-
-window.StoreConstructor = StoreConstructor;
