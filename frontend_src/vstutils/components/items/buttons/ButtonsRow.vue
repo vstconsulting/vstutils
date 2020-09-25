@@ -21,12 +21,7 @@
             :buttons="sublinks"
         />
 
-        <gui_group_of_buttons
-            type="action"
-            :title="$t('actions')"
-            classes="btn-warning"
-            :buttons="actions"
-        />
+        <gui_group_of_buttons type="action" :title="$t('actions')" classes="btn-warning" :buttons="actions" />
 
         <template v-if="view.schema.type === 'list'">
             <gui_filters_modal :opt="filters_opt" :view="view" :datastore="datastore" />
@@ -67,11 +62,14 @@
         },
         methods: {
             getButtons(buttons_name) {
-                return this.view.getViewSublinkButtons(
-                    buttons_name,
-                    this.schema[buttons_name],
-                    this.datastore.data.instance,
-                );
+                if (this.datastore.data.instance) {
+                    return this.view.getViewSublinkButtons(
+                        buttons_name,
+                        this.schema[buttons_name],
+                        this.datastore.data.instance,
+                    );
+                }
+                return [];
             },
         },
     };

@@ -2,6 +2,15 @@
  * Mixin with common methods of different table_row components.
  */
 const TableRowMixin = {
+    inject: {
+        /**
+         * Handler of type function can be provided to do custom action on click.
+         * If handler returns true default handler (goToTrLink) will continue its execution
+         */
+        customRowClickHandler: {
+            default: undefined,
+        },
+    },
     computed: {
         rowLink() {
             if (this.view.schema.page_path) {
@@ -18,6 +27,13 @@ const TableRowMixin = {
          * @param {boolean=} blank If true, function opens link in new window.
          */
         goToTrLink(event, blank = false) {
+            if (
+                typeof this.customRowClickHandler === 'function' &&
+                !this.customRowClickHandler({ event, blank, link: this.rowLink })
+            ) {
+                return;
+            }
+
             if (!this.blockTrLink(event.target, 'tr', 'highlight-tr-none')) {
                 let href;
                 if (event.target.hasAttribute('href')) {
