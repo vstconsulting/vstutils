@@ -1,6 +1,7 @@
 import time
 import logging
 import typing as _t
+from django.db import connection
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
@@ -8,6 +9,19 @@ from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
+
+
+class QueryTimingLogger:
+
+    def __init__(self):
+        self.queries_time = 0
+
+    def __call__(self, execute, sql, params, many, context):
+        start = time.time()
+        try:
+            return execute(sql, params, many, context)
+        finally:
+            self.queries_time += time.time() - start
 
 
 class BaseMiddleware(BaseVstObject):
@@ -128,15 +142,29 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
             value = ''
         return f'{key}{value}'
 
+    def _round_time(self, seconds: _t.Union[int, float]):
+        return round(seconds * 1000, 2)
+
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         start_time = time.time()
-        response = super().get_response_handler(request)
-        response_durations = getattr(response, 'timings', None)
-        total_time = round((time.time() - start_time)*1000, 2)
+        ql = QueryTimingLogger()
+
+        with connection.execute_wrapper(ql):
+            response = super().get_response_handler(request)
+
+        if hasattr(response, 'timings'):
+            response_durations = response.timings  # type: ignore
+        else:
+            response_durations = None
+        total_time = self._round_time(time.time() - start_time)
+
         if getattr(request, 'is_bulk', False):
             response['Response-Time'] = str(total_time)
         else:
             if response_durations:
                 response_durations = f', {", ".join(map(self.__duration_handler, response_durations.items()))}'
+            else:
+                response_durations = ""
+            response_durations += f', db_execution_time;dur={self._round_time(ql.queries_time)}'
             response['Server-Timing'] = f'total;dur={total_time}{response_durations or ""}'
         return response
