@@ -41,6 +41,10 @@ const FKFieldContentReadonly = {
          * Text of link.
          */
         text() {
+            if (this.values_cache[this.value]) {
+                return this.values_cache[this.value].prefetch_value;
+            }
+
             if (!this.value) {
                 return;
             }

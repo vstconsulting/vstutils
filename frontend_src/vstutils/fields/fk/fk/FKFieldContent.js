@@ -14,10 +14,6 @@ const FKFieldContent = {
     },
     created() {
         if (this.value !== undefined && typeof this.value != 'object') {
-            if (this.values_cache[this.value]) {
-                return this.$emit('proxyEvent', 'setValueInStore', this.values_cache[this.value]);
-            }
-
             this.fetchValue(this.value);
         }
     },
@@ -29,10 +25,6 @@ const FKFieldContent = {
 
             if (typeof value == 'object') {
                 return;
-            }
-
-            if (this.values_cache[value]) {
-                return this.$emit('proxyEvent', 'setValueInStore', this.values_cache[value]);
             }
 
             this.fetchValue(value);
@@ -91,7 +83,7 @@ const FKFieldContent = {
          * Method, that loads prefetch_value.
          * @param {string, number} value.
          */
-        fetchValue(value) {
+        async fetchValue(value) {
             if (!this.field.fetchDataOrNot(this.data)) {
                 return;
             }
@@ -100,18 +92,11 @@ const FKFieldContent = {
                 [this.field.getPrefetchFilterName(this.data)]: value,
             };
 
-            this.queryset
-                .filter(filters)
-                .items()
-                .then((instances) => {
-                    let instance = instances[0];
+            const [instance] = await this.queryset.filter(filters).items();
 
-                    if (instance && instance.data) {
-                        this.values_cache[value] = this.field.getPrefetchValue(this.data, instance.data);
-
-                        this.$emit('proxyEvent', 'setValueInStore', this.values_cache[value]);
-                    }
-                });
+            if (instance && instance.data) {
+                Vue.set(this.values_cache, value, this.field.getPrefetchValue(this.data, instance.data));
+            }
         },
     },
 };

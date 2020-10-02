@@ -1,11 +1,15 @@
 <template>
-    <a href="/" class="logo-link nav-link brand-link logo">
-        <i class="nav-icon fa fa-globe mr-2" style="margin-left: 20px;"></i>
-        <span class="brand-text font-weight-light">{{ $t(title.toLowerCase()) | capitalize }}</span>
-    </a>
+    <router-link :to="{ name: 'home' }" class="logo-link nav-link brand-link logo">
+        <span @click="hideSidebar">
+            <i class="nav-icon fa fa-globe mr-2" style="margin-left: 20px;"></i>
+            <span class="brand-text font-weight-light">{{ $t(title.toLowerCase()) | capitalize }}</span>
+        </span>
+    </router-link>
 </template>
 
 <script>
+    import $ from 'jquery';
+
     /**
      * Logo component.
      */
@@ -15,6 +19,13 @@
             title: {
                 type: String,
                 default: () => '',
+            },
+        },
+        methods: {
+            hideSidebar() {
+                if (document.body.classList.contains('sidebar-open')) {
+                    $('[data-widget="pushmenu"]').PushMenu('collapse');
+                }
             },
         },
     };
@@ -30,10 +41,5 @@
     }
     .brand-link:hover {
         color: rgba(255, 255, 255, 0.8) !important;
-    }
-    @media (max-width: 767px) {
-        .logo {
-            display: none;
-        }
     }
 </style>

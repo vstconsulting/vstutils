@@ -79,17 +79,15 @@
              * Method, that hides sidebar.
              */
             hideSidebar() {
-                if (window.innerWidth <= 991) {
-                    $('body').removeClass('sidebar-open').addClass('sidebar-collapse');
+                if (document.body.classList.contains('sidebar-open')) {
+                    $('[data-widget="pushmenu"]').PushMenu('collapse');
                 }
             },
             /**
              * Method, that hides sidebar.
              */
             openSidebar() {
-                if (window.innerWidth <= 991) {
-                    $('body').addClass('sidebar-open').removeClass('sidebar-collapse');
-                }
+                $('[data-widget="pushmenu"]').PushMenu('expand');
             },
         },
     };
