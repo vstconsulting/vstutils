@@ -1,7 +1,7 @@
 $admonition:
-    (".warning", ".important") ("background-color": "#fff8a96b", "border": "1px solid lightgray", "padding-left": "10px"),
-    (".attention", ".caution", ".danger", ".error") ("background-color": "#ff97976b", "border": "1px solid lightgray", "padding-left": "10px"),
-    (".admonition", ".hint", ".note", ".tip") ("background-color": "#d3d3d36b", "border": "1px solid lightgray", "padding-left": "10px"),
+    (".warning", ".important") ("background-color": "#fff8a96b", "border": "1px solid lightgray", "padding-left": "10px", "margin": "1%"),
+    (".attention", ".caution", ".danger", ".error") ("background-color": "#ff97976b", "border": "1px solid lightgray", "padding-left": "10px", "margin": "1%"),
+    (".admonition", ".hint", ".note", ".tip") ("background-color": "#d3d3d36b", "border": "1px solid lightgray", "padding-left": "10px", "margin": "1%"),
     (".attention", ".caution", ".danger", ".error .admonition-title") ("color": "#c70413bd"),
     (".important", ".warning .admonition-title") ("color": "#ffa10abd"),
     (" .admonition-title") ("color": "#0000008a");
@@ -409,4 +409,29 @@ body {
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link p {
         width: auto;
   }
+}
+
+dt.class,
+dt.method,
+dt.function,
+dt.exception,
+dt.attribute
+{
+    margin-top: 1%;
+    margin-bottom: 5px;
+}
+
+dl.class > dd,
+dl.method > dd,
+dl.function > dd,
+dl.exception > dd,
+dl.attribute > dd,
+{
+    margin-bottom: 3%;
+}
+
+
+
+dl dl {
+    margin-left: 1%;
 }

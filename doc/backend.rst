@@ -8,10 +8,16 @@ Below are descriptions of some features used in the development of projects base
 Models
 ------
 
+A model is the single, definitive source of truth about your data. It contains the essential fields and behaviors of the data you’re storing.
+The goal is to define your data model in one place and automatically derive things from it.
+You can also define everything you need to get the generated view from the model.
+
 .. automodule:: vstutils.models
     :members:
 
-Also you can use custom models without uses DB:
+
+Also you can use custom models without using database:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: vstutils.custom_model
     :members: ListModel,FileModel

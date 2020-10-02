@@ -1,9 +1,21 @@
 Quick Start
 ===========
-Starting of new project, based on VST Utils Framework, is rather simple. All you need to do is run several commands.
+Starting of new project, based on VST Utils Framework, is rather simple.
+We recommend creating a virtual environment for each project to avoid conflicts in the system.
+
+Let’s learn by example.
+All you need to do is run several commands.
+This manual consist of two parts:
+
+1. Description of the process of creating a new application and the main commands for launching and deploying.
+
+2. Description of the process of creating new entities in the application.
+
 
 New application creation
 ------------------------
+
+Throughout this tutorial, we’ll walk you through the creation of a basic poll application.
 
 1. **Install VST Utils**
 
@@ -13,6 +25,10 @@ New application creation
 
 2. **Create new project, based on VST Utils**
 
+    If this is your first time using vstutils, you’ll have to take care of some initial setup.
+    Namely, you’ll need to auto-generate some code that establishes a vstutils application –
+    a collection of settings for an instance of vstutils, including database configuration,
+    Django-specific and vstutils-specific options and application-specific settings.
     You can execute base command for new project creation.
 
     .. sourcecode:: bash
@@ -37,7 +53,7 @@ New application creation
     Both these commands create several files in ``project directory``,
     that was mentioned in the new project creation command.
 
-    .. sourcecode:: yaml
+    .. sourcecode::
 
        /{{app_dir}}/{{app_name}}
         ├── .coveragerc
@@ -68,9 +84,6 @@ New application creation
         ├── tox.ini
         └── webpack.config.jsdefault
 
-
-
-
     where:
 
     * **frontend_src** - directory that contains all sources for frontend;
@@ -90,9 +103,16 @@ New application creation
 
 3. **Apply migrations**
 
+    Let’s verify your vstutils project works.
+    Change into the outer ``/{{app_dir}}/{{app_name}}`` directory, if you haven’t already,
+    and run the following command:
+
     .. sourcecode:: bash
 
         python -m {{app_name}} migrate
+
+    This command create SQLite (by default) database with default SQL-schema.
+    VSTUTILS supports all databases `Django does <https://docs.djangoproject.com/en/2.2/ref/databases/#databases>`_.
 
 4. **Create superuser**
 
@@ -107,6 +127,11 @@ New application creation
         python -m {{app_name}} web
 
     Web-interface of your application will be started on the port 8080.
+    You’ve started the vstutils production server based on `uWSGI <https://uwsgi-docs.readthedocs.io/>`_.
+
+    .. warning::
+        Now’s a good time to note: if you want to run the web-server under the debugger, then you should run
+        `the standard Django's dev-server <https://docs.djangoproject.com/en/2.2/intro/tutorial01/#the-development-server>`_.
 
     .. image:: img/app_example_login_page.png
 
@@ -147,7 +172,7 @@ Let make out an example from **`BModel**:
 
 .. autoclass:: vstutils.models.BModel
     :exclude-members:
-    
+    :noindex:
 
 
 More information about Models you can find in `Django Models documentation <https://docs.djangoproject.com/en/2.2/topics/db/models/>`_.
@@ -155,8 +180,10 @@ More information about Models you can find in `Django Models documentation <http
 If you don't need to create custom :ref:`serializers<SerializerCreateTag>` or :ref:`view sets<ViewSetCreateTag>`, you can go to this :ref:`sstage<AddModelsToApiTag>`.
 
 .. _SerializerCreateTag:
+
 Serializers creation
 ~~~~~~~~~~~~~~~~~~~~
+
 *Note - If you don't need custom serializer you can skip this section*
 
 Firstly, you need to create file ``serializers.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory.
@@ -188,8 +215,10 @@ More information about Serializers you can find in `Django REST Framework docume
 
 
 .. _ViewSetCreateTag:
+
 Views creation
 ~~~~~~~~~~~~~~
+
 *Note - If you don't need custom view set you can skip this section*
 
 Firstly, you need to create file ``views.py`` in the ``/{{app_dir}}/{{app_name}}/{{app_name}}/`` directory.
@@ -202,11 +231,11 @@ Then you need to add some code like this to ``views.py``:
     from vstutils.api.base import ModelViewSet
     from . import serializers as sers
     from .models import Stage, Task
-    
-    
+
+
     class StageViewSet(Stage.generated_view):
         serializer_class_one = sers.StageSerializer
-    
+
 
     '''
     Decorator, that allows to put one view into another
@@ -227,8 +256,10 @@ More information about Views and ViewSets you can find in `Django REST Framework
 
 
 .. _AddModelsToApiTag:
+
 Adding Models to API
 ~~~~~~~~~~~~~~~~~~~~
+
 To add created Models to the API you need to write something like this at the end of your ``settings.py`` file:
 
 .. sourcecode:: python
@@ -246,7 +277,7 @@ To add created Models to the API you need to write something like this at the en
     API[VST_API_VERSION][r'task'] = {
         'view': 'newapp2.views.TaskViewSet'
     }
-    
+
     '''
     You can add model too.
     All model generate base ViewSet with data that they have, if dont create custom ViewSet or Serializer

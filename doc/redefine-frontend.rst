@@ -247,7 +247,7 @@ views.afterInitEach
 ~~~~~~~~~~~~~~~~~~~
 **Signal name:** "views.afterInitEach".
 
-**Context argument:** obj - {object} - Object with following structure: { views, path }, where views - object with initialized 
+**Context argument:** obj - {object} - Object with following structure: { views, path }, where views - object with initialized
 View Instances, path - path of view that was currently initialized.
 
 **Description:** This signal will be emitted after initialization of each view.
@@ -481,7 +481,8 @@ Fields' components are being rendered using ``Field.mixins()`` static method. Yo
 
 Customizing field using ``dynamic`` format
 ------------------------------------------
-Setting ``field.format`` to ``dynamic`` you can provide ``field.additionalProperties.callback``s and customize field on
+
+Setting ``field.format`` to ``dynamic`` you can provide ``field.additionalProperties.callback`` and customize field on
 every rendering, for example:
 
 .. sourcecode:: javascript
