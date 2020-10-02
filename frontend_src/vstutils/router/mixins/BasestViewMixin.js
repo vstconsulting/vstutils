@@ -51,11 +51,6 @@ const BasestViewMixin = {
             return this.$store.getters[`${this.storeName}/queryset`];
         },
     },
-    watch: {
-        title() {
-            this.setDocumentTitle();
-        },
-    },
     created() {
         /**
          * Register new module in store
@@ -63,8 +58,6 @@ const BasestViewMixin = {
         if (this.componentId && this.view) {
             this.registerStoreModule();
         }
-
-        this.setDocumentTitle();
     },
     destroyed() {
         /**
@@ -139,14 +132,6 @@ const BasestViewMixin = {
          */
         goToHistoryRecord(n) {
             this.$router.go(n);
-        },
-        /**
-         * Method, that sets <title></title> equal to this.title.
-         */
-        setDocumentTitle() {
-            let title = this.$options.filters.capitalize(this.title);
-            title = this.$options.filters.split(title);
-            document.title = title;
         },
         /**
          * Method, that inits showing of preloader.

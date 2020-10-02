@@ -2,7 +2,12 @@
     <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <span class="nav-link" @click="saveHideMenuSettings" data-widget="pushmenu">
+                <span
+                    ref="sidebarControl"
+                    class="nav-link sidebar-control"
+                    data-widget="pushmenu"
+                    @click="saveHideMenuSettings"
+                >
                     <i class="fa fa-bars ico-data-default"></i>
                 </span>
             </li>
@@ -87,6 +92,7 @@
 </template>
 
 <script>
+    import $ from 'jquery';
     import { Gravatar } from '../../../users';
     import { saveHideMenuSettings } from '../../../utils';
 
@@ -196,6 +202,9 @@
                 return '/login/';
             },
         },
+        mounted() {
+            $(this.$refs.sidebarControl).PushMenu();
+        },
         methods: {
             saveHideMenuSettings() {
                 saveHideMenuSettings();
@@ -233,5 +242,9 @@
         color: #fff;
         box-shadow: 0 0 0 0;
         border-color: #dfe3e7;
+    }
+
+    .sidebar-control {
+        cursor: pointer;
     }
 </style>

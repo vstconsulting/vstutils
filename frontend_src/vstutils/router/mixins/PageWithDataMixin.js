@@ -45,7 +45,7 @@ const PageWithDataMixin = {
                             this.$t(this.view.schema.name),
                         ]),
                     );
-                    this.openRedirectUrl({ path: this.getRedirectUrl() });
+                    this.openRedirectUrl({ path: this.getRedirectUrl({ afterDelete: true }) });
                 })
                 .catch((error) => {
                     let str = window.app.error_handler.errorToString(error);
@@ -67,7 +67,13 @@ const PageWithDataMixin = {
          */
         // eslint-disable-next-line no-unused-vars
         getRedirectUrl(opt) {
-            return this.url.replace('/edit', '').replace('/new', '').split('/').slice(0, -1).join('/');
+            let url = this.url.replace(/\/edit$/, '').replace(/\/new$/, '');
+
+            if (opt && opt.afterDelete) {
+                return url.split('/').slice(0, -1).join('/');
+            }
+
+            return url;
         },
     },
 };

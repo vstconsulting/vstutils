@@ -157,26 +157,6 @@ export function getCookie(name) {
 }
 
 /**
- * Callback for window.onresize event.
- */
-window.onresize = function () {
-    const body = $('body');
-    if (window.innerWidth > 991) {
-        if (guiLocalSettings.get('hideMenu')) {
-            body.addClass('sidebar-collapse');
-        }
-
-        if (body.hasClass('sidebar-open')) {
-            body.removeClass('sidebar-open');
-        }
-    } else {
-        if (body.hasClass('sidebar-collapse')) {
-            body.removeClass('sidebar-collapse');
-        }
-    }
-};
-
-/**
  * Function saves 'hideMenu' options to guiLocalSettings.
  * Function is supposed to be called when push-menu button was clicked.
  */

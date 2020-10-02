@@ -72,7 +72,7 @@ export let routesComponentsTemplates = {
             /**
              * Title of View.
              */
-            title: function () {
+            title() {
                 return this.view.schema.name;
             },
             /**
@@ -137,6 +137,7 @@ export let routesComponentsTemplates = {
          * Vue Hook, that will be called after View Vue Component creation.
          */
         created() {
+            this.setDocumentTitle();
             this.onCreatedHandler();
         },
         /**
@@ -144,6 +145,7 @@ export let routesComponentsTemplates = {
          */
         watch: {
             $route: 'fetchData',
+            title: 'setDocumentTitle',
         },
         /**
          * Dict with methods of current Vue component.
@@ -161,6 +163,14 @@ export let routesComponentsTemplates = {
                     }
                     return error;
                 });
+            },
+            /**
+             * Method, that sets <title></title> equal to this.title.
+             */
+            setDocumentTitle() {
+                let title = this.$options.filters.capitalize(this.title);
+                title = this.$options.filters.split(title);
+                document.title = title;
             },
             /**
              * Method, that makes redirect to some page.
@@ -763,7 +773,7 @@ export let routesComponentsTemplates = {
              * Redefinition of 'qs_url' from base mixin.
              */
             qs_url: function () {
-                return this.url.replace('/new', '').replace(/^\/|\/$/g, '');
+                return this.url.replace(/\/new$/, '').replace(/^\/|\/$/g, '');
             },
             /**
              * Redefinition of 'title' from base mixin.
@@ -843,8 +853,8 @@ export let routesComponentsTemplates = {
              * @param {object} opt Object with arguments for current method.
              */
             getRedirectUrl(opt) {
-                return [this.url.replace('/edit', '').replace('/new', ''), opt.instance.getPkValue()].join(
-                    '/',
+                return (
+                    this.url.replace(/\/edit$/, '').replace(/\/new$/, '') + '/' + opt.instance.getPkValue()
                 );
             },
         },
@@ -890,7 +900,7 @@ export let routesComponentsTemplates = {
              * Redefinition of 'qs_url' from base mixin.
              */
             qs_url: function () {
-                return this.url.replace('/edit', '').replace(/^\/|\/$/g, '');
+                return this.url.replace(/\/edit$/, '').replace(/^\/|\/$/g, '');
             },
         },
         methods: {
@@ -957,15 +967,6 @@ export let routesComponentsTemplates = {
             async reloadInstance() {
                 this.commitMutation('setInstance', await this.queryset.get());
             },
-            /**
-             * Method, that forms redirect URL,
-             * which will be opened after successful action execution.
-             * @param {object} opt Object with arguments for current method.
-             */
-            // eslint-disable-next-line no-unused-vars
-            getRedirectUrl(opt) {
-                return this.url.replace('/edit', '');
-            },
         },
     },
     action: {
@@ -1017,7 +1018,11 @@ export let routesComponentsTemplates = {
                 let parent_paths = this.getParentPaths(this.$route.name, this.url);
                 let view = this.$store.getters.getView(parent_paths[parent_paths.length - 1].path);
                 let instance = view.objects.model.getInstance(opt.data, view.objects);
-                let url_parts = this.url.replace('/edit', '').replace('/new', '').split('/').slice(0, -2);
+                let url_parts = this.url
+                    .replace(/\/edit$/, '')
+                    .replace(/\/new$/, '')
+                    .split('/')
+                    .slice(0, -2);
                 url_parts.push(instance.getPkValue());
                 return url_parts.join('/');
             },
