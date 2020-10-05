@@ -19,7 +19,7 @@ from pathlib import Path
 from threading import Thread
 
 import json
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
@@ -900,7 +900,7 @@ class ObjectHandlers(BaseVstObject):
         :param name: -- name of backend type
         :type name: str
         :return: class of backend
-        :rtype: class,module,object
+        :rtype: type,types.ModuleType,object
         """
         try:
             backend = self.get_backend_handler_path(name)
@@ -1004,7 +1004,7 @@ class URLHandlers(ObjectHandlers):
         :param argv: overrided args
         :param kwargs: overrided kwargs
         :return: url object
-        :rtype: django.conf.urls.url
+        :rtype: django.urls.re_path
         """
         regexp = name
         options = self.opts(regexp)
@@ -1021,7 +1021,7 @@ class URLHandlers(ObjectHandlers):
             view = view_class.as_view(**view_kwargs)
             if not csrf_enable:
                 view = csrf_exempt(view)
-            return url(regexp, view, *args, **options)
+            return re_path(regexp, view, *args, **options)
         elif (isinstance(view_class, types.ModuleType) and
               hasattr(view_class, 'urlpatterns') and
               hasattr(view_class, 'app_name')):
@@ -1029,7 +1029,7 @@ class URLHandlers(ObjectHandlers):
             namespace = None
         else:
             result = (view_class, 'gui')
-        return url(regexp, include(result, namespace=namespace), *args, **view_kwargs)
+        return re_path(regexp, include(result, namespace=namespace), *args, **view_kwargs)
 
     def urls(self) -> tp.Iterable:
         for regexp in self.list():
