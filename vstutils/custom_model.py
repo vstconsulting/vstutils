@@ -167,7 +167,7 @@ class ListModel(BaseModel):
 
                 data = [
                     {"name": "Sergey Klyuykov"},
-                    {"name": "Roman Akhmadullin"},
+                    {"name": "Michael Taran"},
                 ]
     """
 
@@ -196,7 +196,7 @@ class FileModel(ListModel):
         .. sourcecode:: YAML
 
             - name: "Sergey Klyuykov"
-            - name: "Roman Akhmadullin"
+            - name: "Michael Taran"
 
         Correct usage will be:
 

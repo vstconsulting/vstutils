@@ -25,6 +25,11 @@ class register_view_decorator:  # pylint: disable=invalid-name
 
 
 class register_view_action(register_view_decorator):  # pylint: disable=invalid-name
+    """
+    Simple decorator for marking model methods as generated view actions.
+    The decorated method becomes a method of generated view and `self` will be view object.
+    See supported args in :func:`vstutils.api.decorators.subaction`
+    """
     __slots__ = tuple()  # type: ignore
 
     def __init__(self, *args, **kwargs):

@@ -28,7 +28,7 @@ admin.site.login = AdminLoginLogoutRedirectView.as_view(url=settings.LOGIN_URL)
 admin.site.logout = AdminLoginLogoutRedirectView.as_view(url=settings.LOGOUT_URL)
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
-urlpatterns = list(URLHandlers().urls())
+urlpatterns = list(URLHandlers())
 
 urlpatterns += [
     re_path(r'^admin/', admin.site.urls),

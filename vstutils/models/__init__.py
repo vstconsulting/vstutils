@@ -27,7 +27,7 @@ class BModel(BaseModel):
 
             from django.db import models
             from rest_framework.fields import ChoiceField
-            from vstutils.models import BModel, register_view_action
+            from vstutils.models import BModel
 
             class Stage(BModel):
                 name = models.CharField(max_length=256)
@@ -100,7 +100,7 @@ class BModel(BaseModel):
 
           Default is simple CRUD-view.
 
-        - ``_serializer_class`` - class of API serializer. Default is ``vstutils.api.serializers.VSTSerializer``.
+        - ``_serializer_class`` - class of API serializer. Default is :class:`vstutils.api.serializers.VSTSerializer`.
         - ``_serializer_class_name`` - model name for OpenAPI definitions. Default is name of model class.
         - ``_list_fields`` or ``_detail_fields`` - list of fields which will show in entity view.
         - ``_override_list_fields`` or ``_override_detail_fields`` - mapping with names and field types
@@ -115,12 +115,12 @@ class BModel(BaseModel):
         - ``_override_permission_classes`` - boolean flag indicates that ``_permission_classes`` override default
           viewset (otherwise appends). Default is ``False``.
         - ``_copy_attrs`` - list of model-instance attributes indicates that object is copiable with this attrs.
-        - ``_nested`` - key-value mapping with nested views (key - nested name, kwargs for nested decorator).
-          Supports ``model`` attribute as nested.
+        - ``_nested`` - key-value mapping with nested views (key - nested name,
+          kwargs for :class:`vstutils.api.decorators.nested_view` decorator but supports ``model`` attribute as nested.).
 
         .. note::
             Sometimes you may need to create an action on generated view. Use around the class method
-            the ``vstutils.models.register_view_action`` decorator with the ``detail`` argument
+            the :class:`vstutils.models.decorators.register_view_action` decorator with the ``detail`` argument
             to determine applicability to a list or detail entry.
             In this case, the decorated method will take an instance of the view object as ``self`` attribute.
     """

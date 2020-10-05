@@ -245,7 +245,7 @@ class redirect_stdany:
 
 class Dict(dict):
     """
-    Wrapper over `collections.OrderedDict` which
+    Wrapper over `dict` which
     return JSON on conversion to string.
     """
 
@@ -511,7 +511,14 @@ class SecurePickling(BaseVstObject):
 
 class Executor(BaseVstObject):
     """
-    Command executor with realtime output write.
+    Command executor with realtime output write and line handling.
+    By default and by design executor initialize string attribute ``output``
+    which will be modifyed by ``+=`` operator with new lines by :meth:`.Executor.write_output`
+    procedure. Override the method if you want change behavior.
+
+    Executor class supports periodically (0.01 sec) handling process and execute some checks
+    by overriding :meth:`.Executor.working_handler` procedure method. If you want disable this behavior
+    override the method by None value or use :class:`.UnhandledExecutor`.
     """
     __slots__ = 'output', '_stdout', '_stderr', 'env'
 
@@ -524,16 +531,15 @@ class Executor(BaseVstObject):
 
     env: tp.Dict[tp.Text, tp.Text]
 
-    def __init__(self, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
+    def __init__(self, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **environ_variables):
         """
-
         :type stdout: BinaryIO,int
         :type stderr: BinaryIO,int
         """
         self.output = ''
         self._stdout = stdout
         self._stderr = stderr
-        self.env = {}
+        self.env = environ_variables
 
     def write_output(self, line: tp.Text) -> None:
         """
@@ -580,11 +586,6 @@ class Executor(BaseVstObject):
             out.close()
 
     def line_handler(self, line: tp.Text) -> None:
-        """
-        Per line handler.
-
-        :type line: str
-        """
         if line is not None:
             with raise_context():
                 self.write_output(line)
@@ -621,6 +622,9 @@ class Executor(BaseVstObject):
 
 
 class UnhandledExecutor(Executor):
+    """
+    Class based on :class:`.Executor` but disables `working_handler`.
+    """
     working_handler = None  # type: ignore
 
 
@@ -917,6 +921,7 @@ class ObjectHandlers(BaseVstObject):
 class ModelHandlers(ObjectHandlers):
     """
     Handlers for some models like 'INTEGRATIONS' or 'REPO_BACKENDS'.
+    Based on :class:`.ObjectHandlers` but more specific for working with models.
     All handlers backends get by first argument model object.
 
     **Attributes**:
@@ -942,7 +947,19 @@ class ModelHandlers(ObjectHandlers):
 
 
 class URLHandlers(ObjectHandlers):
-    """ Object handler for GUI views. Uses `GUI_VIEWS` from settings.py. """
+    """
+    Object handler for GUI views. Uses `GUI_VIEWS` from settings.py.
+    Based on :class:`.ObjectHandlers` but more specific to urlpatterns.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import URLHandlers
+
+
+            # By default gets from `GUI_VIEWS` in `settings.py`
+            urlpatterns = list(URLHandlers())
+    """
     __slots__ = ('additional_handlers', '__handlers__')
 
     settings_urls: tp.ClassVar[tp.List[tp.Text]] = [
@@ -1015,3 +1032,6 @@ class URLHandlers(ObjectHandlers):
     def urls(self) -> tp.Iterable:
         for regexp in self.list():
             yield self.get_object(regexp)
+
+    def __iter__(self):
+        return self.urls()

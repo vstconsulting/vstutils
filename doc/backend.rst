@@ -15,6 +15,9 @@ You can also define everything you need to get the generated view from the model
 .. automodule:: vstutils.models
     :members:
 
+.. automodule:: vstutils.models.decorators
+    :members: register_view_action
+
 
 Also you can use custom models without using database:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,6 +28,11 @@ Also you can use custom models without using database:
 
 Utils
 -----
+
+This is some tested set of development utilities.
+Utilities include a collection of some code that will be useful
+in one way or another to develop the application.
+Most of the functions are used by vstutils itself.
 
 .. automodule:: vstutils.utils
     :members:
