@@ -5,17 +5,17 @@ from rest_framework import serializers
 
 
 class RegularExpressionValidator:
-    '''Class for regular expression based validation
+    """
+    Class for regular expression based validation
 
-    :raises serializers.ValidationError: in case value does not match regular expression
-    '''
+    :raises rest_framework.exceptions.ValidationError: in case value does not match regular expression
+    """
     regexp: _t.Optional[_t.Pattern[_t.Text]] = None
 
-    def __init__(self, regexp=None):
-        '''
+    def __init__(self, regexp: _t.Optional[_t.Pattern] = None):
+        """
         :param regexp: Compiled regular expression
-        :type regexp: typing.Pattern
-        '''
+        """
         self._regexp = regexp if regexp else self.regexp
 
     def __call__(self, value):

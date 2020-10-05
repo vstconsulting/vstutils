@@ -53,13 +53,13 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     Render string from template.
 
     :param name: -- full template name
-    :type name: str,unicode
+    :type name: str
     :param data: -- dict of rendered vars
     :type data: dict
     :param trans: -- translation for render. Default 'en'.
-    :type trans: str,unicode
+    :type trans: str
     :return: -- rendered string
-    :rtype: str,unicode
+    :rtype: str
     """
     translation.activate(trans)
     config = loader.get_template(name)
@@ -260,21 +260,21 @@ class tmp_file:
     """
     Temporary file with name
     generated and auto removed on close.
+
+    **Attributes**:
+
+    :param data: -- string to write in tmp file.
+    :type data: str
+    :param mode: -- file open mode. Default 'w'.
+    :type mode: str
+    :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
+    :type bufsize: int
+    :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
+
     """
     __slots__ = ('fd', 'path',)
 
     def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = -1, **kwargs):
-        """
-        tmp_file constructor
-
-        :param data: -- string to write in tmp file.
-        :type data: str
-        :param mode: -- file open mode. Default 'w'.
-        :type mode: str
-        :param bufsize: -- bufer size for tempfile.NamedTemporaryFile
-        :type bufsize: int
-        :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
-        """
         self.fd = tempfile.NamedTemporaryFile(mode, buffering=bufsize, **kwargs)
         self.path = Path(self.fd.name)
         if data:
@@ -318,6 +318,8 @@ class tmp_file_context:
     Context object for work with tmp_file.
     Auto close on exit from context and
     remove if file still exist.
+
+    This context manager over :class:`.tmp_file`
     """
     __slots__ = ('tmp',)
 
@@ -445,7 +447,7 @@ class BaseVstObject:
         Get params from Django settings.
 
         :param name: name of param
-        :type name: str,unicode
+        :type name: str
         :param default: default value of param
         :type default: object
         :return: Param from Django settings or default.

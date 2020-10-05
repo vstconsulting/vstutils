@@ -21,6 +21,7 @@ import datetime
 from django import setup
 sys.path.insert(0, os.path.abspath('../'))
 import vstutils
+import django
 from vstutils.environment import prepare_environment
 
 
@@ -53,9 +54,11 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
     'sphinxcontrib.mermaid',
     'sphinxcontrib.httpdomain',
-    'vstutils.api.doc_generator'
+    'vstutils.api.doc_generator',
+    'sphinx.ext.intersphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -218,3 +221,16 @@ if os.path.exists(_mermaid_cmd):
     mermaid_output_format = 'png'
 
 autodoc_mock_imports = ["django", "vstutils.tools"]
+
+django_version = '.'.join((str(django.VERSION[0]), str(django.VERSION[1])))
+django_version_docs = 'https://docs.djangoproject.com/en/{version}/'.format(version=django_version)
+
+intersphinx_mapping = {
+    'django': (django_version_docs, django_version_docs + '_objects/'),
+    'python': ('https://docs.python.org/3.6', None)
+}
+
+set_type_checking_flag = True
+typehints_fully_qualified = True
+always_document_param_types = True
+autodoc_inherit_docstrings = False

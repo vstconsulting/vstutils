@@ -279,6 +279,9 @@ class OperationSerializer(serializers.Serializer):
 
 
 class EndpointViewSet(views.APIView):
+    """
+    Default API-endpoint viewset.
+    """
     schema = None  # type: ignore
     versioning_class = versioning.QueryParameterVersioning  # type: ignore
     renderer_classes = list(views.APIView.renderer_classes) + list(SPEC_RENDERERS)
@@ -295,7 +298,8 @@ class EndpointViewSet(views.APIView):
         "HTTP_USER_AGENT"
     ]
 
-    serializer_class = OperationSerializer
+    #: One operation serializer class.
+    serializer_class: _t.ClassVar[_t.Type[OperationSerializer]] = OperationSerializer
 
     def get_client(self, request: BulkRequestType) -> BulkClient:
         """

@@ -28,9 +28,9 @@ class BaseMiddleware(BaseVstObject):
     """
     Middleware base class for handling:
 
-    * Incoming requests by `.request_handler()`;
-    * Outgoing response before any calling on server by `.get_response_handler()`;
-    * Outgoing responses by `.handler()`.
+    * Incoming requests by :meth:`.BaseMiddleware.request_handler()`;
+    * Outgoing response before any calling on server by :meth:`.BaseMiddleware.get_response_handler()`;
+    * Outgoing responses by :meth:`.BaseMiddleware.handler()`.
 
     Middleware must be added to `MIDDLEWARE` list in settings.
 
@@ -84,8 +84,11 @@ class BaseMiddleware(BaseVstObject):
         processing the response sent, insertion of headers to response, etc.
 
         :param request: HTTP-request object.
+        :type request: django.http.HttpRequest
         :param response: HTTP-response object which will be sended to client.
+        :type response: django.http.HttpResponse
         :return: Handled response object.
+        :rtype: django.http.HttpResponse
         """
 
         return response
@@ -97,7 +100,9 @@ class BaseMiddleware(BaseVstObject):
         The request handler. Called before request will be handled by any view.
 
         :param request: HTTP-request object which is wrapped from client request.
+        :type request: django.http.HttpRequest
         :return: Handled request object.
+        :rtype: django.http.HttpRequest
         """
 
         return request
@@ -109,7 +114,8 @@ class BaseMiddleware(BaseVstObject):
         or result of parent class calling.
 
         :param request: HTTP-request object which is wrapped from client request.
-        :return: `django.http.HttpResponse` object
+        :type request: django.http.HttpRequest
+        :rtype: django.http.HttpResponse
         """
         return self.get_response(request)
 

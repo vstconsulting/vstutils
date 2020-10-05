@@ -46,7 +46,15 @@ Web API is based on Django Rest Framework with some nested functions.
 Fields
 ~~~~~~
 
+There is additional fields which extends API and GUI. Also, it would be usefull
+for customizing frontend view without write any JS code.
+
 .. automodule:: vstutils.api.fields
+    :members:
+
+There is useful validation classes for fields.
+
+.. automodule:: vstutils.api.validators
     :members:
 
 Serializers
@@ -63,6 +71,24 @@ Views
 
 .. automodule:: vstutils.api.decorators
     :members: nested_view,subaction
+
+
+Responses
+~~~~~~~~~
+
+DRF provides a standard set of variables whose names correspond to
+the human-readable name of the HTTP code.
+For convenience, we have dynamically wrapped this in a set of classes
+that have appropriate names and additionally provide the following capabilities:
+
+- String responses are wrapped in json like ``{ "detail": "string response" }``.
+- Keep attribute timings for further processing in middlewares.
+- Set status code from class name (e.g. ``HTTP_200_OK`` or ``Response200`` got code 200).
+
+All classes inherit from:
+
+.. automodule:: vstutils.api.responses
+    :members: BaseResponseClass
 
 
 Middlewares

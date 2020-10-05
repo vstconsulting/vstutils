@@ -11,6 +11,15 @@ def __status_name_filter(name):
 class BaseResponseClass(response.Response):
     """
     API response class with default status code.
+
+    :var status_code: HTTP status code.
+    :vartype status_code: int
+
+    :ivar timings: Response timings.
+    :vartype timings: int,None
+
+    :param timings: Response timings.
+    :vartype timings: int,None
     """
 
     __slots__ = ('data', 'timings')

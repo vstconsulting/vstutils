@@ -331,9 +331,9 @@ class CopyMixin(GenericViewSet):
     @transaction.atomic()
     def copy(self, request: Request, **kwargs) -> responses.BaseResponseClass:
         # pylint: disable=unused-argument
-        '''
+        """
         Endpoint which copy instance with deps.
-        '''
+        """
         instance = self.copy_instance(self.get_object())
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid()
@@ -348,14 +348,14 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
     A viewset that provides default `create()`, `retrieve()`, `update()`,
     `partial_update()`, `destroy()` and `list()` actions under model.
 
-    :param model: -- DB model with data.
-    :type model: vstutils.model.BModel
-    :param serializer_class: -- Serializer for view of Model data.
-    :type serializer_class: vstutils.api.serializers.VSTSerializer
-    :param serializer_class_one: -- Serializer for view one instance of Model data.
-    :type serializer_class_one: vstutils.api.serializers.VSTSerializer
-    :param serializer_class_[endpoint]: -- Serializer for view of any endpoint like `.create`.
-    :type serializer_class_[endpoint]: vstutils.api.serializers.VSTSerializer
+    :var model: DB model with data.
+    :vartype model: vstutils.models.BModel
+    :var serializer_class: Serializer for view of Model data.
+    :vartype serializer_class: vstutils.api.serializers.VSTSerializer
+    :var serializer_class_one: Serializer for view one instance of Model data.
+    :vartype serializer_class_one: vstutils.api.serializers.VSTSerializer
+    :var serializer_class_[ACTION_NAME]: Serializer for view of any endpoint like `.create`.
+    :vartype serializer_class_[ACTION_NAME]: vstutils.api.serializers.VSTSerializer
 
 
     Examples:

@@ -8,12 +8,6 @@ import pwd
 from pathlib import Path
 
 try:
-    import pyximport
-    pyximport.install()
-except ImportError:  # nocv
-    pass
-
-try:
     from mock import patch
 except ImportError:  # nocv
     from unittest.mock import patch
