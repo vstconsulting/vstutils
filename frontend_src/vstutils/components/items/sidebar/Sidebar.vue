@@ -13,6 +13,8 @@
 <script>
     import $ from 'jquery';
 
+    const hasTouchScreen = 'ontouchstart' in window || navigator.msMaxTouchPoints;
+
     export default {
         name: 'Sidebar',
         props: {
@@ -61,18 +63,20 @@
             },
         },
         mounted() {
-            $('body').swipe({
-                swipe: (event, direction) => {
-                    if (direction === 'right') {
-                        this.openSidebar();
-                    } else if (direction === 'left') {
-                        this.hideSidebar();
-                    }
-                    return true;
-                },
-                threshold: 90,
-                preventDefaultEvents: false,
-            });
+            if (hasTouchScreen) {
+                $('body').swipe({
+                    swipe: (event, direction) => {
+                        if (direction === 'right') {
+                            this.openSidebar();
+                        } else if (direction === 'left') {
+                            this.hideSidebar();
+                        }
+                        return true;
+                    },
+                    threshold: 150,
+                    preventDefaultEvents: false,
+                });
+            }
         },
         methods: {
             /**
