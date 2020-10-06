@@ -50,9 +50,17 @@ def _get_unicode(obj):
     return obj.__unicode__()
 
 
+def _import_class_if_string(value):
+    if isinstance(value, str):
+        return import_class(value)
+    return value
+
+
 def _get_setting_for_view(metatype, metadata, views):
     override = metadata[f'override_{metatype}']
     metadataobject = metadata[metatype]
+    if metadataobject:
+        metadataobject = [_import_class_if_string(i) for i in metadataobject]
     if override:
         return metadataobject  # nocv
     if metadataobject:
@@ -76,7 +84,7 @@ class ApplyNestedDecorators(apply_decorators):
             f"Unable to set 'model' and 'view' at the same time for path [{path}]."
         )
         if 'model' in deco_kwargs:
-            model = deco_kwargs.pop('model')
+            model = _import_class_if_string(deco_kwargs.pop('model'))
             assert isinstance(model, ModelBaseClass), (
                 f"Invalid model type {type(model)} for path [{path}]."
             )
@@ -116,31 +124,33 @@ class ModelBaseClass(ModelBase):
         if serializer_class is None:
             serializer_class = api_serializers.VSTSerializer
 
+        serializer_class = _import_class_if_string(serializer_class)
+
         if serializer_class_name is None:
             serializer_class_name = cls.__name__ + 'Serializer'
 
         if fields:
             fields = list(fields)
         else:
-            fields = '__all__'
+            fields = [f.name for f in cls._meta.get_fields()]
 
-        class SerializerClass(serializer_class):
-            class Meta:
-                model = cls
-                ref_name = serializer_class_name.replace('Serializer', '')
+        meta = type('Meta', (), {
+            'model': cls,
+            'ref_name': serializer_class_name.replace('Serializer', ''),
+            'fields': fields
+        })
 
-        for attr_name, attr_value in field_overrides.items():
-            SerializerClass._declared_fields[attr_name] = attr_value
-
-        SerializerClass.__name__ = serializer_class_name
-        setattr(SerializerClass.Meta, 'fields', fields)
-
-        return SerializerClass
+        return type(serializer_class)(
+            serializer_class_name,
+            (serializer_class,),
+            {"Meta": meta, **field_overrides}
+        )
 
     def get_extra_metadata(cls):
         return cls.__extra_metadata__
 
     def get_view_class(cls):
+        # pylint: disable=too-many-branches,too-many-statements
         metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
 
         view_attributes = dict(model=cls)
@@ -165,7 +175,7 @@ class ModelBaseClass(ModelBase):
             field_overrides=detail_fields_override or {}
         )
         serializers.update(map(
-            lambda k, v: (f'serializer_class_{k}', v),
+            lambda k, v: (f'serializer_class_{k}', _import_class_if_string(v)),
             (metadata['extra_serializer_classes'] or {}).items()
         ))
 
@@ -207,13 +217,21 @@ class ModelBaseClass(ModelBase):
                 model = cls
                 fields = filterset_fields_list
 
+            filter_base_classes = []
+            if 'id' in filterset_fields_list:
+                filter_base_classes.append(api_filters.DefaultIDFilter)
+            if 'name' in filterset_fields_list:
+                filter_base_classes.append(api_filters.DefaultNameFilter)
+            if not filter_base_classes:
+                filter_base_classes.append(filters.FilterSet)
+
             view_attributes['filterset_class'] = filterset.FilterSetMetaclass(
-                'FilterSetClass',
-                (api_filters.DefaultIDFilter if 'id' in filterset_fields_list else filters.FilterSet,),
+                f'{cls.__name__}FilterSetClass',
+                tuple(filter_base_classes),
                 {'Meta': Meta, **filterset_fields_types}
             )
 
-        for metatype in ['permission_classes', 'filter_backends']:
+        for metatype in ('permission_classes', 'filter_backends'):
             metaobject = _get_setting_for_view(metatype, metadata, view_class)
             if metaobject:
                 view_attributes[metatype] = metaobject
@@ -229,5 +247,5 @@ class ModelBaseClass(ModelBase):
         )
 
         return apply_decorators(
-            *getattr(cls, 'generated_view_decorators', [])
+            *map(_import_class_if_string, getattr(cls, 'generated_view_decorators', []))
         )(ApplyNestedDecorators(metadata['nested'] or {})(generated_view))

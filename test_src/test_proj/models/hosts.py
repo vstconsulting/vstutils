@@ -28,6 +28,7 @@ class Host(BModel):
     name = models.CharField(max_length=1024)
 
     class Meta:
+        _serializer_class = 'vstutils.api.serializers.VSTSerializer'
         _list_fields = (
             'id',
             'name',

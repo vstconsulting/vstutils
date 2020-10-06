@@ -73,6 +73,16 @@ Views
     :members: nested_view,subaction
 
 
+Filtersets
+~~~~~~~~~~
+
+For greater development convenience, the framework provides additional classes
+and functions for filtering elements by fields.
+
+.. automodule:: vstutils.api.filters
+    :members:
+
+
 Responses
 ~~~~~~~~~
 
