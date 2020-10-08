@@ -1,9 +1,10 @@
+from rest_framework.filters import BaseFilterBackend
 from django.db import models
 from vstutils.utils import raise_context
 
 
 # Call standart filtering
-class VSTFilterBackend:
+class VSTFilterBackend(BaseFilterBackend):
     __slots__ = ()
     required = False
 
