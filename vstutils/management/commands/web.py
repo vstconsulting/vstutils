@@ -82,7 +82,7 @@ class Command(BaseCommand):
         cmd = []
 
         # Check that worker is enabled in settings.
-        if not settings.RUN_WORKER:
+        if not getattr(settings, 'RUN_WORKER', False):
             return cmd
 
         # Get celery args from settings.
