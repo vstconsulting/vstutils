@@ -1077,6 +1077,10 @@ class BaseModelViewTestCase(BaseTestCase):
             api['definitions']['Post']['properties']['author']['additionalProperties']['model']['$ref'],
             '#/definitions/Author'
         )
+        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/'
+        self.assertTrue(api['paths'][sub_path]['post']['x-allow-append'])
+        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/'
+        self.assertFalse(api['paths'][sub_path]['post']['x-allow-append'])
         self.assertIn('OnePost', api['definitions'])
 
 

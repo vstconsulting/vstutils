@@ -540,6 +540,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         nested_view_function_wrapper.__name__ = name
         nested_view_function_wrapper.__doc__ = self.view.__doc__
         nested_view_function_wrapper._nested_view = self.view  # type: ignore
+        nested_view_function_wrapper._nested_wrapped_view = NestedView  # type: ignore
         return name, nested_view_function_wrapper
 
     def get_view_type(self, type_name: _t.Text, **options):
@@ -583,6 +584,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         view_class._nested_view = self.view
         view_class._nested_name = self.name
         view_class._nested_subname = self.name
+        view_class._nested_wrapped_view = view._nested_wrapped_view
         return name, view_class
 
     def decorated_list(self):
@@ -611,6 +613,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         view._nested_view = getattr(sub_view, '_nested_view', self.view)
         view._nested_name = sub
         view._nested_subname = getattr(sub_view, '_nested_subname', self.name)
+        view._nested_wrapped_view = getattr(sub_view, '_nested_wrapped_view', None)
         return name, view
 
     def generate_decorated_subs(self):

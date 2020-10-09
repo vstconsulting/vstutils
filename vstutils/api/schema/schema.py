@@ -5,6 +5,7 @@ from rest_framework import status
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
 
+from ..decorators import NestedWithAppendMixin
 from .inspectors import (
     CommaMultiSelectFieldInspector,
     FkFieldInspector,
@@ -76,9 +77,11 @@ class VSTAutoSchema(SwaggerAutoSchema):
         nested_view_obj.lookup_field = self.view.lookup_field
         nested_view_obj.lookup_url_kwarg = self.view.lookup_url_kwarg
         nested_view_obj.format_kwarg = None
+        nested_view_obj.format_kwarg = None
         # Check operation action
         if method == 'post' and is_list:
             nested_view_obj.action = 'create'
+            nested_view_obj._nested_wrapped_view = getattr(view_action_func, '_nested_wrapped_view', None)
         elif method == 'get' and is_list:
             nested_view_obj.action = 'list'
         elif method == 'get' and is_detail:
@@ -146,3 +149,10 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
     def get_responses(self, *args, **kwargs):
         return self.__perform_with_nested('get_responses', *args, **kwargs)
+
+    def get_operation(self, operation_keys=None):
+        result = self.__perform_with_nested('get_operation', operation_keys)
+        if result['operationId'].endswith('_add') and getattr(self.view, '_nested_wrapped_view', None):
+            # pylint: disable=protected-access
+            result['x-allow-append'] = issubclass(self.view._nested_wrapped_view, NestedWithAppendMixin)
+        return result
