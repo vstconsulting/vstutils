@@ -95,8 +95,12 @@ class ApplyNestedDecorators(apply_decorators):
         return api_decorators.nested_view(path, **deco_kwargs)
 
 
-class ModelBaseClass(ModelBase):
-    """Metaclass for all models."""
+class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
+    """
+    Metaclass for all models.
+
+    :ivar django.db.models.options.Options _meta:
+    """
 
     def __new__(mcs, name, bases, attrs, **kwargs):
         if "__slots__" not in attrs:
@@ -133,7 +137,7 @@ class ModelBaseClass(ModelBase):
         if fields:
             fields = list(fields)
         else:
-            fields = [f.name for f in cls._meta.get_fields()]
+            fields = [f.name for f in cls._meta.fields]
 
         meta = type('Meta', (), {
             'model': cls,

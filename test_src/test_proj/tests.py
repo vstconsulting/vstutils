@@ -1065,6 +1065,21 @@ class EndpointTestCase(BaseTestCase):
         )
 
 
+class BaseModelViewTestCase(BaseTestCase):
+
+    def test_nested_scenario(self):
+        api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+        self.assertIn('Author', api['definitions'])
+        self.assertIn('OneAuthor', api['definitions'])
+        self.assertIn('Post', api['definitions'])
+        self.assertEqual(api['definitions']['Post']['properties']['author']['format'], 'fk')
+        self.assertEqual(
+            api['definitions']['Post']['properties']['author']['additionalProperties']['model']['$ref'],
+            '#/definitions/Author'
+        )
+        self.assertIn('OnePost', api['definitions'])
+
+
 class ValidatorsTestCase(BaseTestCase):
 
     def test_regexp_validator(self):
@@ -1707,6 +1722,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['count'], 1)
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):

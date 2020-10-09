@@ -185,10 +185,19 @@ class FkModelField(FkField):
 
     def __init__(self, **kwargs):
         select = kwargs.pop('select')
-        if not issubclass(select, ModelSerializer):  # nocv
-            raise Exception('Argument "select" must be rest_framework.serializers.ModelSerializer subclass.')
-        self.model_class = select.Meta.model
-        kwargs['select'] = select.__name__.replace('Serializer', '')
+        if '__extra_metadata__' in dir(select):
+            self.model_class = select
+            kwargs['select'] = select.__name__
+        elif issubclass(select, ModelSerializer):
+            self.model_class = select.Meta.model
+            kwargs['select'] = select.__name__.replace('Serializer', '')
+        else:  # nocv
+            raise Exception(
+                'Argument "select" must be '
+                'rest_framework.serializers.ModelSerializer or'
+                'vstutils.models.BModel '
+                'subclass.'
+            )
         super().__init__(**kwargs)
 
     def to_internal_value(self, data: int) -> _t.Union[models.Model, _t.NoReturn]:
@@ -240,6 +249,13 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     __slots__ = ()
     __valid_keys = ['name', 'content']
+
+    def __init__(self, *args, **kwargs):
+        if 'default' not in kwargs:
+            kwargs['default'] = '{name: null, content: null}'
+            kwargs.pop('required', None)
+        super(NamedBinaryFileInJsonField, self).__init__(*args, **kwargs)
+
 
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):

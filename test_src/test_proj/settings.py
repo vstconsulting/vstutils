@@ -10,6 +10,9 @@ MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
 API['v2'] = {}
 API['v3'] = {}
 API['v4'] = {}
+API[VST_API_VERSION][r'author'] = dict(
+    model='test_proj.models.Author'
+)
 API[VST_API_VERSION][r'settings'] = dict(
     view='vstutils.api.views.SettingsViewSet',
     op_types=['get', 'mod'],
