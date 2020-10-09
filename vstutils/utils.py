@@ -1,6 +1,4 @@
 # pylint: disable=django-not-available,invalid-name,import-outside-toplevel,too-many-lines
-from __future__ import unicode_literals
-
 import base64
 import codecs
 import io
@@ -17,8 +15,8 @@ import typing as tp
 import warnings
 from pathlib import Path
 from threading import Thread
-
 import json
+
 from django.urls import re_path, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
@@ -272,7 +270,7 @@ class tmp_file:
     :param kwargs:  -- other kwargs for tempfile.NamedTemporaryFile
 
     """
-    __slots__ = ('fd', 'path',)
+    __slots__ = ('fd', 'path')
 
     def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = -1, **kwargs):
         self.fd = tempfile.NamedTemporaryFile(mode, buffering=bufsize, **kwargs)
@@ -644,9 +642,9 @@ class KVExchanger(BaseVstObject):
 
     @classproperty
     def cache(cls):
-        # pylint: disable=no-self-argument,no-member
+        # pylint: disable=no-self-argument,no-member,access-member-before-definition
         if hasattr(cls, '__django_cache__'):
-            return getattr(cls, '__django_cache__')
+            return cls.__django_cache__
         cls.__django_cache__ = cls.get_django_cache('locks')
         return cls.cache
 

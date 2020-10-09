@@ -12,15 +12,15 @@ from ..utils import import_class
 class _AbstractRouter(routers.DefaultRouter):
 
     def __init__(self, *args, **kwargs):
-        self.custom_urls = list()
+        self.custom_urls = []
         self.permission_classes = kwargs.pop("perms", None)
         super().__init__(*args, **kwargs)
 
     def _get_api_root_dict(self):
-        return dict((
-            (reg[0], self.routes[0].name.format(basename=reg[2]))
-            for reg in self.registry)
-        )
+        return {
+            reg[0]: self.routes[0].name.format(basename=reg[2])
+            for reg in self.registry
+        }
 
     def _get_custom_lists(self):
         return self.custom_urls

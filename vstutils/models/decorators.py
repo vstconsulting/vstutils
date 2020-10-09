@@ -30,14 +30,14 @@ class register_view_action(register_view_decorator):  # pylint: disable=invalid-
     The decorated method becomes a method of generated view and `self` will be view object.
     See supported args in :func:`vstutils.api.decorators.subaction`
     """
-    __slots__ = tuple()  # type: ignore
+    __slots__ = ()  # type: ignore
 
     def __init__(self, *args, **kwargs):
         super().__init__('action', *args, **kwargs)
 
 
 class register_view_method(register_view_decorator):  # pylint: disable=invalid-name
-    __slots__ = tuple()  # type: ignore
+    __slots__ = ()  # type: ignore
 
     def __init__(self, *args, **kwargs):
         super().__init__('override_method', *args, **kwargs)

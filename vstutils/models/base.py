@@ -1,8 +1,9 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
-from __future__ import unicode_literals
 from functools import lru_cache
+
 from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
+
 from ..utils import import_class, apply_decorators, classproperty
 from ..api import (
     base as api_base,

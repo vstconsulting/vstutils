@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from jsmin import jsmin
+
 from .forms import RegistrationForm
 
 UserModel = get_user_model()

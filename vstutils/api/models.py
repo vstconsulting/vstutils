@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.utils.module_loading import import_string as import_class
+
 from ..custom_model import ListModel, CharField
 
 

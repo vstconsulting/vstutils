@@ -1,9 +1,11 @@
 import uuid
 import json
+
 from django.conf import settings
 from django.http.cookie import SimpleCookie
 from channels.generic.websocket import AsyncJsonWebsocketConsumer, StopConsumer
 from channels.db import database_sync_to_async
+
 from ..api.endpoint import BulkClient
 from ..utils import raise_context
 from ..gui.context import HttpRequest, project_args

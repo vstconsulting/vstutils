@@ -1,9 +1,9 @@
-from __future__ import unicode_literals
 from typing import Text
 from collections import OrderedDict as odict
 import traceback
 import logging
 import json
+
 import ldap
 from django.conf import settings
 

@@ -1,9 +1,11 @@
 from typing import Dict, Type, Text, Any
 from collections import OrderedDict
+
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework.fields import Field
+
 from .. import fields, serializers
 
 

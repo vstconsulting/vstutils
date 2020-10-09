@@ -5,7 +5,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django_filters import BooleanFilter, CharFilter
 from rest_framework import serializers, exceptions, request as drf_request, permissions as rest_permissions
-
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer
@@ -23,11 +22,13 @@ class UserSerializer(VSTSerializer):
 
     class Meta:
         model = User
-        fields = ('id',
-                  'username',
-                  'is_active',
-                  'is_staff',
-                  'email',)
+        fields = (
+            'id',
+            'username',
+            'is_active',
+            'is_staff',
+            'email',
+        )
         read_only_fields = ('is_superuser',)
         ref_name = 'User'
 
@@ -88,8 +89,10 @@ class OneUserSerializer(UserSerializer):
             'last_name',
             'email',
         )
-        read_only_fields = ('is_superuser',
-                            'date_joined',)
+        read_only_fields = (
+            'is_superuser',
+            'date_joined',
+        )
 
 
 class CreateUserSerializer(OneUserSerializer):
@@ -138,12 +141,14 @@ class UserFilter(DefaultIDFilter):
 
     class Meta:
         model = User
-        fields = ('id',
-                  'username',
-                  'is_active',
-                  'first_name',
-                  'last_name',
-                  'email',)
+        fields = (
+            'id',
+            'username',
+            'is_active',
+            'first_name',
+            'last_name',
+            'email',
+        )
 
 
 class UserViewSet(base.ModelViewSet):

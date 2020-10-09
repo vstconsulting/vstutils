@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-from __future__ import unicode_literals
+
 import os
 import sys
 import time
@@ -7,7 +7,9 @@ from pathlib import Path
 from subprocess import CalledProcessError
 import subprocess
 import signal
+
 from django.conf import settings
+
 from ._base import BaseCommand
 from ...utils import raise_context
 

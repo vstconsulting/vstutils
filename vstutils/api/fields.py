@@ -3,8 +3,10 @@ Additionals serializers fields for generating OpenAPI and GUI.
 """
 import typing as _t
 import json
+
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from django.db import models
+
 from ..utils import raise_context
 
 
@@ -242,7 +244,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):
             self.fail('not a JSON')
-        invalid_keys = list(k for k in data.keys() if k not in self.__valid_keys)
+        invalid_keys = [k for k in data.keys() if k not in self.__valid_keys]
         if invalid_keys:
             self.fail(f'invalid key {invalid_keys[0]}')
         for key in self.__valid_keys:
@@ -294,7 +296,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
         try:
             return json.loads(value)
         except Exception:
-            return list()
+            return []
 
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):

@@ -1,4 +1,5 @@
 import json
+
 from django.templatetags.static import template, StaticNode
 
 register = template.Library()

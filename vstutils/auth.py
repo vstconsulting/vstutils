@@ -1,13 +1,14 @@
-from __future__ import unicode_literals
 import typing as _t
 import logging
 import traceback
+
 from django.core.cache import cache
 from django.contrib.auth import get_user_model, backends
 from django.db.models import signals
 from django.dispatch import receiver
 from django.conf import settings
 from django.http.request import HttpRequest
+
 from .utils import SecurePickling, ObjectHandlers, raise_context, raise_context_decorator_with_default
 try:
     from .ldap_utils import LDAP as _LDAP

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from ._base import BaseCommand
 from ...utils import get_render
 from ... import __version__
@@ -94,7 +95,7 @@ class Command(BaseCommand):
 
     def recursive_create(self, root, node, node_chain=None):
         if node_chain is None:
-            node_chain = list()
+            node_chain = []
 
         for name, path_value in node.items():
             real_name = name.format(**self.render_vars)

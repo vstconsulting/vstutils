@@ -5,11 +5,12 @@ Read more in Django REST Framework documentation for
 `Serializers <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_.
 """
 
-from __future__ import unicode_literals
 
 import json
+
 from django.db import models
 from rest_framework import serializers
+
 from . import fields
 from .. import utils
 

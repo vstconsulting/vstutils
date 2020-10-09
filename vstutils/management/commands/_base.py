@@ -1,13 +1,14 @@
 # pylint: disable=abstract-method,unused-import,undefined-variable
-from __future__ import unicode_literals
+
 import os
 import logging
 from collections import OrderedDict
+
+from django.conf import settings
 from django.core.management.base import (
     BaseCommand as _BaseCommand,
     CommandError as CmdError,
 )
-from django.conf import settings
 
 
 logger = logging.getLogger(settings.VST_PROJECT)

@@ -1,5 +1,4 @@
 # pylint: disable=unused-import
-from __future__ import unicode_literals
 from rest_framework import status
 
 

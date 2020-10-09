@@ -82,7 +82,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         if method.upper() == 'GET' and '_detail' in r_type:
             keys = keys[:-1] + ['_'.join(r_type.split('_')[:-1])] + ['get']
         if r_type == 'get' and subpath_keys[-1] == gist:
-            if any([f for f in dir(view) if f.endswith('_'.join([gist, 'list']))]):
+            if any(f for f in dir(view) if f.endswith('_'.join([gist, 'list']))):
                 keys[-1] = 'list'
         return keys
 

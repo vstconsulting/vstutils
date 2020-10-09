@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import typing as _t
 import logging
 from django.db.models import Model

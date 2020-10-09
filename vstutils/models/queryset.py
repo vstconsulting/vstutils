@@ -1,5 +1,6 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from django.db import models
+
 from ..utils import Paginator
 
 

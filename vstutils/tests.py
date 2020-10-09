@@ -1,13 +1,12 @@
 # pylint: disable=unused-import
-from __future__ import unicode_literals
 import typing as _t
 import random  # noqa: F401
 import string  # noqa: F401
 import os  # noqa: F401
 import uuid
-
 from unittest.mock import patch
 import json  # noqa: F401
+
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -151,7 +150,7 @@ class BaseTestCase(TestCase):
     @transaction.atomic
     def result(self, request, url, code=200, *args, **kwargs):
         response = request(url, secure=True, *args, **kwargs)
-        setattr(self, 'last_response', response)
+        self.last_response = response
         self.assertRCode(response, code, url)
         return self.render_api_response(response)
 

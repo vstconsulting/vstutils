@@ -1,8 +1,10 @@
 from copy import copy
 from warnings import warn
+
 from rest_framework import status
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
+
 from .inspectors import (
     CommaMultiSelectFieldInspector,
     FkFieldInspector,

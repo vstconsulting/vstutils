@@ -4,8 +4,8 @@ import traceback
 import functools
 from concurrent.futures import ThreadPoolExecutor, Executor
 from collections import OrderedDict
-
 import json
+
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
@@ -34,9 +34,9 @@ logger: logging.Logger = logging.getLogger('vstutils')
 THREADS_COUNT = settings.BULK_THREADS
 API_URL: _t.Text = settings.API_URL
 DEFAULT_VERSION = settings.VST_API_VERSION
-REST_METHODS: _t.List[_t.Text] = list(
+REST_METHODS: _t.List[_t.Text] = [
     m.upper() for m in views.APIView.http_method_names
-)
+]
 
 default_authentication_classes = (
     SessionAuthentication,

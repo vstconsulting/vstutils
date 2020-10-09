@@ -1,5 +1,6 @@
 from django.db.models.base import Model
 from django.db.models.manager import Manager
+
 from .queryset import BQuerySet
 from .base import ModelBaseClass
 

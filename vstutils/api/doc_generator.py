@@ -3,6 +3,7 @@ import collections
 import io
 import re
 import json
+
 import yaml
 from docutils.statemachine import ViewList
 from docutils.parsers.rst import Directive, directives
@@ -203,15 +204,15 @@ class VSTOpenApiBase(Directive):
         :type schema: dict
         :return:
         '''
-        dict_for_render = schema.get('properties', dict()).items()
+        dict_for_render = schema.get('properties', {}).items()
         if schema.get('$ref', None):
             def_name = schema.get('$ref').split('/')[-1]
-            dict_for_render = self.definitions[def_name].get('properties', dict()).items()
+            dict_for_render = self.definitions[def_name].get('properties', {}).items()
         elif schema.get('properties', None) is None:
             return ''
 
-        answer_dict = dict()
-        json_dict = dict()
+        answer_dict = {}
+        json_dict = {}
         for opt_name, opt_value in dict_for_render:
             var_type = opt_value.get('format', None) or opt_value.get('type', None) or 'object'
             json_name = self.indent + f':jsonparameter {var_type} {opt_name}:'
@@ -241,7 +242,7 @@ class VSTOpenApiBase(Directive):
         :return: dictionary that contains, title and all properties of field
         :rtype: dict
         '''
-        props = list()
+        props = []
         for name, value in option_value.items():
             if var_type in ['dynamic', 'select2']:  # pylint: disable=no-else-break
                 break
@@ -284,13 +285,13 @@ class VSTOpenApiBase(Directive):
         elif opt_name == 'count' and var_type == 'integer':
             result = 2
         elif var_type == 'array':
-            items = opt_values.get('items', dict()).get('$ref', None)
+            items = opt_values.get('items', {}).get('$ref', None)
             item = 'array_example'
             if items:
                 item = self.get_object_example(items.split('/')[-1])
             result = [item]
         elif var_type == 'autocomplete':
-            result = opt_values.get('enum', list())[0]
+            result = opt_values.get('enum', [])[0]
         elif var_type in [None, 'object']:
             def_name = (opt_values.get('$ref') or '').split('/')[-1]
             result = self.get_object_example(def_name)
@@ -316,8 +317,8 @@ class VSTOpenApiBase(Directive):
         :rtype: dict
         '''
         def_model = self.definitions.get(def_name, {})
-        example = dict()
-        for opt_name, opt_value in def_model.get('properties', dict()).items():
+        example = {}
+        for opt_name, opt_value in def_model.get('properties', {}).items():
             var_type = opt_value.get('format', None) or opt_value.get('type', None)
             example[opt_name] = self.get_response_example(opt_name, var_type, opt_value)
             if var_type == 'string':

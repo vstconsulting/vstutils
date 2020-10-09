@@ -3,10 +3,12 @@ import typing as _t
 from collections import OrderedDict
 from inspect import getmembers
 import json
+
 from django.db import transaction, models
 from rest_framework.decorators import action
 from rest_framework import response, request as drf_request, status, views, serializers
 from drf_yasg.utils import swagger_auto_schema
+
 from . import base
 from ..exceptions import VSTUtilsException
 
@@ -408,7 +410,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     methods: _t.Optional[_t.List[_t.Text]]
     queryset_filters: _t.List
 
-    filter_subs = ['filter', ]
+    filter_subs = ['filter']
 
     class NoView(VSTUtilsException):
         msg = 'Argument "view" must be installed for `nested_view` decorator.'

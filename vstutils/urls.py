@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 from rest_framework import permissions
+
 from .api.routers import MainRouter
 from .utils import URLHandlers
 from .api.views import HealthView

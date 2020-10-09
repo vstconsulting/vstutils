@@ -1,7 +1,9 @@
 from typing import Dict
+
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.utils.functional import lazy
+
 from ..utils import import_class
 from ..tools import multikeysort  # pylint: disable=import-error
 from .. import __version__
@@ -50,7 +52,7 @@ def project_args(request: HttpRequest) -> Dict:
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
         "openapi_url": f'/{settings.VST_API_URL}/openapi/',
         "endpoint_path": f'/{settings.VST_API_URL}/endpoint/',
-        "api_version": getattr(settings, 'VST_API_VERSION'),
+        "api_version": settings.VST_API_VERSION,
         "api_url": f'{host_url}/{settings.VST_API_URL}/{settings.VST_API_VERSION}/',
         "enable_gravatar": settings.ENABLE_GRAVATAR,
     }
