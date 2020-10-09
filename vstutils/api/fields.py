@@ -256,7 +256,6 @@ class NamedBinaryFileInJsonField(VSTCharField):
             kwargs.pop('required', None)
         super(NamedBinaryFileInJsonField, self).__init__(*args, **kwargs)
 
-
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):
             self.fail('not a JSON')
