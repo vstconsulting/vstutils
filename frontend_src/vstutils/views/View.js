@@ -29,6 +29,12 @@ export default class View {
          * which would render current view.
          */
         this.mixins = mixins;
+        /**
+         * Property flag indicates that nested view allowing append objects from shared view.
+         */
+        if (schema['x-allow-append'] !== undefined) {
+            this.nestedAllowAppend = schema['x-allow-append'];
+        }
     }
 
     /**

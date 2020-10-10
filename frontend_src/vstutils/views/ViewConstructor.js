@@ -245,6 +245,12 @@ export default class ViewConstructor extends BaseEntityConstructor {
                 path,
                 operationSchema,
             );
+            if (operationSchema['x-allow-append'] !== undefined) {
+                /**
+                 * Set x-allow-append argument to view schema.
+                 */
+                operationOptions['x-allow-append'] = operationSchema['x-allow-append'];
+            }
             operations[operationOptions.type] = [
                 operationSchema,
                 $.extend(true, {}, this.getViewSchema_baseOptions(path), operationOptions),
@@ -502,7 +508,9 @@ export default class ViewConstructor extends BaseEntityConstructor {
                 let opt = {
                     list_paths: ['/' + views[path].schema.name + '/'],
                 };
-                links.operations.add = $.extend(true, {}, list_op.add, opt);
+                if (views[path + 'new/'] && views[path + 'new/'].nestedAllowAppend) {
+                    links.operations.add = $.extend(true, {}, list_op.add, opt);
+                }
             }
         }
 
