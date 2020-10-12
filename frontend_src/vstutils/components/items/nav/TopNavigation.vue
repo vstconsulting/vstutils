@@ -66,6 +66,7 @@
 
                         <component
                             :is="link_component"
+                            v-if="profile_settings_url"
                             :[link_attr]="profile_settings_url"
                             class="dropdown-item text-data"
                         >
@@ -156,7 +157,11 @@
              * Property, that returns URL to profile/settings page.
              */
             profile_settings_url() {
-                let url = '/profile/settings';
+                if (!app.views['/profile/settings/']) {
+                    return;
+                }
+                const url = '/profile/settings';
+
                 if (this.a_links) {
                     return app.api.getHostUrl() + '/#' + url;
                 }

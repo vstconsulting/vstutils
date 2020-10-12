@@ -249,22 +249,21 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     __slots__ = ()
     __valid_keys = ['name', 'content']
-
-    def __init__(self, *args, **kwargs):
-        if 'default' not in kwargs:
-            kwargs['default'] = '{name: null, content: null}'
-            kwargs.pop('required', None)
-        super(NamedBinaryFileInJsonField, self).__init__(*args, **kwargs)
+    default_error_messages = {
+        'not a JSON': 'value is not a valid JSON',
+        'missing key': 'key {missing_key} is missing',
+        'invalid key': 'invalid key {invalid_key}',
+    }
 
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):
             self.fail('not a JSON')
         invalid_keys = [k for k in data.keys() if k not in self.__valid_keys]
         if invalid_keys:
-            self.fail(f'invalid key {invalid_keys[0]}')
+            self.fail('invalid key', invalid_key=invalid_keys[0])
         for key in self.__valid_keys:
             if key not in data:
-                self.fail(f'"{key}" is not set')
+                self.fail('missing key', missing_key=key)
 
     def to_internal_value(self, data: _t.Dict) -> _t.Text:
         if data is not None:
@@ -298,6 +297,9 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     """
 
     __slots__ = ()
+    default_error_messages = {
+        'not a list': 'value is not a valid list',
+    }
 
     def to_internal_value(self, data: _t.List) -> _t.Text:  # type: ignore
         if data is not None:
