@@ -133,11 +133,17 @@ def make_extensions(extensions_list, packages):
     language_level = 3
     if is_help:
         pass
-    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv):
+    elif has_cython and ('compile' in sys.argv or 'bdist_wheel' in sys.argv or 'build_ext' in sys.argv):
         cy_kwargs = dict(
             nthreads=nthreads,
             force=True,
-            language_level=language_level
+            language_level=language_level,
+            compiler_directives=dict(
+                linetrace='CYTHON_TRACE_NOGIL' in sys.argv,
+                profile=True,
+                c_string_type='str',
+                c_string_encoding='utf8'
+            ),
         )
         return cythonize(ext_modules, **cy_kwargs), extensions_dict
     return ext_modules, extensions_dict
@@ -184,6 +190,32 @@ def minify_static_files(base_dir, files, exclude=None):
                     with gzip.open("{}.gz".format(fext_file), 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
                 print('Compressed file {fext_file}.'.format(fext_file=fext_file))
+
+
+def compile_py_func(fullname, compile_file_func):
+    if compile_file_func(fullname, ddir=os.path.dirname(fullname), legacy=True, optimize=0):
+        os.remove(fullname)
+
+
+def compile_python_sources(base_dir, files, exclude=None):
+    exclude = exclude or []
+    patterns = dict()
+    try:
+        from compileall import compile_file
+        patterns['*.py'] = (compile_py_func, compile_file)
+    except:
+        pass
+
+    regex_exclude = [re.compile(r, re.MULTILINE) for r in exclude]
+
+    for fnext, funcs in patterns.items():
+        for fext_file in filter(lambda f: fnmatch.fnmatch(f, fnext), files):
+            fext_file = os.path.join(base_dir, fext_file)
+            if os.path.exists(fext_file):
+                if not any(filter(lambda fp: bool(fp.search(fext_file)), regex_exclude)):
+                    func, subfunc = funcs
+                    funcs[0](fext_file, funcs[1])
+                    print('Compiled {fext_file}.'.format(fext_file=fext_file))
 
 
 class _Compile(_sdist):
@@ -281,6 +313,7 @@ class build_py(build_py_orig):
 class install_lib(_install_lib):
     exclude = []
     static_exclude = []
+    compile_exclude = []
 
     def _filter_files_with_ext(self, filename):
         _filename, _fext = os.path.splitext(filename)
@@ -298,6 +331,8 @@ class install_lib(_install_lib):
                 print('Removing extention sources [{}].'.format(source))
                 os.remove(source)
         minify_static_files('', files, self.static_exclude)
+        if os.getenv('BUILD_COMPILE', '') == 'true':
+            compile_python_sources('', files, self.compile_exclude)
         return result
 
 
@@ -323,6 +358,7 @@ def make_setup(**opts):
     if has_cython:
         build_py.exclude = ext_modules_list
         install_lib.static_exclude = static_exclude
+        install_lib.compile_exclude = opts.pop('compile_modules_exclude', list())
         cmdclass.update({
             'build_ext': _build_ext,
             'build_py': build_py,
