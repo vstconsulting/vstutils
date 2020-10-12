@@ -8,7 +8,7 @@
             </template>
             <template #body>
                 <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems" />
-                <current_pagination :options="datastore.data.pagination" @goToPage="goToPage" />
+                <current_pagination :options="data.pagination" @goToPage="goToPage" />
                 <template v-if="is_empty">
                     <p class="text-center">
                         {{ $t('list is empty') | capitalize }}
@@ -126,7 +126,7 @@
         },
         created() {
             this.child_view = app.views[this.options.list_paths[0]];
-            this.qs = app.views[this.options.list_paths[0]].objects.clone();
+            this.qs = this.child_view.objects.clone();
         },
         methods: {
             /**

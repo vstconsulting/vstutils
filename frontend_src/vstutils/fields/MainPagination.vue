@@ -89,6 +89,7 @@
 
     .pagination .page-link {
         padding: 6px 8px;
+        cursor: pointer;
     }
 
     .pagination a {

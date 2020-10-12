@@ -1,5 +1,3 @@
-import $ from 'jquery';
-
 import signals from '../signals.js';
 import { path_pk_key, randomString } from '../utils';
 import ProfileViewConstructor from './ProfileViewConstructor.js';

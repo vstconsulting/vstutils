@@ -1,17 +1,14 @@
 <template>
     <div style="display: contents;">
-        <preloader :show="show_loader"></preloader>
+        <preloader :show="show_loader" />
 
         <gui_modal v-show="show_modal" @close="close">
-            <template v-slot:header>
+            <template #header>
                 <h3>{{ $t(qs.model.name.toLowerCase()) | capitalize }}</h3>
             </template>
-            <template v-slot:body>
-                <current_search_input
-                    :field_props="field_props"
-                    @filterQuerySetItems="filterQuerySetItems"
-                ></current_search_input>
-                <current_pagination :options="data.pagination" @goToPage="goToPage"></current_pagination>
+            <template #body>
+                <current_search_input :field_props="field_props" @filterQuerySetItems="filterQuerySetItems" />
+                <current_pagination :options="data.pagination" @goToPage="goToPage" />
                 <template v-if="is_empty">
                     <p class="text-center">{{ $t('list is empty') | capitalize }}</p>
                 </template>
@@ -22,14 +19,14 @@
                         :field_props="field_props"
                         :field_value="field_value"
                         @change-value="changeValue"
-                    ></current_table>
+                    />
                 </template>
             </template>
             <template #footer>
-                <button class="btn btn-default" @click="close" aria-label="Cancel">
+                <button class="btn btn-default" aria-label="Cancel" @click="close">
                     {{ $t('cancel') | capitalize }}
                 </button>
-                <button class="btn btn-primary" @click="setNewValue" aria-label="Add selected">
+                <button class="btn btn-primary" aria-label="Add selected" @click="setNewValue">
                     {{ $t('add') | capitalize }}
                 </button>
             </template>
@@ -39,12 +36,12 @@
             data-toggle="tooltip"
             title="Open modal window"
             class="input-group-append"
-            @click="open"
             role="button"
             aria-label="Open modal window"
+            @click="open"
         >
             <span class="input-group-text" style="cursor: pointer;">
-                <span class="fa fa-chevron-down"></span>
+                <span class="fa fa-chevron-down" />
             </span>
         </div>
     </div>
@@ -58,6 +55,27 @@
     import FKMultiAutocompleteFieldSearchInput from './fk/multi-autocomplete/FKMultiAutocompleteFieldSearchInput.vue';
 
     export default {
+        components: {
+            /**
+             * Component for table with instance.
+             */
+            current_table: FKMultiAutocompleteFieldTable,
+            /**
+             * Component for search input of fk_multi_autocomplete field.
+             */
+            current_search_input: FKMultiAutocompleteFieldSearchInput,
+            current_pagination: {
+                mixins: [MainPagination],
+                methods: {
+                    /**
+                     * Method, that open new pagination page.
+                     */
+                    goToPage(page_number) {
+                        this.$emit('goToPage', page_number);
+                    },
+                },
+            },
+        },
         mixins: [ModalWindowAndButtonMixin],
         props: ['options'],
         data() {
@@ -74,7 +92,6 @@
                     instances: [],
                     pagination: {
                         count: 0,
-                        // page_size: list_props.page_size,
                         page_size: 10,
                         page_number: 1,
                     },
@@ -139,17 +156,19 @@
              * Method - callback for updateInstances method.
              * @param {object} qs Updated QuerySet.
              */
+            // eslint-disable-next-line no-unused-vars
             onUpdateInstances(qs) {},
             /**
              * Method, that generates filters for qs.
-             * @param {string} key Filter's key.
-             * @value {string, number} value Filter's value.
+             * @param {string=} key Filter's key.
+             * @param {string|number=} value Filter's value.
+             * @return {Object}
              */
             generateFilters(key, value) {
                 let page = 1;
                 let limit = this.data.pagination.page_size;
 
-                if (key == 'page') {
+                if (key === 'page') {
                     page = value;
                 }
 
@@ -199,27 +218,6 @@
 
                         app.error_handler.showError(srt_to_show, str);
                     });
-            },
-        },
-        components: {
-            /**
-             * Component for table with instance.
-             */
-            current_table: FKMultiAutocompleteFieldTable,
-            /**
-             * Component for search input of fk_multi_autocomplete field.
-             */
-            current_search_input: FKMultiAutocompleteFieldSearchInput,
-            current_pagination: {
-                mixins: [MainPagination],
-                methods: {
-                    /**
-                     * Method, that open new pagination page.
-                     */
-                    goToPage(page_number) {
-                        this.$emit('goToPage', page_number);
-                    },
-                },
             },
         },
     };
