@@ -38,6 +38,7 @@ class Command(BaseCommand):
             'wsgi.py': Path('wsgi.py'),
         },
         '.coveragerc': Path('.coveragerc'),
+        '.gitignore': Path('.gitignore'),
         '.pep8': Path('.pep8'),
         'MANIFEST.in': Path('MANIFEST.in'),
         'package.json': Path('package.json'),
@@ -48,6 +49,7 @@ class Command(BaseCommand):
         'setup.py': Path('setup.py'),
         'test.py': Path('test.py'),
         'tox.ini': Path('tox.ini'),
+        'tox_build.ini': Path('tox_build.ini'),
         'webpack.config.js.default': Path('webpack.config.js.default')
     }
 

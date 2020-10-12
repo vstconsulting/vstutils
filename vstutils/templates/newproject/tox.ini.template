@@ -1,5 +1,5 @@
 [tox]
-envlist = flake,py{36,37}-{coverage,install}
+envlist = flake,py36-coverage,py38-install
 skipsdist = True
 whitelist_externals =
     rm
@@ -48,5 +48,39 @@ deps =
 basepython = python3.6
 deps =
     flake8
+    flake8-bugbear
+    flake8-import-order
+    flake8-functions
+    flake8-executable
+    flake8-django
+    flake8-comprehensions
+    flake8-commas
 commands =
   flake8 --config=.pep8 {{project_name}}
+
+[testenv:contrib]
+basepython = python3.6
+skipsdist = True
+envdir = {toxinidir}/env
+setenv = CCACHE_DIR = {envdir}/.ccache
+passenv = *
+whitelist_externals = *
+commands =
+    pip install -U -r requirements-test.txt -r requirements.txt
+    python setup.py install_egg_info
+    pip install -U -e .
+deps =
+   cython>0.29,<0.30
+   tox==3.8.4
+   -e .
+
+[testenv:build]
+passenv = *
+changedir = .
+whitelist_externals =
+    tox
+    rm
+commands =
+    rm -rf dist build
+    tox -c tox_build.ini --workdir {toxworkdir}
+deps =

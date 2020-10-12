@@ -1,0 +1,38 @@
+[tox]
+envlist = py36-build,py{38}-wheel
+skipsdist = True
+
+[testenv]
+passenv = *
+setenv =
+  CCACHE_DIR = {envdir}/.ccache
+  DONT_YARN = false
+  BUILD_COMPILE = true
+changedir = .
+whitelist_externals =
+    rm
+    ls
+    grep
+    bash
+commands =
+  rm -rf build
+  build: python setup.py compile -v
+  wheel: python setup.py bdist_wheel -v
+deps =
+  cython>=0.29.2
+  wheel==0.31.1
+  setuptools>=40.6.3
+  jsmin==2.2.2
+  csscompressor==0.9.5
+
+[testenv:auditwheel]
+basepython = python3.6
+whitelist_externals =
+    bash
+    grep
+    rm
+    ls
+commands =
+    bash -c "for whl in `ls dist/*.whl | grep -v manylinux`; do auditwheel repair --plat manylinux2014_x86_64 $whl -w dist/; rm $whl; done"
+deps =
+    auditwheel

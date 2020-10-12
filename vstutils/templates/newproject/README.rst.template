@@ -24,6 +24,4 @@ Read more: `https://tox.readthedocs.io/en/latest/`_.
 Build
 -----
 
-* Install `vstutils`.
-* Run `python setup.py compile`.
-* Install or send to PyPI `.dist/{{project_name}}-[version].tar.gz`.
+* Run ``tox -e build``

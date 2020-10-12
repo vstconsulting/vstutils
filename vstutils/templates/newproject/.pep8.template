@@ -1,4 +1,4 @@
 [flake8]
-ignore = E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741
+ignore = E221,E222,E121,E123,E126,E226,E24,E704,E116,E731,E722,E741,W504,B001,B008,C812,C815
 exclude = ./{{project_name}}/*/migrations/*,./{{project_name}}/settings*.py,.tox/*,{{project_name}}/__main__.py,
-max-line-length=90
+max-line-length=120
