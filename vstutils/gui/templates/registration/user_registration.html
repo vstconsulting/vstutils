@@ -34,6 +34,13 @@
                                 {{ form.username }}
                             </div>
                         {% endblock %}
+                        {% block auth_email %}
+                            <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
+                                {{ form.email.errors }}
+                                <label for="id_email" class="registration-label">*Email:</label>
+                                {{ form.email }}
+                            </div>
+                        {% endblock %}
                         {% block registration_password_fields %}
                             <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
                                 {{ form.password1.errors }}
