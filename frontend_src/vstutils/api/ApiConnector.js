@@ -23,6 +23,17 @@ class APIResponse {
 }
 
 /**
+ * Reject all bulk requests with given value
+ * @param {Object[]} bulks
+ * @param {any=} value
+ */
+function rejectAll(bulks, value) {
+    for (const bulk of bulks) {
+        bulk.callbacks.reject(value);
+    }
+}
+
+/**
  * Represents one bulk response
  *
  * @typedef {Object} BulkResponse
@@ -199,6 +210,7 @@ class ApiConnector {
 
         return promise;
     }
+
     /**
      * Method, that sends one big bulk request to API.
      * @return {Promise} Promise of getting bulk request response.
@@ -209,12 +221,19 @@ class ApiConnector {
         let bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
 
         try {
-            const request = await fetch(this.endpointURL, {
+            const response = await fetch(this.endpointURL, {
                 method: 'put',
                 headers: { ...this.headers, 'Content-Type': 'application/json' },
                 body: JSON.stringify(bulk_data),
             });
-            const result = await request.json();
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (e) {
+                rejectAll(collector.bulk_parts, response.statusText);
+                return;
+            }
 
             for (let [idx, item] of result.entries()) {
                 try {
@@ -225,7 +244,7 @@ class ApiConnector {
                 }
             }
         } catch (error) {
-            throw new StatusError(error.status, error.data);
+            rejectAll(collector.bulk_parts);
         }
     }
     /**
