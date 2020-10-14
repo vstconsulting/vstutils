@@ -1,6 +1,6 @@
-'''
+"""
 Include all models classes from files.
 
 Example:
     from .tasks import Task, Stage
-'''
+"""

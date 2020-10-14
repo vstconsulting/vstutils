@@ -418,6 +418,12 @@ class VSTUtilsTestCase(BaseTestCase):
         test['context'] = 'custom'
         self.assertEqual(get_value(test), 'custom')
 
+    def test_render_tags(self):
+        self.assertEqual(
+            utils.get_render('testproj.template', {"content_data": '{"extra_content": "dGVzdAo="}'}),
+            '\n<img class="photo" src="data:image/png;base64,dGVzdAo=">\n'
+        )
+
 
 class ViewsTestCase(BaseTestCase):
 

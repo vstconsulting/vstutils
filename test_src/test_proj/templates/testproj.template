@@ -1,0 +1,3 @@
+{% load vst_html_tags %}
+{% img_from_json content_data tag_classes='photo' content_attribute='extra_content' %}
+{% img_from_json content_data tag_classes='photo' %}
