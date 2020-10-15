@@ -213,7 +213,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
             if isinstance(filterset_fields, dict):
                 filterset_fields_list = tuple(filterset_fields.keys())
-                filterset_fields_types = filterset_fields
+                filterset_fields_types = {k: v for k, v in filterset_fields.items() if v is not None}
             else:
                 filterset_fields_list = filterset_fields
                 filterset_fields_types = {}
