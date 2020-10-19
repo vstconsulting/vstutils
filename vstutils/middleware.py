@@ -155,10 +155,14 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
 
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         start_time = time.time()
+        get_response_handler = super().get_response_handler
         ql = QueryTimingLogger()
 
-        with connection.execute_wrapper(ql):
-            response = super().get_response_handler(request)
+        if not getattr(request, 'is_bulk', False):
+            with connection.execute_wrapper(ql):
+                response = get_response_handler(request)
+        else:
+            response = get_response_handler(request)
 
         if hasattr(response, 'timings'):
             response_durations = response.timings  # type: ignore

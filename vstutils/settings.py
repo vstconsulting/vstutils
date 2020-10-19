@@ -123,6 +123,7 @@ class DBOptionsSection(cconfig.Section):
         'connect_timeout': ConfigIntSecondsType,
         'read_timeout': ConfigIntSecondsType,
         'write_timeout': ConfigIntSecondsType,
+        'isolation_level': ConfigIntType,
     }
 
 
@@ -360,6 +361,7 @@ INSTALLED_APPS += ADDONS
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
+    'vstutils.middleware.ExecuteTimeHeadersMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -370,7 +372,6 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'vstutils.middleware.ExecuteTimeHeadersMiddleware',
 ]
 
 EXCLUDE_FROM_MINIFYING = []
@@ -382,7 +383,8 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'htmlmin.middleware.MarkRequestMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware'
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.messages.middleware.MessageMiddleware',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
@@ -778,7 +780,7 @@ LOGGING: _t.Dict = {
             'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
             'filename': WEB_DAEMON_LOGFILE
-        },
+        } if WEB_DAEMON_LOGFILE != '/dev/null' else {'class': 'logging.NullHandler', 'level': LOG_LEVEL},
     },
     'loggers': {
         VST_PROJECT_LIB: {
@@ -813,6 +815,14 @@ LOGGING: _t.Dict = {
         },
     }
 }
+
+if main.getboolean('enable_django_logs', fallback=False):  # nocv
+    LOGGING['loggers']['django'] = {
+        'handlers': ['console', 'file'],
+        'level': LOG_LEVEL,
+        'propagate': True,
+    }
+
 SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
     "fields.W122"
@@ -966,6 +976,7 @@ SPA_STATIC: _t.List[_t.Dict] = [
 ##############################################################
 if TESTS_RUN:
     gc.disable()
+    gc.set_threshold(0)
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher', ]
@@ -979,6 +990,7 @@ if TESTS_RUN:
         for name in CACHES
     }
     BULK_THREADS = 10
+
 
 if not TESTSERVER_RUN and TESTS_RUN:
     SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
