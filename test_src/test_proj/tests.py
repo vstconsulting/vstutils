@@ -760,7 +760,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         client = self._login()
         response = client.get('/api/endpoint/')
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'drf-yasg/swagger-ui.html')
+        self.assertTemplateUsed(response, 'drf_yasg2/swagger-ui.html')
         with self.assertRaises(ValueError):
             json.loads(response.content.decode('utf-8'))
 

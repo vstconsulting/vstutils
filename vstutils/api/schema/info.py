@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 import django
 from django.conf import settings
-from drf_yasg import openapi
+from drf_yasg2 import openapi
 
 from ... import __version__ as vstutils_version
 

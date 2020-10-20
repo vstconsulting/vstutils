@@ -1,7 +1,7 @@
 from rest_framework import request as drf_request
 from django.conf import settings
-from drf_yasg import generators
-from drf_yasg.inspectors import field as field_insp
+from drf_yasg2 import generators
+from drf_yasg2.inspectors import field as field_insp
 
 
 class EndpointEnumerator(generators.EndpointEnumerator):
