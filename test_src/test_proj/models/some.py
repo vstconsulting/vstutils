@@ -20,10 +20,10 @@ class ModelWithFK(BModel):
             'multiselect'
         )
         _override_list_fields = {
-            'some_fk': fields.FkModelField(select=Host.generated_view.serializer_class)
+            'some_fk': fields.FkModelField(select=Host)
         }
         _override_detail_fields = {
-            'some_fk': fields.FkModelField(select=Host.generated_view.serializer_class),
+            'some_fk': fields.FkModelField(select=Host),
             'no_prefetch_and_link_fk': fields.FkModelField(select=Host.generated_view.serializer_class,
                                                            use_prefetch=False, make_link=False, required=False),
             'multiselect': fields.CommaMultiSelect(select='test_proj.Host', required=False)

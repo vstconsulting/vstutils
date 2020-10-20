@@ -3,6 +3,7 @@ from functools import lru_cache
 
 from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
+from django.utils.functional import SimpleLazyObject
 
 from ..utils import import_class, apply_decorators, classproperty
 from ..api import (
@@ -53,7 +54,7 @@ def _get_unicode(obj):
 
 def _import_class_if_string(value):
     if isinstance(value, str):
-        return import_class(value)
+        return SimpleLazyObject(lambda: import_class(value))
     return value
 
 
@@ -80,7 +81,7 @@ class ApplyNestedDecorators(apply_decorators):
     def __get_decorator(self, data):
         path, deco_kwargs = data
 
-        assert 'model' in deco_kwargs and 'view' not in deco_kwargs, (
+        assert not ('model' in deco_kwargs and 'view' in deco_kwargs), (
             "Invalid model configuration: "
             f"Unable to set 'model' and 'view' at the same time for path [{path}]."
         )
@@ -89,7 +90,7 @@ class ApplyNestedDecorators(apply_decorators):
             assert isinstance(model, ModelBaseClass), (
                 f"Invalid model type {type(model)} for path [{path}]."
             )
-            deco_kwargs['view'] = model.generated_view
+            deco_kwargs['view'] = model.lazy_generated_view
             if 'arg' not in deco_kwargs:
                 deco_kwargs['arg'] = model._meta.pk.name
         return api_decorators.nested_view(path, **deco_kwargs)
@@ -110,6 +111,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         extra_metadata: dict = {**default_extra_metadata}
         if "Meta" in attrs:
             meta = attrs['Meta']
+            extra_metadata['proxy'] = getattr(meta, 'proxy', False)
             if not getattr(meta, 'abstract', False):
                 for extra_name in filter(lambda y: hasattr(meta, y), map(lambda x: f'_{x}', extra_metadata.keys())):
                     extra_metadata[extra_name[1:]] = getattr(meta, extra_name)
@@ -125,6 +127,12 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=no-value-for-parameter
         return cls.get_view_class()
 
+    @classproperty
+    @lru_cache()
+    def lazy_generated_view(cls):
+        # pylint: disable=unnecessary-lambda,no-value-for-parameter
+        return SimpleLazyObject(lambda: cls.get_view_class())
+
     def get_serializer_class(cls, serializer_class, serializer_class_name=None, fields=None, field_overrides=None):
         if serializer_class is None:
             serializer_class = api_serializers.VSTSerializer
@@ -137,13 +145,17 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if fields:
             fields = list(fields)
         else:
-            fields = [f.name for f in cls._meta.fields]
+            fields = SimpleLazyObject(lambda: [f.name for f in cls._meta.fields])
 
         meta = type('Meta', (), {
             'model': cls,
             'ref_name': serializer_class_name.replace('Serializer', ''),
             'fields': fields
         })
+
+        if isinstance(serializer_class, SimpleLazyObject):
+            serializer_class._setup()
+            serializer_class = serializer_class._wrapped
 
         return type(serializer_class)(
             serializer_class_name,
@@ -187,7 +199,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         view_class = metadata['view_class']
         if view_class is None:
             view_class = api_base.ModelViewSet
-        if view_class == 'read_only':
+        elif view_class == 'read_only':
             view_class = api_base.ReadOnlyModelViewSet
         elif view_class == 'history':
             view_class = api_base.HistoryModelViewSet  # nocv
@@ -219,7 +231,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 filterset_fields_types = {}
 
             class Meta:
-                model = cls
+                model = cls if not cls._meta.proxy else cls._meta.proxy_for_model
                 fields = filterset_fields_list
 
             filter_base_classes = []

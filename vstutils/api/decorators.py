@@ -5,6 +5,7 @@ from inspect import getmembers
 import json
 
 from django.db import transaction, models
+from django.utils.functional import SimpleLazyObject
 from rest_framework.decorators import action
 from rest_framework import response, request as drf_request, status, views, serializers
 from drf_yasg.utils import swagger_auto_schema
@@ -491,7 +492,13 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
         manager_name = self.kwargs.get('manager_name', self.name)
 
-        class NestedView(mixin_class, self.view):  # type: ignore
+        if isinstance(self.view, SimpleLazyObject):
+            self.view._setup()
+            view_class = self.view._wrapped
+        else:
+            view_class = self.view
+
+        class NestedView(mixin_class, view_class):  # type: ignore
             __slots__ = ('nested_detail',)  # pylint: disable=class-variable-slots-conflict
             __doc__ = self.view.__doc__
             format_kwarg = None

@@ -10,12 +10,12 @@ class Author(BModel):
 
     class Meta:
         default_related_name = 'author'
-        _list_field = ['name']
-        _detail_fields = ['name', 'registerDate']
+        _list_field = ['id', 'name']
+        _detail_fields = ['id', 'name', 'registerDate']
         _nested = {
             'post': {
                 'allow_append': False,
-                'model': 'test_proj.models.fields_testing.Post',
+                'model': 'test_proj.models.fields_testing.ExtraPost',
             }
         }
 
@@ -30,5 +30,17 @@ class Post(BModel):
         _list_fields = ['author', 'title']
         _detail_fields = ['author', 'title', 'text']
         _override_list_fields = _override_detail_fields = {
-            'author': FkModelField(select=Author)
+            'author': FkModelField(select=Author, read_only=True)
+        }
+
+
+class ExtraPost(Post):
+
+    class Meta:
+        proxy = True
+        default_related_name = 'post'
+        _list_fields = ['author', 'title']
+        _detail_fields = ['author', 'title', 'text']
+        _override_list_fields = _override_detail_fields = {
+            'author': FkModelField(select=Author, read_only=True)
         }

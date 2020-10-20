@@ -1077,17 +1077,28 @@ class BaseModelViewTestCase(BaseTestCase):
         api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
         self.assertIn('Author', api['definitions'])
         self.assertIn('OneAuthor', api['definitions'])
-        self.assertIn('Post', api['definitions'])
-        self.assertEqual(api['definitions']['Post']['properties']['author']['format'], 'fk')
+        self.assertIn('ExtraPost', api['definitions'])
+        self.assertEqual(api['definitions']['ExtraPost']['properties']['author']['format'], 'fk')
         self.assertEqual(
-            api['definitions']['Post']['properties']['author']['additionalProperties']['model']['$ref'],
+            api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
             '#/definitions/Author'
         )
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/'
         self.assertTrue(api['paths'][sub_path]['post']['x-allow-append'])
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/'
         self.assertFalse(api['paths'][sub_path]['post']['x-allow-append'])
-        self.assertIn('OnePost', api['definitions'])
+        self.assertIn('OneExtraPost', api['definitions'])
+
+        results = self.bulk([
+            {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
+            {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': dict(title="title", text='txt')},
+            {'method': 'get', 'path': ['author', '<<0[data][id]>>', 'post']},
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['count'], 1)
 
 
 class ValidatorsTestCase(BaseTestCase):
