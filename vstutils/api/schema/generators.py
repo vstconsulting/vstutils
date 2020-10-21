@@ -2,6 +2,7 @@ from rest_framework import request as drf_request
 from django.conf import settings
 from drf_yasg2 import generators
 from drf_yasg2.inspectors import field as field_insp
+from vstutils.utils import import_class, raise_context_decorator_with_default
 
 
 class EndpointEnumerator(generators.EndpointEnumerator):
@@ -20,6 +21,18 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         super().__init__(*args, **kwargs)
         if not self.version:
             self.version = settings.VST_API_VERSION
+
+    def _get_hooks(self):
+        return map(
+            raise_context_decorator_with_default(),
+            filter(
+                bool,
+                map(
+                    raise_context_decorator_with_default()(import_class),
+                    getattr(settings, 'OPENAPI_HOOKS', ())
+                )
+            )
+        )
 
     def _get_subname(self, name):
         names = name.split('_')
@@ -93,4 +106,6 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         result = super().get_schema(request, *args, **kwargs)
         if request:
             result['info']['x-user-id'] = request.user.id
+        for hook in self._get_hooks():
+            hook(request=request, schema=result)
         return result

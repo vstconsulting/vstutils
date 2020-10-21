@@ -179,3 +179,24 @@ Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI.
 
 Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns json openapi schema. Also you can specify required
 version of schema using ``version`` query parameter (e.g., ``GET /{API_URL}/endpoint/?format=openapi&version=v2``).
+
+Applying hooks to the schema can also be helpful.
+This functionality will help to change certain data in the schema before it will be sended to user.
+In order to set some hooks, it is enough to specify in ``settings.py`` the ``OPENAPI_HOOKS``
+which is an array with lines for importing functions.
+Each function will take 2 named arguments:
+
+* ``request`` - user request object.
+* ``schema`` - ordered dict with openapi schema.
+
+.. note::
+    Sometimes hooks may raise an exception,
+    and in order not to break the chain of data modification,
+    such exceptions are handled.
+    However, the changes made to the schema before the raised exception will be saved.
+
+Example hook:
+    .. sourcecode:: python
+
+        def hook_add_username_to_guiname(request, schema):
+            schema['info']['title'] = f"{request.username} - {schema['info']['title']}"

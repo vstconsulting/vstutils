@@ -764,6 +764,22 @@ class OpenapiEndpointTestCase(BaseTestCase):
         with self.assertRaises(ValueError):
             json.loads(response.content.decode('utf-8'))
 
+    def test_openapi_hooks(self):
+        OPENAPI_HOOKS = [
+            # valid hook
+            'test_proj.openapi.hook1',
+            # invalid hook
+            'test_proj.openapi.hook3',
+            # valid hook
+            'test_proj.openapi.hook2',
+            # nonexistent hook
+            'test_proj.openapi.hook4'
+        ]
+        with override_settings(OPENAPI_HOOKS=OPENAPI_HOOKS):
+            api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+        self.assertEqual(api['info']['x-check-1'], 1)
+        self.assertEqual(api['info']['x-check-2'], 2)
+
 
 class EndpointTestCase(BaseTestCase):
 
