@@ -356,7 +356,7 @@ if HAS_CHANNELS:
 
 ADDONS: _t.List[_t.Text] = [
     'vstutils',
-    'vstutils.api.apps.VSTUtilsAppConfig'
+    'vstutils.api',
 ]
 
 INSTALLED_APPS += ADDONS
