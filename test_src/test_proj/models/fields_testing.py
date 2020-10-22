@@ -42,5 +42,5 @@ class ExtraPost(Post):
         _list_fields = ['author', 'title']
         _detail_fields = ['author', 'title', 'text']
         _override_list_fields = _override_detail_fields = {
-            'author': FkModelField(select=Author, read_only=True)
+            'author': FkModelField(select='test_proj.Author', read_only=True)
         }

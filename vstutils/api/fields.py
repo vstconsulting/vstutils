@@ -5,7 +5,9 @@ import typing as _t
 import json
 
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
+from django.apps import apps
 from django.db import models
+from django.utils.functional import SimpleLazyObject, empty
 
 from ..utils import raise_context
 
@@ -188,15 +190,20 @@ class FkModelField(FkField):
         if '__extra_metadata__' in dir(select):
             self.model_class = select
             kwargs['select'] = select.__name__
+        elif isinstance(select, str):
+            select = select.split('.')
+            assert len(select) == 2, "'select' must match 'app_name.model_name' pattern."
+            self.model_class = SimpleLazyObject(lambda: apps.get_model(require_ready=True, *select))
+            kwargs['select'] = select[1]
         elif issubclass(select, ModelSerializer):
             self.model_class = select.Meta.model
             kwargs['select'] = select.__name__.replace('Serializer', '')
         else:  # nocv
             raise Exception(
                 'Argument "select" must be '
-                'rest_framework.serializers.ModelSerializer or'
-                'vstutils.models.BModel '
-                'subclass.'
+                'rest_framework.serializers.ModelSerializer or '
+                'vstutils.models.BModel subclass or '
+                'string matched "app_name.model_name" pattern.'
             )
         super().__init__(**kwargs)
 
@@ -204,6 +211,10 @@ class FkModelField(FkField):
         return self.model_class.objects.get(**{self.autocomplete_property: data})
 
     def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
+        if isinstance(self.model_class, SimpleLazyObject):  # type: ignore
+            # pylint: disable=protected-access
+            self.model_class._setup() if self.model_class._wrapped == empty else None  # type: ignore
+            self.model_class = self.model_class._wrapped  # type: ignore
         if isinstance(value, self.model_class):
             return getattr(value, self.autocomplete_property)
         else:  # nocv
