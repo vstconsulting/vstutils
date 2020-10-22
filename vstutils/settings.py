@@ -110,11 +110,14 @@ class DBSection(BackendSection):
         'conn_max_age': ConfigIntSecondsType,
         'atomic_requests': ConfigBoolType,
         'autocommit': ConfigBoolType,
+        'disable_server_side_cursors': ConfigBoolType,
     }
 
 
-class DBTestSection(BackendSection):
+class DBTestSection(DBSection):
     type_serialize = ConfigBoolType
+    type_create_db = ConfigBoolType
+    type_create_user = ConfigBoolType
 
 
 class DBOptionsSection(cconfig.Section):

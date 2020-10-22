@@ -192,6 +192,8 @@ class NestedViewMixin:
     __slots__ = ('action',)
     get_serializer: _t.Callable
     check_object_permissions: _t.Callable
+    check_permissions: _t.Callable
+    check_throttles: _t.Callable
     lookup_field: _t.Text
     request: drf_request.Request
     nested_name: _t.Text
@@ -244,6 +246,8 @@ class NestedViewMixin:
             self.action = self.get_nested_action_name()
         if self.action != 'list':
             kwargs[self.nested_append_arg] = self.nested_id
+        self.check_permissions(self.request)
+        self.check_throttles(self.request)
         return getattr(self, self.action)(self.request, **kwargs)
 
 
