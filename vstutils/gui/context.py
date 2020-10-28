@@ -71,4 +71,4 @@ def pwa_context(request: HttpRequest) -> Dict:
 def headers_context(request: HttpRequest) -> Dict:
     result = dict(request.META)
     result['HTTP_X_APP'] = result.get('HTTP_X_APP', 'browser')
-    return dict(metadata=result)
+    return {'metadata': result}

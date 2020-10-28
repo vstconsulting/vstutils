@@ -174,17 +174,17 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=too-many-branches,too-many-statements
         metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
 
-        view_attributes = dict(model=cls)
+        view_attributes = {'model': cls}
 
         serializer_class = metadata['serializer_class']
-        serializers = dict(
-            serializer_class=cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
+        serializers = {
+            'serializer_class': cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                 serializer_class=serializer_class,
                 serializer_class_name=cls.get_list_serializer_name(),  # pylint: disable=no-value-for-parameter
                 fields=metadata['list_fields'],
                 field_overrides=metadata['override_list_fields'] or {}
             )
-        )
+        }
         detail_fields_override = metadata['override_detail_fields']
         if not detail_fields_override and not metadata['detail_fields']:
             detail_fields_override = metadata['override_list_fields']

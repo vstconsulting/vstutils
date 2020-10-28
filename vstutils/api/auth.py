@@ -124,11 +124,11 @@ class ChangePasswordSerializer(DataSerializer):
         return instance
 
     def to_representation(self, value):
-        return dict(
-            old_password='***',
-            password='***',
-            password2='***',
-        )
+        return {
+            'old_password': '***',
+            'password': '***',
+            'password2': '***'
+        }
 
 
 class UserFilter(DefaultIDFilter):

@@ -127,7 +127,7 @@ class Response(_ResponseClass):
         data = super()._asdict()
         data["status"] = data.get("status", status.HTTP_200_OK)
         if isinstance(data["data"], str):
-            data["data"] = dict(detail=self.data)
+            data["data"] = {'detail': self.data}
         return data
 
     @property

@@ -578,7 +578,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
     def decorated(self, detail) -> _t.Tuple[_t.Text, _t.Type[_t.Union[NestedViewMixin, base.GenericViewSet]]]:
         name, view = self.get_detail_view() if detail else self.get_list_view()
-        kwargs = dict(detail=detail)
+        kwargs = {'detail': detail}
         kwargs['url_name'] = f'{self.name}-{"detail" if detail else "list"}'
         if not detail:
             kwargs['suffix'] = 'List'
@@ -605,7 +605,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
         sub_path = sub_view.url_path
         decorator = self.get_decorator(
             detail=sub_view.detail,
-            sub_opts=dict(sub_path=sub_path),
+            sub_opts={'sub_path': sub_path},
             methods=sub_view.mapping or self.methods,
             serializer_class=sub_view.kwargs.get('serializer_class', self.serializer),
             url_name=f'{self.name}-{sub_view.url_name}',

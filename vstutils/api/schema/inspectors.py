@@ -31,45 +31,56 @@ FORMAT_UPTIME = 'uptime'
 
 # Base types
 basic_type_info: Dict[Type[Field], Dict[Text, Any]] = OrderedDict()
-basic_type_info[fields.FileInStringField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_FILE
-)
-basic_type_info[fields.SecretFileInString] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_SECRET_FILE
-)
-basic_type_info[fields.BinFileInStringField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_BIN_FILE
-)
-basic_type_info[fields.NamedBinaryFileInJsonField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_NAMED_BIN_FILE
-)
-basic_type_info[fields.NamedBinaryImageInJsonField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_NAMED_BIN_IMAGE
-)
-basic_type_info[fields.MultipleNamedBinaryFileInJsonField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_MULTIPLE_NAMED_BIN_FILE
-)
-basic_type_info[fields.MultipleNamedBinaryImageInJsonField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_MULTIPLE_NAMED_BIN_IMAGE
-)
-basic_type_info[fields.HtmlField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_HTML
-)
-basic_type_info[serializers.JsonObjectSerializer] = dict(
-    type=openapi.TYPE_OBJECT, format=FORMAT_JSON
-)
-basic_type_info[fields.TextareaField] = dict(
-    type=openapi.TYPE_STRING, format=FORMAT_TEXTAREA
-)
-basic_type_info[fields.UptimeField] = dict(
-    type=openapi.TYPE_INTEGER, format=FORMAT_UPTIME
-)
-basic_type_info[fields.RedirectIntegerField] = dict(
-    type=openapi.TYPE_INTEGER
-)
-basic_type_info[fields.RedirectCharField] = dict(
-    type=openapi.TYPE_STRING
-)
+basic_type_info[fields.FileInStringField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_FILE
+}
+basic_type_info[fields.SecretFileInString] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_SECRET_FILE
+}
+basic_type_info[fields.BinFileInStringField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_BIN_FILE
+}
+basic_type_info[fields.NamedBinaryFileInJsonField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_NAMED_BIN_FILE
+}
+basic_type_info[fields.NamedBinaryImageInJsonField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_NAMED_BIN_IMAGE
+}
+basic_type_info[fields.MultipleNamedBinaryFileInJsonField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_MULTIPLE_NAMED_BIN_FILE
+}
+basic_type_info[fields.MultipleNamedBinaryImageInJsonField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_MULTIPLE_NAMED_BIN_IMAGE
+}
+basic_type_info[fields.HtmlField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_HTML
+}
+basic_type_info[serializers.JsonObjectSerializer] = {
+    'type': openapi.TYPE_OBJECT,
+    'format': FORMAT_JSON
+}
+basic_type_info[fields.TextareaField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_TEXTAREA
+}
+basic_type_info[fields.UptimeField] = {
+    'type': openapi.TYPE_INTEGER,
+    'format': FORMAT_UPTIME
+}
+basic_type_info[fields.RedirectIntegerField] = {
+    'type': openapi.TYPE_INTEGER
+}
+basic_type_info[fields.RedirectCharField] = {
+    'type': openapi.TYPE_STRING
+}
 
 
 def field_have_redirect(field, **kwargs):
@@ -110,18 +121,21 @@ class AutoCompletionFieldInspector(FieldInspector):
         SwaggerType, _ = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_AUTOCOMPLETE)
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': FORMAT_AUTOCOMPLETE
+        }
         if isinstance(field.autocomplete, (list, tuple)):
             kwargs['enum'] = list(field.autocomplete)
         else:
-            prop = dict(
-                model=openapi.SchemaRef(
+            prop = {
+                'model': openapi.SchemaRef(
                     self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                     field.autocomplete, ignore_unresolved=True
                 ),
-                value_field=field.autocomplete_property,
-                view_field=field.autocomplete_represent
-            )
+                'value_field': field.autocomplete_property,
+                'view_field': field.autocomplete_represent
+            }
             kwargs['additionalProperties'] = prop
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -136,10 +150,15 @@ class DependEnumFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_DYN)
-        kwargs['additionalProperties'] = dict(
-            field=field.field, choices=field.choices, types=field.types
-        )
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': FORMAT_DYN
+        }
+        kwargs['additionalProperties'] = {
+            'field': field.field,
+            'choices': field.choices,
+            'types': field.types
+        }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
@@ -153,17 +172,20 @@ class FkFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(type=openapi.TYPE_INTEGER, format=FORMAT_FK)
-        kwargs['additionalProperties'] = dict(
-            model=openapi.SchemaRef(
+        kwargs = {
+            'type': openapi.TYPE_INTEGER,
+            'format': FORMAT_FK
+        }
+        kwargs['additionalProperties'] = {
+            'model': openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                 field.select_model, ignore_unresolved=True
             ),
-            value_field=field.autocomplete_property,
-            view_field=field.autocomplete_represent,
-            usePrefetch=field.use_prefetch,
-            makeLink=field.make_link
-        )
+            'value_field': field.autocomplete_property,
+            'view_field': field.autocomplete_represent,
+            'usePrefetch': field.use_prefetch,
+            'makeLink': field.make_link
+        }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
@@ -177,18 +199,21 @@ class CommaMultiSelectFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = dict(type=openapi.TYPE_STRING, format=FORMAT_MULTISELECT)
-        kwargs['additionalProperties'] = dict(
-            model=openapi.SchemaRef(
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': FORMAT_MULTISELECT
+        }
+        kwargs['additionalProperties'] = {
+            'model': openapi.SchemaRef(
                 self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                 field.select_model, ignore_unresolved=True
             ),
-            value_field=field.select_property,
-            view_field=field.select_represent,
-            view_separator=field.select_separator,
-            usePrefetch=field.use_prefetch,
-            makeLink=field.make_link
-        )
+            'value_field': field.select_property,
+            'view_field': field.select_represent,
+            'view_separator': field.select_separator,
+            'usePrefetch': field.use_prefetch,
+            'makeLink': field.make_link
+        }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 

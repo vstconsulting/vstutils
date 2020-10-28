@@ -22,7 +22,12 @@ ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence]
 class BaseTestCase(TestCase):
     server_name = 'vstutilstestserver'
     models = None
-    std_codes = dict(get=200, post=201, patch=200, delete=204)
+    std_codes = {
+        'get': 200,
+        'post': 201,
+        'patch': 200,
+        'delete': 204
+    }
 
     class user_as:
         # pylint: disable=invalid-name

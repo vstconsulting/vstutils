@@ -210,10 +210,10 @@ class BulkViewSet(base.rvs.APIView):  # nocv
                 pass
         if res.status_code != 404 and getattr(res, "rendered_content", False):  # nocv
             return json.loads(res.rendered_content.decode())
-        return Dict(dict(detail=str(res.content.decode('utf-8'))))
+        return Dict({'detail': str(res.content.decode('utf-8'))})
 
     def perform(self, operation):
-        kwargs = dict(content_type="application/json")
+        kwargs = {'content_type': "application/json"}
         response, url = self.get_operation(operation, kwargs)
         return self.create_response(
             response.status_code,
@@ -241,7 +241,10 @@ class BulkViewSet(base.rvs.APIView):  # nocv
             if allow_fail:
                 raise
             response = base.exception_handler(err, None)
-            kwargs = dict(error_type=err.__class__.__name__, message=str(err))
+            kwargs = {
+                'error_type': err.__class__.__name__,
+                'message': str(err)
+            }
             kwargs.update({'results': self.results[:-1]} if isinstance(err, KeyError) else {})
             self.put_result(self.create_response(
                 response.status_code,

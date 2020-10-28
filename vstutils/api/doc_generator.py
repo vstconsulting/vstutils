@@ -32,22 +32,22 @@ class VSTOpenApiBase(Directive):
     path_path = 'paths'
     indent_depth = 2
     indent = '   '
-    type_dict = dict(
-        fk=1,
-        integer=1,
-        uri='http://localhost:8080{}',
-        string='example {}',
-        textarea='example\ntext\narea\n',
-        boolean=True,
-        select2='username',
-        dynamic='test_dynamic',
-        uptime='22:11:34',
-        date_time='2019-01-07T06:10:31+10:00',
-        html='test_html',
-        email='example@mail.com',
-        file='value data',
-        secretfile='secret data',
-    )
+    type_dict = {
+        'fk': 1,
+        'integer': 1,
+        'uri': 'http://localhost:8080{}',
+        'string': 'example {}',
+        'textarea': 'example\ntext\narea\n',
+        'boolean': True,
+        'select2': 'username',
+        'dynamic': 'test_dynamic',
+        'uptime': '22:11:34',
+        'date_time': '2019-01-07T06:10:31+10:00',
+        'html': 'test_html',
+        'email': 'example@mail.com',
+        'file': 'value data',
+        'secretfile': 'secret data',
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -261,7 +261,7 @@ class VSTOpenApiBase(Directive):
             props_str = '(' + ', '.join(props) + ')'
         else:
             props_str = ''
-        return dict(props_str=props_str, title=option_value.get('title', ''))
+        return {'props_str': props_str, 'title': option_value.get('title', '')}
 
     def get_response_example(self, opt_name, var_type, opt_values):
         '''

@@ -55,19 +55,19 @@ class EndpointConsumer(AsyncJsonWebsocketConsumer):
 
         if handler_type == 'get':
             # Return OpenApi schema
-            return dict(
-                type='schema',
-                schema=results,
-                request_id=request_id
-            )
+            return {
+                'type': 'schema',
+                'schema': results,
+                'request_id': request_id
+            }
 
         # Return bulk results
-        return dict(
-            type='bulk',
-            results=results,
-            status=response.status_code,
-            request_id=request_id
-        )
+        return {
+            'type': 'bulk',
+            'results': results,
+            'status': response.status_code,
+            'request_id': request_id
+        }
 
     async def prepare_client(self):
         """

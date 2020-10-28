@@ -12,9 +12,9 @@ class Command(BaseCommand):
     default_help = 'Specify the {} of project'
 
     _values_parser = {
-        "name": dict(required=True),
-        "dir": dict(help='Specify the directory where project will be.', default='./'),
-        "guiname": dict(default='')
+        "name": {'required': True},
+        "dir": {'help': 'Specify the directory where project will be.', 'default': './'},
+        "guiname": {'default': ''}
     }
 
     files_to_create = {
@@ -82,13 +82,13 @@ class Command(BaseCommand):
     def get_render_kwargs(self, options):
         project_name = self._from_user('name', options)
         project_gui_name = self._from_user('guiname', options) or project_name.upper()
-        return dict(
-            project_name=project_name,
-            project_place=self._from_user('dir', options),
-            project_gui_name=project_gui_name,
-            vstutils_version=__version__,
-            project_gui_name_head_lines='=' * len(project_gui_name)
-        )
+        return {
+            'project_name': project_name,
+            'project_place': self._from_user('dir', options),
+            'project_gui_name': project_gui_name,
+            'vstutils_version': __version__,
+            'project_gui_name_head_lines': '=' * len(project_gui_name)
+        }
 
     def allow_create(self, path):
         root_dir_path = self.get_path(*path) if not isinstance(path, Path) else path

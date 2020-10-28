@@ -110,9 +110,7 @@ class APIRouter(_AbstractRouter):
     def __register_openapi(self):
         schema_view = import_class(settings.OPENAPI_VIEW_CLASS)
         cache_timeout = settings.SCHEMA_CACHE_TIMEOUT
-        swagger_kwargs = dict(
-            cache_timeout=0 if settings.DEBUG else cache_timeout,
-        )
+        swagger_kwargs = {'cache_timeout': 0 if settings.DEBUG else cache_timeout}
         self.register_view(
             '_openapi',
             schema_view.with_ui('swagger', **swagger_kwargs),

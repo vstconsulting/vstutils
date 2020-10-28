@@ -254,7 +254,7 @@ class Command(BaseCommand):
 
     def prepare_smtp_section(self, config):
         mail_parameters = ['port', 'user', 'password', 'tls', 'ssl', 'from_address']
-        mail_settings = dict(host=os.environ.get(f'{self.prefix}_MAIL_HOST'))
+        mail_settings = {'host': os.environ.get(f'{self.prefix}_MAIL_HOST')}
         if mail_settings['host']:
             for param in mail_parameters:
                 value = os.environ.get(f'{self.prefix}_MAIL_{param.upper()}')

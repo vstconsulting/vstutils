@@ -379,7 +379,7 @@ class EndpointViewSet(views.APIView):
                     'operation_data': operation_data
                 },
                 'status': 500,
-                'data': dict(detail=f'Error in bulk request data. See info. Original message: {str(err)}')
+                'data': {'detail': f'Error in bulk request data. See info. Original message: {str(err)}'}
             }, 0.0
 
     def get(self, request: BulkRequestType) -> HttpResponse:

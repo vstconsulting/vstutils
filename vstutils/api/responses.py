@@ -28,7 +28,7 @@ class BaseResponseClass(response.Response):
         self.timings = kwargs.pop('timings', None)
         super().__init__(*args, **kwargs)
         if isinstance(self.data, str):
-            self.data = dict(detail=self.data)
+            self.data = {'detail': self.data}
 
 
 for __status_name in filter(__status_name_filter, dir(status)):

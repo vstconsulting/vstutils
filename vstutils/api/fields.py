@@ -9,7 +9,7 @@ from django.apps import apps
 from django.db import models
 from django.utils.functional import SimpleLazyObject
 
-from ..utils import raise_context, get_if_lazy
+from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
 
 
 class VSTCharField(CharField):
@@ -280,11 +280,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
             self.validate_value(data)
         return super().to_internal_value(data)
 
+    @raise_context_decorator_with_default(default={"name": None, "content": None})
     def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
-        try:
-            return json.loads(value)
-        except Exception:
-            return dict(name=None, content=None)
+        return json.loads(value)
 
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):

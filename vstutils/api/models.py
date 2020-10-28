@@ -13,7 +13,7 @@ for __attr_name in ['VST_PROJECT', 'VST_PROJECT_LIB_NAME']:
 
 class Language(ListModel):
     data = [
-        dict(code=code, name=name)
+        {'code': code, 'name': name}
         for code, name in settings.LANGUAGES
     ]
     code = CharField(primary_key=True, max_length=5)
