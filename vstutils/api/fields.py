@@ -194,7 +194,7 @@ class FkModelField(FkField):
             select = select.split('.')
             assert len(select) == 2, "'select' must match 'app_name.model_name' pattern."
             self.model_class = SimpleLazyObject(lambda: apps.get_model(require_ready=True, *select))
-            kwargs['select'] = select[1]
+            kwargs['select'] = SimpleLazyObject(lambda: self.model_class.get_list_serializer_name().split('Serializer')[0])
         elif issubclass(select, ModelSerializer):
             self.model_class = select.Meta.model
             kwargs['select'] = select.__name__.replace('Serializer', '')

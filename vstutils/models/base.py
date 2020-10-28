@@ -139,8 +139,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
         serializer_class = _import_class_if_string(serializer_class)
 
-        if serializer_class_name is None:
-            serializer_class_name = cls.__name__ + 'Serializer'
+        serializer_class_name = cls.__name__ + 'Serializer' if serializer_class_name is None else serializer_class_name
 
         if fields:
             fields = list(fields)
@@ -164,6 +163,12 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
     def get_extra_metadata(cls):
         return cls.__extra_metadata__
 
+    def get_list_serializer_name(cls):
+        serializer_class_name = cls.get_extra_metadata()['serializer_class_name']
+        if serializer_class_name is None:
+            serializer_class_name = cls.__name__ + 'Serializer'
+        return serializer_class_name
+
     def get_view_class(cls):
         # pylint: disable=too-many-branches,too-many-statements
         metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
@@ -174,7 +179,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         serializers = dict(
             serializer_class=cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                 serializer_class=serializer_class,
-                serializer_class_name=metadata['serializer_class_name'],
+                serializer_class_name=cls.get_list_serializer_name(),
                 fields=metadata['list_fields'],
                 field_overrides=metadata['override_list_fields'] or {}
             )
