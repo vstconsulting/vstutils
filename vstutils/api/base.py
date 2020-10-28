@@ -15,7 +15,6 @@ from django.core import exceptions as djexcs
 from django.http.response import Http404
 from django.db.models.query import QuerySet
 from django.db import transaction, models
-from django.utils.functional import SimpleLazyObject
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.response import Response as RestResponse
@@ -24,7 +23,7 @@ from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 
 from ..exceptions import VSTUtilsException
-from ..utils import classproperty, deprecated
+from ..utils import classproperty, deprecated, get_if_lazy
 from . import responses
 from .serializers import (
     ErrorSerializer,
@@ -150,11 +149,7 @@ class AutoSchema(DRFAutoSchema):
             getattr(method_obj, '_nested_view', None)
             if method_obj else None
         )
-
-        if isinstance(method_view, SimpleLazyObject):
-            # pylint: disable=protected-access
-            method_view._setup()
-            method_view = method_view._wrapped
+        method_view = get_if_lazy(method_view)
 
         if method_obj.__doc__:
             return method_obj.__doc__.strip()

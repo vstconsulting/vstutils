@@ -5,6 +5,7 @@ from rest_framework import status
 from drf_yasg2.inspectors.view import SwaggerAutoSchema
 from drf_yasg2.app_settings import swagger_settings
 
+from ... import utils
 from ..decorators import NestedWithAppendMixin
 from .inspectors import (
     CommaMultiSelectFieldInspector,
@@ -61,7 +62,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
     def __get_nested_view_obj(self, nested_view, view_action_func):
         # pylint: disable=protected-access
         # Get nested view recursively
-        nested_view = self._get_nested_view_class(nested_view, view_action_func)
+        nested_view = utils.get_if_lazy(self._get_nested_view_class(nested_view, view_action_func))
         # Get action suffix
         replace_pattern = view_action_func._nested_subname + '_'
         replace_index = self.view.action.index(replace_pattern) + len(replace_pattern)

@@ -7,9 +7,9 @@ import json
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from django.apps import apps
 from django.db import models
-from django.utils.functional import SimpleLazyObject, empty
+from django.utils.functional import SimpleLazyObject
 
-from ..utils import raise_context
+from ..utils import raise_context, get_if_lazy
 
 
 class VSTCharField(CharField):
@@ -211,10 +211,7 @@ class FkModelField(FkField):
         return self.model_class.objects.get(**{self.autocomplete_property: data})
 
     def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
-        if isinstance(self.model_class, SimpleLazyObject):  # type: ignore
-            # pylint: disable=protected-access
-            self.model_class._setup() if self.model_class._wrapped == empty else None  # type: ignore
-            self.model_class = self.model_class._wrapped  # type: ignore
+        self.model_class = get_if_lazy(self.model_class)
         if isinstance(value, self.model_class):
             return getattr(value, self.autocomplete_property)
         else:  # nocv

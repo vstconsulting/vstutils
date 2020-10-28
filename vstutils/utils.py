@@ -21,7 +21,7 @@ from django.urls import re_path, include
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
-from django.utils import translation
+from django.utils import translation, functional
 from django.utils.module_loading import import_string as import_class
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
@@ -105,6 +105,15 @@ def decode(key, enc):
         key_c = key[i % len(key)]
         dec.append(chr((256 + ord(enc[i]) - ord(key_c)) % 256))
     return "".join(dec)
+
+
+def get_if_lazy(obj):
+    with raise_context():
+        if isinstance(obj, functional.SimpleLazyObject):
+            # pylint: disable=protected-access
+            obj._setup() if obj._wrapped == functional.empty else None
+            return obj._wrapped
+    return obj
 
 
 class apply_decorators:

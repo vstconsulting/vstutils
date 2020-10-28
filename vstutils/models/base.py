@@ -5,7 +5,7 @@ from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
 from django.utils.functional import SimpleLazyObject
 
-from ..utils import import_class, apply_decorators, classproperty
+from ..utils import import_class, apply_decorators, classproperty, get_if_lazy
 from ..api import (
     base as api_base,
     filters as api_filters,
@@ -153,9 +153,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             'fields': fields
         })
 
-        if isinstance(serializer_class, SimpleLazyObject):
-            serializer_class._setup()
-            serializer_class = serializer_class._wrapped
+        serializer_class = get_if_lazy(serializer_class)
 
         return type(serializer_class)(
             serializer_class_name,
