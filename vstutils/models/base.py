@@ -164,6 +164,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         return cls.__extra_metadata__
 
     def get_list_serializer_name(cls):
+        # pylint: disable=no-value-for-parameter
         serializer_class_name = cls.get_extra_metadata()['serializer_class_name']
         if serializer_class_name is None:
             serializer_class_name = cls.__name__ + 'Serializer'
@@ -179,7 +180,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         serializers = dict(
             serializer_class=cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                 serializer_class=serializer_class,
-                serializer_class_name=cls.get_list_serializer_name(),
+                serializer_class_name=cls.get_list_serializer_name(),  # pylint: disable=no-value-for-parameter
                 fields=metadata['list_fields'],
                 field_overrides=metadata['override_list_fields'] or {}
             )
