@@ -1,4 +1,4 @@
-from ..api import decorators as api_decorators
+from ..api import decorators as api_decorators, serializers
 
 
 class register_view_decorator:  # pylint: disable=invalid-name
@@ -13,6 +13,8 @@ class register_view_decorator:  # pylint: disable=invalid-name
     def type_action(self, func):
         if func.__doc__ and 'description' not in self.kwargs:
             self.kwargs['description'] = func.__doc__
+        if 'response_serializer' not in self.kwargs and 'serializer_class' not in self.kwargs:
+            self.kwargs['serializer_class'] = serializers.EmptySerializer
         return api_decorators.subaction(*self.args, **self.kwargs)(func)
 
     def type_override_method(self, func):

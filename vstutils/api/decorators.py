@@ -154,15 +154,18 @@ def subaction(*args, **kwargs):
 
     def decorator(func: _t.Callable):
         func_object = action(*args, **kwargs)(func)
-        override_kw = {}
+        override_kw: _t.Dict = {'methods': tuple(func_object.mapping.keys()) or None}  # type: ignore
+
         if response_code:
             override_kw['responses'] = {
                 response_code: response_serializer()
             }
+
         if operation_description:
             override_kw['operation_description'] = operation_description
         else:
             override_kw['operation_description'] = str(func.__doc__ or '').strip()  # type: ignore
+
         return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 
     return decorator
