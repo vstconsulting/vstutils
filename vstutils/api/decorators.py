@@ -7,7 +7,7 @@ import json
 from django.db import transaction, models
 from rest_framework.decorators import action
 from rest_framework import response, request as drf_request, status, views, serializers
-from drf_yasg2.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema
 
 from . import base
 from ..exceptions import VSTUtilsException

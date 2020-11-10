@@ -12,7 +12,7 @@ from django.http import HttpResponse, HttpRequest
 from django.contrib.auth.models import AbstractUser
 from django.test.client import Client, ClientHandler
 from django.test.utils import modify_settings
-from drf_yasg2.views import SPEC_RENDERERS
+from drf_yasg.views import SPEC_RENDERERS
 from rest_framework import serializers, views, versioning, request as drf_request
 from rest_framework.authentication import (
     SessionAuthentication,

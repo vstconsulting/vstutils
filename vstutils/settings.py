@@ -349,7 +349,7 @@ INSTALLED_APPS += [
 if HAS_DOCS:
     INSTALLED_APPS.append('docs')
 
-INSTALLED_APPS += ['drf_yasg2']
+INSTALLED_APPS += ['drf_yasg']
 
 if HAS_CHANNELS:
     INSTALLED_APPS.append('channels')
@@ -637,7 +637,7 @@ VST_API_VERSION: _t.Text = os.getenv("VST_API_VERSION", r'v1')
 API_URL: _t.Text = VST_API_URL
 ENDPOINT_VIEW_CLASS: _t.Text = 'vstutils.api.endpoint.EndpointViewSet'
 HAS_COREAPI: bool = False
-API_CREATE_SWAGGER: bool = web.getboolean('rest_swagger', fallback=('drf_yasg2' in INSTALLED_APPS))
+API_CREATE_SWAGGER: bool = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
 SWAGGER_API_DESCRIPTION: _t.Text = web['rest_swagger_description']
 TERMS_URL: _t.Text = ''
 CONTACT: _t.Dict = config['contact'].all()
@@ -806,7 +806,7 @@ LOGGING: _t.Dict = {
             'level': LOG_LEVEL,
             'propagate': True,
         },
-        'drf_yasg2.generators': {
+        'drf_yasg.generators': {
             'handlers': ['console', 'file'],
             'level': LOG_LEVEL,
             'propagate': True,
