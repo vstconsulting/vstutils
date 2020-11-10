@@ -3,7 +3,7 @@ from typing import Text, Iterable, Callable, Dict, Tuple
 from django.db import connections
 from rest_framework import status as st
 
-from ..utils import BaseVstObject
+from ..utils import BaseVstObject, import_class
 
 
 class BaseBackend(BaseVstObject):
@@ -62,3 +62,7 @@ class DefaultBackend(BaseBackend):
         """
         if not self.get_django_settings('RPC_ENABLED'):
             return 'disabled'
+        celery_app = import_class(
+            self.get_django_settings('WORKER_OPTIONS')['app'].replace(':', '.')
+        )
+        celery_app.pool.connection.connect()
