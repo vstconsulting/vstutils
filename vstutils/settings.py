@@ -7,7 +7,7 @@ from tempfile import gettempdir
 
 from django.contrib import admin
 from django.utils.functional import lazy
-from drf_yasg2 import errors
+from drf_yasg import errors
 import rest_framework
 
 from configparserc import config as cconfig

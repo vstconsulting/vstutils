@@ -1092,7 +1092,9 @@ class BaseModelViewTestCase(BaseTestCase):
     def test_nested_scenario(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
         self.assertIn('Author', api['definitions'])
+        self.assertIn('id', api['definitions']['Author']['properties'])
         self.assertIn('OneAuthor', api['definitions'])
+        self.assertIn('id', api['definitions']['OneAuthor']['properties'])
         self.assertIn('ExtraPost', api['definitions'])
         self.assertEqual(api['definitions']['ExtraPost']['properties']['author']['format'], 'fk')
         self.assertEqual(

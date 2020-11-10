@@ -13,8 +13,7 @@ class ModelWithFK(BModel):
     multiselect = models.TextField(null=True, default=None, blank=True)
 
     class Meta:
-        _list_fields = (
-            'id',
+        _detail_fields = (
             'some_fk',
             'no_prefetch_and_link_fk',
             'multiselect'
@@ -38,14 +37,6 @@ class ModelWithBinaryFiles(BModel):
     some_multiplenamedbinimage = models.TextField(default='')
 
     class Meta:
-        _list_fields = (
-            'id',
-            'some_binfile',
-            'some_namedbinfile',
-            'some_namedbinimage',
-            'some_multiplenamedbinfile',
-            'some_multiplenamedbinimage',
-        )
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
             some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False),

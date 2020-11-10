@@ -10,8 +10,8 @@ class Author(BModel):
 
     class Meta:
         default_related_name = 'author'
-        _list_field = ['id', 'name']
-        _detail_fields = ['id', 'name', 'registerDate']
+        _list_field = ['name']
+        _detail_fields = ['name', 'registerDate']
         _nested = {
             'post': {
                 'allow_append': False,

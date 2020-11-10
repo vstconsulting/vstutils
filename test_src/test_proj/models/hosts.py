@@ -30,7 +30,6 @@ class Host(BModel):
     class Meta:
         _serializer_class = 'vstutils.api.serializers.VSTSerializer'
         _list_fields = (
-            'id',
             'name',
             'local_filter_applied',
             'filter_applied',

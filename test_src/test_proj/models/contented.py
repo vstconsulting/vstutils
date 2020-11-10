@@ -13,8 +13,7 @@ class Variable(BModel):
 
     class Meta:
         _list_fields = (
-            'id',
-            'value'
+            'value',
         )
         _view_class = 'vstutils.api.base.ModelViewSet'
 
@@ -26,7 +25,6 @@ class VarBasedModel(BModel):
 
     class Meta:
         _list_fields = [
-            'id',
             'name',
         ]
         _nested = {

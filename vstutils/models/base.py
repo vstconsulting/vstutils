@@ -3,6 +3,7 @@ from functools import lru_cache
 
 from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
+from django.db.models.fields.related import ManyToManyField, OneToOneField
 from django.utils.functional import SimpleLazyObject
 
 from ..utils import import_class, apply_decorators, classproperty, get_if_lazy
@@ -50,6 +51,16 @@ default_extra_metadata: dict = {
 
 def _get_unicode(obj):
     return obj.__unicode__()
+
+
+def _ensure_pk_in_fields(model_class, fields):
+    if fields is None:
+        return
+    fields = list(fields)
+    primary_key_name = model_class._meta.pk.attname
+    if primary_key_name not in fields:
+        fields.insert(0, primary_key_name)
+    return fields
 
 
 def _import_class_if_string(value):
@@ -144,7 +155,10 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if fields:
             fields = list(fields)
         else:
-            fields = SimpleLazyObject(lambda: [f.name for f in cls._meta.fields])
+            fields = SimpleLazyObject(lambda: [
+                f.name for f in cls._meta.fields
+                if not isinstance(f, (ManyToManyField, OneToOneField))
+            ])
 
         meta = type('Meta', (), {
             'model': cls,
@@ -173,6 +187,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
     def get_view_class(cls):
         # pylint: disable=too-many-branches,too-many-statements
         metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
+        list_fields = _ensure_pk_in_fields(cls, metadata['list_fields'])
+        detail_fields = _ensure_pk_in_fields(cls, metadata['detail_fields'] or list_fields)
 
         view_attributes = {'model': cls}
 
@@ -181,7 +197,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             'serializer_class': cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                 serializer_class=serializer_class,
                 serializer_class_name=cls.get_list_serializer_name(),  # pylint: disable=no-value-for-parameter
-                fields=metadata['list_fields'],
+                fields=list_fields,
                 field_overrides=metadata['override_list_fields'] or {}
             )
         }
@@ -192,7 +208,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         serializers['serializer_class_one'] = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
             serializer_class=serializer_class,
             serializer_class_name=f'One{serializers["serializer_class"].__name__}',
-            fields=metadata['detail_fields'] or metadata['list_fields'],
+            fields=detail_fields,
             field_overrides=detail_fields_override or {}
         )
         serializers.update(map(
