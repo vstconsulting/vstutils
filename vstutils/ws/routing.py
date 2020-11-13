@@ -5,6 +5,6 @@ from ..utils import ObjectHandlers
 
 
 ws_router = URLRouter([
-    re_path(rf"^ws/{path}/$", consumer)
+    re_path(rf"^ws/{path}/$", consumer.as_asgi())
     for path, consumer in ObjectHandlers('WS_CONSUMERS').items()
 ])
