@@ -51,15 +51,6 @@
             ]
         },
         {
-            "name": "jshint",
-            "type": "python",
-            "request": "launch",
-            "module": "tox",
-            "args": [
-                "-e", "jshint"
-            ]
-        },
-        {
             "name": "pylint",
             "type": "python",
             "request": "launch",
@@ -74,7 +65,7 @@
             "request": "launch",
             "module": "tox",
             "args": [
-                "-e", "py37-django22-coverage"
+                "-e", "py36-django22-coverage"
             ]
         },
         {
@@ -83,7 +74,7 @@
             "request": "launch",
             "module": "tox",
             "args": [
-                "-e", "py37-django22-install"
+                "-e", "py38-django22-install"
             ]
         },
         {
@@ -99,9 +90,8 @@
             "configurations": [
                 "flake",
                 "pylint",
-                "jshint",
-                "coverage", 
-                "install",
+                "coverage",
+                "install"
             ]
         },
         {
@@ -109,8 +99,7 @@
             "configurations": [
                 "flake",
                 "pylint",
-                "jshint",
-                "coverage",
+                "coverage"
             ]
         }
     ]

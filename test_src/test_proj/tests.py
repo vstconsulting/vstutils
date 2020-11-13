@@ -15,6 +15,7 @@ except ImportError:  # nocv
 from collections import OrderedDict
 
 from asgiref.sync import async_to_sync
+from django import VERSION as django_version
 from django.conf import settings
 from django.core import mail
 from django.core.management import call_command
@@ -1879,12 +1880,23 @@ class ConfigParserCTestCase(BaseTestCase):
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': 'file:memorydb_default?mode=memory&cache=shared',
             'TEST': {
-                'SERIALIZE': False, 'CHARSET': None, 'COLLATION': None, 'NAME': None,
+                'SERIALIZE': False,
+                'CHARSET': None,
+                'COLLATION': None,
+                'NAME': None,
                 'MIRROR': None
             },
-            'ATOMIC_REQUESTS': False, 'AUTOCOMMIT': True, 'CONN_MAX_AGE': 0,
-            'TIME_ZONE': None, 'USER': '', 'PASSWORD': '', 'HOST': '', 'PORT': ''
+            'ATOMIC_REQUESTS': False,
+            'AUTOCOMMIT': True,
+            'CONN_MAX_AGE': 0,
+            'TIME_ZONE': None,
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': ''
         }
+        if django_version[0] >= 3 and django_version[1] == 1:  # nocv
+            db_default_val['TEST']['MIGRATE'] = True
 
         self.assertEqual(settings.ALLOWED_HOSTS, ['*', 'testserver'])
 
