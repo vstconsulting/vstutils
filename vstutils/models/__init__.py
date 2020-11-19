@@ -3,6 +3,13 @@ Default Django model classes overrides in `vstutils.models` module.
 """
 
 from django.db import models
+from django.db.models import signals
+from django.dispatch import receiver
+from django.conf import settings
+from django.utils.functional import SimpleLazyObject
+from django.contrib.auth import get_user_model
+
+from cent import Client as CentrifugoClient
 
 from .base import ModelBaseClass
 from .queryset import BQuerySet
@@ -142,3 +149,36 @@ class BModel(BaseModel):
 
     def __unicode__(self):
         return f"<{self.id}>"
+
+
+def notify_clients(model, pk=None):
+    if not settings.CENTRIFUGO_CLIENT_KWARGS:
+        return  # nocv
+    cent_client.publish(
+        "subscriptions:update",
+        {
+            "subscribe-label": model._meta.label,
+            "pk": pk
+        }
+    )
+
+
+def get_centrifugo_client():
+    # pylint: disable=invalid-name,protected-access
+
+    if not settings.CENTRIFUGO_CLIENT_KWARGS:
+        return None
+
+    client = CentrifugoClient(**settings.CENTRIFUGO_CLIENT_KWARGS)
+
+    @receiver(signals.post_save)
+    @receiver(signals.post_delete)
+    def centrifugo_signal_for_notificate_users_about_updates(instance, *args, **kwargs):
+        if isinstance(instance, (BModel, get_user_model())):
+            notify_clients(instance.__class__, instance.pk)
+
+    client._signal = centrifugo_signal_for_notificate_users_about_updates
+    return client
+
+
+cent_client = SimpleLazyObject(get_centrifugo_client)

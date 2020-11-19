@@ -12,6 +12,10 @@ django-crispy-forms==1.9.2
 uWSGI==2.0.19.1
 # pyuwsgi==2.0.19
 
+# Notifications
+cent~=3.0.1
+PyJWT~=1.7.1
+
 # Minificators
 jsmin==2.2.2
 django-htmlmin~=0.11.0

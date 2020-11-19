@@ -173,6 +173,13 @@ class WorkerSection(BaseAppendSection):
     }
 
 
+class CentrifugoSection(cconfig.Section):
+    type_address = cconfig.StrType()
+    type_api_key = cconfig.StrType()
+    type_timeout = ConfigIntSecondsType
+    type_verify = ConfigBoolType
+
+
 config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     format_kwargs=KWARGS,
     section_defaults={
@@ -264,6 +271,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'mail': MailSection,
         'uwsgi': UWSGISection,
         'rpc': RPCSection,
+        'centrifugo': CentrifugoSection,
     }
 )
 config.parse_files([CONFIG_FILE, DEV_SETTINGS_FILE])
@@ -974,6 +982,10 @@ SPA_STATIC: _t.List[_t.Dict] = [
     # Load app
     {'priority': 2, 'type': 'js', 'name': 'bundle/spa.js'},
 ]
+
+# Centrifugo settings
+CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
+
 
 # Test settings for speedup tests
 ##############################################################

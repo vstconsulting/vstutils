@@ -7,10 +7,7 @@ import io
 import pwd
 from pathlib import Path
 
-try:
-    from mock import patch
-except ImportError:  # nocv
-    from unittest.mock import patch
+from unittest.mock import patch
 
 from collections import OrderedDict
 
@@ -35,6 +32,7 @@ from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.urls import router
 from vstutils.ws import application
+from vstutils.models import cent_client, get_centrifugo_client
 
 from .models import File, Host, HostGroup, List
 from rest_framework.exceptions import ValidationError
@@ -1090,8 +1088,13 @@ class EndpointTestCase(BaseTestCase):
 
 class BaseModelViewTestCase(BaseTestCase):
 
-    def test_nested_scenario(self):
+    @override_settings(CENTRIFUGO_CLIENT_KWARGS={
+        'address': 'https://localhost:8000',
+        'api_key': "XXX"
+    })
+    def test_openapi_schema(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+
         self.assertIn('Author', api['definitions'])
         self.assertIn('id', api['definitions']['Author']['properties'])
         self.assertIn('OneAuthor', api['definitions'])
@@ -1118,6 +1121,9 @@ class BaseModelViewTestCase(BaseTestCase):
         self.assertEqual(api['paths']['/subhosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
         self.assertEqual(api['paths']['/hosts/{id}/hosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
         self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
+
+        self.assertEqual(api['info']['x-centrifugo-address'], "wss://localhost:8000")
+        self.assertIn('x-centrifugo-token', api['info'])
 
         results = self.bulk([
             {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
@@ -1961,6 +1967,10 @@ class ConfigParserCTestCase(BaseTestCase):
         self.assertDictEqual(worker_options, settings.WORKER_OPTIONS)
 
 
+@override_settings(CENTRIFUGO_CLIENT_KWARGS={
+    'address': 'http://localhost:8000',
+    'api_key': "XXX"
+})
 class WebSocketTestCase(BaseTestCase):
 
     def setUp(self):
@@ -1986,6 +1996,33 @@ class WebSocketTestCase(BaseTestCase):
             'sec-websocket-key': 'some_key',
             'sec-websocket-extensions': 'permessage-deflate; client_max_window_bits'
         }
+
+    def test_centrifugo_notification(self):
+        mock_args, mock_kwargs, mock_call_count = [], [], 0
+
+        def publish(*args, **kwargs):
+            nonlocal mock_args, mock_kwargs, mock_call_count
+            mock_call_count += 1
+            mock_args.append(args)
+            mock_kwargs.append(kwargs)
+
+
+        Host = self.get_model_class('test_proj.models.Host')
+        cent_client._wrapped = get_centrifugo_client()
+        cent_client._wrapped.publish = publish
+
+        host_obj = Host.objects.create(name="centrifuga")
+        host_obj2 = Host.objects.create(name="centrifuga")
+        Host.objects.filter(id__in=[host_obj.id, host_obj2.id]).delete()
+        self.assertEqual(mock_call_count, 4)
+        self.assertEqual(mock_args[0][0], 'subscriptions:update')
+        self.assertEqual(mock_args[1][0], 'subscriptions:update')
+        self.assertEqual(mock_args[2][0], 'subscriptions:update')
+        self.assertEqual(mock_args[3][0], 'subscriptions:update')
+        self.assertDictEqual(mock_args[0][1], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
+        self.assertDictEqual(mock_args[1][1], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
+        self.assertDictEqual(mock_args[2][1], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
+        self.assertDictEqual(mock_args[3][1], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
 
     @async_test
     async def test_endpoint_requests(self):

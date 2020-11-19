@@ -1,3 +1,4 @@
+import jwt
 from rest_framework import request as drf_request
 from django.conf import settings
 from drf_yasg import generators
@@ -105,7 +106,24 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
             request.version = self.version  # type: ignore
         result = super().get_schema(request, *args, **kwargs)
         if request:
-            result['info']['x-user-id'] = request.user.id
+            result['info']['x-user-id'] = request.user.pk
+            if settings.CENTRIFUGO_CLIENT_KWARGS:
+                secret = settings.CENTRIFUGO_CLIENT_KWARGS.get('api_key', '')
+                if secret and request.user.pk:
+                    result['info']['x-centrifugo-token'] = jwt.encode(
+                        {
+                            "sub": request.session.session_key,
+                            "exp": settings.SESSION_COOKIE_AGE,
+                            "info": {
+                                'user_id': request.user.pk
+                            }
+                        },
+                        secret,
+                        algorithm="HS256"
+                    ).decode()
+                    result['info']['x-centrifugo-address'] = settings.\
+                        CENTRIFUGO_CLIENT_KWARGS.get('address', '').\
+                        replace('http', 'ws', 1)
         for hook in self._get_hooks():
             hook(request=request, schema=result)
         return result

@@ -4,7 +4,7 @@ import random  # noqa: F401
 import string  # noqa: F401
 import os  # noqa: F401
 import uuid
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 import json  # noqa: F401
 
 from django.db import transaction
@@ -128,8 +128,8 @@ class BaseTestCase(TestCase):
         return url
 
     @classmethod
-    def patch(cls, *args, **kwargs):  # nocv
-        return patch(*args, **kwargs)
+    def patch(cls, *args, **kwargs) -> _t.ContextManager[Mock]:
+        return patch(*args, **kwargs)  # type: ignore
 
     def get_model_class(self, model):
         if isinstance(model, str):

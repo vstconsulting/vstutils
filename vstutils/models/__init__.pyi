@@ -29,3 +29,7 @@ class BaseModel(_BaseModel):
 class BModel(BaseModel):
     id: _t.Union[_t.SupportsInt, models.AutoField]
     hidden: _t.Union[bool, models.BooleanField]
+
+
+def notify_clients(model: _t.Union[BModel, models.Model], pk: _t.Optional[_t.Any] = None) -> None:
+    ...
