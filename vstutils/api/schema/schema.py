@@ -4,6 +4,7 @@ from warnings import warn
 from rest_framework import status
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
+from drf_yasg.openapi import Operation
 
 from ... import utils
 from ..decorators import NestedWithAppendMixin
@@ -45,7 +46,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         nested_action_name = '_'.join(view_action_func._nested_name.split('_')[1:])
 
         if nested_view is None:
-            return nested_view
+            return nested_view  # nocv
 
         if hasattr(view_action_func, '_nested_view'):
             nested_view_class = view_action_func._nested_view
@@ -79,10 +80,10 @@ class VSTAutoSchema(SwaggerAutoSchema):
         nested_view_obj.lookup_url_kwarg = self.view.lookup_url_kwarg
         nested_view_obj.format_kwarg = None
         nested_view_obj.format_kwarg = None
+        nested_view_obj._nested_wrapped_view = getattr(view_action_func, '_nested_wrapped_view', None)
         # Check operation action
         if method == 'post' and is_list:
             nested_view_obj.action = 'create'
-            nested_view_obj._nested_wrapped_view = getattr(view_action_func, '_nested_wrapped_view', None)
         elif method == 'get' and is_list:
             nested_view_obj.action = 'list'
         elif method == 'get' and is_detail:
@@ -119,17 +120,21 @@ class VSTAutoSchema(SwaggerAutoSchema):
                 response.description = self.default_status_messages.get(response_code, 'Action accepted.')
         return responses
 
+    def __get_nested_view_and_subaction(self, default=None):
+        sub_action = getattr(self.view, self.view.action, None)
+        return getattr(sub_action, '_nested_view', default), sub_action
+
     def __perform_with_nested(self, func_name, *args, **kwargs):
         # pylint: disable=protected-access
-        sub_action = getattr(self.view, self.view.action, None)
-        if hasattr(sub_action, '_nested_view'):
+        nested_view, sub_action = self.__get_nested_view_and_subaction()
+        if nested_view and sub_action:
             schema = copy(self)
             try:
-                schema.view = self.__get_nested_view_obj(sub_action._nested_view, sub_action)
+                schema.view = self.__get_nested_view_obj(nested_view, sub_action)
                 result = getattr(schema, func_name)(*args, **kwargs)
                 if result:
                     return result
-            except Exception as err:
+            except Exception as err:  # nocv
                 warn(
                     f"Error in parse '{self.view.action}'."
                     f" Using default inspection. Err: {err}"
@@ -152,8 +157,20 @@ class VSTAutoSchema(SwaggerAutoSchema):
         return self.__perform_with_nested('get_responses', *args, **kwargs)
 
     def get_operation(self, operation_keys=None):
-        result = self.__perform_with_nested('get_operation', operation_keys)
-        if result['operationId'].endswith('_add') and getattr(self.view, '_nested_wrapped_view', None):
+        result: Operation = self.__perform_with_nested('get_operation', operation_keys)
+        _nested_wrapped_view = getattr(self.view, '_nested_wrapped_view', None)
+        if result['operationId'].endswith('_add') and _nested_wrapped_view:
             # pylint: disable=protected-access
-            result['x-allow-append'] = issubclass(self.view._nested_wrapped_view, NestedWithAppendMixin)
+            result['x-allow-append'] = issubclass(_nested_wrapped_view, NestedWithAppendMixin)
+        if self.method.lower() == 'get':
+            subscribe_view = self.__get_nested_view_and_subaction(self.view)[0]
+            # subscribe_view = getattr(getattr(self.view, self.view.action, None), '_nested_view', self.view)
+            queryset = getattr(subscribe_view, 'queryset', None)
+            if queryset is not None:
+                # pylint: disable=protected-access
+                subscribe_labels = [queryset.model._meta.label]
+                proxy_model = queryset.model._meta.proxy_for_model
+                if proxy_model:
+                    subscribe_labels.append(proxy_model._meta.label)
+                result['x-subscribe-labels'] = subscribe_labels
         return result

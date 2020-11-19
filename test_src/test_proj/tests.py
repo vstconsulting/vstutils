@@ -1102,11 +1102,22 @@ class BaseModelViewTestCase(BaseTestCase):
             api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
             '#/definitions/Author'
         )
+        self.assertIn('OneExtraPost', api['definitions'])
+        self.assertEqual(api['paths']['/author/']['get']['x-subscribe-labels'], ['test_proj.Author'])
+        self.assertEqual(api['paths']['/author/{id}/']['get']['x-subscribe-labels'], ['test_proj.Author'])
+        self.assertEqual(api['paths']['/author/{id}/post/']['get']['x-subscribe-labels'], ['test_proj.ExtraPost', 'test_proj.Post'])
+        self.assertEqual(api['paths']['/author/{id}/post/{post_id}/']['get']['x-subscribe-labels'], ['test_proj.ExtraPost', 'test_proj.Post'])
+
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/'
         self.assertTrue(api['paths'][sub_path]['post']['x-allow-append'])
+        self.assertEqual(api['paths'][sub_path]['get']['x-subscribe-labels'], ['test_proj.Host'])
         sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/'
         self.assertFalse(api['paths'][sub_path]['post']['x-allow-append'])
-        self.assertIn('OneExtraPost', api['definitions'])
+        self.assertEqual(api['paths'][sub_path]['get']['x-subscribe-labels'], ['test_proj.Host'])
+
+        self.assertEqual(api['paths']['/subhosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
+        self.assertEqual(api['paths']['/hosts/{id}/hosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
+        self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
 
         results = self.bulk([
             {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
