@@ -2,11 +2,12 @@
 Default Django model classes overrides in `vstutils.models` module.
 """
 
+import logging
+
 from django.db import models
 from django.db.models import signals
 from django.dispatch import receiver
 from django.conf import settings
-from django.utils.functional import SimpleLazyObject
 from django.contrib.auth import get_user_model
 
 from cent import Client as CentrifugoClient
@@ -15,6 +16,9 @@ from .base import ModelBaseClass
 from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
+
+
+logger = logging.getLogger('vstutils')
 
 
 class Manager(models.Manager.from_queryset(BQuerySet)):
@@ -152,10 +156,11 @@ class BModel(BaseModel):
 
 
 def notify_clients(model, pk=None):
+    logger.debug(f'Notify clients about model update: {model._meta.label}')
     if not settings.CENTRIFUGO_CLIENT_KWARGS:
         return  # nocv
     cent_client.publish(
-        "subscriptions:update",
+        "subscriptions_update",
         {
             "subscribe-label": model._meta.label,
             "pk": pk
@@ -169,16 +174,21 @@ def get_centrifugo_client():
     if not settings.CENTRIFUGO_CLIENT_KWARGS:
         return None
 
-    client = CentrifugoClient(**settings.CENTRIFUGO_CLIENT_KWARGS)
+    centrifugo_client_kwargs = {**settings.CENTRIFUGO_CLIENT_KWARGS}
+    centrifugo_client_kwargs.pop('token_hmac_secret_key', None)
+    logger.debug(f"Getting Centrifugo client with kwargs: {centrifugo_client_kwargs}")
+    client = CentrifugoClient(**centrifugo_client_kwargs)
+
+    User = get_user_model()
 
     @receiver(signals.post_save)
     @receiver(signals.post_delete)
     def centrifugo_signal_for_notificate_users_about_updates(instance, *args, **kwargs):
-        if isinstance(instance, (BModel, get_user_model())):
+        if isinstance(instance, (BModel, User)):
             notify_clients(instance.__class__, instance.pk)
 
     client._signal = centrifugo_signal_for_notificate_users_about_updates
     return client
 
 
-cent_client = SimpleLazyObject(get_centrifugo_client)
+cent_client = get_centrifugo_client()

@@ -32,7 +32,8 @@ from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.urls import router
 from vstutils.ws import application
-from vstutils.models import cent_client, get_centrifugo_client
+from vstutils.models import get_centrifugo_client
+from vstutils import models
 
 from .models import File, Host, HostGroup, List
 from rest_framework.exceptions import ValidationError
@@ -1090,7 +1091,8 @@ class BaseModelViewTestCase(BaseTestCase):
 
     @override_settings(CENTRIFUGO_CLIENT_KWARGS={
         'address': 'https://localhost:8000',
-        'api_key': "XXX"
+        'api_key': "XXX",
+        'token_hmac_secret_key': "YYY"
     })
     def test_openapi_schema(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
@@ -1998,6 +2000,7 @@ class WebSocketTestCase(BaseTestCase):
         }
 
     def test_centrifugo_notification(self):
+        global cent_client
         mock_args, mock_kwargs, mock_call_count = [], [], 0
 
         def publish(*args, **kwargs):
@@ -2008,17 +2011,17 @@ class WebSocketTestCase(BaseTestCase):
 
 
         Host = self.get_model_class('test_proj.models.Host')
-        cent_client._wrapped = get_centrifugo_client()
-        cent_client._wrapped.publish = publish
+        models.cent_client = get_centrifugo_client()
+        models.cent_client.publish = publish
 
         host_obj = Host.objects.create(name="centrifuga")
         host_obj2 = Host.objects.create(name="centrifuga")
         Host.objects.filter(id__in=[host_obj.id, host_obj2.id]).delete()
         self.assertEqual(mock_call_count, 4)
-        self.assertEqual(mock_args[0][0], 'subscriptions:update')
-        self.assertEqual(mock_args[1][0], 'subscriptions:update')
-        self.assertEqual(mock_args[2][0], 'subscriptions:update')
-        self.assertEqual(mock_args[3][0], 'subscriptions:update')
+        self.assertEqual(mock_args[0][0], 'subscriptions_update')
+        self.assertEqual(mock_args[1][0], 'subscriptions_update')
+        self.assertEqual(mock_args[2][0], 'subscriptions_update')
+        self.assertEqual(mock_args[3][0], 'subscriptions_update')
         self.assertDictEqual(mock_args[0][1], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
         self.assertDictEqual(mock_args[1][1], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
         self.assertDictEqual(mock_args[2][1], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})

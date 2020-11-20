@@ -108,7 +108,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         if request:
             result['info']['x-user-id'] = request.user.pk
             if settings.CENTRIFUGO_CLIENT_KWARGS:
-                secret = settings.CENTRIFUGO_CLIENT_KWARGS.get('api_key', '')
+                secret = settings.CENTRIFUGO_CLIENT_KWARGS.get('token_hmac_secret_key', '')
                 if secret and request.user.pk:
                     result['info']['x-centrifugo-token'] = jwt.encode(
                         {
