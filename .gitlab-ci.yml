@@ -42,15 +42,24 @@ stages:
 code_style:
   <<: *branch_tests
   stage: code_standarts
+  parallel:
+    matrix:
+      - TOX_ENVS:
+          - flake
+          - mypy
+          - pylint
+
+js_style:
+  <<: *branch_tests
+  stage: code_standarts
   cache:
     <<: *global_cache
     policy: pull-push
   variables:
-    TOX_ENVS: "flake,mypy,pylint"
+    TOX_ENVS: "js_style"
 
 functional_test:
   <<: *branch_tests
-  needs: [ "code_style" ]
   parallel:
     matrix:
       - TOX_ENVS:

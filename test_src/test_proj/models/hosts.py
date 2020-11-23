@@ -47,7 +47,8 @@ class Host(BModel):
         response_code=200,
         response_serializer=serializers.EmptySerializer,
         detail=True,
-        description='Some desc'
+        description='Some desc',
+        multiaction=True
     )
     def test(self, request, *args, **kwargs):
         return responses.HTTP_200_OK('OK')
