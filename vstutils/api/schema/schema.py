@@ -14,16 +14,21 @@ from .inspectors import (
     DependEnumFieldInspector,
     AutoCompletionFieldInspector,
     VSTFieldInspector,
-    NestedFilterInspector
+    NestedFilterInspector,
+    VSTReferencingSerializerInspector
 )
 
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
         CommaMultiSelectFieldInspector,
-        FkFieldInspector, DependEnumFieldInspector,
-        AutoCompletionFieldInspector, VSTFieldInspector,
+        FkFieldInspector,
+        DependEnumFieldInspector,
+        AutoCompletionFieldInspector,
+        VSTFieldInspector,
+        VSTReferencingSerializerInspector
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
+
     filter_inspectors = [
         NestedFilterInspector
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS

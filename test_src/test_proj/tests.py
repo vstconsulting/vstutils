@@ -1099,10 +1099,15 @@ class BaseModelViewTestCase(BaseTestCase):
 
         self.assertIn('Author', api['definitions'])
         self.assertIn('id', api['definitions']['Author']['properties'])
+        self.assertEqual(
+            api['definitions']['Author']['x-properties-groups'],
+            {'Main': ['id', 'name'], '': ['hidden', 'registerDate']}
+        )
         self.assertIn('OneAuthor', api['definitions'])
         self.assertIn('id', api['definitions']['OneAuthor']['properties'])
         self.assertIn('ExtraPost', api['definitions'])
         self.assertEqual(api['definitions']['ExtraPost']['properties']['author']['format'], 'fk')
+        self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
         self.assertEqual(
             api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
             '#/definitions/Author'

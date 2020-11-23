@@ -30,6 +30,8 @@ default_extra_metadata: dict = {
     "detail_fields": None,
     # dict which override fields types of detail view serializer
     "override_detail_fields": None,
+    # dict which indicates about properties groups
+    "properties_groups": None,
     # key-value of actions serializers (key - action, value - serializer class)
     "extra_serializer_classes": None,
     # tuple or list of filters on list
@@ -145,6 +147,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         return SimpleLazyObject(lambda: cls.get_view_class())
 
     def get_serializer_class(cls, serializer_class, serializer_class_name=None, fields=None, field_overrides=None):
+        # pylint: disable=no-value-for-parameter
+
         if serializer_class is None:
             serializer_class = api_serializers.VSTSerializer
 
@@ -167,11 +171,21 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         })
 
         serializer_class = get_if_lazy(serializer_class)
+        properties_groups = cls.get_extra_metadata()['properties_groups']
+
+        if properties_groups:
+            schema_properties_groups = dict(**properties_groups)
+        else:
+            schema_properties_groups = None
 
         return type(serializer_class)(
             serializer_class_name,
             (serializer_class,),
-            {"Meta": meta, **field_overrides}
+            {
+                "Meta": meta,
+                "_schema_properties_groups": schema_properties_groups,
+                **field_overrides
+            }
         )
 
     def get_extra_metadata(cls):

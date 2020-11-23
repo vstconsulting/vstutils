@@ -2,6 +2,7 @@ from typing import Dict, Type, Text, Any
 from collections import OrderedDict
 
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
+from drf_yasg.inspectors.field import ReferencingSerializerInspector
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework.fields import Field
@@ -97,6 +98,13 @@ def field_have_redirect(field, **kwargs):
 def field_extra_handler(field, **kwargs):
     kwargs = field_have_redirect(field, **kwargs)
     return kwargs
+
+
+def _get_handled_props(group_mapping):
+    for group_name, props in (group_mapping or {}).items():
+        if group_name == '':
+            continue
+        yield from props
 
 
 class VSTFieldInspector(FieldInspector):
@@ -234,4 +242,29 @@ class NestedFilterInspector(CoreAPICompatInspector):
         self.view.filter_class = nested_view_filter_class
         result = super().get_filter_parameters(filter_backend)
         self.view.filter_class = filter_class
+        return result
+
+
+class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
+    def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
+        result = super().field_to_swagger_object(field, swagger_object_type, use_references, **kwargs)
+
+        if result != NotHandled:
+            schema = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)[self.get_serializer_ref_name(field)]
+            default = {'': list(schema['properties'].keys())}
+
+            # pylint: disable=protected-access
+            schema_properties_groups = OrderedDict(
+                getattr(schema._NP_serializer, '_schema_properties_groups', None) or
+                default
+            )
+            if schema_properties_groups:
+                not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))
+                if not_handled:
+                    schema_properties_groups[''] = [
+                        prop
+                        for prop in schema['properties']
+                        if prop in not_handled
+                    ]
+            schema['x-properties-groups'] = schema_properties_groups
         return result

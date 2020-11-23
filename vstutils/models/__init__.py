@@ -116,6 +116,8 @@ class BModel(BaseModel):
         - ``_list_fields`` or ``_detail_fields`` - list of fields which will show in entity view.
         - ``_override_list_fields`` or ``_override_detail_fields`` - mapping with names and field types
           that will declared in serializer attributes.
+        - ``_properties_groups`` - dict with key as group name and value as list with fields. Allows to
+          grouping fields on frontend in cases.
         - ``_extra_serializer_classes`` - mapping with additional serializers in viewset. Example, custom serializer,
           which will compute smthg in action (mapping name). Value can be string for import.
         - ``_filterset_fields`` - list of filterset names for API-filtering. Default is list of fields in list view.

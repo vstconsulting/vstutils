@@ -12,6 +12,9 @@ class Author(BModel):
         default_related_name = 'author'
         _list_field = ['name']
         _detail_fields = ['name', 'registerDate']
+        _properties_groups = {
+            "Main": ["id", "name"]
+        }
         _nested = {
             'post': {
                 'allow_append': False,
