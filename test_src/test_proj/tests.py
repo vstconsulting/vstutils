@@ -1122,6 +1122,7 @@ class BaseModelViewTestCase(BaseTestCase):
 
         self.assertEqual(api['paths']['/subhosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
         self.assertEqual(api['paths']['/hosts/{id}/hosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
+        self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-multiaction'])
         self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
 
         self.assertEqual(api['info']['x-centrifugo-address'], "wss://localhost:8000")
@@ -1371,9 +1372,9 @@ class ProjectTestCase(BaseTestCase):
             dict(method='get', path=['hosts', host_group_id, 'hosts'], query='offset=10'),
             dict(method='get', path=['hosts', host_group_id, 'shost', '<<24[data][id]>>']),
             dict(method='post', path=['hosts', host_group_id, 'shost'], data=dict(name='some_other')),
-            dict(method='get', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test']),
-            dict(method='get', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test2']),
-            dict(method='get', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test3']),
+            dict(method='post', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test']),
+            dict(method='post', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test2']),
+            dict(method='post', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>', 'test3']),
             dict(method='delete', path=['hosts', host_group_id, 'shost', '<<14[data][id]>>']),
             dict(method='post', path=['hosts', host_group_id, 'shost'], data=dict(id='<<14[data][id]>>')),
         ]

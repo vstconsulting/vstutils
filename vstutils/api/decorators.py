@@ -141,16 +141,22 @@ def subaction(*args, **kwargs):
     :type url_path: str
     :param description: -- Description for this action in OpenAPI.
     :type description: str
+    :param multiaction: -- Allow to use this action in multiactions. Works only with EmptySerializer as response.
+    :type multiaction: bool
     """
+
     operation_description = kwargs.pop('description', None)
     response_code = kwargs.pop('response_code', None)
-    response_serializer = kwargs.pop(
-        'response_serializer', kwargs.get('serializer_class', None)
-    )
+    serializer_class = kwargs.get('serializer_class', None)
+    response_serializer = kwargs.pop('response_serializer', serializer_class)
+
     assert (
         (response_code is None) or
         (response_code is not None and response_serializer is not None)
     ), "If `response_code` was setted, `response_serializer` should be setted too."
+
+    is_mul = kwargs.pop('multiaction', False)
+    kwargs['methods'] = kwargs.pop('methods', ['post'])
 
     def decorator(func: _t.Callable):
         func_object = action(*args, **kwargs)(func)
@@ -165,6 +171,9 @@ def subaction(*args, **kwargs):
             override_kw['operation_description'] = operation_description
         else:
             override_kw['operation_description'] = str(func.__doc__ or '').strip()  # type: ignore
+
+        if response_serializer is not None and response_serializer.__name__ == 'EmptySerializer':
+            override_kw['x-multiaction'] = bool(is_mul)
 
         return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 
