@@ -200,3 +200,139 @@ Example hook:
 
         def hook_add_username_to_guiname(request, schema):
             schema['info']['title'] = f"{request.username} - {schema['info']['title']}"
+
+
+
+Testing Framework
+-----------------
+
+VST Utils Framework includes a few helper in base testcase class and
+improve support for making API requests. That means if you want make bulk request
+to endpoint you dont need create and init test client, but just need to call:
+
+.. sourcecode:: python
+
+    endpoint_results = self.bulk([
+        # list of endpoint requests
+    ])
+
+Creating test case
+~~~~~~~~~~~~~~~~~~
+
+After creating new project via ``vstutils`` you can found ``test.py`` module,
+where you see testcase classes based on :class:`vstutils.tests.BaseTestCase`.
+At the moment, we officially support two styles of writing tests:
+through classic and simple query wrappers with run check and
+through runtime optimized bulk queries with manual value checking.
+
+
+Simple example with classic tests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For example, if you have api endpoint like ``/api/v1/project/`` and model Project
+you can write testcase like this:
+
+.. sourcecode:: python
+
+    from vstutils.tests import BaseTestCase
+
+
+    class ProjectTestCase(BaseTestCase):
+        def setUp(self):
+            super(ProjectTestCase, self).setUp()
+            # init demo project
+            self.initial_project = self.get_model_class('project.Test').objects.create(name="Test")
+
+        def tearDown(self)
+            super(ProjectTestCase, self).tearDown()
+            # remove it after test
+            self.initial_project.delete()
+
+        def test_project_endpoint(self):
+            # Test checks that api return valid values
+            self.list_test('/api/v1/project/', 1)
+            self.details_test(
+                ["project", self.initial_project.id],
+                name=self.initial_project.name
+            )
+            # Try to create new projects and check list endpoint
+            test_data = [
+                {"name": f"TestProject{i}"}
+                for i in range(2)
+            ]
+            id_list = self.mass_create("/api/v1/project/", test_data, 'name')
+            self.list_test('/api/v1/project/', 1 + len(id_list))
+
+
+This simple example demonstrate functionality of default test case class.
+Default projects are initialized in such a way that for the fastest and most efficient result
+it is best to distribute testing of various entities into different classes.
+This example demonstrate classic style of testing,
+but you can use bulks in your test cases.
+
+
+Bulk requests in tests
+~~~~~~~~~~~~~~~~~~~~~~
+
+The bulk query system and its capabilities are very well suited for testing and
+executing valid queries.
+Returning to the previous example, it could be rewritten as follows:
+
+.. sourcecode:: python
+
+    from vstutils.tests import BaseTestCase
+
+
+    class ProjectTestCase(BaseTestCase):
+        def setUp(self):
+            super(ProjectTestCase, self).setUp()
+            # init demo project
+            self.initial_project = self.get_model_class('project.Test').objects.create(name="Test")
+
+        def tearDown(self)
+            super(ProjectTestCase, self).tearDown()
+            # remove it after test
+            self.initial_project.delete()
+
+        def test_project_endpoint(self):
+            test_data = [
+                {"name": f"TestProject{i}"}
+                for i in range(2)
+            ]
+            bulk_data = [
+                {"method": "get", "path": ["project"]},
+                {"method": "get", "path": ["project", self.initial_project.id]}
+            ]
+            bulk_data += [
+                {"method": "post", "path": ["project"], "data": i}
+                for i in test_data
+            ]
+            bulk_data.append(
+                {"method": "get", "path": ["project"]}
+            )
+            results = self.bulk_transactional(bulk_data)
+
+            self.assertEqual(results[0]['status'], 200)
+            self.assertEqual(results[0]['data']['count'], 1)
+            self.assertEqual(results[1]['status'], 200)
+            self.assertEqual(results[1]['data']['name'], self.initial_project.name)
+
+            for pos, result in enumerate(results[2:-1]):
+                self.assertEqual(result['status'], 201)
+                self.assertEqual(result['data']['name'], test_data[pos]['name'])
+
+            self.assertEqual(results[-1]['status'], 200)
+            self.assertEqual(results[-1]['data']['count'], 1 + len(test_data))
+
+
+In this case, you have more code rows, but your tests will be closer to GUI workflow,
+because vstutils-projects uses ``/api/endpoint/`` for requests.
+Either way, bulk queries are much faster due to some optimizations,
+so you can reduce testcase execution time.
+
+
+Test case API
+~~~~~~~~~~~~~
+
+.. automodule:: vstutils.tests
+    :members: BaseTestCase

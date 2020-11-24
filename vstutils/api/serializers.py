@@ -34,7 +34,10 @@ class VSTSerializer(serializers.ModelSerializer):
 
 
 class EmptySerializer(serializers.Serializer):
-    """ Default serializer for empty responses. """
+    """
+    Default serializer for empty responses.
+    In generated GUI this means simple action button which will not show additional view before execution.
+    """
 
     def create(self, validated_data):  # nocv
         return validated_data

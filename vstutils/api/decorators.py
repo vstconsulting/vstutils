@@ -130,18 +130,19 @@ def subaction(*args, **kwargs):
     """
     Decorator which wrap object method to subaction of viewset.
 
-    :param methods: -- List of allowed HTTP-request methods.
+    :param methods: List of allowed HTTP-request methods. Default is ``["post"]``.
     :type methods: list
-    :param detail: -- Flag which signalizing that this method is over one instance.
+    :param detail: Flag which signalizing that this method is over one instance.
     :type detail: bool
-    :param serializer_class: -- Serializer for this action.
+    :param serializer_class: Serializer for this action.
     :type serializer_class: vstutils.api.serializers.VSTSerializer
-    :param permission_classes: -- Tuple or list permission classes.
-    :param url_path: -- API-path name for this action.
+    :param permission_classes: Tuple or list permission classes.
+    :param url_path: API-path name for this action.
     :type url_path: str
-    :param description: -- Description for this action in OpenAPI.
+    :param description: Description for this action in OpenAPI.
     :type description: str
-    :param multiaction: -- Allow to use this action in multiactions. Works only with EmptySerializer as response.
+    :param multiaction: Allow to use this action in multiactions.
+                        Works only with :class:`vstutils.api.serializers.EmptySerializer` as response.
     :type multiaction: bool
     """
 

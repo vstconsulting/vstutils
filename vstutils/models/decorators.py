@@ -31,6 +31,11 @@ class register_view_action(register_view_decorator):  # pylint: disable=invalid-
     Simple decorator for marking model methods as generated view actions.
     The decorated method becomes a method of generated view and `self` will be view object.
     See supported args in :func:`vstutils.api.decorators.subaction`
+
+    .. note::
+        Often, the action does not transfer any parameters and requires only sending an empty query.
+        To speed up development, we set the default serializer to :class:`vstutils.api.serializers.EmptySerializer`.
+
     """
     __slots__ = ()  # type: ignore
 

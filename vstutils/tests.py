@@ -7,6 +7,7 @@ import uuid
 from unittest.mock import patch, Mock
 import json  # noqa: F401
 
+from django.apps import apps
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
@@ -20,9 +21,16 @@ ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence]
 
 
 class BaseTestCase(TestCase):
+    """
+    Main testcase class extends :class:`django.test.TestCase`.
+    """
     server_name = 'vstutilstestserver'
+
+    #: Attribute with default project models module.
     models = None
-    std_codes = {
+
+    #: Default http status codes for different http methods. Uses in :meth:`.get_result`
+    std_codes: _t.Dict[_t.Text, int] = {
         'get': 200,
         'post': 201,
         'patch': 200,
@@ -31,9 +39,14 @@ class BaseTestCase(TestCase):
 
     class user_as:
         # pylint: disable=invalid-name
-        '''
-        Context for do something as another user in TestCase
-        '''
+        """
+        Context for execute bulk or something as user.
+        The context manager overrides ``self.user`` in TestCase and revert this
+        changes on exit.
+
+        :param user: new user object for execution.
+        :type user: django.contrib.auth.models.AbstractUser
+        """
 
         def __init__(self, testcase, user):
             self.testcase = testcase
@@ -73,13 +86,15 @@ class BaseTestCase(TestCase):
         self.assertEqual(client.get(self.logout_url).status_code, 302)
 
     def _check_update(self, url, data, **fields):
-        '''
+        """
         Test update instance of model
-        :param url: - url to instance
-        :param data: - update fields
-        :param fields: - checking resulted fields as named args
+
+        :param url: url to instance
+        :param data: update fields
+        :param fields: checking resulted fields as named args
         :return: None
-        '''
+
+        """
         self.get_result(fields.pop('method', 'patch'), url, data=json.dumps(data))
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
@@ -117,31 +132,89 @@ class BaseTestCase(TestCase):
     def _settings(self, item, default=None):
         return getattr(self.settings_obj, item, default)
 
-    def random_name(self):
+    def random_name(self) -> _t.Text:
+        """
+        Simple function which returns uuid1 string.
+        """
         return str(uuid.uuid1())
 
-    def get_url(self, item=None, pk=None, sub=None):
-        url = f'/{self._settings("VST_API_URL")}/{self._settings("VST_API_VERSION")}/'
-        url += f"{item}/" if item else ''
-        url += f"{pk}/" if pk else ''
-        url += f'{sub}/' if sub else ''
+    def get_url(self, *items) -> _t.Text:
+        """
+        Function for creating url path based on ``VST_API_URL`` and ``VST_API_VERSION`` settings.
+        Without arguments returns path to default version of api.
+
+        :return: string like ``/api/v1/.../.../`` where ``...`` is args of function.
+        """
+
+        vst_api_url = self._settings("VST_API_URL")
+        vst_api_version = self._settings("VST_API_VERSION")
+
+        items = items[2:] if items[:2] == (vst_api_url, vst_api_version) else items
+
+        url = f'/{vst_api_url}/{vst_api_version}/'
+        url += "".join(f'{i}/' for i in filter(bool, items))
+
         return url
 
     @classmethod
     def patch(cls, *args, **kwargs) -> _t.ContextManager[Mock]:
+        """
+        Simple :func:`unittest.mock.patch` class-method wrapper.
+        """
         return patch(*args, **kwargs)  # type: ignore
 
     def get_model_class(self, model):
+        """
+        Getting model class by string or return model arg.
+
+        :param model: string which contains model name (if attribute ``model`` is set to the testcase class),
+                      module import, ``app.ModelName`` or :class:`django.db.models.Model`.
+        :type model: str,django.db.models.Model
+        :return: Model class.
+        :rtype: django.db.models.Model
+
+        """
+
+        handlers = (
+            lambda x: getattr(self.models, x, None) if self.models is not None else None,
+            import_class,
+            apps.get_model
+        )
+
         if isinstance(model, str):
-            model_string = str(model)
-            model = getattr(self.models, model_string, None)
-            model = import_class(model_string) if model is None else model
+            for handler in handlers:
+                result = handler(model)
+                if result:
+                    model = result
+                    break
+
         return model
 
     def get_model_filter(self, model, **kwargs):
+        """
+        Simple wrapper over :meth:`.get_model_class` which returns filtered
+        queryset from model.
+
+        :param model: string which contains model name (if attribute ``model`` is set to the testcase class),
+                      module import, ``app.ModelName`` or :class:`django.db.models.Model`.
+        :type model: str,django.db.models.Model
+        :param kwargs: named arguments to :meth:`django.db.models.query.QuerySet.filter`.
+        :rtype: django.db.models.query.QuerySet
+
+        """
         return self.get_model_class(model).objects.filter(**kwargs)
 
     def get_count(self, model, **kwargs):
+        """
+        Simple wrapper over :meth:`.get_model_filter` which returns counter of items.
+
+        :param model: string which contains model name (if attribute ``model`` is set to the testcase class),
+                      module import, ``app.ModelName`` or :class:`django.db.models.Model`.
+        :type model: str,django.db.models.Model
+        :param kwargs: named arguments to :meth:`django.db.models.query.QuerySet.filter`.
+        :return: number of instances in database.
+        :rtype: int
+        """
         return self.get_model_filter(model, **kwargs).count()
 
     def change_identity(self, is_super_user=False):
@@ -159,16 +232,26 @@ class BaseTestCase(TestCase):
         self.assertRCode(response, code, url)
         return self.render_api_response(response)
 
-    def assertCount(self, list, count, msg=None):
-        self.assertEqual(len(list), count, msg)
+    def assertCount(self, iterable: _t.Sized, count: int, msg: _t.Any = None):
+        """
+        Call :func:`len` over ``iterable`` and check equals with ``count``.
+
+        :param iterable: any iterable object which could be sended to :func:`len`.
+        :param count: expected result.
+        :param msg: error message
+
+        """
+        self.assertEqual(len(iterable), count, msg)
 
     def assertRCode(self, resp, code=200, *additional_info):
-        '''
+        """
         Fail if response code is not equal. Message is response body.
-        :param resp: - response object
-        :param code: - expected code
-        :return: None
-        '''
+
+        :param resp: response object
+        :type resp: django.http.HttpResponse
+        :param code: expected code
+        :type code: int
+        """
         err_msg = "{} != {}\n{}\n{}".format(
             resp.status_code, code,
             self.__get_rendered(resp),
@@ -179,12 +262,11 @@ class BaseTestCase(TestCase):
             err_msg += '\n'.join([str(i) for i in additional_info])
         self.assertEqual(resp.status_code, code, err_msg)
 
-    def assertCheckDict(self, first, second, msg=None):
-        '''
-        Fail if the two fields in dicts are unequal as determined by the '=='
-           operator.
+    def assertCheckDict(self, first: _t.Dict, second: _t.Dict, msg: _t.Text = None):
+        """
+        Fail if the two fields in dicts are unequal as determined by the '==' operator.
         Checks if fist not contains or not equal field in second
-        '''
+        """
         for field_name in first.keys():
             self.assertEqual(
                 first[field_name], second.get(field_name, None), msg or [first, second]
@@ -194,15 +276,29 @@ class BaseTestCase(TestCase):
         return self.get_result("post", url, code, *args, **kwargs)
 
     def get_result(self, rtype, url, code: int = None, *args, **kwargs) -> ApiResultType:
-        '''
-        Test request with returning result of request
-        :param rtype:  - request type (methods from Client cls): get, post etc
-        :param url:    - requested url
-        :param code:   - expected return code from request.
-        :param args:   - extra-args for Client class
-        :param kwargs: - extra-kwargs for Client class
-        :return:       - result of request
-        '''
+        """
+        Execute and test response code on request with returning parsed result of request.
+        The method uses the following procedure:
+
+        - Test client authorization (with :attr:`.user` which creates in :meth:`.setUp`).
+        - Executing a request (sending args and kwargs to request method).
+        - Parsing the result (converts json string to python-object).
+        - Checking the http status code with :meth:`.assertRCode`
+          (if you have not specified it,
+          the code will be selected in accordance with the request method
+          from the standard set :attr:`.std_codes`).
+        - Logout client.
+        - Return parsed result.
+
+        :param rtype:  request type (methods from Client cls): get, post etc.
+        :param url:    requested url string or tuple for :meth:`.get_url`.
+                       You can use :meth:`.get_url` for url building or setup it as full string.
+        :param code:   expected return code from request.
+        :param args:   extra-args for Client class request method.
+        :param kwargs: extra-kwargs for Client class request method.
+        :return:       result of request.
+
+        """
         client = self._login()
         request = getattr(client, rtype)
         code = code or self.std_codes.get(rtype, 200)
@@ -210,23 +306,33 @@ class BaseTestCase(TestCase):
             if isinstance(kwargs["data"], str):
                 kwargs["content_type"] = "application/json"
         kwargs['code'] = code
+        if isinstance(url, (tuple, list)):
+            url = self.get_url(*url)
         result = self.result(request, url, *args, **kwargs)
         self._logout(client)
         return result
 
-    def mass_create(self, url, data, *fields):
-        '''
-        Mass creation objects in api-abstration
+    def mass_create(self, url, data, *fields, **kwargs):
+        """
+        Mass creation objects in api-abstration. Uses :meth:`.get_result` method.
 
-        :param url: - url to abstract layer
-        :param data: - fields of model
-        :params fields: - list of fields to check
-        :return: - list of id by every resulted models
-        '''
+        :param url: url to abstract layer like argument in :meth:`.get_result`. For example: ``/api/v1/project/``.
+        :param data: list with data to send on creation and feature checks.
+        :params fields: list of fields to check after creation.
+        :param kwargs: extra-kwargs for request method.
+        :return: list of id from all resulted objects.
+        :rtype: list
+
+        .. note::
+            The method does not use endpoint requests. That mean if you want
+            send some extra headers or data you can do it by additional kwargs.
+
+        """
+
         results_id = []
         counter = 0
         for dt in data:
-            result = self.get_result("post", url, 201, data=json.dumps(dt))
+            result = self.get_result("post", url, 201, data=json.dumps(dt), **kwargs)
             self.assertTrue(isinstance(result, dict))
             for field in fields:
                 st = "[~~ENCRYPTED~~]"
@@ -239,24 +345,29 @@ class BaseTestCase(TestCase):
         return results_id
 
     def list_test(self, url, count):
-        '''
-        Test for get list of models
-        :param url: - url to abstract layer
-        :param count: - count of objects in DB
-        :return: None
-        '''
+        """
+        Test for get list of models. Checks only list count. Uses :meth:`.get_result` method.
+
+        :param url: url to abstract layer. For example: ``/api/v1/project/``.
+                    You can use :meth:`.get_url` for building url.
+        :param count: count of objects in DB.
+
+        """
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
         self.assertEqual(result["count"], count)
 
     def details_test(self, url, **kwargs):
-        '''
-        Test for get details of model
-        :param url: - url to abstract layer
-        :param **kwargs: - params thats should be
-                          (key - field name, value - field value)
-        :return: None
-        '''
+        """
+        Test for get details of model. If you setup additional named arguments,
+        the method check their equality with response data.
+        Uses :meth:`.get_result` method.
+
+        :param url: url to detail record. For example: ``/api/v1/project/1/`` (where ``1`` is uniq id of project).
+                    You can use :meth:`.get_url` for building url.
+        :param kwargs: params that's should be checked (key - field name, value - field value).
+
+        """
         result = self.get_result("get", url)
         self.assertTrue(isinstance(result, dict))
         for key, value in kwargs.items():
@@ -264,7 +375,8 @@ class BaseTestCase(TestCase):
 
     def endpoint_call(self, data: BulkDataType = None, method: str = 'get', code: int = 200) -> ApiResultType:
         """
-        Make request to endpoint and assert response status code if specified
+        Make request to endpoint and assert response status code if specified (default is 200).
+        Uses :meth:`.get_result` method for execution.
 
         :param data: request data
         :param method: http request method

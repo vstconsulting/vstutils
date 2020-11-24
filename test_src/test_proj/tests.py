@@ -1257,9 +1257,10 @@ class ProjectTestCase(BaseTestCase):
         self.assertTrue(hasattr(Host.objects, 'test_filter'))
 
     def _check_subhost(self, id, *args, **kwargs):
-        suburls = '/'.join(['{}/{}'.format(s, i) for s, i in args])
-        url = self.get_url('hosts', id, suburls)
-        result = self.get_result('get', url)
+        result = self.get_result(
+            'get',
+            ('hosts', id, *map("{0[0]}/{0[1]}".format, args))
+        )
         for key, value in kwargs.items():
             self.assertEqual(result.get(key, None), value, result)
 
