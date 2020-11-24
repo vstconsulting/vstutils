@@ -263,10 +263,20 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
             if serializer_class:
                 return serializer_class
 
+        is_detail = (
+            hasattr(self, 'serializer_class_one') and
+            self.request and
+            (
+                action_name in detail_actions or
+                (
+                    self.kwargs.get(lookup_field, False) and
+                    action_name in main_actions
+                )
+            )
+        )
+
         # Get 'serializer_class_one' for detail operations
-        if hasattr(self, 'serializer_class_one') and \
-           self.request and \
-           (self.kwargs.get(lookup_field, False) or action_name in detail_actions):
+        if is_detail:
             return self.serializer_class_one  # pylint: disable=no-member
         return super().get_serializer_class()
 
