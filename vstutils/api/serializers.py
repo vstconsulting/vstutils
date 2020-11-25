@@ -16,13 +16,32 @@ from .. import utils
 
 
 class BaseSerializer(serializers.Serializer):
+    """
+    Default and simple serializer with default logic to work with objects.
+    Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#serializers>`_
+    how to create Serializers and work with them.
+    """
+
     # pylint: disable=abstract-method
-    pass
+
+    def create(self, validated_data):  # nocv
+        return validated_data
+
+    def update(self, instance, validated_data):  # nocv
+        if isinstance(instance, dict):
+            instance.update(validated_data)
+        else:
+            for key, value in validated_data.items():
+                setattr(instance, key, value)
+        return instance
 
 
 class VSTSerializer(serializers.ModelSerializer):
     """
-    Default model serializer based on rest_framework.serializers.ModelSerializer.
+    Default model serializer based on :class:`rest_framework.serializers.ModelSerializer`.
+    Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_
+    how to create Model Serializers.
+
     """
     # pylint: disable=abstract-method
 
@@ -33,17 +52,11 @@ class VSTSerializer(serializers.ModelSerializer):
     })
 
 
-class EmptySerializer(serializers.Serializer):
+class EmptySerializer(BaseSerializer):
     """
     Default serializer for empty responses.
     In generated GUI this means simple action button which will not show additional view before execution.
     """
-
-    def create(self, validated_data):  # nocv
-        return validated_data
-
-    def update(self, instance, validated_data):  # nocv
-        return instance
 
 
 class DataSerializer(EmptySerializer):

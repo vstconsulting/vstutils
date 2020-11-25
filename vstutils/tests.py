@@ -265,7 +265,7 @@ class BaseTestCase(TestCase):
     def assertCheckDict(self, first: _t.Dict, second: _t.Dict, msg: _t.Text = None):
         """
         Fail if the two fields in dicts are unequal as determined by the '==' operator.
-        Checks if fist not contains or not equal field in second
+        Checks if first not contains or not equal field in second
         """
         for field_name in first.keys():
             self.assertEqual(
