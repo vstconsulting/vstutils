@@ -1,6 +1,7 @@
 """
-Additionals serializers fields for generating OpenAPI and GUI.
+Additional serializer fields for generating OpenAPI and GUI.
 """
+
 import typing as _t
 import json
 
@@ -13,6 +14,10 @@ from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_def
 
 
 class VSTCharField(CharField):
+    """
+    Simple CharField (extends :class:`rest_framework.fields.CharField`).
+    This field translate any json type to string for model.
+    """
 
     __slots__ = ()
 
@@ -24,10 +29,14 @@ class VSTCharField(CharField):
         return super().to_internal_value(data)
 
 
-class FileInStringField(CharField):
+class FileInStringField(VSTCharField):
     """
-    Field, that saves file's content as string.
-    Take effect only in GUI.
+    Field extends :class:`.VSTCharField` and saves file's content as string.
+
+    Value must be text (not binary) and saves in model as is.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -35,8 +44,12 @@ class FileInStringField(CharField):
 
 class SecretFileInString(FileInStringField):
     """
-    Field, that saves file's content as string and should be hidden.
-    Take effect only in GUI.
+    Field extends :class:`.FileInStringField` and saves file's content as string and should be hidden on frontend.
+
+    Value must be text (not binary) and saves in model as is.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -48,17 +61,34 @@ class SecretFileInString(FileInStringField):
 
 class BinFileInStringField(FileInStringField):
     """
-    Field, that saves file's content as base64 string.
-    Take effect only in GUI.
+    Field extends :class:`.FileInStringField` and  that saves file's content as base64 string.
+    This often useful when you want save binary file in django model text field.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
     __slots__ = ()
 
 
-class AutoCompletionField(CharField):
+class AutoCompletionField(VSTCharField):
     """
-    Field with autocomplite from list of objects.
-    Take effect only in GUI.
+    Field with autocomplete from list of objects.
+
+    :param autocomplete: Autocompletion reference. You can set simple list/tuple with
+                         values or set OpenApi schema definition name.
+                         For definition name GUI will find optimal link and
+                         will show values based on ``autocomplete_property`` and
+                         ``autocomplete_represent`` arguments.
+    :type autocomplete: list,tuple,str
+    :param autocomplete_property: this argument indicates which attribute will be
+                                  get from OpenApi schema definition model as value.
+    :type autocomplete_property: str
+    :param autocomplete_represent: this argument indicates which attribute will be
+                                   get from OpenApi schema definition model as represent value.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
     __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent'
 
@@ -75,11 +105,26 @@ class AutoCompletionField(CharField):
         super().__init__(**kwargs)
 
 
-class CommaMultiSelect(CharField):
+class CommaMultiSelect(VSTCharField):
     """
     Comma (or specified) separated list of values field.
-    Gets list of values from another model or custom list.
-    Take effect only in GUI.
+    Gets list of values from another model or custom list. Works as :class:`.AutoCompletionField`
+    but with comma-lists.
+    Often uses with property-fields in model where main logic is already implemented or
+    with simple CharFields.
+
+    :param select: OpenApi schema definition name or list with values.
+    :type select: str,tuple,list
+    :param select_separator: separator of values. Default is comma.
+    :type select_separator: str
+    :param select_property,select_represent: work as ``autocomplete_property`` and ``autocomplete_represent``.
+                                             Default is ``name``.
+    :param use_prefetch: prefetch values on frontend at list-view. Default is ``False``.
+    :param make_link: Show value as link to model. Default is ``True``.
+
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
     __slots__ = ('select_model', 'select_separator', 'select_property', 'select_represent', 'use_prefetch', 'make_link')
@@ -111,10 +156,24 @@ class CommaMultiSelect(CharField):
         return self.select_separator.join(data)
 
 
-class DependEnumField(CharField):
+class DependEnumField(VSTCharField):
     """
-    Field based on another field.
-    Take effect only in GUI.
+    Field which type is based on another field.
+
+    :param field: field in model which value change will change type of current value.
+    :type field: str
+    :param types: key-value mapping where key is value of subscribed field and
+                  value is type (in OpenApi format) of current field.
+    :type type: dict
+    :param choices: variants of choices for different subscribed field values.
+                    Uses mapping where key is value of subscribed field and
+                    value is list with values to choice.
+    :type choices: dict
+
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`
+        but without value modifications.
     """
     __slots__ = 'field', 'choices', 'types'
 
@@ -135,19 +194,27 @@ class DependEnumField(CharField):
         return value
 
 
-class TextareaField(CharField):
+class TextareaField(VSTCharField):
     """
     Field contained multiline string.
-    Take effect only in GUI.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
     __slots__ = ()
 
 
-class HtmlField(CharField):
+class HtmlField(VSTCharField):
     """
-    Field contained html-text and marked as format:html.
-    Take effect only in GUI.
+    Field contained html-text and marked as format:html. This reach-text is represents as is.
+
+    .. warning::
+        Do not allow for users to modify this data because they can set some scripts to value and
+        it would be vulnerability.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -155,8 +222,22 @@ class HtmlField(CharField):
 
 class FkField(IntegerField):
     """
-    Field what means where we got list.
-    Take effect only in GUI.
+    Field indicates where we got list of primary key values (should be integer).
+
+    :param select: OpenApi schema definition name.
+    :type select: str
+    :param autocomplete_property: this argument indicates which attribute will be
+                                  get from OpenApi schema definition model as value.
+                                  Default is ``id``.
+    :type autocomplete_property: str
+    :param autocomplete_represent: this argument indicates which attribute will be
+                                   get from OpenApi schema definition model as represent value.
+                                   Default is ``name``.
+    :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
+    :param make_link: Show value as link to model. Default is ``True``.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
     """
     __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent', 'use_prefetch', 'make_link'
 
@@ -177,8 +258,30 @@ class FkField(IntegerField):
 
 class FkModelField(FkField):
     """
-    FK field which got integer from API and returns model object.
-    `select_model` is a model class instead of string.
+    FK field extends :class:`.FkField` which got integer from API and returns model object as value.
+    This field is useful for :class:`django.db.models.ForeignKey` fields in model to set.
+
+    :param select: model class (based on :class:`vstutils.models.BModel`) or serializer class
+                   which used in API and has path in OpenApi schema.
+    :type select: vstutils.models.BModel,vstutils.api.serializers.VSTSerializer
+    :param autocomplete_property: this argument indicates which attribute will be
+                                  get from OpenApi schema definition model as value.
+                                  Default is ``id``.
+    :type autocomplete_property: str
+    :param autocomplete_represent: this argument indicates which attribute will be
+                                   get from OpenApi schema definition model as represent value.
+                                   Default is ``name``.
+    :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
+    :param make_link: Show value as link to model. Default is ``True``.
+
+
+    .. warning::
+        Model class on call `.to_internal_value` get object from database. Be careful on mass save executions.
+
+    .. warning::
+        Model class does not check permissons to model instance where this field using.
+        You should check it manually in signals or validators.
+
     """
 
     __slots__ = ('model_class',)
@@ -189,14 +292,12 @@ class FkModelField(FkField):
         select = kwargs.pop('select')
         if '__extra_metadata__' in dir(select):
             self.model_class = select
-            kwargs['select'] = select.__name__
+            kwargs['select'] = self._get_lazy_select_name_from_model()
         elif isinstance(select, str):
             select = select.split('.')
             assert len(select) == 2, "'select' must match 'app_name.model_name' pattern."
             self.model_class = SimpleLazyObject(lambda: apps.get_model(require_ready=True, *select))
-            kwargs['select'] = SimpleLazyObject(
-                lambda: self.model_class.get_list_serializer_name().split('Serializer')[0]
-            )
+            kwargs['select'] = self._get_lazy_select_name_from_model()
         elif issubclass(select, ModelSerializer):
             self.model_class = select.Meta.model
             kwargs['select'] = select.__name__.replace('Serializer', '')
@@ -208,6 +309,12 @@ class FkModelField(FkField):
                 'string matched "app_name.model_name" pattern.'
             )
         super().__init__(**kwargs)
+
+    def _get_lazy_select_name_from_model(self):
+        # pylint: disable=invalid-name
+        return SimpleLazyObject(
+            lambda: self.model_class.get_list_serializer_name().split('Serializer')[0]
+        )
 
     def to_internal_value(self, data: int) -> _t.Union[models.Model, _t.NoReturn]:
         return self.model_class.objects.get(**{self.autocomplete_property: data})
@@ -223,7 +330,10 @@ class FkModelField(FkField):
 class UptimeField(IntegerField):
     """
     Field for some uptime(time duration), in seconds, for example.
-    Take effect only in GUI.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+
     """
 
     __slots__ = ()
@@ -231,8 +341,11 @@ class UptimeField(IntegerField):
 
 class RedirectIntegerField(IntegerField):
     """
-    Field for redirect by id.
-    Take effect only in GUI.
+    Field for redirect by id. Often uses in actions for redirect after execution.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+
     """
 
     __slots__ = ()
@@ -241,8 +354,11 @@ class RedirectIntegerField(IntegerField):
 
 class RedirectCharField(CharField):
     """
-    Field for redirect by string.
-    Take effect only in GUI.
+    Field for redirect by string. Often uses in actions for redirect after execution.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+
     """
 
     __slots__ = ()
@@ -254,11 +370,19 @@ class NamedBinaryFileInJsonField(VSTCharField):
     Field that takes JSON with properties:
     * name - string - name of file;
     * content - base64 string - content of file.
-    Take effect only in GUI.
+
+    This field is useful for saving binary files with their names in simple :class:`django.db.models.CharField`
+    or :class:`django.db.models.TextField` model fields. All manipulations with decoding and encoding
+    binary content data executes on client. This imposes reasonable limits on file size.
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField` with structure of data.
+
     """
 
     __slots__ = ()
-    __valid_keys = ['name', 'content']
+
+    __valid_keys = ('name', 'content')
     default_error_messages = {
         'not a JSON': 'value is not a valid JSON',
         'missing key': 'key {missing_key} is missing',
@@ -268,9 +392,15 @@ class NamedBinaryFileInJsonField(VSTCharField):
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):
             self.fail('not a JSON')
-        invalid_keys = [k for k in data.keys() if k not in self.__valid_keys]
+        invalid_keys = [
+            k
+            for k in data.keys()
+            if k not in self.__valid_keys
+        ]
+
         if invalid_keys:
             self.fail('invalid key', invalid_key=invalid_keys[0])
+
         for key in self.__valid_keys:
             if key not in data:
                 self.fail('missing key', missing_key=key)
@@ -287,10 +417,8 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
-    Field that takes JSON with properties:
-    * name - string - name of image;
-    * content - base64 string - content of image.
-    Take effect only in GUI.
+    Extends :class:`.NamedBinaryFileInJsonField` but in GUI has a different view
+    which shows content of image.
     """
 
     __slots__ = ()
@@ -298,10 +426,8 @@ class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
 
 class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     """
-    Field that takes JSON with array, that consists of objects with properties:
-    * name - string - name of file;
-    * content - base64 string - content of file.
-    Take effect only in GUI.
+    Extends :class:`.NamedBinaryFileInJsonField` but uses list of structures.
+    This provide operating with multiple files.
     """
 
     __slots__ = ()
@@ -317,19 +443,15 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
                 self.validate_value(file)
         return VSTCharField.to_internal_value(self, data)
 
+    @raise_context_decorator_with_default(default=[])
     def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore
-        try:
-            return json.loads(value)
-        except Exception:
-            return []
+        return json.loads(value)
 
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
     """
-    Field that takes JSON with array, that consists of objects with properties:
-    * name - string - name of image;
-    * content - base64 string - content of image.
-    Take effect only in GUI.
+    Extends :class:`.MultipleNamedBinaryFileInJsonField` but uses list of structures.
+    This provide operating with multiple images and works as list of :class:`NamedBinaryImageInJsonField`.
     """
 
     __slots__ = ()

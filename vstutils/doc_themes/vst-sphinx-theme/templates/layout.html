@@ -1,5 +1,12 @@
-
+{%- block doctype -%}{%- if html5_doctype %}
 <!DOCTYPE html>
+{%- else %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{%- endif %}{%- endblock %}
+{%- set url_root = pathto('', 1) %}
+{# XXX necessary? #}
+{%- if url_root == '#' %}{% set url_root = '' %}{% endif %}
 <html>
 {%- macro css() %}
     <link rel="stylesheet" href="{{ pathto('_static/' + style, 1) }}" type="text/css" />
@@ -10,22 +17,25 @@
     <link rel="stylesheet" href="{{ pathto(css, 1) }}" type="text/css" />
       {%- endif %}
     {%- endfor %}
+    {% if theme_canonical_url %}
+    <link rel="canonical" href="{{ theme_canonical_url }}{{ pagename }}.html"/>
+    {% endif %}
 {%- endmacro %}
 {%- macro script() %}
     <script>
         window.hostname = window.location.origin || window.location.protocol + "//" + window.location.host
     </script>
-    <script type="text/javascript" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
-    {%- for scriptfile in script_files %}
-    <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
+    <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
+    {%- for js in script_files %}
+    {{ js_tag(js) }}
     {%- endfor %}
 {%- endmacro %}
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-   <meta name="robots" content="NONE,NOARCHIVE" />
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-   <title>{{ project }} documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="robots" content="NONE,NOARCHIVE" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>{{ project }} documentation</title>
     {%- block css_basic %}
         {{- css() }}
     {%- endblock %}
@@ -34,7 +44,7 @@
     <script type="text/javascript" src="{{ pathto('_static/bundle/doc.js', 1) }}"></script>
     {%- block css %}
     {%- endblock %}
-   <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
+    <link rel="shortcut icon" href="{{ pathto('_static/img/logo/favicon.ico', 1) }}" />
     {%- block scripts %}
         {{- script() }}
     {%- endblock %}
@@ -110,11 +120,13 @@
             <div class="container-fluid">
                 <div class="card card-info">
                     <div class="card-body">
-                    {%- block content %}
-                        {%- block document %}
-                             {% block body %} {% endblock %}
-                        {%- endblock %}
-                    {%- endblock %}
+                        <div class="body">
+                            {%- block content %}
+                                {%- block document %}
+                                     {% block body %} {% endblock %}
+                                {%- endblock %}
+                            {%- endblock %}
+                        </div>
                     </div>
                 </div>
             </div>
