@@ -757,24 +757,142 @@ class DefaultBulkTestCase(BaseTestCase):
 
 class OpenapiEndpointTestCase(BaseTestCase):
 
+    @override_settings(CENTRIFUGO_CLIENT_KWARGS={
+        'address': 'https://localhost:8000',
+        'api_key': "XXX",
+        'token_hmac_secret_key': "YYY"
+    })
     def test_get_openapi(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
 
+        # Check project title
         self.assertEqual(api['info']['title'], 'Example Project')
+
+        # Check Centrifugo settings
+        self.assertEqual(api['info']['x-centrifugo-address'], "wss://localhost:8000")
+        self.assertIn('x-centrifugo-token', api['info'])
+
+        # Check docs info
+        self.assertDictEqual(api['info']['x-docs'], {'has_docs': True, 'docs_url': '/docs/'})
+        # Check links info
+        self.assertDictEqual(
+            api['info']['x-links'],
+            {'vstutils': {'name': 'VST Utils sources', 'url': 'https://github.com/vstconsulting/vstutils.git'}}
+        )
+        # Check user id
+        self.assertEqual(api['info']['x-user-id'], self.user.id)
+        # Check gui menu
+        self.assertEqual(api['info']['x-menu'], self.settings_obj.PROJECT_GUI_MENU)
+
+        # Check if schema has basic attributes
         self.assertTrue('basePath' in api, api.keys())
+        self.assertEqual(api['basePath'], self.get_url()[:-1])
         self.assertTrue('paths' in api, api.keys())
         self.assertTrue('host' in api, api.keys())
+        self.assertEqual(api['host'], self.server_name)
         self.assertTrue('definitions' in api, api.keys())
         self.assertTrue('schemes' in api, api.keys())
+        self.assertEqual(api['schemes'], ['https'])
         self.assertTrue('application/json' in api['consumes'], api['consumes'])
         self.assertTrue('application/json' in api['produces'], api['produces'])
 
+        # Test swagger ui
         client = self._login()
         response = client.get('/api/endpoint/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'drf-yasg/swagger-ui.html')
         with self.assertRaises(ValueError):
             json.loads(response.content.decode('utf-8'))
+
+    def test_openapi_schema_content(self):
+        api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+
+        # Checking generated view correct schema
+        self.assertIn('Author', api['definitions'])
+        self.assertIn('OneAuthor', api['definitions'])
+        # id must appears if it not set in meta-attributes
+        self.assertIn('id', api['definitions']['Author']['properties'])
+        self.assertIn('id', api['definitions']['OneAuthor']['properties'])
+        # Grouping model properties for GUI
+        self.assertEqual(
+            api['definitions']['Author']['x-properties-groups'],
+            {'Main': ['id', 'name'], '': ['hidden', 'registerDate']}
+        )
+
+        # Checking generated view correct schema
+        self.assertIn('ExtraPost', api['definitions'])
+        self.assertIn('OneExtraPost', api['definitions'])
+        # Check propery format for FkModelField
+        self.assertEqual(api['definitions']['ExtraPost']['properties']['author']['format'], 'fk')
+        self.assertEqual(
+            api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
+            '#/definitions/Author'
+        )
+        # Check default fields grouping
+        self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
+
+        # Checking correct `x-subscribe-labels` for Centrifugo subscriptions
+        self.assertEqual(api['paths']['/author/']['get']['x-subscribe-labels'], ['test_proj.Author'])
+        self.assertEqual(api['paths']['/author/{id}/']['get']['x-subscribe-labels'], ['test_proj.Author'])
+        # Check it for Proxy models
+        self.assertEqual(api['paths']['/author/{id}/post/']['get']['x-subscribe-labels'],
+                         ['test_proj.ExtraPost', 'test_proj.Post'])
+        self.assertEqual(api['paths']['/author/{id}/post/{post_id}/']['get']['x-subscribe-labels'],
+                         ['test_proj.ExtraPost', 'test_proj.Post'])
+
+        # Check correct nested schema generation
+        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/'
+        # Check `x-allow-append` label for nested POST-method
+        self.assertTrue(api['paths'][sub_path]['post']['x-allow-append'])
+
+        self.assertEqual(api['paths'][sub_path]['get']['x-subscribe-labels'], ['test_proj.Host'])
+        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/'
+        self.assertFalse(api['paths'][sub_path]['post']['x-allow-append'])
+        self.assertEqual(api['paths'][sub_path]['get']['x-subscribe-labels'], ['test_proj.Host'])
+
+        self.assertEqual(api['paths']['/subhosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
+        self.assertEqual(api['paths']['/hosts/{id}/hosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
+        self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-multiaction'])
+        self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
+
+
+        # Check that's schema is correct and fields are working
+        results = self.bulk([
+            {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
+            {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': dict(title="title", text='txt')},
+            {'method': 'get', 'path': ['author', '<<0[data][id]>>', 'post']},
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['count'], 1)
+
+    def test_api_version_request(self):
+        api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
+        paths_which_is_tech = (r'settings', r'_lang')
+
+        valid_paths = [
+            f'/{y}/'
+            for y in self.settings_obj.API['v2'].keys()
+            if y not in paths_which_is_tech
+        ]
+
+        # Check paths which should not appears
+        invalid_paths = [
+            p
+            for p in api['paths']
+            if list(filter(p.startswith, valid_paths)) == []
+        ]
+        self.assertFalse(invalid_paths, invalid_paths)
+
+        # Check path which is not appears but should be
+        invalid_paths = [
+            p
+            for p in valid_paths
+            if p not in api['paths']
+        ]
+        self.assertFalse(invalid_paths, invalid_paths)
 
     def test_openapi_hooks(self):
         OPENAPI_HOOKS = [
@@ -796,8 +914,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
 class EndpointTestCase(BaseTestCase):
 
     def test_auth(self):
-        response = self.client_class().get('/api/endpoint/?format=openapi')
-        self.assertEqual(response.status_code, 200)
+        # Check public schema access
+        result = self.get_result('get', '/api/endpoint/?format=openapi', relogin=False)
+        self.assertEqual(result['info']['x-user-id'], None)
 
         user = self._create_user()
         auth_str = b64encode(f'{user.data["username"]}:{user.data["password"]}'.encode()).decode('ascii')
@@ -1097,64 +1216,6 @@ class EndpointTestCase(BaseTestCase):
                 pk=response[0]['data']['id']
             ).exists()
         )
-
-
-class BaseModelViewTestCase(BaseTestCase):
-
-    @override_settings(CENTRIFUGO_CLIENT_KWARGS={
-        'address': 'https://localhost:8000',
-        'api_key': "XXX",
-        'token_hmac_secret_key': "YYY"
-    })
-    def test_openapi_schema(self):
-        api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
-
-        self.assertIn('Author', api['definitions'])
-        self.assertIn('id', api['definitions']['Author']['properties'])
-        self.assertEqual(
-            api['definitions']['Author']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['hidden', 'registerDate']}
-        )
-        self.assertIn('OneAuthor', api['definitions'])
-        self.assertIn('id', api['definitions']['OneAuthor']['properties'])
-        self.assertIn('ExtraPost', api['definitions'])
-        self.assertEqual(api['definitions']['ExtraPost']['properties']['author']['format'], 'fk')
-        self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
-        self.assertEqual(
-            api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
-            '#/definitions/Author'
-        )
-        self.assertIn('OneExtraPost', api['definitions'])
-        self.assertEqual(api['paths']['/author/']['get']['x-subscribe-labels'], ['test_proj.Author'])
-        self.assertEqual(api['paths']['/author/{id}/']['get']['x-subscribe-labels'], ['test_proj.Author'])
-        self.assertEqual(api['paths']['/author/{id}/post/']['get']['x-subscribe-labels'], ['test_proj.ExtraPost', 'test_proj.Post'])
-        self.assertEqual(api['paths']['/author/{id}/post/{post_id}/']['get']['x-subscribe-labels'], ['test_proj.ExtraPost', 'test_proj.Post'])
-
-        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/shost/'
-        self.assertTrue(api['paths'][sub_path]['post']['x-allow-append'])
-        self.assertEqual(api['paths'][sub_path]['get']['x-subscribe-labels'], ['test_proj.Host'])
-        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/'
-        self.assertFalse(api['paths'][sub_path]['post']['x-allow-append'])
-        self.assertEqual(api['paths'][sub_path]['get']['x-subscribe-labels'], ['test_proj.Host'])
-
-        self.assertEqual(api['paths']['/subhosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
-        self.assertEqual(api['paths']['/hosts/{id}/hosts/']['get']['x-subscribe-labels'], ['test_proj.Host'])
-        self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-multiaction'])
-        self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
-
-        self.assertEqual(api['info']['x-centrifugo-address'], "wss://localhost:8000")
-        self.assertIn('x-centrifugo-token', api['info'])
-
-        results = self.bulk([
-            {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
-            {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': dict(title="title", text='txt')},
-            {'method': 'get', 'path': ['author', '<<0[data][id]>>', 'post']},
-        ])
-
-        self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[2]['status'], 200)
-        self.assertEqual(results[2]['data']['count'], 1)
 
 
 class ValidatorsTestCase(BaseTestCase):
