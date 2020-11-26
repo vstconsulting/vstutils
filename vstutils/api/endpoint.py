@@ -46,6 +46,16 @@ default_authentication_classes = (
 
 append_to_list = list.append
 
+set_cookie_morsel_keys = (
+    "max-age",
+    "expires",
+    "path",
+    "domain",
+    "secure",
+    "httponly",
+    "samesite"
+)
+
 
 @functools.singledispatch
 def _get_request_data(request_data: _t.Iterable) -> _t.Union[_t.List, _t.Tuple]:
@@ -157,7 +167,7 @@ class BulkClient(Client):
             request['user'] = self.user
         response = self.handler(self._base_environ(**request))
         if response.cookies:
-            self.cookies.update(response.cookies)  # nocv
+            self.cookies.update(response.cookies)
         return response
 
 
@@ -258,7 +268,7 @@ class OperationSerializer(serializers.Serializer):
     def get_operation_method(self, method: _t.Text) -> _t.Callable:
         return getattr(self.context.get('client'), method.lower())
 
-    def create(self, validated_data: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Mapping]]) -> _t.Dict[_t.Text, _t.Any]:
+    def create(self, validated_data: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Mapping]]) -> ParseResponseDict:
         # pylint: disable=protected-access
         method = self.get_operation_method(str(validated_data['method']))
         url = _join_paths(API_URL, validated_data['version'], validated_data['path'])
@@ -403,7 +413,7 @@ class EndpointViewSet(views.APIView):
 
     def put(self, request: BulkRequestType, allow_fail=True) -> responses.BaseResponseClass:
         """Execute non transaction bulk request"""
-        context = {
+        context: _t.Dict[_t.Text, _t.Union[_t.List, BulkClient]] = {
             'client': self.get_client(request),
             'results': self.results
         }
@@ -413,7 +423,24 @@ class EndpointViewSet(views.APIView):
             append_to_list(timings, timing)
             if not allow_fail and not (100 <= result.get('status', 500) < 400):
                 raise Exception(f'Execute transaction stopped. Error message: {str(result)}')
-        return responses.HTTP_200_OK(self.results, timings={f'op{i}': float(j) for i, j in enumerate(timings)})
+        response = responses.HTTP_200_OK(self.results, timings={f'op{i}': float(j) for i, j in enumerate(timings)})
+        updated_cookies = {
+            cookie_name: cookie_value
+            for cookie_name, cookie_value in context['client'].cookies.items()  # type: ignore
+            if cookie_value.value != request.COOKIES.get(cookie_name, None)
+        }
+        if updated_cookies:
+            for cookie_name, cookie_value in updated_cookies.items():
+                response.set_cookie(
+                    cookie_name,
+                    cookie_value.value,
+                    **{
+                        k.replace('-', '_'): v
+                        for k, v in cookie_value.items()
+                        if k in set_cookie_morsel_keys
+                    }
+                )
+        return response
 
     def patch(self, request: BulkRequestType) -> responses.BaseResponseClass:
         return self.put(request)

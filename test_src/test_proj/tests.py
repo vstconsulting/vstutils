@@ -551,27 +551,39 @@ class ViewsTestCase(BaseTestCase):
             'patch', '/api/v1/user/{}/'.format(self.user.id),
             data=json.dumps(dict(last_name=self.user.last_name))
         )
-        invalid_old_password = json.dumps(dict(
-            old_password='1', password='2', password2='2'
-        ))
-        self.get_result(
-            'post', '/api/v1/user/{}/change_password/'.format(self.user.id),
-            data=invalid_old_password, code=403
+        invalid_old_password = dict(
+            old_password='1',
+            password='2',
+            password2='2'
         )
-        not_identical_passwords = json.dumps(dict(
-            old_password=self.user.data['password'], password='2', password2='3'
-        ))
-        self.get_result(
-            'post', '/api/v1/user/{}/change_password/'.format(self.user.id),
-            data=not_identical_passwords, code=400
+        not_identical_passwords = dict(
+            old_password=self.user.data['password'],
+            password='2',
+            password2='3'
         )
-        update_password = json.dumps(dict(
-            old_password=self.user.data['password'], password='12345', password2='12345'
-        ))
-        self.get_result(
-            'post', '/api/v1/user/{}/change_password/'.format(self.user.id),
-            data=update_password
+        update_password = dict(
+            old_password=self.user.data['password'],
+            password='12345',
+            password2='12345'
         )
+        user_get_request = {"method": "get", "path": ['user', self.user.id]}
+        self._login()
+        results = self.bulk([
+            {"method": "post", "path": ['user', self.user.id, 'change_password'], "data": i}
+            for i in (invalid_old_password, not_identical_passwords, update_password)
+        ] + [user_get_request], relogin=False)
+        self.assertEqual(results[0]['status'], 403)
+        self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(results[2]['status'], 201)
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data']['username'], self.user.username)
+
+        results = self.bulk([user_get_request], relogin=False)
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['username'], self.user.username)
+
+        self._logout(self.client)
+
         self.change_identity(True)
         data = [
             dict(username="USER{}".format(i), password="123", password2="123")

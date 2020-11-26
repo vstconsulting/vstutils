@@ -290,26 +290,40 @@ class BaseTestCase(TestCase):
         - Logout client.
         - Return parsed result.
 
-        :param rtype:  request type (methods from Client cls): get, post etc.
-        :param url:    requested url string or tuple for :meth:`.get_url`.
-                       You can use :meth:`.get_url` for url building or setup it as full string.
-        :param code:   expected return code from request.
-        :param args:   extra-args for Client class request method.
-        :param kwargs: extra-kwargs for Client class request method.
-        :return:       result of request.
+        :param rtype:     request type (methods from Client cls): get, post etc.
+        :param url:       requested url string or tuple for :meth:`.get_url`.
+                          You can use :meth:`.get_url` for url building or setup it as full string.
+        :param code:      expected return code from request.
+        :param relogin:   execute force login and logout on each call. Default is ``True``.
+        :param args:      extra-args for Client class request method.
+        :param kwargs:    extra-kwargs for Client class request method.
+        :return:          result of request.
 
         """
-        client = self._login()
-        request = getattr(client, rtype)
-        code = code or self.std_codes.get(rtype, 200)
+
+        relogin = kwargs.get('relogin', True)
+
+        if relogin:
+            client = self._login()
+        else:
+            client = self.client
+
+        request_handler = getattr(client, rtype)
+
         if kwargs.get("data", False):
             if isinstance(kwargs["data"], str):
                 kwargs["content_type"] = "application/json"
-        kwargs['code'] = code
+
+        kwargs['code'] = code or self.std_codes.get(rtype, 200)
+
         if isinstance(url, (tuple, list)):
             url = self.get_url(*url)
-        result = self.result(request, url, *args, **kwargs)
-        self._logout(client)
+
+        result = self.result(request_handler, url, *args, **kwargs)
+
+        if relogin:
+            self._logout(client)
+
         return result
 
     def mass_create(self, url, data, *fields, **kwargs):
@@ -373,7 +387,7 @@ class BaseTestCase(TestCase):
         for key, value in kwargs.items():
             self.assertEqual(result[key], value)
 
-    def endpoint_call(self, data: BulkDataType = None, method: str = 'get', code: int = 200) -> ApiResultType:
+    def endpoint_call(self, data: BulkDataType = None, method: str = 'get', code: int = 200, **kwargs) -> ApiResultType:
         """
         Make request to endpoint and assert response status code if specified (default is 200).
         Uses :meth:`.get_result` method for execution.
@@ -391,10 +405,11 @@ class BaseTestCase(TestCase):
             method,
             f'/{self._settings("VST_API_URL")}/endpoint/',
             data=data,
-            code=code
+            code=code,
+            **kwargs
         )
 
-    def bulk(self, data: BulkDataType, code: int = 200) -> ApiResultType:
+    def bulk(self, data: BulkDataType, code: int = 200, **kwargs) -> ApiResultType:
         """
         Make non transactional bulk request and assert status code (default is 200)
 
@@ -402,7 +417,7 @@ class BaseTestCase(TestCase):
         :param code: http status to assert
         :return: bulk response
         """
-        return self.endpoint_call(data, method='put', code=code)
+        return self.endpoint_call(data, method='put', code=code, **kwargs)
 
     def bulk_transactional(self, data: BulkDataType, code: int = 200) -> ApiResultType:
         """

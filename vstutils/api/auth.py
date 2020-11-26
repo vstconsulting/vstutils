@@ -1,15 +1,20 @@
 import typing as _t
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django_filters import BooleanFilter, CharFilter
-from rest_framework import serializers, exceptions, request as drf_request, permissions as rest_permissions
+from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer
 
 User = get_user_model()
+
+
+class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
+    def has_object_permission(self, request: drf_request.Request, view: base.GenericViewSet, obj: User):  # type: ignore
+        return request.user.is_superuser or (isinstance(obj, request.user.__class__) and request.user.pk == obj.pk)
 
 
 class UserSerializer(VSTSerializer):
@@ -184,9 +189,11 @@ class UserViewSet(base.ModelViewSet):
         self.perform_update(serializer)
         return responses.HTTP_200_OK(serializer.data)
 
-    @deco.action(["post"], detail=True, permission_classes=(rest_permissions.IsAuthenticated,))
+    @deco.action(["post"], detail=True, permission_classes=(ChangePasswordPermission,))
     def change_password(self, request: drf_request.Request, *args, **kwargs):
-        serializer = self.get_serializer(self.get_object(), data=request.data)
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        update_session_auth_hash(request, user)
         return responses.HTTP_201_CREATED(serializer.data)
