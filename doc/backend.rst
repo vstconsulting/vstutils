@@ -172,6 +172,10 @@ Result of bulk request is json list of objects for operation:
 
 Transactional bulk request returns ``502 BAG GATEWAY`` and make rollback if one of requests is failed.
 
+.. warning::
+    If you send non-transactional bulk request, you will get ``200`` status and must
+    validate statuses on each operation responses.
+
 Openapi schema
 ~~~~~~~~~~~~~~
 

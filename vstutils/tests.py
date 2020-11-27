@@ -415,16 +415,18 @@ class BaseTestCase(TestCase):
 
         :param data: request data
         :param code: http status to assert
+        :param kwargs: named arguments for :meth:`.get_result`
         :return: bulk response
         """
         return self.endpoint_call(data, method='put', code=code, **kwargs)
 
-    def bulk_transactional(self, data: BulkDataType, code: int = 200) -> ApiResultType:
+    def bulk_transactional(self, data: BulkDataType, code: int = 200, **kwargs) -> ApiResultType:
         """
         Make transactional bulk request and assert status code (default is 200)
 
         :param data: request data
         :param code: http status to assert
+        :param kwargs: named arguments for :meth:`.get_result`
         :return: bulk response
         """
-        return self.endpoint_call(data, method='post', code=code)
+        return self.endpoint_call(data, method='post', code=code, **kwargs)
