@@ -149,10 +149,10 @@ class AutoCompletionFieldInspector(FieldInspector):
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
-class DependEnumFieldInspector(FieldInspector):
+class DynamicJsonTypeFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
-        if not isinstance(field, fields.DependEnumField):
+        if not isinstance(field, fields.DynamicJsonTypeField):
             return NotHandled
 
         SwaggerType, ChildSwaggerType = self._get_partial_types(
@@ -160,12 +160,12 @@ class DependEnumFieldInspector(FieldInspector):
         )
         kwargs = {
             'type': openapi.TYPE_STRING,
-            'format': FORMAT_DYN
-        }
-        kwargs['additionalProperties'] = {
-            'field': field.field,
-            'choices': field.choices,
-            'types': field.types
+            'format': FORMAT_DYN,
+            'additionalProperties': {
+                'field': field.field,
+                'choices': field.choices,
+                'types': field.types
+            }
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -182,17 +182,17 @@ class FkFieldInspector(FieldInspector):
         )
         kwargs = {
             'type': openapi.TYPE_INTEGER,
-            'format': FORMAT_FK
-        }
-        kwargs['additionalProperties'] = {
-            'model': openapi.SchemaRef(
-                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                field.select_model, ignore_unresolved=True
-            ),
-            'value_field': field.autocomplete_property,
-            'view_field': field.autocomplete_represent,
-            'usePrefetch': field.use_prefetch,
-            'makeLink': field.make_link
+            'format': FORMAT_FK,
+            'additionalProperties': {
+                'model': openapi.SchemaRef(
+                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                    field.select_model, ignore_unresolved=True
+                ),
+                'value_field': field.autocomplete_property,
+                'view_field': field.autocomplete_represent,
+                'usePrefetch': field.use_prefetch,
+                'makeLink': field.make_link
+            }
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -209,18 +209,18 @@ class CommaMultiSelectFieldInspector(FieldInspector):
         )
         kwargs = {
             'type': openapi.TYPE_STRING,
-            'format': FORMAT_MULTISELECT
-        }
-        kwargs['additionalProperties'] = {
-            'model': openapi.SchemaRef(
-                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                field.select_model, ignore_unresolved=True
-            ),
-            'value_field': field.select_property,
-            'view_field': field.select_represent,
-            'view_separator': field.select_separator,
-            'usePrefetch': field.use_prefetch,
-            'makeLink': field.make_link
+            'format': FORMAT_MULTISELECT,
+            'additionalProperties': {
+                'model': openapi.SchemaRef(
+                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                    field.select_model, ignore_unresolved=True
+                ),
+                'value_field': field.select_property,
+                'view_field': field.select_represent,
+                'view_separator': field.select_separator,
+                'usePrefetch': field.use_prefetch,
+                'makeLink': field.make_link
+            }
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))

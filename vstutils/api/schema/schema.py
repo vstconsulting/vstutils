@@ -11,7 +11,7 @@ from ..decorators import NestedWithAppendMixin
 from .inspectors import (
     CommaMultiSelectFieldInspector,
     FkFieldInspector,
-    DependEnumFieldInspector,
+    DynamicJsonTypeFieldInspector,
     AutoCompletionFieldInspector,
     VSTFieldInspector,
     NestedFilterInspector,
@@ -23,7 +23,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
         CommaMultiSelectFieldInspector,
         FkFieldInspector,
-        DependEnumFieldInspector,
+        DynamicJsonTypeFieldInspector,
         AutoCompletionFieldInspector,
         VSTFieldInspector,
         VSTReferencingSerializerInspector

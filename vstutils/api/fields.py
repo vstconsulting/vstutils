@@ -156,9 +156,10 @@ class CommaMultiSelect(VSTCharField):
         return self.select_separator.join(data)
 
 
-class DependEnumField(VSTCharField):
+class DynamicJsonTypeField(VSTCharField):
     """
-    Field which type is based on another field.
+    Field which type is based on another field and converts value to internal string
+    and represent field as json object.
 
     :param field: field in model which value change will change type of current value.
     :type field: str
@@ -181,6 +182,8 @@ class DependEnumField(VSTCharField):
     choices: _t.Dict
     types: _t.Dict
 
+    to_json = True
+
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', {})
@@ -188,10 +191,36 @@ class DependEnumField(VSTCharField):
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):
-        return data
+        return super().to_internal_value(data) if self.to_json else data
 
     def to_representation(self, value):
+        with raise_context():
+            value = json.loads(value) if self.to_json else value
         return value
+
+
+class DependEnumField(DynamicJsonTypeField):
+    """
+    Field extends :class:`DynamicJsonTypeField` but without data modification.
+    Useful for :class:`property` in models or for actions.
+
+    :param field: field in model which value change will change type of current value.
+    :type field: str
+    :param types: key-value mapping where key is value of subscribed field and
+                  value is type (in OpenApi format) of current field.
+    :type type: dict
+    :param choices: variants of choices for different subscribed field values.
+                    Uses mapping where key is value of subscribed field and
+                    value is list with values to choice.
+    :type choices: dict
+
+
+    .. note::
+        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`
+        but without value modifications.
+    """
+    __slots__ = ()
+    to_json = False
 
 
 class TextareaField(VSTCharField):
