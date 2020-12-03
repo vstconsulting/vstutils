@@ -903,12 +903,19 @@ class OpenapiEndpointTestCase(BaseTestCase):
             # valid hook
             'test_proj.openapi.hook2',
             # nonexistent hook
-            'test_proj.openapi.hook4'
+            'test_proj.openapi.hook4',
+            # valid hook
+            'test_proj.openapi.hook5'
         ]
         with override_settings(OPENAPI_HOOKS=OPENAPI_HOOKS):
             api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
         self.assertEqual(api['info']['x-check-1'], 1)
         self.assertEqual(api['info']['x-check-2'], 2)
+        with override_settings(OPENAPI_HOOKS=OPENAPI_HOOKS):
+            with self.user_as(self, self._create_user(is_super_user=False)):
+                api1_user = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+        self.assertEqual(api['info']['x-check-5'], 5)
+        self.assertEqual(api1_user['info'].get('x-check-5'), None)
 
 
 class EndpointTestCase(BaseTestCase):
