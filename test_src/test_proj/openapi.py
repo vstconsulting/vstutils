@@ -8,3 +8,8 @@ def hook2(request, schema):
 
 def hook3(request, schema):
     raise Exception('Invalid hook')
+
+
+def hook5(request, schema):
+    if request.user.is_superuser:
+        schema['info']['x-check-5'] = 5

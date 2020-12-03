@@ -1,3 +1,5 @@
+import copy
+
 import jwt
 from rest_framework import request as drf_request
 from django.conf import settings
@@ -125,5 +127,6 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                         CENTRIFUGO_CLIENT_KWARGS.get('address', '').\
                         replace('http', 'ws', 1)
         for hook in self._get_hooks():
+            result = copy.deepcopy(result)
             hook(request=request, schema=result)
         return result
