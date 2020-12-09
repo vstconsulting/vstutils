@@ -51,14 +51,20 @@ class Host(BModel):
         multiaction=True
     )
     def test(self, request, *args, **kwargs):
-        return responses.HTTP_200_OK('OK')
+        response = request.session.get(0, "OK")
+        request.session[0] = "OK"
+        request.session.save()
+        return responses.HTTP_200_OK(response)
 
     @register_view_action(detail=True)
     def test2(self, request, *args, **kwargs):
         """ test description """
         obj = self.get_object()
+        response = request.session.get(0, "OK")
+        request.session.save()
+        request.session[0] = "OK"
         assert hasattr(obj, 'filter_applied')
-        return base.Response("OK", 201).resp
+        return base.Response(response, 201).resp
 
 
 class HostGroup(BModel):

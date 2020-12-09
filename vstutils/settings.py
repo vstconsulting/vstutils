@@ -452,6 +452,7 @@ SESSION_COOKIE_DOMAIN: _t.Optional[_t.Text] = os.getenv(
     'DJANGO_SESSION_COOKIE_DOMAIN',
     _t.cast(_t.Any, web.get('session_cookie_domain', fallback=None))
 )
+SESSION_SERIALIZER = 'vstutils.session.YamlSessionSerializer'
 
 CSRF_COOKIE_AGE: int = SESSION_COOKIE_AGE
 CSRF_COOKIE_DOMAIN: _t.Optional[_t.Text] = SESSION_COOKIE_DOMAIN

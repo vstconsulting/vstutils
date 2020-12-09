@@ -1394,6 +1394,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual('JsonString', results[2]['data']['results'][-1]['name'])
 
+    @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_hierarchy(self):
         Host.objects.all().delete()
         HostGroup.objects.all().delete()
