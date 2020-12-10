@@ -115,7 +115,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                     result['info']['x-centrifugo-token'] = jwt.encode(
                         {
                             "sub": request.session.session_key,
-                            "exp": settings.SESSION_COOKIE_AGE,
+                            "exp": request.session.get_expiry_age(),
                             "info": {
                                 'user_id': request.user.pk
                             }
