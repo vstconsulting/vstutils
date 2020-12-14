@@ -6,6 +6,7 @@ import typing as _t
 import json
 
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
+from rest_framework.fields import empty
 from django.apps import apps
 from django.db import models
 from django.utils.functional import SimpleLazyObject
@@ -338,6 +339,8 @@ class FkModelField(FkField):
                 'string matched "app_name.model_name" pattern.'
             )
         super().__init__(**kwargs)
+        # Remove min/max validators from integer field.
+        self.validators = self.validators[:-2]
 
     def _get_lazy_select_name_from_model(self):
         # pylint: disable=invalid-name
@@ -345,8 +348,22 @@ class FkModelField(FkField):
             lambda: self.model_class.get_list_serializer_name().split('Serializer')[0]
         )
 
-    def to_internal_value(self, data: int) -> _t.Union[models.Model, _t.NoReturn]:
-        return self.model_class.objects.get(**{self.autocomplete_property: data})
+    def _get_data_from_model(self, value):
+        return self.model_class.objects.get(**{self.autocomplete_property: value})
+
+    def get_value(self, dictionary: _t.Any) -> _t.Any:
+        value = super().get_value(dictionary)
+        if value is not empty:
+            return self._get_data_from_model(value)
+        return empty
+
+    def to_internal_value(self, data: _t.Union[models.Model, int]) -> _t.Union[models.Model, _t.NoReturn]:
+        if isinstance(data, self.model_class):
+            return data
+        elif isinstance(data, (int, str)):  # nocv
+            # deprecated
+            return self._get_data_from_model(data)
+        self.fail('Unknown datatype')  # nocv
 
     def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
         self.model_class = get_if_lazy(self.model_class)
