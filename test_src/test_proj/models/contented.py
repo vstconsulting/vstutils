@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from rest_framework import fields as drf_fields
 from vstutils.models import BModel
-from vstutils.api.fields import FkModelField, DependFromFkField, VSTCharField
+from vstutils.api.fields import FkModelField, DependFromFkField
 
 
 class VariableType(BModel):

@@ -245,6 +245,10 @@ class DependFromFkField(DynamicJsonTypeField):
     :param field_attribute: attribute of model related model instance with name of type.
     :type field_attribute: str
 
+    .. warning::
+        ``field_attribute`` in related model must be :class:`rest_framework.ChoicesField` or
+        GUI will show field as simple text.
+
     """
     __slots__ = ('field', 'field_attribute')
 
