@@ -41,6 +41,9 @@ API[VST_API_VERSION][r'testbinaryfiles'] = dict(
 API[VST_API_VERSION][r'testcontenttype'] = dict(
     model='test_proj.models.VarBasedModel'
 )
+API[VST_API_VERSION][r'vartype'] = dict(
+    model='test_proj.models.VariableType'
+)
 API['v2'][r'testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )

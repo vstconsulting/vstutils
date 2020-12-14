@@ -855,6 +855,23 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-multiaction'])
         self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
 
+        # Check depend fields
+        self.assertEqual(api['definitions']['Variable']['properties']['key']['format'], 'fk')
+        self.assertEqual(
+            api['definitions']['Variable']['properties']['key']['additionalProperties'],
+            {
+                'makeLink': True,
+                'model': {'$ref': '#/definitions/VariableType'},
+                'usePrefetch': True,
+                'value_field': 'id',
+                'view_field': 'name'
+            }
+        )
+        self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic')
+        self.assertEqual(
+            api['definitions']['Variable']['properties']['value']['additionalProperties'],
+            {"field": 'key', 'field_attribute': 'val_type'}
+        )
 
         # Check that's schema is correct and fields are working
         results = self.bulk([
@@ -1860,15 +1877,54 @@ class ProjectTestCase(BaseTestCase):
 
     def test_contenttype_nested_views(self):
         bulk_data = [
+            {'method': 'post', 'path': ['vartype'], 'data': {'name': 'test', 'val_type': "text"}},
             {'method': 'post', 'path': ['testcontenttype'], 'data': {'name': 'test'}},
-            {'method': 'post', 'path': ['testcontenttype', '<<0[data][id]>>', 'vars'], 'data': {'value': 'test_val'}},
-            {'method': 'get', 'path': ['testcontenttype', '<<0[data][id]>>', 'vars']},
+            {
+                'method': 'post',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'data': {
+                    'key': '<<0[data][id]>>',
+                    'value': 'test_val',
+                }
+            },
+            {'method': 'get', 'path': ['testcontenttype', '<<1[data][id]>>', 'vars']},
+            {
+                'method': 'post',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'data': {
+                    'key': '<<0[data][id]>>',
+                    'value': ''.join(map(str, range(12))),
+                }
+            },
+            {'method': 'post', 'path': ['vartype'], 'data': {'name': 'test_int', 'val_type': "integer"}},
+            {
+                'method': 'post',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'data': {
+                    'key': '<<5[data][id]>>',
+                    'value': '10',
+                }
+            },
+            {
+                'method': 'post',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'data': {
+                    'key': '<<5[data][id]>>',
+                    'value': 'qwerty',
+                }
+            },
         ]
         results = self.bulk(bulk_data)
-        self.assertEqual(results[0]['status'], 201)
-        self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[2]['status'], 200)
-        self.assertEqual(results[2]['data']['count'], 1)
+        self.assertEqual(results[1]['status'], 201, results[1])
+        self.assertEqual(results[2]['status'], 201, results[2])
+        self.assertEqual(results[3]['status'], 200, results[3])
+        self.assertEqual(results[3]['data']['count'], 1, results[3])
+        self.assertEqual(results[4]['status'], 400, results[4])
+        self.assertEqual(results[4]['data'], {'value': ['Ensure this field has no more than 10 characters.']})
+        self.assertEqual(results[5]['status'], 201, results[5])
+        self.assertEqual(results[6]['status'], 201, results[6])
+        self.assertEqual(results[7]['status'], 400, results[7])
+        self.assertEqual(results[7]['data'], {'value': ['A valid integer is required.']})
 
 
 class CustomModelTestCase(BaseTestCase):

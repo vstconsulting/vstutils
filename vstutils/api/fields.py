@@ -4,12 +4,16 @@ Additional serializer fields for generating OpenAPI and GUI.
 
 import typing as _t
 import json
+import copy
+import functools
 
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
-from rest_framework.fields import empty
+from rest_framework.fields import empty, SkipField, get_error_detail, Field
+from rest_framework.exceptions import ValidationError
 from django.apps import apps
 from django.db import models
 from django.utils.functional import SimpleLazyObject
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
 
@@ -224,6 +228,63 @@ class DependEnumField(DynamicJsonTypeField):
     to_json = False
 
 
+class DependFromFkField(DynamicJsonTypeField):
+
+    """
+    Field extends :class:`DynamicJsonTypeField`. Validates field data by :attr:`.field_attribute`
+    chosen in related model. By default, any value of :attr:`.field_attribute` validates as :class:`.VSTCharField`.
+    To override this behavior you should set dict-attribute in related model  named
+    ``{field_attribute value}_fields_mapping`` where:
+
+    - **key** - string representation of value type which is received from related instance :attr:`.field_attribute`.
+    - **value** - :class:`rest_framework.Field` instance for validation.
+
+    :param field: field in model which value change will change type of current value.
+                  Field must be :class:`.FkModelField`.
+    :type field: str
+    :param field_attribute: attribute of model related model instance with name of type.
+    :type field_attribute: str
+
+    """
+    __slots__ = ('field', 'field_attribute')
+
+    default_related_field = VSTCharField(allow_null=True, allow_blank=True, default='')
+
+    def __init__(self, **kwargs):
+        self.field = kwargs.pop('field')
+        self.field_attribute = kwargs.pop('field_attribute')
+        super(DynamicJsonTypeField, self).__init__(**kwargs)  # pylint: disable=bad-super-call
+
+    def get_value(self, dictionary: _t.Any) -> _t.Any:
+        value = super().get_value(dictionary)
+
+        related_object: models.Model = self.parent.fields[self.field].get_value(dictionary)  # type: ignore
+        related_type = getattr(related_object, self.field_attribute)
+        related_field: Field = getattr(
+            related_object,
+            f'{self.field_attribute}_fields_mapping',
+            {related_type: self.default_related_field}
+        ).get(related_type, self.default_related_field)
+        related_field: Field = copy.deepcopy(related_field)
+        related_field.field_name: _t.Text = self.field_name  # type: ignore
+
+        errors = {}
+        primitive_value = related_field.get_value(dictionary)
+        try:
+            value = related_field.run_validation(primitive_value)
+        except ValidationError as exc:
+            errors[related_field.field_name] = exc.detail  # type: ignore
+        except DjangoValidationError as exc:  # nocv
+            errors[related_field.field_name] = get_error_detail(exc)  # type: ignore
+        except SkipField:  # nocv
+            pass
+
+        if errors:
+            raise ValidationError(errors)
+
+        return value
+
+
 class TextareaField(VSTCharField):
     """
     Field contained multiline string.
@@ -348,7 +409,9 @@ class FkModelField(FkField):
             lambda: self.model_class.get_list_serializer_name().split('Serializer')[0]
         )
 
+    @functools.lru_cache()
     def _get_data_from_model(self, value):
+        self.model_class = get_if_lazy(self.model_class)
         return self.model_class.objects.get(**{self.autocomplete_property: value})
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:

@@ -158,14 +158,18 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
+        additionalProperties = {"field": field.field}
+
+        if isinstance(field, fields.DependFromFkField):
+            additionalProperties['field_attribute'] = field.field_attribute
+        else:
+            additionalProperties['choices'] = field.choices
+            additionalProperties['types'] = field.types
+
         kwargs = {
             'type': openapi.TYPE_STRING,
             'format': FORMAT_DYN,
-            'additionalProperties': {
-                'field': field.field,
-                'choices': field.choices,
-                'types': field.types
-            }
+            'additionalProperties': additionalProperties
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
