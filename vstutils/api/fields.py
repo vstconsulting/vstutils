@@ -420,9 +420,9 @@ class FkModelField(FkField):
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)
-        if value is not empty:
-            return self._get_data_from_model(value)
-        return empty
+        if value is not empty and value is not None:
+            value = self._get_data_from_model(value)
+        return value
 
     def to_internal_value(self, data: _t.Union[models.Model, int]) -> _t.Union[models.Model, _t.NoReturn]:
         if isinstance(data, self.model_class):
