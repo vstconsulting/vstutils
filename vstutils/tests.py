@@ -12,7 +12,7 @@ from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
 
-from .utils import import_class
+from .utils import import_class, raise_context_decorator_with_default
 
 User = get_user_model()
 
@@ -182,12 +182,13 @@ class BaseTestCase(TestCase):
         )
 
         if isinstance(model, str):
-            for handler in handlers:
+            for handler in map(raise_context_decorator_with_default(default=None), handlers):
                 result = handler(model)
                 if result:
                     model = result
                     break
 
+        assert not isinstance(model, str), f"couldn't find '{model}'."
         return model
 
     def get_model_filter(self, model, **kwargs):
