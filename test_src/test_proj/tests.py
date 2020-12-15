@@ -818,6 +818,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['definitions']['Author']['x-properties-groups'],
             {'Main': ['id', 'name'], '': ['hidden', 'registerDate']}
         )
+        hidden_param = [i for i in api['paths']['/author/']['get']['parameters'] if i['name'] == 'hidden'][0]
+        self.assertEqual(hidden_param['type'], 'boolean')
 
         # Checking generated view correct schema
         self.assertIn('ExtraPost', api['definitions'])
@@ -828,6 +830,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
             '#/definitions/Author'
         )
+
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
 

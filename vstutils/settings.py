@@ -726,7 +726,7 @@ REST_FRAMEWORK: _t.Dict = {
     ],
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
+        'vstutils.api.filter_backends.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
         'vstutils.api.filter_backends.HideHiddenFilterBackend',
         'vstutils.api.filter_backends.SelectRelatedFilterBackend',
