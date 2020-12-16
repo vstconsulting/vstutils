@@ -810,6 +810,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Checking generated view correct schema
         self.assertIn('Author', api['definitions'])
         self.assertIn('OneAuthor', api['definitions'])
+        self.assertIn('UpdateAuthor', api['definitions'])
         # id must appears if it not set in meta-attributes
         self.assertIn('id', api['definitions']['Author']['properties'])
         self.assertIn('id', api['definitions']['OneAuthor']['properties'])
@@ -881,12 +882,15 @@ class OpenapiEndpointTestCase(BaseTestCase):
             {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
             {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': dict(title="title", text='txt')},
             {'method': 'get', 'path': ['author', '<<0[data][id]>>', 'post']},
+            {'method': 'patch', 'path': ['author', '<<0[data][id]>>'], 'data': dict(name="Update name")},
         ])
 
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['count'], 1)
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(tuple(results[3]['data'].keys()), ('id', 'name'))
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)

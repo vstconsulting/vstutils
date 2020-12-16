@@ -1,7 +1,16 @@
 from django.db import models
 from vstutils.models import BModel
+from vstutils.api.serializers import VSTSerializer
 from vstutils.api.fields import FkModelField
 from django.utils import timezone
+
+
+class UpdateAuthorSerializer(VSTSerializer):
+    class Meta:
+        fields = (
+            'id',
+            'name',
+        )
 
 
 class Author(BModel):
@@ -12,6 +21,10 @@ class Author(BModel):
         default_related_name = 'author'
         _list_field = ['name']
         _detail_fields = ['name', 'registerDate']
+        _extra_serializer_classes = {
+            'serializer_class_update': UpdateAuthorSerializer,
+            'serializer_class_partial_update': UpdateAuthorSerializer,
+        }
         _properties_groups = {
             "Main": ["id", "name"]
         }

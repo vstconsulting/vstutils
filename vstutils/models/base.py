@@ -184,9 +184,20 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             {
                 "Meta": meta,
                 "_schema_properties_groups": schema_properties_groups,
-                **field_overrides
+                **(field_overrides or {})
             }
         )
+
+    def _update_serializers(cls, metadata: dict, serializers: dict):
+        for serializer_name, extra_serializer_class in (metadata['extra_serializer_classes'] or {}).items():
+            if issubclass(extra_serializer_class, api_serializers.VSTSerializer) and \
+                    getattr(extra_serializer_class.Meta, 'model', None) is None:
+                extra_serializer_class = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
+                    serializer_class=extra_serializer_class,
+                    serializer_class_name=extra_serializer_class.__name__,
+                    fields=extra_serializer_class.Meta.fields
+                )
+            serializers[serializer_name] = extra_serializer_class
 
     def get_extra_metadata(cls):
         return cls.__extra_metadata__
@@ -199,7 +210,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         return serializer_class_name
 
     def get_view_class(cls):
-        # pylint: disable=too-many-branches,too-many-statements
+        # pylint: disable=too-many-branches,too-many-statements,too-many-locals,no-value-for-parameter
         metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
         list_fields = _ensure_pk_in_fields(cls, metadata['list_fields'])
         detail_fields = _ensure_pk_in_fields(cls, metadata['detail_fields'] or list_fields)
@@ -225,25 +236,23 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             fields=detail_fields,
             field_overrides=detail_fields_override or {}
         )
-        serializers.update(map(
-            lambda k, v: (f'serializer_class_{k}', _import_class_if_string(v)),
-            (metadata['extra_serializer_classes'] or {}).items()
-        ))
+        cls._update_serializers(metadata, serializers)
 
-        view_class = metadata['view_class']
-        if view_class is None:
-            view_class = api_base.ModelViewSet
-        elif view_class == 'read_only':
-            view_class = api_base.ReadOnlyModelViewSet
-        elif view_class == 'history':
-            view_class = api_base.HistoryModelViewSet  # nocv
-        elif isinstance(view_class, str):
-            view_class = import_class(view_class)
+        view_class_data = metadata['view_class']
 
-        if not isinstance(view_class, (tuple, list)):
-            view_class = (view_class,)
+        if not isinstance(view_class_data, (tuple, list)):
+            view_class_data = (view_class_data,)
 
-        view_class = list(view_class)
+        view_class = []
+        for view_base_class in view_class_data:
+            if view_base_class is None:
+                view_class.append(api_base.ModelViewSet)
+            elif view_base_class == 'read_only':
+                view_class.append(api_base.ReadOnlyModelViewSet)
+            elif view_base_class == 'history':
+                view_class.append(api_base.HistoryModelViewSet)  # nocv
+            elif isinstance(view_base_class, str):
+                view_class.append(import_class(view_base_class))
 
         if metadata['copy_attrs']:
             view_attributes.update(map(lambda r: (f'copy_{r[0]}', r[1]), metadata['copy_attrs'].items()))
