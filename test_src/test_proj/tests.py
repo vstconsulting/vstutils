@@ -816,8 +816,8 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertIn('id', api['definitions']['OneAuthor']['properties'])
         # Grouping model properties for GUI
         self.assertEqual(
-            api['definitions']['Author']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['hidden', 'registerDate']}
+            api['definitions']['OneAuthor']['x-properties-groups'],
+            {'Main': ['id', 'name'], '': ['registerDate']}
         )
         hidden_param = [i for i in api['paths']['/author/']['get']['parameters'] if i['name'] == 'hidden'][0]
         self.assertEqual(hidden_param['type'], 'boolean')
@@ -890,7 +890,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['count'], 1)
         self.assertEqual(results[3]['status'], 200)
-        self.assertEqual(tuple(results[3]['data'].keys()), ('id', 'name'))
+        self.assertEqual(tuple(results[3]['data'].keys()), ('id', 'name', 'hidden'))
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)

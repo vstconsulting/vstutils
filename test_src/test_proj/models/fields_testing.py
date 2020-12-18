@@ -7,10 +7,7 @@ from django.utils import timezone
 
 class UpdateAuthorSerializer(VSTSerializer):
     class Meta:
-        fields = (
-            'id',
-            'name',
-        )
+        __inject_from__ = 'list'
 
 
 class Author(BModel):
@@ -19,7 +16,7 @@ class Author(BModel):
 
     class Meta:
         default_related_name = 'author'
-        _list_field = ['name']
+        _list_fields = ['name', 'hidden']
         _detail_fields = ['name', 'registerDate']
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,

@@ -192,10 +192,16 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         for serializer_name, extra_serializer_class in (metadata['extra_serializer_classes'] or {}).items():
             if issubclass(extra_serializer_class, api_serializers.VSTSerializer) and \
                     getattr(extra_serializer_class.Meta, 'model', None) is None:
+                inject_from = getattr(extra_serializer_class.Meta, '__inject_from__', None)
                 extra_serializer_class = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                     serializer_class=extra_serializer_class,
                     serializer_class_name=extra_serializer_class.__name__,
-                    fields=extra_serializer_class.Meta.fields
+                    fields=_ensure_pk_in_fields(
+                        cls,
+                        getattr(extra_serializer_class.Meta, 'fields', None) or
+                        metadata.get(f'{inject_from}_fields', None)
+                    ),
+                    field_overrides=metadata.get(f'override_{inject_from}_fields', None)
                 )
             serializers[serializer_name] = extra_serializer_class
 
