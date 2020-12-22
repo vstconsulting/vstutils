@@ -92,7 +92,11 @@ class Command(BaseCommand):
 
         # Format args string.
         options = ''
+        app_option = f'--app={settings.VST_PROJECT}.wapp:app'
         for key, value in worker_options.items():
+            if key == 'app':
+                app_option = "--app={}".format(value.replace(',', r'\,'))
+                continue
             is_boolean = isinstance(value, bool)
             if (is_boolean and value) or value:
                 options += f' --{key}'
@@ -107,7 +111,7 @@ class Command(BaseCommand):
         # Add arguments to uwsgi cmd list.
         cmd.append('--attach-daemon2')
         run = 'stopsignal=15,reloadsignal=1,'
-        run += 'exec=celery worker'
+        run += f'exec=celery {app_option} worker'
         run += options
         cmd.append(run)
 

@@ -274,7 +274,12 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'centrifugo': CentrifugoSection,
     }
 )
-config.parse_files([CONFIG_FILE, DEV_SETTINGS_FILE])
+config.parse_files([
+    CONFIG_FILE + '.yml',
+    CONFIG_FILE,
+    DEV_SETTINGS_FILE + '.yml',
+    DEV_SETTINGS_FILE,
+])
 config.parse_text(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 
 main: MainSection = config['main']

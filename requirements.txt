@@ -1,8 +1,8 @@
 # Main packages
 configparser~=5.0.1
-configparserc~=1.1.5
-pyyaml>=3.13,<=5.3.1
-django-cors-headers==3.5.0
+configparserc~=1.2.0
+# pyyaml>=3.13,<=5.3.1
+django-cors-headers==3.6.0
 
 # REST API packages
 djangorestframework~=3.12.2

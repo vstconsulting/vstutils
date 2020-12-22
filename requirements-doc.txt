@@ -1,7 +1,7 @@
 # Packages needed for compile documentation.
-sphinx~=3.2.1
+sphinx~=3.4.0
 sphinx-autobuild~=2020.9.1
 sphinxcontrib-httpdomain~=1.7.0
 sphinxcontrib-websupport~=1.2.4
 sphinxcontrib-mermaid~=0.5.0
-sphinx-autodoc-typehints~=1.11.0
+sphinx-autodoc-typehints~=1.11.1
