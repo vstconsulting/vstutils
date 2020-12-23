@@ -1,5 +1,13 @@
 from celery.app.task import BaseTask
 from celery.result import AsyncResult
+from django.conf import settings
+
+from .utils import import_class, send_template_email_handler
+
+
+celery_app = import_class(
+    settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
+)
 
 
 class TaskClass(BaseTask):
@@ -16,3 +24,12 @@ class TaskClass(BaseTask):
     @classmethod
     def do(cls, *args, **kwargs) -> AsyncResult:
         return cls().delay(*args, **kwargs)
+
+
+class SendEmailMessage(TaskClass):
+
+    def run(self, *args, **kwargs):
+        send_template_email_handler(*args, **kwargs)
+
+
+celery_app.register_task(SendEmailMessage())

@@ -148,6 +148,8 @@ class MailSection(BaseAppendSection):
         'port': ConfigIntType,
         'tls': ConfigBoolType,
         'ssl': ConfigBoolType,
+        'send_confirmation': ConfigBoolType,
+        'authenticate_after_registration': ConfigBoolType,
     }
 
 
@@ -240,7 +242,9 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'user': "",
             'password': "",
             'tls': False,
-            'host': None
+            'host': None,
+            'send_confirmation': os.getenv(f'{ENV_NAME}_SEND_CONFIRMATION_EMAIL', False),
+            'authenticate_after_registration': os.getenv(f'{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION', False),
         },
         'contact': {
             'name': 'System Administrator'
@@ -645,6 +649,8 @@ if mail.get('ssl', None) is not None:
 EMAIL_HOST = mail["host"]
 if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+SEND_CONFIRMATION_EMAIL = mail["send_confirmation"]
+AUTHENTICATE_AFTER_REGISTRATION = mail["authenticate_after_registration"]
 
 
 # API settings

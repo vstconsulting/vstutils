@@ -16,7 +16,11 @@ from django import VERSION as django_version
 from django.conf import settings
 from django.core import mail
 from django.core.management import call_command
+from django.template.exceptions import TemplateDoesNotExist
 from django.middleware.csrf import _get_new_csrf_token
+from django.core.cache import cache
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 from django.test import Client
 from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
@@ -34,6 +38,7 @@ from vstutils.urls import router
 from vstutils.ws import application
 from vstutils.models import get_centrifugo_client
 from vstutils import models
+from vstutils.utils import SecurePickling
 
 from .models import File, Host, HostGroup, List
 from rest_framework.exceptions import ValidationError
@@ -646,6 +651,72 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_register_new_user(self):
+        # create user data and init client class
+        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
+        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com')
+        client = self.client_class()
+
+        self.assertIsNone(get_user_model().objects.filter(email=user['email']).last())
+
+        # Try register failed user data
+        response = client.post('/registration/', data=user_fail)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ''.join(response.context_data['form'].errors.get('password2', [])),
+            'The two password fields didn\'t match.'
+        )
+
+        # Try register user without data
+        response = client.post('/registration/')
+        self.assertEqual(response.status_code, 200)
+        self.assertListEqual(
+            list(response.context_data['form'].errors.keys()),
+            ['username', 'email', 'password1', 'password2']
+        )
+
+        # Correct registration request
+        response = client.post('/registration/', data=user)
+        self.assertRedirects(response, '/login/')
+
+        self.assertCount(mail.outbox, 1)
+        regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
+        match = re.search(regex, mail.outbox[-1].alternatives[-1][0], re.MULTILINE)
+        href = match.group(0)
+
+        href_base, correct_uid = href.split('uid=')
+        user['uid'] = 'wrong'
+
+        response = client.post(href_base, user)
+        self.assertEqual(response.status_code, 400)
+
+        # Check email and uid in create method
+        secure_pickle = SecurePickling()
+        fail_check_email_user = user.copy()
+        fail_check_email_user['email'] = 'new_random_changed@email.com'
+        cache_key_unhashed = 'not_correct@email.com'
+        cache_key_hashed = make_password(cache_key_unhashed)
+
+        cache.set(cache_key_hashed, secure_pickle.dumps(fail_check_email_user))
+        fail_check_email_user['uid'] = cache_key_hashed
+        response = client.post(href_base, fail_check_email_user)
+        self.assertEqual(response.status_code, 400)
+
+        # Success registration
+        user['uid'] = correct_uid
+        response = client.post(href, user)
+        self.assertRedirects(response, '/login/', target_status_code=302)
+
+        get_user_model().objects.filter(email=user['email']).delete()
+        response = client.post(href, {'uid': user['uid']})
+        self.assertRedirects(response, '/login/', target_status_code=302)
+
+        client.post('/logout/')
+        client.get(href)
+        response = client.post(href, user)
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(SEND_CONFIRMATION_EMAIL=False, AUTHENTICATE_AFTER_REGISTRATION=False)
+    def test_register_new_user_without_confirmation(self):
         user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
         user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com')
         client = self.client_class()
@@ -940,6 +1011,87 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 api1_user = self.get_result('get', '/api/endpoint/?format=openapi', 200)
         self.assertEqual(api['info']['x-check-5'], 5)
         self.assertEqual(api1_user['info'].get('x-check-5'), None)
+
+    def test_sync_email_sending(self):
+        from vstutils.utils import send_template_email
+        with self.assertRaises(TypeError):
+            send_template_email(
+                sync=True,
+                template_name='registration/confirm_email.html',
+                subject='Test',
+            )
+        self.assertCount(mail.outbox, 0)
+
+        with self.assertRaises(TemplateDoesNotExist):
+            send_template_email(
+                sync=True,
+                template_name='yololo',
+                subject='qwe',
+                email='ctulhu@fhtagn.deep',
+                context_data=[(1, 2), (3, 4)]
+            )
+        self.assertCount(mail.outbox, 0)
+
+        subj = 'Test'
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject=subj,
+            email='ctulhu@fhtagn.deep',
+            context_data=[('first', 2), ('second', 4)]
+        )
+        self.assertCount(mail.outbox, 1)
+        self.assertEqual(mail.outbox[-1].subject, subj)
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject='',
+            email='ctulhu@fhtagn.deep',
+            context_data=[('first', 2), ('second', 4)]
+        )
+        self.assertCount(mail.outbox, 2)
+        self.assertEqual(mail.outbox[-1].subject, '')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject='',
+            email='ctulhu@fhtagn.deep',
+            context_data={'first': 2, 'second': 4}
+        )
+        self.assertCount(mail.outbox, 3)
+        self.assertEqual(mail.outbox[-1].subject, '')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject='',
+            email='ctulhu@fhtagn.deep',
+            context_data={}
+        )
+        self.assertCount(mail.outbox, 4)
+        self.assertEqual(mail.outbox[-1].subject, '')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject=subj,
+            email='ctulhu@fhtagn.deep',
+            context_data=None
+        )
+        self.assertCount(mail.outbox, 5)
+        self.assertEqual(mail.outbox[-1].subject, 'Test')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
 
 
 class EndpointTestCase(BaseTestCase):

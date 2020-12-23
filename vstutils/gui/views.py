@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.template.response import TemplateResponse
-from django.contrib.auth import views as auth
+from django.contrib.auth import views as auth, login
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
@@ -76,5 +76,8 @@ class Registration(FormView, BaseView):
     form_class = RegistrationForm
 
     def form_valid(self, form):
-        form.save()
+        form.request = self.request
+        user = form.save()
+        if settings.AUTHENTICATE_AFTER_REGISTRATION and user.id is not None:
+            login(self.request, user)
         return super().form_valid(form)
