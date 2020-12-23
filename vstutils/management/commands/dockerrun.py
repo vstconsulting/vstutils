@@ -6,7 +6,7 @@ import traceback
 import logging
 from subprocess import check_call
 
-from configparserc.config import ConfigParserC
+from configparserc.config import ConfigParserC, Section, BoolType
 
 from ._base import BaseCommand
 
@@ -87,7 +87,7 @@ class Command(BaseCommand):
             self._print(error, 'ERROR')
             sys.exit(10)
 
-    def prepare_main_section(self, config):
+    def prepare_section_main(self, config):
         config['main'] = {
             'debug': os.getenv(f'{self.prefix}_DEBUG', 'false'),
             'log_level': self.log_level,
@@ -106,7 +106,7 @@ class Command(BaseCommand):
         if ldap_default_domain:  # nocv
             config['main']['ldap-default-domain'] = ldap_default_domain
 
-    def prepare_db_section(self, config):
+    def prepare_section_db(self, config):
         # SQLite prepearing
         sqlite_default_dir = os.environ.get(f'{self.prefix}_SQLITE_DIR', '/')
         if sqlite_default_dir != '/' and not os.path.exists(sqlite_default_dir):  # nocv
@@ -147,7 +147,7 @@ class Command(BaseCommand):
                 'name': sqlite_db_path
             }
 
-    def prepare_cache_section(self, config):
+    def prepare_section_cache(self, config):
         cache_loc = os.getenv('CACHE_LOCATION', f'/tmp/{self.prefix}_django_cache')
         cache_type = os.getenv(f'{self.prefix}_CACHE_TYPE', 'file')
         if cache_type == 'file':
@@ -164,7 +164,7 @@ class Command(BaseCommand):
             'location': cache_loc
         }
 
-    def prepare_rpc_section(self, config):
+    def prepare_section_rpc(self, config):
         rpc_connection = os.getenv('RPC_ENGINE', None)
         config['rpc'] = {
             'heartbeat': os.getenv('RPC_HEARTBEAT', '5'),
@@ -185,7 +185,7 @@ class Command(BaseCommand):
                 'beat': os.getenv(f'{self.prefix}_SCHEDULER_ENABLE', 'true')
             }
 
-    def prepare_web_section(self, config):
+    def prepare_section_web(self, config):
         config['web'] = {
             'session_timeout': os.getenv(f'{self.prefix}_SESSION_TIMEOUT', '2w'),
             'rest_page_limit': os.getenv(f'{self.prefix}_WEB_REST_PAGE_LIMIT', '100'),
@@ -236,7 +236,7 @@ class Command(BaseCommand):
             ),
         }
 
-    def prepare_uwsgi_section(self, config):
+    def prepare_section_uwsgi(self, config):
         config['uwsgi'] = {
             'thread-stacksize': os.getenv(f'{self.prefix}_UWSGI_THREADSTACK', '40960'),
             'max-requests': os.getenv(f'{self.prefix}_UWSGI_MAXREQUESTS', '50000'),
@@ -252,7 +252,7 @@ class Command(BaseCommand):
             f"{os.getenv(f'{self.prefix}_WEB_PORT', current_port)}"
         )
 
-    def prepare_smtp_section(self, config):
+    def prepare_section_smtp(self, config):
         mail_parameters = ['port', 'user', 'password', 'tls', 'ssl', 'from_address']
         mail_settings = {'host': os.environ.get(f'{self.prefix}_MAIL_HOST')}
         if mail_settings['host']:
@@ -266,31 +266,53 @@ class Command(BaseCommand):
         # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         prefix = self.prefix
 
+        default_sections = (
+            'main',
+            'db',
+            'cache',
+            'rpc',
+            'web',
+            'uwsgi',
+            'smtp',
+        )
+        section_handlers_prefix = 'prepare_section_'
+        sections = default_sections + tuple(map(
+            lambda y: y.replace(section_handlers_prefix, ''),
+            filter(
+                lambda x: x.startswith(section_handlers_prefix) and x not in default_sections,
+                dir(self)
+            )
+        ))
+
+        class DockerSection(Section):
+            types_map = {
+                f'override_{s}': BoolType()
+                for s in sections
+            }
+
         # Start configuring config file
-        self.config = ConfigParserC()
+        self.config = ConfigParserC(
+            format_kwargs=self._settings('KWARGS', {}),
+            section_defaults={
+                'docker': {
+                    s: os.getenv(f'{prefix}_DOCKER_{s.upper()}', 'True')
+                    for s in DockerSection.types_map
+                }
+            },
+            section_overload={
+                'docker': DockerSection
+            }
+
+        )
         config = self.config
+        config.parse_files(self._settings('CONFIG_FILES'))
 
         # Set log level
         self.log_level = os.getenv(f'{prefix}_LOG_LEVEL', 'WARNING')
 
-        # Set default settings
-        self.prepare_main_section(config)
-
-        # Set db config
-        self.prepare_db_section(config)
-
-        # Set cache and locks config
-        self.prepare_cache_section(config)
-
-        # Set rpc settings
-        self.prepare_rpc_section(config)
-
-        # Set web server and API settings
-        self.prepare_web_section(config)
-        self.prepare_uwsgi_section(config)
-
-        # Set email server settings
-        self.prepare_smtp_section(config)
+        for section_name in sections:
+            if config['docker'][f'override_{section_name}']:
+                getattr(self, f'prepare_section_{section_name}')(config)
 
         # Set secret key
         os.environ.setdefault('SECRET_KEY', 'DISABLE')

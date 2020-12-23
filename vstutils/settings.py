@@ -57,6 +57,13 @@ CONFIG_FILE: _t.Text = os.getenv(
 )
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
+CONFIG_FILES = (
+    CONFIG_FILE + '.yml',
+    CONFIG_FILE,
+    DEV_SETTINGS_FILE + '.yml',
+    DEV_SETTINGS_FILE,
+)
+
 ConfigBoolType = cconfig.BoolType()
 ConfigIntType = cconfig.IntType()
 ConfigIntSecondsType = cconfig.IntSecondsType()
@@ -274,12 +281,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'centrifugo': CentrifugoSection,
     }
 )
-config.parse_files([
-    CONFIG_FILE + '.yml',
-    CONFIG_FILE,
-    DEV_SETTINGS_FILE + '.yml',
-    DEV_SETTINGS_FILE,
-])
+
+config.parse_files(CONFIG_FILES)
 config.parse_text(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 
 main: MainSection = config['main']
