@@ -18,6 +18,7 @@ from threading import Thread
 import json
 
 from django.urls import re_path, include
+from django.core.mail import send_mail
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
@@ -114,6 +115,68 @@ def get_if_lazy(obj):
             obj._setup() if obj._wrapped == functional.empty else None
             return obj._wrapped
     return obj
+
+
+def send_template_email_handler(
+        subject: tp.Text,
+        email_from: tp.Text,
+        email: tp.Union[tp.List, tp.Text],
+        template_name: tp.Text,
+        context_data: tp.Optional[tp.Dict] = None
+):
+    """
+    Function for email sending.
+    The function convert recipient to list and set context before sending if it possible.
+
+    :param subject: mail subject.
+    :param email_from: sender that be setup in email.
+    :param email: list of strings or single string, with email addresses of recipients
+    :param template_name: relative path to template in `templates` directory, must include extension in file name.
+    :param context_data: dictionary with context for rendering message template.
+    """
+    recipient_list = email if isinstance(email, (list, tuple)) else [email]
+
+    if context_data is None:
+        context = {}
+    elif not isinstance(context_data, dict):
+        context = dict(context_data)
+    else:
+        context = context_data.copy()
+
+    send_mail(
+        subject=subject,
+        message="",
+        from_email=email_from,
+        recipient_list=recipient_list,
+        fail_silently=False,
+        html_message=loader.render_to_string(
+            template_name,
+            context=context
+        )
+    )
+
+
+def send_template_email(sync: bool = False, **kwargs):
+    """
+    Function executing sync or async email sending; according `sync` argument and settings variable "RPC_ENABLED".
+    You can use this function to send message, it sends message asynchronously or synchronously.
+    If you don't set settings for celery or don't have celery it sends synchronously mail.
+    If celery is installed and configured and `sync` argument of the function is set to `False`,
+    it sends asynchronously email.
+
+    :param sync: argument for determining how send email, asynchronously or synchronously
+    :param subject: mail subject.
+    :param email_from: sender that be setup in email.
+    :param email: list of strings or single string, with email addresses of recipients
+    :param template_name: relative path to template in `templates` directory, must include extension in file name.
+    :param context_data: dictionary with context for rendering message template.
+    """
+    from django.conf import settings
+    if sync or not settings.RPC_ENABLED:
+        send_template_email_handler(email_from=settings.EMAIL_FROM_ADDRESS, **kwargs)
+    else:
+        from .tasks import SendEmailMessage
+        SendEmailMessage.do(email_from=settings.EMAIL_FROM_ADDRESS, **kwargs)
 
 
 class apply_decorators:
