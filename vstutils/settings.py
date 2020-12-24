@@ -9,6 +9,7 @@ from django.contrib import admin
 from django.utils.functional import lazy
 from drf_yasg import errors
 import rest_framework
+import orjson
 
 from configparserc import config as cconfig
 from .tools import get_file_value
@@ -55,11 +56,17 @@ CONFIG_FILE: _t.Text = os.getenv(
     f"{ENV_NAME}_SETTINGS_FILE",
     f"/etc/{VST_PROJECT_LIB}/settings.ini"
 )
+PROJECT_CONFIG_FILE: _t.Text = os.getenv(
+    f"{ENV_NAME}_LIB_SETTINGS_FILE",
+    f"/etc/{VST_PROJECT}/settings.ini"
+)
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
 CONFIG_FILES = (
     CONFIG_FILE + '.yml',
     CONFIG_FILE,
+    PROJECT_CONFIG_FILE + '.yml',
+    PROJECT_CONFIG_FILE,
     DEV_SETTINGS_FILE + '.yml',
     DEV_SETTINGS_FILE,
 )
@@ -562,15 +569,14 @@ TEMPLATES: _t.List[_t.Dict] = [
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 ##############################################################
 STATIC_URL: _t.Text = web["static_files_url"]
-__STATIC_FILES_FOLDERS = (
+STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
     os.path.join(VST_PROJECT_DIR, 'static'),
     os.path.join(BASE_DIR, 'static') if BASE_DIR != VST_PROJECT_DIR else None,
     os.path.join(VSTUTILS_DIR, 'static'),
     os.path.join(os.path.dirname(admin.__file__), 'static'),
     os.path.join(os.path.dirname(errors.__file__), 'static'),
     os.path.join(os.path.dirname(rest_framework.__file__), 'static')
-)
-STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, __STATIC_FILES_FOLDERS)), list)()
+))), list)()
 
 if LOCALRUN:
     STATICFILES_DIRS = list(STATIC_FILES_FOLDERS)
@@ -726,18 +732,26 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
+        # 'rest_framework.renderers.JSONRenderer',
+        "drf_orjson_renderer.renderers.ORJSONRenderer",
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
+        # 'rest_framework.parsers.JSONParser',
+        "drf_orjson_renderer.parsers.ORJSONParser",
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'vstutils.api.permissions.IsAuthenticatedOpenApiRequest'
     ],
+    "ORJSON_RENDERER_OPTIONS": (
+        orjson.OPT_NON_STR_KEYS,
+        orjson.OPT_SERIALIZE_DATACLASS,
+        orjson.OPT_SERIALIZE_NUMPY,
+        orjson.OPT_SERIALIZE_UUID,
+    ),
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
     'DEFAULT_FILTER_BACKENDS': [
         'vstutils.api.filter_backends.DjangoFilterBackend',
@@ -781,10 +795,16 @@ FIRST_DAY_OF_WEEK = main['first_day_of_week']
 
 # LOGGING settings
 ##############################################################
-LOG_LEVEL: _t.Text = os.getenv('DJANGO_LOG_LEVEL', main["log_level"]).upper()
+LOG_LEVEL: _t.Text = os.getenv('DJANGO_LOG_LEVEL', main["log_level"])
 LOG_LEVEL = os.getenv(f'{VST_PROJECT_LIB.upper()}_LOG_LEVEL', LOG_LEVEL).upper()
 LOG_FORMAT: _t.Text = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
 LOG_DATE_FORMAT: _t.Text = "%d/%b/%Y %H:%M:%S"
+
+default_logger_data = {
+    'handlers': ['console', 'file'],
+    'level': LOG_LEVEL,
+    'propagate': True,
+}
 
 LOGGING: _t.Dict = {
     'version': 1,
@@ -809,45 +829,17 @@ LOGGING: _t.Dict = {
         } if WEB_DAEMON_LOGFILE != '/dev/null' else {'class': 'logging.NullHandler', 'level': LOG_LEVEL},
     },
     'loggers': {
-        VST_PROJECT_LIB: {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        VST_PROJECT_LIB_NAME: {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        VST_PROJECT: {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        'vstutils': {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        'drf_yasg.generators': {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        'daphne': {
-            'handlers': ['console', 'file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
+        VST_PROJECT_LIB: default_logger_data,
+        VST_PROJECT_LIB_NAME: default_logger_data,
+        VST_PROJECT: default_logger_data,
+        'vstutils': default_logger_data,
+        'drf_yasg.generators': default_logger_data,
+        'daphne': default_logger_data,
     }
 }
 
 if main.getboolean('enable_django_logs', fallback=False):  # nocv
-    LOGGING['loggers']['django'] = {
-        'handlers': ['console', 'file'],
-        'level': LOG_LEVEL,
-        'propagate': True,
-    }
+    LOGGING['loggers']['django'] = default_logger_data
 
 SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
@@ -858,7 +850,7 @@ SILENCED_SYSTEM_CHECKS: _t.List = [
 # Celery broker settings
 # Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings
 ##############################################################
-if has_django_celery_beat:
+if RPC_ENABLED:
     rpc: RPCSection = config['rpc']
     __broker_url = rpc.get("connection", fallback="file:///tmp")
     if __broker_url.startswith("file://"):
@@ -890,10 +882,10 @@ if has_django_celery_beat:
     CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
     CONCURRENCY = rpc["concurrency"]
     WORKER_QUEUES = ['celery']
-    RUN_WORKER = rpc.getboolean('enable_worker', fallback=has_django_celery_beat)
+    RUN_WORKER = rpc.getboolean('enable_worker', fallback=True)
 
     if RUN_WORKER:
-        WORKER_OPTIONS = config['worker'].all() if has_django_celery_beat else {}
+        WORKER_OPTIONS = config['worker'].all()
 
 # View settings
 ##############################################################

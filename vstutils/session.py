@@ -1,6 +1,10 @@
 import yaml
 
 
+Dumper = getattr(yaml, 'CSafeDumper', yaml.SafeDumper)
+Loader = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)
+
+
 class YamlSessionSerializer:
     """
     Simple wrapper around json and yaml to be used in signing.dumps and
@@ -8,7 +12,7 @@ class YamlSessionSerializer:
     """
 
     def dumps(self, obj):
-        return yaml.dump(obj, Dumper=getattr(yaml, 'CSafeDumper', yaml.SafeDumper)).encode('latin-1')
+        return yaml.dump(obj, Dumper=Dumper).encode('latin-1')
 
     def loads(self, data):
-        return yaml.load(data.decode('latin-1'), Loader=getattr(yaml, 'CSafeLoader', yaml.SafeLoader))
+        return yaml.load(data.decode('latin-1'), Loader=Loader)
