@@ -655,8 +655,12 @@ if mail.get('ssl', None) is not None:
 EMAIL_HOST = mail["host"]
 if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-SEND_CONFIRMATION_EMAIL = mail["send_confirmation"]
-AUTHENTICATE_AFTER_REGISTRATION = mail["authenticate_after_registration"]
+SEND_CONFIRMATION_EMAIL: bool = mail["send_confirmation"]
+AUTHENTICATE_AFTER_REGISTRATION: bool = mail["authenticate_after_registration"]
+REGISTRATION_HASHERS: tuple = mail.getlist(
+    'send_confirmation_uid_hashers',
+    'django.contrib.auth.hashers.MD5PasswordHasher'
+)
 
 
 # API settings
@@ -1002,6 +1006,7 @@ if TESTS_RUN:
     CELERY_TASK_ALWAYS_EAGER = True
     EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher', ]
+    REGISTRATION_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
     CONTACT = dict(
         some_extra_url='https://pypi.org/project/vstutils/', **CONTACT
     )
