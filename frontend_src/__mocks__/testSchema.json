@@ -1,0 +1,2798 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "QuickStart",
+        "termsOfService": "",
+        "contact": { "name": "System Administrator" },
+        "x-docs": { "has_docs": false, "docs_url": "/docs/" },
+        "x-links": {
+            "vstutils": {
+                "url": "https://github.com/vstconsulting/vstutils.git",
+                "name": "VST Utils sources"
+            }
+        },
+        "x-menu": [
+            { "name": "Authors", "url": "/author", "span_class": "fa fa-cog" },
+            { "name": "Categories", "url": "/category", "span_class": "fa fa-cog" },
+            { "name": "Posts", "url": "/post", "span_class": "fa fa-cog" },
+            { "name": "Post Types", "url": "/post_types", "span_class": "fa fa-cog" },
+            {
+                "name": "System",
+                "span_class": "fa fa-cog",
+                "sublinks": [{ "name": "Users", "url": "/user", "span_class": "fa fa-user" }]
+            }
+        ],
+        "x-settings": { "static_path": "/static/", "enable_gravatar": true, "time_zone": "UTC" },
+        "x-versions": {
+            "application": "1.0.0",
+            "library": "1.0.0",
+            "vstutils": "4.2.1b6",
+            "django": "2.2.16"
+        },
+        "version": "v1",
+        "x-user-id": 1
+    },
+    "host": "localhost:8000",
+    "schemes": ["http"],
+    "basePath": "/api/v1",
+    "consumes": ["application/json"],
+    "produces": ["application/json", "multipart/form-data; boundary=BoUnDaRyStRiNg"],
+    "securityDefinitions": { "basic": { "type": "basic" } },
+    "security": [{ "basic": [] }],
+    "paths": {
+        "/author/": {
+            "get": {
+                "operationId": "author_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Author" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.Author"]
+            },
+            "post": {
+                "operationId": "author_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["author"]
+            },
+            "parameters": []
+        },
+        "/author/sub_with_post/": {
+            "get": {
+                "operationId": "author_sub_with_post_get",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/SubView" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.Author"]
+            },
+            "post": {
+                "operationId": "author_sub_with_post_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["author"]
+            },
+            "delete": {
+                "operationId": "author_sub_with_post_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["author"]
+            },
+            "parameters": []
+        },
+        "/author/{id}/": {
+            "get": {
+                "operationId": "author_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.Author"]
+            },
+            "put": {
+                "operationId": "author_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["author"]
+            },
+            "patch": {
+                "operationId": "author_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["author"]
+            },
+            "delete": {
+                "operationId": "author_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["author"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/author/{id}/post/": {
+            "get": {
+                "operationId": "author_post_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "author",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Post" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "post": {
+                "operationId": "author_post_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["author"],
+                "x-allow-append": true
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/author/{id}/post/archive_all/": {
+            "delete": {
+                "operationId": "author_post_archive_all",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["author"],
+                "x-multiaction": false,
+                "x-label": "Archive All Posts"
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/author/{id}/post/{post_id}/": {
+            "get": {
+                "operationId": "author_post_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "author_post_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["author"]
+            },
+            "patch": {
+                "operationId": "author_post_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["author"]
+            },
+            "delete": {
+                "operationId": "author_post_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["author"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ],
+            "x-edit-style": true
+        },
+        "/author/{id}/post/{post_id}/archive/": {
+            "post": {
+                "operationId": "author_post_archive",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/Empty" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/Empty" } }
+                },
+                "tags": ["author"],
+                "x-multiaction": false,
+                "x-multi-action": true
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/author/{id}/post/{post_id}/change_title/": {
+            "patch": {
+                "operationId": "author_post_change_title",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                },
+                "tags": ["author"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/author/{id}/post/{post_id}/meta/": {
+            "get": {
+                "operationId": "author_post_meta_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    { "name": "key", "in": "query", "description": "", "required": false, "type": "string" },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/PostMeta" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "post": {
+                "operationId": "author_post_meta_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["author"],
+                "x-allow-append": false
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/author/{id}/post/{post_id}/meta/{meta_id}/": {
+            "get": {
+                "operationId": "author_post_meta_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "put": {
+                "operationId": "author_post_meta_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["author"]
+            },
+            "patch": {
+                "operationId": "author_post_meta_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["author"]
+            },
+            "delete": {
+                "operationId": "author_post_meta_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["author"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                { "name": "meta_id", "in": "path", "required": true, "type": "string" },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/author/{id}/post/{post_id}/sub/": {
+            "get": {
+                "operationId": "author_post_sub_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["author"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "author_post_sub_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["author"]
+            },
+            "patch": {
+                "operationId": "author_post_sub_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["author"]
+            },
+            "delete": {
+                "operationId": "author_post_sub_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["author"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/category/": {
+            "get": {
+                "operationId": "category_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Category" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["category"],
+                "x-subscribe-labels": ["quick.Category"]
+            },
+            "post": {
+                "operationId": "category_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneCategory" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["category"]
+            },
+            "parameters": []
+        },
+        "/category/{id}/": {
+            "get": {
+                "operationId": "category_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["category"],
+                "x-subscribe-labels": ["quick.Category"]
+            },
+            "put": {
+                "operationId": "category_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneCategory" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["category"]
+            },
+            "patch": {
+                "operationId": "category_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneCategory" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["category"]
+            },
+            "delete": {
+                "operationId": "category_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["category"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this category.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Author" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.Author"]
+            },
+            "post": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "parameters": []
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/sub_with_post/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_sub_with_post_get",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/SubView" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.Author"]
+            },
+            "post": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_sub_with_post_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "delete": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_sub_with_post_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["fragment1"]
+            },
+            "parameters": []
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.Author"]
+            },
+            "put": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "patch": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "delete": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["fragment1"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "author",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Post" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "post": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["fragment1"],
+                "x-allow-append": true
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/archive_all/": {
+            "delete": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_archive_all",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["fragment1"],
+                "x-multiaction": false,
+                "x-label": "Archive All Posts"
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "patch": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "delete": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["fragment1"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ],
+            "x-edit-style": true
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/archive/": {
+            "post": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_archive",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/Empty" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/Empty" } }
+                },
+                "tags": ["fragment1"],
+                "x-multiaction": false,
+                "x-multi-action": true
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/change_title/": {
+            "patch": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_change_title",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/meta/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    { "name": "key", "in": "query", "description": "", "required": false, "type": "string" },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/PostMeta" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "post": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["fragment1"],
+                "x-allow-append": false
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/meta/{meta_id}/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "put": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "patch": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "delete": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["fragment1"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                { "name": "meta_id", "in": "path", "required": true, "type": "string" },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/sub/": {
+            "get": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_sub_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["fragment1"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_sub_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "patch": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_sub_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["fragment1"]
+            },
+            "delete": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_sub_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["fragment1"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/post/": {
+            "get": {
+                "operationId": "post_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "author",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Post" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["post"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "post": {
+                "operationId": "post_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["post"]
+            },
+            "parameters": []
+        },
+        "/post/archive_all/": {
+            "delete": {
+                "operationId": "post_archive_all",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["post"],
+                "x-multiaction": false,
+                "x-label": "Archive All Posts"
+            },
+            "parameters": []
+        },
+        "/post/{id}/": {
+            "get": {
+                "operationId": "post_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["post"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "post_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["post"]
+            },
+            "patch": {
+                "operationId": "post_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["post"]
+            },
+            "delete": {
+                "operationId": "post_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["post"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "x-edit-style": true
+        },
+        "/post/{id}/archive/": {
+            "post": {
+                "operationId": "post_archive",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/Empty" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/Empty" } }
+                },
+                "tags": ["post"],
+                "x-multiaction": false,
+                "x-multi-action": true
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/post/{id}/change_title/": {
+            "patch": {
+                "operationId": "post_change_title",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                },
+                "tags": ["post"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/post/{id}/meta/": {
+            "get": {
+                "operationId": "post_meta_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    { "name": "key", "in": "query", "description": "", "required": false, "type": "string" },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/PostMeta" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["post"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "post": {
+                "operationId": "post_meta_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["post"],
+                "x-allow-append": false
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/post/{id}/meta/{meta_id}/": {
+            "get": {
+                "operationId": "post_meta_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["post"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "put": {
+                "operationId": "post_meta_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["post"]
+            },
+            "patch": {
+                "operationId": "post_meta_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["post"]
+            },
+            "delete": {
+                "operationId": "post_meta_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["post"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "meta_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this meta sublist."
+                }
+            ]
+        },
+        "/post/{id}/sub/": {
+            "get": {
+                "operationId": "post_sub_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["post"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "post_sub_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["post"]
+            },
+            "patch": {
+                "operationId": "post_sub_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["post"]
+            },
+            "delete": {
+                "operationId": "post_sub_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["post"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/post_types/": {
+            "get": {
+                "operationId": "post_types_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/definitions/PredefinedPostType" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": ["post_types"],
+                "x-subscribe-labels": ["quick.PredefinedPostType"]
+            },
+            "post": {
+                "operationId": "post_types_add",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED",
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                },
+                "tags": ["post_types"]
+            },
+            "parameters": []
+        },
+        "/post_types/{id}/": {
+            "get": {
+                "operationId": "post_types_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                },
+                "tags": ["post_types"],
+                "x-subscribe-labels": ["quick.PredefinedPostType"]
+            },
+            "put": {
+                "operationId": "post_types_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                },
+                "tags": ["post_types"]
+            },
+            "patch": {
+                "operationId": "post_types_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/OnePredefinedPostType" }
+                    }
+                },
+                "tags": ["post_types"]
+            },
+            "delete": {
+                "operationId": "post_types_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["post_types"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this predefined post type.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/user/": {
+            "get": {
+                "operationId": "user_list",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "description": "Boolean value meaning status of user.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "first_name",
+                        "in": "query",
+                        "description": "Users first name.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "last_name",
+                        "in": "query",
+                        "description": "Users last name.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Users e-mail value.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "username__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/User" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["user"],
+                "x-subscribe-labels": ["auth.User"]
+            },
+            "post": {
+                "operationId": "user_add",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/CreateUser" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/CreateUser" } }
+                },
+                "tags": ["user"]
+            },
+            "parameters": []
+        },
+        "/user/{id}/": {
+            "get": {
+                "operationId": "user_get",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneUser" } }
+                },
+                "tags": ["user"],
+                "x-subscribe-labels": ["auth.User"]
+            },
+            "put": {
+                "operationId": "user_update",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneUser" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneUser" } }
+                },
+                "tags": ["user"]
+            },
+            "patch": {
+                "operationId": "user_edit",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneUser" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneUser" } }
+                },
+                "tags": ["user"]
+            },
+            "delete": {
+                "operationId": "user_remove",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["user"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this user.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/user/{id}/change_password/": {
+            "post": {
+                "operationId": "user_change_password",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangePassword" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/ChangePassword" } }
+                },
+                "tags": ["user"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this user.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "Author": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name"] }
+        },
+        "OneAuthor": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name"] }
+        },
+        "SubView": {
+            "type": "object",
+            "properties": {
+                "item_name": { "title": "Item name", "type": "string", "default": "No name", "minLength": 1 },
+                "item_value": {
+                    "title": "Item value",
+                    "type": "string",
+                    "default": "No value",
+                    "minLength": 1
+                }
+            },
+            "x-properties-groups": { "": ["item_name", "item_value"] }
+        },
+        "Post": {
+            "required": ["author", "category", "title"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "author": {
+                    "title": "Author",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Author" },
+                        "value_field": "id",
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null
+                    }
+                },
+                "category": {
+                    "title": "Category",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Category" },
+                        "value_field": "id",
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null
+                    },
+                    "x-nullable": true
+                },
+                "title": { "title": "Title", "type": "string", "maxLength": 255, "minLength": 1 }
+            },
+            "x-properties-groups": {
+                "Main": ["author", "title", "type", "category"],
+                "Content": ["text"],
+                "": ["id"]
+            }
+        },
+        "OnePost": {
+            "required": ["author", "title", "text", "category", "type"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "author": {
+                    "title": "Author",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Author" },
+                        "value_field": "id",
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null
+                    }
+                },
+                "title": { "title": "Title", "type": "string", "maxLength": 255, "minLength": 1 },
+                "text": { "title": "Text", "type": "string", "format": "textarea" },
+                "category": {
+                    "title": "Category",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Category" },
+                        "value_field": "id",
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null
+                    },
+                    "x-nullable": true
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string",
+                    "format": "fk_autocomplete",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/PredefinedPostType" },
+                        "value_field": "id",
+                        "view_field": "name"
+                    }
+                }
+            },
+            "x-properties-groups": {
+                "Main": ["author", "title", "type", "category"],
+                "Content": ["text"],
+                "": ["id"]
+            }
+        },
+        "Empty": { "type": "object", "properties": {}, "x-properties-groups": { "": [] } },
+        "ChangeTitle": {
+            "required": ["title"],
+            "type": "object",
+            "properties": { "title": { "title": "Title", "type": "string", "minLength": 1 } },
+            "x-properties-groups": { "": ["title"] }
+        },
+        "PostMeta": {
+            "required": ["key", "value"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "key": { "title": "Key", "type": "string", "maxLength": 255, "minLength": 1 },
+                "value": { "title": "Value", "type": "string", "maxLength": 255, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "key", "value"] }
+        },
+        "OnePostMeta": {
+            "required": ["key", "value"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "key": { "title": "Key", "type": "string", "enum": ["meta_title", "some_boolean"] },
+                "value": {
+                    "title": "Value",
+                    "type": "string",
+                    "format": "dynamic",
+                    "additionalProperties": {
+                        "field": "key",
+                        "choices": {},
+                        "types": { "meta_title": "string", "some_boolean": "boolean" }
+                    }
+                }
+            },
+            "x-properties-groups": { "": ["id", "key", "value"] }
+        },
+        "Category": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name"] }
+        },
+        "OneCategory": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name"] }
+        },
+        "PredefinedPostType": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 50, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name"] }
+        },
+        "OnePredefinedPostType": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 50, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name"] }
+        },
+        "User": {
+            "required": ["username"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "ID", "type": "integer", "readOnly": true },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "is_active": { "title": "Is active", "type": "boolean", "default": true },
+                "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
+                "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "username", "is_active", "is_staff", "email"] }
+        },
+        "CreateUser": {
+            "required": ["username", "password", "password2"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "ID", "type": "integer", "readOnly": true },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "is_active": { "title": "Is active", "type": "boolean", "default": true },
+                "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
+                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
+                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
+                "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 },
+                "password": { "title": "Password", "type": "string", "minLength": 1 },
+                "password2": { "title": "Repeat password", "type": "string", "minLength": 1 }
+            },
+            "x-properties-groups": {
+                "": [
+                    "id",
+                    "username",
+                    "is_active",
+                    "is_staff",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "password",
+                    "password2"
+                ]
+            }
+        },
+        "OneUser": {
+            "required": ["username"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "ID", "type": "integer", "readOnly": true },
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1
+                },
+                "is_active": { "title": "Is active", "type": "boolean", "default": true },
+                "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
+                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
+                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
+                "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 }
+            },
+            "x-properties-groups": {
+                "": ["id", "username", "is_active", "is_staff", "first_name", "last_name", "email"]
+            }
+        },
+        "ChangePassword": {
+            "required": ["old_password", "password", "password2"],
+            "type": "object",
+            "properties": {
+                "old_password": { "title": "Old password", "type": "string", "minLength": 1 },
+                "password": { "title": "New password", "type": "string", "minLength": 1 },
+                "password2": { "title": "Confirm new password", "type": "string", "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["old_password", "password", "password2"] }
+        }
+    }
+}

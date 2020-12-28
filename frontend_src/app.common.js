@@ -2,12 +2,12 @@
 import TabSignal from '@vstconsulting/tabsignal';
 import signals from './vstutils/signals.js';
 
-import $ from './libs/jquery.js';
+import './libs/jquery.js';
 
 import 'select2';
 import 'select2/dist/css/select2.css';
 import 'select2-theme-bootstrap4/dist/select2-bootstrap.css';
-$.fn.select2.defaults.set('theme', 'bootstrap');
+window.SELECT2_THEME = 'bootstrap';
 
 import 'jquery.scrollto';
 

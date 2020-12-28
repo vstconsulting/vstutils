@@ -30,10 +30,6 @@ const SidebarLinkMixin = {
             if (!instance) {
                 return false;
             }
-
-            if (item.url && item.url.indexOf(instance) == 1) {
-                return true;
-            }
         },
     },
 };

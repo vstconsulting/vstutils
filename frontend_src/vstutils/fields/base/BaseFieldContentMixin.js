@@ -9,7 +9,7 @@ const BaseFieldContentMixin = {
             /**
              * Type of field's input element (if it exists).
              */
-            input_type: 'text',
+            inputType: 'text',
             /**
              * Names of additional attributes of field's input element.
              */

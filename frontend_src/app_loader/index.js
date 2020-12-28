@@ -3,6 +3,7 @@ import LoadingPageController from './LoadingPageController.js';
 import { cleanAllCacheAndReloadPage, cleanOpenApiCacheAndReloadPage } from './cleanCacheHelpers.js';
 import { StaticFilesLoader } from './StaticFilesLoader.js';
 import OpenAPILoader from './OpenAPILoader.js';
+import { AppConfiguration } from '../vstutils/AppConfiguration.js';
 
 window.cleanAllCacheAndReloadPage = cleanAllCacheAndReloadPage;
 window.cleanOpenApiCacheAndReloadPage = cleanOpenApiCacheAndReloadPage;
@@ -14,9 +15,7 @@ if (
 ) {
     navigator.serviceWorker
         .register('/service-worker.js')
-        .then((registration) => {
-            registration.update();
-        })
+        .then((registration) => registration.update())
         .catch((error) => {
             console.error('Service Worker registration failed with ' + error);
         });
@@ -43,7 +42,7 @@ window.addEventListener('error', errorEventHandler);
 
 pageController.loadAndAppendDependencies();
 
-async function startApp(cache) {
+function checkCacheVersions() {
     if (localStorage.gui_version !== undefined && localStorage.gui_version !== window.gui_version) {
         updateGuiVersionsInLocalStorage();
         pageController.showUpdatingAppVersionMessage();
@@ -60,6 +59,10 @@ async function startApp(cache) {
     }
 
     updateGuiVersionsInLocalStorage();
+}
+
+async function startApp(cache) {
+    checkCacheVersions();
 
     const openApiLoadPromise = new OpenAPILoader(cache).loadSchema();
 
@@ -69,11 +72,19 @@ async function startApp(cache) {
         (path, type) => pageController.fileAddedToPageCallback(path, type),
     ).loadAndAddToPageAllFiles();
 
-    const openapi = (await Promise.all([openApiLoadPromise, filesLoadPromise]))[0];
+    const [openapi] = await Promise.all([openApiLoadPromise, filesLoadPromise]);
 
     window.spa.signals.emit('openapi.loaded', openapi);
 
-    window.app = new window.App(openapi, cache);
+    const appConfig = new AppConfiguration({ schema: openapi });
+
+    window.app = new window.App(
+        appConfig,
+        cache,
+        window.spa.fields.globalFields,
+        window.spa.models.globalModels,
+        window.spa.querySet.globalQuerySets,
+    );
 
     // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
     await window.app.start();

@@ -5,7 +5,7 @@ export default class StatusError extends Error {
     /**
      * Constructor of StatusError class.
      * @param {number} status Status of HTTP response.
-     * @param {string, object} data Error object.
+     * @param {string|Object} data Error object.
      */
     constructor(status, data) {
         super();

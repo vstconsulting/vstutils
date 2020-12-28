@@ -25,14 +25,13 @@
 </template>
 
 <script>
-    import HideFieldInTableMixin from '../../HideFieldInTableMixin.js';
     import TableRowMixin from '../../TableRowMixin.js';
 
     /**
      * Mixin for table row of table, that is used in fk_multi_autocomplete modal.
      */
     export default {
-        mixins: [HideFieldInTableMixin, TableRowMixin],
+        mixins: [TableRowMixin],
         props: ['qs', 'instance', 'fields', 'field_props', 'field_value'],
         computed: {
             data_to_represent: function () {

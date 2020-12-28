@@ -65,11 +65,8 @@ export function trim(s) {
  * @param {string} string String, that should be capitalized.
  * @return {string}
  */
-export function capitalizeString(string) {
-    if (!string) {
-        return '';
-    }
-
+export function capitalize(string) {
+    if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
@@ -249,7 +246,7 @@ export function allPropertiesIsObjects(obj) {
 
 /**
  * Function, that converts instance of ArrayBuffer to Base64.
- * @param {array} buffer Instance of ArrayBuffer.
+ * @param {ArrayBuffer} buffer Instance of ArrayBuffer.
  * @return {string}
  */
 export function arrayBufferToBase64(buffer) {
@@ -763,27 +760,18 @@ export let current_view = new CurrentView();
 export let path_pk_key = 'id';
 
 /**
- * Returns joined dependence field values of parent_data_object for given field_name using separator
- * or undefined if parent_data_object has no such field_name
+ * Returns joined dependence field values of data for given fieldName using separator
+ * or undefined if data has no such fieldName
  *
- * @param {Object} parent_data_object
- * @param {string} field_name
+ * @param value
  * @param {string} separator
  * @return {string | undefined}
  */
-export function getDependenceValueAsString(parent_data_object, field_name, separator = ',') {
-    if (!field_name || !Object.prototype.hasOwnProperty.call(parent_data_object, field_name)) {
-        return undefined;
-    }
-
-    const data = parent_data_object[field_name];
-
-    if (Array.isArray(data)) {
-        return data.map((data) => data.value).join(separator);
-    } else if (typeof data === 'object' && data !== null && data.value !== undefined && data.value !== null) {
-        return data.value;
-    } else if (typeof data === 'string') {
-        return data;
+export function getDependenceValueAsString(value, separator = ',') {
+    if (Array.isArray(value)) {
+        return value.map((item) => (item.getPkValue ? item.getPkValue() : item)).join(separator);
+    } else if (typeof value === 'string' || typeof value === 'number') {
+        return value;
     }
 }
 
@@ -819,4 +807,134 @@ export function mergeDeep(target, ...sources) {
     }
 
     return mergeDeep(target, ...sources);
+}
+
+/**
+ * Helper that wraps Map and allows to set/get in object style
+ * @param {Map} map
+ * @return {Object}
+ */
+export function mapToObjectProxy(map) {
+    return new Proxy(map, {
+        get(target, p) {
+            return target.get(p);
+        },
+        set(target, p, value) {
+            target.set(p, value);
+            return true;
+        },
+    });
+}
+
+/**
+ * Template literal that formats strings. Strings and integers can be used as keys.
+ *
+ * @example
+ * const str = template`This is ${'type'} #${0}`;
+ * // returns "This is text #2"
+ * str(2, { type: text });
+ *
+ * @param strings
+ * @param keys
+ * @return {function(...[*]): string}
+ */
+export function template(strings, ...keys) {
+    return function (...values) {
+        let dict = values[values.length - 1] || {};
+        let result = [strings[0]];
+        keys.forEach(function (key, i) {
+            let value = Number.isInteger(key) ? values[key] : dict[key];
+            result.push(value, strings[i + 1]);
+        });
+        return result.join('');
+    };
+}
+
+/**
+ * @typedef {string} RequestType
+ */
+
+/**
+ * Enum for request types
+ * @enum {RequestType}
+ */
+export const RequestTypes = {
+    LIST: 'list',
+    RETRIEVE: 'retrieve',
+    CREATE: 'create',
+    UPDATE: 'update',
+    PARTIAL_UPDATE: 'partialUpdate',
+    REMOVE: 'remove',
+};
+
+/**
+ * @typedef {string} HttpMethod
+ */
+
+/**
+ * Enum for HTTP methods
+ * @enum {HttpMethod}
+ */
+export const HttpMethods = {
+    GET: 'get',
+    POST: 'post',
+    PUT: 'put',
+    PATCH: 'patch',
+    DELETE: 'delete',
+
+    ALL: ['get', 'post', 'put', 'patch', 'delete'],
+};
+
+/**
+ * Enum for HTTP methods
+ */
+export const FieldViews = {
+    LIST: 'list',
+    READ_ONLY: 'readonly',
+    EDIT: 'edit',
+};
+
+/**
+ * Function that formats path from params and replaces last param with instance's id
+ * @param {string} path
+ * @param {Object} params
+ * @param {Model} instance
+ * @return {string}
+ */
+export function formatPath(path, params, instance = null) {
+    for (const [name, value] of Object.entries(params)) {
+        path = path.replace(`{${name}}`, value);
+    }
+
+    if (instance) {
+        return path.replace(/{.+}/, instance.getPkValue());
+    }
+
+    return path;
+}
+
+/**
+ * Method, that converts query object into string
+ *
+ * @param {(string|object|URLSearchParams)=} query
+ * @param {boolean} useBulk - If false adds question mark (?) in front of string
+ * @returns {string}
+ */
+export function makeQueryString(query = undefined, useBulk = false) {
+    let queryStr = '';
+    if (typeof query === 'string') {
+        queryStr = new URLSearchParams(query).toString();
+    } else if (typeof query === 'object') {
+        queryStr = new URLSearchParams(Object.entries(query)).toString();
+    } else if (query instanceof URLSearchParams) {
+        queryStr = query.toString();
+    }
+
+    if (!useBulk && queryStr !== '') queryStr = `?${queryStr}`;
+
+    return queryStr;
+}
+
+export function copyToClipboard(value) {
+    return navigator.clipboard.writeText(value || '').catch(console.warn);
 }

@@ -1,29 +1,51 @@
-import { mergeDeep } from '../../utils';
+import { mergeDeep, RequestTypes } from '../../utils';
 import Vue from 'vue';
 
 export const LIST_STORE_MODULE = {
     state: {
         data: {
-            filters: undefined,
+            filters: {},
             instances: [],
+            selection: [],
             pagination: {
                 count: 0,
-                page_size: 20,
-                page_number: 1,
+                pageSize: 20,
+                pageNumber: 1,
             },
         },
     },
     getters: {
-        filters: (state) => {
-            return state.data.filters;
-        },
+        filters: (state) => state.data.filters,
+        pagination: (state) => state.data.pagination,
+        instances: (state) => state.data.instances,
+        selection: (state) => state.data.selection,
+        allSelected: (state) =>
+            state.data.instances.every((instance) => state.data.selection.includes(instance.getPkValue())),
     },
     mutations: {
-        setFilters(state, { filters, url }) {
+        setFilters(state, filters) {
             state.data.filters = filters;
-            if (url) {
-                url = url.replace(/^\/|\/$/g, '');
-                this.commit('setFilters', { filters, url }, { root: true });
+            state.queryset = state.queryset.clone({ query: filters });
+        },
+
+        setPageNumber(state, page) {
+            state.data.pagination.pageNumber = page;
+        },
+
+        setSelection(state, selection) {
+            state.data.selection = selection;
+        },
+
+        unselectIds(state, ids) {
+            state.data.selection = state.data.selection.filter((id) => !ids.includes(id));
+        },
+
+        toggleSelection(state, instanceId) {
+            const index = state.data.selection.indexOf(instanceId);
+            if (index === -1) {
+                state.data.selection.push(instanceId);
+            } else {
+                Vue.delete(state.data.selection, index);
             }
         },
 
@@ -32,29 +54,28 @@ export const LIST_STORE_MODULE = {
             if (instances.extra !== undefined && instances.extra['count'] !== undefined) {
                 state.data.pagination.count = instances.extra['count'];
             }
-            state.data.pagination.page_number = state.data.filters['page'] || 1;
+            state.data.pagination.pageNumber = Number(state.data.filters['page']) || 1;
         },
     },
     actions: {
-        async fetchData({ commit, getters, state }, { view, url, qs, filters }) {
+        toggleAllSelection({ getters, commit }) {
+            const selection = getters.allSelected
+                ? []
+                : getters.instances.map((instance) => instance.getPkValue());
+
+            commit('setSelection', selection);
+        },
+
+        async fetchData({ commit, dispatch }, { filters = undefined }) {
             if (filters) {
-                commit('setFilters', { filters });
+                commit('setFilters', filters);
             }
 
-            commit('setQuerySet', { view, url, qs });
-
-            if (qs === undefined) {
-                qs = getters.queryset.filter({ ...state.data.filters }).prefetch();
-            }
-            commit('setQuerySet', { view, url, qs });
-
-            const instances = await getters.queryset.items();
-            commit('setInstances', instances);
+            return dispatch('updateData');
         },
 
         async updateData({ commit, getters }) {
-            const instances = await getters.queryset.items();
-            commit('setInstances', instances);
+            commit('setInstances', await getters.queryset.items());
         },
     },
 };
@@ -63,90 +84,50 @@ export const PAGE_WITH_INSTANCE = {
     state: {
         data: {
             instance: undefined,
+            sandbox: {},
         },
+    },
+
+    getters: {
+        instance: (state) => state.data.instance,
+        sandbox: (state) => state.data.sandbox,
     },
     mutations: {
         setInstance(state, instance) {
             state.data.instance = instance;
+            state.data.sandbox = instance._getRepresentData();
         },
     },
 };
 
 export const PAGE_STORE_MODULE = mergeDeep({}, PAGE_WITH_INSTANCE, {
-    state: {
-        data: {
-            instance: undefined,
-        },
-    },
     actions: {
-        async fetchData({ commit, dispatch }, { view, url, qs }) {
-            commit('setQuerySet', { view, url, qs });
-
-            return dispatch('updateData');
+        async fetchData({ dispatch }, instanceId) {
+            return dispatch('updateData', instanceId);
         },
 
-        async updateData({ commit, getters }) {
-            const instance = await getters.queryset.get();
+        async updateData({ commit, getters }, instanceId = undefined) {
+            const instance = await getters.queryset.get(instanceId || getters.instance?.getPkValue());
             commit('setInstance', instance);
         },
     },
 });
 
 export const PAGE_WITH_EDITABLE_DATA = mergeDeep({}, PAGE_WITH_INSTANCE, {
-    state: {
-        data: {
-            sandbox: {},
-        },
-    },
     mutations: {
         setFieldValue(state, { field, value }) {
             Vue.set(state.data.sandbox, field, value);
-        },
-
-        setInstance(state, instance) {
-            state.data.instance = instance;
-            state.data.sandbox = instance.data;
         },
     },
 });
 
 export const PAGE_NEW_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
-    mutations: {
-        setQuerySet(state, { view, url, qs }) {
-            if (!qs) {
-                let page_view = view;
-
-                try {
-                    page_view = app.views[view.schema.path.replace('/new', '')];
-                } catch (e) {
-                    console.log(e);
-                }
-
-                qs = page_view.objects.copy();
-                qs.use_prefetch = true;
-                qs.url = url.replace(/^\/|\/$/g, '');
-
-                if (qs.model.name === view.objects.model.name) {
-                    qs = qs.copy();
-                } else {
-                    qs = view.objects.clone({
-                        use_prefetch: true,
-                        url: url.replace(/^\/|\/$/g, ''),
-                    });
-                }
-            }
-            state.queryset = qs;
-        },
-    },
     actions: {
         // eslint-disable-next-line no-unused-vars
-        async fetchData({ commit, getters }, { view, url, qs = undefined }) {
-            commit('setQuerySet', { view, url, qs });
-
+        async fetchData({ commit, getters }) {
             const queryset = getters.queryset;
-            const instance = queryset.model.getInstance({}, queryset);
-
-            commit('setInstance', instance);
+            const model = queryset.getModelClass(RequestTypes.CREATE);
+            commit('setInstance', new model(null, queryset));
         },
     },
 });
@@ -154,27 +135,13 @@ export const PAGE_NEW_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
 export const PAGE_EDIT_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
     actions: {
         // eslint-disable-next-line no-unused-vars
-        async fetchData({ commit, getters }, { view, url, qs = undefined }) {
-            commit('setQuerySet', { view, url, qs });
-            commit('setInstance', await getters.queryset.get());
+        async fetchData({ commit, getters }, instanceId) {
+            commit('setInstance', await getters.queryset.get(instanceId));
+        },
+        async reloadInstance({ dispatch, getters }) {
+            return dispatch('fetchData', getters.instance.getPkValue());
         },
     },
 });
 
-export const ACTION_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
-    mutations: {
-        setQuerySet(state, { view, url, qs }) {
-            if (!qs) {
-                qs = view.objects.clone({ url: url.replace(/^\/|\/$/g, '') });
-            }
-            state.queryset = qs;
-        },
-    },
-    actions: {
-        async fetchData({ commit, getters }, { view, url, qs = undefined }) {
-            commit('setQuerySet', { view, url, qs });
-            qs = getters.queryset;
-            commit('setInstance', qs.model.getInstance({}, qs));
-        },
-    },
-});
+export const ACTION_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA);

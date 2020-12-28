@@ -40,7 +40,7 @@ const FKMultiAutocompleteFieldModal = {
          */
         close() {
             this.$emit('clean-tmp-value');
-            this.show_modal = false;
+            this.showModal = false;
         },
         /**
          * Method, that emits changeValue event of parent component.

@@ -7,8 +7,8 @@
         :aria-labelledby="label_id"
         :aria-label="aria_label"
     >
-        <div class="ico-on fa fa-toggle-on"></div>
-        <div class="ico-off fa fa-toggle-off"></div>
+        <div class="ico-on fa fa-toggle-on" />
+        <div class="ico-off fa fa-toggle-off" />
         <div class="boolean-title">{{ $t(text) | capitalize }}</div>
     </div>
 </template>

@@ -62,6 +62,8 @@ class IndexedDBCache extends FakeCache {
         super();
         this.indexed_db =
             window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+        if (!this.indexed_db) throw new Error('IndexedDB is not supported by current environment');
+
         this.db_name = 'cache_' + window.host_url.replace(/[^0-9A-z]/gim, '_') + '__';
         this.db_version = 1;
         this.store_name = 'cache_store';
@@ -212,4 +214,4 @@ async function getGlobalCache() {
 
 const cachePromise = getGlobalCache();
 
-export { cachePromise };
+export { FakeCache, IndexedDBCache, cachePromise };

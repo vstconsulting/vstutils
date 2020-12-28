@@ -1,7 +1,6 @@
 import { BaseField } from '../base';
-import { BaseEntityConstructor } from '../../models';
-import { openapi_dictionary } from '../../api';
 import FormFieldMixin from './FormFieldMixin.vue';
+import { getFieldFormat } from '../index.js';
 
 /**
  * Form guiField class.
@@ -64,14 +63,12 @@ class FormField extends BaseField {
         let realFields = {};
 
         if (this.options.form) {
-            let constructor = new BaseEntityConstructor(openapi_dictionary);
-
             for (let key in this.options.form) {
                 if (Object.prototype.hasOwnProperty.call(this.options.form, key)) {
                     let field = this.options.form[key];
                     field.name = key;
 
-                    field.format = constructor.getFieldFormat(field);
+                    field.format = getFieldFormat(field);
 
                     realFields[key] = this.generateRealField(field);
                 }
@@ -87,9 +84,8 @@ class FormField extends BaseField {
     generateRealField(options) {
         let field = new window.spa.fields.guiFields[options.format](options);
 
-        if (field.constructor.prepareField) {
-            field = field.constructor.prepareField(field, window.app.application.$route.name);
-        }
+        // TODO cannot prepare field because have no app and path
+        // field.prepareField(window.app, path);
 
         return field;
     }

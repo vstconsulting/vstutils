@@ -1,11 +1,10 @@
-import { BaseFieldContentEdit } from '../base';
+import { BaseFieldMixin } from '../base';
 import AutocompleteFieldContentEditMixin from './AutocompleteFieldContentEditMixin.vue';
 
 const AutocompleteFieldMixin = {
+    mixins: [BaseFieldMixin],
     components: {
-        field_content_edit: {
-            mixins: [BaseFieldContentEdit, AutocompleteFieldContentEditMixin],
-        },
+        field_content_edit: AutocompleteFieldContentEditMixin,
     },
 };
 

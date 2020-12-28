@@ -1,6 +1,6 @@
 <template>
     <div style="display: inline-block;">
-        <gui_modal v-show="show_modal" @close="close" :opt="{ footer: false }">
+        <Modal v-show="showModal" @close="close" :opt="{ footer: false }">
             <template v-slot:header>
                 <h3>{{ $t(info.title.toLowerCase()) | capitalize }}</h3>
             </template>
@@ -34,7 +34,7 @@
                     </ul>
                 </template>
             </template>
-        </gui_modal>
+        </Modal>
         <a href="#" @click.stop.prevent="open" class="help-text-data">
             <span class="fa fa-question-circle"></span>
             {{ $t('app info') | capitalize }}
@@ -43,10 +43,12 @@
 </template>
 
 <script>
-    import { ModalWindowAndButtonMixin } from '../../../fields';
+    import ModalWindowAndButtonMixin from '../../../fields/ModalWindowAndButtonMixin.js';
+    import Modal from './Modal.vue';
 
     export default {
-        name: 'gui_help_modal',
+        name: 'HelpModal',
+        components: { Modal },
         mixins: [ModalWindowAndButtonMixin],
         data() {
             return {

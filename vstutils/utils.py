@@ -166,7 +166,6 @@ def send_template_email(sync: bool = False, **kwargs):
 
     :param sync: argument for determining how send email, asynchronously or synchronously
     :param subject: mail subject.
-    :param email_from: sender that be setup in email.
     :param email: list of strings or single string, with email addresses of recipients
     :param template_name: relative path to template in `templates` directory, must include extension in file name.
     :param context_data: dictionary with context for rendering message template.

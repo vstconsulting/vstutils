@@ -1,8 +1,10 @@
 import ChoicesFieldContentReadonly from './ChoicesFieldContentReadonly.vue';
 import ChoicesFieldContentEdit from './ChoicesFieldContentEdit.vue';
 import ChoicesFieldListView from './ChoicesFieldListView.vue';
+import { BaseFieldMixin } from '../base';
 
 const ChoicesFieldMixin = {
+    mixins: [BaseFieldMixin],
     components: {
         field_list_view: {
             mixins: [ChoicesFieldListView],

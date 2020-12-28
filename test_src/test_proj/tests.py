@@ -930,6 +930,15 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue(api['paths']['/hosts/{id}/hosts/{hosts_id}/test/']['post']['x-multiaction'])
         self.assertEqual(api['paths']['/hosts/{id}/']['get']['x-subscribe-labels'], ['test_proj.HostGroup'])
 
+        # Test list only view
+        self.assertIn('/hosts_list/', api['paths'])
+        self.assertNotIn('/hosts_list/{id}/', api['paths'])
+        hosts_list = api['paths']['/hosts_list/']
+        self.assertNotIn('post', hosts_list)
+        self.assertNotIn('delete', hosts_list)
+        self.assertNotIn('patch', hosts_list)
+        self.assertNotIn('put', hosts_list)
+
         # Check depend fields
         self.assertEqual(api['definitions']['Variable']['properties']['key']['format'], 'fk')
         self.assertEqual(
@@ -939,20 +948,24 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'model': {'$ref': '#/definitions/VariableType'},
                 'usePrefetch': True,
                 'value_field': 'id',
-                'view_field': 'name'
+                'view_field': 'name',
+                'dependence': None,
             }
         )
-        self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic')
+        self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic_fk')
         self.assertEqual(
             api['definitions']['Variable']['properties']['value']['additionalProperties'],
             {"field": 'key', 'field_attribute': 'val_type'}
         )
 
         # Check that's schema is correct and fields are working
+        host_obj = self.get_model_class('test_proj.HostList').objects.create(name='123')
         results = self.bulk([
             {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
             {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': dict(title="title", text='txt')},
             {'method': 'get', 'path': ['author', '<<0[data][id]>>', 'post']},
+            {'method': 'get', 'path': ['hosts_list']},
+            {'method': 'get', 'path': ['hosts_list', host_obj.id]},
             {'method': 'patch', 'path': ['author', '<<0[data][id]>>'], 'data': dict(name="Update name")},
         ])
 
@@ -961,7 +974,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['count'], 1)
         self.assertEqual(results[3]['status'], 200)
-        self.assertEqual(tuple(results[3]['data'].keys()), ('id', 'name', 'hidden'))
+        self.assertEqual(results[3]['data']['count'], self.get_model_filter('test_proj.HostList').count())
+        self.assertEqual(results[4]['status'], 404)
+        self.assertEqual(results[5]['status'], 200)
+        self.assertEqual(tuple(results[5]['data'].keys()), ('id', 'name', 'hidden'))
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -1711,7 +1727,7 @@ class ProjectTestCase(BaseTestCase):
         api_model_hostgroup = data['definitions']['HostGroup']
         hostgroup_props = api_model_hostgroup['properties']
         self.assertEqual(api_model_hostgroup['properties']['parent']['type'], 'string')
-        self.assertEqual(hostgroup_props['parent']['format'], 'autocomplete')
+        self.assertEqual(hostgroup_props['parent']['format'], 'fk_autocomplete')
         self.assertEqual(
             hostgroup_props['parent']['additionalProperties']['model']['$ref'],
             '#/definitions/Host'

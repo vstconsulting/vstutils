@@ -24,9 +24,7 @@ const BinaryFileFieldMixin = {
         },
     },
     components: {
-        field_content_edit: {
-            mixins: [BinaryFileFieldContentEdit],
-        },
+        field_content_edit: BinaryFileFieldContentEdit,
     },
 };
 

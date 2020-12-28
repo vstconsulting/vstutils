@@ -1,600 +1,440 @@
 import $ from 'jquery';
-import Vue from 'vue';
-import { isEmptyObject } from '../utils';
-import DefaultEntityView from './DefaultEntityView.vue';
+import { capitalize, HttpMethods, mergeDeep, RequestTypes } from '../utils';
 import signals from '../signals.js';
-import { guiFields } from '../fields';
-import { BaseEntityConstructor } from '../models';
+import { ActionView, ListView, PageEditView, PageNewView, PageView, ViewTypes } from './View.js';
+import { QuerySet } from '../querySet';
+import { NoModel } from '../models';
+import { getFieldFormatFactory } from '../fields';
+import { SingleEntityQueryset } from '../querySet/SingleEntityQueryset.js';
+
+/**
+ * Function that checks if status code if OK
+ * @param {number|string} code - Http status code.
+ * @return {boolean}
+ */
+function isSuccessful(code) {
+    const codeNum = typeof code === 'string' ? parseInt(code) : code;
+    return codeNum >= 200 && codeNum < 400;
+}
+
+const FILTERS_TO_EXCLUDE = ['limit', 'offset'];
+
+const EDIT_STYLE_PROPERTY_NAME = 'x-edit-style';
+const ACTION_NAME = 'x-action-name';
+const IS_MULTI_ACTION_PROPERTY_NAME = 'x-multiaction';
 
 /**
  * Class, that manages creation of guiViews.
  */
-export default class ViewConstructor extends BaseEntityConstructor {
+export default class ViewConstructor {
     /**
      * Constructor of ViewConstructor class.
      * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
      * and some settings for views of different types.
-     * @param {object} models Dict with Models.
+     * @param {Map<string, Function>} modelsClasses
+     * @param {Map<string, Function>} fieldsClasses
      */
-    constructor(openapi_dictionary, models) {
-        super(openapi_dictionary);
-        this.models = models;
-    }
-
-    /**
-     * Method, that returns paths list from OpenApi Schema.
-     * @param {Object} openapi_schema OpenApi Schema.
-     * @return {Object.<string,Object>}
-     */
-    getPaths(openapi_schema) {
-        return openapi_schema[this.dictionary.paths.name];
-    }
-
-    /**
-     * Method, that returns operation_id property of current path type object (path_obj_prop).
-     * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
-     */
-    getPathOperationId(path_obj_prop) {
-        return path_obj_prop[this.dictionary.paths.operation_id.name];
-    }
-
-    /**
-     * Method, that returns Array with views types,
-     * to which ViewConstructor should always add operations from dictionary.
-     */
-    getTypesOperationAlwaysToAdd() {
-        return this.dictionary.paths.types_operations_always_to_add;
+    constructor(openapi_dictionary, modelsClasses, fieldsClasses) {
+        this.dictionary = openapi_dictionary;
+        this.modelsClasses = modelsClasses;
+        this.fieldsClasses = fieldsClasses;
+        this.getFieldFormat = getFieldFormatFactory(fieldsClasses);
     }
 
     /**
      * Method, that returns path's name.
      * @param {string} path Key of path object, from OpenApi's path dict.
      */
-    getViewSchema_name(path) {
+    _getViewName(path) {
         let path_parts = path.replace(/\/{[A-z]+}/g, '').split(/\//g);
         return path_parts[path_parts.length - 2];
     }
 
     /**
-     * Method, that returns base options of view schema.
-     * @param {string} path Key of path object, from OpenApi's path dict.
-     */
-    getViewSchema_baseOptions(path) {
-        return {
-            name: this.getViewSchema_name(path),
-            level: (path.match(/\//g) || []).length,
-        };
-    }
-
-    /**
-     * Method, that returns object with filters for current path.
-     * @param {object} operation_id_filters Filters property from operation_id_options.
-     * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
-     */
-    getViewSchema_filters(operation_id_filters, path_obj_prop) {
-        const filtersCopy = $.extend(true, {}, path_obj_prop[operation_id_filters.name]);
-        return Object.values(filtersCopy).filter(
-            (f) => !this.dictionary.models.filters_to_delete.includes(f.name),
-        );
-    }
-
-    /**
-     * Method, that generates new guiField objects for View filters.
-     * @param {object} operation_id_filters Filters property from operation_id_options.
-     * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
-     * @param {string} path View path.
-     */
-    generateViewSchemaFilters(operation_id_filters, path_obj_prop, path) {
-        let f_obj = {};
-        let filters = this.getViewSchema_filters(operation_id_filters, path_obj_prop);
-
-        signals.emit('views[' + path + '].filters.beforeInit', filters);
-
-        for (let filter of Object.values(filters)) {
-            let format = this.getFilterFormat(filter);
-            let opt = { format: format };
-
-            f_obj[filter.name] = new guiFields[format]($.extend(true, {}, filter, opt));
-        }
-
-        signals.emit('views[' + path + '].filters.afterInit', filters);
-
-        return f_obj;
-    }
-
-    /**
-     * Method, that defined format for filter's guiField object.
-     * @param {object} filter Object with filter options (object from View schema).
-     */
-    getFilterFormat(filter) {
-        return this.getFieldFormat(filter);
-    }
-
-    /**
      * Method, that return operation_id options for view schema.
      * It gets operation_id options from openapi_dictionary and sets them.
-     * @param {string} operation_id  Operation_id value.
+     * @param {string} operationId  Operation_id value.
      * @param {string} path Key of path object, from OpenApi's path dict.
-     * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
-     * @return {object} operation_id_options Operation_id options for view schema.
      */
-    getViewSchema_operationIdOptions(operation_id, path, path_obj_prop) {
-        let opt = {
-            operation_id: operation_id,
-        };
-        for (let item in this.dictionary.schema_types) {
-            if (!Object.prototype.hasOwnProperty.call(this.dictionary.schema_types, item)) {
-                continue;
-            }
-            if (operation_id.indexOf(item) === -1) {
-                continue;
-            }
-            opt = $.extend(true, opt, this.dictionary.schema_types[item]);
-            opt.path = path + opt.url_postfix;
-            delete opt.url_postfix;
-            if (opt.filters) {
-                opt.filters = this.generateViewSchemaFilters(opt.filters, path_obj_prop, opt.path);
-            }
-            return opt;
+    getOperationOptions(operationId, path) {
+        const opt = { operationId };
+        const operationOptions = this.dictionary.schema_types[
+            Object.keys(this.dictionary.schema_types).find((suffix) => operationId.endsWith(suffix))
+        ];
+
+        if (operationOptions) {
+            mergeDeep(opt, operationOptions);
+            opt.path = path + opt.urlPostfix;
+            delete opt.urlPostfix;
+        } else {
+            mergeDeep(opt, { path, type: ViewTypes.ACTION });
         }
 
-        return $.extend(true, opt, {
-            query_type: 'post',
-            path: path,
-            type: 'action',
-        });
+        return opt;
     }
 
     /**
-     * Method, that recursively finds link to Model name for current path type object (path_obj_prop).
-     * @param {object} obj property of path object, from OpenApi's path dict, for which method should find Model name.
-     * @param {number} max_level Max level of inner recursion.
-     * @param {number} level Current level of recursion.
+     * @param operationSchema
+     * @return {Function}
      */
-    getModelNameLink(obj, max_level = 0, level = 0) {
-        if (!obj) {
-            return;
-        }
+    _getOperationModel(operationSchema) {
+        const responseCode = Object.keys(operationSchema.responses).find(isSuccessful);
+        const responseModelRef =
+            operationSchema.responses[responseCode].schema?.$ref || // Detail view
+            operationSchema.responses[responseCode].schema?.properties?.results?.items?.$ref || // List view
+            NoModel.name; // Default model
 
-        if (max_level && max_level <= level) {
-            return;
-        }
+        // TODO ideal is to check if request and response models are the same
+        // const requestModelRef =
+        //     operationSchema.parameters &&
+        //     operationSchema.parameters.find((param) => param.in === 'body')?.schema?.$ref;
 
-        if (typeof obj == 'string') {
-            let name = obj.match(/\/([A-z0-9]+)$/);
-            if (name && name[1]) {
-                return obj;
-            }
-            return;
-        }
+        // if (requestModelRef && requestModelRef !== responseModelRef)
+        //     throw new Error(
+        //         `Request and response models are not equal (${requestModelRef} !== ${responseModelRef})`,
+        //     );
 
-        if (typeof obj != 'object') {
-            return;
-        }
-
-        for (let prop in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-                if (this.dictionary.models.ref_names.includes(prop)) {
-                    let name = obj[prop].match(/\/([A-z0-9]+)$/);
-                    if (name && name[1]) {
-                        return obj[prop];
-                    }
-                }
-
-                if (typeof obj[prop] == 'object') {
-                    let api_obj = this.getModelNameLink(obj[prop], max_level, level + 1);
-                    if (api_obj) {
-                        return api_obj;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Method, that returns name of Model, connected with current path type object (path_obj_prop).
-     * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
-     */
-    getModelName(path_obj_prop) {
-        let model_link = this.getModelNameLink(path_obj_prop);
-        if (!model_link) {
-            return 'NoModel';
-        }
-        let model_name = model_link.split('/');
-        return model_name[model_name.length - 1];
-    }
-
-    /**
-     * Method, that returns Model, connected with current path type object (path_obj_prop).
-     * @param {object} path_obj_prop Property of path object, from OpenApi's path dict.
-     */
-    getViewSchema_model(path_obj_prop) {
-        let model_name = this.getModelName(path_obj_prop);
-        return this.models[model_name];
-    }
-
-    /**
-     * Method, that returns mixin with compiled template for template with given name or undefined if
-     * template is not found.
-     * @param {object} templateName View schema.
-     * @return {(Object|undefined)}
-     */
-    getViewTemplateMixin(templateName) {
-        const templateComponent = document.getElementById(`#template_view_${templateName}`);
-
-        if (templateComponent) {
-            return Vue.compile(templateComponent.textContent);
-        }
-    }
-
-    /**
-     * @param {string} path
-     * @param {Object} schema
-     * @returns {Object.<string, Object>}
-     */
-    _getOperations(path, schema) {
-        const operations = {};
-        for (let operationSchema of Object.values(schema)) {
-            const operationId = this.getPathOperationId(operationSchema);
-            if (!operationId) {
-                continue;
-            }
-
-            const operationOptions = this.getViewSchema_operationIdOptions(
-                operationId,
-                path,
-                operationSchema,
-            );
-            if (operationSchema['x-allow-append'] !== undefined) {
-                /**
-                 * Set x-allow-append argument to view schema.
-                 */
-                operationOptions['x-allow-append'] = operationSchema['x-allow-append'];
-            }
-            operations[operationOptions.type] = [
-                operationSchema,
-                $.extend(true, {}, this.getViewSchema_baseOptions(path), operationOptions),
-            ];
-        }
-        return operations;
+        return this.modelsClasses.get(responseModelRef.split('/').pop());
     }
 
     /**
      * Method, that creates views based on OpenApi schema.
-     * @param {class} constructor View class - constructor, that returns View object.
-     * @param {object} openapi_schema OpenApi Schema.
-     * @return {object} views Dict of views objects.
+     * @param {object} schema OpenApi Schema.
+     * @return {Map<string, View>} views Dict of views objects.
      */
-    getViews(constructor, openapi_schema) {
-        let views = {};
-        let paths = this.getPaths(openapi_schema);
-        const editStyle = openapi_schema.info['x-edit-style'];
-        for (let [path, pathObj] of Object.entries(paths)) {
-            const signalObj = { schema: pathObj, editStyle };
-            signals.emit(`views.schema[${path}].beforeInit`, signalObj);
+    getViews(schema) {
+        /**
+         * @type {Map<string, View>}
+         */
+        const views = new Map();
+        const viewsSchema = schema[this.dictionary.paths.name];
 
-            const operations = this._getOperations(path, pathObj);
-            const availableOperations = Object.keys(operations);
+        const paths = Object.keys(viewsSchema);
+        paths.sort();
 
-            const editViewInsteadOfReadonly =
-                signalObj.editStyle &&
-                (availableOperations.includes('page_edit') || availableOperations.includes('page_update'));
+        const editStyleViewDefault = schema.info[EDIT_STYLE_PROPERTY_NAME];
 
-            for (let [opSchema, opOptions] of Object.values(operations)) {
-                if (views[opOptions.path]) continue;
+        for (const path of paths) {
+            const pathSchema = viewsSchema[path];
+            const dataType = path.replace(/^\/|\/$/g, '').split('/');
+            const level = dataType.length;
+            const parentDataType = dataType.slice(0, -1);
+            const parentPath = level > 1 ? '/' + parentDataType.join('/') + '/' : null;
+            let parent = views.get(parentPath);
 
-                if (editViewInsteadOfReadonly) {
-                    if (opOptions.type === 'page') {
-                        continue;
+            const viewName = this._getViewName(path);
+            const commonOptions = {
+                level,
+                name: viewName,
+                title: capitalize(viewName.replace(/_/g, ' ')),
+            };
+
+            /** @type {ListView} */
+            let listView = null;
+            /** @type {PageView} */
+            let pageView = null;
+            /** @type {PageEditView} */
+            let editView = null;
+            /** @type {PageNewView} */
+            let newView = null;
+            let hasRemoveAction = false;
+
+            /**
+             * @type {Action}
+             */
+            let action = null;
+
+            const editStyleView =
+                pathSchema[EDIT_STYLE_PROPERTY_NAME] !== undefined
+                    ? pathSchema[EDIT_STYLE_PROPERTY_NAME]
+                    : editStyleViewDefault;
+
+            for (const httpMethod of HttpMethods.ALL) {
+                const operationSchema = pathSchema[httpMethod];
+                if (!operationSchema) continue;
+                const operationId = operationSchema[this.dictionary.paths.operation_id.name];
+
+                const model = this._getOperationModel(operationSchema);
+
+                const operationOptions = mergeDeep(
+                    { method: httpMethod, model },
+                    commonOptions,
+                    operationSchema,
+                    this.getOperationOptions(operationId, path),
+                );
+
+                if (operationOptions['x-label']) operationOptions.title = operationOptions['x-label'];
+
+                if (operationOptions.type === ViewTypes.LIST) {
+                    operationOptions.filters = this._generateFilters(path, operationOptions.parameters);
+                    const qs = new QuerySet(path, { [RequestTypes.LIST]: model });
+                    listView = new ListView(operationOptions, qs);
+                    views.set(path, listView);
+                    const filterAction = this.dictionary.paths.operations.list.filters;
+                    listView.actions.set(filterAction.name, filterAction);
+                    continue;
+                }
+
+                if (operationOptions.type === ViewTypes.PAGE) {
+                    pageView = new PageView(operationOptions, null);
+                    views.set(pageView.path, pageView);
+                } else if (operationOptions.type === ViewTypes.PAGE_NEW) {
+                    newView = new PageNewView(operationOptions, null);
+                    views.set(newView.path, newView);
+                } else if (operationOptions.type === ViewTypes.PAGE_EDIT) {
+                    editView = new PageEditView(operationOptions, null);
+                    views.set(editView.path, editView);
+                } else if (operationOptions.type === ViewTypes.PAGE_REMOVE) {
+                    hasRemoveAction = true;
+                } else if (operationOptions.type === ViewTypes.ACTION) {
+                    const isEmpty = model.fields.size === 0 || model === NoModel;
+                    const isMultiAction =
+                        (operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined &&
+                            operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]) ||
+                        isEmpty;
+
+                    const params = {
+                        name: operationOptions.name,
+                        title: operationOptions.title,
+                        isMultiAction,
+                        isEmpty,
+                    };
+                    if (isEmpty) {
+                        params.method = httpMethod;
+                        params.path = path;
                     } else {
-                        opOptions.path = opOptions.path.replace('/edit', '');
+                        const view = new ActionView(operationOptions, null);
+                        const executeAction = {
+                            ...this.dictionary.paths.operations.action.execute,
+                            title: operationOptions[ACTION_NAME] || operationOptions.title,
+                        };
+                        view.actions.set(executeAction.name, executeAction);
+                        params.view = view;
+                        views.set(view.path, view);
                     }
+                    action = params;
                 }
+            }
 
-                let model = this.getViewSchema_model(opSchema);
+            const isNested = parent;
+            const isListPath = listView;
+            const parentIsList = parent && parent.type === ViewTypes.LIST;
+            const isDetailPath = !isListPath && pageView;
+            const isDetailWithoutList = isDetailPath && !dataType[dataType.length - 1].includes('{');
+            const isListDetail = parentIsList && isDetailPath && dataType[dataType.length - 1].includes('{');
 
-                let mixins = [];
-                let templateMixin = this.getViewTemplateMixin(opOptions.name);
-                if (templateMixin) mixins.push(templateMixin);
+            // Set list path models
+            if (isListDetail) {
+                parent.objects.models[RequestTypes.RETRIEVE] = pageView.params.model;
+                pageView.objects = parent.objects;
+                if (editView) {
+                    parent.objects.models[RequestTypes.PARTIAL_UPDATE] = editView.params.model;
+                    parent.objects.models[RequestTypes.UPDATE] = editView.params.model;
+                    editView.objects = parent.objects;
+                }
+            }
 
-                signals.emit(`views[${opOptions.path}].beforeInit`, {
-                    schema: opOptions,
-                    model: model,
-                    mixins: mixins,
+            // Set new page queryset
+            if (isListPath && newView) {
+                listView.objects.models[RequestTypes.CREATE] = newView.params.model;
+                newView.objects = listView.objects;
+            }
+
+            // Set detail path models
+            if (isDetailWithoutList) {
+                pageView.objects = new SingleEntityQueryset(pageView.path, {
+                    [RequestTypes.RETRIEVE]: pageView.params.model,
+                });
+                if (newView) {
+                    pageView.objects.models[RequestTypes.CREATE] = newView.params.model;
+                    newView.objects = pageView.objects;
+                }
+                if (editView) {
+                    pageView.objects.models[RequestTypes.PARTIAL_UPDATE] = editView.params.model;
+                    pageView.objects.models[RequestTypes.UPDATE] = editView.params.model;
+                    editView.objects = pageView.objects;
+                }
+            }
+
+            // Set nested list view
+            if (isNested && isListPath)
+                parent.sublinks.set(listView.params.name, {
+                    name: listView.params.name,
+                    title: listView.params.title,
+                    href: listView.path,
                 });
 
-                views[opOptions.path] = new constructor(model, opOptions, templateMixin, mixins);
+            // Edit style views
+            if (editStyleView && editView && pageView) {
+                views.delete(editView.path);
+                views.set(pageView.path, editView);
+                editView.path = pageView.path;
+                editView.isEditStyleOnly = true;
+                pageView = editView;
+            }
 
-                signals.emit(`views[${opOptions.path}].afterInit`, {
-                    view: views[opOptions.path],
+            // Set nested page view
+            if (isNested && isDetailWithoutList) {
+                parent.sublinks.set(pageView.params.name, {
+                    name: pageView.params.name,
+                    title: pageView.params.title,
+                    href: pageView.path,
                 });
+            }
 
-                signals.emit('views.afterInitEach', { views: views, path: opOptions.path });
+            // Set pagePath and listPath
+            if (pageView && isListDetail) {
+                parent.pageView = pageView;
+                pageView.listView = parent;
+                if (editView) editView.listView = parent;
+            }
 
-                if (!views[opOptions.path].mixins.some((mixin) => mixin.render)) {
-                    views[opOptions.path].mixins.unshift(DefaultEntityView);
+            // Set edit view actions
+            if (editView) {
+                const saveAction = this.dictionary.paths.operations.page_edit.save;
+                const reloadAction = this.dictionary.paths.operations.page_edit.reload;
+                editView.actions.set(saveAction.name, saveAction);
+                editView.actions.set(reloadAction.name, reloadAction);
+            }
+
+            // Set edit action
+            if (editView && !editStyleView) {
+                const pageEditAction = mergeDeep(
+                    { view: editView },
+                    this.dictionary.paths.operations.page.edit,
+                );
+                if (pageView) pageView.actions.set(pageEditAction.name, pageEditAction);
+            }
+
+            // Set remove action
+            if (hasRemoveAction) {
+                const pageRemoveAction = mergeDeep({}, this.dictionary.paths.operations.base.remove);
+                if (pageView) pageView.actions.set(pageRemoveAction.name, pageRemoveAction);
+                if (parentIsList) parent.multiActions.set(pageRemoveAction.name, pageRemoveAction);
+            }
+
+            // Set new sublink/action
+            if (newView) {
+                const saveAction = this.dictionary.paths.operations.page_new.save_new;
+                newView.actions.set(saveAction.name, saveAction);
+
+                const viewToLink = (isDetailPath && pageView) || listView || parent;
+                newView.listView = viewToLink;
+                const newAction = mergeDeep(
+                    { href: newView.path },
+                    this.dictionary.paths.operations.list.new,
+                );
+                viewToLink.sublinks.set(newAction.name, newAction);
+                if (newView.nestedAllowAppend) {
+                    const options = mergeDeep({}, this.dictionary.paths.operations.list.add);
+                    viewToLink.actions.set(options.name, options);
                 }
+            }
+
+            // Set action
+            if (action && isNested) {
+                parent.actions.set(action.name, action);
+                if (
+                    action.isMultiAction &&
+                    [ViewTypes.PAGE, ViewTypes.PAGE_EDIT].includes(parent.type) &&
+                    parent.listView
+                ) {
+                    parent.listView.multiActions.set(action.name, action);
+                }
+            }
+
+            // Set pkParamName
+            if (isListDetail) {
+                const param = path
+                    .replace(/^\/|\/$/g, '')
+                    .split('/')
+                    .last?.replace('{', '')
+                    .replace('}', '');
+
+                for (const view of [pageView, editView]) if (view) view.pkParamName = param;
             }
         }
 
-        signals.emit('allViews.inited', { views: views });
+        this._setNestedQuerysets(views);
+        this._setParents(views);
+
+        signals.emit('allViews.created', { views });
 
         return views;
     }
 
     /**
-     * Method, that checks: is current link an operation for this path_obj.
-     * @param {string} name Name of a link obj.
-     * @param {object} path_obj View object of a path, for which internal links are setting.
-     * @return {boolean} bool True, if link is operation for this path_obj, otherwise - false.
+     * Method, that generates new guiField objects for View filters.
+     * @return {Object<string, BaseField>}
      */
-    internalLinkIsOperation(name, path_obj) {
-        let bool = false;
-        ['base', path_obj.schema.type].forEach((type) => {
-            if (this.dictionary.paths.operations[type] && this.dictionary.paths.operations[type][name]) {
-                bool = true;
-            }
-        });
-        return bool;
+    _generateFilters(path, parameters) {
+        const filters = {};
+
+        const parametersCopy = Object.values($.extend(true, {}, parameters)).filter(
+            (f) => !FILTERS_TO_EXCLUDE.includes(f.name),
+        );
+
+        signals.emit(`views[${path}].filters.beforeInit`, parametersCopy);
+
+        for (const parameterObject of parametersCopy) {
+            const format = this.getFieldFormat(parameterObject);
+            const fieldConstructor = this.fieldsClasses.get(format);
+            filters[parameterObject.name] = new fieldConstructor(
+                $.extend(true, { format }, parameterObject, { readOnly: false }),
+            );
+        }
+
+        signals.emit(`views[${path}].filters.afterInit`, parametersCopy);
+
+        return filters;
     }
 
     /**
-     * Method, that returns extension from opeanapi_dictionary for current link obj.
-     * @param {string} link_name Name of a link.
-     * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
-     * @param {object} path_obj View object for a path (object FROM which link wll be formed).
+     * Method that sets nested querysets needed for to getting instances that can be added
+     * @param {Map<string, View>} views
      */
-    getInternalLinkObj_extension(link_name, link_type, path_obj) {
-        let obj = {};
-        let dict = this.dictionary.paths;
-        ['base', path_obj.schema.type].forEach((path_type) => {
-            if (
-                dict &&
-                dict[link_type] &&
-                dict[link_type][path_type] &&
-                dict[link_type][path_type][link_name]
-            ) {
-                $.extend(true, obj, dict[link_type][path_type][link_name]);
-            }
-        });
-        return obj;
+    _setNestedQuerysets(views) {
+        /** @type {Map<string, QuerySet>} */
+        const qsCache = new Map();
+        const listViews = Array.from(views.values())
+            .filter((view) => view.type === ViewTypes.LIST)
+            .sort((a, b) => a.level - b.level);
+
+        for (const listView of listViews) {
+            const modelName = listView.objects.getModelClass(RequestTypes.LIST).name;
+            if (!qsCache.has(modelName)) qsCache.set(modelName, listView.objects);
+        }
+
+        /** @type {ListView[]} */
+        const nestedListViews = Array.from(views.values())
+            .filter((view) => view instanceof PageNewView && view.nestedAllowAppend)
+            .map((view) => view.listView);
+
+        for (const nestedListView of nestedListViews) {
+            const modelName = nestedListView.objects.getModelClass(RequestTypes.LIST).name;
+            const qs = qsCache.get(modelName);
+            if (!qs) throw new Error(`Cannot find queryset for model: ${modelName}`);
+            nestedListView.nestedQueryset = qs;
+        }
     }
 
     /**
-     * Method, that defines emptiness of path_obj.
-     * @param {object} path_obj View object for a link path.
-     * @returns {boolean}
+     * @param {Map<string, View>} views
      */
-    isPathObjSchemaEmpty(path_obj) {
-        if (path_obj.schema.empty) {
-            return true;
-        }
-
-        return isEmptyObject(path_obj.objects.model.fields);
-    }
-
-    /**
-     * Method, that returns object for a current link.
-     * @param {string} link_name Name of a link.
-     * @param {string} link_type Type of link object (child_links, actions, operations, sublinks).
-     * @param {string} link Real path of link_obj.
-     * @param {object} link_obj View object for a link (object TO which link will be formed).
-     * @param {object} path_obj View object for a path (object FROM which link wll be formed).
-     */
-    getInternalLinkObj(link_name, link_type, link, link_obj, path_obj) {
-        let obj = {
-            name: link_name,
-        };
-
-        if (!link_obj.schema.hidden && link) {
-            obj.path = link;
-        }
-
-        if (this.isPathObjSchemaEmpty(link_obj)) {
-            obj.empty = true;
-            obj.query_type = link_obj.schema.query_type;
-        }
-
-        $.extend(true, obj, this.getInternalLinkObj_extension(link_name, link_type, path_obj));
-
-        return obj;
-    }
-
-    /**
-     * Method, that finds and returns internal links(links for another views) for a current view.
-     * @param {object} views Dict with view objects.
-     * @param {string} path Path of current view.
-     * @return {object} Links - dict with links objects.
-     */
-    getViewInternalLinks(views, path) {
-        let links = {
-            actions: {},
-            operations: {},
-            sublinks: {},
-            child_links: {},
-        };
-
-        for (let link in views) {
-            if (!Object.prototype.hasOwnProperty.call(views, link)) {
-                continue;
-            }
-
-            if (views[link].schema.do_not_connect_with_another_views) {
-                continue;
-            }
-
-            if (link === path) {
-                continue;
-            }
-
-            if (link.indexOf(path) !== 0) {
-                continue;
-            }
-
-            let link_name = link.match(/\/([A-z0-9]+)\/$/);
-
-            if (
-                views[link].schema.do_not_connect_with_another_views ||
-                link === path ||
-                link.indexOf(path) !== 0 ||
-                !link_name
-            ) {
-                continue;
-            }
-
-            link_name = link_name[1];
-
-            let dif = link.match(/\//g).length - path.match(/\//g).length;
-            let link_type;
-
-            if (dif > 2) {
-                continue;
-            }
-
-            if (dif === 2) {
-                link_type = 'child_links';
-            } else {
-                if (views[link].schema.type === 'action') {
-                    link_type = 'actions';
-                } else if (this.internalLinkIsOperation(link_name, views[path])) {
-                    link_type = 'operations';
-                } else {
-                    link_type = 'sublinks';
-                }
-            }
-
-            if (link_type) {
-                links[link_type][link_name] = this.getInternalLinkObj(
-                    link_name,
-                    link_type,
-                    link,
-                    views[link],
-                    views[path],
-                );
-            }
-        }
-
-        // adds required links, that were not added before
-        let types_to_add = this.getTypesOperationAlwaysToAdd();
-        if (types_to_add.includes(views[path].schema.type)) {
-            let dict = this.dictionary.paths;
-            let path_type = views[path].schema.type;
-
-            Object.keys(links).forEach((link_type) => {
-                if (dict && dict[link_type] && dict[link_type][path_type]) {
-                    for (let [link, linkObj] of Object.entries(dict[link_type][path_type])) {
-                        if (links[link_type][link]) {
-                            continue;
-                        }
-
-                        links[link_type][link] = linkObj;
-                    }
-                }
-            });
-        }
-
-        if (
-            views[path].schema.type === 'list' &&
-            views[path].schema.level > 2 &&
-            views['/' + views[path].schema.name + '/']
-        ) {
-            let dict = this.dictionary.paths;
-            let list_op;
-
-            if (dict && dict.operations && dict.operations.list) {
-                list_op = dict.operations.list;
-
-                //@todo add the nearest way.
-                let opt = {
-                    list_paths: ['/' + views[path].schema.name + '/'],
-                };
-                if (views[path + 'new/'] && views[path + 'new/'].nestedAllowAppend) {
-                    links.operations.add = $.extend(true, {}, list_op.add, opt);
-                }
-            }
-        }
-
-        return links;
-    }
-
-    /**
-     * Method, that finds and returns multi_actions for a current view.
-     * Multi_actions - actions/operations, that can be called for a list of instances.
-     * @param {object} views Dict with view objects.
-     * @param {string} path Path of current view.
-     * @return {object} multi_actions Dict with multi_actions objects.
-     */
-    getViewMultiActions(views, path) {
-        let multi_actions = {};
-        let dict = this.dictionary.paths;
-        let list = views[path];
-        if (!list.schema.page_path) {
-            return;
-        }
-        let page = views[list.schema.page_path];
-        ['actions', 'operations'].forEach((op_type) => {
-            if (!page.schema[op_type]) {
-                return;
-            }
-            for (let [item, itemObj] of Object.entries(page.schema[op_type])) {
-                if (dict && dict.multi_actions && dict.multi_actions.includes(item)) {
-                    multi_actions[item] = $.extend(true, { multi_action: true }, itemObj);
-                }
-            }
-        });
-        return multi_actions;
-    }
-
-    /**
-     * Method, that sets links to connected list and page views.
-     * @param {object} views Dict with view objects.
-     * @param {string} page_path Path of page view.
-     */
-    connectPageAndListViews(views, page_path) {
-        // let list_path = page_path.replace(/\{[A-z]+\}\/$/, "");
-        let list_path = page_path.replace(/{[A-z0-9]+}\/$/, '');
-        if (views[list_path]) {
-            views[page_path].schema.list_path = list_path;
-            views[list_path].schema.page_path = page_path;
+    _setParents(views) {
+        for (const [path, view] of views) {
+            const parent = views.get(path.replace(/[^/]+\/$/, ''));
+            if (parent) view.parent = parent;
         }
     }
 
     /**
      * Method, that returns dict with views, ready to use.
      * Method creates views, sets internal links for them and so on.
-     * @param {class} constructor View class - constructor, that returns View object.
      * @param {object} openapi_schema OpenApi Schema.
-     * @return {object} Views Dict of views objects, ready for usage.
+     * @return {Map<string, View>} Map of views objects, ready for usage.
      */
-    generateViews(constructor, openapi_schema) {
-        let views = this.getViews(constructor, openapi_schema);
-
-        for (let [path, view] of Object.entries(views)) {
-            let links = this.getViewInternalLinks(views, path);
-            for (let [key, val] of Object.entries(links)) {
-                views[path].schema[key] = val;
-            }
-
-            if (view.schema.type === 'page') {
-                this.connectPageAndListViews(views, path);
-            }
-        }
-
-        for (let [path, view] of Object.entries(views)) {
-            if (view.schema.type === 'list') {
-                view.schema.multi_actions = this.getViewMultiActions(views, path);
-            }
-
-            if (view.schema.hidden) {
-                delete views[path];
-                continue;
-            }
-
-            signals.emit(`views[${path}].created`, { view: view });
-        }
-
-        signals.emit('allViews.created', { views: views });
-
-        return views;
+    generateViews(openapi_schema) {
+        return this.getViews(openapi_schema);
     }
 }

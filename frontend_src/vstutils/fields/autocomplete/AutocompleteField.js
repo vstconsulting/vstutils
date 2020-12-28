@@ -15,7 +15,7 @@ class AutocompleteField extends StringField {
      * Redefinition of string guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(AutocompleteFieldMixin);
+        return [AutocompleteFieldMixin];
     }
 }
 

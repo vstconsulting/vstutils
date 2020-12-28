@@ -1,16 +1,11 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
+import { capitalize } from './utils';
 
 /**
  * Setting of global Vue filter - capitalize.
  */
-Vue.filter('capitalize', function (value) {
-    if (!value) {
-        return '';
-    }
-    value = value.toString();
-    return value.charAt(0).toUpperCase() + value.slice(1);
-});
+Vue.filter('capitalize', capitalize);
 /**
  * Setting of global Vue filter - split - replacing "_" on " ".
  */

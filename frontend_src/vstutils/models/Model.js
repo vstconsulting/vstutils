@@ -1,88 +1,291 @@
-import { isEmptyObject, obj_prop_retriever } from '../utils';
-import { FKField } from '../fields/fk/fk';
+class ModelUtils {
+    static viewFields = ['name', 'title', 'username', 'email', 'key'];
+    static pkFields = ['id', 'pk'];
+
+    static getPrototypes(cls, parents = [cls]) {
+        const proto = Object.getPrototypeOf(cls);
+        if (proto !== null) {
+            parents.push(proto);
+            ModelUtils.getPrototypes(proto, parents);
+        }
+        return parents;
+    }
+
+    /**
+     * @param cls
+     * @return {Map<string, BaseField>}
+     */
+    static getFields(cls) {
+        const fields = new Map();
+        const prototypes = ModelUtils.getPrototypes(cls).reverse();
+
+        for (const proto of prototypes) {
+            for (const field of proto.declaredFields || []) {
+                fields.set(field.name, field);
+            }
+        }
+
+        return fields;
+    }
+
+    static getPkField(cls) {
+        if (!cls.fields.size) return null;
+
+        if (cls.pkFieldName) return cls.fields.get(cls.pkFieldName);
+
+        for (const name of cls.fields.keys()) {
+            if (ModelUtils.pkFields.includes(name)) {
+                return cls.fields.get(name);
+            }
+        }
+
+        // If no fields found then return name of first field
+        return cls.fields.values().next().value;
+    }
+
+    static getViewField(cls) {
+        if (!cls.fields.size) return null;
+
+        if (cls.viewFieldName) return cls.fields.get(cls.viewFieldName);
+
+        for (const viewFieldName of ModelUtils.viewFields) {
+            if (cls.fields.has(viewFieldName)) {
+                return cls.fields.get(viewFieldName);
+            }
+        }
+
+        return null;
+    }
+
+    static isPrefetchField(field) {
+        return typeof field.prefetchDataOrNot === 'function';
+    }
+}
+
+/**
+ * @typedef {Function} RawModel
+ * @property {BaseField[]} [declaredFields]
+ * @property {string} [viewFieldName]
+ * @property {string} [pkFieldName]
+ */
+
+/**
+ * @function ModelClass_innerFunction
+ * @param {RawModel} cls
+ * @return {Function}
+ */
+
+/**
+ * Decorator that creates model class. Must be used as `@MakeModel(name)`.
+ * Name is optional if class is not anonymous, but parentheses is required.
+ * @param {string} [name] - Name if model
+ * @return {ModelClass_innerFunction}
+ */
+export function ModelClass(name) {
+    return (cls) => makeModel(cls, name);
+}
+
+/**
+ * @param {RawModel} cls
+ * @param {string} [name]
+ * @return {Function}
+ */
+export function makeModel(cls, name) {
+    // Set model name
+    name = name || cls.name;
+    if (name) {
+        const nameParameters = { value: name, writable: false };
+        Object.defineProperty(cls, 'name', nameParameters);
+        Object.defineProperty(cls.prototype, '_name', nameParameters);
+    }
+
+    // Set fields
+    const fields = ModelUtils.getFields(cls);
+    for (const field of fields.values()) field.model = cls;
+    Object.defineProperty(cls, 'fields', { value: fields, writable: true });
+    Object.defineProperty(cls.prototype, '_fields', {
+        get() {
+            return this.constructor.fields;
+        },
+    });
+
+    // Set pk field
+    const pkFieldParameters = { value: ModelUtils.getPkField(cls), writable: true };
+    Object.defineProperty(cls, 'pkField', pkFieldParameters);
+    Object.defineProperty(cls.prototype, '_pkField', {
+        get() {
+            return this.constructor.pkField;
+        },
+    });
+
+    // Set view field
+    const viewFieldParameters = { value: ModelUtils.getViewField(cls), writable: true };
+    Object.defineProperty(cls, 'viewField', viewFieldParameters);
+    Object.defineProperty(cls.prototype, '_viewField', {
+        get() {
+            return this.constructor.viewField;
+        },
+    });
+
+    // Set fields descriptors
+    for (let [fieldName, field] of fields) {
+        Object.defineProperty(cls.prototype, fieldName, field.toDescriptor());
+    }
+
+    return cls;
+}
+
+/**
+ * @typedef {Object} FieldValidationErrorInfo
+ * @property {BaseField} field
+ * @property {string} message
+ */
+
+export class ModelValidationError extends Error {
+    /**
+     * @param {FieldValidationErrorInfo[]} errors
+     */
+    constructor(errors = []) {
+        super();
+        this.errors = errors;
+    }
+}
+
+/**
+ * Data that goes to/from api
+ * @typedef {Object} InnerData
+ */
+
+/**
+ * Data stored in sandbox store
+ * @typedef {Object} RepresentData
+ */
 
 /**
  * Class of Base Model.
+ * @property {string} _name - Model name
+ * @property {Map<string, BaseField>} _fields
+ * @property {BaseField} _pkField
+ * @property {BaseField} _viewField
  */
-export default class Model {
-    /**
-     * @param name {string}
-     * @param fields {Object.<string, BaseField>}
-     */
-    constructor(name, fields) {
-        this.name = name;
-        this.fields = fields;
-        this.non_instance_attr = ['non_instance_attr', 'constructor', 'getInstance'];
-        if (!isEmptyObject(this.fields)) {
-            this.pk_name = Object.keys(this.fields)[0];
-            for (let field in this.fields) {
-                if (this.fields[field].options.is_pk) {
-                    this.pk_name = field;
-                    break;
-                }
-            }
-            this.view_name = 'name';
+export class Model {
+    static declaredFields = [];
+    static fieldsGroups = {};
 
-            this.methodsToBulk = ['get', 'delete', 'put', 'patch', 'post'];
-        }
-    }
     /**
-     * Method, that convert data from 'gui view' format into format, appropriate for API.
-     * @param {object} form_data  Data from GUI form.
+     * @param {InnerData=} data
+     * @param {QuerySet=} queryset
      */
-    toInner(form_data = this.data) {
-        let data = {};
-        for (let item in form_data) {
-            if (this.fields[item]) {
-                data[item] = this.fields[item].toInner(form_data);
-            }
+    constructor(data = null, queryset = null) {
+        if (!data) {
+            data = this._getInitialData();
+        }
+        this._data = data;
+        this._queryset = queryset;
+    }
+
+    /**
+     * @return {InnerData}
+     */
+    _getInitialData() {
+        const data = {};
+        for (const [name, field] of this._fields) {
+            data[name] = field.getInitialValue();
         }
         return data;
     }
+
     /**
-     * Method, that convert data from API format into format, appropriate for 'gui view'.
-     * @param {object} api_data Data from API.
+     * @return {InnerData}
      */
-    toRepresent(api_data = this.data) {
-        let data = {};
-        for (let item in api_data) {
-            if (this.fields[item]) {
-                data[item] = this.fields[item].toRepresent(api_data);
-            }
+    _getInnerData() {
+        const data = {};
+        for (const name of this._fields.keys()) {
+            data[name] = this._data[name];
         }
         return data;
     }
+
+    /**
+     * @return {RepresentData}
+     */
+    _getRepresentData() {
+        const data = {};
+        for (const [name, field] of this._fields) {
+            data[name] = field.toRepresent(this._data);
+        }
+        return data;
+    }
+
+    /**
+     * @param {RepresentData} data
+     * @throws {ModelValidationError}
+     */
+    _validateAndSetData(data) {
+        // Validate data
+        /** @type {FieldValidationErrorInfo[]} */
+        const errors = [];
+        for (const field of this._fields.values()) {
+            const value = data[field.name];
+            try {
+                field.validateValue(value, data);
+            } catch (e) {
+                errors.push({ field, message: e.message });
+            }
+        }
+        if (errors.length) throw new ModelValidationError(errors);
+
+        // Set validated data
+        const newData = {};
+        for (const field of this._fields.values()) {
+            newData[field.name] = field.toInner(data);
+        }
+        this._data = newData;
+    }
+
     /**
      * Method, that returns instance's value of PK field.
      */
     getPkValue() {
-        if (this.fields[this.pk_name]) {
-            return this.fields[this.pk_name].toInner(this.data);
+        if (this._pkField) {
+            return this[this._pkField.name];
         }
     }
+
     /**
      * Method, that returns instance's value of view field.
      */
     getViewFieldValue(defaultValue = '') {
-        if (this.fields[this.view_name]) {
-            return this.fields[this.view_name].toRepresent(this.data);
-        } else if (Object.prototype.hasOwnProperty.call(this.fields, 'username')) {
-            return this.fields.username.toRepresent(this.data);
-        } else if (Object.prototype.hasOwnProperty.call(this.fields, 'email')) {
-            return this.fields.email.toRepresent(this.data);
+        if (this._viewField) {
+            return this[this._viewField.name];
         }
         return defaultValue;
     }
 
     /**
+     * Returns value of view field as string or undefined if model has no view field.
+     * @return {string|undefined}
+     */
+    getViewFieldString() {
+        if (this._viewField) {
+            const value = this[this._viewField.name];
+            if (value instanceof Model) {
+                return value.getViewFieldString();
+            }
+            if (value === null) {
+                return;
+            }
+            return String(value);
+        }
+    }
+
+    /**
      * Method to update model data
-     *
-     * @param {Model=} newDataInstance
      * @param {string=} method
      * @return {Promise.<Model>}
      */
-    async update({ newDataInstance = this, method = undefined }) {
-        return (await this.queryset.update(newDataInstance, [this], method))[0];
+    async update(method) {
+        return (await this._queryset.update(this, [this], method))[0];
     }
 
     /**
@@ -91,88 +294,27 @@ export default class Model {
      * @returns {Promise}
      */
     async delete() {
-        return (await this.queryset.delete([this]))[0];
-    }
-
-    /**
-     * Method, that returns model data, represented as FormData instance.
-     *
-     * @returns {FormData}
-     */
-    getFormData() {
-        const data = this.toInner(this.data);
-        const formData = new FormData();
-
-        for (let [key, value] of Object.entries(data)) formData.append(key, value);
-
-        return formData;
+        return (await this._queryset.delete([this]))[0];
     }
 
     /**
      * Method, that creates new Model instance.
-     *
-     * @returns {Promise.<Model>}
+     * @param {string} method - Http method
+     * @return {Promise<Model>}
      */
     create(method = 'post') {
-        return this.queryset.create(this, method);
+        return this._queryset.create(this, method);
     }
 
-    save(method = 'post') {
+    /**
+     * Method that saves current model instance
+     * @param {string=} method - Http method
+     * @return {Promise<Model>}
+     */
+    save(method) {
         if (!this.getPkValue()) {
             return this.create(method);
         }
-        return this.update({ method });
-    }
-
-    /**
-     * Method, that returns Model instance.
-     * @param {object} data  Data of Model instance's fields.
-     * @param {QuerySet} queryset Queryset for current Model instance.
-     * @returns {Model}
-     */
-    getInstance(data, queryset) {
-        const qs = queryset.clone();
-        qs.query = {};
-
-        let instance = {
-            data: data,
-            queryset: qs,
-        };
-
-        for (let key in this) {
-            if (Object.prototype.hasOwnProperty.call(this, key) && !this.non_instance_attr.includes(key)) {
-                instance[key] = this[key];
-            }
-        }
-
-        let methods = obj_prop_retriever.getPrototypeNonenumerables(this, false);
-
-        for (let index = 0; index < methods.length; index++) {
-            let key = methods[index];
-            if (!this.non_instance_attr.includes(key)) {
-                instance[key] = this[key];
-            }
-        }
-
-        return instance;
-    }
-
-    /**
-     * Method, that returns Array with prefetch fields' names of current model.
-     * @returns {string[]} fields Array with names of prefetch fields.
-     */
-    getPrefetchFields() {
-        let fields = [];
-
-        for (let key in this.fields) {
-            if (Object.prototype.hasOwnProperty.call(this.fields, key)) {
-                let field = this.fields[key];
-                if (field instanceof FKField) {
-                    fields.push(key);
-                }
-            }
-        }
-
-        return fields;
+        return this.update(method);
     }
 }

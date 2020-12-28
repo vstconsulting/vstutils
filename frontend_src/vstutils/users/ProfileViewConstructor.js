@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import { path_pk_key } from '../utils';
 import { View } from '../views';
-import ViewWithParentInstancesForPath from '../views/ViewWithParentInstancesForPath.js';
 
 export default class ProfileViewConstructor {
     /**
@@ -19,7 +18,7 @@ export default class ProfileViewConstructor {
      * @returns {View}
      */
     generateProfileView(views, path) {
-        let view = views[path];
+        let view = views.get(path);
         let new_view = new View(view.objects.model, $.extend(true, {}, view.schema));
         let mixin = this.getBaseProfileMixin(path);
 
@@ -46,7 +45,6 @@ export default class ProfileViewConstructor {
      */
     getBaseProfileMixin(path) {
         return {
-            mixins: [ViewWithParentInstancesForPath],
             computed: {
                 url() {
                     return path
@@ -57,7 +55,7 @@ export default class ProfileViewConstructor {
             },
             methods: {
                 loadParentInstanceOrNot(views, obj) {
-                    if (views[obj.path] && views[obj.path].schema.type === 'list') {
+                    if (views.get(obj.path) && views.get(obj.path).schema.type === 'list') {
                         return false;
                     }
 

@@ -1,20 +1,22 @@
 <template>
     <div class="image-field-content-wrapper">
         <img :src="img_src" :alt="img_alt" class="image-field-content" @click="openImage" />
-        <gui_modal v-show="show_modal" @close="closeImage" :opt="modal_opt">
-            <template v-slot:header>
+        <Modal v-show="show_modal" :opt="modal_opt" @close="closeImage">
+            <template #header>
                 <h3>{{ $t(img_alt.toLowerCase()) | capitalize | split }}</h3>
             </template>
-            <template v-slot:body>
+            <template #body>
                 <img :src="img_src" :alt="img_alt" class="image-field-content" />
             </template>
-        </gui_modal>
+        </Modal>
     </div>
 </template>
 
 <script>
     import { BaseFieldInnerComponentMixin } from '../../base';
+    import Modal from '../../../components/items/modal/Modal.vue';
     export default {
+        components: { Modal },
         mixins: [BaseFieldInnerComponentMixin],
         data() {
             return {

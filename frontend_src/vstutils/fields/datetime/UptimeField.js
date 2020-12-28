@@ -26,16 +26,10 @@ class UptimeField extends BaseField {
             /(?<hh>[0-9]+):(?<mm>[0-9]+):(?<ss>[0-9]+)/,
         ];
     }
-    /**
-     * Redefinition of base guiField method toInner.
-     * @param {object} data
-     */
-    toInner(data = {}) {
-        let value = data[this.options.name];
 
-        if (!value) {
-            return;
-        }
+    toInner(data) {
+        const value = super.toInner(data);
+        if (!value) return;
 
         // TODO think about this 'if', during making decision about what type of data to save in store
         // toInner or to Represent.
@@ -69,12 +63,9 @@ class UptimeField extends BaseField {
 
         return uptime_in_seconds;
     }
-    /**
-     * Redefinition of base guiField method toRepresent.
-     * @param {object} data
-     */
-    toRepresent(data = {}) {
-        return getTimeInUptimeFormat(data[this.options.name]);
+
+    toRepresent(data) {
+        return getTimeInUptimeFormat(super.toRepresent(data));
     }
     /**
      * Redefinition of base guiField method _insertTestValue_imitateEvent.

@@ -6,11 +6,9 @@ import BooleanFieldMixin from './BooleanFieldMixin.js';
 class BooleanField extends BaseField {
     /**
      * Custom method for toInner and toRepresent methods.
-     * @param {object} data
+     * @param {*} value
      */
-    _getValue(data = {}) {
-        let value = data[this.options.name];
-
+    _toBoolean(value) {
         if (typeof value == 'boolean') {
             return value;
         }
@@ -24,20 +22,18 @@ class BooleanField extends BaseField {
         }
     }
 
-    /**
-     * Redefinition of base guiField method toInner.
-     * @param {object} data
-     */
-    toInner(data = {}) {
-        return this._getValue(data);
+    toInner(data) {
+        return this._toBoolean(super.toInner(data));
     }
-    /**
-     * Redefinition of base guiField method toRepresent.
-     * @param {object} data
-     */
-    toRepresent(data = {}) {
-        return this._getValue(data);
+
+    toRepresent(data) {
+        return this._toBoolean(super.toRepresent(data));
     }
+
+    getInitialValue() {
+        return false;
+    }
+
     /**
      * Redefinition of base guiField method _insertTestValue.
      */
@@ -69,7 +65,7 @@ class BooleanField extends BaseField {
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(BooleanFieldMixin);
+        return [BooleanFieldMixin];
     }
 }
 

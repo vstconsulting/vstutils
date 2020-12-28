@@ -3,10 +3,11 @@ import VueI18n from 'vue-i18n';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings } from './vstutils/utils';
-import { View, ViewConstructor } from './vstutils/views';
+import { ViewConstructor } from './vstutils/views';
 import { StoreConstructor } from './vstutils/store';
-import { ModelConstructor, guiModels } from './vstutils/models';
+import { ModelConstructor, ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
+import { QuerySetsResolver } from './vstutils/querySet';
 
 export * from './app.common.js';
 export * from './vstutils/dashboard';
@@ -18,74 +19,58 @@ export * from './vstutils/dashboard';
 export class App extends BaseApp {
     /**
      * Constructor of App class.
-     * @param {object} openapi Object with OpenAPI schema.
-     * @param {object} cache Cache instance (is supposed to be instance of FilesCache class).
+     * @param {AppConfiguration} config Object with OpenAPI schema.
+     * @param {FakeCache} cache Cache instance (is supposed to be instance of FilesCache class).
+     * @param {Map<string, BaseField>} fields
+     * @param {Map<string, Function>} models
      */
-    constructor(openapi, cache) {
-        super(openapi, cache);
-        /**
-         * Dict, that stores all parsed models from OpenAPI schema.
-         */
-        this.models = null;
-        /**
-         * Dict, that stores all views, generated for all paths from OpenAPI schema.
-         */
+    constructor(config, cache, fields, models) {
+        super(config, cache);
+
+        this.fieldsClasses = fields;
+        this.modelsClasses = models;
+
+        /** @type {Map<string, View>} */
         this.views = null;
+
+        /** @type {ModelsResolver} */
+        this.modelsResolver = null;
+
+        /** @type {QuerySetsResolver} */
+        this.qsResolver = null;
+
         /**
          * Main(root) Vue instance for current application, that has access to the app store and app router.
          */
         this.application = null;
     }
     afterInitialDataBeforeMount() {
-        this.initModels();
-        this.initViews();
-    }
-    /**
-     * Method, that inits Models Objects.
-     */
-    initModels() {
-        this.models = this.generateModels();
-    }
-    /**
-     * Method, that generates Models Objects, based on openapi_schema.
-     */
-    generateModels() {
-        let models_constructor = new ModelConstructor(openapi_dictionary, guiModels);
-        return models_constructor.generateModels(this.api.openapi);
-    }
-    /**
-     * Method, that inits Views Objects.
-     */
-    initViews() {
-        this.views = this.generateViews();
+        new ModelConstructor(
+            openapi_dictionary,
+            this.config.schema,
+            this.fieldsClasses,
+            this.modelsClasses,
+        ).generateModels();
+
+        this.modelsResolver = new ModelsResolver(this.modelsClasses, this.fieldsClasses, this.config.schema);
+
+        this.views = new ViewConstructor(
+            openapi_dictionary,
+            this.modelsClasses,
+            this.fieldsClasses,
+        ).generateViews(this.config.schema);
+
+        this.qsResolver = new QuerySetsResolver(this.modelsClasses, this.views);
+
         this.prepareViewsModelsFields();
     }
-    /**
-     * Method, that generates Views Objects, based on openapi_schema.
-     */
-    generateViews() {
-        let views_constructor = new ViewConstructor(openapi_dictionary, this.models);
-        return views_constructor.generateViews(View, this.api.openapi);
-    }
-    /**
-     * Method, that runs through all views
-     * and handles all fields with additionalProperties.
-     */
+
     prepareViewsModelsFields() {
-        for (let path in this.views) {
-            if (Object.prototype.hasOwnProperty.call(this.views, path)) {
-                let view = this.views[path];
-
-                for (let key in view.objects.model.fields) {
-                    if (Object.prototype.hasOwnProperty.call(view.objects.model.fields, key)) {
-                        let field = view.objects.model.fields[key];
-
-                        if (field.constructor.prepareField) {
-                            let prepared = field.constructor.prepareField(field, path);
-
-                            view.objects.model.fields[key] = prepared;
-                        }
-                    }
+        for (const [path, view] of this.views) {
+            if (!view.objects) continue;
+            for (const model of Object.values(view.objects.models)) {
+                for (const field of model.fields.values()) {
+                    field.prepareField(this, path);
                 }
             }
         }
@@ -125,7 +110,7 @@ export class App extends BaseApp {
             return Promise.resolve(lang);
         }
 
-        return this.api
+        return this.translationsManager
             .getTranslations(lang)
             .then((transitions) => {
                 this.translations = {
@@ -156,8 +141,8 @@ export class App extends BaseApp {
             routerMixins.routesComponentsTemplates,
             routerMixins.customRoutesComponentsTemplates,
         );
-
         window.spa.signals.emit('app.beforeInitRouter', { routerConstructor });
+        this.router = routerConstructor.getRouter();
 
         let i18n = new VueI18n({
             locale: guiLocalSettings.get('lang') || 'en',
@@ -167,13 +152,14 @@ export class App extends BaseApp {
 
         this.application = new Vue({
             mixins: [this.appRootComponent],
+            provide: { appInstance: this },
             propsData: {
-                info: this.api.openapi.info,
-                x_menu: this.api.openapi.info['x-menu'],
-                x_docs: this.api.openapi.info['x-docs'],
+                info: this.config.schema.info,
+                x_menu: this.config.schema.info['x-menu'],
+                x_docs: this.config.schema.info['x-docs'],
                 a_links: false,
             },
-            router: routerConstructor.getRouter(),
+            router: this.router,
             store: storeConstructor.getStore(),
             i18n: i18n,
         }).$mount('#RealBody');

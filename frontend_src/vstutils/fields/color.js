@@ -6,7 +6,7 @@ import { BaseField, BaseFieldContentReadonlyMixin, BaseFieldContentEdit } from '
 const ColorFieldContentMixin = {
     data() {
         return {
-            input_type: 'color',
+            inputType: 'color',
         };
     },
 };

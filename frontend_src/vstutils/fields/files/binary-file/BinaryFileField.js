@@ -1,6 +1,6 @@
-import { arrayBufferToBase64 } from '../../../utils';
 import { FileField } from '../file';
 import BinaryFileFieldMixin from './BinaryFileFieldMixin.js';
+import { arrayBufferToBase64 } from '../../../utils';
 
 /**
  * BinFile guiField class.

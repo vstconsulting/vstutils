@@ -27,7 +27,7 @@ class ComponentsRegistrator {
     registerAll() {
         for (let [name, component] of Object.entries(this.components)) {
             if (Vue.options.components[name]) {
-                throw new Error(`Conponent ${name} already registred`);
+                throw new Error(`Component ${name} already registered`);
             }
             Vue.component(name, component);
         }

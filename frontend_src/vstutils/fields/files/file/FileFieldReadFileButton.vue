@@ -1,21 +1,21 @@
 <template>
-    <div :class="wrapper_classes" :style="wrapper_styles" data-toggle="tooltip" :title="help_text">
-        <span :class="span_classes" :style="span_styles" @change="eventHandler">
+    <div :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="helpText">
+        <span :class="spanClasses" :style="spanStyles" @change="eventHandler">
             <input
+                id="file_reader_input"
                 type="file"
                 class="input-file"
-                id="file_reader_input"
                 :accept="accept"
                 :multiple="multiple"
             />
-            <span :class="icon_classes" :style="icon_styles"></span>
+            <span :class="iconClasses" :style="icon_styles" />
         </span>
     </div>
 </template>
 
 <script>
-    import { BaseFieldButton } from '../../base';
     import FileFieldButtonMixin from './FileFieldButtonMixin.js';
+    import { BaseFieldButton } from '../../buttons';
 
     /**
      * Component for 'open file' button.
@@ -24,9 +24,8 @@
         mixins: [BaseFieldButton, FileFieldButtonMixin],
         data() {
             return {
-                icon_classes: ['far', 'fa-file-alt'],
-                event_handler: 'readFile',
-                help_text: 'Open file',
+                iconClasses: ['far', 'fa-file-alt'],
+                helpText: 'Open file',
                 accept: '*',
                 multiple: false,
             };

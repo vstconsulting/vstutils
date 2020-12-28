@@ -67,6 +67,12 @@ class Host(BModel):
         return base.Response(response, 201).resp
 
 
+class HostList(Host):
+    class Meta:
+        proxy = True
+        _view_class = 'list_only'
+
+
 class HostGroup(BModel):
     objects = Manager.from_queryset(HostQuerySet)()
     name = models.CharField(max_length=1024)

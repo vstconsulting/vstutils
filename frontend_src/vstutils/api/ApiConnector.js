@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import StatusError from './StatusError.js';
-import { guiLocalSettings, getCookie } from '../utils';
+import { guiLocalSettings, getCookie, makeQueryString } from '../utils';
 
 class APIResponse {
     constructor(status = undefined, data = undefined) {
@@ -33,6 +33,24 @@ function rejectAll(bulks, value) {
     }
 }
 
+export const BulkType = {
+    SIMPLE: 'put',
+    TRANSACTIONAL: 'post',
+    ASYNC: 'patch',
+};
+
+/**
+ * Represents one bulk request
+ *
+ * @typedef {Object} BulkRequest
+ * @property {string} method - Http method.
+ * @property {string} path - Request path.
+ * @property {string} [version] - API version.
+ * @property {any} [data] - Request data.
+ * @property {Object} [query] - Query params.
+ * @property {Object} [headers] - Request headers.
+ */
+
 /**
  * Represents one bulk response
  *
@@ -52,6 +70,22 @@ class ApiConnector {
      */
     constructor() {
         /**
+         * @type {AppConfiguration}
+         */
+        this.appConfig = null;
+        this.openapi = null;
+        this.defaultVersion = null;
+        this.endpointURL = null;
+
+        /**
+         * @typedef CollectedBulkRequest
+         * @type {object}
+         * @property {BulkRequest} data - Body of bulk query.
+         * @property {Promise} promise - Promise for bulk request.
+         * @property {{resolve: Function, reject: Function}} callbacks - Object with promise callbacks.
+         */
+
+        /**
          * Property for collecting several bulk requests into one.
          */
         this.bulk_collector = {
@@ -60,68 +94,36 @@ class ApiConnector {
              */
             timeout_id: undefined,
             /**
-             * Array, that collects objects, created for every bulk request.
-             * Example of this object.
-             * {
-             *   // Body of bulk query.
-             *   data: {method: get, path: []},
-             *
-             *   // Promise for bulk request.
-             *   promise: new Promise(),
-             *
-             *   // Object with promise callbacks.
-             *   callbacks: {resolve: function(){}, reject: function(){},},
-             * }
+             * @type {CollectedBulkRequest[]}
              */
             bulk_parts: [],
         };
-
-        this.endpointURL = window.endpoint_url;
 
         this.headers = {
             'X-CSRFToken': getCookie('csrftoken'),
         };
     }
 
-    get openapi() {
-        return window.app.schema;
+    /**
+     * Method that sets application configuration. Must be called before making any requests.
+     * @param {AppConfiguration} appConfig
+     * @return {ApiConnector}
+     */
+    initConfiguration(appConfig) {
+        this.appConfig = appConfig;
+        this.openapi = appConfig.schema;
+        this.defaultVersion = this.openapi.info.version;
+        this.endpointURL = appConfig.endpointUrl;
+
+        // remove version and ending slash from path (/api/v1/)
+        const path = this.openapi.basePath.replace(this.defaultVersion, '').replace(/\/$/, '');
+        this.baseURL = `${this.openapi.schemes[0]}://${this.openapi.host}${path}`;
+
+        return this;
     }
 
     get cache() {
         return window.app.cache;
-    }
-
-    get defaultVersion() {
-        return this.openapi.info.version;
-    }
-
-    get baseURL() {
-        // remove version and ending slash from path (/api/v1/)
-        const path = this.openapi.basePath.replace(this.defaultVersion, '').replace(/\/$/, '');
-
-        return `${this.openapi.schemes[0]}://${this.openapi.host}${path}`;
-    }
-
-    /**
-     * Method, that converts query object into string
-     *
-     * @param {(string|object|URLSearchParams)=} query
-     * @param {boolean} useBulk - If false adds question mark (?) in front of string
-     * @returns {string}
-     */
-    makeQueryString(query = undefined, useBulk = false) {
-        let queryStr = '';
-        if (typeof query === 'string') {
-            queryStr = new URLSearchParams(query).toString();
-        } else if (typeof query === 'object') {
-            queryStr = new URLSearchParams(Object.entries(query)).toString();
-        } else if (query instanceof URLSearchParams) {
-            queryStr = query.toString();
-        }
-
-        if (!useBulk && queryStr !== '') queryStr = `?${queryStr}`;
-
-        return queryStr;
     }
 
     /**
@@ -138,9 +140,9 @@ class ApiConnector {
      * @returns {Promise<APIResponse>}
      */
     async makeRequest({
-        method = method,
+        method,
         version = this.defaultVersion,
-        path = path,
+        path,
         query = undefined,
         data = undefined,
         headers = {},
@@ -152,7 +154,7 @@ class ApiConnector {
                 method,
                 version,
                 path,
-                query: this.makeQueryString(query, useBulk),
+                query: makeQueryString(query, useBulk),
                 data,
                 headers,
             });
@@ -165,7 +167,7 @@ class ApiConnector {
             const fetchConfig = { method: method, headers: { ...this.headers, ...headers }, body: data };
 
             const response = await fetch(
-                `${this.baseURL}/${version}/${pathStr}/${this.makeQueryString(query)}`,
+                `${this.baseURL}/${version}/${pathStr}/${makeQueryString(query)}`,
                 fetchConfig,
             );
 
@@ -178,9 +180,23 @@ class ApiConnector {
             return new APIResponse(response.status, json);
         }
     }
+
+    /**
+     * @param {BulkRequest[]} requests
+     * @param {string} type - bulk type
+     * @return {Promise.<BulkResponse[]>}
+     */
+    sendBulk(requests, type = BulkType.SIMPLE) {
+        return fetch(this.endpointURL, {
+            method: type,
+            headers: { ...this.headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify(requests),
+        }).then((response) => response.json());
+    }
+
     /**
      * Method, that collects several bulk requests into one.
-     * @param {object} data Body of bulk request.
+     * @param {BulkRequest} data - Body of bulk request.
      * @returns {Promise.<BulkResponse>}
      */
     bulkQuery(data) {
@@ -188,25 +204,18 @@ class ApiConnector {
             clearTimeout(this.bulk_collector.timeout_id);
         }
 
-        let callbacks = {
-            resolve: undefined,
-            reject: undefined,
-        };
-
-        let promise = new Promise((resolve, reject) => {
+        const callbacks = {};
+        const promise = new Promise((resolve, reject) => {
             callbacks.resolve = resolve;
             callbacks.reject = reject;
         });
 
-        this.bulk_collector.bulk_parts.push({
-            data: data,
-            promise: promise,
-            callbacks: callbacks,
-        });
+        this.bulk_collector.bulk_parts.push({ data, promise, callbacks });
 
-        let bulk_timeout = guiLocalSettings.get('guiApi.real_query_timeout') || 100;
-
-        this.bulk_collector.timeout_id = setTimeout(() => this.sendBulk(), bulk_timeout);
+        this.bulk_collector.timeout_id = setTimeout(
+            () => this._sendCollectedBulks(),
+            guiLocalSettings.get('guiApi.real_query_timeout') || 100,
+        );
 
         return promise;
     }
@@ -215,32 +224,19 @@ class ApiConnector {
      * Method, that sends one big bulk request to API.
      * @return {Promise} Promise of getting bulk request response.
      */
-    async sendBulk() {
-        let collector = $.extend(true, {}, this.bulk_collector);
+    async _sendCollectedBulks() {
+        const collector = $.extend(true, {}, this.bulk_collector);
         this.bulk_collector.bulk_parts = [];
-        let bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
+        const bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
 
         try {
-            const response = await fetch(this.endpointURL, {
-                method: 'put',
-                headers: { ...this.headers, 'Content-Type': 'application/json' },
-                body: JSON.stringify(bulk_data),
-            });
-
-            let result;
-            try {
-                result = await response.json();
-            } catch (e) {
-                rejectAll(collector.bulk_parts, response.statusText);
-                return;
-            }
-
-            for (let [idx, item] of result.entries()) {
+            const results = await this.sendBulk(bulk_data);
+            for (let [idx, item] of results.entries()) {
                 try {
                     APIResponse.checkStatus(item.status, item.data);
-                    collector.bulk_parts[idx].callbacks['resolve'](item);
+                    collector.bulk_parts[idx].callbacks.resolve(item);
                 } catch (e) {
-                    collector.bulk_parts[idx].callbacks['reject'](item);
+                    collector.bulk_parts[idx].callbacks.reject(item);
                 }
             }
         } catch (error) {
@@ -286,87 +282,6 @@ class ApiConnector {
         }).then((response) => {
             return response.data;
         });
-    }
-    /**
-     * Method, that loads list of App languages from API.
-     * @return {promise} Promise of getting list of App languages from API.
-     */
-    loadLanguages() {
-        return this.bulkQuery({ path: '/_lang/', method: 'get' }).then((response) => {
-            return response.data.results;
-        });
-    }
-    /**
-     * Method, that gets list of App languages from cache.
-     * @return {promise} Promise of getting list of App languages from Cache.
-     */
-    getLanguagesFromCache() {
-        return (
-            this.cache
-                .get('languages')
-                .then((response) => {
-                    return JSON.parse(response.data);
-                })
-                // eslint-disable-next-line no-unused-vars
-                .catch((error) => {
-                    return this.loadLanguages().then((languages) => {
-                        this.cache.set('languages', JSON.stringify(languages));
-                        return languages;
-                    });
-                })
-        );
-    }
-    /**
-     * Method, that gets list of App languages.
-     * @return {promise} Promise of getting list of App languages.
-     */
-    getLanguages() {
-        if (this.cache) {
-            return this.getLanguagesFromCache();
-        }
-        return this.loadLanguages();
-    }
-    /**
-     * Method, that loads translations for some language from API.
-     * @param {string} lang Code of language, translations of which to load.
-     * @return {promise} Promise of getting translations for some language from API.
-     */
-    loadTranslations(lang) {
-        return this.bulkQuery({ path: ['_lang', lang], method: 'get' }).then((response) => {
-            return response.data.translations;
-        });
-    }
-    /**
-     * Method, that gets translations for some language from cache.
-     * @param {string} lang Code of language, translations of which to load.
-     * @return {promise} Promise of getting translations for some language from Cache.
-     */
-    getTranslationsFromCache(lang) {
-        return (
-            this.cache
-                .get('translations.' + lang)
-                .then((response) => {
-                    return JSON.parse(response.data);
-                })
-                // eslint-disable-next-line no-unused-vars
-                .catch((error) => {
-                    return this.loadTranslations(lang).then((translations) => {
-                        this.cache.set('translations.' + lang, JSON.stringify(translations));
-                        return translations;
-                    });
-                })
-        );
-    }
-    /**
-     * Method, that gets translations for some language.
-     * @param {string} lang Code of language, translations of which to load.
-     * @return {promise} Promise of getting translations for some language.
-     */
-    getTranslations(lang) {
-        if (this.cache) {
-            return this.getTranslationsFromCache(lang);
-        }
-        return this.loadTranslations(lang);
     }
 }
 

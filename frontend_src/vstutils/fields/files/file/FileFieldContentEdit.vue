@@ -5,13 +5,10 @@
             @cleanValue="$emit('proxyEvent', 'cleanValue')"
         ></field_clear_button>
 
-        <field_read_file_button
-            :field="field"
-            @readFile="$emit('proxyEvent', 'readFile', $event)"
-        ></field_read_file_button>
+        <ReadFileButton @click.native="$parent.readFile($event)" />
 
         <field_hidden_button
-            v-if="with_hidden_button"
+            v-if="hasHideButton"
             :field="field"
             @hideField="$emit('proxyEvent', 'hideField')"
         ></field_hidden_button>
@@ -57,7 +54,7 @@
                     };
                 },
             },
-            field_read_file_button: FileFieldReadFileButton,
+            ReadFileButton: FileFieldReadFileButton,
         },
     };
 </script>

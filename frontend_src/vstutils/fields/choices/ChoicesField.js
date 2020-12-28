@@ -6,19 +6,12 @@ import ChoicesFieldMixin from './ChoicesFieldMixin.js';
  * Choices guiField class.
  */
 class ChoicesField extends StringField {
-    /**
-     * Redefinition of string guiField method toInner.
-     * @param {object} data
-     */
-    toInner(data = {}) {
-        return data[this.options.name];
-    }
-    /**
-     * Redefinition of string guiField method toRepresent.
-     * @param {object} data
-     */
-    toRepresent(data = {}) {
-        return data[this.options.name];
+    constructor(options) {
+        super(options);
+        const props = options.additionalProperties || {};
+
+        this.enum = options.enum;
+        this.fieldForEnum = props.fieldForEnum;
     }
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.
@@ -37,7 +30,7 @@ class ChoicesField extends StringField {
      * Redefinition of string guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(ChoicesFieldMixin);
+        return [ChoicesFieldMixin];
     }
 }
 

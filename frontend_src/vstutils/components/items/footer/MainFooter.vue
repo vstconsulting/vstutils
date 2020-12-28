@@ -1,11 +1,11 @@
 <template>
     <footer class="main-footer">
         <div class="footer-section">
-            <gui_help_modal></gui_help_modal>
+            <HelpModal />
 
-            <slot name="footer_buttons"></slot>
+            <slot name="footer_buttons" />
 
-            <div class="d-none d-sm-block" style="margin-right: 0px;">
+            <div class="d-none d-sm-block" style="margin-right: 0px">
                 <b>{{ $tc('version', 1) | capitalize }}</b>
                 {{ project_version }}
             </div>
@@ -29,8 +29,10 @@
 </template>
 
 <script>
+    import HelpModal from '../modal/HelpModal.vue';
     export default {
         name: 'MainFooter',
+        components: { HelpModal },
         computed: {
             /**
              * Property, that returns project version.

@@ -8,16 +8,6 @@ const MultiselectFieldMixin = {
         field_content_readonly: MultiselectFieldContentReadonly,
         field_content_edit: MultiselectFieldContentEdit,
     },
-    methods: {
-        /**
-         * Redefinition of 'handleValue' method of base guiField.
-         * @param {object} data Object with values of current field
-         * and fields from the same fields_wrapper.
-         */
-        handleValue(data) {
-            return this.field.toInner(data);
-        },
-    },
 };
 
 export default MultiselectFieldMixin;

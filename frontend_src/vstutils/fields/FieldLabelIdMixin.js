@@ -6,8 +6,7 @@ const FieldLabelIdMixin = {
     props: ['field', 'wrapper_opt', 'value', 'data'],
     computed: {
         label_id() {
-            let w = this.wrapper_opt.use_prop_data ? '-inner' : '';
-            return 'label-for-' + this.field.options.name + '-field' + w;
+            return 'label-for-' + this.field.options.name + '-field';
         },
     },
 };

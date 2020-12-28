@@ -5,7 +5,7 @@ import ButtonLi from './ButtonLi.vue';
 import ButtonsGroup from './ButtonsGroup.vue';
 import ButtonsList from './ButtonsList.vue';
 import ButtonsRow from './ButtonsRow.vue';
-import MultiActions from './MultiActions.vue';
+import MultiActions from '../../list/MultiActions.vue';
 
 globalComponentsRegistrator.add(ButtonCommon);
 globalComponentsRegistrator.add(ButtonLi);

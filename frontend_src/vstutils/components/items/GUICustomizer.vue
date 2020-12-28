@@ -1,0 +1,82 @@
+<template>
+    <div class="p-3 customizer-options">
+        <h5>{{ $t('customize application styles') | capitalize }}</h5>
+        <hr class="mb-2" />
+        <ChoicesField :field="skinField" :data="data" type="edit" @setValueInStore="skinOnChangeHandler" />
+        <hr class="mb-2" />
+        <div class="customize-skin-options">
+            <FormField :field="formField" :data="data" type="edit" @setValueInStore="formOnChangeHandler" />
+        </div>
+    </div>
+</template>
+
+<script>
+    import { guiCustomizer } from '../../guiCustomizer';
+    import { ChoicesFieldMixin } from '../../fields/choices';
+    import { FormFieldMixin } from '../../fields/form';
+
+    export default {
+        name: 'GUICustomizer',
+        components: { ChoicesField: ChoicesFieldMixin, FormField: FormFieldMixin },
+        data() {
+            return {
+                customizer: guiCustomizer,
+                data: {
+                    skin_settings: this.skin_settings,
+                },
+            };
+        },
+
+        created() {
+            this.customizer.init();
+        },
+
+        computed: {
+            /**
+             * Property, that returns current skin settings.
+             */
+            skin_settings() {
+                return this.customizer.skin.settings;
+            },
+            /**
+             * Property, that returns current skin name.
+             */
+            skin_name() {
+                return this.customizer.skin.name;
+            },
+            /**
+             * Property, that returns guiFields.form instance,
+             * that is aimed to be form for skin settings.
+             */
+            formField() {
+                return this.customizer.formField;
+            },
+            /**
+             * Property, that returns guiFields.choices instance,
+             * that is aimed to be field for skin selecting.
+             */
+            skinField() {
+                return this.customizer.skinField;
+            },
+        },
+
+        methods: {
+            /**
+             * Method - handler for formField's onChange event.
+             * @param {object} value New form value.
+             */
+            formOnChangeHandler(value) {
+                return this.customizer.setSkinSettings(value);
+            },
+            /**
+             * Method - handler for skinField's onChange event.
+             * @param {string} skin New skin.
+             */
+            skinOnChangeHandler(skin) {
+                return this.customizer.setSkin(skin);
+            },
+        },
+    };
+</script>
+
+<style scoped></style>

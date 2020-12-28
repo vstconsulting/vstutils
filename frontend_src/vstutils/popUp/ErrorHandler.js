@@ -1,4 +1,5 @@
 import { guiPopUp } from './PopUp';
+import { ModelValidationError } from '../models/Model.js';
 
 /**
  * Class, that handles errors.
@@ -35,13 +36,15 @@ export default class ErrorHandler {
     errorToString(error) {
         let result = 'Unknown error';
 
-        if (!error) {
-            return result;
+        if (!error) return result;
+
+        if (error instanceof ModelValidationError) {
+            return error.errors
+                .map(({ field, message }) => `<b>${field.title}</b>: ${message}`)
+                .join('<br />');
         }
 
-        if (typeof error == 'string') {
-            return error;
-        }
+        if (typeof error == 'string') return error;
 
         if (typeof error == 'object' && error.message) {
             return error.message;
