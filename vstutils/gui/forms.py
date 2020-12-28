@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django import forms
 from django.forms.utils import ErrorDict
+from django.test import override_settings
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth.hashers import make_password, check_password
@@ -12,6 +13,10 @@ from ..utils import SecurePickling, send_template_email
 
 UserModel = get_user_model()
 secure_pickle = SecurePickling()
+
+override_setting_decorator = override_settings(PASSWORD_HASHERS=settings.REGISTRATION_HASHERS)
+hash_data = override_setting_decorator(make_password)
+check_data = override_setting_decorator(check_password)
 
 
 class RegistrationForm(UserCreationForm):
@@ -40,7 +45,7 @@ class RegistrationForm(UserCreationForm):
         cache_key = self.cleaned_data.get('uid', None)
 
         if cache_key in (None, ''):
-            cache_key = make_password(self.cleaned_data['email'])
+            cache_key = hash_data(self.cleaned_data['email'])
             self.cleaned_data['uid'] = cache_key
 
             secured_data = secure_pickle.dumps(self.cleaned_data)
@@ -58,7 +63,7 @@ class RegistrationForm(UserCreationForm):
             )
             return super().save(commit=False)
 
-        if not check_password(self.cleaned_data['email'], cache_key):
+        if not check_data(self.cleaned_data['email'], cache_key):
             raise SuspiciousOperation('Invalid registration email send.')
 
         return super().save(commit)
