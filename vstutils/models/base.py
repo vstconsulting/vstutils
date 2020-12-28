@@ -1,5 +1,6 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from functools import lru_cache
+from copy import deepcopy
 
 from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
@@ -122,14 +123,16 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if "__unicode__" in attrs and '__str__' not in attrs:
             attrs['__str__'] = _get_unicode
         extra_metadata: dict = {**default_extra_metadata}
+        meta = None
         if "Meta" in attrs:
             meta = attrs['Meta']
             extra_metadata['proxy'] = getattr(meta, 'proxy', False)
             if not getattr(meta, 'abstract', False):
                 for extra_name in filter(lambda y: hasattr(meta, y), map(lambda x: f'_{x}', extra_metadata.keys())):
                     extra_metadata[extra_name[1:]] = getattr(meta, extra_name)
-        attrs['__extra_metadata__'] = extra_metadata
+        attrs['__extra_metadata__'] = deepcopy(extra_metadata)
         model_class = super(ModelBaseClass, mcs).__new__(mcs, name, bases, attrs, **kwargs)
+        model_class.OriginalMeta = meta if meta is not None else model_class.Meta
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
         return model_class
@@ -259,6 +262,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 view_class.append(api_base.HistoryModelViewSet)  # nocv
             elif isinstance(view_base_class, str):
                 view_class.append(import_class(view_base_class))
+            else:
+                view_class.append(view_base_class)
 
         if metadata['copy_attrs']:
             view_attributes.update(map(lambda r: (f'copy_{r[0]}', r[1]), metadata['copy_attrs'].items()))

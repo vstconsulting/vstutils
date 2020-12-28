@@ -111,7 +111,7 @@ class BModel(BaseModel):
           Default is simple CRUD-view.
 
         - ``_serializer_class`` - class of API serializer. Default is :class:`vstutils.api.serializers.VSTSerializer`.
-          Can take a string to import.
+          Can take a string to import, serializer class or :class:`django.utils.functional.SimpleLazyObject`.
         - ``_serializer_class_name`` - model name for OpenAPI definitions. Default is name of model class.
         - ``_list_fields`` or ``_detail_fields`` - list of fields which will show in entity view.
         - ``_override_list_fields`` or ``_override_detail_fields`` - mapping with names and field types
@@ -143,6 +143,11 @@ class BModel(BaseModel):
             the :class:`vstutils.models.decorators.register_view_action` decorator with the ``detail`` argument
             to determine applicability to a list or detail entry.
             In this case, the decorated method will take an instance of the view object as ``self`` attribute.
+
+        .. note::
+            In some cases, inheriting models may require inheriting the Meta class from the base model.
+            If the Meta is explicitly declared in the base class, then you can get it through
+            the attribute `OriginalMeta` and use it for inheritance.
     """
 
     #: Primary field for select and search in API.

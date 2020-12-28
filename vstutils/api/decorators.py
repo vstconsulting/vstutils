@@ -367,7 +367,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     and two viewsets. Decorator setups nested viewset to parent viesetclass and
     generate paths in API.
 
-    :param name: -- Name of nested path. Also used as default name for related queryset.
+    :param name: -- Name of nested path. Also used as default name for related queryset (see `manager_name`).
     :type name: str
     :param arg: -- Name of nested primary key field.
     :type arg: str

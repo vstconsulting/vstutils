@@ -5,6 +5,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from rest_framework import fields as drf_fields
 from vstutils.models import BModel
 from vstutils.api.fields import FkModelField, DependFromFkField
+from vstutils.api.base import ModelViewSet
 
 
 class VariableType(BModel):
@@ -49,6 +50,7 @@ class VarBasedModel(BModel):
                                 object_id_field="object_id")
 
     class Meta:
+        _view_class = ModelViewSet
         _list_fields = [
             'name',
         ]
