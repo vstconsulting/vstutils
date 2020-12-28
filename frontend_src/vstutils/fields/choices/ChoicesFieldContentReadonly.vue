@@ -1,7 +1,7 @@
 <template>
     <div class="input-group">
         <input
-            :type="input_type"
+            :type="inputType"
             :class="classes"
             :style="styles"
             :value="value"

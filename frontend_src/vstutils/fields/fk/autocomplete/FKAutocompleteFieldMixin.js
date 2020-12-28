@@ -1,11 +1,14 @@
 import $ from 'jquery';
 import { BaseFieldContentEdit } from '../../base';
-import { getDependenceValueAsString, guiLocalSettings } from '../../../utils';
+import { getDependenceValueAsString, guiLocalSettings, RequestTypes } from '../../../utils';
 import { AutocompleteFieldContentEditMixin } from '../../autocomplete';
-import { FKFieldContent } from '../fk';
+import { FKFieldContent, FKFieldMixin } from '../fk';
 import FKAutocompleteFieldContentEdit from './FKAutocompleteFieldContentEdit.js';
 import signals from '../../../signals.js';
 
+/**
+ * @vue/component
+ */
 const FKAutocompleteFieldMixin = {
     components: {
         field_content_edit: {
@@ -21,14 +24,10 @@ const FKAutocompleteFieldMixin = {
                  * of autocomplete_field_content_edit_mixin.
                  */
                 // eslint-disable-next-line no-unused-vars
-                _renderItem(item, search) {
-                    return (
-                        '<div class="autocomplete-suggestion" data-value="' +
-                        item.value_field +
-                        '" >' +
-                        item.view_field +
-                        '</div>'
-                    );
+                _renderItem({ value_field, view_field }, search) {
+                    return `<div class="autocomplete-suggestion" data-value="${value_field}">
+                                ${view_field}
+                            </div>`;
                 },
                 /**
                  * Redefinition of '_getAutocompleteValue' method
@@ -46,20 +45,21 @@ const FKAutocompleteFieldMixin = {
                  * Redefinition of '_filterAutocompleteData' method
                  * of autocomplete_field_content_edit_mixin.
                  */
-                _filterAutocompleteData(search_input, response) {
+                async _filterAutocompleteData(search_input, response) {
                     let props = this.field.options.additionalProperties;
                     let filters = {
                         limit: guiLocalSettings.get('page_size') || 20,
-                        [this.field.getAutocompleteFilterName(this.data)]: search_input,
+                        [this.field.viewField]: search_input,
                     };
 
                     let field_dependence_data = getDependenceValueAsString(
-                        this.$parent.data,
+                        this.data,
                         props.field_dependence_name,
                     );
+                    // TODO Make dependence like in fk
                     let format_data = {
                         fieldType: this.field.options.format,
-                        modelName: this.queryset.model.name,
+                        modelName: this.queryset.getModelClass(RequestTypes.LIST).name,
                         fieldName: this.field.options.name,
                     };
 
@@ -84,36 +84,40 @@ const FKAutocompleteFieldMixin = {
                         }
                     });
 
-                    Promise.all(all)
-                        .then((results) => {
-                            let matches = [];
+                    try {
+                        const results = await Promise.all(all);
 
-                            if (this.field.options.default !== undefined) {
-                                if (typeof this.field.options.default !== 'object') {
-                                    matches.push({
-                                        value_field: this.field.options.default,
-                                        view_field: this.field.options.default,
-                                    });
-                                } else {
-                                    matches.push(this.field.options.default);
-                                }
+                        let matches = [];
+
+                        if (this.field.options.default !== undefined) {
+                            if (typeof this.field.options.default !== 'object') {
+                                matches.push({
+                                    value_field: this.field.options.default,
+                                    view_field: this.field.options.default,
+                                });
+                            } else {
+                                matches.push(this.field.options.default);
                             }
+                        }
 
-                            results.forEach((instances) => {
-                                instances.forEach((instance) => {
-                                    matches.push(this.field.getAutocompleteValue(this.data, instance.data));
+                        results.forEach((instances) => {
+                            instances.forEach((instance) => {
+                                matches.push({
+                                    value_field: this.field.getValueFieldValue(instance),
+                                    view_field: this.field.getViewFieldValue(instance),
                                 });
                             });
-
-                            response(matches);
-                        })
-                        .catch((error) => {
-                            console.error(error);
                         });
+
+                        response(matches);
+                    } catch (error) {
+                        console.error(error);
+                    }
                 },
             },
         },
     },
+    mixins: [FKFieldMixin],
 };
 
 export default FKAutocompleteFieldMixin;

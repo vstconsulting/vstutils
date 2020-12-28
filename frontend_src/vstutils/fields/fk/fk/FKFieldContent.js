@@ -2,32 +2,36 @@ import $ from 'jquery';
 
 /**
  * Mixin for content components of FK field.
+ * @vue/component
  */
-const FKFieldContent = {
+export default {
     data() {
         return {
-            /**
-             * Property, that stores cached values.
-             */
-            values_cache: {},
+            fetchedValue: null,
         };
     },
-    created() {
-        if (this.value !== undefined && typeof this.value != 'object') {
-            this.fetchValue(this.value);
-        }
+    computed: {
+        /**
+         * Property, that stores all querysets for current field.
+         */
+        querysets() {
+            return this.field.getAllQuerysets();
+        },
+
+        /**
+         * Property, that stores the most appropriate queryset for current field.
+         */
+        queryset() {
+            return this.field.getAppropriateQuerySet(this.data, this.querysets);
+        },
     },
     watch: {
         value(value) {
-            if (value === undefined) {
-                return;
+            if (value !== undefined && typeof value != 'object' && this.field.fetchData) {
+                this.fetchValue(value);
+            } else {
+                this.fetchedValue = value;
             }
-
-            if (typeof value == 'object') {
-                return;
-            }
-
-            this.fetchValue(value);
         },
 
         'field.options.additionalProperties.querysets': function (querysets) {
@@ -49,56 +53,32 @@ const FKFieldContent = {
             this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
         },
     },
-    computed: {
-        /**
-         * Property, that stores all querysets for current field.
-         */
-        querysets() {
-            let props = this.field.options.additionalProperties;
-
-            if (!props.querysets) {
-                return [];
-            }
-
-            return props.querysets.map((qs) => {
-                return qs.clone({
-                    url: this.field.getQuerySetFormattedUrl(
-                        this.data,
-                        $.extend(true, {}, this.$route.params, props.url_params || {}),
-                        qs,
-                    ),
-                });
-            });
-        },
-
-        /**
-         * Property, that stores the most appropriate queryset for current field.
-         */
-        queryset() {
-            return this.field.getAppropriateQuerySet(this.data, this.querysets);
-        },
+    beforeMount() {
+        if (this.value !== undefined && typeof this.value != 'object' && this.field.fetchData) {
+            this.fetchValue(this.value);
+        } else {
+            this.fetchedValue = this.value;
+        }
     },
     methods: {
         /**
          * Method, that loads prefetch_value.
-         * @param {string, number} value.
+         * @param {string|number} value.
          */
         async fetchValue(value) {
-            if (!this.field.fetchDataOrNot(this.data)) {
+            if (!this.field.fetchData) {
                 return;
             }
             let filters = {
                 limit: 1,
-                [this.field.getPrefetchFilterName(this.data)]: value,
+                [this.field.valueField]: value,
             };
 
             const [instance] = await this.queryset.filter(filters).items();
 
-            if (instance && instance.data) {
-                Vue.set(this.values_cache, value, this.field.getPrefetchValue(this.data, instance.data));
+            if (instance) {
+                this.fetchedValue = instance;
             }
         },
     },
 };
-
-export default FKFieldContent;

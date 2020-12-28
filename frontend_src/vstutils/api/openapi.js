@@ -1,3 +1,6 @@
+import { ViewTypes } from '../views';
+import FiltersModal from '../components/list/FiltersModal.vue';
+
 /**
  * Dictionary, that contains names of openapi schema attributes.
  * This dictionary is needed for easier updates of following opeanapi versions,
@@ -24,72 +27,90 @@ const openapi_dictionary = {
             base: {
                 remove: {
                     name: 'remove',
-                    title: 'remove',
-                    icon_classes: ['fas', 'fa-trash-alt'],
-                    title_classes: ['d-none', 'd-lg-inline-block'],
-                    classes: ['btn-danger', 'danger-right'],
+                    title: 'Remove',
+                    iconClasses: ['fas', 'fa-trash-alt'],
+                    titleClasses: ['d-none', 'd-lg-inline-block'],
+                    classes: ['btn', 'btn-danger', 'danger-right'],
+                    isEmpty: true,
+                    isMultiAction: true,
+                    styles: { order: 100, marginLeft: 'auto' },
                 },
             },
             list: {
                 new: {
                     name: 'new',
-                    title: 'create',
-                    icon_classes: ['fas', 'fa-plus'],
-                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    title: 'Create',
+                    iconClasses: ['fas', 'fa-plus'],
+                    titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    styles: { order: -10 },
                 },
                 add: {
                     name: 'add',
-                    title: 'add',
-                    component: 'gui_add_child_modal',
+                    title: 'Add',
+                    component: 'AddChildModal',
+                    styles: { order: -10 },
+                },
+                filters: {
+                    name: 'filters',
+                    title: '',
+                    iconClasses: ['fas', 'fa-filter'],
+                    component: FiltersModal,
+                    styles: { order: -20 },
                 },
             },
             page: {
                 edit: {
                     name: 'edit',
-                    title: 'edit',
-                    icon_classes: ['fas', 'fa-edit'],
-                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    title: 'Edit',
+                    iconClasses: ['fas', 'fa-edit'],
+                    titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    styles: { order: -8 },
                 },
             },
             page_new: {
                 save_new: {
                     name: 'save',
-                    title: 'save',
-                    icon_classes: ['fas', 'fa-save'],
-                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    title: 'Save',
+                    iconClasses: ['fas', 'fa-save'],
+                    titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    styles: { order: -10 },
                 },
             },
             page_edit: {
                 save: {
                     name: 'save',
-                    title: 'save',
-                    icon_classes: ['fas', 'fa-save'],
-                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    title: 'Save',
+                    iconClasses: ['fas', 'fa-save'],
+                    titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    doNotShowOnList: true,
+                    styles: { order: -9 },
                 },
                 reload: {
                     name: 'reload',
-                    title: 'reload',
-                    icon_classes: ['fas', 'fa-sync-alt'],
-                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    title: 'Reload',
+                    iconClasses: ['fas', 'fa-sync-alt'],
+                    titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    doNotShowOnList: true,
+                    styles: { order: -8 },
                 },
             },
             action: {
                 execute: {
                     name: 'execute',
-                    title: 'send',
-                    icon_classes: ['fas', 'fa-upload'],
-                    title_classes: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
+                    styles: { order: -7 },
                 },
             },
         },
-        multi_actions: ['remove'],
+        multiActions: ['remove'],
         types_operations_always_to_add: ['page_new', 'page_edit', 'action'],
     },
+    /**
+     * @type {Object<string, Object>}
+     */
     schema_types: {
         /**
          * Description of possible properties of some schema type:
          * 'some_schema_type': {
-         *     query_type: "post|get|put|patch|delete",         // method of http request, that will be used for API request from view instance
          *     url_postfix: "{string}",                         // postfix, that will be added to view instance URL
          *     type: "{string}",                                // type of view, that will be added to the view's schema
          *     autoupdate: "{boolean}",                         // if true, view instance will automatically send API requests for getting fresh data
@@ -98,38 +119,30 @@ const openapi_dictionary = {
          * }
          */
         _add: {
-            query_type: 'post',
-            url_postfix: 'new/',
-            type: 'page_new',
+            urlPostfix: 'new/',
+            type: ViewTypes.PAGE_NEW,
         },
         _list: {
-            query_type: 'get',
-            url_postfix: '',
-            // name of property from OpenAPI schema, where filters can be find.
-            filters: { name: 'parameters' },
-            type: 'list',
+            urlPostfix: '',
+            type: ViewTypes.LIST,
             autoupdate: true,
         },
         _get: {
-            query_type: 'get',
-            url_postfix: '',
-            type: 'page',
+            urlPostfix: '',
+            type: ViewTypes.PAGE,
             autoupdate: true,
         },
         _edit: {
-            query_type: 'patch',
-            url_postfix: 'edit/',
-            type: 'page_edit',
+            urlPostfix: 'edit/',
+            type: ViewTypes.PAGE_EDIT,
         },
         _update: {
-            query_type: 'put',
-            url_postfix: 'edit/',
-            type: 'page_edit',
+            urlPostfix: 'edit/',
+            type: ViewTypes.PAGE_EDIT,
         },
         _remove: {
-            query_type: 'delete',
-            url_postfix: 'remove/',
-            type: 'page_remove',
+            urlPostfix: 'remove/',
+            type: ViewTypes.PAGE_REMOVE,
             hidden: true,
         },
     },

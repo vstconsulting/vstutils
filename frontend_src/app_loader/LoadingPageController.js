@@ -204,11 +204,11 @@ class LoadingPageController {
             return;
         }
 
-        if (elem.innerText.length === 3) {
+        if (elem.innerText.length >= 3) {
             elem.innerText = '';
+        } else {
+            elem.innerText += '.';
         }
-
-        elem.innerText += '.';
 
         setTimeout(() => {
             if (this.loading) {

@@ -1,15 +1,21 @@
 module.exports = {
-    extends: ['eslint:recommended', 'plugin:vue/vue3-recommended', 'plugin:prettier/recommended'],
+    extends: ['eslint:recommended', 'plugin:vue/recommended', 'plugin:prettier/recommended'],
+    parser: 'vue-eslint-parser',
+    parserOptions: {
+        parser: '@babel/eslint-parser',
+        sourceType: 'module',
+    },
     env: {
         browser: true,
         commonjs: true,
         es6: true,
+        node: true,
     },
     rules: {
         'no-debugger': 'warn',
         'prettier/prettier': 'warn',
         'vue/html-indent': ['error', 4],
-        'vue/no-deprecated-filter': 'off',
+        'vue/html-self-closing': ['error', { html: { void: 'any' } }],
         'vue/max-attributes-per-line': 'off',
     },
     globals: {

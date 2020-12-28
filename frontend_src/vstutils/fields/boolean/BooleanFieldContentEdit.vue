@@ -3,10 +3,10 @@
         <div
             :class="classes"
             :style="styles"
-            @click="$emit('proxyEvent', 'toggleValue')"
             onselectstart="return false"
             onmousedown="return false"
             :aria-labelledby="label_id"
+            @click="$emit('set-value', !value)"
             :aria-label="aria_label"
         >
             <div class="ico-on fa fa-toggle-on"></div>
@@ -14,7 +14,7 @@
             <div class="boolean-title">{{ $t(text) | capitalize }}</div>
         </div>
         <field_hidden_button
-            v-if="with_hidden_button"
+            v-if="hasHideButton"
             :field="field"
             @hideField="$emit('proxyEvent', 'hideField')"
         ></field_hidden_button>

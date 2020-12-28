@@ -5,7 +5,7 @@
         :value="value"
         :aria-labelledby="label_id"
         :aria-label="aria_label"
-    ></select>
+    />
 </template>
 
 <script>
@@ -25,19 +25,9 @@
             };
         },
         computed: {
-            fieldForEnum() {
-                return (
-                    (this.field.options.additionalProperties &&
-                        this.field.options.additionalProperties.fieldForEnum) ||
-                    undefined
-                );
-            },
             disableIfEmpty() {
-                if (
-                    this.field.options.additionalProperties &&
-                    this.field.options.additionalProperties.fieldForEnum !== undefined
-                ) {
-                    return this.field.options.additionalProperties.fieldForEnum;
+                if (this.field.fieldForEnum !== undefined) {
+                    return this.field.fieldForEnum;
                 }
                 return false;
             },
@@ -50,11 +40,11 @@
         mounted() {
             this.s2 = $(this.$el);
 
-            if (this.fieldForEnum) {
-                this.enum = this.prepareFieldData(this.data[this.fieldForEnum]);
+            if (this.field.fieldForEnum) {
+                this.enum = this.prepareFieldData(this.data[this.field.fieldForEnum]);
                 this.$watch(
                     function () {
-                        return this.data[this.fieldForEnum];
+                        return this.data[this.field.fieldForEnum];
                     },
                     function (newVal) {
                         this.enum = this.prepareFieldData(newVal);
@@ -62,10 +52,10 @@
                     },
                 );
             } else {
-                this.enum = this.field.options.enum;
+                this.enum = this.field.enum;
                 this.$watch(
                     function () {
-                        return this.field.options.enum;
+                        return this.field.enum;
                     },
                     function (newVal) {
                         this.enum = newVal || [];
@@ -75,6 +65,9 @@
             }
 
             this.initSelect2();
+        },
+        destroyed() {
+            $(this.$el).off().select2('destroy');
         },
         methods: {
             prepareFieldData(data) {
@@ -94,10 +87,13 @@
                 $(this.s2)
                     .empty() // Remove all children (options)
                     .select2({
+                        theme: window.SELECT2_THEME,
                         width: '100%',
                         data: this.enum,
                         disabled:
                             this.field.options.disabled || (this.disableIfEmpty && this.enum.length === 0),
+                        allowClear: this.field.nullable,
+                        placeholder: { id: undefined, text: '' },
                     })
                     .on('change', (event) => {
                         let value;
@@ -113,7 +109,7 @@
                             value = this.enum[0] || '';
                         }
 
-                        this.$emit('proxyEvent', 'setValueInStore', value);
+                        this.$emit('set-value', value);
                     });
 
                 // Set initial value

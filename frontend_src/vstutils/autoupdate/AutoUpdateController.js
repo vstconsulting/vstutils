@@ -51,12 +51,20 @@ export default {
             clearTimeout(this.autoupdate.timeoutId);
         },
         updateData() {
-            const promises = this.$store.state.autoupdate.actionsToInvoke.map((action) => {
+            const promises = [];
+
+            for (const { type, value } of this.$store.state.autoupdate.actionsToInvoke.values()) {
                 try {
-                    return this.$store.dispatch(action);
+                    if (type === 'function') {
+                        promises.push(value());
+                    } else if (type === 'storeAction') {
+                        promises.push(this.$store.dispatch(value));
+                    } else {
+                        console.warn('Unknown action type: ' + type);
+                    }
                     // eslint-disable-next-line no-empty
                 } catch (error) {}
-            });
+            }
 
             return Promise.all(promises);
         },

@@ -2,14 +2,20 @@ import $ from 'jquery';
 import { FKField } from '../fk';
 import FKAutocompleteFieldMixin from './FKAutocompleteFieldMixin.js';
 
-/**
- * FK_autocomplete guiField class.
- */
 class FKAutocompleteField extends FKField {
     constructor(options) {
         super(options);
-        this._usePrefetch = false;
-        this._fetchData = false;
+        this.usePrefetch = false;
+        this.fetchData = false;
+        this.makeLink = false;
+    }
+
+    static get mixins() {
+        return [FKAutocompleteFieldMixin];
+    }
+
+    getInitialValue() {
+        return '';
     }
 
     /**
@@ -36,12 +42,6 @@ class FKAutocompleteField extends FKField {
      */
     _insertTestValue_imitateEvent(el) {
         el.dispatchEvent(new Event('blur'));
-    }
-    /**
-     * Redefinition of base guiField static property 'mixins'.
-     */
-    static get mixins() {
-        return super.mixins.concat(FKAutocompleteFieldMixin);
     }
 }
 

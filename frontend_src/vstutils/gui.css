@@ -1793,22 +1793,6 @@ input[type='color'] {
     padding: 0 0;
 }
 
-.dropdown-item {
-    padding: 0px;
-}
-
-.dropdown-menu .dropdown-item a,
-.dropdown-menu .dropdown-item b i,
-.dropdown-menu a.dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 0.35rem 1rem;
-}
-
-.dropdown-menu .dropdown-item .sublink-btn-empty-action {
-    padding: 0px;
-}
-
 .btn {
     font-size: 14px;
 }
@@ -1934,13 +1918,6 @@ input[type='color'] {
     border: none;
     max-width: none;
     margin-bottom: 15px;
-}
-
-@media (max-width: 991px) {
-    .btn-previous-page,
-    .h1-header {
-        display: none;
-    }
 }
 
 .card-header-custom {

@@ -1,9 +1,6 @@
-import { guiFields } from './fields.js';
-import mixins from './mixins.js';
-import gui_fields_mixins from './fieldsMixins';
-import fieldsRegistrator from './fieldsRegistrator.js';
+import { globalFields, guiFields } from './fields.js';
 
-export { mixins, gui_fields_mixins, guiFields, fieldsRegistrator };
+export { globalFields, guiFields };
 
 import * as apiObject from './api-object';
 import * as autocomplete from './autocomplete';
@@ -52,17 +49,42 @@ export { apiData, color, email, hidden };
 
 import BaseModalWindowForInstanceList from './BaseModalWindowForInstanceList.vue';
 import FieldLabelIdMixin from './FieldLabelIdMixin.js';
-import FKandAPIObjectMixin from './FKandAPIObjectMixin.js';
-import HideFieldInTableMixin from './HideFieldInTableMixin.js';
-import MainPagination from './MainPagination.vue';
 import ModalWindowAndButtonMixin from './ModalWindowAndButtonMixin.js';
 import TableRowMixin from './TableRowMixin.js';
-export {
-    BaseModalWindowForInstanceList,
-    FieldLabelIdMixin,
-    FKandAPIObjectMixin,
-    HideFieldInTableMixin,
-    MainPagination,
-    ModalWindowAndButtonMixin,
-    TableRowMixin,
-};
+export { BaseModalWindowForInstanceList, FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
+
+/**
+ * Method, that creates new getFieldFormat function for given fields map.
+ * @param {Map<string, BaseField>} fields
+ */
+export function getFieldFormatFactory(fields) {
+    /**
+     * Function, that returns format for field options.
+     * @param {object} fieldOptions - Object with field options.
+     */
+    return function getFieldFormat(fieldOptions) {
+        if (fields.has(fieldOptions.format)) {
+            return fieldOptions.format;
+        }
+
+        if (fieldOptions.enum) {
+            return 'choices';
+        }
+
+        if (Object.keys(fieldOptions).includes('$ref')) {
+            return 'api_object';
+        }
+
+        if (fields.has(fieldOptions.type)) {
+            return fieldOptions.type;
+        }
+
+        return 'string';
+    };
+}
+
+/**
+ * Function, that returns format for field options.
+ * @param {object} fieldOptions - Object with field options.
+ */
+export const getFieldFormat = getFieldFormatFactory(globalFields);

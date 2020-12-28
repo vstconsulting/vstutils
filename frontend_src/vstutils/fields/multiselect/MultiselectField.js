@@ -9,7 +9,9 @@ class MultiselectField extends FKField {
     constructor(options) {
         super(options);
 
-        this._fetchData = false;
+        this.fetchData = false;
+
+        this.viewSeparator = options.additionalProperties.view_separator;
     }
     /**
      * Redefinition of base guiField static property 'mixins'.
@@ -17,38 +19,20 @@ class MultiselectField extends FKField {
     static get mixins() {
         return super.mixins.concat(MultiselectFieldMixin);
     }
-    /**
-     * Redefinition of 'toInner' method of base guiField.
-     * @param {object} data
-     */
-    toInner(data = {}) {
-        let value = data[this.options.name];
 
-        if (value && typeof value == 'object' && Array.isArray(value)) {
-            return value
-                .map((item) => {
-                    return item.value;
-                })
-                .join(this.options.additionalProperties.view_separator);
+    toInner(data) {
+        const value = data[this.name];
+        if (value && Array.isArray(value)) {
+            return value.map((item) => item.value).join(this.viewSeparator);
         }
-
         return value;
     }
-    /**
-     * Redefinition of 'toRepresent' method of base guiField.
-     * @param {object} data
-     */
-    toRepresent(data = {}) {
-        let value = data[this.options.name];
 
-        if (value && typeof value == 'object' && Array.isArray(value)) {
-            return value
-                .map((item) => {
-                    return item.prefetch_value;
-                })
-                .join(this.options.additionalProperties.view_separator);
+    toRepresent(data) {
+        const value = data[this.name];
+        if (value && Array.isArray(value)) {
+            return value.map((item) => item.prefetch_value).join(this.viewSeparator);
         }
-
         return value;
     }
 }

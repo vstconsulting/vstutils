@@ -218,6 +218,19 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializer_class_name = cls.__name__ + 'Serializer'
         return serializer_class_name
 
+    def _get_view_class(cls, view_base_class):
+        if view_base_class is None:
+            return api_base.ModelViewSet
+        elif view_base_class == 'read_only':
+            return api_base.ReadOnlyModelViewSet
+        elif view_base_class == 'list_only':
+            return api_base.ListOnlyModelViewSet
+        elif view_base_class == 'history':
+            return api_base.HistoryModelViewSet  # nocv
+        elif isinstance(view_base_class, str):
+            return import_class(view_base_class)
+        return view_base_class
+
     def get_view_class(cls):
         # pylint: disable=too-many-branches,too-many-statements,too-many-locals,no-value-for-parameter
         metadata = cls.get_extra_metadata()  # pylint: disable=no-value-for-parameter
@@ -252,18 +265,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if not isinstance(view_class_data, (tuple, list)):
             view_class_data = (view_class_data,)
 
-        view_class = []
-        for view_base_class in view_class_data:
-            if view_base_class is None:
-                view_class.append(api_base.ModelViewSet)
-            elif view_base_class == 'read_only':
-                view_class.append(api_base.ReadOnlyModelViewSet)
-            elif view_base_class == 'history':
-                view_class.append(api_base.HistoryModelViewSet)  # nocv
-            elif isinstance(view_base_class, str):
-                view_class.append(import_class(view_base_class))
-            else:
-                view_class.append(view_base_class)
+        view_class = [cls._get_view_class(v) for v in view_class_data]
 
         if metadata['copy_attrs']:
             view_attributes.update(map(lambda r: (f'copy_{r[0]}', r[1]), metadata['copy_attrs'].items()))
@@ -281,8 +283,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 filterset_fields_list = tuple(filterset_fields.keys())
                 filterset_fields_types = {k: v for k, v in filterset_fields.items() if v is not None}
             else:
-                filterset_fields_list = filterset_fields
-                filterset_fields_types = {}
+                filterset_fields_list, filterset_fields_types = filterset_fields, {}
 
             class Meta:
                 model = cls if not cls._meta.proxy else cls._meta.proxy_for_model

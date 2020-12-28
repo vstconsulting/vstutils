@@ -1,23 +1,32 @@
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
-import { fieldsRegistrator } from './vstutils/fields';
 import { ErrorHandler } from './vstutils/popUp';
 import { guiLocalSettings } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
+import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
 
 export default class BaseApp {
     /**
      * Constructor of App class.
-     * @param {object} openapi Object with OpenAPI schema.
+     * @param {AppConfiguration} config Object with OpenAPI schema.
      * @param {FakeCache} cache Object, that manages api responses cache operations.
      */
-    constructor(openapi, cache) {
-        this.schema = openapi;
+    constructor(config, cache) {
+        this.config = config;
+
+        this.schema = config.schema;
+        /**
+         * Application router. Will be available after BaseApp#mountApplication.
+         * @type {VueRouter}
+         */
+        this.router = null;
         this.cache = cache;
         /**
          * Object, that manages connection with API (sends API requests).
          */
-        this.api = apiConnector;
+        this.api = apiConnector.initConfiguration(config);
+
+        this.translationsManager = new TranslationsManager(apiConnector, cache);
         /**
          * Object, that handles errors.
          */
@@ -54,29 +63,23 @@ export default class BaseApp {
      * Method, that starts work of app.
      * Method gets openapi_schema, inits models, inits views and mounts application to DOM.
      */
-    start() {
-        let LANG = guiLocalSettings.get('lang') || 'en';
-        let promises = [this.api.getLanguages(), this.api.getTranslations(LANG), this.api.loadUser()];
+    async start() {
+        const LANG = guiLocalSettings.get('lang') || 'en';
 
-        return Promise.all(promises)
-            .then((response) => {
-                this.languages = response[0];
-                this.translations = {
-                    [LANG]: response[1],
-                };
-                this.user = response[2];
+        const [languages, translations, user] = await Promise.all([
+            this.translationsManager.getLanguages(),
+            this.translationsManager.getTranslations(LANG),
+            this.api.loadUser(),
+        ]);
+        this.languages = languages;
+        this.translations = { [LANG]: translations };
+        this.user = user;
 
-                fieldsRegistrator.registerAllFieldsComponents();
-                this.global_components.registerAll();
+        this.afterInitialDataBeforeMount();
 
-                this.afterInitialDataBeforeMount();
+        this.global_components.registerAll();
 
-                this.mountApplication();
-            })
-            .catch((error) => {
-                console.error(error);
-                throw new Error(error);
-            });
+        this.mountApplication();
     }
 
     /**

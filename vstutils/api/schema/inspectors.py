@@ -21,11 +21,13 @@ FORMAT_NAMED_BIN_IMAGE = 'namedbinimage'
 FORMAT_MULTIPLE_NAMED_BIN_FILE = 'multiplenamedbinfile'
 FORMAT_MULTIPLE_NAMED_BIN_IMAGE = 'multiplenamedbinimage'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
+FORMAT_FK_AUTOCOMPLETE = 'fk_autocomplete'
 FORMAT_MULTISELECT = 'multiselect'
 FORMAT_HTML = 'html'
 FORMAT_JSON = 'json'
 FORMAT_TEXTAREA = 'textarea'
 FORMAT_DYN = 'dynamic'
+FORMAT_DYN_FK = 'dynamic_fk'
 FORMAT_FK = 'fk'
 FORMAT_UPTIME = 'uptime'
 
@@ -136,7 +138,8 @@ class AutoCompletionFieldInspector(FieldInspector):
         if isinstance(field.autocomplete, (list, tuple)):
             kwargs['enum'] = list(field.autocomplete)
         else:
-            prop = {
+            kwargs['format'] = FORMAT_FK_AUTOCOMPLETE
+            kwargs['additionalProperties'] = {
                 'model': openapi.SchemaRef(
                     self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                     field.autocomplete, ignore_unresolved=True
@@ -144,7 +147,6 @@ class AutoCompletionFieldInspector(FieldInspector):
                 'value_field': field.autocomplete_property,
                 'view_field': field.autocomplete_represent
             }
-            kwargs['additionalProperties'] = prop
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
@@ -158,17 +160,20 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        additionalProperties = {"field": field.field}
+        additionalProperties = {'field': field.field}
 
         if isinstance(field, fields.DependFromFkField):
+            field_format = FORMAT_DYN_FK
             additionalProperties['field_attribute'] = field.field_attribute
+
         else:
+            field_format = FORMAT_DYN
             additionalProperties['choices'] = field.choices
             additionalProperties['types'] = field.types
 
         kwargs = {
             'type': openapi.TYPE_STRING,
-            'format': FORMAT_DYN,
+            'format': field_format,
             'additionalProperties': additionalProperties
         }
 
@@ -195,7 +200,8 @@ class FkFieldInspector(FieldInspector):
                 'value_field': field.autocomplete_property,
                 'view_field': field.autocomplete_represent,
                 'usePrefetch': field.use_prefetch,
-                'makeLink': field.make_link
+                'makeLink': field.make_link,
+                'dependence': field.dependence,
             }
         }
 
@@ -223,7 +229,8 @@ class CommaMultiSelectFieldInspector(FieldInspector):
                 'view_field': field.select_represent,
                 'view_separator': field.select_separator,
                 'usePrefetch': field.use_prefetch,
-                'makeLink': field.make_link
+                'makeLink': field.make_link,
+                'dependence': field.dependence,
             }
         }
 

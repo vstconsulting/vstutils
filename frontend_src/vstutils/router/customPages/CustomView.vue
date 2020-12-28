@@ -23,7 +23,7 @@
 </template>
 
 <script>
-    import BasestViewMixin from '../mixins/BasestViewMixin.js';
+    import BasestViewMixin from '../../views/mixins/BasestViewMixin.js';
     export default {
         mixins: [BasestViewMixin],
         data() {

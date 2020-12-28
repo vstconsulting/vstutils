@@ -10,7 +10,7 @@
             :aria-label="text"
         >
             {{ $t(text.toLowerCase()) | capitalize }}
-            <span class="caret"></span>
+            <span class="caret" />
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
             <gui_button_li

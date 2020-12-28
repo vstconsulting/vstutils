@@ -1,46 +1,89 @@
 import $ from 'jquery';
-import { deepEqual } from '../utils';
-import { apiConnector } from '../api';
-import { Model } from '../models';
+import { HttpMethods, makeQueryString, RequestTypes } from '../utils';
+import { StatusError, apiConnector, APIResponse } from '../api';
 
+/**
+ * Error that will be thrown if given instance has not appropriate model.
+ */
+export class WrongModelError extends Error {
+    constructor(expectedModel, actualInstance) {
+        super(`Wrong model used. Expected: ${expectedModel.name}. Actual: ${actualInstance._name}.`);
+    }
+
+    static checkModel(model, instance) {
+        if (!(instance instanceof model)) {
+            throw new WrongModelError(model, instance);
+        }
+    }
+}
+
+const DEFAULT_BULK_METHODS = Object.values(HttpMethods);
 const NOT_PUT_IN_EXTRA = ['results'];
+
+/**
+ * @typedef {Object.<RequestType, Function>} ModelsConfiguration
+ */
 
 /**
  * Base QuerySet class.
  */
 export default class QuerySet {
     /**
-     * Constructor of QuerySet class.
-     * @param {Model} model Model for which this QuerySet will be created.
-     * @param {string} url Current url of view.
-     * @param {object} query Object, that stores current QuerySet filters.
-     * @param {boolean} many Is queryset has many items
+     * @param {string} url - Must be without leading and ending slashes
+     * @param {ModelsConfiguration} models - Models classes
+     * @param {Object} query - Object with query parameters
      */
-    constructor(model, url, query = {}, many = false) {
-        this.model = model;
+    constructor(url, models, query = {}) {
         this.url = url;
+        this.models = models;
         this.query = query;
-        this.many = many;
-        /**
-         * Property, that means, loads prefetch data or not.
-         */
-        this.use_prefetch = false;
+
+        this.cache = undefined;
+        this.use_prefetch = true;
+
+        this.bulkMethods = DEFAULT_BULK_METHODS;
     }
 
     /**
-     * Method, that converts 'this.query' object into 'filters' string,
-     * appropriate for bulk query.
-     * @param {object} query Object with pairs of key, value for QuerySet filters.
+     * Method that returns proper model for specified operation. If custom operation type
+     * used and model for that type exists in configuration it will be returned.
+     * If no appropriate model found, than null is returned.
+     *
+     * Order used to determine model class:
+     * `PARTIAL_UPDATE` / `UPDATE` -> `CREATE` -> `RETRIEVE` -> `LIST`
+     *
+     * @param {RequestType} operation
+     * @return {Function|null}
      */
-    makeQueryString(query = this.query) {
-        return Object.entries(query)
-            .map(([k, v]) => `${k}=${v}`)
-            .join('&');
+    getModelClass(operation) {
+        if (this.models[operation]) return this.models[operation];
+
+        switch (operation) {
+            case RequestTypes.PARTIAL_UPDATE:
+                return this.getModelClass(RequestTypes.CREATE);
+            case RequestTypes.UPDATE:
+                return this.getModelClass(RequestTypes.CREATE);
+            case RequestTypes.CREATE:
+                return this.getModelClass(RequestTypes.RETRIEVE);
+            case RequestTypes.RETRIEVE:
+                return this.getModelClass(RequestTypes.LIST);
+        }
+
+        return null;
     }
 
     /**
-     * Method, that converts 'this.url' string into 'path' array,
-     * appropriate for bulk query.
+     * Helper method that bulk should be used for ALL given http methods
+     * @param {HttpMethod} httpMethods
+     * @return {boolean}
+     */
+    _useBulkFor(...httpMethods) {
+        return httpMethods.every((httpMethod) => this.bulkMethods.includes(httpMethod));
+    }
+
+    /**
+     * Getter that returns queryset urls as string array
+     * @return {string[]}
      */
     getDataType() {
         return this.url.replace(/^\/|\/$/g, '').split('/');
@@ -53,18 +96,12 @@ export default class QuerySet {
      * @return {QuerySet} Clone - new QuerySet instance.
      */
     clone(props = {}, save_cache = false) {
-        let clone = $.extend(true, {}, this);
-        clone.__proto__ = this.__proto__;
+        const clone = Object.create(Object.getPrototypeOf(this));
 
-        for (let key in props) {
-            if (Object.prototype.hasOwnProperty.call(props, key)) {
-                clone[key] = props[key];
-            }
-        }
+        $.extend(true, clone, this);
+        Object.assign(clone, props);
 
-        if (!save_cache) {
-            clone.clearCache();
-        }
+        if (!save_cache) clone.clearCache();
 
         return clone;
     }
@@ -90,11 +127,10 @@ export default class QuerySet {
      * Method, that returns new QuerySet with new filters, that will be saved in 'query' property.
      * @param {object} filters Object with filters(key, value),
      * according to which Model instances list should be sorted.
+     * @return {QuerySet}
      */
     filter(filters) {
-        return this.clone({
-            query: $.extend(true, {}, this.query, filters),
-        });
+        return this.clone({ query: $.extend(true, {}, this.query, filters) });
     }
 
     /**
@@ -129,29 +165,72 @@ export default class QuerySet {
         return qs;
     }
 
+    _getDetailPath(id) {
+        return [...this.getDataType(), id];
+    }
+
     /**
      * Method, that returns promise with Model instance.
-     *
      * @return {Promise.<Model>}
      */
-    async get(invalidateCache = true) {
-        if (!invalidateCache && this.cache) {
-            return this.cache;
+    async get(id = undefined) {
+        const model = this.getModelClass(RequestTypes.RETRIEVE);
+
+        let instance;
+        if (id === undefined) {
+            instance = await this.getOne();
+        } else {
+            const response = await this.execute({
+                method: HttpMethods.GET,
+                path: this._getDetailPath(id),
+            });
+            instance = new model(response.data, this);
         }
 
-        const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });
+        await this._executeAfterInstancesFetchedHooks([instance], model);
 
-        let instance = this.model.getInstance(response.data, this);
-        let prefetch_fields = this._getPrefetchFields();
-
-        // if prefetch fields exist, loads prefetch data.
-        if (prefetch_fields && prefetch_fields.length > 0) {
-            await this._loadPrefetchData(prefetch_fields, [instance]);
-        }
-
-        // otherwise, returns instance.
-        this.cache = instance;
         return instance;
+    }
+
+    /**
+     * Method returns one instance, if more than one instance found error is thrown
+     * @return {Promise<Model>}
+     */
+    async getOne() {
+        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
+        const listModelSameAsRetrieve = retrieveModel === this.getModelClass(RequestTypes.LIST);
+        const useBulk = this._useBulkFor(HttpMethods.GET);
+
+        if (useBulk && !listModelSameAsRetrieve) {
+            const pkFieldName = retrieveModel.pkField.name;
+            const path = this.getDataType();
+            const results = await apiConnector.sendBulk([
+                { method: HttpMethods.GET, path, query: makeQueryString({ ...this.query, limit: 1 }, true) },
+                { method: HttpMethods.GET, path: [...path, `<<0[data][results][0][${pkFieldName}]>>`] },
+            ]);
+            if (results[0].data.count > 1) {
+                throw new Error('More then one entity found');
+            } else if (results[0].data.count === 0) {
+                return new APIResponse(404, { detail: `No ${retrieveModel.name} matches the given query.` });
+            }
+            const instance = new retrieveModel(results[1].data, this);
+
+            await this._executeAfterInstancesFetchedHooks([instance], retrieveModel);
+
+            return instance;
+        } else {
+            const items = await this.filter({ limit: 1 }).items();
+            if (items.extra.count > 1) {
+                throw new Error('More then one entity found');
+            }
+            if (!items.length) {
+                throw new StatusError(404, 'Not Found');
+            }
+            if (listModelSameAsRetrieve) {
+                return items[0];
+            }
+            return this.get(items[0].getPkValue());
+        }
     }
 
     /**
@@ -160,23 +239,23 @@ export default class QuerySet {
      * Method, returns promise, that returns list of Model instances,
      * if api request was successful.
      *
-     * @returns {Model[]}
+     * @returns {Promise<Model[]>}
      */
     async items(invalidateCache = true) {
-        if (!invalidateCache && this.cache) {
-            return this.cache;
-        }
-        const response = await this.execute({ method: 'get', path: this.getDataType(), query: this.query });
+        if (!invalidateCache && this.cache) return this.cache;
+
+        const model = this.getModelClass(RequestTypes.LIST);
+
+        const response = await this.execute({
+            method: HttpMethods.GET,
+            path: this.getDataType(),
+            query: this.query,
+        });
 
         this.api_count = response.data.count;
+        const instances = response.data.results.map((item) => new model(item, this.clone()));
 
-        const instances = response.data.results.map((item) => this.model.getInstance(item, this.clone()));
-
-        const prefetch_fields = this._getPrefetchFields();
-        // if prefetch fields exist, loads prefetch data.
-        if (prefetch_fields && prefetch_fields.length > 0) {
-            await this._loadPrefetchData(prefetch_fields, instances);
-        }
+        await this._executeAfterInstancesFetchedHooks(instances, model);
 
         instances.extra = {};
         for (let key of Object.keys(response.data)) {
@@ -185,94 +264,118 @@ export default class QuerySet {
             }
         }
 
-        this.cache = instances;
         instances.total = response.data.count;
         return instances;
+    }
+
+    _executeAfterInstancesFetchedHooks(instances, model) {
+        const fields = Array.from(model.fields.values());
+
+        // Execute fields hooks
+        return Promise.all(fields.map((field) => field.afterInstancesFetched(instances, this)));
+    }
+
+    _getCreateBulkPath(pkFieldName) {
+        return [...this.getDataType(), `<<0[data][${pkFieldName}]>>`];
     }
 
     /**
      * Method, that sends query to API for creation of new Model instance
      * and returns promise, that returns Model instance, if query response was successful.
      *
-     * @param {(Model|Object)} data - new model data.
+     * @param {Model} instance - new model data.
      * @param {string} method - Http method.
      * @returns {Promise.<Model>}
      */
-    async create(data, method = 'post') {
-        if (!(data instanceof Model)) {
-            data = this.model.getInstance(data, this);
+    async create(instance, method = HttpMethods.POST) {
+        const createModel = this.getModelClass(RequestTypes.CREATE);
+        WrongModelError.checkModel(createModel, instance);
+        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
+        const createModelSameAsRetrieve = createModel === this.getModelClass(RequestTypes.RETRIEVE);
+        const dataType = this.getDataType();
+
+        if (!createModelSameAsRetrieve && this._useBulkFor(method, HttpMethods.GET)) {
+            const pkFieldName = retrieveModel.pkField.name;
+            const results = await apiConnector.sendBulk([
+                { method, path: dataType, data: instance._getInnerData() },
+                { method: HttpMethods.GET, path: this._getCreateBulkPath(pkFieldName) },
+            ]);
+            return new retrieveModel(results[1].data, this);
+        } else {
+            const response = await this.execute({
+                method,
+                data: instance,
+                path: dataType,
+                query: this.query,
+            });
+            const createdInstance = new createModel(response.data, this);
+            if (createModelSameAsRetrieve) {
+                return createdInstance;
+            }
+            return this.get(createdInstance.getPkValue());
         }
-
-        const response = await this.execute({
-            method,
-            data,
-            path: this.url,
-            query: this.query,
-        });
-
-        return this.model.getInstance(response.data, this);
     }
 
     /**
      * Method, that sends api request for model update
      *
-     * @param {Model} newDataInstance - Model instance with new data.
-     * @param {Model[]=} instances - Model instances to apply update.
-     * @param {string} method - Http method.
-     * @returns {Promise.<Model[]>}
+     * @param {Model} updatedInstance
+     * @param {Model[]} [instances] - Model instances to update.
+     * @param {HttpMethod} [method] - Http method, PATCH by default.
+     * @returns {Promise.<Model>[]}
      */
-    async update(newDataInstance, instances = undefined, method = 'patch') {
-        if (instances === undefined) {
-            instances = await this.items();
-        }
+    async update(updatedInstance, instances, method = HttpMethods.PATCH) {
+        if (instances === undefined) instances = await this.items();
 
-        const updatePromises = instances.map(async (instance) => {
-            const path = instance.queryset.getDataType();
+        const modelUpdate = this.getModelClass(RequestTypes.PARTIAL_UPDATE);
+        const modelRetrieve = this.getModelClass(RequestTypes.RETRIEVE);
 
-            const response = await this.execute({
-                method,
-                data: newDataInstance,
-                path: path,
-                query: this.query,
+        WrongModelError.checkModel(modelUpdate, updatedInstance);
+
+        const updateModelSameAsRetrieve = modelUpdate === modelRetrieve;
+
+        if (!updateModelSameAsRetrieve && this._useBulkFor(method, HttpMethods.GET)) {
+            const requests = instances.flatMap((instance) => {
+                const path = this._getDetailPath(instance.getPkValue());
+                return [
+                    { method, path, data: updatedInstance._getInnerData() },
+                    { method: HttpMethods.GET, path },
+                ];
             });
 
-            return this.model.getInstance(response.data, this);
-        });
-
-        return Promise.all(updatePromises);
+            return (await apiConnector.sendBulk(requests))
+                .filter((_, idx) => idx % 2 === 0)
+                .map((response) => new modelRetrieve(response.data, this));
+        } else {
+            return Promise.all(
+                instances.map(async (instance) => {
+                    const response = await this.execute({
+                        method,
+                        data: updatedInstance,
+                        path: this._getDetailPath(instance.getPkValue()),
+                        query: this.query,
+                    });
+                    return new modelUpdate(response.data, this);
+                }),
+            );
+        }
     }
 
     /**
-     * Method, that deletes all Model instances, that this.items() returns.
-     * It means, that this method deletes all instances, that were filtered before it's execution.
+     * Method, that deletes provided instances or all instances that match current queryset items().
      * This method is expected to be called after instance filtering.
-     * This method is only for querysets, that have 'url' of 'list' type.
-     * This method should not be applied for querysets with 'page' type url.
      *
-     * @param {Model[]=} instances
+     * @param {Model[]} instances
      * @returns {Promise}
      */
     async delete(instances = undefined) {
-        if (instances === undefined) {
-            instances = await this.items();
-        }
+        if (instances === undefined) instances = await this.items();
 
-        const deletePromises = instances.map(async (instance) => {
-            const pk = instance.getPkValue();
-            let path = this.getDataType();
-
-            if ('' + path[path.length - 1] !== '' + pk) {
-                path.push(pk);
-            }
-
-            return this.execute({
-                method: 'delete',
-                path: path,
-                query: this.query,
-            });
-        });
-
-        return Promise.all(deletePromises);
+        return Promise.all(
+            instances.map((instance) =>
+                this.execute({ method: 'delete', path: this._getDetailPath(instance.getPkValue()) }),
+            ),
+        );
     }
 
     /**
@@ -283,30 +386,27 @@ export default class QuerySet {
      * @param {string=} req.version - API version.
      * @param {(string|string[])} req.path
      * @param {(string|Object|URLSearchParams)=} req.query - URL query params.
-     * @param {(Model|Object)=} req.data
+     * @param {Model=} req.data
      * @param {(string|Object)=} req.headers
      * @returns {Promise.<APIResponse>}
      */
     execute(req) {
-        let useBulk = this.model.methodsToBulk.includes(req.method);
+        const useBulk = this._useBulkFor(req.method);
 
-        let data;
-        if (req.data !== undefined) {
-            if (req.data instanceof Model) {
-                data = this.model.toInner(req.data.data);
-            } else {
-                data = req.data;
-            }
-
-            if (useBulk) {
-                data = JSON.stringify(data);
-            } else {
-                const formData = new FormData();
-                for (let [key, value] of Object.entries(data)) formData.append(key, value);
-                data = formData;
-            }
+        if (req.data === undefined) {
+            return apiConnector.makeRequest({ ...req, useBulk });
         }
 
+        const rawData = req.data._getInnerData ? req.data._getInnerData() : req.data;
+
+        let data;
+        if (useBulk) {
+            data = JSON.stringify(rawData);
+        } else {
+            const formData = new FormData();
+            for (let [key, value] of Object.entries(rawData)) formData.append(key, value);
+            data = formData;
+        }
         return apiConnector.makeRequest({ ...req, data, useBulk });
     }
 
@@ -314,166 +414,7 @@ export default class QuerySet {
      * Method, that cleans QuerySet cache.
      */
     clearCache() {
-        delete this.cache;
-        delete this.api_count;
-    }
-
-    /**
-     * Method, that returns array with names of prefetch fields.
-     */
-    _getPrefetchFields() {
-        if (Array.isArray(this.use_prefetch)) {
-            return this.use_prefetch;
-        } else if (this.use_prefetch) {
-            return this.model.getPrefetchFields();
-        }
-    }
-
-    /**
-     * Method, that forms bulk_data for prefetch Bulk.
-     * @param {array} prefetch_fields Array with names of prefetch fields.
-     * @param {object} instances Object with loaded model instances.
-     * @private
-     */
-    _getBulkDataForPrefetch(prefetch_fields, instances) {
-        let bulk_data = {};
-
-        for (let index = 0; index < instances.length; index++) {
-            let instance = instances[index];
-
-            this._getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data);
-        }
-
-        return bulk_data;
-    }
-
-    /**
-     * Method, that forms prefetch bulk_data for one instance.
-     * @param {array} prefetch_fields Array with names of prefetch fields.
-     * @param {object} instance Model instance.
-     * @param {object} bulk_data Object with bulk_data.
-     * @private
-     */
-    _getBulkDataForPrefetchForInstance(prefetch_fields, instance, bulk_data) {
-        for (let field_name of prefetch_fields) {
-            let field = this.model.fields[field_name];
-            let value = instance.data[field_name];
-
-            if (value === null || value === undefined) {
-                continue;
-            }
-
-            if (!field.prefetchDataOrNot(instance.data)) {
-                continue;
-            }
-
-            let obj = field.getObjectBulk(instance.data, this.url);
-
-            if (obj === undefined || typeof obj == 'string') {
-                continue;
-            }
-
-            if (!bulk_data[field_name]) {
-                bulk_data[field_name] = [];
-            }
-
-            let pushed = false;
-
-            for (const item of bulk_data[field_name]) {
-                if (deepEqual(item.path, obj.path)) {
-                    if (!item.filter_values.includes(obj.id)) {
-                        item.filter_values.push(obj.id);
-                    }
-                    if (!item.instances_ids.includes(instance.getPkValue())) {
-                        item.instances_ids.push(instance.getPkValue());
-                    }
-
-                    pushed = true;
-                }
-            }
-
-            if (!pushed) {
-                bulk_data[field_name].push({
-                    instances_ids: [instance.getPkValue()],
-                    path: obj.path,
-                    filter_name: field.getPrefetchFilterName(instance.data),
-                    filter_values: [obj.id],
-                });
-            }
-        }
-
-        return bulk_data;
-    }
-
-    /**
-     * Method, that loads prefetch info for instances,
-     * which were loaded by current queryset.
-     * @param {string[]} prefetch_fields Array with names of prefetch fields.
-     * @param {Model[]} instances Object with loaded model instances.
-     * @private
-     */
-    _loadPrefetchData(prefetch_fields, instances) {
-        let promises = [];
-        let bulk_data = this._getBulkDataForPrefetch(prefetch_fields, instances);
-        for (let key in bulk_data) {
-            if (Object.prototype.hasOwnProperty.call(bulk_data, key)) {
-                for (let index = 0; index < bulk_data[key].length; index++) {
-                    let item = bulk_data[key][index];
-                    let filters = {};
-
-                    filters[item.filter_name] = item.filter_values;
-
-                    let bulk = {
-                        method: 'get',
-                        path: item.path,
-                        query: this.makeQueryString(filters),
-                    };
-
-                    promises.push(
-                        apiConnector
-                            .bulkQuery(bulk)
-                            .then((res) => {
-                                this._setPrefetchValue(res, item, instances, key);
-                            })
-                            .catch((error) => {
-                                console.log(error);
-                            }),
-                    );
-                }
-            }
-        }
-
-        return Promise.all(promises);
-    }
-
-    /**
-     * Method, that adds loaded prefetch data to instances.
-     * @param {object} res Prefetch API response.
-     * @param {object} bulk_data_item Object bulk data for prefetch request.
-     * @param {array} instances Array with instances.
-     * @param {string} field_name Name of model field.
-     * @private
-     */
-    _setPrefetchValue(res, bulk_data_item, instances, field_name) {
-        if (res.status !== 200) {
-            return;
-        }
-
-        let prefetch_data = res.data.results;
-        let field = this.model.fields[field_name];
-
-        for (let index = 0; index < instances.length; index++) {
-            let instance = instances[index];
-
-            if (!bulk_data_item.instances_ids.includes(instance.getPkValue())) {
-                continue;
-            }
-
-            for (let num = 0; num < prefetch_data.length; num++) {
-                if (field.isPrefetchDataForMe(instance.data, prefetch_data[num])) {
-                    instance.data[field_name] = field.getPrefetchValue(instance.data, prefetch_data[num]);
-                }
-            }
-        }
+        this.cache = undefined;
+        this.api_count = undefined;
     }
 }

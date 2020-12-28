@@ -1,11 +1,13 @@
 import BooleanFieldContentEdit from './BooleanFieldContentEdit.vue';
 import BooleanFieldContentReadonly from './BooleanFieldContentReadonly.vue';
 import BooleanFieldListView from './BooleanFieldListView.vue';
+import BaseFieldMixin from '../base/BaseFieldMixin.vue';
 
 const BooleanFieldMixin = {
+    mixins: [BaseFieldMixin],
     methods: {
         toggleValue() {
-            this.setValueInStore(!this.value);
+            this.setValue(!this.value);
         },
         /**
          * Method, that sets some value (default or false) to current boolean field,
@@ -21,7 +23,7 @@ const BooleanFieldMixin = {
                     value = this.field.options.default;
                 }
 
-                this.setValueInStore(value);
+                this.setValue(value);
             }
         },
     },

@@ -36,15 +36,15 @@ const MultipleNamedBinaryFileFieldMixin = {
         readFileOnLoadCallback(event, file) {
             let files = [...this.val];
             let obj = {};
-            obj[this.field.options.name] = event.target.result;
+            obj[this.field.name] = event.target.result;
             files.push({
                 name: file.name,
                 content: this.field.toBase64(obj),
             });
-            this.setValueInStore(files);
+            this.$emit('set-value', { field: this.field.name, value: files });
         },
 
-        readFile: function (event) {
+        readFile(event) {
             let files = event.target.files;
 
             for (let index = 0; index < files.length; index++) {

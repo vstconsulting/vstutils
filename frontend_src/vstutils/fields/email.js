@@ -8,7 +8,7 @@ const EmailFieldMixin = {
             mixins: [BaseFieldContentEdit],
             data() {
                 return {
-                    input_type: 'email',
+                    inputType: 'email',
                 };
             },
         },

@@ -15,10 +15,7 @@ export default {
         },
     },
     mutations: {
-        setQuerySet(state, { view, url, qs }) {
-            if (!qs) {
-                qs = view.objects.copy({ url: url.replace(/^\/|\/$/g, '') }).prefetch(true);
-            }
+        setQuerySet(state, qs) {
             state.queryset = qs;
         },
         setData(state, value) {
@@ -30,7 +27,7 @@ export default {
     },
     actions: {
         // eslint-disable-next-line no-unused-vars
-        async fetchData(obj, { view, url, qs }) {},
+        async fetchData(obj) {},
 
         // eslint-disable-next-line no-unused-vars
         async updateData(obj) {},

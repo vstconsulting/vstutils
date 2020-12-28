@@ -10,7 +10,7 @@ class DynamicField extends BaseField {
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(DynamicFieldMixin);
+        return [DynamicFieldMixin];
     }
     /**
      * Redefinition of 'toInner' method of base guiField.
@@ -163,13 +163,10 @@ class DynamicField extends BaseField {
             opt.format = 'string';
         }
 
-        let real_field = new window.spa.fields.guiFields[opt.format](opt);
+        let realField = new window.spa.fields.guiFields[opt.format](opt);
+        realField.prepareField(window.app);
 
-        if (real_field.constructor.prepareField) {
-            real_field = real_field.constructor.prepareField(real_field, window.app.application.$route.name);
-        }
-
-        return real_field;
+        return realField;
     }
 }
 

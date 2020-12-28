@@ -4,7 +4,7 @@
 const DateTimeFieldContent = {
     data() {
         return {
-            input_type: 'datetime-local',
+            inputType: 'datetime-local',
         };
     },
 };

@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import { BaseField } from '../base';
-import { ViewConstructor } from '../../views';
-import { openapi_dictionary } from '../../api';
+// import { ViewConstructor } from '../../views';
+// import { openapi_dictionary } from '../../api';
 import InnerAPIObjectFieldMixin from './InnerAPIObjectFieldMixin';
 
 /**
@@ -20,18 +20,13 @@ class InnerAPIObjectField extends BaseField {
      * @param {object} field Inner_api_object field instance.
      */
     static getModel(field) {
-        let constructor = new ViewConstructor(openapi_dictionary, window.app.models);
-        return constructor.getViewSchema_model(field.options);
+        // TODO usage of ViewConstructor creates circular dependency
+        // let constructor = new ViewConstructor(openapi_dictionary, window.app.models);
+        // return constructor.getViewSchema_model(field.options);
     }
 
-    /**
-     * Static method, that prepares field for usage.
-     * @param {object} field Inner_api_object field instance.
-     * @param {string} path Name of View path.
-     */
-    // eslint-disable-next-line no-unused-vars
-    static prepareField(field, path) {
-        let model = this.getModel(field);
+    prepareField(app, path) {
+        let model = this.getModel(this);
 
         if (!model) {
             console.error(

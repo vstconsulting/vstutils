@@ -4,7 +4,7 @@
 
 <script>
     import $ from 'jquery';
-    import { deepEqual, trim, guiLocalSettings, getDependenceValueAsString } from '../../../utils';
+    import { trim, guiLocalSettings, RequestTypes } from '../../../utils';
     import { BaseFieldContentEdit } from '../../base';
     import FKFieldContent from './FKFieldContent.js';
     import signals from '../../../signals.js';
@@ -18,11 +18,11 @@
         },
         watch: {
             value(value) {
-                this.setValue(value);
+                this.setValue(value, false);
             },
         },
         mounted() {
-            this.select_el = $(this.$el);
+            this.instancesCache = new Map();
 
             this.initSelect2();
 
@@ -34,13 +34,17 @@
             this.currentQuerysetIdx = 0;
             this.currentQuerysetOffset = 0;
         },
+        destroyed() {
+            $(this.$el).off().select2('destroy');
+        },
         methods: {
             /**
              * Method, that mounts select2 to current field's select.
              */
             initSelect2() {
-                $(this.select_el)
+                $(this.$el)
                     .select2({
+                        theme: window.SELECT2_THEME,
                         width: '100%',
                         ajax: {
                             delay: 350,
@@ -48,46 +52,48 @@
                                 this.transport(params, success, failure);
                             },
                         },
+                        allowClear: this.field.nullable,
+                        placeholder: { id: undefined, text: '' },
                     })
-                    .on('change', (event) => {
-                        let data = $(this.select_el).select2('data')[0];
-                        let val_obj = {};
+                    .on('change', () => {
+                        const selected = $(this.$el).select2('data')[0] || {};
+                        const newValue =
+                            selected.instance || this.instancesCache.get(String(selected.id)) || null;
 
-                        if (data) {
-                            val_obj.value = data.id;
-                            val_obj.prefetch_value = data.text;
-                        } else {
-                            val_obj.value = event.target.value;
-                            val_obj.prefetch_value = event.target.value;
-                        }
-
-                        if (!deepEqual(val_obj, this.value)) {
-                            this.$emit('proxyEvent', 'setValueInStore', val_obj);
+                        if (!this.isSameValues(newValue, this.value)) {
+                            this.$emit('set-value', newValue);
                         }
                     });
             },
 
+            isSameValues(first, second) {
+                return this.field.getValueFieldValue(first) === this.field.getValueFieldValue(second);
+            },
+
             setValue(value) {
                 if (!value) {
-                    return $(this.select_el).val(null).trigger('change');
+                    return $(this.$el).val(null).trigger('change');
                 }
 
-                if (typeof value !== 'object') {
-                    value = {
-                        value: value,
-                        prefetch_value: value,
-                    };
+                const selected = $(this.$el).select2('data')[0] || {};
+                const currentValue =
+                    selected.instance || this.instancesCache.get(String(selected.id)) || null;
+
+                if (this.isSameValues(currentValue, value)) {
+                    return;
                 }
+                this.instancesCache.set(String(this.field.getValueFieldValue(value)), value);
 
-                let result = {
-                    id: value.value,
-                    text: value.prefetch_value,
-                };
+                const newOption = new Option(
+                    value[this.field.viewField] || value,
+                    value[this.field.valueField] || value,
+                    false,
+                    true,
+                );
 
-                let newOption = new Option(result.text, result.id, false, true);
-
-                $(this.select_el).append(newOption).trigger('change');
+                $(this.$el).empty().append(newOption).trigger('change');
             },
+
             transport(params, success, failure) {
                 if (this.querysets.length === 0) {
                     success({ results: [] });
@@ -122,10 +128,10 @@
                     })
                     .catch((error) => {
                         console.error(error);
-                        const default_value = this.field.options.additionalProperties.default_value;
-                        failure(default_value ? [default_value] : []);
+                        failure([]);
                     });
             },
+
             /**
              * Method to make query to one queryset with given search term and offset
              *
@@ -134,55 +140,49 @@
              * @param {QuerySet} queryset
              * @return {Promise<{items: Array, total: number}>}
              */
-            getQuerysetResults(searchTerm, offset, queryset) {
-                const props = this.field.options.additionalProperties;
-                let filters = {
-                    limit: this.pageSize,
-                    offset: offset,
-                    [this.field.getAutocompleteFilterName(this.data)]: searchTerm,
-                };
+            async getQuerysetResults(searchTerm, offset, queryset) {
+                const filters = { limit: this.pageSize, offset, [this.field.viewField]: searchTerm };
 
-                let signal_obj = {
+                const signalObj = {
                     qs: queryset,
                     filters: filters,
+                    dependenceFilters: this.field.getDependenceFilters(this.data),
                 };
 
-                let field_dependence_data = getDependenceValueAsString(
-                    this.$parent.data,
-                    props.field_dependence_name,
-                );
-                if (field_dependence_data !== undefined) {
-                    signal_obj.field_dependence_name = props.field_dependence_name;
-                    signal_obj.filter_name = props.filter_name;
-                    signal_obj[props.field_dependence_name] = field_dependence_data;
+                const model = this.queryset.getModelClass(RequestTypes.LIST);
+
+                signals.emit(`filter.${this.field.format}.${model.name}.${this.field.name}`, signalObj);
+
+                let req;
+
+                if (signalObj.nest_prom) {
+                    req = signalObj.nest_prom;
+                } else if (signalObj.dependenceFilters !== null) {
+                    req = queryset.filter({ ...filters, ...signalObj.dependenceFilters }).items();
+                } else {
+                    req = Promise.resolve([]);
                 }
 
-                signals.emit(
-                    `filter.${this.field.options.format}.${this.queryset.model.name}.${this.field.options.name}`,
-                    signal_obj,
-                );
+                const instances = await req;
 
-                const req = signal_obj.nest_prom || queryset.filter(filters).items();
+                const items = instances.map((instance) => ({
+                    id: instance[this.field.valueField],
+                    text: instance[this.field.viewField],
+                    instance,
+                }));
 
-                return req.then((response) => {
-                    const items = response.map((instance) => {
-                        let a_data = this.field.getAutocompleteValue(this.data, instance.data);
-                        return { id: a_data.value_field, text: a_data.view_field };
-                    });
-
-                    if (this.field.options.default !== undefined) {
-                        if (typeof this.field.options.default !== 'object') {
-                            items.push({
-                                id: this.field.options.default,
-                                text: this.field.options.default,
-                            });
-                        } else {
-                            items.push(this.field.options.default);
-                        }
+                if (this.field.hasDefault) {
+                    if (typeof this.field.default !== 'object') {
+                        items.push({
+                            id: this.field.default,
+                            text: this.field.default,
+                        });
+                    } else {
+                        items.push(this.field.default);
                     }
-                    const total = response.total !== undefined ? response.total : items.length;
-                    return { items: items, total };
-                });
+                }
+                const total = instances.total !== undefined ? instances.total : items.length;
+                return { items, total };
             },
         },
     };

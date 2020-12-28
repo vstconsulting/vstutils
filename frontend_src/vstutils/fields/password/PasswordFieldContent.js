@@ -4,7 +4,7 @@
 const PasswordFieldContent = {
     data() {
         return {
-            input_type: 'password',
+            inputType: 'password',
         };
     },
 };

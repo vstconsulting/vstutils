@@ -83,30 +83,6 @@ export class StoreConstructor {
                 Vue.set(state.selections, url, {});
             },
             /**
-             * Mutation, that changes selection dict record value to opposite.
-             * False || Undefined => True.
-             * True => False.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            toggleSelectionValue(state, obj) {
-                if (state.selections[obj.url][obj.id] == undefined) {
-                    state.selections[obj.url][obj.id] = true;
-                } else {
-                    state.selections[obj.url][obj.id] = !state.selections[obj.url][obj.id];
-                }
-                state.selections = { ...state.selections };
-            },
-            /**
-             * Mutation, that updates values of several selection dict records.
-             * @param {object} state Current state.
-             * @param {object} obj Object with arguments for this mutation.
-             */
-            setSelectionValuesByIds(state, obj) {
-                state.selections[obj.url] = $.extend(true, {}, state.selections[obj.url], obj.ids);
-                state.selections = { ...state.selections };
-            },
-            /**
              * Mutation, that saves widgets data in store.
              * @param {object} state Current state.
              * @param {object} obj Object with arguments for this mutation.

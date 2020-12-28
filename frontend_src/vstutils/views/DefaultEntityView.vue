@@ -75,7 +75,7 @@
                     </div>
                     <div class="row">
                         <section class="col-lg-12">
-                            <template v-if="view.schema.type === 'list'">
+                            <template v-if="view.type === 'list'">
                                 <component
                                     :is="content_body_component"
                                     :view="view"
@@ -114,7 +114,7 @@
                                         <div
                                             v-show="!card_collapsed"
                                             class="card-body card-body-custom"
-                                            :class="'card-body-' + view.schema.type"
+                                            :class="'card-body-' + view.type"
                                         >
                                             <component
                                                 :is="content_body_component"

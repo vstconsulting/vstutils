@@ -33,7 +33,7 @@ const FileFieldMixin = {
          * Method, that reads content of selected file
          * and sets field value equal to this content.
          */
-        readFile: function (event) {
+        readFile(event) {
             let file = event.target.files[0];
 
             if (!file) {
@@ -58,8 +58,8 @@ const FileFieldMixin = {
          * Method - callback for onLoad event of FileReader.
          * @param {object} event Event object.
          */
-        readFileOnLoadCallback: function (event) {
-            this.setValueInStore(event.target.result);
+        readFileOnLoadCallback(event) {
+            this.$emit('set-value', { field: this.field.name, value: event.target.result });
 
             let el = $(this.$el).find('#file_reader_input');
             $(el).val('');

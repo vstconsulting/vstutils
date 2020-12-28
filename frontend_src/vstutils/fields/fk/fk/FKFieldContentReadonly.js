@@ -11,21 +11,16 @@ const FKFieldContentReadonly = {
          * @return {boolean}
          */
         with_link() {
-            return this.field.makeLinkOrNot(this.data);
+            return this.field.makeLink;
         },
         /**
          * Property, that returns 'fk' value.
          */
         fk() {
-            if (!this.value) {
-                return;
+            if (this.fetchedValue && typeof this.fetchedValue === 'object') {
+                return this.fetchedValue[this.field.valueField];
             }
-
-            if (typeof this.value == 'object' && this.value.value) {
-                return this.value.value;
-            }
-
-            return this.value;
+            return this.fetchedValue;
         },
         /**
          * Link to the page of current instance, to which this field is linked.
@@ -41,19 +36,10 @@ const FKFieldContentReadonly = {
          * Text of link.
          */
         text() {
-            if (this.values_cache[this.value]) {
-                return this.values_cache[this.value].prefetch_value;
+            if (this.fetchedValue && typeof this.fetchedValue === 'object') {
+                return this.fetchedValue[this.field.viewField];
             }
-
-            if (!this.value) {
-                return;
-            }
-
-            if (typeof this.value == 'object' && this.value.prefetch_value) {
-                return this.value.prefetch_value;
-            }
-
-            return this.value;
+            return this.fetchedValue;
         },
     },
     methods: {

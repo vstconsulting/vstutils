@@ -106,6 +106,7 @@ class BModel(BaseModel):
           Constants are also supported:
 
             - ``read_only`` - to create a view only for viewing;
+            - ``list_only`` - to create a view with list only;
             - ``history`` - to create a view only for viewing and deleting records.
 
           Default is simple CRUD-view.

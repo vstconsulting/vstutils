@@ -4,7 +4,7 @@
 const IntegerFieldContentMixin = {
     data() {
         return {
-            input_type: 'number',
+            inputType: 'number',
         };
     },
 };

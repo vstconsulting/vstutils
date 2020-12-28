@@ -8,7 +8,7 @@ const ModalWindowAndButtonMixin = {
              * Property, that is responsible
              * for modal showing/hiding.
              */
-            show_modal: false,
+            showModal: false,
         };
     },
     methods: {
@@ -16,7 +16,7 @@ const ModalWindowAndButtonMixin = {
          * Method, that opens modal window.
          */
         open() {
-            this.show_modal = true;
+            this.showModal = true;
 
             this.onOpen();
         },
@@ -24,7 +24,7 @@ const ModalWindowAndButtonMixin = {
          * Method, that closes modal window.
          */
         close() {
-            this.show_modal = false;
+            this.showModal = false;
 
             this.onClose();
         },

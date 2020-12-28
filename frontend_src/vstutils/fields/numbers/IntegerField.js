@@ -25,6 +25,11 @@ class IntegerField extends BaseField {
 
         return val;
     }
+
+    getInitialValue() {
+        return null;
+    }
+
     /**
      * Redefinition of base guiField static property 'mixins'.
      */

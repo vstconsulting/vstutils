@@ -1,21 +1,11 @@
 import { BaseField } from './base';
+import EmptyComponent from '../components/EmptyComponent.js';
 
-const HiddenFieldMixin = {
-    render: function (createElement) {
-        return createElement('div');
-    },
-};
-
-/**
- * Hidden guiField class.
- */
-class HiddenField extends BaseField {
+export class HiddenField extends BaseField {
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(HiddenFieldMixin);
+        return super.mixins.concat(EmptyComponent);
     }
 }
-
-export { HiddenField, HiddenFieldMixin };

@@ -5,27 +5,14 @@
             :class="classes"
             :style="styles"
             :value="val"
-            @blur="setValueByHandsInStore($event.target.value)"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
+            @blur="$emit('set-value', $event.target.value)"
         />
 
-        <field_hidden_button
-            v-if="with_hidden_button"
-            :field="field"
-            @hideField="$emit('proxyEvent', 'hideField')"
-        ></field_hidden_button>
-
-        <field_default_value_button
-            v-if="with_default_value"
-            :field="field"
-            @valueToDefault="$emit('proxyEvent', 'valueToDefault')"
-        ></field_default_value_button>
-
-        <field_clear_button
-            :field="field"
-            @cleanValue="$emit('proxyEvent', 'cleanValue', '')"
-        ></field_clear_button>
+        <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+        <SetDefaultButton v-if="hasDefaultValue" @click.native="$emit('set-value', field.default)" />
+        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
     </div>
 </template>
 
@@ -33,11 +20,13 @@
     import $ from 'jquery';
     import autoComplete from 'JavaScript-autoComplete/auto-complete';
     import { trim } from '../../utils';
+    import { BaseFieldContentEdit } from '../base';
 
     /**
      * Mixin for editable autocomplete field content(input value area).
      */
     export default {
+        mixins: [BaseFieldContentEdit],
         data() {
             return {
                 /**
@@ -47,10 +36,6 @@
                 class_list: ['form-control', 'autocomplete-field-input'],
             };
         },
-        mounted() {
-            this.ac = $(this.$el).find('.autocomplete-field-input')[0];
-            this.initAutoComplete();
-        },
         computed: {
             /**
              * Property, that returns value to represent.
@@ -58,6 +43,10 @@
             val() {
                 return this.value;
             },
+        },
+        mounted() {
+            this.ac = $(this.$el).find('.autocomplete-field-input')[0];
+            this.initAutoComplete();
         },
         methods: {
             /**
@@ -102,7 +91,7 @@
             _onSelect(event, term, item) {
                 let value = this._getAutocompleteValue(item);
 
-                this.$emit('proxyEvent', 'setValueInStore', value);
+                this.$emit('set-value', value);
 
                 $(this.ac).attr({ 'data-hide': 'hide' });
             },
@@ -168,7 +157,7 @@
              * @param {string} value
              */
             setValueByHandsInStore(value) {
-                this.$emit('proxyEvent', 'setValueInStore', value);
+                this.$emit('set-value', value);
             },
         },
     };

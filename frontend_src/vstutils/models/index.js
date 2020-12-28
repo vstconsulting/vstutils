@@ -1,14 +1,14 @@
-import Model from './Model.js';
-import ModelConstructor from './ModelConstructor.js';
-import BaseEntityConstructor from './BaseEntityConstructor.js';
+import { Model, ModelClass } from './Model.js';
+import ModelConstructor, { NoModel } from './ModelConstructor.js';
+import { ModelsResolver } from './ModelsResolver.js';
+import { mapToObjectProxy } from '../utils';
+
+const globalModels = new Map();
 
 /**
- * Object, that contains Models classes.
- * Model class - constructor, that creates Models - JS objects.
- * This Model (JS object) is an abstraction aimed to be something similar to Django Models.
- * This Model can create Model instances (also JS Objects),
- * that aimed to be something similar to Django Model instances.
+ * @deprecated
+ * @type {Object<string, BaseField>}
  */
-const guiModels = { Model };
+const guiModels = mapToObjectProxy(globalModels);
 
-export { Model, ModelConstructor, guiModels, BaseEntityConstructor };
+export { Model, ModelClass, ModelConstructor, ModelsResolver, globalModels, guiModels, NoModel };

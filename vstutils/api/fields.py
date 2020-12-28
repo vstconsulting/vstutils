@@ -18,6 +18,9 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
 
 
+DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
+
+
 class VSTCharField(CharField):
     """
     Simple CharField (extends :class:`rest_framework.fields.CharField`).
@@ -126,13 +129,25 @@ class CommaMultiSelect(VSTCharField):
                                              Default is ``name``.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``False``.
     :param make_link: Show value as link to model. Default is ``True``.
+    :param dependence: Dictionary, where keys are name of field from the same model, and keys are name of query filter.
+                       If at least one of the fields that we depend on is non nullable, required and set to null,
+                       autocompletion list will be empty and field will be disabled.
+    :type dependence: dict
 
 
     .. note::
         Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
     """
 
-    __slots__ = ('select_model', 'select_separator', 'select_property', 'select_represent', 'use_prefetch', 'make_link')
+    __slots__ = (
+        'select_model',
+        'select_separator',
+        'select_property',
+        'select_represent',
+        'use_prefetch',
+        'make_link',
+        'dependence'
+    )
 
     select_model: _t.Text
     select_separator: _t.Text
@@ -140,6 +155,7 @@ class CommaMultiSelect(VSTCharField):
     select_represent: _t.Text
     use_prefetch: bool
     make_link: bool
+    dependence: DependenceType
 
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
@@ -150,6 +166,7 @@ class CommaMultiSelect(VSTCharField):
             self.select_represent = kwargs.pop('select_represent', 'name')
         self.use_prefetch = kwargs.pop('use_prefetch', False)
         self.make_link = kwargs.pop('make_link', True)
+        self.dependence = kwargs.pop('dependence', None)
         super().__init__(**kwargs)
 
     def to_internal_value(self, data: _t.Union[_t.Text, _t.Sequence]) -> _t.Text:
@@ -329,18 +346,32 @@ class FkField(IntegerField):
                                    get from OpenApi schema definition model as represent value.
                                    Default is ``name``.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
+    :type use_prefetch: bool
     :param make_link: Show value as link to model. Default is ``True``.
+    :type make_link: bool
+    :param dependence: Dictionary, where keys are name of field from the same model, and keys are name of query filter.
+                       If at least one of the fields that we depend on is non nullable, required and set to null,
+                       autocompletion list will be empty and field will be disabled.
+    :type dependence: dict
 
     .. note::
         Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
     """
-    __slots__ = 'select_model', 'autocomplete_property', 'autocomplete_represent', 'use_prefetch', 'make_link'
+    __slots__ = (
+        'select_model',
+        'autocomplete_property',
+        'autocomplete_represent',
+        'use_prefetch',
+        'make_link',
+        'dependence'
+    )
 
     select_model: _t.Text
     autocomplete_property: _t.Text
     autocomplete_represent: _t.Text
     use_prefetch: bool
     make_link: bool
+    dependence: DependenceType
 
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
@@ -348,6 +379,7 @@ class FkField(IntegerField):
         self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
         self.use_prefetch = kwargs.pop('use_prefetch', True)
         self.make_link = kwargs.pop('make_link', True)
+        self.dependence = kwargs.pop('dependence', None)
         super().__init__(**kwargs)
 
 

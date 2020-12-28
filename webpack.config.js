@@ -48,6 +48,10 @@ const config = {
     libraryTarget: 'window'
   },
   plugins: [
+      new webpack.ProvidePlugin({
+        $: 'jquery',
+        jQuery: 'jquery'
+      }),
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new CleanWebpackPlugin(),
     new VueLoaderPlugin(),
@@ -64,7 +68,6 @@ const config = {
   resolve: {
     alias: {
       vue$: "vue/dist/vue.esm.js",
-      jquery: require.resolve("jquery")
     },
     extensions: [".tsx", ".ts", ".js", ".vue"]
   },
@@ -72,13 +75,7 @@ const config = {
     rules: [
       {
         test: /\.js$/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"],
-            plugins: ['@babel/plugin-transform-runtime']
-          }
-        },
+        loader: "babel-loader",
         exclude: [/node_modules/]
       },
       {

@@ -7,7 +7,7 @@
         rel="noreferrer"
         @click="onLinkClickHandler"
     >
-        <i class="nav-icon ico-menu" :class="icon_classes"></i>
+        <i class="nav-icon ico-menu" :class="icon_classes" />
         <p>
             <span class="li-header-span">
                 <i class="li-header-span-i-none menu-text-data">
@@ -15,7 +15,7 @@
                 </i>
             </span>
             <template v-if="item.sublinks">
-                <i class="right fa fa-angle-left ico-menu" @click.stop.prevent="onToggleIconClickHandler"></i>
+                <i class="right fa fa-angle-left ico-menu" @click.stop.prevent="onToggleIconClickHandler" />
             </template>
         </p>
     </component>

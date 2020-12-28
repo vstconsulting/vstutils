@@ -1,42 +1,51 @@
 import $ from 'jquery';
-import BaseEntityConstructor from './BaseEntityConstructor.js';
-import { guiFields } from '../fields';
 import signals from '../signals.js';
 import { StringField } from '../fields/text';
+import { makeModel, Model, ModelClass } from './Model.js';
+import { getFieldFormatFactory } from '../fields';
+
+@ModelClass()
+export class NoModel extends Model {
+    static declaredFields = [
+        new StringField({
+            format: 'string',
+            name: 'detail',
+            required: false,
+            title: 'Detail',
+            type: 'string',
+        }),
+    ];
+}
 
 /**
  * Class, that manages creation of guiModels.
  */
-export default class ModelConstructor extends BaseEntityConstructor {
+export default class ModelConstructor {
     /**
      * Redefinition of BaseEntityConstructor class.
-     * @param {object} openapi_dictionary.
-     * @param {object} models_classes Dict with models classes.
+     * @param {object} openapiDictionary.
+     * @param {object} schema - Openapi schema.
+     * @param {Map<string, Function>} fieldsClasses
+     * @param {Map<string, Function>} modelsClasses
      */
-    constructor(openapi_dictionary, models_classes) {
-        super(openapi_dictionary);
-        this.pk_names = ['id'];
-        this.classes = models_classes;
-    }
-
-    /**
-     * Method, that returns Models list, from OpenApi schema.
-     * @param {object} openapi_schema OpenApi schema.
-     */
-    getModelsList(openapi_schema) {
-        return openapi_schema[this.dictionary.models.name];
+    constructor(openapiDictionary, schema, fieldsClasses, modelsClasses) {
+        this.dictionary = openapiDictionary;
+        this.schema = schema;
+        this.fieldsClasses = fieldsClasses;
+        this.models = modelsClasses;
+        this.getFieldFormat = getFieldFormatFactory(fieldsClasses);
     }
 
     /**
      * Method, that returns list of fields for current model.
      * @param {object} model OpenApi's Model schema.
      */
-    getModelFieldsList(model) {
-        let required_fields = this.getModelRequiredFieldsList(model);
-        let fields = model[this.dictionary.models.fields.name];
+    _getModelFields(model) {
+        const requiredFields = model[this.dictionary.models.required_fields.name] || [];
+        const fields = model[this.dictionary.models.fields.name];
 
         for (let key in fields) {
-            if (required_fields.includes(key)) {
+            if (requiredFields.includes(key)) {
                 fields[key].required = true;
             }
         }
@@ -45,101 +54,76 @@ export default class ModelConstructor extends BaseEntityConstructor {
     }
 
     /**
-     * Method, that returns list of required fields' names for current model.
-     * @param {object} model OpenApi's Model schema.
+     * Method that generates fields for given model
+     * @param {Object} modelSchema
+     * @param {string} modelName
+     * @return {BaseField[]}
      */
-    getModelRequiredFieldsList(model) {
-        return model[this.dictionary.models.required_fields.name] || [];
+    _generateModelFields(modelSchema, modelName) {
+        const fields = [];
+        const schemaFields = this._getModelFields(modelSchema);
+
+        signals.emit('models[' + modelName + '].fields.beforeInit', schemaFields);
+
+        for (const [fieldName, fieldSchema] of Object.entries(schemaFields)) {
+            const opt = {
+                name: fieldName,
+                format: this.getFieldFormat(fieldSchema),
+            };
+
+            const fieldConstructor = this.fieldsClasses.get(opt.format);
+
+            if (!fieldConstructor) throw new Error('Field ' + opt.format + ' has no constructor');
+
+            fields.push(new fieldConstructor($.extend(true, {}, fieldSchema, opt)));
+        }
+
+        signals.emit('models[' + modelName + '].fields.afterInit', fields);
+
+        return fields;
     }
 
     /**
-     * Method, that defines format of current field.
-     * @param {object} field Field from OpenApi's Model schema.
+     * Method that generates model class from schema
+     * @param {string} modelName
+     * @param {Object} modelSchema
+     * @return {Function} Model class
      */
-    getModelFieldFormat(field) {
-        return this.getFieldFormat(field);
+    _generateModel(modelName, modelSchema) {
+        const fields = this._generateModelFields(modelSchema, modelName);
+
+        return makeModel(
+            class extends Model {
+                static declaredFields = fields;
+                static fieldsGroups = modelSchema['x-properties-groups'] || {};
+            },
+            modelName,
+        );
     }
 
     /**
-     * Method, that returns object with guiFields for current Model.
-     * Method defines appropriate guiField for every field from OpenApi's Model schema.
-     * @param {object} model OpenApi's Model schema.
-     * @param {string} model_name Model name.
+     * Method, that generates Models classes and sets to models map provided in the constructor
      */
-    generateModelFields(model, model_name) {
-        let f_obj = {};
-        let fields = this.getModelFieldsList(model);
+    generateModels() {
+        /**
+         * Object where key is model name and value is model schema
+         * @type {Object<string, Object>}
+         */
+        const schemaModels = this.schema[this.dictionary.models.name];
 
-        signals.emit('models[' + model_name + '].fields.beforeInit', fields);
-
-        for (let field in fields) {
-            if (Object.prototype.hasOwnProperty.call(fields, field)) {
-                let format = this.getModelFieldFormat(fields[field]);
-                let opt = {
-                    name: field,
-                    format: format,
-                };
-
-                if (this.pk_names.includes(field)) {
-                    opt.is_pk = true;
-                }
-
-                f_obj[field] = new guiFields[format]($.extend(true, {}, fields[field], opt));
+        for (const modelName in schemaModels) {
+            if (
+                !this.models.has(modelName) &&
+                Object.prototype.hasOwnProperty.call(schemaModels, modelName)
+            ) {
+                const model = this._generateModel(modelName, schemaModels[modelName]);
+                this.models.set(modelName, model);
+                signals.emit(`models[${modelName}].created`, { model });
             }
         }
 
-        signals.emit('models[' + model_name + '].fields.afterInit', f_obj);
+        this.models.set('NoModel', NoModel);
 
-        return f_obj;
-    }
-
-    /**
-     * Method, that returns Model class (Model Constructor).
-     * @param {string} model Name of Model.
-     */
-    getModelsConstructor(model) {
-        if (this.classes[model + 'Model']) {
-            return this.classes[model + 'Model'];
-        }
-
-        return this.classes.Model;
-    }
-
-    /**
-     * Method, that generates Models objects based on OpenApi schema.
-     * Method returns dict with generating models.
-     * @param {object} openapi_schema OpenApi Schema.
-     * @return {object} Models store - object, that contains generated Models.
-     */
-    generateModels(openapi_schema) {
-        let store = {};
-        let models = this.getModelsList(openapi_schema);
-
-        for (let model in models) {
-            if (Object.prototype.hasOwnProperty.call(models, model)) {
-                let constructor = this.getModelsConstructor(model);
-
-                store[model] = new constructor(model, this.generateModelFields(models[model], model));
-
-                signals.emit('models[' + model + '].created', {
-                    model: store[model],
-                });
-            }
-        }
-
-        signals.emit('allModels.created', { models: store });
-
-        let constructor = this.getModelsConstructor('NoModel');
-        store['NoModel'] = new constructor('NoModel', {
-            detail: new StringField({
-                format: 'string',
-                name: 'detail',
-                required: false,
-                title: 'Detail',
-                type: 'string',
-            }),
-        });
-
-        return store;
+        signals.emit('allModels.created', { models: this.models });
     }
 }

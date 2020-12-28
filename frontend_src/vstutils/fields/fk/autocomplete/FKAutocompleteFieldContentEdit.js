@@ -39,12 +39,10 @@ const FKAutocompleteFieldContentEdit = {
                 return;
             }
 
-            let obj = {
+            this.$emit('set-value', {
                 value: value,
                 prefetch_value: value,
-            };
-
-            this.$emit('proxyEvent', 'setValueInStore', obj);
+            });
         },
     },
 };

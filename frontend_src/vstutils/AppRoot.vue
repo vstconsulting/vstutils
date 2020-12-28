@@ -24,16 +24,16 @@
 
                 <!-- Content Wrapper. Contains page content -->
                 <div class="content-wrapper">
-                    <router-view ref="currentViewComponent"></router-view>
+                    <router-view ref="currentViewComponent" />
                 </div>
                 <!-- /Content Wrapper. Contains page content -->
 
                 <!-- Control Sidebar -->
-                <div id="gui_customizer_wrapper">
-                    <aside class="control-sidebar control-sidebar-dark guiCustomizer">
-                        <GUICustomizer />
-                    </aside>
-                </div>
+<!--                <div id="gui_customizer_wrapper">-->
+<!--                    <aside class="control-sidebar control-sidebar-dark guiCustomizer">-->
+<!--                        <GUICustomizer />-->
+<!--                    </aside>-->
+<!--                </div>-->
                 <!-- /Control Sidebar -->
 
                 <!-- Main Footer -->
@@ -47,9 +47,11 @@
 </template>
 <script>
     import AutoUpdateController from './autoupdate/AutoUpdateController.js';
+    import GUICustomizer from './components/items/GUICustomizer.vue';
 
     export default {
         name: 'AppRoot',
+        components: { GUICustomizer },
         mixins: [AutoUpdateController],
         props: ['info', 'x_menu', 'x_docs', 'a_links'],
         computed: {

@@ -66,6 +66,14 @@ functional_test:
           - py36-django31-install
           - py38-django22-coverage
 
+js_tests:
+  <<: *branch_tests
+  needs: ["js_style"]
+  coverage: '/^Statements\s*:\s*([^%]+)/'
+  variables:
+    TOX_ENVS: "js_tests"
+
+
 pages:
   <<: *branch_tests
   stage: release

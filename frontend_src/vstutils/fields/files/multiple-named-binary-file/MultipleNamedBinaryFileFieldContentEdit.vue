@@ -11,21 +11,9 @@
                 {{ val }}
             </p>
 
-            <field_read_file_button
-                :field="field"
-                @readFile="$emit('proxyEvent', 'readFile', $event)"
-            ></field_read_file_button>
-
-            <field_hidden_button
-                v-if="with_hidden_button"
-                :field="field"
-                @hideField="$emit('proxyEvent', 'hideField')"
-            ></field_hidden_button>
-
-            <field_clear_button
-                :field="field"
-                @cleanValue="$emit('proxyEvent', 'cleanValue')"
-            ></field_clear_button>
+            <ReadFileButton @read-file="$parent.readFile($event)" />
+            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+            <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
         <div>
             <ul class="multiple-files-list">
@@ -33,7 +21,7 @@
                     <li :key="idx">
                         <div>
                             <span class="break-word">{{ file.name }}</span>
-                            <span class="cursor-pointer fa fa-times" @click="removeFile(index)"></span>
+                            <span class="cursor-pointer fa fa-times" @click="removeFile(idx)" />
                         </div>
                     </li>
                 </template>
@@ -50,23 +38,23 @@
      * Mixin for editable multiplenamedbinfile field.
      */
     export default {
+        components: {
+            ReadFileButton: {
+                mixins: [BinaryFileFieldReadFileButton],
+                data() {
+                    return {
+                        helpText: 'Open files',
+                        multiple: true,
+                    };
+                },
+            },
+        },
         mixins: [BinaryFileFieldContentEdit, MultipleNamedBinaryFileFieldContent],
         methods: {
             removeFile(index) {
                 let v = this.value ? [...this.value] : [];
                 v.splice(index, 1);
-                this.$emit('proxyEvent', 'setValueInStore', v);
-            },
-        },
-        components: {
-            field_read_file_button: {
-                mixins: [BinaryFileFieldReadFileButton],
-                data() {
-                    return {
-                        help_text: 'Open files',
-                        multiple: true,
-                    };
-                },
+                this.$emit('set-value', v);
             },
         },
     };

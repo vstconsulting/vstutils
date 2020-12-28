@@ -1,7 +1,7 @@
 <template>
     <div class="input-group">
         <input
-            :type="input_type"
+            :type="inputType"
             :class="classes"
             :style="styles"
             :value="value"
@@ -23,6 +23,7 @@
     export default {
         name: 'BaseFieldContentReadonlyMixin',
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
+        props: ['field', 'value', 'data'],
         data() {
             return {
                 class_list: ['form-control'],

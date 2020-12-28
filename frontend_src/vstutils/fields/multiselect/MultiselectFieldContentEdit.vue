@@ -1,5 +1,5 @@
 <template>
-    <select name="values[]" :class="classes" :style="styles"></select>
+    <select name="values[]" :class="classes" :style="styles" />
 </template>
 
 <script>
@@ -14,8 +14,9 @@
              * Method, that mounts select2 to current field's select.
              */
             initSelect2() {
-                $(this.select_el)
+                $(this.$el)
                     .select2({
+                        theme: window.SELECT2_THEME,
                         width: '100%',
                         multiple: true,
                         ajax: {
@@ -25,8 +26,8 @@
                             },
                         },
                     })
-                    .on('change', (event) => {
-                        let data = $(this.select_el).select2('data');
+                    .on('change', () => {
+                        let data = $(this.$el).select2('data');
                         let val_arr = [];
 
                         if (data) {
@@ -39,36 +40,34 @@
                         }
 
                         if (!deepEqual(val_arr, this.value)) {
-                            this.$emit('proxyEvent', 'setValueInStore', val_arr);
+                            this.$emit('set-value', val_arr);
                         }
                     });
             },
 
             setValue(value) {
                 if (!value) {
-                    return $(this.select_el).val(null).trigger('change');
+                    return $(this.$el).val(null).trigger('change');
                 }
 
                 let val = value;
 
                 if (typeof val == 'string') {
-                    val = val.split(this.field.options.additionalProperties.view_separator);
+                    val = val.split(this.field.viewSeparator);
                 }
 
                 if (Array.isArray(val)) {
-                    $(this.select_el).html(null);
+                    $(this.$el).html(null);
 
                     val.forEach((item) => {
                         if (typeof item == 'object') {
-                            $(this.select_el).append(
-                                new Option(item.prefetch_value, item.value, false, true),
-                            );
+                            $(this.$el).append(new Option(item.prefetch_value, item.value, false, true));
                         } else {
-                            $(this.select_el).append(new Option(item, item, false, true));
+                            $(this.$el).append(new Option(item, item, false, true));
                         }
                     });
 
-                    $(this.select_el).trigger('change');
+                    $(this.$el).trigger('change');
                 }
             },
         },

@@ -227,7 +227,18 @@ class QuerySetMixin(rvs.APIView):
         return self._base_get_queryset()
 
 
-class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
+class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
+    def __new__(mcs, name, bases, attrs):
+        new_class = super().__new__(mcs, name, bases, attrs)
+        for detail in (True, False):
+            setattr(new_class, mcs.__get_http_methods_attr_name(new_class, detail), None)
+        return new_class
+
+    def __get_http_methods_attr_name(cls, detail):
+        return ''.join(['__', 'detail' if detail else 'list', 'http_methods', '__'])
+
+
+class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewSetMeta):
     __slots__ = ()
     select_related = False
     serializer_class: _t.Type[serializers.Serializer]
@@ -260,6 +271,12 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet):
                 return serializer_class
         if action_name in self.action_serializers:
             serializer_class = self.action_serializers.get(action_name, None)
+            if serializer_class:
+                return serializer_class
+
+        if action_name not in main_actions:
+            view_func = getattr(self, action_name)
+            serializer_class = view_func.kwargs.get('serializer_class', None)
             if serializer_class:
                 return serializer_class
 
@@ -431,6 +448,11 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
     """ Default viewset like vstutils.api.base.ModelViewSet for readonly models. """
+    __slots__ = ()
+
+
+class ListOnlyModelViewSet(GenericViewSet, vsets.mixins.ListModelMixin):
+    """ Default viewset like vstutils.api.base.ModelViewSet for list only models. """
     __slots__ = ()
 
 

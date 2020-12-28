@@ -157,7 +157,7 @@
              * Property, that returns URL to profile/settings page.
              */
             profile_settings_url() {
-                if (!app.views['/profile/settings/']) {
+                if (!app.views.get('/profile/settings/')) {
                     return;
                 }
                 const url = '/profile/settings';

@@ -24,13 +24,13 @@
         ></field_uptime_up_button>
 
         <field_hidden_button
-            v-if="with_hidden_button"
+            v-if="hasHideButton"
             :field="field"
             @hideField="$emit('proxyEvent', 'hideField')"
         ></field_hidden_button>
 
         <field_default_value_button
-            v-if="with_default_value"
+            v-if="hasDefaultValue"
             :field="field"
             @valueToDefault="$emit('proxyEvent', 'valueToDefault')"
         ></field_default_value_button>

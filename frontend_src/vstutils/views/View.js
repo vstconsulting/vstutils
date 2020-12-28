@@ -1,4 +1,3 @@
-import { guiQuerySets } from '../querySet';
 import {
     ACTION_STORE_MODULE,
     LIST_STORE_MODULE,
@@ -6,55 +5,96 @@ import {
     PAGE_NEW_STORE_MODULE,
     PAGE_STORE_MODULE,
 } from '../store/components_state/commonStoreModules.js';
+import ListViewComponent from '../components/list/ListViewComponent.vue';
+import {
+    ActionViewComponent,
+    PageEditViewComponent,
+    PageNewViewComponent,
+    PageViewComponent,
+} from '../components/page';
+
+/**
+ * @typedef {Object} VisibleButton
+ * @property {string} title
+ * @property {Object} [styles] - Styles for button (https://vuejs.org/v2/guide/class-and-style.html#Object-Syntax-1)
+ * @property {string[]} [classes]
+ * @property {string[]} [iconClasses]
+ * @property {string[]} [titleClasses]
+ */
+
+/**
+ * @typedef {VisibleButton} Sublink
+ * @property {string} name
+ * @property {string} [href]
+ */
+
+/**
+ * Object that describes one action. Only empty action can be executed on multiple instances.
+ * For empty action path and method are required.
+ * For non empty action component or href must me provided.
+ *
+ * @typedef {VisibleButton} Action
+ * @property {string} name
+ * @property {boolean} isEmpty
+ * @property {boolean} isMultiAction
+ * @property {string|Object} [component]
+ * @property {string} [href]
+ * @property {path} [path]
+ * @property {string} [method]
+ * @property {boolean} [doNotShowOnList]
+ */
+
+export const ViewTypes = {
+    LIST: 'list',
+    PAGE: 'page',
+    PAGE_NEW: 'page_new',
+    PAGE_EDIT: 'page_edit',
+    PAGE_REMOVE: 'page_remove',
+    ACTION: 'action',
+};
 
 /**
  * View class - constructor, that returns view object.
  */
-export default class View {
+export class View {
+    /**
+     * @type {Map<string, Sublink>}
+     */
+    sublinks = new Map();
+    /**
+     * @type {Map<string, Action>}
+     */
+    actions = new Map();
+    /**
+     * @type {View|null}
+     */
+    parent = null;
+
     /**
      * Constructor of View class.
-     *
-     * @param {object} model Model, with which this view is connected.
-     * @param {object} schema Options of current view,
-     * that include settings for a view (internal links, view type and so on).
-     * @param mixins {Array.<Object>} Vue mixins for view component
      */
-    constructor(model, schema, mixins = []) {
-        let qs_constructor = this.constructor.getQuerySetConstructor(model);
+    constructor(params, objects, mixins = []) {
+        this.params = params;
+        this.objects = objects;
+        this.type = params.type;
+        this.operationId = params.operationId;
+        this.level = params.level;
+        this.name = params.name;
+        this.path = params.path;
+        this.title = params.title || params.name;
 
-        this.schema = schema;
-        this.objects = new qs_constructor(model, this.schema.path, {}, schema.type === 'list');
         /**
          * Property, that stores extensions for components,
          * which would render current view.
          */
         this.mixins = mixins;
-        /**
-         * Property flag indicates that nested view allowing append objects from shared view.
-         */
-        if (schema['x-allow-append'] !== undefined) {
-            this.nestedAllowAppend = schema['x-allow-append'];
-        }
     }
 
     /**
      * Returns custom store module
      * @returns {Object|undefined}
      */
-    getStoreModule() {
-        switch (this.schema.type) {
-            case 'list':
-                return LIST_STORE_MODULE;
-            case 'page':
-                return PAGE_STORE_MODULE;
-            case 'page_new':
-                return PAGE_NEW_STORE_MODULE;
-            case 'page_edit':
-                return PAGE_EDIT_STORE_MODULE;
-            case 'action':
-                return ACTION_STORE_MODULE;
-        }
-    }
+    getStoreModule() {}
 
     /**
      * Method, that handles view buttons (actions, operations, sublinks, child_links)
@@ -70,22 +110,134 @@ export default class View {
 
     /**
      * Method returns string with template of route path for current view.
-     * @param {string} path View path.
      * @return {string}
      */
-    getPathTemplateForRouter(path = '') {
-        return path.replace(/{/g, ':').replace(/}/g, '');
+    getRoutePath() {
+        return this.path.replace(/{/g, ':').replace(/}/g, '');
     }
 
     /**
-     * Method, that returns QuerySet constructor for view.
-     * @param {object} model Model object.
+     * Method that returns Vue component for view
+     * @return {Object}
      */
-    static getQuerySetConstructor(model) {
-        if (guiQuerySets[model.name + 'QuerySet']) {
-            return guiQuerySets[model.name + 'QuerySet'];
-        }
+    getComponent() {
+        // If we provide `this` in `data` directly then `view` will become Vue component
+        const thisView = this;
+        return {
+            mixins: this.mixins,
+            provide: { view: thisView },
+            data() {
+                return { view: thisView };
+            },
+        };
+    }
 
-        return guiQuerySets.QuerySet;
+    /**
+     * Method that returns route object for view (RouteConfig)
+     * @return {Object}
+     */
+    toRoute() {
+        return {
+            name: this.path,
+            path: this.getRoutePath(),
+            component: this.getComponent(),
+            props: true,
+        };
+    }
+}
+
+export class ListView extends View {
+    /**
+     * @type {Map<string, Action>}
+     */
+    multiActions = new Map();
+    /**
+     * @type {View|null}
+     */
+    pageView = null;
+    /**
+     * @type {QuerySet}
+     */
+    nestedQueryset = null;
+
+    constructor(params, objects, mixins = [ListViewComponent]) {
+        super(params, objects, mixins);
+        /**
+         * @type {Object<String, BaseField>}
+         */
+        this.filters = params.filters;
+    }
+
+    getStoreModule() {
+        return LIST_STORE_MODULE;
+    }
+}
+
+export class PageView extends View {
+    /**
+     * @type {ListView}
+     */
+    listView = null;
+
+    /**
+     * @type {string}
+     */
+    pkParamName = null;
+
+    constructor(params, objects, mixins = [PageViewComponent]) {
+        super(params, objects, mixins);
+    }
+
+    getStoreModule() {
+        return PAGE_STORE_MODULE;
+    }
+}
+
+export class PageNewView extends View {
+    /**
+     * @type {Map<string, Action>}
+     */
+    multiActions = new Map();
+    /**
+     * @type {ListView}
+     */
+    listView = null;
+
+    constructor(params, objects, mixins = [PageNewViewComponent]) {
+        super(params, objects, mixins);
+
+        /**
+         * Property flag indicates that nested view allowing append objects from shared view.
+         */
+        this.nestedAllowAppend = params['x-allow-append'];
+    }
+
+    getStoreModule() {
+        return PAGE_NEW_STORE_MODULE;
+    }
+}
+
+export class PageEditView extends PageView {
+    isEditStyleOnly = false;
+
+    constructor(params, objects, mixins = [PageEditViewComponent]) {
+        super(params, objects, mixins);
+    }
+
+    getStoreModule() {
+        return PAGE_EDIT_STORE_MODULE;
+    }
+}
+
+export class ActionView extends View {
+    constructor(params, objects, mixins = [ActionViewComponent]) {
+        super(params, objects, mixins);
+
+        this.model = params.model;
+        this.method = params.method;
+    }
+
+    getStoreModule() {
+        return ACTION_STORE_MODULE;
     }
 }

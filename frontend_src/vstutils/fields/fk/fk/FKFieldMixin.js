@@ -1,18 +1,10 @@
 import FKFieldContentEditable from './FKFieldContentEditable.vue';
 import FKFieldContentReadonlyComponent from './FKFieldContentReadonlyComponent.vue';
 import FKFieldListView from './FKFieldListView.vue';
+import { BaseFieldMixin } from '../../base';
 
 const FKFieldMixin = {
-    methods: {
-        /**
-         * Redefinition of 'getRepresentValue' method of base guiField.
-         * @param {object} data Object with values of current field
-         * and fields from the same fields_wrapper.
-         */
-        getRepresentValue: function (data) {
-            return data[this.field.options.name];
-        },
-    },
+    mixins: [BaseFieldMixin],
     components: {
         field_content_edit: FKFieldContentEditable,
         field_content_readonly: FKFieldContentReadonlyComponent,

@@ -4,11 +4,11 @@
 const FileFieldButtonMixin = {
     data() {
         return {
-            wrapper_classes: [],
-            wrapper_styles: {},
-            span_classes: ['btn', 'btn-default', 'btn-right', 'textfile'],
-            span_styles: { float: 'right', marginLeft: '10px', marginBottom: '10px' },
-            icon_styles: {},
+            wrapperClasses: [],
+            wrapperStyles: {},
+            spanClasses: ['btn', 'btn-default', 'btn-right', 'textfile'],
+            spanStyles: { float: 'right', marginLeft: '10px', marginBottom: '10px' },
+            iconStyles: {},
         };
     },
 };

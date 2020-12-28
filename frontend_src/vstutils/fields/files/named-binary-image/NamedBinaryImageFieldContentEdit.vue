@@ -1,7 +1,7 @@
 <template>
     <div>
         <template v-if="value && value.content">
-            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
+            <image_block :field="field" :data="data" :value="value" />
         </template>
         <div class="input-group">
             <p
@@ -14,44 +14,32 @@
                 {{ val }}
             </p>
 
-            <field_read_file_button
-                :field="field"
-                @readFile="$emit('proxyEvent', 'readFile', $event)"
-            ></field_read_file_button>
-
-            <field_hidden_button
-                v-if="with_hidden_button"
-                :field="field"
-                @hideField="$emit('proxyEvent', 'hideField')"
-            ></field_hidden_button>
-
-            <field_clear_button
-                :field="field"
-                @cleanValue="$emit('proxyEvent', 'cleanValue')"
-            ></field_clear_button>
+            <ReadFileButton @read-file="readFile" />
+            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+            <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
     </div>
 </template>
 
 <script>
     import { BinaryFileFieldContentEdit } from '../binary-file';
-    import { NamedBinaryFileFieldContent } from '../named-binary-file';
+    import { NamedBinaryFileFieldContentEdit } from '../named-binary-file';
     import NamedBinaryImageFieldContent from './NamedBinaryImageFieldContent.js';
     import { BinaryFileFieldReadFileButton } from '../binary-file';
 
     export default {
-        mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContent, NamedBinaryImageFieldContent],
         components: {
-            field_read_file_button: {
+            ReadFileButton: {
                 mixins: [BinaryFileFieldReadFileButton],
                 data() {
                     return {
                         accept: 'image/*',
-                        help_text: 'Open image',
+                        helpText: 'Open image',
                     };
                 },
             },
         },
+        mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContentEdit, NamedBinaryImageFieldContent],
     };
 </script>
 

@@ -4,7 +4,7 @@
 const DateFieldContent = {
     data() {
         return {
-            input_type: 'date',
+            inputType: 'date',
         };
     },
 };

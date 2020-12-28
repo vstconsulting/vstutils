@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import ViewConstructor from './ViewConstructor.js';
-import View from './View.js';
-import ViewWithParentInstancesForPath from './ViewWithParentInstancesForPath.js';
+import { View } from './View.js';
 
 /**
  * Class, that manages creation of SubViews of guiViews - views, paths of which do not exist in API,
@@ -41,7 +40,7 @@ export default class SubViewWithOutApiPathConstructor {
      */
     generateSubView(views, path, new_path) {
         let constr = this.view_constr;
-        let view = views[path];
+        let view = views.get(path);
         let new_view = new View(view.objects.model, $.extend(true, {}, view.schema), view.template);
         let mixin = this.getSubViewMixin();
 
@@ -62,7 +61,6 @@ export default class SubViewWithOutApiPathConstructor {
     getSubViewMixin() {
         let prefix = this.path_prefix;
         return {
-            mixins: [ViewWithParentInstancesForPath],
             computed: {
                 qs_url() {
                     let sub_url = prefix.format(this.$route.params);

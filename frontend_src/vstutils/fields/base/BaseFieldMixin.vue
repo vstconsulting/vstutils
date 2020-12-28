@@ -1,37 +1,30 @@
 <template>
-    <div v-show="!is_hidden" style="display: contents;">
-        <template v-if="wrapper_opt.list_view">
-            <field_list_view :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" />
-        </template>
-        <template v-else>
-            <div :class="wrapper_classes" :style="wrapper_styles">
-                <field_label :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" />
-                <template v-if="field.options.readOnly || wrapper_opt.readOnly">
-                    <field_content_readonly
-                        :value="value"
-                        :field="field"
-                        :wrapper_opt="wrapper_opt"
-                        :data="data"
-                        @proxyEvent="proxyEvent"
-                    />
-                </template>
-                <template v-else>
-                    <field_content_edit
-                        :value="value"
-                        :field="field"
-                        :wrapper_opt="wrapper_opt"
-                        :data="data"
-                        @proxyEvent="proxyEvent"
-                    />
-                </template>
-                <field_description :value="value" :field="field" :wrapper_opt="wrapper_opt" :data="data" />
-            </div>
-        </template>
+    <div style="display: contents;">
+        <field_list_view v-if="type === 'list'" :value="value" :field="field" />
+        <div v-else :class="wrapper_classes">
+            <field_label :value="value" :field="field" :data="data" />
+
+            <field_content_readonly
+                v-if="field.readOnly || type === 'readonly'"
+                :value="value"
+                :field="field"
+                :data="data"
+                @proxyEvent="proxyEvent"
+            />
+            <field_content_edit
+                v-else-if="type === 'edit'"
+                :field="field"
+                :value="value"
+                :data="data"
+                @set-value="setValue"
+            />
+
+            <field_description :value="value" :field="field" :data="data" />
+        </div>
     </div>
 </template>
 
 <script>
-    import $ from 'jquery';
     import { addCssClassesToElement } from '../../utils';
     import BaseFieldLabel from './BaseFieldLabel.vue';
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
@@ -63,8 +56,12 @@
              */
             field_list_view: BaseFieldListView,
         },
-        props: ['field', 'wrapper_opt', 'datastore', 'prop_data'],
-        data: function () {
+        props: {
+            field: { type: Object, required: true },
+            data: { type: Object, required: true },
+            type: { type: String, required: true },
+        },
+        data() {
             return {
                 wrapper_classes_list: {
                     base:
@@ -77,121 +74,56 @@
                     grid: 'col-lg-4 col-xs-12 col-sm-6 col-md-6',
                 },
                 wrapper_styles_list: {},
-                hidden: this.field.options.hidden || false,
+                hidden: this.field.hidden || false,
             };
         },
         computed: {
-            /**
-             * Property, that returns object with values of current field
-             * and fields from the same fields wrapper.
-             * For example, from the same Model Instance.
-             * @return {object}
-             */
-            data() {
-                if (this.wrapper_opt.use_prop_data) {
-                    return this.prop_data;
-                }
-
-                if (this.datastore) {
-                    return this.datastore.data.instance.data;
-                }
-
-                return {};
-            },
-
-            /**
-             * Property, that return value of current field.
-             * @return {*}
-             */
             value() {
-                return this.getRepresentValue(this.data);
+                return this.data[this.field.name];
             },
-
             /**
              * Property, that returns string with classes of field wrapper.
              * @return {string}
              */
-            wrapper_classes: function () {
+            wrapper_classes() {
                 return Object.values(this.wrapper_classes_list).join(' ') + ' ';
             },
             /**
              * Property, that returns string with styles of field wrapper.
              * @return {string}
              */
-            wrapper_styles: function () {
+            wrapper_styles() {
                 return this.wrapper_styles_list;
-            },
-            /**
-             * Property, that returns true, if field should be hidden.
-             * Otherwise, returns false.
-             * @return {boolean}
-             */
-            is_hidden: function () {
-                if (
-                    this.wrapper_opt &&
-                    this.wrapper_opt.hideUnrequired &&
-                    this.wrapper_opt.hidden !== undefined
-                ) {
-                    return this.wrapper_opt.hidden;
-                }
-
-                return this.hidden;
-            },
-        },
-        watch: {
-            'field.options.hidden': function (value) {
-                this.hidden = value;
             },
         },
         methods: {
-            /**
-             * Method, that converts field value to appropriate type,
-             * before saving it to the store.
-             * @param {object} data Object with values of current field
-             * and fields from the same fields_wrapper.
-             */
-            handleValue(data) {
-                return data[this.field.options.name];
+            setValue(value) {
+                this._emitSetValueSignal(value);
             },
-
-            /**
-             * Method, that returns value in representation format.
-             * @param {object} data Object with values of current field
-             * and fields from the same fields_wrapper.
-             */
-            getRepresentValue(data) {
-                return this.field.toRepresent(data);
-            },
-
-            /**
-             * Method, that saves field value into the Vuex store
-             * (commits Vuex store state mutation).
-             */
-            setValueInStore(value) {
-                let val = $.extend(true, {}, this.data);
-
-                val[this.field.options.name] = value;
-
-                this.$emit('update-value', { field: this.field.options.name, value: this.handleValue(val) });
+            _emitSetValueSignal(value) {
+                this.$emit('set-value', {
+                    field: this.field.name,
+                    value: value,
+                });
             },
             /**
              * Method, that cleans field's value (sets field value to undefined).
              */
-            cleanValue: function (opt) {
+            cleanValue(opt) {
                 this.setValueInStore(opt);
             },
             /**
              * Method, that sets field's value equal to default.
              */
-            valueToDefault: function () {
+            valueToDefault() {
                 this.setValueInStore(this.field.options.default);
             },
             /**
              * Method, that sets field property 'hidden' equal to true.
              */
-            hideField: function () {
+            hideField() {
                 this.cleanValue();
-                this.$emit('toggleHidden', { field: this.field.options.name });
+                this.$emit('toggle-hidden', this.field.name);
             },
             /**
              * Method, that calls other field's methods.

@@ -11,32 +11,14 @@
                 {{ val }}
             </p>
 
-            <field_read_file_button
-                :field="field"
-                @readFile="$emit('proxyEvent', 'readFile', $event)"
-            ></field_read_file_button>
-
-            <field_hidden_button
-                v-if="with_hidden_button"
-                :field="field"
-                @hideField="$emit('proxyEvent', 'hideField')"
-            ></field_hidden_button>
-
-            <field_clear_button
-                :field="field"
-                @cleanValue="$emit('proxyEvent', 'cleanValue')"
-            ></field_clear_button>
+            <ReadFileButton @read-file="$parent.readFile($event)" />
+            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+            <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
         <div>
             <template v-for="(file, idx) in value">
-                <MultipleImagesListItem
-                    :key="idx"
-                    :field="field"
-                    :wrapper_opt="wrapper_opt"
-                    :data="data"
-                    :file="file"
-                >
-                    <span class="remove-file cursor-pointer fa fa-times" @click="removeFile(idx)"></span>
+                <MultipleImagesListItem :key="idx" :field="field" :data="data" :file="file">
+                    <span class="remove-file cursor-pointer fa fa-times" @click="removeFile(idx)" />
                 </MultipleImagesListItem>
             </template>
         </div>
@@ -50,24 +32,24 @@
     import MultipleNamedBinaryImageFieldContent from './MultipleNamedBinaryImageFieldContent';
 
     export default {
-        mixins: [
-            BinaryFileFieldContentEdit,
-            MultipleNamedBinaryImageFieldContent,
-            MultipleNamedBinaryFileFieldContentEdit,
-        ],
         components: {
-            MultipleImagesListItem: MultipleImagesListItem,
-            field_read_file_button: {
+            MultipleImagesListItem,
+            ReadFileButton: {
                 mixins: [BinaryFileFieldReadFileButton],
                 data() {
                     return {
                         accept: 'image/*',
-                        help_text: 'Open images',
+                        helpText: 'Open images',
                         multiple: true,
                     };
                 },
             },
         },
+        mixins: [
+            BinaryFileFieldContentEdit,
+            MultipleNamedBinaryImageFieldContent,
+            MultipleNamedBinaryFileFieldContentEdit,
+        ],
     };
 </script>
 

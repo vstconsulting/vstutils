@@ -5,26 +5,20 @@
             :required="attrs['required']"
             :disabled="disabled"
             :value="val"
-            @input="setValueByHandsInStore($event.target.value)"
             :class="classes"
             :style="styles"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
+            @input="setValueByHandsInStore($event.target.value)"
         />
 
         <field_enable_button
             v-if="field.options.enable_button"
             :field="field"
             :disabled="disabled"
-            @toggleEnableField="toggleEnableField"
-        ></field_enable_button>
-
-        <field_hidden_button
-            v-if="!disabled && with_hidden_button"
-            :field="field"
-            @hideField="$emit('proxyEvent', 'hideField')"
-        ></field_hidden_button>
-
+            @click.native="toggleEnableField"
+        />
+        <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
         <field_fk_multi_autocomplete_modal
             v-show="!disabled"
             :options="modal_options"
@@ -32,13 +26,8 @@
             @change-value="changeTmpValue"
             @set-new-value="setValueInStore"
             @update-query-set="updateQuerySet"
-        ></field_fk_multi_autocomplete_modal>
-
-        <field_clear_button
-            v-show="!disabled"
-            :field="field"
-            @cleanValue="$emit('proxyEvent', 'cleanValue')"
-        ></field_clear_button>
+        />
+        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
     </div>
 </template>
 
@@ -47,9 +36,44 @@
     import { FKFieldContent } from '../fk';
     import { FKAutocompleteFieldContentEdit } from '../autocomplete';
     import FKMultiAutocompleteFieldModal from './FKMultiAutocompleteFieldModal.js';
-    import { BaseFieldButton } from '../../base';
+    import { BaseFieldButton } from '../../buttons';
 
     export default {
+        components: {
+            /**
+             * Vue component for button, that enables/disables field.
+             */
+            field_enable_button: {
+                mixins: [BaseFieldButton],
+                props: ['disabled', 'field'],
+                data() {
+                    return { iconClasses: ['fa', 'fa-power-off'], helpText: 'Enable/disable field' };
+                },
+                created() {
+                    this.handleDisabled(this.disabled);
+                },
+                watch: {
+                    disabled(disabled) {
+                        this.handleDisabled(disabled);
+                    },
+                },
+                methods: {
+                    /**
+                     * Method, that handles changes of disabled prop.
+                     * @param {boolean} disabled.
+                     */
+                    handleDisabled(disabled) {
+                        if (disabled) {
+                            this.iconStyles.color = '#00c0ef';
+                        } else {
+                            delete this.iconStyles.color;
+                        }
+                        this.iconStyles = { ...this.iconStyles };
+                    },
+                },
+            },
+            field_fk_multi_autocomplete_modal: FKMultiAutocompleteFieldModal,
+        },
         mixins: [BaseFieldContentEdit, FKFieldContent, FKAutocompleteFieldContentEdit],
         data() {
             return {
@@ -78,40 +102,14 @@
                 queryset: undefined,
             };
         },
-        created() {
-            this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
-
-            if (this.value) {
-                this.setTmpValue(this.value.value, this.value.prefetch_value);
-            }
-
-            if (this.value === undefined && this.field.options.enable_button) {
-                this.disabled = this.field.options.enable_button;
-            }
-        },
-        watch: {
-            /**
-             * Hook, that handles changes of value_field value.
-             * Updates tmp values.
-             * @param {string, number} value Field's value.
-             */
-            value(value) {
-                if (!value) {
-                    this.cleanTmpValue();
-                    return;
-                }
-
-                this.setTmpValue(this.value.value, this.value.prefetch_value);
-            },
-        },
         computed: {
             /**
              * Property that contains names of value_field and view_field.
              */
             field_props() {
                 return {
-                    value_field: this.field.getValueField(this.data),
-                    view_field: this.field.getViewField(this.data),
+                    value_field: this.field.valueField,
+                    view_field: this.field.viewField,
                 };
             },
             /**
@@ -151,13 +149,39 @@
                 };
             },
         },
+        watch: {
+            /**
+             * Hook, that handles changes of value_field value.
+             * Updates tmp values.
+             * @param {string, number} value Field's value.
+             */
+            value(value) {
+                if (!value) {
+                    this.cleanTmpValue();
+                    return;
+                }
+
+                this.setTmpValue(this.value.value, this.value.prefetch_value);
+            },
+        },
+        created() {
+            this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
+
+            if (this.value) {
+                this.setTmpValue(this.value.value, this.value.prefetch_value);
+            }
+
+            if (this.value === undefined && this.field.options.enable_button) {
+                this.disabled = this.field.options.enable_button;
+            }
+        },
         methods: {
             /**
              * Method, that changes value of property 'this.disabled' to opposite.
              */
             toggleEnableField() {
                 this.disabled = !this.disabled;
-                this.$emit('proxyEvent', 'cleanValue');
+                this.$emit('set-value', this.field.getInitialValue());
             },
             /**
              * Method, that adds
@@ -219,7 +243,7 @@
                     new_value = undefined;
                 }
 
-                this.$emit('proxyEvent', 'setValueInStore', new_value);
+                this.$emit('set-value', new_value);
             },
             /**
              * Method, that sets new object to queryset property.
@@ -228,46 +252,6 @@
             updateQuerySet(qs) {
                 this.queryset = qs;
             },
-        },
-        components: {
-            /**
-             * Vue component for button, that enables/disables field.
-             */
-            field_enable_button: {
-                mixins: [BaseFieldButton],
-                props: ['disabled', 'field'],
-                data() {
-                    return {
-                        icon_classes: ['fa', 'fa-power-off'],
-                        event_handler: 'toggleEnableField',
-                        help_text: 'Enable/disable field',
-                    };
-                },
-                created() {
-                    this.handleDisabled(this.disabled);
-                },
-                watch: {
-                    disabled(disabled) {
-                        this.handleDisabled(disabled);
-                    },
-                },
-                methods: {
-                    /**
-                     * Method, that handles changes of disabled prop.
-                     * @param {boolean} disabled.
-                     */
-                    handleDisabled(disabled) {
-                        if (disabled) {
-                            this.icon_styles.color = '#00c0ef';
-                        } else {
-                            delete this.icon_styles.color;
-                        }
-
-                        this.icon_styles = { ...this.icon_styles };
-                    },
-                },
-            },
-            field_fk_multi_autocomplete_modal: FKMultiAutocompleteFieldModal,
         },
     };
 </script>
