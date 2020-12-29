@@ -11,8 +11,8 @@
                     <SelectToggleButton :is-selected="allSelected" />
                 </th>
 
-                <th v-for="(field, idx) in fields" :key="idx" :class="td_classes('td', field.options.name)">
-                    {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
+                <th v-for="(field, idx) in fields" :key="idx" :class="td_classes('td', field.name)">
+                    {{ $t(field.title) }}
                 </th>
 
                 <th

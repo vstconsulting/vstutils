@@ -1,5 +1,5 @@
 <template>
-    <label :id="label_id" :class="classes" :style="styles">{{ label | capitalize | split }}</label>
+    <label :id="label_id" :class="classes" :style="styles">{{ label }}</label>
 </template>
 
 <script>
@@ -19,7 +19,7 @@
         },
         computed: {
             label() {
-                return this.$t((this.field.options.title || this.field.options.name).toLowerCase());
+                return this.$t(this.field.title);
             },
         },
     };

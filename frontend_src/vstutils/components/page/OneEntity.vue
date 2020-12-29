@@ -30,11 +30,7 @@
                             :value="field.options.name"
                             :disabled="field.options.required"
                         >
-                            {{
-                                $t((field.options.title || field.options.name).toLowerCase())
-                                    | capitalize
-                                    | split
-                            }}
+                            {{ $t(field.title) }}
                         </option>
                     </select>
                 </div>
