@@ -24,28 +24,6 @@
         <p>Fields with `*` is required</p>
         <form method="post">
             {% csrf_token %}
-            <script type='text/javascript'>
-                $(document).ready(function () {
-                  const params = new URLSearchParams(document.location.search);
-                  const uid = params.get("uid");
-                  if (Array.from(params.keys()).length === 1 && uid !== null) {
-                    const form = document.createElement("form");
-                    const uidInput = document.createElement("input");
-
-                    form.method = "POST";
-                    form.action = document.location.href;
-
-                    uidInput.value = uid;
-                    uidInput.name = "uid";
-                    form.appendChild(uidInput);
-                    form.appendChild(document.getElementsByName('csrfmiddlewaretoken')[0]);
-
-                    document.body.appendChild(form);
-
-                    form.submit();
-                  }
-                });
-            </script>
             <fieldset class="module aligned">
                 <div style="float: left">
                     {% block base_registration_fields %}
@@ -87,6 +65,31 @@
         </form>
     </div>
 </div>
+{% endblock %}
 
+{% block after_content %}
+    {% block registration_confirmation_script %}
+    <script type='text/javascript'>
+        $(document).ready(function () {
+          const params = new URLSearchParams(document.location.search);
+          const uid = params.get("uid");
+          if (Array.from(params.keys()).length === 1 && uid !== null) {
+            const form = document.createElement("form");
+            const uidInput = document.createElement("input");
 
+            form.method = "POST";
+            form.action = document.location.href;
+
+            uidInput.value = uid;
+            uidInput.name = "uid";
+            form.appendChild(uidInput);
+            form.appendChild(document.getElementsByName('csrfmiddlewaretoken')[0]);
+
+            document.body.appendChild(form);
+
+            form.submit();
+          }
+        });
+    </script>
+    {% endblock %}
 {% endblock %}
