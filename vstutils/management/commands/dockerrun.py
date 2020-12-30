@@ -241,8 +241,6 @@ class Command(BaseCommand):
             'thread-stacksize': os.getenv(f'{self.prefix}_UWSGI_THREADSTACK', '40960'),
             'max-requests': os.getenv(f'{self.prefix}_UWSGI_MAXREQUESTS', '50000'),
             'limit-as': os.getenv(f'{self.prefix}_UWSGI_LIMITS', '512'),
-            'harakiri': os.getenv(f'{self.prefix}_UWSGI_HARAKIRI', '120'),
-            'vacuum': os.getenv(f'{self.prefix}_UWSGI_VACUUM', 'true'),
             'pidfile': os.getenv(f'{self.prefix}_UWSGI_PIDFILE', '/run/web.pid'),
             'daemon': 'false'
         }
@@ -251,6 +249,12 @@ class Command(BaseCommand):
             f"{os.getenv(f'{self.prefix}_WEB_HOST', current_addr)}:"
             f"{os.getenv(f'{self.prefix}_WEB_PORT', current_port)}"
         )
+        harakiri = os.getenv(f'{self.prefix}_UWSGI_HARAKIRI', '')
+        if harakiri:
+            config['uwsgi']['harakiri'] = harakiri
+        vacuum = os.getenv(f'{self.prefix}_UWSGI_VACUUM', '')
+        if vacuum:
+            config['uwsgi']['vacuum'] = vacuum
 
     def prepare_section_smtp(self, config):
         mail_parameters = ['port', 'user', 'password', 'tls', 'ssl', 'from_address']

@@ -164,10 +164,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
         else:
             response = get_response_handler(request)
 
-        if hasattr(response, 'timings'):
-            response_durations = response.timings  # type: ignore
-        else:
-            response_durations = None
+        response_durations = getattr(response, 'timings', None)  # type: ignore
         total_time = self._round_time(time.time() - start_time)
 
         if getattr(request, 'is_bulk', False):

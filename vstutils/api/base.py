@@ -55,9 +55,7 @@ logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 
 
 def _get_cleared(qs):
-    if hasattr(qs, 'cleared'):
-        return qs.cleared()
-    return qs
+    return getattr(qs, 'cleared', lambda: qs)()
 
 
 def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]:
@@ -265,10 +263,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         action_name = getattr(self, 'action', None)
 
         # Try to get overloaded serializer from 'action_serializers' or from attrs
-        if hasattr(self, f'serializer_class_{action_name}'):
-            serializer_class = getattr(self, f'serializer_class_{action_name}')
-            if serializer_class:
-                return serializer_class
+        serializer_class = getattr(self, f'serializer_class_{action_name}', None)
+        if serializer_class:
+            return serializer_class
         if action_name in self.action_serializers:
             serializer_class = self.action_serializers.get(action_name, None)
             if serializer_class:

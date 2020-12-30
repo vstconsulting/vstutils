@@ -101,8 +101,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
             nested_view_obj.action = 'destroy'
         else:
             nested_view_obj.action = action_suffix
-            if hasattr(nested_view_obj, action_suffix):
-                view = getattr(nested_view_obj, action_suffix)
+            view = getattr(nested_view_obj, action_suffix, None)
+            if view is not None:
                 serializer_class = view.kwargs.get('serializer_class', None)
                 if serializer_class:
                     nested_view_obj.serializer_class = serializer_class

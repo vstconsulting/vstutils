@@ -8,6 +8,8 @@ settings = {
     "VST_WSGI": 'vstutils.wsgi',
     "VST_PROJECT_GUI_NAME": "Example Project",
     "DJANGO_SETTINGS_MODULE": 'test_proj.settings',
+    "TEST_PROJ_UWSGI_HARAKIRI": "120",
+    "TEST_PROJ_UWSGI_VACUUM": "true",
 }
 
 prepare_environment(**settings)

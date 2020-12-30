@@ -157,7 +157,8 @@ class APIRouter(_AbstractRouter):
     def get_urls(self):
         urls = super().get_urls()
         for prefix, view, _ in self.custom_urls:
-            view = view.as_view() if hasattr(view, 'as_view') else view
+            # pylint: disable=cell-var-from-loop
+            view = getattr(view, 'as_view', lambda: view)()
             urls.append(re_path(f"^{prefix}/$", view))
         return urls
 
@@ -229,7 +230,8 @@ class MainRouter(_AbstractRouter):
         for prefix, view, _ in self.custom_urls:
             # can't be tested because this initialization takes place before
             # any test code can be run
-            view = view.as_view() if hasattr(view, 'as_view') else view
+            # pylint: disable=cell-var-from-loop
+            view = getattr(view, 'as_view', lambda: view)()
             urls.append(re_path(f"^{prefix}/$", view))
         return urls
 
