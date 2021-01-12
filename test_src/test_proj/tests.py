@@ -7,7 +7,7 @@ import io
 import pwd
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 
 from collections import OrderedDict
 
@@ -28,12 +28,18 @@ from rest_framework.test import CoreAPIClient
 from channels.testing import WebsocketCommunicator
 
 from vstutils import utils, __version__
-from vstutils.api.validators import RegularExpressionValidator
+from vstutils.api.validators import (RegularExpressionValidator,
+                                     ImageValidator,
+                                     ImageOpenValidator,
+                                     ImageHeightValidator,
+                                     ImageWidthValidator,
+                                     ImageResolutionValidator)
 from vstutils.api.auth import UserViewSet
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
+from vstutils.tools import get_file_value
 from vstutils.urls import router
 from vstutils.ws import application
 from vstutils.models import get_centrifugo_client
@@ -44,6 +50,7 @@ from .models import File, Host, HostGroup, List
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 
+DIR_PATH = os.path.abspath('test_proj')
 test_config = '''[main]
 test_key = test_value
 '''
@@ -1418,6 +1425,14 @@ class EndpointTestCase(BaseTestCase):
 
 
 class ValidatorsTestCase(BaseTestCase):
+    valid_image_content_dict = {
+        'name': 'cat.jpg',
+        'content': get_file_value(os.path.join(DIR_PATH, 'image_b64_valid')),
+    }
+    invalid_image_content_dict = {
+        'name': 'cat.jpg',
+        'content': get_file_value(os.path.join(DIR_PATH, 'image_b64_invalid')),
+    }
 
     def test_regexp_validator(self):
         regexp_validator = RegularExpressionValidator(re.compile(r'^valid$'))
@@ -1426,6 +1441,72 @@ class ValidatorsTestCase(BaseTestCase):
             regexp_validator('not valid')
 
         regexp_validator('valid')
+
+    def test_lib_installed_check(self):
+        with patch('vstutils.api.validators.ImageValidator.has_pillow', new_callable=PropertyMock) as mock_pillow:
+            mock_pillow.return_value = False
+            image_res_validator = ImageResolutionValidator(max_width=1280, max_height=720)
+            image_open_validator = ImageOpenValidator()
+            image_validator = ImageValidator()
+            with self.assertWarns(ImportWarning):
+                image_res_validator(self.valid_image_content_dict)
+                image_open_validator(self.valid_image_content_dict)
+                image_validator(self.valid_image_content_dict)
+            mock_pillow.return_value = True
+            image_validator(self.valid_image_content_dict)
+
+    def test_image_validator(self):
+        img_validator = ImageValidator(extensions=['jpg', ])
+
+        with self.assertRaises(ValidationError):
+            img_validator({
+                'name': 'cat.bmp'
+            })
+
+        img_validator({
+            'name': 'cat.jpg'
+        })
+
+    def test_image_open_validator(self):
+        img_open_validator = ImageOpenValidator(extensions=['jpg', ])
+
+        with self.assertRaises(ValidationError):
+            img_open_validator(self.invalid_image_content_dict)
+
+        img_open_validator(self.valid_image_content_dict)
+
+    def test_image_width_validator(self):
+        img_width_validator = ImageWidthValidator(min_width=1500)
+
+        with self.assertRaises(ValidationError):
+            img_width_validator(self.valid_image_content_dict)
+
+        img_width_validator = ImageWidthValidator(min_width=1280)
+        img_width_validator(self.valid_image_content_dict)
+
+    def test_image_height_validator(self):
+        img_height_validator = ImageHeightValidator(min_height=1000)
+
+        with self.assertRaises(ValidationError):
+            img_height_validator(self.valid_image_content_dict)
+
+        img_height_validator = ImageHeightValidator(min_height=720)
+        img_height_validator(self.valid_image_content_dict)
+
+    def test_image_resolution_validator(self):
+        img_resolution_validator = ImageResolutionValidator(min_width=1280, max_height=404)
+
+        with self.assertRaisesMessage(ValidationError, 'Invalid image height. Expected from 1 to 404, got 720'):
+            img_resolution_validator(self.valid_image_content_dict)
+
+        img_resolution_validator = ImageResolutionValidator(max_width=666, max_height=720)
+
+        with self.assertRaisesMessage(ValidationError, 'Invalid image width. Expected from 1 to 666, got 1280'):
+            img_resolution_validator(self.valid_image_content_dict)
+
+        img_resolution_validator = ImageResolutionValidator(max_width=1280, max_height=720)
+
+        img_resolution_validator(self.valid_image_content_dict)
 
 
 class LangTestCase(BaseTestCase):
@@ -2306,9 +2387,11 @@ class WebSocketTestCase(BaseTestCase):
             'connection': 'Upgrade',
             'pragma': 'no-cache',
             'cache-control': 'no-cache',
-            'user-agent': ('Mozilla/5.0 (X11; Linux x86_64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/81.0.4044.138 Safari/537.36'),
+            'user-agent': (
+                'Mozilla/5.0 (X11; Linux x86_64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/81.0.4044.138 Safari/537.36'
+            ),
             'upgrade': 'websocket',
             'origin': f"https://{self.server_name}",
             'sec-websocket-version': '13',
@@ -2327,7 +2410,6 @@ class WebSocketTestCase(BaseTestCase):
             mock_call_count += 1
             mock_args.append(args)
             mock_kwargs.append(kwargs)
-
 
         Host = self.get_model_class('test_proj.models.Host')
         models.cent_client = get_centrifugo_client()
@@ -2365,7 +2447,6 @@ class WebSocketTestCase(BaseTestCase):
             if pk == self.user.id:
                 return self.user
             raise self.user.DoesNotExists()  # nocv
-
 
         with self.patch('vstutils.auth.UserModel._default_manager.get') as mock:
             mock.side_effect = _default_manager_get

@@ -407,7 +407,8 @@ kwargs = dict(
         'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'ws': ['channels~=3.0.2', 'asgiref~=3.3.1']
+        'ws': ['channels~=3.0.2', 'asgiref~=3.3.1'],
+        'pil': ['Pillow~=8.0.1'],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
