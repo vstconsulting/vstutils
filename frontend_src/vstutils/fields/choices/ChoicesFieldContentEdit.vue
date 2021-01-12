@@ -108,8 +108,9 @@
                         if (!this.enum.includes(value)) {
                             value = this.enum[0] || '';
                         }
-
-                        this.$emit('set-value', value);
+                        if (this.value !== value) {
+                            this.$emit('set-value', value);
+                        }
                     });
 
                 // Set initial value

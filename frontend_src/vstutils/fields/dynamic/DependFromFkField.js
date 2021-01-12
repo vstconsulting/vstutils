@@ -8,6 +8,12 @@ export default class DependFromFkField extends BaseField {
 
         this.dependField = options.additionalProperties.field;
         this.dependFieldAttribute = options.additionalProperties.field_attribute;
+
+        /**
+         * Function that is used to customize real field options
+         * @type {Function}
+         */
+        this.callback = options.additionalProperties.callback;
     }
 
     static get mixins() {
@@ -15,22 +21,23 @@ export default class DependFromFkField extends BaseField {
     }
 
     toInner(data) {
-        const value = data[this.name];
-        if (value.realField) {
-            return value.realField.toInner({ ...data, [this.name]: value.value });
-        }
+        return this.getRealField(data).toInner(data);
     }
 
     toRepresent(data) {
-        return super.toRepresent(data);
+        return this.getRealField(data).toRepresent(data);
+    }
+
+    validateValue(value, data) {
+        return this.getRealField(data).validateValue(value, data);
     }
 
     getFieldByFormat(format, data) {
         const fieldClass = window.app.fieldsClasses.get(format || 'string');
 
         let callback_opt = {};
-        if (this.options.additionalProperties.callback) {
-            callback_opt = this.options.additionalProperties.callback(data);
+        if (this.callback) {
+            callback_opt = this.callback(data);
         }
 
         const realField = new fieldClass(mergeDeep({ format, name: this.name }, callback_opt));
@@ -41,13 +48,15 @@ export default class DependFromFkField extends BaseField {
         return realField;
     }
 
-    async getRealField(data) {
-        const formatInfoPk = data[this.dependField]?.value;
-        if (!formatInfoPk) return this.getFieldByFormat('string', data);
+    /**
+     * @param {Object} data - Field data.
+     * @return {BaseField}
+     */
+    getRealField(data) {
+        const dependFromInstance = data[this.dependField];
+        const dependFieldValue =
+            (dependFromInstance && dependFromInstance[this.dependFieldAttribute]) || 'string';
 
-        const formatInfoField = this.model.fields.get(this.dependField);
-        const formatInfo = await formatInfoField.options.additionalProperties.querysets[0].get(formatInfoPk);
-
-        return this.getFieldByFormat(formatInfo[this.dependFieldAttribute]);
+        return this.getFieldByFormat(dependFieldValue, data);
     }
 }

@@ -7,7 +7,8 @@ import * as page from './page';
 import * as widgets from './widgets';
 import AddChildModal from './list/AddChildModal.vue';
 import EmptyComponent from './EmptyComponent.js';
+import { BaseViewMixin } from './BaseViewMixin.js';
 
 globalComponentsRegistrator.add(AddChildModal);
 
-export { EmptyComponent, common, items, list, mixins, page, widgets };
+export { EmptyComponent, BaseViewMixin, common, items, list, mixins, page, widgets };
