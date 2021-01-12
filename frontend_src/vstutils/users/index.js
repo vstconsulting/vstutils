@@ -109,24 +109,6 @@ signals.once('allModels.created', ({ models }) => {
 // };
 //
 // /**
-//  * Function, that creates signals, that add to the user views opportunity to generate random password.
-//  * @param {string} path Path os user view.
-//  */
-// export function addChangePasswordOperationToView(path) {
-//     signals.connect('views[' + path + '].afterInit', (obj) => {
-//         obj.view.mixins.push(view_with_user_password_mixin);
-//     });
-//
-//     signals.connect('views[' + path + '].created', (obj) => {
-//         obj.view.schema.operations.generate_password = {
-//             name: 'generate_password',
-//             title: 'generate password',
-//         };
-//     });
-// }
-// window.addChangePasswordOperationToView = addChangePasswordOperationToView;
-//
-// /**
 //  * Adds to following views opportunity to generate random users password.
 //  */
 // ['/user/new/', '/user/{' + path_pk_key + '}/change_password/', '/profile/change_password/'].forEach(

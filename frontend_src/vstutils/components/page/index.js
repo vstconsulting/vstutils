@@ -5,8 +5,9 @@ import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { apiConnector } from '../../api';
 import { ViewTypes } from '../../views';
+import { LeaveConfirmationMixin } from './LeaveConfirmationMixin.js';
 
-export { OneEntity };
+export { OneEntity, LeaveConfirmationMixin };
 
 /**
  * @vue/component
@@ -43,7 +44,7 @@ export const PageViewComponent = {
         },
         afterEmptyAction() {
             return this.dispatchAction('updateData');
-        }
+        },
     },
 };
 
@@ -52,7 +53,7 @@ export const PageViewComponent = {
  */
 export const PageNewViewComponent = {
     name: 'PageNewViewComponent',
-    mixins: [PageViewComponent, PageWithDataMixin],
+    mixins: [PageViewComponent, PageWithDataMixin, LeaveConfirmationMixin],
     data() {
         return {
             readOnly: false,
@@ -69,6 +70,10 @@ export const PageNewViewComponent = {
             this.initLoading();
             await this.dispatchAction('fetchData');
             this.setLoadingSuccessful();
+        },
+        setFieldValue(obj) {
+            this.isPageChanged = true;
+            this.commitMutation('setFieldValue', obj);
         },
         /**
          * Method, that saves existing Model instance.
@@ -89,6 +94,8 @@ export const PageNewViewComponent = {
                 else await instance.create(this.view.params.method);
 
                 this.loading = false;
+                this.isPageChanged = false;
+
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.save).format([
                         instance.getViewFieldValue() || instance.getPkValue(),
@@ -140,6 +147,7 @@ export const PageEditViewComponent = {
             try {
                 await this.dispatchAction('reloadInstance');
                 this.setLoadingSuccessful();
+                this.isPageChanged = false;
             } catch (error) {
                 this.setLoadingError(error);
             }

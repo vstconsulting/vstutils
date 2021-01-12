@@ -28,19 +28,9 @@
             this.$watch(`data.${this.field.dependField}`, this.updateRealField, { immediate: true });
         },
         methods: {
-            value() {
-                const val = this.data[this.field.name];
-                if (val.realField) {
-                    return val.value;
-                }
-                return val;
-            },
-            async updateRealField() {
-                this.realField = await this.field.getRealField(this.data);
+            updateRealField() {
+                this.realField = this.field.getRealField(this.data);
                 this.setValue(this.realField.getInitialValue());
-            },
-            setValue(value) {
-                this._emitSetValueSignal({ realField: this.realField, value });
             },
         },
     };

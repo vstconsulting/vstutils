@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import Vuex from 'vuex';
 import Vue from 'vue';
 import AutoUpdateStoreModule from '../autoupdate/AutoUpdateStoreModule.js';
@@ -39,29 +38,6 @@ export class StoreConstructor {
     getStore_state() {
         return {
             /**
-             * Views - dict with all views objects.
-             */
-            views: this.views,
-            /**
-             * Sandbox - dict for storing querysets of views,
-             * that can be edited (page_new, page_edit, action types).
-             * Key of this dict record is URL of view, Value - queryset.
-             */
-            sandbox: {},
-            /**
-             * Filters - dict for saving view's filters values.
-             * This dict is for list views only.
-             * Key of this dict record is URL of view, Value - object with filters values.
-             */
-            filters: {},
-            /**
-             * Selections - dict for saving ids of selected view's model instances.
-             * This dict is for list views only.
-             * Key of this dict record is instance id,
-             * Value - boolean value (selected or not).
-             */
-            selections: {},
-            /**
              * Widgets - dict for storing widgets data from views.
              * Key of this dict record is URL of page(view), Value - dict with widgets data.
              */
@@ -74,14 +50,6 @@ export class StoreConstructor {
      */
     getStore_mutations() {
         return {
-            /**
-             * Mutation, that creates selection dict for a view with current URL.
-             * @param {object} state Current state.
-             * @param {string} url View's URL.
-             */
-            setSelection(state, url) {
-                Vue.set(state.selections, url, {});
-            },
             /**
              * Mutation, that saves widgets data in store.
              * @param {object} state Current state.
@@ -98,36 +66,6 @@ export class StoreConstructor {
      */
     getStore_getters() {
         return {
-            /**
-             * Getter, that returns dict with all views objects.
-             */
-            getViews: (state) => {
-                return state.views;
-            },
-            /**
-             * Getter, that returns view with current path.
-             * @param {string} state Current state.
-             * @param {string} path View' path.
-             */
-            getView: (state) => (path) => {
-                return state.views[path];
-            },
-            /**
-             * Getter, that returns View's selections from store.selections.
-             * @param {string} state Current state.
-             * @param {string} url View' url.
-             */
-            getSelections: (state) => (url) => {
-                return state.selections[url];
-            },
-            /**
-             * Getter, that returns View's instance selection value.
-             * @param {string} state Current state.
-             * @param {object} obj Object with arguments for this getter.
-             */
-            getSelectionById: (state) => (obj) => {
-                return state.selections[obj.url][obj.id];
-            },
             /**
              * Getter, that returns View's widgets data.
              * @param {string} state Current state.
