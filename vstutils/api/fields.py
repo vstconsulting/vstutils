@@ -600,3 +600,16 @@ class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
     """
 
     __slots__ = ()
+
+
+class PasswordField(CharField):
+    """
+    Extends :class: `.CharField` but in schema overload format to `password`.
+    This provide ability to make fields with asterisks instead of data on front-end.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs['write_only'] = True
+        kwargs['style'] = kwargs.get('style', {})
+        kwargs['style']['input_type'] = 'password'
+        super(PasswordField, self).__init__(*args, ** kwargs)

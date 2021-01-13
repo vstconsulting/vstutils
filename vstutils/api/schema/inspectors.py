@@ -84,6 +84,10 @@ basic_type_info[fields.RedirectIntegerField] = {
 basic_type_info[fields.RedirectCharField] = {
     'type': openapi.TYPE_STRING
 }
+basic_type_info[fields.PasswordField] = {
+    'type': openapi.TYPE_STRING,
+    'format': openapi.FORMAT_PASSWORD
+}
 
 
 def field_have_redirect(field, **kwargs):
