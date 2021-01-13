@@ -103,6 +103,10 @@ packaje_json_data = {
     }
 }
 
+validator_dict = {
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+}
+
 
 def async_test(coro):
     return async_to_sync(coro, force_new_loop=True)
@@ -612,6 +616,21 @@ class ViewsTestCase(BaseTestCase):
         self.assertCount(users_id, result['count'])
         result = self.get_result('get', '/api/v1/user/?username__not=USER')
         self.assertEqual(result['count'], 3)
+
+    @override_settings(AUTH_PASSWORD_VALIDATORS=[validator_dict])
+    def test_password_validators(self):
+        err_data = dict(
+            old_password=self.user.data['password'],
+            password='12345',
+            password2='12345'
+        )
+
+        result = self.bulk([
+            dict(path=['user', self.user.id, 'change_password'], data=err_data, method='post')
+        ])
+
+        self.assertEqual(result[0]['status'], 400)
+        self.assertEqual(result[0]['data']['detail']['other_errors'][0], "This password is entirely numeric.")
 
     def test_user_gravatar(self):
         # test for get_gravatar method

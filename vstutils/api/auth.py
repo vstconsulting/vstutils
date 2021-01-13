@@ -1,6 +1,7 @@
 import typing as _t
 
 from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
 from django_filters import BooleanFilter, CharFilter
@@ -115,15 +116,16 @@ class CreateUserSerializer(OneUserSerializer):
 
 
 class ChangePasswordSerializer(DataSerializer):
-    old_password = serializers.CharField(required=True)
-    password = serializers.CharField(required=True, label='New password')
-    password2 = serializers.CharField(required=True, label='Confirm new password')
+    old_password = fields.PasswordField(required=True)
+    password = fields.PasswordField(required=True, label='New password')
+    password2 = fields.PasswordField(required=True, label='Confirm new password')
 
     def update(self, instance, validated_data):
         if not instance.check_password(validated_data['old_password']):
             raise exceptions.PermissionDenied('Password is not correct.')
         if validated_data['password'] != validated_data['password2']:
             raise exceptions.ValidationError("New passwords' values are not equal.")
+        validate_password(validated_data['password'])
         instance.set_password(validated_data['password'])
         instance.save()
         return instance
