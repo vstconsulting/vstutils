@@ -90,8 +90,7 @@
                         theme: window.SELECT2_THEME,
                         width: '100%',
                         data: this.enum,
-                        disabled:
-                            this.field.options.disabled || (this.disableIfEmpty && this.enum.length === 0),
+                        disabled: this.field.disabled || (this.disableIfEmpty && this.enum.length === 0),
                         allowClear: this.field.nullable,
                         placeholder: { id: undefined, text: '' },
                     })
@@ -102,11 +101,11 @@
                         if (data && data.id) {
                             value = data.id;
                         } else {
-                            value = event.target.value;
+                            value = event.target.value || null;
                         }
 
                         if (!this.enum.includes(value)) {
-                            value = this.enum[0] || '';
+                            value = this.enum[0] || null;
                         }
                         if (this.value !== value) {
                             this.$emit('set-value', value);
@@ -116,8 +115,8 @@
                 // Set initial value
                 if (this.value) {
                     this.setValue(this.value);
-                } else if (this.field.options.default) {
-                    this.setValue(this.field.options.default);
+                } else if (this.field.hasDefault) {
+                    this.setValue(this.field.default);
                 } else {
                     this.setValue(this.enum.length > 0 ? this.enum[0] : null);
                 }

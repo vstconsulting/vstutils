@@ -163,7 +163,7 @@ export let pop_up_msg = {
             create: 'New "<b>{0}</b>" instance was successfully created.',
             remove: '<b>{1}</b> "<b>{0}</b>" was successfully removed.',
             removeMany: '<b>{0}</b> of "<b>{1}</b>" were successfully removed.',
-            save: 'Changes in <b>{1}</b> "<b>{0}</b>" were successfully saved.',
+            save: 'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.',
             execute: 'Action <b>{0}</b> was successfully executed' + ' on <b>{1}</b>.',
         },
         error: {

@@ -1,10 +1,13 @@
 <template>
     <transition name="modal">
-        <div class="modal-mask">
+        <!--Empty click handler required to stop event propagation -->
+        <div class="modal-mask" @click.stop="() => {}">
             <div class="modal-wrapper">
                 <div class="modal-container">
                     <div v-if="withHeader" class="modal-header text-data">
-                        <slot name="header">default header</slot>
+                        <slot name="header">
+                            <span />
+                        </slot>
                         <span class="btn-modal-header-close" @click="close">
                             <i class="fa fa-times" />
                         </span>
