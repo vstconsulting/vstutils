@@ -28,12 +28,14 @@ from rest_framework.test import CoreAPIClient
 from channels.testing import WebsocketCommunicator
 
 from vstutils import utils, __version__
-from vstutils.api.validators import (RegularExpressionValidator,
-                                     ImageValidator,
-                                     ImageOpenValidator,
-                                     ImageHeightValidator,
-                                     ImageWidthValidator,
-                                     ImageResolutionValidator)
+from vstutils.api.validators import (
+    RegularExpressionValidator,
+    ImageValidator,
+    ImageOpenValidator,
+    ImageHeightValidator,
+    ImageWidthValidator,
+    ImageResolutionValidator
+)
 from vstutils.api.auth import UserViewSet
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
@@ -1458,11 +1460,23 @@ class ValidatorsTestCase(BaseTestCase):
     def test_image_validator(self):
         img_validator = ImageValidator(extensions=['jpg', ])
 
-        with self.assertRaises(ValidationError):
+        # check wrong image extension
+        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format,'
+                                                       ' expected (jpg), got bmp\', code=\'invalid\')]'):
             img_validator({
-                'name': 'cat.bmp'
+                'name': 'cat.bmp',
+                'content': 'cdef',
             })
 
+        # check file with no extension
+        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format,'
+                                                       ' expected (jpg), got \', code=\'invalid\')]'):
+            img_validator({
+                'name': 'qwerty123',
+                'content': 'abcd',
+            })
+
+        # check valid extension
         img_validator({
             'name': 'cat.jpg'
         })

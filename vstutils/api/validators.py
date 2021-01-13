@@ -73,9 +73,10 @@ class ImageValidator:
             warnings.warn(self.warning_msg, ImportWarning)
             return
         file_extension = PurePosixPath(value['name']).suffix
-        if value and file_extension and file_extension[1:] not in self.extensions:
-            raise serializers.ValidationError(f'unsupported image file format, expected {self.extensions},'
-                                              f' got {file_extension}')
+        if value and file_extension[1:] not in self.extensions:
+            raise serializers.ValidationError(f'unsupported image file format,'
+                                              f' expected ({",".join(self.extensions)}),'
+                                              f' got {file_extension[1:]}')
 
     @property
     def has_pillow(self):
