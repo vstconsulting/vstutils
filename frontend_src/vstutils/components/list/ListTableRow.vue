@@ -15,16 +15,12 @@
         <td
             v-for="field in fields"
             :key="field.name"
-            :class="td_classes('td', field.name)"
+            :class="td_classes(field)"
             @click="$emit('row-clicked', instance)"
         >
             <component :is="field.component" :field="field" :data="data" type="list" />
         </td>
-        <td
-            v-if="actions.length || sublinks.length"
-            :class="td_classes('column', 'actions')"
-            style="text-align: center"
-        >
+        <td v-if="hasOperations" class="column column-actions" style="text-align: center">
             <div class="btn-group dropleft">
                 <button
                     type="button"
@@ -84,6 +80,9 @@
             sublinks: { type: Array, required: false, default: () => [] },
         },
         computed: {
+            hasOperations() {
+                return this.actions.length || this.sublinks.length;
+            },
             pk() {
                 return this.instance.getPkValue();
             },
@@ -106,4 +105,10 @@
     };
 </script>
 
-<style scoped></style>
+<style scoped>
+    tr {
+        /* This style is required so cells could not grow infinitely.
+           To prevent cell from grow 'height: inherit' must be set on td */
+        height: 1px;
+    }
+</style>

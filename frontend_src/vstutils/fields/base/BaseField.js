@@ -18,6 +18,9 @@ class BaseField {
          */
         this.options = options;
 
+        /** @type {string} */
+        this.format = options.format;
+
         /** @type {FieldValidator[]} */
         this.validators = [];
 

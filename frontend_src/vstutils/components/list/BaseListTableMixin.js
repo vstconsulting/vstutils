@@ -1,5 +1,6 @@
-import { addCssClassesToElement } from '../../utils';
-
+/**
+ * @vue/component
+ */
 export default {
     name: 'BaseListTableMixin',
     methods: {
@@ -16,8 +17,8 @@ export default {
                 return Object.keys(obj[property]).length > 0;
             }
         },
-        td_classes(el, name) {
-            return addCssClassesToElement(el, name);
+        td_classes(field) {
+            return ['column', `column-${field.name}`, `column-format-${field.format}`];
         },
     },
 };

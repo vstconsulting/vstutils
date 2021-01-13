@@ -11,14 +11,14 @@
                     <SelectToggleButton :is-selected="allSelected" />
                 </th>
 
-                <th v-for="(field, idx) in fields" :key="idx" :class="td_classes('td', field.name)">
+                <th v-for="(field, idx) in fields" :key="idx" :class="td_classes(field)">
                     {{ $t(field.title) }}
                 </th>
 
                 <th
                     v-if="instanceActions.length || instanceSublinks.length"
                     style="width: 60px"
-                    :class="td_classes('column', 'actions')"
+                    class="column column-actions"
                 />
             </tr>
         </thead>

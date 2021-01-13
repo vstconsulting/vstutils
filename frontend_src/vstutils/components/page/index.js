@@ -98,7 +98,7 @@ export const PageNewViewComponent = {
 
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.save).format([
-                        instance.getViewFieldValue() || instance.getPkValue(),
+                        instance.getViewFieldValue() || instance.getPkValue() || '',
                         this.view.name,
                     ]),
                 );
