@@ -1,8 +1,10 @@
+from django.conf import settings
 from django_filters import rest_framework as filters
 from django_filters import CharFilter
 
 id_help = 'A unique integer value (or comma separated list) identifying this instance.'
 name_help = 'A name string value (or comma separated list) of instance.'
+name_filter_method = "contains" if settings.CASE_SENSITIVE_API_FILTER else 'icontains'
 
 
 def _extra_search(queryset, field, value, stype):
@@ -45,8 +47,7 @@ def name_filter(queryset, field, value):
     :return: filtered queryset.
     :rtype: django.db.models.query.QuerySet
     """
-
-    return _extra_search(queryset, field, value, "contains")
+    return _extra_search(queryset, field, value, name_filter_method)
 
 
 class DefaultIDFilter(filters.FilterSet):
