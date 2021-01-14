@@ -1,6 +1,6 @@
 import typing
-import json
 
+import orjson
 from django.conf import settings
 
 
@@ -32,4 +32,4 @@ class PWAManifest:
 
     @property
     def json(self) -> typing.Text:
-        return json.dumps(self.data, indent=4)
+        return orjson.dumps(self.data, option=orjson.OPT_INDENT_2).decode('utf-8')

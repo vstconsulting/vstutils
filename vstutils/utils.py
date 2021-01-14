@@ -15,8 +15,8 @@ import typing as tp
 import warnings
 from pathlib import Path
 from threading import Thread
-import json
 
+import orjson
 from django.urls import re_path, include
 from django.core.mail import send_mail
 from django.core.cache import caches, InvalidCacheBackendError
@@ -322,7 +322,7 @@ class Dict(dict):
         return self.__str__()
 
     def __str__(self):
-        return json.dumps(self.copy())
+        return orjson.dumps(self.copy()).decode('utf-8')
 
 
 class tmp_file:
