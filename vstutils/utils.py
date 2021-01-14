@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import json
 import traceback
 import types
 import typing as tp
@@ -16,7 +17,6 @@ import warnings
 from pathlib import Path
 from threading import Thread
 
-import orjson
 from django.urls import re_path, include
 from django.core.mail import send_mail
 from django.core.cache import caches, InvalidCacheBackendError
@@ -322,7 +322,7 @@ class Dict(dict):
         return self.__str__()
 
     def __str__(self):
-        return orjson.dumps(self.copy()).decode('utf-8')
+        return json.dumps(self.copy())
 
 
 class tmp_file:

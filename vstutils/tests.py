@@ -7,7 +7,6 @@ import uuid
 from unittest.mock import patch, Mock
 import json  # noqa: F401
 
-import orjson
 from django.apps import apps
 from django.db import transaction
 from django.test import TestCase, override_settings  # noqa: F401
@@ -110,7 +109,7 @@ class BaseTestCase(TestCase):
             if getattr(rendered_content, 'decode', False):
                 rendered_content = str(rendered_content.decode('utf-8'))
             try:
-                return orjson.loads(rendered_content.strip())
+                return json.loads(rendered_content)
             except:
                 return str(rendered_content)
         except ValueError:  # nocv
@@ -401,7 +400,7 @@ class BaseTestCase(TestCase):
         """
 
         if data is not None:
-            data = orjson.dumps(data).decode('utf-8')
+            data = json.dumps(data)
 
         return self.get_result(
             method,

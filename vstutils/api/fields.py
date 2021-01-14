@@ -4,9 +4,9 @@ Additional serializer fields for generating OpenAPI and GUI.
 
 import typing as _t
 import copy
+import json
 import functools
 
-import orjson
 from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
@@ -32,7 +32,7 @@ class VSTCharField(CharField):
     def to_internal_value(self, data) -> _t.Text:
         with raise_context():
             if not isinstance(data, str):
-                data = orjson.dumps(data, option=orjson.OPT_SERIALIZE_DATACLASS).decode('utf-8')
+                data = json.dumps(data)
         data = str(data)
         return super().to_internal_value(data)
 
@@ -217,7 +217,7 @@ class DynamicJsonTypeField(VSTCharField):
 
     def to_representation(self, value):
         with raise_context():
-            value = orjson.loads(value) if self.to_json else value
+            value = json.loads(value) if self.to_json else value
         return value
 
 
@@ -557,7 +557,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     @raise_context_decorator_with_default(default={"name": None, "content": None})
     def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
-        return orjson.loads(value.strip())
+        return json.loads(value)
 
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
@@ -590,7 +590,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
 
     @raise_context_decorator_with_default(default=[])
     def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore
-        return orjson.loads(value.strip())
+        return json.loads(value)
 
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
