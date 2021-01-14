@@ -845,6 +845,8 @@ LOGGING: _t.Dict = {
 if main.getboolean('enable_django_logs', fallback=False):  # nocv
     LOGGING['loggers']['django'] = default_logger_data
 
+CASE_SENSITIVE_API_FILTER = web.getboolean('case_sensitive_api_filter', fallback=True)
+
 SILENCED_SYSTEM_CHECKS: _t.List = [
     "urls.W005",
     "fields.W122"

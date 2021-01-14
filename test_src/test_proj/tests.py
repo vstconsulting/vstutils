@@ -2216,6 +2216,35 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[7]['status'], 400, results[7])
         self.assertEqual(results[7]['data'], {'value': ['A valid integer is required.']})
 
+    @override_settings(CASE_SENSITIVE_API_FILTER=False)
+    def test_filters_case_insensitive(self):
+        filters_data = [
+            'tatata',
+            'senS',
+            'en',
+            'Ins',
+        ]
+
+        [
+            self._create_user(username=uname)
+            for uname in ['Insensitive', 'insensitive', 'Sensitive', 'SenS']
+        ]
+
+        bulk_data = [
+            dict(path=['user'], method='get', query=f'username={value}')
+            for value in filters_data
+        ]
+        results = self.bulk(bulk_data)
+
+        self.assertEqual(results[0]['status'], 200)
+        self.assertCount(results[0]['data']['results'], 0)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertCount(results[1]['data']['results'], 4)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertCount(results[2]['data']['results'], 4)
+        self.assertEqual(results[3]['status'], 200)
+        self.assertCount(results[3]['data']['results'], 2)
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):
