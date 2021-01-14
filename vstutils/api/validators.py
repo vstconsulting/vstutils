@@ -5,14 +5,15 @@ import warnings
 from io import BytesIO
 from pathlib import PurePosixPath
 
+import orjson
+from rest_framework import serializers
+
 try:
     from PIL import Image, UnidentifiedImageError
 
     has_pillow = True
 except ImportError:  # nocv
     has_pillow = False
-
-from rest_framework import serializers
 
 
 class RegularExpressionValidator:
@@ -72,6 +73,8 @@ class ImageValidator:
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
+        if isinstance(value, (str, bytes)):
+            value = orjson.loads(value)
         file_extension = PurePosixPath(value['name']).suffix
         if value and file_extension[1:] not in self.extensions:
             raise serializers.ValidationError(f'unsupported image file format,'
@@ -98,6 +101,8 @@ class ImageOpenValidator(ImageValidator):
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
+        if isinstance(value, (str, bytes)):
+            value = orjson.loads(value)
         super().__call__(value)
         try:
             self.img = Image.open(BytesIO(base64.b64decode(value['content'])))
@@ -118,6 +123,8 @@ class ImageBaseSizeValidator(ImageOpenValidator):
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
+        if isinstance(value, (str, bytes)):
+            value = orjson.loads(value)
         super().__call__(value)
         self.validate()
 

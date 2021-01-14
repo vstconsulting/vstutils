@@ -5,6 +5,7 @@ import shutil
 import re
 import io
 import pwd
+import orjson
 from pathlib import Path
 
 from unittest.mock import patch, PropertyMock
@@ -1495,10 +1496,8 @@ class ValidatorsTestCase(BaseTestCase):
                 'content': 'abcd',
             })
 
-        # check valid extension
-        img_validator({
-            'name': 'cat.jpg'
-        })
+        # check valid extension and test bytes input
+        img_validator(orjson.dumps(self.valid_image_content_dict))
 
     def test_image_open_validator(self):
         img_open_validator = ImageOpenValidator(extensions=['jpg', ])
@@ -1506,7 +1505,8 @@ class ValidatorsTestCase(BaseTestCase):
         with self.assertRaises(ValidationError):
             img_open_validator(self.invalid_image_content_dict)
 
-        img_open_validator(self.valid_image_content_dict)
+        # test valid input in bytes
+        img_open_validator(orjson.dumps(self.valid_image_content_dict))
 
     def test_image_width_validator(self):
         img_width_validator = ImageWidthValidator(min_width=1500)
@@ -1529,8 +1529,9 @@ class ValidatorsTestCase(BaseTestCase):
     def test_image_resolution_validator(self):
         img_resolution_validator = ImageResolutionValidator(min_width=1280, max_height=404)
 
+        # test validation error and bytes input
         with self.assertRaisesMessage(ValidationError, 'Invalid image height. Expected from 1 to 404, got 720'):
-            img_resolution_validator(self.valid_image_content_dict)
+            img_resolution_validator(orjson.dumps(self.valid_image_content_dict))
 
         img_resolution_validator = ImageResolutionValidator(max_width=666, max_height=720)
 
