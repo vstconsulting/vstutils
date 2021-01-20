@@ -15,7 +15,8 @@ from .inspectors import (
     AutoCompletionFieldInspector,
     VSTFieldInspector,
     NestedFilterInspector,
-    VSTReferencingSerializerInspector
+    VSTReferencingSerializerInspector,
+    RelatedListFieldInspector
 )
 
 
@@ -26,7 +27,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
         DynamicJsonTypeFieldInspector,
         AutoCompletionFieldInspector,
         VSTFieldInspector,
-        VSTReferencingSerializerInspector
+        VSTReferencingSerializerInspector,
+        RelatedListFieldInspector
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [

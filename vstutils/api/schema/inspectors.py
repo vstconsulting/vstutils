@@ -30,6 +30,7 @@ FORMAT_DYN = 'dynamic'
 FORMAT_DYN_FK = 'dynamic_fk'
 FORMAT_FK = 'fk'
 FORMAT_UPTIME = 'uptime'
+FORMAT_RELATED_LIST = 'related_list'
 
 
 # Base types
@@ -235,6 +236,26 @@ class CommaMultiSelectFieldInspector(FieldInspector):
                 'usePrefetch': field.use_prefetch,
                 'makeLink': field.make_link,
                 'dependence': field.dependence,
+            }
+        }
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class RelatedListFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.RelatedListField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': FORMAT_RELATED_LIST,
+            'additionalProperties': {
+                'fields': field.fields
             }
         }
 

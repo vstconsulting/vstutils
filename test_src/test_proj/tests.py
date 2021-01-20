@@ -49,7 +49,7 @@ from vstutils.models import get_centrifugo_client
 from vstutils import models
 from vstutils.utils import SecurePickling
 
-from .models import File, Host, HostGroup, List
+from .models import File, Host, HostGroup, List, Author, Post
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 
@@ -917,7 +917,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts']}
         )
         hidden_param = [i for i in api['paths']['/author/']['get']['parameters'] if i['name'] == 'hidden'][0]
         self.assertEqual(hidden_param['type'], 'boolean')
@@ -931,6 +931,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
             '#/definitions/Author'
         )
+        # Check properly format for RelatedListField
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['type'], 'string')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['format'], 'related_list')
 
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
@@ -1974,6 +1977,30 @@ class ProjectTestCase(BaseTestCase):
         results = self.bulk(bulk_data)
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[1]['data']['some_fk'], results[0]['data']['id'])
+
+    def test_model_related_list_field(self):
+        date = '2021-01-20T00:26:38Z'
+        author_1 = Author.objects.create(name='author_1', registerDate=date)
+        post_1 = Post.objects.create(author=author_1, title='post_1')
+        post_2 = Post.objects.create(author=author_1, title='post_2')
+        test_data = {
+            'id': author_1.id,
+            'name': author_1.name,
+            'registerDate': date,
+            'posts': [
+                {
+                    'title': post_1.title
+                },
+                {
+                    'title': post_2.title
+                }
+            ]
+        }
+        results = self.bulk([
+            {'method': 'get', 'path': ['author']},
+            {'method': 'get', 'path': ['author', '<<0[data][results][0][id]>>']},
+        ])
+        self.assertEqual(test_data, results[1]['data'])
 
     def test_model_namedbinfile_field(self):
         value = {'name': 'abc.png', 'content': '/4sdfsdf/'}

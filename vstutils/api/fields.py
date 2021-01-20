@@ -246,7 +246,6 @@ class DependEnumField(DynamicJsonTypeField):
 
 
 class DependFromFkField(DynamicJsonTypeField):
-
     """
     Field extends :class:`DynamicJsonTypeField`. Validates field data by :attr:`.field_attribute`
     chosen in related model. By default, any value of :attr:`.field_attribute` validates as :class:`.VSTCharField`.
@@ -613,3 +612,31 @@ class PasswordField(CharField):
         kwargs['style'] = kwargs.get('style', {})
         kwargs['style']['input_type'] = 'password'
         super(PasswordField, self).__init__(*args, ** kwargs)
+
+
+class RelatedListField(VSTCharField):
+    """
+    Extends class 'vstutils.api.fields.VSTCharField'. With this field you can output reverse ForeignKey relation
+    as a list of related instances.
+    To use it, you need to specify 'related_name' kwarg(related_manager for reverse ForeignKey)
+    and 'fields' kwarg(list or tuple of fields from related model, which needs to be included)
+
+    :param related_name: name of a related manager for reverse foreign key
+    :type related_name: str
+    :param fields: list of related model fields.
+    :type fields: list[str], tuple[str]
+    """
+
+    def __init__(self, related_name: _t.Text, fields: _t.Union[_t.Tuple, _t.List], **kwargs):
+        kwargs['read_only'] = True
+        kwargs['source'] = "*"
+        super().__init__(**kwargs)
+        # fields for 'values' in qs
+        assert isinstance(fields, (tuple, list)), "fields must be list or tuple"
+        assert fields, "fields must have one or more values"
+        self.fields = fields
+        self.related_name = related_name
+
+    def to_representation(self, value: _t.Type[models.Model]):
+        # get related mapping with id and name of instances
+        return getattr(value, self.related_name).values(*self.fields)
