@@ -1,4 +1,4 @@
-import { BaseFieldButton } from '../base';
+import { BaseFieldButton } from '../buttons';
 
 /**
  * Button, that shows/hides crontab form.
@@ -7,9 +7,8 @@ const FieldToggleCrontabButton = {
     mixins: [BaseFieldButton],
     data() {
         return {
-            icon_classes: ['fas', 'fa-pencil-alt'],
-            event_handler: 'toggleCrontab',
-            help_text: 'Crontab form',
+            iconClasses: ['fas', 'fa-pencil-alt'],
+            helpText: 'Crontab form',
         };
     },
 };

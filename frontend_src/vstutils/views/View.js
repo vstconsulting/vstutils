@@ -12,6 +12,8 @@ import {
     PageNewViewComponent,
     PageViewComponent,
 } from '../components/page';
+import { ViewTypes } from '../utils';
+export { ViewTypes };
 
 /**
  * @typedef {Object} VisibleButton
@@ -43,15 +45,6 @@ import {
  * @property {string} [method]
  * @property {boolean} [doNotShowOnList]
  */
-
-export const ViewTypes = {
-    LIST: 'list',
-    PAGE: 'page',
-    PAGE_NEW: 'page_new',
-    PAGE_EDIT: 'page_edit',
-    PAGE_REMOVE: 'page_remove',
-    ACTION: 'action',
-};
 
 /**
  * View class - constructor, that returns view object.

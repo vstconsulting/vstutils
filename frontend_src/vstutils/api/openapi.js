@@ -1,5 +1,5 @@
-import { ViewTypes } from '../views';
 import FiltersModal from '../components/list/FiltersModal.vue';
+import { ViewTypes } from '../utils';
 
 /**
  * Dictionary, that contains names of openapi schema attributes.

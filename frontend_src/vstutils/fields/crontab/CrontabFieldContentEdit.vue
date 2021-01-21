@@ -9,24 +9,21 @@
                         :style="styles"
                         :required="attrs['required']"
                         :value="value"
-                        @blur="updateValue($event.target.value)"
                         :aria-labelledby="label_id"
                         :aria-label="aria_label"
+                        @blur="updateValue($event.target.value)"
                     />
 
-                    <field_toggle_crontab_button
-                        :field="field"
-                        @toggleCrontab="toggleCrontab"
-                    ></field_toggle_crontab_button>
+                    <field_toggle_crontab_button @click.native="toggleCrontab" />
                 </div>
             </div>
         </div>
 
         <div
-            class="row crontabEditor"
-            id="guiElement-gui"
-            style="margin-top: 15px; display: none;"
             v-show="show_crontab"
+            id="guiElement-gui"
+            class="row crontabEditor"
+            style="margin-top: 15px; display: none"
         >
             <crontab_element
                 v-for="(item, idx) in crontab_elements"
@@ -35,7 +32,7 @@
                 :model="model"
                 @setModelValue="setModelValue($event)"
                 @setCrontabElValue="setCrontabElValue($event)"
-            ></crontab_element>
+            />
         </div>
     </div>
 </template>
@@ -49,6 +46,10 @@
      * Mixin for editable crontab gui_field(input value area).
      */
     export default {
+        components: {
+            field_toggle_crontab_button: FieldToggleCrontabButton,
+            crontab_element: CrontabFieldComponent,
+        },
         data() {
             return {
                 /**
@@ -179,10 +180,6 @@
                  */
                 model: {},
             };
-        },
-        components: {
-            field_toggle_crontab_button: FieldToggleCrontabButton,
-            crontab_element: CrontabFieldComponent,
         },
         created() {
             // inits properties for models and strings of crontab elements.
@@ -383,7 +380,7 @@
                 }
 
                 this.calculateValue();
-                this.$emit('proxyEvent', 'setValueInStore', this.val);
+                this.$emit('set-value', this.val);
             },
             /**
              * Method, that sets new value to crontab string.
@@ -401,7 +398,7 @@
             parseCalcAndSave(value) {
                 this.parseCronString(value);
                 this.calculateValue();
-                this.$emit('proxyEvent', 'setValueInStore', value);
+                this.$emit('set-value', value);
             },
             /**
              * Method, that compiles value of single crontab element.

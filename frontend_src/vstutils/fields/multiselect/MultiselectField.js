@@ -29,7 +29,7 @@ class MultiselectField extends FKField {
     }
 
     toRepresent(data) {
-        const value = data[this.name];
+        const value = data?.[this.name];
         if (value && Array.isArray(value)) {
             return value.map((item) => item.prefetch_value).join(this.viewSeparator);
         }

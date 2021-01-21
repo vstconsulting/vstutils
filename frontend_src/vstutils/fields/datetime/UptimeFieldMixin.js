@@ -2,6 +2,13 @@ import $ from 'jquery';
 import IMask from 'imask';
 import UptimeFieldContentEdit from './UptimeFieldContentEdit.vue';
 
+const YEAR = { mask: IMask.MaskedRange, from: 0, to: 99 };
+const MONTH = { mask: IMask.MaskedRange, from: 0, to: 12 };
+const DAY = { mask: IMask.MaskedRange, from: 0, to: 31 };
+const HH = { mask: IMask.MaskedRange, from: 0, to: 23 };
+const mm = { mask: IMask.MaskedRange, from: 0, to: 59 };
+const SS = { mask: IMask.MaskedRange, from: 0, to: 59 };
+
 const UptimeFieldMixin = {
     components: {
         field_content_edit: UptimeFieldContentEdit,
@@ -21,127 +28,19 @@ const UptimeFieldMixin = {
              */
             maskObj: {
                 mask: [
-                    {
-                        mask: 'HH:mm:SS',
-                        blocks: {
-                            HH: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 23,
-                            },
-                            mm: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                            SS: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                        },
-                    },
-                    {
-                        mask: 'DAYd HH:mm:SS',
-                        blocks: {
-                            DAY: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 31,
-                            },
-                            HH: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 23,
-                            },
-                            mm: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                            SS: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                        },
-                    },
-                    {
-                        mask: 'MONTHm DAYd HH:mm:SS',
-                        blocks: {
-                            MONTH: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 12,
-                            },
-                            DAY: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 31,
-                            },
-                            HH: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 23,
-                            },
-                            mm: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                            SS: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                        },
-                    },
-                    {
-                        mask: 'YEARy MONTHm DAYd HH:mm:SS',
-                        blocks: {
-                            YEAR: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 99,
-                            },
-                            MONTH: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 12,
-                            },
-                            DAY: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 31,
-                            },
-                            HH: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 23,
-                            },
-                            mm: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                            SS: {
-                                mask: IMask.MaskedRange,
-                                from: 0,
-                                to: 59,
-                            },
-                        },
-                    },
+                    { mask: 'HH:mm:SS', blocks: { HH, mm, SS } },
+                    { mask: 'DAYd HH:mm:SS', blocks: { DAY, HH, mm, SS } },
+                    { mask: 'MONTHm DAYd HH:mm:SS', blocks: { MONTH, DAY, HH, mm, SS } },
+                    { mask: 'YEARy MONTHm DAYd HH:mm:SS', blocks: { YEAR, MONTH, DAY, HH, mm, SS } },
                 ],
             },
         };
     },
     mounted() {
-        if (!this.field.options.readOnly) {
-            let element = $(this.$el).find('input.uptime-input');
-
-            if (element[0]) {
-                // adds mask to uptime field's input
-                this.IMask = new IMask(element[0], this.maskObj);
+        if (!this.field.readOnly) {
+            const element = this.$el.getElementsByTagName('input')[0];
+            if (element) {
+                this.IMask = new IMask(element, this.maskObj);
             }
         }
     },
@@ -150,10 +49,7 @@ const UptimeFieldMixin = {
          * Method, that returns uptime field value in seconds.
          */
         value_in_seconds() {
-            let data = $.extend(true, {}, this.data);
-
-            data[this.field.options.name] = this.value;
-
+            const data = $.extend(true, {}, this.data, { [this.field.name]: this.value });
             return this.field.toInner(data);
         },
         /**
@@ -171,7 +67,7 @@ const UptimeFieldMixin = {
             let data = $.extend(true, {}, this.data);
             data[this.field.options.name] = new_value;
 
-            this.setValueInStore(this.field.toRepresent(data));
+            this.setValue(this.field.toRepresent(data));
         },
         /**
          * Method, that decreases field value on increment amount.
@@ -188,7 +84,7 @@ const UptimeFieldMixin = {
             let data = $.extend(true, {}, this.data);
             data[this.field.options.name] = new_value;
 
-            this.setValueInStore(this.field.toRepresent(data));
+            this.setValue(this.field.toRepresent(data));
         },
         /**
          * Method, that gets increment size and calls valueUp method.
@@ -217,21 +113,14 @@ const UptimeFieldMixin = {
          * @param {number} iteration Number of increase/decrease iteration.
          */
         getIncrement(iteration) {
-            let increement = 1;
-
-            if (iteration >= 20) {
-                increement = 10;
-            }
-
-            if (iteration >= 30) {
-                increement = 100;
-            }
-
             if (iteration >= 40) {
-                increement = 1000;
+                return 1000;
+            } else if (iteration >= 30) {
+                return 100;
+            } else if (iteration >= 20) {
+                return 10;
             }
-
-            return increement;
+            return 1;
         },
         /**
          * Method, that resets uptimeSettings settings.

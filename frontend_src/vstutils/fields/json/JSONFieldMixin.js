@@ -24,12 +24,8 @@ const JSONFieldMixin = {
         };
     },
     components: {
-        field_content_readonly: {
-            mixins: [BaseFieldContentReadonlyMixin, JsonFieldContentReadonly],
-        },
-        field_content_edit: {
-            mixins: [TextAreaFieldContentEdit],
-        },
+        field_content_readonly: JsonFieldContentReadonly,
+        field_content_edit: TextAreaFieldContentEdit,
     },
 };
 

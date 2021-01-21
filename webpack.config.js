@@ -37,7 +37,6 @@ const config = {
     'spa': entrypoints_dir + "/spa.js",
     'doc': entrypoints_dir + "/doc.js",
     'auth': entrypoints_dir + "/auth.js",
-    'tests': entrypoints_dir + "/tests/index.js"
   },
   output: {
     path: __dirname + "/vstutils/static/bundle",

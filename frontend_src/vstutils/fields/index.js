@@ -6,7 +6,6 @@ import * as apiObject from './api-object';
 import * as autocomplete from './autocomplete';
 import * as base from './base';
 import * as boolean from './boolean';
-import * as button from './button';
 import * as choices from './choices';
 import * as crontab from './crontab';
 import * as datetime from './datetime';
@@ -25,7 +24,6 @@ export {
     autocomplete,
     base,
     boolean,
-    button,
     choices,
     crontab,
     datetime,

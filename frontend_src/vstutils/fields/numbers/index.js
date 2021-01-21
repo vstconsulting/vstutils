@@ -3,21 +3,6 @@ import IntegerFieldContentMixin from './IntegerFieldContentMixin.js';
 import IntegerFieldMixin from './IntegerFieldMixin.js';
 
 /**
- * Int32 guiField class.
- */
-class Int32Field extends IntegerField {}
-
-/**
- * Int64 guiField class.
- */
-class Int64Field extends IntegerField {}
-
-/**
- * Double guiField class.
- */
-class DoubleField extends IntegerField {}
-
-/**
  * Number guiField class.
  */
 class NumberField extends IntegerField {}
@@ -27,13 +12,6 @@ class NumberField extends IntegerField {}
  */
 class FloatField extends IntegerField {}
 
-export {
-    IntegerField,
-    Int32Field,
-    Int64Field,
-    DoubleField,
-    NumberField,
-    FloatField,
-    IntegerFieldContentMixin,
-    IntegerFieldMixin,
-};
+class DecimalField extends FloatField {}
+
+export { IntegerField, NumberField, FloatField, DecimalField, IntegerFieldContentMixin, IntegerFieldMixin };

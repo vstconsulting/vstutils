@@ -193,6 +193,7 @@ export const ActionViewComponent = {
                     path: formatPath(this.view.path, this.$route.params),
                     data: JSON.stringify(instance._getInnerData()),
                 });
+                this.isPageChanged = false;
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.execute).format([
                         this.$t(this.view.name),

@@ -66,7 +66,7 @@ describe('Model', () => {
         // Simple getting 'toRepresent' value
         expect(user.firstName).toBeUndefined();
         expect(user.age).toBe(22);
-        expect(user.settings).toBe('{"param1":"value1","param2":2}');
+        expect(user.settings).toStrictEqual({ param1: 'value1', param2: 2 });
         expect(user.email).toBe('name@domain.com');
         expect(user['email']).toBe('name@domain.com');
 
@@ -74,7 +74,7 @@ describe('Model', () => {
         const settingsSpy = jest.spyOn(user._fields.get('settings'), 'toInner');
         user.settings = { param1: 'value2', param2: 2, param3: false };
         expect(settingsSpy).toBeCalledTimes(1);
-        expect(user.settings).toBe('{"param1":"value2","param2":2,"param3":false}');
+        expect(user.settings).toStrictEqual({ param1: 'value2', param2: 2, param3: false });
 
         // Check inner values
         expect(user._getInnerData()).toStrictEqual({
@@ -89,7 +89,7 @@ describe('Model', () => {
             email: 'name@domain.com',
             firstName: undefined,
             age: 22,
-            settings: '{"param1":"value2","param2":2,"param3":false}',
+            settings: { param1: 'value2', param2: 2, param3: false },
         });
     });
 

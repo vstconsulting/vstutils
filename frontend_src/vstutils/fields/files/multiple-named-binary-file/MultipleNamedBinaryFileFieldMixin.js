@@ -5,7 +5,7 @@ import MultipleNamedBinaryFileFieldContentEdit from './MultipleNamedBinaryFileFi
 const MultipleNamedBinaryFileFieldMixin = {
     computed: {
         val() {
-            return this.value === undefined ? [] : this.value;
+            return this.value || [];
         },
     },
     methods: {

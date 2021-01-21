@@ -8,6 +8,7 @@ import { StoreConstructor } from './vstutils/store';
 import { ModelConstructor, ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 import { QuerySetsResolver } from './vstutils/querySet';
+import { signals } from './app.common.js';
 
 export * from './app.common.js';
 export * from './vstutils/dashboard';
@@ -45,6 +46,8 @@ export class App extends BaseApp {
         this.application = null;
     }
     afterInitialDataBeforeMount() {
+        this.prepareFieldsClasses();
+
         new ModelConstructor(
             openapi_dictionary,
             this.config.schema,
@@ -63,6 +66,14 @@ export class App extends BaseApp {
         this.qsResolver = new QuerySetsResolver(this.modelsClasses, this.views);
 
         this.prepareViewsModelsFields();
+    }
+
+    prepareFieldsClasses() {
+        for (const fieldClass of this.fieldsClasses.values()) {
+            if (typeof fieldClass.prepareFieldClass === 'function') {
+                fieldClass.prepareFieldClass(this);
+            }
+        }
     }
 
     prepareViewsModelsFields() {
@@ -129,19 +140,19 @@ export class App extends BaseApp {
     /**
      * Method, that creates store and router for an application and mounts it to DOM.
      */
-    mountApplication() {
-        window.spa.signals.emit('app.beforeInit', { app: this });
+    prepare() {
+        signals.emit('app.beforeInit', { app: this });
 
         let storeConstructor = new StoreConstructor(this.views);
 
-        window.spa.signals.emit('app.beforeInitStore', { storeConstructor });
+        signals.emit('app.beforeInitStore', { storeConstructor });
 
         let routerConstructor = new RouterConstructor(
             this.views,
             routerMixins.routesComponentsTemplates,
             routerMixins.customRoutesComponentsTemplates,
         );
-        window.spa.signals.emit('app.beforeInitRouter', { routerConstructor });
+        signals.emit('app.beforeInitRouter', { routerConstructor });
         this.router = routerConstructor.getRouter();
 
         let i18n = new VueI18n({
@@ -162,9 +173,13 @@ export class App extends BaseApp {
             router: this.router,
             store: storeConstructor.getStore(),
             i18n: i18n,
-        }).$mount('#RealBody');
+        });
 
-        window.spa.signals.emit('app.afterInit', { app: this });
+        signals.emit('app.afterInit', { app: this });
+    }
+
+    mount() {
+        this.application.$mount('#RealBody');
     }
 }
 

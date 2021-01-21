@@ -24,7 +24,7 @@
         <FieldButton
             help-text="Copy field's value to clipboard"
             :icon-classes="['far', 'fa-copy']"
-            @click="copy"
+            @click.native="copy"
         />
         <SetDefaultButton v-if="hasDefaultValue" @click.native="$emit('set-value', field.default)" />
         <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />

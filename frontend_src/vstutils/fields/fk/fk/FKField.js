@@ -38,6 +38,10 @@ class FKField extends BaseField {
         return [FKFieldMixin];
     }
 
+    static prepareFieldClass(app) {
+        this.appInstance = app;
+    }
+
     getInitialValue() {
         return null;
     }
@@ -65,11 +69,15 @@ class FKField extends BaseField {
         } else {
             querysets = [app.qsResolver.findQuerySet(this.fkModel.name, path)];
         }
-        this.querysets = querysets.map(this._formatQuerysetPath);
+        this.querysets = this._formatQuerysets(querysets);
+    }
+
+    _formatQuerysets(querysets) {
+        return querysets.map((qs) => this._formatQuerysetPath(qs));
     }
 
     _formatQuerysetPath(queryset) {
-        const params = window.app.application?.$route?.params || {};
+        const params = this.constructor.appInstance.application?.$route?.params || {};
         return queryset.clone({ url: formatPath(queryset.url, params) });
     }
 
@@ -112,7 +120,11 @@ class FKField extends BaseField {
 
     getValueFieldValue(val) {
         if (val !== null && typeof val === 'object') {
-            return val._data[this.valueField];
+            if (val._data) {
+                return val._data[this.valueField];
+            } else {
+                return val.value;
+            }
         }
         return val;
     }
@@ -134,7 +146,7 @@ class FKField extends BaseField {
     }
 
     getAllQuerysets() {
-        return this.querysets.map(this._formatQuerysetPath);
+        return this._formatQuerysets(this.querysets);
     }
 
     /**

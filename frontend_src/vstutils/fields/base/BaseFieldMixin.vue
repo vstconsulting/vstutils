@@ -68,8 +68,8 @@
                         'form-group ' +
                         addCssClassesToElement(
                             'guiField',
-                            this.field.options.name,
-                            this.field.options.format || this.field.options.type,
+                            this.field.name,
+                            this.field.format || this.field.type,
                         ),
                     grid: 'col-lg-4 col-xs-12 col-sm-6 col-md-6',
                 },

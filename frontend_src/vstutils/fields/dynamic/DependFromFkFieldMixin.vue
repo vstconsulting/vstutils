@@ -25,12 +25,15 @@
             },
         },
         created() {
-            this.$watch(`data.${this.field.dependField}`, this.updateRealField, { immediate: true });
+            this.$watch(`data.${this.field.dependField}`, () => {
+                this.updateRealField();
+                this.setValue(this.realField.getInitialValue());
+            });
+            this.updateRealField();
         },
         methods: {
             updateRealField() {
                 this.realField = this.field.getRealField(this.data);
-                this.setValue(this.realField.getInitialValue());
             },
         },
     };

@@ -1,9 +1,14 @@
 <template>
     <div style="display: contents">
-        <div class="named-bin-image" :style="{ backgroundImage: cssUrl }" @click.stop="isModalOpen = true" />
+        <div
+            v-if="src"
+            class="named-bin-image"
+            :style="{ backgroundImage: cssUrl }"
+            @click.stop="isModalOpen = true"
+        />
         <Modal v-show="isModalOpen" :opt="{ footer: false }" @close="isModalOpen = false">
             <template #body>
-                <img :src="src" alt="" class="image-field-content" />
+                <img v-if="src" :src="src" alt="" class="image-field-content" />
             </template>
         </Modal>
     </div>
@@ -24,7 +29,9 @@
         },
         computed: {
             src() {
-                return 'data:image/png;base64,' + this.value.content;
+                return this.value && this.value.content
+                    ? 'data:image/png;base64,' + this.value.content
+                    : null;
             },
             cssUrl() {
                 return `url("${this.src}")`;

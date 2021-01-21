@@ -3,7 +3,7 @@ import { BaseField } from '../base';
 import DateTimeFieldMixin from './DateTimeFieldMixin.js';
 
 /**
- * Date_time guiField class.
+ * Date-time guiField class.
  */
 class DateTimeField extends BaseField {
     toInner(data) {

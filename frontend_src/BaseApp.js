@@ -79,7 +79,7 @@ export default class BaseApp {
 
         this.global_components.registerAll();
 
-        this.mountApplication();
+        this.prepare();
     }
 
     /**
@@ -101,5 +101,5 @@ export default class BaseApp {
     /**
      * Method, that creates store and router for an application and mounts it to DOM.
      */
-    mountApplication() {}
+    prepare() {}
 }
