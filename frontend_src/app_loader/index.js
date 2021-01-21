@@ -88,6 +88,7 @@ async function startApp(cache) {
 
     // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
     await window.app.start();
+    window.app.mount();
 
     cache.close();
 

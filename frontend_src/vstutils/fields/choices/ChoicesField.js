@@ -13,6 +13,17 @@ class ChoicesField extends StringField {
         this.enum = options.enum;
         this.fieldForEnum = props.fieldForEnum;
     }
+
+    getInitialValue() {
+        if (this.hasDefault) {
+            return this.default;
+        }
+        if (this.enum) {
+            return this.enum[0];
+        }
+        return null;
+    }
+
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.
      */

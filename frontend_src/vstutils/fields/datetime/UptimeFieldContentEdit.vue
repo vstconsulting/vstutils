@@ -6,71 +6,49 @@
             :style="styles"
             :required="attrs['required']"
             :value="value"
-            @blur="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
+            @blur="$emit('set-value', $event.target.value)"
         />
 
-        <field_uptime_down_button
-            :field="field"
-            @callDoDecrease="$emit('proxyEvent', 'callDoDecrease')"
-            @resetIncrement="$emit('proxyEvent', 'resetIncrement')"
-        ></field_uptime_down_button>
+        <DownButton @action="$parent.callDoDecrease" @reset-increment="$parent.resetIncrement" />
+        <UpButton @action="$parent.callDoIncrease" @reset-increment="$parent.resetIncrement" />
 
-        <field_uptime_up_button
-            :field="field"
-            @callDoIncrease="$emit('proxyEvent', 'callDoIncrease')"
-            @resetIncrement="$emit('proxyEvent', 'resetIncrement')"
-        ></field_uptime_up_button>
-
-        <field_hidden_button
-            v-if="hasHideButton"
-            :field="field"
-            @hideField="$emit('proxyEvent', 'hideField')"
-        ></field_hidden_button>
-
-        <field_default_value_button
-            v-if="hasDefaultValue"
-            :field="field"
-            @valueToDefault="$emit('proxyEvent', 'valueToDefault')"
-        ></field_default_value_button>
+        <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+        <SetDefaultButton v-if="hasDefaultValue" @click.native="$parent.valueToDefault" />
     </div>
 </template>
 
 <script>
-    import { BaseFieldContentEdit, BaseFieldButton } from '../base';
+    import { BaseFieldContentEdit } from '../base';
     import UptimeFieldButton from './UptimeFieldButton.vue';
 
     export default {
+        components: {
+            DownButton: {
+                mixins: [UptimeFieldButton],
+                data() {
+                    return {
+                        iconClasses: ['fa', 'fa-chevron-left'],
+                        helpText: 'Decrease value',
+                    };
+                },
+            },
+            UpButton: {
+                mixins: [UptimeFieldButton],
+                data() {
+                    return {
+                        iconClasses: ['fa', 'fa-chevron-right'],
+                        helpText: 'Increase value',
+                    };
+                },
+            },
+        },
         mixins: [BaseFieldContentEdit],
         data() {
             return {
                 class_list: ['form-control', 'uptime-input'],
             };
-        },
-        components: {
-            // button, that decreases field's value
-            field_uptime_down_button: {
-                mixins: [BaseFieldButton, UptimeFieldButton],
-                data() {
-                    return {
-                        icon_classes: ['fa', 'fa-chevron-left'],
-                        event_handler: 'callDoDecrease',
-                        help_text: 'Decrease value',
-                    };
-                },
-            },
-            // button, that increases field's value
-            field_uptime_up_button: {
-                mixins: [BaseFieldButton, UptimeFieldButton],
-                data() {
-                    return {
-                        icon_classes: ['fa', 'fa-chevron-right'],
-                        event_handler: 'callDoIncrease',
-                        help_text: 'Increase value',
-                    };
-                },
-            },
         },
     };
 </script>

@@ -1,5 +1,5 @@
 /**
- * Mixin for date_time gui_field content(input value area).
+ * Mixin for date-time gui_field content(input value area).
  */
 const DateTimeFieldContent = {
     data() {

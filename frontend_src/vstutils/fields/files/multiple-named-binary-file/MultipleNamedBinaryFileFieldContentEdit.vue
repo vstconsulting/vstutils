@@ -20,7 +20,12 @@
                 <template v-for="(file, idx) in value">
                     <li :key="idx">
                         <div>
-                            <span class="break-word">{{ file.name }}</span>
+                            <span
+                                title="Download file"
+                                class="cursor-pointer break-word"
+                                @click="fileClickHandler(file)"
+                                v-text="file.name"
+                            />
                             <span class="cursor-pointer fa fa-times" @click="removeFile(idx)" />
                         </div>
                     </li>
@@ -33,6 +38,7 @@
 <script>
     import { BinaryFileFieldReadFileButton, BinaryFileFieldContentEdit } from '../binary-file';
     import MultipleNamedBinaryFileFieldContent from './MultipleNamedBinaryFileFieldContent';
+    import { downloadBase64File } from '../../../utils';
 
     /**
      * Mixin for editable multiplenamedbinfile field.
@@ -51,6 +57,9 @@
         },
         mixins: [BinaryFileFieldContentEdit, MultipleNamedBinaryFileFieldContent],
         methods: {
+            fileClickHandler(file) {
+                downloadBase64File('text/plain', file.content, file.name);
+            },
             removeFile(index) {
                 let v = this.value ? [...this.value] : [];
                 v.splice(index, 1);

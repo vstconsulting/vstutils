@@ -625,17 +625,21 @@ class RelatedListField(VSTCharField):
     :type related_name: str
     :param fields: list of related model fields.
     :type fields: list[str], tuple[str]
+    :param view_type: Determines how field should be shown on frontend. Must be either 'list' or 'table'.
+    :type view_type: str
     """
 
-    def __init__(self, related_name: _t.Text, fields: _t.Union[_t.Tuple, _t.List], **kwargs):
+    def __init__(self, related_name: _t.Text, fields: _t.Union[_t.Tuple, _t.List], view_type: str = 'list', **kwargs):
         kwargs['read_only'] = True
         kwargs['source'] = "*"
         super().__init__(**kwargs)
         # fields for 'values' in qs
         assert isinstance(fields, (tuple, list)), "fields must be list or tuple"
         assert fields, "fields must have one or more values"
+        assert view_type in ('list', 'table')
         self.fields = fields
         self.related_name = related_name
+        self.view_type = view_type
 
     def to_representation(self, value: _t.Type[models.Model]):
         # get related mapping with id and name of instances

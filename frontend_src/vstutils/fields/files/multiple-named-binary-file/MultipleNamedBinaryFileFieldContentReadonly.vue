@@ -5,13 +5,16 @@
         </div>
         <div>
             <ul class="multiple-files-list">
-                <template v-for="(file, idx) in value">
-                    <li :key="idx">
-                        <div>
-                            <span class="break-word">{{ file.name }}</span>
-                        </div>
-                    </li>
-                </template>
+                <li
+                    v-for="(file, idx) in value"
+                    :key="idx"
+                    title="Download file"
+                    @click="fileClickHandler(file)"
+                >
+                    <div>
+                        <span class="break-word">{{ file.name }}</span>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
@@ -20,10 +23,20 @@
 <script>
     import { BaseFieldContentReadonlyMixin } from '../../base';
     import MultipleNamedBinaryFileFieldContent from './MultipleNamedBinaryFileFieldContent.js';
+    import { downloadBase64File } from '../../../utils';
 
     export default {
         mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContent],
+        methods: {
+            fileClickHandler(file) {
+                downloadBase64File('text/plain', file.content, file.name);
+            },
+        },
     };
 </script>
 
-<style></style>
+<style scoped>
+    li {
+        cursor: pointer;
+    }
+</style>

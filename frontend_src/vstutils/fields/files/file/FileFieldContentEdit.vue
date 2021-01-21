@@ -1,21 +1,12 @@
 <template>
     <div>
-        <field_clear_button
-            :field="field"
-            @cleanValue="$emit('proxyEvent', 'cleanValue')"
-        ></field_clear_button>
-
-        <ReadFileButton @click.native="$parent.readFile($event)" />
-
-        <field_hidden_button
-            v-if="hasHideButton"
-            :field="field"
-            @hideField="$emit('proxyEvent', 'hideField')"
-        ></field_hidden_button>
-
+        <div class="file-buttons">
+            <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
+            <ReadFileButton @read-file="$parent.readFile($event)" />
+            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+        </div>
         <textarea
             :value="value"
-            @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
             :placeholder="$t('enter value') | capitalize"
             :class="classes"
             :style="styles"
@@ -24,39 +15,34 @@
             :maxlength="attrs['maxlength']"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
-        ></textarea>
+            @input="$emit('set-value', $event.target.value)"
+        />
     </div>
 </template>
 
 <script>
-    import { BaseFieldContentEdit, BaseFieldButton } from '../../base';
-    import FileFieldButtonMixin from './FileFieldButtonMixin.js';
+    import { BaseFieldContentEdit } from '../../base';
     import FileFieldReadFileButton from './FileFieldReadFileButton.vue';
 
     export default {
+        components: {
+            ReadFileButton: FileFieldReadFileButton,
+        },
         mixins: [BaseFieldContentEdit],
         data() {
             return {
                 styles_dict: { resize: 'vertical' },
             };
         },
-        components: {
-            field_clear_button: {
-                mixins: [BaseFieldButton, FileFieldButtonMixin],
-            },
-            field_hidden_button: {
-                mixins: [BaseFieldButton, FileFieldButtonMixin],
-                data() {
-                    return {
-                        icon_classes: ['fa', 'fa-minus'],
-                        event_handler: 'hideField',
-                        help_text: 'Hide field',
-                    };
-                },
-            },
-            ReadFileButton: FileFieldReadFileButton,
-        },
     };
 </script>
 
-<style scoped></style>
+<style scoped>
+    .file-buttons {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    .file-buttons > * {
+        height: 35px;
+    }
+</style>

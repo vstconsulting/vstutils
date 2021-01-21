@@ -14,6 +14,10 @@ class BinaryFileField extends FileField {
         return super.mixins.concat(BinaryFileFieldMixin);
     }
 
+    getInitialValue() {
+        return null;
+    }
+
     /**
      * Method, that converts field's value to base64.
      * It's supposed that value of current field is an instance of ArrayBuffer.

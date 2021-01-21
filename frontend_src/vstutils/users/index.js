@@ -117,7 +117,7 @@ signals.once('allModels.created', ({ models }) => {
 
 // Redirect all /profile/... requests to /user/{currentUser.id}/...
 signals.once('app.afterInit', ({ app }) => {
-    const currentUserViewPath = `/user/${window.app.api.getUserId()}`;
+    const currentUserViewPath = `/user/${app.api.getUserId()}`;
     const profilePath = '/profile';
     app.router.beforeEach((to, from, next) => {
         if (to.path.startsWith(profilePath)) {

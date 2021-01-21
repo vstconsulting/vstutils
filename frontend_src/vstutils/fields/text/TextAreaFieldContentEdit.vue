@@ -3,7 +3,7 @@
         <textarea
             :value="value"
             :required="attrs['required']"
-            @input="$emit('proxyEvent', 'setValueInStore', $event.target.value)"
+            @input="$emit('set-value', $event.target.value)"
             rows="3"
             cols="50"
             :class="classes"
@@ -12,7 +12,7 @@
             :maxlength="attrs['maxlength']"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
-        ></textarea>
+        />
     </div>
 </template>
 

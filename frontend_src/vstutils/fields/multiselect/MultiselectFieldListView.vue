@@ -10,11 +10,11 @@
 </template>
 
 <script>
-    import { BaseFieldContentReadonlyMixin } from '../base';
+    import { BaseFieldListView } from '../base';
     import { FKFieldContent } from '../fk/fk';
 
     export default {
-        mixins: [BaseFieldContentReadonlyMixin, FKFieldContent],
+        mixins: [BaseFieldListView, FKFieldContent],
         computed: {
             with_link() {
                 return false;

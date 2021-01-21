@@ -16,6 +16,11 @@ class MultipleNamedBinFileField extends NamedBinaryFileField {
     static get mixins() {
         return super.mixins.concat(MultipleNamedBinaryFileFieldMixin);
     }
+
+    getInitialValue() {
+        return [];
+    }
+
     /**
      * Redefinition of 'validateValue' method of binfile guiField.
      */

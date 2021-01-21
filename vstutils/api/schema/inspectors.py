@@ -5,7 +5,7 @@ from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector
-from rest_framework.fields import Field
+from rest_framework.fields import Field, JSONField
 
 from .. import fields, serializers
 
@@ -69,6 +69,10 @@ basic_type_info[fields.HtmlField] = {
 }
 basic_type_info[serializers.JsonObjectSerializer] = {
     'type': openapi.TYPE_OBJECT,
+    'format': FORMAT_JSON
+}
+basic_type_info[JSONField] = {
+    'type': openapi.TYPE_STRING,
     'format': FORMAT_JSON
 }
 basic_type_info[fields.TextareaField] = {
@@ -255,7 +259,8 @@ class RelatedListFieldInspector(FieldInspector):
             'type': openapi.TYPE_STRING,
             'format': FORMAT_RELATED_LIST,
             'additionalProperties': {
-                'fields': field.fields
+                'fields': field.fields,
+                'viewType': field.view_type,
             }
         }
 

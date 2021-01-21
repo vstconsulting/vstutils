@@ -26,7 +26,7 @@ class Author(BModel):
             "Main": ["id", "name"]
         }
         _override_detail_fields = {
-            'posts': RelatedListField(fields=['title'], related_name='post')
+            'posts': RelatedListField(fields=['title'], related_name='post', view_type='table')
         }
         _nested = {
             'post': {

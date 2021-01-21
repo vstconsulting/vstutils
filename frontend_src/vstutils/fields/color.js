@@ -32,12 +32,17 @@ class ColorField extends BaseField {
     static get mixins() {
         return super.mixins.concat(ColorFieldMixin);
     }
+
+    getInitialValue() {
+        return this.hasDefault ? this.default : null;
+    }
+
     /**
      * Custom method for toInner and toRepresent methods.
      * @param {object} data
      */
     _getValue(data = {}) {
-        let value = data[this.options.name];
+        let value = data[this.name];
 
         if (!value) {
             return '#000000';

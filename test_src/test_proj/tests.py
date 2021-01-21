@@ -934,6 +934,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check properly format for RelatedListField
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['type'], 'string')
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['format'], 'related_list')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['additionalProperties']['viewType'], 'table')
 
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
