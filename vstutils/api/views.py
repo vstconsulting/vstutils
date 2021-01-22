@@ -7,10 +7,16 @@ from django.conf import settings
 from django.db import transaction
 from django.http import Http404
 from django.test import Client
-from rest_framework import permissions as rest_permissions, throttling, request as drf_request
+from rest_framework import (
+    permissions as rest_permissions,
+    throttling,
+    request as drf_request,
+    serializers as drf_serializers
+)
 from rest_framework.exceptions import ValidationError, NotFound, UnsupportedMediaType
 
 from . import base, serializers, decorators as deco, responses, models
+from .decorators import subaction
 from ..utils import Dict, import_class, deprecated
 
 
@@ -33,6 +39,31 @@ class OneLanguageSerializer(serializers.VSTSerializer):
             'name',
             'translations'
         )
+
+
+class TranslationSerializer(serializers.VSTSerializer):
+    '''
+    Serializer for API Endpoint that translates given phrase using dictionaries from vstutils/translations
+    '''
+    original = drf_serializers.CharField()
+    translated = drf_serializers.CharField(read_only=True)
+
+    class Meta:
+        model: _t.Type[models.Language] = models.Language
+        fields: _t.Tuple = (
+            'original',
+            'translated'
+        )
+
+    def update(self, instance, validated_data):
+        original = validated_data['original']
+        translated = instance.translations.get(original, None)
+        # place for additional translation methods
+        if translated is None:
+            translated = original
+        instance.original = original
+        instance.translated = translated
+        return instance
 
 
 class SettingsViewSet(base.ListNonModelViewSet):
@@ -340,3 +371,17 @@ class LangViewSet(base.ReadOnlyModelViewSet):
                 'name': self.kwargs[lookup_url_kwarg],
             }
             return self.model(**obj_kwargs)
+
+    @subaction(
+        methods=['post'],
+        detail=True,
+        serializer_class=TranslationSerializer,
+    )
+    def translate(self, request, pk=None):
+        '''
+        detail action method for translating given phrases using dictionaries.
+        '''
+        serializer = self.get_serializer(self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return responses.HTTP_201_CREATED(serializer.data)
