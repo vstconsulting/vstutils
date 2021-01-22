@@ -1575,6 +1575,30 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(results[4]['data']['name'], 'Empty list')
         self.assertEqual(results[4]['data']['translations'], {})
 
+    def test_translate_action(self):
+        test_results = [
+            {
+                'original': 'enter value',
+                'translated': 'введите значение'
+            },
+            {
+                'original': 'репозиторий',
+                'translated': 'репозиторий'
+            }
+        ]
+
+        bulk_data = [
+            dict(path=['_lang', 'ru', 'translate'], method='post', data=dict(original='enter value')),
+            dict(path=['_lang', 'en', 'translate'], method='post', data=dict(original='репозиторий')),
+        ]
+        results = self.bulk(bulk_data)
+        # test successful translation
+        self.assertEqual(201, results[0]['status'])
+        self.assertEqual(test_results[0], results[0]['data'])
+        # test not translated
+        self.assertEqual(201, results[1]['status'])
+        self.assertEqual(test_results[1], results[1]['data'])
+
 
 class CoreApiTestCase(BaseTestCase):
 
