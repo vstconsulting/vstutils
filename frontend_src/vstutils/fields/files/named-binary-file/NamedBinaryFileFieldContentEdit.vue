@@ -25,12 +25,6 @@
     export default {
         mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContent],
         methods: {
-            isFileSizeValid(file_size) {
-                if (this.field.maxSize !== undefined) {
-                    return this.field.maxSize <= file_size;
-                }
-                return true;
-            },
             readFile(event) {
                 const file = event.target.files[0];
                 if (!file) return;

@@ -4,7 +4,7 @@ import { StringField } from '../fields/text';
 import { makeModel, Model, ModelClass } from './Model.js';
 import { getFieldFormatFactory } from '../fields';
 
-@ModelClass()
+@ModelClass('NoModel')
 export class NoModel extends Model {
     static declaredFields = [
         new StringField({
