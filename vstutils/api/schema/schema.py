@@ -16,7 +16,8 @@ from .inspectors import (
     VSTFieldInspector,
     NestedFilterInspector,
     VSTReferencingSerializerInspector,
-    RelatedListFieldInspector
+    RelatedListFieldInspector,
+    RatingFieldInspector
 )
 
 
@@ -28,7 +29,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
         AutoCompletionFieldInspector,
         VSTFieldInspector,
         VSTReferencingSerializerInspector,
-        RelatedListFieldInspector
+        RelatedListFieldInspector,
+        RatingFieldInspector
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [

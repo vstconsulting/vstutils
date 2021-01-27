@@ -7,7 +7,7 @@ import copy
 import json
 import functools
 
-from rest_framework.serializers import CharField, IntegerField, ModelSerializer
+from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer
 from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
@@ -644,3 +644,51 @@ class RelatedListField(VSTCharField):
     def to_representation(self, value: _t.Type[models.Model]):
         # get related mapping with id and name of instances
         return getattr(value, self.related_name).values(*self.fields)
+
+
+class RatingField(FloatField):
+    """
+    Extends class 'rest_framework.serializers.FloatField'. This field represents a rating form input on frontend.
+    Grading limits can be specified with 'min_value=' and 'max_value=', defaults are 0 to 5.Minimal step between
+    grades are specified in 'step=', default - 1.Frontend visual representation can be choosen
+    with 'front_style=', available variants are listed in 'self.valid_front_styles'.
+
+    for 'slider' front style, you can specify slider color, by passing valid color to 'color='.
+    for 'fa_icon' front style, you can specify FontAwesome icon that would be used for displaying rating, by passing a
+    valid FontAwesome icon code to 'fa_class='.
+
+    :param min_value: minimal level
+    :type min_value: float, int
+    :param max_value: maximal level
+    :type max_value: float, int
+    :param step: minimal step between levels
+    :type step: float, int
+    :param front_style: visualization on frontend field. Allowed: ['stars', 'slider', 'fa_icon'].
+    :type front_style: str
+    :param color: color of slider (css color style)
+    :type color: str
+    :param fa_class: FontAwesome icon code
+    :type fa_class: str
+    """
+    valid_front_styles = (
+        'stars',
+        'slider',
+        'fa_icon',
+    )
+
+    def __init__(
+            self,
+            min_value: float = 0,
+            max_value: float = 5,
+            step: float = 1,
+            front_style: _t.Text = 'stars',
+            **kwargs,
+    ):
+        assert front_style in self.valid_front_styles, f"front_style should be one of {self.valid_front_styles}"
+        self.front_style = front_style
+        self.color = kwargs.pop('color', None)
+        assert isinstance(self.color, str) or self.color is None, "color should be str"
+        self.fa_class = kwargs.pop('fa_class', None)
+        assert isinstance(self.fa_class, str) or self.fa_class is None, "fa_class should be str"
+        self.step = step
+        super(RatingField, self).__init__(min_value=min_value, max_value=max_value, **kwargs)
