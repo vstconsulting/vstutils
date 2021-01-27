@@ -31,6 +31,7 @@ FORMAT_DYN_FK = 'dynamic_fk'
 FORMAT_FK = 'fk'
 FORMAT_UPTIME = 'uptime'
 FORMAT_RELATED_LIST = 'related_list'
+FORMAT_RATING = 'rating'
 
 
 # Base types
@@ -264,6 +265,29 @@ class RelatedListFieldInspector(FieldInspector):
             }
         }
 
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class RatingFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.RatingField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = {
+            'type': openapi.TYPE_NUMBER,
+            'format': FORMAT_RATING,
+            'additionalProperties': {
+                'min_value': field.min_value,
+                'max_value': field.max_value,
+                'style': field.front_style,
+                'color': field.color,
+                'fa_class': field.fa_class
+            }
+        }
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 

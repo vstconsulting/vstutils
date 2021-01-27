@@ -935,7 +935,37 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['type'], 'string')
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['format'], 'related_list')
         self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['additionalProperties']['viewType'], 'table')
-
+        # Check properly format for RatingField
+        self.assertEqual(
+                api['definitions']['OneExtraPost']['properties']['rating'],
+                {
+                    'title': 'Rating',
+                    'type': 'number',
+                    'format': 'rating',
+                    'additionalProperties': {
+                        'min_value': 0,
+                        'max_value': 10,
+                        'style': 'slider',
+                        'color': 'red',
+                        'fa_class': None,
+                    }
+                }
+            )
+        self.assertEqual(
+            api['definitions']['OneExtraPost']['properties']['fa_icon_rating'],
+            {
+                'title': 'Fa icon rating',
+                'type': 'number',
+                'format': 'rating',
+                'additionalProperties': {
+                    'min_value': 0,
+                    'max_value': 5,
+                    'style': 'fa_icon',
+                    'color': None,
+                    'fa_class': 'fas fa-cat'
+                }
+            }
+        )
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})
 
@@ -2026,6 +2056,30 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'get', 'path': ['author', '<<0[data][results][0][id]>>']},
         ])
         self.assertEqual(test_data, results[1]['data'])
+
+    # find me
+    def test_model_rating_field(self):
+        date = '2021-01-20T00:26:38Z'
+        author = Author.objects.create(name='author_1', registerDate=date)
+        post_data = {
+            'author': author,
+            'title': 'exm_post',
+            'rating': 8.0,
+            'fa_icon_rating': 0.0,
+            'text': 'lorem'
+        }
+        post = Post.objects.create(**post_data)
+        post_data['rating'] = 25
+        post_data['author'] = author.id
+        post_data['id'] = post.id
+        results = self.bulk([
+            {'method': 'post', 'path': ['author', author.id, 'post'], 'data': post_data},
+            {'method': 'get', 'path': ['author', author.id, 'post']},
+            {'method': 'get', 'path': ['author', author.id, 'post', '<<1[data][results][0][id]>>']},
+        ])
+        post_data['rating'] = 8
+        self.assertEqual(['Ensure this value is less than or equal to 10.'], results[0]['data']['rating'])
+        self.assertDictEqual(post_data, results[2]['data'])
 
     def test_model_namedbinfile_field(self):
         value = {'name': 'abc.png', 'content': '/4sdfsdf/'}

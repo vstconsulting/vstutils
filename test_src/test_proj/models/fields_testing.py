@@ -1,7 +1,7 @@
 from django.db import models
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer
-from vstutils.api.fields import FkModelField, RelatedListField
+from vstutils.api.fields import FkModelField, RelatedListField, RatingField
 from django.utils import timezone
 
 
@@ -40,13 +40,19 @@ class Post(BModel):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     text = models.TextField()
+    rating = models.FloatField(default=0)
+    fa_icon_rating = models.FloatField(default=0)
 
     class Meta:
         default_related_name = 'post'
         _list_fields = ['author', 'title']
-        _detail_fields = ['author', 'title', 'text']
+        _detail_fields = ['author', 'title', 'text', 'rating', 'fa_icon_rating']
         _override_list_fields = _override_detail_fields = {
             'author': FkModelField(select=Author, read_only=True)
+        }
+        _override_detail_fields = {
+            'author': FkModelField(select=Author, read_only=True),
+            'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10)
         }
 
 
@@ -59,6 +65,11 @@ class ExtraPost(Post):
         # default_related_name = 'post'
         # _list_fields = ['author', 'title']
         # _detail_fields = ['author', 'title', 'text']
-        _override_list_fields = _override_detail_fields = {
+        _override_list_fields = {
             'author': FkModelField(select='test_proj.Author', read_only=True)
+        }
+        _override_detail_fields = {
+            'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10, color='red'),
+            'fa_icon_rating': RatingField(required=False, front_style='fa_icon', fa_class='fas fa-cat'),
+            **_override_list_fields
         }
