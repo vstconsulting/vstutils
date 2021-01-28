@@ -7,7 +7,7 @@ from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework.fields import Field, JSONField
 
-from .. import fields, serializers
+from .. import fields, serializers, validators
 
 
 # Extra types
@@ -52,17 +52,9 @@ basic_type_info[fields.NamedBinaryFileInJsonField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_NAMED_BIN_FILE
 }
-basic_type_info[fields.NamedBinaryImageInJsonField] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_NAMED_BIN_IMAGE
-}
 basic_type_info[fields.MultipleNamedBinaryFileInJsonField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_MULTIPLE_NAMED_BIN_FILE
-}
-basic_type_info[fields.MultipleNamedBinaryImageInJsonField] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_MULTIPLE_NAMED_BIN_IMAGE
 }
 basic_type_info[fields.HtmlField] = {
     'type': openapi.TYPE_STRING,
@@ -288,6 +280,39 @@ class RatingFieldInspector(FieldInspector):
                 'fa_class': field.fa_class
             }
         }
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class NamedBinaryImageInJsonFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if isinstance(field, fields.NamedBinaryImageInJsonField):
+            img_format = FORMAT_NAMED_BIN_IMAGE
+        elif isinstance(field, fields.MultipleNamedBinaryImageInJsonField):
+            img_format = FORMAT_MULTIPLE_NAMED_BIN_IMAGE
+        else:
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': img_format,
+            'additionalProperties': {},
+        }
+        for validator in field.validators:
+            if isinstance(validator, validators.ImageResolutionValidator):
+                kwargs['additionalProperties'].update(
+                    {
+                        'min_width': validator.min_width,
+                        'max_width': validator.max_width,
+                        'min_height': validator.min_width,
+                        'max_height': validator.max_width,
+                        'extensions': validator.extensions
+                    }
+                )
+
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 

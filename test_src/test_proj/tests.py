@@ -906,7 +906,15 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
     def test_openapi_schema_content(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
-
+        img_res_validator_data = {
+                    'min_width': 200,
+                    'max_width': 600,
+                    'min_height': 200,
+                    'max_height': 600,
+                    'extensions': [
+                        'jpg'
+                    ],
+                }
         # Checking generated view correct schema
         self.assertIn('Author', api['definitions'])
         self.assertIn('OneAuthor', api['definitions'])
@@ -965,6 +973,25 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'fa_class': 'fas fa-cat'
                 }
             }
+        )
+        # Check properly format for NamedBinaryImageInJsonField
+        self.assertDictEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_namedbinimage'],
+            {
+                'title': 'Some namedbinimage',
+                'type': 'string',
+                'format': 'namedbinimage',
+                'additionalProperties': {},
+            }
+        )
+        self.assertDictEqual(
+                api['definitions']['ModelWithBinaryFiles']['properties']['some_validatednamedbinimage']['additionalProperties'],
+                img_res_validator_data
+            )
+        # Check properly format for MultipleNamedBinaryImageInJsonField
+        self.assertDictEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['additionalProperties'],
+            img_res_validator_data
         )
         # Check default fields grouping
         self.assertEqual(api['definitions']['ExtraPost']['x-properties-groups'], {"": ['id', 'author', 'title']})

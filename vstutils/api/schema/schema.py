@@ -17,7 +17,8 @@ from .inspectors import (
     NestedFilterInspector,
     VSTReferencingSerializerInspector,
     RelatedListFieldInspector,
-    RatingFieldInspector
+    RatingFieldInspector,
+    NamedBinaryImageInJsonFieldInspector,
 )
 
 
@@ -30,7 +31,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
         VSTFieldInspector,
         VSTReferencingSerializerInspector,
         RelatedListFieldInspector,
-        RatingFieldInspector
+        RatingFieldInspector,
+        RelatedListFieldInspector,
+        NamedBinaryImageInJsonFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [
