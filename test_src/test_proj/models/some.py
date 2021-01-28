@@ -3,6 +3,7 @@ from django.db import models
 from vstutils.models import BModel
 from vstutils.api import fields
 from .hosts import Host
+from ..validators import image_res_validator
 
 
 class ModelWithFK(BModel):
@@ -33,16 +34,28 @@ class ModelWithBinaryFiles(BModel):
     some_binfile = models.TextField(default='')
     some_namedbinfile = models.TextField(default='')
     some_namedbinimage = models.TextField(default='')
+    some_validatednamedbinimage = models.TextField(default='')
     some_multiplenamedbinfile = models.TextField(default='')
     some_multiplenamedbinimage = models.TextField(default='')
+    some_validatedmultiplenamedbinimage = models.TextField(default='')
 
     class Meta:
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
             some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False),
+            some_validatednamedbinimage=fields.NamedBinaryImageInJsonField
+            (
+                required=False,
+                validators=[image_res_validator]
+            ),
             some_namedbinimage=fields.NamedBinaryImageInJsonField(required=False),
             some_multiplenamedbinfile=fields.MultipleNamedBinaryFileInJsonField(required=False),
-            some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False)
+            some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False),
+            some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField
+            (
+                required=False,
+                validators=[image_res_validator]
+            )
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')
