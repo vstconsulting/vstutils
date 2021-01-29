@@ -971,3 +971,32 @@ export const ViewTypes = {
     PAGE_REMOVE: 'page_remove',
     ACTION: 'action',
 };
+
+/**
+ * Function that returns promise which will resolve after given time interval.
+ * @param {number} ms
+ * @return {Promise}
+ */
+export function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * The maximum is exclusive and the minimum is inclusive
+ * @param {number} min
+ * @param {number} max
+ * @return {number}
+ */
+export function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+/**
+ * Function that returns promise which will resolve after random time interval in given range.
+ * @param {number} min
+ * @param {number} max
+ * @return {Promise}
+ */
+export function randomSleep(min, max) {
+    return sleep(getRandomInt(min, max));
+}

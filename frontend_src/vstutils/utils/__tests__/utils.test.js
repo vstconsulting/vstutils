@@ -1,9 +1,11 @@
-import { expect, test, describe } from '@jest/globals';
+import { jest, expect, test, describe } from '@jest/globals';
 import {
     capitalize,
+    getRandomInt,
     hexToRgbA,
     isEmptyObject,
     mergeDeep,
+    randomSleep,
     sliceLongString,
     stringToBoolean,
 } from '../index.js';
@@ -144,5 +146,24 @@ describe('utils', () => {
 
         // Arrays are not supported yet
         expect(copy.obj.nestedObj.arr[0]).toBe(original.obj.nestedObj.arr[0]);
+    });
+
+    test('getRandomInt', () => {
+        for (let i = 0; i < 100; i++) {
+            const num = getRandomInt(-1, 2);
+            expect(num).toBeGreaterThanOrEqual(-1);
+            expect(num).toBeLessThan(2);
+        }
+    });
+
+    test('randomSleep', async () => {
+        jest.useFakeTimers();
+        const callback = jest.fn();
+        const promise = randomSleep(500, 600).then(callback);
+        jest.advanceTimersByTime(499);
+        expect(callback).not.toBeCalled();
+        jest.advanceTimersByTime(600);
+        await promise;
+        expect(callback).toBeCalledTimes(1);
     });
 });

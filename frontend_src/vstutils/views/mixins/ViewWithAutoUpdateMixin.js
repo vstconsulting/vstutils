@@ -14,22 +14,27 @@ const ViewWithAutoUpdateMixin = {
     beforeDestroy() {
         this.stopAutoUpdate();
     },
+    computed: {
+        autoUpdatePK() {},
+    },
     methods: {
         autoAutoUpdateActionName() {
             return `${this.storeName}/updateData`;
         },
         getAutoUpdateAction() {
             const actionName = this.autoAutoUpdateActionName();
-
+            const action = {
+                autoupdateId: this.componentId,
+                triggerType: this.$app.centrifugoClient?.isConnected() ? 'centrifugo' : 'timer',
+                subscriptions: this.view.subscriptionLabels,
+                pk: this.autoUpdatePK,
+            };
             return typeof this[actionName] === 'function'
-                ? { type: 'function', value: this[actionName] }
-                : { type: 'storeAction', value: actionName };
+                ? { ...action, type: 'function', value: this[actionName] }
+                : { ...action, type: 'storeAction', value: actionName };
         },
         startAutoUpdate() {
-            this.$store.commit('autoupdate/subscribe', {
-                action: this.getAutoUpdateAction(),
-                autoupdateId: this.componentId,
-            });
+            this.$store.commit('autoupdate/subscribe', this.getAutoUpdateAction());
         },
         stopAutoUpdate() {
             this.$store.commit('autoupdate/unsubscribe', this.componentId);

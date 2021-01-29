@@ -16,7 +16,7 @@ from .base import ModelBaseClass
 from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
-
+from ..utils import raise_context
 
 logger = logging.getLogger('vstutils')
 
@@ -163,6 +163,7 @@ class BModel(BaseModel):
         return f"<{self.id}>"
 
 
+@raise_context()
 def notify_clients(model, pk=None):
     logger.debug(f'Notify clients about model update: {model._meta.label}')
     if not settings.CENTRIFUGO_CLIENT_KWARGS:

@@ -4,17 +4,55 @@
 export default {
     namespaced: true,
     state: () => ({
-        actionsToInvoke: new Map(),
+        timerSubscribers: new Map(),
+
+        centrifugoSubscribers: new Map(),
+        centrifugoSubscriptions: new Map(),
     }),
     mutations: {
-        subscribe({ actionsToInvoke }, { action, autoupdateId }) {
-            if (!actionsToInvoke.has(autoupdateId)) {
-                actionsToInvoke.set(autoupdateId, action);
+        /**
+         * @param {Object} state
+         * @param {AutoUpdateAction} action
+         */
+        subscribe(state, action) {
+            const autoupdateId = action.autoupdateId;
+
+            if (action.triggerType === 'timer') {
+                state.timerSubscribers.set(autoupdateId, action);
+            } else if (action.triggerType === 'centrifugo') {
+                state.centrifugoSubscribers.set(autoupdateId, action);
+                for (const subscription of action.subscriptions) {
+                    if (!state.centrifugoSubscriptions.has(subscription)) {
+                        state.centrifugoSubscriptions.set(subscription, []);
+                    }
+                    state.centrifugoSubscriptions.get(subscription).push(action);
+                }
+            } else {
+                throw new Error(`Unknown trigger type: ${action.triggerType}`);
             }
         },
 
-        unsubscribe({ actionsToInvoke }, autoupdateId) {
-            actionsToInvoke.delete(autoupdateId);
+        unsubscribe(state, autoupdateId) {
+            // Timer subscription
+            if (state.timerSubscribers.has(autoupdateId)) {
+                state.timerSubscribers.delete(autoupdateId);
+                return;
+            }
+
+            // Centrifugo subscription
+            if (state.centrifugoSubscribers.has(autoupdateId)) {
+                const action = state.centrifugoSubscribers.get(autoupdateId);
+                state.centrifugoSubscribers.delete(autoupdateId);
+                for (const subscription of action.subscriptions) {
+                    const subscribers = state.centrifugoSubscriptions.get(subscription);
+                    subscribers.splice(
+                        subscribers.findIndex((action) => autoupdateId === action.autoupdateId),
+                    );
+                    if (subscribers.length === 0) {
+                        state.centrifugoSubscriptions.delete(subscription);
+                    }
+                }
+            }
         },
     },
 };
