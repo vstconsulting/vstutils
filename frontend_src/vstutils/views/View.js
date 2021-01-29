@@ -77,6 +77,11 @@ export class View {
         this.title = params.title || params.name;
 
         /**
+         * @type {Array<string>|null}
+         */
+        this.subscriptionLabels = params['x-subscribe-labels'] || null;
+
+        /**
          * Property, that stores extensions for components,
          * which would render current view.
          */

@@ -20,6 +20,11 @@ export const PageViewComponent = {
             readOnly: true,
         };
     },
+    computed: {
+        autoUpdatePK() {
+            return this.getInstancePk();
+        },
+    },
     methods: {
         getInstancePk() {
             return this.$route.params[this.view.pkParamName];
@@ -161,7 +166,6 @@ export const PageEditViewComponent = {
 export const ActionViewComponent = {
     name: 'ActionViewComponent',
     mixins: [PageNewViewComponent],
-    inject: ['appInstance'],
     computed: {
         fields() {
             return Array.from(this.view.model.fields.values());
@@ -216,7 +220,7 @@ export const ActionViewComponent = {
             }
         },
         getRedirectUrl() {
-            const parentView = this.appInstance.views.get(this.view.path.replace(/[^/]+\/$/, ''));
+            const parentView = this.$app.views.get(this.view.path.replace(/[^/]+\/$/, ''));
             if (parentView) {
                 return formatPath(parentView.path, this.$route.params);
             }

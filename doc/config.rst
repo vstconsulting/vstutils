@@ -78,7 +78,7 @@ use. vstutils-based application supports all databases supported by ``django``. 
 supported out of the box: SQLite (default choice), MySQL, Oracle, or
 PostgreSQL. Configuration details you can look at
 `Django database documentation
-<https://docs.djangoproject.com/en/2.22/ref/settings/#databases>`_.
+<https://docs.djangoproject.com/en/2.2/ref/settings/#databases>`_.
 If you run vstutils-based application at multiple nodes (clusterization), you should
 use some of client-server database (SQLite not suitable) shared for all nodes.
 

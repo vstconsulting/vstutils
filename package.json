@@ -25,6 +25,7 @@
     "admin-lte": "3.0.5",
     "ansi_up": "^4.0.4",
     "bootstrap": "4.4.1",
+    "centrifuge": "^2.6.4",
     "core-js": "3",
     "dotenv": "^8.2.0",
     "imask": "4.1.1",
@@ -50,7 +51,8 @@
     "workbox-sw": "^5.1.3"
   },
   "resolutions": {
-    "izimodal/jquery": "^3.4.1"
+    "izimodal/jquery": "^3.4.1",
+    "admin-lte/**/datatables.net": "^1.10.22"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.0",

@@ -1,3 +1,4 @@
+import time
 import copy
 
 import jwt
@@ -115,7 +116,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                     result['info']['x-centrifugo-token'] = jwt.encode(
                         {
                             "sub": request.session.session_key,
-                            "exp": request.session.get_expiry_age(),
+                            "exp": int(time.time() + request.session.get_expiry_age()),
                             "info": {
                                 'user_id': request.user.pk
                             }

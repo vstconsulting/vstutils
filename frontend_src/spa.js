@@ -161,9 +161,10 @@ export class App extends BaseApp {
             silentTranslationWarn: true,
         });
 
+        Vue.prototype.$app = this;
+
         this.application = new Vue({
             mixins: [this.appRootComponent],
-            provide: { appInstance: this },
             propsData: {
                 info: this.config.schema.info,
                 x_menu: this.config.schema.info['x-menu'],

@@ -1,9 +1,26 @@
+import Centrifuge from 'centrifuge';
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
 import { ErrorHandler } from './vstutils/popUp';
 import { guiLocalSettings } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
 import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
+
+/**
+ * @param {string} address
+ * @param {string} [token]
+ * @return {null|Centrifuge}
+ */
+export function getCentrifugoClient(address, token) {
+    if (!address) {
+        return null;
+    }
+    const client = new Centrifuge(new URL('connection/websocket', address).toString());
+    if (token) {
+        client.setToken(token);
+    }
+    return client;
+}
 
 export default class BaseApp {
     /**
@@ -27,6 +44,12 @@ export default class BaseApp {
         this.api = apiConnector.initConfiguration(config);
 
         this.translationsManager = new TranslationsManager(apiConnector, cache);
+
+        this.centrifugoClient = getCentrifugoClient(
+            this.schema.info['x-centrifugo-address'],
+            this.schema.info['x-centrifugo-token'],
+        );
+
         /**
          * Object, that handles errors.
          */
@@ -65,6 +88,10 @@ export default class BaseApp {
      */
     async start() {
         const LANG = guiLocalSettings.get('lang') || 'en';
+
+        if (this.centrifugoClient) {
+            this.centrifugoClient.connect();
+        }
 
         const [languages, translations, user] = await Promise.all([
             this.translationsManager.getLanguages(),
