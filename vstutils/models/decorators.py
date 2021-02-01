@@ -28,7 +28,8 @@ class register_view_decorator:  # pylint: disable=invalid-name
 
 class register_view_action(register_view_decorator):  # pylint: disable=invalid-name
     """
-    Simple decorator for marking model methods as generated view actions.
+    Simple decorator for marking model methods as generated view
+    `actions <https://www.django-rest-framework.org/api-guide/viewsets/#marking-extra-actions-for-routing>`_.
     The decorated method becomes a method of generated view and `self` will be view object.
     See supported args in :func:`vstutils.api.decorators.subaction`
 
