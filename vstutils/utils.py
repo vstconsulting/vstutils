@@ -16,6 +16,7 @@ import typing as tp
 import warnings
 from pathlib import Path
 from threading import Thread
+from enum import Enum
 
 from django.urls import re_path, include
 from django.core.mail import send_mail
@@ -1106,3 +1107,62 @@ class URLHandlers(ObjectHandlers):
 
     def __iter__(self):
         return self.urls()
+
+
+def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = list) -> tp.Iterable[tp.Tuple[str, str]]:
+    """
+    Method to create django model choices from flat list of values.
+
+    :param items_list: list of flat values.
+    :param response_type: casting type of returned mapping
+    :return: list of tuples from `items_list` values
+    """
+    return response_type(map(lambda x: (x, x), items_list))
+
+
+class BaseEnum(Enum):
+    """
+    BaseEnum extends `Enum` class and used to create enum-like objects that can be used in django serializers or
+    django models.
+
+    Example:
+
+        .. sourcecode:: python
+
+            from vstutils.models import BModel
+
+            class ItemCLasses(BaseEnum):
+                FIRST='FIRST'
+                SECOND='SECOND'
+                THIRD='THIRD'
+
+
+            class MyDjangoModel(BModel):
+                item_class = models.CharField(max_length=1024, choices=ItemCLasses.to_choices())
+
+                @property
+                def is_second(self):
+                    # Function check is item has second class of instance
+                    return ItemCLasses.SECOND.is_equal(self.item_class)
+
+    """
+
+    def __repr__(self):
+        return str(self.name)
+
+    def __str__(self):
+        return self.__repr__()
+
+    @classmethod
+    def get_names(cls):
+        return tuple(x.name for x in cls)
+
+    @classmethod
+    def to_choices(cls):
+        return list_to_choices(cls.get_names())
+
+    def is_equal(self, cmp_str):
+        return str(cmp_str) == str(self)
+
+    def not_equal(self, cmp_str):
+        return not self.is_equal(cmp_str)

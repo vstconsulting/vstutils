@@ -47,7 +47,7 @@ from vstutils.urls import router
 from vstutils.ws import application
 from vstutils.models import get_centrifugo_client
 from vstutils import models
-from vstutils.utils import SecurePickling
+from vstutils.utils import SecurePickling, BaseEnum
 
 from .models import File, Host, HostGroup, List, Author, Post
 from rest_framework.exceptions import ValidationError
@@ -1785,6 +1785,23 @@ class ProjectTestCase(BaseTestCase):
         ])
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual('JsonString', results[2]['data']['results'][-1]['name'])
+
+    def test_base_enum(self):
+        # check is_equal
+
+        class FieldChoices(BaseEnum):
+            FIRST = 'FIRST'
+            SECOND = 'SECOND'
+            THIRD = 'THIRD'
+
+        self.assertFalse(FieldChoices.FIRST.not_equal('FIRST'))
+        self.assertTrue(FieldChoices.SECOND.is_equal('SECOND'))
+        self.assertFalse(FieldChoices.THIRD.not_equal('THIRD'))
+        self.assertListEqual(
+            FieldChoices.to_choices(),
+            [('FIRST', 'FIRST',), ('SECOND', 'SECOND'), ('THIRD', 'THIRD')]
+        )
+
 
     @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_hierarchy(self):
