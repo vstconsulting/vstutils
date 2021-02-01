@@ -44,7 +44,7 @@ class FileInStringField(VSTCharField):
     Value must be text (not binary) and saves in model as is.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -52,12 +52,12 @@ class FileInStringField(VSTCharField):
 
 class SecretFileInString(FileInStringField):
     """
-    Field extends :class:`.FileInStringField` and saves file's content as string and should be hidden on frontend.
+    Field extends :class:`.FileInStringField`, but hides it's value in admin interface.
 
     Value must be text (not binary) and saves in model as is.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -69,11 +69,10 @@ class SecretFileInString(FileInStringField):
 
 class BinFileInStringField(FileInStringField):
     """
-    Field extends :class:`.FileInStringField` and  that saves file's content as base64 string.
-    This often useful when you want save binary file in django model text field.
+    Field extends :class:`.FileInStringField`, but work with binary(base64) files.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -81,7 +80,7 @@ class BinFileInStringField(FileInStringField):
 
 class AutoCompletionField(VSTCharField):
     """
-    Field with autocomplete from list of objects.
+    Field that provides autocompletion on frontend, using specified list of objects.
 
     :param autocomplete: Autocompletion reference. You can set simple list/tuple with
                          values or set OpenApi schema definition name.
@@ -96,7 +95,7 @@ class AutoCompletionField(VSTCharField):
                                    get from OpenApi schema definition model as represent value.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
     __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent'
 
@@ -115,11 +114,11 @@ class AutoCompletionField(VSTCharField):
 
 class CommaMultiSelect(VSTCharField):
     """
-    Comma (or specified) separated list of values field.
-    Gets list of values from another model or custom list. Works as :class:`.AutoCompletionField`
+    Field containing a list of values with specified separator(default: ",").
+    Gets list of values from another model or custom list. Provides autocompletion as :class:`.AutoCompletionField`,
     but with comma-lists.
-    Often uses with property-fields in model where main logic is already implemented or
-    with simple CharFields.
+    Suited for property-fields in model where main logic is already implemented or
+    with :class:`CharField`.
 
     :param select: OpenApi schema definition name or list with values.
     :type select: str,tuple,list
@@ -129,14 +128,14 @@ class CommaMultiSelect(VSTCharField):
                                              Default is ``name``.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``False``.
     :param make_link: Show value as link to model. Default is ``True``.
-    :param dependence: Dictionary, where keys are name of field from the same model, and keys are name of query filter.
-                       If at least one of the fields that we depend on is non nullable, required and set to null,
+    :param dependence: Dictionary, where keys are name of field from the same model, and values are name of query filter
+                       .If at least one of the fields that we depend on is non nullable, required and set to null,
                        autocompletion list will be empty and field will be disabled.
     :type dependence: dict
 
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
     __slots__ = (
@@ -180,7 +179,7 @@ class CommaMultiSelect(VSTCharField):
 
 class DynamicJsonTypeField(VSTCharField):
     """
-    Field which type is based on another field and converts value to internal string
+    Field which type is based on another field. It converts value to internal string
     and represent field as json object.
 
     :param field: field in model which value change will change type of current value.
@@ -195,7 +194,7 @@ class DynamicJsonTypeField(VSTCharField):
 
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`
         but without value modifications.
     """
     __slots__ = 'field', 'choices', 'types'
@@ -223,7 +222,7 @@ class DynamicJsonTypeField(VSTCharField):
 
 class DependEnumField(DynamicJsonTypeField):
     """
-    Field extends :class:`DynamicJsonTypeField` but without data modification.
+    Field extends :class:`DynamicJsonTypeField` but data won't be transformed to json and would be given as is.
     Useful for :class:`property` in models or for actions.
 
     :param field: field in model which value change will change type of current value.
@@ -238,7 +237,7 @@ class DependEnumField(DynamicJsonTypeField):
 
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`
         but without value modifications.
     """
     __slots__ = ()
@@ -307,10 +306,10 @@ class DependFromFkField(DynamicJsonTypeField):
 
 class TextareaField(VSTCharField):
     """
-    Field contained multiline string.
+    Field containing multiline string.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -318,14 +317,14 @@ class TextareaField(VSTCharField):
 
 class HtmlField(VSTCharField):
     """
-    Field contained html-text and marked as format:html. This reach-text is represents as is.
+    Field contains html text and marked as format:html. The field does not validate whether its content is HTML.
 
     .. warning::
         Do not allow for users to modify this data because they can set some scripts to value and
         it would be vulnerability.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField`.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
     __slots__ = ()
@@ -333,7 +332,8 @@ class HtmlField(VSTCharField):
 
 class FkField(IntegerField):
     """
-    Field indicates where we got list of primary key values (should be integer).
+    Implementation of ForeignKeyField.You can specify which field of a related model will be
+    stored in field(default: "id"), and which will represent field on frontend.
 
     :param select: OpenApi schema definition name.
     :type select: str
@@ -354,7 +354,7 @@ class FkField(IntegerField):
     :type dependence: dict
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
     """
     __slots__ = (
         'select_model',
@@ -384,7 +384,7 @@ class FkField(IntegerField):
 
 class FkModelField(FkField):
     """
-    FK field extends :class:`.FkField` which got integer from API and returns model object as value.
+    Extends :class:`.FkField`, but stores referred model class.
     This field is useful for :class:`django.db.models.ForeignKey` fields in model to set.
 
     :param select: model class (based on :class:`vstutils.models.BModel`) or serializer class
@@ -405,7 +405,7 @@ class FkModelField(FkField):
         Model class on call `.to_internal_value` get object from database. Be careful on mass save executions.
 
     .. warning::
-        Model class does not check permissons to model instance where this field using.
+        Permissions to model which is referred by this field, will not be checked.
         You should check it manually in signals or validators.
 
     """
@@ -476,7 +476,7 @@ class UptimeField(IntegerField):
     Field for some uptime(time duration), in seconds, for example.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
 
     """
 
@@ -485,10 +485,10 @@ class UptimeField(IntegerField):
 
 class RedirectIntegerField(IntegerField):
     """
-    Field for redirect by id. Often uses in actions for redirect after execution.
+    Field for redirect by id. Often used in actions for redirect after execution.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
 
     """
 
@@ -498,10 +498,10 @@ class RedirectIntegerField(IntegerField):
 
 class RedirectCharField(CharField):
     """
-    Field for redirect by string. Often uses in actions for redirect after execution.
+    Field for redirect by string. Often used in actions for redirect after execution.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`rest_framework.IntegerField`.
+        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
 
     """
 
@@ -515,12 +515,12 @@ class NamedBinaryFileInJsonField(VSTCharField):
     * name - string - name of file;
     * content - base64 string - content of file.
 
-    This field is useful for saving binary files with their names in simple :class:`django.db.models.CharField`
+    This field is useful for saving binary files with their names in :class:`django.db.models.CharField`
     or :class:`django.db.models.TextField` model fields. All manipulations with decoding and encoding
     binary content data executes on client. This imposes reasonable limits on file size.
 
     .. note::
-        Take effect only in GUI. In API it would be simple :class:`.VSTCharField` with structure of data.
+        Take effect only in GUI. In API it would behave as :class:`.VSTCharField` with structure of data.
 
     """
 
@@ -562,7 +562,8 @@ class NamedBinaryFileInJsonField(VSTCharField):
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
     Extends :class:`.NamedBinaryFileInJsonField` but in GUI has a different view
-    which shows content of image.
+    which shows an image(if inputed binary image is valid).Validation of this field can be done with
+    :class:`vstutils.api.validators.ImageValidator`.
     """
 
     __slots__ = ()
@@ -571,7 +572,7 @@ class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
 class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     """
     Extends :class:`.NamedBinaryFileInJsonField` but uses list of structures.
-    This provide operating with multiple files.
+    Used for operating with multiple files.
     """
 
     __slots__ = ()
@@ -595,7 +596,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
     """
     Extends :class:`.MultipleNamedBinaryFileInJsonField` but uses list of structures.
-    This provide operating with multiple images and works as list of :class:`NamedBinaryImageInJsonField`.
+    Used for operating with multiple images and works as list of :class:`NamedBinaryImageInJsonField`.
     """
 
     __slots__ = ()
@@ -603,8 +604,9 @@ class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
 
 class PasswordField(CharField):
     """
-    Extends :class: `.CharField` but in schema overload format to `password`.
-    This provide ability to make fields with asterisks instead of data on front-end.
+    Extends `CharField <https://www.django-rest-framework.org/api-guide/fields/#charfield>`_
+    but in schema overload format to `password`.
+    Used for making fields with asterisks instead of data in GUI.
     """
 
     def __init__(self, *args, **kwargs):

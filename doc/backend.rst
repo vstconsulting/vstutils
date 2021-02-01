@@ -9,8 +9,8 @@ Models
 ------
 
 A model is the single, definitive source of truth about your data. It contains the essential fields and behaviors of the data you’re storing.
-The goal is to define your data model in one place and automatically derive things from it.
-You can also define everything you need to get the generated view from the model.
+Usually best practice is to avoid writing views and serializers manually,
+BModel provides plenty of Meta attributes to autogenerate serializers and views for almost any usecase.
 
 .. automodule:: vstutils.models
     :members:
@@ -26,18 +26,6 @@ Also you can use custom models without using database:
     :members: ListModel,FileModel
 
 
-Utils
------
-
-This is some tested set of development utilities.
-Utilities include a collection of some code that will be useful
-in one way or another to develop the application.
-Most of the functions are used by vstutils itself.
-
-.. automodule:: vstutils.utils
-    :members:
-
-
 Web API
 -------
 
@@ -46,11 +34,13 @@ Web API is based on Django Rest Framework with some nested functions.
 Fields
 ~~~~~~
 
-There is additional fields which extends API and GUI. Also, it would be usefull
-for customizing frontend view without write any JS code.
+The Framework includes a list of convenient serializer fields. Some of them take effect only in generated admin interface.
 
 .. automodule:: vstutils.api.fields
     :members:
+
+Validators
+~~~~~~~~~~
 
 There is useful validation classes for fields.
 
@@ -340,3 +330,15 @@ Test case API
 
 .. automodule:: vstutils.tests
     :members: BaseTestCase
+
+
+Utils
+-----
+
+This is some tested set of development utilities.
+Utilities include a collection of some code that will be useful
+in one way or another to develop the application.
+Most of the functions are used by vstutils itself.
+
+.. automodule:: vstutils.utils
+    :members:
