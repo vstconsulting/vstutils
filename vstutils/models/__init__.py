@@ -126,13 +126,18 @@ class BModel(BaseModel):
           grouping fields on frontend in cases.
         - ``_extra_serializer_classes`` - mapping with additional serializers in viewset. Example, custom serializer,
           which will compute smthg in action (mapping name). Value can be string for import.
+          Important note: setting `model` attribute to None allows to use standard serializer generation mechanism
+          and get fields from a list or detail serializer (set `__inject_from__` serializer's meta attribute to
+          `list` or `detail` accordingly).
         - ``_filterset_fields`` - list/dict of filterset names for API-filtering. Default is list of fields in list view.
           When processing a list of fields, it checks for the presence of special field names and inherit additional
           parent classes. If the list contains ``id``, class will inherit from
           :class:`vstutils.api.filters.DefaultIDFilter`. If the list contains ``name``, class will inherit from
           :class:`vstutils.api.filters.DefaultNameFilter`. If both conditions are present, inheritance will be from all
           of the above classes.
-          Can be dict where key is a field name and value is a Filter class.
+          Possible values include `list` of fields to filter or `dict` where key is a field name and value is
+          a Filter class. Dict extends attribute functionality and provide ability to override filter field class
+          (None value disable overriding).
         - ``_filter_backends`` - list of `vstutils.api.filter_backends.VSTFilterBackend` classes.
           Values can be string for import.
         - ``_override_filter_backends`` - boolean flag indicates that ``_filter_backends`` override default viewset
