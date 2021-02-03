@@ -60,6 +60,7 @@ extensions = [
     'sphinxcontrib.httpdomain',
     'vstutils.api.doc_generator',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -228,7 +229,11 @@ django_version_docs = 'https://docs.djangoproject.com/en/{version}/'.format(vers
 
 intersphinx_mapping = {
     'django': (django_version_docs, django_version_docs + '_objects/'),
-    'python': ('https://docs.python.org/3.6', None)
+    'python': ('https://docs.python.org/3.6', None),
+}
+extlinks = {
+    'wiki': ('https://en.wikipedia.org/wiki/%s', None),
+    'django_docs': (django_version_docs + 'ref/%s', None),
 }
 
 set_type_checking_flag = True

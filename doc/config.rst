@@ -63,7 +63,16 @@ So in this case authorization logic will be the following:
 * **ldap-auth_format** - Default search request format for auth. Default: ``cn=<username>,<domain>``.
 * **timezone** - Timezone of web-application. Default: UTC.
 * **log_level** - Logging level. Default: WARNING.
-* **enable_admin_panel** - Enable or disable Django Admin panel. Defaul: false.
+* **enable_django_logs** - Enable or disable Django logger to output.
+  Useful for debugging. Default: false.
+* **enable_admin_panel** - Enable or disable Django Admin panel. Default: false.
+* **auth-plugins** - Comma separated list of django authentication backends.
+  Authorization attempt are made until the first successful one in order specified in the list.
+* **auth-cache-user** - Enable or disable user instance caching. This is increase session performance
+  on each request but saves model instance in unsafe storage (default django cache).
+  The instance is serialized to a string using the :mod:`standard python module pickle <pickle>`
+  and then encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`.
+  Read more in the :class:`vstutils.utils.SecurePickling` documentation. Default: false.
 
 
 .. _database:
@@ -77,8 +86,7 @@ Here you can change settings related to database system, which vstutils-based ap
 use. vstutils-based application supports all databases supported by ``django``. List of
 supported out of the box: SQLite (default choice), MySQL, Oracle, or
 PostgreSQL. Configuration details you can look at
-`Django database documentation
-<https://docs.djangoproject.com/en/2.2/ref/settings/#databases>`_.
+:django_docs:`Django database documentation <settings/#databases>`.
 If you run vstutils-based application at multiple nodes (clusterization), you should
 use some of client-server database (SQLite not suitable) shared for all nodes.
 
@@ -124,9 +132,8 @@ This section is for settings related to cache backend used by vstutils-based app
 vstutils-based application supports all cache backends that Django supports.
 Currently is: filesystem, in-memory, memcached out of the box and many more by
 additional plugins. You can find details about cache configuration at
-`Django caches documentation
-<https://docs.djangoproject.com/en/2.2/ref/settings/#caches>`_. In
-clusterization scenario we advice to share cache between nodes to speedup their
+:django_docs:`Django caches documentation
+<settings/#caches>`. In clusterization scenario we advice to share cache between nodes to speedup their
 work using client-server cache realizations.
 We recommend to use Redis in production environments.
 
@@ -243,6 +250,12 @@ session_timeout, static_files_url or pagination limit.
 * **bulk_threads** - Threads count for PATCH `/api/endpoint/` endpoint. Default: 3.
 * **session_timeout** - Session life-cycle time. Default: 2w (two weeks).
 * **rest_page_limit** and **page_limit** - Default limit of objects in API list. Default: 1000.
+* **session_cookie_domain** - The domain to use for session cookies.
+  Read :django_docs:`more <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. Default: None.
+* **csrf_trusted_origins** - A list of hosts which are trusted origins for unsafe requests.
+  Read :django_docs:`more <settings/#csrf-trusted-origins>`. Default: from **session_cookie_domain**.
+* **case_sensitive_api_filter** - Enables/disables case sensitive search for name filtering.
+  Default: True.
 
 
 .. _centrifugo:
