@@ -6,7 +6,7 @@ import default_nested_module from '../components_state/default_nested_module.js'
 import { createLocalVue } from '@vue/test-utils';
 import { QuerySet } from '../../querySet';
 import { Model, ModelClass } from '../../models';
-import { IntegerField } from '../../fields/numbers';
+import { IntegerField } from '../../fields/numbers/integer';
 import { StringField } from '../../fields/text';
 
 jest.mock('../../api');

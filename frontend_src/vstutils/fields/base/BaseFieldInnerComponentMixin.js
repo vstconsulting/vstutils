@@ -3,7 +3,7 @@
  */
 const BaseFieldInnerComponentMixin = {
     name: 'BaseFieldInnerComponentMixin',
-    props: ['field', 'wrapper_opt', 'value', 'data'],
+    props: ['field', 'value', 'data'],
     data() {
         return {
             /**

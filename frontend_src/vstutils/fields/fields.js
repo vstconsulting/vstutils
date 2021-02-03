@@ -45,7 +45,7 @@ const globalFields = new Map([
     ['hidden', HiddenField], // CANT_CREATE_ON_BACKEND
     ['html', text.HTMLField],
     // ['inner_api_object', InnerAPIObjectField],
-    ['integer', numbers.IntegerField],
+    ['integer', numbers.integer.IntegerField],
     ['json', JSONField],
     ['multiplenamedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],
     ['multiplenamedbinimage', files.multipleNamedBinaryImage.MultipleNamedBinaryImageField],
@@ -55,6 +55,7 @@ const globalFields = new Map([
     ['number', numbers.NumberField],
     ['password', PasswordField],
     ['plain_text', text.PlainTextField],
+    ['rating', numbers.rating.RatingField],
     ['related_list', RelatedListField],
     ['secretfile', files.secretFile.SecretFileField], // DOES_NOTHING_ON_FRONTEND
     ['string', text.StringField],
