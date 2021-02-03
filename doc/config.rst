@@ -16,6 +16,9 @@ A shared file storage may be required in some cases, a but it isn't required by 
 
 Let's consider the main sections of the config and its parameters:
 
+|
+|
+
 .. _main:
 
 Main settings
@@ -74,6 +77,8 @@ So in this case authorization logic will be the following:
   and then encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`.
   Read more in the :class:`vstutils.utils.SecurePickling` documentation. Default: false.
 
+|
+|
 
 .. _database:
 
@@ -120,6 +125,8 @@ Finally, you should add some options to MariaDB configuration:
       character-set-server=utf8
       collation-server=utf8_unicode_ci
 
+|
+|
 
 .. _cache:
 
@@ -136,6 +143,9 @@ additional plugins. You can find details about cache configuration at
 <settings/#caches>`. In clusterization scenario we advice to share cache between nodes to speedup their
 work using client-server cache realizations.
 We recommend to use Redis in production environments.
+
+|
+|
 
 .. _locks:
 
@@ -154,6 +164,8 @@ example, is not suitable. In case of clusterization we strongly recommend
 to use Redis or Memcached as backend for that purpose. Cache and locks backend
 can be same, but don't forget about requirement we said above.
 
+|
+|
 
 .. _session:
 
@@ -167,6 +179,8 @@ we use a cache-based session backend. It is based on Django cache, so there is
 another bunch of same settings as cache_. By default,
 settings getted from cache_.
 
+|
+|
 
 .. _rpc:
 
@@ -185,13 +199,23 @@ server-broker-worker interaction problems.
 
 This section actual only with vstutils installed with `rpc` extra dependency.
 
-
-* **connection** - Celery broker connection. Read more: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-broker-settings Default: ``filesystem:///var/tmp``.
+* **connection** - Celery :celery_docs:`broker connection <userguide/configuration.html#conf-broker-settings>`. Default: ``filesystem:///var/tmp``.
 * **concurrency** - Count of celery worker threads. Default: 4.
 * **heartbeat** - Interval between sending heartbeat packages, which says that connection still alive. Default: 10.
 * **enable_worker** - Enable or disable worker with webserver. Default: true.
-* **clone_retry_count** - Count of retrys on project sync operation.
 
+|
+
+The following variables from :celery_docs:`Django settings <userguide/configuration.html#new-lowercase-settings>`
+are also supported (with the corresponding types):
+
+* **prefetch_multiplier** - :celery_docs:`CELERYD_PREFETCH_MULTIPLIER <userguide/configuration.html#std-setting-worker_prefetch_multiplier>`
+* **max_tasks_per_child** - :celery_docs:`CELERYD_MAX_TASKS_PER_CHILD <userguide/configuration.html#std-setting-worker_max_tasks_per_child>`
+* **results_expiry_days** - :celery_docs:`CELERY_RESULT_EXPIRES <userguide/configuration.html#std-setting-result_expires>`
+* **default_delivery_mode** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task-default-delivery-mode>`
+
+|
+|
 
 .. _worker:
 
@@ -210,6 +234,8 @@ Celery worker options for start. Useful settings:
 Other settings can be getted from command ``celery worker --help``.
 
 
+|
+|
 
 .. _mail:
 
@@ -231,6 +257,8 @@ Applications based on vstutils uses only ``smtp`` and ``console`` backends.
 * **send_confirmation** - Enable/disable confirmation message after registration. Default: ``False``.
 * **authenticate_after_registration** - Enable/disable autologin after registration confirmation. Default: ``False``.
 
+|
+|
 
 .. _web:
 
@@ -257,6 +285,23 @@ session_timeout, static_files_url or pagination limit.
 * **case_sensitive_api_filter** - Enables/disables case sensitive search for name filtering.
   Default: True.
 
+|
+
+The following variables from Django settings are also supported (with the corresponding types):
+
+* **secure_browser_xss_filter** - :django_docs:`SECURE_BROWSER_XSS_FILTER <settings/#secure-browser-xss-filter>`
+* **secure_content_type_nosniff** - :django_docs:`SECURE_CONTENT_TYPE_NOSNIFF <settings/#secure-content-type-nosniff>`
+* **secure_hsts_include_subdomains** - :django_docs:`SECURE_HSTS_INCLUDE_SUBDOMAINS <settings/#secure-hsts-include-subdomains>`
+* **secure_hsts_preload** - :django_docs:`SECURE_HSTS_PRELOAD <settings/#secure-hsts-preload>`
+* **secure_hsts_seconds** - :django_docs:`SECURE_HSTS_SECONDS <settings/#secure-hsts-seconds>`
+* **password_reset_timeout_days** - :django_docs:`PASSWORD_RESET_TIMEOUT_DAYS <settings/#std:setting-PASSWORD_RESET_TIMEOUT>`
+* **request_max_size** - :django_docs:`DATA_UPLOAD_MAX_MEMORY_SIZE <settings/#std:setting-DATA_UPLOAD_MAX_MEMORY_SIZE>`
+* **x_frame_options** - :django_docs:`X_FRAME_OPTIONS <settings/#x-frame-options>`
+* **use_x_forwarded_host** - :django_docs:`USE_X_FORWARDED_HOST <settings/#use-x-forwarded-host>`
+* **use_x_forwarded_port** - :django_docs:`USE_X_FORWARDED_PORT <settings/#use-x-forwarded-port>`
+
+|
+|
 
 .. _centrifugo:
 
@@ -272,6 +317,8 @@ For installations with centrifugo client, ``[centrifugo]`` section must be setup
 * **timeout** - Connection timeout.
 * **verify** - Connection verification.
 
+|
+|
 
 Production web settings
 -----------------------
@@ -283,6 +330,9 @@ Here placed settings related to web-server used by vstutils-based application in
 (logging, PID-file and so on).
 More settings in `uWSGI docs
 <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
+
+|
+|
 
 Configuration options
 -----------------------------

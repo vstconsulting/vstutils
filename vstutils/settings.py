@@ -113,7 +113,7 @@ class WebSection(BaseAppendSection):
         'secure_content_type_nosniff': ConfigBoolType,
         'secure_hsts_include_subdomains': ConfigBoolType,
         'secure_hsts_preload': ConfigBoolType,
-        'secure_hsts_seconds': ConfigIntType,
+        'secure_hsts_seconds': ConfigIntSecondsType,
         'health_throttle_rate': ConfigIntType,
         'bulk_threads': ConfigIntType,
     }
@@ -266,6 +266,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'heartbeat': 10,
             'results_expiry_days': 1,
             'create_instance_attempts': 10,
+            'default_delivery_mode': "persistent",
         },
         'worker': {
             'app': '{PROG_NAME}.wapp:app',
@@ -320,7 +321,7 @@ SECRET_KEY: _t.Text = lazy(secret_key, str)()
 TESTS_RUN: bool = any([True for i in sys.argv if i in ['testserver', 'test']])
 LOCALRUN: bool = any([True for i in sys.argv if i not in ['collectstatic', 'runserver']]) or TESTS_RUN
 TESTSERVER_RUN: bool = 'testserver' in sys.argv
-DEBUG: bool = os.getenv('DJANGO_DEBUG', main["debug"]) in [True, 'true', 'True', '1']
+DEBUG: bool = ConfigBoolType(os.getenv('DJANGO_DEBUG', main["debug"]))
 ALLOWED_HOSTS: _t.Iterable = main["allowed_hosts"]
 SECURE_PROXY_SSL_HEADER: _t.Tuple[_t.Text, _t.Text] = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 
@@ -463,7 +464,7 @@ AUTHENTICATION_BACKENDS: _t.List[_t.Text] = [
 CACHE_AUTH_USER = main.getboolean('auth-cache-user', fallback=False)
 
 # Sessions settings
-# https://docs.djangoproject.com/en/1.11/ref/settings/#sessions
+# https://docs.djangoproject.com/en/2.2/ref/settings/#sessions
 SESSION_COOKIE_AGE: int = web["session_timeout"]
 SESSION_ENGINE: _t.Text = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS: _t.Text = 'session'
@@ -485,7 +486,7 @@ SECURE_HSTS_SECONDS = web['secure_hsts_seconds']
 
 
 # Password validation
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS: _t.List[_t.Dict] = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -566,7 +567,7 @@ TEMPLATES: _t.List[_t.Dict] = [
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
 ##############################################################
 STATIC_URL: _t.Text = web["static_files_url"]
 STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
@@ -602,7 +603,7 @@ if HAS_DOCS:
 
 
 # Database settings.
-# Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+# Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 ##############################################################
 DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'default': config['database'].all()
@@ -626,7 +627,7 @@ if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.sqlite3':
         pass
 
 # Cache settings.
-# Read more: https://docs.djangoproject.com/en/1.11/ref/settings/#caches
+# Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#caches
 ##############################################################
 default_cache = config['cache'].all()
 session_cache = config['session'].all() or default_cache
@@ -640,7 +641,7 @@ CACHES: SIMPLE_OBJECT_SETTINGS_TYPE = {
 
 
 # E-Mail settings
-# https://docs.djangoproject.com/en/1.10/ref/settings/#email-host
+# https://docs.djangoproject.com/en/2.2/ref/settings/#email-host
 ##############################################################
 mail = config['mail']
 EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
@@ -781,7 +782,7 @@ REST_FRAMEWORK: _t.Dict = {
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.10/topics/i18n/
+# https://docs.djangoproject.com/en/2.2/topics/i18n/
 ##############################################################
 LANGUAGE_CODE: _t.Text = 'en'
 
@@ -881,6 +882,7 @@ if RPC_ENABLED:
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
     CELERY_TASK_SERIALIZER = 'pickle'
     CELERY_RESULT_EXPIRES = rpc["results_expiry_days"]
+    CELERY_DEFAULT_DELIVERY_MODE = rpc["default_delivery_mode"]
     CELERY_BEAT_SCHEDULER = 'vstutils.celery_beat_scheduler:SingletonDatabaseScheduler'
     CELERY_TASK_CREATE_MISSING_QUEUES = True
     CELERY_TIMEZONE = TIME_ZONE
