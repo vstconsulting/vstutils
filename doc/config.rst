@@ -70,8 +70,8 @@ So in this case authorization logic will be the following:
   Useful for debugging. Default: false.
 * **enable_admin_panel** - Enable or disable Django Admin panel. Default: false.
 * **auth-plugins** - Comma separated list of django authentication backends.
-  Authorization attempt are made until the first successful one in order specified in the list.
-* **auth-cache-user** - Enable or disable user instance caching. This is increase session performance
+  Authorization attempt is made until the first successful one in order specified in the list.
+* **auth-cache-user** - Enable or disable user instance caching. It increases session performance
   on each request but saves model instance in unsafe storage (default django cache).
   The instance is serialized to a string using the :mod:`standard python module pickle <pickle>`
   and then encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`.
@@ -95,8 +95,8 @@ PostgreSQL. Configuration details you can look at
 If you run vstutils-based application at multiple nodes (clusterization), you should
 use some of client-server database (SQLite not suitable) shared for all nodes.
 
-If you use MySQL there is a list of required settings, that you should create for correct
-database work.
+There is a list of required settings, that you should create for correct
+database work while using MySQL.
 
 Firstly, if you use MariaDB and you have set timezone different from "UTC" you should run
 next command:
@@ -137,8 +137,8 @@ Section ``[cache]``.
 
 This section is for settings related to cache backend used by vstutils-based application.
 vstutils-based application supports all cache backends that Django supports.
-Currently is: filesystem, in-memory, memcached out of the box and many more by
-additional plugins. You can find details about cache configuration at
+Filesystem, in-memory, memcached is supported out of the box and many others are supported by
+additional plugins. You can find details about cache configusupported
 :django_docs:`Django caches documentation
 <settings/#caches>`. In clusterization scenario we advice to share cache between nodes to speedup their
 work using client-server cache realizations.
@@ -154,15 +154,14 @@ Locks settings
 
 Section ``[locks]``.
 
-Locks is system that vstutils-based application uses to prevent damage from parallel actions
+Locks is a system that vstutils-based application uses to prevent damage from parallel actions
 working on something simultaneously. It is based on Django cache, so there is
 another bunch of same settings as cache_. And why there is another
-section for them, you may ask. Because cache backend used for locking must
-provide some guarantees, which does not required to usual cache: it MUST
-be shared for all vstutils-based application threads and nodes. So, in-memory backend, for
-example, is not suitable. In case of clusterization we strongly recommend
+section for them, you may ask. Because cache backend is used for locking must
+provide some guarantees, which do not required to usual cache: it MUST
+be shared for all vstutils-based application threads and nodes. So, for example, in-memory backend is not suitable. In case of clusterization we strongly recommend
 to use Redis or Memcached as backend for that purpose. Cache and locks backend
-can be same, but don't forget about requirement we said above.
+can be the same, but don't forget about requirement we said above.
 
 |
 |
