@@ -1,12 +1,12 @@
-import { IntegerField } from '../numbers';
 import TimeIntervalFieldMixin from './TimeIntervalFieldMixin.js';
+import { integer } from '../numbers';
 
 /**
  * Time_interval guiField class.
  * Field that gets time in milliseconds and convert it into seconds before render.
  * Before sending data to API it converts time from seconds to milliseconds.
  */
-class TimeIntervalField extends IntegerField {
+class TimeIntervalField extends integer.IntegerField {
     /**
      * Redefinition of base guiField method toInner.
      * @param {object} data

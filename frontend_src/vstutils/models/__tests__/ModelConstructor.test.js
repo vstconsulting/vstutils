@@ -4,7 +4,7 @@ import { openapi_dictionary } from '../../api';
 import { globalFields } from '../../fields';
 import testSchema from '../../../__mocks__/testSchema.json';
 import { Model, ModelClass } from '../Model.js';
-import { IntegerField } from '../../fields/numbers';
+import { IntegerField } from '../../fields/numbers/integer.js';
 import { StringField } from '../../fields/text';
 
 describe('ModelConstructor', () => {

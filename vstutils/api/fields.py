@@ -652,7 +652,7 @@ class RatingField(FloatField):
     """
     Extends class 'rest_framework.serializers.FloatField'. This field represents a rating form input on frontend.
     Grading limits can be specified with 'min_value=' and 'max_value=', defaults are 0 to 5.Minimal step between
-    grades are specified in 'step=', default - 1.Frontend visual representation can be choosen
+    grades are specified in 'step=', default - 1.Frontend visual representation can be chosen
     with 'front_style=', available variants are listed in 'self.valid_front_styles'.
 
     for 'slider' front style, you can specify slider color, by passing valid color to 'color='.
@@ -667,7 +667,7 @@ class RatingField(FloatField):
     :type step: float, int
     :param front_style: visualization on frontend field. Allowed: ['stars', 'slider', 'fa_icon'].
     :type front_style: str
-    :param color: color of slider (css color style)
+    :param color: color of rating element (star, icon or slider) in css format
     :type color: str
     :param fa_class: FontAwesome icon code
     :type fa_class: str
@@ -693,4 +693,5 @@ class RatingField(FloatField):
         self.fa_class = kwargs.pop('fa_class', None)
         assert isinstance(self.fa_class, str) or self.fa_class is None, "fa_class should be str"
         self.step = step
+        assert not (step != 1 and front_style != 'slider'), 'custom step can be used only with front_style "slider"'
         super(RatingField, self).__init__(min_value=min_value, max_value=max_value, **kwargs)

@@ -1,7 +1,7 @@
 import { expect, jest, test, describe, it } from '@jest/globals';
 import { Model, ModelClass } from '../Model.js';
 import StringField from '../../fields/text/StringField.js';
-import IntegerField from '../../fields/numbers/IntegerField.js';
+import { IntegerField } from '../../fields/numbers/integer.js';
 import JSONField from '../../fields/json/JSONField.js';
 
 const emailField = new StringField({ name: 'email' });

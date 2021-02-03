@@ -275,6 +275,7 @@ class RatingFieldInspector(FieldInspector):
             'additionalProperties': {
                 'min_value': field.min_value,
                 'max_value': field.max_value,
+                'step': field.step,
                 'style': field.front_style,
                 'color': field.color,
                 'fa_class': field.fa_class

@@ -1,10 +1,23 @@
-import { BaseField } from '../base';
-import IntegerFieldMixin from './IntegerFieldMixin';
+import { BaseField, BaseFieldContentEdit, BaseFieldMixin } from '../base';
 
-/**
- * Integer guiField class.
- */
-class IntegerField extends BaseField {
+export const IntegerFieldContentMixin = {
+    data() {
+        return {
+            inputType: 'number',
+        };
+    },
+};
+
+export const IntegerFieldMixin = {
+    mixins: [BaseFieldMixin],
+    components: {
+        field_content_edit: {
+            mixins: [BaseFieldContentEdit, IntegerFieldContentMixin],
+        },
+    },
+};
+
+export class IntegerField extends BaseField {
     /**
      * Redefinition of base guiField method toInner.
      * @param {object} data
@@ -34,8 +47,6 @@ class IntegerField extends BaseField {
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(IntegerFieldMixin);
+        return [IntegerFieldMixin];
     }
 }
-
-export default IntegerField;

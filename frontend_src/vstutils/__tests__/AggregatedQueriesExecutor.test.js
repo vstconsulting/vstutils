@@ -2,7 +2,7 @@ import { expect, jest, test, describe } from '@jest/globals';
 import { Model, ModelClass } from '../models/Model.js';
 import QuerySet from '../querySet/QuerySet.js';
 import StringField from '../fields/text/StringField.js';
-import IntegerField from '../fields/numbers/IntegerField.js';
+import { IntegerField } from '../fields/numbers/integer.js';
 import { APIResponse, apiConnector } from '../api';
 import { RequestTypes } from '../utils';
 import { AggregatedQueriesExecutor } from '../AggregatedQueriesExecutor.js';

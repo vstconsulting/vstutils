@@ -1,17 +1,8 @@
-import IntegerField from './IntegerField.js';
-import IntegerFieldContentMixin from './IntegerFieldContentMixin.js';
-import IntegerFieldMixin from './IntegerFieldMixin.js';
+import * as integer from './integer.js';
+import * as rating from './rating';
+import { FloatField } from './float.js';
 
-/**
- * Number guiField class.
- */
-class NumberField extends IntegerField {}
-
-/**
- * Float guiField class.
- */
-class FloatField extends IntegerField {}
-
+class NumberField extends integer.IntegerField {}
 class DecimalField extends FloatField {}
 
-export { IntegerField, NumberField, FloatField, DecimalField, IntegerFieldContentMixin, IntegerFieldMixin };
+export { integer, rating, NumberField, FloatField, DecimalField };

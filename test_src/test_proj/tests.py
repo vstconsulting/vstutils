@@ -953,6 +953,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'additionalProperties': {
                         'min_value': 0,
                         'max_value': 10,
+                        'step': 1,
                         'style': 'slider',
                         'color': 'red',
                         'fa_class': None,
@@ -968,6 +969,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'additionalProperties': {
                     'min_value': 0,
                     'max_value': 5,
+                    'step': 1,
                     'style': 'fa_icon',
                     'color': None,
                     'fa_class': 'fas fa-cat'
