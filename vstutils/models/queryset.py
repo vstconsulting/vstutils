@@ -1,5 +1,6 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from django.db import models
+from django.utils.functional import cached_property
 
 from ..utils import Paginator
 
@@ -39,12 +40,19 @@ class BQuerySet(models.QuerySet):
     def get_paginator(self, *args, **kwargs):
         return Paginator(self.filter(), *args, **kwargs)
 
+    @cached_property
+    def has_hidden_filter(self):
+        return any(filter(
+            lambda x: x.lhs.field.attname == 'hidden',
+            self.query.where.children
+        ))
+
     def cleared(self):
         """
         Filter queryset for models with attribute 'hidden' and
         exclude all hidden objects.
         """
-        if hasattr(self.model, "hidden"):
+        if hasattr(self.model, "hidden") and not self.has_hidden_filter:
             return self.filter(hidden=False)
         return self
 
