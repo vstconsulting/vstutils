@@ -152,6 +152,10 @@ class AutoSchema(DRFAutoSchema):
         if method_obj.__doc__:
             return method_obj.__doc__.strip()
         if not method_view:
+            if not self.view.__class__.__doc__:
+                model = getattr(self.view, 'model', None)
+                if model is not None and model.__doc__:
+                    self.view.__class__.__doc__ = model.__doc__
             return super().get_description(path, method)
 
         method_view_obj = method_view()

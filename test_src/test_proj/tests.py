@@ -1071,6 +1071,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(results[5]['status'], 200)
         self.assertEqual(tuple(results[5]['data'].keys()), ('id', 'name', 'hidden'))
 
+        # Check models docstrings as description
+        self.assertEqual(
+            api['paths']['/testcontenttype/{id}/']['get']['description'],
+            'Return an variable-based instance.'
+        )
+        self.assertEqual(
+            api['paths']['/testcontenttype/']['post']['description'],
+            'Create new model based on variables.'
+        )
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')

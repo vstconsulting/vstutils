@@ -45,6 +45,15 @@ class Variable(BModel):
 
 
 class VarBasedModel(BModel):
+    """
+    Variables based model.
+
+    create:
+        Create new model based on variables.
+
+    retrieve:
+        Return an variable-based instance.
+    """
     name = models.CharField(max_length=512, default=uuid.uuid1)
     variables = GenericRelation(Variable, related_query_name="variables",
                                 object_id_field="object_id")
