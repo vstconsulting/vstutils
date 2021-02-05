@@ -161,6 +161,20 @@ class BModel(BaseModel):
             In some cases, inheriting models may require inheriting the Meta class from the base model.
             If the Meta is explicitly declared in the base class, then you can get it through
             the attribute `OriginalMeta` and use it for inheritance.
+
+        .. note::
+            Docstring of model will be reused for view descriptions. You can specify both a general description
+            for all actions and specifically for each action using the following syntax:
+
+            .. sourcecode::
+
+                General description for all actions.
+
+                action_name:
+                    Description for this action.
+
+                another_action:
+                    Description for another action.
     """
 
     #: Primary field for select and search in API.

@@ -192,6 +192,7 @@ class WorkerSection(BaseAppendSection):
 class CentrifugoSection(cconfig.Section):
     type_address = cconfig.StrType()
     type_api_key = cconfig.StrType()
+    type_token_hmac_secret_key = cconfig.StrType()
     type_timeout = ConfigIntSecondsType
     type_verify = ConfigBoolType
 

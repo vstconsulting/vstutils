@@ -1080,6 +1080,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['paths']['/testcontenttype/']['post']['description'],
             'Create new model based on variables.'
         )
+        self.assertEqual(
+            api['paths']['/testcontenttype/']['get']['description'],
+            'Variables based model.'
+        )
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)

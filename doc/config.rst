@@ -310,11 +310,22 @@ Centrifugo client settings
 Section ``[centrifugo]``.
 
 For installations with centrifugo client, ``[centrifugo]`` section must be setuped.
+Centrifugo is used by application for auto-update mechanism of pages data.
+When user change some data, other clients will get notification on ``subscriptions_update`` channel
+with model label and primary key. Without the service all GUI-clients will get page data
+every 5 seconds (by default).
 
 * **address** - Centrifugo server address.
 * **api_key** - API key for clients.
+* **token_hmac_secret_key** - API key for jwt-token generation.
 * **timeout** - Connection timeout.
 * **verify** - Connection verification.
+
+.. note::
+    These settings also add parameters to the OpenApi scheme and
+    these will change how the auto-update system works in the GUI.
+    ``token_hmac_secret_key`` is used for jwt-token generation (based on
+    session expiration time). Token will be used for Centrifugo-JS client.
 
 |
 |
