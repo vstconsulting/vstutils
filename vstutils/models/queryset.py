@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.functional import cached_property
 
-from ..utils import Paginator, deprecated
+from ..utils import Paginator, deprecated, raise_context_decorator_with_default
 
 
 class BQuerySet(models.QuerySet):
@@ -42,7 +42,9 @@ class BQuerySet(models.QuerySet):
 
     def has_field_filter_in_query(self, field_name):
         return any(filter(
-            lambda x: x.lhs.field.attname == field_name,
+            raise_context_decorator_with_default(default=False)(
+                lambda x: x.lhs.field.attname == field_name
+            ),
             self.query.where.children
         ))
 

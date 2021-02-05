@@ -16,6 +16,15 @@ const ViewWithAutoUpdateMixin = {
     },
     computed: {
         autoUpdatePK() {},
+        autoupdateSubscriptionLabels() {
+            return this.view.autoupdateSubscriptionLabels;
+        },
+        autoupdateTriggerType() {
+            if (this.$app.centrifugoClient?.isConnected() && this.autoupdateSubscriptionLabels) {
+                return 'centrifugo';
+            }
+            return 'timer';
+        },
     },
     methods: {
         autoAutoUpdateActionName() {
@@ -25,8 +34,8 @@ const ViewWithAutoUpdateMixin = {
             const actionName = this.autoAutoUpdateActionName();
             const action = {
                 autoupdateId: this.componentId,
-                triggerType: this.$app.centrifugoClient?.isConnected() ? 'centrifugo' : 'timer',
-                subscriptions: this.view.subscriptionLabels,
+                triggerType: this.autoupdateTriggerType,
+                subscriptions: this.subscriptionLabels,
                 pk: this.autoUpdatePK,
             };
             return typeof this[actionName] === 'function'
