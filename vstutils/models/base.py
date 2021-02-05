@@ -1,5 +1,6 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from functools import lru_cache
+from itertools import chain
 from copy import deepcopy
 
 from django_filters import rest_framework as filters, filterset
@@ -76,13 +77,13 @@ def _get_setting_for_view(metatype, metadata, views):
     override = metadata[f'override_{metatype}']
     metadataobject = metadata[metatype]
     if metadataobject:
-        metadataobject = [_import_class_if_string(i) for i in metadataobject]
+        metadataobject = map(_import_class_if_string, metadataobject)
     if override:
         return metadataobject  # nocv
     if metadataobject:
         for view in views:
             if hasattr(view, metatype):
-                return list(getattr(view, metatype)) + list(metadata[metatype])
+                return chain(getattr(view, metatype), metadata[metatype])
         return metadataobject  # nocv
 
 

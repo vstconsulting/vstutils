@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.functional import cached_property
 
-from ..utils import Paginator
+from ..utils import Paginator, deprecated
 
 
 class BQuerySet(models.QuerySet):
@@ -40,12 +40,15 @@ class BQuerySet(models.QuerySet):
     def get_paginator(self, *args, **kwargs):
         return Paginator(self.filter(), *args, **kwargs)
 
-    @cached_property
-    def has_hidden_filter(self):
+    def has_field_filter_in_query(self, field_name):
         return any(filter(
-            lambda x: x.lhs.field.attname == 'hidden',
+            lambda x: x.lhs.field.attname == field_name,
             self.query.where.children
         ))
+
+    @cached_property
+    def has_hidden_filter(self):
+        return self.has_field_filter_in_query('hidden')
 
     def cleared(self):
         """
@@ -56,6 +59,7 @@ class BQuerySet(models.QuerySet):
             return self.filter(hidden=False)
         return self
 
+    @deprecated
     def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
         field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
         if field is None:
