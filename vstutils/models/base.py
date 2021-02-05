@@ -77,13 +77,13 @@ def _get_setting_for_view(metatype, metadata, views):
     override = metadata[f'override_{metatype}']
     metadataobject = metadata[metatype]
     if metadataobject:
-        metadataobject = map(_import_class_if_string, metadataobject)
+        metadataobject = list(map(_import_class_if_string, metadataobject))
     if override:
         return metadataobject  # nocv
     if metadataobject:
         for view in views:
             if hasattr(view, metatype):
-                return chain(getattr(view, metatype), metadata[metatype])
+                return list(chain(getattr(view, metatype), metadata[metatype]))
         return metadataobject  # nocv
 
 
