@@ -47,6 +47,12 @@ export default class ErrorHandler {
         if (typeof error == 'string') return error;
 
         if (typeof error == 'object' && error.message) {
+            if (error.message.other_errors) {
+                if (Array.isArray(error.message.other_errors)) {
+                    return error.message.other_errors.join('<br/>');
+                }
+                return error.message.other_errors;
+            }
             return error.message;
         }
 
