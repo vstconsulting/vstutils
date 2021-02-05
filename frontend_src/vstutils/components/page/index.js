@@ -201,7 +201,7 @@ export const ActionViewComponent = {
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.execute).format([
                         this.$t(this.view.name),
-                        instance.getViewFieldString().toLowerCase(),
+                        instance.getViewFieldString()?.toLowerCase() || '',
                     ]),
                 );
                 this.openPage({ path: this.getRedirectUrl() });
@@ -209,7 +209,7 @@ export const ActionViewComponent = {
                 const str = window.app.error_handler.errorToString(error);
                 const srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
                     this.view.name,
-                    instance.getViewFieldString().toLowerCase(),
+                    instance.getViewFieldString()?.toLowerCase() || '',
                     str,
                 ]);
                 window.app.error_handler.showError(srt_to_show, str);

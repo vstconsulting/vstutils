@@ -1000,3 +1000,29 @@ export function getRandomInt(min, max) {
 export function randomSleep(min, max) {
     return sleep(getRandomInt(min, max));
 }
+
+/**
+ * @param url
+ * @return {Promise<Image>}
+ */
+export async function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.addEventListener('load', () => resolve(img));
+        img.addEventListener('error', reject);
+        img.src = url;
+    });
+}
+
+/**
+ * @param {File|Blob} file
+ * @return {Promise<ArrayBuffer>}
+ */
+export async function readFileAsArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', (loadEvent) => resolve(loadEvent.target.result));
+        reader.addEventListener('error', reject);
+        reader.readAsArrayBuffer(file);
+    });
+}

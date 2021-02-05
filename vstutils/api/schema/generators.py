@@ -123,7 +123,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                         },
                         secret,
                         algorithm="HS256"
-                    ).decode()
+                    )
                     result['info']['x-centrifugo-address'] = settings.\
                         CENTRIFUGO_CLIENT_KWARGS.get('address', '').\
                         replace('http', 'ws', 1)

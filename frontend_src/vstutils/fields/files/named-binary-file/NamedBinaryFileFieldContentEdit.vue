@@ -19,7 +19,6 @@
 <script>
     import { BinaryFileFieldContentEdit } from '../binary-file';
     import NamedBinaryFileFieldContent from './NamedBinaryFileFieldContent.js';
-    import { guiPopUp } from '../../../popUp';
     import { arrayBufferToBase64 } from '../../../utils';
 
     export default {
@@ -27,13 +26,7 @@
         methods: {
             readFile(event) {
                 const file = event.target.files[0];
-                if (!file) return;
-
-                if (!this.isFileSizeValid(file.size)) {
-                    guiPopUp.error('File is too large');
-                    console.log('File is too large ' + file.size);
-                    return;
-                }
+                if (!file || !this.$parent.validateFileSize(file.size)) return;
 
                 const reader = new FileReader();
 

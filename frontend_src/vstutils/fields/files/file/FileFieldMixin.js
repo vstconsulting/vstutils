@@ -17,15 +17,11 @@ const FileFieldMixin = {
             this.file_obj = {};
             this.setValueInStore();
         },
-        /**
-         * Method, returns false, if file's size is invalid (too large).
-         * Otherwise, it returns true.
-         * @param file_size {number} File's size.
-         * @return {boolean}
-         */
-        isFileSizeValid(file_size) {
-            if (this.field.options.max_size !== undefined) {
-                return this.field.options.max_size <= file_size;
+        validateFileSize(fileSize) {
+            if (this.field.maxSize !== undefined && this.field.maxSize <= fileSize) {
+                guiPopUp.error('File is too large');
+                console.log('File is too large ' + fileSize);
+                return false;
             }
             return true;
         },
@@ -36,13 +32,7 @@ const FileFieldMixin = {
         readFile(event) {
             let file = event.target.files[0];
 
-            if (!file) {
-                return;
-            }
-
-            if (!this.isFileSizeValid(file.size)) {
-                guiPopUp.error('File is too large');
-                console.log('File is too large ' + file.size);
+            if (!file || !this.validateFileSize(file.size)) {
                 return;
             }
 

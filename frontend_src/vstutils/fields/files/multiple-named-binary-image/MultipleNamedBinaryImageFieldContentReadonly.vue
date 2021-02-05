@@ -8,7 +8,6 @@
                 <MultipleImagesListItem
                     :key="idx"
                     :field="field"
-                    :wrapper_opt="wrapper_opt"
                     :data="data"
                     :file="file"
                 />

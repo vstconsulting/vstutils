@@ -1,8 +1,14 @@
 <template>
     <div>
-        <template v-if="value && value.content">
-            <image_block :field="field" :data="data" :value="value" />
-        </template>
+        <image_block v-if="showPreview" :field="field" :data="data" :value="value" />
+        <ResolutionValidatorModal
+            v-if="imagesForValidation"
+            :field="field"
+            :images="imagesForValidation"
+            @cancel="cancelValidation"
+            @validated="onImageValidated"
+        />
+
         <div class="input-group">
             <p
                 class="p-as-input"
@@ -14,7 +20,7 @@
                 {{ val }}
             </p>
 
-            <ReadFileButton @read-file="readFile" />
+            <ReadFileButton :extensions="field.extensions" @read-file="readFiles" />
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
             <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
@@ -22,25 +28,40 @@
 </template>
 
 <script>
-    import { BinaryFileFieldContentEdit } from '../binary-file';
+    import { BinaryFileFieldContentEdit, BinaryFileFieldReadFileButton } from '../binary-file';
     import { NamedBinaryFileFieldContentEdit } from '../named-binary-file';
     import NamedBinaryImageFieldContent from './NamedBinaryImageFieldContent.js';
-    import { BinaryFileFieldReadFileButton } from '../binary-file';
+    import ResolutionValidatorModal from './ResolutionValidatorModal.vue';
+    import ResolutionValidatorMixin from './ResolutionValidatorMixin.js';
+
+    const ReadFileButton = {
+        data() {
+            return {
+                accept: this.$parent.field.extensions || 'image/*',
+                helpText: 'Open image',
+            };
+        },
+        mixins: [BinaryFileFieldReadFileButton],
+    };
 
     export default {
-        components: {
-            ReadFileButton: {
-                mixins: [BinaryFileFieldReadFileButton],
-                data() {
-                    return {
-                        accept: 'image/*',
-                        helpText: 'Open image',
-                    };
-                },
+        components: { ResolutionValidatorModal, ReadFileButton },
+        mixins: [
+            BinaryFileFieldContentEdit,
+            NamedBinaryFileFieldContentEdit,
+            NamedBinaryImageFieldContent,
+            ResolutionValidatorMixin,
+        ],
+        computed: {
+            showPreview() {
+                return this.value?.content;
             },
         },
-        mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContentEdit, NamedBinaryImageFieldContent],
+        methods: {
+            onImageValidated([validatedImage]) {
+                this.$emit('set-value', validatedImage);
+                this.cancelValidation();
+            },
+        },
     };
 </script>
-
-<style></style>

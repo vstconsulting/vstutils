@@ -15,7 +15,7 @@ uWSGI==2.0.19.1
 
 # Notifications
 cent~=3.0.1
-PyJWT~=1.7.1
+PyJWT~=2.0.1
 
 # Minificators
 jsmin==2.2.2

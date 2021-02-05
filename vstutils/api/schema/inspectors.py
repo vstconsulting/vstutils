@@ -308,8 +308,8 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
                     {
                         'min_width': validator.min_width,
                         'max_width': validator.max_width,
-                        'min_height': validator.min_width,
-                        'max_height': validator.max_width,
+                        'min_height': validator.min_height,
+                        'max_height': validator.max_height,
                         'extensions': validator.extensions
                     }
                 )

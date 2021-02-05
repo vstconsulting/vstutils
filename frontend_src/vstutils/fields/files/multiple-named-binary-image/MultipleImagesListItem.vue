@@ -1,6 +1,6 @@
 <template>
     <div class="multiple-images-list-item">
-        <ImageBlock :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="file" />
+        <ImageBlock :field="field" :data="data" :value="file" />
         <span class="file-name break-word">{{ file.name }}</span>
         <slot />
     </div>
@@ -11,11 +11,9 @@
     import { BaseFieldInnerComponentMixin } from '../../base';
 
     export default {
+        components: { ImageBlock },
         mixins: [BaseFieldInnerComponentMixin],
         props: ['file'],
-        components: {
-            ImageBlock: ImageBlock,
-        },
     };
 </script>
 

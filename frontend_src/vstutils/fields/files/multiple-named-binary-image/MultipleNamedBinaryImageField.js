@@ -1,5 +1,6 @@
 import MultipleNamedBinaryImageFieldMixin from './MultipleNamedBinaryImageFieldMixin.js';
 import { MultipleNamedBinaryFileField } from '../multiple-named-binary-file';
+import { ResolutionValidatorConfig } from '../named-binary-image';
 
 /**
  * MultipleNamedBinFile guiField class.
@@ -8,6 +9,10 @@ import { MultipleNamedBinaryFileField } from '../multiple-named-binary-file';
  * - content - base64 string - content of file.
  */
 class MultipleNamedBinaryImageField extends MultipleNamedBinaryFileField {
+    constructor(options) {
+        super(options);
+        this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(options);
+    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
