@@ -1,4 +1,3 @@
-import { guiPopUp } from '../../../popUp';
 import MultipleNamedBinaryFileFieldContentReadonly from './MultipleNamedBinaryFileFieldContentReadonly.vue';
 import MultipleNamedBinaryFileFieldContentEdit from './MultipleNamedBinaryFileFieldContentEdit.vue';
 
@@ -14,16 +13,9 @@ const MultipleNamedBinaryFileFieldMixin = {
         },
 
         readOneFile(file) {
-            if (!file) {
+            if (!file || !this.validateFileSize(file.size)) {
                 return;
             }
-
-            if (!this.isFileSizeValid(file.size)) {
-                guiPopUp.error('File "' + file.name + '" is too large.');
-                console.log('File "' + file.name + '" is too large.');
-                return;
-            }
-
             let reader = new FileReader();
 
             reader.onload = (event) => {

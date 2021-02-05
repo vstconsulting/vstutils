@@ -1,5 +1,13 @@
 <template>
     <div>
+        <ResolutionValidatorModal
+            v-if="imagesForValidation"
+            :field="field"
+            :images="imagesForValidation"
+            @cancel="cancelValidation"
+            @validated="onImageValidated"
+        />
+
         <div class="input-group">
             <p
                 class="p-as-input"
@@ -11,7 +19,7 @@
                 {{ val }}
             </p>
 
-            <ReadFileButton @read-file="$parent.readFile($event)" />
+            <ReadFileButton @read-file="readFiles" />
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
             <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
@@ -27,28 +35,29 @@
 
 <script>
     import { BinaryFileFieldContentEdit, BinaryFileFieldReadFileButton } from '../binary-file';
+    import { ResolutionValidatorMixin, ResolutionValidatorModal } from '../named-binary-image';
     import { MultipleNamedBinaryFileFieldContentEdit } from '../multiple-named-binary-file';
     import MultipleImagesListItem from './MultipleImagesListItem.vue';
     import MultipleNamedBinaryImageFieldContent from './MultipleNamedBinaryImageFieldContent';
 
-    export default {
-        components: {
-            MultipleImagesListItem,
-            ReadFileButton: {
-                mixins: [BinaryFileFieldReadFileButton],
-                data() {
-                    return {
-                        accept: 'image/*',
-                        helpText: 'Open images',
-                        multiple: true,
-                    };
-                },
-            },
+    const ReadFileButton = {
+        data() {
+            return {
+                accept: this.$parent.field.extensions || 'image/*',
+                helpText: 'Open images',
+                multiple: true,
+            };
         },
+        mixins: [BinaryFileFieldReadFileButton],
+    };
+
+    export default {
+        components: { MultipleImagesListItem, ReadFileButton, ResolutionValidatorModal },
         mixins: [
             BinaryFileFieldContentEdit,
             MultipleNamedBinaryImageFieldContent,
             MultipleNamedBinaryFileFieldContentEdit,
+            ResolutionValidatorMixin,
         ],
     };
 </script>

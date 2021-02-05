@@ -16,10 +16,9 @@
 </template>
 
 <script>
-    import { BaseFieldContentEdit } from '../../base';
     import BinaryFileFieldReadFileButton from './BinaryFileFieldReadFileButton.vue';
-    import { guiPopUp } from '../../../popUp';
     import { arrayBufferToBase64 } from '../../../utils';
+    import { FileFieldContentEdit } from '../file';
 
     export default {
         components: {
@@ -28,26 +27,14 @@
              */
             ReadFileButton: BinaryFileFieldReadFileButton,
         },
-        mixins: [BaseFieldContentEdit],
+        mixins: [FileFieldContentEdit],
         created() {
             this.styles_dict.minHeight = '38px';
         },
         methods: {
-            isFileSizeValid(file_size) {
-                if (this.field.maxSize !== undefined) {
-                    return this.field.maxSize <= file_size;
-                }
-                return true;
-            },
             readFile(event) {
                 const file = event.target.files[0];
-                if (!file) return;
-
-                if (!this.isFileSizeValid(file.size)) {
-                    guiPopUp.error('File is too large');
-                    console.log('File is too large ' + file.size);
-                    return;
-                }
+                if (!file || !this.$parent.validateFileSize(file.size)) return;
 
                 const reader = new FileReader();
 

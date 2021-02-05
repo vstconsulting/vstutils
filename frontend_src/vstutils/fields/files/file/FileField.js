@@ -9,17 +9,11 @@ class FileField extends TextAreaField {
         super(options);
 
         this.maxSize = options.max_size;
+        this.extensions = options.additionalProperties?.extensions?.map((ext) => '.' + ext).join(',');
     }
 
     static get mixins() {
         return super.mixins.concat(FileFieldMixin);
-    }
-
-    isFileSizeValid(fileSize) {
-        if (this.maxSize !== undefined) {
-            return this.maxSize <= fileSize;
-        }
-        return true;
     }
 }
 

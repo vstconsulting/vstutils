@@ -1,5 +1,6 @@
 import { NamedBinaryFileField } from '../named-binary-file';
 import NamedBinaryImageFieldMixin from './NamedBinaryImageFieldMixin.js';
+import ResolutionValidatorConfig from './ResolutionValidatorConfig.js';
 
 /**
  * NamedBinImage guiField class.
@@ -8,6 +9,11 @@ import NamedBinaryImageFieldMixin from './NamedBinaryImageFieldMixin.js';
  * - content - base64 string - content of image.
  */
 class NamedBinaryImageField extends NamedBinaryFileField {
+    constructor(options) {
+        super(options);
+        this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(options);
+    }
+
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
