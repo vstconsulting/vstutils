@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import { BaseFieldContentEdit } from '../../base';
-import { getDependenceValueAsString, guiLocalSettings, RequestTypes } from '../../../utils';
+import { escapeHtml, getDependenceValueAsString, guiLocalSettings, RequestTypes } from '../../../utils';
 import { AutocompleteFieldContentEditMixin } from '../../autocomplete';
 import { FKFieldContent, FKFieldMixin } from '../fk';
 import FKAutocompleteFieldContentEdit from './FKAutocompleteFieldContentEdit.js';
@@ -25,8 +25,8 @@ const FKAutocompleteFieldMixin = {
                  */
                 // eslint-disable-next-line no-unused-vars
                 _renderItem({ value_field, view_field }, search) {
-                    return `<div class="autocomplete-suggestion" data-value="${value_field}">
-                                ${view_field}
+                    return `<div class="autocomplete-suggestion" data-value="${escapeHtml(value_field)}">
+                                ${escapeHtml(view_field)}
                             </div>`;
                 },
                 /**

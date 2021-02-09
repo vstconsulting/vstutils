@@ -1026,3 +1026,17 @@ export async function readFileAsArrayBuffer(file) {
         reader.readAsArrayBuffer(file);
     });
 }
+
+/**
+ * Escape string so it can be safe used in html
+ * @param {string} unsafe
+ * @return {string}
+ */
+export function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
