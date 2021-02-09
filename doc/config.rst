@@ -358,3 +358,6 @@ This section contains additional information for configure additional elements.
         addrport = 0.0.0.0:8443,foobar.crt,foobar.key
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
+
+#. You can use `{ENV[HOME:-value]}` (where `HOME` is environment variable, `value` is default value)
+   in configuration values.

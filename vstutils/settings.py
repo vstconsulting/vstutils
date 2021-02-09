@@ -19,6 +19,17 @@ from . import __version__ as VSTUTILS_VERSION, __file__ as vstutils_file
 
 SIMPLE_OBJECT_SETTINGS_TYPE = _t.Dict[_t.Text, _t.Dict[_t.Text, _t.Any]]
 
+
+class Env(dict):
+    def __getitem__(self, item):
+        if item in self:
+            return super().__getitem__(item)
+        default = ''
+        if ':-' in item:
+            item, default = item.split(':-')
+        return os.environ.get(item, default)
+
+
 # MAIN Variables
 ##############################################################
 interpreter_dir: _t.Text = os.path.dirname(sys.executable or 'python')
@@ -32,6 +43,7 @@ vst_project_module = __import__(VST_PROJECT)
 vst_lib_module = __import__(VST_PROJECT_LIB_NAME) if VST_PROJECT != VST_PROJECT_LIB else vst_project_module
 PROJECT_LIB_VERSION: _t.Text = getattr(vst_lib_module, '__version__', VSTUTILS_VERSION)
 PROJECT_VERSION: _t.Text = getattr(vst_project_module, '__version__', PROJECT_LIB_VERSION)
+FULL_VERSION: _t.Text = f'{PROJECT_VERSION}_{PROJECT_LIB_VERSION}_{VSTUTILS_VERSION}'
 PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
 
 PY_VER: _t.SupportsInt = sys.version_info.major
@@ -39,10 +51,18 @@ TMP_DIR: _t.Text = gettempdir() or '/tmp'
 BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))
 __kwargs: _t.Dict[_t.Text, _t.Any] = dict(
-    PY=PY_VER, PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
-    INTERPRETER=PYTHON_INTERPRETER, TMP=TMP_DIR, HOME=BASE_DIR,
-    PROG=VST_PROJECT_DIR, LIB=BASE_DIR, VST=VSTUTILS_DIR,
-    PROG_NAME=VST_PROJECT, LIB_NAME=VST_PROJECT_LIB_NAME
+    PY=PY_VER,
+    PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
+    INTERPRETER=PYTHON_INTERPRETER,
+    TMP=TMP_DIR,
+    HOME=BASE_DIR,
+    PROG=VST_PROJECT_DIR,
+    LIB=BASE_DIR,
+    VST=VSTUTILS_DIR,
+    PROG_NAME=VST_PROJECT,
+    LIB_NAME=VST_PROJECT_LIB_NAME,
+    FULL_VERSION=FULL_VERSION,
+    ENV=Env()
 )
 KWARGS: _t.Dict[_t.Text, _t.Any] = __kwargs
 

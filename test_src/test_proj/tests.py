@@ -1708,6 +1708,11 @@ class ProjectTestCase(BaseTestCase):
             dict(method='post', path='hosts/<<3[data][id]>>/hosts', data=dict(name='da')),
         ]
 
+    def test_env_vars(self):
+        self.assertIn(settings.TEST_VAR_FROM_ENV, (os.environ['HOME'], 'default'))
+        self.assertEqual(settings.TEST_VAR_FROM_ENV_DEFAULT, 'default')
+        self.assertEqual(settings.TEST_VAR_FROM_ENV2, '123')
+
     def test_deep_host_create(self):
         bulk_data = [
             dict(method='post', path='deephosts', data={'name': 'level1'}),
