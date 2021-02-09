@@ -85,15 +85,15 @@ export const PageNewViewComponent = {
          * Method gets instance data, validates it and sends API request.
          */
         async saveInstance() {
-            const instance = this.instance;
             try {
-                instance._validateAndSetData(this.sandbox);
+                this.commitMutation('validateAndSetInstanceData');
             } catch (e) {
                 window.app.error_handler.defineErrorAndShow(e);
                 current_view.setLoadingError({});
                 return;
             }
             this.loading = true;
+            const instance = this.instance;
             try {
                 if (this.view.type === ViewTypes.PAGE_EDIT) await instance.update(this.view.params.method);
                 else await instance.create(this.view.params.method);
@@ -183,7 +183,7 @@ export const ActionViewComponent = {
         },
         async executeInstance(action, instance) {
             try {
-                instance._validateAndSetData(this.sandbox);
+                this.commitMutation('validateAndSetInstanceData', { instance });
             } catch (e) {
                 window.app.error_handler.defineErrorAndShow(e);
                 current_view.setLoadingError({});

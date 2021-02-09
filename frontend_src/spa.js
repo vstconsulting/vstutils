@@ -143,7 +143,7 @@ export class App extends BaseApp {
     prepare() {
         signals.emit('app.beforeInit', { app: this });
 
-        let storeConstructor = new StoreConstructor(this.views);
+        let storeConstructor = new StoreConstructor(this.views, this.config.isDebug);
 
         signals.emit('app.beforeInitStore', { storeConstructor });
 

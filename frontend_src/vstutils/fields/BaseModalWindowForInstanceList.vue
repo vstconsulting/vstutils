@@ -109,7 +109,7 @@
                         const num = this.queryset.query.offset / this.pagination.pageSize;
 
                         this.instances = instances;
-                        this.pagination.count = this.queryset.api_count;
+                        this.pagination.count = instances.extra.count;
                         this.pagination.page_number = num + 1;
 
                         this.showModal = true;

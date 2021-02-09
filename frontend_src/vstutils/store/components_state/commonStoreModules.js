@@ -118,6 +118,10 @@ export const PAGE_WITH_EDITABLE_DATA = mergeDeep({}, PAGE_WITH_INSTANCE, {
         setFieldValue(state, { field, value }) {
             Vue.set(state.data.sandbox, field, value);
         },
+        validateAndSetInstanceData(state, { instance, data } = {}) {
+            instance = instance || state.data.instance;
+            instance._validateAndSetData(data || state.data.sandbox);
+        },
     },
 });
 

@@ -181,7 +181,7 @@ export const BaseViewMixin = {
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.execute).format([
                         this.$t(action.title),
-                        this.$t(instance.getViewFieldString() || this.view.title),
+                        this.$t(instance?.getViewFieldString() || this.view.title),
                     ]),
                 );
 
