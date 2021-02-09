@@ -252,7 +252,6 @@ export default class QuerySet {
             query: this.query,
         });
 
-        this.api_count = response.data.count;
         const instances = response.data.results.map((item) => new model(item, this.clone()));
 
         await this._executeAfterInstancesFetchedHooks(instances, model);
@@ -415,6 +414,5 @@ export default class QuerySet {
      */
     clearCache() {
         this.cache = undefined;
-        this.api_count = undefined;
     }
 }

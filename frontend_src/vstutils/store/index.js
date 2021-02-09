@@ -18,10 +18,12 @@ export class StoreConstructor {
     /**
      * Constructor of StoreConstructor class.
      * @param {object} views Dict with Views objects.
+     * @param {boolean} enableStrictMode
      */
-    constructor(views) {
+    constructor(views, enableStrictMode) {
         this.views = views;
         this.store = {
+            strict: enableStrictMode,
             state: this.getStore_state(),
             mutations: this.getStore_mutations(),
             getters: this.getStore_getters(),

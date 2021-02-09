@@ -109,7 +109,6 @@ describe('QuerySet', () => {
 
     test('items', async () => {
         const usersQueryset = new QuerySet('users', models);
-        expect(usersQueryset.api_count).toBeUndefined();
 
         const usersData = [
             { id: 1, name: 'kek name' },
@@ -131,18 +130,15 @@ describe('QuerySet', () => {
         const users = await usersQueryset.items();
         expect(users.length).toBe(4);
         expect(users.total).toBe(4);
-        expect(usersQueryset.api_count).toBe(4);
         expect(users.extra).toStrictEqual({ count: 4, next: null, previous: null });
         expect(users.map((u) => [u.id, u.name])).toStrictEqual(usersData.map((u) => [u.id, u.name]));
 
         // Get users with name 'vitya'
         const filteredQueryset = usersQueryset.filter({ name: 'vitya' });
-        expect(filteredQueryset.api_count).toBeUndefined();
         const vityas = await filteredQueryset.items();
         expect(vityas.length).toBe(2);
         expect(vityas.total).toBe(2);
         expect(vityas.extra).toStrictEqual({ count: 2, next: null, previous: null });
-        expect(filteredQueryset.api_count).toBe(2);
         expect(vityas.map((u) => [u.id, u.name])).toStrictEqual([
             [2, 'vitya'],
             [4, 'vitya'],
