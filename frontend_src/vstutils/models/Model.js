@@ -1,3 +1,5 @@
+import { escapeHtml } from '../utils';
+
 class ModelUtils {
     static viewFields = ['name', 'title', 'username', 'email', 'key'];
     static pkFields = ['id', 'pk'];
@@ -263,7 +265,7 @@ export class Model {
     }
 
     /**
-     * Returns value of view field as string or undefined if model has no view field.
+     * Returns value of view field as safe escaped string or undefined if model has no view field.
      * @return {string|undefined}
      */
     getViewFieldString() {
@@ -275,7 +277,7 @@ export class Model {
             if (value === null) {
                 return;
             }
-            return String(value);
+            return escapeHtml(String(value));
         }
     }
 

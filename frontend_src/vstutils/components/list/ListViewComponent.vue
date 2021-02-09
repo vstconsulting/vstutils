@@ -209,7 +209,7 @@
                     await instance.delete();
                     guiPopUp.success(
                         this.$t(pop_up_msg.instance.success.remove).format([
-                            instance.getViewFieldValue() || instance.getPkValue(),
+                            instance.getViewFieldString() || instance.getPkValue(),
                             this.$t(this.view.name),
                         ]),
                     );
@@ -235,7 +235,7 @@
                     guiPopUp.success(
                         this.$t(pop_up_msg.instance.success.removeMany).format([
                             instances.length,
-                            instances[0]?._name,
+                            instances[0]?.getViewFieldString(),
                         ]),
                     );
                     this.commitMutation(

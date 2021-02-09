@@ -19,7 +19,7 @@
 <script>
     import $ from 'jquery';
     import autoComplete from 'JavaScript-autoComplete/auto-complete';
-    import { trim } from '../../utils';
+    import { escapeHtml, trim } from '../../utils';
     import { BaseFieldContentEdit } from '../base';
 
     /**
@@ -77,9 +77,8 @@
              * @private
              */
             _renderItem(item, search) {
-                return (
-                    '<div class="autocomplete-suggestion"' + ' data-value="' + item + '" >' + item + '</div>'
-                );
+                item = escapeHtml(item);
+                return `<div class="autocomplete-suggestion" data-value="${item}">${item}</div>`;
             },
             /**
              * Method callback for autoComplete.onSelect() method.

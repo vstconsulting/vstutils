@@ -33,7 +33,7 @@ const PageWithDataMixin = {
                 .then((response) => {
                     guiPopUp.success(
                         this.$t(pop_up_msg.instance.success.remove).format([
-                            instance.getViewFieldValue() || instance.getPkValue(),
+                            instance.getViewFieldString() || instance.getPkValue(),
                             this.$t(this.view.name),
                         ]),
                     );
