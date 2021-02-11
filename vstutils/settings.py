@@ -272,6 +272,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'tls': False,
             'host': None,
             'send_confirmation': os.getenv(f'{ENV_NAME}_SEND_CONFIRMATION_EMAIL', False),
+            'send_email_retries': os.getenv(f'{ENV_NAME}_SEND_EMAIL_RETRIES', 3),
+            'send_email_retry_delay': os.getenv(f'{ENV_NAME}_SEND_EMAIL_RETRY_DELAY', 10),
             'authenticate_after_registration': os.getenv(f'{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION', False),
         },
         'contact': {
@@ -678,6 +680,8 @@ EMAIL_HOST = mail["host"]
 if EMAIL_HOST is None:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SEND_CONFIRMATION_EMAIL: bool = mail["send_confirmation"]
+SEND_EMAIL_RETRIES: int = mail['send_email_retries']
+SEND_MESSAGE_RETRY_DELAY: int = mail['send_email_retry_delay']
 AUTHENTICATE_AFTER_REGISTRATION: bool = mail["authenticate_after_registration"]
 REGISTRATION_HASHERS: tuple = mail.getlist(
     'send_confirmation_uid_hashers',
@@ -1042,6 +1046,7 @@ if TESTS_RUN:
         for name in CACHES
     }
     BULK_THREADS = 10
+    SEND_EMAIL_RETRIES = 10
 
 
 if not TESTSERVER_RUN and TESTS_RUN:

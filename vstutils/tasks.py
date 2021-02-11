@@ -1,3 +1,5 @@
+from smtplib import SMTPException
+
 from celery.app.task import BaseTask
 from celery.result import AsyncResult
 from django.conf import settings
@@ -29,7 +31,14 @@ class TaskClass(BaseTask):
 class SendEmailMessage(TaskClass):
 
     def run(self, *args, **kwargs):
-        send_template_email_handler(*args, **kwargs)
+        try:
+            send_template_email_handler(*args, **kwargs)
+        except SMTPException as exc:
+            raise self.retry(
+                exc=exc,
+                max_retries=settings.SEND_EMAIL_RETRIES,
+                countdown=settings.SEND_MESSAGE_RETRY_DELAY
+            )
 
 
 celery_app.register_task(SendEmailMessage())
