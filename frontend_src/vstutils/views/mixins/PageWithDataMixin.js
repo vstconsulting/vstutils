@@ -14,7 +14,7 @@ const PageWithDataMixin = {
             return this.datastore?.data?.sandbox;
         },
         title() {
-            return this.instance?.getViewFieldString() || this.view.name;
+            return this.instance?.getViewFieldString() || this.view.title;
         },
     },
     methods: {

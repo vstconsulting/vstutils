@@ -65,6 +65,7 @@ export default class RouterConstructor {
     formRoutesBasedOnViews() {
         let routes = [];
         for (let view of this.views.values()) {
+            if (view.hidden) continue;
             routes.push(view.toRoute());
             this.emitSignalAboutRouteCreation(routes.last);
         }

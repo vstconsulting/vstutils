@@ -1,5 +1,5 @@
 import { COMPONENTS_MODULE_NAME } from '../../store';
-import { current_view, formatPath, mergeDeep } from '../../utils';
+import { formatPath, mergeDeep } from '../../utils';
 import ComponentIDMixin from '../../ComponentIDMixin.js';
 import default_nested_module from '../../store/components_state/default_nested_module.js';
 
@@ -149,9 +149,6 @@ const BasestViewMixin = {
         initLoading() {
             this.error = this.response = null;
             this.loading = true;
-
-            // the code line below is needed for tests.
-            current_view.initLoading();
         },
         /**
          * Method, that stops showing of preloader and shows view content.
@@ -159,9 +156,6 @@ const BasestViewMixin = {
         setLoadingSuccessful() {
             this.loading = false;
             this.response = true;
-
-            // the code line below is needed for tests.
-            current_view.setLoadingSuccessful();
         },
         /**
          * Method, that stops showing of preloader and shows error.
@@ -169,9 +163,6 @@ const BasestViewMixin = {
         setLoadingError(error) {
             this.loading = false;
             this.error = error;
-
-            // the code line below is needed for tests.
-            current_view.setLoadingError(error);
         },
     },
 };
