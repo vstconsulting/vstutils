@@ -123,8 +123,9 @@ def send_template_email_handler(
         email_from: tp.Text,
         email: tp.Union[tp.List, tp.Text],
         template_name: tp.Text,
-        context_data: tp.Optional[tp.Dict] = None
-):
+        context_data: tp.Optional[tp.Dict] = None,
+        **kwargs,
+) -> tp.SupportsInt:
     """
     Function for email sending.
     The function convert recipient to list and set context before sending if it possible.
@@ -134,6 +135,8 @@ def send_template_email_handler(
     :param email: list of strings or single string, with email addresses of recipients
     :param template_name: relative path to template in `templates` directory, must include extension in file name.
     :param context_data: dictionary with context for rendering message template.
+    :param kwargs: additional named arguments for `send_mail`
+    :return: Number of emails sent.
     """
     recipient_list = email if isinstance(email, (list, tuple)) else [email]
 
@@ -144,16 +147,16 @@ def send_template_email_handler(
     else:
         context = context_data.copy()
 
-    send_mail(
+    return send_mail(
         subject=subject,
         message="",
         from_email=email_from,
         recipient_list=recipient_list,
-        fail_silently=False,
         html_message=loader.render_to_string(
             template_name,
             context=context
-        )
+        ),
+        **kwargs
     )
 
 

@@ -7,6 +7,7 @@ import io
 import pwd
 import orjson
 from pathlib import Path
+from smtplib import SMTPException
 
 from unittest.mock import patch, PropertyMock
 
@@ -1214,6 +1215,45 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(mail.outbox[-1].subject, 'Test')
         self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
         self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+    def test_async_mail_send_retries(self):
+        from vstutils.tasks import SendEmailMessage
+
+        def raise_smtp_exc(*args, **kwargs):
+            raise SMTPException()
+
+        def raise_and_success(*args, **kwargs):
+            if kwargs['additional']['count'] < 3:
+                kwargs['additional']['count'] += 1
+                raise SMTPException()
+            return 1
+
+        with patch('vstutils.utils.send_mail') as mock_send:
+            mock_send.side_effect = raise_and_success
+            SendEmailMessage.do(
+                email_from=settings.EMAIL_FROM_ADDRESS,
+                template_name='test_tmplt.html',
+                subject='',
+                email='ctulhu@fhtagn.deep',
+                context_data={},
+                additional={
+                    'count': 0,
+                },
+            )
+            self.assertEqual(mock_send.call_count, 4)
+            mock_send.reset_mock()
+            mock_send.side_effect = raise_smtp_exc
+            SendEmailMessage.do(
+                email_from=settings.EMAIL_FROM_ADDRESS,
+                template_name='test_tmplt.html',
+                subject='',
+                email='ctulhu@fhtagn.deep',
+                context_data={},
+                additional={
+                    'count': 0,
+                },
+            )
+            self.assertEqual(mock_send.call_count, 11)
 
 
 class EndpointTestCase(BaseTestCase):
