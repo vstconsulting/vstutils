@@ -25,7 +25,7 @@
             },
             icons() {
                 const icons = [];
-                for (let value = this.field.min + 1; value < this.field.max + 1; value++) {
+                for (let value = 1; value - 1 < this.field.max; value++) {
                     icons.push({
                         value,
                         leftClass: this.selectedValue >= value - 0.5 ? this.activeIcon : this.inactiveIcon,

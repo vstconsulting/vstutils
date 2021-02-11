@@ -118,38 +118,6 @@
                     !field.hidden && !(this.hideReadOnly && field.readOnly) && !this.hiddenStore[field.name]
                 );
             },
-            // /**
-            //  * Method, that defines: hide field or not.
-            //  * @param {object} field Field object.
-            //  * @return {boolean}
-            //  */
-            // hideFieldOrNot(field) {
-            //     if (this.data[field.name] !== undefined) {
-            //         return false;
-            //     }
-            //     return this.hiddenStore[field.name];
-            // },
-            // /**
-            //  * Method, that returns wrapper_opt prop for each field.
-            //  * @param {object} field Field object.
-            //  */
-            // getFieldWrapperOpt(field) {
-            //     let w_opt = $.extend(true, {}, { qs_url: this.qs_url });
-            //
-            //     if (this.hideNotRequired) {
-            //         let hidden = this.hideFieldOrNot(field);
-            //         $.extend(true, w_opt, {
-            //             hidden: hidden,
-            //             hidden_button: true,
-            //         });
-            //     }
-            //
-            //     if (this.datastore && this.datastore.data.sandbox) {
-            //         w_opt.use_prop_data = true;
-            //     }
-            //
-            //     return w_opt;
-            // },
             /**
              * Method - onChange handler of <select>Add field</select>.
              * @param {Event} event.

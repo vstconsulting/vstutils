@@ -635,102 +635,6 @@ export function findClosestPath(paths, current_path) {
 }
 
 /**
- * Class, that saves status of current view, that is opened right now in current tab.
- * This class is used in gui tests.
- * This class helps to determine, that page was loaded completely.
- */
-export class CurrentView {
-    /**
-     * Constructor of CurrentView class.
-     */
-    constructor() {
-        /**
-         * Property, that means, that page is loading.
-         */
-        this.loading = null;
-        /**
-         * Property, that means, that page was loaded successfully.
-         */
-        this.success = null;
-        /**
-         * Property, that means, that page was loaded with error.
-         * It stores error.
-         */
-        this.error = null;
-        /**
-         * Property, that stores promise, that current page will be loaded.
-         */
-        this.promise = null;
-        /**
-         * Property, that stores promise status.
-         */
-        this.promise_status = '';
-        /**
-         * Property, that stores promise callbacks.
-         */
-        this.promise_callbacks = {};
-    }
-
-    /**
-     * Method, that inits loading of current view.
-     */
-    initLoading() {
-        this.error = this.response = null;
-        this.loading = true;
-
-        this._initLoadingPromise();
-    }
-
-    /**
-     * Method, that is called when page was loaded successfully.
-     */
-    setLoadingSuccessful() {
-        this.loading = false;
-        this.success = true;
-        this.error = null;
-
-        return setTimeout(() => {
-            this.promise_callbacks.resolve();
-            this.promise_status = 'resolved';
-        }, 10);
-    }
-
-    /**
-     * Method, that is called when page was loaded with error.
-     */
-    setLoadingError(error) {
-        this.loading = false;
-        this.success = null;
-        this.error = error;
-
-        return setTimeout(() => {
-            this.promise_callbacks.reject();
-            this.promise_status = 'rejected';
-        }, 10);
-    }
-
-    /**
-     * Method, that inits new instance of promise.
-     * @private
-     */
-    _initLoadingPromise() {
-        if (!(this.promise && (this.promise_status === '' || this.promise_status === 'pending'))) {
-            this.promise_callbacks = {
-                resolve: undefined,
-                reject: undefined,
-            };
-
-            this.promise = new Promise((resolve, reject) => {
-                this.promise_callbacks.resolve = resolve;
-                this.promise_callbacks.reject = reject;
-            });
-
-            this.promise_status = 'pending';
-        }
-    }
-}
-
-/**
  * Function, that returns translation of string.
  * @param {string} str - String to translate.
  * @return {string}
@@ -743,11 +647,6 @@ export function _translate(str) {
 
     return str;
 }
-
-/**
- * Instance of CurrentView class, that is used in gui tests.
- */
-export let current_view = new CurrentView();
 
 /**
  * Variable, that is responsible for 3rd level path keys.

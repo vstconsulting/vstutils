@@ -76,6 +76,8 @@ export class View {
         this.path = params.path;
         this.title = params.title || params.name;
 
+        this.hidden = false;
+
         /**
          * @type {Array<string>|null}
          */

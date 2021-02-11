@@ -1,6 +1,6 @@
 /* eslint-disable vue/one-component-per-file */
 import OneEntity from './OneEntity.vue';
-import { current_view, formatPath, RequestTypes } from '../../utils';
+import { formatPath, RequestTypes } from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { apiConnector } from '../../api';
@@ -89,7 +89,6 @@ export const PageNewViewComponent = {
                 this.commitMutation('validateAndSetInstanceData');
             } catch (e) {
                 window.app.error_handler.defineErrorAndShow(e);
-                current_view.setLoadingError({});
                 return;
             }
             this.loading = true;
@@ -119,8 +118,6 @@ export const PageNewViewComponent = {
                 ]);
 
                 window.app.error_handler.showError(srt_to_show, str);
-                // the code line below is needed for tests.
-                current_view.setLoadingError(error);
             }
         },
     },
@@ -186,7 +183,6 @@ export const ActionViewComponent = {
                 this.commitMutation('validateAndSetInstanceData', { instance });
             } catch (e) {
                 window.app.error_handler.defineErrorAndShow(e);
-                current_view.setLoadingError({});
                 return;
             }
             this.loading = true;
@@ -213,8 +209,6 @@ export const ActionViewComponent = {
                     str,
                 ]);
                 window.app.error_handler.showError(srt_to_show, str);
-                // the code line below is needed for tests.
-                current_view.setLoadingError({});
             } finally {
                 this.loading = false;
             }

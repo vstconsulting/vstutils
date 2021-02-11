@@ -98,9 +98,7 @@ export const BaseViewMixin = {
          * Method, that sets <title></title> equal to this.title.
          */
         setDocumentTitle() {
-            let title = this.$options.filters.capitalize(this.title);
-            title = this.$options.filters.split(title);
-            document.title = title;
+            document.title = this.title;
         },
         /**
          * Method, that calls from created() Hook.
