@@ -6,6 +6,8 @@ from django.utils import timezone
 
 
 class UpdateAuthorSerializer(VSTSerializer):
+    _view_field_name = 'id'
+
     class Meta:
         __inject_from__ = 'list'
 

@@ -32,6 +32,8 @@ default_extra_metadata: dict = {
     "detail_fields": None,
     # dict which override fields types of detail view serializer
     "override_detail_fields": None,
+    # name of default view field
+    "view_field_name": None,
     # dict which indicates about properties groups
     "properties_groups": None,
     # key-value of actions serializers (key - action, value - serializer class)
@@ -151,8 +153,19 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=unnecessary-lambda,no-value-for-parameter
         return SimpleLazyObject(lambda: cls.get_view_class())
 
-    def get_serializer_class(cls, serializer_class, serializer_class_name=None, fields=None, field_overrides=None):
+    def get_serializer_class(
+            cls,
+            serializer_class,
+            serializer_class_name=None,
+            fields=None,
+            field_overrides=None,
+            view_field_name=None
+    ):
         # pylint: disable=no-value-for-parameter
+        attributes = {}
+
+        if view_field_name:
+            attributes['_view_field_name'] = view_field_name
 
         if serializer_class is None:
             serializer_class = api_serializers.VSTSerializer
@@ -179,16 +192,14 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         properties_groups = cls.get_extra_metadata()['properties_groups']
 
         if properties_groups:
-            schema_properties_groups = dict(**properties_groups)
-        else:
-            schema_properties_groups = None
+            attributes['_schema_properties_groups'] = dict(**properties_groups)
 
         return type(serializer_class)(
             serializer_class_name,
             (serializer_class,),
             {
                 "Meta": meta,
-                "_schema_properties_groups": schema_properties_groups,
+                **attributes,
                 **(field_overrides or {})
             }
         )
@@ -209,7 +220,12 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                         getattr(extra_serializer_class.Meta, 'fields', None) or
                         metadata.get(f'{inject_from}_fields', None)
                     ),
-                    field_overrides=metadata.get(f'override_{inject_from}_fields', None)
+                    field_overrides=metadata.get(f'override_{inject_from}_fields', None),
+                    view_field_name=(
+                        metadata['view_field_name']
+                        if inject_from is not None
+                        else getattr(extra_serializer_class, '_view_field_name', None)
+                    )
                 )
             serializers[serializer_name] = extra_serializer_class
 
@@ -292,7 +308,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 serializer_class=serializer_class,
                 serializer_class_name=cls.get_list_serializer_name(),  # pylint: disable=no-value-for-parameter
                 fields=list_fields,
-                field_overrides=metadata['override_list_fields'] or {}
+                field_overrides=metadata['override_list_fields'] or {},
+                view_field_name=metadata['view_field_name']
             )
         }
         detail_fields_override = metadata['override_detail_fields']
@@ -303,7 +320,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializer_class=serializer_class,
             serializer_class_name=f'One{serializers["serializer_class"].__name__}',
             fields=detail_fields,
-            field_overrides=detail_fields_override or {}
+            field_overrides=detail_fields_override or {},
+            view_field_name=metadata['view_field_name']
         )
         cls._update_serializers(metadata, serializers)
 

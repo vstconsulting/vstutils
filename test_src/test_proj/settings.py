@@ -13,6 +13,9 @@ API['v4'] = {}
 API[VST_API_VERSION][r'author'] = dict(
     model='test_proj.models.Author'
 )
+API[VST_API_VERSION][r'list'] = dict(
+    model='test_proj.models.List'
+)
 API[VST_API_VERSION][r'settings'] = dict(
     view='vstutils.api.views.SettingsViewSet',
     op_types=['get', 'mod'],

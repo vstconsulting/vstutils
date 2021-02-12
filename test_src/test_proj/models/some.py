@@ -40,6 +40,7 @@ class ModelWithBinaryFiles(BModel):
     some_validatedmultiplenamedbinimage = models.TextField(default='')
 
     class Meta:
+        _view_field_name = 'some_namedbinfile'
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
             some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False),
