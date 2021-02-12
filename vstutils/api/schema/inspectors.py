@@ -10,6 +10,15 @@ from rest_framework.fields import Field, JSONField
 from .. import fields, serializers, validators
 
 
+# Constants
+DEFAULT_VIEW_FIELD_NAMES = (
+    'name',
+    'title',
+    'username',
+    'email',
+    'key',
+)
+
 # Extra types
 
 # Extra formats
@@ -342,13 +351,19 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
 
         if result != NotHandled:
             schema = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)[self.get_serializer_ref_name(field)]
-            default = {'': list(schema['properties'].keys())}
+            schema_properties = tuple(schema['properties'].keys())
+            serializer_class = schema._NP_serializer  # pylint: disable=protected-access
 
-            # pylint: disable=protected-access
             schema_properties_groups = OrderedDict(
-                getattr(schema._NP_serializer, '_schema_properties_groups', None) or
-                default
+                getattr(serializer_class, '_schema_properties_groups', None) or {'': schema_properties}
             )
+            view_field_name = getattr(serializer_class, '_view_field_name', None)
+            if view_field_name is None and schema_properties:
+                view_field_name = next(
+                    (i for i in schema_properties if i in DEFAULT_VIEW_FIELD_NAMES),
+                    next(iter(schema_properties[1:]), schema_properties[0])
+                )
+
             if schema_properties_groups:
                 not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))
                 if not_handled:
@@ -358,4 +373,5 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
                         if prop in not_handled
                     ]
             schema['x-properties-groups'] = schema_properties_groups
+            schema['x-view-field-name'] = view_field_name
         return result
