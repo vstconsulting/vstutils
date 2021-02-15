@@ -931,11 +931,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
         self.assertEqual(api['definitions']['OneAuthor']['x-view-field-name'], 'name')
+        self.assertEqual(api['definitions']['OneAuthor']['x-non-bulk-methods'], ['post'])
         self.assertEqual(api['definitions']['OneVariable']['x-view-field-name'], 'key')
         self.assertEqual(api['definitions']['OneUser']['x-view-field-name'], 'username')
         self.assertEqual(api['definitions']['OneList']['x-view-field-name'], 'value')
         self.assertEqual(api['definitions']['ModelWithBinaryFiles']['x-view-field-name'], 'some_namedbinfile')
         self.assertEqual(api['definitions']['UpdateAuthor']['x-view-field-name'], 'id')
+        self.assertEqual(api['definitions']['UpdateAuthor']['x-non-bulk-methods'], '*')
 
         hidden_param = [i for i in api['paths']['/author/']['get']['parameters'] if i['name'] == 'hidden'][0]
         self.assertEqual(hidden_param['type'], 'boolean')

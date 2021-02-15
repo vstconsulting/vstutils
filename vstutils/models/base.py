@@ -34,6 +34,8 @@ default_extra_metadata: dict = {
     "override_detail_fields": None,
     # name of default view field
     "view_field_name": None,
+    # list or tuple of non-bulk methods from gui
+    "non_bulk_methods": None,
     # dict which indicates about properties groups
     "properties_groups": None,
     # key-value of actions serializers (key - action, value - serializer class)
@@ -153,15 +155,16 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=unnecessary-lambda,no-value-for-parameter
         return SimpleLazyObject(lambda: cls.get_view_class())
 
-    def get_serializer_class(
+    def get_serializer_class(  # noqa: CFQ002
             cls,
             serializer_class,
             serializer_class_name=None,
             fields=None,
             field_overrides=None,
-            view_field_name=None
+            view_field_name=None,
+            non_bulk_methods=None,
     ):
-        # pylint: disable=no-value-for-parameter
+        # pylint: disable=no-value-for-parameter,too-many-arguments
         attributes = {}
 
         if view_field_name:
@@ -194,6 +197,9 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if properties_groups:
             attributes['_schema_properties_groups'] = dict(**properties_groups)
 
+        if non_bulk_methods:
+            attributes['_non_bulk_methods'] = non_bulk_methods
+
         return type(serializer_class)(
             serializer_class_name,
             (serializer_class,),
@@ -225,6 +231,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                         metadata['view_field_name']
                         if inject_from is not None
                         else getattr(extra_serializer_class, '_view_field_name', None)
+                    ),
+                    non_bulk_methods=(
+                        getattr(extra_serializer_class, '_non_bulk_methods', None) or metadata['non_bulk_methods']
+                        if inject_from is not None and metadata['non_bulk_methods']
+                        else getattr(extra_serializer_class, '_non_bulk_methods', None)
                     )
                 )
             serializers[serializer_name] = extra_serializer_class
@@ -309,7 +320,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 serializer_class_name=cls.get_list_serializer_name(),  # pylint: disable=no-value-for-parameter
                 fields=list_fields,
                 field_overrides=metadata['override_list_fields'] or {},
-                view_field_name=metadata['view_field_name']
+                view_field_name=metadata['view_field_name'],
+                non_bulk_methods=metadata['non_bulk_methods']
             )
         }
         detail_fields_override = metadata['override_detail_fields']
@@ -321,7 +333,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializer_class_name=f'One{serializers["serializer_class"].__name__}',
             fields=detail_fields,
             field_overrides=detail_fields_override or {},
-            view_field_name=metadata['view_field_name']
+            view_field_name=metadata['view_field_name'],
+            non_bulk_methods=metadata['non_bulk_methods']
         )
         cls._update_serializers(metadata, serializers)
 

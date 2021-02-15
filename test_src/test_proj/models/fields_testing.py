@@ -7,6 +7,7 @@ from django.utils import timezone
 
 class UpdateAuthorSerializer(VSTSerializer):
     _view_field_name = 'id'
+    _non_bulk_methods = '*'
 
     class Meta:
         __inject_from__ = 'list'
@@ -18,6 +19,7 @@ class Author(BModel):
 
     class Meta:
         default_related_name = 'author'
+        _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
         _detail_fields = ['name', 'registerDate', 'posts']
         _extra_serializer_classes = {

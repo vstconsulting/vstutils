@@ -354,6 +354,7 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             schema_properties = tuple(schema['properties'].keys())
             serializer_class = schema._NP_serializer  # pylint: disable=protected-access
 
+            non_bulk_methods = getattr(serializer_class, '_non_bulk_methods', None)
             schema_properties_groups = OrderedDict(
                 getattr(serializer_class, '_schema_properties_groups', None) or {'': schema_properties}
             )
@@ -374,4 +375,6 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
                     ]
             schema['x-properties-groups'] = schema_properties_groups
             schema['x-view-field-name'] = view_field_name
+            if non_bulk_methods:
+                schema['x-non-bulk-methods'] = non_bulk_methods
         return result

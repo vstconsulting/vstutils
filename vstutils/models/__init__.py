@@ -124,6 +124,8 @@ class BModel(BaseModel):
           that will be redeclared in serializer attributes(think of it as you are redeclaring fields in DRF ModelSerializer).
         - ``_properties_groups`` - dict with key as group name and value as list with fields. Allows to
           grouping fields on frontend in cases.
+        - ``_view_field_name`` - name of field which frontend should show as main view name.
+        - ``_non_bulk_methods`` - list of methods which must not used via bulk requests.
         - ``_extra_serializer_classes`` - mapping with additional serializers in viewset. Example, custom serializer,
           which will compute smthg in action (mapping name). Value can be string for import.
           Important note: setting `model` attribute to None allows to use standard serializer generation mechanism
