@@ -16,6 +16,8 @@
             { "name": "Categories", "url": "/category", "span_class": "fa fa-cog" },
             { "name": "Posts", "url": "/post", "span_class": "fa fa-cog" },
             { "name": "Post Types", "url": "/post_types", "span_class": "fa fa-cog" },
+            { "name": "Predefined Attributes", "url": "/predefined_attribute", "span_class": "fa fa-cog" },
+            { "name": "All Fields", "url": "/all_fields", "span_class": "fa fa-cog" },
             {
                 "name": "System",
                 "span_class": "fa fa-cog",
@@ -23,16 +25,11 @@
             }
         ],
         "x-settings": { "static_path": "/static/", "enable_gravatar": true, "time_zone": "UTC" },
-        "x-versions": {
-            "application": "1.0.0",
-            "library": "1.0.0",
-            "vstutils": "4.2.1b6",
-            "django": "2.2.16"
-        },
+        "x-versions": { "application": "1.0.0", "library": "1.0.0", "vstutils": "4.3.1", "django": "2.2.18" },
         "version": "v1",
         "x-user-id": 1
     },
-    "host": "localhost:8000",
+    "host": "0.0.0.0:8080",
     "schemes": ["http"],
     "basePath": "/api/v1",
     "consumes": ["application/json"],
@@ -40,10 +37,133 @@
     "securityDefinitions": { "basic": { "type": "basic" } },
     "security": [{ "basic": [] }],
     "paths": {
+        "/all_fields/": {
+            "get": {
+                "operationId": "all_fields_list",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/AllFields" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["all_fields"],
+                "x-subscribe-labels": ["quick.AllFields"]
+            },
+            "post": {
+                "operationId": "all_fields_add",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAllFields" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OneAllFields" } }
+                },
+                "tags": ["all_fields"]
+            },
+            "parameters": []
+        },
+        "/all_fields/{id}/": {
+            "get": {
+                "operationId": "all_fields_get",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAllFields" } }
+                },
+                "tags": ["all_fields"],
+                "x-subscribe-labels": ["quick.AllFields"]
+            },
+            "put": {
+                "operationId": "all_fields_update",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAllFields" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAllFields" } }
+                },
+                "tags": ["all_fields"]
+            },
+            "patch": {
+                "operationId": "all_fields_edit",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneAllFields" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAllFields" } }
+                },
+                "tags": ["all_fields"]
+            },
+            "delete": {
+                "operationId": "all_fields_remove",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["all_fields"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this all fields.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
         "/author/": {
             "get": {
                 "operationId": "author_list",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "id",
@@ -115,7 +235,7 @@
             },
             "post": {
                 "operationId": "author_add",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "data",
@@ -232,7 +352,7 @@
         "/author/{id}/": {
             "get": {
                 "operationId": "author_get",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
@@ -242,7 +362,7 @@
             },
             "put": {
                 "operationId": "author_update",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "data",
@@ -258,7 +378,7 @@
             },
             "patch": {
                 "operationId": "author_edit",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "data",
@@ -274,7 +394,7 @@
             },
             "delete": {
                 "operationId": "author_remove",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["author"]
@@ -292,7 +412,7 @@
         "/author/{id}/post/": {
             "get": {
                 "operationId": "author_post_list",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "id",
@@ -371,7 +491,7 @@
             },
             "post": {
                 "operationId": "author_post_add",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -419,7 +539,7 @@
         "/author/{id}/post/{post_id}/": {
             "get": {
                 "operationId": "author_post_get",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
@@ -429,7 +549,7 @@
             },
             "put": {
                 "operationId": "author_post_update",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -445,7 +565,7 @@
             },
             "patch": {
                 "operationId": "author_post_edit",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -461,7 +581,7 @@
             },
             "delete": {
                 "operationId": "author_post_remove",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["author"]
@@ -557,7 +677,7 @@
         "/author/{id}/post/{post_id}/meta/": {
             "get": {
                 "operationId": "author_post_meta_list",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "id",
@@ -623,7 +743,7 @@
             },
             "post": {
                 "operationId": "author_post_meta_add",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -658,7 +778,7 @@
         "/author/{id}/post/{post_id}/meta/{meta_id}/": {
             "get": {
                 "operationId": "author_post_meta_get",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
@@ -668,7 +788,7 @@
             },
             "put": {
                 "operationId": "author_post_meta_update",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -684,7 +804,7 @@
             },
             "patch": {
                 "operationId": "author_post_meta_edit",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -700,7 +820,7 @@
             },
             "delete": {
                 "operationId": "author_post_meta_remove",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["author"]
@@ -793,7 +913,7 @@
         "/category/": {
             "get": {
                 "operationId": "category_list",
-                "description": "",
+                "description": "Category(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "id",
@@ -865,7 +985,7 @@
             },
             "post": {
                 "operationId": "category_add",
-                "description": "",
+                "description": "Category(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "data",
@@ -884,7 +1004,7 @@
         "/category/{id}/": {
             "get": {
                 "operationId": "category_get",
-                "description": "",
+                "description": "Category(id, hidden, name)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
@@ -894,7 +1014,7 @@
             },
             "put": {
                 "operationId": "category_update",
-                "description": "",
+                "description": "Category(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "data",
@@ -910,7 +1030,7 @@
             },
             "patch": {
                 "operationId": "category_edit",
-                "description": "",
+                "description": "Category(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "data",
@@ -926,7 +1046,7 @@
             },
             "delete": {
                 "operationId": "category_remove",
-                "description": "",
+                "description": "Category(id, hidden, name)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["category"]
@@ -944,7 +1064,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_list",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "id",
@@ -1016,7 +1136,7 @@
             },
             "post": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_add",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1133,7 +1253,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/{id}/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_get",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
@@ -1143,7 +1263,7 @@
             },
             "put": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_update",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1159,7 +1279,7 @@
             },
             "patch": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_edit",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1175,7 +1295,7 @@
             },
             "delete": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_remove",
-                "description": "",
+                "description": "Author(id, hidden, name, registerDate)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["fragment1"]
@@ -1193,7 +1313,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_list",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "id",
@@ -1272,7 +1392,7 @@
             },
             "post": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_add",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1320,7 +1440,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_get",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
@@ -1330,7 +1450,7 @@
             },
             "put": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_update",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1346,7 +1466,7 @@
             },
             "patch": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_edit",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1362,7 +1482,7 @@
             },
             "delete": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_remove",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["fragment1"]
@@ -1458,7 +1578,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/meta/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_list",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "id",
@@ -1524,7 +1644,7 @@
             },
             "post": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_add",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1559,7 +1679,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/meta/{meta_id}/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_get",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
@@ -1569,7 +1689,7 @@
             },
             "put": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_update",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1585,7 +1705,7 @@
             },
             "patch": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_edit",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1601,7 +1721,7 @@
             },
             "delete": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_meta_remove",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["fragment1"]
@@ -1694,7 +1814,7 @@
         "/post/": {
             "get": {
                 "operationId": "post_list",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "id",
@@ -1773,7 +1893,7 @@
             },
             "post": {
                 "operationId": "post_add",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1804,7 +1924,7 @@
         "/post/{id}/": {
             "get": {
                 "operationId": "post_get",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
@@ -1814,7 +1934,7 @@
             },
             "put": {
                 "operationId": "post_update",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1830,7 +1950,7 @@
             },
             "patch": {
                 "operationId": "post_edit",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1846,7 +1966,7 @@
             },
             "delete": {
                 "operationId": "post_remove",
-                "description": "",
+                "description": "Post(id, hidden, author, title, text, category, type)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["post"]
@@ -1921,7 +2041,7 @@
         "/post/{id}/meta/": {
             "get": {
                 "operationId": "post_meta_list",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "id",
@@ -1987,7 +2107,7 @@
             },
             "post": {
                 "operationId": "post_meta_add",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -2015,7 +2135,7 @@
         "/post/{id}/meta/{meta_id}/": {
             "get": {
                 "operationId": "post_meta_get",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
@@ -2025,7 +2145,7 @@
             },
             "put": {
                 "operationId": "post_meta_update",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -2041,7 +2161,7 @@
             },
             "patch": {
                 "operationId": "post_meta_edit",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [
                     {
                         "name": "data",
@@ -2057,7 +2177,7 @@
             },
             "delete": {
                 "operationId": "post_meta_remove",
-                "description": "",
+                "description": "PostMeta(id, hidden, key, value, post)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["post"]
@@ -2142,7 +2262,7 @@
         "/post_types/": {
             "get": {
                 "operationId": "post_types_list",
-                "description": "",
+                "description": "PredefinedPostType(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "id",
@@ -2217,7 +2337,7 @@
             },
             "post": {
                 "operationId": "post_types_add",
-                "description": "",
+                "description": "PredefinedPostType(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "data",
@@ -2239,7 +2359,7 @@
         "/post_types/{id}/": {
             "get": {
                 "operationId": "post_types_get",
-                "description": "",
+                "description": "PredefinedPostType(id, hidden, name)",
                 "parameters": [],
                 "responses": {
                     "200": {
@@ -2252,7 +2372,7 @@
             },
             "put": {
                 "operationId": "post_types_update",
-                "description": "",
+                "description": "PredefinedPostType(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "data",
@@ -2271,7 +2391,7 @@
             },
             "patch": {
                 "operationId": "post_types_edit",
-                "description": "",
+                "description": "PredefinedPostType(id, hidden, name)",
                 "parameters": [
                     {
                         "name": "data",
@@ -2290,7 +2410,7 @@
             },
             "delete": {
                 "operationId": "post_types_remove",
-                "description": "",
+                "description": "PredefinedPostType(id, hidden, name)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["post_types"]
@@ -2300,6 +2420,179 @@
                     "name": "id",
                     "in": "path",
                     "description": "A unique integer value identifying this predefined post type.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/predefined_attribute/": {
+            "get": {
+                "operationId": "predefined_attribute_list",
+                "description": "PredefinedAttribute(id, hidden, name, field_type)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "field_type",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/definitions/PredefinedAttribute" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": ["predefined_attribute"],
+                "x-subscribe-labels": ["quick.PredefinedAttribute"]
+            },
+            "post": {
+                "operationId": "predefined_attribute_add",
+                "description": "PredefinedAttribute(id, hidden, name, field_type)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED",
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                },
+                "tags": ["predefined_attribute"]
+            },
+            "parameters": []
+        },
+        "/predefined_attribute/{id}/": {
+            "get": {
+                "operationId": "predefined_attribute_get",
+                "description": "PredefinedAttribute(id, hidden, name, field_type)",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                },
+                "tags": ["predefined_attribute"],
+                "x-subscribe-labels": ["quick.PredefinedAttribute"]
+            },
+            "put": {
+                "operationId": "predefined_attribute_update",
+                "description": "PredefinedAttribute(id, hidden, name, field_type)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                },
+                "tags": ["predefined_attribute"]
+            },
+            "patch": {
+                "operationId": "predefined_attribute_edit",
+                "description": "PredefinedAttribute(id, hidden, name, field_type)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": { "$ref": "#/definitions/OnePredefinedAttribute" }
+                    }
+                },
+                "tags": ["predefined_attribute"]
+            },
+            "delete": {
+                "operationId": "predefined_attribute_remove",
+                "description": "PredefinedAttribute(id, hidden, name, field_type)",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["predefined_attribute"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this predefined attribute.",
                     "required": true,
                     "type": "integer"
                 }
@@ -2513,23 +2806,585 @@
         }
     },
     "definitions": {
+        "AllFields": {
+            "required": [
+                "autocomplete_model",
+                "autocomplete_enum",
+                "binfile",
+                "dynamic_fk",
+                "dynamic",
+                "file",
+                "fk",
+                "html",
+                "multiselect_model",
+                "namedbinfile",
+                "namedbinimage",
+                "namedbinimage_validation",
+                "rating_stars",
+                "rating_slider",
+                "rating_icon",
+                "secretfile",
+                "uptime"
+            ],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "autocomplete_model": {
+                    "title": "Autocomplete model",
+                    "type": "string",
+                    "format": "fk_autocomplete",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Author" },
+                        "value_field": "name",
+                        "view_field": "name"
+                    },
+                    "x-nullable": true
+                },
+                "autocomplete_enum": {
+                    "title": "Autocomplete enum",
+                    "type": "string",
+                    "format": "autocomplete",
+                    "enum": ["Author 1", "Author 2"],
+                    "x-nullable": true
+                },
+                "binfile": { "title": "Binfile", "type": "string", "format": "binfile", "x-nullable": true },
+                "boolean": { "title": "Boolean", "type": "boolean" },
+                "choices": {
+                    "title": "Choices",
+                    "type": "string",
+                    "enum": ["integer", "boolean"],
+                    "x-nullable": true
+                },
+                "color": {
+                    "title": "Color",
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1,
+                    "x-nullable": true,
+                    "format": "color"
+                },
+                "crontab": {
+                    "title": "Crontab",
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "x-nullable": true,
+                    "format": "crontab"
+                },
+                "date": { "title": "Date", "type": "string", "format": "date", "x-nullable": true },
+                "date_time": {
+                    "title": "Date time",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "decimal": { "title": "Decimal", "type": "string", "format": "decimal" },
+                "dynamic_fk": {
+                    "title": "Dynamic fk",
+                    "type": "string",
+                    "format": "dynamic_fk",
+                    "additionalProperties": { "field": "fk", "field_attribute": "field_type" }
+                },
+                "dynamic": {
+                    "title": "Dynamic",
+                    "type": "string",
+                    "format": "dynamic",
+                    "additionalProperties": {
+                        "field": "choices",
+                        "choices": {},
+                        "types": { "integer": "integer", "boolean": "boolean" }
+                    },
+                    "x-nullable": true
+                },
+                "email": {
+                    "title": "Email",
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                    "x-nullable": true
+                },
+                "file": { "title": "File", "type": "string", "format": "file", "x-nullable": true },
+                "fk": {
+                    "title": "Fk",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/PredefinedAttribute" },
+                        "value_field": "id",
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null
+                    },
+                    "x-nullable": true
+                },
+                "float": { "title": "Float", "type": "number", "x-nullable": true },
+                "html": { "title": "Html", "type": "string", "format": "html" },
+                "integer": { "title": "Integer", "type": "integer", "x-nullable": true },
+                "json": { "title": "Json", "type": "string", "format": "json", "default": "{}" },
+                "multiplenamedbinfile": {
+                    "title": "Multiplenamedbinfile",
+                    "type": "string",
+                    "format": "multiplenamedbinfile"
+                },
+                "multiplenamedbinimage": {
+                    "title": "Multiplenamedbinimage",
+                    "type": "string",
+                    "format": "multiplenamedbinimage",
+                    "additionalProperties": {}
+                },
+                "multiplenamedbinimage_validation": {
+                    "title": "Multiplenamedbinimage validation",
+                    "type": "string",
+                    "format": "multiplenamedbinimage",
+                    "additionalProperties": {
+                        "min_width": 400,
+                        "max_width": 800,
+                        "min_height": 200,
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                    }
+                },
+                "multiselect_model": {
+                    "title": "Multiselect model",
+                    "type": "string",
+                    "format": "multiselect",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Author" },
+                        "value_field": "name",
+                        "view_field": "name",
+                        "view_separator": ",",
+                        "usePrefetch": false,
+                        "makeLink": true,
+                        "dependence": null
+                    },
+                    "x-nullable": true
+                },
+                "namedbinfile": {
+                    "title": "Namedbinfile",
+                    "type": "string",
+                    "format": "namedbinfile",
+                    "x-nullable": true
+                },
+                "namedbinimage": {
+                    "title": "Namedbinimage",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "namedbinimage_validation": {
+                    "title": "Namedbinimage validation",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {
+                        "min_width": 400,
+                        "max_width": 800,
+                        "min_height": 200,
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                    },
+                    "x-nullable": true
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string",
+                    "format": "password",
+                    "x-nullable": true
+                },
+                "rating_stars": {
+                    "title": "Rating stars",
+                    "type": "number",
+                    "format": "rating",
+                    "additionalProperties": {
+                        "min_value": 0,
+                        "max_value": 5,
+                        "step": 1,
+                        "style": "stars",
+                        "color": "green",
+                        "fa_class": null
+                    },
+                    "x-nullable": true
+                },
+                "rating_slider": {
+                    "title": "Rating slider",
+                    "type": "number",
+                    "format": "rating",
+                    "additionalProperties": {
+                        "min_value": 0,
+                        "max_value": 5,
+                        "step": 0.3,
+                        "style": "slider",
+                        "color": "orange",
+                        "fa_class": null
+                    }
+                },
+                "rating_icon": {
+                    "title": "Rating icon",
+                    "type": "number",
+                    "format": "rating",
+                    "additionalProperties": {
+                        "min_value": 0,
+                        "max_value": 5,
+                        "step": 1,
+                        "style": "fa_icon",
+                        "color": "DeepPink",
+                        "fa_class": "fas fa-poo-storm"
+                    }
+                },
+                "secretfile": {
+                    "title": "Secretfile",
+                    "type": "string",
+                    "format": "secretfile",
+                    "x-nullable": true
+                },
+                "textarea": { "title": "Textarea", "type": "string", "format": "textarea", "default": "" },
+                "uptime": { "title": "Uptime", "type": "integer", "format": "uptime", "x-nullable": true }
+            },
+            "x-properties-groups": {
+                "": [
+                    "id",
+                    "autocomplete_model",
+                    "autocomplete_enum",
+                    "binfile",
+                    "boolean",
+                    "choices",
+                    "color",
+                    "crontab",
+                    "date",
+                    "date_time",
+                    "decimal",
+                    "dynamic_fk",
+                    "dynamic",
+                    "email",
+                    "file",
+                    "fk",
+                    "float",
+                    "html",
+                    "integer",
+                    "json",
+                    "multiplenamedbinfile",
+                    "multiplenamedbinimage",
+                    "multiplenamedbinimage_validation",
+                    "multiselect_model",
+                    "namedbinfile",
+                    "namedbinimage",
+                    "namedbinimage_validation",
+                    "password",
+                    "rating_stars",
+                    "rating_slider",
+                    "rating_icon",
+                    "secretfile",
+                    "textarea",
+                    "uptime"
+                ]
+            }
+        },
+        "OneAllFields": {
+            "required": [
+                "autocomplete_model",
+                "autocomplete_enum",
+                "binfile",
+                "dynamic_fk",
+                "dynamic",
+                "file",
+                "fk",
+                "html",
+                "multiselect_model",
+                "namedbinfile",
+                "namedbinimage",
+                "namedbinimage_validation",
+                "rating_stars",
+                "rating_slider",
+                "rating_icon",
+                "secretfile",
+                "uptime"
+            ],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "autocomplete_model": {
+                    "title": "Autocomplete model",
+                    "type": "string",
+                    "format": "fk_autocomplete",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Author" },
+                        "value_field": "name",
+                        "view_field": "name"
+                    },
+                    "x-nullable": true
+                },
+                "autocomplete_enum": {
+                    "title": "Autocomplete enum",
+                    "type": "string",
+                    "format": "autocomplete",
+                    "enum": ["Author 1", "Author 2"],
+                    "x-nullable": true
+                },
+                "binfile": { "title": "Binfile", "type": "string", "format": "binfile", "x-nullable": true },
+                "boolean": { "title": "Boolean", "type": "boolean" },
+                "choices": {
+                    "title": "Choices",
+                    "type": "string",
+                    "enum": ["integer", "boolean"],
+                    "x-nullable": true
+                },
+                "color": {
+                    "title": "Color",
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1,
+                    "x-nullable": true,
+                    "format": "color"
+                },
+                "crontab": {
+                    "title": "Crontab",
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 1,
+                    "x-nullable": true,
+                    "format": "crontab"
+                },
+                "date": { "title": "Date", "type": "string", "format": "date", "x-nullable": true },
+                "date_time": {
+                    "title": "Date time",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "decimal": { "title": "Decimal", "type": "string", "format": "decimal" },
+                "dynamic_fk": {
+                    "title": "Dynamic fk",
+                    "type": "string",
+                    "format": "dynamic_fk",
+                    "additionalProperties": { "field": "fk", "field_attribute": "field_type" }
+                },
+                "dynamic": {
+                    "title": "Dynamic",
+                    "type": "string",
+                    "format": "dynamic",
+                    "additionalProperties": {
+                        "field": "choices",
+                        "choices": {},
+                        "types": { "integer": "integer", "boolean": "boolean" }
+                    },
+                    "x-nullable": true
+                },
+                "email": {
+                    "title": "Email",
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                    "x-nullable": true
+                },
+                "file": { "title": "File", "type": "string", "format": "file", "x-nullable": true },
+                "fk": {
+                    "title": "Fk",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/PredefinedAttribute" },
+                        "value_field": "id",
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null
+                    },
+                    "x-nullable": true
+                },
+                "float": { "title": "Float", "type": "number", "x-nullable": true },
+                "html": { "title": "Html", "type": "string", "format": "html" },
+                "integer": { "title": "Integer", "type": "integer", "x-nullable": true },
+                "json": { "title": "Json", "type": "string", "format": "json", "default": "{}" },
+                "multiplenamedbinfile": {
+                    "title": "Multiplenamedbinfile",
+                    "type": "string",
+                    "format": "multiplenamedbinfile"
+                },
+                "multiplenamedbinimage": {
+                    "title": "Multiplenamedbinimage",
+                    "type": "string",
+                    "format": "multiplenamedbinimage",
+                    "additionalProperties": {}
+                },
+                "multiplenamedbinimage_validation": {
+                    "title": "Multiplenamedbinimage validation",
+                    "type": "string",
+                    "format": "multiplenamedbinimage",
+                    "additionalProperties": {
+                        "min_width": 400,
+                        "max_width": 800,
+                        "min_height": 200,
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                    }
+                },
+                "multiselect_model": {
+                    "title": "Multiselect model",
+                    "type": "string",
+                    "format": "multiselect",
+                    "additionalProperties": {
+                        "model": { "$ref": "#/definitions/Author" },
+                        "value_field": "name",
+                        "view_field": "name",
+                        "view_separator": ",",
+                        "usePrefetch": false,
+                        "makeLink": true,
+                        "dependence": null
+                    },
+                    "x-nullable": true
+                },
+                "namedbinfile": {
+                    "title": "Namedbinfile",
+                    "type": "string",
+                    "format": "namedbinfile",
+                    "x-nullable": true
+                },
+                "namedbinimage": {
+                    "title": "Namedbinimage",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "namedbinimage_validation": {
+                    "title": "Namedbinimage validation",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {
+                        "min_width": 400,
+                        "max_width": 800,
+                        "min_height": 200,
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                    },
+                    "x-nullable": true
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string",
+                    "format": "password",
+                    "x-nullable": true
+                },
+                "rating_stars": {
+                    "title": "Rating stars",
+                    "type": "number",
+                    "format": "rating",
+                    "additionalProperties": {
+                        "min_value": 0,
+                        "max_value": 5,
+                        "step": 1,
+                        "style": "stars",
+                        "color": "green",
+                        "fa_class": null
+                    },
+                    "x-nullable": true
+                },
+                "rating_slider": {
+                    "title": "Rating slider",
+                    "type": "number",
+                    "format": "rating",
+                    "additionalProperties": {
+                        "min_value": 0,
+                        "max_value": 5,
+                        "step": 0.3,
+                        "style": "slider",
+                        "color": "orange",
+                        "fa_class": null
+                    }
+                },
+                "rating_icon": {
+                    "title": "Rating icon",
+                    "type": "number",
+                    "format": "rating",
+                    "additionalProperties": {
+                        "min_value": 0,
+                        "max_value": 5,
+                        "step": 1,
+                        "style": "fa_icon",
+                        "color": "DeepPink",
+                        "fa_class": "fas fa-poo-storm"
+                    }
+                },
+                "secretfile": {
+                    "title": "Secretfile",
+                    "type": "string",
+                    "format": "secretfile",
+                    "x-nullable": true
+                },
+                "textarea": { "title": "Textarea", "type": "string", "format": "textarea", "default": "" },
+                "uptime": { "title": "Uptime", "type": "integer", "format": "uptime", "x-nullable": true }
+            },
+            "x-properties-groups": {
+                "": [
+                    "id",
+                    "autocomplete_model",
+                    "autocomplete_enum",
+                    "binfile",
+                    "boolean",
+                    "choices",
+                    "color",
+                    "crontab",
+                    "date",
+                    "date_time",
+                    "decimal",
+                    "dynamic_fk",
+                    "dynamic",
+                    "email",
+                    "file",
+                    "fk",
+                    "float",
+                    "html",
+                    "integer",
+                    "json",
+                    "multiplenamedbinfile",
+                    "multiplenamedbinimage",
+                    "multiplenamedbinimage_validation",
+                    "multiselect_model",
+                    "namedbinfile",
+                    "namedbinimage",
+                    "namedbinimage_validation",
+                    "password",
+                    "rating_stars",
+                    "rating_slider",
+                    "rating_icon",
+                    "secretfile",
+                    "textarea",
+                    "uptime"
+                ]
+            }
+        },
         "Author": {
             "required": ["name"],
             "type": "object",
             "properties": {
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
-                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
+                "posts": {
+                    "title": "Posts",
+                    "type": "string",
+                    "format": "related_list",
+                    "readOnly": true,
+                    "additionalProperties": { "fields": ["title", "type"], "viewType": "list" }
+                }
             },
-            "x-properties-groups": { "": ["id", "name"] }
+            "x-properties-groups": { "": ["id", "name", "posts"] }
         },
         "OneAuthor": {
             "required": ["name"],
             "type": "object",
             "properties": {
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
-                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
+                "posts": {
+                    "title": "Posts",
+                    "type": "string",
+                    "format": "related_list",
+                    "readOnly": true,
+                    "additionalProperties": { "fields": ["title", "type"], "viewType": "list" }
+                }
             },
-            "x-properties-groups": { "": ["id", "name"] }
+            "x-properties-groups": { "": ["id", "name", "posts"] }
         },
         "SubView": {
             "type": "object",
@@ -2624,7 +3479,7 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/PredefinedPostType" },
-                        "value_field": "id",
+                        "value_field": "name",
                         "view_field": "name"
                     }
                 }
@@ -2707,6 +3562,26 @@
             },
             "x-properties-groups": { "": ["id", "name"] }
         },
+        "PredefinedAttribute": {
+            "required": ["name", "field_type"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
+                "field_type": { "title": "Field type", "type": "string", "maxLength": 256, "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["id", "name", "field_type"] }
+        },
+        "OnePredefinedAttribute": {
+            "required": ["name", "field_type"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
+                "field_type": { "title": "Field type", "type": "string", "enum": ["integer", "boolean"] }
+            },
+            "x-properties-groups": { "": ["id", "name", "field_type"] }
+        },
         "User": {
             "required": ["username"],
             "type": "object",
@@ -2788,9 +3663,9 @@
             "required": ["old_password", "password", "password2"],
             "type": "object",
             "properties": {
-                "old_password": { "title": "Old password", "type": "string", "minLength": 1 },
-                "password": { "title": "New password", "type": "string", "minLength": 1 },
-                "password2": { "title": "Confirm new password", "type": "string", "minLength": 1 }
+                "old_password": { "title": "Old password", "type": "string", "format": "password" },
+                "password": { "title": "New password", "type": "string", "format": "password" },
+                "password2": { "title": "Confirm new password", "type": "string", "format": "password" }
             },
             "x-properties-groups": { "": ["old_password", "password", "password2"] }
         }
