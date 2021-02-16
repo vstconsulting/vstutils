@@ -21,6 +21,17 @@ describe('ModelConstructor', () => {
                 maxLength: 256,
                 minLength: 1,
             }),
+            new StringField({
+                additionalProperties: {
+                    fields: ['title', 'type'],
+                    viewType: 'list',
+                },
+                name: 'posts',
+                title: 'Posts',
+                type: 'string',
+                format: 'related_list',
+                readOnly: true,
+            }),
         ];
     }
 
