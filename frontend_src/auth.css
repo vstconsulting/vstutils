@@ -326,3 +326,7 @@ form > .row {
 .login-logo a {
     color: inherit;
 }
+
+.form-errors li {
+    color: red;
+}

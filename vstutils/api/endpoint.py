@@ -46,16 +46,6 @@ default_authentication_classes = (
 
 append_to_list = list.append
 
-set_cookie_morsel_keys = (
-    "max-age",
-    "expires",
-    "path",
-    "domain",
-    "secure",
-    "httponly",
-    "samesite"
-)
-
 
 @functools.singledispatch
 def _get_request_data(request_data: _t.Iterable) -> _t.Union[_t.List, _t.Tuple]:
@@ -424,22 +414,9 @@ class EndpointViewSet(views.APIView):
             if not allow_fail and not (100 <= result.get('status', 500) < 400):
                 raise Exception(f'Execute transaction stopped. Error message: {str(result)}')
         response = responses.HTTP_200_OK(self.results, timings={f'op{i}': float(j) for i, j in enumerate(timings)})
-        updated_cookies = {
-            cookie_name: cookie_value
-            for cookie_name, cookie_value in context['client'].cookies.items()  # type: ignore
-            if cookie_value.value != request.COOKIES.get(cookie_name, None)
-        }
-        if updated_cookies:
-            for cookie_name, cookie_value in updated_cookies.items():
-                response.set_cookie(
-                    cookie_name,
-                    cookie_value.value,
-                    **{
-                        k.replace('-', '_'): v
-                        for k, v in cookie_value.items()
-                        if k in set_cookie_morsel_keys
-                    }
-                )
+        for cookie_name, cookie_value in context['client'].cookies.items():  # type: ignore
+            if cookie_value.value != request.COOKIES.get(cookie_name, None):
+                response.cookies[cookie_name] = cookie_value
         return response
 
     def patch(self, request: BulkRequestType) -> responses.BaseResponseClass:

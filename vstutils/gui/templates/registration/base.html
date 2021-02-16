@@ -20,6 +20,7 @@
 
 {% block body %}
 <body class="{% block bodyclass %}hold-transition login-page{% endblock %}">
+    {% include "auth/language_selector.html" %}
 
     {% block content %}
     {% endblock %}

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.utils.module_loading import import_string as import_class
+from django.utils.functional import cached_property
 
 from ..custom_model import ListModel, CharField
 
@@ -28,7 +29,7 @@ class Language(ListModel):
         except:
             return {}
 
-    @property
+    @cached_property
     def translations(self):
         code = self.code.replace('-', '_')
         translation_data = self._get_translation_data('vstutils', code)
@@ -37,3 +38,10 @@ class Language(ListModel):
                 self._get_translation_data(attr_name, code)
             )
         return translation_data
+
+    def translate(self, text):
+        translated = self.translations.get(text, None)
+        if translated is None:
+            # place for additional translation methods
+            return text
+        return translated

@@ -1,8 +1,7 @@
 {% load request_static %}
-{% load i18n %}
 {% load cache %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{% block html_language %}{{ request.language.code }}{% endblock %}">
 {% block head %}
 <head>
     {% block meta %}
@@ -62,6 +61,7 @@
 {% block body %}
     <body class="{% block bodyclass %}hold-transition login-page{% endblock %}">
         <div class="login-box">
+            {% include "auth/language_selector.html" %}
             {% block login_logo %}
                 <div class="login-logo">
                     <a>{{ project_gui_name }}</a>

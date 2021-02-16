@@ -2,7 +2,7 @@ import Centrifuge from 'centrifuge';
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
 import { ErrorHandler } from './vstutils/popUp';
-import { guiLocalSettings } from './vstutils/utils';
+import { guiLocalSettings, getCookie } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
 import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
 
@@ -74,6 +74,8 @@ export default class BaseApp {
          * Root Vue component
          */
         this.appRootComponent = AppRoot;
+
+        this.initLanguage = guiLocalSettings.get('lang') || getCookie('lang') || 'en';
     }
 
     /**
@@ -87,19 +89,17 @@ export default class BaseApp {
      * Method gets openapi_schema, inits models, inits views and mounts application to DOM.
      */
     async start() {
-        const LANG = guiLocalSettings.get('lang') || 'en';
-
         if (this.centrifugoClient) {
             this.centrifugoClient.connect();
         }
 
         const [languages, translations, user] = await Promise.all([
             this.translationsManager.getLanguages(),
-            this.translationsManager.getTranslations(LANG),
+            this.translationsManager.getTranslations(this.initLanguage),
             this.api.loadUser(),
         ]);
         this.languages = languages;
-        this.translations = { [LANG]: translations };
+        this.translations = { [this.initLanguage]: translations };
         this.user = user;
 
         this.afterInitialDataBeforeMount();

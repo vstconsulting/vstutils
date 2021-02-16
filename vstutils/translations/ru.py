@@ -200,4 +200,20 @@ TRANSLATION = {
     'a name string value (or comma separated list) of instance.': 'имя объекта - строковое значение (или их последовательность разделенная запятой).',
 
     'page matching current url was not found': 'страница, соответствующая данному url, не была найдена',
+
+    'sign in to start your session': 'Войдите, чтобы начать сеанс',
+    'sign in': 'войти',
+    'forgot password': 'забыли пароль',
+    'confirm password': 'подтвердите пароль',
+    'register': 'регистрация',
+    'fields with * is required': 'поля отмеченые * обязательны для заполнения',
+    'Forgotten your password? Enter your email address below, and we\'ll email instructions for setting a new one.': 'Забыли пароль? Введите свой адрес и мы отправим вам инструкцию для восстановления.',
+    'reset my password': 'сбросить пароль',
+    'We\'ve emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly.': 'Мы отправили вам письмо с инструкцией для сброса пароля.',
+    'If you don\'t receive an email, please make sure you\'ve entered the address you registered with, and check your spam folder.': 'Если вы не получили письмо, пожалуйста убедитесь что введен верный адрес и проверьте папку со спамом.',
+    'The password reset link was invalid, possibly because it has already been used. Please request a new password reset.': 'Неверная ссылка для восстановления пароля, возможно она уже была использована. Пожалуйста попробуйте заново.',
+    'Please enter your new password twice so we can verify you typed it in correctly.': 'Пожалуйста введите новый пароль.',
+    'change my password': 'изменить пароль',
+    'Your password has been set.  You may go ahead and log in now.': 'Ваш пароль был успешно установлен. Теперь вы можете войти.',
+    'Please enter a correct %(username)s and password. Note that both fields may be case-sensitive.': 'Пожалуйста введите корректные %(username)s и пароль. Внимание, поля могуь быть регистрозвисимыми.',
 }
