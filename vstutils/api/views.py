@@ -55,14 +55,10 @@ class TranslationSerializer(serializers.VSTSerializer):
             'translated'
         )
 
-    def update(self, instance, validated_data):
+    def update(self, instance: models.Language, validated_data):
         original = validated_data['original']
-        translated = instance.translations.get(original, None)
-        # place for additional translation methods
-        if translated is None:
-            translated = original
         instance.original = original
-        instance.translated = translated
+        instance.translated = instance.translate(original)
         return instance
 
 

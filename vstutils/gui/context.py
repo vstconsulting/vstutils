@@ -33,7 +33,8 @@ def settings_constants(request: HttpRequest) -> Dict:
         "docs_url": getattr(settings, 'DOC_URL', '/docs/'),
         "has_docs": getattr(settings, 'HAS_DOCS', False),
         "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
-        "debug": debug_enabled
+        "debug": debug_enabled,
+        "languages": settings.LANGUAGES,
     }
 
 

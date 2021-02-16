@@ -1,0 +1,15 @@
+<form id="lang-form" action="" method="get" style="width: 120px; top: 10px; right: 10px; position: absolute;">
+    <select class="custom-select" name="lang">
+        {% for code, name in languages %}
+            <option {% if request.language.code == code %}selected{% endif %} value="{{ code }}">{{ name }}</option>
+        {% endfor %}
+    </select>
+</form>
+<script>
+    window.addEventListener('load', function() {
+        const selector = document.getElementsByName('lang')[0];
+        selector.addEventListener('change', function() {
+            document.getElementById('lang-form').submit();
+        });
+    });
+</script>

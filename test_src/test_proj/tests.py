@@ -14,6 +14,7 @@ from unittest.mock import patch, PropertyMock
 from collections import OrderedDict
 
 from asgiref.sync import async_to_sync
+from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
 from django.core import mail
@@ -108,6 +109,10 @@ packaje_json_data = {
 validator_dict = {
     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
 }
+
+
+def to_soup(content):
+    return BeautifulSoup(content, 'html.parser')
 
 
 def async_test(coro):
@@ -1722,6 +1727,35 @@ class LangTestCase(BaseTestCase):
         # test not translated
         self.assertEqual(201, results[1]['status'])
         self.assertEqual(test_results[1], results[1]['data'])
+
+    def test_user_language_detection(self):
+        client = self.client_class()
+        languages = (
+            ('en', 'en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7,es;q=0.6'),
+            ('ru', 'ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6'),
+            ('en', 'de,es;q=0.9'),
+            ('ru', 'de,es;q=0.9,ru;q=0.8,en-US;q=0.7,en;q=0.6'),
+        )
+
+        for expected_code, header in languages:
+            response = self.client_class().get('/login/', HTTP_ACCEPT_LANGUAGE=header)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.cookies['lang'].value, expected_code)
+            self.assertEqual(to_soup(response.content).html['lang'], expected_code, f'Header: {header}')
+
+        response = client.get('/login/?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.cookies.get('lang').value, 'ru')
+        self.assertEqual(to_soup(response.content).html['lang'], 'ru')
+
+        response = client.get('/login/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        self.assertEqual(to_soup(response.content).html['lang'], 'ru')
+
+        response = self.client_class().get('/login/')
+        self.assertEqual(to_soup(response.content).html['lang'], 'en')
+
+        response = self.client_class().get('/login/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
 
 class CoreApiTestCase(BaseTestCase):

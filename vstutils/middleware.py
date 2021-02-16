@@ -6,7 +6,9 @@ from django.db import connection
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
+from django.utils import translation
 
+from .api.models import Language
 from .utils import BaseVstObject
 
 
@@ -176,4 +178,28 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
                 response_durations = ""
             response_durations += f', db_execution_time;dur={self._round_time(ql.queries_time)}'
             response['Server-Timing'] = f'total;dur={total_time}{response_durations or ""}'
+        return response
+
+
+class LangMiddleware(BaseMiddleware):
+
+    def get_lang_object(self, request: HttpRequest) -> _t.Tuple[Language, bool]:
+        set_cookie = True
+        if 'lang' in request.GET:
+            code = request.GET['lang']
+        elif 'lang' in request.COOKIES:
+            code = request.COOKIES['lang']
+            set_cookie = False
+        else:
+            code = translation.get_language_from_request(request)  # type: ignore
+        obj = Language.objects.filter(code=code).first()
+        if obj is not None:
+            return obj, set_cookie
+        return Language.objects.get(code=settings.LANGUAGE_CODE), set_cookie  # nocv
+
+    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+        request.language, set_cookie = self.get_lang_object(request)  # type: ignore
+        response = super().get_response_handler(request)
+        if set_cookie:
+            response.set_cookie('lang', request.language.code)  # type: ignore
         return response

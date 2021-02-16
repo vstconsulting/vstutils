@@ -156,7 +156,7 @@ export class App extends BaseApp {
         this.router = routerConstructor.getRouter();
 
         let i18n = new VueI18n({
-            locale: guiLocalSettings.get('lang') || 'en',
+            locale: this.initLanguage,
             messages: this.translations,
             silentTranslationWarn: true,
         });

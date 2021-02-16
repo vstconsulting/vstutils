@@ -426,6 +426,7 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'vstutils.middleware.LangMiddleware',
 ]
 
 EXCLUDE_FROM_MINIFYING = []
@@ -439,6 +440,7 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
+        'vstutils.middleware.LangMiddleware',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
@@ -584,6 +586,9 @@ TEMPLATES: _t.List[_t.Dict] = [
                 'vstutils.gui.context.pwa_context',
                 'vstutils.gui.context.headers_context',
             ],
+            'builtins': [
+                'vstutils.templatetags.translation',
+            ]
         },
     },
 ]
