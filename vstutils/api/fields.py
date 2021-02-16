@@ -7,6 +7,7 @@ import copy
 import json
 import functools
 
+import orjson
 from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer
 from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
@@ -579,6 +580,15 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     default_error_messages = {
         'not a list': 'value is not a valid list',
     }
+
+    def run_validators(self, value: _t.Any) -> None:
+        if isinstance(value, str):
+            value = orjson.loads(value)
+        if isinstance(value, (list, tuple)):
+            for one_value in value:
+                super().run_validators(one_value)
+        else:  # nocv
+            super().run_validators(value)
 
     def to_internal_value(self, data: _t.List) -> _t.Text:  # type: ignore
         if data is not None:
