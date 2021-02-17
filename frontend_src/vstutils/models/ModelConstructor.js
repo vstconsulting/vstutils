@@ -96,6 +96,7 @@ export default class ModelConstructor {
             class extends Model {
                 static declaredFields = fields;
                 static fieldsGroups = modelSchema['x-properties-groups'] || {};
+                static viewFieldName = modelSchema['x-view-field-name'] || null;
             },
             modelName,
         );

@@ -1,7 +1,6 @@
 import { escapeHtml } from '../utils';
 
 class ModelUtils {
-    static viewFields = ['name', 'title', 'username', 'email', 'key'];
     static pkFields = ['id', 'pk'];
 
     static getPrototypes(cls, parents = [cls]) {
@@ -46,17 +45,10 @@ class ModelUtils {
     }
 
     static getViewField(cls) {
-        if (!cls.fields.size) return null;
-
-        if (cls.viewFieldName) return cls.fields.get(cls.viewFieldName);
-
-        for (const viewFieldName of ModelUtils.viewFields) {
-            if (cls.fields.has(viewFieldName)) {
-                return cls.fields.get(viewFieldName);
-            }
+        if (cls.fields.has(cls.viewFieldName)) {
+            return cls.fields.get(cls.viewFieldName);
         }
-
-        return null;
+        return cls.pkField;
     }
 
     static isPrefetchField(field) {
