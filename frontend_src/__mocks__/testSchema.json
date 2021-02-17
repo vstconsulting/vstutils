@@ -4,7 +4,7 @@
         "title": "QuickStart",
         "termsOfService": "",
         "contact": { "name": "System Administrator" },
-        "x-docs": { "has_docs": false, "docs_url": "/docs/" },
+        "x-docs": { "has_docs": true, "docs_url": "/docs/" },
         "x-links": {
             "vstutils": {
                 "url": "https://github.com/vstconsulting/vstutils.git",
@@ -25,11 +25,13 @@
             }
         ],
         "x-settings": { "static_path": "/static/", "enable_gravatar": true, "time_zone": "UTC" },
-        "x-versions": { "application": "1.0.0", "library": "1.0.0", "vstutils": "4.3.1", "django": "2.2.18" },
+        "x-versions": { "application": "1.0.0", "library": "1.0.0", "vstutils": "4.3.3", "django": "2.2.18" },
         "version": "v1",
-        "x-user-id": 1
+        "x-user-id": 1,
+        "x-centrifugo-token": "",
+        "x-centrifugo-address": "ws://localhost:8765/"
     },
-    "host": "0.0.0.0:8080",
+    "host": "quick.local:8086",
     "schemes": ["http"],
     "basePath": "/api/v1",
     "consumes": ["application/json"],
@@ -3078,7 +3080,8 @@
                     "textarea",
                     "uptime"
                 ]
-            }
+            },
+            "x-view-field-name": "color"
         },
         "OneAllFields": {
             "required": [
@@ -3352,7 +3355,8 @@
                     "textarea",
                     "uptime"
                 ]
-            }
+            },
+            "x-view-field-name": "color"
         },
         "Author": {
             "required": ["name"],
@@ -3368,7 +3372,8 @@
                     "additionalProperties": { "fields": ["title", "type"], "viewType": "list" }
                 }
             },
-            "x-properties-groups": { "": ["id", "name", "posts"] }
+            "x-properties-groups": { "": ["id", "name", "posts"] },
+            "x-view-field-name": "name"
         },
         "OneAuthor": {
             "required": ["name"],
@@ -3384,7 +3389,8 @@
                     "additionalProperties": { "fields": ["title", "type"], "viewType": "list" }
                 }
             },
-            "x-properties-groups": { "": ["id", "name", "posts"] }
+            "x-properties-groups": { "": ["id", "name", "posts"] },
+            "x-view-field-name": "name"
         },
         "SubView": {
             "type": "object",
@@ -3397,7 +3403,8 @@
                     "minLength": 1
                 }
             },
-            "x-properties-groups": { "": ["item_name", "item_value"] }
+            "x-properties-groups": { "": ["item_name", "item_value"] },
+            "x-view-field-name": "item_value"
         },
         "Post": {
             "required": ["author", "category", "title"],
@@ -3437,7 +3444,8 @@
                 "Main": ["author", "title", "type", "category"],
                 "Content": ["text"],
                 "": ["id"]
-            }
+            },
+            "x-view-field-name": "title"
         },
         "OnePost": {
             "required": ["author", "title", "text", "category", "type"],
@@ -3488,14 +3496,21 @@
                 "Main": ["author", "title", "type", "category"],
                 "Content": ["text"],
                 "": ["id"]
-            }
+            },
+            "x-view-field-name": "title"
         },
-        "Empty": { "type": "object", "properties": {}, "x-properties-groups": { "": [] } },
+        "Empty": {
+            "type": "object",
+            "properties": {},
+            "x-properties-groups": { "": [] },
+            "x-view-field-name": null
+        },
         "ChangeTitle": {
             "required": ["title"],
             "type": "object",
             "properties": { "title": { "title": "Title", "type": "string", "minLength": 1 } },
-            "x-properties-groups": { "": ["title"] }
+            "x-properties-groups": { "": ["title"] },
+            "x-view-field-name": "title"
         },
         "PostMeta": {
             "required": ["key", "value"],
@@ -3505,7 +3520,8 @@
                 "key": { "title": "Key", "type": "string", "maxLength": 255, "minLength": 1 },
                 "value": { "title": "Value", "type": "string", "maxLength": 255, "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "key", "value"] }
+            "x-properties-groups": { "": ["id", "key", "value"] },
+            "x-view-field-name": "key"
         },
         "OnePostMeta": {
             "required": ["key", "value"],
@@ -3524,7 +3540,8 @@
                     }
                 }
             },
-            "x-properties-groups": { "": ["id", "key", "value"] }
+            "x-properties-groups": { "": ["id", "key", "value"] },
+            "x-view-field-name": "key"
         },
         "Category": {
             "required": ["name"],
@@ -3533,7 +3550,8 @@
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
                 "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "name"] }
+            "x-properties-groups": { "": ["id", "name"] },
+            "x-view-field-name": "name"
         },
         "OneCategory": {
             "required": ["name"],
@@ -3542,7 +3560,8 @@
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
                 "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "name"] }
+            "x-properties-groups": { "": ["id", "name"] },
+            "x-view-field-name": "name"
         },
         "PredefinedPostType": {
             "required": ["name"],
@@ -3551,7 +3570,8 @@
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
                 "name": { "title": "Name", "type": "string", "maxLength": 50, "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "name"] }
+            "x-properties-groups": { "": ["id", "name"] },
+            "x-view-field-name": "name"
         },
         "OnePredefinedPostType": {
             "required": ["name"],
@@ -3560,7 +3580,8 @@
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
                 "name": { "title": "Name", "type": "string", "maxLength": 50, "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "name"] }
+            "x-properties-groups": { "": ["id", "name"] },
+            "x-view-field-name": "name"
         },
         "PredefinedAttribute": {
             "required": ["name", "field_type"],
@@ -3570,7 +3591,8 @@
                 "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
                 "field_type": { "title": "Field type", "type": "string", "maxLength": 256, "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "name", "field_type"] }
+            "x-properties-groups": { "": ["id", "name", "field_type"] },
+            "x-view-field-name": "name"
         },
         "OnePredefinedAttribute": {
             "required": ["name", "field_type"],
@@ -3580,7 +3602,8 @@
                 "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
                 "field_type": { "title": "Field type", "type": "string", "enum": ["integer", "boolean"] }
             },
-            "x-properties-groups": { "": ["id", "name", "field_type"] }
+            "x-properties-groups": { "": ["id", "name", "field_type"] },
+            "x-view-field-name": "name"
         },
         "User": {
             "required": ["username"],
@@ -3599,7 +3622,8 @@
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 }
             },
-            "x-properties-groups": { "": ["id", "username", "is_active", "is_staff", "email"] }
+            "x-properties-groups": { "": ["id", "username", "is_active", "is_staff", "email"] },
+            "x-view-field-name": "username"
         },
         "CreateUser": {
             "required": ["username", "password", "password2"],
@@ -3634,7 +3658,8 @@
                     "password",
                     "password2"
                 ]
-            }
+            },
+            "x-view-field-name": "username"
         },
         "OneUser": {
             "required": ["username"],
@@ -3657,7 +3682,8 @@
             },
             "x-properties-groups": {
                 "": ["id", "username", "is_active", "is_staff", "first_name", "last_name", "email"]
-            }
+            },
+            "x-view-field-name": "username"
         },
         "ChangePassword": {
             "required": ["old_password", "password", "password2"],
@@ -3667,7 +3693,8 @@
                 "password": { "title": "New password", "type": "string", "format": "password" },
                 "password2": { "title": "Confirm new password", "type": "string", "format": "password" }
             },
-            "x-properties-groups": { "": ["old_password", "password", "password2"] }
+            "x-properties-groups": { "": ["old_password", "password", "password2"] },
+            "x-view-field-name": "password"
         }
     }
 }

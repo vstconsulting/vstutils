@@ -195,19 +195,12 @@ export const ActionViewComponent = {
                 });
                 this.isPageChanged = false;
                 guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.execute).format([
-                        this.$t(this.view.name),
-                        instance.getViewFieldString()?.toLowerCase() || '',
-                    ]),
+                    this.$t(pop_up_msg.instance.success.execute).format([this.$t(this.view.title)]),
                 );
                 this.openPage({ path: this.getRedirectUrl() });
             } catch (error) {
                 const str = window.app.error_handler.errorToString(error);
-                const srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
-                    this.view.name,
-                    instance.getViewFieldString()?.toLowerCase() || '',
-                    str,
-                ]);
+                const srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([this.view.title, str]);
                 window.app.error_handler.showError(srt_to_show, str);
             } finally {
                 this.loading = false;

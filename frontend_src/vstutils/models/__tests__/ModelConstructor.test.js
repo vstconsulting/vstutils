@@ -58,4 +58,12 @@ describe('ModelConstructor', () => {
             Content: ['text'],
         });
     });
+
+    test('view field selection', () => {
+        const AllFields = models.get('AllFields');
+        expect(AllFields.viewField).toBe(AllFields.fields.get('color'));
+
+        const OneAllFields = models.get('OneAllFields');
+        expect(OneAllFields.viewField).toBe(OneAllFields.fields.get('color'));
+    });
 });

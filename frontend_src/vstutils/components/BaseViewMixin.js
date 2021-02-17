@@ -177,7 +177,7 @@ export const BaseViewMixin = {
                 const response = await this.queryset.execute({ method: action.method, path });
 
                 guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.execute).format([
+                    this.$t(pop_up_msg.instance.success.executeEmpty).format([
                         this.$t(action.title),
                         this.$t(instance?.getViewFieldString() || this.view.title),
                     ]),
@@ -199,7 +199,7 @@ export const BaseViewMixin = {
             } catch (error) {
                 let str = window.app.error_handler.errorToString(error);
 
-                let srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
+                let srt_to_show = this.$t(pop_up_msg.instance.error.executeEmpty).format([
                     this.$t(action.name),
                     this.$t(this.view.name),
                     str,
