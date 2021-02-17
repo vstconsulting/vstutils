@@ -126,11 +126,6 @@ class CustomQuerySet(BQuerySet):
     custom_iterable_class = CustomModelIterable
     custom_query_class = Query
 
-    def __init__(self, model=None, query=None, using=None, hints=None):
-        if query is None:
-            query = self.custom_query_class(self)
-        super().__init__(model=model, query=query, using=using, hints=hints)
-
     def _filter_or_exclude(self, is_exclude, *args, **kwargs):
         clone = self._clone()
         if is_exclude:

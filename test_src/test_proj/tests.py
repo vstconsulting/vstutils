@@ -921,6 +921,14 @@ class OpenapiEndpointTestCase(BaseTestCase):
                         'jpg'
                     ],
                 }
+        # Checking versions list
+        self.assertIn('application', api['info']['x-versions'])
+        self.assertIn('library', api['info']['x-versions'])
+        self.assertIn('vstutils', api['info']['x-versions'])
+        self.assertIn('django', api['info']['x-versions'])
+        self.assertIn('djangorestframework', api['info']['x-versions'])
+        self.assertIn('drf_yasg', api['info']['x-versions'])
+
         # Checking generated view correct schema
         self.assertIn('Author', api['definitions'])
         self.assertIn('OneAuthor', api['definitions'])

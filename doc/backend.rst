@@ -15,6 +15,9 @@ BModel provides plenty of Meta attributes to autogenerate serializers and views 
 .. automodule:: vstutils.models
     :members:
 
+.. automodule:: vstutils.models.queryset
+    :members:
+
 .. automodule:: vstutils.models.decorators
     :members: register_view_action
 

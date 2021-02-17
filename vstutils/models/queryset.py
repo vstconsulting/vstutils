@@ -8,10 +8,19 @@ from ..utils import Paginator, deprecated, raise_context_decorator_with_default
 class BQuerySet(models.QuerySet):
     """
     Represent a lazy database lookup for a set of objects.
-    Allows to override default iterable class by `custom_iterable_class` attr.
+    Allows to override default iterable class by `custom_iterable_class` attribute
+    (class with `__iter__` method which returns generator of model objects) and
+    default query class by `custom_query_class` attribute
+    (class inherited from :class:`django.db.models.sql.query.Query`).
     """
 
     use_for_related_fields = True
+    custom_query_class = None
+
+    def __init__(self, model=None, query=None, using=None, hints=None):
+        if query is None and self.custom_query_class is not None:
+            query = self.custom_query_class(self)  # pylint: disable=not-callable
+        super().__init__(model=model, query=query, using=using, hints=hints)
 
     @property
     def _iterable_class(self):
@@ -38,6 +47,10 @@ class BQuerySet(models.QuerySet):
         return self.get_paginator(*args, **kwargs).items()
 
     def get_paginator(self, *args, **kwargs):
+        """
+        Returns initialized object of :class:`vstutils.utils.Paginator` over
+        current instance's QuerySet. All args and kwargs passthroughs to Paginator's constructor.
+        """
         return Paginator(self.filter(), *args, **kwargs)
 
     def has_field_filter_in_query(self, field_name):
