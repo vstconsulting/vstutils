@@ -18,7 +18,11 @@
         <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
     {% endblock %}
 
-    {% block gui_init_scripts %}{% endblock %}
+    {% block gui_init_scripts %}
+        <script src="{% static_path 'bundle/base~doc~spa.chunk.js' %}?v={{ vstutils_version }}"></script>
+        <script src="{% static_path 'bundle/base~spa.chunk.js' %}?v={{ vstutils_version }}"></script>
+        <script src="{% static_path 'bundle/base.js' %}?v={{ vstutils_version }}"></script>
+    {% endblock %}
 
     {% block style %}
 

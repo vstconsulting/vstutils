@@ -25,7 +25,7 @@ Frontend src entry points
 
 * ``spa.js`` - main application
 * ``doc.js`` - bundle for documentation
-* ``auth.js`` - libraries for login and register pages
+* ``base.js`` - bundle with basic libraries (vue, bootstrap, adminlte)
 
 All entry points contains at least:
 
