@@ -1019,13 +1019,13 @@ PROJECT_GUI_MENU: _t.List[_t.Dict] = [
 
 SPA_STATIC: _t.List[_t.Dict] = [
     # Load common chunks
-    {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js'},
-    {'priority': 1, 'type': 'js', 'name': 'bundle/auth~doc~spa.chunk.js'},
-    {'priority': 1, 'type': 'js', 'name': 'bundle/auth~spa.chunk.js'},
-    {'priority': 1, 'type': 'js', 'name': 'bundle/vendors~spa.chunk.js'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js', 'source': 'vstutils'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/base~doc~spa.chunk.js', 'source': 'vstutils'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/base~spa.chunk.js', 'source': 'vstutils'},
+    {'priority': 1, 'type': 'js', 'name': 'bundle/vendors~spa.chunk.js', 'source': 'vstutils'},
 
     # Load app
-    {'priority': 2, 'type': 'js', 'name': 'bundle/spa.js'},
+    {'priority': 2, 'type': 'js', 'name': 'bundle/spa.js', 'source': 'vstutils'},
 ]
 
 # Centrifugo settings

@@ -1,14 +1,6 @@
 {% extends "base.html" %}
 {% load request_static %}
 
-{% block common_script %}
-
-    <script src="{% static_path 'bundle/auth~doc~spa.chunk.js' %}"></script>
-    <script src="{% static_path 'bundle/auth~spa.chunk.js' %}"></script>
-    <script src="{% static_path 'bundle/auth.js' %}"></script>
-
-{% endblock %}
-
 {% block login_body %}
      <div class="login-box-body rounded">
         <div class="overlay" id="login_wrapper">

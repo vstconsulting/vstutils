@@ -2,19 +2,17 @@ from typing import Dict
 
 from django.conf import settings
 from django.http.request import HttpRequest
-from django.utils.functional import lazy
+from django.utils.functional import lazy, SimpleLazyObject
 
 from ..utils import import_class
 from ..tools import multikeysort  # pylint: disable=import-error
-from .. import __version__
 
 
 manifest_object = import_class(settings.MANIFEST_CLASS)()
-gui_version = "_".join(map(str, [
-    getattr(settings, 'PROJECT_VERSION', ''),
-    getattr(settings, 'PROJECT_LIB_VERSION', ''),
-    __version__
-]))
+project_lib_version = getattr(settings, 'PROJECT_LIB_VERSION', '')
+project_version = getattr(settings, 'PROJECT_VERSION', '')
+vstutils_version = settings.VSTUTILS_VERSION
+gui_version = "_".join(map(str, [project_version, project_lib_version, vstutils_version]))
 static_path = getattr(settings, 'STATIC_URL', '/static/')
 static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['priority'])
 debug_enabled = getattr(settings, 'DEBUG', False)
@@ -22,6 +20,17 @@ debug_enabled = getattr(settings, 'DEBUG', False)
 
 def lazy_decorator(func):
     return lazy(func, dict)
+
+
+def lazy_value(func):
+    return SimpleLazyObject(func)
+
+
+def static_file_set_version_to_name(files_list_object: dict):
+    new_object = files_list_object.copy()
+    version_source = new_object.get('source', 'gui') or 'gui'
+    new_object['version'] = globals().get(version_source + '_version', gui_version)
+    return new_object
 
 
 @lazy_decorator
@@ -47,8 +56,10 @@ def project_args(request: HttpRequest) -> Dict:
         "host_url": host_url,
         "gui_version": gui_version,
         "gui_user_version": request_gui_version,
-        "project_version": getattr(settings, 'PROJECT_VERSION', ''),
-        ver_key: getattr(settings, 'PROJECT_VERSION', False),
+        "vstutils_version": settings.VSTUTILS_VERSION,
+        "project_lib_version": project_lib_version,
+        "project_version": project_version,
+        ver_key: project_version,
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
         "openapi_url": f'/{settings.VST_API_URL}/openapi/',
@@ -63,7 +74,12 @@ def project_args(request: HttpRequest) -> Dict:
 def pwa_context(request: HttpRequest) -> Dict:
     return {
         "manifest_object": manifest_object,
-        "static_files_list": static_list,
+        "static_files_list": lazy_value(
+            lambda: tuple(map(
+                static_file_set_version_to_name,
+                static_list
+            ))
+        ),
         "block_timeout": 86400 if not debug_enabled else 0,
     }
 

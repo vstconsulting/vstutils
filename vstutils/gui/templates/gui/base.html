@@ -24,7 +24,7 @@
         // {% block gui_static_list %}
         window.resourceList = [
             // {% for file in static_files_list %}
-                { priority: Number('{{ file.priority }}'), type: '{{ file.type }}', name: '{% static file.name %}?v={{gui_version}}'},
+                { priority: Number('{{ file.priority }}'), type: '{{ file.type }}', name: '{% static file.name %}?v={{file.version}}'},
             // {% endfor %}
         ];
         // {% endblock %}
@@ -38,7 +38,7 @@
         {% block script %}{% endblock %}
 
         {% block app_loader %}
-            <script src="{% static 'bundle/app_loader.js' %}?v={{ gui_version }}"></script>
+            <script src="{% static 'bundle/app_loader.js' %}?v={{ vstutils_version }}"></script>
         {% endblock %}
     </body>
 {% endblock %}
