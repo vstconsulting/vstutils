@@ -170,6 +170,9 @@ export const ActionViewComponent = {
         model() {
             return this.view.model;
         },
+        title() {
+            return this.view.title;
+        },
     },
     methods: {
         fetchData() {
