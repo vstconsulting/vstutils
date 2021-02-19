@@ -168,6 +168,11 @@ class APIRouter(_AbstractRouter):
                 'view': 'vstutils.api.views.LangViewSet'
             }
 
+        if r'user' not in views_list:
+            views_list[r'user'] = {
+                'view': 'vstutils.api.auth.UserViewSet'
+            }
+
         super().generate(views_list)
 
 

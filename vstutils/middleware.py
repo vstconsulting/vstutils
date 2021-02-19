@@ -16,6 +16,7 @@ logger = logging.getLogger(settings.VST_PROJECT)
 
 
 class QueryTimingLogger:
+    __slots__ = ('queries_time',)
 
     def __init__(self):
         self.queries_time = 0
@@ -131,6 +132,8 @@ class BaseMiddleware(BaseVstObject):
 
 
 class TimezoneHeadersMiddleware(BaseMiddleware):
+    __slots__ = ()
+
     def handler(self, request: HttpRequest, response: HttpResponse) -> HttpResponse:
         response['Server-Timezone'] = self.get_setting('TIME_ZONE')
         response['VSTutils-Version'] = self.get_setting('VSTUTILS_VERSION')
@@ -138,6 +141,8 @@ class TimezoneHeadersMiddleware(BaseMiddleware):
 
 
 class ExecuteTimeHeadersMiddleware(BaseMiddleware):
+    __slots__ = ()
+
     def __duration_handler(self, data):
         key, value = data
         if isinstance(value, (list, tuple, map, filter, _t.Generator)):
@@ -182,6 +187,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
 
 
 class LangMiddleware(BaseMiddleware):
+    __slots__ = ()
 
     def get_lang_object(self, request: HttpRequest) -> _t.Tuple[Language, bool]:
         set_cookie = True

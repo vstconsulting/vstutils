@@ -159,9 +159,9 @@ class UserFilter(DefaultIDFilter):
 
 
 class UserViewSet(base.ModelViewSet):
-    '''
+    """
     API endpoint that allows users to be viewed or edited.
-    '''
+    """
     # pylint: disable=invalid-name
 
     model: _t.Type[AbstractUser] = User
@@ -171,6 +171,12 @@ class UserViewSet(base.ModelViewSet):
     serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer
     filterset_class = UserFilter
     permission_classes = (permissions.SuperUserPermission,)
+
+    def get_object(self) -> AbstractUser:
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        if self.kwargs.get(lookup_url_kwarg, None) == 'profile':
+            self.kwargs[lookup_url_kwarg] = getattr(self.request.user, self.lookup_field)
+        return super().get_object()
 
     def destroy(self, request: drf_request.Request, *args, **kwargs):
         user = self.get_object()

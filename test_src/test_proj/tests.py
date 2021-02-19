@@ -591,10 +591,10 @@ class ViewsTestCase(BaseTestCase):
             password='12345',
             password2='12345'
         )
-        user_get_request = {"method": "get", "path": ['user', self.user.id]}
+        user_get_request = {"method": "get", "path": ['user', 'profile']}
         self._login()
         results = self.bulk([
-            {"method": "post", "path": ['user', self.user.id, 'change_password'], "data": i}
+            {"method": "post", "path": ['user', 'profile', 'change_password'], "data": i}
             for i in (invalid_old_password, not_identical_passwords, update_password)
         ] + [user_get_request], relogin=False)
         self.assertEqual(results[0]['status'], 403)

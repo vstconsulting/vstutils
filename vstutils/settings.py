@@ -732,11 +732,7 @@ SWAGGER_SETTINGS: _t.Dict = {
 
 
 API: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    VST_API_VERSION: {
-        r'user': {
-            'view': 'vstutils.api.auth.UserViewSet'
-        },
-    }
+    VST_API_VERSION: {}
 }
 
 # deprecated
