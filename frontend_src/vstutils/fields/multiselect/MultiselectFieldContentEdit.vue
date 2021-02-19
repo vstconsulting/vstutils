@@ -28,21 +28,24 @@
                     })
                     .on('change', () => {
                         let data = $(this.$el).select2('data');
-                        let val_arr = [];
+                        let newValue = data
+                            ? data.map((item) => ({ value: item.id, prefetch_value: item.text }))
+                            : [];
 
-                        if (data) {
-                            val_arr = data.map((item) => {
-                                return {
-                                    value: item.id,
-                                    prefetch_value: item.text,
-                                };
-                            });
-                        }
-
-                        if (!deepEqual(val_arr, this.value)) {
-                            this.$emit('set-value', val_arr);
+                        if (!deepEqual(newValue, this.value) && !this.isSameValues(newValue, this.value)) {
+                            this.$emit('set-value', newValue);
                         }
                     });
+            },
+
+            isSameValues(first, second) {
+                if (Array.isArray(first)) {
+                    first = first.map((item) => (typeof item === 'object' ? item.value : item)).join(',');
+                }
+                if (Array.isArray(second)) {
+                    second = second.map((item) => (typeof item === 'object' ? item.value : item)).join(',');
+                }
+                return first === second;
             },
 
             setValue(value) {
