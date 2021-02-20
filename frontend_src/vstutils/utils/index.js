@@ -915,14 +915,14 @@ export async function loadImage(url) {
 
 /**
  * @param {File|Blob} file
- * @return {Promise<ArrayBuffer>}
+ * @return {Promise<string>}
  */
-export async function readFileAsArrayBuffer(file) {
+export function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.addEventListener('load', (loadEvent) => resolve(loadEvent.target.result));
         reader.addEventListener('error', reject);
-        reader.readAsArrayBuffer(file);
+        reader.readAsDataURL(file);
     });
 }
 
@@ -938,4 +938,38 @@ export function escapeHtml(unsafe) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+/**
+ * Removes base64 prefix from content of the file
+ * @param {string} content
+ * @return {string}
+ */
+export function removeBase64Prefix(content) {
+    return content.slice(content.indexOf(',') + 1);
+}
+
+/**
+ * Function that reads file to vstutils named binary files format
+ * @param {File} file
+ * @return {Promise<Object>}
+ */
+export async function readFileAsObject(file) {
+    return {
+        name: file.name || null,
+        content: removeBase64Prefix(await readFileAsDataUrl(file)),
+        mediaType: file.type || null,
+    };
+}
+
+/**
+ *
+ * @param file {object}
+ * @return {{url: string}}
+ */
+
+export function makeDataImageUrl(file) {
+    return {
+        url: `data:${file.mediaType || 'image/png'};base64,${file.content}`,
+    };
 }

@@ -15,6 +15,7 @@
 <script>
     import { BaseFieldInnerComponentMixin } from '../../base';
     import Modal from '../../../components/items/modal/Modal.vue';
+    import { makeDataImageUrl } from '../../../utils';
     export default {
         components: { Modal },
         mixins: [BaseFieldInnerComponentMixin],
@@ -29,7 +30,7 @@
         computed: {
             img_src() {
                 if (this.value && this.value.content) {
-                    return 'data:image/png;base64,' + this.value.content;
+                    return makeDataImageUrl(this.value);
                 }
             },
             img_alt() {

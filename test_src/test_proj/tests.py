@@ -2269,7 +2269,9 @@ class ProjectTestCase(BaseTestCase):
         self.assertDictEqual(post_data, results[2]['data'])
 
     def test_model_namedbinfile_field(self):
-        value = {'name': 'abc.png', 'content': '/4sdfsdf/'}
+        value = {'name': 'abc.png', 'content': '/4sdfsdf/', 'mediaType': 'text/txt'}
+        missing_mediaType = {'name': '123', 'content': 'qwedsf'}
+        instance_without_mediaType = self.get_model_filter('test_proj.models.ModelWithBinaryFiles').create(some_namedbinfile=json.dumps(missing_mediaType))
         bulk_data = [
             dict(method='post', path=['testbinaryfiles'], data={}),
             dict(method='get', path=['testbinaryfiles', '<<0[data][id]>>']),
@@ -2408,13 +2410,25 @@ class ProjectTestCase(BaseTestCase):
                 method='get',
                 path=['testbinaryfiles', '<<0[data][id]>>'],
             ),
+            {'method': 'post', 'path': 'testbinaryfiles', 'data': {'some_namedbinimage': missing_mediaType}},
+            {
+                'method': 'post',
+                'path': 'testbinaryfiles',
+                'data': {'some_multiplenamedbinimage': [missing_mediaType, missing_mediaType]}
+            },
+            {
+                'method': 'post',
+                'path': 'testbinaryfiles',
+                'data': {'some_multiplenamedbinfile': [missing_mediaType, missing_mediaType]}
+            },
+            {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id]}
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200, results[0])
         self.assertEqual(results[1]['data']['some_binfile'], '')
-        self.assertEqual(results[1]['data']['some_namedbinfile'], dict(name=None, content=None))
-        self.assertEqual(results[1]['data']['some_namedbinimage'], dict(name=None, content=None))
+        self.assertEqual(results[1]['data']['some_namedbinfile'], dict(name=None, content=None, mediaType=None))
+        self.assertEqual(results[1]['data']['some_namedbinimage'], dict(name=None, content=None, mediaType=None))
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[3]['status'], 200)
         self.assertEqual(results[3]['data']['some_binfile'], value['content'])
@@ -2457,6 +2471,11 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[29]['status'], 200)
         self.assertEqual(results[30]['status'], 200)
         self.assertEqual(results[30]['data']['some_multiplenamedbinimage'], [value, value])
+        self.assertEqual(results[31]['status'], 400)
+        self.assertEqual(results[32]['status'], 400)
+        self.assertEqual(results[33]['status'], 400)
+        self.assertEqual(results[34]['status'], 200)
+        self.assertEqual(results[34]['data']['some_namedbinfile'], dict(**missing_mediaType, mediaType=None))
 
     def test_contenttype_nested_views(self):
         bulk_data = [

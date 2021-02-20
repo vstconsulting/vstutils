@@ -19,24 +19,15 @@
 <script>
     import { BinaryFileFieldContentEdit } from '../binary-file';
     import NamedBinaryFileFieldContent from './NamedBinaryFileFieldContent.js';
-    import { arrayBufferToBase64 } from '../../../utils';
+    import { readFileAsObject } from '../../../utils';
 
     export default {
         mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContent],
         methods: {
-            readFile(event) {
+            async readFile(event) {
                 const file = event.target.files[0];
                 if (!file || !this.$parent.validateFileSize(file.size)) return;
-
-                const reader = new FileReader();
-
-                reader.onload = (loadEvent) =>
-                    this.$emit('set-value', {
-                        name: file.name || null,
-                        content: arrayBufferToBase64(loadEvent.target.result),
-                    });
-
-                reader.readAsArrayBuffer(file);
+                this.$emit('set-value', await readFileAsObject(file));
             },
         },
     };
