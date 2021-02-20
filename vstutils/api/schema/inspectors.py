@@ -8,16 +8,8 @@ from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework.fields import Field, JSONField
 
 from .. import fields, serializers, validators
+from ...models.base import get_first_match_name
 
-
-# Constants
-DEFAULT_VIEW_FIELD_NAMES = (
-    'name',
-    'title',
-    'username',
-    'email',
-    'key',
-)
 
 # Extra types
 
@@ -360,10 +352,7 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
             )
             view_field_name = getattr(serializer_class, '_view_field_name', None)
             if view_field_name is None and schema_properties:
-                view_field_name = next(
-                    (i for i in schema_properties if i in DEFAULT_VIEW_FIELD_NAMES),
-                    next(iter(schema_properties[1:]), schema_properties[0])
-                )
+                view_field_name = get_first_match_name(schema_properties, schema_properties[0])
 
             if schema_properties_groups:
                 not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))

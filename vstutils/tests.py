@@ -17,7 +17,7 @@ from .utils import import_class, raise_context_decorator_with_default
 User = get_user_model()
 
 BulkDataType = _t.Union[_t.List[_t.Dict[_t.Text, _t.Any]], str]
-ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence]
+ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence[BulkDataType]]
 
 
 class BaseTestCase(TestCase):

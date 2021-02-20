@@ -2215,6 +2215,35 @@ class ProjectTestCase(BaseTestCase):
         ])
         self.assertEqual(test_data, results[1]['data'])
 
+    def test_fk_filtering(self):
+        author_1 = Author.objects.create(name='author_1', registerDate='2021-01-20T00:26:38Z')
+        author_2 = Author.objects.create(name='author_2', registerDate='2021-01-20T00:26:38Z')
+        author_1_post_count = 3
+        author_2_post_count = 6
+        authors_post_count = author_1_post_count + author_2_post_count
+        for i in range(author_1_post_count):
+            author_1.post.create(title=f'post_{i}')
+        for i in range(author_2_post_count):
+            author_2.post.create(title=f'post_{i}')
+
+        results = self.bulk([
+            {'method': "get", "path": ["post"]},
+            {'method': "get", "path": ["post"], "query": f"author={author_1.name}"},
+            {'method': "get", "path": ["post"], "query": f"author={author_1.id}"},
+            {'method': "get", "path": ["post"], "query": f"author={author_2.name}"},
+            {'method': "get", "path": ["post"], "query": f"author={author_2.id}"},
+        ])
+
+        for pos, count in enumerate((
+                authors_post_count,
+                author_1_post_count,
+                author_1_post_count,
+                author_2_post_count,
+                author_2_post_count,
+        )):
+            self.assertEqual(results[pos]['status'], 200)
+            self.assertEqual(results[pos]['data']['count'], count)
+
     # find me
     def test_model_rating_field(self):
         date = '2021-01-20T00:26:38Z'

@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
-from django.db.models.fields.related import ManyToManyField, OneToOneField
+from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
 from django.utils.functional import SimpleLazyObject
 
 from ..utils import import_class, apply_decorators, classproperty, get_if_lazy, raise_context_decorator_with_default
@@ -16,6 +16,15 @@ from ..api import (
     decorators as api_decorators
 )
 
+
+# Constants
+DEFAULT_VIEW_FIELD_NAMES = (
+    'name',
+    'title',
+    'username',
+    'email',
+    'key',
+)
 
 default_extra_metadata: dict = {
     # list or class which is base for view
@@ -55,6 +64,14 @@ default_extra_metadata: dict = {
     # key-value mapping with nested views (key - nested name, kwargs for nested decorator)
     "nested": None
 }
+
+
+# Handlers
+def get_first_match_name(field_names, default=None):
+    return next(
+        (i for i in field_names if i in DEFAULT_VIEW_FIELD_NAMES),
+        next(iter(field_names[1:]), default)
+    )
 
 
 def _get_unicode(obj):
@@ -109,6 +126,7 @@ def _get_decorator(data):
     return api_decorators.nested_view(path, **deco_kwargs)
 
 
+# Classes
 class ApplyNestedDecorators(apply_decorators):
     def __init__(self, nested: dict):
         super().__init__(
@@ -155,6 +173,13 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=unnecessary-lambda,no-value-for-parameter
         return SimpleLazyObject(lambda: cls.get_view_class())
 
+    def get_model_fields_mapping(cls, filter_handler=lambda f: True):
+        return {
+            f.name: f
+            for f in cls._meta.fields
+            if filter_handler(f)
+        }
+
     def get_serializer_class(  # noqa: CFQ002
             cls,
             serializer_class,
@@ -180,10 +205,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if fields:
             fields = list(fields)
         else:
-            fields = SimpleLazyObject(lambda: [
-                f.name for f in cls._meta.fields
-                if not isinstance(f, (ManyToManyField, OneToOneField))
-            ])
+            fields = SimpleLazyObject(
+                lambda: tuple(cls.get_model_fields_mapping(
+                    lambda f: not isinstance(f, (ManyToManyField, OneToOneField))
+                ).keys())
+            )
 
         meta = type('Meta', (), {
             'model': cls,
@@ -279,6 +305,20 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 filter_base_classes.append(api_filters.DefaultNameFilter)
             if not filter_base_classes:
                 filter_base_classes.append(filters.FilterSet)
+
+            iteration_filter_handler = (
+                lambda f: f.name not in filterset_fields_types and f.name in filterset_fields_list
+            )
+            for field_name, field in cls.get_model_fields_mapping(iteration_filter_handler).items():
+                if isinstance(field, ForeignKey):
+                    related_name = get_first_match_name([f.name for f in field.related_model._meta.fields])
+                    filterset_fields_types[field_name] = api_filters.CharFilter(
+                        method=api_filters.FkFilterHandler(
+                            related_pk=field.target_field.attname,
+                            related_name=related_name
+                        ),
+                        help_text=f"Search by {field_name}'s primary key or {related_name}"
+                    )
 
             return filterset.FilterSetMetaclass(
                 f'{cls.__name__}FilterSetClass',
