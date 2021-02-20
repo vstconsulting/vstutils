@@ -23,6 +23,7 @@
 <script>
     import Croppie from 'croppie';
     import Modal from '../../../components/items/modal/Modal.vue';
+    import {makeDataImageUrl} from "../../../utils";
 
     const allowedExtensions = ['jpeg', 'png', 'webp'];
 
@@ -89,7 +90,9 @@
         },
         methods: {
             updateCroppie() {
-                this.croppie.bind({ url: `data:image/png;base64,${this.image.content}` });
+                this.croppie.bind({
+                    url: makeDataImageUrl(this.image),
+                });
             },
             async crop() {
                 let img = await this.croppie.result({ type: 'base64', format: this.format });

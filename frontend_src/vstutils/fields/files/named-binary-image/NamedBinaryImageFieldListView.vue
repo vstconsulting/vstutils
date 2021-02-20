@@ -1,5 +1,5 @@
 <template>
-    <div style="display: contents">
+    <div style="display: contents;">
         <div
             v-if="src"
             class="named-bin-image"
@@ -17,6 +17,7 @@
 <script>
     import { BaseFieldListView } from '../../base';
     import Modal from '../../../components/items/modal/Modal.vue';
+    import {makeDataImageUrl} from "../../../utils";
 
     export default {
         name: 'NamedBinaryImageFieldListView',
@@ -30,7 +31,7 @@
         computed: {
             src() {
                 return this.value && this.value.content
-                    ? 'data:image/png;base64,' + this.value.content
+                    ? makeDataImageUrl(this.value)
                     : null;
             },
             cssUrl() {

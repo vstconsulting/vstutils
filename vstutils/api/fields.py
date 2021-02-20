@@ -514,6 +514,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
     """
     Field that takes JSON with properties:
     * name - string - name of file;
+    * mediaType - string - MIME type of file
     * content - base64 string - content of file.
 
     This field is useful for saving binary files with their names in :class:`django.db.models.CharField`
@@ -527,7 +528,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     __slots__ = ()
 
-    __valid_keys = ('name', 'content')
+    __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
         'not a JSON': 'value is not a valid JSON',
         'missing key': 'key {missing_key} is missing',
@@ -555,9 +556,12 @@ class NamedBinaryFileInJsonField(VSTCharField):
             self.validate_value(data)
         return super().to_internal_value(data)
 
-    @raise_context_decorator_with_default(default={"name": None, "content": None})
+    @raise_context_decorator_with_default(default={"name": None, "content": None, 'mediaType': None})
     def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
-        return json.loads(value)
+        result = json.loads(value)
+        if not result.get('mediaType'):
+            result['mediaType'] = None
+        return result
 
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):

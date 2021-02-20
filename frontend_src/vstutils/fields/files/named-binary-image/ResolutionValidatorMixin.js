@@ -1,4 +1,4 @@
-import { arrayBufferToBase64, loadImage, readFileAsArrayBuffer } from '../../../utils';
+import { loadImage, makeDataImageUrl, readFileAsObject } from '../../../utils';
 import { guiPopUp } from '../../../popUp';
 
 /**
@@ -19,17 +19,14 @@ export default {
                 if (!file || !this.$parent.validateFileSize(file.size)) {
                     return;
                 }
-                results.push({
-                    name: file.name || null,
-                    content: arrayBufferToBase64(await readFileAsArrayBuffer(file)),
-                });
+                results.push(await readFileAsObject(file));
             }
 
             event.target.value = '';
 
             if (this.field.resolutionConfig) {
-                for (const { content } of results) {
-                    const img = await loadImage('data:image/png;base64,' + content);
+                for (const { content, mediaType } of results) {
+                    const img = await loadImage(makeDataImageUrl({ content, mediaType }));
                     const errors = [];
                     if (img.naturalHeight < this.field.resolutionConfig.minHeight)
                         errors.push(`Height should be more then ${this.field.resolutionConfig.minHeight}px.`);
