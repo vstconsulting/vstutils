@@ -13,6 +13,7 @@
 
                 <th v-for="(field, idx) in fields" :key="idx" :class="td_classes(field)">
                     {{ $t(field.title) }}
+                    <Popover :content="field.description" />
                 </th>
 
                 <th
@@ -43,6 +44,7 @@
 </template>
 
 <script>
+    import Popover from '../Popover.vue';
     import SelectToggleButton from './SelectToggleButton.vue';
     import ListTableRow from './ListTableRow.vue';
     import BaseListTableMixin from './BaseListTableMixin.js';
@@ -53,7 +55,7 @@
      */
     export default {
         name: 'ListTable',
-        components: { ListTableRow, SelectToggleButton },
+        components: { ListTableRow, SelectToggleButton, Popover },
         mixins: [BaseListTableMixin],
         props: {
             instances: { type: Array, required: true },

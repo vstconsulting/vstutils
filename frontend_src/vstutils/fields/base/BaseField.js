@@ -36,6 +36,9 @@ class BaseField {
         /** @type {string} */
         this.title = options.title || capitalize(this.name.replace(/_/g, ' '));
 
+        /** @type {string|null} */
+        this.description = options.description || null;
+
         /** @type {boolean} */
         this.required = Boolean(options.required);
 

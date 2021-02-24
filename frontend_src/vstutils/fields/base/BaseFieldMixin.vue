@@ -2,7 +2,7 @@
     <div style="display: contents;">
         <field_list_view v-if="type === 'list'" :value="value" :field="field" />
         <div v-else :class="wrapper_classes">
-            <field_label :value="value" :field="field" :data="data" />
+            <FieldLabel :value="value" :field="field" :data="data" />
 
             <field_content_readonly
                 v-if="field.readOnly || type === 'readonly'"
@@ -18,8 +18,6 @@
                 :data="data"
                 @set-value="setValue"
             />
-
-            <field_description :value="value" :field="field" :data="data" />
         </div>
     </div>
 </template>
@@ -29,7 +27,6 @@
     import BaseFieldLabel from './BaseFieldLabel.vue';
     import BaseFieldContentReadonlyMixin from './BaseFieldContentReadonlyMixin.vue';
     import BaseFieldContentEdit from './BaseFieldContentEdit.vue';
-    import BaseFieldDescription from './BaseFieldDescription.vue';
     import BaseFieldListView from './BaseFieldListView.vue';
 
     export default {
@@ -38,7 +35,7 @@
             /**
              * Component for label (title) of field.
              */
-            field_label: BaseFieldLabel,
+            FieldLabel: BaseFieldLabel,
             /**
              * Component for area, that shows value of field with readOnly == true.
              */
@@ -47,10 +44,6 @@
              * Component for area, that shows value of field with readOnly == false.
              */
             field_content_edit: BaseFieldContentEdit,
-            /**
-             * Component for description (help text) of field.
-             */
-            field_description: BaseFieldDescription,
             /**
              * Component for list_view of field.
              */
