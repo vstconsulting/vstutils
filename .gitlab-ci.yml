@@ -63,7 +63,7 @@ functional_test:
   parallel:
     matrix:
       - TOX_ENVS:
-          - py36-django31-install
+          - py36-django32-install
           - py38-django22-coverage
 
 js_tests:

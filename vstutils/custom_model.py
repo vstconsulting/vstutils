@@ -126,15 +126,19 @@ class CustomQuerySet(BQuerySet):
     custom_iterable_class = CustomModelIterable
     custom_query_class = Query
 
-    def _filter_or_exclude(self, is_exclude, *args, **kwargs):
+    def _filter_or_exclude(self, negate, *args, **kwargs):
         clone = self._clone()
-        if is_exclude:
+        if negate:
             filter_type = 'exclude'
         else:
             filter_type = 'filter'
         clone.query[filter_type] = clone.query.get(filter_type, {})
         clone.query[filter_type].update(kwargs)
+        for q_arg in filter(lambda x: isinstance(x, dict), filter(bool, args)):
+            clone.query[filter_type].update(q_arg)  # nocv
         return clone
+
+    _filter_or_exclude_inplace = _filter_or_exclude
 
     def last(self):
         data = list(self)[-1:]

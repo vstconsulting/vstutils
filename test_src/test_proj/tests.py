@@ -1547,7 +1547,12 @@ class EndpointTestCase(BaseTestCase):
             results = self.endpoint_call(request_data, method=method)
             self.assertFalse(any(filter(lambda r: r['status'] != 200, results)), results)
             self.assertFalse(any(filter(lambda r: r['data']['id'] != self.user.id, results)))
-            return method, self.last_response._headers['server-timing'][1].split(', ')[0].split('=')[-1]
+
+            if django_version[0] >= 3 and django_version[1] == 2:  # nocv
+                headers = self.last_response.headers
+            else:
+                headers = self.last_response._headers
+            return method, headers['server-timing'][1].split(', ')[0].split('=')[-1]
 
         perf_results = '\n'.join(f'{k.upper()}: {v}ms' for k, v in map(iteration, ('post', 'put', 'patch')))
         print(f"\nTimings for different methods:\n{perf_results}\n")
@@ -2689,7 +2694,7 @@ class ConfigParserCTestCase(BaseTestCase):
             'HOST': '',
             'PORT': ''
         }
-        if django_version[0] >= 3 and django_version[1] == 1:  # nocv
+        if django_version[0] >= 3 and django_version[1] in (1, 2):  # nocv
             db_default_val['TEST']['MIGRATE'] = True
 
         self.assertEqual(settings.ALLOWED_HOSTS, ['*', 'testserver'])
