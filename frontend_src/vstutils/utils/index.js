@@ -973,3 +973,5 @@ export function makeDataImageUrl(file) {
         url: `data:${file.mediaType || 'image/png'};base64,${file.content}`,
     };
 }
+
+export const IGNORED_FILTERS = ['offset', 'limit'];
