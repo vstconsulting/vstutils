@@ -244,6 +244,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             if issubclass(extra_serializer_class, api_serializers.VSTSerializer) and \
                     getattr(extra_serializer_class.Meta, 'model', None) is None:
                 inject_from = getattr(extra_serializer_class.Meta, '__inject_from__', None)
+                field_overrides = {
+                    n: f
+                    for n, f in (metadata.get(f'override_{inject_from}_fields', {}) or {}).items()
+                    if not hasattr(extra_serializer_class, n)
+                } or None
                 extra_serializer_class = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                     serializer_class=extra_serializer_class,
                     serializer_class_name=extra_serializer_class.__name__,
@@ -252,7 +257,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                         getattr(extra_serializer_class.Meta, 'fields', None) or
                         metadata.get(f'{inject_from}_fields', None)
                     ),
-                    field_overrides=metadata.get(f'override_{inject_from}_fields', None),
+                    field_overrides=field_overrides,
                     view_field_name=(
                         metadata['view_field_name']
                         if inject_from is not None
