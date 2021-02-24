@@ -1,6 +1,6 @@
 <template>
     <div v-if="fields.length" style="display: inline-block">
-        <Modal v-show="showModal" @close="close">
+        <Modal v-show="showModal" @apply="filter" @close="close">
             <template #header>
                 <h3>{{ $t('filters') | capitalize }}</h3>
             </template>
@@ -26,7 +26,12 @@
                 </button>
             </template>
         </Modal>
-        <button class="btn gui-btn btn-default btn-open-filters-modal" aria-label="Filters" @click="open">
+        <button
+            class="btn gui-btn btn-default btn-open-filters-modal"
+            :class="{ active: hasActiveFilters }"
+            aria-label="Filters"
+            @click="open"
+        >
             <i class="fas fa-filter" aria-hidden="true" />
             <span class="d-none d-lg-inline-block title-for-btn">{{ $t('filters') | capitalize }}</span>
         </button>
@@ -36,7 +41,7 @@
 <script>
     import Vue from 'vue';
     import Modal from '../items/modal/Modal.vue';
-    import { mergeDeep } from '../../utils';
+    import { IGNORED_FILTERS, mergeDeep } from '../../utils';
     import ModalWindowAndButtonMixin from '../../fields/ModalWindowAndButtonMixin.js';
 
     /**
@@ -52,6 +57,7 @@
         data() {
             return {
                 filtersData: {},
+                isMounted: false,
             };
         },
         computed: {
@@ -59,8 +65,19 @@
                 return Object.values(this.view.filters).filter((field) => !field.hidden);
             },
             filters() {
-                return this.$root.$refs.currentViewComponent.filters;
+                if (this.isMounted) {
+                    return this.$root.$refs.currentViewComponent.filters || {};
+                }
+                return {};
             },
+            hasActiveFilters() {
+                return (
+                    Object.keys(this.filters).filter((filter) => !IGNORED_FILTERS.includes(filter)).length > 0
+                );
+            },
+        },
+        mounted() {
+            this.isMounted = true;
         },
         methods: {
             onOpen() {
@@ -77,4 +94,13 @@
     };
 </script>
 
-<style scoped></style>
+<style>
+    .btn-open-filters-modal.active {
+        background-color: var(--btn-selected-bg-color);
+        color: var(--btn-selected-color);
+        border-color: var(--btn-selected-border-color);
+    }
+    .btn-open-filters-modal.active:hover {
+        background-color: var(--btn-selected-hover-bg-color);
+    }
+</style>

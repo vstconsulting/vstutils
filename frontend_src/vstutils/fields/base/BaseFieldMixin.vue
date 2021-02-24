@@ -71,7 +71,7 @@
                             this.field.name,
                             this.field.format || this.field.type,
                         ),
-                    grid: 'col-lg-4 col-xs-12 col-sm-6 col-md-6',
+                    grid: 'col-lg-6 col-xs-12 col-sm-6 col-md-6',
                 },
                 wrapper_styles_list: {},
                 hidden: this.field.hidden || false,

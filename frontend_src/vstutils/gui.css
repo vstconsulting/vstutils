@@ -1367,6 +1367,11 @@ body {
     --btn-warning-color: #1f2d3d;
     --btn-warning-border-color: #ffc107;
 
+    --btn-selected-bg-color: #ffa600;
+    --btn-selected-hover-bg-color: #c48200;
+    --btn-selected-color: #444;
+    --btn-selected-border-color: var(--btn-selected-hover-bg-color);
+
     --a-color: #007bff;
     --a-color-hover: #0056b3;
     --text-color: #1b2026;

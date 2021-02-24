@@ -2,7 +2,7 @@
     <div style="display: inline-block">
         <Preloader v-if="showLoader" />
 
-        <Modal v-show="showModal" @close="close">
+        <Modal v-show="showModal" @close="close" @apply="addSelected">
             <template #header>
                 <h3>{{ ($t('add') + ' ' + $t('child instances')) | capitalize }}</h3>
             </template>

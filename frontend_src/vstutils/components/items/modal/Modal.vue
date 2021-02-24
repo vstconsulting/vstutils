@@ -20,9 +20,7 @@
                     <div v-if="withFooter" class="modal-footer text-data">
                         <slot name="footer">
                             default footer
-                            <button class="modal-default-button" aria-label="OK" @click="close">
-                                OK
-                            </button>
+                            <button class="modal-default-button" aria-label="OK" @click="close">OK</button>
                         </slot>
                     </div>
                 </div>
@@ -47,21 +45,26 @@
          * Adds event callback for keyup.
          */
         mounted() {
-            window.addEventListener('keyup', this.escHandler);
+            window.addEventListener('keyup', this.keyHandler);
         },
         /**
          * Removes event callback for keyup.
          */
         beforeDestroy() {
-            window.removeEventListener('keyup', this.escHandler);
+            window.removeEventListener('keyup', this.keyHandler);
         },
         methods: {
             close() {
                 this.$emit('close');
             },
-            escHandler(e) {
+            apply() {
+                this.$emit('apply');
+            },
+            keyHandler(e) {
                 if (e.code === 'Escape') {
                     this.close();
+                } else if (e.code === 'Enter') {
+                    this.apply();
                 }
             },
         },

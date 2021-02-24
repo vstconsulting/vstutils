@@ -24,12 +24,12 @@
                 @open-sublink="$emit('open-sublink', $event)"
             />
 
+            <SelectedFilters v-if="!error && showUsedFilters" :view="view" />
+
             <div class="row">
                 <section class="col-lg-12">
                     <div v-if="error" class="error-text-wrapper">
-                        <p class="text-center error-p">
-                            {{ errorData }}
-                        </p>
+                        <p class="text-center error-p" v-html="errorData" />
                     </div>
                     <slot v-else-if="response" />
                 </section>
@@ -43,6 +43,7 @@
     import Breadcrumbs from './Breadcrumbs.vue';
     import ButtonsRow from './ButtonsRow.vue';
     import { capitalize, formatPath } from '../../utils';
+    import SelectedFilters from './SelectedFilters.vue';
 
     /**
      * Function that checks if first letter is in upper case
@@ -54,7 +55,7 @@
 
     export default {
         name: 'EntityView',
-        components: { ButtonsRow, Breadcrumbs, Preloader },
+        components: { ButtonsRow, Breadcrumbs, Preloader, SelectedFilters },
         props: {
             view: { type: Object, required: true },
             loading: { type: Boolean, required: true },
@@ -64,6 +65,7 @@
             breadcrumbs: { type: Array, required: false, default: undefined },
             showBackButton: { type: Boolean, required: false, default: true },
             showTopButtons: { type: Boolean, required: false, default: true },
+            showUsedFilters: { type: Boolean, required: false, default: true },
             isContainerFluid: { type: Boolean, required: false, default: true },
             actions: { type: Array, required: false, default: () => [] },
             sublinks: { type: Array, required: false, default: () => [] },

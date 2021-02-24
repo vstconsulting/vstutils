@@ -150,6 +150,9 @@
                     this.setLoadingError(error);
                 }
             },
+            filterNonEmpty(obj) {
+                return Object.fromEntries(Object.entries(obj).filter((entry) => entry[1]));
+            },
             /**
              * Method, that generates object
              * with values of base list QuerySet filters(limit, offset).
@@ -159,11 +162,10 @@
                 const limit = this.pagination.pageSize;
                 const page = this.$route.query.page || 1;
                 const query = { limit, offset: limit * (page - 1) };
-
-                return $.extend(true, query, this.$route.query);
+                return $.extend(true, query, this.filterNonEmpty(this.$route.query));
             },
             applyFilters(filters) {
-                this.commitMutation('setFilters', filters);
+                this.commitMutation('setFilters', this.filterNonEmpty(filters));
                 this.filterInstances();
             },
             /**
