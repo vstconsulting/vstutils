@@ -203,6 +203,7 @@ TRANSLATION = {
 
     'sign in to start your session': 'Войдите, чтобы начать сеанс',
     'sign in': 'войти',
+    'sign up': 'зарегистрируйтесь',
     'forgot password': 'забыли пароль',
     'confirm password': 'подтвердите пароль',
     'register': 'регистрация',
@@ -216,4 +217,5 @@ TRANSLATION = {
     'change my password': 'изменить пароль',
     'Your password has been set.  You may go ahead and log in now.': 'Ваш пароль был успешно установлен. Теперь вы можете войти.',
     'Please enter a correct %(username)s and password. Note that both fields may be case-sensitive.': 'Пожалуйста введите корректные %(username)s и пароль. Внимание, поля могуь быть регистрозвисимыми.',
+    'or': 'или',
 }

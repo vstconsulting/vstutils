@@ -13,12 +13,6 @@
                 ></component>
             </template>
         </div>
-        <field_description
-            :value="value"
-            :field="field"
-            :wrapper_opt="wrapper_opt"
-            :data="data"
-        ></field_description>
     </div>
 </template>
 

@@ -200,29 +200,6 @@ table {
     background-color: #efefef;
 }
 
-.popover {
-    max-width: none;
-    word-wrap: break-word;
-}
-
-@media (max-width: 768px) {
-    .popover {
-        max-width: 720px;
-    }
-}
-
-@media (max-width: 480px) {
-    .popover {
-        max-width: 420px;
-    }
-}
-
-@media (max-width: 320px) {
-    .popover {
-        max-width: 272px;
-    }
-}
-
 .textfile {
     position: relative;
 }

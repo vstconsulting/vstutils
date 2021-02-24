@@ -1,8 +1,12 @@
 <template>
-    <label :id="label_id" :class="classes" :style="styles">{{ label }}</label>
+    <label :id="label_id" :class="classes" :style="styles">
+        {{ label }}
+        <Popover :content="field.description" />
+    </label>
 </template>
 
 <script>
+    import Popover from '../../components/Popover.vue';
     import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
     import FieldLabelIdMixin from '../FieldLabelIdMixin.js';
 
@@ -11,6 +15,7 @@
      */
     export default {
         name: 'BaseFieldLabel',
+        components: { Popover },
         mixins: [BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         data() {
             return {
@@ -24,5 +29,3 @@
         },
     };
 </script>
-
-<style scoped></style>
