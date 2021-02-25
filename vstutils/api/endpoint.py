@@ -131,6 +131,8 @@ class BulkMiddleware(BaseMiddleware):
             request.user = request.META.pop('user')
             # pylint: disable=protected-access
             request._cached_user = request.user  # type: ignore
+        if 'language' in request.META:
+            request.language = request.META.pop('language')  # type: ignore
         return request
 
 
@@ -149,12 +151,15 @@ class BulkClient(Client):
     def __init__(self, enforce_csrf_checks=False, **defaults):
         # pylint: disable=bad-super-call
         self.user = defaults.pop('user', None)
+        self.language = defaults.pop('language', None)
         super(Client, self).__init__(**defaults)
         self.exc_info = None
 
     def request(self, **request):
         if self.user:
             request['user'] = self.user
+        if self.language:
+            request['language'] = self.language
         response = self.handler(self._base_environ(**request))
         if response.cookies:
             self.cookies.update(response.cookies)
@@ -321,6 +326,7 @@ class EndpointViewSet(views.APIView):
             elif isinstance(request.successful_authenticator, (BasicAuthentication, TokenAuthentication)):
                 kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
             kwargs['user'] = request.user  # type: ignore
+        kwargs['language'] = getattr(request, 'language', None)
         return kwargs
 
     def get_serializer(self, *args, **kwargs) -> OperationSerializer:

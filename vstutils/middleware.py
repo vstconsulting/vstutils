@@ -208,4 +208,6 @@ class LangMiddleware(BaseMiddleware):
         response = super().get_response_handler(request)
         if set_cookie:
             response.set_cookie('lang', request.language.code)  # type: ignore
+        if 'Content-Language' not in response:
+            response['Content-Language'] = request.language.code  # type: ignore
         return response
