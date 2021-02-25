@@ -806,6 +806,8 @@ REST_FRAMEWORK: _t.Dict = {
     }
 }
 
+OPTIMIZE_GET_BY_VALUES = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

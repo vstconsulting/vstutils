@@ -7,7 +7,9 @@ class TestFilterBackend:
     required = True
 
     def filter_queryset(self, request, queryset, view):
-        return queryset.extra(select={'local_filter_applied': 1})
+        return queryset.\
+            extra(select={'local_filter_applied': 1}).\
+            annotate(additional_name=models.F('name'))
 
     def get_schema_fields(self, view):
         return []

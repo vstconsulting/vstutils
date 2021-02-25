@@ -23,7 +23,7 @@ from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 
 from ..exceptions import VSTUtilsException
-from ..utils import classproperty, deprecated, get_if_lazy
+from ..utils import classproperty, deprecated, get_if_lazy, raise_context_decorator_with_default
 from . import responses
 from .serializers import (
     ErrorSerializer,
@@ -51,6 +51,10 @@ detail_actions: _t.Tuple[_t.Text, _t.Text, _t.Text, _t.Text] = (
     'partial_update'
 )
 main_actions: _t.Tuple[_t.Text, _t.Text, _t.Text, _t.Text, _t.Text] = ('list',) + detail_actions
+query_check_params = (
+    'extra_select',
+    'annotations_select'
+)
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 
 
@@ -242,6 +246,7 @@ class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewSetMeta):
     __slots__ = ()
+    optimize_get_by_values = settings.OPTIMIZE_GET_BY_VALUES
     select_related = False
     serializer_class: _t.Type[serializers.Serializer]
     _serializer_class_one: _t.Optional[_t.Type[serializers.Serializer]] = None
@@ -254,13 +259,33 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     def filter_for_filter_backends(self, backend):
         return getattr(backend, 'required', False)
 
+    @raise_context_decorator_with_default(default=set())
+    def _get_selectable_fields(self, qs):
+        result = {f.name for f in qs.model._meta.fields}
+
+        for extra in filter(bool, map(lambda x: getattr(qs.query, x, None), query_check_params)):
+            result.update(extra.keys())
+
+        return result
+
     def filter_queryset(self, queryset: QuerySet):
         if hasattr(self, 'nested_name'):
             self.filter_backends = filter(  # type: ignore
                 self.filter_for_filter_backends,
                 self.filter_backends
             )
-        return super().filter_queryset(queryset)
+        qs = super().filter_queryset(queryset)
+
+        if self.action in ('list', 'retrieve') and self.optimize_get_by_values:
+            # pylint: disable=protected-access
+
+            serializer_class = self.get_serializer_class()
+            read_fields = {f.field_name for f in serializer_class()._readable_fields}
+
+            if read_fields.issubset(self._get_selectable_fields(qs)):
+                qs = qs.values(*read_fields)
+
+        return qs
 
     def get_serializer_class(self):
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'

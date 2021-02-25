@@ -104,6 +104,10 @@ class Query(dict):
 
 
 class CustomModelIterable(ModelIterable):
+    def values_handler(self, unit):
+        # pylint: disable=no-member
+        return {f: unit.get(f) for f in self.fields}  # nocv
+
     def __iter__(self):
         # pylint: disable=protected-access
         queryset = self.queryset
@@ -118,8 +122,10 @@ class CustomModelIterable(ModelIterable):
             model_data.reverse()
         low = query.get('low_mark', 0)
         high = query.get('high_mark', len(model_data))
+        fields = getattr(self, 'fields', None)
+        handler = (lambda d: model(**d)) if not fields else self.values_handler
         for data in model_data[low:high]:
-            yield model(**data)
+            yield handler(data)
 
 
 class CustomQuerySet(BQuerySet):
@@ -149,6 +155,12 @@ class CustomQuerySet(BQuerySet):
         data = list(self[:1])
         if data:
             return data[0]
+
+    def values(self, *fields, **expressions):
+        assert not expressions, 'Expressions is not supported on custom non-database models.'
+        clone = self._clone()
+        clone.__iterable_class__ = type('CustomModelIterableValues', (object,), {'fields': fields})
+        return clone
 
 
 class ListModel(BaseModel):

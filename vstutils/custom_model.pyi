@@ -34,6 +34,9 @@ class CustomQuerySet(BQuerySet):
 
 
 class CustomModelIterable(ModelIterable):
+    def values_handler(self, unit: _t.Dict) -> _t.Dict:
+        ...
+
     def __iter__(self) -> _t.Iterator[BaseModel]:
         ...
 

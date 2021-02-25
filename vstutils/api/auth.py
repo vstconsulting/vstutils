@@ -171,6 +171,7 @@ class UserViewSet(base.ModelViewSet):
     serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer
     filterset_class = UserFilter
     permission_classes = (permissions.SuperUserPermission,)
+    optimize_get_by_values = False
 
     def get_object(self) -> AbstractUser:
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
