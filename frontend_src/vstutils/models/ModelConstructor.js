@@ -97,6 +97,7 @@ export default class ModelConstructor {
                 static declaredFields = fields;
                 static fieldsGroups = modelSchema['x-properties-groups'] || {};
                 static viewFieldName = modelSchema['x-view-field-name'] || null;
+                static nonBulkMethods = modelSchema['x-non-bulk-methods'] || null;
             },
             modelName,
         );

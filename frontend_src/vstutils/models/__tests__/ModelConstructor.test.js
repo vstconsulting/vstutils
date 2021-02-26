@@ -66,4 +66,23 @@ describe('ModelConstructor', () => {
         const OneAllFields = models.get('OneAllFields');
         expect(OneAllFields.viewField).toBe(OneAllFields.fields.get('color'));
     });
+
+    test('setting non bulk methods in schema', () => {
+        const Author = models.get('Author');
+        expect(Author.nonBulkMethods).toStrictEqual(['post', 'delete']);
+        expect(Author.shouldUseBulk('get')).toBeTruthy();
+        expect(Author.shouldUseBulk('post')).toBeFalsy();
+        expect(Author.shouldUseBulk('patch')).toBeTruthy();
+        expect(Author.shouldUseBulk('put')).toBeTruthy();
+        expect(Author.shouldUseBulk('delete')).toBeFalsy();
+
+        const OneAuthor = models.get('OneAuthor');
+        expect(OneAuthor.nonBulkMethods).toStrictEqual(['post', 'delete']);
+
+        const SubView = models.get('SubView');
+        expect(SubView.nonBulkMethods).toStrictEqual(['get']);
+
+        const Post = models.get('Post');
+        expect(Post.nonBulkMethods).toBeNull();
+    });
 });

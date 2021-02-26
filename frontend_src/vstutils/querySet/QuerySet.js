@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { HttpMethods, makeQueryString, RequestTypes } from '../utils';
+import { HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '../utils';
 import { StatusError, apiConnector, APIResponse } from '../api';
 
 /**
@@ -17,7 +17,6 @@ export class WrongModelError extends Error {
     }
 }
 
-const DEFAULT_BULK_METHODS = Object.values(HttpMethods);
 const NOT_PUT_IN_EXTRA = ['results'];
 
 /**
@@ -40,8 +39,6 @@ export default class QuerySet {
 
         this.cache = undefined;
         this.use_prefetch = true;
-
-        this.bulkMethods = DEFAULT_BULK_METHODS;
     }
 
     /**
@@ -70,15 +67,6 @@ export default class QuerySet {
         }
 
         return null;
-    }
-
-    /**
-     * Helper method that bulk should be used for ALL given http methods
-     * @param {HttpMethod} httpMethods
-     * @return {boolean}
-     */
-    _useBulkFor(...httpMethods) {
-        return httpMethods.every((httpMethod) => this.bulkMethods.includes(httpMethod));
     }
 
     /**
@@ -183,6 +171,7 @@ export default class QuerySet {
             const response = await this.execute({
                 method: HttpMethods.GET,
                 path: this._getDetailPath(id),
+                useBulk: model.shouldUseBulk(HttpMethods.GET),
             });
             instance = new model(response.data, this);
         }
@@ -199,7 +188,7 @@ export default class QuerySet {
     async getOne() {
         const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
         const listModelSameAsRetrieve = retrieveModel === this.getModelClass(RequestTypes.LIST);
-        const useBulk = this._useBulkFor(HttpMethods.GET);
+        const useBulk = retrieveModel.shouldUseBulk(HttpMethods.GET);
 
         if (useBulk && !listModelSameAsRetrieve) {
             const pkFieldName = retrieveModel.pkField.name;
@@ -250,6 +239,7 @@ export default class QuerySet {
             method: HttpMethods.GET,
             path: this.getDataType(),
             query: this.query,
+            useBulk: model.shouldUseBulk(HttpMethods.GET),
         });
 
         const instances = response.data.results.map((item) => new model(item, this.clone()));
@@ -293,7 +283,11 @@ export default class QuerySet {
         const createModelSameAsRetrieve = createModel === this.getModelClass(RequestTypes.RETRIEVE);
         const dataType = this.getDataType();
 
-        if (!createModelSameAsRetrieve && this._useBulkFor(method, HttpMethods.GET)) {
+        if (
+            !createModelSameAsRetrieve &&
+            createModel.shouldUseBulk(method) &&
+            retrieveModel.shouldUseBulk(HttpMethods.GET)
+        ) {
             const pkFieldName = retrieveModel.pkField.name;
             const results = await apiConnector.sendBulk([
                 { method, path: dataType, data: instance._getInnerData() },
@@ -306,6 +300,7 @@ export default class QuerySet {
                 data: instance,
                 path: dataType,
                 query: this.query,
+                useBulk: createModel.shouldUseBulk(method),
             });
             const createdInstance = new createModel(response.data, this);
             if (createModelSameAsRetrieve) {
@@ -333,7 +328,11 @@ export default class QuerySet {
 
         const updateModelSameAsRetrieve = modelUpdate === modelRetrieve;
 
-        if (!updateModelSameAsRetrieve && this._useBulkFor(method, HttpMethods.GET)) {
+        if (
+            !updateModelSameAsRetrieve &&
+            modelUpdate.shouldUseBulk(method) &&
+            modelRetrieve.shouldUseBulk(HttpMethods.GET)
+        ) {
             const requests = instances.flatMap((instance) => {
                 const path = this._getDetailPath(instance.getPkValue());
                 return [
@@ -353,6 +352,7 @@ export default class QuerySet {
                         data: updatedInstance,
                         path: this._getDetailPath(instance.getPkValue()),
                         query: this.query,
+                        useBulk: modelUpdate.shouldUseBulk(method),
                     });
                     return new modelUpdate(response.data, this);
                 }),
@@ -370,11 +370,27 @@ export default class QuerySet {
     async delete(instances = undefined) {
         if (instances === undefined) instances = await this.items();
 
+        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
+        const useBulk = retrieveModel ? retrieveModel.shouldUseBulk(HttpMethods.DELETE) : true;
+
         return Promise.all(
             instances.map((instance) =>
-                this.execute({ method: 'delete', path: this._getDetailPath(instance.getPkValue()) }),
+                this.execute({
+                    method: HttpMethods.DELETE,
+                    path: this._getDetailPath(instance.getPkValue()),
+                    useBulk,
+                }),
             ),
         );
+    }
+
+    /**
+     * Function that checks if given object is instance of Model
+     * @param {*} obj
+     * @return {boolean}
+     */
+    _isModelInstance(obj) {
+        return obj && typeof obj._getInnerData === 'function';
     }
 
     /**
@@ -387,26 +403,25 @@ export default class QuerySet {
      * @param {(string|Object|URLSearchParams)=} req.query - URL query params.
      * @param {Model=} req.data
      * @param {(string|Object)=} req.headers
+     * @param {boolean=} req.useBulk
      * @returns {Promise.<APIResponse>}
      */
     execute(req) {
-        const useBulk = this._useBulkFor(req.method);
+        const dataIsModel = this._isModelInstance(req.data);
 
-        if (req.data === undefined) {
-            return apiConnector.makeRequest({ ...req, useBulk });
+        if (req.useBulk === undefined) {
+            req.useBulk = dataIsModel ? req.data.constructor.shouldUseBulk(req.method) : true;
         }
 
-        const rawData = req.data._getInnerData ? req.data._getInnerData() : req.data;
-
-        let data;
-        if (useBulk) {
-            data = JSON.stringify(rawData);
-        } else {
-            const formData = new FormData();
-            for (let [key, value] of Object.entries(rawData)) formData.append(key, value);
-            data = formData;
+        if (req.data !== undefined) {
+            const rawData = dataIsModel ? req.data._getInnerData() : req.data;
+            if (req.useBulk) {
+                req.data = JSON.stringify(rawData);
+            } else {
+                req.data = objectToFormData(rawData);
+            }
         }
-        return apiConnector.makeRequest({ ...req, data, useBulk });
+        return apiConnector.makeRequest(req);
     }
 
     /**

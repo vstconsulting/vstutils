@@ -25,7 +25,14 @@
             }
         ],
         "x-settings": { "static_path": "/static/", "enable_gravatar": true, "time_zone": "UTC" },
-        "x-versions": { "application": "1.0.0", "library": "1.0.0", "vstutils": "4.3.3", "django": "2.2.18" },
+        "x-versions": {
+            "application": "1.0.0",
+            "library": "1.0.0",
+            "vstutils": "4.3.5",
+            "django": "2.2.18",
+            "djangorestframework": "3.12.2",
+            "drf_yasg": "1.20.0"
+        },
         "version": "v1",
         "x-user-id": 1,
         "x-centrifugo-token": "",
@@ -426,14 +433,14 @@
                     {
                         "name": "author",
                         "in": "query",
-                        "description": "",
+                        "description": "Search by author's primary key or name",
                         "required": false,
                         "type": "string"
                     },
                     {
                         "name": "category",
                         "in": "query",
-                        "description": "",
+                        "description": "Search by category's primary key or name",
                         "required": false,
                         "type": "string"
                     },
@@ -1327,14 +1334,14 @@
                     {
                         "name": "author",
                         "in": "query",
-                        "description": "",
+                        "description": "Search by author's primary key or name",
                         "required": false,
                         "type": "string"
                     },
                     {
                         "name": "category",
                         "in": "query",
-                        "description": "",
+                        "description": "Search by category's primary key or name",
                         "required": false,
                         "type": "string"
                     },
@@ -1828,14 +1835,14 @@
                     {
                         "name": "author",
                         "in": "query",
-                        "description": "",
+                        "description": "Search by author's primary key or name",
                         "required": false,
                         "type": "string"
                     },
                     {
                         "name": "category",
                         "in": "query",
-                        "description": "",
+                        "description": "Search by category's primary key or name",
                         "required": false,
                         "type": "string"
                     },
@@ -2833,6 +2840,7 @@
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
                 "autocomplete_model": {
                     "title": "Autocomplete model",
+                    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vitae dui ut ipsum feugiat varius. Duis tempor tristique augue. Vestibulum.",
                     "type": "string",
                     "format": "fk_autocomplete",
                     "additionalProperties": {
@@ -2844,6 +2852,7 @@
                 },
                 "autocomplete_enum": {
                     "title": "Autocomplete enum",
+                    "description": "Lorem ipsum <a href=\"/#/author\">dolor sit amet</a>, <b>consectetur</b> adipiscing elit. Integer ut lectus id mauris tincidunt sagittis non vel magna. Nullam tincidunt.",
                     "type": "string",
                     "format": "autocomplete",
                     "enum": ["Author 1", "Author 2"],
@@ -3108,6 +3117,7 @@
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
                 "autocomplete_model": {
                     "title": "Autocomplete model",
+                    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vitae dui ut ipsum feugiat varius. Duis tempor tristique augue. Vestibulum.",
                     "type": "string",
                     "format": "fk_autocomplete",
                     "additionalProperties": {
@@ -3119,6 +3129,7 @@
                 },
                 "autocomplete_enum": {
                     "title": "Autocomplete enum",
+                    "description": "Lorem ipsum <a href=\"/#/author\">dolor sit amet</a>, <b>consectetur</b> adipiscing elit. Integer ut lectus id mauris tincidunt sagittis non vel magna. Nullam tincidunt.",
                     "type": "string",
                     "format": "autocomplete",
                     "enum": ["Author 1", "Author 2"],
@@ -3373,7 +3384,8 @@
                 }
             },
             "x-properties-groups": { "": ["id", "name", "posts"] },
-            "x-view-field-name": "name"
+            "x-view-field-name": "name",
+            "x-non-bulk-methods": ["post", "delete"]
         },
         "OneAuthor": {
             "required": ["name"],
@@ -3390,7 +3402,8 @@
                 }
             },
             "x-properties-groups": { "": ["id", "name", "posts"] },
-            "x-view-field-name": "name"
+            "x-view-field-name": "name",
+            "x-non-bulk-methods": ["post", "delete"]
         },
         "SubView": {
             "type": "object",
@@ -3404,7 +3417,8 @@
                 }
             },
             "x-properties-groups": { "": ["item_name", "item_value"] },
-            "x-view-field-name": "item_value"
+            "x-view-field-name": "item_value",
+            "x-non-bulk-methods": ["get"]
         },
         "Post": {
             "required": ["author", "category", "title"],
