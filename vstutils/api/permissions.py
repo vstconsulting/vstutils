@@ -27,8 +27,10 @@ class SuperUserPermission(IsAuthenticatedOpenApiRequest):
             # pylint: disable=bad-super-call
             return super(IsAuthenticatedOpenApiRequest, self).has_permission(request, view)
         with raise_context():
-            return issubclass(view.get_queryset().model, AbstractUser)\
-                   and str(view.kwargs['pk']) == str(request.user.pk)
+            return (
+                issubclass(view.get_queryset().model, AbstractUser) and
+                str(view.kwargs['pk']) in (str(request.user.pk), 'profile')
+            )
         return self.is_openapi(request)
 
     def has_object_permission(self, request, view, obj):
