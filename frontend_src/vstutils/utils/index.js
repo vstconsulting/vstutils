@@ -975,3 +975,11 @@ export function makeDataImageUrl(file) {
 }
 
 export const IGNORED_FILTERS = ['offset', 'limit'];
+
+export function objectToFormData(obj) {
+    const formData = new FormData();
+    for (let [key, value] of Object.entries(obj)) {
+        formData.append(key, value);
+    }
+    return formData;
+}

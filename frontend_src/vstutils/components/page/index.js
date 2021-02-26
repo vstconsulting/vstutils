@@ -195,6 +195,7 @@ export const ActionViewComponent = {
                     headers: { 'content-type': 'application/json' },
                     path: formatPath(this.view.path, this.$route.params),
                     data: JSON.stringify(instance._getInnerData()),
+                    useBulk: instance.constructor.shouldUseBulk(this.view.method),
                 });
                 this.isPageChanged = false;
                 guiPopUp.success(

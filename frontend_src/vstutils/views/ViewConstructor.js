@@ -1,11 +1,10 @@
 import $ from 'jquery';
-import { capitalize, HttpMethods, mergeDeep, RequestTypes } from '../utils';
+import { capitalize, HttpMethods, mergeDeep, RequestTypes, ViewTypes } from '../utils';
 import signals from '../signals.js';
-import { ActionView, ListView, PageEditView, PageNewView, PageView, ViewTypes } from './View.js';
-import { QuerySet } from '../querySet';
+import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
 import { getFieldFormatFactory } from '../fields';
-import { SingleEntityQueryset } from '../querySet/SingleEntityQueryset.js';
+import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.js';
 
 /**
  * Function that checks if status code if OK

@@ -163,8 +163,14 @@ export class ModelValidationError extends Error {
  * @property {BaseField} _viewField
  */
 export class Model {
+    /** @type {Array<BaseField>} */
     static declaredFields = [];
+    /** @type {Object<string, Array[string]>} */
     static fieldsGroups = {};
+    /** @type {string|null} */
+    static viewFieldName = null;
+    /** @type {Array<string>|null} */
+    static nonBulkMethods = null;
 
     /**
      * @param {InnerData=} data
@@ -271,6 +277,17 @@ export class Model {
             }
             return escapeHtml(String(value));
         }
+    }
+
+    /**
+     * @param {HttpMethod} method
+     * @returns {boolean}
+     */
+    static shouldUseBulk(method) {
+        if (!this.nonBulkMethods) {
+            return true;
+        }
+        return !this.nonBulkMethods.includes(method);
     }
 
     /**
