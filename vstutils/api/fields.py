@@ -278,7 +278,11 @@ class DependFromFkField(DynamicJsonTypeField):
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)
 
-        related_object: models.Model = self.parent.fields[self.field].get_value(dictionary)  # type: ignore
+        parent_field = self.parent.fields[self.field]
+        related_object: models.Model = parent_field.get_value(dictionary)  # type: ignore
+        if not isinstance(related_object, models.Model) and isinstance(parent_field, FkModelField):
+            # TODO: write test to it
+            related_object = parent_field.model_class(**{parent_field.autocomplete_property: related_object})  # nocv
         related_type = getattr(related_object, self.field_attribute)
         related_field: Field = getattr(
             related_object,
@@ -468,7 +472,7 @@ class FkModelField(FkField):
         self.model_class = get_if_lazy(self.model_class)
         if isinstance(value, self.model_class):
             return getattr(value, self.autocomplete_property)
-        else:  # nocv
+        else:
             return value  # type: ignore
 
 

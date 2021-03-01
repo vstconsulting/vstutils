@@ -341,8 +341,7 @@ class NestedFilterInspector(CoreAPICompatInspector):
 class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
     def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
         if isinstance(field, FileResponse):
-            schema = openapi.Schema(type='file')
-            return schema
+            return openapi.Schema(type='file')
 
         result = super().field_to_swagger_object(field, swagger_object_type, use_references, **kwargs)
 
