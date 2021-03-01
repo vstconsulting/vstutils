@@ -1,6 +1,7 @@
 from typing import Dict, Type, Text, Any
 from collections import OrderedDict
 
+from django.http import FileResponse
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector
 from drf_yasg import openapi
@@ -339,6 +340,10 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
     def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
+        if isinstance(field, FileResponse):
+            schema = openapi.Schema(type='file')
+            return schema
+
         result = super().field_to_swagger_object(field, swagger_object_type, use_references, **kwargs)
 
         if result != NotHandled:

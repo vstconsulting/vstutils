@@ -6,17 +6,19 @@ import sys
 import logging
 import inspect
 import traceback
+import datetime
 import typing as _t
 from collections import namedtuple
 from copy import deepcopy
 
 from django.conf import settings
 from django.core import exceptions as djexcs
-from django.http.response import Http404
+from django.http.response import Http404, FileResponse, HttpResponseNotModified
 from django.db.models.query import QuerySet
 from django.db import transaction, models
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
+from rest_framework.serializers import BaseSerializer
 from rest_framework.response import Response as RestResponse
 from rest_framework.request import Request
 from rest_framework.decorators import action
@@ -55,6 +57,7 @@ query_check_params = (
     'extra_select',
     'annotations_select'
 )
+default_cache_control_header_data = 'private, no-cache'
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 
 
@@ -280,10 +283,11 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             # pylint: disable=protected-access
 
             serializer_class = self.get_serializer_class()
-            read_fields = {f.field_name for f in serializer_class()._readable_fields}
+            if issubclass(serializer_class, BaseSerializer):
+                read_fields = {f.field_name for f in serializer_class()._readable_fields}
 
-            if read_fields.issubset(self._get_selectable_fields(qs)):
-                qs = qs.values(*read_fields)
+                if read_fields.issubset(self._get_selectable_fields(qs)):
+                    qs = qs.values(*read_fields)
 
         return qs
 
@@ -322,6 +326,18 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         if is_detail:
             return self.serializer_class_one  # pylint: disable=no-member
         return super().get_serializer_class()
+
+    def get_serializer(self, *args: _t.Any, **kwargs: _t.Any) -> BaseSerializer:
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+
+        Provide to use :class:`django.http.StreamingHttpResponse` as serializer init.
+        """
+        serializer_class = self.get_serializer_class()
+        if issubclass(serializer_class, BaseSerializer):
+            kwargs.setdefault('context', self.get_serializer_context())
+        return serializer_class(*args, **kwargs)
 
     def nested_allow_check(self):
         """
@@ -395,6 +411,50 @@ class CopyMixin(GenericViewSet):
         serializer.is_valid()
         serializer.save()
         return responses.HTTP_201_CREATED(serializer.data)
+
+
+class FileResponseRetrieveMixin(GenericViewSet):
+    """
+    ViewSet mixin for retriving FileResponse from models with file fields data.
+
+    Example:
+
+        .. literalinclude:: ../test_src/test_proj/models/files.py
+           :lines: 1-20,54-76
+    """
+    instance_field_data: _t.Text
+    instance_field_filename: _t.Text = 'filename'
+    instance_field_timestamp: _t.Optional[_t.Text] = None
+    cache_control_header_data: _t.Optional[_t.Text] = None
+    serializer_class_retrieve = FileResponse
+
+    def get_file_response_kwargs(self, instance):
+        return {
+            "streaming_content": getattr(instance, self.instance_field_data),
+            "as_attachment": True,
+            "filename": getattr(instance, self.instance_field_filename, '')
+        }
+
+    def retrieve(self, request: Request, *args, **kwargs) -> _t.Union[FileResponse, HttpResponseNotModified]:
+        instance = self.get_object()
+
+        instance_edit_timestamp = None
+        if self.instance_field_timestamp:
+            instance_edit: datetime.datetime = getattr(instance, self.instance_field_timestamp, None)
+            instance_edit_timestamp = instance_edit.timestamp() if instance_edit else None
+
+        if instance_edit_timestamp and instance_edit_timestamp == float(request.META.get('HTTP_IF_NONE_MATCH', '0.0')):
+            return HttpResponseNotModified()
+
+        response: FileResponse = self.get_serializer(**self.get_file_response_kwargs(instance))  # type: ignore
+
+        if self.instance_field_timestamp and instance_edit_timestamp:
+            cache_control_header_data = getattr(self, 'cache_control_header_data', None)
+            if cache_control_header_data is None:
+                cache_control_header_data = default_cache_control_header_data
+            response['Cache-Control'] = cache_control_header_data
+            response['ETag'] = str(instance_edit_timestamp)
+        return response
 
 
 class ModelViewSet(GenericViewSet, vsets.ModelViewSet):

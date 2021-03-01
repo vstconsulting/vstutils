@@ -1,7 +1,23 @@
+import datetime
+import io
 import os
-from vstutils.models import models
+from django.db import models
 from vstutils.custom_model import ListModel, FileModel
-from vstutils.api import fields
+from vstutils.api import fields, base
+
+
+class FileViewMixin(base.FileResponseRetrieveMixin):
+    # required always
+    instance_field_data = 'value_bytes'
+    # required for response caching in browser
+    instance_field_timestamp = 'updated'
+    # search this field in instance for response filename
+    # instance_field_filename = 'filename'  # as default
+    # headers for response caching (default works with user auth)
+    # cache_control_header_data = 'private, no-cache'
+    #
+    # WARNING:
+    # DO NOT OVERRIDE `serializer_class_retrieve` if you do not know what you do.
 
 
 class File(FileModel):
@@ -35,3 +51,25 @@ class List(ListModel):
     ]
     id = models.IntegerField(primary_key=True)
     value = models.TextField()
+
+
+class ListOfFiles(ListModel):
+    data = [
+        dict(id=i, value='File data', updated=datetime.datetime(2021, 3, 1, 16, 15, 51, 801564))
+        for i in range(1)
+    ]
+    id = models.IntegerField(primary_key=True)
+    value = models.TextField()
+    updated = models.DateTimeField()
+
+    class Meta:
+        _view_class = (FileViewMixin, 'read_only')
+        _list_fields = _detail_fields = ('id', 'filename',)
+
+    @property
+    def filename(self):
+        return f"File_{self.id}.txt"
+
+    @property
+    def value_bytes(self):
+        return io.BytesIO(self.value.encode('utf-8'))

@@ -19,6 +19,9 @@ API[VST_API_VERSION][r'post'] = dict(
 API[VST_API_VERSION][r'list'] = dict(
     model='test_proj.models.List'
 )
+API[VST_API_VERSION][r'listoffiles'] = dict(
+    model='test_proj.models.ListOfFiles'
+)
 API[VST_API_VERSION][r'settings'] = dict(
     view='vstutils.api.views.SettingsViewSet',
     op_types=['get', 'mod'],

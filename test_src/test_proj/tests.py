@@ -5,6 +5,7 @@ import shutil
 import re
 import io
 import pwd
+import datetime
 import orjson
 from pathlib import Path
 from smtplib import SMTPException
@@ -25,6 +26,7 @@ from django.core.cache import cache
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.test import Client
+from django.http import FileResponse, HttpResponseNotModified
 from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
@@ -1108,6 +1110,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(
             api['paths']['/testcontenttype/']['get']['description'],
             'Variables based model.'
+        )
+        self.assertEqual(
+            api['paths']['/listoffiles/{id}/']['get']['responses']['200']['schema'],
+            {'type': 'file'}
         )
 
     def test_api_version_request(self):
@@ -2606,6 +2612,7 @@ class CustomModelTestCase(BaseTestCase):
             dict(method='get', path='files'),
             dict(method='get', path=['files', 1]),
             dict(method='get', path='files', query='name=ToFilter'),
+            dict(method='get', path='listoffiles'),
         ])
 
         for result in results:
@@ -2614,6 +2621,24 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(results[0]['data']['count'], 10)
         self.assertEqual(results[1]['data']['origin_pos'], 1, results[1]['data'])
         self.assertEqual(results[2]['data']['count'], 5)
+        self.assertEqual(results[3]['data']['count'], 1)
+
+        self.client.force_login(self.user)
+        last_update = datetime.datetime(2021, 3, 1, 16, 15, 51, 801564).timestamp()
+        response = self.client.get('/api/v1/listoffiles/0/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response, FileResponse)
+        self.assertEqual(response.as_attachment, True)
+        self.assertEqual(response.filename, 'File_0.txt')
+        self.assertEqual(
+            ''.join(line.decode('utf-8') for line in response.streaming_content),
+            'File data'
+        )
+
+        # Check browser cache
+        response = self.client.get('/api/v1/listoffiles/0/', HTTP_IF_NONE_MATCH=str(last_update))
+        self.assertEqual(response.status_code, 304)
+        self.assertIsInstance(response, HttpResponseNotModified)
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')
