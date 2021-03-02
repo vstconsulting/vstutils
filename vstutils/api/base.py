@@ -26,7 +26,7 @@ from rest_framework.schemas import AutoSchema as DRFAutoSchema
 
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty, deprecated, get_if_lazy, raise_context_decorator_with_default
-from . import responses
+from . import responses, fields
 from .serializers import (
     ErrorSerializer,
     ValidationErrorSerializer,
@@ -58,6 +58,10 @@ query_check_params = (
     'annotations_select'
 )
 default_cache_control_header_data = 'private, no-cache'
+non_optimizeable_fields = (
+    serializers.PrimaryKeyRelatedField,
+    serializers.BaseSerializer
+)
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 
 
@@ -284,9 +288,15 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
 
             serializer_class = self.get_serializer_class()
             if issubclass(serializer_class, BaseSerializer):
-                read_fields = {f.field_name for f in serializer_class()._readable_fields}
+                serializer = serializer_class()
+                read_fields = {f.field_name for f in serializer._readable_fields}
+                model_fields = {
+                    f.field_name  # type: ignore
+                    for f in serializer._readable_fields
+                    if isinstance(f, non_optimizeable_fields)
+                }
 
-                if read_fields.issubset(self._get_selectable_fields(qs)):
+                if read_fields.issubset(self._get_selectable_fields(qs)) and not (read_fields & model_fields):
                     qs = qs.values(*read_fields)
 
         return qs

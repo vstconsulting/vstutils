@@ -278,7 +278,7 @@ class DependFromFkField(DynamicJsonTypeField):
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)
 
-        parent_field = self.parent.fields[self.field]
+        parent_field = self.parent.fields[self.field]  # type: ignore
         related_object: models.Model = parent_field.get_value(dictionary)  # type: ignore
         if not isinstance(related_object, models.Model) and isinstance(parent_field, FkModelField):
             # TODO: write test to it
