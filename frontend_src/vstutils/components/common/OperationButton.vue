@@ -1,7 +1,7 @@
 <template functional>
     <button type="button" :class="props.classes" :style="props.styles" @click="listeners.clicked">
         <i v-if="props.iconClasses" :class="props.iconClasses" />
-        <span :class="props.titleClasses" v-text="props.title" />
+        <span :class="props.titleClasses">{{ parent.$t(props.title) | capitalize }}</span>
     </button>
 </template>
 

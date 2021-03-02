@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from jsmin import jsmin
 
-from .forms import RegistrationForm
+from .forms import RegistrationForm, TwoFaForm
 
 UserModel = get_user_model()
 
@@ -64,6 +64,24 @@ class SWView(BaseView):
 class Login(auth.LoginView):
     template_name = 'auth/login.html'
     redirect_authenticated_user = True
+
+    def _is_need_tfa(self, request):
+        return request.user.is_authenticated and getattr(request.user, 'need_twofa', False)
+
+    def dispatch(self, request, *args, **kwargs):
+        if self._is_need_tfa(request):
+            self.redirect_authenticated_user = False
+        return super(Login, self).dispatch(request, *args, **kwargs)
+
+    def get_form_class(self):
+        if self._is_need_tfa(self.request):
+            return TwoFaForm
+        return super().get_form_class()
+
+    def get_template_names(self):
+        if self._is_need_tfa(self.request):
+            return ['auth/tfa.html']
+        return super().get_template_names()
 
 
 class Logout(auth.LogoutView):

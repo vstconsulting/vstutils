@@ -1,8 +1,15 @@
+import pyotp
 from django.conf import settings
+from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string as import_class
 from django.utils.functional import cached_property
 
+from ..models import BaseModel
 from ..custom_model import ListModel, CharField
+
+
+User = get_user_model()
 
 
 lib_names = []
@@ -45,3 +52,29 @@ class Language(ListModel):
             # place for additional translation methods
             return text
         return translated
+
+
+class TwoFactor(BaseModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    secret = models.CharField(max_length=256, blank=False, null=False)
+
+    class Meta:
+        default_related_name = 'twofa'
+
+    @property
+    def enabled(self):
+        return bool(self.secret)
+
+    def verify(self, pin):
+        if not pyotp.TOTP(self.secret).verify(pin):
+            return self.recoverycode.filter(key=pin).delete()[0]
+        return True
+
+
+class RecoveryCode(BaseModel):
+    id = models.AutoField(primary_key=True, max_length=100)
+    key = models.CharField(max_length=256)
+    tfa = models.ForeignKey(TwoFactor, on_delete=models.CASCADE)
+
+    class Meta:
+        default_related_name = 'recoverycode'

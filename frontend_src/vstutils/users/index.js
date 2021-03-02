@@ -1,8 +1,8 @@
 import signals from '../signals.js';
-import { path_pk_key } from '../utils';
 import ProfileViewConstructor from './ProfileViewConstructor.js';
 
 import Gravatar from './Gravatar.js';
+import TFAPage from './TFAPage.vue';
 
 export { Gravatar, ProfileViewConstructor };
 
@@ -126,4 +126,22 @@ signals.once('app.afterInit', ({ app }) => {
             next();
         }
     });
+});
+
+// Setup tfa configuration page
+signals.once('openapi.loaded', (schema) => {
+    schema.paths['/user/{id}/twofa/']['x-edit-style'] = true;
+});
+signals.once('allModels.created', ({ models }) => {
+    models.get('TwoFA').viewField = null;
+});
+signals.once('allViews.created', ({ views }) => {
+    const userView = views.get('/user/{id}/');
+    const tfaSublink = userView.sublinks.get('twofa');
+    tfaSublink.title = 'Two factor authentication';
+    tfaSublink.iconClasses = ['fas', 'fa-lock'];
+
+    const tfaView = views.get('/user/{id}/twofa/');
+    tfaView.mixins.push(TFAPage);
+    tfaView.params.method = 'PUT';
 });

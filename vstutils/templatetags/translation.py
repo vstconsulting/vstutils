@@ -47,8 +47,9 @@ class TranslateErrorsTag(template.Node):
         errors = self.errors_list.resolve(context)
         for error in errors.as_data():
             translated = trans(str(error.message))
-            msg = translated % {k: trans(v) for k, v in error.params.items()}
-            result += f'<li>{msg}</li>'
+            if error.params:
+                translated = translated % {k: trans(v) for k, v in error.params.items()}
+            result += f'<li>{translated}</li>'
 
         return f'<ul class="form-errors">{result}</ul>'
 

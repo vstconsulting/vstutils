@@ -93,6 +93,7 @@ export const PageNewViewComponent = {
             }
             this.loading = true;
             const instance = this.instance;
+            const name = instance.getViewFieldString() || instance.getPkValue() || '';
             try {
                 if (this.view.type === ViewTypes.PAGE_EDIT) await instance.update(this.view.params.method);
                 else await instance.create(this.view.params.method);
@@ -100,19 +101,14 @@ export const PageNewViewComponent = {
                 this.loading = false;
                 this.isPageChanged = false;
 
-                guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.save).format([
-                        instance.getViewFieldString() || instance.getPkValue() || '',
-                        this.view.name,
-                    ]),
-                );
+                guiPopUp.success(this.$t(pop_up_msg.instance.success.save).format([name, this.view.name]));
                 this.openPage({ path: this.getRedirectUrl({ instance }) });
             } catch (error) {
                 this.loading = false;
                 let str = window.app.error_handler.errorToString(error);
 
                 let srt_to_show = this.$t(pop_up_msg.instance.error.save).format([
-                    instance.getViewFieldValue(),
+                    name,
                     this.$t(this.view.name),
                     str,
                 ]);

@@ -20,3 +20,6 @@ PyJWT~=2.0.1
 # Minificators
 jsmin==2.2.2
 django-htmlmin~=0.11.0
+
+# 2fa
+pyotp~=2.6.0

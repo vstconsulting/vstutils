@@ -136,6 +136,7 @@ class WebSection(BaseAppendSection):
         'secure_hsts_seconds': ConfigIntSecondsType,
         'health_throttle_rate': ConfigIntType,
         'bulk_threads': ConfigIntType,
+        'max_tfa_attempts': ConfigIntType,
     }
 
 
@@ -251,7 +252,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'secure_hsts_preload': False,
             'secure_hsts_seconds': 0,
             'health_throttle_rate': 60,
-            'bulk_threads': 3
+            'bulk_threads': 3,
+            'max_tfa_attempts': ConfigIntType(os.getenv(f'{ENV_NAME}_MAX_TFA_ATTEMPTS', 5)),
         },
         'database': {
             'engine': 'django.db.backends.sqlite3',
@@ -427,6 +429,7 @@ MIDDLEWARE: _t.List[_t.Text] = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'vstutils.middleware.LangMiddleware',
+    'vstutils.middleware.TwoFaMiddleware',
 ]
 
 EXCLUDE_FROM_MINIFYING = []
@@ -441,12 +444,15 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'vstutils.middleware.LangMiddleware',
+        'vstutils.middleware.TwoFaMiddleware',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
     ],
     'append': []
 }
+
+MAX_TFA_ATTEMPTS: int = web['max_tfa_attempts']
 
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
@@ -950,7 +956,8 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "LOGOUT": {
         "BACKEND": 'vstutils.gui.views.Logout',
         "OPTIONS": {
-            'view_args': [{'next_page': '/'}]
+            'view_args': [{'next_page': '/'}],
+            'name': 'logout'
         }
     },
     "PASSWORD_RESET": {

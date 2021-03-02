@@ -983,3 +983,30 @@ export function objectToFormData(obj) {
     }
     return formData;
 }
+
+/**
+ * Function that generates string
+ * @param {number} length
+ * @param {string} [characters]
+ * @return {string}
+ */
+export function generateRandomString(
+    length,
+    characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+) {
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+/**
+ * Function that generates random string using base32 characters.
+ * @param {number} length
+ * @return {string}
+ */
+export function generateBase32String(length = 32) {
+    return generateRandomString(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567');
+}

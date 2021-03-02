@@ -1,26 +1,2 @@
 {% extends "auth/base.html" %}
 {% load request_static %}
-
-{% block style %}
-    {{ block.super }}
-    <style>
-        @media (min-width: 600px) {
-            .password-reset {
-                width: 500px
-            }
-        }
-    </style>
-{% endblock %}
-
-{% block body %}
-<body class="{% block bodyclass %}hold-transition login-page{% endblock %}">
-    {% include "auth/language_selector.html" %}
-
-    {% block content %}
-    {% endblock %}
-
-    {% block after_content %}
-    {% endblock %}
-
-</body>
-{% endblock %}

@@ -1,14 +1,17 @@
 import typing as _t
 
+import pyotp
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
+from django.utils.functional import SimpleLazyObject
 from django_filters import BooleanFilter, CharFilter
 from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer
+from vstutils.api.models import TwoFactor, RecoveryCode
 
 User = get_user_model()
 
@@ -138,6 +141,50 @@ class ChangePasswordSerializer(DataSerializer):
         }
 
 
+class TwoFASerializer(VSTSerializer):
+    enabled = serializers.BooleanField(read_only=True)
+    secret = serializers.CharField(write_only=True, default=None, allow_null=True)
+    pin = serializers.CharField(write_only=True, required=False, label='Enter the six-digit code from the application')
+    recovery = serializers.CharField(write_only=True, required=False)
+
+    default_error_messages = {
+        'invalid_pin': 'Invalid authentication code',
+        'no_secret_provided': 'Secret string must be provided',
+        **VSTSerializer.default_error_messages
+    }
+
+    class Meta:
+        model = TwoFactor
+        fields = (
+            'enabled',
+            'secret',
+            'pin',
+            'recovery',
+        )
+
+    def verify_pin(self, secret, pin):
+        if not secret:
+            self.fail('no_secret_provided')
+        if not pyotp.TOTP(secret).verify(pin):
+            self.fail('invalid_pin')
+
+    @transaction.atomic()
+    def create(self, validated_data: dict):
+        recovery_codes = validated_data.pop('recovery', '')
+        self.verify_pin(validated_data.get('secret'), validated_data.pop('pin', ''))
+        instance = super().create(validated_data)
+        RecoveryCode.objects.bulk_create([
+            RecoveryCode(key=code, tfa=instance)
+            for code in tuple(filter(bool, recovery_codes.split(',')))[:15]
+        ])
+        return instance
+
+    def update(self, instance, validated_data):
+        instance.delete()
+        instance.secret = None  # type: ignore
+        return instance
+
+
 class UserFilter(DefaultIDFilter):
     is_active = BooleanFilter(help_text='Boolean value meaning status of user.')
     first_name = CharFilter(help_text='Users first name.')
@@ -169,6 +216,7 @@ class UserViewSet(base.ModelViewSet):
     serializer_class_one: _t.Type[OneUserSerializer] = OneUserSerializer
     serializer_class_create: _t.Type[CreateUserSerializer] = CreateUserSerializer
     serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer
+    serializer_class_twofa: _t.Type[serializers.BaseSerializer] = TwoFASerializer
     filterset_class = UserFilter
     permission_classes = (permissions.SuperUserPermission,)
     optimize_get_by_values = False
@@ -206,3 +254,21 @@ class UserViewSet(base.ModelViewSet):
         serializer.save()
         update_session_auth_hash(request, user)
         return responses.HTTP_201_CREATED(serializer.data)
+
+    @deco.action(['get', 'put'], detail=True, permission_classes=(ChangePasswordPermission,))
+    def twofa(self, request: drf_request.Request, *args, **kwargs):
+        user: User = self.get_object()  # type: ignore
+        instance = getattr(user, 'twofa', None)
+
+        if request.method.upper() == 'PUT':  # type: ignore
+            serializer = self.get_serializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            request.session['twofa'] = True
+        else:
+            serializer = self.get_serializer(
+                instance or
+                SimpleLazyObject(lambda: TwoFactor(user=user))
+            )
+
+        return responses.HTTP_200_OK(serializer.data)
