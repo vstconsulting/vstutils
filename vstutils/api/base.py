@@ -26,7 +26,7 @@ from rest_framework.schemas import AutoSchema as DRFAutoSchema
 
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty, deprecated, get_if_lazy, raise_context_decorator_with_default
-from . import responses, fields
+from . import responses
 from .serializers import (
     ErrorSerializer,
     ValidationErrorSerializer,
