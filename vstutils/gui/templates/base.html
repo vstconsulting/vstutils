@@ -66,16 +66,18 @@
     <body class="{% block bodyclass %}hold-transition login-page{% endblock %}">
         <div class="login-box">
             {% include "auth/language_selector.html" %}
+
             {% block login_logo %}
                 <div class="login-logo">
                     <a>{{ project_gui_name }}</a>
                 </div>
             {% endblock %}
 
-            <!-- /.login-logo -->
             {% block login_body %}
-                    {% block alter_auth %}
-                    {% endblock %}
+                <div class="login-box-body rounded">
+                    {% block login_body_content %}{% endblock %}
+                </div>
+                {% block alter_auth %}{% endblock %}
             {% endblock %}
           <!-- /.login-box-body -->
         </div>

@@ -20,6 +20,7 @@ import * as numbers from './numbers';
 import * as text from './text';
 import { mapToObjectProxy } from '../utils';
 import { RelatedListField } from './related-list';
+import { QRCodeField } from './qr.js';
 
 const globalFields = new Map([
     // ['api_data', APIDataField],
@@ -55,6 +56,7 @@ const globalFields = new Map([
     ['number', numbers.NumberField],
     ['password', PasswordField],
     ['plain_text', text.PlainTextField],
+    ['qrcode', QRCodeField],
     ['rating', numbers.rating.RatingField],
     ['related_list', RelatedListField],
     ['secretfile', files.secretFile.SecretFileField], // DOES_NOTHING_ON_FRONTEND

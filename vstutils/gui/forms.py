@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.conf import settings
 from django import forms
@@ -80,3 +80,29 @@ class RegistrationForm(UserCreationForm):
             if self.errors and uid not in (None, ''):
                 self.cleaned_data.update(secure_pickle.loads(cache.get(uid)))
                 self._errors = ErrorDict()
+
+
+class TwoFaForm(forms.Form):
+    pin = forms.CharField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(TwoFaForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        pin = self.cleaned_data.get('pin')
+
+        if self.request.user.twofa.verify(pin):
+            self.request.session['2fa'] = True
+        else:
+            self.add_error('pin', 'Invalid authentication code')
+            attempts = self.request.session.get('2fa_attempts', 0) + 1
+            if attempts >= settings.MAX_TFA_ATTEMPTS:
+                logout(self.request)
+            else:
+                self.request.session['2fa_attempts'] = attempts
+
+        return super().clean()
+
+    def get_user(self):
+        return self.request.user

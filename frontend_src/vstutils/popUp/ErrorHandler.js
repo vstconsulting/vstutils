@@ -61,6 +61,8 @@ export default class ErrorHandler {
                 return error.data.detail;
             } else if (error.data.detail && typeof error.data.detail == 'object') {
                 return this.errorDetailHandler(error.data.detail);
+            } else if (Array.isArray(error.data)) {
+                return error.data.join('<br>');
             } else if (typeof error.data == 'object') {
                 return this.errorDetailHandler(error.data);
             }

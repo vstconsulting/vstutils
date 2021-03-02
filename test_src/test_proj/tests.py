@@ -779,6 +779,117 @@ class ViewsTestCase(BaseTestCase):
         })
         self.assertRedirects(response, redirect_page)
 
+    @override_settings(MAX_TFA_ATTEMPTS=4)
+    def test_2fa(self):
+        secret = 'base32secret3232'
+        pin = '492039'
+        with self.patch('pyotp.TOTP.verify') as mock_obj:
+            mock_obj.side_effect = lambda x: x == pin
+            results = self.bulk([
+                # [0] check disabled
+                {'method': 'get', 'path': ['user', 'profile', 'twofa']},
+
+                # [1] setup 2fa
+                {'method': 'put', 'path': ['user', 'profile', 'twofa'], 'data': {
+                    'secret': secret, 'pin': pin, 'recovery': 'code1,,,,',
+                }},
+                # [2] check enabled
+                {'method': 'get', 'path': ['user', 'profile', 'twofa']},
+
+                # [3] disable 2fa
+                {'method': 'put', 'path': ['user', 'profile', 'twofa'], 'data': {}},
+                # [4] check disabled
+                {'method': 'get', 'path': ['user', 'profile', 'twofa']},
+
+                # [5] setup 2fa with wrong pin
+                {'method': 'put', 'path': ['user', 'profile', 'twofa'], 'data': {'secret': secret, 'pin': '1337'}},
+                # [6] check disabled
+                {'method': 'get', 'path': ['user', 'profile', 'twofa']},
+
+                # [7] setup 2fa with no secret
+                {'method': 'put', 'path': ['user', 'profile', 'twofa'], 'data': {'pin': '1337'}},
+                # [8] check disabled
+                {'method': 'get', 'path': ['user', 'profile', 'twofa']},
+
+
+                # [9] enable 2FA with recovery codes
+                {'method': 'put', 'path': ['user', 'profile', 'twofa'], 'data': {
+                    'secret': secret, 'pin': pin, 'recovery': 'co-de1,,,,cod-e2,,,,'
+                }},
+
+            ])
+            self.assertEqual(mock_obj.call_count, 3)
+
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data'], {'enabled': False})
+
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data'], {'enabled': True})
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data'], {'enabled': True})
+
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data'], {'enabled': False})
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data'], {'enabled': False})
+
+        self.assertEqual(results[5]['status'], 400)
+        self.assertEqual(results[5]['data'], ['Invalid authentication code'])
+        self.assertEqual(results[6]['status'], 200)
+        self.assertEqual(results[6]['data'], {'enabled': False})
+
+        self.assertEqual(results[7]['status'], 400)
+        self.assertEqual(results[7]['data'], ['Secret string must be provided'])
+        self.assertEqual(results[8]['status'], 200)
+        self.assertEqual(results[8]['data'], {'enabled': False})
+
+        self.assertEqual(results[9]['status'], 200)
+        self.assertEqual(results[9]['data'], {'enabled': True})
+        self.assertEqual(self.user.twofa.recoverycode.all().count(), 2)
+
+        # Check logout after invalid attempts
+        client = self.client_class()
+        client.post('/login/', data=self.user.data)
+        with self.patch('pyotp.TOTP.verify') as mock_obj:
+            mock_obj.side_effect = lambda x: x == pin
+            # Make 3 attempts with invalid pin
+            client.post('/login/', data={'pin': '111'})
+            client.post('/login/', data={'pin': '111'})
+            response = client.post('/login/', data={'pin': '111'})
+            # Check that response contains error message
+            self.assertContains(response, 'Invalid authentication code')
+            # Make 4th attempt
+            response = client.post('/login/', data={'pin': '111'})
+            # Check that login page returned
+            self.assertContains(response, 'Sign in to start your session')
+
+        # Check recovery codes
+        client = self.client_class()
+        client.post('/login/', data=self.user.data)
+        response = client.post('/login/', data={'pin': 'cod-e2'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.user.twofa.recoverycode.all().count(), 1)
+        response = client.get('/')
+        self.assertEqual(response.status_code, 200)
+
+        # Check login and redirects
+        client = self.client_class()
+        client.post('/login/', data=self.user.data)
+        self.assertTrue(settings.SESSION_COOKIE_NAME in client.cookies)
+
+        response = client.get('/')
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/login/')
+
+        with self.patch('pyotp.TOTP.verify') as mock_obj:
+            mock_obj.side_effect = lambda x: x == pin
+            response = client.post('/login/', data={'pin': pin})
+            self.assertEqual(response.status_code, 302)
+
+        response = client.get('/')
+        self.assertEqual(response.status_code, 200)
+
+
 
 class DefaultBulkTestCase(BaseTestCase):
 

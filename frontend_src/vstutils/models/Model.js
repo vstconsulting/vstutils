@@ -200,8 +200,8 @@ export class Model {
      */
     _getInnerData() {
         const data = {};
-        for (const name of this._fields.keys()) {
-            data[name] = this._data[name];
+        for (const field of this._fields.values()) {
+            data[field.name] = this._data[field.name];
         }
         return data;
     }
@@ -272,7 +272,7 @@ export class Model {
             if (value instanceof Model) {
                 return value.getViewFieldString();
             }
-            if (value === null) {
+            if (value === null || value === undefined) {
                 return;
             }
             return escapeHtml(String(value));
