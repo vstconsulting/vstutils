@@ -2,6 +2,7 @@
 Default ViewSets for web-api.
 """
 
+import io
 import sys
 import logging
 import inspect
@@ -439,10 +440,15 @@ class FileResponseRetrieveMixin(GenericViewSet):
     serializer_class_retrieve = FileResponse
 
     def get_file_response_kwargs(self, instance):
+        data = getattr(instance, self.instance_field_data)
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        if isinstance(data, (bytes, bytearray)):
+            data = io.BytesIO(data)
         return {
-            "streaming_content": getattr(instance, self.instance_field_data),
+            "streaming_content": data,
             "as_attachment": True,
-            "filename": getattr(instance, self.instance_field_filename, '')
+            "filename": getattr(instance, self.instance_field_filename, ''),
         }
 
     def retrieve(self, request: Request, *args, **kwargs) -> _t.Union[FileResponse, HttpResponseNotModified]:

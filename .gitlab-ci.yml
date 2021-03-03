@@ -42,12 +42,14 @@ stages:
 code_style:
   <<: *branch_tests
   stage: code_standarts
-  parallel:
-    matrix:
-      - TOX_ENVS:
-          - flake
-          - mypy
-          - pylint
+  variables:
+    TOX_ENVS: "flake,mypy,pylint  --parallel 3"
+#  parallel:
+#    matrix:
+#      - TOX_ENVS:
+#          - flake
+#          - mypy
+#          - pylint
 
 js_style:
   <<: *branch_tests

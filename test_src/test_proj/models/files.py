@@ -8,7 +8,7 @@ from vstutils.api import fields, base
 
 class FileViewMixin(base.FileResponseRetrieveMixin):
     # required always
-    instance_field_data = 'value_bytes'
+    instance_field_data = 'value'
     # required for response caching in browser
     instance_field_timestamp = 'updated'
     # search this field in instance for response filename
@@ -69,7 +69,3 @@ class ListOfFiles(ListModel):
     @property
     def filename(self):
         return f"File_{self.id}.txt"
-
-    @property
-    def value_bytes(self):
-        return io.BytesIO(self.value.encode('utf-8'))
