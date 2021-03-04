@@ -71,7 +71,7 @@ class BaseAuthBackend(backends.ModelBackend):
     def get_user(self, user_id: int) -> AuthRes:
         # pylint: disable=protected-access
         try:
-            user = UserModel._default_manager.get(pk=user_id)
+            user = UserModel._default_manager.select_related('twofa').get(pk=user_id)
         except UserModel.DoesNotExist:  # nocv
             return None
         return user if self.user_can_authenticate(user) else None
@@ -100,7 +100,7 @@ class LdapBackend(BaseAuthBackend):  # nocv
             backend = LDAP(self.server, username, password, self.domain)
             if not backend.isAuth():
                 return
-            user = UserModel._default_manager.get_by_natural_key(backend.domain_user)
+            user = UserModel._default_manager.select_related('twofa').get_by_natural_key(backend.domain_user)
             if self.user_can_authenticate(user) and backend.isAuth():
                 return user
         except:

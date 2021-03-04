@@ -3002,12 +3002,12 @@ class WebSocketTestCase(BaseTestCase):
         headers[b'cookie'] = self.cookie.encode('utf-8')
         endpoint_communicator = WebsocketCommunicator(application, "/ws/endpoint/", headers=headers.items())
 
-        def _default_manager_get(pk=None, *args, **kwargs):
-            if pk == self.user.id:
+        def _default_manager_get(user_id=None, pk=None, *args, **kwargs):
+            if user_id == self.user.id or pk == self.user.id:
                 return self.user
             raise self.user.DoesNotExists()  # nocv
 
-        with self.patch('vstutils.auth.UserModel._default_manager.get') as mock:
+        with self.patch('vstutils.auth.BaseAuthBackend.get_user') as mock:
             mock.side_effect = _default_manager_get
             connected, _ = await endpoint_communicator.connect()
             self.assertTrue(connected)

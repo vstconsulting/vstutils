@@ -1037,6 +1037,24 @@ SPA_STATIC: _t.List[_t.Dict] = [
 CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
 
 
+# Storage settings
+storages = config['storages']
+
+if 'libcloud' in storages:
+
+    LIBCLOUD_PROVIDERS: _t.Dict[_t.Text, _t.Dict] = {
+        store_name: store_settings
+        for store_name, store_settings in storages['libcloud'].all().items()
+        if isinstance(store_settings, dict)
+    }
+
+    if LIBCLOUD_PROVIDERS:
+        DEFAULT_LIBCLOUD_PROVIDER = 'storages.backends.apache_libcloud.LibCloudStorage'
+
+        if 'default' not in LIBCLOUD_PROVIDERS:
+            DEFAULT_LIBCLOUD_PROVIDER = next(iter(LIBCLOUD_PROVIDERS))
+
+
 # Test settings for speedup tests
 ##############################################################
 if TESTS_RUN:

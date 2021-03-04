@@ -329,6 +329,33 @@ every 5 seconds (by default).
 
 |
 |
+.. _storages:
+
+External storage settings
+-------------------------
+
+Section ``[storages]``.
+
+Applications based on ``vstutils`` supports store files in external services
+with `Apache Libcloud <http://libcloud.apache.org/>`_. All storages settings
+grouped by sections named ``[storages.libcloud.provider]``, where ``provider`` is name
+of storage. Each section has four keys: ``type``, ``user``, ``key`` and ``bucket``.
+Read more about the settings in
+`django-storages docs <https://django-storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-providers>`_
+
+This setting is required to configure connections to cloud storage providers.
+Each entry corresponds to a single ‘bucket’ of storage. You can have multiple
+buckets for a single service provider (e.g., multiple S3 buckets), and
+you can define buckets at multiple providers.
+
+Once you have defined your Libcloud providers, you have the option of setting
+one provider as the default provider of Libcloud storage. You can do it
+by setup ``[storages.libcloud.default]`` section or vstutils will set the first storage
+as default.
+
+
+|
+|
 
 Production web settings
 -----------------------

@@ -23,3 +23,6 @@ django-htmlmin~=0.11.0
 
 # 2fa
 pyotp~=2.6.0
+
+# Storage
+django-storages[libcloud]~=1.11.1
