@@ -5,10 +5,12 @@ import shutil
 import re
 import io
 import pwd
+import base64
 import datetime
 import orjson
 from pathlib import Path
 from smtplib import SMTPException
+from unittest.mock import patch
 
 from unittest.mock import patch, PropertyMock
 
@@ -51,6 +53,7 @@ from vstutils.urls import router
 from vstutils.ws import application
 from vstutils.models import get_centrifugo_client
 from vstutils import models
+from vstutils.api.fields import NamedBinaryFileInJsonField
 from vstutils.utils import SecurePickling, BaseEnum
 
 from .models import File, Host, HostGroup, List, Author, Post
@@ -1759,17 +1762,11 @@ class ValidatorsTestCase(BaseTestCase):
                 'content': 'abcd',
             })
 
-        # check valid extension and test bytes input
-        img_validator(orjson.dumps(self.valid_image_content_dict))
-
     def test_image_open_validator(self):
         img_open_validator = ImageOpenValidator(extensions=['jpg', ])
 
         with self.assertRaises(ValidationError):
             img_open_validator(self.invalid_image_content_dict)
-
-        # test valid input in bytes
-        img_open_validator(orjson.dumps(self.valid_image_content_dict))
 
     def test_image_width_validator(self):
         img_width_validator = ImageWidthValidator(min_width=1500)
@@ -1791,10 +1788,6 @@ class ValidatorsTestCase(BaseTestCase):
 
     def test_image_resolution_validator(self):
         img_resolution_validator = ImageResolutionValidator(min_width=1280, max_height=404)
-
-        # test validation error and bytes input
-        with self.assertRaisesMessage(ValidationError, 'Invalid image height. Expected from 1 to 404, got 720'):
-            img_resolution_validator(orjson.dumps(self.valid_image_content_dict))
 
         img_resolution_validator = ImageResolutionValidator(max_width=666, max_height=720)
 
@@ -2391,6 +2384,12 @@ class ProjectTestCase(BaseTestCase):
         self.assertDictEqual(post_data, results[2]['data'])
 
     def test_model_namedbinfile_field(self):
+        file = get_file_value(os.path.join(DIR_PATH, 'image_b64_valid'))
+        valid_image_content_dict = {
+            'name': 'cat.jpg',
+            'content': file,
+            'mediaType': 'image/jpeg'
+        }
         value = {'name': 'abc.png', 'content': '/4sdfsdf/', 'mediaType': 'text/txt'}
         missing_mediaType = {'name': '123', 'content': 'qwedsf'}
         instance_without_mediaType = self.get_model_filter('test_proj.models.ModelWithBinaryFiles').create(some_namedbinfile=json.dumps(missing_mediaType))
@@ -2543,7 +2542,8 @@ class ProjectTestCase(BaseTestCase):
                 'path': 'testbinaryfiles',
                 'data': {'some_multiplenamedbinfile': [missing_mediaType, missing_mediaType]}
             },
-            {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id]}
+            {'method': 'get', 'path': ['testbinaryfiles', instance_without_mediaType.id]},
+            {'method': 'post', 'path': ['testbinaryfiles'], 'data': {'some_validatedmultiplenamedbinimage': [valid_image_content_dict]}},
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 201)
@@ -2598,6 +2598,49 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[33]['status'], 400)
         self.assertEqual(results[34]['status'], 200)
         self.assertEqual(results[34]['data']['some_namedbinfile'], dict(**missing_mediaType, mediaType=None))
+        self.assertEqual(results[35]['status'], 400)
+        self.assertEqual(results[35]['data']['some_validatedmultiplenamedbinimage'][0], 'Invalid image height. Expected from 200 to 600, got 720')
+
+    def test_file_field(self):
+        with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
+            cat64 = base64.b64encode(cat1.read()).decode('utf-8')
+        # convert file to json
+        valid_image_content_dict = {
+            'name': 'cat.jpg',
+            'content': cat64,
+            'mediaType': 'image/jpeg'
+        }
+
+        results = self.bulk([
+            {
+                'method': 'post',
+                'path': ['testbinaryfiles'],
+                'data': {'some_filefield': valid_image_content_dict, 'some_imagefield': valid_image_content_dict}},
+            {
+                'method': 'get',
+                'path': ['testbinaryfiles', '<<0[data][id]>>']
+            },
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        model_qs = self.get_model_filter('test_proj.models.ModelWithBinaryFiles')
+        instance = model_qs.get(id=results[0]['data']['id'])
+        self.assertDictEqual({
+            'content': instance.some_filefield.url,
+            'name': instance.some_filefield.name,
+            'mediaType': ''
+        },
+            results[1]['data']['some_filefield'])
+        self.assertDictEqual({
+            'content': instance.some_imagefield.url,
+            'name': instance.some_imagefield.name,
+            'mediaType': ''
+        },
+            results[1]['data']['some_imagefield'])
+        with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
+            self.assertEqual(instance.some_filefield.file.read(), cat1.read())
+
+
 
     def test_contenttype_nested_views(self):
         bulk_data = [

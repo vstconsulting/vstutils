@@ -27,7 +27,7 @@ from rest_framework.schemas import AutoSchema as DRFAutoSchema
 
 from ..exceptions import VSTUtilsException
 from ..utils import classproperty, deprecated, get_if_lazy, raise_context_decorator_with_default
-from . import responses
+from . import responses, fields
 from .serializers import (
     ErrorSerializer,
     ValidationErrorSerializer,
@@ -60,8 +60,10 @@ query_check_params = (
 )
 default_cache_control_header_data = 'private, no-cache'
 non_optimizeable_fields = (
+    fields.NamedBinaryFileInJsonField,
     serializers.PrimaryKeyRelatedField,
-    serializers.BaseSerializer
+    serializers.BaseSerializer,
+    serializers.SerializerMethodField,
 )
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
 

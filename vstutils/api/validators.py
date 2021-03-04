@@ -5,7 +5,6 @@ import warnings
 from io import BytesIO
 from pathlib import PurePosixPath
 
-import orjson
 from rest_framework import serializers
 
 try:
@@ -73,8 +72,6 @@ class ImageValidator:
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
-        if isinstance(value, (str, bytes)):
-            value = orjson.loads(value)
         file_extension = PurePosixPath(value['name']).suffix
         if value and file_extension[1:] not in self.extensions:
             raise serializers.ValidationError(f'unsupported image file format,'
@@ -101,8 +98,6 @@ class ImageOpenValidator(ImageValidator):
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
-        if isinstance(value, (str, bytes)):
-            value = orjson.loads(value)
         super().__call__(value)
         try:
             self.img = Image.open(BytesIO(base64.b64decode(value['content'])))
@@ -123,8 +118,6 @@ class ImageBaseSizeValidator(ImageOpenValidator):
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
-        if isinstance(value, (str, bytes)):
-            value = orjson.loads(value)
         super().__call__(value)
         self.validate()
 
@@ -150,7 +143,7 @@ class ImageHeightValidator(ImageBaseSizeValidator):
 
 class ImageWidthValidator(ImageBaseSizeValidator):
     """
-    Wrapper for _ImageBaseSizeValidator that validates only height
+    Wrapper for _ImageBaseSizeValidator that validates only width
 
     :param min_width: minimal width of an image being validated
     :param max_width: maximal width of an image being validated

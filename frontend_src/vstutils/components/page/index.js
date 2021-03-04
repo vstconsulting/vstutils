@@ -1,6 +1,6 @@
 /* eslint-disable vue/one-component-per-file */
 import OneEntity from './OneEntity.vue';
-import { formatPath, RequestTypes } from '../../utils';
+import { formatPath, HttpMethods, RequestTypes } from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { apiConnector } from '../../api';
@@ -63,21 +63,27 @@ export const PageNewViewComponent = {
         return {
             readOnly: false,
             hideReadOnly: true,
+            changedFields: [],
         };
     },
     computed: {
         model() {
             return this.view.objects.getModelClass(RequestTypes.CREATE);
         },
+        shouldAskForLeaveConfirmation() {
+            return this.changedFields.length > 0;
+        },
     },
     methods: {
         async fetchData() {
             this.initLoading();
             await this.dispatchAction('fetchData');
+            this.changedFields = [];
             this.setLoadingSuccessful();
         },
         setFieldValue(obj) {
             this.isPageChanged = true;
+            if (!this.changedFields.includes(obj.field)) this.changedFields.push(obj.field);
             this.commitMutation('setFieldValue', obj);
         },
         /**
@@ -95,11 +101,16 @@ export const PageNewViewComponent = {
             const instance = this.instance;
             const name = instance.getViewFieldString() || instance.getPkValue() || '';
             try {
-                if (this.view.type === ViewTypes.PAGE_EDIT) await instance.update(this.view.params.method);
-                else await instance.create(this.view.params.method);
+                const method = this.view.params.method;
+                if (this.view.type === ViewTypes.PAGE_EDIT) {
+                    await instance.update(method, method === HttpMethods.PATCH ? this.changedFields : null);
+                } else {
+                    await instance.create(method);
+                }
 
                 this.loading = false;
                 this.isPageChanged = false;
+                this.changedFields = [];
 
                 guiPopUp.success(this.$t(pop_up_msg.instance.success.save).format([name, this.view.name]));
                 this.openPage({ path: this.getRedirectUrl({ instance }) });
@@ -145,7 +156,7 @@ export const PageEditViewComponent = {
             try {
                 await this.dispatchAction('reloadInstance');
                 this.setLoadingSuccessful();
-                this.isPageChanged = false;
+                this.changedFields = [];
             } catch (error) {
                 this.setLoadingError(error);
             }
@@ -193,7 +204,7 @@ export const ActionViewComponent = {
                     data: JSON.stringify(instance._getInnerData()),
                     useBulk: instance.constructor.shouldUseBulk(this.view.method),
                 });
-                this.isPageChanged = false;
+                this.changedFields = [];
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.execute).format([this.$t(this.view.title)]),
                 );

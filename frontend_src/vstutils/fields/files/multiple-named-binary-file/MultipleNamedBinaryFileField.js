@@ -39,6 +39,14 @@ class MultipleNamedBinFileField extends NamedBinaryFileField {
 
         return value;
     }
+
+    toRepresent(data) {
+        let value = data[this.options.name];
+        if (Array.isArray(value)) {
+            value = value.map((file) => this.ensureMediaTypeExists(file));
+        }
+        return value;
+    }
 }
 
 export default MultipleNamedBinFileField;

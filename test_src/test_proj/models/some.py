@@ -38,6 +38,8 @@ class ModelWithBinaryFiles(BModel):
     some_multiplenamedbinfile = models.TextField(default='')
     some_multiplenamedbinimage = models.TextField(default='')
     some_validatedmultiplenamedbinimage = models.TextField(default='')
+    some_filefield = models.FileField(null=True, blank=True)
+    some_imagefield = models.ImageField(null=True, blank=True)
 
     class Meta:
         _view_field_name = 'some_namedbinfile'
@@ -56,7 +58,9 @@ class ModelWithBinaryFiles(BModel):
             (
                 required=False,
                 validators=[image_res_validator]
-            )
+            ),
+            some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True),
+            some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True)
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')
