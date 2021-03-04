@@ -330,9 +330,6 @@ export default class QuerySet {
         const updateModelSameAsRetrieve = modelUpdate === modelRetrieve;
 
         const data = updatedInstance._getInnerData(fields);
-        if (Object.keys(data).length === 0) {
-            return Promise.all(instances.map((instance) => Promise.resolve(instance)));
-        }
 
         if (
             !updateModelSameAsRetrieve &&
