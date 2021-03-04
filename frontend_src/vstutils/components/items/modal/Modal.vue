@@ -75,7 +75,7 @@
     .modal-mask {
         color: #333;
         position: fixed;
-        z-index: 1110;
+        z-index: 1059;
         top: 0;
         left: 0;
         width: 100%;

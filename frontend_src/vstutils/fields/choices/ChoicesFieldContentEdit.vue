@@ -117,6 +117,8 @@
                     this.setValue(this.value);
                 } else if (this.field.hasDefault) {
                     this.setValue(this.field.default);
+                } else {
+                    this.setValue(this.enum[0] || null);
                 }
             },
             /**

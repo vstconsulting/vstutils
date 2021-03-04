@@ -264,7 +264,7 @@ class UserViewSet(base.ModelViewSet):
             serializer = self.get_serializer(instance, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(user=user)
-            request.session['twofa'] = True
+            request.session['2fa'] = True
         else:
             serializer = self.get_serializer(
                 instance or
