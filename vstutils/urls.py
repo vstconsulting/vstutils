@@ -38,7 +38,8 @@ urlpatterns += [
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [re_path(rf'^{settings.API_URL}/', include(router.urls))]
-urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
+if settings.STATIC_URL.startswith('/'):
+    urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
     urlpatterns += static(settings.MEDIA_URL, view=serve, document_root=settings.MEDIA_ROOT)  # nocv
 if 'docs' in settings.INSTALLED_APPS:  # nocv

@@ -5,13 +5,14 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction
-from django.utils.functional import SimpleLazyObject
+from django.utils.functional import SimpleLazyObject, cached_property
 from django_filters import BooleanFilter, CharFilter
 from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer
 from vstutils.api.models import TwoFactor, RecoveryCode
+from vstutils.utils import raise_context_decorator_with_default
 
 User = get_user_model()
 
@@ -41,10 +42,15 @@ class UserSerializer(VSTSerializer):
         read_only_fields = ('is_superuser',)
         ref_name = 'User'
 
+    @cached_property
+    @raise_context_decorator_with_default(default=False)
+    def is_staff_or_super(self):
+        return self.context['request'].user.is_staff or self.context['request'].user.is_superuser
+
     def create(self, data):
         """ Create user from validated data. """
 
-        if not self.context['request'].user.is_staff:
+        if not self.is_staff_or_super:
             raise exceptions.PermissionDenied  # nocv
         valid_fields = [
             'username', 'password', 'is_active', 'is_staff',
@@ -72,7 +78,7 @@ class UserSerializer(VSTSerializer):
         return super().is_valid(raise_exception)
 
     def update(self, instance, validated_data):
-        if not self.context['request'].user.is_staff and instance.id != self.context['request'].user.id:
+        if not self.is_staff_or_super and instance.id != self.context['request'].user.id:
             # can't be tested because PATCH from non privileged user to other
             # user fails at self.get_object() in View
             raise exceptions.PermissionDenied  # nocv

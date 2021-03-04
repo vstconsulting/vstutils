@@ -329,12 +329,18 @@ every 5 seconds (by default).
 
 |
 |
+
 .. _storages:
 
-External storage settings
--------------------------
+Storage settings
+----------------
 
 Section ``[storages]``.
+
+Applications based on ``vstutils`` supports filesystem storage out of box.
+Setup ``media_root`` and ``media_url`` in ``[storages.filesystem]`` section
+to configure custom media dir and relative url. By default it would be
+``{/path/to/project/module}/media`` and ``/media/``.
 
 Applications based on ``vstutils`` supports store files in external services
 with `Apache Libcloud <http://libcloud.apache.org/>`_. All storages settings
@@ -353,6 +359,13 @@ one provider as the default provider of Libcloud storage. You can do it
 by setup ``[storages.libcloud.default]`` section or vstutils will set the first storage
 as default.
 
+If you configure default libcloud provider, vstutils will use it as global file storage.
+You can override it by set ``default=django.core.files.storage.FileSystemStorage`` in ``[storages]``
+section.
+When ``[storages.libcloud.default]`` is empty ``django.core.files.storage.FileSystemStorage``
+will be used as default.
+To overriding this behavior set ``default=storages.backends.apache_libcloud.LibCloudStorage``
+in ``[storages]`` section and use Libcloud provider as default.
 
 |
 |

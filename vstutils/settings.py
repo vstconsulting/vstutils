@@ -300,6 +300,12 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'autoscale': '{this[rpc][concurrency]},1',
             'hostname': f'{pwd.getpwuid(os.getuid()).pw_name}@%h',
             'beat': True
+        },
+        'storages': {
+            'filesystem': {
+                'media_url': '/media/',
+                'media_root': os.getenv(f'{ENV_NAME}_MEDIA_ROOT', os.path.join(VST_PROJECT_DIR, "media"))
+            }
         }
     },
     section_overload={
@@ -1039,21 +1045,31 @@ CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
 
 # Storage settings
 storages = config['storages']
+default_storage_class = lazy(
+    lambda: (
+        'django.core.files.storage.FileSystemStorage'
+        if not LIBCLOUD_PROVIDERS.get('default') else
+        'storages.backends.apache_libcloud.LibCloudStorage'),
+    str
+)()
+
+LIBCLOUD_PROVIDERS: _t.Dict[_t.Text, _t.Dict] = {}
+MEDIA_ROOT = storages['filesystem']['media_root']
+MEDIA_URL = storages['filesystem']['media_url']
 
 if 'libcloud' in storages:
 
-    LIBCLOUD_PROVIDERS: _t.Dict[_t.Text, _t.Dict] = {
+    LIBCLOUD_PROVIDERS = {
         store_name: store_settings
         for store_name, store_settings in storages['libcloud'].all().items()
         if isinstance(store_settings, dict)
     }
 
-    if LIBCLOUD_PROVIDERS:
-        DEFAULT_LIBCLOUD_PROVIDER = 'storages.backends.apache_libcloud.LibCloudStorage'
+    if LIBCLOUD_PROVIDERS and 'default' not in LIBCLOUD_PROVIDERS:
+        DEFAULT_LIBCLOUD_PROVIDER = next(iter(LIBCLOUD_PROVIDERS))
 
-        if 'default' not in LIBCLOUD_PROVIDERS:
-            DEFAULT_LIBCLOUD_PROVIDER = next(iter(LIBCLOUD_PROVIDERS))
 
+DEFAULT_FILE_STORAGE = storages.get('default', fallback=default_storage_class)
 
 # Test settings for speedup tests
 ##############################################################
@@ -1075,6 +1091,7 @@ if TESTS_RUN:
     }
     BULK_THREADS = 10
     SEND_EMAIL_RETRIES = 10
+    DEFAULT_FILE_STORAGE = lazy(lambda: 'inmemorystorage.InMemoryStorage', str)()
 
 
 if not TESTSERVER_RUN and TESTS_RUN:

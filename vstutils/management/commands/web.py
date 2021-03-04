@@ -147,9 +147,13 @@ class Command(BaseCommand):
             cmd += [f'--ini={opts["config"]}']
 
         # Connect static files.
-        for static_path in settings.STATIC_FILES_FOLDERS:
-            if f"/static={static_path}" not in cmd:
-                cmd += ['--static-map', f"/static={static_path}"]
+        if settings.STATIC_URL.startswith('/'):
+            for static_path in settings.STATIC_FILES_FOLDERS:
+                if f"{settings.STATIC_URL}={static_path}" not in cmd:
+                    cmd += ['--static-map', f"{settings.STATIC_URL}={static_path}"]
+
+        if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
+            cmd += ['--static-map', f"{settings.MEDIA_URL}={settings.MEDIA_ROOT}"]
 
         # Append uwsgi configs.
         for cf in settings.VST_PROJECT_LIB, settings.VST_PROJECT:
