@@ -34,6 +34,17 @@ class NamedBinaryFileField extends BinaryFileField {
 
         return value;
     }
+
+    ensureMediaTypeExists(value) {
+        if (value && typeof value === 'object' && !Object.prototype.hasOwnProperty.call(value, 'mediaType')) {
+            value = { ...value, mediaType: null };
+        }
+        return value;
+    }
+
+    toRepresent(data) {
+        return this.ensureMediaTypeExists(super.toRepresent(data));
+    }
 }
 
 export default NamedBinaryFileField;

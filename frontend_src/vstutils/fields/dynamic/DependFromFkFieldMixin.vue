@@ -25,10 +25,13 @@
             },
         },
         created() {
-            this.$watch(`data.${this.field.dependField}`, () => {
-                this.updateRealField();
-                this.setValue(this.realField.getInitialValue());
-            });
+            if (this.type === 'edit') {
+                this.$watch(`data.${this.field.dependField}`, () => {
+                    this.updateRealField();
+                    this.setValue(this.realField.getInitialValue());
+                });
+            }
+
             this.updateRealField();
         },
         methods: {

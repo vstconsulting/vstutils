@@ -182,6 +182,7 @@ export class Model {
         }
         this._data = data;
         this._queryset = queryset;
+        this._changedFields = [];
     }
 
     /**
@@ -196,11 +197,16 @@ export class Model {
     }
 
     /**
+     * @property @property {Array<string>} [fieldsNames]
      * @return {InnerData}
      */
-    _getInnerData() {
+    _getInnerData(fieldsNames = null) {
+        let selectedFields = Array.from(this._fields.values());
+        if (fieldsNames) {
+            selectedFields = selectedFields.filter((f) => fieldsNames.includes(f.name));
+        }
         const data = {};
-        for (const field of this._fields.values()) {
+        for (const field of selectedFields) {
             data[field.name] = this._data[field.name];
         }
         return data;
@@ -293,10 +299,11 @@ export class Model {
     /**
      * Method to update model data
      * @param {string=} method
+     * @param {null | string[]} fields
      * @return {Promise.<Model>}
      */
-    async update(method) {
-        return (await this._queryset.update(this, [this], method))[0];
+    async update(method, fields = null) {
+        return (await this._queryset.update(this, [this], method, fields))[0];
     }
 
     /**

@@ -6,8 +6,8 @@ import typing as _t
 import copy
 import json
 import functools
+import base64
 
-import orjson
 from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer
 from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
@@ -15,6 +15,7 @@ from django.apps import apps
 from django.db import models
 from django.utils.functional import SimpleLazyObject
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
 
@@ -277,12 +278,15 @@ class DependFromFkField(DynamicJsonTypeField):
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:
         value = super().get_value(dictionary)
+        if value == empty:
+            return value  # nocv
 
         parent_field = self.parent.fields[self.field]  # type: ignore
         related_object: models.Model = parent_field.get_value(dictionary)  # type: ignore
-        if not isinstance(related_object, models.Model) and isinstance(parent_field, FkModelField):
+        if not isinstance(related_object, models.Model) and isinstance(parent_field, FkModelField):  # nocv
             # TODO: write test to it
-            related_object = parent_field.model_class(**{parent_field.autocomplete_property: related_object})  # nocv
+            model_class = get_if_lazy(parent_field.model_class)
+            related_object = model_class(**{parent_field.autocomplete_property: related_object})
         related_type = getattr(related_object, self.field_attribute)
         related_field: Field = getattr(
             related_object,
@@ -525,10 +529,16 @@ class NamedBinaryFileInJsonField(VSTCharField):
     or :class:`django.db.models.TextField` model fields. All manipulations with decoding and encoding
     binary content data executes on client. This imposes reasonable limits on file size.
 
+    Additionally, this field can construct :class:`django.core.files.uploadedfile.SimpleUploadedFile`
+    from incoming JSON and store it as file in :class:`django.db.models.FileField` if `file` argument is set to `True`
+
     .. note::
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField` with structure of data.
 
     """
+    def __init__(self, **kwargs):
+        self.file = kwargs.pop('file', False)
+        super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
 
     __slots__ = ()
 
@@ -555,17 +565,32 @@ class NamedBinaryFileInJsonField(VSTCharField):
             if key not in data:
                 self.fail('missing key', missing_key=key)
 
-    def to_internal_value(self, data: _t.Dict) -> _t.Text:
-        if data is not None:
-            self.validate_value(data)
-        return super().to_internal_value(data)
-
     @raise_context_decorator_with_default(default={"name": None, "content": None, 'mediaType': None})
     def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
-        result = json.loads(value)
-        if not result.get('mediaType'):
-            result['mediaType'] = None
-        return result
+        if self.file:
+            return {'content': value.url, 'name': value.name, 'mediaType': ''}
+        else:
+            result = json.loads(value)
+            if not result.get('mediaType'):
+                result['mediaType'] = None
+            return result
+
+    def run_validation(self, data=empty):
+        (is_empty_value, data) = self.validate_empty_values(data)
+        if is_empty_value:
+            return data  # nocv
+        self.validate_value(data)
+        self.run_validators(data)
+        return self.to_internal_value(data)
+
+    def to_internal_value(self, data) -> _t.Any:
+        if self.file and data.get('content', None):
+            return SimpleUploadedFile(
+                name=data['name'],
+                content=base64.b64decode(data['content']),
+                content_type=data['mediaType']
+            )
+        return super().to_internal_value(data)
 
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
@@ -590,8 +615,6 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     }
 
     def run_validators(self, value: _t.Any) -> None:
-        if isinstance(value, str):
-            value = orjson.loads(value)
         if isinstance(value, (list, tuple)):
             for one_value in value:
                 super().run_validators(one_value)
@@ -605,6 +628,13 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
             for file in data:
                 self.validate_value(file)
         return VSTCharField.to_internal_value(self, data)
+
+    def run_validation(self, data=empty):
+        (is_empty_value, data) = self.validate_empty_values(data)
+        if is_empty_value:
+            return data  # nocv
+        self.run_validators(data)
+        return self.to_internal_value(data)
 
     @raise_context_decorator_with_default(default=[])
     def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore

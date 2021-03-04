@@ -316,9 +316,10 @@ export default class QuerySet {
      * @param {Model} updatedInstance
      * @param {Model[]} [instances] - Model instances to update.
      * @param {HttpMethod} [method] - Http method, PATCH by default.
+     * @param {null | string[]} fields
      * @returns {Promise.<Model>[]}
      */
-    async update(updatedInstance, instances, method = HttpMethods.PATCH) {
+    async update(updatedInstance, instances, method = HttpMethods.PATCH, fields = null) {
         if (instances === undefined) instances = await this.items();
 
         const modelUpdate = this.getModelClass(RequestTypes.PARTIAL_UPDATE);
@@ -328,6 +329,11 @@ export default class QuerySet {
 
         const updateModelSameAsRetrieve = modelUpdate === modelRetrieve;
 
+        const data = updatedInstance._getInnerData(fields);
+        if (Object.keys(data).length === 0) {
+            return Promise.all(instances.map((instance) => Promise.resolve(instance)));
+        }
+
         if (
             !updateModelSameAsRetrieve &&
             modelUpdate.shouldUseBulk(method) &&
@@ -336,7 +342,7 @@ export default class QuerySet {
             const requests = instances.flatMap((instance) => {
                 const path = this._getDetailPath(instance.getPkValue());
                 return [
-                    { method, path, data: updatedInstance._getInnerData() },
+                    { method, path, data },
                     { method: HttpMethods.GET, path },
                 ];
             });
@@ -349,7 +355,7 @@ export default class QuerySet {
                 instances.map(async (instance) => {
                     const response = await this.execute({
                         method,
-                        data: updatedInstance,
+                        data,
                         path: this._getDetailPath(instance.getPkValue()),
                         query: this.query,
                         useBulk: modelUpdate.shouldUseBulk(method),

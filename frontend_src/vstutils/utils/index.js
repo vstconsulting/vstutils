@@ -969,9 +969,10 @@ export async function readFileAsObject(file) {
  */
 
 export function makeDataImageUrl(file) {
-    return {
-        url: `data:${file.mediaType || 'image/png'};base64,${file.content}`,
-    };
+    if (file.mediaType === '') {
+        return file.content;
+    }
+    return `data:${file.mediaType || 'image/png'};base64,${file.content}`;
 }
 
 export const IGNORED_FILTERS = ['offset', 'limit'];
