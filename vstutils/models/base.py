@@ -247,7 +247,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 field_overrides = {
                     n: f
                     for n, f in (metadata.get(f'override_{inject_from}_fields', {}) or {}).items()
-                    if not hasattr(extra_serializer_class, n)
+                    if extra_serializer_class._declared_fields.get(n, None) is None
                 } or None
                 extra_serializer_class = cls.get_serializer_class(  # pylint: disable=no-value-for-parameter
                     serializer_class=extra_serializer_class,
