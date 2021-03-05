@@ -942,16 +942,28 @@ MANIFEST_CLASS = 'vstutils.gui.pwa_manifest.PWAManifest'
 
 VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "GUI": {
-        "BACKEND": 'vstutils.gui.views.GUIView'
+        "BACKEND": 'vstutils.gui.views.GUIView',
+        "OPTIONS": {
+            'name': 'gui'
+        }
     },
     "MANIFEST": {
-        "BACKEND": 'vstutils.gui.views.ManifestView'
+        "BACKEND": 'vstutils.gui.views.ManifestView',
+        "OPTIONS": {
+            'name': 'pwa_manifest'
+        }
     },
     "SERVICE_WORKER": {
-        "BACKEND": 'vstutils.gui.views.SWView'
+        "BACKEND": 'vstutils.gui.views.SWView',
+        "OPTIONS": {
+            'name': 'service_worker'
+        }
     },
     "OFFLINE": {
-        "BACKEND": 'vstutils.gui.views.OfflineView'
+        "BACKEND": 'vstutils.gui.views.OfflineView',
+        "OPTIONS": {
+            'name': 'offline_gui'
+        }
     },
     "LOGIN": {
         "BACKEND": 'vstutils.gui.views.Login',

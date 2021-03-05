@@ -218,7 +218,11 @@ class LangMiddleware(BaseMiddleware):
 class TwoFaMiddleware(BaseMiddleware):
     pass_names = (
         'login',
-        'logout'
+        'logout',
+        'pwa_manifest',
+        'service_worker',
+        'offline_gui',
+        'user_registration',
     )
 
     def request_handler(self, request: HttpRequest) -> HttpRequest:
