@@ -149,7 +149,8 @@ class AutoCompletionFieldInspector(FieldInspector):
                     field.autocomplete, ignore_unresolved=True
                 ),
                 'value_field': field.autocomplete_property,
-                'view_field': field.autocomplete_represent
+                'view_field': field.autocomplete_represent,
+                'usePrefetch': field.use_prefetch,
             }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))

@@ -5,8 +5,6 @@ import FKAutocompleteFieldMixin from './FKAutocompleteFieldMixin.js';
 class FKAutocompleteField extends FKField {
     constructor(options) {
         super(options);
-        this.usePrefetch = false;
-        this.fetchData = false;
         this.makeLink = false;
     }
 

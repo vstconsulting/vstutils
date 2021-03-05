@@ -19,7 +19,11 @@ class FKField extends BaseField {
         this.makeLink = props.makeLink;
         this.dependence = props.dependence || {};
 
-        this.fetchData = Object.prototype.hasOwnProperty.call(props, 'fetchData') ? props.fetchData : true;
+        if (Object.prototype.hasOwnProperty.call(props, 'fetchData')) {
+            this.fetchData = props.fetchData;
+        } else {
+            this.fetchData = this.viewField !== this.valueField;
+        }
 
         /**
          * Property will be set in prepareField.
@@ -82,7 +86,7 @@ class FKField extends BaseField {
     }
 
     async afterInstancesFetched(instances) {
-        if (this.usePrefetch) {
+        if (this.usePrefetch && this.fetchData) {
             return this.prefetchValues(instances);
         }
     }

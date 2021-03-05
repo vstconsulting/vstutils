@@ -48,8 +48,10 @@
     "vuex": "^3.5.1"
   },
   "resolutions": {
+    "admin-lte/**/datatables.net": "^1.10.22",
     "izimodal/jquery": "^3.4.1",
-    "admin-lte/**/datatables.net": "^1.10.22"
+    "jquery-slimscroll/jquery": "^3.4.1",
+    "jquery.scrollto/jquery": "^3.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.0",

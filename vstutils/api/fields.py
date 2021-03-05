@@ -95,15 +95,18 @@ class AutoCompletionField(VSTCharField):
     :type autocomplete_property: str
     :param autocomplete_represent: this argument indicates which attribute will be
                                    get from OpenApi schema definition model as represent value.
+    :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
+    :type use_prefetch: bool
 
     .. note::
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
-    __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent'
+    __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent', 'use_prefetch'
 
     autocomplete: _t.Text
     autocomplete_property: _t.Text
     autocomplete_represent: _t.Text
+    use_prefetch: bool
 
     def __init__(self, **kwargs):
         self.autocomplete = kwargs.pop('autocomplete')
@@ -111,6 +114,7 @@ class AutoCompletionField(VSTCharField):
         if not isinstance(self.autocomplete, (list, tuple)):
             self.autocomplete_property = kwargs.pop('autocomplete_property', 'id')
             self.autocomplete_represent = kwargs.pop('autocomplete_represent', 'name')
+            self.use_prefetch = kwargs.pop('use_prefetch', True)
         super().__init__(**kwargs)
 
 
