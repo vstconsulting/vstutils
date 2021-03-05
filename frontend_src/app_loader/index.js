@@ -16,11 +16,6 @@ if (
     navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => registration.update())
-        .then(() => {
-            navigator.serviceWorker.ready.then((registration) => {
-                registration.active.postMessage('OFFLINE_CACHE_UPDATE');
-            });
-        })
         .catch((error) => {
             console.error('Service Worker registration failed with ' + error);
         });

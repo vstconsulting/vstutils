@@ -25,6 +25,9 @@ async function cleanAllCacheAndReloadPage() {
     try {
         await (await cachePromise).clearAllCache();
     } finally {
+        if (localStorage.gui_version) {
+            localStorage.clear();
+        }
         await cleanServiceWorkerCache();
     }
 }

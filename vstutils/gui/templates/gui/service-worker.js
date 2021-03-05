@@ -16,7 +16,7 @@ function updateCache() {
 };
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(updateCache().then(() => self.clients.claim()));
 });
 
 self.addEventListener('message', event => {
@@ -27,11 +27,28 @@ self.addEventListener('message', event => {
 
 self.addEventListener('fetch', (event) => {
     const request = event.request;
-    if (request.method === 'GET' && (request.headers.get('accept').includes('text/html'))) {
-        event.respondWith(fetch(request).catch((error) => caches.match(OFFLINE_PAGE)));
-    } else if (request.method === 'GET' && request.url.endsWith(FAVICON)) {
-        event.respondWith(fetch(request).catch((error) => caches.match(FAVICON)));
+    try {
+        if (request.method === 'GET' && (
+            !request.headers ||
+            !request.headers.get('accept') ||
+            request.headers.get('accept').includes('text/html')
+        )) {
+            event.respondWith(
+                fetch(request).
+                catch((error) => caches.match(OFFLINE_PAGE, {ignoreVary: true}))
+            );
+        } else if (request.method === 'GET' && request.url.endsWith(FAVICON)) {
+            event.respondWith(
+                fetch(request).
+                catch((error) => caches.match(FAVICON, {ignoreVary: true}))
+            );
+        }
+    } catch (e) {
+        console.log("SW error on:");
+        console.log(request);
+        console.log(e);
     }
+
 });
 
 //{% endautoescape %}
