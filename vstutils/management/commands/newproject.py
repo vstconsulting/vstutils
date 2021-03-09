@@ -20,7 +20,7 @@ class Command(BaseCommand):
     files_to_create = {
         'frontend_src': {
             'app': {
-                'index': Path('index.js')
+                'index.js': Path('index.js')
             },
             '.editorconfig': Path('.editorconfig'),
             '.eslintrc.js': Path('.eslintrc.js'),
