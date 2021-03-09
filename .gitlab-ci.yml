@@ -44,12 +44,6 @@ code_style:
   stage: code_standarts
   variables:
     TOX_ENVS: "flake,mypy,pylint  --parallel 3"
-#  parallel:
-#    matrix:
-#      - TOX_ENVS:
-#          - flake
-#          - mypy
-#          - pylint
 
 js_style:
   <<: *branch_tests
@@ -66,7 +60,7 @@ functional_test:
     matrix:
       - TOX_ENVS:
           - py36-django32-install
-          - py38-django22-coverage
+          - py39-django22-coverage
 
 js_tests:
   <<: *branch_tests
