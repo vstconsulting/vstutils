@@ -207,7 +207,7 @@ class LangMiddleware(BaseMiddleware):
 
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         request.language, set_cookie = self.get_lang_object(request)  # type: ignore
-        translation.activate(request.language.code)
+        translation.activate(request.language.code)  # type: ignore
         request.LANGUAGE_CODE = translation.get_language()  # type: ignore
         response = super().get_response_handler(request)
         if set_cookie:
