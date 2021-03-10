@@ -2,6 +2,7 @@
 Default ViewSets for web-api.
 """
 
+import re
 import io
 import sys
 import logging
@@ -66,6 +67,7 @@ non_optimizeable_fields = (
     serializers.SerializerMethodField,
 )
 logger: logging.Logger = logging.getLogger(settings.VST_PROJECT)
+http404_re_translate = re.compile(r"^No\s(.+)\smatches the given query.$", re.MULTILINE)
 
 
 def _get_cleared(qs):
@@ -78,6 +80,8 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
     serializer_class = ErrorSerializer
     data: _t.Optional[_t.Dict[_t.Text, _t.Any]] = None
     code: _t.SupportsInt = status.HTTP_400_BAD_REQUEST
+    lang = getattr(context.get('request'), 'language', None)
+    translate = getattr(lang, 'translate', lambda text: text)
 
     if isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
         data = {"detail": str(exc)}
@@ -85,23 +89,34 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
         logger.debug(traceback_str)
 
     elif isinstance(exc, Http404):
-        data = {"detail": getattr(exc, 'msg', str(exc))}
+        text = getattr(exc, 'msg', str(exc))
+        with raise_context_decorator_with_default():
+            instance_type = http404_re_translate.match(text).group(1)  # type: ignore
+            if instance_type:
+                instance_type = str(instance_type)
+                instance_type_format = translate(instance_type.lower())
+                if instance_type.istitle():
+                    instance_type_format = instance_type_format.title()
+                text = translate(text.replace(instance_type, '{0}')).format(instance_type_format)
+            elif text:  # nocv
+                text = translate(text)
+        data = {"detail": text}
         code = status.HTTP_404_NOT_FOUND
         logger.debug(traceback_str)
 
-    elif isinstance(exc, djexcs.ValidationError):  # nocv
-        if hasattr(exc, 'error_dict'):
+    elif isinstance(exc, djexcs.ValidationError):
+        if hasattr(exc, 'error_dict'):  # nocv
             errors = dict(exc)  # type: ignore
         elif hasattr(exc, 'error_list'):
-            errors = {'other_errors': list(exc)}
-        else:
-            errors = {'other_errors': str(exc)}  # type: ignore
+            errors = {'other_errors': [translate(s) for s in list(exc)]}
+        else:  # nocv
+            errors = {'other_errors': translate(str(exc))}  # type: ignore
         data = {"detail": errors}
         serializer_class = ValidationErrorSerializer
         logger.debug(traceback_str)
 
     elif isinstance(exc, VSTUtilsException):  # nocv
-        data = {"detail": exc.msg, 'error_type': sys.exc_info()[0].__name__}  # type: ignore
+        data = {"detail": translate(exc.msg), 'error_type': sys.exc_info()[0].__name__}  # type: ignore
         code = exc.status
         serializer_class = OtherErrorsSerializer
         logger.info(traceback_str)

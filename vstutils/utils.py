@@ -61,10 +61,13 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     :return: -- rendered string
     :rtype: str
     """
-    translation.activate(trans)
-    config = loader.get_template(name)
-    result = config.render(data).replace('\r', '')
-    translation.deactivate()
+    cur_language = translation.get_language()
+    try:
+        translation.activate(trans)
+        config = loader.get_template(name)
+        result = config.render(data).replace('\r', '')
+    finally:
+        translation.activate(cur_language)
     return result
 
 

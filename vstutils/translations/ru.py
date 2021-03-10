@@ -231,4 +231,8 @@ TRANSLATION = {
     'Enable': 'Включить',
     'Disable': 'Выключить',
     'Two factor authentication': 'Двухфакторная авторизация',
+    'No {0} matches the given query.': "Ни один {0} не соответствует данному запросу.",
+    'Password is not correct.': 'Неверный пароль.',
+    'New passwords values are not equal.': 'Значения нового пароля не эквивалентны.',
+    'This password is entirely numeric.': 'Этот пароль полностью числовой.'
 }

@@ -597,7 +597,10 @@ class ViewsTestCase(BaseTestCase):
             password2='12345'
         )
         user_get_request = {"method": "get", "path": ['user', 'profile']}
-        self._login()
+        self.client.post(
+            '/login/?lang=ru',
+            data=self.user.data
+        )
         results = self.bulk([
             {"method": "post", "path": ['user', 'profile', 'change_password'], "data": i}
             for i in (invalid_old_password, not_identical_passwords, update_password)
@@ -937,10 +940,13 @@ class DefaultBulkTestCase(BaseTestCase):
             dict(method='get', path=['usr', self.user.id])
         ]
         self.bulk_transactional(bulk_request_data, 502)
-        result = self.bulk(bulk_request_data)
+        self.client.post('/login/?lang=ru', self.user.data)
+        result = self.bulk(bulk_request_data, HTTP_ACCEPT_LANGUAGE='ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6', relogin=False)
+        self._logout(self.client)
 
         self.assertEqual(result[0]['status'], 204)
         self.assertEqual(result[1]['status'], 404)
+        self.assertEqual(result[1]['data']['detail'], 'Ни один Пользователь не соответствует данному запросу.')
         self.assertEqual(result[2]['status'], 201)
         self.assertEqual(result[2]['data']['username'], test_user['username'])
         self.assertEqual(result[3]['status'], 200)

@@ -131,9 +131,9 @@ class ChangePasswordSerializer(DataSerializer):
 
     def update(self, instance, validated_data):
         if not instance.check_password(validated_data['old_password']):
-            raise exceptions.PermissionDenied('Password is not correct.')
+            raise exceptions.AuthenticationFailed()
         if validated_data['password'] != validated_data['password2']:
-            raise exceptions.ValidationError("New passwords' values are not equal.")
+            raise exceptions.ValidationError("New passwords values are not equal.")
         validate_password(validated_data['password'])
         instance.set_password(validated_data['password'])
         instance.save()
