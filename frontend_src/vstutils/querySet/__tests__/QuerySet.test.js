@@ -1,151 +1,127 @@
-import { expect, jest, test, describe } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
+import { IntegerField } from '../../fields/numbers/integer';
+import { apiConnector } from '../../api';
+import fetchMock from 'jest-fetch-mock';
 import { Model, ModelClass } from '../../models';
-import QuerySet from '../QuerySet.js';
-import StringField from '../../fields/text/StringField.js';
-import { IntegerField } from '../../fields/numbers/integer.js';
-import { APIResponse, apiConnector } from '../../api';
+import StringField from '../../fields/text/StringField';
+import QuerySet from '../QuerySet';
 import { RequestTypes } from '../../utils';
-
-jest.mock('../../api');
 
 describe('QuerySet', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });
     const emailField = new StringField({ name: 'email' });
     const nameField = new StringField({ name: 'name' });
 
+    beforeAll(() => {
+        apiConnector.defaultVersion = 'v1';
+        apiConnector.baseURL = 'http://localhost/api';
+        fetchMock.enableMocks();
+    });
+
+    beforeEach(() => {
+        fetchMock.resetMocks();
+    });
+
     @ModelClass()
     class User extends Model {
-        static declaredFields = [idField, nameField];
+        static declaredFields = [idField, emailField, nameField];
+        static nonBulkMethods = ['get', 'post'];
     }
 
     @ModelClass()
     class OneUser extends Model {
         static declaredFields = [idField, emailField, nameField];
+        static nonBulkMethods = ['get', 'patch', 'put', 'delete'];
     }
 
     @ModelClass()
     class CreateUser extends Model {
-        static declaredFields = [idField, emailField];
+        static declaredFields = [idField, emailField, nameField];
+        static nonBulkMethods = ['post'];
     }
 
-    /**
-     * @type {ModelsConfiguration}
-     */
-    const models = {
+    const qs = new QuerySet('users', {
         [RequestTypes.LIST]: User,
         [RequestTypes.RETRIEVE]: OneUser,
+        [RequestTypes.UPDATE]: OneUser,
+        [RequestTypes.PARTIAL_UPDATE]: OneUser,
         [RequestTypes.CREATE]: CreateUser,
-    };
-
-    test('get', async () => {
-        const usersQueryset = new QuerySet('users', models);
-
-        const usersData = [
-            { id: 1, email: 'user1@users.omg', name: 'Name1' },
-            { id: 2, email: 'user2@users.omg', name: 'SameName' },
-            { id: 3, email: 'user3@users.omg', name: 'SameName' },
-        ];
-
-        // GET users?name=, GET users/1, GET users/2
-        apiConnector._requestHandler = (request) => {
-            expect(request.method).toBe('get');
-            const url = request.path.join('/');
-            if (url === 'users/1') {
-                return new APIResponse(200, usersData[0]);
-            } else if (url === 'users/2') {
-                return new APIResponse(200, usersData[1]);
-            } else if (url === 'users') {
-                const nameFilter = request.query.name ? (u) => u.name === request.query.name : () => true;
-                const users = usersData.filter(nameFilter);
-                return new APIResponse(200, {
-                    count: users.length,
-                    next: null,
-                    previous: null,
-                    results: users,
-                });
-            } else {
-                return new APIResponse(404);
-            }
-        };
-
-        // Get one user
-        const user1 = await usersQueryset.get(usersData[1].id);
-        expect(user1).toBeInstanceOf(OneUser);
-        expect(user1.id).toBe(usersData[1].id);
-        expect(user1.email).toBe(usersData[1].email);
-        expect(user1.name).toBe(usersData[1].name);
-
-        try {
-            await usersQueryset.get(1);
-        } catch (error) {
-            expect(error.status).toBe(404);
-        }
-
-        // Get one user using filter, without providing id
-
-        apiConnector._bulkHandler = () => [
-            { status: 200, data: { count: 1, next: null, previous: null, results: [usersData[0]] } },
-            { status: 200, data: usersData[0] },
-        ];
-
-        const user2 = await usersQueryset.filter({ name: 'Name1' }).get();
-        expect(user2).toBeInstanceOf(OneUser);
-        expect(user2.id).toBe(usersData[0].id);
-        expect(user2.email).toBe(usersData[0].email);
-        expect(user2.name).toBe(usersData[0].name);
-
-        // Get one user using empty filter, without providing id
-        apiConnector._bulkHandler = () => [
-            { status: 200, data: { count: 3, next: null, previous: null, results: usersData } },
-            { status: 200, data: usersData[0] },
-        ];
-        try {
-            expect(usersQueryset.query).toStrictEqual({});
-            await usersQueryset.get();
-        } catch (error) {
-            expect(error.message).toBe('More then one entity found');
-        }
     });
 
-    test('items', async () => {
-        const usersQueryset = new QuerySet('users', models);
+    test('get list', async () => {
+        fetchMock.mockResponseOnce(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
+        expect((await qs.items()).length).toBe(0);
+        let [url, request] = fetchMock.mock.calls[0];
+        expect(url).toBe('http://localhost/api/v1/users/');
+        expect(request.method).toBe('get');
+    });
 
-        const usersData = [
-            { id: 1, name: 'kek name' },
-            { id: 2, name: 'vitya' },
-            { id: 3, name: 'oleg' },
-            { id: 4, name: 'vitya' },
-        ];
+    test('create', async () => {
+        let data = JSON.stringify({ id: 1, name: 'test_name', email: 'test_mail' }, null, ' ');
+        fetchMock.mockResponses(data, data);
+        let user = await qs.create(new CreateUser({ name: 'test_name', email: 'test_mail' }));
+        expect(user.id).toBe(1);
+        expect(user.name).toBe('test_name');
+        expect(user.email).toBe('test_mail');
+        let [url, request] = fetchMock.mock.calls[0];
+        expect(url).toBe('http://localhost/api/v1/users/');
+        expect(request.method).toBe('post');
+    });
 
-        // Prepare request handler with filter
-        apiConnector._requestHandler = (request) => {
-            expect(request.method).toBe('get');
-            expect(request.path).toStrictEqual(['users']);
-            const nameFilter = request.query.name ? (u) => u.name === request.query.name : () => true;
-            const users = usersData.filter(nameFilter);
-            return new APIResponse(200, { count: users.length, next: null, previous: null, results: users });
-        };
+    test('update', async () => {
+        fetchMock.mockResponses('{"id": 2}');
+        let [user] = await qs.update(new OneUser({ id: 2 }), [new User({ id: 2 })]);
+        expect(user.id).toBe(2);
+        let [url, request] = fetchMock.mock.calls[0];
+        expect(url).toBe('http://localhost/api/v1/users/2/');
+        expect(request.method).toBe('patch');
+    });
 
-        // Request all users
-        const users = await usersQueryset.items();
-        expect(users.length).toBe(4);
-        expect(users.total).toBe(4);
-        expect(users.extra).toStrictEqual({ count: 4, next: null, previous: null });
-        expect(users.map((u) => [u.id, u.name])).toStrictEqual(usersData.map((u) => [u.id, u.name]));
+    test('get by id', async () => {
+        fetchMock.mockResponses('{"id": 1}');
+        let user = await qs.get(1);
+        expect(user.id).toBe(1);
+        let [url, request] = fetchMock.mock.calls[0];
+        expect(url).toBe('http://localhost/api/v1/users/1/');
+        expect(request.method).toBe('get');
+    });
 
-        // Get users with name 'vitya'
-        const filteredQueryset = usersQueryset.filter({ name: 'vitya' });
-        const vityas = await filteredQueryset.items();
-        expect(vityas.length).toBe(2);
-        expect(vityas.total).toBe(2);
-        expect(vityas.extra).toStrictEqual({ count: 2, next: null, previous: null });
-        expect(vityas.map((u) => [u.id, u.name])).toStrictEqual([
-            [2, 'vitya'],
-            [4, 'vitya'],
-        ]);
+    test('get first', async () => {
+        fetchMock.mockResponses('{"count": 1, "results": [{"id": 4 }]}', '{"id": 4}');
+        let user = await qs.get();
+        expect(user.id).toBe(4);
+    });
+
+    test('delete', async () => {
+        fetchMock.resetMocks();
+        await qs.delete([new User({ id: 3 })]);
+        let [url, request] = fetchMock.mock.calls[0];
+        expect(url).toBe('http://localhost/api/v1/users/3/');
+        expect(request.method).toBe('delete');
+    });
+
+    test('get one with error', async () => {
+        fetchMock.mockResponseOnce(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
+        try {
+            await qs.getOne();
+        } catch (StatusError) {
+            expect(StatusError.message).toBe('Not Found');
+        }
+
+        fetchMock.mockResponseOnce(JSON.stringify({ count: 2, next: null, previous: null, results: [] }));
+        try {
+            await qs.getOne();
+        } catch (StatusError) {
+            expect(StatusError.message).toBe('More then one entity found');
+        }
     });
 
     test('clone', () => {
+        const models = {
+            [RequestTypes.LIST]: User,
+            [RequestTypes.RETRIEVE]: OneUser,
+            [RequestTypes.CREATE]: CreateUser,
+        };
         // Simple clone
         const qs1 = new QuerySet('users', models);
         const qs2 = qs1.clone();
@@ -170,109 +146,31 @@ describe('QuerySet', () => {
         expect(qs3.query).toStrictEqual({ rating: 10 });
     });
 
-    test('create', async () => {
-        apiConnector._requestHandler = function (request) {
-            const url = request.path.join('/');
+    test('items', async () => {
+        const usersData = [
+            { id: 1, name: 'kek name' },
+            { id: 2, name: 'vitya' },
+            { id: 3, name: 'oleg' },
+            { id: 4, name: 'vitya' },
+        ];
 
-            if (request.method === 'post' && url === 'users') {
-                this.savedUserEmail = request.data.email;
-                return new APIResponse(201, { id: 1, email: this.savedUserEmail });
-            } else if (request.method === 'get' && url === 'users/<<0[data][id]>>') {
-                return new APIResponse(201, { id: 1, email: this.savedUserEmail, name: '' });
-            }
+        // Request all users
+        fetchMock.mockResponse(JSON.stringify({ count: 4, next: null, previous: null, results: usersData }));
+        const users = await qs.items();
+        expect(users.length).toBe(4);
+        expect(users.total).toBe(4);
+        expect(users.extra).toStrictEqual({ count: 4, next: null, previous: null });
 
-            return new APIResponse(404);
-        };
-        apiConnector._bulkHandler = (reqs) => reqs.map((req) => apiConnector._requestHandler(req));
-
-        const usersQs = new QuerySet('users', models);
-
-        const user1 = new CreateUser({ email: 'user1@users.com' }, usersQs);
-        const savedUser1 = await user1.save();
-        expect(savedUser1).toBeInstanceOf(OneUser);
-        expect(savedUser1.id).toBe(1);
-        expect(savedUser1.email).toBe('user1@users.com');
-    });
-
-    test('update with different update/retrieve models', async () => {
-        @ModelClass()
-        class CreatePost extends Model {
-            static declaredFields = [idField, nameField];
-        }
-
-        @ModelClass()
-        class OnePost extends CreatePost {}
-
-        const models = {
-            [RequestTypes.CREATE]: CreatePost,
-            [RequestTypes.RETRIEVE]: OnePost,
-        };
-
-        const postsQueryset = new QuerySet('posts', models);
-
-        apiConnector._requestHandler = (request) => {
-            const url = request.path.join('/');
-
-            if (request.method === 'patch' && url === 'posts/3') {
-                expect(request.data).toStrictEqual({ id: 3, name: 'Post 1' });
-                return new APIResponse(200, request.data);
-            } else if (request.method === 'get' && url === 'posts/3') {
-                return new APIResponse(200, request.data);
-            }
-
-            return new APIResponse(404);
-        };
-        apiConnector._bulkHandler = (reqs) => reqs.map((req) => apiConnector._requestHandler(req));
-
-        const post = new CreatePost({ id: 3, name: 'Post 1' }, postsQueryset);
-        const savedPost = await post.save();
-        expect(savedPost).toBeInstanceOf(OnePost);
-    });
-
-    test('update with same update/retrieve models', async () => {
-        @ModelClass()
-        class OnePost extends Model {
-            static declaredFields = [idField, nameField];
-        }
-
-        const models = { [RequestTypes.RETRIEVE]: OnePost };
-
-        const postsQueryset = new QuerySet('posts', models);
-
-        apiConnector._requestHandler = (request) => {
-            const url = request.path.join('/');
-
-            if (request.method === 'patch' && url === 'posts/3') {
-                expect(JSON.parse(request.data)).toStrictEqual({ id: 3, name: 'Post 1' });
-                return new APIResponse(200, request.data);
-            }
-
-            return new APIResponse(404);
-        };
-        apiConnector._bulkHandler = (reqs) => reqs.map((req) => apiConnector._requestHandler(req));
-
-        const post = new OnePost({ id: 3, name: 'Post 1' }, postsQueryset);
-        const savedPost = await post.save();
-        expect(savedPost).toBeInstanceOf(OnePost);
-    });
-
-    test('delete', async () => {
-        @ModelClass()
-        class OnePost extends Model {
-            static declaredFields = [idField, nameField];
-        }
-        const models = { [RequestTypes.RETRIEVE]: OnePost };
-
-        const postsQueryset = new QuerySet('posts', models);
-
-        apiConnector._requestHandler = (request) => {
-            expect(request.path).toStrictEqual(['posts', 4]);
-            expect(request.method).toBe('delete');
-            return new APIResponse(204);
-        };
-        apiConnector._bulkHandler = (reqs) => reqs.map((req) => apiConnector._requestHandler(req));
-
-        const post = new OnePost({ id: 4, name: 'Post 4' }, postsQueryset);
-        await post.delete();
+        // Get users with name 'vitya'
+        fetchMock.mockResponse(
+            JSON.stringify({ count: 2, next: null, previous: null, results: [usersData[1], usersData[3]] }),
+        );
+        const filteredQueryset = qs.filter({ name: 'vitya' });
+        expect(qs).not.toBe(filteredQueryset);
+        const vityas = await filteredQueryset.items();
+        expect(vityas.length).toBe(2);
+        expect(vityas.total).toBe(2);
+        expect(vityas.extra).toStrictEqual({ count: 2, next: null, previous: null });
+        expect(vityas[1].name).toBe('vitya');
     });
 });
