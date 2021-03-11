@@ -697,7 +697,7 @@ class RelatedListField(VSTCharField):
 
     def to_representation(self, value: _t.Type[models.Model]):
         # get related mapping with id and name of instances
-        return getattr(value, self.related_name).values(*self.fields)
+        return SimpleLazyObject(lambda: tuple(getattr(value, self.related_name).values(*self.fields)))
 
 
 class RatingField(FloatField):
