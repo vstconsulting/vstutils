@@ -1011,3 +1011,12 @@ export function generateRandomString(
 export function generateBase32String(length = 32) {
     return generateRandomString(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567');
 }
+
+/**
+ * @param {Object} obj
+ * @param {string} prop
+ * @return {boolean}
+ */
+export function hasOwnProp(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}

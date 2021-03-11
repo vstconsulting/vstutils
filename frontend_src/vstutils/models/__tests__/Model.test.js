@@ -121,6 +121,7 @@ describe('Model', () => {
         @ModelClass()
         class Model4 extends Model1 {
             static declaredFields = [id];
+            static pkFieldName = 'id';
         }
         expect(Model4.pkField).toBe(id);
         expect(new Model4({ id: 1, field2: 'value' }).getPkValue()).toBe(1);
@@ -151,5 +152,25 @@ describe('Model', () => {
         class NoViewField extends Model {}
         expect(NoViewField.viewField).toBeNull();
         expect(new NoViewField().getViewFieldValue('default')).toBe('default');
+    });
+
+    test('test parent instance', () => {
+        const id = new StringField({ name: 'id' });
+        const name = new StringField({ name: 'name' });
+
+        @ModelClass()
+        class RetrieveModel extends Model {
+            static declaredFields = [id, name];
+        }
+
+        @ModelClass()
+        class UpdateModel extends Model {
+            static declaredFields = [name];
+        }
+
+        const retrieveInstance = new RetrieveModel({ id: 1, name: 'Eugene' });
+        const updateModel = new UpdateModel({ name: 'Eugene' }, null, retrieveInstance);
+
+        expect(updateModel.getPkValue()).toBe(1);
     });
 });

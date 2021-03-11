@@ -1,6 +1,6 @@
 /* eslint-disable vue/one-component-per-file */
 import OneEntity from './OneEntity.vue';
-import { formatPath, HttpMethods, RequestTypes } from '../../utils';
+import { formatPath, RequestTypes } from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { apiConnector } from '../../api';
@@ -103,7 +103,7 @@ export const PageNewViewComponent = {
             try {
                 const method = this.view.params.method;
                 if (this.view.type === ViewTypes.PAGE_EDIT) {
-                    await instance.update(method, method === HttpMethods.PATCH ? this.changedFields : null);
+                    await instance.update(method, this.view.isPartial ? this.changedFields : null);
                 } else {
                     await instance.create(method);
                 }
@@ -138,7 +138,8 @@ export const PageEditViewComponent = {
     mixins: [PageNewViewComponent],
     computed: {
         model() {
-            return this.view.objects.getModelClass(RequestTypes.UPDATE);
+            const requestType = this.view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE;
+            return this.view.objects.getModelClass(requestType);
         },
     },
     methods: {

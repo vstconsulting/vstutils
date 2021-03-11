@@ -159,7 +159,7 @@
              * @return {object}
              */
             generateBaseFilters() {
-                const limit = this.pagination.pageSize;
+                const limit = this.pagination.pageSize || this.$app.config.defaultPageLimit;
                 const page = this.$route.query.page || 1;
                 const query = { limit, offset: limit * (page - 1) };
                 return $.extend(true, query, this.filterNonEmpty(this.$route.query));
@@ -305,8 +305,15 @@
             // Page view
 
             openPageView(instance) {
-                if (this.view.pageView)
-                    this.$router.push(formatPath(this.view.pageView.path, this.$route.params, instance));
+                const pageView = this.view.pageView;
+                if (pageView) {
+                    const link = formatPath(pageView.path, this.$route.params, instance);
+                    if (pageView.isFileResponse) {
+                        window.open(`${this.$app.api.baseURL}/${this.$app.api.defaultVersion}${link}`);
+                    } else {
+                        this.$router.push(link);
+                    }
+                }
             },
 
             // Multi actions

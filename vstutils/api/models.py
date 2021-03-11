@@ -60,6 +60,9 @@ class TwoFactor(BaseModel):
 
     class Meta:
         default_related_name = 'twofa'
+        indexes = [
+            models.Index(fields=('user', 'secret'), name='%(app_label)s_tfa_fullidx')
+        ]
 
     @property
     def enabled(self):
@@ -78,3 +81,6 @@ class RecoveryCode(BaseModel):
 
     class Meta:
         default_related_name = 'recoverycode'
+        indexes = [
+            models.Index(fields=('id', 'key', 'tfa'), name='%(app_label)s_recov_fullidx')
+        ]

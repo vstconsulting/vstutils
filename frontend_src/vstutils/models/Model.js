@@ -112,6 +112,14 @@ export function makeModel(cls, name) {
         },
     });
 
+    // Set pk field name
+    Object.defineProperty(cls, 'pkFieldName', { value: cls.pkField?.name || null, writable: true });
+    Object.defineProperty(cls.prototype, '_pkFieldName', {
+        get() {
+            return this.constructor.pkFieldName;
+        },
+    });
+
     // Set view field
     const viewFieldParameters = { value: ModelUtils.getViewField(cls), writable: true };
     Object.defineProperty(cls, 'viewField', viewFieldParameters);
@@ -161,6 +169,7 @@ export class ModelValidationError extends Error {
  * @property {Map<string, BaseField>} _fields
  * @property {BaseField} _pkField
  * @property {BaseField} _viewField
+ * @property {string|null} _pkFieldName
  */
 export class Model {
     /** @type {Array<BaseField>} */
@@ -175,11 +184,16 @@ export class Model {
     /**
      * @param {InnerData=} data
      * @param {QuerySet=} queryset
+     * @param {Model=} parentInstance
      */
-    constructor(data = null, queryset = null) {
+    constructor(data = null, queryset = null, parentInstance = null) {
         if (!data) {
-            data = this._getInitialData();
+            data = parentInstance?._data || this._getInitialData();
         }
+        if (!queryset && parentInstance) {
+            queryset = parentInstance._queryset;
+        }
+        this._parentInstance = parentInstance;
         this._data = data;
         this._queryset = queryset;
         this._changedFields = [];
@@ -253,9 +267,7 @@ export class Model {
      * Method, that returns instance's value of PK field.
      */
     getPkValue() {
-        if (this._pkField) {
-            return this[this._pkField.name];
-        }
+        return this._parentInstance?.getPkValue() || this._data[this._pkFieldName];
     }
 
     /**

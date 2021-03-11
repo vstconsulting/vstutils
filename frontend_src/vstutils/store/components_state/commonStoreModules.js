@@ -1,5 +1,5 @@
-import { mergeDeep, RequestTypes } from '../../utils';
 import Vue from 'vue';
+import { mergeDeep, RequestTypes } from '../../utils';
 
 export const LIST_STORE_MODULE = {
     state: {
@@ -9,7 +9,7 @@ export const LIST_STORE_MODULE = {
             selection: [],
             pagination: {
                 count: 0,
-                pageSize: 20,
+                pageSize: 0, // Will be set to default page limit in ListViewComponent
                 pageNumber: 1,
             },
         },
@@ -137,8 +137,20 @@ export const PAGE_NEW_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
 });
 
 export const PAGE_EDIT_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
+    mutations: {
+        setInstance(state, instance) {
+            const model =
+                state.queryset.getModelClass(RequestTypes.PARTIAL_UPDATE) ||
+                state.queryset.getModelClass(RequestTypes.UPDATE);
+
+            if (!(instance instanceof model)) {
+                instance = new model(null, null, instance);
+            }
+
+            PAGE_WITH_INSTANCE.mutations.setInstance(state, instance);
+        },
+    },
     actions: {
-        // eslint-disable-next-line no-unused-vars
         async fetchData({ commit, getters }, instanceId) {
             commit('setInstance', await getters.queryset.get(instanceId));
         },

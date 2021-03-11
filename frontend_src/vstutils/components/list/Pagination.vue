@@ -27,7 +27,8 @@
         },
         computed: {
             pagesAmount() {
-                return Math.ceil(this.count / this.pageSize);
+                const amount = Math.ceil(this.count / this.pageSize);
+                return Number.isFinite(amount) ? amount : 1;
             },
 
             items() {

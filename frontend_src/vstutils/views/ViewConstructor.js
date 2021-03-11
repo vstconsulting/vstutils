@@ -73,25 +73,14 @@ export default class ViewConstructor {
     }
 
     /**
-     * @param operationSchema
+     * @param {Object} response
      * @return {Function}
      */
-    _getOperationModel(operationSchema) {
-        const responseCode = Object.keys(operationSchema.responses).find(isSuccessful);
+    _getOperationModel(response) {
         const responseModelRef =
-            operationSchema.responses[responseCode].schema?.$ref || // Detail view
-            operationSchema.responses[responseCode].schema?.properties?.results?.items?.$ref || // List view
+            response.schema?.$ref || // Detail view
+            response.schema?.properties?.results?.items?.$ref || // List view
             NoModel.name; // Default model
-
-        // TODO ideal is to check if request and response models are the same
-        // const requestModelRef =
-        //     operationSchema.parameters &&
-        //     operationSchema.parameters.find((param) => param.in === 'body')?.schema?.$ref;
-
-        // if (requestModelRef && requestModelRef !== responseModelRef)
-        //     throw new Error(
-        //         `Request and response models are not equal (${requestModelRef} !== ${responseModelRef})`,
-        //     );
 
         return this.modelsClasses.get(responseModelRef.split('/').pop());
     }
@@ -153,7 +142,11 @@ export default class ViewConstructor {
                 if (!operationSchema) continue;
                 const operationId = operationSchema[this.dictionary.paths.operation_id.name];
 
-                const model = this._getOperationModel(operationSchema);
+                const responseCode = Object.keys(operationSchema.responses).find(isSuccessful);
+                const response = operationSchema.responses[responseCode];
+                const responseSchemaType = response.schema?.type;
+
+                const model = this._getOperationModel(response);
 
                 const operationOptions = mergeDeep(
                     { method: httpMethod, model },
@@ -175,6 +168,7 @@ export default class ViewConstructor {
                 }
 
                 if (operationOptions.type === ViewTypes.PAGE) {
+                    operationOptions.isFileResponse = responseSchemaType === 'file';
                     pageView = new PageView(operationOptions, null);
                     views.set(pageView.path, pageView);
                 } else if (operationOptions.type === ViewTypes.PAGE_NEW) {
