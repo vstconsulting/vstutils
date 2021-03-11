@@ -127,11 +127,10 @@ export const PAGE_WITH_EDITABLE_DATA = mergeDeep({}, PAGE_WITH_INSTANCE, {
 
 export const PAGE_NEW_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
     actions: {
-        // eslint-disable-next-line no-unused-vars
-        async fetchData({ commit, getters }) {
+        async fetchData({ commit, getters }, { data } = {}) {
             const queryset = getters.queryset;
             const model = queryset.getModelClass(RequestTypes.CREATE);
-            commit('setInstance', new model(null, queryset));
+            commit('setInstance', new model(model.getInitialData(data), queryset));
         },
     },
 });

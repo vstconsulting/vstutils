@@ -1,4 +1,4 @@
-import { escapeHtml } from '../utils';
+import { escapeHtml, hasOwnProp, mergeDeep } from '../utils';
 
 class ModelUtils {
     static pkFields = ['id', 'pk'];
@@ -188,7 +188,7 @@ export class Model {
      */
     constructor(data = null, queryset = null, parentInstance = null) {
         if (!data) {
-            data = parentInstance?._data || this._getInitialData();
+            data = parentInstance?._data || this.constructor.getInitialData();
         }
         if (!queryset && parentInstance) {
             queryset = parentInstance._queryset;
@@ -200,12 +200,15 @@ export class Model {
     }
 
     /**
+     * @param {Object=} providedData
      * @return {InnerData}
      */
-    _getInitialData() {
-        const data = {};
-        for (const [name, field] of this._fields) {
-            data[name] = field.getInitialValue();
+    static getInitialData(providedData = {}) {
+        const data = mergeDeep({}, providedData);
+        for (const [name, field] of this.fields) {
+            if (!hasOwnProp(data, name)) {
+                data[name] = field.getInitialValue();
+            }
         }
         return data;
     }

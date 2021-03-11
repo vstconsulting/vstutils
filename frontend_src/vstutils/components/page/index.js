@@ -77,7 +77,7 @@ export const PageNewViewComponent = {
     methods: {
         async fetchData() {
             this.initLoading();
-            await this.dispatchAction('fetchData');
+            await this.dispatchAction('fetchData', { data: this.query });
             this.changedFields = [];
             this.setLoadingSuccessful();
         },
