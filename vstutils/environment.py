@@ -5,7 +5,7 @@ import sys
 _default_settings = {
     # vstutils settings for generate settings
     "VST_PROJECT": "vstutils",
-    'VST_DEV_SETTINGS': 'settings.ini',
+    'VST_DEV_SETTINGS': 'dev_settings.ini',
     # django settings module
     "DJANGO_SETTINGS_MODULE": 'vstutils.settings',
     # Default urlconf

@@ -2892,7 +2892,7 @@ class ConfigParserCTestCase(BaseTestCase):
 
         self.assertEqual(settings.SESSION_COOKIE_AGE, 1209600)
         self.assertEqual(settings.STATIC_URL, '/static/')
-        self.assertEqual(settings.PAGE_LIMIT, 1000)
+        self.assertEqual(settings.PAGE_LIMIT, 20)
         self.assertEqual(settings.SWAGGER_API_DESCRIPTION, None)
         self.assertEqual(settings.OPENAPI_PUBLIC, False)
         self.assertEqual(settings.SCHEMA_CACHE_TIMEOUT, 120)

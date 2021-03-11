@@ -80,6 +80,7 @@ PROJECT_CONFIG_FILE: _t.Text = os.getenv(
     f"{ENV_NAME}_LIB_SETTINGS_FILE",
     f"/etc/{VST_PROJECT}/settings.ini"
 )
+PROJECT_DEFAULTS_CONFIG = os.path.join(BASE_DIR, 'settings.ini')
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
 CONFIG_FILES = (
@@ -120,6 +121,7 @@ class WebSection(BaseAppendSection):
         'allow_cors': ConfigBoolType,
         'session_timeout': ConfigIntSecondsType,
         'page_limit': ConfigIntType,
+        'rest_page_limit': ConfigIntType,
         'public_openapi': ConfigBoolType,
         'openapi_cache_timeout': ConfigIntType,
         'enable_gravatar': ConfigBoolType,
@@ -236,7 +238,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'allow_cors': False,
             'session_timeout': '2w',
             'static_files_url': '/static/',
-            'page_limit': 1000,
+            'page_limit': 20,
+            'rest_page_limit': 1000,
             'rest_swagger_description': (vst_project_module.__doc__ or vst_lib_module.__doc__),
             'public_openapi': False,
             'openapi_cache_timeout': 120,
@@ -803,7 +806,7 @@ REST_FRAMEWORK: _t.Dict = {
         'vstutils.api.filter_backends.SelectRelatedFilterBackend',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': web.getint("rest_page_limit", fallback=PAGE_LIMIT),
+    'PAGE_SIZE': web["rest_page_limit"],
     'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
     'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
