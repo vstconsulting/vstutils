@@ -1,9 +1,8 @@
+import $ from 'jquery';
+import { findClosestPath, formatPath, path_pk_key, ViewTypes } from '../utils';
+import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
-import { findClosestPath, formatPath, path_pk_key } from '../utils';
-import $ from 'jquery';
-import { guiPopUp, pop_up_msg } from '../popUp';
-import { ViewTypes } from '../views/View.js';
 
 function* getParentViews(view) {
     if (view.parent) {
@@ -17,6 +16,9 @@ function* getParentViews(view) {
  */
 export const BaseViewMixin = {
     mixins: [BasestViewMixin, CollapsibleCardMixin],
+    props: {
+        query: { type: Object, required: true },
+    },
     /**
      * Computed properties of Vue component.
      */

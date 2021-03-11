@@ -133,6 +133,16 @@ export class View {
     }
 
     /**
+     * @param {Route} route
+     * @returns {Object} component properties
+     */
+    _propsFunc(route) {
+        return {
+            query: { ...route.query },
+        };
+    }
+
+    /**
      * Method that returns route object for view (RouteConfig)
      * @return {Object}
      */
@@ -141,7 +151,7 @@ export class View {
             name: this.path,
             path: this.getRoutePath(),
             component: this.getComponent(),
-            props: true,
+            props: this._propsFunc,
         };
     }
 }
