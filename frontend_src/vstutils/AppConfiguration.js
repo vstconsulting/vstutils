@@ -39,6 +39,8 @@ export class AppConfiguration {
         isSuperuser,
         isStaff,
         schema,
+
+        defaultPageLimit,
     } = {}) {
         if (!schema) {
             throw new TypeError('schema is required');
@@ -54,5 +56,7 @@ export class AppConfiguration {
         this.isSuperuser = fallbackIfUndef(isSuperuser, window.is_superuser);
         this.isStaff = fallbackIfUndef(isStaff, window.is_staff);
         this.schema = schema;
+
+        this.defaultPageLimit = defaultPageLimit || schema.info['x-page-limit'];
     }
 }

@@ -12,7 +12,7 @@ import {
     PageNewViewComponent,
     PageViewComponent,
 } from '../components/page';
-import { ViewTypes } from '../utils';
+import { HttpMethods, ViewTypes } from '../utils';
 export { ViewTypes };
 
 /**
@@ -186,6 +186,9 @@ export class PageView extends View {
 
     constructor(params, objects, mixins = [PageViewComponent]) {
         super(params, objects, mixins);
+
+        /** @type {boolean} */
+        this.isFileResponse = params.isFileResponse;
     }
 
     getStoreModule() {
@@ -222,6 +225,9 @@ export class PageEditView extends PageView {
 
     constructor(params, objects, mixins = [PageEditViewComponent]) {
         super(params, objects, mixins);
+
+        /** @type {boolean} */
+        this.isPartial = params.method === HttpMethods.PATCH;
     }
 
     getStoreModule() {

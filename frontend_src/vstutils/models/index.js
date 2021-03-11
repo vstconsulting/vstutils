@@ -11,4 +11,4 @@ const globalModels = new Map();
  */
 const guiModels = mapToObjectProxy(globalModels);
 
-export { Model, ModelClass, ModelConstructor, ModelsResolver, globalModels, guiModels, NoModel };
+export { Model, ModelClass, ModelConstructor, ModelsResolver, NoModel, globalModels, guiModels };

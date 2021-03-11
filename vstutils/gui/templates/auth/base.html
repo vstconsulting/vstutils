@@ -32,7 +32,7 @@
                 <div class="col-xs-4">
                     <button type="submit" class="btn btn-primary btn-block" style="margin-bottom: 5px" id="login_button">{% translate_text "sign in" title %}</button>
                     {% block additional_link %}
-                        <a style="margin-bottom: 10px" href="/password_reset">{% translate_text "forgot password" capfirst %}?</a>
+                        <a style="margin-bottom: 10px" href="{% url 'password_reset' %}">{% translate_text "forgot password" capfirst %}?</a>
                     {% endblock %}
                 </div>
             </div>

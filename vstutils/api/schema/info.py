@@ -35,7 +35,8 @@ api_info_dict = OrderedDict(
             static_path=settings.STATIC_URL,
             enable_gravatar=settings.ENABLE_GRAVATAR,
             time_zone=settings.TIME_ZONE
-        )
+        ),
+        'x-page-limit': settings.PAGE_LIMIT,
     }
 )
 
