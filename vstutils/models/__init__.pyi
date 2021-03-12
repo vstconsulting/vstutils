@@ -31,5 +31,11 @@ class BModel(BaseModel):
     hidden: _t.Union[bool, models.BooleanField]
 
 
+def bulk_notify_clients(
+        channel: _t.Text = "subscriptions_update",
+        objects: _t.Iterable[_t.Tuple[_t.Text, _t.Any]] = ()
+) -> _t.Optional[_t.List]:
+    ...
+
 def notify_clients(model: _t.Union[BModel, models.Model], pk: _t.Optional[_t.Any] = None) -> None:
     ...
