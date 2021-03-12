@@ -232,12 +232,12 @@ class MainRouter(_AbstractRouter):
                     namespace=getattr(router, 'router_version_name', name)
                 )
             ))
-        for prefix, view, _ in self.custom_urls:
+        for prefix, view, name in self.custom_urls:
             # can't be tested because this initialization takes place before
             # any test code can be run
             # pylint: disable=cell-var-from-loop
             view = getattr(view, 'as_view', lambda: view)()
-            urls.append(re_path(f"^{prefix}/$", view))
+            urls.append(re_path(f"^{prefix}/$", view, name=name))
         return urls
 
     def generate_routers(self, api):

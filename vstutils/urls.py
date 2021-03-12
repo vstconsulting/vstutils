@@ -34,6 +34,10 @@ doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 urlpatterns = list(URLHandlers())
 
 urlpatterns += [
+    re_path(settings.ACCOUNT_URL, include(list(URLHandlers('ACCOUNT_URLS'))))
+]
+
+urlpatterns += [
     re_path(r'^admin/', admin.site.urls),
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 

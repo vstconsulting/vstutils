@@ -1,5 +1,6 @@
 from typing import Dict
 
+from django.urls import reverse
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.utils.functional import lazy, SimpleLazyObject
@@ -37,9 +38,9 @@ def static_file_set_version_to_name(files_list_object: dict):
 def settings_constants(request: HttpRequest) -> Dict:
     # pylint: disable=unused-argument
     return {
-        "login_url": getattr(settings, 'LOGIN_URL', '/login/'),
-        "logout_url": getattr(settings, 'LOGOUT_URL', '/logout/'),
-        "docs_url": getattr(settings, 'DOC_URL', '/docs/'),
+        "login_url": reverse('login'),
+        "logout_url": reverse('logout'),
+        "docs_url": reverse('docs:docs_root') if getattr(settings, 'HAS_DOCS', False) else '',
         "has_docs": getattr(settings, 'HAS_DOCS', False),
         "timezone": getattr(settings, 'TIME_ZONE', 'UTC'),
         "debug": debug_enabled,
@@ -62,11 +63,12 @@ def project_args(request: HttpRequest) -> Dict:
         ver_key: project_version,
         "project_gui_name": getattr(settings, 'PROJECT_GUI_NAME', None),
         "project_menu": getattr(settings, 'PROJECT_GUI_MENU', []),
-        "openapi_url": f'/{settings.VST_API_URL}/openapi/',
-        "endpoint_path": f'/{settings.VST_API_URL}/endpoint/',
+        "openapi_url": reverse('endpoint'),
+        "endpoint_path": reverse('endpoint'),
         "api_version": settings.VST_API_VERSION,
-        "api_url": f'{host_url}/{settings.VST_API_URL}/{settings.VST_API_VERSION}/',
+        "api_url": f'{host_url}{reverse("api-root")}{settings.VST_API_VERSION}/',
         "enable_gravatar": settings.ENABLE_GRAVATAR,
+        "registration_enabled": settings.REGISTRATION_ENABLED,
     }
 
 

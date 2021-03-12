@@ -9,6 +9,7 @@ import json  # noqa: F401
 
 from django.apps import apps
 from django.db import transaction
+from django.urls import reverse
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
 
@@ -125,8 +126,8 @@ class BaseTestCase(TestCase):
         }
         self.client = self.client_class(**client_kwargs)
         self.user = self._create_user()
-        self.login_url = getattr(self.settings_obj, 'LOGIN_URL', '/login/')
-        self.logout_url = getattr(self.settings_obj, 'LOGOUT_URL', '/logout/')
+        self.login_url = reverse('login')
+        self.logout_url = reverse('logout')
         self.last_response = None
 
     def _settings(self, item, default=None):

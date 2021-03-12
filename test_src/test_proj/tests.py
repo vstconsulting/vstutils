@@ -29,6 +29,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.http import FileResponse, HttpResponseNotModified
+from django.urls import reverse
 from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
@@ -211,10 +212,10 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 class VSTUtilsTestCase(BaseTestCase):
 
     def _get_test_ldap(self, client, data):
-        self.client.post('/login/', data=data, HTTP_X_AUTH_PLUGIN='DJANGO')
+        self.client.post(self.login_url, data=data, HTTP_X_AUTH_PLUGIN='DJANGO')
         response = client.get('/api/v1/user/')
         self.assertNotEqual(response.status_code, 200)
-        response = self.client.post("/logout/")
+        response = self.client.post(self.logout_url)
         self.assertEqual(response.status_code, 302)
 
     @patch('ldap.initialize')
@@ -460,9 +461,9 @@ class ViewsTestCase(BaseTestCase):
     def test_main_views(self):
         # Main
         self.get_result('get', '/')
-        self.get_result('post', '/logout/', 302)
-        self.get_result('post', '/login/', 302)
-        self.get_result('get', '/login/', 302)
+        self.get_result('post', self.logout_url, 302)
+        self.get_result('post', self.login_url, 302)
+        self.get_result('get', self.login_url, 302)
         # API
         api = self.get_result('get', '/api/')
         print(api)
@@ -598,7 +599,7 @@ class ViewsTestCase(BaseTestCase):
         )
         user_get_request = {"method": "get", "path": ['user', 'profile']}
         self.client.post(
-            '/login/?lang=ru',
+            f'{self.login_url}?lang=ru',
             data=self.user.data
         )
         results = self.bulk([
@@ -676,21 +677,21 @@ class ViewsTestCase(BaseTestCase):
     def test_reset_password(self):
         test_user = self._create_user(is_super_user=False)
         client = self.client_class()
-        response = client.post('/login/', {'username': test_user.username, 'password': test_user.password})
+        response = client.post(self.login_url, {'username': test_user.username, 'password': test_user.password})
         self.assertEqual(response.status_code, 200)
-        response = client.post('/logout/')
+        response = client.post(self.logout_url)
         self.assertEqual(response.status_code, 302)
-        response = client.post('/password_reset/', {'email': 'error@error.error'})
+        response = client.post(reverse('password_reset'), {'email': 'error@error.error'})
         self.assertEqual(response.status_code, 302)
         self.assertCount(mail.outbox, 0)
-        response = client.post('/password_reset/', {'email': test_user.email})
+        response = client.post(reverse('password_reset'), {'email': test_user.email})
         self.assertEqual(response.status_code, 302)
         regex = r"^http(s)?:\/\/.*$"
         match = re.search(regex, mail.outbox[-1].body, re.MULTILINE)
         href = match.group(0)
         response = client.post(href, {'new_password1': 'newpass', 'new_password2': 'newpass'})
         self.assertEqual(response.status_code, 302)
-        response = client.post('/login/', {'username': test_user.username, 'password': 'newpass'})
+        response = client.post(self.login_url, {'username': test_user.username, 'password': 'newpass'})
         self.assertEqual(response.status_code, 200)
 
     def test_register_new_user(self):
@@ -702,7 +703,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertIsNone(get_user_model().objects.filter(email=user['email']).last())
 
         # Try register failed user data
-        response = client.post('/registration/', data=user_fail)
+        response = client.post(reverse('user_registration'), data=user_fail)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             ''.join(response.context_data['form'].errors.get('password2', [])),
@@ -710,7 +711,7 @@ class ViewsTestCase(BaseTestCase):
         )
 
         # Try register user without data
-        response = client.post('/registration/')
+        response = client.post(reverse('user_registration'))
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(
             list(response.context_data['form'].errors.keys()),
@@ -718,8 +719,8 @@ class ViewsTestCase(BaseTestCase):
         )
 
         # Correct registration request
-        response = client.post('/registration/', data=user)
-        self.assertRedirects(response, '/login/')
+        response = client.post(reverse('user_registration'), data=user)
+        self.assertRedirects(response, self.login_url)
 
         self.assertCount(mail.outbox, 1)
         regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
@@ -747,13 +748,13 @@ class ViewsTestCase(BaseTestCase):
         # Success registration
         user['uid'] = correct_uid
         response = client.post(href, user)
-        self.assertRedirects(response, '/login/', target_status_code=302)
+        self.assertRedirects(response, self.login_url, target_status_code=302)
 
         get_user_model().objects.filter(email=user['email']).delete()
         response = client.post(href, {'uid': user['uid']})
-        self.assertRedirects(response, '/login/', target_status_code=302)
+        self.assertRedirects(response, self.login_url, target_status_code=302)
 
-        client.post('/logout/')
+        client.post(self.logout_url)
         client.get(href)
         response = client.post(href, user)
         self.assertEqual(response.status_code, 200)
@@ -763,13 +764,13 @@ class ViewsTestCase(BaseTestCase):
         user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
         user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com')
         client = self.client_class()
-        response = client.post('/login/', {'username': user['username'], 'password': user['password1']})
+        response = client.post(self.login_url, {'username': user['username'], 'password': user['password1']})
         self.assertEqual(response.status_code, 200)
-        response = client.post('/registration/', data=user_fail)
+        response = client.post(reverse('user_registration'), data=user_fail)
         self.assertEqual(response.status_code, 200)
-        response = client.post('/registration/', data=user)
-        self.assertRedirects(response, '/login/')
-        response = client.post('/login/', {'username': user['username'], 'password': user['password2']})
+        response = client.post(reverse('user_registration'), data=user)
+        self.assertRedirects(response, self.login_url)
+        response = client.post(self.login_url, {'username': user['username'], 'password': user['password2']})
         self.assertRedirects(response, '/')
 
     def test_login_redirects(self):
@@ -778,7 +779,7 @@ class ViewsTestCase(BaseTestCase):
         redirect_page = '/#/user/1/notification_settings'
 
         # Test that login POST handler redirects after successful login
-        response = client.post('/login/', {
+        response = client.post(self.login_url, {
             'username': user.data['username'],
             'password': user.data['password'],
             'next': redirect_page
@@ -855,24 +856,24 @@ class ViewsTestCase(BaseTestCase):
 
         # Check logout after invalid attempts
         client = self.client_class()
-        client.post('/login/', data=self.user.data)
+        client.post(self.login_url, data=self.user.data)
         with self.patch('pyotp.TOTP.verify') as mock_obj:
             mock_obj.side_effect = lambda x: x == pin
             # Make 3 attempts with invalid pin
-            client.post('/login/', data={'pin': '111'})
-            client.post('/login/', data={'pin': '111'})
-            response = client.post('/login/', data={'pin': '111'})
+            client.post(self.login_url, data={'pin': '111'})
+            client.post(self.login_url, data={'pin': '111'})
+            response = client.post(self.login_url, data={'pin': '111'})
             # Check that response contains error message
             self.assertContains(response, 'Invalid authentication code')
             # Make 4th attempt
-            response = client.post('/login/', data={'pin': '111'})
+            response = client.post(self.login_url, data={'pin': '111'})
             # Check that login page returned
             self.assertContains(response, 'Sign in to start your session')
 
         # Check recovery codes
         client = self.client_class()
-        client.post('/login/', data=self.user.data)
-        response = client.post('/login/', data={'pin': 'cod-e2'})
+        client.post(self.login_url, data=self.user.data)
+        response = client.post(self.login_url, data={'pin': 'cod-e2'})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.user.twofa.recoverycode.all().count(), 1)
         response = client.get('/')
@@ -880,16 +881,16 @@ class ViewsTestCase(BaseTestCase):
 
         # Check login and redirects
         client = self.client_class()
-        client.post('/login/', data=self.user.data)
+        client.post(self.login_url, data=self.user.data)
         self.assertTrue(settings.SESSION_COOKIE_NAME in client.cookies)
 
         response = client.get('/')
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/login/')
+        self.assertEqual(response.url, self.login_url)
 
         with self.patch('pyotp.TOTP.verify') as mock_obj:
             mock_obj.side_effect = lambda x: x == pin
-            response = client.post('/login/', data={'pin': pin})
+            response = client.post(self.login_url, data={'pin': pin})
             self.assertEqual(response.status_code, 302)
 
         response = client.get('/')
@@ -940,7 +941,7 @@ class DefaultBulkTestCase(BaseTestCase):
             dict(method='get', path=['usr', self.user.id])
         ]
         self.bulk_transactional(bulk_request_data, 502)
-        self.client.post('/login/?lang=ru', self.user.data)
+        self.client.post(f'{self.login_url}?lang=ru', self.user.data)
         result = self.bulk(bulk_request_data, HTTP_ACCEPT_LANGUAGE='ru,en-US;q=0.9,en;q=0.8,ru-RU;q=0.7,es;q=0.6', relogin=False)
         self._logout(self.client)
 
@@ -1867,23 +1868,23 @@ class LangTestCase(BaseTestCase):
         )
 
         for expected_code, header in languages:
-            response = self.client_class().get('/login/', HTTP_ACCEPT_LANGUAGE=header)
+            response = self.client_class().get(self.login_url, HTTP_ACCEPT_LANGUAGE=header)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.cookies['lang'].value, expected_code)
             self.assertEqual(to_soup(response.content).html['lang'], expected_code, f'Header: {header}')
 
-        response = client.get('/login/?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = client.get(f'{self.login_url}?lang=ru', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.cookies.get('lang').value, 'ru')
         self.assertEqual(to_soup(response.content).html['lang'], 'ru')
 
-        response = client.get('/login/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = client.get(self.login_url, HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'ru')
 
-        response = self.client_class().get('/login/')
+        response = self.client_class().get(self.login_url)
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
-        response = self.client_class().get('/login/', HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
+        response = self.client_class().get(self.login_url, HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
 
 
@@ -2805,7 +2806,7 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 302)
         response = self.client.get('/suburls_module/admin/login/')
         self.assertEqual(response.status_code, 302)
-        response = self.client.get('/suburls/login/')
+        response = self.client.get(f'/suburls/login/')
         self.assertEqual(response.status_code, 302)
 
 
