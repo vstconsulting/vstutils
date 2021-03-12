@@ -69,6 +69,7 @@ So in this case authorization logic will be the following:
 * **enable_django_logs** - Enable or disable Django logger to output.
   Useful for debugging. Default: false.
 * **enable_admin_panel** - Enable or disable Django Admin panel. Default: false.
+* **enable_registration** - Enable or disable user self-registration. Default: false.
 * **auth-plugins** - Comma separated list of django authentication backends.
   Authorization attempt is made until the first successful one in order specified in the list.
 * **auth-cache-user** - Enable or disable user instance caching. It increases session performance

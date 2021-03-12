@@ -50,6 +50,7 @@ PY_VER: _t.SupportsInt = sys.version_info.major
 TMP_DIR: _t.Text = gettempdir() or '/tmp'
 BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))
+VST_PROJECT_LIB_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 __kwargs: _t.Dict[_t.Text, _t.Any] = dict(
     PY=PY_VER,
     PY_VER='.'.join([str(i) for i in sys.version_info[:2]]),
@@ -80,10 +81,11 @@ PROJECT_CONFIG_FILE: _t.Text = os.getenv(
     f"{ENV_NAME}_LIB_SETTINGS_FILE",
     f"/etc/{VST_PROJECT}/settings.ini"
 )
-PROJECT_DEFAULTS_CONFIG = os.path.join(BASE_DIR, 'settings.ini')
+PROJECT_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_LIB_DIR, 'settings.ini')
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
 CONFIG_FILES = (
+    PROJECT_DEFAULTS_CONFIG,
     CONFIG_FILE + '.yml',
     CONFIG_FILE,
     PROJECT_CONFIG_FILE + '.yml',
@@ -111,6 +113,7 @@ class MainSection(BaseAppendSection):
     types_map = {
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
+        'enable_registration': ConfigBoolType,
         'allowed_hosts': cconfig.ListType(),
         'first_day_of_week': ConfigIntType,
     }
@@ -229,7 +232,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'timezone': 'UTC',
             'first_day_of_week': 0,
             'log_level': 'WARNING',
-            'enable_admin_panel': False,
+            'enable_admin_panel': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', 'false')),
+            'enable_registration': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_REGISTRATION', 'false')),
             'ldap-server': None,
             'ldap-default-domain': '',
             'ldap-auth_format': 'cn=<username>,<domain>',
@@ -743,6 +747,8 @@ SWAGGER_SETTINGS: _t.Dict = {
             'type': 'basic'
         }
     },
+    'LOGIN_URL': 'login',
+    'LOGOUT_URL': 'logout',
 }
 
 
@@ -1021,6 +1027,9 @@ GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     r'^manifest.json$': 'MANIFEST',
     r'^service-worker.js$': 'SERVICE_WORKER',
     r'^offline.html$': 'OFFLINE',
+}
+
+ACCOUNT_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     'LOGIN_URL': 'LOGIN',
     'LOGOUT_URL': 'LOGOUT',
     r'^password_reset/$': 'PASSWORD_RESET',
@@ -1028,6 +1037,21 @@ GUI_VIEWS: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Dict]] = {
     r'^password_reset_complete/$': 'PASSWORD_RESET_COMPLETE',
     r'^password_reset_confirm/(?P<uidb64>.*)/(?P<token>.*)/$': 'PASSWORD_RESET_CONFIRM',
 }
+
+
+def get_accounts_views_mapping():
+    mapping = {**ACCOUNT_VIEWS}
+    if REGISTRATION_URL not in mapping and REGISTRATION_URL not in ACCOUNT_VIEWS and REGISTRATION_ENABLED:
+        mapping[REGISTRATION_URL] = 'USER_REGISTRATION'
+    return mapping
+
+
+URLS = lazy(lambda: {**GUI_VIEWS}, dict)()
+ACCOUNT_URLS = lazy(get_accounts_views_mapping, dict)()
+ACCOUNT_URL = '^account/'
+
+REGISTRATION_URL = r'^registration/$'
+REGISTRATION_ENABLED = main['enable_registration']
 
 PROJECT_GUI_MENU: _t.List[_t.Dict] = [
     {

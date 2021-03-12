@@ -27,7 +27,7 @@ class BaseView(TemplateView):
     @classmethod
     def as_view(cls, *args, **kwargs):
         view = super().as_view(*args, **kwargs)
-        return cls.login_required and login_required(view) or view
+        return cls.login_required and login_required(view, login_url=reverse_lazy('login')) or view
 
 
 class GUIView(BaseView):
@@ -85,7 +85,7 @@ class Login(auth.LoginView):
 
 
 class Logout(auth.LogoutView):
-    next_page = settings.LOGIN_URL
+    next_page = reverse_lazy('login')
 
 
 class Registration(FormView, BaseView):

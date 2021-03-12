@@ -1046,8 +1046,9 @@ class URLHandlers(ObjectHandlers):
     ]
     additional_handlers: tp.List[tp.Text]
 
-    def __init__(self, type_name: tp.Text = 'GUI_VIEWS', *args, **kwargs):
+    def __init__(self, type_name: tp.Text = 'URLS', *args, **kwargs):
         self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [type_name]
+        self.default_namespace = kwargs.pop('namespace', 'gui')
         super().__init__(type_name, *args, **kwargs)
 
     @property
@@ -1091,7 +1092,7 @@ class URLHandlers(ObjectHandlers):
         if regexp in self.settings_urls:
             regexp = rf'^{self.get_django_settings(regexp)[1:]}'
         view_class = self[name]
-        namespace = view_kwargs.pop('namespace', 'gui')
+        namespace = view_kwargs.pop('namespace', self.default_namespace)
         result: tp.Union[tp.Tuple, types.ModuleType]
         if isinstance(view_class, View) or hasattr(view_class, 'as_view'):
             view = view_class.as_view(**view_kwargs)

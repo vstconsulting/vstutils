@@ -93,7 +93,6 @@ GUI_VIEWS[r'^suburls_namespaced/'] = {
 GUI_VIEWS[r'^suburls_module/'] = {
     'BACKEND': 'test_proj.suburls'
 }
-GUI_VIEWS[r'^registration/$'] = VIEWS['USER_REGISTRATION']
 
 DEBUG = True
 PWA_MANIFEST = {

@@ -2,7 +2,12 @@
 {% load request_static %}
 
 {% block login_body_content %}
-    <p class="login-box-msg">{% translate_text "sign in to start your session" capfirst %}{% block session_message_suffix %}{% endblock %}</p>
+    <p class="login-box-msg">{% translate_text "sign in to start your session" capfirst %}
+        {% block session_message_suffix %}
+        {% if registration_enabled %}
+        {% translate_text "or" %} <a href="{% url 'user_registration' %}">{% translate_text "sign up" %}</a>.
+        {% endif %}
+        {% endblock %}</p>
 
     <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" id="login_form">
         {% csrf_token %}
