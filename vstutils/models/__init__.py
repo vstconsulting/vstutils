@@ -192,16 +192,28 @@ class BModel(BaseModel):
 
 
 @raise_context()
+def bulk_notify_clients(channel="subscriptions_update", objects=()):
+    for label, pk in objects:
+        with raise_context():
+            cent_client.add("publish", cent_client.get_publish_params(
+                channel,
+                {
+                    "subscribe-label": label,
+                    "pk": pk
+                }
+            ))
+    if objects:
+        return cent_client.send()
+
+
+@raise_context()
 def notify_clients(model, pk=None):
     logger.debug(f'Notify clients about model update: {model._meta.label}')
     if not settings.CENTRIFUGO_CLIENT_KWARGS:
         return  # nocv
-    cent_client.publish(
+    bulk_notify_clients(
         "subscriptions_update",
-        {
-            "subscribe-label": model._meta.label,
-            "pk": pk
-        }
+        ((model._meta.label, pk),)
     )
 
 

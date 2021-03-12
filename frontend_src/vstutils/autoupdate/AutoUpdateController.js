@@ -23,6 +23,10 @@ export default {
                 timeoutId: null,
                 stop: false,
                 centrifugoSubscription: null,
+
+                bulkedActionsDelay: 1000,
+                bulkedActions: [],
+                bulkedActionsTimeout: null,
             },
         };
     },
@@ -80,6 +84,23 @@ export default {
                 // eslint-disable-next-line no-empty
             } catch (error) {}
         },
+        bulkInvoke(action) {
+            if (!this.autoupdate.bulkedActions.includes(action)) {
+                this.autoupdate.bulkedActions.push(action);
+
+                if (!this.autoupdate.bulkedActionsTimeout) {
+                    this.autoupdate.bulkedActionsTimeout = setTimeout(() => {
+                        // Add random delay up to 1 second to avoid massive simultaneous requests from clients
+                        randomSleep(1, 1000).then(() => {
+                            const actionsCopy = this.autoupdate.bulkedActions.slice();
+                            this.autoupdate.bulkedActionsTimeout = null;
+                            this.autoupdate.bulkedActions = [];
+                            actionsCopy.map((action) => this.invokeSubscriber(action));
+                        });
+                    }, this.autoupdate.bulkedActionsDelay);
+                }
+            }
+        },
 
         // Timer updates
 
@@ -100,13 +121,10 @@ export default {
             if (!this.$store.state.autoupdate.centrifugoSubscriptions.has(label)) {
                 return;
             }
-            return (
-                this.$store.state.autoupdate.centrifugoSubscriptions
-                    .get(label)
-                    .filter((action) => !action.pk || String(action.pk) === String(pk))
-                    // Add random delay up to 1 second to avoid massive simultaneous requests from clients
-                    .map((action) => randomSleep(1, 1000).then(() => this.invokeSubscriber(action)))
-            );
+            return this.$store.state.autoupdate.centrifugoSubscriptions
+                .get(label)
+                .filter((action) => !action.pk || String(action.pk) === String(pk))
+                .map((action) => this.bulkInvoke(action));
         },
     },
 };

@@ -2978,20 +2978,26 @@ class WebSocketTestCase(BaseTestCase):
 
         Host = self.get_model_class('test_proj.models.Host')
         models.cent_client = get_centrifugo_client()
-        models.cent_client.publish = publish
+        models.cent_client._send = publish
 
         host_obj = Host.objects.create(name="centrifuga")
         host_obj2 = Host.objects.create(name="centrifuga")
         Host.objects.filter(id__in=[host_obj.id, host_obj2.id]).delete()
         self.assertEqual(mock_call_count, 4)
-        self.assertEqual(mock_args[0][0], 'subscriptions_update')
-        self.assertEqual(mock_args[1][0], 'subscriptions_update')
-        self.assertEqual(mock_args[2][0], 'subscriptions_update')
-        self.assertEqual(mock_args[3][0], 'subscriptions_update')
-        self.assertDictEqual(mock_args[0][1], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
-        self.assertDictEqual(mock_args[1][1], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
-        self.assertDictEqual(mock_args[2][1], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
-        self.assertDictEqual(mock_args[3][1], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
+        mock_data = []
+        for arg in mock_args:
+            cent_host = arg[0]
+            arg = json.loads(arg[-1])
+            self.assertEqual(arg['method'], 'publish')
+            mock_data.append((cent_host, arg['params']['channel'], arg['params']['data']))
+        self.assertEqual(mock_data[0][1], 'subscriptions_update')
+        self.assertEqual(mock_data[1][1], 'subscriptions_update')
+        self.assertEqual(mock_data[2][1], 'subscriptions_update')
+        self.assertEqual(mock_data[3][1], 'subscriptions_update')
+        self.assertDictEqual(mock_data[0][2], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
+        self.assertDictEqual(mock_data[1][2], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
+        self.assertDictEqual(mock_data[2][2], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
+        self.assertDictEqual(mock_data[3][2], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
 
     @async_test
     async def test_endpoint_requests(self):
