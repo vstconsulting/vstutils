@@ -10,9 +10,17 @@ import json
 
 from django.db import models
 from rest_framework import serializers
+from rest_framework.utils.field_mapping import get_relation_kwargs
 
 from . import fields
 from .. import utils
+from ..models.fields import (
+    NamedBinaryFileInJSONField,
+    NamedBinaryImageInJSONField,
+    MultipleNamedBinaryFileInJSONField,
+    MultipleNamedBinaryImageInJSONField,
+    FkModelField
+)
 
 
 class BaseSerializer(serializers.Serializer):
@@ -41,7 +49,10 @@ class VSTSerializer(serializers.ModelSerializer):
     Default model serializer based on :class:`rest_framework.serializers.ModelSerializer`.
     Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_
     how to create Model Serializers.
-
+    This serializer generate `vstutils.api.fields` from `vstutils.models.fields`.
+    List of available pairs specified in  `VSTSerializer.serializer_field_mapping`.
+    To set :class:`vstutils.api.fields.FkModelField` in serializer use
+    :class:`vstutils.models.fields.FkModelField` in a model.
     """
     # pylint: disable=abstract-method
 
@@ -49,7 +60,31 @@ class VSTSerializer(serializers.ModelSerializer):
     serializer_field_mapping.update({
         models.CharField: fields.VSTCharField,
         models.TextField: fields.VSTCharField,
+        models.FileField: fields.NamedBinaryFileInJsonField,
+        models.ImageField: fields.NamedBinaryImageInJsonField,
+        NamedBinaryFileInJSONField: fields.NamedBinaryFileInJsonField,
+        NamedBinaryImageInJSONField: fields.NamedBinaryImageInJsonField,
+        MultipleNamedBinaryFileInJSONField: fields.MultipleNamedBinaryFileInJsonField,
+        MultipleNamedBinaryImageInJSONField: fields.MultipleNamedBinaryImageInJsonField,
     })
+
+    def build_standard_field(self, field_name, model_field):
+        field_class, field_kwargs = super().build_standard_field(field_name, model_field)
+        if isinstance(model_field, models.FileField):
+            field_kwargs['file'] = True
+        return field_class, field_kwargs
+
+    def build_relational_field(self, field_name, relation_info):
+        from ..models import ModelBaseClass  # pylint: disable=import-outside-toplevel
+        if isinstance(relation_info.model_field, FkModelField) and\
+                isinstance(relation_info.related_model, ModelBaseClass):
+            field_kwargs = get_relation_kwargs(field_name, relation_info)
+            valid_kwargs = ['read_only', 'label', 'help_text', 'allow_null', 'required']
+            field_kwargs = {key: field_kwargs[key] for key in field_kwargs if key in valid_kwargs}
+            field_kwargs['select'] = relation_info.related_model
+            return fields.FkModelField, field_kwargs
+        # if DRF ForeignField in model or related_model is not BModel, perform default DRF logic
+        return super().build_relational_field(field_name, relation_info)  # nocv
 
 
 class EmptySerializer(BaseSerializer):

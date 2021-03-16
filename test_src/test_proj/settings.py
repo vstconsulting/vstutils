@@ -50,6 +50,9 @@ API[VST_API_VERSION][r'testfk'] = dict(
 API[VST_API_VERSION][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )
+API[VST_API_VERSION][r'testbinarymodelschema'] = dict(
+    model='test_proj.models.OverridenModelWithBinaryFiles'
+)
 API[VST_API_VERSION][r'testcontenttype'] = dict(
     model='test_proj.models.VarBasedModel'
 )
