@@ -17,7 +17,8 @@ function* getParentViews(view) {
 export const BaseViewMixin = {
     mixins: [BasestViewMixin, CollapsibleCardMixin],
     props: {
-        query: { type: Object, required: true },
+        query: { type: Object, default: () => ({}) },
+        params: { type: Object, default: () => ({}) },
     },
     /**
      * Computed properties of Vue component.
@@ -88,6 +89,14 @@ export const BaseViewMixin = {
          * @param {object} options Options for router for new page opening.
          */
         openPage(options = {}) {
+            // Get name by path so additional params can be passed
+            if (options.path) {
+                const name = this.$router.resolve(options)?.route?.name;
+                if (name && name !== '404') {
+                    options.name = name;
+                    delete options['path'];
+                }
+            }
             return this.$router.push(options).catch((error) => {
                 // Allow to open route with the same path as current
                 if (error.name !== 'NavigationDuplicated') {

@@ -13,7 +13,7 @@
         @open-sublink="openSublink"
     >
         <template #additionalTitleInfo>
-            <span v-if="totalNumberOfInstances > -1" class="badge bg-info">
+            <span v-if="!error && totalNumberOfInstances > -1" class="badge bg-info">
                 {{ totalNumberOfInstances }}
             </span>
         </template>

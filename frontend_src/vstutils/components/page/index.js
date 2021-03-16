@@ -24,6 +24,9 @@ export const PageViewComponent = {
         autoUpdatePK() {
             return this.getInstancePk();
         },
+        providedInstance() {
+            return this.params.providedInstance || null;
+        },
     },
     methods: {
         getInstancePk() {
@@ -32,7 +35,11 @@ export const PageViewComponent = {
         async fetchData() {
             this.initLoading();
             try {
-                await this.dispatchAction('fetchData', this.getInstancePk());
+                if (this.providedInstance) {
+                    this.commitMutation('setInstance', this.providedInstance);
+                } else {
+                    await this.dispatchAction('fetchData', this.getInstancePk());
+                }
 
                 this.setLoadingSuccessful();
                 if (this.view.params.autoupdate) {
@@ -99,21 +106,21 @@ export const PageNewViewComponent = {
             }
             this.loading = true;
             const instance = this.instance;
+            const isUpdate = this.view.type === ViewTypes.PAGE_EDIT;
             const name = instance.getViewFieldString() || instance.getPkValue() || '';
             try {
                 const method = this.view.params.method;
-                if (this.view.type === ViewTypes.PAGE_EDIT) {
-                    await instance.update(method, this.view.isPartial ? this.changedFields : null);
-                } else {
-                    await instance.create(method);
-                }
+
+                const providedInstance = isUpdate
+                    ? await instance.update(method, this.view.isPartial ? this.changedFields : null)
+                    : await instance.create(method);
 
                 this.loading = false;
                 this.isPageChanged = false;
                 this.changedFields = [];
 
                 guiPopUp.success(this.$t(pop_up_msg.instance.success.save).format([name, this.view.name]));
-                this.openPage({ path: this.getRedirectUrl({ instance }) });
+                this.openPage({ path: this.getRedirectUrl({ instance }), params: { providedInstance } });
             } catch (error) {
                 this.loading = false;
                 let str = window.app.error_handler.errorToString(error);
