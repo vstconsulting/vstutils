@@ -139,6 +139,7 @@ export class View {
     _propsFunc(route) {
         return {
             query: { ...route.query },
+            params: { ...route.params },
         };
     }
 

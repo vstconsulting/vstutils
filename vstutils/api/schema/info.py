@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import django
 from django.conf import settings
+from django.urls import reverse_lazy
 from rest_framework import __version__ as drf_version  # type: ignore
 from drf_yasg import openapi, __version__ as drf_yasg_version  # type: ignore
 
@@ -34,7 +35,9 @@ api_info_dict = OrderedDict(
         'x-settings': OrderedDict(
             static_path=settings.STATIC_URL,
             enable_gravatar=settings.ENABLE_GRAVATAR,
-            time_zone=settings.TIME_ZONE
+            time_zone=settings.TIME_ZONE,
+            logout_url=reverse_lazy('logout'),
+            login_url=reverse_lazy('login'),
         ),
         'x-page-limit': settings.PAGE_LIMIT,
     }
