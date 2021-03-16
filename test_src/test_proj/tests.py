@@ -54,7 +54,7 @@ from vstutils.urls import router
 from vstutils.ws import application
 from vstutils.models import get_centrifugo_client
 from vstutils import models
-from vstutils.api.fields import NamedBinaryFileInJsonField
+from vstutils.api import serializers, fields
 from vstutils.utils import SecurePickling, BaseEnum
 
 from .models import File, Host, HostGroup, List, Author, Post
@@ -1025,6 +1025,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue('application/json' in api['consumes'], api['consumes'])
         self.assertTrue('application/json' in api['produces'], api['produces'])
 
+        # test generated fields produce same fields in schema as manually overriden
+        self.assertDictEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties'],
+            api['definitions']['OverridenModelWithBinaryFiles']['properties']
+        )
         # Test swagger ui
         client = self._login()
         response = client.get('/api/endpoint/')
@@ -2728,6 +2733,58 @@ class ProjectTestCase(BaseTestCase):
         self.assertCount(results[2]['data']['results'], 4)
         self.assertEqual(results[3]['status'], 200)
         self.assertCount(results[3]['data']['results'], 2)
+
+    def test_smart_serializer(self):
+        ModelWithBinaryFiles = self.get_model_class('test_proj.ModelWithBinaryFiles')
+        class TestSerializer(serializers.VSTSerializer):
+            class Meta:
+                model = ModelWithBinaryFiles
+                fields = [
+                    'some_namedbinfile',
+                    'some_namedbinimage',
+                    'some_multiplenamedbinfile',
+                    'some_multiplenamedbinimage',
+                    'some_filefield',
+                    'some_imagefield',
+                    'some_FkModelfield',
+                    'some_validatednamedbinimage',
+                    'some_validatedmultiplenamedbinimage',
+                    'some_FkModelfield'
+                ]
+
+        serializer = TestSerializer()
+
+        def serializer_test(serializer):
+            # correct serializer field class
+            self.assertIsInstance(serializer.fields['some_filefield'], fields.NamedBinaryFileInJsonField)
+            self.assertIsInstance(serializer.fields['some_imagefield'], fields.NamedBinaryImageInJsonField)
+            # correct kwarg file=True
+            self.assertTrue(serializer.fields['some_filefield'].file)
+            self.assertTrue(serializer.fields['some_imagefield'].file)
+            # correct serializer field classes
+            self.assertIsInstance(serializer.fields['some_namedbinfile'], fields.NamedBinaryFileInJsonField)
+            self.assertIsInstance(serializer.fields['some_namedbinimage'], fields.NamedBinaryImageInJsonField)
+            self.assertIsInstance(
+                serializer.fields['some_multiplenamedbinfile'],
+                fields.MultipleNamedBinaryFileInJsonField
+            )
+            self.assertIsInstance(
+                serializer.fields['some_multiplenamedbinimage'],
+                fields.MultipleNamedBinaryImageInJsonField
+            )
+            self.assertIsInstance(serializer.fields['some_validatednamedbinimage'], fields.NamedBinaryImageInJsonField)
+            self.assertIsInstance(serializer.fields['some_FkModelfield'], fields.FkModelField)
+            # correct model selected
+            self.assertEqual(
+                serializer.fields['some_FkModelfield'].model_class,
+                self.get_model_class('test_proj.Author')
+            )
+
+        # test manually created serializer
+        serializer_test(serializer)
+        # test generated serializer
+        generated_serializer = ModelWithBinaryFiles.generated_view.serializer_class()
+        serializer_test(generated_serializer)
 
 
 class CustomModelTestCase(BaseTestCase):
