@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import StatusError from './StatusError.js';
-import { guiLocalSettings, getCookie, makeQueryString } from '../utils';
+import { guiLocalSettings, getCookie, makeQueryString, BulkType } from '../utils';
 
 class APIResponse {
     constructor(status = undefined, data = undefined) {
@@ -32,12 +32,6 @@ function rejectAll(bulks, value) {
         bulk.callbacks.reject(value);
     }
 }
-
-export const BulkType = {
-    SIMPLE: 'put',
-    TRANSACTIONAL: 'post',
-    ASYNC: 'patch',
-};
 
 /**
  * Represents one bulk request

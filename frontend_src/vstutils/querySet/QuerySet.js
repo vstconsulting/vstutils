@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '../utils';
+import { BulkType, HttpMethods, makeQueryString, objectToFormData, RequestTypes } from '../utils';
 import { StatusError, apiConnector, APIResponse } from '../api';
 
 /**
@@ -293,6 +293,7 @@ export default class QuerySet {
                 { method, path: dataType, data: instance._getInnerData() },
                 { method: HttpMethods.GET, path: this._getCreateBulkPath(pkFieldName) },
             ]);
+            APIResponse.checkStatus(results[0].status, results[0].data);
             return new retrieveModel(results[1].data, this);
         } else {
             const response = await this.execute({
@@ -344,8 +345,9 @@ export default class QuerySet {
                 ];
             });
 
-            return (await apiConnector.sendBulk(requests))
-                .filter((_, idx) => idx % 2 === 0)
+            return (await apiConnector.sendBulk(requests, BulkType.TRANSACTIONAL))
+                .map((response) => new APIResponse(response.status, response.data))
+                .filter((_, idx) => idx % 2 !== 0)
                 .map((response) => new modelRetrieve(response.data, this));
         } else {
             return Promise.all(
