@@ -15,6 +15,7 @@ describe('QuerySet', () => {
     beforeAll(() => {
         apiConnector.defaultVersion = 'v1';
         apiConnector.baseURL = 'http://localhost/api';
+        apiConnector.endpointURL = 'http://localhost/api/endpoint/';
         fetchMock.enableMocks();
     });
 
@@ -172,5 +173,57 @@ describe('QuerySet', () => {
         expect(vityas.total).toBe(2);
         expect(vityas.extra).toStrictEqual({ count: 2, next: null, previous: null });
         expect(vityas[1].name).toBe('vitya');
+    });
+
+    describe('bulk requests', () => {
+        @ModelClass()
+        class User extends Model {
+            static declaredFields = [idField, nameField];
+        }
+        @ModelClass()
+        class OneUser extends Model {
+            static declaredFields = [idField, emailField, nameField];
+        }
+        @ModelClass()
+        class CreateUser extends Model {
+            static declaredFields = [idField, nameField];
+        }
+        const qs = new QuerySet('users', {
+            [RequestTypes.LIST]: User,
+            [RequestTypes.RETRIEVE]: OneUser,
+            [RequestTypes.UPDATE]: CreateUser,
+            [RequestTypes.PARTIAL_UPDATE]: CreateUser,
+            [RequestTypes.CREATE]: CreateUser,
+        });
+
+        test('update/create with normal response', async () => {
+            const testData = [
+                { status: 200, data: { id: 5, name: 'User 1' } },
+                { status: 200, data: { id: 5, name: 'User 1', email: 'user@user.com' } },
+            ];
+            fetchMock.mockResponse(JSON.stringify(testData));
+
+            // Create
+            const createdUser = await new CreateUser({ name: 'User 1' }, qs).create();
+            expect(createdUser).toBeInstanceOf(OneUser);
+            expect(createdUser._getInnerData()).toStrictEqual(testData[1].data);
+
+            // Update
+            const updatedUser = await new CreateUser(null, null, createdUser).update();
+            expect(updatedUser).toBeInstanceOf(OneUser);
+            expect(updatedUser._getInnerData()).toStrictEqual(testData[1].data);
+        });
+
+        test('update/create with error', async () => {
+            const testData = { status: 400, data: { name: ['Error text'] } };
+            fetchMock.mockResponse(JSON.stringify([testData]));
+
+            // Create with error
+            await expect(new CreateUser({ name: '' }, qs).create()).rejects.toMatchObject(testData);
+
+            // Update with error
+            const user = new CreateUser(null, null, new OneUser({ id: 3, email: '', name: 'User 2' }, qs));
+            await expect(user.update()).rejects.toMatchObject(testData);
+        });
     });
 });

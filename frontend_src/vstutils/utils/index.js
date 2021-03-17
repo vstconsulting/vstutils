@@ -1020,3 +1020,9 @@ export function generateBase32String(length = 32) {
 export function hasOwnProp(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
 }
+
+export const BulkType = {
+    SIMPLE: 'put',
+    TRANSACTIONAL: 'post',
+    ASYNC: 'patch',
+};
