@@ -13,7 +13,7 @@ class APIObjectField extends BaseField {
         return super.mixins.concat(APIObjectFieldMixin);
     }
 
-    prepareField(app, path) {
+    prepareFieldForView(path) {
         // TODO usage of ViewConstructor creates circular dependency
         // let constructor = new ViewConstructor(openapi_dictionary, window.app.models);
         // let model = constructor.getViewSchema_model(field.options);
@@ -28,7 +28,7 @@ class APIObjectField extends BaseField {
             let opt = $.extend(true, {}, this.options, { format: new_format });
             let new_field = new window.spa.fields.guiFields[new_format](opt);
 
-            new_field.prepareField(app, path);
+            new_field.prepareFieldForView(path);
 
             return new_field;
         }

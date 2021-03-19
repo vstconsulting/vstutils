@@ -91,18 +91,16 @@ export class App extends BaseApp {
 
     prepareFieldsClasses() {
         for (const fieldClass of this.fieldsClasses.values()) {
-            if (typeof fieldClass.prepareFieldClass === 'function') {
-                fieldClass.prepareFieldClass(this);
-            }
+            fieldClass.app = this;
         }
     }
 
     prepareViewsModelsFields() {
         for (const [path, view] of this.views) {
             if (!view.objects) continue;
-            for (const model of Object.values(view.objects.models)) {
+            for (const model of new Set(Object.values(view.objects.models))) {
                 for (const field of model.fields.values()) {
-                    field.prepareField(this, path);
+                    field.prepareFieldForView(path);
                 }
             }
         }

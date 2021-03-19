@@ -25,12 +25,12 @@ class InnerAPIObjectField extends BaseField {
         // return constructor.getViewSchema_model(field.options);
     }
 
-    prepareField(app, path) {
+    prepareFieldForView(path) {
         let model = this.getModel(this);
 
         if (!model) {
             console.error(
-                "Model was not found in static method 'prepareField'" +
+                "Model was not found in static method 'prepareFieldForView'" +
                     ' of guiFields.inner_api_object class',
             );
             return field;

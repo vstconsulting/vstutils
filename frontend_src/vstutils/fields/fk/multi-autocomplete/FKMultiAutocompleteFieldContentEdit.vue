@@ -165,7 +165,7 @@
             },
         },
         created() {
-            this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
+            this.queryset = this.field.getAppropriateQuerySet({ data: this.data, querysets: this.querysets });
 
             if (this.value) {
                 this.setTmpValue(this.value.value, this.value.prefetch_value);

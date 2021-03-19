@@ -6,6 +6,7 @@ import testSchema from '../../../__mocks__/testSchema.json';
 import { Model, ModelClass } from '../Model.js';
 import { IntegerField } from '../../fields/numbers/integer.js';
 import { StringField } from '../../fields/text';
+import { DateTimeField } from '../../fields/datetime';
 
 describe('ModelConstructor', () => {
     @ModelClass()
@@ -15,6 +16,7 @@ describe('ModelConstructor', () => {
             new StringField({
                 name: 'name',
                 title: 'Name',
+                description: 'Default serializer',
                 format: 'string',
                 type: 'string',
                 required: true,
@@ -32,6 +34,15 @@ describe('ModelConstructor', () => {
                 format: 'related_list',
                 readOnly: true,
             }),
+            new DateTimeField({
+                // default=timezone.now
+                default: '2021-03-17T04:40:16.757125Z',
+                name: 'register_date',
+                format: 'date-time',
+                readOnly: true,
+                title: 'Register date',
+                type: 'string',
+            }),
         ];
     }
 
@@ -43,7 +54,7 @@ describe('ModelConstructor', () => {
 
     test('models generation', () => {
         const actualModel = models.get('Author');
-        expect(actualModel.name).toStrictEqual(Author.name);
+        expect(actualModel.name).toBe(Author.name);
 
         const actualFieldsOptions = Array.from(actualModel.fields.values()).map((f) => f.options);
         const expectedFieldsOptions = Array.from(Author.fields.values()).map((f) => f.options);

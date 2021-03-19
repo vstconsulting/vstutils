@@ -24,11 +24,18 @@
                 "sublinks": [{ "name": "Users", "url": "/user", "span_class": "fa fa-user" }]
             }
         ],
-        "x-settings": { "static_path": "/static/", "enable_gravatar": true, "time_zone": "UTC" },
+        "x-page-limit": 20,
+        "x-settings": {
+            "static_path": "/static/",
+            "enable_gravatar": true,
+            "time_zone": "UTC",
+            "logout_url": "/account/logout/",
+            "login_url": "/account/login/"
+        },
         "x-versions": {
             "application": "1.0.0",
             "library": "1.0.0",
-            "vstutils": "4.3.5",
+            "vstutils": "4.4.8",
             "django": "2.2.18",
             "djangorestframework": "3.12.2",
             "drf_yasg": "1.20.0"
@@ -49,7 +56,7 @@
         "/all_fields/": {
             "get": {
                 "operationId": "all_fields_list",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
                 "parameters": [
                     {
                         "name": "ordering",
@@ -93,7 +100,7 @@
             },
             "post": {
                 "operationId": "all_fields_add",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
                 "parameters": [
                     {
                         "name": "data",
@@ -112,7 +119,7 @@
         "/all_fields/{id}/": {
             "get": {
                 "operationId": "all_fields_get",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAllFields" } }
@@ -122,7 +129,7 @@
             },
             "put": {
                 "operationId": "all_fields_update",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
                 "parameters": [
                     {
                         "name": "data",
@@ -138,7 +145,7 @@
             },
             "patch": {
                 "operationId": "all_fields_edit",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
                 "parameters": [
                     {
                         "name": "data",
@@ -154,7 +161,7 @@
             },
             "delete": {
                 "operationId": "all_fields_remove",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["all_fields"]
@@ -172,7 +179,7 @@
         "/author/": {
             "get": {
                 "operationId": "author_list",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "id",
@@ -244,7 +251,7 @@
             },
             "post": {
                 "operationId": "author_add",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "data",
@@ -361,7 +368,7 @@
         "/author/{id}/": {
             "get": {
                 "operationId": "author_get",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
@@ -371,7 +378,7 @@
             },
             "put": {
                 "operationId": "author_update",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "data",
@@ -387,23 +394,23 @@
             },
             "patch": {
                 "operationId": "author_edit",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "data",
                         "in": "body",
                         "required": true,
-                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                        "schema": { "$ref": "#/definitions/AuthorUpdate" }
                     }
                 ],
                 "responses": {
-                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/AuthorUpdate" } }
                 },
                 "tags": ["author"]
             },
             "delete": {
                 "operationId": "author_remove",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["author"]
@@ -1073,7 +1080,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_list",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "id",
@@ -1145,7 +1152,7 @@
             },
             "post": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_add",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1262,7 +1269,7 @@
         "/fragment1/fragment2/fragment3/fragment4/author/{id}/": {
             "get": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_get",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
@@ -1272,7 +1279,7 @@
             },
             "put": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_update",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "data",
@@ -1288,23 +1295,23 @@
             },
             "patch": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_edit",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [
                     {
                         "name": "data",
                         "in": "body",
                         "required": true,
-                        "schema": { "$ref": "#/definitions/OneAuthor" }
+                        "schema": { "$ref": "#/definitions/AuthorUpdate" }
                     }
                 ],
                 "responses": {
-                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAuthor" } }
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/AuthorUpdate" } }
                 },
                 "tags": ["fragment1"]
             },
             "delete": {
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_remove",
-                "description": "Author(id, hidden, name, registerDate)",
+                "description": "Author(id, hidden, name, register_date)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["fragment1"]
@@ -1817,6 +1824,605 @@
                     "required": true,
                     "type": "integer",
                     "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/nested/category/": {
+            "get": {
+                "operationId": "nested_category_list",
+                "description": "Category(id, hidden, name)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "name__not",
+                        "in": "query",
+                        "description": "A name string value (or comma separated list) of instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Category" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.Category"]
+            },
+            "post": {
+                "operationId": "nested_category_add",
+                "description": "Category(id, hidden, name)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneCategory" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["nested"]
+            },
+            "parameters": []
+        },
+        "/nested/category/{id}/": {
+            "get": {
+                "operationId": "nested_category_get",
+                "description": "Category(id, hidden, name)",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.Category"]
+            },
+            "put": {
+                "operationId": "nested_category_update",
+                "description": "Category(id, hidden, name)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneCategory" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["nested"]
+            },
+            "patch": {
+                "operationId": "nested_category_edit",
+                "description": "Category(id, hidden, name)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OneCategory" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneCategory" } }
+                },
+                "tags": ["nested"]
+            },
+            "delete": {
+                "operationId": "nested_category_remove",
+                "description": "Category(id, hidden, name)",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["nested"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this category.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/nested/nested/post/": {
+            "get": {
+                "operationId": "nested_nested_post_list",
+                "description": "Post(id, hidden, author, title, text, category, type)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "author",
+                        "in": "query",
+                        "description": "Search by author's primary key or name",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Search by category's primary key or name",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/Post" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "post": {
+                "operationId": "nested_nested_post_add",
+                "description": "Post(id, hidden, author, title, text, category, type)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["nested"]
+            },
+            "parameters": []
+        },
+        "/nested/nested/post/archive_all/": {
+            "delete": {
+                "operationId": "nested_nested_post_archive_all",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["nested"],
+                "x-multiaction": false,
+                "x-label": "Archive All Posts"
+            },
+            "parameters": []
+        },
+        "/nested/nested/post/{id}/": {
+            "get": {
+                "operationId": "nested_nested_post_get",
+                "description": "Post(id, hidden, author, title, text, category, type)",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "nested_nested_post_update",
+                "description": "Post(id, hidden, author, title, text, category, type)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["nested"]
+            },
+            "patch": {
+                "operationId": "nested_nested_post_edit",
+                "description": "Post(id, hidden, author, title, text, category, type)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePost" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePost" } }
+                },
+                "tags": ["nested"]
+            },
+            "delete": {
+                "operationId": "nested_nested_post_remove",
+                "description": "Post(id, hidden, author, title, text, category, type)",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["nested"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "x-edit-style": true
+        },
+        "/nested/nested/post/{id}/archive/": {
+            "post": {
+                "operationId": "nested_nested_post_archive",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/Empty" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/Empty" } }
+                },
+                "tags": ["nested"],
+                "x-multiaction": false,
+                "x-multi-action": true
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/nested/nested/post/{id}/change_title/": {
+            "patch": {
+                "operationId": "nested_nested_post_change_title",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                },
+                "tags": ["nested"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/nested/nested/post/{id}/meta/": {
+            "get": {
+                "operationId": "nested_nested_post_meta_list",
+                "description": "PostMeta(id, hidden, key, value, post)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    { "name": "key", "in": "query", "description": "", "required": false, "type": "string" },
+                    {
+                        "name": "value",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "id__not",
+                        "in": "query",
+                        "description": "A unique integer value (or comma separated list) identifying this instance.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "The initial index from which to return the results.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "required": ["count", "results"],
+                            "type": "object",
+                            "properties": {
+                                "count": { "type": "integer" },
+                                "next": { "type": "string", "format": "uri", "x-nullable": true },
+                                "previous": { "type": "string", "format": "uri", "x-nullable": true },
+                                "results": { "type": "array", "items": { "$ref": "#/definitions/PostMeta" } }
+                            }
+                        }
+                    }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "post": {
+                "operationId": "nested_nested_post_meta_add",
+                "description": "PostMeta(id, hidden, key, value, post)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "201": { "description": "CREATED", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["nested"],
+                "x-allow-append": false
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/nested/nested/post/{id}/meta/{meta_id}/": {
+            "get": {
+                "operationId": "nested_nested_post_meta_get",
+                "description": "PostMeta(id, hidden, key, value, post)",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.PostMeta"]
+            },
+            "put": {
+                "operationId": "nested_nested_post_meta_update",
+                "description": "PostMeta(id, hidden, key, value, post)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["nested"]
+            },
+            "patch": {
+                "operationId": "nested_nested_post_meta_edit",
+                "description": "PostMeta(id, hidden, key, value, post)",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/OnePostMeta" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/OnePostMeta" } }
+                },
+                "tags": ["nested"]
+            },
+            "delete": {
+                "operationId": "nested_nested_post_meta_remove",
+                "description": "PostMeta(id, hidden, key, value, post)",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["nested"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "meta_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this meta sublist."
+                }
+            ]
+        },
+        "/nested/nested/post/{id}/sub/": {
+            "get": {
+                "operationId": "nested_nested_post_sub_get",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["nested"],
+                "x-subscribe-labels": ["quick.Post"]
+            },
+            "put": {
+                "operationId": "nested_nested_post_sub_update",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["nested"]
+            },
+            "patch": {
+                "operationId": "nested_nested_post_sub_edit",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/SubView" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/SubView" } }
+                },
+                "tags": ["nested"]
+            },
+            "delete": {
+                "operationId": "nested_nested_post_sub_remove",
+                "description": "",
+                "parameters": [],
+                "responses": { "204": { "description": "NO CONTENT" } },
+                "tags": ["nested"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
                 }
             ]
         },
@@ -2780,7 +3386,7 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this user.",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
                     "required": true,
                     "type": "integer"
                 }
@@ -2807,7 +3413,40 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this user.",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/user/{id}/twofa/": {
+            "get": {
+                "operationId": "user_twofa_get",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [],
+                "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/TwoFA" } } },
+                "tags": ["user"],
+                "x-subscribe-labels": ["auth.User"]
+            },
+            "put": {
+                "operationId": "user_twofa_update",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/TwoFA" }
+                    }
+                ],
+                "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/TwoFA" } } },
+                "tags": ["user"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
                     "required": true,
                     "type": "integer"
                 }
@@ -2846,7 +3485,8 @@
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/Author" },
                         "value_field": "name",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true
                     },
                     "x-nullable": true
                 },
@@ -3003,6 +3643,7 @@
                     "format": "password",
                     "x-nullable": true
                 },
+                "qrcode": { "title": "Qrcode", "type": "string", "maxLength": 255, "format": "qrcode" },
                 "rating_stars": {
                     "title": "Rating stars",
                     "type": "number",
@@ -3082,6 +3723,7 @@
                     "namedbinimage",
                     "namedbinimage_validation",
                     "password",
+                    "qrcode",
                     "rating_stars",
                     "rating_slider",
                     "rating_icon",
@@ -3123,7 +3765,8 @@
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/Author" },
                         "value_field": "name",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true
                     },
                     "x-nullable": true
                 },
@@ -3280,6 +3923,7 @@
                     "format": "password",
                     "x-nullable": true
                 },
+                "qrcode": { "title": "Qrcode", "type": "string", "maxLength": 255, "format": "qrcode" },
                 "rating_stars": {
                     "title": "Rating stars",
                     "type": "number",
@@ -3359,6 +4003,7 @@
                     "namedbinimage",
                     "namedbinimage_validation",
                     "password",
+                    "qrcode",
                     "rating_stars",
                     "rating_slider",
                     "rating_icon",
@@ -3374,16 +4019,29 @@
             "type": "object",
             "properties": {
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
-                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
+                "name": {
+                    "title": "Name",
+                    "description": "Default serializer",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                },
                 "posts": {
                     "title": "Posts",
                     "type": "string",
                     "format": "related_list",
                     "readOnly": true,
                     "additionalProperties": { "fields": ["title", "type"], "viewType": "list" }
+                },
+                "register_date": {
+                    "title": "Register date",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                    "default": "2021-03-17T04:40:16.757125Z"
                 }
             },
-            "x-properties-groups": { "": ["id", "name", "posts"] },
+            "x-properties-groups": { "": ["id", "name", "posts", "register_date"] },
             "x-view-field-name": "name",
             "x-non-bulk-methods": ["post", "delete"]
         },
@@ -3392,16 +4050,29 @@
             "type": "object",
             "properties": {
                 "id": { "title": "Id", "type": "integer", "readOnly": true },
-                "name": { "title": "Name", "type": "string", "maxLength": 256, "minLength": 1 },
+                "name": {
+                    "title": "Name",
+                    "description": "Default serializer",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                },
                 "posts": {
                     "title": "Posts",
                     "type": "string",
                     "format": "related_list",
                     "readOnly": true,
                     "additionalProperties": { "fields": ["title", "type"], "viewType": "list" }
+                },
+                "register_date": {
+                    "title": "Register date",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                    "default": "2021-03-17T04:40:16.758391Z"
                 }
             },
-            "x-properties-groups": { "": ["id", "name", "posts"] },
+            "x-properties-groups": { "": ["id", "name", "posts", "register_date"] },
             "x-view-field-name": "name",
             "x-non-bulk-methods": ["post", "delete"]
         },
@@ -3419,6 +4090,22 @@
             "x-properties-groups": { "": ["item_name", "item_value"] },
             "x-view-field-name": "item_value",
             "x-non-bulk-methods": ["get"]
+        },
+        "AuthorUpdate": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": { "title": "Id", "type": "integer", "readOnly": true },
+                "name": {
+                    "title": "Name",
+                    "description": "Update serializer",
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 1
+                }
+            },
+            "x-properties-groups": { "": ["id", "name"] },
+            "x-view-field-name": "name"
         },
         "Post": {
             "required": ["author", "category", "title"],
@@ -3502,7 +4189,8 @@
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/PredefinedPostType" },
                         "value_field": "name",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true
                     }
                 }
             },
@@ -3625,8 +4313,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "Username",
-                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -3645,8 +4333,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "Username",
-                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -3654,8 +4342,12 @@
                 },
                 "is_active": { "title": "Is active", "type": "boolean", "default": true },
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
-                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
-                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
+                "first_name": { "title": "\u0418\u043c\u044f", "type": "string", "maxLength": 30 },
+                "last_name": {
+                    "title": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
+                    "type": "string",
+                    "maxLength": 150
+                },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 },
                 "password": { "title": "Password", "type": "string", "minLength": 1 },
                 "password2": { "title": "Repeat password", "type": "string", "minLength": 1 }
@@ -3681,8 +4373,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "Username",
-                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -3690,8 +4382,12 @@
                 },
                 "is_active": { "title": "Is active", "type": "boolean", "default": true },
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
-                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
-                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
+                "first_name": { "title": "\u0418\u043c\u044f", "type": "string", "maxLength": 30 },
+                "last_name": {
+                    "title": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
+                    "type": "string",
+                    "maxLength": 150
+                },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 }
             },
             "x-properties-groups": {
@@ -3709,6 +4405,21 @@
             },
             "x-properties-groups": { "": ["old_password", "password", "password2"] },
             "x-view-field-name": "password"
+        },
+        "TwoFA": {
+            "type": "object",
+            "properties": {
+                "enabled": { "title": "Enabled", "type": "boolean", "readOnly": true },
+                "secret": { "title": "Secret", "type": "string", "minLength": 1, "x-nullable": true },
+                "pin": {
+                    "title": "Enter the six-digit code from the application",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "recovery": { "title": "Recovery", "type": "string", "minLength": 1 }
+            },
+            "x-properties-groups": { "": ["enabled", "secret", "pin", "recovery"] },
+            "x-view-field-name": "secret"
         }
     }
 }

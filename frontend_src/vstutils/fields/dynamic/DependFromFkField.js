@@ -43,7 +43,7 @@ export default class DependFromFkField extends BaseField {
         const realField = new fieldClass(mergeDeep({ format, name: this.name }, callback_opt));
 
         // TODO cannot prepare field because have no app and path
-        // realField.prepareField(window.app, path);
+        // realField.prepareFieldForView(path);
 
         return realField;
     }

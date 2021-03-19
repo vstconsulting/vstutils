@@ -1,22 +1,114 @@
-import { findClosestPath, RequestTypes } from '../utils';
+import { RequestTypes } from '../utils';
+
+function pathToArray(path) {
+    return path.replace(/^\/|\/$/g, '').split('/');
+}
+
+class Node {
+    /**
+     * @param {string|null} fragment - Part of view path
+     * @param {View} view
+     */
+    constructor(fragment = null, view = null) {
+        this.fragment = fragment;
+        this.view = view;
+        /** @type {Map<string, Node>} */
+        this.children = new Map();
+        /** @type {Node|null} */
+        this.parent = null;
+    }
+
+    /**
+     * @param {string[]} dt
+     * @return {Node|null}
+     */
+    get(dt) {
+        let node = this;
+        for (const fragment of dt) {
+            if (node.children.has(fragment)) {
+                node = node.children.get(fragment);
+            } else {
+                return null;
+            }
+        }
+        return node;
+    }
+
+    *siblings() {
+        if (!this.parent) return;
+        for (const sibling of this.parent.children.values()) {
+            if (sibling !== this) {
+                yield sibling;
+            }
+        }
+    }
+
+    *parents() {
+        if (!this.parent) return;
+        yield this.parent;
+        yield* this.parent.parents();
+    }
+
+    /**
+     * @param {Node} node
+     * @return {Node}
+     */
+    add(node) {
+        this.children.set(node.fragment, node);
+        node.parent = this;
+        return node;
+    }
+
+    ensureExists(fragment) {
+        if (!this.children.has(fragment)) {
+            return this.add(new Node(fragment));
+        }
+        return this.children.get(fragment);
+    }
+}
+
+/**
+ * @param {Map<string, View>} views
+ * @return {Node}
+ */
+function buildViewsTree(views) {
+    const root = new Node();
+
+    for (const [path, view] of views) {
+        const dt = pathToArray(path);
+        let node = root;
+        for (let i = 0; i < dt.length - 1; i++) {
+            node = node.ensureExists(dt[i]);
+        }
+        node.add(new Node(dt[dt.length - 1], view));
+    }
+
+    return root;
+}
 
 export class QuerySetsResolver {
     constructor(models, views) {
         this.models = models;
         this.views = views;
+        this.root = buildViewsTree(views);
     }
 
-    /**
-     * Static method, that finds queryset by view's path and model's name.
-     * @param {string} path Name of View path.
-     * @param {string} modelName Name Model to which fk field links.
-     */
-    findQuerySet(modelName, path = undefined) {
+    findQuerySet(modelName, path = null) {
+        if (!path) {
+            return this.findInAllPaths(modelName);
+        }
+
+        const node = this.root.get(pathToArray(path));
+        if (!node) {
+            throw new Error('View does not exists in tree: ' + path);
+        }
+
         const qs =
-            (path && this.findQuerySetInCurrentPath(path, modelName)) ||
-            (path && this.findQuerySetInNeighbourPaths(path, modelName)) ||
-            this.findQuerySetSecondLevelPaths(modelName) ||
-            this.findQuerySetInAllPaths(modelName);
+            this._checkView(node.view, modelName) ||
+            this.findInChildren(node, modelName) ||
+            this.findInNeighbourPaths(node, modelName) ||
+            this.findInParents(node, modelName) ||
+            this.findInAllPaths(modelName);
 
         if (qs) {
             return qs;
@@ -25,87 +117,73 @@ export class QuerySetsResolver {
     }
 
     /**
-     * Static method, that finds queryset by model's name in views of second nesting level.
-     * @param {string} model_name Name Model to which autocomplete field links.
+     * @param {Node} node
+     * @param {string} modelName
+     * @return {QuerySet|null}
      */
-    findQuerySetSecondLevelPaths(model_name) {
-        let paths = Array.from(this.views.values())
-            .filter((view) => view.level === 2)
-            .sort((a, b) => b.path.length - a.path.length);
-
-        for (const p of paths) {
-            const listModel = p.objects?.getModelClass(RequestTypes.LIST);
-
-            if (listModel && listModel.name === model_name) {
-                return p.objects.clone();
-            }
+    findInChildren(node, modelName) {
+        for (const child of node.children.values()) {
+            const qs = this._checkView(child.view, modelName);
+            if (qs) return qs;
         }
-    }
-
-    findQuerySetInAllPaths(model_name) {
-        let paths = Array.from(this.views.values()).sort((a, b) => b.path.length - a.path.length);
-
-        for (const p of paths) {
-            const listModel = p.objects?.getModelClass(RequestTypes.LIST);
-
-            if (listModel && listModel.name === model_name) {
-                return p.objects.clone();
-            }
-        }
+        return null;
     }
 
     /**
-     * Static method, that finds queryset by view's path and model's name in current path.
-     * @param {string} path Name of View path.
-     * @param {string} model_name Name Model to which fk field links.
+     * @param {Node} node
+     * @param {string} modelName
+     * @return {QuerySet|null}
      */
-    findQuerySetInCurrentPath(path, model_name) {
-        const view = this.views.get(path);
-        if (view.objects?.getModelClass(RequestTypes.LIST)?.name === model_name) {
+    findInNeighbourPaths(node, modelName) {
+        for (const sibling of node.siblings()) {
+            const qs = this._checkView(sibling.view, modelName);
+            if (qs) return qs;
+        }
+        return null;
+    }
+
+    /**
+     * @param {Node} node
+     * @param {string} modelName
+     * @return {QuerySet|null}
+     */
+    findInParents(node, modelName) {
+        for (const parent of node.parents()) {
+            const qs = this._checkView(parent.view, modelName);
+            if (qs) return qs;
+
+            for (const sibling of parent.siblings()) {
+                const qs = this._checkView(sibling.view, modelName);
+                if (qs) return qs;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param {string} modelName
+     * @return {QuerySet|null}
+     */
+    findInAllPaths(modelName) {
+        for (const view of this.views.values()) {
+            const qs = this._checkView(view, modelName);
+            if (qs) return qs;
+        }
+        return null;
+    }
+
+    /**
+     * @param {View} view
+     * @param {string} modelName
+     * @return {QuerySet|null}
+     */
+    _checkView(view, modelName) {
+        const listModel = view?.objects?.getModelClass(RequestTypes.LIST);
+
+        if (listModel && listModel.name === modelName) {
             return view.objects.clone();
         }
-    }
 
-    /**
-     * Static method, that finds queryset by view's path and model's name
-     * in views with neighbour paths.
-     * @param {string} path Name of View path.
-     * @param {string} model_name Name Model to which fk field links.
-     */
-    findQuerySetInNeighbourPaths(path, model_name) {
-        let num = path.replace(/^\/|\/$/g, '').split('/').length;
-        // let level = views[path].schema.level + 2;
-        let level = this.views.get(path).params.level;
-        let path1 = path.split('/').slice(0, -2).join('/') + '/';
-        function func(item) {
-            if (
-                item.indexOf(path1) !== -1 &&
-                this.views.get(item)?.schema.type === 'list' &&
-                this.views.get(item)?.schema.level <= level
-            ) {
-                return item;
-            }
-        }
-        function func1(item) {
-            if (this.views.get(item)?.objects?.getModelClass(RequestTypes.LIST).name === model_name) {
-                return item;
-            }
-        }
-
-        for (num; num > 0; num--) {
-            path1 = path1.split('/').slice(0, -2).join('/') + '/';
-
-            let paths = Object.keys(this.views)
-                .filter(func)
-                .sort((a, b) => b.length - a.length);
-
-            let paths_with_model = paths.filter(func1);
-
-            let closest_path = findClosestPath(paths_with_model, path);
-
-            if (closest_path) {
-                return this.views.get(closest_path)?.objects.clone();
-            }
-        }
+        return null;
     }
 }

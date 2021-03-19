@@ -164,7 +164,7 @@ class DynamicField extends BaseField {
         }
 
         let realField = new window.spa.fields.guiFields[opt.format](opt);
-        realField.prepareField(window.app);
+        realField.prepareFieldForView();
 
         return realField;
     }
