@@ -23,8 +23,8 @@ describe('ViewConstructor', () => {
             let qs = authorsView.objects;
             expect(qs.models[RequestTypes.LIST]).toBe(modelsClasses.get('Author'));
             expect(qs.models[RequestTypes.RETRIEVE]).toBe(modelsClasses.get('OneAuthor'));
-            expect(qs.models[RequestTypes.UPDATE]).toBe(modelsClasses.get('OneAuthor'));
-            expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toBe(modelsClasses.get('OneAuthor'));
+            expect(qs.models[RequestTypes.UPDATE]).toBe(modelsClasses.get('AuthorUpdate'));
+            expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toBe(modelsClasses.get('AuthorUpdate'));
 
             const subWithPostSublink = authorsView.sublinks.get('sub_with_post');
             expect(subWithPostSublink).toBeDefined();

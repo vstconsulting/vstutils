@@ -199,13 +199,13 @@
              * Property, that returns logout URL.
              */
             logout_url() {
-                return this.$app.config.schema.info['x-settings'].logout_url;
+                return this.$app.config.urls.logout;
             },
             /**
              * Property, that returns login URL.
              */
             login_url() {
-                return this.$app.config.schema.info['x-settings'].login_url;
+                return this.$app.config.urls.login;
             },
         },
         mounted() {

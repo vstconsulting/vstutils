@@ -1,41 +1,24 @@
-import { expect, jest, test, describe } from '@jest/globals';
-import { AppConfiguration } from '../../../AppConfiguration';
-import testSchema from '../../../../__mocks__/testSchema.json';
-import { FakeCache } from '../../../../app_loader/Cache';
-import { App } from '../../../../spa';
-import { globalFields } from '../../fields';
-import { globalModels } from '../../../models';
+import { jest, expect, test, describe, beforeAll } from '@jest/globals';
 import { apiConnector, APIResponse } from '../../../api';
 import { FKField } from '../fk';
+import { createApp } from '../../../../unittests/create-app.js';
+import { QuerySet } from '../../../querySet';
 
 jest.mock('../../../api');
 
 describe('FKfield', () => {
+    /** @type {App} */
+    let app;
+
+    beforeAll(() => {
+        return createApp().then((a) => (app = a));
+    });
+
     test('Test Fk model', async () => {
-        const config = new AppConfiguration({
-            isDebug: true,
-            hostUrl: 'http://localhost:8080',
-            endpointUrl: 'http://localhost:8080/api/endpoint/',
-            projectName: 'TestProject',
-            projectVersion: '1.0.0',
-            fullVersion: '1.0.0_1.0.0_4.2.2b5',
-            fullUserVersion: '1.0.0_1.0.0_4.2.2b5_1',
-            isSuperuser: false,
-            isStaff: false,
-            schema: testSchema,
-        });
-        const cache = new FakeCache();
-        const app = new App(config, cache, globalFields, globalModels);
-
-        await app.start();
-
         const authorFkField = app.modelsClasses.get('Post').fields.get('author');
         const Post = app.modelsClasses.get('Post');
 
         expect(authorFkField.format).toBe('fk');
-        expect(authorFkField.querysets.length).toBeGreaterThanOrEqual(1);
-        expect(authorFkField.querysets[0].url).toBe('/author/');
-        expect(authorFkField.querysets[0].models.list.name).toBe(authorFkField.fkModel.name);
         expect(authorFkField.fkModel.name).toBe('Author');
         expect(authorFkField).toBeInstanceOf(FKField);
 
@@ -59,8 +42,18 @@ describe('FKfield', () => {
         };
         expect(post1._data.author).toBe(1);
         expect(post2._data.author).toBe(2);
-        await authorFkField.afterInstancesFetched(instances);
+        await authorFkField.afterInstancesFetched(instances, new QuerySet('post', {}));
         expect(post1._data.author).toMatchObject({ id: 1, name: 'a1', posts: [] });
         expect(post2._data.author).toMatchObject({ id: 2, name: 'a2', posts: [] });
+    });
+
+    test('querysets selection', () => {
+        const OnePost = app.modelsClasses.get('OnePost');
+        const category = OnePost.fields.get('category');
+
+        expect(category).toBeInstanceOf(FKField);
+
+        expect(category.querysets.get('/author/{id}/post/{post_id}/')[0].url).toBe('/category/');
+        expect(category.querysets.get('/nested/nested/post/{id}/')[0].url).toBe('/nested/category/');
     });
 });

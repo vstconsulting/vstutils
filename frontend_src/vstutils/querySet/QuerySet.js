@@ -34,6 +34,7 @@ export default class QuerySet {
      */
     constructor(url, models, query = {}) {
         this.url = url;
+        this.originalUrl = '/' + url.replace(/^\/|\/$/g, '') + '/';
         this.models = models;
         this.query = query;
 

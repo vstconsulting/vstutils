@@ -7,6 +7,9 @@ import BaseFieldMixin from './BaseFieldMixin.vue';
  * @template TInner, TRepresent
  */
 class BaseField {
+    /** @type {App} */
+    static app;
+
     /**
      * Constructor of base field class.
      * @param {Object} options - Object with field options.
@@ -63,11 +66,10 @@ class BaseField {
     /**
      * Method, that prepares instance of field for usage. Method is called after models and views are
      * created, for every field instance that is part of view.
-     * @param {App} app
      * @param {string} path
      */
     // eslint-disable-next-line no-unused-vars
-    prepareField(app, path) {}
+    prepareFieldForView(path) {}
 
     /**
      * Method that will be called after every fetch of instances from api (QuerySet#items, QuerySet#get)

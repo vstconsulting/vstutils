@@ -107,7 +107,7 @@ class ApiConnector {
         this.appConfig = appConfig;
         this.openapi = appConfig.schema;
         this.defaultVersion = this.openapi.info.version;
-        this.endpointURL = appConfig.endpointUrl;
+        this.endpointURL = String(appConfig.endpointUrl); // TODO fetchMock does not support URL
 
         // remove version and ending slash from path (/api/v1/)
         const path = this.openapi.basePath.replace(this.defaultVersion, '').replace(/\/$/, '');

@@ -85,7 +85,7 @@ class FormField extends BaseField {
         let field = new window.spa.fields.guiFields[options.format](options);
 
         // TODO cannot prepare field because have no app and path
-        // field.prepareField(window.app, path);
+        // field.prepareFieldForView(path);
 
         return field;
     }

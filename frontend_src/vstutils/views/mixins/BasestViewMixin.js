@@ -11,7 +11,10 @@ import default_nested_module from '../../store/components_state/default_nested_m
 const BasestViewMixin = {
     mixins: [ComponentIDMixin],
     provide() {
-        return { storeName: this.storeName };
+        return {
+            storeName: this.storeName,
+            view: this.view,
+        };
     },
     data() {
         return {

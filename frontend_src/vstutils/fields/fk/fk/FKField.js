@@ -26,10 +26,9 @@ class FKField extends BaseField {
         }
 
         /**
-         * Property will be set in prepareField.
-         * @type {QuerySet[]}
+         * @type {Map<string, QuerySet[]>}
          */
-        this.querysets = props.querysets;
+        this.querysets = new Map(Object.entries(props.querysets || {}));
 
         /**
          * Property will be set in prepareField.
@@ -42,10 +41,6 @@ class FKField extends BaseField {
         return [FKFieldMixin];
     }
 
-    static prepareFieldClass(app) {
-        this.appInstance = app;
-    }
-
     getInitialValue() {
         return null;
     }
@@ -54,16 +49,15 @@ class FKField extends BaseField {
         return this.getValueFieldValue(super.toInner(data));
     }
 
-    prepareField(app, path) {
-        const { list_paths } = this.options.additionalProperties;
-
-        if (this.fkModelSchema) {
-            this.fkModel = app.modelsResolver.bySchemaObject(this.fkModelSchema);
+    prepareFieldForView(path) {
+        if (this.fkModelSchema && !this.fkModel) {
+            this.fkModel = this.constructor.app.modelsResolver.bySchemaObject(this.fkModelSchema);
         }
 
-        if (this.querysets) return;
+        if (this.querysets.has(path)) return;
 
         let querysets;
+        const { list_paths } = this.options.additionalProperties;
 
         if (list_paths) {
             querysets = list_paths.map((listPath) => app.views.get(listPath).objects.clone());
@@ -71,9 +65,9 @@ class FKField extends BaseField {
                 this.fkModel = querysets[0].getModelClass(RequestTypes.LIST);
             }
         } else {
-            querysets = [app.qsResolver.findQuerySet(this.fkModel.name, path)];
+            querysets = [this.constructor.app.qsResolver.findQuerySet(this.fkModel.name, path)];
         }
-        this.querysets = this._formatQuerysets(querysets);
+        this.querysets.set(path, this._formatQuerysets(querysets));
     }
 
     _formatQuerysets(querysets) {
@@ -81,18 +75,21 @@ class FKField extends BaseField {
     }
 
     _formatQuerysetPath(queryset) {
-        const params = this.constructor.appInstance.application?.$route?.params || {};
+        const params = this.constructor.app.application?.$route?.params || {};
         return queryset.clone({ url: formatPath(queryset.url, params) });
     }
 
-    async afterInstancesFetched(instances) {
+    async afterInstancesFetched(instances, qs) {
         if (this.usePrefetch && this.fetchData) {
-            return this.prefetchValues(instances);
+            return this.prefetchValues(instances, qs.originalUrl);
         }
     }
 
-    prefetchValues(instances) {
-        const executor = new AggregatedQueriesExecutor(this.getAppropriateQuerySet(), this.valueField);
+    prefetchValues(instances, instancesUrl) {
+        const executor = new AggregatedQueriesExecutor(
+            this.getAppropriateQuerySet({ path: instancesUrl }),
+            this.valueField,
+        );
         for (const instance of instances) {
             const pk = instance._data[this.name];
             if (pk) {
@@ -142,15 +139,18 @@ class FKField extends BaseField {
 
     /**
      * Method, that selects one, the most appropriate queryset, from querysets array.
-     * @param data {object} Object with instance data.
-     * @param querysets {array=} Array with field QuerySets.
+     * @param {object} data Object with instance data.
+     * @param {array=} querysets Array with field QuerySets.
+     * @param {string} path
      */
-    getAppropriateQuerySet(data, querysets = undefined) {
-        return this._formatQuerysetPath((querysets || this.querysets)[0]);
+    // eslint-disable-next-line no-unused-vars
+    getAppropriateQuerySet({ data, querysets, path } = {}) {
+        const qss = querysets || this.querysets.get(path);
+        return this._formatQuerysetPath(qss[0]);
     }
 
-    getAllQuerysets() {
-        return this._formatQuerysets(this.querysets);
+    getAllQuerysets(path) {
+        return this._formatQuerysets(this.querysets.get(path));
     }
 
     /**

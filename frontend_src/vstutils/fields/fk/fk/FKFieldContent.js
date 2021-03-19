@@ -1,10 +1,11 @@
-import $ from 'jquery';
+import { formatPath } from '../../../utils';
 
 /**
  * Mixin for content components of FK field.
  * @vue/component
  */
 export default {
+    inject: ['view'],
     data() {
         return {
             fetchedValue: null,
@@ -15,14 +16,14 @@ export default {
          * Property, that stores all querysets for current field.
          */
         querysets() {
-            return this.field.getAllQuerysets();
+            return this.field.getAllQuerysets(this.view.path);
         },
 
         /**
          * Property, that stores the most appropriate queryset for current field.
          */
         queryset() {
-            return this.field.getAppropriateQuerySet(this.data, this.querysets);
+            return this.field.getAppropriateQuerySet({ data: this.data, querysets: this.querysets });
         },
     },
     watch: {
@@ -35,22 +36,12 @@ export default {
         },
 
         'field.options.additionalProperties.querysets': function (querysets) {
-            let props = this.field.options.additionalProperties;
-            let params = props.url_params || {};
+            const props = this.field.options.additionalProperties;
+            const params = props.url_params || {};
 
-            this.querysets = querysets.map((qs) => {
-                let clone = qs.clone();
+            this.querysets = querysets.map((qs) => qs.clone({ url: formatPath(qs.url, params) }));
 
-                clone.url = this.field.getQuerySetFormattedUrl(
-                    this.data,
-                    $.extend(true, {}, this.$route.params, params),
-                    clone,
-                );
-
-                return clone;
-            });
-
-            this.queryset = this.field.getAppropriateQuerySet(this.data, this.querysets);
+            this.queryset = this.field.getAppropriateQuerySet({ data: this.data, querysets: this.querysets });
         },
     },
     beforeMount() {

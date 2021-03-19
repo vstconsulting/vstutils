@@ -57,6 +57,11 @@ export class AppConfiguration {
         this.isStaff = fallbackIfUndef(isStaff, window.is_staff);
         this.schema = schema;
 
+        this.urls = {
+            login: schema.info['x-settings'].login_url,
+            logout: schema.info['x-settings'].logout_url,
+        };
+
         this.defaultPageLimit = defaultPageLimit || schema.info['x-page-limit'];
     }
 }
