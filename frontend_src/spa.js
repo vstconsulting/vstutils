@@ -2,8 +2,8 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
-import { guiLocalSettings } from './vstutils/utils';
-import { ViewConstructor } from './vstutils/views';
+import { guiLocalSettings, RequestTypes } from './vstutils/utils';
+import { PageNewView, ViewConstructor } from './vstutils/views';
 import { StoreConstructor } from './vstutils/store';
 import { ModelConstructor, ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
@@ -86,6 +86,8 @@ export class App extends BaseApp {
 
         this.qsResolver = new QuerySetsResolver(this.modelsClasses, this.views);
 
+        this.setNestedViewsQuerysets();
+
         this.prepareViewsModelsFields();
     }
 
@@ -101,6 +103,22 @@ export class App extends BaseApp {
             for (const model of new Set(Object.values(view.objects.models))) {
                 for (const field of model.fields.values()) {
                     field.prepareFieldForView(path);
+                }
+            }
+        }
+    }
+
+    setNestedViewsQuerysets() {
+        for (const view of this.views.values()) {
+            if (view instanceof PageNewView && view.nestedAllowAppend) {
+                const listView = view.listView;
+                const modelName = listView.objects.getModelClass(RequestTypes.LIST).name;
+                try {
+                    listView.nestedQueryset = this.qsResolver.findQuerySetForNested(modelName, listView.path);
+                } catch (e) {
+                    console.warn(e);
+                    view.nestedAllowAppend = false;
+                    listView.actions.delete('add');
                 }
             }
         }

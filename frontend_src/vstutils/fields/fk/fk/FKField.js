@@ -150,7 +150,7 @@ class FKField extends BaseField {
     }
 
     getAllQuerysets(path) {
-        return this._formatQuerysets(this.querysets.get(path));
+        return this._formatQuerysets(this.querysets.get(path) || this.querysets.get(undefined));
     }
 
     /**
