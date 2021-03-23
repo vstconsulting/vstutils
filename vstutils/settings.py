@@ -97,6 +97,8 @@ CONFIG_FILES = (
 ConfigBoolType = cconfig.BoolType()
 ConfigIntType = cconfig.IntType()
 ConfigIntSecondsType = cconfig.IntSecondsType()
+ConfigListType = cconfig.ListType()
+ConfigStringType = cconfig.StrType()
 
 
 class BackendSection(cconfig.Section):
@@ -223,6 +225,13 @@ class CentrifugoSection(cconfig.Section):
     type_verify = ConfigBoolType
 
 
+class ThrottleSection(BaseAppendSection):
+    types_map = {
+        'rate': ConfigStringType,
+        'actions': ConfigListType,
+    }
+
+
 config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     format_kwargs=KWARGS,
     section_defaults={
@@ -313,6 +322,11 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
                 'media_url': '/media/',
                 'media_root': os.getenv(f'{ENV_NAME}_MEDIA_ROOT', os.path.join(VST_PROJECT_DIR, "media"))
             }
+        },
+        'throttle': {
+            'rate': os.getenv(f'{ENV_NAME}_GLOBAL_THROTTLE_RATE', ''),
+            'actions': ConfigListType(os.getenv(f'{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS', ('update', 'partial_update'))),
+            'views': {},
         }
     },
     section_overload={
@@ -329,6 +343,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'uwsgi': UWSGISection,
         'rpc': RPCSection,
         'centrifugo': CentrifugoSection,
+        'throttle': ThrottleSection,
     }
 )
 
@@ -824,7 +839,10 @@ REST_FRAMEWORK: _t.Dict = {
         'update': 'update',
         'partial_update': 'edit',
         'destroy': 'remove',
-    }
+    },
+    'DEFAULT_THROTTLE_CLASSES': (
+        'vstutils.api.throttling.ActionBasedThrottle',
+    )
 }
 
 OPTIMIZE_GET_BY_VALUES = True
@@ -1080,6 +1098,9 @@ SPA_STATIC: _t.List[_t.Dict] = [
 
 # Centrifugo settings
 CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
+
+
+THROTTLE = config['throttle'].all()
 
 
 # Storage settings

@@ -3123,3 +3123,92 @@ class WebSocketTestCase(BaseTestCase):
             self.assertTrue('swagger' in response['schema'], response['schema'])
             self.assertEqual(response['schema']['swagger'], '2.0')
             await endpoint_communicator.disconnect()
+
+
+class ThrottleTestCase(BaseTestCase):
+    def throttle_requests(self):
+        test_post = {
+            'title': 'test_post',
+            'text': 'test_post_text'
+        }
+        results = self.bulk([
+            {'method': 'post', 'path': ['author'], 'data': {'name': 'test_author'}},
+            {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': test_post},
+            {'method': 'put', 'path': ['author', '<<0[data][id]>>', 'post', '<<1[data][id]>>'], 'data': test_post},
+            {'method': 'put', 'path': ['author', '<<0[data][id]>>', 'post', '<<1[data][id]>>'], 'data': test_post},
+            {'method': 'delete', 'path': ['author', '<<0[data][id]>>', 'post', '<<1[data][id]>>']},
+            {'method': 'patch', 'path': ['author', '<<0[data][id]>>', 'post', '<<1[data][id]>>'], 'data': {'title': 'patched'}},
+            {'method': 'post', 'path': ['author'], 'data': {'name': 'author_2'}},
+            {'method': 'get', 'path': ['author'], 'query': 'name=test_author'},
+            {'method': 'get', 'path': ['user', 'profile']},
+        ])
+        return results
+
+    def test_throttle_none(self):
+        results = self.throttle_requests()
+        # test post to an outer viewset(not throttled)
+        self.assertEqual(201, results[0]['status'])
+        # test post to inner viewset(not throttled)
+        self.assertEqual(201, results[1]['status'])
+        # test put to inner viewset(not throttled)
+        self.assertEqual(200, results[2]['status'])
+        # test put to inner viewset(not throttled)
+        self.assertEqual(200, results[3]['status'])
+        # test delete to inner viewset(not throttled)
+        self.assertEqual(204, results[4]['status'])
+
+    @patch(
+        'vstutils.api.throttling.ActionBasedThrottle.throttle_rates',
+        new_callable=PropertyMock,
+    )
+    def test_throttle_from_settings(self, mock_throttle_rate):
+        test_throttle_conf = {
+            'rate': '1/day',
+            'actions': 'list, create, update, destroy',
+            'views': {
+                'post': {
+                    'rate': '3/day',
+                    'actions': 'create, update, destroy'
+                },
+                'user': {
+                    'rate': '0/day',
+                    'actions': 'retrieve'
+                }
+            }
+        }
+        mock_throttle_rate.return_value = test_throttle_conf
+        results = self.throttle_requests()
+        # test post to an outer viewset(1/1)
+        self.assertEqual(201, results[0]['status'])
+        # test post to inner viewset(1/3)
+        self.assertEqual(201, results[1]['status'])
+        # test put to inner viewset(2/3)
+        self.assertEqual(200, results[2]['status'])
+        # test put to inner viewset(3/3)
+        self.assertEqual(200, results[3]['status'])
+        # test delete to inner viewset(4/3), gets throttled
+        self.assertEqual(429, results[4]['status'])
+        # test patch to inner viewset(not throttled)
+        self.assertEqual(200, results[5]['status'])
+        # test post to an outer viewset(2/1), gets throttled
+        self.assertEqual(429, results[6]['status'])
+        # test list to outer viewset with query params(throttled)
+        self.assertEqual(429, results[7]['status'])
+        # test retrieve to user viewset(throttled)
+        self.assertEqual(429, results[8]['status'])
+
+    @patch(
+        'vstutils.api.throttling.ActionBasedThrottle.throttle_rates',
+        new_callable=PropertyMock,
+        return_value={'rate': '0/day', 'actions': 'create', 'views': {}}
+    )
+    def test_anonymous_user_throttle(self, mock_throttle_rate):
+        c = self.client
+        c.logout()
+        response = c.post(
+            '/api/v1/author/',
+            {
+                'name': 'author_1'
+            }
+        )
+        self.assertEqual(429, response.status_code)
