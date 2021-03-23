@@ -93,6 +93,16 @@ export class QuerySetsResolver {
         this.root = buildViewsTree(views);
     }
 
+    findQuerySetForNested(modelName, path) {
+        const node = this.root.get(pathToArray(path));
+        const qs = this.findInParents(node, modelName);
+
+        if (qs) {
+            return qs;
+        }
+        throw new Error(`Cannot find model ${modelName} for path ${path}`);
+    }
+
     findQuerySet(modelName, path = null) {
         if (!path) {
             return this.findInAllPaths(modelName);
