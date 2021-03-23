@@ -22,6 +22,14 @@ from ..models.fields import (
     FkModelField
 )
 
+VALID_FK_KWARGS = (
+    'read_only',
+    'label',
+    'help_text',
+    'allow_null',
+    'required'
+)
+
 
 class BaseSerializer(serializers.Serializer):
     """
@@ -70,21 +78,24 @@ class VSTSerializer(serializers.ModelSerializer):
 
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super().build_standard_field(field_name, model_field)
-        if isinstance(model_field, models.FileField):
+        if isinstance(model_field, models.FileField) and issubclass(field_class, fields.NamedBinaryFileInJsonField):
             field_kwargs['file'] = True
         return field_class, field_kwargs
 
     def build_relational_field(self, field_name, relation_info):
-        from ..models import ModelBaseClass  # pylint: disable=import-outside-toplevel
-        if isinstance(relation_info.model_field, FkModelField) and\
-                isinstance(relation_info.related_model, ModelBaseClass):
-            field_kwargs = get_relation_kwargs(field_name, relation_info)
-            valid_kwargs = ['read_only', 'label', 'help_text', 'allow_null', 'required']
-            field_kwargs = {key: field_kwargs[key] for key in field_kwargs if key in valid_kwargs}
+        if isinstance(relation_info.model_field, FkModelField) and \
+                hasattr(relation_info.related_model, '__extra_metadata__'):
+
+            field_kwargs = {
+                key: value
+                for key, value in get_relation_kwargs(field_name, relation_info).items()
+                if key in VALID_FK_KWARGS
+            }
             field_kwargs['select'] = relation_info.related_model
+
             return fields.FkModelField, field_kwargs
         # if DRF ForeignField in model or related_model is not BModel, perform default DRF logic
-        return super().build_relational_field(field_name, relation_info)  # nocv
+        return super().build_relational_field(field_name, relation_info)
 
 
 class EmptySerializer(BaseSerializer):
