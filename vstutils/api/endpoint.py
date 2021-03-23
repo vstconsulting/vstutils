@@ -287,6 +287,7 @@ class EndpointViewSet(views.APIView):
     """
     Default API-endpoint viewset.
     """
+    throttle_classes = []  # type: ignore
     schema = None  # type: ignore
     versioning_class = versioning.QueryParameterVersioning  # type: ignore
     renderer_classes = list(views.APIView.renderer_classes) + list(SPEC_RENDERERS)

@@ -1,4 +1,6 @@
 from django.db import models
+from rest_framework.permissions import AllowAny
+
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer
 from vstutils.api.fields import FkModelField, RelatedListField, RatingField
@@ -18,6 +20,8 @@ class Author(BModel):
     registerDate = models.DateTimeField(default=timezone.now)
 
     class Meta:
+        _permission_classes = (AllowAny, )
+        _override_permission_classes = True
         default_related_name = 'author'
         _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
