@@ -7,16 +7,13 @@ import io
 import pwd
 import base64
 import datetime
-import orjson
 from pathlib import Path
 from smtplib import SMTPException
-from unittest.mock import patch
 
 from unittest.mock import patch, PropertyMock
 
 from collections import OrderedDict
 
-from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
@@ -33,7 +30,6 @@ from django.urls import reverse
 from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
-from channels.testing import WebsocketCommunicator
 
 from vstutils import utils, __version__
 from vstutils.api.validators import (
@@ -51,7 +47,6 @@ from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.tools import get_file_value
 from vstutils.urls import router
-from vstutils.ws import application
 from vstutils.models import get_centrifugo_client
 from vstutils import models
 from vstutils.api import serializers, fields
@@ -119,10 +114,6 @@ validator_dict = {
 
 def to_soup(content):
     return BeautifulSoup(content, 'html.parser')
-
-
-def async_test(coro):
-    return async_to_sync(coro, force_new_loop=True)
 
 
 class VSTUtilsCommandsTestCase(BaseTestCase):
@@ -3056,73 +3047,6 @@ class WebSocketTestCase(BaseTestCase):
         self.assertDictEqual(mock_data[1][2], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
         self.assertDictEqual(mock_data[2][2], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
         self.assertDictEqual(mock_data[3][2], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
-
-    @async_test
-    async def test_endpoint_requests(self):
-        headers = {
-            k.encode('utf-8'): v.encode('utf-8')
-            for k, v in self.headers_dict.items()
-        }
-        endpoint_communicator = WebsocketCommunicator(application, "/ws/endpoint/", headers=headers.items())
-        connected, subprotocol = await endpoint_communicator.connect()
-        self.assertFalse(connected)
-        self.assertEqual(subprotocol, 1008)
-        endpoint_communicator.stop()
-
-        headers[b'cookie'] = self.cookie.encode('utf-8')
-        endpoint_communicator = WebsocketCommunicator(application, "/ws/endpoint/", headers=headers.items())
-
-        def _default_manager_get(user_id=None, pk=None, *args, **kwargs):
-            if user_id == self.user.id or pk == self.user.id:
-                return self.user
-            raise self.user.DoesNotExists()  # nocv
-
-        with self.patch('vstutils.auth.BaseAuthBackend.get_user') as mock:
-            mock.side_effect = _default_manager_get
-            connected, _ = await endpoint_communicator.connect()
-            self.assertTrue(connected)
-            # initial message
-            response = await endpoint_communicator.receive_json_from(3)
-            self.assertEqual(response['type'], 'bootstrap')
-            self.assertEqual(response['data']['debug_mode'], settings.DEBUG)
-            self.assertEqual(
-                response['data']['version'],
-                f'1.0.0_1.0.0_{__version__}_{self.user.id}'
-            )
-            self.assertEqual(
-                response['data']['endpoint_path'],
-                f'http://{self.server_name}/api/endpoint/'
-            )
-            self.assertEqual(
-                response['data']['static'],
-                [
-                    {
-                        "priority": f.get('priority', 999999),
-                        "type": f['type'],
-                        "name": f"http://{self.server_name}/{f['name']}"
-                    }
-                    for f in settings.SPA_STATIC
-                ]
-            )
-
-            with self.patch('django.contrib.auth.models.User.objects.get') as mk:
-                mk.side_effect = _default_manager_get
-                await endpoint_communicator.send_json_to({
-                    "data": [
-                        {"method": "get", "path": ['user', self.user.id]}
-                    ],
-                    "handler_type": "put",
-                    "request_id": 123
-                })
-            response = await endpoint_communicator.receive_json_from(3)
-            self.assertEqual(response['status'], 200)
-            self.assertEqual(response['request_id'], 123)
-            await endpoint_communicator.send_json_to({"handler_type": "get"})
-            response = await endpoint_communicator.receive_json_from(3)
-            self.assertEqual(response['type'], 'schema')
-            self.assertTrue('swagger' in response['schema'], response['schema'])
-            self.assertEqual(response['schema']['swagger'], '2.0')
-            await endpoint_communicator.disconnect()
 
 
 class ThrottleTestCase(BaseTestCase):
