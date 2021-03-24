@@ -25,10 +25,11 @@ class FKField extends BaseField {
             this.fetchData = this.viewField !== this.valueField;
         }
 
-        /**
-         * @type {Map<string, QuerySet[]>}
-         */
-        this.querysets = new Map(Object.entries(props.querysets || {}));
+        if (props.querysets instanceof Map) {
+            this.querysets = props.querysets;
+        } else {
+            this.querysets = new Map(Object.entries(props.querysets || {}));
+        }
 
         /**
          * Property will be set in prepareField.
