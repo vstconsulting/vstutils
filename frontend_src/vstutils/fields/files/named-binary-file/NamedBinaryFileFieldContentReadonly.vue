@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a v-if="value.content" :href="link" :download="name || 'download'">{{ name }}</a>
+        <a v-if="value && value.content" :href="link" :download="name || 'download'">{{ name }}</a>
         <input v-else :class="classes" :styles="styles" disabled :value="name" />
     </div>
 </template>
