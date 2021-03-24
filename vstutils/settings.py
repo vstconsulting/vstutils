@@ -397,13 +397,6 @@ try:
 except ImportError:  # nocv
     pass
 
-# :websockets:
-try:
-    import channels
-    HAS_CHANNELS: bool = True
-except ImportError:  # nocv
-    HAS_CHANNELS = False
-
 
 # Applications definition
 ##############################################################
@@ -431,9 +424,6 @@ if HAS_DOCS:
     INSTALLED_APPS.append('docs')
 
 INSTALLED_APPS += ['drf_yasg']
-
-if HAS_CHANNELS:
-    INSTALLED_APPS.append('channels')
 
 ADDONS: _t.List[_t.Text] = [
     'vstutils',
@@ -585,12 +575,6 @@ X_FRAME_OPTIONS = web['x_frame_options']
 USE_X_FORWARDED_HOST = web['use_x_forwarded_host']
 USE_X_FORWARDED_PORT = web['use_x_forwarded_port']
 
-if HAS_CHANNELS:
-    CHANNEL_LAYERS: SIMPLE_OBJECT_SETTINGS_TYPE = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        }
-    }
 
 # Templates settings
 ##############################################################
@@ -771,22 +755,7 @@ API: SIMPLE_OBJECT_SETTINGS_TYPE = {
     VST_API_VERSION: {}
 }
 
-# deprecated
-BULK_OPERATION_TYPES: _t.Dict[_t.Text, _t.Text] = {
-    "get": "get",
-    "add": "post",
-    "set": "patch",
-    "del": "delete",
-    "mod": "get"
-}
-
 HEALTH_BACKEND_CLASS: _t.Text = 'vstutils.api.health.DefaultBackend'
-
-WS_CONSUMERS: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    'endpoint': {
-        "BACKEND": 'vstutils.ws.builtin.EndpointConsumer'
-    }
-}
 
 # Rest Api settings
 # http://www.django-rest-framework.org/api-guide/settings/
