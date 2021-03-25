@@ -380,7 +380,7 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         if non_bulk_methods:
             schema['x-non-bulk-methods'] = non_bulk_methods
 
-        schema._handled = True
+        schema._handled = True  # pylint: disable=protected-access
 
     def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
         if isinstance(field, FileResponse):
