@@ -340,6 +340,48 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 
 class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
+    def handle_schema(self, field: Any):
+        ref_name = self.get_serializer_ref_name(field)
+        definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)
+
+        if ref_name not in definitions:
+            return
+
+        schema = definitions[ref_name]
+
+        if getattr(schema, '_handled', False):
+            return
+
+        schema_properties = tuple(schema['properties'].keys())
+        serializer_class = schema._NP_serializer  # pylint: disable=protected-access
+
+        non_bulk_methods = getattr(serializer_class, '_non_bulk_methods', None)
+        schema_properties_groups = OrderedDict(
+            getattr(serializer_class, '_schema_properties_groups', None) or {'': schema_properties}
+        )
+        view_field_name = getattr(serializer_class, '_view_field_name', None)
+
+        if view_field_name is None and schema_properties:
+            view_field_name = get_first_match_name(schema_properties, schema_properties[0])
+
+        if schema_properties_groups:
+            not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))
+
+            if not_handled:
+                schema_properties_groups[''] = [
+                    prop
+                    for prop in schema['properties']
+                    if prop in not_handled
+                ]
+
+        schema['x-properties-groups'] = schema_properties_groups
+        schema['x-view-field-name'] = view_field_name
+
+        if non_bulk_methods:
+            schema['x-non-bulk-methods'] = non_bulk_methods
+
+        schema._handled = True
+
     def field_to_swagger_object(self, field: Any, swagger_object_type: Any, use_references: Any, **kwargs: Any):
         if isinstance(field, FileResponse):
             return openapi.Schema(type='file')
@@ -347,28 +389,6 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         result = super().field_to_swagger_object(field, swagger_object_type, use_references, **kwargs)
 
         if result != NotHandled:
-            schema = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)[self.get_serializer_ref_name(field)]
-            schema_properties = tuple(schema['properties'].keys())
-            serializer_class = schema._NP_serializer  # pylint: disable=protected-access
+            self.handle_schema(field)
 
-            non_bulk_methods = getattr(serializer_class, '_non_bulk_methods', None)
-            schema_properties_groups = OrderedDict(
-                getattr(serializer_class, '_schema_properties_groups', None) or {'': schema_properties}
-            )
-            view_field_name = getattr(serializer_class, '_view_field_name', None)
-            if view_field_name is None and schema_properties:
-                view_field_name = get_first_match_name(schema_properties, schema_properties[0])
-
-            if schema_properties_groups:
-                not_handled = set(schema['properties']) - set(_get_handled_props(schema_properties_groups))
-                if not_handled:
-                    schema_properties_groups[''] = [
-                        prop
-                        for prop in schema['properties']
-                        if prop in not_handled
-                    ]
-            schema['x-properties-groups'] = schema_properties_groups
-            schema['x-view-field-name'] = view_field_name
-            if non_bulk_methods:
-                schema['x-non-bulk-methods'] = non_bulk_methods
         return result

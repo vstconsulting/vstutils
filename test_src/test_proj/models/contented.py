@@ -63,6 +63,12 @@ class VarBasedModel(BModel):
         _list_fields = [
             'name',
         ]
+        _detail_fields = _list_fields + [
+            'variables_list',
+        ]
+        _override_detail_fields = {
+            'variables_list': drf_fields.ListField(read_only=True, child=drf_fields.DictField(read_only=True))
+        }
         _nested = {
             'vars': {
                 'manager_name': 'variables',
@@ -70,3 +76,7 @@ class VarBasedModel(BModel):
                 'model': 'test_proj.models.contented.Variable'
             }
         }
+
+    @property
+    def variables_list(self):
+        return list(self.variables.values('key', 'value'))
