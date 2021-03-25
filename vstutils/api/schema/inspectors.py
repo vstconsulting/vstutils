@@ -340,6 +340,11 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 
 class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
+    def get_serializer_ref_name(self, serializer: Any):
+        if isinstance(serializer, serializers.serializers.ListSerializer):
+            return super().get_serializer_ref_name(serializer.child)
+        return super().get_serializer_ref_name(serializer)
+
     def handle_schema(self, field: Any):
         ref_name = self.get_serializer_ref_name(field)
         definitions = self.components.with_scope(openapi.SCHEMA_DEFINITIONS)

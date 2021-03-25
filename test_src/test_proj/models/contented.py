@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from rest_framework import fields as drf_fields
 from vstutils.models import BModel
+from vstutils.api.serializers import BaseSerializer
 from vstutils.api.fields import FkModelField, DependFromFkField
 from vstutils.api.base import ModelViewSet
 
@@ -44,6 +45,11 @@ class Variable(BModel):
         _view_class = 'vstutils.api.base.ModelViewSet'
 
 
+class SubVariablesSerializer(BaseSerializer):
+    key = drf_fields.CharField(read_only=True)
+    value = drf_fields.CharField(read_only=True)
+
+
 class VarBasedModel(BModel):
     """
     Variables based model.
@@ -65,9 +71,11 @@ class VarBasedModel(BModel):
         ]
         _detail_fields = _list_fields + [
             'variables_list',
+            'variables_ser',
         ]
         _override_detail_fields = {
-            'variables_list': drf_fields.ListField(read_only=True, child=drf_fields.DictField(read_only=True))
+            'variables_list': drf_fields.ListField(read_only=True, child=drf_fields.DictField(read_only=True)),
+            'variables_ser': SubVariablesSerializer(many=True, read_only=True)
         }
         _nested = {
             'vars': {
