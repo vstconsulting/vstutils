@@ -559,9 +559,11 @@ class ViewsTestCase(BaseTestCase):
         post_data = dict(password="some_password", **user_data)
         self.post_result('/api/v1/user/', data=post_data, code=400)
         self.post_result('/api/v1/user/', data=user_data, code=400)
-        self.post_result(
-            '/api/v1/user/', data=dict(username=self.user.username), code=409
+        result = self.post_result(
+            '/api/v1/user/', data=dict(username=self.user.username), code=400
         )
+        self.assertIn('username', result)
+        self.assertEqual(result['username'], ['A user with that username already exists.'])
         self.assertCount(self.get_model_filter('django.contrib.auth.models.User'), 1)
         url_to_user = '/api/v1/user/{}/'.format(self.user.id)
         self.change_identity(False)

@@ -47,35 +47,19 @@ class UserSerializer(VSTSerializer):
     def is_staff_or_super(self):
         return self.context['request'].user.is_staff or self.context['request'].user.is_superuser
 
-    def create(self, data):
+    def create(self, credentials):
         """ Create user from validated data. """
 
         if not self.is_staff_or_super:
             raise exceptions.PermissionDenied  # nocv
-        valid_fields = [
-            'username', 'password', 'is_active', 'is_staff',
-            "email", "first_name", "last_name"
-        ]
-        creditals = {
-            d: data[d] for d in valid_fields
-            if data.get(d, None) is not None
-        }
+
         raw_passwd = self.initial_data.get("raw_password", "False")
-        user = super().create(creditals)
+        assert raw_passwd in ("False", "True"), f"Invalid 'raw_password' value: '{raw_passwd}'."
+        user = super().create(credentials)
         if not raw_passwd == "True":
-            user.set_password(creditals['password'])
+            user.set_password(credentials['password'])
             user.save()
         return user
-
-    def is_valid(self, raise_exception=False):
-        if self.instance is None:
-            try:
-                initial_data = self.initial_data
-                User.objects.get(username=initial_data.get('username', None))
-                raise self.UserExist({'username': ["Already exists."]})
-            except User.DoesNotExist:
-                pass
-        return super().is_valid(raise_exception)
 
     def update(self, instance, validated_data):
         if not self.is_staff_or_super and instance.id != self.context['request'].user.id:
