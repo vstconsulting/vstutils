@@ -2861,6 +2861,8 @@ class CustomModelTestCase(BaseTestCase):
 
 
 class ToolsTestCase(BaseTestCase):
+    databases = '__all__'
+
     def test_health_page(self):
         result = self.get_result('get', '/api/health/')
         self.assertIn('db', result)

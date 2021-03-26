@@ -278,6 +278,10 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
                 'serialize': 'false'
             }
         },
+        'databases': {
+            "default_db": "default",
+            'default': {}
+        },
         'cache': {
             "backend": 'django.core.cache.backends.filebased.FileBasedCache',
             'location': '/tmp/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
@@ -332,6 +336,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     section_overload={
         'main': MainSection,
         'web': WebSection,
+        'databases': BaseAppendSection,
         'database': DBSection,
         'database.options': DBOptionsSection,
         'database.test': DBTestSection,
@@ -651,11 +656,19 @@ if HAS_DOCS:
 # Database settings.
 # Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 ##############################################################
-DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE = {
-    'default': config['database'].all()
-}
+DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE
 
-if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.mysql':  # nocv
+
+def parse_db(params):
+    data: DBSection = config.get_section_instance('database')
+    data.update({**config['database'].all(), **params[1].all()})
+    return params[0], data.all()
+
+
+DATABASES = dict(map(parse_db, filter(lambda x: isinstance(x[1], cconfig.Section), config['databases'].items())))
+USED_ENGINES = set(filter(bool, (i.get('ENGINE', None) for i in DATABASES.values())))
+
+if 'django.db.backends.mysql' in USED_ENGINES:  # nocv
     try:
         import mysql
     except ImportError:
@@ -665,10 +678,9 @@ if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.mysql':  # no
         except ImportError:
             pass
 
-if DATABASES['default'].get('ENGINE', None) == 'django.db.backends.sqlite3':
+for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3', DATABASES.values()):
     try:
-        timeout = DATABASES['default']['OPTIONS'].pop('timeout', 20)
-        DATABASES['default']['OPTIONS']['timeout'] = timeout
+        db['OPTIONS'].setdefault('timeout', 20)
     except:  # nocv
         pass
 
