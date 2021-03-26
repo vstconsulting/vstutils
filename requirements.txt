@@ -1,14 +1,14 @@
 # Main packages
 configparser~=5.0.2
-configparserc~=1.2.1
+configparserc~=1.2.3
 # pyyaml>=3.13,<=5.3.1
 django-cors-headers==3.7.0
 
 # REST API packages
-djangorestframework~=3.12.2
+djangorestframework~=3.12.3
 drf-yasg==1.20.0
 django-filter==2.4.0
-django-crispy-forms~=1.11.1
+django-crispy-forms~=1.11.2
 drf_orjson_renderer~=1.1.4
 uWSGI==2.0.19.1
 
