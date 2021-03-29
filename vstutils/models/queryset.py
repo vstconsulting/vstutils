@@ -56,7 +56,11 @@ class BQuerySet(models.QuerySet):
     def has_field_filter_in_query(self, field_name):
         return any(filter(
             raise_context_decorator_with_default(default=False)(
-                lambda x: x.lhs.field.attname == field_name
+                lambda x: (
+                    hasattr(x, 'hls') and
+                    hasattr(x.hls, 'field') and
+                    getattr(x.lhs.field, 'attname', None) == field_name
+                )
             ),
             self.query.where.children
         ))
@@ -76,9 +80,9 @@ class BQuerySet(models.QuerySet):
 
     @deprecated
     def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
-        field = kwargs.get(field_name, None) or (list(args)[0:1]+[None])[0]
+        field = kwargs.get(field_name, None) or (list(args)[0:1] + [None])[0]
         if field is None:
             return self
         if isinstance(field, list):
-            return getattr(self, tp_name)(**{field_name+"__in": field})
+            return getattr(self, tp_name)(**{field_name + "__in": field})
         return getattr(self, tp_name)(**{field_name: field})
