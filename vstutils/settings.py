@@ -84,15 +84,17 @@ PROJECT_CONFIG_FILE: _t.Text = os.getenv(
 PROJECT_DEFAULTS_CONFIG = os.path.join(VST_PROJECT_LIB_DIR, 'settings.ini')
 CONFIG_ENV_DATA_NAME: _t.Text = f"{ENV_NAME}_SETTINGS_DATA"
 
-CONFIG_FILES = (
+CONFIG_FILES = tuple(filter(bool, (
     PROJECT_DEFAULTS_CONFIG,
-    CONFIG_FILE + '.yml',
+    '/etc/vstutils/settings.ini' if VST_PROJECT != 'test_proj' else None,
+    '/etc/vstutils/settings.yml' if VST_PROJECT != 'test_proj' else None,
+    os.path.splitext(CONFIG_FILE)[0] + '.yml' if CONFIG_FILE else None,
     CONFIG_FILE,
-    PROJECT_CONFIG_FILE + '.yml',
+    os.path.splitext(PROJECT_CONFIG_FILE)[0] + '.yml' if PROJECT_CONFIG_FILE else None,
     PROJECT_CONFIG_FILE,
-    DEV_SETTINGS_FILE + '.yml',
+    os.path.splitext(DEV_SETTINGS_FILE)[0] + '.yml' if DEV_SETTINGS_FILE else None,
     DEV_SETTINGS_FILE,
-)
+)))
 
 ConfigBoolType = cconfig.BoolType()
 ConfigIntType = cconfig.IntType()
@@ -567,8 +569,6 @@ ROOT_URLCONF: _t.Text = os.getenv('VST_ROOT_URLCONF', f'{VST_PROJECT}.urls')
 WSGI: _t.Text = os.getenv('VST_WSGI', f'{VST_PROJECT}.wsgi')
 WSGI_APPLICATION: _t.Text = f"{WSGI}.application"
 UWSGI_APPLICATION: _t.Text = f'{WSGI}:application'
-
-ASGI_APPLICATION: _t.Text = "vstutils.ws:application"
 
 uwsgi_settings: cconfig.Section = config['uwsgi']
 WEB_DAEMON = uwsgi_settings.getboolean('daemon', fallback=True)

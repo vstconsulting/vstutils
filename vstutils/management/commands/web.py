@@ -128,9 +128,7 @@ class Command(BaseCommand):
             str(opts['script']),
             f'--set-ph=program_name={settings.VST_PROJECT}',
             f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
-            f'--set-ph=asgi_app={settings.ASGI_APPLICATION}',
             f'--set-ph=api_path={settings.API_URL}',
-            f'--set-ph=ws={"true" if settings.HAS_CHANNELS else "false"}',
             f'--module={settings.UWSGI_APPLICATION}',
         ]
         #  Setup http addr:port.
@@ -148,6 +146,7 @@ class Command(BaseCommand):
 
         # Connect static files.
         if settings.STATIC_URL.startswith('/'):
+            cmd += [f'--set-ph=static_url={settings.STATIC_URL}']
             for static_path in settings.STATIC_FILES_FOLDERS:
                 if f"{settings.STATIC_URL}={static_path}" not in cmd:
                     cmd += ['--static-map', f"{settings.STATIC_URL}={static_path}"]
@@ -156,10 +155,9 @@ class Command(BaseCommand):
             cmd += ['--static-map', f"{settings.MEDIA_URL}={settings.MEDIA_ROOT}"]
 
         # Append uwsgi configs.
-        for cf in settings.VST_PROJECT_LIB, settings.VST_PROJECT:
-            config_file = Path('/etc/') / Path(cf) / 'settings.ini'
+        for config_file in map(Path, settings.CONFIG_FILES):
             option = f'--ini={str(config_file)}'
-            if config_file.exists() and option not in cmd:
+            if config_file.exists() and config_file.suffix == '.ini' and option not in cmd:
                 cmd.append(option)
 
         if self.uwsgi_default_config.exists():
