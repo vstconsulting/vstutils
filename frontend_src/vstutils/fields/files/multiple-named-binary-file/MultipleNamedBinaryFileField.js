@@ -7,6 +7,7 @@ import MultipleNamedBinaryFileFieldMixin from './MultipleNamedBinaryFileFieldMix
  * MultipleNamedBinFile guiField class.
  * This field takes and returns array with objects, consisting of 2 properties:
  * - name - string - name of file;
+ * - mediaType - string - MIME type of file;
  * - content - base64 string - content of file.
  */
 class MultipleNamedBinFileField extends NamedBinaryFileField {

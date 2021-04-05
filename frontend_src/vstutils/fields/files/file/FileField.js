@@ -12,6 +12,10 @@ class FileField extends TextAreaField {
         this.extensions = options.additionalProperties?.extensions?.map((ext) => '.' + ext).join(',');
     }
 
+    /**
+     *
+     * @return {Mixins}
+     */
     static get mixins() {
         return super.mixins.concat(FileFieldMixin);
     }

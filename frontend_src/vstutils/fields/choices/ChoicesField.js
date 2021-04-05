@@ -14,6 +14,9 @@ class ChoicesField extends StringField {
         this.fieldForEnum = props.fieldForEnum;
     }
 
+    /**
+     * @return {string}
+     */
     getInitialValue() {
         if (this.hasDefault) {
             return this.default;

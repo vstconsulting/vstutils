@@ -28,6 +28,10 @@ Also you can use custom models without using database:
 .. automodule:: vstutils.custom_model
     :members: ListModel,FileModel
 
+Model Fields
+~~~~~~~~~~~~
+.. automodule:: vstutils.models.fields
+
 
 Web API
 -------

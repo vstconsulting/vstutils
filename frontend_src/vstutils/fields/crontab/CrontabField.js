@@ -3,6 +3,7 @@ import CrontabFieldMixin from './CrontabFieldMixin.js';
 
 /**
  * Crontab guiField class.
+ * Field to create crontab commands from GUI.
  */
 class CrontabField extends BaseField {
     /**

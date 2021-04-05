@@ -439,3 +439,14 @@ dl dl {
 span.highlighted {
     background-color: #ffff006e;
 }
+
+//Show lists with discs and numbers
+
+li {
+    list-style: decimal !important;
+    margin-left: 14px;
+}
+
+ul li {
+    list-style: disc !important;
+}

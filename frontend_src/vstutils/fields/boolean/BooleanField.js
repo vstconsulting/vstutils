@@ -3,10 +3,14 @@ import { stringToBoolean } from '../../utils';
 import { BaseField } from '../base';
 import BooleanFieldMixin from './BooleanFieldMixin.js';
 
+/**
+ * Field to store bool value
+ */
 class BooleanField extends BaseField {
     /**
      * Custom method for toInner and toRepresent methods.
      * @param {*} value
+     * @private
      */
     _toBoolean(value) {
         if (typeof value == 'boolean') {
@@ -22,20 +26,32 @@ class BooleanField extends BaseField {
         }
     }
 
+    /**
+     * @param data
+     * @return {boolean}
+     */
     toInner(data) {
         return this._toBoolean(super.toInner(data));
     }
 
+    /**
+     * @param data
+     * @return {boolean}
+     */
     toRepresent(data) {
         return this._toBoolean(super.toRepresent(data));
     }
 
+    /**
+     * @return {boolean}
+     */
     getInitialValue() {
         return false;
     }
 
     /**
      * Redefinition of base guiField method _insertTestValue.
+     * @private
      */
     _insertTestValue(data) {
         let value = data[this.options.name];
@@ -50,6 +66,7 @@ class BooleanField extends BaseField {
     }
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.
+     * @private
      */
     _insertTestValue_getElement(format) {
         let selector = '.guifield-' + format + '-' + this.options.name + ' .boolean-select';
@@ -57,12 +74,14 @@ class BooleanField extends BaseField {
     }
     /**
      * Redefinition of base guiField method _insertTestValue_imitateEvent.
+     * @private
      */
     _insertTestValue_imitateEvent(el) {
         $(el).trigger('click');
     }
     /**
      * Redefinition of base guiField static property 'mixins'.
+     * @private
      */
     static get mixins() {
         return [BooleanFieldMixin];

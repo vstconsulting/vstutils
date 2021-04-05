@@ -80,6 +80,7 @@ class BaseField {
     async afterInstancesFetched(instances, queryset) {}
 
     /**
+     * Returns field default value if any, empty string otherwise
      * @return {TInner}
      */
     getInitialValue() {

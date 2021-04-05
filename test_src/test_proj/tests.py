@@ -86,8 +86,9 @@ packaje_json_data = {
     },
     "dependencies": {},
     "devDependencies": {
-        "@babel/core": "^7.8.7",
-        "@babel/preset-env": "^7.8.7",
+        "@babel/core": "^7.12.0",
+        "@babel/plugin-transform-runtime": "^7.13.10",
+        "@babel/preset-env": "^7.12.0",
         "babel-loader": "^8.1.0",
         "core-js": "^3.6.4",
         "css-loader": "^3.4.2",
@@ -101,9 +102,9 @@ packaje_json_data = {
         "url-loader": "^3.0.0",
         "vue-loader": "^15.9.1",
         "vue-template-compiler": "^2.6.11",
-        "webpack": "^4.42.1",
+        "webpack": "^4.43.0",
         "webpack-bundle-analyzer": "^3.6.0",
-        "webpack-cli": "^3.3.11"
+        "webpack-cli": "^3.3.12"
     }
 }
 

@@ -8,6 +8,7 @@ import TextAreaFieldMixin from './TextAreaFieldMixin.js';
 class TextAreaField extends BaseField {
     /**
      * Redefinition of base guiField method '_insertTestValue_getElement'.
+     * @private
      */
     _insertTestValue_getElement(format) {
         let selector = '.guifield-' + format + '-' + this.options.name + ' textarea';

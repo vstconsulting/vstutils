@@ -61,6 +61,7 @@ extensions = [
     'vstutils.api.doc_generator',
     'sphinx.ext.intersphinx',
     'sphinx.ext.extlinks',
+    'sphinx_js',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -237,7 +238,14 @@ extlinks = {
     'celery_docs': ('http://docs.celeryproject.org/en/latest/%s', None),
 }
 
+
 set_type_checking_flag = True
 typehints_fully_qualified = True
 always_document_param_types = True
 autodoc_inherit_docstrings = False
+
+
+# -- JS section -------------------------------------------------
+
+jsdoc_config_path = './jsdoc.json'
+js_source_path = '../frontend_src/'

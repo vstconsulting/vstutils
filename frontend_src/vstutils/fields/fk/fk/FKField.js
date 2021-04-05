@@ -33,7 +33,7 @@ class FKField extends BaseField {
 
         /**
          * Property will be set in prepareField.
-         * @type {Function<Model>}
+         * @type {Function}
          */
         this.fkModel = null;
     }

@@ -1,8 +1,12 @@
 const REF_PROPERTY = '$ref';
 
+/**
+ * @class ModelsResolver
+ * Resolves model by reference path
+ */
 export class ModelsResolver {
     /**
-     * @param {Map<string, Function<Model>>} modelsClasses
+     * @param {Map<string, Function>} modelsClasses
      * @param {Map<string, BaseField>} fieldsClasses
      * @param {Object} schema
      */
@@ -15,7 +19,7 @@ export class ModelsResolver {
     /**
      * Resolves model by reference path
      * @param {string} reference
-     * @return {Function<Model>|undefined}
+     * @return {Function|undefined}
      */
     byReferencePath(reference) {
         return this.modelsClasses.get(reference.split('/').pop());
@@ -24,7 +28,7 @@ export class ModelsResolver {
     /**
      * Resolves model by schema object. Now $ref only is supported.
      * @param {Object} object
-     * @return {Function<Model>|undefined}
+     * @return {Function|undefined}
      * @see {@link https://swagger.io/specification/v2/#schemaObject}
      */
     bySchemaObject(object) {

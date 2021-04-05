@@ -319,7 +319,7 @@ export default class QuerySet {
      * @param {Model[]} [instances] - Model instances to update.
      * @param {HttpMethod} [method] - Http method, PATCH by default.
      * @param {null | string[]} fields
-     * @returns {Promise.<Model>[]}
+     * @returns {Array.<Promise<Model>>}
      */
     async update(updatedInstance, instances, method = HttpMethods.PATCH, fields = null) {
         if (instances === undefined) instances = await this.items();

@@ -13,6 +13,11 @@ class APIObjectField extends BaseField {
         return super.mixins.concat(APIObjectFieldMixin);
     }
 
+    /**
+     *
+     * @param path {string}
+     * @return {Field | undefined}
+     */
     prepareFieldForView(path) {
         // TODO usage of ViewConstructor creates circular dependency
         // let constructor = new ViewConstructor(openapi_dictionary, window.app.models);

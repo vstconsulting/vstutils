@@ -1,11 +1,7 @@
 import VueRouter from 'vue-router';
 import signals from '../signals.js';
 
-/**
- * Class, that manages Router creation.
- * In current realization, Router is Vue-Router.
- * More about Vue-Router - https://router.vuejs.org/.
- */
+
 export default class RouterConstructor {
     /**
      * Constructor of RouterConstructor Class.

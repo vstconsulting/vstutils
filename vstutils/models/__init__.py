@@ -17,6 +17,13 @@ from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
 from ..utils import raise_context
+from .fields import (
+    NamedBinaryFileInJSONField,
+    NamedBinaryImageInJSONField,
+    MultipleNamedBinaryFileInJSONField,
+    MultipleNamedBinaryImageInJSONField,
+    FkModelField
+)
 
 logger = logging.getLogger('vstutils')
 

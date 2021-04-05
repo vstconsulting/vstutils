@@ -86,6 +86,9 @@ function buildViewsTree(views) {
     return root;
 }
 
+/**
+ * @class QuerySetsResolver choses appropriate queryset for path.
+ */
 export class QuerySetsResolver {
     constructor(models, views) {
         this.models = models;
