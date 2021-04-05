@@ -17,6 +17,9 @@ export const IntegerFieldMixin = {
     },
 };
 
+/**
+ * Field to store integers
+ */
 export class IntegerField extends BaseField {
     /**
      * Redefinition of base guiField method toInner.

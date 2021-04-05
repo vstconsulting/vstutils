@@ -57,9 +57,9 @@ class VSTSerializer(serializers.ModelSerializer):
     Default model serializer based on :class:`rest_framework.serializers.ModelSerializer`.
     Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_
     how to create Model Serializers.
-    This serializer generate `vstutils.api.fields` from `vstutils.models.fields`.
+    This serializer matches model fields to extended set of serializer fields.
     List of available pairs specified in  `VSTSerializer.serializer_field_mapping`.
-    To set :class:`vstutils.api.fields.FkModelField` in serializer use
+    For example, to set :class:`vstutils.api.fields.FkModelField` in serializer use
     :class:`vstutils.models.fields.FkModelField` in a model.
     """
     # pylint: disable=abstract-method

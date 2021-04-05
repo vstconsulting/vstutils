@@ -7,6 +7,7 @@ import NamedBinaryFileFieldMixin from './NamedBinaryFileFieldMixin.js';
  * NamedBinFile guiField class.
  * This field takes and returns JSON with 2 properties:
  * - name - string - name of file;
+ * - mediaType - string - MIME type of file
  * - content - base64 string - content of file.
  */
 class NamedBinaryFileField extends BinaryFileField {

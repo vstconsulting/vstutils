@@ -6,6 +6,7 @@ import ResolutionValidatorConfig from './ResolutionValidatorConfig.js';
  * NamedBinImage guiField class.
  * This field takes and returns JSON with 2 properties:
  * - name - string - name of image;
+ * - mediaType - string - MIME type of file;
  * - content - base64 string - content of image.
  */
 class NamedBinaryImageField extends NamedBinaryFileField {

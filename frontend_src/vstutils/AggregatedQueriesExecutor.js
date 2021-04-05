@@ -10,7 +10,7 @@ export class AggregatedQueriesExecutor {
         this.queryset = queryset;
         this.filterName = filterName;
         this.filterFieldName = filterFieldName;
-        /** @type {Map<string|number,{resolve: Function, reject: Function}[]>} */
+        /** @type {Map<string|number, Array.<{resolve: Function, reject: Function}>>} */
         this._queries = new Map();
     }
 

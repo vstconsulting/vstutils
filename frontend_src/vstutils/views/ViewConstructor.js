@@ -23,7 +23,9 @@ const ACTION_NAME = 'x-action-name';
 const IS_MULTI_ACTION_PROPERTY_NAME = 'x-multiaction';
 
 /**
- * Class, that manages creation of guiViews.
+ * ModelConstructor is a class, that have methods to parse of OpenAPI schema
+ * and to generate Views objects based on the result of parsing.
+
  */
 export default class ViewConstructor {
     /**

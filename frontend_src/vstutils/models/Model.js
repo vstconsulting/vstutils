@@ -174,7 +174,7 @@ export class ModelValidationError extends Error {
 export class Model {
     /** @type {Array<BaseField>} */
     static declaredFields = [];
-    /** @type {Object<string, Array[string]>} */
+    /** @type {Object<string, string[]>} */
     static fieldsGroups = {};
     /** @type {string|null} */
     static viewFieldName = null;

@@ -305,7 +305,7 @@ class LoadingPageController {
 
     /**
      * Method, that adds to the html document info about file loading error.
-     * @param {object, string} exception Error object or string.
+     * @param {object|string} exception Error object or string.
      * @param {object} extendData Additional logging message.
      */
     appendError(exception, extendData = null) {

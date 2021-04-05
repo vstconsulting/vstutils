@@ -22,7 +22,8 @@ export class NoModel extends Model {
  */
 export default class ModelConstructor {
     /**
-     * Redefinition of BaseEntityConstructor class.
+     * ModelConstructor is a class, that have methods for parsing of OpenAPI schema
+     * and generating of Models objects based on the result of parsing.
      * @param {object} openapiDictionary.
      * @param {object} schema - Openapi schema.
      * @param {Map<string, Function>} fieldsClasses
