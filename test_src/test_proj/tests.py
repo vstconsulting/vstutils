@@ -134,6 +134,13 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         except OSError:
             pass
 
+    def test_deprecation_functions(self):
+        @utils.deprecated
+        def testing_func(code):
+            return code
+
+        self.assertEqual(testing_func(1), 1)
+
     def test_executors(self):
         dir_name = os.path.dirname(__file__)
         cmd = utils.UnhandledExecutor(stderr=utils.UnhandledExecutor.DEVNULL)

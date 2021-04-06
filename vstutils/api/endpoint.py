@@ -117,7 +117,7 @@ class ParseResponseDict(dict):
         return Dict(detail=str(response.content.decode('utf-8')))
 
 
-class BulkRequestType(drf_request.Request, HttpRequest):
+class BulkRequestType(drf_request.Request, HttpRequest):  # type: ignore
     # pylint: disable=abstract-method
     data: _t.List[_t.Dict[_t.Text, _t.Any]]  # type: ignore
     version: _t.Optional[_t.Text]

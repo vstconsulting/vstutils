@@ -3,7 +3,7 @@ import json
 
 from vstutils.api import responses, filter_backends
 from vstutils.api.views import SettingsViewSet
-from vstutils.api.base import NonModelsViewSet, Response
+from vstutils.api.base import NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
 from vstutils.api.serializers import EmptySerializer, DataSerializer
 from vstutils.api.auth import UserViewSet
@@ -34,7 +34,7 @@ class HostViewSet(Host.generated_view):
 
     @subaction(detail=True, serializer_class=Host.generated_view.serializer_class)
     def test3(self, request, *args, **kwargs):
-        return Response("OK", 201).resp  # nocv
+        return responses.HTTP_201_CREATED("OK")  # nocv
 
 
 @extend_filterbackends(list(HostGroup.generated_view.filter_backends)+[TestFilterBackend], override=True)
@@ -93,7 +93,7 @@ try:
     class ErrorView(_HostGroupViewSet):
         @subaction(response_code=200, detail=True)
         def test_err(self, request, *args, **kwargs):  # nocv
-            return Response("OK", 200).resp
+            return responses.HTTP_200_OK("OK")
 except AssertionError:
     pass
 

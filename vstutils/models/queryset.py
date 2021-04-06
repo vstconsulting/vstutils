@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.functional import cached_property
 
-from ..utils import Paginator, deprecated, raise_context_decorator_with_default
+from ..utils import Paginator, raise_context_decorator_with_default
 
 
 class BQuerySet(models.QuerySet):
@@ -77,12 +77,3 @@ class BQuerySet(models.QuerySet):
         if hasattr(self.model, "hidden") and not self.has_hidden_filter:
             return self.filter(hidden=False)
         return self
-
-    @deprecated
-    def _find(self, field_name, tp_name, *args, **kwargs):  # nocv
-        field = kwargs.get(field_name, None) or (list(args)[0:1] + [None])[0]
-        if field is None:
-            return self
-        if isinstance(field, list):
-            return getattr(self, tp_name)(**{field_name + "__in": field})
-        return getattr(self, tp_name)(**{field_name: field})

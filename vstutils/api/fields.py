@@ -13,7 +13,7 @@ from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
 from django.db import models
-from django.utils.functional import SimpleLazyObject
+from django.utils.functional import SimpleLazyObject, lazy
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -300,7 +300,7 @@ class DependFromFkField(DynamicJsonTypeField):
         related_field: Field = copy.deepcopy(related_field)
         related_field.field_name: _t.Text = self.field_name  # type: ignore
 
-        errors = {}
+        errors: _t.Dict = {}
         primitive_value = related_field.get_value(dictionary)
         try:
             value = related_field.run_validation(primitive_value)
@@ -468,7 +468,7 @@ class FkModelField(FkField):
             value = self._get_data_from_model(value)
         return value
 
-    def to_internal_value(self, data: _t.Union[models.Model, int]) -> _t.Union[models.Model, _t.NoReturn]:
+    def to_internal_value(self, data: _t.Union[models.Model, int]) -> _t.Union[models.Model]:  # type: ignore[override]
         if isinstance(data, self.model_class):
             return data
         elif isinstance(data, (int, str)):  # nocv
@@ -695,9 +695,9 @@ class RelatedListField(VSTCharField):
         self.related_name = related_name
         self.view_type = view_type
 
-    def to_representation(self, value: _t.Type[models.Model]):
+    def to_representation(self, value: _t.Type[models.Model]) -> _t.Tuple[_t.Dict]:  # type: ignore[override]
         # get related mapping with id and name of instances
-        return SimpleLazyObject(lambda: tuple(getattr(value, self.related_name).values(*self.fields)))
+        return lazy(lambda: tuple(getattr(value, self.related_name).values(*self.fields)), tuple)()
 
 
 class RatingField(FloatField):

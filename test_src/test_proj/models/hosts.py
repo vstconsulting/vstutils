@@ -66,7 +66,7 @@ class Host(BModel):
         request.session.save()
         request.session[0] = "OK"
         assert hasattr(obj, 'filter_applied')
-        return base.Response(response, 201).resp
+        return responses.HTTP_201_CREATED(response)
 
 
 class HostList(Host):

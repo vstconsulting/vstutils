@@ -4,7 +4,7 @@ from rest_framework import status
 
 class VSTUtilsException(Exception):
     msg = "Bad request."
-    status = status.HTTP_400_BAD_REQUEST
+    status: int = status.HTTP_400_BAD_REQUEST
 
     def __init__(self, *args, **kwargs):
         self.msg = (list(args)[0:1]+[""])[0]

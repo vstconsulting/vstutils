@@ -14,12 +14,18 @@ from vstutils.api.serializers import VSTSerializer, DataSerializer
 from vstutils.api.models import TwoFactor, RecoveryCode
 from vstutils.utils import raise_context_decorator_with_default
 
-User = get_user_model()
+User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
 
 
 class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
     def has_object_permission(self, request: drf_request.Request, view: base.GenericViewSet, obj: User):  # type: ignore
-        return request.user.is_superuser or (isinstance(obj, request.user.__class__) and request.user.pk == obj.pk)
+        return (
+            request.user.is_superuser or
+            (
+                isinstance(obj, request.user.__class__) and
+                request.user.pk == obj.pk  # type: ignore
+            )
+        )
 
 
 class UserSerializer(VSTSerializer):

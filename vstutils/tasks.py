@@ -1,5 +1,6 @@
 from smtplib import SMTPException
 
+from celery import Celery
 from celery.app.task import BaseTask
 from celery.result import AsyncResult
 from django.conf import settings
@@ -7,7 +8,7 @@ from django.conf import settings
 from .utils import import_class, send_template_email_handler
 
 
-celery_app = import_class(
+celery_app: Celery = import_class(
     settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
 )
 
@@ -41,4 +42,4 @@ class SendEmailMessage(TaskClass):
             )
 
 
-celery_app.register_task(SendEmailMessage())
+celery_app.tasks.register(SendEmailMessage())  # type: ignore

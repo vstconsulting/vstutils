@@ -10,7 +10,6 @@ import inspect
 import traceback
 import datetime
 import typing as _t
-from collections import namedtuple
 from copy import deepcopy
 
 from django.conf import settings
@@ -27,7 +26,7 @@ from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 
 from ..exceptions import VSTUtilsException
-from ..utils import classproperty, deprecated, get_if_lazy, raise_context_decorator_with_default
+from ..utils import classproperty, get_if_lazy, raise_context_decorator_with_default
 from . import responses, fields
 from .serializers import (
     ErrorSerializer,
@@ -36,9 +35,6 @@ from .serializers import (
     serializers
 )
 
-_ResponseClass: _t.Type[_t.NamedTuple] = namedtuple("ResponseData", [
-    "data", "status"
-])
 default_methods: _t.List[_t.Text] = [
     'get',
     'post',
@@ -144,26 +140,6 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
         default_response["X-Anonymous"] = "true"  # type: ignore
 
     return default_response
-
-
-# TODO deprecated
-@deprecated
-class Response(_ResponseClass):
-
-    def _asdict(self):
-        data = super()._asdict()
-        data["status"] = data.get("status", status.HTTP_200_OK)
-        if isinstance(data["data"], str):
-            data["data"] = {'detail': self.data}
-        return data
-
-    @property
-    def resp(self):
-        return responses.BaseResponseClass(**self._asdict())
-
-    @property
-    def resp_dict(self):
-        return self._asdict()  # nocv
 
 
 class AutoSchema(DRFAutoSchema):
