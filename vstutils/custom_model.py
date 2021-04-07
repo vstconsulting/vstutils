@@ -14,6 +14,7 @@ from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 
 
 class Query(dict):
+    __slots__ = 'queryset', 'combinator', 'is_sliced', 'select_for_update', 'select_related', 'empty'
     distinct_fields = False
 
     def __init__(self, queryset, *args, **kwargs):
@@ -104,6 +105,8 @@ class Query(dict):
 
 
 class CustomModelIterable(ModelIterable):
+    __slots__ = ()
+
     def values_handler(self, unit):
         # pylint: disable=no-member
         return {f: unit.get(f) for f in self.fields}  # nocv
@@ -129,6 +132,7 @@ class CustomModelIterable(ModelIterable):
 
 
 class CustomQuerySet(BQuerySet):
+    __slots__ = ()
     custom_iterable_class = CustomModelIterable
     custom_query_class = Query
 

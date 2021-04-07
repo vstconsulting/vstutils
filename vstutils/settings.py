@@ -21,6 +21,8 @@ SIMPLE_OBJECT_SETTINGS_TYPE = _t.Dict[_t.Text, _t.Dict[_t.Text, _t.Any]]
 
 
 class Env(dict):
+    __slots__ = ()
+
     def __getitem__(self, item):
         if item in self:
             return super().__getitem__(item)
@@ -104,16 +106,19 @@ ConfigStringType = cconfig.StrType()
 
 
 class BackendSection(cconfig.Section):
+    __slots__ = ()
 
     def key_handler_to_all(self, key):
         return super().key_handler_to_all(key).upper()
 
 
 class BaseAppendSection(cconfig.AppendSection):
+    __slots__ = ()
     get: _t.Callable[..., _t.Any]
 
 
 class MainSection(BaseAppendSection):
+    __slots__ = ()
     types_map = {
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
@@ -124,6 +129,7 @@ class MainSection(BaseAppendSection):
 
 
 class WebSection(BaseAppendSection):
+    __slots__ = ()
     types_map = {
         'allow_cors': ConfigBoolType,
         'session_timeout': ConfigIntSecondsType,
@@ -150,6 +156,7 @@ class WebSection(BaseAppendSection):
 
 
 class DBSection(BackendSection):
+    __slots__ = ()
     types_map = {
         'conn_max_age': ConfigIntSecondsType,
         'atomic_requests': ConfigBoolType,
@@ -159,12 +166,14 @@ class DBSection(BackendSection):
 
 
 class DBTestSection(DBSection):
+    __slots__ = ()
     type_serialize = ConfigBoolType
     type_create_db = ConfigBoolType
     type_create_user = ConfigBoolType
 
 
 class DBOptionsSection(cconfig.Section):
+    __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
         'connect_timeout': ConfigIntSecondsType,
@@ -175,12 +184,14 @@ class DBOptionsSection(cconfig.Section):
 
 
 class CacheSection(BackendSection):
+    __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
     }
 
 
 class MailSection(BaseAppendSection):
+    __slots__ = ()
     types_map = {
         'port': ConfigIntType,
         'tls': ConfigBoolType,
@@ -191,10 +202,12 @@ class MailSection(BaseAppendSection):
 
 
 class UWSGISection(cconfig.Section):
+    __slots__ = ()
     type_daemon = ConfigBoolType
 
 
 class RPCSection(BaseAppendSection):
+    __slots__ = ()
     type_map = {
         'concurrency"': ConfigIntType,
         'prefetch_multiplier"': ConfigIntType,
@@ -207,6 +220,7 @@ class RPCSection(BaseAppendSection):
 
 
 class WorkerSection(BaseAppendSection):
+    __slots__ = ()
     types_map = {
         'beat': ConfigBoolType,
         'events': ConfigBoolType,
@@ -220,6 +234,7 @@ class WorkerSection(BaseAppendSection):
 
 
 class CentrifugoSection(cconfig.Section):
+    __slots__ = ()
     type_address = cconfig.StrType()
     type_api_key = cconfig.StrType()
     type_token_hmac_secret_key = cconfig.StrType()
@@ -228,6 +243,7 @@ class CentrifugoSection(cconfig.Section):
 
 
 class ThrottleSection(BaseAppendSection):
+    __slots__ = ()
     types_map = {
         'rate': ConfigStringType,
         'actions': ConfigListType,

@@ -125,6 +125,8 @@ class BulkRequestType(drf_request.Request, HttpRequest):  # type: ignore
 
 
 class BulkMiddleware(BaseMiddleware):
+    __slots__ = ()
+
     def request_handler(self, request: HttpRequest) -> HttpRequest:
         request.is_bulk = True  # type: ignore
         if 'user' in request.META:
@@ -137,6 +139,8 @@ class BulkMiddleware(BaseMiddleware):
 
 
 class BulkClientHandler(ClientHandler):
+    __slots__ = ()
+
     @modify_settings(MIDDLEWARE=settings.MIDDLEWARE_ENDPOINT_CONTROL)
     def __init__(self, *args, **kwargs):
         super().__init__(enforce_csrf_checks=False, *args, **kwargs)
@@ -145,6 +149,7 @@ class BulkClientHandler(ClientHandler):
 
 
 class BulkClient(Client):
+    __slots__ = ('user', 'language', 'exc_info')
     handler: BulkClientHandler = BulkClientHandler()
     user: _t.Optional[AbstractUser]
 
@@ -170,7 +175,7 @@ class FormatDataFieldMixin:
     """
     Mixin for fields that can format "<< >>" templates inside strings
     """
-
+    __slots__ = ()
     requires_context: bool = True
     context: _t.Dict
 
@@ -193,6 +198,7 @@ class TemplateStringField(FormatDataFieldMixin, serializers.CharField):
     """
     Field that can format "<< >>" templates inside strings
     """
+    __slots__ = ()
 
 
 class RequestDataField(FormatDataFieldMixin, DataSerializer):
@@ -200,6 +206,7 @@ class RequestDataField(FormatDataFieldMixin, DataSerializer):
     Field that can handle basic data types and recursise
     format template strings inside them
     """
+    __slots__ = ()
 
     def to_internal_value(self, data):
         if isinstance(data, str):
@@ -219,6 +226,7 @@ class RequestDataField(FormatDataFieldMixin, DataSerializer):
 
 class MethodChoicesField(serializers.ChoiceField):
     """Field for HTTP method"""
+    __slots__ = ()
 
     def __init__(self, choices: _t.List = None, **kwargs):
         super().__init__(choices or REST_METHODS, **kwargs)
@@ -228,6 +236,7 @@ class MethodChoicesField(serializers.ChoiceField):
 
 
 class PathField(TemplateStringField):
+    __slots__ = ()
 
     def to_internal_value(self, data):
 
@@ -242,6 +251,8 @@ class PathField(TemplateStringField):
 
 class OperationSerializer(serializers.Serializer):
     # pylint: disable=abstract-method
+    __slots__ = ()
+
     path = PathField(required=True)
     method = MethodChoicesField(required=True)
     headers = serializers.DictField(child=TemplateStringField(), default={}, write_only=True)
@@ -287,6 +298,8 @@ class EndpointViewSet(views.APIView):
     """
     Default API-endpoint viewset.
     """
+    __slots__ = ('results',)
+
     throttle_classes = []  # type: ignore
     schema = None  # type: ignore
     versioning_class = versioning.QueryParameterVersioning  # type: ignore

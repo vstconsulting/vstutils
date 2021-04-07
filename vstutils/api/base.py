@@ -143,6 +143,7 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
 
 
 class AutoSchema(DRFAutoSchema):
+    __slots__ = ()
 
     def get_description(self, path: _t.Text, method: _t.Text) -> _t.Text:
         # pylint: disable=simplifiable-if-statement,redefined-outer-name
@@ -235,6 +236,8 @@ class QuerySetMixin(rvs.APIView):
 
 
 class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
+    __slots__ = ()
+
     def __new__(mcs, name, bases, attrs):
         new_class = super().__new__(mcs, name, bases, attrs)
         for detail in (True, False):
@@ -426,6 +429,8 @@ class FileResponseRetrieveMixin(GenericViewSet):
         .. literalinclude:: ../test_src/test_proj/models/files.py
            :lines: 1-20,54-76
     """
+    __slots__ = ()
+
     instance_field_data: _t.Text
     instance_field_filename: _t.Text = 'filename'
     instance_field_timestamp: _t.Optional[_t.Text] = None
@@ -505,6 +510,8 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
                 # etc...
 
     """
+
+    __slots__ = ()
 
 
 class NonModelsViewSet(GenericViewSet):

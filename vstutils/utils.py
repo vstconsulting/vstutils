@@ -18,6 +18,7 @@ from pathlib import Path
 from threading import Thread
 from enum import Enum
 
+from django.conf import settings
 from django.urls import re_path, include
 from django.core.mail import send_mail
 from django.core.cache import caches, InvalidCacheBackendError
@@ -46,6 +47,13 @@ def deprecated(func: tp.Callable):
         return func(*args, **kwargs)
 
     return new_func
+
+
+def is_member_descriptor(obj):
+    try:
+        return type(obj).__name__ == 'member_descriptor'
+    except:  # nocv
+        return False
 
 
 def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
@@ -177,7 +185,6 @@ def send_template_email(sync: bool = False, **kwargs):
     :param template_name: relative path to template in `templates` directory, must include extension in file name.
     :param context_data: dictionary with context for rendering message template.
     """
-    from django.conf import settings
     if sync or not settings.RPC_ENABLED:
         send_template_email_handler(email_from=settings.EMAIL_FROM_ADDRESS, **kwargs)
     else:
@@ -208,6 +215,8 @@ class apply_decorators:
                 print("Function call.")
     """
 
+    __slots__ = ('decorators',)
+
     def __init__(self, *decorators):
         self.decorators = decorators
 
@@ -226,7 +235,7 @@ class ClassPropertyMeta(type):
 
 
 class ClassPropertyDescriptor:
-    __slots__ = 'fget', 'fset'
+    __slots__ = ('fget', 'fset')
 
     meta = ClassPropertyMeta
 
@@ -293,7 +302,7 @@ class redirect_stdany:
         - On context return stream object.
         - On exit return old streams
     """
-    __slots__ = 'stream', 'streams', '_old_streams'
+    __slots__ = ('stream', 'streams', '_old_streams')
 
     _streams: tp.ClassVar[tp.List[tp.Text]] = ["stdout", "stderr"]
 
@@ -412,6 +421,7 @@ class tmp_file_context:
 
 
 class assertRaises:
+    __slots__ = ('_kwargs', '_verbose', '_exclude', '_excepts')
 
     def __init__(self, *args, **kwargs):
         """
@@ -442,6 +452,9 @@ class raise_context(assertRaises):
     """
     Context for exclude exceptions.
     """
+
+    __slots__ = ()
+
     def execute(self, func: tp.Callable, *args, **kwargs):
         with self.__class__(self._excepts, **self._kwargs):
             try:
@@ -500,6 +513,8 @@ class raise_context_decorator_with_default(raise_context):
 
 
 class exception_with_traceback(raise_context):
+    __slots__ = ()
+
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
@@ -513,8 +528,7 @@ class BaseVstObject:
     """
     Default mixin-class for custom objects which needed to get settings and cache.
     """
-
-    __django_settings__: tp.Any
+    __slots__ = ()
 
     @classmethod
     def get_django_settings(cls, name: tp.Text, default: tp.Any = None):
@@ -528,11 +542,7 @@ class BaseVstObject:
         :type default: object
         :return: Param from Django settings or default.
         """
-        if hasattr(cls, '__django_settings__'):
-            return getattr(cls.__django_settings__, name, default)
-        from django.conf import settings
-        cls.__django_settings__ = settings
-        return cls.get_django_settings(name)
+        return getattr(settings, name, default)
 
     @classmethod
     def get_django_cache(cls, cache_name: tp.Text = 'default'):
@@ -598,7 +608,7 @@ class Executor(BaseVstObject):
     by overriding :meth:`.Executor.working_handler` procedure method. If you want disable this behavior
     override the method by None value or use :class:`.UnhandledExecutor`.
     """
-    __slots__ = 'output', '_stdout', '_stderr', 'env'
+    __slots__ = ('output', '__stdout__', '__stderr__', 'env')
 
     CANCEL_PREFIX: tp.ClassVar[tp.Text] = "CANCEL_EXECUTE_"
     newlines: tp.ClassVar[tp.List[tp.Text]] = ['\n', '\r\n', '\r']
@@ -615,8 +625,8 @@ class Executor(BaseVstObject):
         :type stderr: BinaryIO,int
         """
         self.output = ''
-        self._stdout = stdout
-        self._stderr = stderr
+        self.__stdout__ = stdout
+        self.__stderr__ = stderr
         self.env = environ_variables
 
     def write_output(self, line: tp.Text) -> None:
@@ -683,7 +693,7 @@ class Executor(BaseVstObject):
         env = os.environ.copy()
         env.update(self.env)
         proc = subprocess.Popen(
-            cmd, stdout=self._stdout, stderr=self._stderr,
+            cmd, stdout=self.__stdout__, stderr=self.__stderr__,
             bufsize=0, universal_newlines=True,
             cwd=str(cwd), env=env,
             close_fds=ON_POSIX
@@ -703,6 +713,7 @@ class UnhandledExecutor(Executor):
     """
     Class based on :class:`.Executor` but disables `working_handler`.
     """
+    __slots__ = ()
     working_handler = None  # type: ignore
 
 
@@ -711,6 +722,7 @@ class KVExchanger(BaseVstObject):
     Class for transmit data using key-value fast (cache-like) storage between
     services. Uses same cache-backend as Lock.
     """
+    __slots__ = ('key', 'timeout', '__djangocache__')
     TIMEOUT: tp.ClassVar[int] = 60
 
     @classproperty
@@ -721,9 +733,9 @@ class KVExchanger(BaseVstObject):
     @classproperty
     def cache(cls):
         # pylint: disable=no-self-argument,no-member,access-member-before-definition
-        if hasattr(cls, '__django_cache__'):
-            return cls.__django_cache__
-        cls.__django_cache__ = cls.get_django_cache('locks')
+        if hasattr(cls, '__djangocache__') and not is_member_descriptor(cls.__djangocache__):
+            return cls.__djangocache__
+        cls.__djangocache__ = cls.get_django_cache('locks')
         return cls.cache
 
     def __init__(self, key, timeout=None):
@@ -758,6 +770,7 @@ class Lock(KVExchanger):
         - Used django.core.cache lib and settings in `settings.py`
         - Have Lock.SCHEDULER and Lock.GLOBAL id
     """
+    __slots__ = ('id',)
     TIMEOUT: tp.ClassVar[int] = 60 * 60 * 24
     GLOBAL: tp.ClassVar[tp.Text] = "global-deploy"
     SCHEDULER: tp.ClassVar[tp.Text] = "celery-beat"
@@ -809,6 +822,7 @@ class Lock(KVExchanger):
 
 
 class __LockAbstractDecorator:
+    __slots__ = ('kwargs',)
     _err = "Wait until the end."
     _lock_key = None
 
@@ -839,6 +853,7 @@ class model_lock_decorator(__LockAbstractDecorator):
         - Method must have and called with ``pk`` named arg.
 
     """
+    __slots__ = ('_lock_key',)
     _err = "Object locked. Wait until unlock."
 
     def execute(self, func, *args, **kwargs):
@@ -850,6 +865,7 @@ class Paginator(BasePaginator):
     """
     Class for fragmenting the query for small queries.
     """
+    __slots__ = ()
 
     def __init__(self, qs, chunk_size=None):
         """
@@ -909,7 +925,7 @@ class ObjectHandlers(BaseVstObject):
 
     """
 
-    __slots__ = 'type', 'err_message', '_list', '_loaded_backends'
+    __slots__ = ('type', 'err_message', '__list__', '__loaded_backends__')
 
     type: tp.Text
     err_message: tp.Optional[tp.Text]
@@ -921,8 +937,8 @@ class ObjectHandlers(BaseVstObject):
         """
         self.type = type_name
         self.err_message = err_message
-        self._list: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
-        self._loaded_backends: tp.Dict[tp.Text, tp.Any] = {}
+        self.__list__: tp.Optional[tp.Dict[tp.Text, tp.Any]] = None
+        self.__loaded_backends__: tp.Dict[tp.Text, tp.Any] = {}
 
     @property
     def objects(self):
@@ -953,15 +969,15 @@ class ObjectHandlers(BaseVstObject):
         return self.objects.items()
 
     def list(self) -> tp.Dict[tp.Text, tp.Dict[tp.Text, tp.Any]]:
-        if self._list is None:
-            self._list = self.get_django_settings(self.type, {})
-        return self._list
+        if self.__list__ is None:
+            self.__list__ = self.get_django_settings(self.type, {})
+        return self.__list__
 
-    def _get_baskend(self, backend):
-        if backend in self._loaded_backends:
-            return self._loaded_backends[backend]
-        self._loaded_backends[backend] = import_class(backend)
-        return self._loaded_backends[backend]
+    def _get_backend(self, backend):
+        if backend in self.__loaded_backends__:
+            return self.__loaded_backends__[backend]
+        self.__loaded_backends__[backend] = import_class(backend)
+        return self.__loaded_backends__[backend]
 
     def get_backend_data(self, name: tp.Text):
         return self.list()[name]
@@ -982,7 +998,7 @@ class ObjectHandlers(BaseVstObject):
             backend = self.get_backend_handler_path(name)
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
-            return self._get_baskend(backend)
+            return self._get_backend(backend)
         except KeyError or ImportError:
             msg = f"{name} ({self.err_message})" if self.err_message else name
             raise ex.UnknownTypeException(msg)
@@ -1012,6 +1028,8 @@ class ModelHandlers(ObjectHandlers):
     :type values: list
     """
 
+    __slots__ = ()
+
     def get_object(self, name: tp.Text, obj) -> tp.Any:  # type: ignore
         """
         :param name: -- string name of backend
@@ -1038,7 +1056,7 @@ class URLHandlers(ObjectHandlers):
             # By default gets from `GUI_VIEWS` in `settings.py`
             urlpatterns = list(URLHandlers())
     """
-    __slots__ = ('additional_handlers', '__handlers__')
+    __slots__ = ('additional_handlers', '__handlers__', 'default_namespace')
 
     settings_urls: tp.ClassVar[tp.List[tp.Text]] = [
         'LOGIN_URL',
@@ -1048,16 +1066,18 @@ class URLHandlers(ObjectHandlers):
 
     def __init__(self, type_name: tp.Text = 'URLS', *args, **kwargs):
         self.additional_handlers = kwargs.pop('additional_handlers', ['VIEWS']) + [type_name]
-        self.default_namespace = kwargs.pop('namespace', 'gui')
+        self.default_namespace = kwargs.pop('namespace', None)
+        self.__handlers__ = None
         super().__init__(type_name, *args, **kwargs)
 
     @property
     def view_handlers(self):
-        if not hasattr(self, '__handlers__'):
-            self.__handlers__ = []
-            handler_class = self.__class__
-            for handler_settings_name in self.additional_handlers:
-                self.__handlers__.append(handler_class(handler_settings_name))
+        if not self.__handlers__:
+            self.__handlers__ = tuple(map(self.__class__, self.additional_handlers))
+            # self.__handlers__ = []
+            # handler_class = self.__class__
+            # for handler_settings_name in self.additional_handlers:
+            #     self.__handlers__.append(handler_class(handler_settings_name))
         return self.__handlers__
 
     def get_backend_data(self, name: tp.Text):

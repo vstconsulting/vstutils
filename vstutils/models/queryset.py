@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.functional import cached_property
 
-from ..utils import Paginator, raise_context_decorator_with_default
+from ..utils import Paginator, raise_context_decorator_with_default, is_member_descriptor
 
 
 class BQuerySet(models.QuerySet):
@@ -14,6 +14,7 @@ class BQuerySet(models.QuerySet):
     (class inherited from :class:`django.db.models.sql.query.Query`).
     """
 
+    __slots__ = ('__iterable_class__',)
     use_for_related_fields = True
     custom_query_class = None
 
@@ -24,7 +25,7 @@ class BQuerySet(models.QuerySet):
 
     @property
     def _iterable_class(self):
-        if hasattr(self, '__iterable_class__'):
+        if hasattr(self, '__iterable_class__') and not is_member_descriptor(self.__iterable_class__):
             return self.__iterable_class__
         if hasattr(self, 'custom_iterable_class'):
             self.__iterable_class__ = self.custom_iterable_class

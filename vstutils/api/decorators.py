@@ -298,6 +298,8 @@ class NestedWithoutAppendMixin(NestedViewMixin):
 
 
 class NestedWithAppendMixin(NestedWithoutAppendMixin):
+    __slots__ = ()
+
     def _data_create(self, request_data, nested_append_arg):
         filter_arg = f'{nested_append_arg}__in'
         request_data = [ensure_is_object(d) for d in request_data]

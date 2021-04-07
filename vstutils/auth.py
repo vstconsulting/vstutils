@@ -78,9 +78,9 @@ class BaseAuthBackend(backends.ModelBackend):
 
 
 class LDAP(_LDAP):
-    '''
+    """
     LDAP class wrapper
-    '''
+    """
 
 
 class LdapBackend(BaseAuthBackend):  # nocv

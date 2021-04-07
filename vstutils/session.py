@@ -10,6 +10,7 @@ class YamlSessionSerializer:
     Simple wrapper around json and yaml to be used in signing.dumps and
     signing.loads.
     """
+    __slots__ = ()
 
     def dumps(self, obj):
         return yaml.dump(obj, Dumper=Dumper).encode('latin-1')
