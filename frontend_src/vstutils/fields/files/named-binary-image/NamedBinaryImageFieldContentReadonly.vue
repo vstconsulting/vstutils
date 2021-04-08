@@ -1,10 +1,10 @@
 <template>
     <div>
         <template v-if="value && value.content">
-            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value"></image_block>
+            <image_block :field="field" :wrapper_opt="wrapper_opt" :data="data" :value="value" />
         </template>
         <template v-else>
-            <input :class="classes" :styles="styles" disabled :value="val" />
+            {{ val }}
         </template>
     </div>
 </template>

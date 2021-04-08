@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes" :style="styles" v-text="value" />
+    <span v-text="value" />
 </template>
 
 <script>
@@ -11,12 +11,16 @@
     export default {
         name: 'BaseFieldListView',
         mixins: [BaseFieldInnerComponentMixin],
-        data() {
-            return {
-                styles_dict: { display: 'contents' },
-            };
-        },
     };
 </script>
 
-<style scoped></style>
+<style>
+    .field-component.type-list {
+        margin-bottom: 0;
+
+        /* Truncate text */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>

@@ -24,7 +24,7 @@ import { QRCodeField } from './qr.js';
 
 const globalFields = new Map([
     // ['api_data', APIDataField],
-    // ['api_object', APIObjectField],
+    ['api_object', APIObjectField],
     ['autocomplete', AutocompleteField],
     ['binfile', files.binaryFile.BinaryFileField],
     ['boolean', BooleanField],

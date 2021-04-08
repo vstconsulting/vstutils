@@ -12,6 +12,9 @@ class ChoicesField extends StringField {
 
         this.enum = options.enum;
         this.fieldForEnum = props.fieldForEnum;
+
+        this.templateResult = props.templateResult;
+        this.templateSelection = props.templateSelection;
     }
 
     /**

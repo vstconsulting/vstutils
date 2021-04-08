@@ -25,6 +25,9 @@ export const LIST_STORE_MODULE = {
     mutations: {
         setFilters(state, filters) {
             state.data.filters = filters;
+            if (filters.limit) {
+                state.data.pagination.pageSize = filters.limit;
+            }
             state.queryset = state.queryset.clone({ query: filters });
         },
 

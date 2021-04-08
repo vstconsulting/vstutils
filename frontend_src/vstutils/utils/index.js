@@ -975,7 +975,7 @@ export function makeDataImageUrl(file) {
     return `data:${file.mediaType || 'image/png'};base64,${file.content}`;
 }
 
-export const IGNORED_FILTERS = ['offset', 'limit'];
+export const IGNORED_FILTERS = ['offset', 'limit', 'page'];
 
 export function objectToFormData(obj) {
     const formData = new FormData();

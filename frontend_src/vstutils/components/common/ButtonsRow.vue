@@ -1,23 +1,21 @@
 <template>
-    <div class="row">
-        <div class="col-lg-12 buttons-row-wrapper">
-            <OperationButton
-                v-for="sublink in sublinks"
-                :key="sublink.name"
-                v-bind="sublink"
-                @clicked="$emit('open-sublink', sublink)"
-            />
+    <div class="buttons-row-wrapper">
+        <OperationButton
+            v-for="sublink in sublinks"
+            :key="sublink.name"
+            v-bind="sublink"
+            @clicked="$emit('open-sublink', sublink)"
+        />
 
-            <template v-for="action in actions">
-                <component :is="action.component" v-if="action.component" :key="action.name" :view="view" />
-                <OperationButton
-                    v-else
-                    :key="action.name"
-                    v-bind="action"
-                    @clicked="$emit('execute-action', action)"
-                />
-            </template>
-        </div>
+        <template v-for="action in actions">
+            <component :is="action.component" v-if="action.component" :key="action.name" :view="view" />
+            <OperationButton
+                v-else
+                :key="action.name"
+                v-bind="action"
+                @clicked="$emit('execute-action', action)"
+            />
+        </template>
     </div>
 </template>
 
@@ -39,9 +37,14 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        flex-grow: 1;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        padding-right: 15px;
     }
     .buttons-row-wrapper::v-deep button {
         margin-top: 5px;
         margin-right: 5px;
+        height: 35px;
     }
 </style>

@@ -21,39 +21,50 @@
             <component :is="field.component" :field="field" :data="data" type="list" />
         </td>
         <td v-if="hasOperations" class="column column-actions" style="text-align: center">
-            <div class="btn-group dropleft">
-                <button
-                    type="button"
-                    class="btn btn-primary dropdown-toggle"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                />
-                <div class="dropdown-menu">
-                    <template v-if="actions.length">
-                        <h6 class="dropdown-header">Actions</h6>
-                        <a
-                            v-for="action in actions"
-                            :key="action.name"
-                            class="dropdown-item"
-                            @click="$emit('execute-action', { action, instance })"
-                        >
-                            {{ action.title }}
-                        </a>
-                    </template>
-                    <template v-if="sublinks.length">
-                        <h6 class="dropdown-header">Sublinks</h6>
-                        <a
-                            v-for="sublink in sublinks"
-                            :key="sublink.name"
-                            class="dropdown-item"
-                            @click="$emit('open-sublink', { sublink, instance })"
-                        >
-                            {{ sublink.title }}
-                        </a>
-                    </template>
-                </div>
-            </div>
+            <BootstrapModal classes="modal-sm">
+                <template #activator="{ openModal }">
+                    <button class="btn btn-outline-secondary" @click="openModal">
+                        <i class="fas fa-cog" />
+                    </button>
+                </template>
+                <template #content="{ closeModal }">
+                    <div class="modal-body">
+                        <ul class="list-group list-group-flush">
+                            <template v-if="actions.length">
+                                <li class="list-group-item disabled">
+                                    <b>{{ $t('Actions') }}</b>
+                                </li>
+                                <li v-for="action in actions" :key="action.name" class="list-group-item">
+                                    <a href="#" @click.prevent="createActionClickHandler(closeModal, action)">
+                                        <i
+                                            v-if="action.iconClasses && action.iconClasses.length"
+                                            :class="action.iconClasses"
+                                        />
+                                        {{ $t(action.title) }}
+                                    </a>
+                                </li>
+                            </template>
+                            <template v-if="sublinks.length">
+                                <li class="list-group-item disabled">
+                                    <b>{{ $t('Sublinks') }}</b>
+                                </li>
+                                <li v-for="sublink in sublinks" :key="sublink.name" class="list-group-item">
+                                    <router-link
+                                        :to="formatPath(sublink.href, $route.params, instance)"
+                                        @click.native.capture="closeModal"
+                                    >
+                                        <i
+                                            v-if="sublink.iconClasses && sublink.iconClasses.length"
+                                            :class="sublink.iconClasses"
+                                        />
+                                        {{ $t(sublink.title) }}
+                                    </router-link>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+            </BootstrapModal>
         </td>
     </tr>
 </template>
@@ -62,6 +73,9 @@
     import TableRowMixin from '../../fields/TableRowMixin.js';
     import SelectToggleButton from './SelectToggleButton.vue';
     import BaseListTableMixin from './BaseListTableMixin.js';
+    import Modal from '../items/modal/Modal.vue';
+    import BootstrapModal from '../BootstrapModal.vue';
+    import { formatPath } from '../../utils';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -69,7 +83,7 @@
      */
     export default {
         name: 'ListTableRow',
-        components: { SelectToggleButton },
+        components: { BootstrapModal, Modal, SelectToggleButton },
         mixins: [BaseListTableMixin, TableRowMixin],
         props: {
             isSelected: { type: Boolean, required: true },
@@ -79,6 +93,7 @@
             actions: { type: Array, required: false, default: () => [] },
             sublinks: { type: Array, required: false, default: () => [] },
         },
+        data: () => ({ formatPath }),
         computed: {
             hasOperations() {
                 return this.actions.length || this.sublinks.length;
@@ -102,13 +117,25 @@
                 return '';
             },
         },
+        methods: {
+            createActionClickHandler(callback, action) {
+                callback();
+                this.$emit('execute-action', { action, instance: this.instance });
+            },
+        },
     };
 </script>
 
 <style scoped>
+    .item-row td {
+        padding: 7px;
+    }
     tr {
         /* This style is required so cells could not grow infinitely.
            To prevent cell from grow 'height: inherit' must be set on td */
         height: 1px;
+    }
+    td.column-actions {
+        padding: 5px;
     }
 </style>

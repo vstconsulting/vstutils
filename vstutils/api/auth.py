@@ -1,20 +1,28 @@
+import json
 import typing as _t
 
 import pyotp
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
-from django.db import transaction
+from django.db import transaction, models
+from django.conf import settings
 from django.utils.functional import SimpleLazyObject, cached_property
 from django_filters import BooleanFilter, CharFilter
 from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
-from vstutils.api.serializers import VSTSerializer, DataSerializer
+from vstutils.api.serializers import VSTSerializer, DataSerializer, BaseSerializer
 from vstutils.api.models import TwoFactor, RecoveryCode
+from vstutils.models import BModel
 from vstutils.utils import raise_context_decorator_with_default
 
 User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
+
+
+class UserSettings(BModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='_settings')
+    value = models.TextField(default='{}')
 
 
 class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
@@ -181,6 +189,29 @@ class TwoFASerializer(VSTSerializer):
         return instance
 
 
+class LanguageFromRequestDefault:
+    requires_context = True
+
+    def __call__(self, serializer_field):
+        return serializer_field.context['request'].language.code
+
+
+class MainSettingsSerializer(BaseSerializer):
+    language = serializers.ChoiceField(choices=settings.LANGUAGES, default=LanguageFromRequestDefault())  # type: ignore
+    dark_mode = serializers.BooleanField(default=False)
+
+    class Meta:
+        ref_name = '_MainSettings'
+
+
+class UserSettingsSerializer(BaseSerializer):
+    main = MainSettingsSerializer(default={})
+    custom = serializers.JSONField(default={})
+
+    class Meta:
+        ref_name = '_UserSettings'
+
+
 class UserFilter(DefaultIDFilter):
     is_active = BooleanFilter(help_text='Boolean value meaning status of user.')
     first_name = CharFilter(help_text='Users first name.')
@@ -213,6 +244,7 @@ class UserViewSet(base.ModelViewSet):
     serializer_class_create: _t.Type[CreateUserSerializer] = CreateUserSerializer
     serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer
     serializer_class_twofa: _t.Type[serializers.BaseSerializer] = TwoFASerializer
+    serializer_class__settings: _t.Type[serializers.BaseSerializer] = UserSettingsSerializer
     filterset_class = UserFilter
     permission_classes = (permissions.SuperUserPermission,)
     optimize_get_by_values = False
@@ -266,5 +298,22 @@ class UserViewSet(base.ModelViewSet):
                 instance or
                 SimpleLazyObject(lambda: TwoFactor(user=user))
             )
+
+        return responses.HTTP_200_OK(serializer.data)
+
+    @deco.action(['get', 'put'], detail=True, permission_classes=(ChangePasswordPermission,))
+    def _settings(self, request: drf_request.Request, *args, **kwargs):
+        instance, _ = UserSettings.objects.get_or_create(
+            user=self.get_object(),
+            defaults=SimpleLazyObject(lambda: {'value': json.dumps(self.get_serializer({}).data)})  # type: ignore
+        )
+
+        if request.method.upper() == 'PUT':  # type: ignore
+            serializer = self.get_serializer(json.loads(instance.value), data=request.data)
+            serializer.is_valid(raise_exception=True)
+            instance.value = json.dumps(serializer.save())
+            instance.save()
+        else:
+            serializer = self.get_serializer(json.loads(instance.value))
 
         return responses.HTTP_200_OK(serializer.data)

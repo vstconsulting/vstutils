@@ -1,11 +1,13 @@
 <template>
-    <div style="display: inline-block;">
-        <Modal v-show="showModal" @close="close" :opt="{ footer: false }">
-            <template v-slot:header>
+    <div style="display: contents">
+        <Modal v-show="showModal" :opt="{ footer: false }" @close="close">
+            <template #header>
                 <h3>{{ $t(info.title.toLowerCase()) | capitalize }}</h3>
             </template>
-            <template v-slot:body>
-                <h4 class="with_bottom_border">{{ $tc('version', 2) | capitalize }}</h4>
+            <template #body>
+                <h4 class="with_bottom_border">
+                    {{ $tc('version', 2) | capitalize }}
+                </h4>
                 <ul>
                     <li v-for="(item, idx) in info['x-versions']" :key="idx">
                         <b>{{ $t(idx).toLowerCase() }}:</b>
@@ -13,7 +15,7 @@
                     </li>
                 </ul>
                 <template v-for="(item, idx) in info['x-links']">
-                    <h4 class="with_bottom_border" style="margin-top: 20px;" :key="`header-${idx}`">
+                    <h4 :key="`header-${idx}`" class="with_bottom_border" style="margin-top: 20px">
                         {{ $t(idx.toLowerCase()) | capitalize }}
                     </h4>
                     <ul :key="`list-${idx}`">
@@ -35,10 +37,10 @@
                 </template>
             </template>
         </Modal>
-        <a href="#" @click.stop.prevent="open" class="help-text-data">
-            <span class="fa fa-question-circle"></span>
+        <button class="btn btn-secondary btn-block" style="margin-bottom: 10px" @click.stop.prevent="open">
+            <span class="fa fa-question-circle" />
             {{ $t('app info') | capitalize }}
-        </a>
+        </button>
     </div>
 </template>
 
@@ -52,7 +54,7 @@
         mixins: [ModalWindowAndButtonMixin],
         data() {
             return {
-                info: app.api.openapi.info,
+                info: this.$app.schema.info,
             };
         },
         methods: {
@@ -62,5 +64,3 @@
         },
     };
 </script>
-
-<style scoped></style>

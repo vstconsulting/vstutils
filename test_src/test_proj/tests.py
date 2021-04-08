@@ -897,6 +897,60 @@ class ViewsTestCase(BaseTestCase):
         response = client.get('/')
         self.assertEqual(response.status_code, 200)
 
+    def test_user_settings(self):
+        initial_settings = {'custom': {}, 'main': {'dark_mode': False, 'language': 'en'}}
+        custom_settings = {'custom': {'key1': 'val1'}, 'main': {'dark_mode': False, 'language': 'en'}}
+        updated_settings = {'custom': {}, 'main': {'dark_mode': True, 'language': 'en'}}
+        wrong_settings = {'custom': {}, 'main': {'dark_mode': 'SOME ERROR', 'language': 'en'}}
+
+        results = self.bulk([
+            # [0] Get request to user with no settings
+            {'method': 'get', 'path': '/user/profile/_settings/'},
+            # [1] Update settings
+            {'method': 'put', 'path': '/user/profile/_settings/', 'data': updated_settings},
+            # [2] Get updated settings
+            {'method': 'get', 'path': '/user/profile/_settings/'},
+
+            # [3] If completely wrong data sent, default value will be set
+            {'method': 'put', 'path': '/user/profile/_settings/', 'data': ''},
+            # [4] Check that settings did not change
+            {'method': 'get', 'path': '/user/profile/_settings/'},
+
+            # [5] If wrong value sent, error will be returned
+            {'method': 'put', 'path': '/user/profile/_settings/', 'data': wrong_settings},
+            # [6] Check that settings did not change
+            {'method': 'get', 'path': '/user/profile/_settings/'},
+
+            # [7] Set custom settings
+            {'method': 'put', 'path': '/user/profile/_settings/', 'data': custom_settings},
+            # [8] Check that custom settings set
+            {'method': 'get', 'path': '/user/profile/_settings/'},
+
+
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data'], initial_settings)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data'], updated_settings)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data'], updated_settings)
+        self.assertEqual(results[3]['status'], 200)
+        self.assertEqual(results[3]['data'], initial_settings)
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data'], initial_settings)
+        self.assertEqual(results[5]['status'], 400)
+        self.assertEqual(results[5]['data'], {'main': {'dark_mode': ['Must be a valid boolean.']}})
+        self.assertEqual(results[6]['status'], 200)
+        self.assertEqual(results[6]['data'], initial_settings)
+        self.assertEqual(results[7]['status'], 200)
+        self.assertEqual(results[7]['data'], custom_settings)
+        self.assertEqual(results[8]['status'], 200)
+        self.assertEqual(results[8]['data'], custom_settings)
+
+        # Request with lang parameter
+        with self.user_as(self, self._create_user()):
+            response = self.get_result('get', '/api/v1/user/profile/_settings/?lang=ru', relogin=True)
+        self.assertEqual(response['main']['language'], 'ru')
 
 
 class DefaultBulkTestCase(BaseTestCase):

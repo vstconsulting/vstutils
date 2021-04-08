@@ -1,13 +1,18 @@
-@import '~bootstrap/scss/bootstrap';
+// Bootstrap
+// ---------------------------------------------------
+@import "~bootstrap/scss/functions";
+@import "~admin-lte/build/scss/bootstrap-variables";
+@import "../vstutils/variables-overrides";
+@import "~bootstrap/scss/bootstrap";
 
-@import '~admin-lte/build/scss/bootstrap-variables';
-@import '~admin-lte/build/scss/variables';
-@import '~admin-lte/build/scss/mixins';
+// Variables and Mixins
+// ---------------------------------------------------
+@import "~admin-lte/build/scss/variables";
+@import "~admin-lte/build/scss/variables-alt";
+@import "~admin-lte/build/scss/mixins";
 
-@import '~admin-lte/build/scss/parts/core';
-@import '~admin-lte/build/scss/parts/components';
-
-@import '~admin-lte/build/scss/small-box';
-@import '~admin-lte/build/scss/miscellaneous';
-
-@import '~admin-lte/build/scss/pages/login_and_register';
+@import "~admin-lte/build/scss/parts/core";
+@import "~admin-lte/build/scss/parts/components";
+@import "~admin-lte/build/scss/parts/extra-components";
+@import "~admin-lte/build/scss/parts/pages";
+@import "~admin-lte/build/scss/parts/miscellaneous";

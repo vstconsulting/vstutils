@@ -1,9 +1,8 @@
 <template>
-    <div style="display: contents;">
+    <div class="field-component" :class="wrapperClasses">
         <field_list_view v-if="type === 'list'" :value="value" :field="field" />
-        <div v-else :class="wrapper_classes">
-            <FieldLabel :value="value" :field="field" :data="data" />
-
+        <template v-else>
+            <FieldLabel :type="type" :value="value" :field="field" :data="data" />
             <field_content_readonly
                 v-if="field.readOnly || type === 'readonly'"
                 :value="value"
@@ -11,14 +10,8 @@
                 :data="data"
                 @proxyEvent="proxyEvent"
             />
-            <field_content_edit
-                v-else-if="type === 'edit'"
-                :field="field"
-                :value="value"
-                :data="data"
-                @set-value="setValue"
-            />
-        </div>
+            <field_content_edit v-else :field="field" :value="value" :data="data" @set-value="setValue" />
+        </template>
     </div>
 </template>
 
@@ -71,6 +64,9 @@
             };
         },
         computed: {
+            wrapperClasses() {
+                return [`name-${this.field.name}`, `format-${this.field.format}`, `type-${this.type}`];
+            },
             value() {
                 return this.data[this.field.name];
             },
@@ -135,4 +131,8 @@
     };
 </script>
 
-<style scoped></style>
+<style>
+    .field-component {
+        margin-bottom: 1rem;
+    }
+</style>

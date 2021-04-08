@@ -150,6 +150,10 @@ export const PageEditViewComponent = {
         },
     },
     methods: {
+        cancelInstance() {
+            this.changedFields = [];
+            this.$root.goBack();
+        },
         async fetchData() {
             this.initLoading();
             try {
@@ -186,7 +190,7 @@ export const ActionViewComponent = {
             return this.view.model;
         },
         title() {
-            return this.view.title;
+            return this.$t(this.view.title);
         },
     },
     methods: {
@@ -219,7 +223,10 @@ export const ActionViewComponent = {
                 this.openPage({ path: this.getRedirectUrl() });
             } catch (error) {
                 const str = window.app.error_handler.errorToString(error);
-                const srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([this.view.title, str]);
+                const srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
+                    this.$t(this.view.title),
+                    str,
+                ]);
                 window.app.error_handler.showError(srt_to_show, str);
             } finally {
                 this.loading = false;
