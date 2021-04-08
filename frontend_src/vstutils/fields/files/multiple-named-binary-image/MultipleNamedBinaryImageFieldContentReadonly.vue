@@ -1,16 +1,11 @@
 <template>
     <div>
         <div class="input-group">
-            <input :class="classes" :styles="styles" disabled :value="val" />
+            {{ val }}
         </div>
         <div>
             <template v-for="(file, idx) in value">
-                <MultipleImagesListItem
-                    :key="idx"
-                    :field="field"
-                    :data="data"
-                    :file="file"
-                />
+                <MultipleImagesListItem :key="idx" :field="field" :data="data" :file="file" />
             </template>
         </div>
     </div>
@@ -22,10 +17,10 @@
     import MultipleImagesListItem from './MultipleImagesListItem.vue';
 
     export default {
-        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentEdit],
         components: {
             MultipleImagesListItem,
         },
+        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentEdit],
     };
 </script>
 

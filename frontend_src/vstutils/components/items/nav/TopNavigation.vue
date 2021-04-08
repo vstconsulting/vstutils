@@ -2,93 +2,78 @@
     <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <span
-                    ref="sidebarControl"
-                    class="nav-link sidebar-control"
-                    data-widget="pushmenu"
-                    @click="saveHideMenuSettings"
-                >
-                    <i class="fa fa-bars ico-data-default" />
-                </span>
+                <a ref="sidebarControl" class="nav-link" data-widget="pushmenu" href="#" role="button">
+                    <i class="fas fa-bars" />
+                </a>
             </li>
-            <template v-if="is_authenticated">
-                <li class="nav-item for-web api-link">
-                    <a :href="openapi_url" class="nav-link">
-                        <i class="fa fa-star ico-data-default" />
-                        <span class="text-data">API</span>
-                    </a>
-                </li>
-            </template>
-            <template v-else>
-                <li class="nav-item for-web login-link">
-                    <a class="nav-link" :href="login_url">
-                        <i class="fas fa-sign-out-alt text-data" />
-                        <span>{{ $t('login') | capitalize }}</span>
-                    </a>
-                </li>
-            </template>
         </ul>
 
-        <template v-if="is_authenticated">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <template v-if="enable_gravatar">
-                            <img
-                                :src="gravatar_img"
-                                class="img-circle elevation-1 gravatar-img"
-                                alt="User gravatar"
-                                @error="setDefaultGravatar($event.target)"
-                            />
-                        </template>
-                        <template v-else>
-                            <i class="fa fa-user mr-2 ico-data-default" />
-                        </template>
-                        <span class="text-data hidden-480">
-                            {{ user.first_name | capitalize }}
-                            {{ user.last_name | capitalize }}
-                        </span>
-                    </a>
-
-                    <div
-                        class="dropdown-menu dropdown-menu-xs dropdown-menu-right profile-menu background-default"
-                    >
-                        <component
-                            :is="link_component"
-                            :[link_attr]="profile_url"
-                            class="dropdown-item text-data"
-                        >
-                            <i class="fa fa-id-card-o mr-2 ico-data-default" />
-                            {{ $t('profile') | capitalize }}
-                        </component>
-
-                        <div class="dropdown-divider" />
-
-                        <component
-                            :is="link_component"
-                            v-if="profile_settings_url"
-                            :[link_attr]="profile_settings_url"
-                            class="dropdown-item text-data"
-                        >
-                            <i class="fa fa-cogs mr-2 ico-data-default" />
-                            {{ $t('settings') | capitalize }}
-                        </component>
-
-                        <div class="dropdown-divider for-web" />
-
-                        <a :href="logout_url" class="dropdown-item for-web text-data">
-                            <i class="fas fa-sign-out-alt mr-2 ico-data-default" />
-                            {{ $t('logout') | capitalize }}
-                        </a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <span class="nav-link" data-widget="control-sidebar" data-slide="true">
-                        <i class="fa fa-th-large ico-data-default" />
+        <ul class="navbar-nav ml-auto">
+            <li v-if="is_authenticated" class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <template v-if="enable_gravatar">
+                        <img
+                            :src="gravatar_img"
+                            class="img-circle elevation-1 gravatar-img"
+                            alt="User gravatar"
+                            @error="setDefaultGravatar($event.target)"
+                        />
+                    </template>
+                    <template v-else>
+                        <i class="fa fa-user mr-2 ico-data-default" />
+                    </template>
+                    <span class="text-data hidden-480">
+                        {{ user.first_name | capitalize }}
+                        {{ user.last_name | capitalize }}
                     </span>
-                </li>
-            </ul>
-        </template>
+                </a>
+
+                <div
+                    class="dropdown-menu dropdown-menu-xs dropdown-menu-right profile-menu background-default"
+                >
+                    <router-link :to="profile_url" class="dropdown-item text-data">
+                        <i class="fa fa-id-card-o mr-2 ico-data-default" />
+                        {{ $t('profile') | capitalize }}
+                    </router-link>
+
+                    <div class="dropdown-divider" />
+
+                    <router-link
+                        v-if="profile_settings_url"
+                        :to="profile_settings_url"
+                        class="dropdown-item text-data"
+                    >
+                        <i class="fa fa-cogs mr-2 ico-data-default" />
+                        {{ $t('settings') | capitalize }}
+                    </router-link>
+
+                    <div class="dropdown-divider for-web" />
+
+                    <a :href="logout_url" class="dropdown-item for-web text-data">
+                        <i class="fas fa-sign-out-alt mr-2 ico-data-default" />
+                        {{ $t('logout') | capitalize }}
+                    </a>
+                </div>
+            </li>
+            <li v-else class="nav-item">
+                <a class="nav-link" :href="login_url">
+                    <i class="fas fa-sign-out-alt text-data" />
+                    <span>{{ $t('login') | capitalize }}</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a
+                    class="nav-link"
+                    data-widget="control-sidebar"
+                    data-slide="true"
+                    href="#"
+                    role="button"
+                    @click="toggleUserSettings"
+                >
+                    <i class="fas fa-th-large" />
+                </a>
+            </li>
+        </ul>
     </nav>
 </template>
 
@@ -102,16 +87,6 @@
      */
     export default {
         name: 'TopNav',
-        props: {
-            /**
-             * Property, that means what type of links to use:
-             *  - true - <a></a>,
-             *  - false - <router-link></router-link>.
-             */
-            a_links: {
-                default: false,
-            },
-        },
         data() {
             return {
                 gravatar: new Gravatar(),
@@ -146,12 +121,7 @@
              * Property, that returns URL to profile page.
              */
             profile_url() {
-                let url = '/user/profile/';
-                if (this.a_links) {
-                    return this.$app.api.getHostUrl() + '/#' + url;
-                }
-
-                return url;
+                return '/user/profile/';
             },
             /**
              * Property, that returns URL to profile/settings page.
@@ -163,31 +133,7 @@
                     return;
                 }
 
-                if (this.a_links) {
-                    return this.$app.api.getHostUrl() + '/#' + url;
-                }
-
                 return url;
-            },
-            /**
-             * Property, that returns name of attribute for storing link url.
-             */
-            link_attr() {
-                if (this.a_links) {
-                    return 'href';
-                }
-
-                return 'to';
-            },
-            /**
-             * Property, that returns name html tag for link.
-             */
-            link_component() {
-                if (this.a_links) {
-                    return 'a';
-                }
-
-                return 'router-link';
             },
             /**
              * Property, that returns URL to openapi.
@@ -229,6 +175,14 @@
                 el.src = this.getDefaultGravatarImg();
                 return false;
             },
+            toggleUserSettings() {
+                if (
+                    document.body.classList.contains('control-sidebar-slide-open') &&
+                    this.$store.state.userSettings.changed
+                ) {
+                    this.$store.dispatch('userSettings/save');
+                }
+            },
         },
     };
 </script>
@@ -242,15 +196,10 @@
     }
 
     .profile-menu {
-        margin-top: 8px;
         border-radius: 0px;
         border-top: 0px;
         color: #fff;
         box-shadow: 0 0 0 0;
         border-color: #dfe3e7;
-    }
-
-    .sidebar-control {
-        cursor: pointer;
     }
 </style>

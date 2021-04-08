@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes" :style="styles" readonly disabled>
+    <div>
         <template v-if="with_link">
             <router-link :to="href">{{ text }}</router-link>
         </template>
@@ -23,5 +23,3 @@
         },
     };
 </script>
-
-<style></style>

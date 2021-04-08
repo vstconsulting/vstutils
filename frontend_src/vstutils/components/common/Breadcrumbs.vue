@@ -9,11 +9,13 @@
             >
                 <template v-if="item.link">
                     <router-link :to="item.link">
-                        {{ $t(item.name.toLowerCase()) | capitalize }}
+                        <i v-if="item.iconClasses" :class="item.iconClasses" />
+                        <span v-if="item.name">{{ $t(item.name.toLowerCase()) | capitalize }}</span>
                     </router-link>
                 </template>
                 <template v-else>
-                    {{ $t(item.name.toLowerCase()) | capitalize }}
+                    <i v-if="item.iconClasses" :class="item.iconClasses" />
+                    <span v-if="item.name">{{ $t(item.name.toLowerCase()) | capitalize }}</span>
                 </template>
             </li>
         </ol>
@@ -21,6 +23,17 @@
 </template>
 
 <script>
+    /**
+     * One breadcrumb item
+     * @typedef {Object} BreadcrumbItem
+     * @property {string} [name]
+     * @property {string|string[]} [iconClasses]
+     * @property {string|Object} [link]
+     */
+
+    /**
+     * Component that renders list of breadcrumbs
+     */
     export default {
         name: 'Breadcrumbs',
         props: {
@@ -30,8 +43,20 @@
 </script>
 
 <style scoped>
+    nav {
+        overflow: auto;
+    }
     .breadcrumb {
+        display: flex;
+        flex-wrap: nowrap;
+        font-size: 0.9rem;
         background-color: transparent;
+        margin: 0;
+        padding: 0;
+    }
+    .breadcrumb-item {
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     .breadcrumb-item,
     .breadcrumb-item a {

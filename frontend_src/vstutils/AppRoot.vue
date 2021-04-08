@@ -1,62 +1,96 @@
 <template>
-    <div id="RealBody" style="display: none;" :class="classes">
-        <div class="skin-black-light sidebar-mini">
-            <div class="wrapper">
-                <!-- Navbar -->
-                <div id="top_nav_wrapper">
-                    <TopNav :a_links="a_links" />
-                </div>
-                <!-- /Navbar -->
+    <div id="RealBody" style="display: none" class="wrapper" :class="classes">
+        <TopNavigation :show-back-button="showBackButton" />
 
-                <!-- Main Sidebar Container -->
-                <div id="sidebar_wrapper">
-                    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-                        <!-- Logo -->
-                        <Logo :title="info.title" />
-                        <!-- Logo -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <Logo :title="info.title" />
+            <Sidebar :menu="x_menu" :docs="x_docs" />
+        </aside>
 
-                        <!-- Sidebar -->
-                        <Sidebar :menu="x_menu" :docs="x_docs" :a_links="a_links" />
-                        <!-- /.Sidebar -->
-                    </aside>
-                </div>
-                <!-- /Main Sidebar Container -->
-
-                <!-- Content Wrapper. Contains page content -->
-                <div class="content-wrapper">
-                    <router-view ref="currentViewComponent" />
-                </div>
-                <!-- /Content Wrapper. Contains page content -->
-
-                <!-- Control Sidebar -->
-<!--                <div id="gui_customizer_wrapper">-->
-<!--                    <aside class="control-sidebar control-sidebar-dark guiCustomizer">-->
-<!--                        <GUICustomizer />-->
-<!--                    </aside>-->
-<!--                </div>-->
-                <!-- /Control Sidebar -->
-
-                <!-- Main Footer -->
-                <div id="main_footer_wrapper">
-                    <MainFooter />
-                </div>
-                <!-- /Main Footer -->
-            </div>
+        <div class="content-wrapper">
+            <router-view ref="currentViewComponent" />
         </div>
+
+        <MainFooter
+            :show-back-button="showBackButton"
+            :show-title="showTitle"
+            :hide-title-on-mobile="hideTitleOnMobile"
+            :show-breadcrumbs="showBreadcrumbs"
+        />
+
+        <ControlSidebar />
     </div>
 </template>
 <script>
+    import { formatPath } from './utils';
     import AutoUpdateController from './autoupdate/AutoUpdateController.js';
-    import GUICustomizer from './components/items/GUICustomizer.vue';
+    import ControlSidebar from './components/items/ControlSidebar.vue';
+    import { MainFooter, Sidebar, TopNavigation } from './components/items';
 
     export default {
         name: 'AppRoot',
-        components: { GUICustomizer },
+        components: { TopNavigation, ControlSidebar, MainFooter, Sidebar },
         mixins: [AutoUpdateController],
-        props: ['info', 'x_menu', 'x_docs', 'a_links'],
+        props: ['info', 'x_menu', 'x_docs'],
+        data: () => ({
+            layoutClasses: ['sidebar-mini', 'layout-fixed', 'layout-footer-fixed'],
+        }),
         computed: {
-            classes() {
+            showBackButton() {
+                return this.$route.name !== 'home';
+            },
+            showTitle() {
+                return true;
+            },
+            hideTitleOnMobile() {
+                return true;
+            },
+            showBreadcrumbs() {
+                return true;
+            },
+            currentRouteClassName() {
+                const routeName = this.$route?.name
+                    ?.replace(/^\/|\/$/g, '') // Remove leading and ending slashes
+                    .replace(/[{}]/g, '') // Remove brackets
+                    .replace(/\//g, '_'); // Replace slashes with underscores;
+
+                if (routeName) {
+                    return 'page-' + routeName;
+                }
+
+                return null;
+            },
+            userPermissionClasses() {
                 return ['is_superuser', 'is_staff'].filter((c) => window[c]);
+            },
+            bodyClasses() {
+                return [...this.userPermissionClasses, ...this.layoutClasses];
+            },
+            classes() {
+                return [];
+            },
+        },
+        watch: {
+            currentRouteClassName: { handler: 'updateBodyClass', immediate: true },
+        },
+        created() {
+            document.body.classList.add(...this.bodyClasses);
+        },
+        methods: {
+            goBack() {
+                const parentPath = this.$refs.currentViewComponent?.view?.parent?.path;
+                if (parentPath) {
+                    return this.$router.push({ path: formatPath(parentPath, this.$route.params) });
+                }
+                return this.$router.push({ name: 'home' });
+            },
+            updateBodyClass(newClass, oldClass) {
+                if (oldClass) {
+                    document.body.classList.remove(oldClass);
+                }
+                if (newClass) {
+                    document.body.classList.add(newClass);
+                }
             },
         },
     };

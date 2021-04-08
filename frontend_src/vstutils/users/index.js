@@ -33,7 +33,11 @@ signals.once('allModels.created', ({ models }) => {
     models.get('TwoFA').viewField = null;
 });
 signals.once('allViews.created', ({ views }) => {
+    // Configure user page
     const userView = views.get('/user/{id}/');
+
+    userView.sublinks.delete('_settings');
+
     const tfaSublink = userView.sublinks.get('twofa');
     tfaSublink.title = 'Two factor authentication';
     tfaSublink.iconClasses = ['fas', 'fa-lock'];
@@ -41,4 +45,7 @@ signals.once('allViews.created', ({ views }) => {
     const tfaView = views.get('/user/{id}/twofa/');
     tfaView.mixins.push(TFAPage);
     tfaView.params.method = 'PUT';
+
+    // Hide settings view
+    views.get('/user/{id}/_settings/').hidden = true;
 });

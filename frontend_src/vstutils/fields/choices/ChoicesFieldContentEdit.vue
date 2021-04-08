@@ -93,6 +93,8 @@
                         disabled: this.field.disabled || (this.disableIfEmpty && this.enum.length === 0),
                         allowClear: this.field.nullable,
                         placeholder: { id: undefined, text: '' },
+                        templateResult: this.field.templateResult,
+                        templateSelection: this.field.templateSelection,
                     })
                     .on('change', (event) => {
                         let value;

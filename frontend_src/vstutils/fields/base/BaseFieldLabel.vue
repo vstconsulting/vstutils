@@ -1,8 +1,8 @@
 <template>
-    <label :id="label_id" :class="classes" :style="styles">
+    <p :id="label_id" class="text-muted field-label">
         {{ label }}
         <Popover :content="field.description" />
-    </label>
+    </p>
 </template>
 
 <script>
@@ -10,17 +10,12 @@
     import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
     import FieldLabelIdMixin from '../FieldLabelIdMixin.js';
 
-    /**
-     * Mixin for gui_field label component.
-     */
     export default {
         name: 'BaseFieldLabel',
         components: { Popover },
         mixins: [BaseFieldInnerComponentMixin, FieldLabelIdMixin],
-        data() {
-            return {
-                class_list: ['control-label'],
-            };
+        props: {
+            type: { type: String, required: true },
         },
         computed: {
             label() {
@@ -29,3 +24,9 @@
         },
     };
 </script>
+
+<style>
+    .field-component .field-label {
+        margin-bottom: 0.2rem;
+    }
+</style>

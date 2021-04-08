@@ -1290,28 +1290,6 @@ a.multiaction-button {
     display: none;
 }
 
-.guiCustomizer .customizer-options {
-    overflow: auto;
-    height: 100%;
-}
-
-.guiCustomizer .customizer-options::-webkit-scrollbar {
-    width: 0em;
-}
-
-/*.guiCustomizer .gui-element{*/
-.guiCustomizer .guiField,
-.guiCustomizer .guifield {
-    width: 100%;
-    max-width: 100%;
-    flex: auto;
-}
-
-.guiCustomizer .guiField > button,
-.guiCustomizer .guifield > button {
-    width: 100%;
-}
-
 .gui-skin-light {
 }
 
@@ -1590,17 +1568,8 @@ pre {
     color: var(--text-header-color);
 }
 
-.main-header,
-.main-footer {
-    background-color: var(--main-header-bg-color) !important;
-}
-
 .main-sidebar {
     background-color: var(--left-sidebar-bg-color) !important;
-}
-
-.customizer-options {
-    background-color: var(--customizer-options-bg-color) !important;
 }
 
 .content-wrapper,
@@ -1691,19 +1660,6 @@ a.revers-color:hover {
 .main-header.border-bottom {
     border-bottom: 1px solid var(--main-border-color) !important;
 }
-.main-footer {
-    display: flex;
-    justify-content: space-between;
-    border-top: 1px solid var(--main-border-color) !important;
-}
-
-.main-footer .footer-section {
-    display: flex;
-}
-
-.main-footer .footer-section > * {
-    padding: 0 10px;
-}
 
 /* start of code highlighting in API */
 .com,
@@ -1760,15 +1716,6 @@ input[type='color'] {
 
 .gui-element .readonly .boolean-select {
     background-color: #eaedf0;
-}
-
-@media (max-width: 800px) {
-    /* hide edit buttons on the Dashboard on small screens and choose colors on the customizer; */
-    .btn-showWidgetSettings, .btn-toggleSortable,
-        /*.customizer-options .skin-options,*/
-    .customizer-options .customize-skin-options {
-        display: none;
-    }
 }
 
 .dropdown-menu {
@@ -1872,11 +1819,6 @@ input[type='color'] {
 
 .title-for-btn {
     margin-left: 5px;
-}
-
-.buttons-row-wrapper {
-    margin-bottom: 0;
-    padding-bottom: 15px;
 }
 
 .list-footer-btns-wrapper {

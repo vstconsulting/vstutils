@@ -4,59 +4,59 @@
         :error="error"
         :loading="loading"
         :response="response"
-        :title="title"
         :view="view"
         :actions="actions"
         :sublinks="sublinks"
-        :show-back-button="showBackButton"
         @execute-action="executeAction($event, instance)"
         @open-sublink="openSublink($event, instance)"
     >
-        <div class="container-fluid fields-wrapper">
-            <div class="row">
-                <div v-if="hideNotRequired" class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-                    <label class="control-label">{{ ($t('add') + ' ' + $t('field')) | capitalize }}</label>
-                    <select
-                        id="show_not_required_fields_select"
-                        class="form-control"
-                        @change.prevent="addFieldHandler"
-                    >
-                        <option disabled selected>
-                            {{ ($t('select') + ' ' + $t('field')) | capitalize }}
-                        </option>
-                        <option
-                            v-for="(field, idx) in fields"
-                            :key="idx"
-                            :value="field.options.name"
-                            :disabled="field.options.required"
-                        >
-                            {{ $t(field.title) }}
-                        </option>
-                    </select>
-                </div>
-
-                <div
-                    v-for="(fields, groupName) in fieldsGroups"
-                    :key="groupName"
-                    class="col-12 card fields-group"
+        <div v-if="hideNotRequired" class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
+            <label class="control-label">{{ ($t('add') + ' ' + $t('field')) | capitalize }}</label>
+            <select
+                id="show_not_required_fields_select"
+                class="form-control"
+                @change.prevent="addFieldHandler"
+            >
+                <option disabled selected>
+                    {{ ($t('select') + ' ' + $t('field')) | capitalize }}
+                </option>
+                <option
+                    v-for="(field, idx) in fields"
+                    :key="idx"
+                    :value="field.name"
+                    :disabled="field.required"
                 >
-                    <h5 v-if="groupName" class="card-header" v-text="groupName" />
+                    {{ $t(field.title) }}
+                </option>
+            </select>
+        </div>
+
+        <div class="row">
+            <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" />
+            <div
+                v-for="(fields, groupName) in fieldsGroups"
+                :key="groupName"
+                :class="fieldsGroupClasses(groupName)"
+            >
+                <div class="card">
+                    <h5 v-if="groupName" class="card-header">
+                        {{ $t(groupName) }}
+                    </h5>
                     <div class="card-body">
-                        <div class="row">
-                            <component
-                                :is="field.component"
-                                v-for="field in fields"
-                                :key="field.name"
-                                :field="field"
-                                :data="data"
-                                :type="fieldsType"
-                                @toggle-hidden="toggleHidden"
-                                @set-value="setFieldValue"
-                            />
-                        </div>
+                        <component
+                            :is="field.component"
+                            v-for="field in fields"
+                            :key="field.name"
+                            :field="field"
+                            :data="data"
+                            :type="fieldsType"
+                            @toggle-hidden="toggleHidden"
+                            @set-value="setFieldValue"
+                        />
                     </div>
                 </div>
             </div>
+            <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" />
         </div>
     </EntityView>
 </template>
@@ -81,6 +81,12 @@
             };
         },
         computed: {
+            beforeFieldsGroupsComponent() {
+                return null;
+            },
+            afterFieldsGroupsComponent() {
+                return null;
+            },
             showBackButton() {
                 return true;
             },
@@ -143,6 +149,16 @@
             setFieldValue(obj) {
                 this.commitMutation('setFieldValue', obj);
             },
+            fieldsGroupClasses(name) {
+                return ['col-md-6', 'fields-group', `fields-group-${name}`];
+            },
         },
     };
 </script>
+
+<style>
+    .fields-group:only-child {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+</style>

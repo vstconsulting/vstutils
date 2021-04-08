@@ -1,7 +1,7 @@
 <template>
     <div>
         <div>
-            <input :class="classes" :styles="styles" disabled :value="val" />
+            {{ val }}
         </div>
         <div>
             <ul class="multiple-files-list">

@@ -134,7 +134,8 @@ export class App extends BaseApp {
         return this._prefetchTranslation(lang).then((lang) => {
             this.application.$i18n.locale = lang;
             guiLocalSettings.set('lang', lang);
-            window.spa.signals.emit('app.language.changed', { lang: lang });
+            signals.emit('app.language.changed', { lang: lang });
+            document.documentElement.setAttribute('lang', lang);
             return lang;
         });
     }
@@ -180,7 +181,7 @@ export class App extends BaseApp {
     prepare() {
         signals.emit('app.beforeInit', { app: this });
 
-        let storeConstructor = new StoreConstructor(this.views, this.config.isDebug);
+        let storeConstructor = new StoreConstructor(this, this.config.isDebug);
 
         signals.emit('app.beforeInitStore', { storeConstructor });
 
@@ -209,7 +210,6 @@ export class App extends BaseApp {
                 info: this.config.schema.info,
                 x_menu: this.config.schema.info['x-menu'],
                 x_docs: this.config.schema.info['x-docs'],
-                a_links: false,
             },
             router: this.router,
             store: storeConstructor.getStore(),

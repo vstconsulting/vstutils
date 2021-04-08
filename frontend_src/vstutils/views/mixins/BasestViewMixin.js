@@ -59,7 +59,12 @@ const BasestViewMixin = {
             return this.$store.getters[`${this.storeName}/queryset`];
         },
     },
+    watch: {
+        title: 'setDocumentTitle',
+    },
     created() {
+        this.setBreadcrumbs();
+        this.setDocumentTitle();
         /**
          * Register new module in store
          */
@@ -81,6 +86,14 @@ const BasestViewMixin = {
         }
     },
     methods: {
+        setBreadcrumbs() {
+            this.$store.commit('setBreadcrumbs', this.breadcrumbs);
+        },
+        setDocumentTitle() {
+            this.$store.commit('setPageTitle', this.title);
+            document.title = this.title;
+        },
+
         /**
          * Method that can be used to customize module for store
          * @returns {Object}

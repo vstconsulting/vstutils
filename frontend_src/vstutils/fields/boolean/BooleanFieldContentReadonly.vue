@@ -1,7 +1,6 @@
 <template>
     <div
         :class="classes"
-        :style="styles"
         onselectstart="return false"
         onmousedown="return false"
         :aria-labelledby="label_id"
@@ -9,7 +8,6 @@
     >
         <div class="ico-on fa fa-toggle-on" />
         <div class="ico-off fa fa-toggle-off" />
-        <div class="boolean-title">{{ $t(text) | capitalize }}</div>
     </div>
 </template>
 
@@ -35,7 +33,6 @@
         padding-top: 4px;
     }
     .boolean-select_disabled {
-        background-color: #eaedf0;
         cursor: not-allowed;
     }
 </style>

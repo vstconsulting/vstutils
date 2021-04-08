@@ -5,6 +5,7 @@ import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
 import { getFieldFormatFactory } from '../fields';
 import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.js';
+import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
 
 /**
  * Function that checks if status code if OK
@@ -237,14 +238,17 @@ export default class ViewConstructor {
 
             // Set detail path models
             if (isDetailWithoutList) {
+                pageView.mixins.push(DetailWithoutListPageMixin);
                 pageView.objects = new SingleEntityQueryset(pageView.path, {
                     [RequestTypes.RETRIEVE]: pageView.params.model,
                 });
                 if (newView) {
+                    newView.mixins.push(DetailWithoutListPageMixin);
                     pageView.objects.models[RequestTypes.CREATE] = newView.params.model;
                     newView.objects = pageView.objects;
                 }
                 if (editView) {
+                    editView.mixins.push(DetailWithoutListPageMixin);
                     pageView.objects.models[RequestTypes.PARTIAL_UPDATE] = editView.params.model;
                     pageView.objects.models[RequestTypes.UPDATE] = editView.params.model;
                     editView.objects = pageView.objects;
@@ -347,6 +351,12 @@ export default class ViewConstructor {
                     .replace('}', '');
 
                 for (const view of [pageView, editView]) if (view) view.pkParamName = param;
+            }
+
+            // Add cancel action
+            if (editView && !editView.isEditStyleOnly) {
+                const cancel = mergeDeep({}, this.dictionary.paths.operations.page_edit.cancel);
+                editView.actions.set(cancel.name, cancel);
             }
         }
 

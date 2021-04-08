@@ -7,12 +7,6 @@ import { getFieldFormat } from '../index.js';
  */
 class FormField extends BaseField {
     /**
-     * Redefinition of base guiField constructor.
-     */
-    constructor(options = {}) {
-        super(options);
-    }
-    /**
      * Method, that makes some manipulations with value.
      * @param {object} data Field value.
      * @param {string} method Method, that will called.
@@ -82,7 +76,8 @@ class FormField extends BaseField {
      * @param {object} options Options of real field.
      */
     generateRealField(options) {
-        let field = new window.spa.fields.guiFields[options.format](options);
+        const Field = this.constructor.app.fieldsClasses.get(options.format);
+        const field = new Field(options);
 
         // TODO cannot prepare field because have no app and path
         // field.prepareFieldForView(path);
@@ -93,7 +88,7 @@ class FormField extends BaseField {
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(FormFieldMixin);
+        return [FormFieldMixin];
     }
 }
 

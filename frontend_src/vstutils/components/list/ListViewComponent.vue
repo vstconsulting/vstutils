@@ -24,9 +24,6 @@
                 </p>
             </template>
             <template v-else>
-                <div class="filters-buttons">
-                    <Pagination v-bind="pagination" @open-page="goToPage" />
-                </div>
                 <ListTable
                     :instances="instances"
                     :selection="selection"

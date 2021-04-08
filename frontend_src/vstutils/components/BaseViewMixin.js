@@ -28,7 +28,7 @@ export const BaseViewMixin = {
          * Title of View.
          */
         title() {
-            return this.view.title;
+            return this.$t(this.view.title);
         },
         actions() {
             return Array.from(this.view.actions.values());
@@ -42,14 +42,11 @@ export const BaseViewMixin = {
          */
         breadcrumbs() {
             return [
-                { name: 'Home', link: '/' },
+                { iconClasses: 'fas fa-home', link: '/' },
                 ...Array.from(getParentViews(this.view))
-                    .map((view) => ({
-                        name: this.getViewNameForBreadcrumbs(view),
-                        link: formatPath(view.path, this.$route.params),
-                    }))
+                    .map((view) => this.getViewNameForBreadcrumbs(view))
                     .reverse(),
-                { name: this.getViewNameForBreadcrumbs(this.view) },
+                this.getViewNameForBreadcrumbs(this.view),
             ];
         },
         /**
@@ -64,13 +61,11 @@ export const BaseViewMixin = {
      */
     watch: {
         $route: 'fetchData',
-        title: 'setDocumentTitle',
     },
     /**
      * Vue Hook, that will be called after View Vue Component creation.
      */
     created() {
-        this.setDocumentTitle();
         this.onCreatedHandler();
     },
     /**
@@ -78,11 +73,17 @@ export const BaseViewMixin = {
      */
     methods: {
         getViewNameForBreadcrumbs(view) {
-            if (view.type === ViewTypes.PAGE_NEW) return 'New';
-            if (view.type === ViewTypes.PAGE_EDIT && !view.isEditStyleOnly) return 'Edit';
+            const link = formatPath(view.path, this.$route.params);
+
+            if (view.type === ViewTypes.PAGE_NEW) {
+                return { iconClasses: 'fas fa-plus', link };
+            }
+            if (view.type === ViewTypes.PAGE_EDIT && !view.isEditStyleOnly) {
+                return { iconClasses: 'fas fa-pen', link };
+            }
 
             const pk = view.pkParamName && this.$route.params[view.pkParamName];
-            return pk || view.title;
+            return { name: pk || view.title, link };
         },
         /**
          * Method, that opens some page.
@@ -104,12 +105,6 @@ export const BaseViewMixin = {
                 }
                 return error;
             });
-        },
-        /**
-         * Method, that sets <title></title> equal to this.title.
-         */
-        setDocumentTitle() {
-            document.title = this.title;
         },
         /**
          * Method, that calls from created() Hook.
@@ -190,7 +185,7 @@ export const BaseViewMixin = {
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.executeEmpty).format([
                         this.$t(action.title),
-                        this.$t(instance?.getViewFieldString() || this.view.title),
+                        instance?.getViewFieldString() || this.$t(this.view.title),
                     ]),
                 );
 

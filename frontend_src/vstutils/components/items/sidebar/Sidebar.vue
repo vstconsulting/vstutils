@@ -20,31 +20,17 @@
         props: {
             menu: Array,
             docs: Object,
-            /**
-             * Property, that means what type of links to use:
-             *  - true - <a></a>,
-             *  - false - <router-link></router-link>.
-             */
-            a_links: {
-                default: false,
-            },
         },
         computed: {
             /**
              * Property, that returns menu items, that should be rendered.
              */
             menu_items() {
-                let url_prefix = '';
-                if (this.a_links) {
-                    url_prefix = app.api.getHostUrl();
-                }
-
                 let items = [
                     {
                         name: 'Home',
-                        url: url_prefix + '/',
+                        url: '/',
                         span_class: 'fas fa-tachometer-alt',
-                        origin_link: this.a_links,
                     },
                 ];
 
