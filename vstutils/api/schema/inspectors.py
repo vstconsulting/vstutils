@@ -207,6 +207,7 @@ class FkFieldInspector(FieldInspector):
                 'usePrefetch': field.use_prefetch,
                 'makeLink': field.make_link,
                 'dependence': field.dependence,
+                'filters': field.filters
             }
         }
 

@@ -36,7 +36,7 @@ describe('ModelConstructor', () => {
             }),
             new DateTimeField({
                 // default=timezone.now
-                default: '2021-03-17T04:40:16.757125Z',
+                default: '2021-04-08T02:10:39.377418Z',
                 name: 'register_date',
                 format: 'date-time',
                 readOnly: true,

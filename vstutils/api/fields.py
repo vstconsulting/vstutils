@@ -19,7 +19,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
 
-
 DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
 
 
@@ -361,11 +360,17 @@ class FkField(IntegerField):
     :type use_prefetch: bool
     :param make_link: Show value as link to model. Default is ``True``.
     :type make_link: bool
-    :param dependence: Dictionary, where keys are name of field from the same model, and keys are name of query filter.
+    :param dependence: Dictionary, where keys are names of a field from the same model,
+                       and keys are name of query filter.
                        If at least one of the fields that we depend on is non nullable, required and set to null,
                        autocompletion list will be empty and field will be disabled.
     :type dependence: dict
+    :param filters: Dictionary, where keys are names of a field from a related (by this FkField) model,
+                    and values are values of that field.
+    :type filters: dict
 
+    .. note::
+        Intersection of `dependence.values()` and `filters.keys()` will throw error to prevent ambiguous filtering.
     .. note::
         Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
     """
@@ -384,6 +389,9 @@ class FkField(IntegerField):
     use_prefetch: bool
     make_link: bool
     dependence: DependenceType
+    default_error_messages = {
+        'ambiguous_filter': 'Ambiguous filtering, use different filters for dependencies and filters',
+    }
 
     def __init__(self, **kwargs):
         self.select_model = kwargs.pop('select')
@@ -392,7 +400,10 @@ class FkField(IntegerField):
         self.use_prefetch = kwargs.pop('use_prefetch', True)
         self.make_link = kwargs.pop('make_link', True)
         self.dependence = kwargs.pop('dependence', None)
+        self.filters = kwargs.pop('filters', None)
         super().__init__(**kwargs)
+        if self.filters and self.dependence and set(self.dependence.values()) & set(self.filters.keys()):
+            self.fail('ambiguous_filter')
 
 
 class FkModelField(FkField):
@@ -540,6 +551,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField` with structure of data.
 
     """
+
     def __init__(self, **kwargs):
         self.file = kwargs.pop('file', False)
         super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
@@ -665,7 +677,7 @@ class PasswordField(CharField):
         kwargs['write_only'] = True
         kwargs['style'] = kwargs.get('style', {})
         kwargs['style']['input_type'] = 'password'
-        super(PasswordField, self).__init__(*args, ** kwargs)
+        super(PasswordField, self).__init__(*args, **kwargs)
 
 
 class RelatedListField(VSTCharField):

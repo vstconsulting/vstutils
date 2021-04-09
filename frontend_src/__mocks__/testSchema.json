@@ -4,24 +4,24 @@
         "title": "QuickStart",
         "termsOfService": "",
         "contact": { "name": "System Administrator" },
-        "x-docs": { "has_docs": true, "docs_url": "/docs/" },
+        "x-docs": { "has_docs": false, "docs_url": "/docs/" },
         "x-links": {
             "vstutils": {
-                "url": "https://github.com/vstconsulting/vstutils.git",
-                "name": "VST Utils sources"
+                "name": "VST Utils sources",
+                "url": "https://github.com/vstconsulting/vstutils.git"
             }
         },
         "x-menu": [
-            { "name": "Authors", "url": "/author", "span_class": "fa fa-cog" },
-            { "name": "Categories", "url": "/category", "span_class": "fa fa-cog" },
-            { "name": "Posts", "url": "/post", "span_class": "fa fa-cog" },
-            { "name": "Post Types", "url": "/post_types", "span_class": "fa fa-cog" },
-            { "name": "Predefined Attributes", "url": "/predefined_attribute", "span_class": "fa fa-cog" },
-            { "name": "All Fields", "url": "/all_fields", "span_class": "fa fa-cog" },
+            { "name": "Authors", "span_class": "fa fa-cog", "url": "/author" },
+            { "name": "Categories", "span_class": "fa fa-cog", "url": "/category" },
+            { "name": "Posts", "span_class": "fa fa-cog", "url": "/post" },
+            { "name": "Post Types", "span_class": "fa fa-cog", "url": "/post_types" },
+            { "name": "Predefined Attributes", "span_class": "fa fa-cog", "url": "/predefined_attribute" },
+            { "name": "All Fields", "span_class": "fa fa-cog", "url": "/all_fields" },
             {
                 "name": "System",
                 "span_class": "fa fa-cog",
-                "sublinks": [{ "name": "Users", "url": "/user", "span_class": "fa fa-user" }]
+                "sublinks": [{ "name": "Users", "span_class": "fa fa-user", "url": "/user" }]
             }
         ],
         "x-page-limit": 20,
@@ -35,17 +35,15 @@
         "x-versions": {
             "application": "1.0.0",
             "library": "1.0.0",
-            "vstutils": "4.4.8",
+            "vstutils": "4.6.2",
             "django": "2.2.18",
             "djangorestframework": "3.12.2",
             "drf_yasg": "1.20.0"
         },
         "version": "v1",
-        "x-user-id": 1,
-        "x-centrifugo-token": "",
-        "x-centrifugo-address": "ws://localhost:8765/"
+        "x-user-id": 1
     },
-    "host": "quick.local:8086",
+    "host": "0.0.0.0:8080",
     "schemes": ["http"],
     "basePath": "/api/v1",
     "consumes": ["application/json"],
@@ -56,7 +54,7 @@
         "/all_fields/": {
             "get": {
                 "operationId": "all_fields_list",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime, file_as_file, image_as_file, smart_named_file, smart_named_image, smart_multiple_field, smart_multiple_image, smart_fk_field, smart_file_as_file, smart_image_as_file, fk_with_dependency)",
                 "parameters": [
                     {
                         "name": "ordering",
@@ -100,7 +98,7 @@
             },
             "post": {
                 "operationId": "all_fields_add",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime, file_as_file, image_as_file, smart_named_file, smart_named_image, smart_multiple_field, smart_multiple_image, smart_fk_field, smart_file_as_file, smart_image_as_file, fk_with_dependency)",
                 "parameters": [
                     {
                         "name": "data",
@@ -119,7 +117,7 @@
         "/all_fields/{id}/": {
             "get": {
                 "operationId": "all_fields_get",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime, file_as_file, image_as_file, smart_named_file, smart_named_image, smart_multiple_field, smart_multiple_image, smart_fk_field, smart_file_as_file, smart_image_as_file, fk_with_dependency)",
                 "parameters": [],
                 "responses": {
                     "200": { "description": "OK", "schema": { "$ref": "#/definitions/OneAllFields" } }
@@ -129,7 +127,7 @@
             },
             "put": {
                 "operationId": "all_fields_update",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime, file_as_file, image_as_file, smart_named_file, smart_named_image, smart_multiple_field, smart_multiple_image, smart_fk_field, smart_file_as_file, smart_image_as_file, fk_with_dependency)",
                 "parameters": [
                     {
                         "name": "data",
@@ -145,7 +143,7 @@
             },
             "patch": {
                 "operationId": "all_fields_edit",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime, file_as_file, image_as_file, smart_named_file, smart_named_image, smart_multiple_field, smart_multiple_image, smart_fk_field, smart_file_as_file, smart_image_as_file, fk_with_dependency)",
                 "parameters": [
                     {
                         "name": "data",
@@ -161,7 +159,7 @@
             },
             "delete": {
                 "operationId": "all_fields_remove",
-                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime)",
+                "description": "AllFields(id, hidden, autocomplete_model, autocomplete_enum, binfile, boolean, choices, color, crontab, date, date_time, decimal, dynamic_fk, dynamic, email, file, fk, float, html, integer, json, multiplenamedbinfile, multiplenamedbinimage, multiplenamedbinimage_validation, multiselect_model, namedbinfile, namedbinimage, namedbinimage_validation, rating_stars, rating_slider, rating_icon, password, qrcode, secretfile, textarea, uptime, file_as_file, image_as_file, smart_named_file, smart_named_image, smart_multiple_field, smart_multiple_image, smart_fk_field, smart_file_as_file, smart_image_as_file, fk_with_dependency)",
                 "parameters": [],
                 "responses": { "204": { "description": "NO CONTENT" } },
                 "tags": ["all_fields"]
@@ -3386,7 +3384,7 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
+                    "description": "A unique integer value identifying this user.",
                     "required": true,
                     "type": "integer"
                 }
@@ -3413,7 +3411,7 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
+                    "description": "A unique integer value identifying this user.",
                     "required": true,
                     "type": "integer"
                 }
@@ -3446,7 +3444,7 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
+                    "description": "A unique integer value identifying this user.",
                     "required": true,
                     "type": "integer"
                 }
@@ -3459,7 +3457,6 @@
                 "autocomplete_model",
                 "autocomplete_enum",
                 "binfile",
-                "dynamic_fk",
                 "dynamic",
                 "file",
                 "fk",
@@ -3484,9 +3481,9 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/Author" },
+                        "usePrefetch": true,
                         "value_field": "name",
-                        "view_field": "name",
-                        "usePrefetch": true
+                        "view_field": "name"
                     },
                     "x-nullable": true
                 },
@@ -3541,9 +3538,9 @@
                     "type": "string",
                     "format": "dynamic",
                     "additionalProperties": {
-                        "field": "choices",
                         "choices": {},
-                        "types": { "integer": "integer", "boolean": "boolean" }
+                        "field": "choices",
+                        "types": { "boolean": "boolean", "integer": "integer" }
                     },
                     "x-nullable": true
                 },
@@ -3560,12 +3557,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "model": { "$ref": "#/definitions/PredefinedAttribute" },
-                        "value_field": "id",
-                        "view_field": "name",
-                        "usePrefetch": true,
+                        "dependence": null,
+                        "filters": null,
                         "makeLink": true,
-                        "dependence": null
+                        "model": { "$ref": "#/definitions/PredefinedAttribute" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
                     },
                     "x-nullable": true
                 },
@@ -3589,11 +3587,11 @@
                     "type": "string",
                     "format": "multiplenamedbinimage",
                     "additionalProperties": {
-                        "min_width": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"],
+                        "max_height": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "max_height": 400,
-                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                        "min_width": 400
                     }
                 },
                 "multiselect_model": {
@@ -3601,13 +3599,13 @@
                     "type": "string",
                     "format": "multiselect",
                     "additionalProperties": {
+                        "dependence": null,
+                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Author" },
+                        "usePrefetch": false,
                         "value_field": "name",
                         "view_field": "name",
-                        "view_separator": ",",
-                        "usePrefetch": false,
-                        "makeLink": true,
-                        "dependence": null
+                        "view_separator": ","
                     },
                     "x-nullable": true
                 },
@@ -3629,11 +3627,11 @@
                     "type": "string",
                     "format": "namedbinimage",
                     "additionalProperties": {
-                        "min_width": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"],
+                        "max_height": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "max_height": 400,
-                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                        "min_width": 400
                     },
                     "x-nullable": true
                 },
@@ -3649,12 +3647,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "min_value": 0,
-                        "max_value": 5,
-                        "step": 1,
-                        "style": "stars",
                         "color": "green",
-                        "fa_class": null
+                        "fa_class": null,
+                        "max_value": 5,
+                        "min_value": 0,
+                        "step": 1,
+                        "style": "stars"
                     },
                     "x-nullable": true
                 },
@@ -3663,12 +3661,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "min_value": 0,
-                        "max_value": 5,
-                        "step": 0.3,
-                        "style": "slider",
                         "color": "orange",
-                        "fa_class": null
+                        "fa_class": null,
+                        "max_value": 5,
+                        "min_value": 0,
+                        "step": 0.3,
+                        "style": "slider"
                     }
                 },
                 "rating_icon": {
@@ -3676,12 +3674,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "min_value": 0,
-                        "max_value": 5,
-                        "step": 1,
-                        "style": "fa_icon",
                         "color": "DeepPink",
-                        "fa_class": "fas fa-poo-storm"
+                        "fa_class": "fas fa-poo-storm",
+                        "max_value": 5,
+                        "min_value": 0,
+                        "step": 1,
+                        "style": "fa_icon"
                     }
                 },
                 "secretfile": {
@@ -3691,7 +3689,76 @@
                     "x-nullable": true
                 },
                 "textarea": { "title": "Textarea", "type": "string", "format": "textarea", "default": "" },
-                "uptime": { "title": "Uptime", "type": "integer", "format": "uptime", "x-nullable": true }
+                "uptime": { "title": "Uptime", "type": "integer", "format": "uptime", "x-nullable": true },
+                "file_as_file": {
+                    "title": "File as file",
+                    "type": "string",
+                    "format": "namedbinfile",
+                    "x-nullable": true
+                },
+                "image_as_file": {
+                    "title": "Image as file",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "smart_named_file": {
+                    "title": "Smart named file",
+                    "type": "string",
+                    "format": "namedbinfile",
+                    "x-nullable": true
+                },
+                "smart_named_image": {
+                    "title": "Smart named image",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "smart_multiple_field": {
+                    "title": "Smart multiple field",
+                    "type": "string",
+                    "format": "multiplenamedbinfile",
+                    "x-nullable": true
+                },
+                "smart_multiple_image": {
+                    "title": "Smart multiple image",
+                    "type": "string",
+                    "format": "multiplenamedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "smart_fk_field": {
+                    "title": "Smart fk field",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "dependence": null,
+                        "filters": null,
+                        "makeLink": true,
+                        "model": { "$ref": "#/definitions/Category" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
+                    },
+                    "x-nullable": true
+                },
+                "fk_with_filters": {
+                    "title": "Fk with filters",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "dependence": { "integer": "id" },
+                        "filters": { "category": "1", "title": "123" },
+                        "makeLink": true,
+                        "model": { "$ref": "#/definitions/Post" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "title"
+                    },
+                    "x-nullable": true
+                }
             },
             "x-properties-groups": {
                 "": [
@@ -3729,7 +3796,15 @@
                     "rating_icon",
                     "secretfile",
                     "textarea",
-                    "uptime"
+                    "uptime",
+                    "file_as_file",
+                    "image_as_file",
+                    "smart_named_file",
+                    "smart_named_image",
+                    "smart_multiple_field",
+                    "smart_multiple_image",
+                    "smart_fk_field",
+                    "fk_with_filters"
                 ]
             },
             "x-view-field-name": "color"
@@ -3739,7 +3814,6 @@
                 "autocomplete_model",
                 "autocomplete_enum",
                 "binfile",
-                "dynamic_fk",
                 "dynamic",
                 "file",
                 "fk",
@@ -3764,9 +3838,9 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/Author" },
+                        "usePrefetch": true,
                         "value_field": "name",
-                        "view_field": "name",
-                        "usePrefetch": true
+                        "view_field": "name"
                     },
                     "x-nullable": true
                 },
@@ -3821,9 +3895,9 @@
                     "type": "string",
                     "format": "dynamic",
                     "additionalProperties": {
-                        "field": "choices",
                         "choices": {},
-                        "types": { "integer": "integer", "boolean": "boolean" }
+                        "field": "choices",
+                        "types": { "boolean": "boolean", "integer": "integer" }
                     },
                     "x-nullable": true
                 },
@@ -3840,12 +3914,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "model": { "$ref": "#/definitions/PredefinedAttribute" },
-                        "value_field": "id",
-                        "view_field": "name",
-                        "usePrefetch": true,
+                        "dependence": null,
+                        "filters": null,
                         "makeLink": true,
-                        "dependence": null
+                        "model": { "$ref": "#/definitions/PredefinedAttribute" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
                     },
                     "x-nullable": true
                 },
@@ -3869,11 +3944,11 @@
                     "type": "string",
                     "format": "multiplenamedbinimage",
                     "additionalProperties": {
-                        "min_width": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"],
+                        "max_height": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "max_height": 400,
-                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                        "min_width": 400
                     }
                 },
                 "multiselect_model": {
@@ -3881,13 +3956,13 @@
                     "type": "string",
                     "format": "multiselect",
                     "additionalProperties": {
+                        "dependence": null,
+                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Author" },
+                        "usePrefetch": false,
                         "value_field": "name",
                         "view_field": "name",
-                        "view_separator": ",",
-                        "usePrefetch": false,
-                        "makeLink": true,
-                        "dependence": null
+                        "view_separator": ","
                     },
                     "x-nullable": true
                 },
@@ -3909,11 +3984,11 @@
                     "type": "string",
                     "format": "namedbinimage",
                     "additionalProperties": {
-                        "min_width": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"],
+                        "max_height": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "max_height": 400,
-                        "extensions": ["bmp", "jpeg", "jpg", "png"]
+                        "min_width": 400
                     },
                     "x-nullable": true
                 },
@@ -3929,12 +4004,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "min_value": 0,
-                        "max_value": 5,
-                        "step": 1,
-                        "style": "stars",
                         "color": "green",
-                        "fa_class": null
+                        "fa_class": null,
+                        "max_value": 5,
+                        "min_value": 0,
+                        "step": 1,
+                        "style": "stars"
                     },
                     "x-nullable": true
                 },
@@ -3943,12 +4018,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "min_value": 0,
-                        "max_value": 5,
-                        "step": 0.3,
-                        "style": "slider",
                         "color": "orange",
-                        "fa_class": null
+                        "fa_class": null,
+                        "max_value": 5,
+                        "min_value": 0,
+                        "step": 0.3,
+                        "style": "slider"
                     }
                 },
                 "rating_icon": {
@@ -3956,12 +4031,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "min_value": 0,
-                        "max_value": 5,
-                        "step": 1,
-                        "style": "fa_icon",
                         "color": "DeepPink",
-                        "fa_class": "fas fa-poo-storm"
+                        "fa_class": "fas fa-poo-storm",
+                        "max_value": 5,
+                        "min_value": 0,
+                        "step": 1,
+                        "style": "fa_icon"
                     }
                 },
                 "secretfile": {
@@ -3971,7 +4046,76 @@
                     "x-nullable": true
                 },
                 "textarea": { "title": "Textarea", "type": "string", "format": "textarea", "default": "" },
-                "uptime": { "title": "Uptime", "type": "integer", "format": "uptime", "x-nullable": true }
+                "uptime": { "title": "Uptime", "type": "integer", "format": "uptime", "x-nullable": true },
+                "file_as_file": {
+                    "title": "File as file",
+                    "type": "string",
+                    "format": "namedbinfile",
+                    "x-nullable": true
+                },
+                "image_as_file": {
+                    "title": "Image as file",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "smart_named_file": {
+                    "title": "Smart named file",
+                    "type": "string",
+                    "format": "namedbinfile",
+                    "x-nullable": true
+                },
+                "smart_named_image": {
+                    "title": "Smart named image",
+                    "type": "string",
+                    "format": "namedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "smart_multiple_field": {
+                    "title": "Smart multiple field",
+                    "type": "string",
+                    "format": "multiplenamedbinfile",
+                    "x-nullable": true
+                },
+                "smart_multiple_image": {
+                    "title": "Smart multiple image",
+                    "type": "string",
+                    "format": "multiplenamedbinimage",
+                    "additionalProperties": {},
+                    "x-nullable": true
+                },
+                "smart_fk_field": {
+                    "title": "Smart fk field",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "dependence": null,
+                        "filters": null,
+                        "makeLink": true,
+                        "model": { "$ref": "#/definitions/Category" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
+                    },
+                    "x-nullable": true
+                },
+                "fk_with_filters": {
+                    "title": "Fk with filters",
+                    "type": "integer",
+                    "format": "fk",
+                    "additionalProperties": {
+                        "dependence": { "integer": "id" },
+                        "filters": { "category": "1", "title": "123" },
+                        "makeLink": true,
+                        "model": { "$ref": "#/definitions/Post" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "title"
+                    },
+                    "x-nullable": true
+                }
             },
             "x-properties-groups": {
                 "": [
@@ -4009,7 +4153,15 @@
                     "rating_icon",
                     "secretfile",
                     "textarea",
-                    "uptime"
+                    "uptime",
+                    "file_as_file",
+                    "image_as_file",
+                    "smart_named_file",
+                    "smart_named_image",
+                    "smart_multiple_field",
+                    "smart_multiple_image",
+                    "smart_fk_field",
+                    "fk_with_filters"
                 ]
             },
             "x-view-field-name": "color"
@@ -4038,7 +4190,7 @@
                     "type": "string",
                     "format": "date-time",
                     "readOnly": true,
-                    "default": "2021-03-17T04:40:16.757125Z"
+                    "default": "2021-04-08T02:10:39.377418Z"
                 }
             },
             "x-properties-groups": { "": ["id", "name", "posts", "register_date"] },
@@ -4069,7 +4221,7 @@
                     "type": "string",
                     "format": "date-time",
                     "readOnly": true,
-                    "default": "2021-03-17T04:40:16.758391Z"
+                    "default": "2021-04-08T02:10:39.381870Z"
                 }
             },
             "x-properties-groups": { "": ["id", "name", "posts", "register_date"] },
@@ -4117,12 +4269,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "model": { "$ref": "#/definitions/Author" },
-                        "value_field": "id",
-                        "view_field": "name",
-                        "usePrefetch": true,
+                        "dependence": null,
+                        "filters": null,
                         "makeLink": true,
-                        "dependence": null
+                        "model": { "$ref": "#/definitions/Author" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
                     }
                 },
                 "category": {
@@ -4130,12 +4283,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "model": { "$ref": "#/definitions/Category" },
-                        "value_field": "id",
-                        "view_field": "name",
-                        "usePrefetch": true,
+                        "dependence": null,
+                        "filters": null,
                         "makeLink": true,
-                        "dependence": null
+                        "model": { "$ref": "#/definitions/Category" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
                     },
                     "x-nullable": true
                 },
@@ -4158,12 +4312,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "model": { "$ref": "#/definitions/Author" },
-                        "value_field": "id",
-                        "view_field": "name",
-                        "usePrefetch": true,
+                        "dependence": null,
+                        "filters": null,
                         "makeLink": true,
-                        "dependence": null
+                        "model": { "$ref": "#/definitions/Author" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
                     }
                 },
                 "title": { "title": "Title", "type": "string", "maxLength": 255, "minLength": 1 },
@@ -4173,12 +4328,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "model": { "$ref": "#/definitions/Category" },
-                        "value_field": "id",
-                        "view_field": "name",
-                        "usePrefetch": true,
+                        "dependence": null,
+                        "filters": null,
                         "makeLink": true,
-                        "dependence": null
+                        "model": { "$ref": "#/definitions/Category" },
+                        "usePrefetch": true,
+                        "value_field": "id",
+                        "view_field": "name"
                     },
                     "x-nullable": true
                 },
@@ -4188,9 +4344,9 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/PredefinedPostType" },
+                        "usePrefetch": true,
                         "value_field": "name",
-                        "view_field": "name",
-                        "usePrefetch": true
+                        "view_field": "name"
                     }
                 }
             },
@@ -4236,8 +4392,8 @@
                     "type": "string",
                     "format": "dynamic",
                     "additionalProperties": {
-                        "field": "key",
                         "choices": {},
+                        "field": "key",
                         "types": { "meta_title": "string", "some_boolean": "boolean" }
                     }
                 }
@@ -4313,8 +4469,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
-                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -4333,8 +4489,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
-                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -4342,12 +4498,8 @@
                 },
                 "is_active": { "title": "Is active", "type": "boolean", "default": true },
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
-                "first_name": { "title": "\u0418\u043c\u044f", "type": "string", "maxLength": 30 },
-                "last_name": {
-                    "title": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
-                    "type": "string",
-                    "maxLength": 150
-                },
+                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
+                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 },
                 "password": { "title": "Password", "type": "string", "minLength": 1 },
                 "password2": { "title": "Repeat password", "type": "string", "minLength": 1 }
@@ -4373,8 +4525,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
-                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -4382,12 +4534,8 @@
                 },
                 "is_active": { "title": "Is active", "type": "boolean", "default": true },
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
-                "first_name": { "title": "\u0418\u043c\u044f", "type": "string", "maxLength": 30 },
-                "last_name": {
-                    "title": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
-                    "type": "string",
-                    "maxLength": 150
-                },
+                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
+                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 }
             },
             "x-properties-groups": {

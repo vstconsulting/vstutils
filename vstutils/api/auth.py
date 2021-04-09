@@ -154,7 +154,6 @@ class TwoFASerializer(VSTSerializer):
     default_error_messages = {
         'invalid_pin': 'Invalid authentication code',
         'no_secret_provided': 'Secret string must be provided',
-        **VSTSerializer.default_error_messages
     }
 
     class Meta:

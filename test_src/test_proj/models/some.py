@@ -19,12 +19,14 @@ class ModelWithFK(BModel):
     no_prefetch_and_link_fk = models.ForeignKey('test_proj.Host', related_name='ModelWithFK2', on_delete=models.CASCADE,
                                                 null=True, default=None, blank=True)
     multiselect = models.TextField(null=True, default=None, blank=True)
+    fk_with_filters = models.ForeignKey('test_proj.Post', on_delete=models.CASCADE, null=True)
 
     class Meta:
         _detail_fields = (
             'some_fk',
             'no_prefetch_and_link_fk',
-            'multiselect'
+            'multiselect',
+            'fk_with_filters'
         )
         _override_list_fields = {
             'some_fk': fields.FkModelField(select=Host)
@@ -33,9 +35,9 @@ class ModelWithFK(BModel):
             'some_fk': fields.FkModelField(select=Host),
             'no_prefetch_and_link_fk': fields.FkModelField(select=Host.generated_view.serializer_class,
                                                            use_prefetch=False, make_link=False, required=False),
-            'multiselect': fields.CommaMultiSelect(select='test_proj.Host', required=False)
+            'multiselect': fields.CommaMultiSelect(select='test_proj.Host', required=False),
+            'fk_with_filters': fields.FkModelField(select='test_proj.Post', filters={'rating': 5}, required=False, allow_null=True)
         }
-
 
 class ModelWithBinaryFiles(BModel):
     some_binfile = models.TextField(default='')
