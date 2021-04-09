@@ -142,13 +142,15 @@
              */
             async getQuerysetResults(searchTerm, offset, queryset) {
                 const filters = { limit: this.pageSize, offset, [this.field.viewField]: searchTerm };
+                if (this.field.filters) {
+                    Object.assign(filters, this.field.filters);
+                }
 
                 const signalObj = {
                     qs: queryset,
                     filters: filters,
                     dependenceFilters: this.field.getDependenceFilters(this.data),
                 };
-
                 const model = this.queryset.getModelClass(RequestTypes.LIST);
 
                 signals.emit(`filter.${this.field.format}.${model.name}.${this.field.name}`, signalObj);

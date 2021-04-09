@@ -17,11 +17,12 @@ describe('FKfield', () => {
     test('Test Fk model', async () => {
         const authorFkField = app.modelsClasses.get('Post').fields.get('author');
         const Post = app.modelsClasses.get('Post');
-
+        const filteredFk = app.modelsClasses.get('OneAllFields').fields.get('fk_with_filters');
         expect(authorFkField.format).toBe('fk');
         expect(authorFkField.fkModel.name).toBe('Author');
         expect(authorFkField).toBeInstanceOf(FKField);
-
+        expect(filteredFk.filters).toMatchObject({ category: '1', title: '123' });
+        expect(filteredFk.dependence).toMatchObject({ integer: 'id' });
         const post1 = new Post({ id: 1, name: 'post1', author: 1 });
         const post2 = new Post({ id: 2, name: 'post1', author: 2 });
         const instances = [post1, post2];

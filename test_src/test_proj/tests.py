@@ -55,6 +55,7 @@ from vstutils.utils import SecurePickling, BaseEnum
 from .models import File, Host, HostGroup, List, Author, Post
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
+from vstutils.api.fields import FkField
 
 DIR_PATH = os.path.abspath('test_proj')
 test_config = '''[main]
@@ -1250,7 +1251,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'value_field': 'id',
                 'view_field': 'name',
                 'dependence': None,
+                'filters': None
             }
+        )
+        self.assertEqual(
+            api['definitions']['OneModelWithFK']['properties']['fk_with_filters']['additionalProperties']['filters'],
+            {'rating': 5}
         )
         self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic_fk')
         self.assertEqual(
@@ -2372,6 +2378,8 @@ class ProjectTestCase(BaseTestCase):
         results = self.bulk(bulk_data)
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[1]['data']['some_fk'], results[0]['data']['id'])
+        with self.assertRaises(ValidationError):
+            FkField(select=Post, dependence={'author': 'name'}, filters={'name': 'Lee'})
 
     def test_model_related_list_field(self):
         date = '2021-01-20T00:26:38Z'

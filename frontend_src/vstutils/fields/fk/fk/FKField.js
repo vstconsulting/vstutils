@@ -18,6 +18,7 @@ class FKField extends BaseField {
         this.usePrefetch = props.usePrefetch;
         this.makeLink = props.makeLink;
         this.dependence = props.dependence || {};
+        this.filters = props.filters || null;
 
         if (Object.prototype.hasOwnProperty.call(props, 'fetchData')) {
             this.fetchData = props.fetchData;
@@ -119,7 +120,6 @@ class FKField extends BaseField {
         }
         return filters;
     }
-
     getValueFieldValue(val) {
         if (val !== null && typeof val === 'object') {
             if (val._data) {
