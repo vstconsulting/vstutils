@@ -1741,11 +1741,7 @@ class EndpointTestCase(BaseTestCase):
             self.assertFalse(any(filter(lambda r: r['status'] != 200, results)), results)
             self.assertFalse(any(filter(lambda r: r['data']['id'] != self.user.id, results)))
 
-            if django_version[0] >= 3 and django_version[1] == 2:  # nocv
-                headers = self.last_response.headers
-            else:
-                headers = self.last_response._headers
-            return method, headers['server-timing'][1].split(', ')[0].split('=')[-1]
+            return method, self.last_response.headers['server-timing'][1].split(', ')[0].split('=')[-1]
 
         perf_results = '\n'.join(f'{k.upper()}: {v}ms' for k, v in map(iteration, ('post', 'put', 'patch')))
         print(f"\nTimings for different methods:\n{perf_results}\n")

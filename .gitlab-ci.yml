@@ -60,7 +60,7 @@ functional_test:
     matrix:
       - TOX_ENVS:
           - py36-django32-install
-          - py39-django22-coverage
+          - py39-django32-coverage
 
 js_tests:
   <<: *branch_tests
