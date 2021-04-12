@@ -264,6 +264,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'ldap-server': None,
             'ldap-default-domain': '',
             'ldap-auth_format': 'cn=<username>,<domain>',
+            'language_cookie_name': 'lang',
         },
         'web': {
             'allow_cors': False,
@@ -858,6 +859,7 @@ USE_I18N: bool = True
 USE_L10N: bool = True
 USE_TZ: bool = True
 FIRST_DAY_OF_WEEK = main['first_day_of_week']
+LANGUAGE_COOKIE_NAME = main['language_cookie_name']
 
 
 # LOGGING settings
