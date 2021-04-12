@@ -409,6 +409,11 @@ kwargs = dict(
         'stubs': load_requirements('requirements-stubs.txt'),
         'ws': ['channels~=3.0.2', 'asgiref~=3.3.1'],
         'pil': ['Pillow~=8.0.1'],
+        'boto3': [
+            i.replace('libcloud', 'libcloud,boto3')
+            for i in load_requirements('requirements.txt')
+            if isinstance(i, str) and 'django-storages' in i
+        ]
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),

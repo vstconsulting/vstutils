@@ -344,8 +344,9 @@ to configure custom media dir and relative url. By default it would be
 ``{/path/to/project/module}/media`` and ``/media/``.
 
 Applications based on ``vstutils`` supports store files in external services
-with `Apache Libcloud <http://libcloud.apache.org/>`_. All storages settings
-grouped by sections named ``[storages.libcloud.provider]``, where ``provider`` is name
+with `Apache Libcloud <http://libcloud.apache.org/>`_ and `Boto3`_.
+
+Apache Libcloud settings grouped by sections named ``[storages.libcloud.provider]``, where ``provider`` is name
 of storage. Each section has four keys: ``type``, ``user``, ``key`` and ``bucket``.
 Read more about the settings in
 `django-storages docs <https://django-storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-providers>`_
@@ -355,7 +356,20 @@ Each entry corresponds to a single ‘bucket’ of storage. You can have multipl
 buckets for a single service provider (e.g., multiple S3 buckets), and
 you can define buckets at multiple providers.
 
-Once you have defined your Libcloud providers, you have the option of setting
+For ``Boto3`` all settings grouped by section named ``[storages.boto3]``. Section must contain following keys:
+``access_key_id``, ``secret_access_key``, ``storage_bucket_name``.
+Read more about the settings in
+`django-storages docs <https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_
+
+Storage has following priority to choose storage engine if multiple was provided:
+
+1. Libcloud store when config contains this section.
+
+2. Boto3 store, when you have section and has all required keys.
+
+3. FileSystem store otherwise.
+
+Once you have defined your Libcloud providers, you have an option of setting
 one provider as the default provider of Libcloud storage. You can do it
 by setup ``[storages.libcloud.default]`` section or vstutils will set the first storage
 as default.
