@@ -4,14 +4,16 @@ Default ViewSets for web-api.
 
 import re
 import io
-import sys
+import json
 import logging
 import inspect
 import traceback
 import datetime
 import typing as _t
+from functools import partial
 from copy import deepcopy
 
+import orjson
 from django.conf import settings
 from django.core import exceptions as djexcs
 from django.http.response import Http404, FileResponse, HttpResponseNotModified
@@ -24,8 +26,8 @@ from rest_framework.response import Response as RestResponse
 from rest_framework.request import Request
 from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
+from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
-from ..exceptions import VSTUtilsException
 from ..utils import classproperty, get_if_lazy, raise_context_decorator_with_default
 from . import responses, fields
 from .serializers import (
@@ -70,6 +72,22 @@ def _get_cleared(qs):
     return getattr(qs, 'cleared', lambda: qs)()
 
 
+def apply_translation(obj: _t.Any, trans_function: _t.Callable):
+    recursive_call = partial(apply_translation, trans_function=trans_function)
+    if isinstance(obj, dict):
+        return {
+            trans_function(k): recursive_call(v)
+            for k, v in obj.items()
+        }
+    elif isinstance(obj, (tuple, list)):
+        return type(obj)(recursive_call(v) for v in obj)
+    elif isinstance(obj, (exceptions.ErrorDetail, ReturnList, ReturnDict)):
+        with raise_context_decorator_with_default():
+            obj = orjson.loads(json.dumps(obj))
+            return recursive_call(obj)
+    return trans_function(obj)
+
+
 def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]:
     traceback_str: _t.Text = traceback.format_exc()
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
@@ -79,8 +97,11 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
     lang = getattr(context.get('request'), 'language', None)
     translate = getattr(lang, 'translate', lambda text: text)
 
-    if isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
-        data = {"detail": str(exc)}
+    if isinstance(exc, exceptions.APIException):
+        exc.detail = apply_translation(exc.detail, translate)
+
+    elif isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
+        data = {"detail": translate(str(exc))}
         code = status.HTTP_403_FORBIDDEN
         logger.debug(traceback_str)
 
@@ -102,25 +123,21 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
 
     elif isinstance(exc, djexcs.ValidationError):
         if hasattr(exc, 'error_dict'):  # nocv
-            errors = dict(exc)  # type: ignore
+            errors = apply_translation(dict(exc), translate)  # type: ignore
         elif hasattr(exc, 'error_list'):
-            errors = {'other_errors': [translate(s) for s in list(exc)]}
+            errors = {'other_errors': apply_translation(list(exc), translate)}
         else:  # nocv
-            errors = {'other_errors': translate(str(exc))}  # type: ignore
+            errors = {'other_errors': apply_translation(str(exc), translate)}
         data = {"detail": errors}
         serializer_class = ValidationErrorSerializer
         logger.debug(traceback_str)
 
-    elif isinstance(exc, VSTUtilsException):  # nocv
-        data = {"detail": translate(exc.msg), 'error_type': sys.exc_info()[0].__name__}  # type: ignore
-        code = exc.status
-        serializer_class = OtherErrorsSerializer
-        logger.info(traceback_str)
-
     elif not isinstance(exc, default_exc) and isinstance(exc, Exception):
         data = {
-            'detail': str(sys.exc_info()[1]), 'error_type': sys.exc_info()[0].__name__  # type: ignore
+            'detail': translate(str(exc)),
+            'error_type': type(exc).__name__
         }
+        code = getattr(exc, 'status', code)
         serializer_class = OtherErrorsSerializer
         logger.debug(traceback_str)
 

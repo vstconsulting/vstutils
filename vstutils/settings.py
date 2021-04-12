@@ -796,13 +796,11 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        # 'rest_framework.renderers.JSONRenderer',
         "drf_orjson_renderer.renderers.ORJSONRenderer",
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        # 'rest_framework.parsers.JSONParser',
         "drf_orjson_renderer.parsers.ORJSONParser",
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
