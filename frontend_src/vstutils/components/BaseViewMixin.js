@@ -41,6 +41,9 @@ export const BaseViewMixin = {
          * Breadcrumbs of View.
          */
         breadcrumbs() {
+            if (!this.view) {
+                return null;
+            }
             return [
                 { iconClasses: 'fas fa-home', link: '/' },
                 ...Array.from(getParentViews(this.view))

@@ -5,16 +5,14 @@
         </template>
         <template #body>
             <div ref="croppie" />
-            <p :class="{ valid: isWidthValid }">
-                Width: {{ width }}px.
-                <span class="error">Must be between {{ config.minWidth }} and {{ config.maxWidth }}</span>
+            <p v-for="param in checkParams" :key="param">
+                {{ $t(param) | capitalize }}: {{ $data[param] }}px.
+                <span v-if="!isValidSizeParam(param)" class="error">
+                    {{ getErrorMessage(param) }}
+                </span>
             </p>
-            <p :class="{ valid: isHeightValid }">
-                Height: {{ height }}px.
-                <span class="error">Must be between {{ config.minHeight }} and {{ config.maxHeight }}</span>
-            </p>
-            <button :disabled="!isWidthValid || !isHeightValid" class="btn btn-primary" @click="crop">
-                Crop
+            <button :disabled="!isValid" class="btn btn-primary" @click="crop">
+                {{ $t('Crop') }}
             </button>
         </template>
     </Modal>
@@ -23,7 +21,7 @@
 <script>
     import Croppie from 'croppie';
     import Modal from '../../../components/items/modal/Modal.vue';
-    import {makeDataImageUrl} from "../../../utils";
+    import { makeDataImageUrl } from '../../../utils';
 
     const allowedExtensions = ['jpeg', 'png', 'webp'];
 
@@ -44,6 +42,7 @@
             height: 0,
             currentImageIdx: 0,
             resized: [],
+            checkParams: ['width', 'height'],
         }),
         computed: {
             config() {
@@ -60,11 +59,8 @@
                 }
                 return 'jpg';
             },
-            isHeightValid() {
-                return this.config.minHeight <= this.height && this.height <= this.config.maxHeight;
-            },
-            isWidthValid() {
-                return this.config.minWidth <= this.width && this.width <= this.config.maxWidth;
+            isValid() {
+                return this.checkParams.filter((param) => !this.isValidSizeParam(param)).length === 0;
             },
         },
         watch: {
@@ -72,8 +68,8 @@
         },
         mounted() {
             this.croppie = new Croppie(this.$refs.croppie, {
-                viewport: { width: this.config.minWidth, height: this.config.minHeight },
-                boundary: { width: this.config.minWidth + 100, height: this.config.minHeight + 100 },
+                viewport: { width: this.config.width.min, height: this.config.height.min },
+                boundary: { width: this.config.width.min + 100, height: this.config.height.min + 100 },
                 enforceBoundary: true,
                 enableResize: true,
                 enableZoom: true,
@@ -89,6 +85,17 @@
             this.croppie.destroy();
         },
         methods: {
+            isValidSizeParam(param) {
+                return this.config[param].min <= this[param] && this[param] <= this.config[param].max;
+            },
+            getErrorMessage(param) {
+                if (param === 'height' || param === 'width') {
+                    return this.$t('imageValidationResolutionError', {
+                        min: this.config[param].min,
+                        max: this.config[param].max,
+                    });
+                }
+            },
             updateCroppie() {
                 this.croppie.bind({
                     url: makeDataImageUrl(this.image),
@@ -111,9 +118,5 @@
 <style scoped>
     .error {
         color: red;
-    }
-
-    p.valid .error {
-        display: none;
     }
 </style>

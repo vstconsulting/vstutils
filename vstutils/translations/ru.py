@@ -245,9 +245,12 @@ TRANSLATION = {
     'This password is entirely numeric.': 'Этот пароль полностью числовой.',
     'Dark theme': 'Темная тема',
     'Language': 'Язык',
+    'height': 'высота',
+    'width': 'ширина',
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',
     'for some reason, this image file cannot be opened': 'Не удалось открыть файл изображения',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
+    'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
 }

@@ -17,9 +17,7 @@ const DEFAULT_GENERATOR = createGenerator();
  * Mixin to generate unique id for components
  */
 export default {
-    data() {
-        return {
-            componentId: DEFAULT_GENERATOR(),
-        };
+    beforeCreate() {
+        this.componentId = DEFAULT_GENERATOR();
     },
 };

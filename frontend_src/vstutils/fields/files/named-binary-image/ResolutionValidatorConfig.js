@@ -1,9 +1,13 @@
 export default class ResolutionValidatorConfig {
     constructor(minWidth, maxWidth, minHeight, maxHeight) {
-        this.minWidth = minWidth;
-        this.maxWidth = maxWidth;
-        this.minHeight = minHeight;
-        this.maxHeight = maxHeight;
+        this.width = {
+            min: minWidth,
+            max: maxWidth,
+        };
+        this.height = {
+            min: minHeight,
+            max: maxHeight,
+        };
     }
     static createIfNeeded({ additionalProperties: { min_width, max_width, min_height, max_height } }) {
         if ([min_width, max_width, min_height, max_height].includes(undefined)) {

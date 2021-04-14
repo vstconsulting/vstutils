@@ -24,17 +24,15 @@
                 {{ $t('code') | capitalize }}:
                 <code>{{ secret }}</code>
             </p>
-            <div class="row">
-                <div class="col-lg-3 col-xs-12 col-sm-3 col-md-3" />
-                <component
-                    :is="pinField.component"
-                    :key="pinField.name"
-                    :field="pinField"
-                    :data="data"
-                    type="edit"
-                    @set-value="setFieldValue"
-                />
-            </div>
+            <component
+                :is="pinField.component"
+                :key="pinField.name"
+                :field="pinField"
+                :data="data"
+                type="edit"
+                style="max-width: 340px; margin: 0 auto"
+                @set-value="setFieldValue"
+            />
             <hr />
             <p>
                 <!-- eslint-disable-next-line prettier/prettier -->

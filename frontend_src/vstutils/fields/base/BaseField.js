@@ -37,7 +37,7 @@ class BaseField {
         this.name = options.name;
 
         /** @type {string} */
-        this.title = options.title || capitalize(this.name.replace(/_/g, ' '));
+        this.title = options.title || capitalize(this.name.replace(/_/g, ' ').replace(/\s{2,}/g, ' '));
 
         /** @type {string|null} */
         this.description = options.description || null;

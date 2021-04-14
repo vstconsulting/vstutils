@@ -278,3 +278,59 @@ Output files will be built into `frontend_src/{AppName}/static/{AppName}/bundle`
 corresponds to name of entry in `config`. In the example above output files will have names `app.js` and `myapp.js`.
 Add all of these files to `STATIC_SPA` in `settings.py`. During vstutils installation trough `pip`
 frontend code are being build automatically, so you may need to add `bundle` directory to `gitignore`.
+
+
+Basic data components
+---------------------
+If you want to add on page some component that gets data from API and displays it in some way, you can use
+`spa.components.mixins.InstanceComponent` and `spa.components.mixins.InstancesComponent`. Both mixins expect you
+to define at least `getQuerySet` method that will be called on component creation before data fetching.
+
+Components based on mixins will have computed property `instance` or `instances` respectively.
+It will be refreshed on every auto update.
+
+Example component:
+
+.. sourcecode:: HTML
+
+    <template>
+        <h1>Number of users: {{ count }}</h1>
+    </template>
+    <script>
+        export default {
+            mixins: [spa.components.mixins.InstancesComponent],
+            computed: {
+                uniqueName() {
+                    return 'usersCounter';
+                },
+                count() {
+                    return this.instances && this.instances.extra.count || 0;
+                },
+            },
+            methods: {
+                getQuerySet() {
+                    return this.$app.views.get('/user/').objects.filter({ limit: 1 });
+                },
+            },
+        };
+    </script>
+
+In given example store module with name `usersCounter` will be registered so data can be accessed globally.
+
+
+Overriding root component
+-------------------------
+Root component of the application can be overridden using `app.beforeInit` signal. This can be useful for such things as
+changing layout CSS classes, back button behaviour or main layout components.
+
+Example of customizing sidebar component:
+
+.. sourcecode:: javascript
+
+    const CustomAppRoot = {
+        components: { Sidebar: CustomSidebar },
+        mixins: [spa.AppRoot],
+    };
+    spa.signals.once('app.beforeInit', ({ app }) => {
+        app.appRootComponent = CustomAppRoot;
+    });
