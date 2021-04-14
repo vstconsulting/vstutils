@@ -25,11 +25,11 @@
     import { formatPath } from './utils';
     import AutoUpdateController from './autoupdate/AutoUpdateController.js';
     import ControlSidebar from './components/items/ControlSidebar.vue';
-    import { MainFooter, Sidebar, TopNavigation } from './components/items';
+    import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
 
     export default {
         name: 'AppRoot',
-        components: { TopNavigation, ControlSidebar, MainFooter, Sidebar },
+        components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo },
         mixins: [AutoUpdateController],
         props: ['info', 'x_menu', 'x_docs'],
         data: () => ({

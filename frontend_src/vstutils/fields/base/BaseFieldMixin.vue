@@ -133,6 +133,9 @@
 
 <style>
     .field-component {
-        margin-bottom: 1rem;
+        margin: 0.5rem;
+    }
+    .field-component.type-list {
+        margin: 0;
     }
 </style>

@@ -1,4 +1,3 @@
-import json
 import typing as _t
 
 import pyotp
@@ -22,7 +21,7 @@ User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
 
 class UserSettings(BModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='_settings')
-    value = models.TextField(default='{}')
+    value = models.JSONField(default=dict)
 
 
 class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
@@ -304,15 +303,15 @@ class UserViewSet(base.ModelViewSet):
     def _settings(self, request: drf_request.Request, *args, **kwargs):
         instance, _ = UserSettings.objects.get_or_create(
             user=self.get_object(),
-            defaults=SimpleLazyObject(lambda: {'value': json.dumps(self.get_serializer({}).data)})  # type: ignore
+            defaults=SimpleLazyObject(lambda: {'value': self.get_serializer({}).data})  # type: ignore
         )
 
         if request.method.upper() == 'PUT':  # type: ignore
-            serializer = self.get_serializer(json.loads(instance.value), data=request.data)
+            serializer = self.get_serializer(instance.value, data=request.data)
             serializer.is_valid(raise_exception=True)
-            instance.value = json.dumps(serializer.save())
+            instance.value = serializer.save()
             instance.save()
         else:
-            serializer = self.get_serializer(json.loads(instance.value))
+            serializer = self.get_serializer(instance.value)
 
         return responses.HTTP_200_OK(serializer.data)

@@ -21,9 +21,6 @@ export const PageViewComponent = {
         };
     },
     computed: {
-        autoUpdatePK() {
-            return this.getInstancePk();
-        },
         providedInstance() {
             return this.params.providedInstance || null;
         },
