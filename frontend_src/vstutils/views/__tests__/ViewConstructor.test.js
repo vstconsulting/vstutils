@@ -182,12 +182,18 @@ describe('ViewConstructor', () => {
     test.each([
         '/author/{id}/post/{post_id}/',
         '/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/',
+        '/nested/nested/post/{id}/',
         '/post/{id}/',
     ])('post edit only view (%s)', (path) => {
         const postEditView = views.get(path);
-
         expect(postEditView).toBeInstanceOf(PageEditView);
         expect(postEditView.isEditStyleOnly).toBeTruthy();
+        expect(postEditView.actions.has('edit')).toBeFalsy();
+        const removeAction = postEditView.actions.get('remove');
+        expect(removeAction).toBeDefined();
+        expect(removeAction.name).toBe('remove');
+        expect(removeAction.title).toBe('Remove');
+        expect(views.has(path + 'edit/')).toBeFalsy();
     });
 
     test.each([
