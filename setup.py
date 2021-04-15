@@ -408,6 +408,11 @@ kwargs = dict(
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
         'pil': ['Pillow~=8.0.1'],
+        'boto3': [
+            i.replace('libcloud', 'libcloud,boto3')
+            for i in load_requirements('requirements.txt')
+            if isinstance(i, str) and 'django-storages' in i
+        ]
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),

@@ -391,6 +391,14 @@ class VSTUtilsTestCase(BaseTestCase):
             with open(file.name, 'r') as output:
                 self.assertEqual(output.read(), "Test\n")
 
+    def test_boto3_storage_setting(self):
+        self.assertTrue(isinstance(settings.AWS_S3_MAX_MEMORY_SIZE, int))
+        self.assertEqual(settings.AWS_S3_MAX_MEMORY_SIZE, 123)
+        self.assertTrue(isinstance(settings.AWS_QUERYSTRING_AUTH, bool))
+        self.assertTrue(settings.AWS_QUERYSTRING_AUTH)
+        self.assertTrue(isinstance(settings.GZIP_CONTENT_TYPES, tuple))
+        self.assertEqual(settings.GZIP_CONTENT_TYPES, ('text/css', 'text/javascript'))
+
     def test_kvexchanger(self):
         exchenger = utils.KVExchanger("somekey")
         exchenger.send(True, 10)
@@ -1719,7 +1727,13 @@ class EndpointTestCase(BaseTestCase):
         self.assertEqual(response[3]['status'], 200)
         self.assertEqual(response[3]['status'], 200)
         self.assertEqual(response[4]['status'], 200)
-        self.assertEqual(response[4]['data'], {'filter_applied': 1, 'id': 2, 'local_filter_applied': 1, 'name': 5})
+        self.assertEqual(response[4]['data'], {
+            'filter_applied': 1,
+            'id': 2,
+            'local_filter_applied': 1,
+            'name': 5,
+            'string_filter_applied': True
+        })
         self.assertEqual(len(response[5]['data']['results']), 5)
         self.assertEqual(response[6]['data']['headers']['TEST_HEADER'], 5)
         self.assertEqual(response[7]['data'], {

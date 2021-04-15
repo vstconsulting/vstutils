@@ -249,6 +249,24 @@ class ThrottleSection(BaseAppendSection):
         'actions': ConfigListType,
     }
 
+class Boto3Subsection(BackendSection):
+    types_map = {
+        'querystring_auth': ConfigBoolType,
+        's3_max_memory_size': ConfigIntType,
+        'querystring_expire': ConfigIntSecondsType,
+        's3_file_overwrite': ConfigBoolType,
+        'is_gzipped': ConfigBoolType,
+        's3_use_ssl': ConfigBoolType,
+        'content_types': ConfigListType,
+        'gzip_content_types': ConfigListType,
+    }
+
+    def key_handler_to_all(self, key):
+        key_uppercase = super().key_handler_to_all(key).upper()
+        if key_uppercase != 'GZIP_CONTENT_TYPES':
+            return f'AWS_{key_uppercase}'
+        return key_uppercase
+
 
 config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     format_kwargs=KWARGS,
@@ -368,6 +386,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'rpc': RPCSection,
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
+        'storages.boto3': Boto3Subsection,
     }
 )
 
@@ -1101,15 +1120,15 @@ THROTTLE = config['throttle'].all()
 
 
 # Storage settings
-storages = config['storages']
-default_storage_class = lazy(
-    lambda: (
-        'django.core.files.storage.FileSystemStorage'
-        if not LIBCLOUD_PROVIDERS.get('default') else
-        'storages.backends.apache_libcloud.LibCloudStorage'),
-    str
-)()
+def get_default_storage_class():
+    if LIBCLOUD_PROVIDERS.get('default'):
+        return 'storages.backends.apache_libcloud.LibCloudStorage'  # nocv
+    elif all([i in globals() for i in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_STORAGE_BUCKET_NAME']]):
+        return 'storages.backends.s3boto3.S3Boto3Storage'
 
+    return 'django.core.files.storage.FileSystemStorage'  # nocv
+
+storages = config['storages']
 LIBCLOUD_PROVIDERS: _t.Dict[_t.Text, _t.Dict] = {}
 MEDIA_ROOT = storages['filesystem']['media_root']
 MEDIA_URL = storages['filesystem']['media_url']
@@ -1125,8 +1144,10 @@ if 'libcloud' in storages:
     if LIBCLOUD_PROVIDERS and 'default' not in LIBCLOUD_PROVIDERS:
         DEFAULT_LIBCLOUD_PROVIDER = next(iter(LIBCLOUD_PROVIDERS))
 
+if 'boto3' in storages:
+    globals().update( storages['boto3'].all())
 
-DEFAULT_FILE_STORAGE = storages.get('default', fallback=default_storage_class)
+DEFAULT_FILE_STORAGE = storages.get('default', fallback=get_default_storage_class())
 
 # Test settings for speedup tests
 ##############################################################

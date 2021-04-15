@@ -347,7 +347,7 @@ export default class ViewConstructor {
                 const param = path
                     .replace(/^\/|\/$/g, '')
                     .split('/')
-                    .last?.replace('{', '')
+                    .last.replace('{', '')
                     .replace('}', '');
 
                 for (const view of [pageView, editView]) if (view) view.pkParamName = param;
