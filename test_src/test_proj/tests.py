@@ -1668,7 +1668,13 @@ class EndpointTestCase(BaseTestCase):
         self.assertEqual(response[3]['status'], 200)
         self.assertEqual(response[3]['status'], 200)
         self.assertEqual(response[4]['status'], 200)
-        self.assertEqual(response[4]['data'], {'filter_applied': 1, 'id': 2, 'local_filter_applied': 1, 'name': 5})
+        self.assertEqual(response[4]['data'], {
+            'filter_applied': 1,
+            'id': 2,
+            'local_filter_applied': 1,
+            'name': 5,
+            'string_filter_applied': True
+        })
         self.assertEqual(len(response[5]['data']['results']), 5)
         self.assertEqual(response[6]['data']['headers']['TEST_HEADER'], 5)
         self.assertEqual(response[7]['data'], {

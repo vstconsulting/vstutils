@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models import Value, BooleanField
+from rest_framework.fields import BooleanField as DrfBooleanField
+
+from vstutils.api.filter_backends import VSTFilterBackend
 from vstutils.models import BQuerySet, BModel, Manager, register_view_action, register_view_method
 from vstutils.api import fields, responses, serializers, base
 
@@ -13,6 +17,11 @@ class TestFilterBackend:
 
     def get_schema_fields(self, view):
         return []
+
+
+class TestStringFilterBackend(VSTFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        return queryset.annotate(string_filter_applied=Value(True, output_field=BooleanField()))
 
 
 class HostQuerySet(BQuerySet):
@@ -35,15 +44,17 @@ class Host(BModel):
             'name',
             'local_filter_applied',
             'filter_applied',
+            'string_filter_applied'
         )
         _override_list_fields = {
             'id': fields.RedirectIntegerField(read_only=True),
             'name': fields.DependEnumField(field='id', choices={3: 'hello', 1: 'NOO!'}),
             'local_filter_applied': fields.IntegerField(default=0, read_only=True),
             'filter_applied': fields.IntegerField(default=0, read_only=True),
+            'string_filter_applied': DrfBooleanField(default=False, read_only=True)
         }
         _filterset_fields = ('id', 'name')
-        _filter_backends = (TestFilterBackend,)
+        _filter_backends = (TestFilterBackend, 'test_proj.models.hosts.TestStringFilterBackend')
 
     @register_view_action(
         response_code=200,

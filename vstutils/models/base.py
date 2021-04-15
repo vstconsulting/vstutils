@@ -1,5 +1,5 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
-from functools import lru_cache
+from functools import lru_cache, partial
 from itertools import chain
 from copy import deepcopy
 
@@ -104,8 +104,19 @@ def _get_setting_for_view(metatype, metadata, views):
     if metadataobject:
         for view in views:
             if hasattr(view, metatype):
-                return list(chain(getattr(view, metatype), metadata[metatype]))
+                return list(chain(getattr(view, metatype), metadataobject))
         return metadataobject  # nocv
+
+
+def _result_with_arg_decorator(func):
+    def wrapper(*args, **kwargs):
+        return (func(*args, **kwargs), *args)
+
+    return wrapper
+
+
+def _bool_first(item):
+    return item and item[0]
 
 
 def _get_decorator(data):
@@ -399,10 +410,13 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if filterset_class is not None:
             view_attributes['filterset_class'] = filterset_class
 
-        for metatype in ('permission_classes', 'filter_backends'):
-            metaobject = _get_setting_for_view(metatype, metadata, view_class)
-            if metaobject:
-                view_attributes[metatype] = metaobject
+        get_setting_for_view = partial(
+            _result_with_arg_decorator(_get_setting_for_view),
+            metadata=metadata,
+            views=view_class
+        )
+        for value, name in filter(_bool_first, map(get_setting_for_view, ('permission_classes', 'filter_backends'))):
+            view_attributes[name] = SimpleLazyObject(lambda obj=value: list(map(get_if_lazy, obj)))
 
         generated_view = type(
             f'{cls.__name__}ViewSet',
