@@ -318,6 +318,7 @@ class VSTUtilsTestCase(BaseTestCase):
                 self.val = "init"
 
             @utils.classproperty
+            @classmethod
             def test(self):
                 return self.val
 
@@ -337,7 +338,7 @@ class VSTUtilsTestCase(BaseTestCase):
         with self.assertRaises(AttributeError):
             test_obj.test2 = 3
         with self.assertRaises(AttributeError):
-            if TestClass.test2 == 'Some text':
+            if TestClass.test2 == 'Some text':  # pragma: no branch
                 TestClass.test2 = 3
         TestClass.test3 = 3
 
@@ -444,6 +445,8 @@ class VSTUtilsTestCase(BaseTestCase):
         ex_method(SomeEx())
         with self.assertRaises(Exception):
             ex_method()
+
+        self.assertEqual(utils.exception_with_traceback()(lambda: 1)(), 1)
 
     def test_raise_context_with_default(self):
         @utils.raise_context_decorator_with_default(default='default')
@@ -630,7 +633,11 @@ class ViewsTestCase(BaseTestCase):
 
         self.change_identity(True)
         data = [
-            dict(username="USER{}".format(i), password="123", password2="123")
+            {
+                'username': "USER{}".format(i),
+                'password': "123",
+                'password2': "123",
+            }
             for i in range(10)
         ]
         users_id = self.mass_create('/api/v1/user/', data, 'username')
@@ -642,6 +649,17 @@ class ViewsTestCase(BaseTestCase):
         self.assertCount(users_id, result['count'])
         result = self.get_result('get', '/api/v1/user/?username__not=USER')
         self.assertEqual(result['count'], 3)
+
+        def raise_on_create(*args, **kwargs):
+            raise Exception('test')
+
+        with self.patch('vstutils.api.auth.UserSerializer.create') as mock:
+            mock.side_effect = raise_on_create
+            result = self.bulk([
+                {'method': 'post', 'path': ['user'], 'data': {**data[0], 'username': 'qwe123123'}},
+            ])[0]
+            self.assertEqual(result['status'], 400)
+            self.assertEqual(result['data']['detail'], 'test')
 
     @override_settings(AUTH_PASSWORD_VALIDATORS=[validator_dict])
     def test_password_validators(self):
@@ -744,7 +762,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
 
         # Check email and uid in create method
-        secure_pickle = SecurePickling()
+        secure_pickle = SecurePickling(settings.SECRET_KEY)
         fail_check_email_user = user.copy()
         fail_check_email_user['email'] = 'new_random_changed@email.com'
         cache_key_unhashed = 'not_correct@email.com'

@@ -2,6 +2,7 @@ import typing as _t
 
 import pyotp
 from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
 from django.db import transaction, models
@@ -66,13 +67,8 @@ class UserSerializer(VSTSerializer):
         if not self.is_staff_or_super:
             raise exceptions.PermissionDenied  # nocv
 
-        raw_passwd = self.initial_data.get("raw_password", "False")
-        assert raw_passwd in ("False", "True"), f"Invalid 'raw_password' value: '{raw_passwd}'."
-        user = super().create(credentials)
-        if not raw_passwd == "True":
-            user.set_password(credentials['password'])
-            user.save()
-        return user
+        credentials['password'] = make_password(credentials['password'])
+        return super().create(credentials)
 
     def update(self, instance, validated_data):
         if not self.is_staff_or_super and instance.id != self.context['request'].user.id:
@@ -117,7 +113,9 @@ class CreateUserSerializer(OneUserSerializer):
     def run_validation(self, data=serializers.empty):
         validated_data = super().run_validation(data)
         if validated_data['password'] != validated_data.pop('password2', None):
-            raise exceptions.ValidationError('Passwords do not match.')
+            raise exceptions.ValidationError({
+                "password": ['Passwords do not match.'],
+            })
         return validated_data
 
 

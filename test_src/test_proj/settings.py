@@ -7,6 +7,8 @@ INSTALLED_APPS += [
 
 MIDDLEWARE.append('vstutils.middleware.TimezoneHeadersMiddleware')
 
+HEALTH_BACKEND_CLASS = 'test_proj.health.TestDefaultBackend'
+
 API['v2'] = {}
 API['v3'] = {}
 API['v4'] = {}

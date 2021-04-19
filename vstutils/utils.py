@@ -255,9 +255,7 @@ class ClassPropertyDescriptor:
         return self.fset.__get__(obj, type(obj))(value)  # nocv
 
     def setter(self, func: tp.Union[tp.Callable, classmethod]):
-        if not isinstance(func, (classmethod, staticmethod)):
-            func = classmethod(func)
-        self.fset = func
+        self.fset = self._fix_function(func)
         return self
 
     @classmethod
@@ -394,8 +392,6 @@ class tmp_file:
 
     def __exit__(self, type_e, value, tb):
         self.fd.close()
-        if value is not None:
-            return False
 
 
 class tmp_file_context:
@@ -461,8 +457,7 @@ class raise_context(assertRaises):
                 return func(*args, **kwargs)
             except:
                 type, value, traceback_obj = sys.exc_info()
-                if type is not None:
-                    logger.debug(traceback.format_exc())
+                logger.debug(traceback.format_exc())
                 raise
         return type, value, traceback_obj
 
@@ -674,7 +669,7 @@ class Executor(BaseVstObject):
             out.close()
 
     def line_handler(self, line: tp.Text) -> None:
-        if line is not None:
+        if line is not None:  # pragma: no branch
             with raise_context():
                 self.write_output(line)
 
@@ -1085,11 +1080,10 @@ class URLHandlers(ObjectHandlers):
         if isinstance(data, str):
             for handler in self.view_handlers:
                 try:
-                    handler_data = handler.get_backend_data(data)
+                    return handler.get_backend_data(data)
                 except:
                     continue
-                if handler_data:
-                    return handler_data
+            raise ex.VSTUtilsException(f'Invalid handler name "{data}"')  # nocv
         return data
 
     def get_object(self, name: tp.Text, *argv, **kwargs):

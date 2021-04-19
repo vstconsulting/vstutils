@@ -42,7 +42,7 @@ urlpatterns += [
 ] if getattr(settings, 'ENABLE_ADMIN_PANEL', False) else []
 
 urlpatterns += [re_path(rf'^{settings.API_URL}/', include(router.urls))]
-if settings.STATIC_URL.startswith('/'):
+if settings.STATIC_URL.startswith('/'):  # pragma: no branch
     urlpatterns += staticfiles_urlpatterns(settings.STATIC_URL)
 if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
     urlpatterns += static(settings.MEDIA_URL, view=serve, document_root=settings.MEDIA_ROOT)  # nocv
