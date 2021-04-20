@@ -109,6 +109,30 @@ Middlewares is needed to process incoming requests and sent responses before the
 .. automodule:: vstutils.middleware
     :members: BaseMiddleware
 
+Filter Backends
+~~~~~~~~~~~~~~~
+`Filter Backends <https://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend>`_ are used to modify model queryset.
+If you want to create custom filter backend to, for example, annotate
+something to a model queryset, you should inherit from :class:vstutils.api.filter_backends.VSTFilterBackend
+and override :meth:vstutils.api.filter_backends.VSTFilterBackend.filter_queryset and in some cases
+:meth:vstutils.api.filter_backends.VSTFilterBackend.get_schema_fields.
+
+.. automodule:: vstutils.api.filter_backends
+    :members:
+
+Celery
+------
+
+Celery is a distributed task queue. It's used to execute some actions asynchronously in a separate worker.
+For more details on Celery, check it's official `docs <https://docs.celeryproject.org/en/stable/>`_.
+For Celery related vstutils features to work, you need to specify `[rpc] <config.html#rpc-settings>`_ and
+`[worker] <config.html#worker-settings>`_ sections in settings.ini. Also you need to include extra [rpc] requirements.
+
+Tasks
+~~~~~
+
+.. automodule:: vstutils.tasks
+    :members: TaskClass
 
 Endpoint
 --------

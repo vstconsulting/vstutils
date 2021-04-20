@@ -223,7 +223,7 @@ if os.path.exists(_mermaid_cmd):
     mermaid_pdfcrop = 'pdfcrop'
     mermaid_output_format = 'png'
 
-autodoc_mock_imports = ["django", "vstutils.tools"]
+autodoc_mock_imports = ["vstutils.tools", "vstutils.wapp"]
 
 django_version = '.'.join((str(django.VERSION[0]), str(django.VERSION[1])))
 django_version_docs = 'https://docs.djangoproject.com/en/{version}/'.format(version=django_version)
