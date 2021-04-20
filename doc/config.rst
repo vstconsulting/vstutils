@@ -344,12 +344,12 @@ to configure custom media dir and relative url. By default it would be
 ``{/path/to/project/module}/media`` and ``/media/``.
 
 Applications based on ``vstutils`` supports store files in external services
-with `Apache Libcloud <http://libcloud.apache.org/>`_ and `Boto3`_.
+with `Apache Libcloud <http://libcloud.apache.org/>`_ and `Boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_.
 
 Apache Libcloud settings grouped by sections named ``[storages.libcloud.provider]``, where ``provider`` is name
 of storage. Each section has four keys: ``type``, ``user``, ``key`` and ``bucket``.
 Read more about the settings in
-`django-storages docs <https://django-storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-providers>`_
+`django-storages libcloud docs <https://django-storages.readthedocs.io/en/latest/backends/apache_libcloud.html#libcloud-providers>`_
 
 This setting is required to configure connections to cloud storage providers.
 Each entry corresponds to a single ‘bucket’ of storage. You can have multiple
@@ -359,7 +359,7 @@ you can define buckets at multiple providers.
 For ``Boto3`` all settings grouped by section named ``[storages.boto3]``. Section must contain following keys:
 ``access_key_id``, ``secret_access_key``, ``storage_bucket_name``.
 Read more about the settings in
-`django-storages docs <https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_
+`django-storages amazon-S3 docs <https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html>`_
 
 Storage has following priority to choose storage engine if multiple was provided:
 
@@ -381,6 +381,33 @@ When ``[storages.libcloud.default]`` is empty ``django.core.files.storage.FileSy
 will be used as default.
 To overriding this behavior set ``default=storages.backends.apache_libcloud.LibCloudStorage``
 in ``[storages]`` section and use Libcloud provider as default.
+
+|
+|
+
+.. _throttle:
+
+Throttle settings
+-------------------
+
+Section ``[throttle]``.
+
+By including this section to your config, you can setup global and per-view throttle rates.
+Global throttle rates are specified under root [throttle] section.To specify per-view throttle rate, you need to include
+child section.
+
+For example, if you want to apply throttle to ``api/v1/author``:
+
+    .. sourcecode:: ini
+
+        [throttle.views.author]
+        rate=50/day
+        actions=create,update
+
+* **rate** - Throttle rate in format number_of_requests/time_period. Expected time_periods: second/minute/hour/day.
+* **actions** - Commma separated list of drf actions.Throttle will be applied only on specified here actions. Default: update, partial_update.
+
+More on throttling at `DRF Throttle docs <https://www.django-rest-framework.org/api-guide/throttling/>`_.
 
 |
 |

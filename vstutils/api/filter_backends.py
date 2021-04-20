@@ -21,6 +21,24 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
 
 # Call standart filtering
 class VSTFilterBackend(BaseFilterBackend):
+    """
+    A base class from which all filter backend classes should inherit from.
+    Example:
+
+        .. sourcecode:: python
+
+            from django.utils import timezone
+            from django.db.models import Value, DateTimeField
+
+            from vstutils.api.filter_backends import VSTFilterBackend
+
+            CurrentTimeFilterBackend(VSTFilterBackend):
+                def filter_queryset(self, request, queryset, view):
+                    return queryset.annotate(current_time=Value(timezone.now(), output_field=DateTimeField())
+
+        In this example we created Filter Backend that will annotate current time in current timezone to any connected
+        model's queryset.
+    """
     __slots__ = ()
     required = False
 
@@ -28,11 +46,16 @@ class VSTFilterBackend(BaseFilterBackend):
         raise NotImplementedError  # nocv
 
     def get_schema_fields(self, view):
+        """
+        You can also make the filter controls available to the schema autogeneration that REST framework provides,
+        by implementing this method. The method should return a list of coreapi.Field instances.
+        """
         # pylint: disable=unused-argument
         return []
 
 
 class HideHiddenFilterBackend(VSTFilterBackend):
+    """Filter Backend that will hide all objects with hidden=True from the queryset"""
     __slots__ = ()
     required = True
 
@@ -45,6 +68,9 @@ class HideHiddenFilterBackend(VSTFilterBackend):
 
 
 class SelectRelatedFilterBackend(VSTFilterBackend):
+    """
+    Filter Backend that will automatically call prefetch_related and select_realted on all relations in queryset.
+    """
     __slots__ = ()
     required = True
     fields_fetch_map = {
