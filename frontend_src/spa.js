@@ -11,7 +11,6 @@ import { QuerySetsResolver } from './vstutils/querySet';
 import { signals } from './app.common.js';
 
 export * from './app.common.js';
-export * from './vstutils/dashboard';
 
 const RUPluralizationRule = (choice, choicesLength) => {
     if (choice === 0) {

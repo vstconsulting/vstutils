@@ -47,6 +47,7 @@ export default {
                     const subscribers = state.centrifugoSubscriptions.get(subscription);
                     subscribers.splice(
                         subscribers.findIndex((action) => autoupdateId === action.autoupdateId),
+                        1,
                     );
                     if (subscribers.length === 0) {
                         state.centrifugoSubscriptions.delete(subscription);

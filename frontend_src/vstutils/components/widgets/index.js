@@ -1,9 +1,5 @@
-import { globalComponentsRegistrator } from '../../ComponentsRegistrator.js';
+import ChartWidget from './ChartWidget.vue';
+import InstancesListWidget from './InstancesListWidget.vue';
+import SmallBoxWidget from './SmallBoxWidget.vue';
 
-import CounterWidgetComponent from './CounterWidgetComponent.vue';
-import LineChartWidgetComponent from './LineChartWidgetComponent.js';
-
-globalComponentsRegistrator.add(CounterWidgetComponent);
-globalComponentsRegistrator.add(LineChartWidgetComponent);
-
-export { CounterWidgetComponent, LineChartWidgetComponent };
+export { ChartWidget, InstancesListWidget, SmallBoxWidget };

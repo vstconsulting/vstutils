@@ -1,5 +1,5 @@
-import CustomView from './CustomView.vue';
 import Home from './Home.js';
+import CustomView from './CustomView.vue';
 import NotFound from './NotFound.js';
 
-export { CustomView, Home, NotFound };
+export { Home, CustomView, NotFound };

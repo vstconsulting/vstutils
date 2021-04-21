@@ -50,7 +50,7 @@
                     </div>
                 </div>
                 <div ref="recoveryCodes" class="card-body">
-                    <code v-for="code in recoveryCodes" class="col-3">{{ code }}</code>
+                    <code v-for="code in recoveryCodes" :key="code" class="col-3">{{ code }}</code>
                 </div>
             </div>
         </template>
@@ -64,7 +64,7 @@
     import QRCode from 'qrcode';
     import { PageEditViewComponent } from '../components/page';
     import { guiPopUp, pop_up_msg } from '../popUp';
-    import { copyToClipboard, generateBase32String, generateRandomString, RequestTypes } from '../utils';
+    import { copyToClipboard, generateBase32String, generateRandomString } from '../utils';
 
     const RECOVERY_CODE_LENGTH = 10;
 
@@ -94,9 +94,7 @@
         },
         methods: {
             getSecretUri() {
-                const userView = this.$app.views.get('/user/{id}/');
-                const userClass = userView.objects.getModelClass(RequestTypes.RETRIEVE);
-                const username = new userClass(this.$app.user).getViewFieldValue();
+                const username = this.$app.user.getViewFieldValue();
                 return `otpauth://totp/${username}@${this.$app.config.projectName}?secret=${this.secret}`;
             },
             async fetchData() {

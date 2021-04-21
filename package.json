@@ -39,6 +39,7 @@
     "md5": "^2.2.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.28",
+    "portal-vue": "^2.1.7",
     "qrcode": "^1.4.4",
     "select2": "4.0.13",
     "select2-theme-bootstrap4": "^0.2.0-beta.6",

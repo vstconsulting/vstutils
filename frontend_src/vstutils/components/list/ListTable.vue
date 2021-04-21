@@ -11,7 +11,7 @@
                     <SelectToggleButton :is-selected="allSelected" />
                 </th>
 
-                <th v-for="(field, idx) in fields" :key="idx" :class="td_classes(field)">
+                <th v-for="(field, idx) in fields" :key="idx" :class="tableColumnClasses(field)">
                     {{ $t(field.title) }}
                     <Popover :content="field.description" />
                 </th>
@@ -47,7 +47,7 @@
     import Popover from '../Popover.vue';
     import SelectToggleButton from './SelectToggleButton.vue';
     import ListTableRow from './ListTableRow.vue';
-    import BaseListTableMixin from './BaseListTableMixin.js';
+    import { tableColumnClasses } from '../../utils';
 
     /**
      * Component for 'list' views data representation.
@@ -56,7 +56,6 @@
     export default {
         name: 'ListTable',
         components: { ListTableRow, SelectToggleButton, Popover },
-        mixins: [BaseListTableMixin],
         props: {
             instances: { type: Array, required: true },
             selection: { type: Array, required: true },
@@ -66,6 +65,7 @@
             instanceSublinks: { type: Array, required: false, default: () => [] },
             opt: { type: Object, required: false, default: () => {} },
         },
+        data: () => ({ tableColumnClasses }),
         computed: {
             allSelected() {
                 return this.instances.every((instance) => this.selection.includes(instance.getPkValue()));

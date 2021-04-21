@@ -1,6 +1,5 @@
 <template>
     <EntityView
-        :breadcrumbs="breadcrumbs"
         :error="error"
         :loading="loading"
         :response="response"
