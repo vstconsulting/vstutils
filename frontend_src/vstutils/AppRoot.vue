@@ -19,6 +19,8 @@
         />
 
         <ControlSidebar />
+
+        <portal-target name="root-bottom" multiple />
     </div>
 </template>
 <script>

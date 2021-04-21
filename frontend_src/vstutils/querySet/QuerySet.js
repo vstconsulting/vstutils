@@ -40,6 +40,8 @@ export default class QuerySet {
 
         this.cache = undefined;
         this.use_prefetch = true;
+
+        this.listSubscriptionLabels = [];
     }
 
     /**

@@ -15,7 +15,7 @@
         <td
             v-for="field in fields"
             :key="field.name"
-            :class="td_classes(field)"
+            :class="tableColumnClasses(field)"
             @click="$emit('row-clicked', instance)"
         >
             <component :is="field.component" :field="field" :data="data" type="list" />
@@ -32,7 +32,7 @@
                         <ul class="list-group list-group-flush">
                             <template v-if="actions.length">
                                 <li class="list-group-item disabled">
-                                    <b>{{ $t('Actions') }}</b>
+                                    <b>{{ $t('actions') | capitalize }}</b>
                                 </li>
                                 <li v-for="action in actions" :key="action.name" class="list-group-item">
                                     <a href="#" @click.prevent="createActionClickHandler(closeModal, action)">
@@ -40,13 +40,13 @@
                                             v-if="action.iconClasses && action.iconClasses.length"
                                             :class="action.iconClasses"
                                         />
-                                        {{ $t(action.title) }}
+                                        {{ $t(action.title) | capitalize }}
                                     </a>
                                 </li>
                             </template>
                             <template v-if="sublinks.length">
                                 <li class="list-group-item disabled">
-                                    <b>{{ $t('Sublinks') }}</b>
+                                    <b>{{ $t('sublinks') | capitalize }}</b>
                                 </li>
                                 <li v-for="sublink in sublinks" :key="sublink.name" class="list-group-item">
                                     <router-link
@@ -57,7 +57,7 @@
                                             v-if="sublink.iconClasses && sublink.iconClasses.length"
                                             :class="sublink.iconClasses"
                                         />
-                                        {{ $t(sublink.title) }}
+                                        {{ $t(sublink.title) | capitalize }}
                                     </router-link>
                                 </li>
                             </template>
@@ -72,10 +72,9 @@
 <script>
     import TableRowMixin from '../../fields/TableRowMixin.js';
     import SelectToggleButton from './SelectToggleButton.vue';
-    import BaseListTableMixin from './BaseListTableMixin.js';
     import Modal from '../items/modal/Modal.vue';
     import BootstrapModal from '../BootstrapModal.vue';
-    import { formatPath } from '../../utils';
+    import { formatPath, tableColumnClasses } from '../../utils';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -84,7 +83,7 @@
     export default {
         name: 'ListTableRow',
         components: { BootstrapModal, Modal, SelectToggleButton },
-        mixins: [BaseListTableMixin, TableRowMixin],
+        mixins: [TableRowMixin],
         props: {
             isSelected: { type: Boolean, required: true },
             instance: { type: Object, required: true },
@@ -93,7 +92,7 @@
             actions: { type: Array, required: false, default: () => [] },
             sublinks: { type: Array, required: false, default: () => [] },
         },
-        data: () => ({ formatPath }),
+        data: () => ({ formatPath, tableColumnClasses }),
         computed: {
             hasOperations() {
                 return this.actions.length || this.sublinks.length;

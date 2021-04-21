@@ -95,7 +95,7 @@ describe('ViewConstructor', () => {
             expect(appendNestedAction).toBeDefined();
             expect(appendNestedAction.name).toBe('add');
             expect(appendNestedAction.title).toBe('Add');
-            expect(appendNestedAction.component).toBe('AddChildModal');
+            expect(appendNestedAction.component).toBeInstanceOf(Object);
 
             const createNestedAction = view.sublinks.get('new');
             expect(createNestedAction).toBeDefined();

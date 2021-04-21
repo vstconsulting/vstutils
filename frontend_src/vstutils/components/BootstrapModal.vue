@@ -1,13 +1,15 @@
 <template>
     <div>
         <slot name="activator" :openModal="open" :closeModal="close" />
-        <div ref="modal" class="modal fade" :class="wrapperClasses" tabindex="-1" role="dialog">
-            <div class="modal-dialog" :class="classes" role="document">
-                <div class="modal-content">
-                    <slot name="content" :closeModal="close" />
+        <portal to="root-bottom">
+            <div ref="modal" class="modal fade" :class="wrapperClasses" tabindex="-1" role="dialog">
+                <div class="modal-dialog" :class="classes" role="document">
+                    <div class="modal-content">
+                        <slot name="content" :closeModal="close" />
+                    </div>
                 </div>
             </div>
-        </div>
+        </portal>
     </div>
 </template>
 

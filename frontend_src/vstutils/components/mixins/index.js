@@ -51,6 +51,9 @@ export const InstancesComponent = {
     mixins: [StoreModuleComponent, ComponentWithAutoUpdate],
     data: () => ({ startAutoupdateAfterFetch: true }),
     computed: {
+        autoupdateSubscriptionLabels() {
+            return this.queryset.listSubscriptionLabels;
+        },
         instances() {
             return this.$store.getters[this.storeName + '/instances'];
         },

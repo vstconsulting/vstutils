@@ -1,5 +1,6 @@
-import FiltersModal from '../components/list/FiltersModal.vue';
 import { ViewTypes } from '../utils';
+import FiltersModal from '../components/list/FiltersModal.vue';
+import AddChildModal from '../components/list/AddChildModal.vue';
 
 /**
  * Dictionary, that contains names of openapi schema attributes.
@@ -34,6 +35,7 @@ const openapi_dictionary = {
                     isEmpty: true,
                     isMultiAction: true,
                     styles: { order: 100, marginLeft: 'auto' },
+                    doNotGroup: true,
                 },
             },
             list: {
@@ -43,12 +45,14 @@ const openapi_dictionary = {
                     iconClasses: ['fas', 'fa-plus'],
                     titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                     styles: { order: -10 },
+                    doNotGroup: true,
                 },
                 add: {
                     name: 'add',
                     title: 'Add',
-                    component: 'AddChildModal',
+                    component: AddChildModal,
                     styles: { order: -10 },
+                    doNotGroup: true,
                 },
                 filters: {
                     name: 'filters',
@@ -56,6 +60,7 @@ const openapi_dictionary = {
                     iconClasses: ['fas', 'fa-filter'],
                     component: FiltersModal,
                     styles: { order: -20 },
+                    doNotGroup: true,
                 },
             },
             page: {
@@ -65,6 +70,7 @@ const openapi_dictionary = {
                     iconClasses: ['fas', 'fa-edit'],
                     titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                     styles: { order: -8 },
+                    doNotGroup: true,
                 },
             },
             page_new: {
@@ -74,6 +80,7 @@ const openapi_dictionary = {
                     iconClasses: ['fas', 'fa-save'],
                     titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                     styles: { order: -10 },
+                    doNotGroup: true,
                 },
             },
             page_edit: {
@@ -84,6 +91,7 @@ const openapi_dictionary = {
                     titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                     doNotShowOnList: true,
                     styles: { order: -9 },
+                    doNotGroup: true,
                 },
                 reload: {
                     name: 'reload',
@@ -92,6 +100,7 @@ const openapi_dictionary = {
                     titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                     doNotShowOnList: true,
                     styles: { order: -8 },
+                    doNotGroup: true,
                 },
                 cancel: {
                     name: 'cancel',
@@ -101,12 +110,14 @@ const openapi_dictionary = {
                     titleClasses: ['d-none', 'd-lg-inline-block', 'title-for-btn'],
                     doNotShowOnList: true,
                     styles: { order: 100, marginLeft: 'auto' },
+                    doNotGroup: true,
                 },
             },
             action: {
                 execute: {
                     name: 'execute',
                     styles: { order: -7 },
+                    doNotGroup: true,
                 },
             },
         },

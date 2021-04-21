@@ -1,7 +1,6 @@
 import VueRouter from 'vue-router';
 import signals from '../signals.js';
 
-
 export default class RouterConstructor {
     /**
      * Constructor of RouterConstructor Class.

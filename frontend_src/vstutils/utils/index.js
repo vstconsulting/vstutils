@@ -1026,3 +1026,7 @@ export const BulkType = {
     TRANSACTIONAL: 'post',
     ASYNC: 'patch',
 };
+
+export function tableColumnClasses(field) {
+    return ['column', `column-${field.name}`, `column-format-${field.format}`];
+}

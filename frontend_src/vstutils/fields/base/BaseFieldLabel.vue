@@ -1,7 +1,7 @@
 <template>
     <p :id="label_id" class="text-muted field-label">
         {{ label }}
-        <Popover :content="field.description" />
+        <Popover v-if="field.description" :content="$t(field.description)" />
     </p>
 </template>
 

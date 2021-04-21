@@ -5,7 +5,7 @@ export const LIST_STORE_MODULE = {
     state: {
         data: {
             filters: {},
-            instances: [],
+            instances: null,
             selection: [],
             pagination: {
                 count: 0,

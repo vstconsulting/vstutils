@@ -18,8 +18,11 @@ export const StoreModuleComponent = {
         datastore() {
             return this.$store.state[COMPONENTS_MODULE_NAME][this.uniqueName];
         },
+        /**
+         * @return {QuerySet}
+         */
         queryset() {
-            return this.$store.state[`${this.storeName}/queryset`];
+            return this.$store.getters[`${this.storeName}/queryset`];
         },
     },
     created() {

@@ -1,5 +1,4 @@
 import AddChildModal from './AddChildModal.vue';
-import BaseListTableMixin from './BaseListTableMixin.js';
 import FiltersModal from './FiltersModal.vue';
 import ListTable from './ListTable.vue';
 import ListTableRow from './ListTableRow.vue';
@@ -10,7 +9,6 @@ import SelectToggleButton from './SelectToggleButton.vue';
 
 export {
     AddChildModal,
-    BaseListTableMixin,
     FiltersModal,
     ListTable,
     ListTableRow,

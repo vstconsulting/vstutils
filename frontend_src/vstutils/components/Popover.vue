@@ -45,7 +45,7 @@
     .popover-symbol {
         color: var(--info);
         display: inline-block;
-        width: 1.5em;
+        width: 1em;
         text-align: center;
         cursor: pointer;
         outline: none;

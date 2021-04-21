@@ -16,7 +16,7 @@ export default {
          * Property, that stores all querysets for current field.
          */
         querysets() {
-            return this.field.getAllQuerysets(this.view.path);
+            return this.field.getAllQuerysets(this.view?.path);
         },
 
         /**

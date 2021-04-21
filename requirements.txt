@@ -1,7 +1,6 @@
 # Main packages
 configparser~=5.0.2
-configparserc~=1.2.3
-# pyyaml>=3.13,<=5.3.1
+configparserc~=1.2.4
 django-cors-headers==3.7.0
 
 # REST API packages

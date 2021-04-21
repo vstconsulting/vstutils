@@ -358,6 +358,11 @@ export default class ViewConstructor {
                 const cancel = mergeDeep({}, this.dictionary.paths.operations.page_edit.cancel);
                 editView.actions.set(cancel.name, cancel);
             }
+
+            // Set subscription labels to queryset
+            if (listView && listView.subscriptionLabels) {
+                listView.objects.listSubscriptionLabels = listView.subscriptionLabels.slice();
+            }
         }
 
         this._setNestedQuerysets(views);

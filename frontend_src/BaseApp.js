@@ -2,7 +2,7 @@ import Centrifuge from 'centrifuge';
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
 import { ErrorHandler } from './vstutils/popUp';
-import { guiLocalSettings, getCookie } from './vstutils/utils';
+import { guiLocalSettings, getCookie, RequestTypes } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
 import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
 
@@ -63,6 +63,11 @@ export default class BaseApp {
          */
         this.translations = null;
         /**
+         * Property that stores raw user response
+         * @type {Object|null}
+         */
+        this.rawUser = null;
+        /**
          * Object, that stores data of authorized user.
          */
         this.user = null;
@@ -93,16 +98,20 @@ export default class BaseApp {
             this.centrifugoClient.connect();
         }
 
-        const [languages, translations, user] = await Promise.all([
+        const [languages, translations, rawUser] = await Promise.all([
             this.translationsManager.getLanguages(),
             this.translationsManager.getTranslations(this.initLanguage),
             this.api.loadUser(),
         ]);
         this.languages = languages;
         this.translations = { [this.initLanguage]: translations };
-        this.user = user;
+        this.rawUser = rawUser;
 
         this.afterInitialDataBeforeMount();
+
+        const usersQs = this.views.get('/user/').objects;
+        const UserModel = usersQs.getModelClass(RequestTypes.RETRIEVE);
+        this.user = new UserModel(this.rawUser, usersQs);
 
         this.global_components.registerAll();
 

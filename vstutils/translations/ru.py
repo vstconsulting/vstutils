@@ -14,8 +14,8 @@ TRANSLATION = {
     'apply': 'применить',
     'cancel': 'отменить',
     'field': 'поле',
-    'Actions': 'действия',
-    'Sublinks': 'вложенные ссылки',
+    'actions': 'действия',
+    'sublinks': 'вложенные ссылки',
     'name': 'наименование',
     'type': 'тип',
     'owner': 'владелец',
@@ -192,7 +192,7 @@ TRANSLATION = {
     'image n selected': 'изображение не выбрано | 1 изображение выбрано | {n} изображения выбрано | {n} изображений выбрано',
 
     # filters
-    'Ordering': 'порядок сортировки',
+    'Ordering': 'Порядок сортировки',
     'is_active': 'активен',
     'Username': 'Ник',
     'First name': 'Имя',
@@ -247,6 +247,7 @@ TRANSLATION = {
     'Language': 'Язык',
     'height': 'высота',
     'width': 'ширина',
+    'More info': 'Подробнее',
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',

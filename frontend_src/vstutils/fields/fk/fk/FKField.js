@@ -150,8 +150,20 @@ class FKField extends BaseField {
         return this._formatQuerysetPath(qss[0]);
     }
 
+    getFirstLevelQs() {
+        for (const querysets of this.querysets.values()) {
+            for (const queryset of querysets) {
+                if (queryset.getDataType().length === 1) {
+                    return queryset;
+                }
+            }
+        }
+    }
+
     getAllQuerysets(path) {
-        return this._formatQuerysets(this.querysets.get(path) || this.querysets.get(undefined));
+        return this._formatQuerysets(
+            this.querysets.get(path) || this.querysets.get(undefined) || [this.getFirstLevelQs()],
+        );
     }
 
     /**
