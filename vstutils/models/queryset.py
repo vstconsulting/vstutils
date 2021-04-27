@@ -27,7 +27,7 @@ class BQuerySet(models.QuerySet):
     def _iterable_class(self):
         if hasattr(self, '__iterable_class__') and not is_member_descriptor(self.__iterable_class__):
             return self.__iterable_class__
-        if hasattr(self, 'custom_iterable_class'):
+        if hasattr(self, 'custom_iterable_class'):  # pragma: no branch
             self.__iterable_class__ = self.custom_iterable_class
         return self._iterable_class
 

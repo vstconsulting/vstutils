@@ -103,7 +103,7 @@ def _get_setting_for_view(metatype, metadata, views):
         return metadataobject  # nocv
     if metadataobject:
         for view in views:
-            if hasattr(view, metatype):
+            if hasattr(view, metatype):  # pragma: no branch
                 return list(chain(getattr(view, metatype), metadataobject))
         return metadataobject  # nocv
 
@@ -134,6 +134,9 @@ def _get_decorator(data):
         deco_kwargs['view'] = model.lazy_generated_view
         if 'arg' not in deco_kwargs:
             deco_kwargs['arg'] = model._meta.pk.name
+    else:  # nocv
+        # TODO: cover it by tests
+        deco_kwargs['view'] = _import_class_if_string(deco_kwargs.pop('view'))
     return api_decorators.nested_view(path, **deco_kwargs)
 
 
@@ -299,7 +302,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         """
         if filterset_fields == 'serializer':
             filterset_fields = serializers['serializer_class'].Meta.fields
-            if not isinstance(filterset_fields, str):
+            if not isinstance(filterset_fields, str):  # pragma: no branch
                 model_fields = tuple(cls.get_model_fields_mapping().keys())  # pylint: disable=no-value-for-parameter
                 filterset_fields = tuple(f for f in filterset_fields if f in model_fields)
 

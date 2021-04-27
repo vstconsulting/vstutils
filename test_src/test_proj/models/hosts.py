@@ -35,6 +35,7 @@ class HostQuerySet(BQuerySet):
 
 
 class Host(BModel):
+    __slots__ = ()
     objects = Manager.from_queryset(HostQuerySet)()
     name = models.CharField(max_length=1024)
 
@@ -53,6 +54,9 @@ class Host(BModel):
             'filter_applied': fields.IntegerField(default=0, read_only=True),
             'string_filter_applied': DrfBooleanField(default=False, read_only=True)
         }
+        _extra_serializer_classes = {
+            'serializer_class_test': serializers.EmptySerializer
+        }
         _filterset_fields = ('id', 'name')
         _filter_backends = (TestFilterBackend, 'test_proj.models.hosts.TestStringFilterBackend')
 
@@ -64,6 +68,7 @@ class Host(BModel):
         multiaction=True
     )
     def test(self, request, *args, **kwargs):
+        assert issubclass(self.get_serializer_class(), serializers.EmptySerializer)
         response = request.session.get(0, "OK")
         request.session[0] = "OK"
         request.session.save()

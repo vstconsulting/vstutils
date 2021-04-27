@@ -397,19 +397,33 @@ class BaseTestCase(TestCase):
         :param data: request data
         :param method: http request method
         :param code: http status to assert
+        :param query: dict with query data (working only with `get`)
         :return: bulk response
         """
 
         if data is not None:
             data = json.dumps(data)
 
+        if method == 'get' and 'query' in kwargs and kwargs['query']:
+            query = f'?{"&".join(map("=".join, kwargs.pop("query").items()))}'
+        else:
+            query = ''
+
         return self.get_result(
             method,
-            f'/{self._settings("VST_API_URL")}/endpoint/',
+            f'/{self._settings("VST_API_URL")}/endpoint/{query}',
             data=data,
             code=code,
             **kwargs
         )
+
+    def endpoint_schema(self, **kwargs):
+        """
+        Make request to schema. Returns dict with swagger data.
+
+        :param version: API version for schema parser.
+        """
+        return self.endpoint_call(query={**kwargs, 'format': 'openapi'})
 
     def bulk(self, data: BulkDataType, code: int = 200, **kwargs) -> ApiResultType:
         """

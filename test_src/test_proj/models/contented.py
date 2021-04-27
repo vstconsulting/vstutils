@@ -81,7 +81,7 @@ class VarBasedModel(BModel):
             'vars': {
                 'manager_name': 'variables',
                 'allow_append': False,
-                'model': 'test_proj.models.contented.Variable'
+                'model': 'test_proj.models.contented.Variable',
             }
         }
 

@@ -12,4 +12,5 @@ def get_first_match_name(field_names: Sequence[Text], default: Optional[Text] = 
 
 class ModelBaseClass(ModelBase):
     generated_view: GenericViewSet
+    lazy_generated_view: GenericViewSet
     OriginalMeta: Any

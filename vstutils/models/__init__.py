@@ -209,7 +209,7 @@ def bulk_notify_clients(channel="subscriptions_update", objects=()):
                     "pk": pk
                 }
             ))
-    if objects:
+    if objects:  # pragma: no branch
         return cent_client.send()
 
 

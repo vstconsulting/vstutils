@@ -39,6 +39,7 @@ class Author(BModel):
             'post': {
                 'allow_append': False,
                 'model': 'test_proj.models.fields_testing.ExtraPost',
+                'arg': 'id'
             }
         }
 
@@ -80,3 +81,5 @@ class ExtraPost(Post):
             'fa_icon_rating': RatingField(required=False, front_style='fa_icon', fa_class='fas fa-cat'),
             **_override_list_fields
         }
+        _filterset_fields = None
+        _serializer_class_name = 'ExtraPost'

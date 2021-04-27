@@ -1074,7 +1074,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         'token_hmac_secret_key': "YYY"
     })
     def test_get_openapi(self):
-        api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+        api = self.endpoint_schema()
 
         # Check project title
         self.assertEqual(api['info']['title'], 'Example Project')
@@ -1121,7 +1121,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
             json.loads(response.content.decode('utf-8'))
 
     def test_openapi_schema_content(self):
-        api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+        api = self.endpoint_schema()
         img_res_validator_data = {
                     'min_width': 200,
                     'max_width': 600,
@@ -1369,12 +1369,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
             'test_proj.openapi.hook5'
         ]
         with override_settings(OPENAPI_HOOKS=OPENAPI_HOOKS):
-            api = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+            api = self.endpoint_schema()
         self.assertEqual(api['info']['x-check-1'], 1)
         self.assertEqual(api['info']['x-check-2'], 2)
         with override_settings(OPENAPI_HOOKS=OPENAPI_HOOKS):
             with self.user_as(self, self._create_user(is_super_user=False)):
-                api1_user = self.get_result('get', '/api/endpoint/?format=openapi', 200)
+                api1_user = self.endpoint_schema()
         self.assertEqual(api['info']['x-check-5'], 5)
         self.assertEqual(api1_user['info'].get('x-check-5'), None)
 
@@ -1672,6 +1672,11 @@ class EndpointTestCase(BaseTestCase):
 
         self.assertEqual(response[0]['status'], 404, response[0])
         self.assertTrue('<h1>Not Found</h1>' in response[0]['data']['detail'])
+
+    def test_testing_tool(self):
+        with self.assertRaises(AssertionError):
+            self.get_model_class('SomeNotFound')
+        self.assertEqual(self.get_model_class(File), File)
 
     def test_param_templates(self):
         Host.objects.all().delete()
@@ -3128,12 +3133,14 @@ class WebSocketTestCase(BaseTestCase):
             mock_kwargs.append(kwargs)
 
         Host = self.get_model_class('test_proj.models.Host')
+        Group = self.get_model_class('auth.Group')
         models.cent_client = get_centrifugo_client()
         models.cent_client._send = publish
 
         host_obj = Host.objects.create(name="centrifuga")
         host_obj2 = Host.objects.create(name="centrifuga")
         Host.objects.filter(id__in=[host_obj.id, host_obj2.id]).delete()
+        Group.objects.create(name='TestUsersGroup').delete()
         self.assertEqual(mock_call_count, 4)
         mock_data = []
         for arg in mock_args:
