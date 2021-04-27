@@ -752,35 +752,63 @@ class KVExchanger(BaseVstObject):
 
 class Lock(KVExchanger):
     """
-    Lock class for multi-jobs workflow.
+    Lock class for multi-jobs workflow. Based on :class:`.KVExchanger`.
+    The Lock allows ony one thread to enter the part that's locked and shared
+    between apps using one locks cache (see also `[locks] <config.html#locks-settings>`_).
+
+
+    :param id: -- unique id for lock.
+    :type id: int,str
+    :param payload: -- lock additional info. Should be any boolean True value.
+    :param repeat: -- time to wait lock.release. Default 1 sec.
+    :type repeat: int
+    :param err_msg: -- message for AcquireLockException error.
+    :type err_msg: str
 
     .. note::
         - Used django.core.cache lib and settings in `settings.py`
         - Have Lock.SCHEDULER and Lock.GLOBAL id
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import Lock
+
+            with Lock("some_lock_identifier", repeat=30, err_msg="Locked by another proccess") as lock:
+                # where
+                # ``"some_lock_identifier"`` is unique id for lock and
+                # ``30`` seconds lock is going wait until another process will release lock id.
+                # After 30 sec waiting lock will raised with :class:`.Lock.AcquireLockException`
+                # and ``err_msg`` value as text.
+                some_code_execution()
+                # ``lock`` object will has been automatically released after
+                # exiting from context.
+
+    Another example without context manager:
+        .. sourcecode:: python
+
+            from vstutils.utils import Lock
+
+            # locked block after locked object created
+            lock = Lock("some_lock_identifier", repeat=30, err_msg="Locked by another proccess")
+            # deleting of object calls ``lock.release()`` which release and remove lock from id.
+            del lock
+
     """
     TIMEOUT: tp.ClassVar[int] = 60 * 60 * 24
     GLOBAL: tp.ClassVar[tp.Text] = "global-deploy"
     SCHEDULER: tp.ClassVar[tp.Text] = "celery-beat"
 
     class AcquireLockException(Exception):
-        pass
+        """ Exception which will raised on unreleased lock. """
 
     @classproperty
     def PREFIX(cls):
         # pylint: disable=no-self-argument
         return f"{cls.get_django_settings('VST_PROJECT_LIB')}_lock_"
 
-    def __init__(self, id, payload=None, repeat=1, err_msg="", timeout=None):
+    def __init__(self, id, payload=1, repeat=1, err_msg="", timeout=None):
         # pylint: disable=too-many-arguments
-        """
-        :param id: -- unique id for lock.
-        :type id: int,str
-        :param payload: -- lock additional info.
-        :param repeat: -- time to wait lock.release. Default 1 sec.
-        :type repeat: int
-        :param err_msg: -- message for AcquireLockException error.
-        :type err_msg: str
-        """
         super().__init__(id, timeout)
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
