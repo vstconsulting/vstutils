@@ -90,7 +90,7 @@
                 return true;
             },
             model() {
-                return this.view.objects.getModelClass(RequestTypes.RETRIEVE);
+                return this.view.objects.getResponseModelClass(RequestTypes.RETRIEVE);
             },
             data() {
                 return this.$store.getters[this.storeName + '/sandbox'];

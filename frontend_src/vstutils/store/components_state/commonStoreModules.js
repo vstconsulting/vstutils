@@ -132,7 +132,7 @@ export const PAGE_NEW_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
     actions: {
         async fetchData({ commit, getters }, { data } = {}) {
             const queryset = getters.queryset;
-            const model = queryset.getModelClass(RequestTypes.CREATE);
+            const model = queryset.getRequestModelClass(RequestTypes.CREATE);
             commit('setInstance', new model(model.getInitialData(data), queryset));
         },
     },
@@ -142,8 +142,8 @@ export const PAGE_EDIT_STORE_MODULE = mergeDeep({}, PAGE_WITH_EDITABLE_DATA, {
     mutations: {
         setInstance(state, instance) {
             const model =
-                state.queryset.getModelClass(RequestTypes.PARTIAL_UPDATE) ||
-                state.queryset.getModelClass(RequestTypes.UPDATE);
+                state.queryset.getRequestModelClass(RequestTypes.PARTIAL_UPDATE) ||
+                state.queryset.getRequestModelClass(RequestTypes.UPDATE);
 
             if (!(instance instanceof model)) {
                 instance = new model(null, null, instance);

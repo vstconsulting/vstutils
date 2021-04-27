@@ -1,5 +1,6 @@
 import ViewConstructor from './ViewConstructor.js';
+import { ViewsTree } from './ViewsTree.js';
 
-export { ViewConstructor };
+export { ViewConstructor, ViewsTree };
 
 export * from './View.js';

@@ -64,7 +64,7 @@ class FKField extends BaseField {
         if (list_paths) {
             querysets = list_paths.map((listPath) => app.views.get(listPath).objects.clone());
             if (!this.fkModel) {
-                this.fkModel = querysets[0].getModelClass(RequestTypes.LIST);
+                this.fkModel = querysets[0].getResponseModelClass(RequestTypes.LIST);
             }
         } else {
             querysets = [this.constructor.app.qsResolver.findQuerySet(this.fkModel.name, path)];

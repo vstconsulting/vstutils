@@ -1,5 +1,4 @@
-import $ from 'jquery';
-import { findClosestPath, formatPath, path_pk_key, ViewTypes } from '../utils';
+import { formatPath, parseResponseMessage, pathToArray, ViewTypes } from '../utils';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
@@ -90,16 +89,20 @@ export const BaseViewMixin = {
         },
         /**
          * Method, that opens some page.
-         * @param {object} options Options for router for new page opening.
+         * @param {Object|string} options Options or path for router for new page opening.
          */
-        openPage(options = {}) {
-            // Get name by path so additional params can be passed
-            if (options.path) {
-                const name = this.$router.resolve(options)?.route?.name;
-                if (name && name !== '404') {
-                    options.name = name;
-                    delete options['path'];
+        openPage(options) {
+            if (typeof options === 'object') {
+                // Get name by path so additional params can be passed
+                if (options.path) {
+                    const name = this.$router.resolve(options)?.route?.name;
+                    if (name && name !== '404') {
+                        options.name = name;
+                        delete options['path'];
+                    }
                 }
+            } else {
+                options = { path: options };
             }
             return this.$router.push(options).catch((error) => {
                 // Allow to open route with the same path as current
@@ -118,77 +121,38 @@ export const BaseViewMixin = {
 
         /**
          * Method, that tries to get redirect URL from response data.
-         * @param {object} response_data response.data object.
+         * @param {object} responseData response.data object.
          * @private
          */
-        _getRedirectUrlFromResponse(response_data) {
-            let pk_key;
-            let pk_value;
-            let redirect_path;
+        _getRedirectUrlFromResponse(responseData) {
+            if (typeof responseData !== 'object') return;
+            const redirectField = Object.keys(responseData).find((key) => key.endsWith('_id'));
+            if (!redirectField) return;
 
-            for (let key in response_data) {
-                if (key.indexOf('_id') !== -1) {
-                    pk_key = key;
-                    pk_value = response_data[key];
-                }
-            }
+            const operationId = redirectField.replace(/_id$/, '') + '_get';
 
-            if (!pk_key || pk_value === null) {
-                return;
-            }
+            const matcher = (view) => view.operationId.endsWith(operationId) && view;
 
-            // tries to find appropriate redirect path in internal paths
-            const paths = window.app.views
-                .values()
-                .filter(
-                    (item) =>
-                        item.schema.type === 'page' &&
-                        item.schema.path.replace(/^\/|\/$/g, '').split('/').last === '{' + pk_key + '}',
-                )
-                .map((item) => item.schema.path);
+            const node = this.$app.viewsTree.root.get(pathToArray(this.view.path));
+            const view =
+                this.$app.viewsTree.findInNeighbourPaths(node, matcher) ||
+                this.$app.viewsTree.findInParentsDeep(node, matcher) ||
+                this.$app.viewsTree.findInAllPaths(matcher);
 
-            redirect_path = findClosestPath(paths, this.$route.name);
-
-            if (redirect_path) {
-                let obj = {};
-
-                obj[pk_key] = pk_value;
-                return redirect_path.format($.extend(true, {}, this.$route.params, obj)).replace(/\/$/g, '');
-            }
-
-            // tries to find appropriate redirect path in paths of 3rd level
-            redirect_path = window.app.views
-                .values()
-                .filter((item) => {
-                    if (
-                        item.schema.path.indexOf(pk_key.replace('_id', '')) !== -1 &&
-                        item.schema.type === 'page' &&
-                        item.schema.level === 3
-                    ) {
-                        return item;
-                    }
-                })
-                .map((item) => item.schema.path)[0];
-
-            if (redirect_path) {
-                let f_obj = {};
-
-                f_obj[path_pk_key] = pk_value;
-
-                return redirect_path.format(f_obj).replace(/\/$/g, '');
-            }
+            return formatPath(view.path, { ...this.params, [view.pkParamName]: responseData[redirectField] });
         },
 
-        async executeEmptyAction(action, instance = undefined, oneOfMultiple = false) {
+        async executeEmptyAction(action, instance = undefined) {
             const path = formatPath(action.path, this.$route.params, instance);
 
             try {
                 const response = await this.queryset.execute({ method: action.method, path });
 
                 guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.executeEmpty).format([
+                    this.$t(pop_up_msg.instance.success.executeEmpty, [
                         this.$t(action.title),
                         instance?.getViewFieldString() || this.$t(this.view.title),
+                        parseResponseMessage(response.data),
                     ]),
                 );
 
@@ -197,24 +161,24 @@ export const BaseViewMixin = {
                         let redirect_path = this._getRedirectUrlFromResponse(response.data);
 
                         if (redirect_path) {
-                            this.openPage({ path: redirect_path });
-                        } else if (!oneOfMultiple) {
-                            this.afterEmptyAction({ action, instance });
+                            this.openPage(redirect_path);
                         }
+                        this.afterEmptyAction({ action, instance });
                     } catch (e) {
                         console.log(e);
                     }
                 }
             } catch (error) {
-                let str = window.app.error_handler.errorToString(error);
+                let str = this.$app.error_handler.errorToString(error);
 
-                let srt_to_show = this.$t(pop_up_msg.instance.error.executeEmpty).format([
+                let srt_to_show = this.$t(pop_up_msg.instance.error.executeEmpty, [
                     this.$t(action.name),
                     this.$t(this.view.name),
                     str,
+                    parseResponseMessage(error.data),
                 ]);
 
-                window.app.error_handler.showError(srt_to_show, str);
+                this.$app.error_handler.showError(srt_to_show, str);
             }
         },
 
@@ -225,7 +189,7 @@ export const BaseViewMixin = {
         // eslint-disable-next-line no-unused-vars
         afterEmptyAction(obj) {},
 
-        executeAction(action, instance = undefined, oneOfMultiple = false) {
+        executeAction(action, instance = undefined) {
             if (typeof this[`${action.name}Instance`] === 'function' && instance) {
                 return this[`${action.name}Instance`](action, instance);
             }

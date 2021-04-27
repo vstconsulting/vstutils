@@ -74,7 +74,7 @@
                 return true;
             },
             model() {
-                return this.view.objects.getModelClass(RequestTypes.LIST);
+                return this.view.objects.getResponseModelClass(RequestTypes.LIST);
             },
             /**
              * Property that returns total number total number of instances, or -1 if

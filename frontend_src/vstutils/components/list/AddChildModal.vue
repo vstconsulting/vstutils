@@ -90,7 +90,7 @@
         },
         computed: {
             model() {
-                return this.view.objects.getModelClass(RequestTypes.LIST);
+                return this.view.objects.getResponseModelClass(RequestTypes.LIST);
             },
             fields() {
                 return Array.from(this.model.fields.values()).filter(

@@ -21,10 +21,12 @@ describe('ViewConstructor', () => {
             expect(authorsView).toBeDefined();
 
             let qs = authorsView.objects;
-            expect(qs.models[RequestTypes.LIST]).toBe(modelsClasses.get('Author'));
-            expect(qs.models[RequestTypes.RETRIEVE]).toBe(modelsClasses.get('OneAuthor'));
-            expect(qs.models[RequestTypes.UPDATE]).toBe(modelsClasses.get('AuthorUpdate'));
-            expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toBe(modelsClasses.get('AuthorUpdate'));
+            expect(qs.models[RequestTypes.LIST]).toStrictEqual([null, modelsClasses.get('Author')]);
+            expect(qs.models[RequestTypes.RETRIEVE]).toStrictEqual([null, modelsClasses.get('OneAuthor')]);
+            expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toStrictEqual([
+                modelsClasses.get('AuthorUpdate'),
+                modelsClasses.get('AuthorUpdate'),
+            ]);
 
             const subWithPostSublink = authorsView.sublinks.get('sub_with_post');
             expect(subWithPostSublink).toBeDefined();
@@ -79,10 +81,13 @@ describe('ViewConstructor', () => {
             expect(view.nestedQueryset).toBe(views.get('/post/').objects);
 
             const qs = view.objects;
-            expect(qs.models[RequestTypes.LIST]).toBe(modelsClasses.get('Post'));
-            expect(qs.models[RequestTypes.RETRIEVE]).toBe(modelsClasses.get('OnePost'));
-            expect(qs.models[RequestTypes.UPDATE]).toBe(modelsClasses.get('OnePost'));
-            expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toBe(modelsClasses.get('OnePost'));
+            expect(qs.models[RequestTypes.LIST]).toStrictEqual([null, modelsClasses.get('Post')]);
+            expect(qs.models[RequestTypes.RETRIEVE]).toStrictEqual([null, modelsClasses.get('OnePost')]);
+            expect(qs.models[RequestTypes.UPDATE]).toBeUndefined();
+            expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toStrictEqual([
+                modelsClasses.get('OnePost'),
+                modelsClasses.get('OnePost'),
+            ]);
 
             const archiveAllAction = view.actions.get('archive_all');
             expect(archiveAllAction).toBeDefined();
@@ -136,7 +141,7 @@ describe('ViewConstructor', () => {
         const changeTitleAction = authorPost.actions.get('change_title');
         expect(changeTitleAction).toBeDefined();
         expect(changeTitleAction.isEmpty).toBeFalsy();
-        expect(changeTitleAction.view.model).toBe(modelsClasses.get('ChangeTitle'));
+        expect(changeTitleAction.view.params.requestModel).toBe(modelsClasses.get('ChangeTitle'));
         const saveAction = authorPost.actions.get('save');
         expect(saveAction).toBeDefined();
         expect(saveAction.isEmpty).toBeFalsy();
@@ -145,7 +150,7 @@ describe('ViewConstructor', () => {
         expect(reloadAction.isEmpty).toBeFalsy();
 
         expect(authorPost.sublinks.size).toBe(2);
-        expect(authorPost.actions.size).toBe(5);
+        expect(authorPost.actions.size).toBe(6);
     });
 
     test.each([
@@ -156,6 +161,8 @@ describe('ViewConstructor', () => {
         const changeTitleView = views.get(path);
         expect(changeTitleView).toBeDefined();
         expect(changeTitleView.type).toBe(ViewTypes.ACTION);
+        expect(changeTitleView.params.requestModel).toBe(modelsClasses.get('ChangeTitle'));
+        expect(changeTitleView.params.responseModel).toBe(modelsClasses.get('ChangeTitleResult'));
 
         const executeAction = changeTitleView.actions.get('execute');
         expect(executeAction).toBeDefined();
@@ -213,9 +220,12 @@ describe('ViewConstructor', () => {
         expect(subView).toBeDefined();
 
         const qs = subView.objects;
-        expect(qs.models[RequestTypes.RETRIEVE]).toBe(modelsClasses.get('SubView'));
-        expect(qs.models[RequestTypes.UPDATE]).toBe(modelsClasses.get('SubView'));
-        expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toBe(modelsClasses.get('SubView'));
+        expect(qs.models[RequestTypes.RETRIEVE]).toStrictEqual([null, modelsClasses.get('SubView')]);
+        expect(qs.models[RequestTypes.UPDATE]).toBeUndefined();
+        expect(qs.models[RequestTypes.PARTIAL_UPDATE]).toStrictEqual([
+            modelsClasses.get('SubView'),
+            modelsClasses.get('SubView'),
+        ]);
 
         const editAction = subView.actions.get('edit');
         expect(editAction).toBeDefined();
@@ -251,8 +261,11 @@ describe('ViewConstructor', () => {
             expect(subView).toBeDefined();
 
             const qs = subView.objects;
-            expect(qs.models[RequestTypes.RETRIEVE]).toBe(modelsClasses.get('SubView'));
-            expect(qs.models[RequestTypes.CREATE]).toBe(modelsClasses.get('SubView'));
+            expect(qs.models[RequestTypes.RETRIEVE]).toStrictEqual([null, modelsClasses.get('SubView')]);
+            expect(qs.models[RequestTypes.CREATE]).toStrictEqual([
+                modelsClasses.get('SubView'),
+                modelsClasses.get('SubView'),
+            ]);
 
             const newSublink = subView.sublinks.get('new');
             expect(newSublink).toBeDefined();

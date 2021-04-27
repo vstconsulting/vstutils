@@ -91,6 +91,14 @@ export class View {
     }
 
     /**
+     * Property that returns array with request and response model
+     * @return {Function[]}
+     */
+    get modelsList() {
+        return [this.params.requestModel || null, this.params.responseModel || null];
+    }
+
+    /**
      * Returns custom store module
      * @returns {Object|undefined}
      */
@@ -250,7 +258,6 @@ export class ActionView extends View {
     constructor(params, objects, mixins = [ActionViewComponent]) {
         super(params, objects, mixins);
 
-        this.model = params.model;
         this.method = params.method;
     }
 

@@ -17,6 +17,10 @@ function isSuccessful(code) {
     return codeNum >= 200 && codeNum < 400;
 }
 
+function isBodyParam(param) {
+    return param.in === 'body';
+}
+
 const FILTERS_TO_EXCLUDE = ['limit', 'offset'];
 
 const EDIT_STYLE_PROPERTY_NAME = 'x-edit-style';
@@ -145,14 +149,16 @@ export default class ViewConstructor {
                 if (!operationSchema) continue;
                 const operationId = operationSchema[this.dictionary.paths.operation_id.name];
 
+                const request = Object.values(operationSchema.parameters).find(isBodyParam);
+                const requestModel = request ? this._getOperationModel(request) : null;
+
                 const responseCode = Object.keys(operationSchema.responses).find(isSuccessful);
                 const response = operationSchema.responses[responseCode];
                 const responseSchemaType = response.schema?.type;
-
-                const model = this._getOperationModel(response);
+                const responseModel = this._getOperationModel(response);
 
                 const operationOptions = mergeDeep(
-                    { method: httpMethod, model },
+                    { method: httpMethod, requestModel, responseModel },
                     commonOptions,
                     operationSchema,
                     this.getOperationOptions(operationId, path),
@@ -162,7 +168,7 @@ export default class ViewConstructor {
 
                 if (operationOptions.type === ViewTypes.LIST) {
                     operationOptions.filters = this._generateFilters(path, operationOptions.parameters);
-                    const qs = new QuerySet(path, { [RequestTypes.LIST]: model });
+                    const qs = new QuerySet(path, { [RequestTypes.LIST]: [null, responseModel] });
                     listView = new ListView(operationOptions, qs);
                     views.set(path, listView);
                     const filterAction = this.dictionary.paths.operations.list.filters;
@@ -183,7 +189,8 @@ export default class ViewConstructor {
                 } else if (operationOptions.type === ViewTypes.PAGE_REMOVE) {
                     hasRemoveAction = true;
                 } else if (operationOptions.type === ViewTypes.ACTION) {
-                    const isEmpty = model.fields.size === 0 || model === NoModel;
+                    const isEmpty =
+                        !requestModel || requestModel.fields.size === 0 || requestModel === NoModel;
                     const isMultiAction =
                         (operationOptions[IS_MULTI_ACTION_PROPERTY_NAME] !== undefined &&
                             operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]) ||
@@ -192,13 +199,14 @@ export default class ViewConstructor {
                     const params = {
                         name: operationOptions.name,
                         title: operationOptions.title,
+                        method: httpMethod,
+                        path,
+                        requestModel,
+                        responseModel,
                         isMultiAction,
                         isEmpty,
                     };
-                    if (isEmpty) {
-                        params.method = httpMethod;
-                        params.path = path;
-                    } else {
+                    if (!isEmpty) {
                         const view = new ActionView(operationOptions, null);
                         const executeAction = {
                             ...this.dictionary.paths.operations.action.execute,
@@ -221,18 +229,20 @@ export default class ViewConstructor {
 
             // Set list path models
             if (isListDetail) {
-                parent.objects.models[RequestTypes.RETRIEVE] = pageView.params.model;
+                parent.objects.models[RequestTypes.RETRIEVE] = pageView.modelsList;
                 pageView.objects = parent.objects;
                 if (editView) {
-                    parent.objects.models[RequestTypes.PARTIAL_UPDATE] = editView.params.model;
-                    parent.objects.models[RequestTypes.UPDATE] = editView.params.model;
+                    const requestType = editView.isPartial
+                        ? RequestTypes.PARTIAL_UPDATE
+                        : RequestTypes.UPDATE;
+                    parent.objects.models[requestType] = editView.modelsList;
                     editView.objects = parent.objects;
                 }
             }
 
             // Set new page queryset
             if (isListPath && newView) {
-                listView.objects.models[RequestTypes.CREATE] = newView.params.model;
+                listView.objects.models[RequestTypes.CREATE] = newView.modelsList;
                 newView.objects = listView.objects;
             }
 
@@ -240,17 +250,19 @@ export default class ViewConstructor {
             if (isDetailWithoutList) {
                 pageView.mixins.push(DetailWithoutListPageMixin);
                 pageView.objects = new SingleEntityQueryset(pageView.path, {
-                    [RequestTypes.RETRIEVE]: pageView.params.model,
+                    [RequestTypes.RETRIEVE]: pageView.modelsList,
                 });
                 if (newView) {
                     newView.mixins.push(DetailWithoutListPageMixin);
-                    pageView.objects.models[RequestTypes.CREATE] = newView.params.model;
+                    pageView.objects.models[RequestTypes.CREATE] = newView.modelsList;
                     newView.objects = pageView.objects;
                 }
                 if (editView) {
                     editView.mixins.push(DetailWithoutListPageMixin);
-                    pageView.objects.models[RequestTypes.PARTIAL_UPDATE] = editView.params.model;
-                    pageView.objects.models[RequestTypes.UPDATE] = editView.params.model;
+                    const requestType = editView.isPartial
+                        ? RequestTypes.PARTIAL_UPDATE
+                        : RequestTypes.UPDATE;
+                    pageView.objects.models[requestType] = editView.modelsList;
                     editView.objects = pageView.objects;
                 }
             }
@@ -411,7 +423,7 @@ export default class ViewConstructor {
             .sort((a, b) => a.level - b.level);
 
         for (const listView of listViews) {
-            const modelName = listView.objects.getModelClass(RequestTypes.LIST).name;
+            const modelName = listView.objects.getResponseModelClass(RequestTypes.LIST).name;
             if (!qsCache.has(modelName)) qsCache.set(modelName, listView.objects);
         }
 
@@ -421,7 +433,7 @@ export default class ViewConstructor {
             .map((view) => view.listView);
 
         for (const nestedListView of nestedListViews) {
-            const modelName = nestedListView.objects.getModelClass(RequestTypes.LIST).name;
+            const modelName = nestedListView.objects.getResponseModelClass(RequestTypes.LIST).name;
             const qs = qsCache.get(modelName);
             if (!qs) throw new Error(`Cannot find queryset for model: ${modelName}`);
             nestedListView.nestedQueryset = qs;
