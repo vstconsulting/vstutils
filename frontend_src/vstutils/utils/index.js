@@ -1030,3 +1030,32 @@ export const BulkType = {
 export function tableColumnClasses(field) {
     return ['column', `column-${field.name}`, `column-format-${field.format}`];
 }
+
+export function parseResponseMessage(data) {
+    if (!data) {
+        return '';
+    }
+    if (typeof data === 'string') {
+        return data;
+    }
+    if (data.detail) {
+        return data.detail;
+    }
+    if (Array.isArray(data)) {
+        return data.join('<br>');
+    }
+    if (typeof data === 'object') {
+        return Object.entries(data)
+            .filter((entry) => !entry[0].endsWith('_id'))
+            .reduce((result, [name, value]) => result + `<b>${name}:</b> ${value}<br>`, '');
+    }
+    return '';
+}
+
+/**
+ * @param {string} path
+ * @return {string[]}
+ */
+export function pathToArray(path) {
+    return path.replace(/^\/|\/$/g, '').split('/');
+}

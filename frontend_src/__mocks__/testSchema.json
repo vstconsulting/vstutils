@@ -4,24 +4,24 @@
         "title": "QuickStart",
         "termsOfService": "",
         "contact": { "name": "System Administrator" },
-        "x-docs": { "has_docs": false, "docs_url": "/docs/" },
+        "x-docs": { "has_docs": true, "docs_url": "/docs/" },
         "x-links": {
             "vstutils": {
-                "name": "VST Utils sources",
-                "url": "https://github.com/vstconsulting/vstutils.git"
+                "url": "https://github.com/vstconsulting/vstutils.git",
+                "name": "VST Utils sources"
             }
         },
         "x-menu": [
-            { "name": "Authors", "span_class": "fa fa-cog", "url": "/author" },
-            { "name": "Categories", "span_class": "fa fa-cog", "url": "/category" },
-            { "name": "Posts", "span_class": "fa fa-cog", "url": "/post" },
-            { "name": "Post Types", "span_class": "fa fa-cog", "url": "/post_types" },
-            { "name": "Predefined Attributes", "span_class": "fa fa-cog", "url": "/predefined_attribute" },
-            { "name": "All Fields", "span_class": "fa fa-cog", "url": "/all_fields" },
+            { "name": "Authors", "url": "/author", "span_class": "fa fa-cog" },
+            { "name": "Categories", "url": "/category", "span_class": "fa fa-cog" },
+            { "name": "Posts", "url": "/post", "span_class": "fa fa-cog" },
+            { "name": "Post Types", "url": "/post_types", "span_class": "fa fa-cog" },
+            { "name": "Predefined Attributes", "url": "/predefined_attribute", "span_class": "fa fa-cog" },
+            { "name": "All Fields", "url": "/all_fields", "span_class": "fa fa-cog" },
             {
                 "name": "System",
                 "span_class": "fa fa-cog",
-                "sublinks": [{ "name": "Users", "span_class": "fa fa-user", "url": "/user" }]
+                "sublinks": [{ "name": "Users", "url": "/user", "span_class": "fa fa-user" }]
             }
         ],
         "x-page-limit": 20,
@@ -35,15 +35,15 @@
         "x-versions": {
             "application": "1.0.0",
             "library": "1.0.0",
-            "vstutils": "4.6.2",
-            "django": "2.2.18",
-            "djangorestframework": "3.12.2",
+            "vstutils": "4.6.4",
+            "django": "3.2",
+            "djangorestframework": "3.12.4",
             "drf_yasg": "1.20.0"
         },
         "version": "v1",
         "x-user-id": 1
     },
-    "host": "0.0.0.0:8080",
+    "host": "quick.local:8086",
     "schemes": ["http"],
     "basePath": "/api/v1",
     "consumes": ["application/json"],
@@ -535,9 +535,10 @@
                 "operationId": "author_post_archive_all",
                 "description": "",
                 "parameters": [],
-                "responses": { "204": { "description": "NO CONTENT" } },
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ArchiveAllResult" } }
+                },
                 "tags": ["author"],
-                "x-multiaction": false,
                 "x-label": "Archive All Posts"
             },
             "parameters": [
@@ -667,9 +668,42 @@
                     }
                 ],
                 "responses": {
-                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitleResult" } }
                 },
                 "tags": ["author"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/author/{id}/post/{post_id}/change_title_with_message/": {
+            "patch": {
+                "operationId": "author_post_change_title_with_message",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Empty" } } },
+                "tags": ["author"],
+                "x-multiaction": false
             },
             "parameters": [
                 {
@@ -1436,9 +1470,10 @@
                 "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_archive_all",
                 "description": "",
                 "parameters": [],
-                "responses": { "204": { "description": "NO CONTENT" } },
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ArchiveAllResult" } }
+                },
                 "tags": ["fragment1"],
-                "x-multiaction": false,
                 "x-label": "Archive All Posts"
             },
             "parameters": [
@@ -1568,9 +1603,42 @@
                     }
                 ],
                 "responses": {
-                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitleResult" } }
                 },
                 "tags": ["fragment1"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this author.",
+                    "required": true,
+                    "type": "integer"
+                },
+                {
+                    "name": "post_id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer",
+                    "description": "A unique integer value identifying instance of this post sublist."
+                }
+            ]
+        },
+        "/fragment1/fragment2/fragment3/fragment4/author/{id}/post/{post_id}/change_title_with_message/": {
+            "patch": {
+                "operationId": "fragment1_fragment2_fragment3_fragment4_author_post_change_title_with_message",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Empty" } } },
+                "tags": ["fragment1"],
+                "x-multiaction": false
             },
             "parameters": [
                 {
@@ -2079,9 +2147,10 @@
                 "operationId": "nested_nested_post_archive_all",
                 "description": "",
                 "parameters": [],
-                "responses": { "204": { "description": "NO CONTENT" } },
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ArchiveAllResult" } }
+                },
                 "tags": ["nested"],
-                "x-multiaction": false,
                 "x-label": "Archive All Posts"
             },
             "parameters": []
@@ -2189,9 +2258,35 @@
                     }
                 ],
                 "responses": {
-                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitleResult" } }
                 },
                 "tags": ["nested"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/nested/nested/post/{id}/change_title_with_message/": {
+            "patch": {
+                "operationId": "nested_nested_post_change_title_with_message",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Empty" } } },
+                "tags": ["nested"],
+                "x-multiaction": false
             },
             "parameters": [
                 {
@@ -2527,9 +2622,10 @@
                 "operationId": "post_archive_all",
                 "description": "",
                 "parameters": [],
-                "responses": { "204": { "description": "NO CONTENT" } },
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ArchiveAllResult" } }
+                },
                 "tags": ["post"],
-                "x-multiaction": false,
                 "x-label": "Archive All Posts"
             },
             "parameters": []
@@ -2637,9 +2733,35 @@
                     }
                 ],
                 "responses": {
-                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitle" } }
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/ChangeTitleResult" } }
                 },
                 "tags": ["post"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this post.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/post/{id}/change_title_with_message/": {
+            "patch": {
+                "operationId": "post_change_title_with_message",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/ChangeTitle" }
+                    }
+                ],
+                "responses": { "200": { "description": "OK", "schema": { "$ref": "#/definitions/Empty" } } },
+                "tags": ["post"],
+                "x-multiaction": false
             },
             "parameters": [
                 {
@@ -3384,7 +3506,44 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this user.",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
+                    "required": true,
+                    "type": "integer"
+                }
+            ]
+        },
+        "/user/{id}/_settings/": {
+            "get": {
+                "operationId": "user__settings_get",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/_UserSettings" } }
+                },
+                "tags": ["user"],
+                "x-subscribe-labels": ["auth.User"]
+            },
+            "put": {
+                "operationId": "user__settings_update",
+                "description": "API endpoint that allows users to be viewed or edited.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": { "$ref": "#/definitions/_UserSettings" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "OK", "schema": { "$ref": "#/definitions/_UserSettings" } }
+                },
+                "tags": ["user"]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
                     "required": true,
                     "type": "integer"
                 }
@@ -3411,7 +3570,7 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this user.",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
                     "required": true,
                     "type": "integer"
                 }
@@ -3444,7 +3603,7 @@
                 {
                     "name": "id",
                     "in": "path",
-                    "description": "A unique integer value identifying this user.",
+                    "description": "A unique integer value identifying this \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c.",
                     "required": true,
                     "type": "integer"
                 }
@@ -3481,9 +3640,9 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/Author" },
-                        "usePrefetch": true,
                         "value_field": "name",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true
                     },
                     "x-nullable": true
                 },
@@ -3538,9 +3697,9 @@
                     "type": "string",
                     "format": "dynamic",
                     "additionalProperties": {
-                        "choices": {},
                         "field": "choices",
-                        "types": { "boolean": "boolean", "integer": "integer" }
+                        "choices": {},
+                        "types": { "integer": "integer", "boolean": "boolean" }
                     },
                     "x-nullable": true
                 },
@@ -3557,13 +3716,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/PredefinedAttribute" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     },
                     "x-nullable": true
                 },
@@ -3587,11 +3746,11 @@
                     "type": "string",
                     "format": "multiplenamedbinimage",
                     "additionalProperties": {
-                        "extensions": ["bmp", "jpeg", "jpg", "png"],
-                        "max_height": 400,
+                        "min_width": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "min_width": 400
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
                     }
                 },
                 "multiselect_model": {
@@ -3599,13 +3758,13 @@
                     "type": "string",
                     "format": "multiselect",
                     "additionalProperties": {
-                        "dependence": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Author" },
-                        "usePrefetch": false,
                         "value_field": "name",
                         "view_field": "name",
-                        "view_separator": ","
+                        "view_separator": ",",
+                        "usePrefetch": false,
+                        "makeLink": true,
+                        "dependence": null
                     },
                     "x-nullable": true
                 },
@@ -3627,11 +3786,11 @@
                     "type": "string",
                     "format": "namedbinimage",
                     "additionalProperties": {
-                        "extensions": ["bmp", "jpeg", "jpg", "png"],
-                        "max_height": 400,
+                        "min_width": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "min_width": 400
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
                     },
                     "x-nullable": true
                 },
@@ -3647,12 +3806,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "color": "green",
-                        "fa_class": null,
-                        "max_value": 5,
                         "min_value": 0,
+                        "max_value": 5,
                         "step": 1,
-                        "style": "stars"
+                        "style": "stars",
+                        "color": "green",
+                        "fa_class": null
                     },
                     "x-nullable": true
                 },
@@ -3661,12 +3820,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "color": "orange",
-                        "fa_class": null,
-                        "max_value": 5,
                         "min_value": 0,
+                        "max_value": 5,
                         "step": 0.3,
-                        "style": "slider"
+                        "style": "slider",
+                        "color": "orange",
+                        "fa_class": null
                     }
                 },
                 "rating_icon": {
@@ -3674,12 +3833,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "color": "DeepPink",
-                        "fa_class": "fas fa-poo-storm",
-                        "max_value": 5,
                         "min_value": 0,
+                        "max_value": 5,
                         "step": 1,
-                        "style": "fa_icon"
+                        "style": "fa_icon",
+                        "color": "DeepPink",
+                        "fa_class": "fas fa-poo-storm"
                     }
                 },
                 "secretfile": {
@@ -3734,13 +3893,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Category" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     },
                     "x-nullable": true
                 },
@@ -3749,13 +3908,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": { "integer": "id" },
-                        "filters": { "category": "1", "title": "123" },
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Post" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "title"
+                        "view_field": "title",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": { "integer": "id" },
+                        "filters": { "category": "1", "title": "123" }
                     },
                     "x-nullable": true
                 }
@@ -3838,9 +3997,9 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/Author" },
-                        "usePrefetch": true,
                         "value_field": "name",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true
                     },
                     "x-nullable": true
                 },
@@ -3895,9 +4054,9 @@
                     "type": "string",
                     "format": "dynamic",
                     "additionalProperties": {
-                        "choices": {},
                         "field": "choices",
-                        "types": { "boolean": "boolean", "integer": "integer" }
+                        "choices": {},
+                        "types": { "integer": "integer", "boolean": "boolean" }
                     },
                     "x-nullable": true
                 },
@@ -3914,13 +4073,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/PredefinedAttribute" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     },
                     "x-nullable": true
                 },
@@ -3944,11 +4103,11 @@
                     "type": "string",
                     "format": "multiplenamedbinimage",
                     "additionalProperties": {
-                        "extensions": ["bmp", "jpeg", "jpg", "png"],
-                        "max_height": 400,
+                        "min_width": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "min_width": 400
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
                     }
                 },
                 "multiselect_model": {
@@ -3956,13 +4115,13 @@
                     "type": "string",
                     "format": "multiselect",
                     "additionalProperties": {
-                        "dependence": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Author" },
-                        "usePrefetch": false,
                         "value_field": "name",
                         "view_field": "name",
-                        "view_separator": ","
+                        "view_separator": ",",
+                        "usePrefetch": false,
+                        "makeLink": true,
+                        "dependence": null
                     },
                     "x-nullable": true
                 },
@@ -3984,11 +4143,11 @@
                     "type": "string",
                     "format": "namedbinimage",
                     "additionalProperties": {
-                        "extensions": ["bmp", "jpeg", "jpg", "png"],
-                        "max_height": 400,
+                        "min_width": 400,
                         "max_width": 800,
                         "min_height": 200,
-                        "min_width": 400
+                        "max_height": 400,
+                        "extensions": ["bmp", "jpeg", "jpg", "png"]
                     },
                     "x-nullable": true
                 },
@@ -4004,12 +4163,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "color": "green",
-                        "fa_class": null,
-                        "max_value": 5,
                         "min_value": 0,
+                        "max_value": 5,
                         "step": 1,
-                        "style": "stars"
+                        "style": "stars",
+                        "color": "green",
+                        "fa_class": null
                     },
                     "x-nullable": true
                 },
@@ -4018,12 +4177,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "color": "orange",
-                        "fa_class": null,
-                        "max_value": 5,
                         "min_value": 0,
+                        "max_value": 5,
                         "step": 0.3,
-                        "style": "slider"
+                        "style": "slider",
+                        "color": "orange",
+                        "fa_class": null
                     }
                 },
                 "rating_icon": {
@@ -4031,12 +4190,12 @@
                     "type": "number",
                     "format": "rating",
                     "additionalProperties": {
-                        "color": "DeepPink",
-                        "fa_class": "fas fa-poo-storm",
-                        "max_value": 5,
                         "min_value": 0,
+                        "max_value": 5,
                         "step": 1,
-                        "style": "fa_icon"
+                        "style": "fa_icon",
+                        "color": "DeepPink",
+                        "fa_class": "fas fa-poo-storm"
                     }
                 },
                 "secretfile": {
@@ -4091,13 +4250,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Category" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     },
                     "x-nullable": true
                 },
@@ -4106,13 +4265,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": { "integer": "id" },
-                        "filters": { "category": "1", "title": "123" },
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Post" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "title"
+                        "view_field": "title",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": { "integer": "id" },
+                        "filters": { "category": "1", "title": "123" }
                     },
                     "x-nullable": true
                 }
@@ -4190,7 +4349,7 @@
                     "type": "string",
                     "format": "date-time",
                     "readOnly": true,
-                    "default": "2021-04-08T02:10:39.377418Z"
+                    "default": "2021-04-27T05:26:17.672957Z"
                 }
             },
             "x-properties-groups": { "": ["id", "name", "posts", "register_date"] },
@@ -4221,7 +4380,7 @@
                     "type": "string",
                     "format": "date-time",
                     "readOnly": true,
-                    "default": "2021-04-08T02:10:39.381870Z"
+                    "default": "2021-04-27T05:26:17.676307Z"
                 }
             },
             "x-properties-groups": { "": ["id", "name", "posts", "register_date"] },
@@ -4269,13 +4428,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Author" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     }
                 },
                 "category": {
@@ -4283,13 +4442,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Category" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     },
                     "x-nullable": true
                 },
@@ -4312,13 +4471,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Author" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     }
                 },
                 "title": { "title": "Title", "type": "string", "maxLength": 255, "minLength": 1 },
@@ -4328,13 +4487,13 @@
                     "type": "integer",
                     "format": "fk",
                     "additionalProperties": {
-                        "dependence": null,
-                        "filters": null,
-                        "makeLink": true,
                         "model": { "$ref": "#/definitions/Category" },
-                        "usePrefetch": true,
                         "value_field": "id",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true,
+                        "makeLink": true,
+                        "dependence": null,
+                        "filters": null
                     },
                     "x-nullable": true
                 },
@@ -4344,9 +4503,9 @@
                     "format": "fk_autocomplete",
                     "additionalProperties": {
                         "model": { "$ref": "#/definitions/PredefinedPostType" },
-                        "usePrefetch": true,
                         "value_field": "name",
-                        "view_field": "name"
+                        "view_field": "name",
+                        "usePrefetch": true
                     }
                 }
             },
@@ -4356,6 +4515,19 @@
                 "": ["id"]
             },
             "x-view-field-name": "title"
+        },
+        "ArchiveAllResult": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "title": "Author id",
+                    "type": "integer",
+                    "readOnly": true,
+                    "additionalProperties": { "redirect": "author" }
+                }
+            },
+            "x-properties-groups": { "": ["author_id"] },
+            "x-view-field-name": "author_id"
         },
         "Empty": {
             "type": "object",
@@ -4369,6 +4541,20 @@
             "properties": { "title": { "title": "Title", "type": "string", "minLength": 1 } },
             "x-properties-groups": { "": ["title"] },
             "x-view-field-name": "title"
+        },
+        "ChangeTitleResult": {
+            "type": "object",
+            "properties": {
+                "new_title": { "title": "New title", "type": "string", "readOnly": true, "minLength": 1 },
+                "author_id": {
+                    "title": "Author id",
+                    "type": "integer",
+                    "readOnly": true,
+                    "additionalProperties": { "redirect": "author" }
+                }
+            },
+            "x-properties-groups": { "": ["new_title", "author_id"] },
+            "x-view-field-name": "author_id"
         },
         "PostMeta": {
             "required": ["key", "value"],
@@ -4392,8 +4578,8 @@
                     "type": "string",
                     "format": "dynamic",
                     "additionalProperties": {
-                        "choices": {},
                         "field": "key",
+                        "choices": {},
                         "types": { "meta_title": "string", "some_boolean": "boolean" }
                     }
                 }
@@ -4469,8 +4655,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "Username",
-                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -4489,8 +4675,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "Username",
-                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -4498,8 +4684,12 @@
                 },
                 "is_active": { "title": "Is active", "type": "boolean", "default": true },
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
-                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
-                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
+                "first_name": { "title": "\u0418\u043c\u044f", "type": "string", "maxLength": 150 },
+                "last_name": {
+                    "title": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
+                    "type": "string",
+                    "maxLength": 150
+                },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 },
                 "password": { "title": "Password", "type": "string", "minLength": 1 },
                 "password2": { "title": "Repeat password", "type": "string", "minLength": 1 }
@@ -4525,8 +4715,8 @@
             "properties": {
                 "id": { "title": "ID", "type": "integer", "readOnly": true },
                 "username": {
-                    "title": "Username",
-                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "title": "\u0418\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+                    "description": "\u041e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043f\u043e\u043b\u0435. \u041d\u0435 \u0431\u043e\u043b\u0435\u0435 150 \u0441\u0438\u043c\u0432\u043e\u043b\u043e\u0432. \u0422\u043e\u043b\u044c\u043a\u043e \u0431\u0443\u043a\u0432\u044b, \u0446\u0438\u0444\u0440\u044b \u0438 \u0441\u0438\u043c\u0432\u043e\u043b\u044b @/./+/-/_.",
                     "type": "string",
                     "pattern": "^[\\w.@+-]+$",
                     "maxLength": 150,
@@ -4534,14 +4724,37 @@
                 },
                 "is_active": { "title": "Is active", "type": "boolean", "default": true },
                 "is_staff": { "title": "Is staff", "type": "boolean", "default": false },
-                "first_name": { "title": "First name", "type": "string", "maxLength": 30 },
-                "last_name": { "title": "Last name", "type": "string", "maxLength": 150 },
+                "first_name": { "title": "\u0418\u043c\u044f", "type": "string", "maxLength": 150 },
+                "last_name": {
+                    "title": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
+                    "type": "string",
+                    "maxLength": 150
+                },
                 "email": { "title": "Email", "type": "string", "format": "email", "minLength": 1 }
             },
             "x-properties-groups": {
                 "": ["id", "username", "is_active", "is_staff", "first_name", "last_name", "email"]
             },
             "x-view-field-name": "username"
+        },
+        "_MainSettings": {
+            "type": "object",
+            "properties": {
+                "language": { "title": "Language", "type": "string", "enum": ["en", "ru"], "default": "ru" },
+                "dark_mode": { "title": "Dark mode", "type": "boolean", "default": false }
+            },
+            "default": { "language": "ru", "dark_mode": false },
+            "x-properties-groups": { "": ["language", "dark_mode"] },
+            "x-view-field-name": "dark_mode"
+        },
+        "_UserSettings": {
+            "type": "object",
+            "properties": {
+                "main": { "$ref": "#/definitions/_MainSettings" },
+                "custom": { "title": "Custom", "type": "string", "format": "json", "default": {} }
+            },
+            "x-properties-groups": { "": ["main", "custom"] },
+            "x-view-field-name": "custom"
         },
         "ChangePassword": {
             "required": ["old_password", "password", "password2"],

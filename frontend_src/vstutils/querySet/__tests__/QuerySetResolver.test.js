@@ -3,7 +3,7 @@ import { IntegerField } from '../../fields/numbers/integer.js';
 import { Model, ModelClass } from '../../models';
 import { RequestTypes } from '../../utils';
 import QuerySet from '../QuerySet.js';
-import { ListView, PageView } from '../../views';
+import { ListView, PageView, ViewsTree } from '../../views';
 import { QuerySetsResolver } from '../QuerySetsResolver.js';
 
 describe('QuerySetResolver test', () => {
@@ -63,12 +63,7 @@ describe('QuerySetResolver test', () => {
             level5_path2,
         ].map((view) => [view.path, view]),
     );
-    const models = new Map([
-        [Model1.name, Model1],
-        [Model2.name, Model2],
-        [Model3.name, Model3],
-    ]);
-    const resolver = new QuerySetsResolver(models, views);
+    const resolver = new QuerySetsResolver(new ViewsTree(views));
 
     test('test nested queryset', () => {
         // test nested qs

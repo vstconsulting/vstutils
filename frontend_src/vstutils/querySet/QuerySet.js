@@ -20,7 +20,7 @@ export class WrongModelError extends Error {
 const NOT_PUT_IN_EXTRA = ['results'];
 
 /**
- * @typedef {Object.<RequestType, Function>} ModelsConfiguration
+ * @typedef {Object.<RequestType, (Function|Function[])>} ModelsConfiguration
  */
 
 /**
@@ -53,23 +53,47 @@ export default class QuerySet {
      * `PARTIAL_UPDATE` / `UPDATE` -> `CREATE` -> `RETRIEVE` -> `LIST`
      *
      * @param {RequestType} operation
+     * @param {number} modelType - 0 for request and 1 for response
      * @return {Function|null}
      */
-    getModelClass(operation) {
-        if (this.models[operation]) return this.models[operation];
+    getModelClass(operation, modelType = 1) {
+        if (this.models[operation]) {
+            if (Array.isArray(this.models[operation])) {
+                return this.models[operation][modelType];
+            }
+            return this.models[operation];
+        }
 
         switch (operation) {
             case RequestTypes.PARTIAL_UPDATE:
-                return this.getModelClass(RequestTypes.CREATE);
+                return this.getModelClass(RequestTypes.CREATE, modelType);
             case RequestTypes.UPDATE:
-                return this.getModelClass(RequestTypes.CREATE);
+                return this.getModelClass(RequestTypes.CREATE, modelType);
             case RequestTypes.CREATE:
-                return this.getModelClass(RequestTypes.RETRIEVE);
+                return this.getModelClass(RequestTypes.RETRIEVE, modelType);
             case RequestTypes.RETRIEVE:
-                return this.getModelClass(RequestTypes.LIST);
+                return this.getModelClass(RequestTypes.LIST, modelType);
         }
 
         return null;
+    }
+
+    /**
+     * Method that returns request model for given operation
+     * @param {RequestType} operation
+     * @return {Function|null}
+     */
+    getRequestModelClass(operation) {
+        return this.getModelClass(operation, 0);
+    }
+
+    /**
+     * Method that returns response model for given operation
+     * @param {RequestType} operation
+     * @return {Function|null}
+     */
+    getResponseModelClass(operation) {
+        return this.getModelClass(operation, 1);
     }
 
     /**
@@ -165,7 +189,7 @@ export default class QuerySet {
      * @return {Promise.<Model>}
      */
     async get(id = undefined) {
-        const model = this.getModelClass(RequestTypes.RETRIEVE);
+        const model = this.getResponseModelClass(RequestTypes.RETRIEVE);
 
         let instance;
         if (id === undefined) {
@@ -189,8 +213,8 @@ export default class QuerySet {
      * @return {Promise<Model>}
      */
     async getOne() {
-        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
-        const listModelSameAsRetrieve = retrieveModel === this.getModelClass(RequestTypes.LIST);
+        const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
+        const listModelSameAsRetrieve = retrieveModel === this.getResponseModelClass(RequestTypes.LIST);
         const useBulk = retrieveModel.shouldUseBulk(HttpMethods.GET);
 
         if (useBulk && !listModelSameAsRetrieve) {
@@ -236,7 +260,7 @@ export default class QuerySet {
     async items(invalidateCache = true) {
         if (!invalidateCache && this.cache) return this.cache;
 
-        const model = this.getModelClass(RequestTypes.LIST);
+        const model = this.getResponseModelClass(RequestTypes.LIST);
 
         const response = await this.execute({
             method: HttpMethods.GET,
@@ -280,10 +304,10 @@ export default class QuerySet {
      * @returns {Promise.<Model>}
      */
     async create(instance, method = HttpMethods.POST) {
-        const createModel = this.getModelClass(RequestTypes.CREATE);
+        const createModel = this.getRequestModelClass(RequestTypes.CREATE);
         WrongModelError.checkModel(createModel, instance);
-        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
-        const createModelSameAsRetrieve = createModel === this.getModelClass(RequestTypes.RETRIEVE);
+        const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
+        const createModelSameAsRetrieve = createModel === this.getResponseModelClass(RequestTypes.RETRIEVE);
         const dataType = this.getDataType();
 
         if (
@@ -326,8 +350,8 @@ export default class QuerySet {
     async update(updatedInstance, instances, method = HttpMethods.PATCH, fields = null) {
         if (instances === undefined) instances = await this.items();
 
-        const modelUpdate = this.getModelClass(RequestTypes.PARTIAL_UPDATE);
-        const modelRetrieve = this.getModelClass(RequestTypes.RETRIEVE);
+        const modelUpdate = this.getRequestModelClass(RequestTypes.PARTIAL_UPDATE);
+        const modelRetrieve = this.getResponseModelClass(RequestTypes.RETRIEVE);
 
         WrongModelError.checkModel(modelUpdate, updatedInstance);
 
@@ -378,7 +402,7 @@ export default class QuerySet {
     async delete(instances = undefined) {
         if (instances === undefined) instances = await this.items();
 
-        const retrieveModel = this.getModelClass(RequestTypes.RETRIEVE);
+        const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
         const useBulk = retrieveModel ? retrieveModel.shouldUseBulk(HttpMethods.DELETE) : true;
 
         return Promise.all(

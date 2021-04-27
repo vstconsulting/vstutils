@@ -1,23 +1,10 @@
-import { BaseWidgetMixin, CardWidgetBodyMixin } from './baseWidgetMixins.js';
-import CardWidgetMixin from './CardWidgetMixin.vue';
-import LineChartContentBodyMixin from './LineChartContentBodyMixin.vue';
-import LineChartMixin from './LineChartMixin.js';
 import SidebarLinkMixin from './SidebarLinkMixin.js';
 import BaseButtonMixin from './BaseButtonMixin.vue';
 import { LIST_STORE_MODULE, PAGE_STORE_MODULE } from '../../store/components_state/commonStoreModules.js';
 import ComponentWithAutoUpdate from '../../autoupdate/ComponentWithAutoUpdate.js';
 import { StoreModuleComponent } from './StoreModuleComponent.js';
 
-export {
-    BaseButtonMixin,
-    BaseWidgetMixin,
-    CardWidgetBodyMixin,
-    CardWidgetMixin,
-    LineChartContentBodyMixin,
-    LineChartMixin,
-    SidebarLinkMixin,
-    StoreModuleComponent,
-};
+export { BaseButtonMixin, SidebarLinkMixin, StoreModuleComponent };
 
 export const InstanceComponent = {
     mixins: [StoreModuleComponent, ComponentWithAutoUpdate],

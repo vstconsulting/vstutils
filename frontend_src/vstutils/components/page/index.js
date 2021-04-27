@@ -1,9 +1,8 @@
 /* eslint-disable vue/one-component-per-file */
 import OneEntity from './OneEntity.vue';
-import { formatPath, RequestTypes } from '../../utils';
+import { formatPath, parseResponseMessage, RequestTypes } from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
-import { apiConnector } from '../../api';
 import { ViewTypes } from '../../views';
 import { LeaveConfirmationMixin } from './LeaveConfirmationMixin.js';
 
@@ -72,7 +71,7 @@ export const PageNewViewComponent = {
     },
     computed: {
         model() {
-            return this.view.objects.getModelClass(RequestTypes.CREATE);
+            return this.view.objects.getRequestModelClass(RequestTypes.CREATE);
         },
         shouldAskForLeaveConfirmation() {
             return this.changedFields.length > 0;
@@ -143,7 +142,7 @@ export const PageEditViewComponent = {
     computed: {
         model() {
             const requestType = this.view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE;
-            return this.view.objects.getModelClass(requestType);
+            return this.view.objects.getRequestModelClass(requestType);
         },
     },
     methods: {
@@ -181,10 +180,10 @@ export const ActionViewComponent = {
     mixins: [PageNewViewComponent],
     computed: {
         fields() {
-            return Array.from(this.view.model.fields.values());
+            return Array.from(this.model.fields.values());
         },
         model() {
-            return this.view.model;
+            return this.view.params.requestModel;
         },
         title() {
             return this.$t(this.view.title);
@@ -192,8 +191,9 @@ export const ActionViewComponent = {
     },
     methods: {
         fetchData() {
+            this.registerStoreModule();
             this.initLoading();
-            const instance = new this.view.model();
+            const instance = new this.model();
             this.commitMutation('setInstance', instance);
             this.setLoadingSuccessful();
         },
@@ -201,12 +201,12 @@ export const ActionViewComponent = {
             try {
                 this.commitMutation('validateAndSetInstanceData', { instance });
             } catch (e) {
-                window.app.error_handler.defineErrorAndShow(e);
+                this.$app.error_handler.defineErrorAndShow(e);
                 return;
             }
             this.loading = true;
             try {
-                await apiConnector.makeRequest({
+                const response = await this.$app.api.makeRequest({
                     method: this.view.method,
                     headers: { 'content-type': 'application/json' },
                     path: formatPath(this.view.path, this.$route.params),
@@ -215,16 +215,19 @@ export const ActionViewComponent = {
                 });
                 this.changedFields = [];
                 guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.execute).format([this.$t(this.view.title)]),
+                    this.$t(pop_up_msg.instance.success.execute, [
+                        this.$t(this.view.title),
+                        parseResponseMessage(response.data),
+                    ]),
                 );
-                this.openPage({ path: this.getRedirectUrl() });
+                this.openPage(this._getRedirectUrlFromResponse(response.data) || this.getRedirectUrl());
             } catch (error) {
-                const str = window.app.error_handler.errorToString(error);
-                const srt_to_show = this.$t(pop_up_msg.instance.error.execute).format([
+                const str = this.$app.error_handler.errorToString(error);
+                const srt_to_show = this.$t(pop_up_msg.instance.error.execute, [
                     this.$t(this.view.title),
                     str,
                 ]);
-                window.app.error_handler.showError(srt_to_show, str);
+                this.$app.error_handler.showError(srt_to_show, str);
             } finally {
                 this.loading = false;
             }

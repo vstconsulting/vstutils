@@ -3,7 +3,7 @@ import VueI18n from 'vue-i18n';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings, RequestTypes } from './vstutils/utils';
-import { PageNewView, ViewConstructor } from './vstutils/views';
+import { PageNewView, ViewConstructor, ViewsTree } from './vstutils/views';
 import { StoreConstructor } from './vstutils/store';
 import { ModelConstructor, ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
@@ -83,7 +83,8 @@ export class App extends BaseApp {
             this.fieldsClasses,
         ).generateViews(this.config.schema);
 
-        this.qsResolver = new QuerySetsResolver(this.modelsClasses, this.views);
+        this.viewsTree = new ViewsTree(this.views);
+        this.qsResolver = new QuerySetsResolver(this.viewsTree);
 
         this.setNestedViewsQuerysets();
 
@@ -99,9 +100,14 @@ export class App extends BaseApp {
     prepareViewsModelsFields() {
         for (const [path, view] of this.views) {
             if (!view.objects) continue;
-            for (const model of new Set(Object.values(view.objects.models))) {
-                for (const field of model.fields.values()) {
-                    field.prepareFieldForView(path);
+            const models = new Set(
+                Object.values(view.objects.models).flatMap((m) => (Array.isArray(m) ? m : [m])),
+            );
+            for (const model of models) {
+                if (model) {
+                    for (const field of model.fields.values()) {
+                        field.prepareFieldForView(path);
+                    }
                 }
             }
         }
@@ -111,7 +117,7 @@ export class App extends BaseApp {
         for (const view of this.views.values()) {
             if (view instanceof PageNewView && view.nestedAllowAppend) {
                 const listView = view.listView;
-                const modelName = listView.objects.getModelClass(RequestTypes.LIST).name;
+                const modelName = listView.objects.getResponseModelClass(RequestTypes.LIST).name;
                 try {
                     listView.nestedQueryset = this.qsResolver.findQuerySetForNested(modelName, listView.path);
                 } catch (e) {
@@ -196,6 +202,7 @@ export class App extends BaseApp {
             locale: this.initLanguage,
             messages: this.translations,
             silentTranslationWarn: true,
+            formatFallbackMessages: true,
             pluralizationRules: {
                 ru: RUPluralizationRule,
             },

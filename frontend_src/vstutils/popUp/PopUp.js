@@ -164,8 +164,8 @@ export let pop_up_msg = {
             remove: '<b>{1}</b> "<b>{0}</b>" was successfully removed.',
             removeMany: '<b>{0}</b> of "<b>{1}</b>" were successfully removed.',
             save: 'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.',
-            executeEmpty: 'Action <b>{0}</b> was successfully executed' + ' on <b>{1}</b>.',
-            execute: 'Action <b>{0}</b> was successfully executed.',
+            executeEmpty: 'Action <b>{0}</b> was successfully executed' + ' on <b>{1}</b>.<br>{2}',
+            execute: 'Action <b>{0}</b> was successfully executed.<br>{1}',
         },
         error: {
             add:
@@ -183,7 +183,8 @@ export let pop_up_msg = {
                 '<br> Error details: {2}',
             executeEmpty:
                 'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>.' +
-                '<br> Error details: {2}',
+                '<br> Error details: {2}' +
+                '<br>{3}',
             execute: 'Some error occurred during <b>{0}</b><br> Error details: {1}',
         },
     },
