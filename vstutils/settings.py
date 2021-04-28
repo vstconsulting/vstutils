@@ -872,6 +872,7 @@ LANGUAGES: _t.Tuple = (
     ('en', 'English'),
     ('ru', 'Русский'),
     ('cn', '简体中文'),
+    ('vi', 'Tiếng Việt'),
 )
 
 TIME_ZONE: _t.Text = main["timezone"]
