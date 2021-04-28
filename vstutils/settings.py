@@ -870,7 +870,8 @@ LANGUAGE_CODE: _t.Text = 'en'
 
 LANGUAGES: _t.Tuple = (
     ('en', 'English'),
-    ('ru', 'Russian'),
+    ('ru', 'Русский'),
+    ('cn', '简体中文'),
 )
 
 TIME_ZONE: _t.Text = main["timezone"]

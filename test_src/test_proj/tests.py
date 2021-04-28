@@ -1914,13 +1914,14 @@ class LangTestCase(BaseTestCase):
             dict(path=['_lang', 'en'], method='get'),
             dict(path=['_lang', 'unkn'], method='get'),
             dict(path=['_lang', 'uk'], method='get'),
+            dict(path=['_lang', 'cn'], method='get'),
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[0]['status'], 200)
-        self.assertEqual(results[0]['data']['count'], 3)
+        self.assertEqual(results[0]['data']['count'], 4)
 
         self.assertEqual(results[1]['data']['code'], 'ru')
-        self.assertEqual(results[1]['data']['name'], 'Russian')
+        self.assertEqual(results[1]['data']['name'], 'Русский')
         self.assertEqual(results[1]['data']['translations']['Hello world!'], 'Привет мир!')
         self.assertFalse('Unknown string' in results[1]['data']['translations'])
 
@@ -1932,6 +1933,10 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(results[4]['data']['code'], 'uk')
         self.assertEqual(results[4]['data']['name'], 'Empty list')
         self.assertEqual(results[4]['data']['translations'], {})
+
+        self.assertEqual(results[5]['data']['code'], 'cn')
+        self.assertEqual(results[5]['data']['name'], '简体中文')
+        self.assertTrue(results[5]['data']['translations'])
 
     def test_translate_action(self):
         test_results = [
