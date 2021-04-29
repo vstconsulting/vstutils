@@ -828,9 +828,10 @@ class Lock(KVExchanger):
     def __exit__(self, type_e, value, tb):
         self.release()
 
-    def release(self):
+    def release(self, force_release=False):
         # pylint: disable=no-member
-        self.cache.delete(self.key)
+        if force_release or self.id is not None:
+            self.cache.delete(self.key)
 
     def __del__(self):
         self.release()
