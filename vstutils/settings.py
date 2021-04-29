@@ -1151,6 +1151,10 @@ if 'boto3' in storages:
 
 DEFAULT_FILE_STORAGE = storages.get('default', fallback=get_default_storage_class())
 
+DOCKERRUN_MIGRATE_LOCK_ID = config['docker'].get('migrate_lock_id', VST_PROJECT_LIB_NAME)
+
+DOCKERRUN_MIGRATE_LOCK_TIMEOUT = config['docker'].getint('migrate_lock_timeout', 15)
+
 # Test settings for speedup tests
 ##############################################################
 if TESTS_RUN:
