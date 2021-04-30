@@ -29,7 +29,7 @@
         mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContent],
         methods: {
             fileClickHandler(file) {
-                downloadBase64File('text/plain', file.content, file.name);
+                downloadBase64File(file);
             },
         },
     };
