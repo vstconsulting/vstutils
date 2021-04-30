@@ -1,16 +1,23 @@
 import { beforeAll, beforeEach, describe, expect, test } from '@jest/globals';
 import { IntegerField } from '../../fields/numbers/integer';
-import { apiConnector } from '../../api';
+import { apiConnector, APIResponse } from '../../api';
 import fetchMock from 'jest-fetch-mock';
 import { Model, ModelClass } from '../../models';
 import StringField from '../../fields/text/StringField';
 import QuerySet from '../QuerySet';
-import { RequestTypes } from '../../utils';
+import { HttpMethods, RequestTypes } from '../../utils';
 
 describe('QuerySet', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });
     const emailField = new StringField({ name: 'email' });
     const nameField = new StringField({ name: 'name' });
+
+    const usersData = [
+        { id: 1, name: 'kek name' },
+        { id: 2, name: 'vitya' },
+        { id: 3, name: 'oleg' },
+        { id: 4, name: 'vitya' },
+    ];
 
     beforeAll(() => {
         apiConnector.defaultVersion = 'v1';
@@ -69,6 +76,16 @@ describe('QuerySet', () => {
         expect(request.method).toBe('post');
     });
 
+    test('create with invalid instance', async () => {
+        let data = JSON.stringify({ id: 1, name: 'test_name', email: 'test_mail' }, null, ' ');
+        fetchMock.mockResponses(data, data);
+
+        const user = await new User({ name: 'test_name', email: 'test_mail' });
+        await expect(qs.create(user)).rejects.toThrow(
+            'Wrong model used. Expected: CreateUser. Actual: User.',
+        );
+    });
+
     test('update', async () => {
         fetchMock.mockResponses('{"id": 2}');
         let [user] = await qs.update(new OneUser({ id: 2 }), [new User({ id: 2 })]);
@@ -76,6 +93,32 @@ describe('QuerySet', () => {
         let [url, request] = fetchMock.mock.calls[0];
         expect(url).toBe('http://localhost/api/v1/users/2/');
         expect(request.method).toBe('patch');
+    });
+
+    test('method "update" with instances == undefined returns updated model', async () => {
+        fetchMock.mockResponses(
+            JSON.stringify({ status: 200, results: [{ id: 2, email: null, name: 'User' }] }),
+            '{"id": 2}',
+        );
+        let [user] = await qs.update(
+            new OneUser({
+                id: 2,
+                email: null,
+                name: 'New Name',
+            }),
+            undefined,
+        );
+
+        expect(user).toBeTruthy();
+        expect(user.id).toBe(2);
+
+        let [urlGet, requestGet] = fetchMock.mock.calls[0];
+        let [urlPatch, requestPatch] = fetchMock.mock.calls[1];
+
+        expect(urlGet).toBe('http://localhost/api/v1/users/');
+        expect(urlPatch).toBe('http://localhost/api/v1/users/2/');
+        expect(requestGet.method).toBe('get');
+        expect(requestPatch.method).toBe('patch');
     });
 
     test('get by id', async () => {
@@ -103,21 +146,86 @@ describe('QuerySet', () => {
 
     test('get one with error', async () => {
         fetchMock.mockResponseOnce(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
-        try {
-            await qs.getOne();
-        } catch (StatusError) {
-            expect(StatusError.message).toBe('Not Found');
-        }
+        await expect(qs.getOne()).rejects.toThrow('Not Found');
 
         fetchMock.mockResponseOnce(JSON.stringify({ count: 2, next: null, previous: null, results: [] }));
-        try {
-            await qs.getOne();
-        } catch (StatusError) {
-            expect(StatusError.message).toBe('More then one entity found');
-        }
+        await expect(qs.getOne()).rejects.toThrow('More then one entity found');
     });
 
-    test('clone', () => {
+    test('method "getOne" returns one instance', async () => {
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 200,
+                    data: { count: 1, next: null, previous: null, results: { id: 5, name: 'User 1' } },
+                },
+                {
+                    status: 200,
+                    data: { id: 5, name: 'User 1' },
+                },
+            ]),
+        );
+        OneUser.nonBulkMethods = [];
+        const testInstance = await qs.getOne();
+        expect(testInstance).toBeTruthy();
+        expect(testInstance).toBeInstanceOf(OneUser);
+        expect(testInstance._data).toEqual({ id: 5, name: 'User 1' });
+    });
+
+    test('method "getOne" returns first item', async () => {
+        // Queryset with LIST model same us RETRIEVE model
+        const qs1 = new QuerySet('users', {
+            [RequestTypes.LIST]: User,
+            [RequestTypes.RETRIEVE]: User,
+        });
+        fetchMock.mockResponse(
+            JSON.stringify({
+                count: 1,
+                next: null,
+                previous: null,
+                results: [{ id: 3, name: 'User 3' }],
+            }),
+        );
+        const testInstance = await qs1.getOne();
+        expect(testInstance).toBeTruthy();
+        expect(testInstance).toBeInstanceOf(User);
+        expect(testInstance._data).toEqual({ id: 3, name: 'User 3' });
+    });
+
+    test('method "getOne" returns error if data count is 0 or more than 1', async () => {
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 200,
+                    data: {
+                        count: 2,
+                        next: null,
+                        previous: null,
+                        results: { id: 5, name: 'User 1' },
+                    },
+                },
+            ]),
+        );
+
+        await expect(qs.getOne()).rejects.toThrow('More then one entity found');
+
+        fetchMock.mockResponseOnce(
+            JSON.stringify([
+                {
+                    status: 200,
+                    data: {
+                        count: 0,
+                        next: null,
+                        previous: null,
+                        results: { id: 5, name: 'User 1' },
+                    },
+                },
+            ]),
+        );
+        await expect(qs.getOne()).rejects.toThrow('No OneUser matches the given query.');
+    });
+
+    test('clone/copy/all', () => {
         const models = {
             [RequestTypes.LIST]: User,
             [RequestTypes.RETRIEVE]: OneUser,
@@ -145,16 +253,19 @@ describe('QuerySet', () => {
 
         expect(qs3.url).toBe('posts');
         expect(qs3.query).toStrictEqual({ rating: 10 });
+
+        // Copy. Check cache
+        qs1.cache = 'testCache';
+        const qs4 = qs1.copy();
+        expect(qs4.cache).toBe('testCache');
+
+        // All. Check this.query
+        qs1.query = { username: 'Nick' };
+        const qs5 = qs1.all();
+        expect(qs5.query).toStrictEqual({ username: 'Nick' });
     });
 
     test('items', async () => {
-        const usersData = [
-            { id: 1, name: 'kek name' },
-            { id: 2, name: 'vitya' },
-            { id: 3, name: 'oleg' },
-            { id: 4, name: 'vitya' },
-        ];
-
         // Request all users
         fetchMock.mockResponse(JSON.stringify({ count: 4, next: null, previous: null, results: usersData }));
         const users = await qs.items();
@@ -173,6 +284,41 @@ describe('QuerySet', () => {
         expect(vityas.total).toBe(2);
         expect(vityas.extra).toStrictEqual({ count: 2, next: null, previous: null });
         expect(vityas[1].name).toBe('vitya');
+
+        // test cache
+        qs.cache = 'testCache';
+        const qsWithCache = await qs.items(false);
+        expect(qsWithCache).toBe('testCache');
+    });
+
+    test('method "exclude" returns new queryset with "query" property', async () => {
+        fetchMock.mockResponse(
+            JSON.stringify({
+                count: 4,
+                next: null,
+                previous: null,
+                results: usersData,
+            }),
+        );
+        const users = qs.exclude({ name: 'vitya' });
+        expect(qs).not.toBe(users);
+        expect(users.query).toEqual({ name__not: 'vitya' });
+    });
+
+    test('method "prefetch" returns new queryset with "use_prefetch" property', async () => {
+        fetchMock.mockResponse(
+            JSON.stringify({
+                count: 4,
+                next: null,
+                previous: null,
+                results: usersData,
+            }),
+        );
+        const users = qs.prefetch('test instance');
+        // Uses 'prefetch' with instance - null
+        const users1 = qs.prefetch(null);
+        expect(users.use_prefetch).toBe('test instance');
+        expect(users1.use_prefetch).toBeFalsy();
     });
 
     describe('bulk requests', () => {
@@ -196,22 +342,46 @@ describe('QuerySet', () => {
             [RequestTypes.CREATE]: CreateUser,
         });
 
-        test('update/create with normal response', async () => {
+        test('update/create/save/delete with normal response', async () => {
             const testData = [
                 { status: 200, data: { id: 5, name: 'User 1' } },
                 { status: 200, data: { id: 5, name: 'User 1', email: 'user@user.com' } },
             ];
             fetchMock.mockResponse(JSON.stringify(testData));
 
+            // Save. Create
+            const createdUser1 = await new CreateUser({ name: 'User 1' }, qs).save();
+            expect(createdUser1).toBeInstanceOf(OneUser);
+            expect(createdUser1._getInnerData()).toStrictEqual(testData[1].data);
+
             // Create
             const createdUser = await new CreateUser({ name: 'User 1' }, qs).create();
             expect(createdUser).toBeInstanceOf(OneUser);
             expect(createdUser._getInnerData()).toStrictEqual(testData[1].data);
 
+            // Create with CREATE model same as RETRIEVE model queryset
+            const qs1 = new QuerySet('users', {
+                [RequestTypes.RETRIEVE]: CreateUser,
+                [RequestTypes.CREATE]: CreateUser,
+            });
+            const createdUser2 = await new CreateUser({ name: 'User 1' }, qs1).create();
+            expect(createdUser2).toBeTruthy();
+            expect(createdUser2).toBeInstanceOf(CreateUser);
+            expect(createdUser2._getInnerData()).toStrictEqual(testData[0].data);
+
             // Update
             const updatedUser = await new CreateUser(null, null, createdUser).update();
             expect(updatedUser).toBeInstanceOf(OneUser);
             expect(updatedUser._getInnerData()).toStrictEqual(testData[1].data);
+
+            // Save. Update
+            const savedUser = await new CreateUser({ email: 'new@mail.com' }, null, createdUser).save();
+            expect(savedUser).toBeInstanceOf(OneUser);
+            expect(savedUser._getInnerData()).toStrictEqual(testData[1].data);
+
+            // Delete
+            const deletedUser = await new CreateUser({}, null, createdUser).delete();
+            expect(deletedUser.status).toBe(200);
         });
 
         test('update/create with error', async () => {
@@ -224,6 +394,34 @@ describe('QuerySet', () => {
             // Update with error
             const user = new CreateUser(null, null, new OneUser({ id: 3, email: '', name: 'User 2' }, qs));
             await expect(user.update()).rejects.toMatchObject(testData);
+        });
+
+        test('method "execute" returns APIResponse', async () => {
+            const testData = [
+                { status: 200, data: { id: 5, name: 'User 1' } },
+                { status: 200, data: { id: 5, name: 'User 1', email: 'user@user.com' } },
+            ];
+            fetchMock.mockResponse(JSON.stringify(testData));
+            const createdUser = await new CreateUser({ name: 'User 1' }, qs).create();
+            const responseWithInstance = await qs.execute({
+                data: createdUser,
+                method: HttpMethods.GET,
+                path: qs.getDataType(),
+                query: qs.query,
+            });
+            expect(responseWithInstance.status).toBe(200);
+            expect(responseWithInstance.data).toEqual({ id: 5, name: 'User 1' });
+            expect(responseWithInstance).toBeInstanceOf(APIResponse);
+
+            const responseWithObj = await qs.execute({
+                data: { id: 5 },
+                method: HttpMethods.GET,
+                path: qs.getDataType(),
+                query: qs.query,
+            });
+            expect(responseWithObj.status).toBe(200);
+            expect(responseWithObj.data).toEqual({ id: 5, name: 'User 1' });
+            expect(responseWithObj).toBeInstanceOf(APIResponse);
         });
     });
 });

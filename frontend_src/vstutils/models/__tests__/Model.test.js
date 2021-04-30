@@ -4,7 +4,7 @@ import StringField from '../../fields/text/StringField.js';
 import { IntegerField } from '../../fields/numbers/integer.js';
 import JSONField from '../../fields/json/JSONField.js';
 
-const emailField = new StringField({ name: 'email' });
+const emailField = new StringField({ name: 'email', maxLength: 60 });
 const firstNameField = new StringField({ name: 'firstName' });
 const ageField = new IntegerField({ name: 'age' });
 const settingsField = new JSONField({ name: 'settings' });
@@ -84,6 +84,11 @@ describe('Model', () => {
             settings: { param1: 'value2', param2: 2, param3: false },
         });
 
+        expect(user._getInnerData(['email', 'age'])).toStrictEqual({
+            email: 'name@domain.com',
+            age: 22,
+        });
+
         // Check represent values
         expect(user._getRepresentData()).toStrictEqual({
             email: 'name@domain.com',
@@ -91,6 +96,20 @@ describe('Model', () => {
             age: 22,
             settings: { param1: 'value2', param2: 2, param3: false },
         });
+        // Check validation data
+        user._validateAndSetData({
+            email: 'test@mail.com',
+            firstName: 'Alex',
+            age: 30,
+            settings: { param1: 'value2', param2: 2, param3: false },
+        });
+        expect(user.email).toBe('test@mail.com');
+        expect(user.age).toBe(30);
+        expect(user.firstName).toBe('Alex');
+        // Check invalid fields
+        emailField.options.maxLength = 1;
+        expect(() => user._validateAndSetData({ email: 'invalid@mail.com' })).toThrow();
+        expect(user.email).toBe('test@mail.com');
     });
 
     test('pk field', () => {
@@ -125,6 +144,11 @@ describe('Model', () => {
         }
         expect(Model4.pkField).toBe(id);
         expect(new Model4({ id: 1, field2: 'value' }).getPkValue()).toBe(1);
+
+        // pkFieldParameters check
+        const modelInstance = new Model4({ id: 1 });
+        const pkFieldResult = modelInstance._pkField;
+        expect(pkFieldResult).toEqual(id);
     });
 
     test('view field', () => {
@@ -137,6 +161,10 @@ describe('Model', () => {
         }
         expect(Model1.viewField).toBe(name);
         expect(new Model1({ name: 'name value', field1: 'value' }).getViewFieldValue()).toBe('name value');
+        expect(new Model1({ name: 'name value', field1: 'value' }).getViewFieldString()).toBe('name value');
+        expect(new Model1({ name: '<script>alert()</script>', field1: 'value' }).getViewFieldString()).toBe(
+            '&lt;script&gt;alert()&lt;/script&gt;',
+        );
 
         @ModelClass()
         class Model2 extends Model1 {
@@ -152,6 +180,15 @@ describe('Model', () => {
         class NoViewField extends Model {}
         expect(NoViewField.viewField).toBeNull();
         expect(new NoViewField().getViewFieldValue('default')).toBe('default');
+
+        @ModelClass()
+        class Model3 extends Model {
+            static declaredFields = [name];
+        }
+        const ModelInst = new Model1();
+        expect(new Model3({ name: ModelInst }).getViewFieldString()).toBe('');
+        // Check value field is null
+        expect(new Model3({ name: null }).getViewFieldString());
     });
 
     test('test parent instance', () => {

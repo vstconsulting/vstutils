@@ -77,6 +77,7 @@ export function getFieldFormatFactory(fields) {
             return fieldOptions.type;
         }
 
+        console.warn('Default field format is used');
         return 'string';
     };
 }
