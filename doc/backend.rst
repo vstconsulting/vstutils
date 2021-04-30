@@ -30,7 +30,9 @@ Also you can use custom models without using database:
 
 Model Fields
 ~~~~~~~~~~~~
+
 .. automodule:: vstutils.models.fields
+    :members:
 
 
 Web API

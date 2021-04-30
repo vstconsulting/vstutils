@@ -9,6 +9,7 @@ Read more in Django REST Framework documentation for
 import json
 
 from django.db import models
+from django.http.request import QueryDict
 from rest_framework import serializers
 from rest_framework.utils.field_mapping import get_relation_kwargs
 
@@ -19,6 +20,8 @@ from ..models.fields import (
     NamedBinaryImageInJSONField,
     MultipleNamedBinaryFileInJSONField,
     MultipleNamedBinaryImageInJSONField,
+    MultipleFileField,
+    MultipleImageField,
     FkModelField
 )
 
@@ -74,6 +77,8 @@ class VSTSerializer(serializers.ModelSerializer):
         NamedBinaryImageInJSONField: fields.NamedBinaryImageInJsonField,  # type: ignore
         MultipleNamedBinaryFileInJSONField: fields.MultipleNamedBinaryFileInJsonField,  # type: ignore
         MultipleNamedBinaryImageInJSONField: fields.MultipleNamedBinaryImageInJsonField,  # type: ignore
+        MultipleFileField: fields.MultipleNamedBinaryFileInJsonField,  # type: ignore
+        MultipleImageField: fields.MultipleNamedBinaryImageInJsonField  # type: ignore
     })
 
     def build_standard_field(self, field_name, model_field):
@@ -117,6 +122,8 @@ class DataSerializer(EmptySerializer):
     )
 
     def to_internal_value(self, data):
+        if isinstance(data, QueryDict):
+            return data.dict()  # nocv
         return data if isinstance(data, self.allowed_data_types) else self.fail("Unknown type.")
 
     def to_representation(self, value):

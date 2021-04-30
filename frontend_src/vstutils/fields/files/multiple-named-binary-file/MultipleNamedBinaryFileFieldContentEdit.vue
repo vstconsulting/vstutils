@@ -58,7 +58,7 @@
         mixins: [BinaryFileFieldContentEdit, MultipleNamedBinaryFileFieldContent],
         methods: {
             fileClickHandler(file) {
-                downloadBase64File('text/plain', file.content, file.name);
+                downloadBase64File(file);
             },
             removeFile(index) {
                 let v = this.value ? [...this.value] : [];

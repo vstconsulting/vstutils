@@ -854,11 +854,16 @@ export function copyToClipboard(value) {
     }
 }
 
-export function downloadBase64File(contentType, base64Data, fileName) {
-    const linkSource = `data:${contentType};base64,${base64Data}`;
+export function downloadBase64File(file) {
+    let url;
+    if (file.mediaType === '') {
+        url = file.content;
+    } else {
+        url = `data:${file.mediaType || 'text/plain'};base64,${file.content}`;
+    }
     const downloadLink = document.createElement('a');
-    downloadLink.href = linkSource;
-    downloadLink.download = fileName;
+    downloadLink.href = url;
+    downloadLink.download = file.name;
     downloadLink.click();
 }
 
@@ -963,7 +968,6 @@ export async function readFileAsObject(file) {
 }
 
 /**
- *
  * @param file {object}
  * @return {{url: string}}
  */

@@ -547,6 +547,10 @@ class NamedBinaryFileInJsonField(VSTCharField):
     Additionally, this field can construct :class:`django.core.files.uploadedfile.SimpleUploadedFile`
     from incoming JSON and store it as file in :class:`django.db.models.FileField` if `file` argument is set to `True`
 
+    Attrs:
+    :attr:`NamedBinaryInJsonField.file`: if True, accept only subclasses of File as input. If False, accept only string
+    input. Default: False.
+
     .. note::
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField` with structure of data.
 
@@ -623,6 +627,10 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     """
     Extends :class:`.NamedBinaryFileInJsonField` but uses list of structures.
     Used for operating with multiple files.
+
+    Attrs:
+    :attr:`NamedBinaryInJsonField.file`: if True, accept only subclasses of File as input. If False, accept only string
+    input. Default: False.
     """
 
     __slots__ = ()
@@ -637,12 +645,21 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
         else:  # nocv
             super().run_validators(value)
 
-    def to_internal_value(self, data: _t.List) -> _t.Text:  # type: ignore
+    def to_internal_value(self, data: _t.List) -> _t.Union[_t.Text, list]:  # type: ignore
         if data is not None:
             if not isinstance(data, list):
                 self.fail('not a list')
             for file in data:
                 self.validate_value(file)
+            if self.file:
+                return [
+                    SimpleUploadedFile(
+                        name=file['name'],
+                        content=base64.b64decode(file['content']),
+                        content_type=file['mediaType']
+                    )
+                    for file in data
+                ]
         return VSTCharField.to_internal_value(self, data)
 
     def run_validation(self, data=empty):
@@ -654,6 +671,11 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
 
     @raise_context_decorator_with_default(default=[])
     def to_representation(self, value) -> _t.List[_t.Dict[_t.Text, _t.Any]]:  # type: ignore
+        if self.file:
+            return [
+                {'content': file.url, 'name': file.name, 'mediaType': ''}
+                for file in value
+            ]
         return json.loads(value)
 
 

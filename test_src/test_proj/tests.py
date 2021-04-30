@@ -52,7 +52,7 @@ from vstutils import models
 from vstutils.api import serializers, fields
 from vstutils.utils import SecurePickling, BaseEnum
 
-from .models import File, Host, HostGroup, List, Author, Post
+from .models import File, Host, HostGroup, List, Author, Post, OverridenModelWithBinaryFiles
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 from vstutils.api.fields import FkField
@@ -1329,6 +1329,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
             {'type': 'file'}
         )
 
+        # Check MultipleFileField and MultipleImageField serializer mapping in schema
+        self.assertEqual('multiplenamedbinfile', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multiplefile']['format'])
+        self.assertEqual('multiplenamedbinimage', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multipleimage']['format'])
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')
@@ -2031,6 +2035,22 @@ class ProjectTestCase(BaseTestCase):
             dict(method='post', path='hosts/<<2[data][id]>>/hosts', data=dict(name='ca')),
             dict(method='post', path='hosts/<<3[data][id]>>/hosts', data=dict(name='da')),
         ]
+        self.test_file_path = os.path.join('test_proj', 'b64_test_image_file')
+        self.test_file_value = get_file_value(self.test_file_path)
+        self.multiplefile_post_data = [
+                {'name': 'cat.jpeg', 'content': self.test_file_value, 'mediaType': 'images/jpeg'},
+                {'name': 'same_cat.jpeg', 'content': self.test_file_value, 'mediaType': 'images/jpeg'}
+        ]
+        self.multiplefile_result_data = [
+            {
+                'name': '.jpeg',
+                'mediaType': ''
+            },
+            {
+                'name': '.jpeg',
+                'mediaType': ''
+            }
+        ]
 
     def test_env_vars(self):
         self.assertIn(settings.TEST_VAR_FROM_ENV, (os.environ['HOME'], 'default'))
@@ -2500,6 +2520,86 @@ class ProjectTestCase(BaseTestCase):
         post_data['rating'] = 8
         self.assertEqual(['Ensure this value is less than or equal to 10.'], results[0]['data']['rating'])
         self.assertDictEqual(post_data, results[2]['data'])
+
+    def test_multiplefilefield(self):
+        post_data = {
+            'some_multiplefile': self.multiplefile_post_data
+        }
+        results = self.bulk([
+            {'method': 'post', 'path': ['testbinarymodelschema'], 'data': post_data},
+            {'method': 'get', 'path': ['testbinarymodelschema']},
+        ])
+        created_model_field = OverridenModelWithBinaryFiles.objects.get(id=results[0]['data']['id']).some_multiplefile
+        # check if if we have a list of valid files
+        self.assertIsInstance(created_model_field, list)
+        self.assertIsInstance(created_model_field[0].size, int)
+
+        # mock 'content' value bacause it's too hard to predict
+        result_data = self.multiplefile_result_data
+        result_data[0]['content'] = results[1]['data']['results'][0]['some_multiplefile'][0]['content']
+        result_data[1]['content'] = results[1]['data']['results'][0]['some_multiplefile'][1]['content']
+        # check only extension out of all name because of unique name generation for files
+        results[0]['data']['some_multiplefile'][0]['name'] = results[0]['data']['some_multiplefile'][0]['name'][-5:]
+        results[0]['data']['some_multiplefile'][1]['name'] = results[0]['data']['some_multiplefile'][1]['name'][-5:]
+        results[1]['data']['results'][0]['some_multiplefile'][0]['name'] = results[1]['data']['results'][0]['some_multiplefile'][0]['name'][-5:]
+        results[1]['data']['results'][0]['some_multiplefile'][1]['name'] = results[1]['data']['results'][0]['some_multiplefile'][1]['name'][-5:]
+
+        # test POST response
+        self.assertEqual(result_data, results[0]['data']['some_multiplefile'])
+        # test GET response
+        self.assertEqual(result_data, results[1]['data']['results'][0]['some_multiplefile'])
+
+    def test_multipleimagefield(self):
+        post_data = {
+            'some_multipleimage': self.multiplefile_post_data
+        }
+        results = self.bulk([
+            {'method': 'post', 'path': ['testbinarymodelschema'], 'data': post_data},
+            {'method': 'get', 'path': ['testbinarymodelschema']},
+        ])
+        # mock 'content' value bacause it's too hard to predict
+        result_data = self.multiplefile_result_data
+        result_data[0]['content'] = results[1]['data']['results'][0]['some_multipleimage'][0]['content']
+        result_data[1]['content'] = results[1]['data']['results'][0]['some_multipleimage'][1]['content']
+        # check only extension out of all name because of unique name generation for files
+        results[0]['data']['some_multipleimage'][0]['name'] = results[0]['data']['some_multipleimage'][0]['name'][-5:]
+        results[0]['data']['some_multipleimage'][1]['name'] = results[0]['data']['some_multipleimage'][1]['name'][-5:]
+        results[1]['data']['results'][0]['some_multipleimage'][0]['name'] = results[1]['data']['results'][0]['some_multipleimage'][0]['name'][-5:]
+        results[1]['data']['results'][0]['some_multipleimage'][1]['name'] = results[1]['data']['results'][0]['some_multipleimage'][1]['name'][-5:]
+
+        created_model_field = OverridenModelWithBinaryFiles.objects.get(id=results[0]['data']['id'])
+        # check if if we have a list of valid images in field
+        self.assertIsInstance(created_model_field.some_multipleimage, list)
+        self.assertIsInstance(created_model_field.some_multipleimage[0].height, int)
+        self.assertIsInstance(created_model_field.some_multipleimage[0].width, int)
+
+        # test .save()
+        name = 'slightly_different_cat.jpeg'
+        content = created_model_field.some_multipleimage[0]
+        created_model_field.some_multipleimage[0].save(name, content.file)
+        self.assertEqual(name, created_model_field.some_multipleimage[0].name)
+
+        # test .delete()
+        self.assertEqual(2, len(created_model_field.some_multipleimage))
+        # we calling width of an image to initiate _dimensions_cache
+        created_model_field.some_multipleimage[0].width
+        created_model_field.some_multipleimage[0].delete()
+        created_model_field.refresh_from_db()
+        self.assertEqual(1, len(created_model_field.some_multipleimage))
+
+        # test POST response
+        self.assertEqual(result_data, results[0]['data']['some_multipleimage'])
+        # test GET response
+        self.assertEqual(result_data, results[1]['data']['results'][0]['some_multipleimage'])
+
+    def test_multiplefilefield_empty(self):
+        post_data = {
+            'some_multiplefile': []
+        }
+        results = self.bulk([
+            {'method': 'post', 'path': ['testbinarymodelschema'], 'data': post_data},
+        ])
+        self.assertEqual([], OverridenModelWithBinaryFiles.objects.get(id=results[0]['data']['id']).some_multiplefile)
 
     def test_model_namedbinfile_field(self):
         file = get_file_value(os.path.join(DIR_PATH, 'image_b64_valid'))

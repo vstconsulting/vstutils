@@ -7,7 +7,7 @@ from vstutils.models.fields import (
     NamedBinaryImageInJSONField,
     MultipleNamedBinaryFileInJSONField,
     MultipleNamedBinaryImageInJSONField,
-    FkModelField
+    FkModelField, MultipleFileField, MultipleImageField
 )
 from .hosts import Host
 from ..validators import image_res_validator
@@ -39,6 +39,7 @@ class ModelWithFK(BModel):
             'fk_with_filters': fields.FkModelField(select='test_proj.Post', filters={'rating': 5}, required=False, allow_null=True)
         }
 
+
 class ModelWithBinaryFiles(BModel):
     some_binfile = models.TextField(default='')
     some_namedbinfile = NamedBinaryFileInJSONField(default='')
@@ -50,6 +51,8 @@ class ModelWithBinaryFiles(BModel):
     some_filefield = models.FileField(null=True, blank=True)
     some_imagefield = models.ImageField(null=True, blank=True)
     some_FkModelfield = FkModelField('test_proj.Author', null=True, blank=True, on_delete=models.CASCADE)
+    some_multiplefile = MultipleFileField(blank=True)
+    some_multipleimage = MultipleImageField(blank=True)
 
     class Meta:
         _view_field_name = 'some_namedbinfile'
