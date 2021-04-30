@@ -33,8 +33,12 @@ admin.site.site_header = 'Admin panel'
 admin.site.site_title = settings.VST_PROJECT
 admin.site.index_title = f"{settings.VST_PROJECT.upper()} Settings Panel"
 admin.site.site_url = "/"
-admin.site.login = AdminLoginLogoutRedirectView.as_view(url=get_valid_url(settings.ACCOUNT_URL, settings.LOGIN_URL))  # type: ignore
-admin.site.logout = AdminLoginLogoutRedirectView.as_view(url=get_valid_url(settings.ACCOUNT_URL, settings.LOGOUT_URL))  # type: ignore
+admin.site.login = AdminLoginLogoutRedirectView.as_view(  # type: ignore
+    url=get_valid_url(settings.ACCOUNT_URL, settings.LOGIN_URL)
+)
+admin.site.logout = AdminLoginLogoutRedirectView.as_view(  # type: ignore
+    url=get_valid_url(settings.ACCOUNT_URL, settings.LOGOUT_URL)
+)
 doc_url = getattr(settings, 'DOC_URL', '/docs/')[1:]
 
 urlpatterns = list(URLHandlers())
