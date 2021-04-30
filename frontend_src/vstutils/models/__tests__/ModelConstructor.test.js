@@ -96,4 +96,37 @@ describe('ModelConstructor', () => {
         const Post = models.get('Post');
         expect(Post.nonBulkMethods).toBeNull();
     });
+
+    test('method "_generateModelFields" returns model fields', async () => {
+        const modelConstructor = new ModelConstructor(
+            openapi_dictionary,
+            {},
+            new Map([
+                ['string', StringField],
+                ['integer', IntegerField],
+            ]),
+            new Map(),
+        );
+
+        const fields = modelConstructor._generateModelFields(
+            {
+                required: ['author', 'category', 'title'],
+                type: 'object',
+                properties: {
+                    id: { type: 'integer', readOnly: true },
+                    title: { type: 'string' },
+                },
+                'x-properties-groups': {
+                    '': ['id', 'title'],
+                },
+                'x-view-field-name': 'title',
+            },
+            'Post',
+        );
+        expect(fields.length).toBe(2);
+        expect(fields[0].name).toBe('id');
+        expect(fields[0].format).toBe('integer');
+        expect(fields[1].name).toBe('title');
+        expect(fields[1].format).toBe('string');
+    });
 });

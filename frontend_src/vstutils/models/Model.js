@@ -50,10 +50,6 @@ class ModelUtils {
         }
         return cls.pkField;
     }
-
-    static isPrefetchField(field) {
-        return typeof field.prefetchDataOrNot === 'function';
-    }
 }
 
 /**

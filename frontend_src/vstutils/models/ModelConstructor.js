@@ -74,8 +74,6 @@ export default class ModelConstructor {
 
             const fieldConstructor = this.fieldsClasses.get(opt.format);
 
-            if (!fieldConstructor) throw new Error('Field ' + opt.format + ' has no constructor');
-
             fields.push(new fieldConstructor($.extend(true, {}, fieldSchema, opt)));
         }
 

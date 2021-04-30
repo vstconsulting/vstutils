@@ -103,19 +103,6 @@ export class View {
      * @returns {Object|undefined}
      */
     getStoreModule() {}
-
-    /**
-     * Method, that handles view buttons (actions, operations, sublinks, child_links)
-     * and returns them.
-     * @param {string} type Buttons type - actions / operations /sublinks / child_links.
-     * @param {object} buttons Object with buttons options.
-     * @param {object} instance Model instance connected with current view.
-     */
-    // eslint-disable-next-line no-unused-vars
-    getViewSublinkButtons(type, buttons, instance) {
-        return buttons;
-    }
-
     /**
      * Method returns string with template of route path for current view.
      * @return {string}
