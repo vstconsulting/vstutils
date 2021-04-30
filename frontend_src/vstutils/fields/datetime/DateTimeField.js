@@ -15,7 +15,7 @@ class DateTimeField extends BaseField {
     toRepresent(data) {
         const value = super.toRepresent(data);
         if (!value) return;
-        const m = moment(moment.tz(value, window.app.api.getTimeZone())).tz(moment.tz.guess());
+        const m = moment.tz(value, moment.tz.guess());
         return m.format('YYYY-MM-DD') + 'T' + m.format('HH:mm');
     }
     /**
