@@ -3341,6 +3341,17 @@ class ThrottleTestCase(BaseTestCase):
         self.assertEqual(429, results[7]['status'])
         # test retrieve to user viewset(throttled)
         self.assertEqual(429, results[8]['status'])
+        not_thottled = self.bulk(
+            {'method': 'get', 'path': ['user', 'profile*']}
+        )
+        thottled = self.bulk(
+            {'method': 'get', 'path': ['user', 'profile%']}
+        )
+        # no throttling because of unparsed url
+        self.assertEqual(not_thottled[0]['status'], 404)
+        # throttled
+        self.assertEqual(thottled[0]['status'], 429)
+
 
     @patch(
         'vstutils.api.throttling.ActionBasedThrottle.throttle_rates',
