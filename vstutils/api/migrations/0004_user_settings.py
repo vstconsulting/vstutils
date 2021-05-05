@@ -24,14 +24,6 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
-        migrations.RemoveIndex(
-            model_name='recoverycode',
-            name='%(app_label)s_recov_fullidx',
-        ),
-        migrations.RemoveIndex(
-            model_name='twofactor',
-            name='%(app_label)s_tfa_fullidx',
-        ),
         migrations.AddIndex(
             model_name='recoverycode',
             index=models.Index(fields=['id', 'key', 'tfa'], name='vstutils_api_recov_fullidx'),
