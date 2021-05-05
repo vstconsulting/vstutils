@@ -6,7 +6,7 @@ from rest_framework.throttling import SimpleRateThrottle
 
 class ActionBasedThrottle(SimpleRateThrottle):
     __slots__ = ('scope', 'rate', 'actions')
-    url_regex = re.compile(r'/(?P<scope>[a-zA-Z0-9?=&_]+)/([a-zA-Z0-9?=&_]+)?/?$')
+    url_regex = re.compile(r'/(?P<scope>[a-zA-Z0-9?=&_.%]+)/([a-zA-Z0-9?=&_.%]+)?/?$')
     throttle_rates = settings.THROTTLE
 
     def __init__(self):  # pylint: disable=W0231 super-init-not-called
@@ -36,8 +36,11 @@ class ActionBasedThrottle(SimpleRateThrottle):
             self.scope = regexed_path.group(1)
 
     def allow_request(self, request, view):
-        self.parse_config(request)
-
+        # do not throttle unrecognized paths
+        try:
+            self.parse_config(request)
+        except AttributeError:
+            return True
         if self.rate == '' or getattr(view, 'action', None) not in self.actions:
             return True
 
