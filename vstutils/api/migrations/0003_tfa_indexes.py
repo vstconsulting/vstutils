@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
         ('vstutils_api', '0002_two_factor'),
     ]
 
-    operations = [
+    operations: list = [
         # migrations.AddIndex(
         #     model_name='recoverycode',
         #     index=models.Index(fields=['id', 'key', 'tfa'], name='%(app_label)s_recov_fullidx'),
