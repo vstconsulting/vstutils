@@ -105,6 +105,15 @@ ConfigListType = cconfig.ListType()
 ConfigStringType = cconfig.StrType()
 
 
+class BoolOrStringType(cconfig.StrType):
+    def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:  # type: ignore
+        if value is None:
+            return
+        elif value in ('false', 'False'):
+            return False
+        return str(value)
+
+
 class BackendSection(cconfig.Section):
     __slots__ = ()
 
@@ -257,6 +266,7 @@ class Boto3Subsection(BackendSection):
         's3_file_overwrite': ConfigBoolType,
         'is_gzipped': ConfigBoolType,
         's3_use_ssl': ConfigBoolType,
+        's3_verify': BoolOrStringType(),
         'content_types': ConfigListType,
         'gzip_content_types': ConfigListType,
     }
