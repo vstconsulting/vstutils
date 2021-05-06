@@ -53,10 +53,12 @@ default_extra_metadata: dict = {
     "filterset_fields": 'serializer',
     # tuple or list of filter backends for queryset
     "filter_backends": None,
+    "pre_filter_backends": None,
     # allow to full override of the filter backends default list
     "override_filter_backends": False,
     # tuple or list of permission_classes for the view
     "permission_classes": None,
+    "pre_permission_classes": None,
     # allow to override the default permission_classes
     "override_permission_classes": False,
     # additional attrs which means that this view allowed to copy elements
@@ -94,18 +96,23 @@ def _import_class_if_string(value):
     return value
 
 
+def _load_settings_for_view(metadataobject):
+    return list(map(_import_class_if_string, metadataobject))
+
+
 def _get_setting_for_view(metatype, metadata, views):
     override = metadata[f'override_{metatype}']
-    metadataobject = metadata[metatype]
+    metadataobject = metadata[metatype] or []
     if metadataobject:
-        metadataobject = list(map(_import_class_if_string, metadataobject))
+        metadataobject = _load_settings_for_view(metadataobject)
+    pre_metadataobject = metadata[f'pre_{metatype}'] or []
     if override:
-        return metadataobject  # nocv
+        return pre_metadataobject + metadataobject  # nocv
     if metadataobject:
         for view in views:
             if hasattr(view, metatype):  # pragma: no branch
-                return list(chain(getattr(view, metatype), metadataobject))
-        return metadataobject  # nocv
+                return list(chain(pre_metadataobject, getattr(view, metatype), metadataobject))
+        return pre_metadataobject + metadataobject  # nocv
 
 
 def _result_with_arg_decorator(func):
