@@ -107,11 +107,11 @@ ConfigStringType = cconfig.StrType()
 
 class BoolOrStringType(cconfig.StrType):
     def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:  # type: ignore
-        if value is None:
-            return
-        elif value in ('false', 'False'):
+        if value is None:  # nocv
+            return None
+        elif value in ('false', 'False'):  # nocv
             return False
-        return str(value)
+        return str(value)  # nocv
 
 
 class BackendSection(cconfig.Section):
