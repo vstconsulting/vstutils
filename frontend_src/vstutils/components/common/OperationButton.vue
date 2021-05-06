@@ -7,7 +7,13 @@
         @click="listeners.clicked"
     >
         <i v-if="props.iconClasses" :class="props.iconClasses" />
-        <span :class="props.titleClasses">{{ parent.$t(props.title) | capitalize }}</span>
+        <span
+            v-if="props.title"
+            class="title-for-btn"
+            :class="{ 'd-none d-lg-inline-block': props.iconClasses }"
+        >
+            {{ parent.$t(props.title) | capitalize }}
+        </span>
     </button>
 </template>
 
@@ -17,7 +23,6 @@
         props: {
             title: { type: String, required: true },
             classes: { type: Array, required: false, default: () => ['btn', 'btn-default'] },
-            titleClasses: { type: Array, required: false, default: () => [] },
             iconClasses: { type: Array, required: false, default: () => null },
             styles: { type: Object, required: false, default: () => ({}) },
         },

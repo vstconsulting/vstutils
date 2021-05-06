@@ -18,7 +18,7 @@
         </template>
 
         <!-- Sublinks -->
-        <template v-if="groupedSublinks.length > 1">
+        <template v-if="shouldGroupSublinks">
             <CompactOperations
                 v-if="groupedSublinks.length"
                 :title="$t('sublinks') | capitalize"
@@ -37,7 +37,7 @@
         </template>
 
         <!-- Actions -->
-        <template v-if="groupedActions.length > 1">
+        <template v-if="shouldGroupActions">
             <CompactOperations
                 v-if="groupedActions"
                 :title="$t('actions') | capitalize"
@@ -79,11 +79,23 @@
             notGroupedActions() {
                 return this.actions.filter((action) => action.doNotGroup);
             },
+            shouldGroupActions() {
+                return (
+                    this.groupedActions.length > 1 ||
+                    this.groupedActions.some((action) => !action.iconClasses)
+                );
+            },
             groupedSublinks() {
                 return this.sublinks.filter((sublink) => !sublink.doNotGroup);
             },
             notGroupedSublinks() {
                 return this.sublinks.filter((sublink) => sublink.doNotGroup);
+            },
+            shouldGroupSublinks() {
+                return (
+                    this.groupedSublinks.length > 1 ||
+                    this.groupedSublinks.some((sublink) => !sublink.iconClasses)
+                );
             },
         },
     };
