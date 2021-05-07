@@ -397,6 +397,7 @@ class VSTUtilsTestCase(BaseTestCase):
         self.assertEqual(settings.AWS_S3_MAX_MEMORY_SIZE, 123)
         self.assertTrue(isinstance(settings.AWS_QUERYSTRING_AUTH, bool))
         self.assertTrue(settings.AWS_QUERYSTRING_AUTH)
+        self.assertFalse(settings.AWS_S3_VERIFY)
         self.assertTrue(isinstance(settings.GZIP_CONTENT_TYPES, tuple))
         self.assertEqual(settings.GZIP_CONTENT_TYPES, ('text/css', 'text/javascript'))
 

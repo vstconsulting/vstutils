@@ -105,11 +105,11 @@ ConfigListType = cconfig.ListType()
 ConfigStringType = cconfig.StrType()
 
 
-class BoolOrStringType(cconfig.StrType):
-    def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:  # type: ignore
-        if value is None:  # nocv
+class BoolOrStringType(cconfig.BaseType):
+    def convert(self, value: _t.Any) -> _t.Optional[_t.Union[bool, _t.Text]]:
+        if value is None or value == '':  # nocv
             return None
-        elif value in ('false', 'False'):  # nocv
+        elif value in ('false', 'False', False):
             return False
         return str(value)  # nocv
 
