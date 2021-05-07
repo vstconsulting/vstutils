@@ -62,7 +62,11 @@ class DefaultBackend(BaseBackend):
         """
         if not self.get_django_settings('RPC_ENABLED'):
             return 'disabled'
-        celery_app = import_class(
-            self.get_django_settings('WORKER_OPTIONS')['app'].replace(':', '.')
-        )
-        celery_app.pool.connection.connect()
+        try:
+            celery_app = import_class(
+                self.get_django_settings('WORKER_OPTIONS')['app'].replace(':', '.')
+            )
+        except ImportError:  # nocv
+            return "disabled"
+        else:
+            celery_app.pool.connection.connect()

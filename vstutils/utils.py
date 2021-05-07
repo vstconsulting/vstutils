@@ -5,6 +5,7 @@ import io
 import logging
 import os
 import pickle
+import random
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,7 @@ import json
 import traceback
 import types
 import typing as tp
+import uuid
 import warnings
 from pathlib import Path
 from threading import Thread
@@ -802,7 +804,7 @@ class Lock(KVExchanger):
             del lock
 
     """
-    __slots__ = ('id',)
+    __slots__ = ('id', 'payload_data')
     TIMEOUT: tp.ClassVar[int] = 60 * 60 * 24
     GLOBAL: tp.ClassVar[tp.Text] = "global-deploy"
     SCHEDULER: tp.ClassVar[tp.Text] = "celery-beat"
@@ -818,12 +820,13 @@ class Lock(KVExchanger):
     def __init__(self, id, payload=1, repeat=1, err_msg="", timeout=None):
         # pylint: disable=too-many-arguments
         super().__init__(id, timeout)
+        self.payload_data = f'{uuid.uuid4()}_{payload}'
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
-            if self.send(payload):
+            if self.send(self.payload_data) and self.get() == self.payload_data:
                 self.id = id
                 return
-            time.sleep(0.01)
+            time.sleep(random.random() / 10)
         raise self.AcquireLockException(err_msg)
 
     def get(self):  # nocv

@@ -730,6 +730,8 @@ for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3'
     except:  # nocv
         pass
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Cache settings.
 # Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#caches
 ##############################################################
@@ -781,7 +783,6 @@ API_CREATE_SWAGGER: bool = web.getboolean('rest_swagger', fallback=('drf_yasg' i
 SWAGGER_API_DESCRIPTION: _t.Text = web['rest_swagger_description']
 TERMS_URL: _t.Text = ''
 CONTACT: _t.Dict = config['contact'].all()
-OPENAPI_PUBLIC: bool = web['public_openapi']
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
 HEALTH_THROTTLE_RATE: _t.Text = f"{web['health_throttle_rate']}/minute"
 OPENAPI_VIEW_CLASS: _t.Text = 'vstutils.api.schema.views.OpenApiView'
