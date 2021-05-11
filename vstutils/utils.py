@@ -823,7 +823,8 @@ class Lock(KVExchanger):
         self.payload_data = f'{uuid.uuid4()}_{payload}'
         self.id, start = None, time.time()
         while time.time() - start <= repeat:
-            if self.send(self.payload_data) and self.get() == self.payload_data:
+            if self.send(self.payload_data) and not time.sleep(random.random()) and self.get() == self.payload_data:
+                logger.debug(f'Acquire lock with id `{id}` and payload `{self.payload_data}`')
                 self.id = id
                 return
             time.sleep(random.random() / 10)
