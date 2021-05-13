@@ -12,7 +12,7 @@ TRANSLATION = {
     'select': 'chọn',
     'filters': 'bộ lọc',
     'apply': 'áp dụng',
-    'cancel': 'hủy',
+    'Cancel': 'Hủy',
     'field': 'tường',
     'actions': 'thao tác',
     'sublinks': 'đường dẫn',
@@ -156,6 +156,7 @@ TRANSLATION = {
     'height': 'chiều cao',
     'width': 'chiều rộng',
     'information': 'Thông tin',
+    'Dark mode': 'Chủ đề tối',
     'date': 'Ngày',
     'file n selected': 'File chưa được chọn',
     'image n selected': 'Hình ảnh chưa được chọn',
@@ -217,4 +218,9 @@ TRANSLATION = {
     'for some reason, this image file cannot be opened': 'Không thể mở file hình ảnh',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Hình ảnh {0} không chính xác. Dự kiến ​​từ {1} đến {2}, đã nhận {3}',
     'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
+
+    # Проверить
+    'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',
+    'now': 'hiện nay',
+    'later': 'một lát sau',
 }

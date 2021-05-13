@@ -2,7 +2,7 @@ import Centrifuge from 'centrifuge';
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
 import { ErrorHandler } from './vstutils/popUp';
-import { guiLocalSettings, getCookie, RequestTypes } from './vstutils/utils';
+import { getCookie, RequestTypes } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
 import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
 
@@ -80,7 +80,7 @@ export default class BaseApp {
          */
         this.appRootComponent = AppRoot;
 
-        this.initLanguage = guiLocalSettings.get('lang') || getCookie('lang') || 'en';
+        this.initLanguage = document.documentElement.lang || getCookie('lang') || 'en';
     }
 
     /**
@@ -106,6 +106,8 @@ export default class BaseApp {
         this.languages = languages;
         this.translations = { [this.initLanguage]: translations };
         this.rawUser = rawUser;
+
+        this.setLanguage(this.initLanguage);
 
         this.afterInitialDataBeforeMount();
 

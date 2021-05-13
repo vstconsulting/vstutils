@@ -1,14 +1,7 @@
-import { formatPath, parseResponseMessage, pathToArray, ViewTypes } from '../utils';
+import { formatPath, joinPaths, parseResponseMessage, pathToArray, ViewTypes } from '../utils';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
-
-function* getParentViews(view) {
-    if (view.parent) {
-        yield view.parent;
-        yield* getParentViews(view.parent);
-    }
-}
 
 /**
  * @vue/component
@@ -43,13 +36,21 @@ export const BaseViewMixin = {
             if (!this.view) {
                 return null;
             }
-            return [
-                { iconClasses: 'fas fa-home', link: '/' },
-                ...Array.from(getParentViews(this.view))
-                    .map((view) => this.getViewNameForBreadcrumbs(view))
-                    .reverse(),
-                this.getViewNameForBreadcrumbs(this.view),
-            ];
+
+            const dt = pathToArray(this.$route.path);
+            const crumbs = [{ iconClasses: 'fas fa-home', link: '/' }];
+            for (let i = 0; i < dt.length; i++) {
+                const { route } = this.$router.resolve(joinPaths(...dt.slice(0, i + 1)));
+                const view = route.matched[0].components.default?.provide?.view;
+                if (view) {
+                    crumbs.push({ link: route.path, ...this.getViewNameForBreadcrumbs(view, dt[i]) });
+                }
+            }
+
+            if (crumbs.length > 4) {
+                return [...crumbs.slice(0, 2), { name: '...' }, ...crumbs.slice(-2)];
+            }
+            return crumbs;
         },
         /**
          * Current URL of view.
@@ -74,18 +75,15 @@ export const BaseViewMixin = {
      * Dict with methods of current Vue component.
      */
     methods: {
-        getViewNameForBreadcrumbs(view) {
-            const link = formatPath(view.path, this.$route.params);
-
+        getViewNameForBreadcrumbs(view, fragment) {
             if (view.type === ViewTypes.PAGE_NEW) {
-                return { iconClasses: 'fas fa-plus', link };
+                return { iconClasses: 'fas fa-plus' };
             }
             if (view.type === ViewTypes.PAGE_EDIT && !view.isEditStyleOnly) {
-                return { iconClasses: 'fas fa-pen', link };
+                return { iconClasses: 'fas fa-pen' };
             }
 
-            const pk = view.pkParamName && this.$route.params[view.pkParamName];
-            return { name: pk || view.title, link };
+            return { name: view.pkParamName ? fragment : view.title };
         },
         /**
          * Method, that opens some page.
@@ -198,6 +196,15 @@ export const BaseViewMixin = {
                 return this.executeEmptyAction(action, instance, false);
             }
 
+            if (action.appendFragment) {
+                if (this.view.type === ViewTypes.LIST && instance) {
+                    return this.$router.push(
+                        joinPaths(this.$route.path, instance.getPkValue(), action.appendFragment),
+                    );
+                }
+                return this.$router.push(joinPaths(this.$route.path, action.appendFragment));
+            }
+
             const path = action.href || action.view?.path;
             if (path) {
                 return this.$router.push(formatPath(path, this.$route.params, instance));
@@ -206,7 +213,10 @@ export const BaseViewMixin = {
             throw new Error(`Cannot execute action ${action.name} on instance ${instance}`);
         },
         openSublink(sublink, instance = undefined) {
-            return this.$router.push(formatPath(sublink.href, this.$route.params, instance));
+            const path = sublink.appendFragment
+                ? joinPaths(this.$route.path, sublink.appendFragment)
+                : sublink.href;
+            return this.$router.push(formatPath(path, this.$route.params, instance));
         },
         /**
          * Method, that gets data for a current view.

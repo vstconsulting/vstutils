@@ -6,7 +6,7 @@ from copy import deepcopy
 from django_filters import rest_framework as filters, filterset
 from django.db.models.base import ModelBase
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
-from django.utils.functional import SimpleLazyObject
+from django.utils.functional import SimpleLazyObject, lazy
 
 from ..utils import import_class, apply_decorators, classproperty, get_if_lazy, raise_context_decorator_with_default
 from ..api import (
@@ -141,10 +141,18 @@ def _get_decorator(data):
         deco_kwargs['view'] = model.lazy_generated_view
         if 'arg' not in deco_kwargs:
             deco_kwargs['arg'] = model._meta.pk.name
-    else:  # nocv
-        # TODO: cover it by tests
+    else:
         deco_kwargs['view'] = _import_class_if_string(deco_kwargs.pop('view'))
     return api_decorators.nested_view(path, **deco_kwargs)
+
+
+def _set_deep_filter_or_not(backends):
+    if backends is None:  # nocv
+        backends = []
+    elif not isinstance(backends, list):
+        backends = list(backends)
+    backends.append('vstutils.api.filter_backends.DeepViewFilterBackend')
+    return backends
 
 
 # Classes
@@ -180,6 +188,10 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         model_class.OriginalMeta = meta if meta is not None else model_class.Meta
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
+        if hasattr(model_class, 'deep_parent_field'):
+            model_class.__extra_metadata__['filter_backends'] = lazy(_set_deep_filter_or_not, list)(
+                model_class.__extra_metadata__['filter_backends']
+            )
         return model_class
 
     @classproperty
@@ -438,6 +450,22 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             }
         )
 
-        return apply_decorators(
+        generated_view = apply_decorators(
             *map(_import_class_if_string, getattr(cls, 'generated_view_decorators', []))
         )(ApplyNestedDecorators(metadata['nested'] or {})(generated_view))
+
+        if hasattr(cls, 'deep_parent_field'):
+            remote_name: str = cls.get_model_fields_mapping()[cls.deep_parent_field].remote_field.related_name
+            parent_view = type(
+                f'Parent{cls.__name__}ViewSet',
+                (generated_view,),
+                {'deep_nested_subview': remote_name}
+            )
+            return ApplyNestedDecorators({remote_name: {
+                'view': generated_view,
+                'arg': cls._meta.pk.attname,
+                'manager_name': remote_name,
+                'allow_append': getattr(cls, 'deep_parent_allow_append', False),
+            }})(parent_view)
+
+        return generated_view

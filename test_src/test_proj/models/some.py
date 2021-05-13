@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 from django.db import models
 from vstutils.models import BModel
-from vstutils.api import fields, serializers
+from vstutils.api import fields, filter_backends
 from vstutils.models.fields import (
     NamedBinaryFileInJSONField,
     NamedBinaryImageInJSONField,
@@ -11,6 +11,11 @@ from vstutils.models.fields import (
 )
 from .hosts import Host
 from ..validators import image_res_validator
+
+
+class EmptyFilterBackend(filter_backends.VSTFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        return queryset
 
 
 class ModelWithFK(BModel):
@@ -99,3 +104,16 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')
         }
+
+
+class DeepNestedModel(BModel):
+    name = models.CharField(max_length=10)
+    parent = models.ForeignKey('self', null=True, default=None, on_delete=models.CASCADE)
+
+    deep_parent_field = 'parent'
+    deep_parent_allow_append = True
+
+    class Meta:
+        default_related_name = 'deepnested'
+        _detail_fields = _list_fields = ('id', 'name', 'parent')
+        _filter_backends = (EmptyFilterBackend,)

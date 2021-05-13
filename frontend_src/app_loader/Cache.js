@@ -109,6 +109,7 @@ class IndexedDBCache extends FakeCache {
 
     close() {
         this.db.close();
+        this.db = undefined;
     }
 
     get(key) {
@@ -133,27 +134,37 @@ class IndexedDBCache extends FakeCache {
 
     set(key, value) {
         return new Promise((resolve, reject) => {
-            let transaction = this.db.transaction([this.store_name], 'readwrite');
+            const set = () => {
+                let transaction = this.db.transaction([this.store_name], 'readwrite');
 
-            transaction.onerror = (event) => {
-                console.error('Error in FilesCache.setFile().', event);
+                transaction.onerror = (event) => {
+                    console.error('Error in FilesCache.setFile().', event);
+                };
+
+                let objectStore = transaction.objectStore(this.store_name);
+
+                let request = objectStore.put({ path: key, data: value });
+
+                request.onerror = (err) => {
+                    console.error('Error in FilesCache.setFile()', err);
+                    reject(err);
+                };
+
+                request.onsuccess = () => {
+                    if (!request.result) {
+                        reject();
+                    }
+                    resolve(request.result);
+                };
             };
 
-            let objectStore = transaction.objectStore(this.store_name);
-
-            let request = objectStore.put({ path: key, data: value });
-
-            request.onerror = (err) => {
-                console.error('Error in FilesCache.setFile()', err);
-                reject(err);
-            };
-
-            request.onsuccess = () => {
-                if (!request.result) {
-                    reject();
-                }
-                resolve(request.result);
-            };
+            if (this.db) {
+                set();
+            } else {
+                this.connect()
+                    .then(set)
+                    .then(() => this.close());
+            }
         });
     }
 
@@ -162,29 +173,39 @@ class IndexedDBCache extends FakeCache {
      */
     delete(key) {
         return new Promise((resolve, reject) => {
-            let transaction = this.db.transaction([this.store_name], 'readwrite');
+            const del = () => {
+                let transaction = this.db.transaction([this.store_name], 'readwrite');
 
-            transaction.onerror = (event) => {
-                console.error('Error in FilesCache.delFile()', event);
+                transaction.onerror = (event) => {
+                    console.error('Error in FilesCache.delFile()', event);
+                };
+
+                let objectStore = transaction.objectStore(this.store_name);
+                let request = objectStore.delete(key);
+
+                request.onerror = (err) => {
+                    console.error('Error in FilesCache.detFile()', err);
+                    reject(err);
+                };
+
+                request.onsuccess = () => {
+                    resolve(true);
+                };
             };
 
-            let objectStore = transaction.objectStore(this.store_name);
-            let request = objectStore.delete(key);
-
-            request.onerror = (err) => {
-                console.error('Error in FilesCache.detFile()', err);
-                reject(err);
-            };
-
-            request.onsuccess = () => {
-                resolve(true);
-            };
+            if (this.db) {
+                return del();
+            } else {
+                this.connect()
+                    .then(del)
+                    .then(() => this.close());
+            }
         });
     }
 
     clearAllCache() {
         return new Promise((resolve, reject) => {
-            this.db.close();
+            if (this.db) this.db.close();
 
             let DBDeleteRequest = this.indexed_db.deleteDatabase(this.db_name);
 

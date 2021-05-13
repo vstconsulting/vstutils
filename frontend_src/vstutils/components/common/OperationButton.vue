@@ -6,7 +6,7 @@
         :style="props.styles"
         @click="listeners.clicked"
     >
-        <i v-if="props.iconClasses" :class="props.iconClasses" />
+        <i v-if="props.iconClasses" class="icon-for-btn" :class="props.iconClasses" />
         <span
             v-if="props.title"
             class="title-for-btn"
@@ -22,8 +22,8 @@
         name: 'OperationButton',
         props: {
             title: { type: String, required: true },
-            classes: { type: Array, required: false, default: () => ['btn', 'btn-default'] },
-            iconClasses: { type: Array, required: false, default: () => null },
+            classes: { type: [Array, String], required: false, default: () => ['btn', 'btn-default'] },
+            iconClasses: { type: [Array, String], required: false, default: () => null },
             styles: { type: Object, required: false, default: () => ({}) },
         },
     };

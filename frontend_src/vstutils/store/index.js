@@ -40,6 +40,10 @@ const userSettingsModule = (api) => ({
             });
             commit('setSettings', data);
         },
+        setAndSave({ dispatch, commit }, obj) {
+            commit('setValue', obj);
+            return dispatch('save');
+        },
     },
 });
 

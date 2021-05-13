@@ -185,6 +185,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
                 if proxy_model:
                     subscribe_labels.append(proxy_model._meta.label)
                 result['x-subscribe-labels'] = subscribe_labels
+            deep_nested_subview = getattr(subscribe_view, 'deep_nested_subview', None)
+            if deep_nested_subview:
+                result['x-deep-nested-view'] = deep_nested_subview
         elif 'x-multiaction' in self.overrides:
             result['x-multiaction'] = self.overrides['x-multiaction']
         return result

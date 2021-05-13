@@ -1,3 +1,5 @@
+import typing as _t
+
 from rest_framework.filters import BaseFilterBackend
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
 from django_filters.rest_framework import filters
@@ -114,3 +116,87 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
         if request.method != 'GET':
             return queryset
         return self.prefetch('prefetch', view, self.prefetch('select', view, queryset))
+
+
+class DeepViewFilterBackend(VSTFilterBackend):
+    """
+    Backend that filters queryset by column from `deep_parent_field` property of the model.
+    Value for filtering must be provided in query param `__deep_parent`.
+
+    If param is missing then no filtering will be applied.
+
+    If param is empty value (`/?__deep_parent=`) then objects with no parent (the value of the field whose name is
+    stored in the property `deep_parent_field` of the model is None) returned.
+
+    This filter backend and nested view is automatically added when model has `deep_parent_field` property.
+
+    Example:
+        .. sourcecode:: python
+
+            from django.db import models
+            from vstutils.models import BModel
+
+            class DeepNestedModel(BModel):
+                name = models.CharField(max_length=10)
+                parent = models.ForeignKey('self', null=True, default=None, on_delete=models.CASCADE)
+
+                deep_parent_field = 'parent'
+                deep_parent_allow_append = True
+
+                class Meta:
+                    default_related_name = 'deepnested'
+
+    In example above if we add this model under path '`deep`', following views will be created: `/deep/` and
+    `/deep/{id}/deepnested/`.
+
+    And filter backend can be used as `/deep/?__deep_parent=1` and will return all `DeepNestedModel` objects
+    whose parent's primary key is `1`.
+
+    You can also use generic DRF views, for that you still must set `deep_parent_field`
+    to your model and manually add `DeepViewFilterBackend` to
+    `filter_backends <https://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend>`_ list.
+    """
+    field_name = '__deep_parent'
+    field_types = {
+        compat.coreschema.Integer: filters.NumberFilter,  # type: ignore
+        compat.coreschema.String: filters.CharFilter,  # type: ignore
+    }
+
+    def filter_queryset(self, request, queryset, view):
+        if view.action != 'list':
+            return queryset
+        model = queryset.model
+        parent_name: _t.Optional[_t.Text] = getattr(model, 'deep_parent_field', None)
+        if not parent_name or self.field_name not in request.query_params:
+            return queryset
+        filter_type_class = self.field_types[type(self.get_coreschema_field(model))]
+        filter_data = request.query_params.get(self.field_name)
+        if not filter_data:
+            return queryset.filter(**{f'{parent_name}__isnull': True})
+        pk_name = model._meta.pk.attname
+        parent_qs = model.objects.filter(**{pk_name: filter_data})
+        parent_qs = getattr(parent_qs, 'cleared', parent_qs.all)()
+        return filter_type_class(field_name=parent_name, lookup_expr='in').filter(
+            queryset,
+            value=parent_qs.values(pk_name)
+        )
+
+    def get_coreschema_field(self, model: models.Model):
+        primary_key_field: _t.Optional[models.Field] = model._meta.pk
+        if isinstance(primary_key_field, models.IntegerField):
+            field_cls = compat.coreschema.Integer  # type: ignore
+        else:  # nocv
+            field_cls = compat.coreschema.String  # type: ignore
+        return field_cls(
+            description=''
+        )
+
+    def get_schema_fields(self, view):
+        return [
+            compat.coreapi.Field(
+                name=self.field_name,
+                required=False,
+                location='query',
+                schema=self.get_coreschema_field(view.get_queryset().model),
+            )
+        ]

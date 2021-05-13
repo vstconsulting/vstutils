@@ -52,7 +52,7 @@ from vstutils import models
 from vstutils.api import serializers, fields
 from vstutils.utils import SecurePickling, BaseEnum
 
-from .models import File, Host, HostGroup, List, Author, Post, OverridenModelWithBinaryFiles
+from .models import File, Host, HostGroup, List, Author, Post, OverridenModelWithBinaryFiles, DeepNestedModel
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 from vstutils.api.fields import FkField
@@ -1333,6 +1333,17 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check MultipleFileField and MultipleImageField serializer mapping in schema
         self.assertEqual('multiplenamedbinfile', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multiplefile']['format'])
         self.assertEqual('multiplenamedbinimage', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multipleimage']['format'])
+
+        # Check deep nested view
+        self.assertTrue(
+            list(filter(
+                lambda x: x['name'] == '__deep_parent' and x['in'] == 'query' and x['type'] == 'integer',
+                api['paths']['/deep_nested_model/']['get']['parameters']
+            ))
+        )
+        self.assertEqual(api['paths']['/deep_nested_model/']['get']['x-deep-nested-view'], 'deepnested')
+        self.assertEqual(api['paths']['/deep_nested_model/{id}/']['get']['x-deep-nested-view'], 'deepnested')
+        self.assertTrue(api['paths']['/deep_nested_model/{id}/deepnested/']['post']['x-allow-append'])
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -2992,6 +3003,30 @@ class ProjectTestCase(BaseTestCase):
         # test generated serializer
         generated_serializer = ModelWithBinaryFiles.generated_view.serializer_class()
         serializer_test(generated_serializer)
+
+    def test_deep_nested(self):
+        results = self.bulk([
+            # [0-2] Create 3 nested objects
+            {'method': 'post', 'path': 'deep_nested_model', 'data': {'name': '1'}},
+            {'method': 'post', 'path': ['deep_nested_model', '<<0[data][id]>>', 'deepnested'], 'data': {'name': '1.1'}},
+            {'method': 'post', 'path': ['deep_nested_model', '<<1[data][id]>>', 'deepnested'], 'data': {'name': '1.1.1'}},
+            # [3] Query all objects
+            {'method': 'get', 'path': 'deep_nested_model'},
+            # [4] Query root objects
+            {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent='},
+            # [5-7] Query nested objects
+            {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<0[data][id]>>'},
+            {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<1[data][id]>>'},
+            {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<2[data][id]>>'},
+            # [8] Check that DeepViewFilterBackend has no effect on detail view
+            {'method': 'get', 'path': ['deep_nested_model', '<<0[data][id]>>'], 'query': '__deep_parent='},
+        ])
+        self.assertEqual(results[3]['data']['count'], 3)
+        self.assertEqual(results[4]['data']['results'], [results[0]['data']])
+        self.assertEqual(results[5]['data']['results'], [results[1]['data']])
+        self.assertEqual(results[6]['data']['results'], [results[2]['data']])
+        self.assertEqual(results[7]['data']['results'], [])
+        self.assertEqual(results[8]['data'], results[0]['data'])
 
 
 class CustomModelTestCase(BaseTestCase):

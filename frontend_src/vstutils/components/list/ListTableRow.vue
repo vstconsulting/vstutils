@@ -50,7 +50,7 @@
                                 </li>
                                 <li v-for="sublink in sublinks" :key="sublink.name" class="list-group-item">
                                     <router-link
-                                        :to="formatPath(sublink.href, $route.params, instance)"
+                                        :to="getSublinkPath(sublink, instance)"
                                         @click.native.capture="closeModal"
                                     >
                                         <i
@@ -74,7 +74,7 @@
     import SelectToggleButton from './SelectToggleButton.vue';
     import Modal from '../items/modal/Modal.vue';
     import BootstrapModal from '../BootstrapModal.vue';
-    import { formatPath, tableColumnClasses } from '../../utils';
+    import { formatPath, joinPaths, tableColumnClasses } from '../../utils';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -120,6 +120,12 @@
             createActionClickHandler(callback, action) {
                 callback();
                 this.$emit('execute-action', { action, instance: this.instance });
+            },
+            getSublinkPath(sublink, instance) {
+                if (sublink.appendFragment) {
+                    return joinPaths(this.$route.path, instance.getPkValue(), sublink.appendFragment);
+                }
+                return formatPath(sublink.href, this.$route.params, instance);
             },
         },
     };

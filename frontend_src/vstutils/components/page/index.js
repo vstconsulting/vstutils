@@ -1,6 +1,6 @@
 /* eslint-disable vue/one-component-per-file */
 import OneEntity from './OneEntity.vue';
-import { formatPath, parseResponseMessage, RequestTypes } from '../../utils';
+import { formatPath, joinPaths, parseResponseMessage, pathToArray, RequestTypes } from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { ViewTypes } from '../../views';
@@ -76,6 +76,10 @@ export const PageNewViewComponent = {
         shouldAskForLeaveConfirmation() {
             return this.changedFields.length > 0;
         },
+        isDeepNested() {
+            // Our parent must be list that is deep nested
+            return this.view.parent?.deepNestedParentView;
+        },
     },
     methods: {
         async fetchData() {
@@ -116,6 +120,9 @@ export const PageNewViewComponent = {
                 this.changedFields = [];
 
                 guiPopUp.success(this.$t(pop_up_msg.instance.success.save).format([name, this.view.name]));
+                if (this.isDeepNested) {
+                    return this.openPage(this.getRedirectUrl({ instance }));
+                }
                 this.openPage({ path: this.getRedirectUrl({ instance }), params: { providedInstance } });
             } catch (error) {
                 this.loading = false;
@@ -143,6 +150,10 @@ export const PageEditViewComponent = {
         model() {
             const requestType = this.view.isPartial ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE;
             return this.view.objects.getRequestModelClass(requestType);
+        },
+        isDeepNested() {
+            // Our parent is detail view which parent is deep nested list view
+            return this.view.parent?.parent?.deepNestedParentView;
         },
     },
     methods: {
@@ -197,6 +208,18 @@ export const ActionViewComponent = {
             this.commitMutation('setInstance', instance);
             this.setLoadingSuccessful();
         },
+        getActionRequestPath() {
+            if (this.view?.parent?.parent?.deepNestedParentView) {
+                const rootNestedView = this.view.parent.parent.deepNestedParentView;
+                return joinPaths(
+                    rootNestedView.path,
+                    pathToArray(this.$route.path).slice(-4)[0],
+                    rootNestedView.deepNestedViewFragment,
+                    this.params[this.view.parent.pkParamName],
+                );
+            }
+            return formatPath(this.view.path, this.$route.params);
+        },
         async executeInstance(action, instance) {
             try {
                 this.commitMutation('validateAndSetInstanceData', { instance });
@@ -209,7 +232,7 @@ export const ActionViewComponent = {
                 const response = await this.$app.api.makeRequest({
                     method: this.view.method,
                     headers: { 'content-type': 'application/json' },
-                    path: formatPath(this.view.path, this.$route.params),
+                    path: this.getActionRequestPath(),
                     data: JSON.stringify(instance._getInnerData()),
                     useBulk: instance.constructor.shouldUseBulk(this.view.method),
                 });
@@ -233,6 +256,9 @@ export const ActionViewComponent = {
             }
         },
         getRedirectUrl() {
+            if (this.view?.parent?.parent?.deepNestedParentView) {
+                return this.$route.path.replace(/[^/]+\/$/, '');
+            }
             const parentView = this.$app.views.get(this.view.path.replace(/[^/]+\/$/, ''));
             if (parentView) {
                 return formatPath(parentView.path, this.$route.params);

@@ -979,7 +979,7 @@ export function makeDataImageUrl(file) {
     return `data:${file.mediaType || 'image/png'};base64,${file.content}`;
 }
 
-export const IGNORED_FILTERS = ['offset', 'limit', 'page'];
+export const IGNORED_FILTERS = ['offset', 'limit', 'page', '__deep_parent'];
 
 export function objectToFormData(obj) {
     const formData = new FormData();
@@ -1062,4 +1062,8 @@ export function parseResponseMessage(data) {
  */
 export function pathToArray(path) {
     return path.replace(/^\/|\/$/g, '').split('/');
+}
+
+export function joinPaths(...paths) {
+    return paths.reduce((value, path) => value + '/' + String(path).replace(/^\/|\/$/g, ''), '') + '/';
 }
