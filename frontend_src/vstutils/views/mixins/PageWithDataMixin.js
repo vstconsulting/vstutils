@@ -37,6 +37,9 @@ const PageWithDataMixin = {
                             this.$t(this.view.name),
                         ]),
                     );
+                    if (this.view.parent?.deepNestedParentView) {
+                        return this.openPage(this.$route.path.replace(/[^/]+\/?$/, ''));
+                    }
                     this.openPage({
                         path: formatPath(this.view.listView?.path || this.view.path, this.$route.params),
                     });

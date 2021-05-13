@@ -26,15 +26,12 @@
                 </button>
             </template>
         </Modal>
-        <button
-            class="btn gui-btn btn-default btn-open-filters-modal"
-            :class="{ active: hasActiveFilters }"
-            aria-label="Filters"
-            @click="open"
-        >
-            <i class="fas fa-filter" aria-hidden="true" />
-            <span class="d-none d-lg-inline-block title-for-btn">{{ $t('filters') | capitalize }}</span>
-        </button>
+        <OperationButton
+            :title="$t('filters') | capitalize"
+            classes="btn gui-btn btn-default btn-open-filters-modal"
+            icon-classes="fas fa-filter"
+            @clicked="open"
+        />
     </div>
 </template>
 
@@ -43,13 +40,14 @@
     import Modal from '../items/modal/Modal.vue';
     import { IGNORED_FILTERS, mergeDeep } from '../../utils';
     import ModalWindowAndButtonMixin from '../../fields/ModalWindowAndButtonMixin.js';
+    import OperationButton from '../common/OperationButton.vue';
 
     /**
      * Component for filter modal window and button, that opens it.
      */
     export default {
         name: 'FiltersModal',
-        components: { Modal },
+        components: { OperationButton, Modal },
         mixins: [ModalWindowAndButtonMixin],
         props: {
             view: { type: Object, required: true },

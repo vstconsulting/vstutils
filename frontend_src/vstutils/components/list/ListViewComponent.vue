@@ -60,7 +60,7 @@
     import ListTable from './ListTable.vue';
     import MultiActions from './MultiActions.vue';
     import Pagination from './Pagination.vue';
-    import { formatPath, RequestTypes } from '../../utils';
+    import { formatPath, IGNORED_FILTERS, joinPaths, makeQueryString, RequestTypes } from '../../utils';
     import { BaseViewMixin } from '../BaseViewMixin.js';
 
     export default {
@@ -158,6 +158,11 @@
                 const limit = this.pagination.pageSize || this.$app.config.defaultPageLimit;
                 const page = this.$route.query.page || 1;
                 const query = { limit, offset: limit * (page - 1) };
+                if (this.view.deepNestedParentView) {
+                    query.__deep_parent = this.params[this.view.parent.pkParamName];
+                } else if (this.view.deepNestedView) {
+                    query.__deep_parent = '';
+                }
                 return $.extend(true, query, this.filterNonEmpty(this.$route.query));
             },
             applyFilters(filters) {
@@ -180,20 +185,15 @@
              * Method opens page, that satisfies current filters values.
              */
             filterInstances() {
-                let HIDDEN_FILTERS = ['offset', 'limit', 'page'];
                 let filters = this.getFiltersPrepared();
 
                 for (let filter in filters) {
-                    if (HIDDEN_FILTERS.includes(filter)) {
+                    if (IGNORED_FILTERS.includes(filter)) {
                         delete filters[filter];
                     }
                 }
 
-                return this.openPage({
-                    name: this.$route.name,
-                    params: this.$route.params,
-                    query: filters,
-                });
+                return this.openPage(this.$route.path + makeQueryString(filters));
             },
             /**
              * Removes one instance
@@ -301,6 +301,9 @@
             // Page view
 
             openPageView(instance) {
+                if (this.view.deepNestedParentView) {
+                    return this.$router.push(joinPaths(this.$route.path, instance.getPkValue()));
+                }
                 const pageView = this.view.pageView;
                 if (pageView) {
                     const link = formatPath(pageView.path, this.$route.params, instance);

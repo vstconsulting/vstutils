@@ -38,7 +38,7 @@ describe('ViewConstructor', () => {
             expect(newSublink).toBeDefined();
             expect(newSublink.name).toBe('new');
             expect(newSublink.title).toBe('Create');
-            expect(newSublink.href).toBe(`${path}new/`);
+            expect(newSublink.appendFragment).toBe('new');
 
             const removeAction = authorsView.multiActions.get('remove');
             expect(removeAction).toBeDefined();
@@ -180,7 +180,7 @@ describe('ViewConstructor', () => {
         expect(newSublink).toBeDefined();
         expect(newSublink.name).toBe('new');
         expect(newSublink.title).toBe('Create');
-        expect(newSublink.href).toBe('/post/new/');
+        expect(newSublink.appendFragment).toBe('new');
 
         expect(postsView.sublinks.size).toBe(1);
         expect(postsView.actions.size).toBe(2);
@@ -227,10 +227,10 @@ describe('ViewConstructor', () => {
             modelsClasses.get('SubView'),
         ]);
 
-        const editAction = subView.actions.get('edit');
-        expect(editAction).toBeDefined();
-        expect(editAction.name).toBe('edit');
-        expect(editAction.title).toBe('Edit');
+        const editSublink = subView.sublinks.get('edit');
+        expect(editSublink).toBeDefined();
+        expect(editSublink.name).toBe('edit');
+        expect(editSublink.title).toBe('Edit');
 
         const removeAction = subView.actions.get('remove');
         expect(removeAction).toBeDefined();
@@ -240,8 +240,8 @@ describe('ViewConstructor', () => {
         const editSubView = views.get(`${path}sub/edit/`);
         expect(editSubView.objects).toBe(subView.objects);
 
-        expect(subView.sublinks.size).toBe(0);
-        expect(subView.actions.size).toBe(2);
+        expect(subView.sublinks.size).toBe(1);
+        expect(subView.actions.size).toBe(1);
     });
 
     test.each(['/author/', '/fragment1/fragment2/fragment3/fragment4/author/', '/author/'])(
@@ -271,7 +271,7 @@ describe('ViewConstructor', () => {
             expect(newSublink).toBeDefined();
             expect(newSublink.name).toBe('new');
             expect(newSublink.title).toBe('Create');
-            expect(newSublink.href).toBe(`${path}sub_with_post/new/`);
+            expect(newSublink.appendFragment).toBe('new');
 
             const removeAction = subView.actions.get('remove');
             expect(removeAction).toBeDefined();

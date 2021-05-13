@@ -12,7 +12,7 @@ TRANSLATION = {
     "select": '选择',
     "filters": '过滤',
     "apply": '应用',
-    "cancel": '取消',
+    "Cancel": '取消',
     "field": '范围',
     "actions": '活动',
     "sublinks": '输入链接',
@@ -217,4 +217,10 @@ TRANSLATION = {
     'for some reason, this image file cannot be opened': '无法打开图像文件',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': "{0}图片不正确。 预期从{1}到{2}，收到{3}",
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
+    'Dark mode': '黑暗主题',
+
+    # Проверить
+    'Changes in settings are successfully saved. Please refresh the page.': '设置更改已成功保存。 请刷新页面。',
+    'now': '眼下',
+    'later': '之后',
 }

@@ -46,18 +46,21 @@
                 </button>
             </template>
         </Modal>
-        <button class="btn btn-primary btn-operation-add" aria-label="Add" @click="open">
-            <span class="fa fa-folder-open" />
-            <span class="d-none d-lg-inline-block title-for-btn">{{ $t('add') | capitalize }}</span>
-        </button>
+        <OperationButton
+            :title="$t('add') | capitalize"
+            classes="btn btn-primary btn-operation-add"
+            icon-classes="fa fa-folder-open"
+            @clicked="open"
+        />
     </div>
 </template>
 
 <script>
     import Preloader from '../common/Preloader.vue';
+    import OperationButton from '../common/OperationButton.vue';
     import Modal from '../items/modal/Modal.vue';
     import Pagination from './Pagination.vue';
-    import { formatPath, RequestTypes } from '../../utils';
+    import { formatPath, joinPaths, RequestTypes } from '../../utils';
     import ListTable from './ListTable.vue';
     import BaseModalWindowForInstanceList from '../../fields/BaseModalWindowForInstanceList.vue';
     import FKMultiAutocompleteFieldSearchInput from '../../fields/fk/multi-autocomplete/FKMultiAutocompleteFieldSearchInput.vue';
@@ -76,7 +79,7 @@
      */
     export default {
         name: 'AddChildModal',
-        components: { FKMultiAutocompleteFieldSearchInput, ListTable, Pagination, Modal, Preloader },
+        components: { FKMultiAutocompleteFieldSearchInput, ListTable, Pagination, Modal, Preloader, OperationButton },
         mixins: [BaseModalWindowForInstanceList],
         props: {
             view: { type: Object, required: true },
@@ -122,23 +125,25 @@
                 const qs = this.view.objects.clone({
                     url: formatPath(this.view.objects.url, this.$route.params),
                 });
+                const path = this.view.deepNestedParentView
+                    ? joinPaths(
+                          this.view.deepNestedParentView.path,
+                          instanceId,
+                          this.view.deepNestedParentView.deepNestedViewFragment,
+                      )
+                    : qs.getDataType();
 
                 try {
                     await qs.execute({
                         method: 'post',
-                        path: qs.getDataType(),
+                        path,
                         data: new AppendNestedModel({ id: instanceId }),
                     });
-                    guiPopUp.success(
-                        this.$t(pop_up_msg.instance.success.add).format([this.$t(this.view.name)]),
-                    );
+                    guiPopUp.success(this.$t(pop_up_msg.instance.success.add, [this.$t(this.view.title)]));
                 } catch (error) {
-                    let str = window.app.error_handler.errorToString(error);
-                    let srt_to_show = this.$t(pop_up_msg.instance.error.add).format([
-                        this.$t(this.view.name),
-                        str,
-                    ]);
-                    window.app.error_handler.showError(srt_to_show, str);
+                    let str = this.$app.error_handler.errorToString(error);
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.add, [this.$t(this.view.title), str]);
+                    this.$app.error_handler.showError(srt_to_show, str);
                 }
             },
             /**

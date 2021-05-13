@@ -27,10 +27,33 @@
                     @set-value="setUserSetting(section.name, field.name, $event.value)"
                 />
             </template>
+            <button
+                class="btn btn-success btn-block"
+                :disabled="!$store.state.userSettings.changed || isSaving"
+                @click="saveSettings"
+            >
+                <i class="fas fa-save" />
+                {{ $t('Save') }}
+            </button>
+            <BootstrapModal ref="reloadPageModal">
+                <template #content="{ closeModal }">
+                    <div style="padding: 1rem">
+                        <p>
+                            {{ $t('Changes in settings are successfully saved. Please refresh the page.') }}
+                        </p>
+                        <button class="btn btn-success" @click="reloadPage">
+                            {{ `${$t('Reload')} ${$t('now')}` | capitalize }}
+                        </button>
+                        <button class="btn btn-secondary" style="float: right" @click="closeModal">
+                            {{ $t('later') | capitalize }}
+                        </button>
+                    </div>
+                </template>
+            </BootstrapModal>
 
             <button class="btn btn-secondary btn-block" @click="cleanAllCache">
                 <i class="fas fa-sync-alt" />
-                {{ ($t('reload') + ' ' + $t('cache')) | capitalize }}
+                {{ ($t('Reload') + ' ' + $t('cache')) | capitalize }}
             </button>
         </div>
     </aside>
@@ -38,12 +61,14 @@
 
 <script>
     import { HelpModal } from './modal';
+    import BootstrapModal from '../BootstrapModal.vue';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
     export default {
         name: 'ControlSidebar',
-        components: { HelpModal },
+        components: { BootstrapModal, HelpModal },
+        data: () => ({ isSaving: false }),
         computed: {
             sections() {
                 const UserSettings = this.$app.modelsClasses.get('_UserSettings');
@@ -59,6 +84,9 @@
             },
         },
         watch: {
+            '$store.state.userSettings.changed': function () {
+                this.isSaving = false;
+            },
             '$store.state.userSettings.settings.main.language': 'setLanguage',
             '$store.state.userSettings.settings.main.dark_mode': 'setDarkMode',
         },
@@ -66,6 +94,14 @@
             this.$store.dispatch('userSettings/load');
         },
         methods: {
+            async saveSettings() {
+                this.isSaving = true;
+                await this.$store.dispatch('userSettings/save');
+                this.$refs.reloadPageModal.open();
+            },
+            reloadPage() {
+                window.location.reload();
+            },
             setUserSetting(section, key, value) {
                 this.$store.commit('userSettings/setValue', { section, key, value });
             },
@@ -77,8 +113,12 @@
                     document.body.classList.remove(DARK_MODE_CLASS);
                 }
             },
-            setLanguage(value) {
-                this.$app.setLanguage(value);
+            async setLanguage(value) {
+                if (this.$i18n.locale !== value) {
+                    await this.$app.setLanguage(value);
+                    await this.$app.cache.delete(window.schemaLoader.cacheKey);
+                    await window.schemaLoader.loadSchema();
+                }
             },
             cleanAllCache() {
                 window.cleanAllCacheAndReloadPage();

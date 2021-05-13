@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { capitalize, HttpMethods, mergeDeep, RequestTypes, ViewTypes } from '../utils';
+import { capitalize, HttpMethods, joinPaths, mergeDeep, pathToArray, RequestTypes, ViewTypes } from '../utils';
 import signals from '../signals.js';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
@@ -111,10 +111,10 @@ export default class ViewConstructor {
 
         for (const path of paths) {
             const pathSchema = viewsSchema[path];
-            const dataType = path.replace(/^\/|\/$/g, '').split('/');
+            const dataType = pathToArray(path);
             const level = dataType.length;
             const parentDataType = dataType.slice(0, -1);
-            const parentPath = level > 1 ? '/' + parentDataType.join('/') + '/' : null;
+            const parentPath = level > 1 ? joinPaths(...parentDataType) : null;
             let parent = views.get(parentPath);
 
             const viewName = this._getViewName(path);
@@ -213,6 +213,7 @@ export default class ViewConstructor {
                             title: operationOptions[ACTION_NAME] || operationOptions.title,
                         };
                         view.actions.set(executeAction.name, executeAction);
+                        params.appendFragment = pathToArray(view.path).last;
                         params.view = view;
                         views.set(view.path, view);
                     }
@@ -308,13 +309,13 @@ export default class ViewConstructor {
                 editView.actions.set(reloadAction.name, reloadAction);
             }
 
-            // Set edit action
+            // Set edit sublink
             if (editView && !editStyleView) {
-                const pageEditAction = mergeDeep(
+                const pageEditSublink = mergeDeep(
                     { view: editView },
                     this.dictionary.paths.operations.page.edit,
                 );
-                if (pageView) pageView.actions.set(pageEditAction.name, pageEditAction);
+                if (pageView) pageView.sublinks.set(pageEditSublink.name, pageEditSublink);
             }
 
             // Set remove action
@@ -331,10 +332,7 @@ export default class ViewConstructor {
 
                 const viewToLink = (isDetailPath && pageView) || listView || parent;
                 newView.listView = viewToLink;
-                const newAction = mergeDeep(
-                    { href: newView.path },
-                    this.dictionary.paths.operations.list.new,
-                );
+                const newAction = mergeDeep({}, this.dictionary.paths.operations.list.new);
                 viewToLink.sublinks.set(newAction.name, newAction);
                 if (newView.nestedAllowAppend) {
                     const options = mergeDeep({}, this.dictionary.paths.operations.list.add);
@@ -374,6 +372,29 @@ export default class ViewConstructor {
             // Set subscription labels to queryset
             if (listView && listView.subscriptionLabels) {
                 listView.objects.listSubscriptionLabels = listView.subscriptionLabels.slice();
+            }
+
+            // Set deep nested properties
+            if (listView && dataType.length >= 3) {
+                // Get view that is 2 fragments closer to root
+                const deepRoot = views.get(`/${dataType.slice(0, -2).join('/')}/`);
+                if (deepRoot instanceof ListView && deepRoot.deepNestedViewFragment === dataType.last) {
+                    listView.deepNestedParentView = deepRoot;
+                    deepRoot.deepNestedView = listView;
+                    listView.objects = deepRoot.objects;
+
+                    delete listView.filters.__deep_parent;
+                    delete deepRoot.filters.__deep_parent;
+                }
+            }
+
+            // Set sublink to deep nested objects
+            if (parentIsList && parent.deepNestedParentView) {
+                pageView.sublinks.set(parent.name, {
+                    name: parent.name,
+                    title: parent.title,
+                    appendFragment: parent.deepNestedParentView.deepNestedViewFragment,
+                });
             }
         }
 

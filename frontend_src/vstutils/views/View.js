@@ -12,7 +12,7 @@ import {
     PageNewViewComponent,
     PageViewComponent,
 } from '../components/page';
-import { HttpMethods, ViewTypes } from '../utils';
+import { HttpMethods, joinPaths, pathToArray, ViewTypes } from '../utils';
 export { ViewTypes };
 
 /**
@@ -27,6 +27,7 @@ export { ViewTypes };
  * @typedef {VisibleButton} Sublink
  * @property {string} name
  * @property {string} [href]
+ * @property {string} [appendFragment]
  */
 
 /**
@@ -64,6 +65,9 @@ export class View {
 
     /**
      * Constructor of View class.
+     * @param {Object} params
+     * @param {QuerySet} objects
+     * @param {Object[]} mixins
      */
     constructor(params, objects, mixins = []) {
         this.params = params;
@@ -72,6 +76,7 @@ export class View {
         this.operationId = params.operationId;
         this.level = params.level;
         this.name = params.name;
+        /** @type {string} */
         this.path = params.path;
         this.title = params.title || params.name;
 
@@ -167,10 +172,28 @@ export class ListView extends View {
 
     constructor(params, objects, mixins = [ListViewComponent]) {
         super(params, objects, mixins);
-        /**
-         * @type {Object<String, BaseField>}
-         */
+        /** @type {Object<String, BaseField>} */
         this.filters = params.filters;
+
+        // Set deep nested related properties
+        /** @type {string|null} */
+        this.deepNestedViewFragment = params['x-deep-nested-view'] || null;
+        /** @type {ListView|null} */
+        this.deepNestedView = null;
+        /** @type {ListView|null} */
+        this.deepNestedParentView = null;
+    }
+
+    getRoutePath() {
+        if (this.deepNestedParentView) {
+            // Example: /category(/\\w+/categories)*/:id/categories/ | /category/1/categories/2/categories/
+            return '{0}(/\\w+/{1})*/:{2}/{1}/'.format([
+                this.deepNestedParentView.getRoutePath().replace(/\/$/, ''),
+                this.deepNestedParentView.deepNestedViewFragment,
+                this.deepNestedParentView.pageView.pkParamName,
+            ]);
+        }
+        return super.getRoutePath();
     }
 
     getStoreModule() {
@@ -199,6 +222,18 @@ export class PageView extends View {
     getStoreModule() {
         return PAGE_STORE_MODULE;
     }
+
+    getRoutePath() {
+        const deepNestedParentView = this.listView?.deepNestedParentView;
+        if (deepNestedParentView) {
+            return '{0}(/\\w+/{1})+/:{2}/'.format([
+                deepNestedParentView.getRoutePath().replace(/\/$/, ''),
+                deepNestedParentView.deepNestedViewFragment,
+                this.pkParamName,
+            ]);
+        }
+        return super.getRoutePath();
+    }
 }
 
 export class PageNewView extends View {
@@ -223,6 +258,13 @@ export class PageNewView extends View {
     getStoreModule() {
         return PAGE_NEW_STORE_MODULE;
     }
+
+    getRoutePath() {
+        if (this?.parent?.deepNestedParentView) {
+            return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
+        }
+        return super.getRoutePath();
+    }
 }
 
 export class PageEditView extends PageView {
@@ -238,6 +280,13 @@ export class PageEditView extends PageView {
     getStoreModule() {
         return PAGE_EDIT_STORE_MODULE;
     }
+
+    getRoutePath() {
+        if (this?.parent?.parent?.deepNestedParentView) {
+            return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
+        }
+        return super.getRoutePath();
+    }
 }
 
 export class ActionView extends View {
@@ -249,5 +298,12 @@ export class ActionView extends View {
 
     getStoreModule() {
         return ACTION_STORE_MODULE;
+    }
+
+    getRoutePath() {
+        if (this?.parent?.parent?.deepNestedParentView) {
+            return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
+        }
+        return super.getRoutePath();
     }
 }

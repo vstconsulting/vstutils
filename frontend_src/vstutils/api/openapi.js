@@ -41,6 +41,7 @@ const openapi_dictionary = {
                 new: {
                     name: 'new',
                     title: 'Create',
+                    appendFragment: 'new',
                     iconClasses: ['fas', 'fa-plus'],
                     styles: { order: -10 },
                     doNotGroup: true,
@@ -65,6 +66,7 @@ const openapi_dictionary = {
                 edit: {
                     name: 'edit',
                     title: 'Edit',
+                    appendFragment: 'edit',
                     iconClasses: ['fas', 'fa-edit'],
                     styles: { order: -8 },
                     doNotGroup: true,

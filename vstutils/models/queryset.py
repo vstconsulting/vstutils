@@ -57,11 +57,7 @@ class BQuerySet(models.QuerySet):
     def has_field_filter_in_query(self, field_name):
         return any(filter(
             raise_context_decorator_with_default(default=False)(
-                lambda x: (
-                    hasattr(x, 'hls') and
-                    hasattr(x.hls, 'field') and
-                    getattr(x.lhs.field, 'attname', None) == field_name
-                )
+                lambda x: getattr(x.lhs.field, 'attname', None) == field_name
             ),
             self.query.where.children
         ))

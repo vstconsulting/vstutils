@@ -5,7 +5,7 @@ TRANSLATION = {
     'add': 'добавить',
     'Edit': 'редактировать',
     'edit': 'Редактировать',
-    'Save': 'сохранить',
+    'Save': 'Сохранить',
     'Remove': 'удалить',
     'Reload': 'перезагрузить',
     'send': 'отправить',
@@ -248,10 +248,17 @@ TRANSLATION = {
     'height': 'высота',
     'width': 'ширина',
     'More info': 'Подробнее',
+    'Dark mode': 'Темная тема',
+
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',
     'for some reason, this image file cannot be opened': 'Не удалось открыть файл изображения',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
     'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
+
+    # Проверить
+    'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста обновите страницу.',
+    'now': 'сейчас',
+    'later': 'позже',
 }

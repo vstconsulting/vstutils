@@ -141,6 +141,7 @@ export class App extends BaseApp {
             guiLocalSettings.set('lang', lang);
             signals.emit('app.language.changed', { lang: lang });
             document.documentElement.setAttribute('lang', lang);
+            document.cookie = `lang=${lang}`;
             return lang;
         });
     }

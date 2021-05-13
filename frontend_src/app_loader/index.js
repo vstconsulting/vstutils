@@ -64,7 +64,8 @@ function checkCacheVersions() {
 async function startApp(cache) {
     checkCacheVersions();
 
-    const openApiLoadPromise = new OpenAPILoader(cache).loadSchema();
+    window.schemaLoader = new OpenAPILoader(cache);
+    const openApiLoadPromise = window.schemaLoader.loadSchema();
 
     const filesLoadPromise = new StaticFilesLoader(
         window.resourceList,
