@@ -57,7 +57,8 @@ class ModelWithBinaryFiles(BModel):
     some_imagefield = models.ImageField(null=True, blank=True)
     some_FkModelfield = FkModelField('test_proj.Author', null=True, blank=True, on_delete=models.CASCADE)
     some_multiplefile = MultipleFileField(blank=True)
-    some_multipleimage = MultipleImageField(blank=True)
+    some_multipleimage = MultipleImageField(blank=True, default='')
+    some_multiplefile_none = MultipleFileField(blank=True, default=None, null=True)
 
     class Meta:
         _view_field_name = 'some_namedbinfile'
