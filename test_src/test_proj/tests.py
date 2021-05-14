@@ -43,6 +43,7 @@ from vstutils.api.validators import (
 from vstutils.api.auth import UserViewSet
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
+from vstutils.models.fields import MultipleFieldFile
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.tools import get_file_value
@@ -2605,13 +2606,15 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(result_data, results[1]['data']['results'][0]['some_multipleimage'])
 
     def test_multiplefilefield_empty(self):
-        post_data = {
-            'some_multiplefile': []
-        }
+
         results = self.bulk([
-            {'method': 'post', 'path': ['testbinarymodelschema'], 'data': post_data},
+            {'method': 'post', 'path': ['testbinarymodelschema'], 'data': {}},
         ])
-        self.assertEqual([], OverridenModelWithBinaryFiles.objects.get(id=results[0]['data']['id']).some_multiplefile)
+        test_obj = OverridenModelWithBinaryFiles.objects.get(id=results[0]['data']['id'])
+        test_create = OverridenModelWithBinaryFiles.objects.create(some_multiplefile_none=[None])
+        self.assertIsInstance(test_create.some_multiplefile_none[0], MultipleFieldFile)
+        self.assertEqual([], test_obj.some_multiplefile)
+        self.assertEqual([], test_obj.some_multiplefile_none)
 
     def test_model_namedbinfile_field(self):
         file = get_file_value(os.path.join(DIR_PATH, 'image_b64_valid'))

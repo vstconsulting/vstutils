@@ -1,10 +1,10 @@
-import json
-
+import orjson
 from django.core.files import File
 from django.core.files.images import ImageFile
 from django.db.models import TextField, ForeignKey, FileField, ImageField, Field
 from django.db.models.fields.files import FileDescriptor, FieldFile
 from django.db.models.query_utils import DeferredAttribute
+from vstutils.utils import raise_context_decorator_with_default
 
 """
 These model fields used in :class:`vstutils.api.serializers.VstSerializer`
@@ -153,20 +153,18 @@ class MultipleFileMixin:
         """
         value = Field.get_prep_value(self, value)
         if value is None:
-            return value  # nocv
+            return value
 
-        return json.dumps([
-            str(file)
-            for file in value
-        ])
+        return orjson.dumps(list(map(str, value)))
 
+    @raise_context_decorator_with_default(default=[])
     def from_db_value(self, value, expression, connection):
         """
         Transform db value to an internal value
         """
-        if value is None:
-            return value  # nocv
-        return json.loads(value)
+        if value:
+            return orjson.loads(value)
+        return value  # nocv
 
 
 class MultipleFileField(MultipleFileMixin, FileField):
