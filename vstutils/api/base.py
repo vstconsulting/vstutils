@@ -28,7 +28,7 @@ from rest_framework.decorators import action
 from rest_framework.schemas import AutoSchema as DRFAutoSchema
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
-from ..utils import classproperty, get_if_lazy, raise_context_decorator_with_default
+from ..utils import classproperty, get_if_lazy, raise_context_decorator_with_default, patch_gzip_response_decorator
 from . import responses, fields
 from .serializers import (
     ErrorSerializer,
@@ -466,6 +466,7 @@ class FileResponseRetrieveMixin(GenericViewSet):
             "filename": getattr(instance, self.instance_field_filename, ''),
         }
 
+    @patch_gzip_response_decorator
     def retrieve(self, request: Request, *args, **kwargs) -> _t.Union[FileResponse, HttpResponseNotModified]:
         instance = self.get_object()
 

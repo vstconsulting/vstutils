@@ -414,6 +414,7 @@ class BaseTestCase(TestCase):
             f'/{self._settings("VST_API_URL")}/endpoint/{query}',
             data=data,
             code=code,
+            HTTP_ACCEPT_ENCODING='gzip',
             **kwargs
         )
 

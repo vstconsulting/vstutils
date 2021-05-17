@@ -1,4 +1,5 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
+import gzip
 import os
 import sys
 import shutil
@@ -3088,13 +3089,13 @@ class CustomModelTestCase(BaseTestCase):
 
         self.client.force_login(self.user)
         last_update = datetime.datetime(2021, 3, 1, 16, 15, 51, 801564).timestamp()
-        response = self.client.get('/api/v1/listoffiles/0/')
+        response = self.client.get('/api/v1/listoffiles/0/', HTTP_ACCEPT_ENCODING='gzip')
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response, FileResponse)
         self.assertEqual(response.as_attachment, True)
         self.assertEqual(response.filename, 'File_0.txt')
         self.assertEqual(
-            ''.join(line.decode('utf-8') for line in response.streaming_content),
+            gzip.decompress(b''.join(response.streaming_content)).decode('utf-8'),
             'File data'
         )
 

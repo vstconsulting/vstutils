@@ -25,7 +25,7 @@ from . import responses
 from .decorators import cache_method_result
 from .serializers import DataSerializer
 from .validators import UrlQueryStringValidator
-from ..utils import Dict, raise_context
+from ..utils import Dict, raise_context, patch_gzip_response
 from ..middleware import BaseMiddleware
 
 RequestType = _t.Union[drf_request.Request, HttpRequest]
@@ -409,8 +409,16 @@ class EndpointViewSet(views.APIView):
 
         if request.query_params.get('format') == 'openapi':  # type: ignore
             url += '?format=openapi'
+            should_gzip = True
+        else:
+            should_gzip = False
 
-        return self.get_client(request).get(url, secure=request.is_secure())
+        response = self.get_client(request).get(url, secure=request.is_secure())
+
+        if should_gzip:
+            patch_gzip_response(response, request)
+
+        return response
 
     def post(self, request: BulkRequestType) -> responses.BaseResponseClass:
         """Execute transactional bulk request"""

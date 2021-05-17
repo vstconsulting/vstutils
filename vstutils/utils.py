@@ -21,13 +21,16 @@ from threading import Thread
 from enum import Enum
 
 from django.conf import settings
+from django.middleware.gzip import re_accepts_gzip
 from django.urls import re_path, include
 from django.core.mail import send_mail
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation, functional
+from django.utils.cache import patch_vary_headers
 from django.utils.module_loading import import_string as import_class
+from django.utils.text import compress_string, compress_sequence
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
@@ -192,6 +195,46 @@ def send_template_email(sync: bool = False, **kwargs):
     else:
         from .tasks import SendEmailMessage
         SendEmailMessage.do(email_from=settings.EMAIL_FROM_ADDRESS, **kwargs)
+
+
+def patch_gzip_response(response, request):
+    if not response.status_code == 200 \
+            or response.has_header('Content-Encoding') \
+            or (not response.streaming and len(response.content) < 200):
+        return  # nocv
+
+    patch_vary_headers(response, ('Accept-Encoding',))
+
+    ae = request.META.get('HTTP_ACCEPT_ENCODING', '')
+
+    if not re_accepts_gzip.search(ae):
+        return response
+
+    if response.streaming:
+        response.streaming_content = compress_sequence(response.streaming_content)
+        del response.headers['Content-Length']
+    else:
+        compressed_content = compress_string(response.content)
+        if len(compressed_content) >= len(response.content):
+            return response  # nocv
+
+        response.content = compressed_content
+        response.headers['Content-Length'] = str(len(response.content))
+
+    etag = response.get('ETag')
+    if etag and etag.startswith('"'):
+        response.headers['ETag'] = 'W/' + etag  # nocv
+    response.headers['Content-Encoding'] = 'gzip'
+
+
+def patch_gzip_response_decorator(func):
+    def gzip_response_wrapper(view, request, *args, **kwargs):
+        response = func(view, request, *args, **kwargs)
+        with raise_context():
+            patch_gzip_response(response, request)
+        return response
+
+    return gzip_response_wrapper
 
 
 class apply_decorators:
@@ -419,7 +462,7 @@ class tmp_file_context:
 
 
 class assertRaises:
-    __slots__ = ('_kwargs', '_verbose', '_exclude', '_excepts')
+    __slots__ = ('_kwargs', '_verbose', '_exclude', '_excepts', '_log')
 
     def __init__(self, *args, **kwargs):
         """
@@ -431,7 +474,7 @@ class assertRaises:
         :type verbose: bool
         """
         self._kwargs = dict(**kwargs)
-        self._verbose = kwargs.pop("verbose", False)
+        self._verbose = kwargs.pop("verbose", settings.DEBUG)
         self._exclude = kwargs.pop("exclude", False)
         self._excepts = tuple(args)
 
@@ -459,7 +502,8 @@ class raise_context(assertRaises):
                 return func(*args, **kwargs)
             except:
                 type, value, traceback_obj = sys.exc_info()
-                logger.debug(traceback.format_exc())
+                if self._verbose:
+                    logger.debug(traceback.format_exc())
                 raise
         return type, value, traceback_obj
 
