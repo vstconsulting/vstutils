@@ -209,7 +209,7 @@ class NamedBinaryFileInJSONField(TextField):
     """
 
 
-class NamedBinaryImageInJSONField(TextField):
+class NamedBinaryImageInJSONField(NamedBinaryFileInJSONField):
     """
     Extends :class:`django.db.models.TextField`. Use this field in :class:`vstutils.models.BModel` to get
     `vstutils.api.NamedBinaryImageInJSONField` in serializer.
@@ -223,7 +223,7 @@ class MultipleNamedBinaryFileInJSONField(TextField):
     """
 
 
-class MultipleNamedBinaryImageInJSONField(TextField):
+class MultipleNamedBinaryImageInJSONField(MultipleNamedBinaryFileInJSONField):
     """
     Extends :class:`django.db.models.TextField`. Use this field in :class:`vstutils.models.BModel` to get
     `vstutils.api.MultipleNamedBinaryImageInJSONField in serializer`.

@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.template.exceptions import TemplateDoesNotExist
 from django.middleware.csrf import _get_new_csrf_token
@@ -32,7 +33,7 @@ from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 
-from vstutils import utils, __version__
+from vstutils import utils
 from vstutils.api.validators import (
     RegularExpressionValidator,
     ImageValidator,
@@ -54,7 +55,18 @@ from vstutils import models
 from vstutils.api import serializers, fields
 from vstutils.utils import SecurePickling, BaseEnum
 
-from .models import File, Host, HostGroup, List, Author, Post, OverridenModelWithBinaryFiles, DeepNestedModel
+from .models import (
+    File,
+    Host,
+    HostGroup,
+    List,
+    Author,
+    Post,
+    OverridenModelWithBinaryFiles,
+    ModelWithBinaryFiles,
+    ModelForCheckFileAndImageField,
+    DeepNestedModel
+)
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
 from vstutils.api.fields import FkField
@@ -1346,6 +1358,27 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['paths']['/deep_nested_model/']['get']['x-deep-nested-view'], 'deepnested')
         self.assertEqual(api['paths']['/deep_nested_model/{id}/']['get']['x-deep-nested-view'], 'deepnested')
         self.assertTrue(api['paths']['/deep_nested_model/{id}/deepnested/']['post']['x-allow-append'])
+
+        # Check fields excludes from the filterset
+        path = api['paths']['/test_json_file_image_fields_model/']['get']
+
+        # fields existing in the model 'ModelForCheckImageAndFileFields'
+        fields_of_model_list = [
+            'some_image_field',
+            'some_file_field',
+            'some_multiple_image_field',
+            'some_multiple_file_field',
+            'some_json_field',
+        ]
+        fields_name_mapping = [field.attname for field in ModelForCheckFileAndImageField._meta.fields]
+        # Check fields in model
+        for field_name in fields_of_model_list:
+            self.assertIn(field_name, fields_name_mapping)
+
+        # Check fields not in filterset_fields
+        fields_in_filterset_list = [i['name'] for i in path['parameters']]
+        for field_name in fields_in_filterset_list:
+            self.assertNotIn(field_name, fields_of_model_list)
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -2874,7 +2907,127 @@ class ProjectTestCase(BaseTestCase):
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:
             self.assertEqual(instance.some_filefield.file.read(), cat1.read())
 
+    def test_related_list_field(self):
+        with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as fd:
+            content = fd.read()
 
+        def file_data(file_name):
+            return SimpleUploadedFile(name=file_name, content=content)
+
+        # create ModelWithBinaryFiles model with empty fields
+        obj_with_empty_fields = ModelWithBinaryFiles.objects.create()
+        related_model = ModelForCheckFileAndImageField.objects.create(some_json_field='test')
+        obj_with_empty_fields.related_model.add(related_model)
+
+        results = self.bulk([
+            {'method': 'get', 'path': ['test_json_file_image_fields_model', related_model.id]},
+        ])
+        # if some_namedbinfile is Empty or invalid - return None
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_namedbinfile'],
+            {"name": None, "content": None, 'mediaType': None}
+        )
+        # if 'some_namedbinimage' is Empty or invalid - return None
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_namedbinimage'],
+            {"name": None, "content": None, 'mediaType': None}
+        )
+        # if 'some_multiplenamedbinfile' is empty or invalid - return empty list
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_multiplenamedbinfile'],
+            []
+        )
+        # if 'some_multiplenamedbinimage' is empty or invalid - return empty list
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_multiplenamedbinimage'],
+            []
+        )
+        # if 'some_filefield' is empty or invalid - return empty list
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_filefield'],
+            {"name": None, "content": None, 'mediaType': None}
+        )
+        obj_with_empty_fields.delete()
+
+        json_data = json.dumps({'name': 'abc.png', 'content': '/4sdfsdf/', 'mediaType': 'text/txt'})
+        author = Author.objects.create(name='test_author', image=file_data('extra.jpg'))
+        obj_with_valid_fields = ModelWithBinaryFiles.objects.create(
+            some_binfile='test',
+            some_namedbinfile=json_data,
+            some_namedbinimage=json_data,
+            some_filefield=file_data('test_file'),
+            some_imagefield=file_data('test_image.jpg'),
+            some_FkModelfield=author,
+            some_multiplefile=[
+                file_data('test_multiplefile1'),
+                file_data('test_multiplefile2'),
+            ],
+            some_multipleimage=[
+                file_data('test_multipleimage1.jpg'),
+                file_data('test_multipleimage2.jpg'),
+            ],
+        )
+        obj_with_valid_fields.related_model.add(related_model)
+        results = self.bulk([
+            {'method': 'get', 'path': ['test_json_file_image_fields_model', related_model.id]},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_filefield'],
+            {'content': '/media/test_file', 'mediaType': '', 'name': 'test_file'}
+        )
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_imagefield'],
+            {'content': '/media/test_image.jpg', 'name': 'test_image.jpg', 'mediaType': ''}
+        )
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_namedbinfile'],
+            {'content': '/4sdfsdf/', 'mediaType': 'text/txt', 'name': 'abc.png'}
+        )
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_namedbinimage'],
+            {'content': '/4sdfsdf/', 'mediaType': 'text/txt', 'name': 'abc.png'}
+        )
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_FkModelfield__image'],
+            {'content': '/media/extra.jpg', 'mediaType': '', 'name': 'extra.jpg'}
+        )
+        # 'multiplefile' to return list of dicts with values
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_multiplefile'],
+            [
+                {'content': '/media/test_multiplefile1', 'name': 'test_multiplefile1', 'mediaType': ''},
+                {'content': '/media/test_multiplefile2', 'name': 'test_multiplefile2', 'mediaType': ''}
+            ]
+        )
+        # 'multipleimage' to return list of dicts with values
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_multipleimage'],
+            [
+                {'content': '/media/test_multipleimage1.jpg', 'name': 'test_multipleimage1.jpg', 'mediaType': ''},
+                {'content': '/media/test_multipleimage2.jpg', 'name': 'test_multipleimage2.jpg', 'mediaType': ''}
+            ]
+        )
+        # test 'fields_custom_handlers_mapping'. Return result custom handler
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_binfile'],
+            'bin file handled'
+        )
+        obj_with_valid_fields.delete()
+
+        obj_with_invalid_namedbinfile = ModelWithBinaryFiles.objects.create(
+            some_namedbinfile='\'',
+        )
+        obj_with_invalid_namedbinfile.related_model.add(related_model)
+
+        results = self.bulk([
+            {'method': 'get', 'path': ['test_json_file_image_fields_model', related_model.id]},
+        ])
+        self.assertEqual(
+            results[0]['data']['some_related_field'][0]['some_namedbinfile'],
+            {'content': None, 'mediaType': None, 'name': None}
+        )
 
     def test_contenttype_nested_views(self):
         bulk_data = [

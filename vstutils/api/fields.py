@@ -1,13 +1,14 @@
 """
 Additional serializer fields for generating OpenAPI and GUI.
 """
-
+import logging
 import typing as _t
 import copy
 import json
 import functools
 import base64
 
+import orjson
 from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer
 from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
@@ -17,9 +18,11 @@ from django.utils.functional import SimpleLazyObject, lazy
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from ..models import fields as vst_model_fields
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
 
 DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
+DEFAULT_NAMED_FILE_DATA = {"name": None, "content": None, 'mediaType': None}
 
 
 class VSTCharField(CharField):
@@ -585,7 +588,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
             if key not in data:
                 self.fail('missing key', missing_key=key)
 
-    @raise_context_decorator_with_default(default={"name": None, "content": None, 'mediaType': None})
+    @raise_context_decorator_with_default(default=DEFAULT_NAMED_FILE_DATA)
     def to_representation(self, value) -> _t.Dict[_t.Text, _t.Optional[_t.Any]]:
         if self.file:
             return {'content': value.url, 'name': value.name, 'mediaType': ''}
@@ -702,6 +705,18 @@ class PasswordField(CharField):
         super(PasswordField, self).__init__(*args, **kwargs)
 
 
+def _handle_related_value_decorator(func):
+    def wrapper(self, value, default, *args, **kwargs):
+        if not value:
+            return default
+        try:
+            return func(self, value, default, *args, **kwargs)
+        except Exception as err:
+            logging.error(err)
+            return default
+    return wrapper
+
+
 class RelatedListField(VSTCharField):
     """
     Extends class 'vstutils.api.fields.VSTCharField'. With this field you can output reverse ForeignKey relation
@@ -715,11 +730,15 @@ class RelatedListField(VSTCharField):
     :type fields: list[str], tuple[str]
     :param view_type: Determines how field should be shown on frontend. Must be either 'list' or 'table'.
     :type view_type: str
+    :param fields_custom_handlers_mapping: includes custom handlers, where key: field_name, value: callable_obj that
+                                           takes params: instance[dict], fields_mapping[dict], model, field_name[str]
+    :type fields_custom_handlers_mapping: dict
     """
 
     def __init__(self, related_name: _t.Text, fields: _t.Union[_t.Tuple, _t.List], view_type: str = 'list', **kwargs):
         kwargs['read_only'] = True
         kwargs['source'] = "*"
+        self.fields_custom_handlers_mapping = kwargs.pop('fields_custom_handlers', {})
         super().__init__(**kwargs)
         # fields for 'values' in qs
         assert isinstance(fields, (tuple, list)), "fields must be list or tuple"
@@ -729,9 +748,79 @@ class RelatedListField(VSTCharField):
         self.related_name = related_name
         self.view_type = view_type
 
+    @_handle_related_value_decorator
+    def _handle_named_bin_text(self, value, default):
+        return orjson.loads(value)
+
+    @_handle_related_value_decorator
+    def _handle_file_or_image_field(self, value, default, field):
+        return {
+            "content": field.storage.url(value),
+            "name": value,
+            'mediaType': '',
+        }
+
+    @_handle_related_value_decorator
+    def _handle_files_or_images_field(self, list_values, default, field):
+        return [
+            self._handle_file_or_image_field(value, DEFAULT_NAMED_FILE_DATA, field)
+            for value in list_values
+        ]
+
+    def handle_values_item_iteration(self, instance, fields_mapping, field_name, value, full_field_name=None):
+        full_field_name = full_field_name or field_name
+        field = fields_mapping.get(field_name, None)
+
+        if '__' in field_name:
+            parent_field_name, child_field_name = field_name.split('__', maxsplit=1)
+            field = fields_mapping.get(parent_field_name, None)
+
+            if isinstance(field, models.ForeignKey):
+                self.handle_values_item_iteration(
+                    instance,
+                    self.get_model_fields_mapping(field.related_model),
+                    child_field_name,
+                    value,
+                    full_field_name
+                )
+        elif isinstance(field, vst_model_fields.NamedBinaryFileInJSONField):
+            instance[full_field_name] = self._handle_named_bin_text(value, DEFAULT_NAMED_FILE_DATA)
+
+        elif isinstance(field, vst_model_fields.MultipleNamedBinaryFileInJSONField):
+            instance[full_field_name] = self._handle_named_bin_text(value, [])
+
+        elif isinstance(field, vst_model_fields.MultipleFileMixin):
+            instance[full_field_name] = self._handle_files_or_images_field(value, [], fields_mapping[field_name])
+
+        elif isinstance(field, vst_model_fields.FileField):
+            instance[full_field_name] = self._handle_file_or_image_field(
+                value,
+                DEFAULT_NAMED_FILE_DATA,
+                fields_mapping[field_name],
+            )
+
+    def handle_values_item(self, instance, fields_mapping, model):
+        for field_name, value in instance.items():
+            if field_name in self.fields_custom_handlers_mapping:
+                self.fields_custom_handlers_mapping[field_name](self, instance, fields_mapping, model, field_name)
+            else:
+                self.handle_values_item_iteration(instance, fields_mapping, field_name, value)
+
+        return instance
+
+    def get_model_fields_mapping(self, model):
+        return {f.name: f for f in model._meta.fields}
+
     def to_representation(self, value: _t.Type[models.Model]) -> _t.Tuple[_t.Dict]:  # type: ignore[override]
+        queryset = getattr(value, self.related_name).all()
+
+        handler = functools.partial(
+            self.handle_values_item,
+            fields_mapping=self.get_model_fields_mapping(queryset.model),
+            model=value,
+        )
         # get related mapping with id and name of instances
-        return lazy(lambda: tuple(getattr(value, self.related_name).values(*self.fields)), tuple)()
+        return lazy(lambda: tuple(map(handler, getattr(value, self.related_name).values(*self.fields))), tuple)()
 
 
 class RatingField(FloatField):
