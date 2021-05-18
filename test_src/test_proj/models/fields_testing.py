@@ -17,6 +17,7 @@ class UpdateAuthorSerializer(VSTSerializer):
 class Author(BModel):
     name = models.CharField(max_length=256)
     registerDate = models.DateTimeField(default=timezone.now)
+    image = models.ImageField(null=True, blank=True)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )

@@ -1,5 +1,7 @@
 from django_filters import CharFilter
 from django.db import models
+
+from vstutils.api.fields import RelatedListField
 from vstutils.models import BModel
 from vstutils.api import fields, filter_backends
 from vstutils.models.fields import (
@@ -11,6 +13,10 @@ from vstutils.models.fields import (
 )
 from .hosts import Host
 from ..validators import image_res_validator
+
+
+def bin_file_handler(self, instance, fields_mapping, model, field_name):
+    instance[field_name] = 'bin file handled'
 
 
 class EmptyFilterBackend(filter_backends.VSTFilterBackend):
@@ -57,11 +63,13 @@ class ModelWithBinaryFiles(BModel):
     some_imagefield = models.ImageField(null=True, blank=True)
     some_FkModelfield = FkModelField('test_proj.Author', null=True, blank=True, on_delete=models.CASCADE)
     some_multiplefile = MultipleFileField(blank=True)
-    some_multipleimage = MultipleImageField(blank=True, default='')
+    some_multipleimage = MultipleImageField(blank=True,  default='')
+    related_model = models.ManyToManyField('ModelForCheckFileAndImageField', related_name='rel_models')
     some_multiplefile_none = MultipleFileField(blank=True, default=None, null=True)
 
     class Meta:
         _view_field_name = 'some_namedbinfile'
+        default_related_name = 'rel_model'
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(
@@ -75,6 +83,46 @@ class ModelWithBinaryFiles(BModel):
         )
         _filterset_fields = {
             'some_binfile': CharFilter(label='Some label for binfile')
+        }
+
+
+class ModelForCheckFileAndImageField(BModel):
+    some_image_field = models.ImageField(default='')
+    some_file_field = models.FileField(default='')
+    some_multiple_image_field = MultipleImageField(default='')
+    some_multiple_file_field = MultipleFileField(default='')
+    some_json_field = models.JSONField()
+
+    class Meta:
+        _list_fields = [
+            'some_image_field',
+            'some_file_field',
+            'some_multiple_image_field',
+            'some_multiple_file_field',
+            'some_json_field',
+        ]
+        _detail_fields = [
+            'some_related_field',
+        ]
+        _override_detail_fields = {
+            'some_related_field': RelatedListField(
+                related_name='rel_models',
+                fields=[
+                    'some_binfile',
+                    'some_namedbinfile',
+                    'some_namedbinimage',
+                    'some_multiplenamedbinfile',
+                    'some_multiplenamedbinimage',
+                    'some_filefield',
+                    'some_imagefield',
+                    'some_multiplefile',
+                    'some_multipleimage',
+                    'some_FkModelfield__image',
+                ],
+                fields_custom_handlers={
+                    'some_binfile': bin_file_handler
+                }
+            )
         }
 
 

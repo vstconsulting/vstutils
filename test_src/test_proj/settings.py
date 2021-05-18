@@ -12,6 +12,10 @@ HEALTH_BACKEND_CLASS = 'test_proj.health.TestDefaultBackend'
 API['v2'] = {}
 API['v3'] = {}
 API['v4'] = {}
+
+API[VST_API_VERSION][r'test_json_file_image_fields_model'] = dict(
+    model='test_proj.models.ModelForCheckFileAndImageField'
+)
 API[VST_API_VERSION][r'deep_nested_model'] = dict(
     model='test_proj.models.DeepNestedModel'
 )
