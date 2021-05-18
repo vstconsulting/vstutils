@@ -5,7 +5,7 @@ def multikeysort(items, columns, reverse=False):
     if not isinstance(items, list):
         items = list(items)  # nocv
     if not isinstance(columns, list):
-        columns = list(columns)
+        columns = list(columns)  # nocv
     columns.reverse()
 
     for column in columns:

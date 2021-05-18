@@ -37,6 +37,9 @@ class CustomModelIterable(ModelIterable):
     def values_handler(self, unit: _t.Dict) -> _t.Dict:
         ...
 
+    def construct_instance(self, data: _t.Dict, model: _t.Type[BaseModel]) -> BaseModel:
+        ...
+
     def __iter__(self) -> _t.Iterator[BaseModel]:
         ...
 

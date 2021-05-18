@@ -1,5 +1,6 @@
 # pylint: disable=unused-import
 from copy import deepcopy
+from functools import partial
 
 from yaml import load
 try:
@@ -103,6 +104,10 @@ class Query(dict):
     def add_ordering(self, *ordering):
         self['ordering'] = ordering
 
+    @property
+    def order_by(self):
+        return self.get('ordering', ())
+
 
 class CustomModelIterable(ModelIterable):
     __slots__ = ()
@@ -111,6 +116,9 @@ class CustomModelIterable(ModelIterable):
         # pylint: disable=no-member
         return {f: unit.get(f) for f in self.fields}  # nocv
 
+    def construct_instance(self, data, model):
+        return model(**data)
+
     def __iter__(self):
         # pylint: disable=protected-access
         queryset = self.queryset
@@ -118,15 +126,23 @@ class CustomModelIterable(ModelIterable):
         query = queryset.query
         model_data = model._get_data(chunked_fetch=self.chunked_fetch)
         model_data = list(filter(query.check_in_query, model_data))
-        ordering = query.get('ordering', [])
+        ordering = query.order_by
         if ordering:
-            model_data = multikeysort(model_data, ordering, not query.standard_ordering)
+            ordering = list(ordering)
+            for idx, value in enumerate(ordering):
+                if value in ('pk', '-pk'):
+                    ordering[idx] = value.replace('pk', model._meta.pk.name)
+            model_data = multikeysort(
+                model_data,
+                ordering,
+                not query.standard_ordering
+            )
         elif not query.standard_ordering:
             model_data.reverse()
         low = query.get('low_mark', 0)
         high = query.get('high_mark', len(model_data))
         fields = getattr(self, 'fields', None)
-        handler = (lambda d: model(**d)) if not fields else self.values_handler
+        handler = partial(self.construct_instance, model=model) if not fields else self.values_handler
         for data in model_data[low:high]:
             yield handler(data)
 

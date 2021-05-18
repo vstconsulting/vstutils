@@ -3189,7 +3189,7 @@ class ProjectTestCase(BaseTestCase):
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):
         qs = File.objects.filter(name__in=['ToFilter', 'ToExclude'])
-        qs = qs.exclude(name='ToExclude', invalid='incorrect').order_by('for_order1', '-for_order2').reverse()
+        qs = qs.exclude(name='ToExclude', invalid='incorrect').order_by('for_order1', '-for_order2', 'pk').reverse()
 
         self.assertEqual(qs.count(), 5)
         self.assertEqual(qs.exists(), True)

@@ -350,7 +350,8 @@ export default class QuerySet {
     async update(updatedInstance, instances, method = HttpMethods.PATCH, fields = null) {
         if (instances === undefined) instances = await this.items();
 
-        const modelUpdate = this.getRequestModelClass(RequestTypes.PARTIAL_UPDATE);
+        const requestType = method === HttpMethods.PATCH ? RequestTypes.PARTIAL_UPDATE : RequestTypes.UPDATE;
+        const modelUpdate = this.getRequestModelClass(requestType);
         const modelRetrieve = this.getResponseModelClass(RequestTypes.RETRIEVE);
 
         WrongModelError.checkModel(modelUpdate, updatedInstance);
