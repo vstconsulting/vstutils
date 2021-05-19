@@ -61,12 +61,17 @@ export default class ViewConstructor {
      * It gets operation_id options from openapi_dictionary and sets them.
      * @param {string} operationId  Operation_id value.
      * @param {string} path Key of path object, from OpenApi's path dict.
+     * @param {string} method Http method
      */
-    getOperationOptions(operationId, path) {
+    getOperationOptions(operationId, path, method) {
         const opt = { operationId };
-        const operationOptions = this.dictionary.schema_types[
+        let operationOptions = this.dictionary.schema_types[
             Object.keys(this.dictionary.schema_types).find((suffix) => operationId.endsWith(suffix))
         ];
+
+        if (!operationOptions && method === HttpMethods.GET) {
+            operationOptions = this.dictionary.schema_types['_get'];
+        }
 
         if (operationOptions) {
             mergeDeep(opt, operationOptions);
@@ -161,7 +166,7 @@ export default class ViewConstructor {
                     { method: httpMethod, requestModel, responseModel },
                     commonOptions,
                     operationSchema,
-                    this.getOperationOptions(operationId, path),
+                    this.getOperationOptions(operationId, path, httpMethod),
                 );
 
                 if (operationOptions['x-label']) operationOptions.title = operationOptions['x-label'];
