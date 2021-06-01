@@ -1349,15 +1349,18 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual('multiplenamedbinimage', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multipleimage']['format'])
 
         # Check deep nested view
-        self.assertTrue(
-            list(filter(
+        def has_deep_parent_filter(params):
+            return any(filter(
                 lambda x: x['name'] == '__deep_parent' and x['in'] == 'query' and x['type'] == 'integer',
-                api['paths']['/deep_nested_model/']['get']['parameters']
+                params,
             ))
-        )
+        self.assertTrue(has_deep_parent_filter(api['paths']['/deep_nested_model/']['get']['parameters']))
         self.assertEqual(api['paths']['/deep_nested_model/']['get']['x-deep-nested-view'], 'deepnested')
         self.assertEqual(api['paths']['/deep_nested_model/{id}/']['get']['x-deep-nested-view'], 'deepnested')
         self.assertTrue(api['paths']['/deep_nested_model/{id}/deepnested/']['post']['x-allow-append'])
+
+        self.assertTrue(has_deep_parent_filter(api['paths']['/readonly_deep_nested_model/']['get']['parameters']))
+        self.assertNotIn('/readonly_deep_nested_model/{id}/readonly_deepnested/', api['paths'])
 
         # Check fields excludes from the filterset
         path = api['paths']['/test_json_file_image_fields_model/']['get']

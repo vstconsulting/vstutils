@@ -5,6 +5,7 @@ from .some import (
     OverridenModelWithBinaryFiles,
     ModelForCheckFileAndImageField,
     DeepNestedModel,
+    ReadonlyDeepNestedModel,
 )
 from .files import File, List, ListOfFiles
 from .contented import VarBasedModel, Variable, VariableType

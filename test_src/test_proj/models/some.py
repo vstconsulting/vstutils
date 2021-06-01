@@ -166,3 +166,15 @@ class DeepNestedModel(BModel):
         default_related_name = 'deepnested'
         _detail_fields = _list_fields = ('id', 'name', 'parent')
         _filter_backends = (EmptyFilterBackend,)
+
+
+class ReadonlyDeepNestedModel(BModel):
+    name = models.CharField(max_length=10)
+    parent = models.ForeignKey('self', null=True, default=None, on_delete=models.CASCADE)
+
+    deep_parent_field = 'parent'
+
+    class Meta:
+        default_related_name = 'readonly_deepnested'
+        _filter_backends = (EmptyFilterBackend,)
+        _view_class = 'read_only'
