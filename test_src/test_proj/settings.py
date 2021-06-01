@@ -19,6 +19,9 @@ API[VST_API_VERSION][r'test_json_file_image_fields_model'] = dict(
 API[VST_API_VERSION][r'deep_nested_model'] = dict(
     model='test_proj.models.DeepNestedModel'
 )
+API[VST_API_VERSION][r'readonly_deep_nested_model'] = dict(
+    model='test_proj.models.ReadonlyDeepNestedModel'
+)
 API[VST_API_VERSION][r'author'] = dict(
     model='test_proj.models.Author'
 )

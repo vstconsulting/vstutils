@@ -8,6 +8,7 @@ from django.db.models.base import ModelBase
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
 from django.utils.functional import SimpleLazyObject, lazy
 from rest_framework.fields import ModelField, JSONField
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 
 from ..api.fields import (
     NamedBinaryFileInJsonField,
@@ -44,6 +45,11 @@ EXCLUDED_FIELDS = (
     MultipleNamedBinaryImageInJsonField,
     ModelField,
     JSONField,
+)
+CHANGE_MIXINS = (
+    CreateModelMixin,
+    UpdateModelMixin,
+    DestroyModelMixin
 )
 
 default_extra_metadata: dict = {
@@ -480,7 +486,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             *map(_import_class_if_string, getattr(cls, 'generated_view_decorators', []))
         )(ApplyNestedDecorators(metadata['nested'] or {})(generated_view))
 
-        if hasattr(cls, 'deep_parent_field'):
+        if hasattr(cls, 'deep_parent_field') and issubclass(generated_view, CHANGE_MIXINS):
             remote_name: str = cls.get_model_fields_mapping()[cls.deep_parent_field].remote_field.related_name
             parent_view = type(
                 f'Parent{cls.__name__}ViewSet',
