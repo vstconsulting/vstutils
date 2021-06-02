@@ -62,28 +62,31 @@ class Command(BaseCommand):
 
         success = False
         error = 'Unknown error.'
-        for i in range(options.get('attempts', 60)):
-            try:
-                with Lock(
-                    self._settings('DOCKERRUN_MIGRATE_LOCK_ID'),
-                    1,
-                    self._settings('DOCKERRUN_MIGRATE_LOCK_TIMEOUT'),
-                    'Migration process still locked by another application process.',
-                ) as lock:  # noqa: F841, pylint:disable=unused-variable
-                    logger.info(f'Migration locked by key: `{lock.id}`')
-                    check_call(
-                        [sys.executable, '-m', project_name, 'migrate'],
-                        env=env, bufsize=0, universal_newlines=True,
-                    )
-                    logger.info(f'Unlocking migration by key: `{lock.id}`')
-            except:
-                error = traceback.format_exc()
-                logger.debug(f'Migration attempt {i} failed: {sys.exc_info()[1]}')
-                self._print(f"Retry #{i}...", 'WARNING')
-                time.sleep(options.get('attempts_timeout', 1))
-            else:
-                success = True
-                break
+        if not config['docker'].getboolean('migration', fallback=True):
+            success = True  # nocv
+        else:
+            for i in range(options.get('attempts', 60)):
+                try:
+                    with Lock(
+                        self._settings('DOCKERRUN_MIGRATE_LOCK_ID'),
+                        1,
+                        self._settings('DOCKERRUN_MIGRATE_LOCK_TIMEOUT'),
+                        'Migration process still locked by another application process.',
+                    ) as lock:  # noqa: F841, pylint:disable=unused-variable
+                        logger.info(f'Migration locked by key: `{lock.id}`')
+                        check_call(
+                            [sys.executable, '-m', project_name, 'migrate'],
+                            env=env, bufsize=0, universal_newlines=True,
+                        )
+                        logger.info(f'Unlocking migration by key: `{lock.id}`')
+                except:
+                    error = traceback.format_exc()
+                    logger.debug(f'Migration attempt {i} failed: {sys.exc_info()[1]}')
+                    self._print(f"Retry #{i}...", 'WARNING')
+                    time.sleep(options.get('attempts_timeout', 1))
+                else:
+                    success = True
+                    break
         if success:
             try:
                 check_call(

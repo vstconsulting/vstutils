@@ -1,11 +1,31 @@
-import $ from 'jquery';
 import { BaseField } from '../base';
 import DynamicFieldMixin from './DynamicFieldMixin.vue';
+import { mapObjectValues, registerHook } from '../../utils';
 
 /**
  * Dynamic guiField class.
  */
 class DynamicField extends BaseField {
+    constructor(options) {
+        super(options);
+        this.usedOnViews = [];
+        registerHook('app.beforeInit', this.resolveTypes.bind(this));
+    }
+
+    resolveTypes() {
+        /** @type {Object<string, BaseField>} */
+        this.types = this.props.types
+            ? mapObjectValues(this.props.types, (field) => this.constructor.app.getField(this.name, field))
+            : null;
+        if (this.types)
+            for (const path of this.usedOnViews)
+                for (const field of Object.values(this.types)) field.prepareFieldForView(path);
+    }
+
+    prepareFieldForView(path) {
+        this.usedOnViews.push(path);
+    }
+
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
@@ -33,19 +53,26 @@ class DynamicField extends BaseField {
     validateValue(data = {}) {
         return this.getRealField(data).validateValue(data);
     }
-    /**
-     * Redefinition of base guiField method _insertTestValue.
-     */
-    _insertTestValue(data = {}) {
-        let real_field = this.getRealField(data);
-        /**
-         * Timeout is needed for adding some async,
-         * because without it adding of test values is too quick
-         * and vue component of dynamic field cleans inserted value.
-         */
-        setTimeout(() => {
-            real_field._insertTestValue(data);
-        }, 20);
+    afterInstancesFetched(instances, queryset) {
+        /** @type {Map<BaseField, Model[]>} */
+        const fields = new Map();
+
+        for (const instance of instances) {
+            const realField = this.getRealField(instance._data);
+            const sameField = Array.from(fields.keys()).find((field) => realField.isEqual(field));
+
+            if (sameField) {
+                fields.get(sameField).push(instance);
+            } else {
+                fields.set(realField, [instance]);
+            }
+        }
+
+        return Promise.all(
+            Array.from(fields.entries()).map(([field, instances]) =>
+                field.afterInstancesFetched(instances, queryset),
+            ),
+        );
     }
     /**
      * Method, that returns Array with names of parent fields -
@@ -61,16 +88,6 @@ class DynamicField extends BaseField {
         }
 
         return [p_f];
-    }
-    /**
-     * Method, that returns Object, that stores pairs (key, value):
-     *  - key - name of parent field;
-     *  - value - new format of current field.
-     * @private
-     * @return {object}
-     */
-    _getParentTypes() {
-        return this.options.additionalProperties.types || {};
     }
     /**
      * Method, that returns Object, that stores arrays with choices values.
@@ -97,6 +114,12 @@ class DynamicField extends BaseField {
 
         return parent_values;
     }
+    _getCurrentPath() {
+        return (
+            this.constructor.app.application.$refs.currentViewComponent?.view?.path ||
+            this.constructor.app.application.$route.name
+        );
+    }
     /**
      * Method, that returns real field instance - some guiField instance of format,
      * that current field should have in current moment.
@@ -105,68 +128,58 @@ class DynamicField extends BaseField {
      * For example, from the same Model Instance.
      */
     getRealField(data = {}) {
-        let parent_values = this._getParentValues(data);
-        let parent_types = this._getParentTypes();
-        let parent_choices = this._getParentChoices();
-        let opt = {
-            format: undefined,
-        };
+        const parentValues = this._getParentValues(data);
 
-        for (let key in parent_values) {
-            if (Object.prototype.hasOwnProperty.call(parent_values, key)) {
-                let item = parent_types[parent_values[key]];
-                if (item !== undefined) {
-                    opt.format = item;
+        const field =
+            this._getFromTypes(parentValues) ||
+            this._getFromCallback(parentValues) ||
+            this._getFromChoices(parentValues) ||
+            this._getDefault();
+
+        field.prepareFieldForView(this._getCurrentPath());
+
+        return field;
+    }
+
+    _getFromTypes(parentValues) {
+        if (this.types) {
+            for (const key of Object.values(parentValues)) {
+                const field = this.types[key];
+                if (field) return field;
+            }
+        }
+    }
+
+    _getFromChoices(parentValues) {
+        const parentChoices = this._getParentChoices();
+        for (const key in parentValues) {
+            if (Object.prototype.hasOwnProperty.call(parentValues, key)) {
+                const item = parentChoices[parentValues[key]];
+                if (Array.isArray(item)) {
+                    const isBoolean = item.some((val) => typeof val === 'boolean');
+                    return this.constructor.app.getField(
+                        this.name,
+                        isBoolean ? 'boolean' : { format: 'choices', enum: item },
+                    );
                 }
             }
         }
+    }
 
-        for (let key in parent_values) {
-            if (Object.prototype.hasOwnProperty.call(parent_values, key)) {
-                let item = parent_choices[parent_values[key]];
-                if (item !== undefined && Array.isArray(item)) {
-                    let bool_values = item.some((val) => {
-                        if (typeof val == 'boolean') {
-                            return val;
-                        }
-                    });
-
-                    if (bool_values) {
-                        opt.format = 'boolean';
-                    } else {
-                        opt.enum = item;
-                        opt.format = 'choices';
-                    }
-                }
+    _getFromCallback(parentValues) {
+        if (this.props.callback) {
+            const callbackResult = this.options.additionalProperties.callback(parentValues);
+            if (callbackResult instanceof BaseField) {
+                return callbackResult;
+            } else if (typeof callbackResult === 'object') {
+                return this.constructor.app.getField(this.name, callbackResult);
             }
         }
+    }
 
-        for (let key in this.options) {
-            if (Object.prototype.hasOwnProperty.call(this.options, key)) {
-                if (['format', 'additionalProperties'].includes(key)) {
-                    continue;
-                }
-
-                opt[key] = this.options[key];
-            }
-        }
-
-        let callback_opt = {};
-
-        if (this.options.additionalProperties.callback) {
-            callback_opt = this.options.additionalProperties.callback(parent_values);
-        }
-
-        opt = $.extend(true, opt, callback_opt);
-
-        if (!window.spa.fields.guiFields[opt.format]) {
-            opt.format = 'string';
-        }
-
-        let realField = new window.spa.fields.guiFields[opt.format](opt);
-        realField.prepareFieldForView();
-
-        return realField;
+    _getDefault() {
+        console.warn(`Default field is used for ${this.model?.name}#${this.name}`);
+        return this.constructor.app.getField(this.name, 'string');
     }
 }
 

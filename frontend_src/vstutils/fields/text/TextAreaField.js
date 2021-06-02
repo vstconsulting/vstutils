@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { BaseField } from '../base';
 import TextAreaFieldMixin from './TextAreaFieldMixin.js';
 
@@ -6,14 +5,6 @@ import TextAreaFieldMixin from './TextAreaFieldMixin.js';
  * Textarea guiField class.
  */
 class TextAreaField extends BaseField {
-    /**
-     * Redefinition of base guiField method '_insertTestValue_getElement'.
-     * @private
-     */
-    _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name + ' textarea';
-        return $(selector)[0];
-    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */

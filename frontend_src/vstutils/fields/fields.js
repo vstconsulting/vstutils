@@ -21,10 +21,14 @@ import * as text from './text';
 import { mapToObjectProxy } from '../utils';
 import { RelatedListField } from './related-list';
 import { QRCodeField } from './qr.js';
+import { NestedObjectField } from './nested-object.js';
+import { ArrayField } from './array.js';
+import { StaticValueField } from './static-value.js';
 
 const globalFields = new Map([
     // ['api_data', APIDataField],
     ['api_object', APIObjectField],
+    ['array', ArrayField],
     ['autocomplete', AutocompleteField],
     ['binfile', files.binaryFile.BinaryFileField],
     ['boolean', BooleanField],
@@ -53,6 +57,7 @@ const globalFields = new Map([
     ['multiselect', MultiselectField],
     ['namedbinfile', files.namedBinaryFile.NamedBinaryFileField],
     ['namedbinimage', files.namedBinaryImage.NamedBinaryImageField],
+    ['nested-object', NestedObjectField],
     ['number', numbers.NumberField],
     ['password', PasswordField],
     ['plain_text', text.PlainTextField],
@@ -60,6 +65,7 @@ const globalFields = new Map([
     ['rating', numbers.rating.RatingField],
     ['related_list', RelatedListField],
     ['secretfile', files.secretFile.SecretFileField], // DOES_NOTHING_ON_FRONTEND
+    ['static_value', StaticValueField],
     ['string', text.StringField],
     ['string_array', text.StringArrayField], // CANT_CREATE_ON_BACKEND
     ['string_id', text.StringIDField], // CANT_CREATE_ON_BACKEND

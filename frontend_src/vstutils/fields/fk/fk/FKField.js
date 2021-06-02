@@ -1,42 +1,45 @@
-import $ from 'jquery';
 import { BaseField } from '../../base';
 import FKFieldMixin from './FKFieldMixin.js';
 import { AggregatedQueriesExecutor } from '../../../AggregatedQueriesExecutor.js';
-import { formatPath, getDependenceValueAsString, RequestTypes } from '../../../utils';
+import {
+    formatPath,
+    getDependenceValueAsString,
+    hasOwnProp,
+    registerHook,
+    RequestTypes,
+} from '../../../utils';
 
-/**
- * FK guiField class.
- */
 class FKField extends BaseField {
     constructor(options) {
         super(options);
-        const props = options.additionalProperties;
+        this.valueField = this.props.value_field;
+        this.viewField = this.props.view_field;
+        this.usePrefetch = this.props.usePrefetch;
+        this.makeLink = this.props.makeLink;
+        this.dependence = this.props.dependence || {};
+        this.filters = this.props.filters || null;
+        this.filterName = this.props.filter_name || this.valueField;
+        this.filterFieldName = this.props.filter_field_name || this.valueField;
 
-        this.fkModelSchema = props.model;
-        this.valueField = props.value_field;
-        this.viewField = props.view_field;
-        this.usePrefetch = props.usePrefetch;
-        this.makeLink = props.makeLink;
-        this.dependence = props.dependence || {};
-        this.filters = props.filters || null;
-
-        if (Object.prototype.hasOwnProperty.call(props, 'fetchData')) {
-            this.fetchData = props.fetchData;
+        if (hasOwnProp(this.props, 'fetchData')) {
+            this.fetchData = this.props.fetchData;
         } else {
             this.fetchData = this.viewField !== this.valueField;
         }
 
-        if (props.querysets instanceof Map) {
-            this.querysets = props.querysets;
+        if (this.props.querysets instanceof Map) {
+            this.querysets = this.props.querysets;
         } else {
-            this.querysets = new Map(Object.entries(props.querysets || {}));
+            this.querysets = new Map(Object.entries(this.props.querysets || {}));
         }
 
-        /**
-         * Property will be set in prepareField.
-         * @type {Function}
-         */
-        this.fkModel = null;
+        if (!this.fkModel && this.props.model) {
+            registerHook('app.beforeInit', this.resolveModel.bind(this));
+        }
+    }
+
+    resolveModel() {
+        this.fkModel = this.constructor.app.modelsResolver.bySchemaObject(this.props.model);
     }
 
     static get mixins() {
@@ -51,15 +54,23 @@ class FKField extends BaseField {
         return this.getValueFieldValue(super.toInner(data));
     }
 
-    prepareFieldForView(path) {
-        if (this.fkModelSchema && !this.fkModel) {
-            this.fkModel = this.constructor.app.modelsResolver.bySchemaObject(this.fkModelSchema);
+    isSameValues(data1, data2) {
+        let val1 = this.toInner(data1);
+        if (val1 && typeof val1 === 'object') {
+            val1 = val1[this.valueField];
         }
+        let val2 = this.toInner(data2);
+        if (val2 && typeof val2 === 'object') {
+            val2 = val2[this.valueField];
+        }
+        return val1 === val2;
+    }
 
+    prepareFieldForView(path) {
         if (this.querysets.has(path)) return;
 
         let querysets;
-        const { list_paths } = this.options.additionalProperties;
+        const { list_paths } = this.props;
 
         if (list_paths) {
             querysets = list_paths.map((listPath) => app.views.get(listPath).objects.clone());
@@ -81,24 +92,34 @@ class FKField extends BaseField {
         return queryset.clone({ url: formatPath(queryset.url, params) });
     }
 
-    async afterInstancesFetched(instances, qs) {
+    async afterInstancesFetched(instances) {
         if (this.usePrefetch && this.fetchData) {
-            return this.prefetchValues(instances, qs.originalUrl);
+            const path =
+                this.constructor.app.application.$refs.currentViewComponent?.view?.path ||
+                this.constructor.app.application.$route.name;
+            return this.prefetchValues(instances, path);
         }
     }
 
-    prefetchValues(instances, instancesUrl) {
+    prefetchValues(instances, path) {
         const executor = new AggregatedQueriesExecutor(
-            this.getAppropriateQuerySet({ path: instancesUrl }),
-            this.valueField,
+            this.getAppropriateQuerySet({ path }),
+            this.filterName,
+            this.filterFieldName,
         );
+        const promises = [];
         for (const instance of instances) {
             const pk = instance._data[this.name];
             if (pk) {
-                executor.query(pk).then((relatedInstance) => (instance._data[this.name] = relatedInstance));
+                promises.push(
+                    executor
+                        .query(pk)
+                        .then((relatedInstance) => (instance._data[this.name] = relatedInstance)),
+                );
             }
         }
-        return executor.execute();
+        executor.execute();
+        return Promise.allSettled(promises);
     }
 
     /**
@@ -164,44 +185,6 @@ class FKField extends BaseField {
         return this._formatQuerysets(
             this.querysets.get(path) || this.querysets.get(undefined) || [this.getFirstLevelQs()],
         );
-    }
-
-    /**
-     * Redefinition of '_insertTestValue' method of base guiField.
-     */
-    _insertTestValue(data = {}) {
-        let val = data[this.options.name];
-        let value = undefined;
-        let format = this.options.format || this.options.type;
-        let el = this._insertTestValue_getElement(format);
-
-        if (val && val.prefetch_value && val.value) {
-            value = val;
-        } else {
-            value = {
-                value: value,
-                prefetch_value: value,
-            };
-        }
-
-        let newOption = new Option(value.prefetch_value, value.value, false, false);
-        $(el).append(newOption);
-
-        this._insertTestValue_imitateEvent(el);
-    }
-    /**
-     * Redefinition of '_insertTestValue_getElement' method of base guiField.
-     */
-    _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name + ' select';
-        return $(selector)[0];
-    }
-
-    /**
-     * Redefinition of '_insertTestValue_imitateEvent' method of base guiField.
-     */
-    _insertTestValue_imitateEvent(el) {
-        el.dispatchEvent(new Event('change'));
     }
 }
 

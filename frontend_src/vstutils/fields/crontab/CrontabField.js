@@ -34,12 +34,6 @@ class CrontabField extends BaseField {
         return this._getValue(data);
     }
     /**
-     * Redefinition of base guiField method _insertTestValue_imitateEvent.
-     */
-    _insertTestValue_imitateEvent(el) {
-        el.dispatchEvent(new Event('blur'));
-    }
-    /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {

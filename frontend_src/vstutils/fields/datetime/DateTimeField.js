@@ -9,20 +9,19 @@ class DateTimeField extends BaseField {
     toInner(data) {
         const value = super.toInner(data);
         if (!value) return;
-        return moment.tz(value, window.app.api.getTimeZone()).format();
+        return moment.tz(value, moment.tz.guess()).tz(this.constructor.app.api.getTimeZone()).format();
     }
 
     toRepresent(data) {
         const value = super.toRepresent(data);
         if (!value) return;
-        const m = moment.tz(value, moment.tz.guess());
-        return m.format('YYYY-MM-DD') + 'T' + m.format('HH:mm');
+        return moment.tz(value, moment.tz.guess());
     }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
     static get mixins() {
-        return super.mixins.concat(DateTimeFieldMixin);
+        return [DateTimeFieldMixin];
     }
 }
 

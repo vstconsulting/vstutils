@@ -17,10 +17,8 @@
         inject: ['jsonMapper'],
         computed: {
             parsedValue() {
-                return JSON.parse(this.value);
+                return typeof this.value === 'string' ? JSON.parse(this.value) : this.value;
             },
         },
     };
 </script>
-
-<style scoped></style>

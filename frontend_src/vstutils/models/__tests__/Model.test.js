@@ -210,4 +210,13 @@ describe('Model', () => {
 
         expect(updateModel.getPkValue()).toBe(1);
     });
+
+    test('isEqual', () => {
+        const user1 = new AbstractUser({ email: 'user1@users.com' });
+        expect(user1.isEqual(new AbstractUser({ email: 'user1@users.com' }))).toBeTruthy();
+        expect(user1.isEqual(new User({ email: 'user1@users.com' }))).toBeFalsy();
+
+        expect(user1.isEqual({ email: 'user1@users.com' })).toBeTruthy();
+        expect(user1.isEqual({ email: 'otheruser@users.com' })).toBeFalsy();
+    });
 });

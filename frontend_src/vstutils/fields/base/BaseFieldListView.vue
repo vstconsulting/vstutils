@@ -1,5 +1,5 @@
 <template>
-    <span v-text="value" />
+    <span v-text="preparedValue" />
 </template>
 
 <script>
@@ -11,6 +11,11 @@
     export default {
         name: 'BaseFieldListView',
         mixins: [BaseFieldInnerComponentMixin],
+        computed: {
+            preparedValue() {
+                return this.value;
+            },
+        },
     };
 </script>
 

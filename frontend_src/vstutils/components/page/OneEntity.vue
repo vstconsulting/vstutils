@@ -31,7 +31,7 @@
         </div>
 
         <div class="row">
-            <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" />
+            <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
             <div
                 v-for="(fields, groupName) in fieldsGroups"
                 :key="groupName"
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             </div>
-            <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" />
+            <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" :page="self" />
         </div>
     </EntityView>
 </template>
@@ -80,6 +80,9 @@
             };
         },
         computed: {
+            self() {
+                return this;
+            },
             beforeFieldsGroupsComponent() {
                 return null;
             },
