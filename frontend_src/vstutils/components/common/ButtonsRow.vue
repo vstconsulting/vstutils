@@ -18,7 +18,7 @@
         </template>
 
         <!-- Sublinks -->
-        <template v-if="shouldGroupSublinks">
+        <template v-if="totalOperations > 2 && shouldGroupSublinks">
             <CompactOperations
                 v-if="groupedSublinks.length"
                 :title="$t('sublinks') | capitalize"
@@ -37,7 +37,7 @@
         </template>
 
         <!-- Actions -->
-        <template v-if="shouldGroupActions">
+        <template v-if="totalOperations > 2 && shouldGroupActions">
             <CompactOperations
                 v-if="groupedActions"
                 :title="$t('actions') | capitalize"
@@ -73,6 +73,9 @@
             sublinks: { type: Array, required: false, default: () => [] },
         },
         computed: {
+            totalOperations() {
+                return this.actions.length + this.sublinks.length;
+            },
             groupedActions() {
                 return this.actions.filter((action) => !action.doNotGroup);
             },

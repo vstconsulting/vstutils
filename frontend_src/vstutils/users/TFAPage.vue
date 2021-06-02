@@ -126,32 +126,23 @@
                 try {
                     this.commitMutation('validateAndSetInstanceData');
                 } catch (e) {
-                    window.app.error_handler.defineErrorAndShow(e);
+                    this.$app.error_handler.defineErrorAndShow(e);
                     return;
                 }
                 this.loading = true;
                 const instance = this.instance;
-                const name = instance.getViewFieldString() || instance.getPkValue() || '';
                 try {
                     await instance.update('put');
                     await this.fetchData();
                     this.loading = false;
                     this.isPageChanged = false;
-                    guiPopUp.success(
-                        this.$t(pop_up_msg.instance.success.save).format([name, this.view.name]),
-                    );
+                    guiPopUp.success(this.$t(pop_up_msg.instance.success.save, ['', 'TFA']));
                     this.openPage({ path: this.getRedirectUrl({ instance }) });
                 } catch (error) {
                     this.loading = false;
-                    let str = window.app.error_handler.errorToString(error);
-
-                    let srt_to_show = this.$t(pop_up_msg.instance.error.save).format([
-                        name,
-                        this.$t(this.view.name),
-                        str,
-                    ]);
-
-                    window.app.error_handler.showError(srt_to_show, str);
+                    let str = this.$app.error_handler.errorToString(error);
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.save, ['TFA', '', str]);
+                    this.$app.error_handler.showError(srt_to_show, str);
                 }
             },
             copyRecoveryCodes() {
@@ -167,7 +158,10 @@
     }
     .qr-code-container {
         margin: 0 auto;
-        width: 200px;
+        width: 270px;
+    }
+    .qr-code-container img {
+        width: 100%;
     }
     .recovery-codes {
         max-width: 533px;

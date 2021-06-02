@@ -1,5 +1,13 @@
 import $ from 'jquery';
-import { capitalize, HttpMethods, joinPaths, mergeDeep, pathToArray, RequestTypes, ViewTypes } from '../utils';
+import {
+    capitalize,
+    HttpMethods,
+    joinPaths,
+    mergeDeep,
+    pathToArray,
+    RequestTypes,
+    ViewTypes,
+} from '../utils';
 import signals from '../signals.js';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';

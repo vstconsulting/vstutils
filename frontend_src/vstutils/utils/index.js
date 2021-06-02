@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import moment from 'moment';
 import { LocalSettings } from './localSettings';
+import signals from '../signals.js';
 
 export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
@@ -171,7 +172,7 @@ export function saveHideMenuSettings() {
  * https://stackoverflow.com/a/25456134/7835270
  * @param {Object} x
  * @param {Object} y
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export function deepEqual(x, y) {
     if (x === y) {
@@ -1066,4 +1067,54 @@ export function pathToArray(path) {
 
 export function joinPaths(...paths) {
     return paths.reduce((value, path) => value + '/' + String(path).replace(/^\/|\/$/g, ''), '') + '/';
+}
+
+/**
+ * Function that checks if instances in two lists are the same
+ * @param {Model[]} a
+ * @param {Model[]} b
+ */
+export function isInstancesEqual(a, b) {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (!a[i].isEqual(b[i])) return false;
+    }
+    return true;
+}
+
+/**
+ * @param {Object} obj
+ * @param {Function} f
+ * @return {Object}
+ */
+export function mapObjectValues(obj, f) {
+    const newObj = {};
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            newObj[key] = f(obj[key], key);
+        }
+    }
+    return newObj;
+}
+
+const emittedSignals = new Map();
+
+/**
+ * Provided function will be guaranteed called after the given signal
+ * @param {string} signalName
+ * @param {Function} func
+ */
+export function registerHook(signalName, func) {
+    const isEmitted = emittedSignals.get(signalName);
+    if (isEmitted === undefined) {
+        emittedSignals.set(signalName, false);
+        signals.once(signalName, () => emittedSignals.set(signalName, true));
+        signals.once(signalName, func);
+    } else if (isEmitted) {
+        func();
+    } else if (!isEmitted) {
+        signals.once(signalName, func);
+    }
 }

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { mergeDeep, RequestTypes } from '../../utils';
+import { isInstancesEqual, mergeDeep, RequestTypes } from '../../utils';
 
 export const LIST_STORE_MODULE = {
     state: {
@@ -59,6 +59,9 @@ export const LIST_STORE_MODULE = {
             }
             state.data.pagination.pageNumber = Number(state.data.filters['page']) || 1;
         },
+        setInstancesCount(state, count) {
+            state.data.pagination.count = count;
+        },
     },
     actions: {
         toggleAllSelection({ getters, commit }) {
@@ -78,7 +81,12 @@ export const LIST_STORE_MODULE = {
         },
 
         async updateData({ commit, getters }) {
-            commit('setInstances', await getters.queryset.items());
+            const instances = await getters.queryset.items();
+            if (!isInstancesEqual(instances, getters.instances)) {
+                commit('setInstances', instances);
+            } else if (getters.pagination.count !== instances.extra.count) {
+                commit('setInstancesCount', instances.extra.count);
+            }
         },
     },
 };

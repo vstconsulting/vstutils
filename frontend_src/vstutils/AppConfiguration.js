@@ -45,6 +45,7 @@ export class AppConfiguration {
         if (!schema) {
             throw new TypeError('schema is required');
         }
+        this.schema = schema;
 
         this.isDebug = fallbackIfUndef(isDebug, window.isDebug);
         this.hostUrl = new URL(fallbackIfUndef(hostUrl, window.host_url));
@@ -55,7 +56,7 @@ export class AppConfiguration {
         this.fullUserVersion = fallbackIfUndef(fullUserVersion, window.gui_user_version);
         this.isSuperuser = fallbackIfUndef(isSuperuser, window.is_superuser);
         this.isStaff = fallbackIfUndef(isStaff, window.is_staff);
-        this.schema = schema;
+        this.staticPath = schema.info['x-settings'].static_path;
 
         this.urls = {
             login: schema.info['x-settings'].login_url,

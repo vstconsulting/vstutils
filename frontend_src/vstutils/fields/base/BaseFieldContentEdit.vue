@@ -11,7 +11,7 @@
             :required="attrs['required']"
             :style="styles"
             :type="inputType"
-            :value="value"
+            :value="preparedValue"
             @input="$emit('set-value', $event.target.value)"
         />
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
@@ -48,8 +48,9 @@
             hasDefaultValue() {
                 return this.field.default !== undefined;
             },
+            preparedValue() {
+                return this.value;
+            },
         },
     };
 </script>
-
-<style scoped></style>

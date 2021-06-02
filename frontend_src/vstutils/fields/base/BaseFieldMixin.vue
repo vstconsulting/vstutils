@@ -1,6 +1,6 @@
 <template>
     <div class="field-component" :class="wrapperClasses">
-        <field_list_view v-if="type === 'list'" :value="value" :field="field" />
+        <field_list_view v-if="type === 'list'" :value="value" :field="field" :data="data" />
         <template v-else>
             <FieldLabel :type="type" :value="value" :field="field" :data="data" />
             <field_content_readonly
@@ -65,7 +65,17 @@
         },
         computed: {
             wrapperClasses() {
-                return [`name-${this.field.name}`, `format-${this.field.format}`, `type-${this.type}`];
+                const classes = [
+                    `name-${this.field.name}`,
+                    `format-${this.field.format}`,
+                    `type-${this.type}`,
+                ];
+
+                if (this.field.model) {
+                    classes.push(`model-${this.field.model.name}`);
+                }
+
+                return classes;
             },
             value() {
                 return this.data[this.field.name];

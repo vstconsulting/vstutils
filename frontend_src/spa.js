@@ -9,6 +9,7 @@ import { ModelConstructor, ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 import { QuerySetsResolver } from './vstutils/querySet';
 import { signals } from './app.common.js';
+import { getFieldFactory, getFieldFormatFactory } from './vstutils/fields';
 
 export * from './app.common.js';
 
@@ -49,6 +50,9 @@ export class App extends BaseApp {
         super(config, cache);
 
         this.fieldsClasses = fields;
+        this.getFieldFormat = getFieldFormatFactory(fields);
+        this.getField = getFieldFactory(fields);
+
         this.modelsClasses = models;
 
         /** @type {Map<string, View>} */
@@ -87,8 +91,6 @@ export class App extends BaseApp {
         this.qsResolver = new QuerySetsResolver(this.viewsTree);
 
         this.setNestedViewsQuerysets();
-
-        this.prepareViewsModelsFields();
     }
 
     prepareFieldsClasses() {
@@ -186,6 +188,8 @@ export class App extends BaseApp {
      */
     prepare() {
         signals.emit('app.beforeInit', { app: this });
+
+        this.prepareViewsModelsFields();
 
         let storeConstructor = new StoreConstructor(this, this.config.isDebug);
 

@@ -28,7 +28,7 @@ export default {
     },
     watch: {
         value(value) {
-            if (value !== undefined && typeof value != 'object' && this.field.fetchData) {
+            if (value && typeof value != 'object' && this.field.fetchData) {
                 this.fetchValue(value);
             } else {
                 this.fetchedValue = value;
@@ -45,8 +45,12 @@ export default {
         },
     },
     beforeMount() {
-        if (this.value !== undefined && typeof this.value != 'object' && this.field.fetchData) {
-            this.fetchValue(this.value);
+        if (this.value && typeof this.value != 'object') {
+            if (this.field.usePrefetch) {
+                this.fetchedValue = null;
+            } else if (this.field.fetchData) {
+                this.fetchValue(this.value);
+            }
         } else {
             this.fetchedValue = this.value;
         }
@@ -62,7 +66,7 @@ export default {
             }
             let filters = {
                 limit: 1,
-                [this.field.valueField]: value,
+                [this.field.filterFieldName]: value,
             };
 
             const [instance] = await this.queryset.filter(filters).items();

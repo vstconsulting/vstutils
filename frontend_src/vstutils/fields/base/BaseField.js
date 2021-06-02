@@ -1,5 +1,4 @@
-import $ from 'jquery';
-import { _translate, capitalize } from '../../utils';
+import { _translate, capitalize, deepEqual } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 
@@ -20,6 +19,9 @@ class BaseField {
          * @type {Object}
          */
         this.options = options;
+
+        /** @type {Object} */
+        this.props = options.additionalProperties || {};
 
         /** @type {string} */
         this.format = options.format;
@@ -179,41 +181,6 @@ class BaseField {
         return value;
     }
     /**
-     * Method, that is used during gui tests - this method imitates user's value input.
-     * @param {object} data Object with values of current field
-     * and fields from the same fields wrapper.
-     * For example, from the same Model Instance.
-     * @private
-     */
-    _insertTestValue(data = {}) {
-        let value = data[this.options.name];
-        let format = this.options.format || this.options.type;
-        let el = this._insertTestValue_getElement(format);
-
-        $(el).val(value);
-
-        this._insertTestValue_imitateEvent(el);
-    }
-    /**
-     * Method, that returns DOM element of input part of guiField.
-     * This method is supposed to be called from _insertTestValue method.
-     * @param {string} format Field's format.
-     * @private
-     */
-    _insertTestValue_getElement(format) {
-        let selector = '.guifield-' + format + '-' + this.options.name + ' input';
-        return $(selector)[0];
-    }
-    /**
-     * Method, that imitates event of inserting value into field.
-     * This method is supposed to be called from _insertTestValue method.
-     * @param {object} el DOM element of field's input.
-     * @private
-     */
-    _insertTestValue_imitateEvent(el) {
-        el.dispatchEvent(new Event('input'));
-    }
-    /**
      * Static property for storing field mixins.
      */
     static get mixins() {
@@ -235,6 +202,15 @@ class BaseField {
                 this._data[fieldThis.name] = fieldThis.toInner({ ...this._data, [fieldThis.name]: value });
             },
         };
+    }
+    isEqual(other) {
+        if (this === other) return true;
+        if (!other) return false;
+        if (other.constructor !== this.constructor) return false;
+        return deepEqual(this.options, other.options);
+    }
+    isSameValues(data1, data2) {
+        return deepEqual(this.toInner(data1), this.toInner(data2));
     }
 }
 

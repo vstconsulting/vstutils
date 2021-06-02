@@ -25,6 +25,9 @@ export const PageViewComponent = {
         },
     },
     methods: {
+        shouldStartAutoupdate() {
+            return this.view.params.autoupdate;
+        },
         getInstancePk() {
             return this.$route.params[this.view.pkParamName];
         },
@@ -38,7 +41,7 @@ export const PageViewComponent = {
                 }
 
                 this.setLoadingSuccessful();
-                if (this.view.params.autoupdate) {
+                if (this.shouldStartAutoupdate()) {
                     this.startAutoUpdate();
                 }
             } catch (error) {

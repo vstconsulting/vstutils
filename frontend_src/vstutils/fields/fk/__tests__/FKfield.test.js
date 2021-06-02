@@ -43,7 +43,7 @@ describe('FKfield', () => {
         };
         expect(post1._data.author).toBe(1);
         expect(post2._data.author).toBe(2);
-        await authorFkField.afterInstancesFetched(instances, new QuerySet('post', {}));
+        await authorFkField.prefetchValues(instances, '/post/');
         expect(post1._data.author).toMatchObject({ id: 1, name: 'a1', posts: [] });
         expect(post2._data.author).toMatchObject({ id: 2, name: 'a2', posts: [] });
     });
