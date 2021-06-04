@@ -2009,9 +2009,13 @@ class LangTestCase(BaseTestCase):
             }
         ]
 
+        CustomTranslations = self.get_model_class('vstutils_api.CustomTranslations')
+        CustomTranslations.objects.create(original='проверка перевода', translated="Успешно переведено", code='ru')
+
         bulk_data = [
             dict(path=['_lang', 'ru', 'translate'], method='post', data=dict(original='enter value')),
             dict(path=['_lang', 'en', 'translate'], method='post', data=dict(original='репозиторий')),
+            dict(path=['_lang', 'ru', 'translate'], method='post', data=dict(original='проверка перевода')),
         ]
         results = self.bulk(bulk_data)
         # test successful translation
@@ -2020,6 +2024,9 @@ class LangTestCase(BaseTestCase):
         # test not translated
         self.assertEqual(201, results[1]['status'])
         self.assertEqual(test_results[1], results[1]['data'])
+        # Custom translations
+        self.assertEqual(201, results[2]['status'])
+        self.assertEqual("Успешно переведено", results[2]['data']['translated'])
 
     def test_user_language_detection(self):
         client = self.client_class()

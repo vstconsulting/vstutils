@@ -44,6 +44,10 @@ class Language(ListModel):
             translation_data.update(
                 self._get_translation_data(attr_name, code)
             )
+        if settings.ENABLE_CUSTOM_TRANSLATIONS:
+            translation_data.update(
+                CustomTranslations.objects.filter(code=code).values_list('original', 'translated')
+            )
         return translation_data
 
     def translate(self, text):
@@ -52,6 +56,18 @@ class Language(ListModel):
             # place for additional translation methods
             return text
         return translated
+
+
+class CustomTranslations(BaseModel):
+    original = CharField(primary_key=True, max_length=1024)
+    translated = CharField(max_length=1024)
+    code = CharField(max_length=5)
+
+    class Meta:
+        default_related_name = 'custom_translations'
+        indexes = [
+            models.Index(fields=('original', 'translated', 'code'), name='%(app_label)s_translations')
+        ]
 
 
 class TwoFactor(BaseModel):

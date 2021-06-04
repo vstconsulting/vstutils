@@ -2,6 +2,8 @@ import json
 
 from django.contrib import admin
 from django.utils.html import format_html
+from django.conf import settings
+from django import forms
 
 from . import models
 
@@ -39,3 +41,14 @@ class LanguageAdmin(_BaseViewAdmin):
             '<pre>{}</pre>',
             json.dumps(instance.translations, indent=4)
         )
+
+
+class CustomTranslationsForm(forms.ModelForm):
+    code = forms.ChoiceField(choices=settings.LANGUAGES)
+
+
+if settings.ENABLE_CUSTOM_TRANSLATIONS:
+    @admin.register(models.CustomTranslations)
+    class CustomTranslationsAdmin(admin.ModelAdmin):
+        list_display = ('original', 'code', 'translated')
+        form = CustomTranslationsForm
