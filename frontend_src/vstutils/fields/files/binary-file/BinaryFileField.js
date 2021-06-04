@@ -14,7 +14,7 @@ class BinaryFileField extends FileField {
         return super.mixins.concat(BinaryFileFieldMixin);
     }
 
-    getInitialValue() {
+    getEmptyValue() {
         return null;
     }
 

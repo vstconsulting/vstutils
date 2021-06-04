@@ -13,10 +13,6 @@ class FKAutocompleteField extends FKField {
     static get mixins() {
         return [FKAutocompleteFieldMixin];
     }
-
-    getInitialValue() {
-        return '';
-    }
 }
 
 export default FKAutocompleteField;

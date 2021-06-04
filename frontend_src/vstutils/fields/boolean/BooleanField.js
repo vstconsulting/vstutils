@@ -44,7 +44,7 @@ class BooleanField extends BaseField {
     /**
      * @return {boolean}
      */
-    getInitialValue() {
+    getEmptyValue() {
         return false;
     }
 

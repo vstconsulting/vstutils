@@ -1044,7 +1044,7 @@ export function parseResponseMessage(data) {
         return data;
     }
     if (data.detail) {
-        return data.detail;
+        return parseResponseMessage(data.detail);
     }
     if (Array.isArray(data)) {
         return data.join('<br>');

@@ -42,7 +42,7 @@ export class IntegerField extends BaseField {
         return val;
     }
 
-    getInitialValue() {
+    getEmptyValue() {
         return null;
     }
 
