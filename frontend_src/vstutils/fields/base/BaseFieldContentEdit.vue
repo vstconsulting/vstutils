@@ -21,7 +21,6 @@
 </template>
 
 <script>
-    import $ from 'jquery';
     import BaseFieldContentMixin from './BaseFieldContentMixin.js';
     import BaseFieldInnerComponentMixin from './BaseFieldInnerComponentMixin.js';
     import FieldLabelIdMixin from '../FieldLabelIdMixin.js';
@@ -41,12 +40,10 @@
         },
         computed: {
             hasHideButton() {
-                let opt = $.extend(true, {}, this.field.options, this.wrapper_opt);
-
-                return opt.hidden_button && !this.field.required;
+                return this.$parent.hideable;
             },
             hasDefaultValue() {
-                return this.field.default !== undefined;
+                return this.field.hasDefaultValue;
             },
             preparedValue() {
                 return this.value;

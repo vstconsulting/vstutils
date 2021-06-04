@@ -9,27 +9,15 @@
         @execute-action="executeAction($event, instance)"
         @open-sublink="openSublink($event, instance)"
     >
-        <div v-if="hideNotRequired" class="form-group col-lg-4 col-xs-12 col-sm-6 col-md-6">
-            <label class="control-label">{{ ($t('add') + ' ' + $t('field')) | capitalize }}</label>
-            <select
-                id="show_not_required_fields_select"
-                class="form-control"
-                @change.prevent="addFieldHandler"
-            >
-                <option disabled selected>
-                    {{ ($t('select') + ' ' + $t('field')) | capitalize }}
-                </option>
-                <option
-                    v-for="(field, idx) in fields"
-                    :key="idx"
-                    :value="field.name"
-                    :disabled="field.required"
-                >
-                    {{ $t(field.title) }}
-                </option>
-            </select>
+        <div v-if="hideNotRequired" class="card">
+            <div class="card-body">
+                <HideNotRequiredSelect
+                    class="col-lg-4 col-xs-12 col-sm-6 col-md-6"
+                    :fields="hiddenFields"
+                    @show-field="showField"
+                />
+            </div>
         </div>
-
         <div class="row">
             <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
             <div
@@ -49,7 +37,8 @@
                             :field="field"
                             :data="data"
                             :type="fieldsType"
-                            @toggle-hidden="toggleHidden"
+                            :hideable="hideNotRequired && !field.required"
+                            @hide-field="hiddenFields.push(field)"
                             @set-value="setFieldValue"
                         />
                     </div>
@@ -66,17 +55,18 @@
     import { RequestTypes } from '../../utils';
     import EntityView from '../common/EntityView.vue';
     import { BaseViewMixin } from '../BaseViewMixin.js';
+    import HideNotRequiredSelect from './HideNotRequiredSelect';
 
     export default {
         name: 'OneEntity',
-        components: { EntityView },
+        components: { HideNotRequiredSelect, EntityView },
         mixins: [BaseViewMixin, PageWithDataMixin, ViewWithAutoUpdateMixin],
         data() {
             return {
                 readOnly: false,
-                hideNotRequired: false,
                 hideReadOnly: false,
-                hiddenStore: {},
+                hideNotRequired: false,
+                hiddenFields: [],
             };
         },
         computed: {
@@ -106,8 +96,10 @@
                 for (const [groupName, fieldsNames] of Object.entries(this.model.fieldsGroups)) {
                     const fields = fieldsNames
                         .map((fieldName) => this.model.fields.get(fieldName))
-                        .filter(Boolean)
-                        .filter(this.shouldShowField);
+                        .filter(
+                            (field) =>
+                                field && this.shouldShowField(field) && !this.hiddenFields.includes(field),
+                        );
                     if (fields.length) groups[groupName] = fields;
                 }
                 return groups;
@@ -115,31 +107,20 @@
         },
         created() {
             if (this.hideNotRequired) {
-                for (const field of this.fields) {
-                    Vue.set(this.hiddenStore, field.name, !field.options.required);
-                }
+                this.hiddenFields = this.fields.filter(
+                    (field) => this.shouldShowField(field) && !field.required,
+                );
             }
         },
         methods: {
-            shouldShowField(field) {
-                return (
-                    !field.hidden && !(this.hideReadOnly && field.readOnly) && !this.hiddenStore[field.name]
+            showField(fieldName) {
+                this.hiddenFields.splice(
+                    this.hiddenFields.findIndex((field) => field.name === fieldName),
+                    1,
                 );
             },
-            /**
-             * Method - onChange handler of <select>Add field</select>.
-             * @param {Event} event.
-             */
-            addFieldHandler(event) {
-                event.target.selectedIndex = 0;
-                this.toggleHidden(event.target.value);
-            },
-            /**
-             * Method, that changes field's value in hidden_store.
-             * @param {string} field - Name of the field.
-             */
-            toggleHidden(field) {
-                this.hiddenStore[field] = !this.hiddenStore[field];
+            shouldShowField(field) {
+                return !field.hidden && !(this.hideReadOnly && field.readOnly);
             },
             /**
              * Updates field value in store

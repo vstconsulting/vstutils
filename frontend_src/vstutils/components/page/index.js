@@ -48,11 +48,6 @@ export const PageViewComponent = {
                 this.setLoadingError(error);
             }
         },
-        getBreadcrumbNameForCurrentPath() {
-            if (this.instance) {
-                return this.instance.getViewFieldValue();
-            }
-        },
         afterEmptyAction() {
             return this.dispatchAction('updateData');
         },

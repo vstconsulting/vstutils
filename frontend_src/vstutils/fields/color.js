@@ -33,8 +33,8 @@ class ColorField extends BaseField {
         return super.mixins.concat(ColorFieldMixin);
     }
 
-    getInitialValue() {
-        return this.hasDefault ? this.default : null;
+    getEmptyValue() {
+        return null;
     }
 
     /**

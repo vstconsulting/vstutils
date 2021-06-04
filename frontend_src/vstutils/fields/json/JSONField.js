@@ -11,8 +11,8 @@ class JSONField extends BaseField {
         this.jsonMapper = jsonMapper || new JsonMapper();
     }
 
-    getInitialValue() {
-        return this.hasDefault ? this.default : null;
+    getEmptyValue() {
+        return null;
     }
 
     /**

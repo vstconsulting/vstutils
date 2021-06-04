@@ -10,7 +10,14 @@
                 :data="data"
                 @proxyEvent="proxyEvent"
             />
-            <field_content_edit v-else :field="field" :value="value" :data="data" @set-value="setValue" />
+            <field_content_edit
+                v-else
+                :field="field"
+                :value="value"
+                :data="data"
+                @hide-field="$emit('hide-field', field)"
+                @set-value="setValue"
+            />
         </template>
     </div>
 </template>
@@ -46,6 +53,7 @@
             field: { type: Object, required: true },
             data: { type: Object, required: true },
             type: { type: String, required: true },
+            hideable: { type: Boolean, default: false },
         },
         data() {
             return {

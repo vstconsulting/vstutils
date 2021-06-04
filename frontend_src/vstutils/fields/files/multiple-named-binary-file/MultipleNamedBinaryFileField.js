@@ -18,7 +18,7 @@ class MultipleNamedBinFileField extends NamedBinaryFileField {
         return super.mixins.concat(MultipleNamedBinaryFileFieldMixin);
     }
 
-    getInitialValue() {
+    getEmptyValue() {
         return [];
     }
 

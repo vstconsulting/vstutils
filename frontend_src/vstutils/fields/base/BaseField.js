@@ -86,7 +86,18 @@ class BaseField {
      * @return {TInner}
      */
     getInitialValue() {
-        return this.hasDefault ? this.default : '';
+        if (this.required) {
+            return this.hasDefault ? this.default : this.getEmptyValue();
+        }
+        return undefined;
+    }
+
+    /**
+     * Returns empty value of field
+     * @returns {TInner}
+     */
+    getEmptyValue() {
+        return '';
     }
 
     /**
@@ -95,7 +106,7 @@ class BaseField {
      * @return {TInner}
      */
     toInner(data) {
-        return data[this.options.name];
+        return data[this.name];
     }
 
     /**
@@ -104,7 +115,7 @@ class BaseField {
      * @return {TRepresent}
      */
     toRepresent(data) {
-        return data[this.options.name];
+        return data[this.name];
     }
 
     /**

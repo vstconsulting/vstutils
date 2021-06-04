@@ -46,7 +46,7 @@ class FKField extends BaseField {
         return [FKFieldMixin];
     }
 
-    getInitialValue() {
+    getEmptyValue() {
         return null;
     }
 

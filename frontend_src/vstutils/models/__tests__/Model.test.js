@@ -79,7 +79,6 @@ describe('Model', () => {
         // Check inner values
         expect(user._getInnerData()).toStrictEqual({
             email: 'name@domain.com',
-            firstName: undefined,
             age: 22,
             settings: { param1: 'value2', param2: 2, param3: false },
         });
@@ -152,7 +151,7 @@ describe('Model', () => {
     });
 
     test('view field', () => {
-        const name = new StringField({ name: 'name' });
+        const name = new StringField({ name: 'name', required: true });
         const field1 = new StringField({ name: 'field1' });
 
         @ModelClass()

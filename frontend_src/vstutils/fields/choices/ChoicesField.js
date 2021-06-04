@@ -16,13 +16,7 @@ class ChoicesField extends StringField {
         this.templateSelection = props.templateSelection;
     }
 
-    /**
-     * @return {string}
-     */
-    getInitialValue() {
-        if (this.hasDefault) {
-            return this.default;
-        }
+    getEmptyValue() {
         if (this.enum) {
             return this.enum[0];
         }

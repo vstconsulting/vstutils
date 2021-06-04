@@ -1,4 +1,4 @@
-import { deepEqual, escapeHtml, hasOwnProp, mergeDeep } from '../utils';
+import { escapeHtml, hasOwnProp, mergeDeep } from '../utils';
 
 class ModelUtils {
     static pkFields = ['id', 'pk'];
@@ -192,7 +192,6 @@ export class Model {
         this._parentInstance = parentInstance;
         this._data = data;
         this._queryset = queryset;
-        this._changedFields = [];
     }
 
     /**
@@ -220,7 +219,10 @@ export class Model {
         }
         const data = {};
         for (const field of selectedFields) {
-            data[field.name] = this._data[field.name];
+            const value = this._data[field.name];
+            if (field.required || value !== undefined) {
+                data[field.name] = value;
+            }
         }
         return data;
     }

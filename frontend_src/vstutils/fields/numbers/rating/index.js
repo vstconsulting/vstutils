@@ -73,10 +73,7 @@ export class RatingField extends FloatField {
         return [RatingFieldMixin];
     }
 
-    getInitialValue() {
-        if (this.hasDefault) {
-            return this.default;
-        }
+    getEmptyValue() {
         if (this.nullable) {
             return null;
         }
