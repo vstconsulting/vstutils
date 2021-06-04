@@ -132,6 +132,7 @@ class MainSection(BaseAppendSection):
         'debug': ConfigBoolType,
         'enable_admin_panel': ConfigBoolType,
         'enable_registration': ConfigBoolType,
+        'enable_custom_translations': ConfigBoolType,
         'allowed_hosts': cconfig.ListType(),
         'first_day_of_week': ConfigIntType,
     }
@@ -289,6 +290,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'log_level': 'WARNING',
             'enable_admin_panel': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', 'false')),
             'enable_registration': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_REGISTRATION', 'false')),
+            'enable_custom_translations': False,
             'ldap-server': None,
             'ldap-default-domain': '',
             'ldap-auth_format': 'cn=<username>,<domain>',
@@ -892,6 +894,7 @@ USE_L10N: bool = True
 USE_TZ: bool = True
 FIRST_DAY_OF_WEEK = main['first_day_of_week']
 LANGUAGE_COOKIE_NAME = main['language_cookie_name']
+ENABLE_CUSTOM_TRANSLATIONS = main['enable_custom_translations']
 
 
 # LOGGING settings
