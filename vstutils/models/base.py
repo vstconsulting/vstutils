@@ -134,7 +134,7 @@ def _get_setting_for_view(metatype, metadata, views):
     pre_metadataobject = metadata[f'pre_{metatype}'] or []
     if override:
         return pre_metadataobject + metadataobject  # nocv
-    if metadataobject:
+    if metadataobject or pre_metadataobject:
         for view in views:
             if hasattr(view, metatype):  # pragma: no branch
                 return list(chain(pre_metadataobject, getattr(view, metatype), metadataobject))
