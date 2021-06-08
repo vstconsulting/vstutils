@@ -2,6 +2,7 @@
 configparser~=5.0.2
 configparserc~=1.2.4
 django-cors-headers==3.7.0
+Markdown==3.3.4
 
 # REST API packages
 djangorestframework~=3.12.4

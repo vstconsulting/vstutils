@@ -1,4 +1,6 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
+from pathlib import Path
+
 import gzip
 import os
 import sys
@@ -8,6 +10,7 @@ import io
 import pwd
 import base64
 import datetime
+import tempfile
 from pathlib import Path
 from smtplib import SMTPException
 
@@ -739,8 +742,8 @@ class ViewsTestCase(BaseTestCase):
 
     def test_register_new_user(self):
         # create user data and init client class
-        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
-        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com')
+        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com', agreement=True)
+        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com', agreement=True)
         client = self.client_class()
 
         self.assertIsNone(get_user_model().objects.filter(email=user['email']).last())
@@ -758,7 +761,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(
             list(response.context_data['form'].errors.keys()),
-            ['username', 'email', 'password1', 'password2']
+            ['username', 'email', 'password1', 'password2', 'agreement']
         )
 
         # Correct registration request
@@ -802,10 +805,56 @@ class ViewsTestCase(BaseTestCase):
         response = client.post(href, user)
         self.assertEqual(response.status_code, 200)
 
+    def test_terms_agreement(self):
+        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com', agreement=True)
+        user_fail = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
+        client = self.client_class()
+
+        lang_text_data = {
+            'ru': 'лицензионное соглашение',
+            'en': 'terms of agreement',
+            'cn': '协议条款',
+            'vi': 'các điều khoản của thỏa thuận'
+        }
+        # Correct registration request returns redirect
+        response = client.post(reverse('user_registration'), data=user)
+        self.assertRedirects(response, self.login_url)
+
+        # Try registration without agreement returns error
+        response = client.post(reverse('user_registration'), data=user_fail)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context_data['form'].errors['agreement'][0],
+            'To continue, need to accept the terms agreement.'
+        )
+
+        # If ENABLE_AGREEMENT_TERMS=False, registration without agreement returns redirect
+        with override_settings(ENABLE_AGREEMENT_TERMS=False):
+            response = client.post(reverse('user_registration'), data=user_fail)
+            self.assertRedirects(response, self.login_url)
+
+        # Response with 'lang=en' returns default 'terms.md' with correct html
+        with utils.tmp_file(data='## test_header', encoding='utf8') as md_file:
+            with override_settings(AGREEMENT_TERMS_PATH=md_file.path):
+                response = self.client.get(reverse('terms') + f'?lang=en')
+
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(response, 'registration/terms.html')
+                self.assertContains(response, '<h2>test_header</h2>')
+
+        # Response with different languages returns different terms
+        for item in lang_text_data.items():
+            with utils.tmp_file(data=f'## {item[1]}', encoding='utf8', suffix=f'.{item[0]}') as md_file:
+                with override_settings(AGREEMENT_TERMS_PATH=f'/tmp/{Path(md_file.path).stem}'):
+
+                    response_with_en_lang = self.client.get(reverse('terms') + f'?lang={item[0]}')
+                    self.assertEqual(response_with_en_lang.status_code, 200)
+                    self.assertContains(response_with_en_lang, f'<h2>{item[1]}</h2>')
+
     @override_settings(SEND_CONFIRMATION_EMAIL=False, AUTHENTICATE_AFTER_REGISTRATION=False)
     def test_register_new_user_without_confirmation(self):
-        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
-        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com')
+        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com', agreement=True)
+        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com', agreement=True)
         client = self.client_class()
         response = client.post(self.login_url, {'username': user['username'], 'password': user['password1']})
         self.assertEqual(response.status_code, 200)

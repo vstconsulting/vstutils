@@ -223,4 +223,6 @@ TRANSLATION = {
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',
     'now': 'hiện nay',
     'later': 'một lát sau',
+    'i accept the ': 'Tôi chấp nhận ',
+    'terms of agreement': 'các điều khoản của thỏa thuận',
 }

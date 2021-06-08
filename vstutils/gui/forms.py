@@ -29,10 +29,19 @@ class RegistrationForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
     if settings.SEND_CONFIRMATION_EMAIL:
         uid = forms.CharField(max_length=256, required=False)
+    if settings.ENABLE_AGREEMENT_TERMS:
+        agreement = forms.BooleanField(required=False)
 
     class Meta(UserCreationForm.Meta):
         model = UserModel
-        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'password1',
+            'password2',
+        ]
 
     def build_confirmation_url(self, uid):
         # pylint: disable=no-member
@@ -80,6 +89,14 @@ class RegistrationForm(UserCreationForm):
             if self.errors and uid not in (None, ''):
                 self.cleaned_data.update(secure_pickle.loads(cache.get(uid)))
                 self._errors = ErrorDict()
+
+    # method clean is not needed?
+    def clean(self):
+        super().clean()
+        if settings.ENABLE_AGREEMENT_TERMS:
+            agreement = self.cleaned_data.get('agreement', None)
+            if not agreement:
+                self.add_error('agreement', 'To continue, need to accept the terms agreement.')
 
 
 class TwoFaForm(forms.Form):
