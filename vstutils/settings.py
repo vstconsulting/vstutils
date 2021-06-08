@@ -135,6 +135,8 @@ class MainSection(BaseAppendSection):
         'enable_custom_translations': ConfigBoolType,
         'allowed_hosts': cconfig.ListType(),
         'first_day_of_week': ConfigIntType,
+        'enable_agreement_terms': ConfigBoolType,
+        'agreement_terms_path': ConfigStringType,
     }
 
 
@@ -208,6 +210,7 @@ class MailSection(BaseAppendSection):
         'ssl': ConfigBoolType,
         'send_confirmation': ConfigBoolType,
         'authenticate_after_registration': ConfigBoolType,
+        'agreement_terms': ConfigBoolType,
     }
 
 
@@ -295,6 +298,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'ldap-default-domain': '',
             'ldap-auth_format': 'cn=<username>,<domain>',
             'language_cookie_name': 'lang',
+            'agreement_terms_path': f'/etc/{VST_PROJECT_LIB}/terms.md',
         },
         'web': {
             'allow_cors': False,
@@ -1069,6 +1073,12 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
         "OPTIONS": {
             'name': 'user_registration'
         }
+    },
+    "TERMS": {
+        "BACKEND": 'vstutils.gui.views.TermsView',
+        "OPTIONS": {
+            'name': 'terms'
+        }
     }
 }
 
@@ -1093,6 +1103,8 @@ def get_accounts_views_mapping():
     mapping = {**ACCOUNT_VIEWS}
     if REGISTRATION_URL not in mapping and REGISTRATION_URL not in ACCOUNT_VIEWS and REGISTRATION_ENABLED:
         mapping[REGISTRATION_URL] = 'USER_REGISTRATION'
+    if REGISTRATION_URL in mapping and ENABLE_AGREEMENT_TERMS and AGREEMENT_TEMRS_URL:
+        mapping[AGREEMENT_TEMRS_URL] = 'TERMS'
     return mapping
 
 
@@ -1102,6 +1114,10 @@ ACCOUNT_URL = '^account/'
 
 REGISTRATION_URL = r'^registration/$'
 REGISTRATION_ENABLED = main['enable_registration']
+
+AGREEMENT_TEMRS_URL = r'^terms/$'
+ENABLE_AGREEMENT_TERMS: bool = main.getboolean('enable_agreement_terms', fallback=REGISTRATION_ENABLED)
+AGREEMENT_TERMS_PATH: str = main['agreement_terms_path']
 
 PROJECT_GUI_MENU: _t.List[_t.Dict] = [
     {

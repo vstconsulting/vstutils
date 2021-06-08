@@ -1,4 +1,7 @@
 #  pylint: disable=bad-super-call,unused-argument
+from pathlib import Path
+
+from markdown import markdown
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
@@ -10,6 +13,7 @@ from django.urls import reverse_lazy
 from jsmin import jsmin
 
 from .forms import RegistrationForm, TwoFaForm
+
 
 UserModel = get_user_model()
 
@@ -99,3 +103,19 @@ class Registration(FormView, BaseView):
         if settings.AUTHENTICATE_AFTER_REGISTRATION and user.id is not None:
             login(self.request, user)
         return super().form_valid(form)
+
+
+class TermsView(TemplateView):
+    template_name = 'registration/terms.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        path = Path(settings.AGREEMENT_TERMS_PATH)
+        # return path with lang code. Example: /tmp/proj_name/terms.md.en
+        translated_file_path = path.with_name(path.name + f'.{self.request.language.code}')
+
+        if translated_file_path.exists():
+            path = translated_file_path
+
+        context['terms'] = markdown(path.read_text(encoding='utf8'))
+        return context

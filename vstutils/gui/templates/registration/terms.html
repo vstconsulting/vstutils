@@ -1,0 +1,18 @@
+{% extends "registration/base.html" %}
+
+{% block login_body_content %}
+    <style>
+        .login-box {
+            width: auto;
+            max-width: 900px;
+        }
+    </style>
+
+    <h3 style="text-align: center">{% translate_text "terms of agreement" capfirst %}</h3>
+
+    {% block terms %}
+        <div class="terms-area">
+            {{ terms | safe }}
+        </div>
+    {% endblock %}
+{% endblock %}

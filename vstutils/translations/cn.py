@@ -219,8 +219,11 @@ TRANSLATION = {
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
     'Dark mode': '黑暗主题',
 
+
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': '设置更改已成功保存。 请刷新页面。',
     'now': '眼下',
     'later': '之后',
+    'i accept the ': '我接受 ',
+    'terms of agreement': '协议条款',
 }

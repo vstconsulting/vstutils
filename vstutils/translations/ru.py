@@ -250,7 +250,6 @@ TRANSLATION = {
     'More info': 'Подробнее',
     'Dark mode': 'Темная тема',
 
-
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',
     'for some reason, this image file cannot be opened': 'Не удалось открыть файл изображения',
@@ -261,4 +260,6 @@ TRANSLATION = {
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста обновите страницу.',
     'now': 'сейчас',
     'later': 'позже',
+    'i accept the ': 'Я принимаю ',
+    'terms of agreement': 'лицензионное соглашение',
 }

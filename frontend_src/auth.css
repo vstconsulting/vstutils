@@ -299,15 +299,16 @@ form > .row {
 
 .login-box,
 .register-box {
-    max-width: 400px;
     margin: 0 auto;
+    width: auto;
 }
 
 @media (max-width: 576px) {
     .login-box,
     .register-box {
-        max-width: 400px;
         margin: 0 auto;
+        max-width: 400px;
+        width: auto;
     }
 }
 

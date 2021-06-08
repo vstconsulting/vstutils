@@ -225,6 +225,7 @@ class TwoFaMiddleware(BaseMiddleware):
         'service_worker',
         'offline_gui',
         'user_registration',
+        'terms',
     )
 
     def request_handler(self, request: HttpRequest) -> HttpRequest:
