@@ -597,6 +597,10 @@ class SecurePickling(BaseVstObject):
     """
     Secured pickle wrapper by Vigenère cipher.
 
+
+    .. warning::
+        Do not use it with untrusted transport anyway.
+
     Example:
         .. sourcecode:: python
 
@@ -614,6 +618,7 @@ class SecurePickling(BaseVstObject):
 
             # Check, that object is correct
             assert a == unpickled
+
     """
     __slots__ = ('secure_key',)
 
@@ -632,7 +637,7 @@ class SecurePickling(BaseVstObject):
         return decode(self.secure_key, value)
 
     def loads(self, value: tp.Any):
-        return pickle.loads(codecs.decode(self._decode(value).encode(), "base64"))
+        return pickle.loads(codecs.decode(self._decode(value).encode(), "base64"))  # nosec
 
     def dumps(self, value: tp.Any):
         return self._encode(codecs.encode(pickle.dumps(value), "base64").decode())
@@ -1158,7 +1163,7 @@ class URLHandlers(ObjectHandlers):
             for handler in self.view_handlers:
                 try:
                     return handler.get_backend_data(data)
-                except:
+                except:  # nosec
                     continue
             raise ex.VSTUtilsException(f'Invalid handler name "{data}"')  # nocv
         return data

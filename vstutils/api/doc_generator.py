@@ -70,7 +70,7 @@ class VSTOpenApiBase(Directive):
 
         encoding = self.options.get('encoding', env.config.source_encoding)
         with io.open(abspath, 'rt', encoding=encoding) as stream:
-            spec = yaml.load(stream, _YamlOrderedLoader)
+            spec = yaml.load(stream, _YamlOrderedLoader)  # nosec
         self.spec = spec
         self.paths = spec[self.path_path]
         self.definitions = spec[self.models_path]

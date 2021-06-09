@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import json
+import tempfile
 import traceback
 import logging
 from subprocess import check_call
@@ -13,6 +14,7 @@ from ._base import BaseCommand
 
 
 logger = logging.getLogger('vstutils')
+tmp = tempfile.tempdir
 
 
 class Command(BaseCommand):
@@ -161,7 +163,7 @@ class Command(BaseCommand):
             }
 
     def prepare_section_cache(self, config):
-        cache_loc = os.getenv('CACHE_LOCATION', f'/tmp/{self.prefix}_django_cache')
+        cache_loc = os.getenv('CACHE_LOCATION', f'{tmp}/{self.prefix}_django_cache')
         cache_type = os.getenv(f'{self.prefix}_CACHE_TYPE', 'file')
         if cache_type == 'file':
             cache_engine = 'django.core.cache.backends.filebased.FileBasedCache'
@@ -194,7 +196,7 @@ class Command(BaseCommand):
             config['rpc']['enable_worker'] = 'true'
             config['worker'] = {
                 'loglevel': self.log_level,
-                'pidfile': f'/tmp/{self.prefix.lower()}_worker.pid',
+                'pidfile': f'{tmp}/{self.prefix.lower()}_worker.pid',
                 'beat': os.getenv(f'{self.prefix}_SCHEDULER_ENABLE', 'true')
             }
 

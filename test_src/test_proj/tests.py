@@ -749,7 +749,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertIsNone(get_user_model().objects.filter(email=user['email']).last())
 
         # Try register failed user data
-        response = client.post(reverse('user_registration'), data=user_fail)
+        response = self.call_registration(user_fail)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             ''.join(response.context_data['form'].errors.get('password2', [])),
@@ -757,7 +757,7 @@ class ViewsTestCase(BaseTestCase):
         )
 
         # Try register user without data
-        response = client.post(reverse('user_registration'))
+        response = self.call_registration(None)
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(
             list(response.context_data['form'].errors.keys()),
@@ -765,7 +765,7 @@ class ViewsTestCase(BaseTestCase):
         )
 
         # Correct registration request
-        response = client.post(reverse('user_registration'), data=user)
+        response = self.call_registration(user)
         self.assertRedirects(response, self.login_url)
 
         self.assertCount(mail.outbox, 1)
@@ -817,11 +817,11 @@ class ViewsTestCase(BaseTestCase):
             'vi': 'các điều khoản của thỏa thuận'
         }
         # Correct registration request returns redirect
-        response = client.post(reverse('user_registration'), data=user)
+        response = self.call_registration(user)
         self.assertRedirects(response, self.login_url)
 
         # Try registration without agreement returns error
-        response = client.post(reverse('user_registration'), data=user_fail)
+        response = self.call_registration(user_fail)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.context_data['form'].errors['agreement'][0],
@@ -830,7 +830,7 @@ class ViewsTestCase(BaseTestCase):
 
         # If ENABLE_AGREEMENT_TERMS=False, registration without agreement returns redirect
         with override_settings(ENABLE_AGREEMENT_TERMS=False):
-            response = client.post(reverse('user_registration'), data=user_fail)
+            response = self.call_registration(user_fail)
             self.assertRedirects(response, self.login_url)
 
         # Response with 'lang=en' returns default 'terms.md' with correct html
@@ -858,9 +858,9 @@ class ViewsTestCase(BaseTestCase):
         client = self.client_class()
         response = client.post(self.login_url, {'username': user['username'], 'password': user['password1']})
         self.assertEqual(response.status_code, 200)
-        response = client.post(reverse('user_registration'), data=user_fail)
+        response = self.call_registration(user_fail)
         self.assertEqual(response.status_code, 200)
-        response = client.post(reverse('user_registration'), data=user)
+        response = self.call_registration(user)
         self.assertRedirects(response, self.login_url)
         response = client.post(self.login_url, {'username': user['username'], 'password': user['password2']})
         self.assertRedirects(response, '/')

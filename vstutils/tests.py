@@ -120,11 +120,11 @@ class BaseTestCase(TestCase):
         # pylint: disable=import-outside-toplevel
         from django.conf import settings
         self.settings_obj = settings
-        client_kwargs = {
+        self.client_kwargs = {
             "HTTP_X_FORWARDED_PROTOCOL": 'https',
             'SERVER_NAME': self.server_name
         }
-        self.client = self.client_class(**client_kwargs)
+        self.client = self.client_class(**self.client_kwargs)
         self.user = self._create_user()
         self.login_url = reverse('login')
         self.logout_url = reverse('logout')
@@ -138,6 +138,18 @@ class BaseTestCase(TestCase):
         Simple function which returns uuid1 string.
         """
         return str(uuid.uuid1())
+
+    def call_registration(self, data, **kwargs):
+        """
+        Function for calling registration. Just got form data and headers.
+
+        :param data: Registration form data.
+        :type data: dict
+        :param kwargs: named arguments with request headers.
+        """
+
+        client = self.client_class(**self.client_kwargs)
+        return client.post(reverse('user_registration'), data=data, **kwargs)
 
     def get_url(self, *items) -> _t.Text:
         """

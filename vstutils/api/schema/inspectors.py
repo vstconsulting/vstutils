@@ -16,7 +16,7 @@ from ...models.base import get_first_match_name
 
 # Extra formats
 FORMAT_FILE = openapi.TYPE_FILE
-FORMAT_SECRET_FILE = 'secretfile'
+FORMAT_SECRET_FILE = 'secretfile'  # nosec
 FORMAT_BIN_FILE = 'binfile'
 FORMAT_NAMED_BIN_FILE = 'namedbinfile'
 FORMAT_NAMED_BIN_IMAGE = 'namedbinimage'

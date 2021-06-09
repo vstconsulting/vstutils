@@ -106,12 +106,10 @@ class ParseResponseDict(dict):
         self.timing = float(response.get('Response-Time', '0.0'))
 
     def _get_rendered(self, response: _t.Union[HttpResponse, responses.BaseResponseClass]):
-        try:
+        with raise_context():
             result = response.data  # type: ignore
             if isinstance(result, dict):
                 return Dict(result)
-        except:
-            pass
         if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
             return json.loads(response.rendered_content.decode())  # type: ignore
         return Dict(detail=str(response.content.decode('utf-8')))

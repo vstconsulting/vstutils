@@ -146,7 +146,7 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
         try:
             serializer.is_valid(raise_exception=True)
         except:  # nocv
-            pass
+            logger.debug("Cannot serialize error data.")
         else:
             return responses.BaseResponseClass(serializer.data, code)
 

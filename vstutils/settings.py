@@ -3,7 +3,7 @@ import os
 import gc
 import pwd
 import sys
-from tempfile import gettempdir
+from tempfile import gettempdir, tempdir
 
 from django.contrib import admin
 from django.utils.functional import lazy
@@ -49,7 +49,7 @@ FULL_VERSION: _t.Text = f'{PROJECT_VERSION}_{PROJECT_LIB_VERSION}_{VSTUTILS_VERS
 PROJECT_GUI_NAME: _t.Text = os.getenv("VST_PROJECT_GUI_NAME", ENV_NAME[0].upper()+ENV_NAME[1:].lower())
 
 PY_VER: _t.SupportsInt = sys.version_info.major
-TMP_DIR: _t.Text = gettempdir() or '/tmp'
+TMP_DIR: _t.Text = gettempdir() or '/tmp'  # nosec
 BASE_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
 VST_PROJECT_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_project_module.__file__))
 VST_PROJECT_LIB_DIR: _t.Text = os.path.dirname(os.path.abspath(vst_lib_module.__file__))
@@ -353,7 +353,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'cache': {
             "backend": 'django.core.cache.backends.filebased.FileBasedCache',
-            'location': '/tmp/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
+            'location': TMP_DIR + '/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
             'timeout': '10m'
         },
         'mail': {

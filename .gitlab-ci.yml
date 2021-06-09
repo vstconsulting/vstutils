@@ -43,7 +43,7 @@ code_style:
   <<: *branch_tests
   stage: code_standarts
   variables:
-    TOX_ENVS: "flake,mypy,pylint  --parallel 3"
+    TOX_ENVS: "flake,mypy,pylint,bandit  --parallel 3"
 
 js_style:
   <<: *branch_tests

@@ -16,4 +16,4 @@ class YamlSessionSerializer:
         return yaml.dump(obj, Dumper=Dumper).encode('latin-1')
 
     def loads(self, data):
-        return yaml.load(data.decode('latin-1'), Loader=Loader)
+        return yaml.load(data.decode('latin-1'), Loader=Loader)  # nosec
