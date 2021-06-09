@@ -1,4 +1,4 @@
 # Packages needed for delayed jobs.
-celery[redis,sqlalchemy]==5.0.5
+celery[redis,sqlalchemy]==5.1.0
 django-celery-beat~=2.2.0
 django-timezone-field~=4.1.1

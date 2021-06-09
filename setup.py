@@ -412,7 +412,13 @@ kwargs = dict(
             i.replace('libcloud', 'libcloud,boto3')
             for i in load_requirements('requirements.txt')
             if isinstance(i, str) and 'django-storages' in i
-        ]
+        ],
+        'sqs': [
+            i.replace('redis', 'sqs,redis')
+            if isinstance(i, str) and 'celery' in i
+            else i
+            for i in load_requirements('requirements-rpc.txt')
+        ],
     },
     dependency_links=[
     ] + load_requirements('requirements-git.txt'),
@@ -428,8 +434,9 @@ kwargs = dict(
 )
 
 all_deps = []
-for deps in kwargs['extras_require'].values():
-    all_deps += deps
+for key, deps in kwargs['extras_require'].items():
+    if key not in ('sqs',):
+        all_deps += deps
 
 kwargs['extras_require']['all'] = all_deps
 

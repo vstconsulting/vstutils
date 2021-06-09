@@ -114,6 +114,11 @@ class BoolOrStringType(cconfig.BaseType):
         return str(value)  # nocv
 
 
+class FloatType(cconfig.BaseType):
+    def convert(self, value: _t.Any) -> _t.SupportsFloat:
+        return float(value)
+
+
 class BackendSection(cconfig.Section):
     __slots__ = ()
 
@@ -232,6 +237,16 @@ class RPCSection(BaseAppendSection):
     }
 
 
+class RPCBrokerSection(BaseAppendSection):
+    __slots__ = ()
+    types_map = {
+        'visibility_timeout': ConfigIntSecondsType,
+        'wait_time_seconds': ConfigIntSecondsType,
+        'max_retries': ConfigIntType,
+        'polling_interval': FloatType(),
+    }
+
+
 class WorkerSection(BaseAppendSection):
     __slots__ = ()
     types_map = {
@@ -261,6 +276,7 @@ class ThrottleSection(BaseAppendSection):
         'rate': ConfigStringType,
         'actions': ConfigListType,
     }
+
 
 class Boto3Subsection(BackendSection):
     types_map = {
@@ -365,6 +381,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'results_expiry_days': 1,
             'create_instance_attempts': 10,
             'default_delivery_mode': "persistent",
+            'broker_transport_options': {}
         },
         'worker': {
             'app': '{PROG_NAME}.wapp:app',
@@ -400,6 +417,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'mail': MailSection,
         'uwsgi': UWSGISection,
         'rpc': RPCSection,
+        'rpc.broker_transport_options': RPCBrokerSection,
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
@@ -962,15 +980,16 @@ SILENCED_SYSTEM_CHECKS: _t.List = [
 ##############################################################
 if RPC_ENABLED:
     rpc: RPCSection = config['rpc']
+    CELERY_BROKER_TRANSPORT_OPTIONS: _t.Dict = rpc['broker_transport_options'].all()
     __broker_url = rpc.get("connection", fallback="file:///tmp")
     if __broker_url.startswith("file://"):
         __broker_folder = __broker_url.split("://", 1)[1]
         CELERY_BROKER_URL = "filesystem://"
-        CELERY_BROKER_TRANSPORT_OPTIONS = {
+        CELERY_BROKER_TRANSPORT_OPTIONS.update({
             "data_folder_in": __broker_folder,
             "data_folder_out": __broker_folder,
             "data_folder_processed": __broker_folder,
-        }
+        })
         CELERY_RESULT_BACKEND = __broker_url
     else:  # nocv
         CELERY_BROKER_URL = __broker_url
