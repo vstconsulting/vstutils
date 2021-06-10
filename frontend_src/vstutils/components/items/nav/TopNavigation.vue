@@ -79,7 +79,7 @@
 
 <script>
     import $ from 'jquery';
-    import { Gravatar } from '../../../users';
+    import Gravatar from '../../../users/Gravatar.js';
     import { saveHideMenuSettings } from '../../../utils';
 
     /**

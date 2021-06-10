@@ -114,12 +114,6 @@ class DynamicField extends BaseField {
 
         return parent_values;
     }
-    _getCurrentPath() {
-        return (
-            this.constructor.app.application.$refs.currentViewComponent?.view?.path ||
-            this.constructor.app.application.$route.name
-        );
-    }
     /**
      * Method, that returns real field instance - some guiField instance of format,
      * that current field should have in current moment.
@@ -136,7 +130,7 @@ class DynamicField extends BaseField {
             this._getFromChoices(parentValues) ||
             this._getDefault();
 
-        field.prepareFieldForView(this._getCurrentPath());
+        field.prepareFieldForView(this.constructor.app.getCurrentViewPath());
 
         return field;
     }

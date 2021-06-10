@@ -69,6 +69,11 @@ export class App extends BaseApp {
          */
         this.application = null;
     }
+
+    getCurrentViewPath() {
+        return this.application.$refs.currentViewComponent?.view?.path;
+    }
+
     afterInitialDataBeforeMount() {
         this.prepareFieldsClasses();
 
@@ -101,10 +106,23 @@ export class App extends BaseApp {
 
     prepareViewsModelsFields() {
         for (const [path, view] of this.views) {
-            if (!view.objects) continue;
-            const models = new Set(
-                Object.values(view.objects.models).flatMap((m) => (Array.isArray(m) ? m : [m])),
-            );
+            const models = new Set();
+
+            if (view.objects) {
+                for (const m of Object.values(view.objects.models)) {
+                    if (Array.isArray(m)) {
+                        for (const model of m) models.add(model);
+                    } else {
+                        models.add(m);
+                    }
+                }
+            }
+            if (view.modelsList) {
+                for (const model of view.modelsList) {
+                    if (model) models.add(model);
+                }
+            }
+
             for (const model of models) {
                 if (model) {
                     for (const field of model.fields.values()) {

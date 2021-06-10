@@ -25,6 +25,10 @@
         mounted() {
             $(this.$refs.modal).modal({ show: false });
         },
+        beforeDestroy() {
+            $(this.$refs.modal).modal('dispose');
+            for (const el of Array.from(document.getElementsByClassName('modal-backdrop'))) el.remove();
+        },
         methods: {
             open() {
                 $(this.$refs.modal).modal('show');
