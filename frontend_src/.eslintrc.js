@@ -21,5 +21,6 @@ module.exports = {
     globals: {
         app: 'readonly',
         Vue: 'readonly',
+        jest: 'readonly',
     },
 };

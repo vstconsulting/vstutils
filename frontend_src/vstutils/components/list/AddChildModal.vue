@@ -1,72 +1,29 @@
 <template>
-    <div style="display: inline-block">
-        <Preloader v-if="showLoader" />
-
-        <Modal v-show="showModal" @close="close" @apply="addSelected">
-            <template #header>
-                <h3>{{ ($t('add') + ' ' + $t('child instances')) | capitalize }}</h3>
-            </template>
-            <template #body>
-                <FKMultiAutocompleteFieldSearchInput
-                    :field_props="{ view_field: viewField.name }"
-                    @filterQuerySetItems="filterQuerySetItems"
-                />
-                <template v-if="!instances.length">
-                    <p class="text-center">
-                        {{ $t('list is empty') | capitalize }}
-                    </p>
-                </template>
-                <template v-else>
-                    <Pagination v-bind="pagination" @open-page="goToPage" />
-                    <ListTable
-                        :instances="instances"
-                        :selection="selection"
-                        :fields="fields"
-                        :has-multi-actions="true"
-                        @row-clicked="rowClicked"
-                        @toggle-selection="toggleSelection"
-                        @toggle-all-selection="toggleAllSelection"
-                    />
-                </template>
-            </template>
-            <template #footer>
-                <button
-                    class="btn btn-default btn-operation-add-child-close"
-                    aria-label="Cancel"
-                    @click="close"
-                >
-                    {{ $t('cancel') | capitalize }}
-                </button>
-                <button
-                    class="btn btn-primary btn-operation-add-child-apply"
-                    aria-label="Add selected"
-                    @click="addSelected"
-                >
-                    {{ $t('add') | capitalize }}
-                </button>
-            </template>
-        </Modal>
-        <OperationButton
-            :title="$t('add') | capitalize"
-            classes="btn btn-primary btn-operation-add"
-            icon-classes="fa fa-folder-open"
-            @clicked="open"
-        />
-    </div>
+    <BaseListModal
+        class="add-child-modal"
+        :qs="queryset"
+        :title="($t('add') + ' ' + $t('child instances')) | capitalize"
+        apply-button-text="Add"
+        @apply="addSelected"
+    >
+        <template #activator="{ openModal }">
+            <OperationButton
+                :title="$t('add') | capitalize"
+                classes="btn btn-primary btn-operation-add"
+                icon-classes="fa fa-folder-open"
+                @clicked="openModal"
+            />
+        </template>
+    </BaseListModal>
 </template>
 
 <script>
-    import Preloader from '../common/Preloader.vue';
+    import { formatPath, joinPaths } from '../../utils';
     import OperationButton from '../common/OperationButton.vue';
-    import Modal from '../items/modal/Modal.vue';
-    import Pagination from './Pagination.vue';
-    import { formatPath, joinPaths, RequestTypes } from '../../utils';
-    import ListTable from './ListTable.vue';
-    import BaseModalWindowForInstanceList from '../../fields/BaseModalWindowForInstanceList.vue';
-    import FKMultiAutocompleteFieldSearchInput from '../../fields/fk/multi-autocomplete/FKMultiAutocompleteFieldSearchInput.vue';
     import { guiPopUp, pop_up_msg } from '../../popUp';
-    import { Model, ModelClass } from '../../models/Model.js';
+    import { Model, ModelClass } from '../../models';
     import StringField from '../../fields/text/StringField.js';
+    import BaseListModal from './BaseListModal';
 
     @ModelClass()
     class AppendNestedModel extends Model {
@@ -79,8 +36,7 @@
      */
     export default {
         name: 'AddChildModal',
-        components: { FKMultiAutocompleteFieldSearchInput, ListTable, Pagination, Modal, Preloader, OperationButton },
-        mixins: [BaseModalWindowForInstanceList],
+        components: { BaseListModal, OperationButton },
         props: {
             view: { type: Object, required: true },
         },
@@ -91,35 +47,11 @@
                 }),
             };
         },
-        computed: {
-            model() {
-                return this.view.objects.getResponseModelClass(RequestTypes.LIST);
-            },
-            fields() {
-                return Array.from(this.model.fields.values()).filter(
-                    (field) => !field.hidden && field !== this.model.pkField,
-                );
-            },
-            allSelected() {
-                return this.instances.every((instance) => this.selection.includes(instance.getPkValue()));
-            },
-            viewField() {
-                return this.model.viewField;
-            },
-        },
         methods: {
-            rowClicked(instance) {
-                this.addChildToParent(instance.getPkValue());
-                this.close();
-            },
-            /**
-             * Method, that inits adding of selected child instances to parent list.
-             */
-            addSelected() {
-                for (const id of this.selection) {
-                    this.addChildToParent(id);
+            addSelected(instances) {
+                for (const instance of instances) {
+                    this.addChildToParent(instance.getPkValue());
                 }
-                this.close();
             },
             async addChildToParent(instanceId) {
                 const qs = this.view.objects.clone({
@@ -145,12 +77,6 @@
                     let srt_to_show = this.$t(pop_up_msg.instance.error.add, [this.$t(this.view.title), str]);
                     this.$app.error_handler.showError(srt_to_show, str);
                 }
-            },
-            /**
-             * Redefinitions of base 'onClose' method.
-             */
-            onClose() {
-                this.selections = { ...{} };
             },
         },
     };

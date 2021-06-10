@@ -5,7 +5,6 @@ import { formatPath } from '../../../utils';
  * @vue/component
  */
 export default {
-    inject: ['view'],
     data() {
         return {
             fetchedValue: null,
@@ -16,7 +15,7 @@ export default {
          * Property, that stores all querysets for current field.
          */
         querysets() {
-            return this.field.getAllQuerysets(this.view?.path);
+            return this.field.getAllQuerysets(this.$app.getCurrentViewPath());
         },
 
         /**

@@ -48,12 +48,11 @@ import * as hidden from './hidden.js';
 import * as staticValue from './static-value.js';
 export { apiData, color, email, hidden, staticValue };
 
-import BaseModalWindowForInstanceList from './BaseModalWindowForInstanceList.vue';
 import FieldLabelIdMixin from './FieldLabelIdMixin.js';
 import ModalWindowAndButtonMixin from './ModalWindowAndButtonMixin.js';
 import TableRowMixin from './TableRowMixin.js';
 import $ from 'jquery';
-export { BaseModalWindowForInstanceList, FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
+export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
 /**
  * Method, that creates new getFieldFormat function for given fields map.

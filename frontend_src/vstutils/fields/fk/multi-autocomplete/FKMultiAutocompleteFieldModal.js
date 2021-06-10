@@ -1,11 +1,4 @@
-import BaseModalWindowForInstanceList from '../../BaseModalWindowForInstanceList.vue';
-
-/**
- * Vue component for fk_multi_autocomplete modal window with instances,
- * that could be chosen.
- */
 const FKMultiAutocompleteFieldModal = {
-    mixins: [BaseModalWindowForInstanceList],
     computed: {
         /**
          * Property, that returns qs for modal window.
