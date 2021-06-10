@@ -1,12 +1,16 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
+import uuid
 from functools import lru_cache, partial
 from itertools import chain
 from copy import deepcopy
 
 from django_filters import rest_framework as filters, filterset
+from django.core.cache import caches as django_caches
 from django.db.models.base import ModelBase
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
 from django.utils.functional import SimpleLazyObject, lazy
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from rest_framework.fields import ModelField, JSONField
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 
@@ -95,6 +99,10 @@ default_extra_metadata: dict = {
 
 
 # Handlers
+def update_cache_for_model(instance, **kwargs):
+    instance.__class__.set_etag_value()
+
+
 def get_first_match_name(field_names, default=None):
     return next(
         (i for i in field_names if i in DEFAULT_VIEW_FIELD_NAMES),
@@ -218,7 +226,21 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             model_class.__extra_metadata__['filter_backends'] = lazy(_set_deep_filter_or_not, list)(
                 model_class.__extra_metadata__['filter_backends']
             )
+        if getattr(model_class, '_cache_responses', False):
+            receiver(post_save, sender=model_class)(update_cache_for_model)
+            receiver(post_delete, sender=model_class)(update_cache_for_model)
         return model_class
+
+    def get_api_cache_name(cls):
+        return f'api_caching_{cls.__name__}'
+
+    def get_etag_value(cls):
+        # pylint: disable=no-value-for-parameter
+        return str(django_caches['etag'].get(cls.get_api_cache_name(), str(uuid.uuid4())))
+
+    def set_etag_value(cls):
+        # pylint: disable=no-value-for-parameter
+        django_caches['etag'].set(cls.get_api_cache_name(), str(uuid.uuid4()))
 
     @classproperty
     @lru_cache()
@@ -455,6 +477,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             view_class_data = (view_class_data,)
 
         view_class = [cls._get_view_class(v) for v in view_class_data]
+        if getattr(cls, '_cache_responses', False):
+            view_class.insert(0, api_base.CachableHeadMixin)
 
         if metadata['copy_attrs']:
             view_attributes.update(map(lambda r: (f'copy_{r[0]}', r[1]), metadata['copy_attrs'].items()))

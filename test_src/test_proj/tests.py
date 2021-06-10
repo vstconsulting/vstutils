@@ -10,7 +10,6 @@ import io
 import pwd
 import base64
 import datetime
-import tempfile
 from pathlib import Path
 from smtplib import SMTPException
 
@@ -2157,6 +2156,30 @@ class ProjectTestCase(BaseTestCase):
                 'mediaType': ''
             }
         ]
+
+    def test_cachable_model(self):
+        CachableModel = self.get_model_class('test_proj.CachableModel')
+        results = self.bulk([
+            {"method": 'get', "path": ['cachable']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+
+        instance = CachableModel.objects.create(name='1')
+        results = self.bulk([
+            {"method": 'get', "path": ['cachable']},
+            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": '<<0[headers][ETag]>>'}},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], 1)
+        self.assertEqual(results[1]['status'], 304)
+
+        instance.save()
+        results = self.bulk([
+            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": results[0]['headers']['ETag']}},
+            {"method": 'get', "path": ['cachable'], 'headers': {"HTTP_IF_NONE_MATCH": '<<0[headers][ETag]>>'}},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[1]['status'], 304)
 
     def test_env_vars(self):
         self.assertIn(settings.TEST_VAR_FROM_ENV, (os.environ['HOME'], 'default'))

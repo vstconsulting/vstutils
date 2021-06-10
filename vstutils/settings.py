@@ -169,6 +169,7 @@ class WebSection(BaseAppendSection):
         'health_throttle_rate': ConfigIntType,
         'bulk_threads': ConfigIntType,
         'max_tfa_attempts': ConfigIntType,
+        'etag_default_timeout': ConfigIntSecondsType,
     }
 
 
@@ -339,6 +340,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'health_throttle_rate': 60,
             'bulk_threads': 3,
             'max_tfa_attempts': ConfigIntType(os.getenv(f'{ENV_NAME}_MAX_TFA_ATTEMPTS', 5)),
+            'etag_default_timeout': ConfigIntSecondsType(os.getenv(f'{ENV_NAME}_ETAG_TIMEOUT', '1d')),
         },
         'database': {
             'engine': 'django.db.backends.sqlite3',
@@ -760,13 +762,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#caches
 ##############################################################
 default_cache = config['cache'].all()
-session_cache = config['session'].all() or default_cache
+session_cache = config['session'].all() or config['cache'].all()
 session_cache['TIMEOUT'] = SESSION_COOKIE_AGE
+etag_cache = config['etag'].all() or config['cache'].all()
+etag_cache['TIMEOUT'] = web['etag_default_timeout']
 
 CACHES: SIMPLE_OBJECT_SETTINGS_TYPE = {
     'default': default_cache,
     "locks": config['locks'].all() or default_cache,
     "session": session_cache,
+    "etag": etag_cache,
 }
 
 

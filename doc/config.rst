@@ -277,6 +277,7 @@ session_timeout, static_files_url or pagination limit.
 * **health_throttle_rate** - Count of requests to `/api/health/` endpoint. Default: 60.
 * **bulk_threads** - Threads count for PATCH `/api/endpoint/` endpoint. Default: 3.
 * **session_timeout** - Session life-cycle time. Default: 2w (two weeks).
+* **etag_default_timeout** - Cache timeout for Etag headers which controlling models caching. Default: 1d (one day).
 * **rest_page_limit** and **page_limit** - Default limit of objects in API list. Default: 1000.
 * **session_cookie_domain** - The domain to use for session cookies.
   Read :django_docs:`more <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. Default: None.

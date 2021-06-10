@@ -150,7 +150,7 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
         else:
             return responses.BaseResponseClass(serializer.data, code)
 
-    logger.info(traceback_str)
+    logger.info(traceback_str) if getattr(exc, 'status_code', 400) >= 400 else None
     default_response = rvs.exception_handler(exc, context)
 
     if isinstance(exc, exceptions.NotAuthenticated):  # nocv
@@ -396,6 +396,31 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     @classmethod
     def as_view(cls, actions=None, **initkwargs):
         return super().as_view(actions, **initkwargs)
+
+
+class CachableHeadMixin(GenericViewSet):
+    """
+    Mixin which cache GET responses.
+    Uses standard HTTP-caching mechanism which response 304 when Etag match.
+
+    .. warning::
+        This works only with models based on :class:`vstutils.models.BModel`.
+    """
+
+    class NotModifiedException(exceptions.APIException):
+        status_code = 304
+        default_detail = ''
+        default_code = 'cached'
+
+    def initial(self, request: Request, *args: _t.Any, **kwargs: _t.Any) -> None:
+        super().initial(request, *args, **kwargs)
+
+        etag_data = self.queryset.model.get_etag_value()  # type: ignore
+        self.headers['ETag'] = etag_data
+
+        if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
+            raise self.NotModifiedException("")
+        # TODO: Workflow with ETag on PUT/PATCH
 
 
 class CopyMixin(GenericViewSet):
