@@ -45,6 +45,10 @@ default_authentication_classes = (
 )
 
 append_to_list = list.append
+response_headers_to_pass = (
+    "ETag",
+    "Location"
+)
 
 
 @functools.singledispatch
@@ -101,7 +105,12 @@ class ParseResponseDict(dict):
             path=path,
             status=response.status_code,
             data=self._get_rendered(response),
-            method=method
+            method=method,
+            headers={
+                header: response.headers[header]
+                for header in response.headers
+                if header in response_headers_to_pass
+            }
         )
         self.timing = float(response.get('Response-Time', '0.0'))
 
@@ -253,7 +262,7 @@ class OperationSerializer(serializers.Serializer):
 
     path = PathField(required=True)
     method = MethodChoicesField(required=True)
-    headers = serializers.DictField(child=TemplateStringField(), default={}, write_only=True)
+    headers = serializers.DictField(child=TemplateStringField(), default={})
     data = RequestDataField(required=False, default=None, allow_null=True)  # type: ignore
     status = serializers.IntegerField(read_only=True, default=500)
     info = serializers.CharField(read_only=True)
