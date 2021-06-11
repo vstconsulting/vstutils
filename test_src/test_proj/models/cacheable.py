@@ -9,3 +9,8 @@ class CachableModel(BModel):
     class Meta:
         _list_fields = ['name']
         _view_class = 'read_only'
+
+
+class CachableProxyModel(CachableModel):
+    class Meta(CachableModel.OriginalMeta):
+        proxy = True

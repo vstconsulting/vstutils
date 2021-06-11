@@ -10,4 +10,4 @@ from .some import (
 from .files import File, List, ListOfFiles
 from .contented import VarBasedModel, Variable, VariableType
 from .fields_testing import Post, ExtraPost, Author
-from .cacheable import CachableModel
+from .cacheable import CachableModel, CachableProxyModel

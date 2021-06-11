@@ -232,7 +232,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         return model_class
 
     def get_api_cache_name(cls):
-        return f'api_caching_{cls.__name__}'
+        return f'api_caching_table_{cls._meta.db_table}'
 
     def get_etag_value(cls):
         # pylint: disable=no-value-for-parameter
