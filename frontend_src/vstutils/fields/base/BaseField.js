@@ -59,6 +59,9 @@ class BaseField {
             /** @type {TInner} */
             this.default = options.default;
 
+        this.prependText = this.props.prependText || '';
+        this.appendText = this.props.appendText || '';
+
         this.component = {
             name: `${this.constructor.name || capitalize(this.name)}FieldComponent`,
             mixins: this.constructor.mixins,

@@ -1,5 +1,5 @@
 <template>
-    <span v-text="preparedValue" />
+    <span v-text="valueWithAdditionalText" />
 </template>
 
 <script>
@@ -12,6 +12,9 @@
         name: 'BaseFieldListView',
         mixins: [BaseFieldInnerComponentMixin],
         computed: {
+            valueWithAdditionalText() {
+                return this.field.prependText + this.preparedValue + this.field.appendText;
+            },
             preparedValue() {
                 return this.value;
             },

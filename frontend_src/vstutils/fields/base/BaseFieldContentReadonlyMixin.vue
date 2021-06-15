@@ -1,6 +1,6 @@
 <template>
     <p :aria-label="aria_label" :aria-labelledby="label_id">
-        {{ preparedValue }}
+        {{ valueWithAdditionalText }}
     </p>
 </template>
 
@@ -14,6 +14,9 @@
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         props: ['field', 'value', 'data'],
         computed: {
+            valueWithAdditionalText() {
+                return this.field.prependText + this.preparedValue + this.field.appendText;
+            },
             preparedValue() {
                 return this.value;
             },

@@ -172,7 +172,6 @@ class DynamicField extends BaseField {
     }
 
     _getDefault() {
-        console.warn(`Default field is used for ${this.model?.name}#${this.name}`);
         return this.constructor.app.getField(this.name, 'string');
     }
 }

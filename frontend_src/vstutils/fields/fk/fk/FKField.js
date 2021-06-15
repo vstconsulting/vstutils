@@ -80,7 +80,7 @@ class FKField extends BaseField {
         } else {
             querysets = [this.constructor.app.qsResolver.findQuerySet(this.fkModel.name, path)];
         }
-        this.querysets.set(path, this._formatQuerysets(querysets));
+        this.querysets.set(path, querysets);
     }
 
     _formatQuerysets(querysets) {
