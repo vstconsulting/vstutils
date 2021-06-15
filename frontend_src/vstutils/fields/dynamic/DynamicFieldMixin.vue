@@ -4,6 +4,7 @@
         :field="realField"
         :data="data"
         :type="type"
+        :hideable="hideable"
         @toggleHidden="$emit('toggleHidden')"
         @set-value="$emit('set-value', $event)"
     />
@@ -20,10 +21,15 @@
                 realField: this.field.getRealField(this.data),
             };
         },
+        computed: {
+            parentValues() {
+                return this.field._getParentValues(this.data);
+            },
+        },
         watch: {
-            data(newData, oldData) {
-                if (!deepEqual(this.field._getParentValues(newData), this.field._getParentValues(oldData))) {
-                    this.realField = this.field.getRealField(newData);
+            parentValues(newValues, oldValues) {
+                if (!deepEqual(newValues, oldValues)) {
+                    this.realField = this.field.getRealField(newValues);
                 }
             },
         },
