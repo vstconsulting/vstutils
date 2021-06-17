@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CustomTranslations',
             fields=[
-                ('original', models.CharField(max_length=1024, primary_key=True, serialize=False)),
-                ('translated', models.CharField(max_length=1024)),
+                ('original', models.CharField(max_length=380, primary_key=True, serialize=False)),
+                ('translated', models.CharField(max_length=380)),
                 ('code', models.CharField(max_length=5)),
             ],
             options={

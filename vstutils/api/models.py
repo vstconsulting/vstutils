@@ -59,8 +59,8 @@ class Language(ListModel):
 
 
 class CustomTranslations(BaseModel):
-    original = CharField(primary_key=True, max_length=1024)
-    translated = CharField(max_length=1024)
+    original = CharField(primary_key=True, max_length=380)
+    translated = CharField(max_length=380)
     code = CharField(max_length=5)
 
     class Meta:
