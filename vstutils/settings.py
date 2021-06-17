@@ -282,12 +282,13 @@ class ThrottleSection(BaseAppendSection):
 class Boto3Subsection(BackendSection):
     types_map = {
         'querystring_auth': ConfigBoolType,
-        's3_max_memory_size': ConfigIntType,
         'querystring_expire': ConfigIntSecondsType,
-        's3_file_overwrite': ConfigBoolType,
         'is_gzipped': ConfigBoolType,
         's3_use_ssl': ConfigBoolType,
+        's3_secure_urls': ConfigBoolType,
         's3_verify': BoolOrStringType(),
+        's3_max_memory_size': ConfigIntType,
+        's3_file_overwrite': ConfigBoolType,
         'content_types': ConfigListType,
         'gzip_content_types': ConfigListType,
     }
