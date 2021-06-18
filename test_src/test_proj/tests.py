@@ -1135,7 +1135,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         'address': 'https://localhost:8000',
         'api_key': "XXX",
         'token_hmac_secret_key': "YYY"
-    })
+    }, CENTRIFUGO_PUBLIC_HOST='https://public:8000')
     def test_get_openapi(self):
         api = self.endpoint_schema()
 
@@ -1143,7 +1143,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['info']['title'], 'Example Project')
 
         # Check Centrifugo settings
-        self.assertEqual(api['info']['x-centrifugo-address'], "wss://localhost:8000")
+        self.assertEqual(api['info']['x-centrifugo-address'], "wss://public:8000")
         self.assertIn('x-centrifugo-token', api['info'])
 
         # Check docs info

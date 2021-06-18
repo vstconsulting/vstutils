@@ -265,6 +265,7 @@ class WorkerSection(BaseAppendSection):
 class CentrifugoSection(cconfig.Section):
     __slots__ = ()
     type_address = cconfig.StrType()
+    type_public_address = cconfig.StrType()
     type_api_key = cconfig.StrType()
     type_token_hmac_secret_key = cconfig.StrType()
     type_timeout = ConfigIntSecondsType
@@ -1171,6 +1172,7 @@ SPA_STATIC: _t.List[_t.Dict] = [
 
 # Centrifugo settings
 CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
+CENTRIFUGO_PUBLIC_HOST = CENTRIFUGO_CLIENT_KWARGS.pop('public_address', None) or CENTRIFUGO_CLIENT_KWARGS.get('address')
 
 
 THROTTLE = config['throttle'].all()
