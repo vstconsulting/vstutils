@@ -1,4 +1,4 @@
-import { formatPath, joinPaths, parseResponseMessage, pathToArray, ViewTypes } from '../utils';
+import { formatPath, iterFind, joinPaths, parseResponseMessage, pathToArray, ViewTypes } from '../utils';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
@@ -123,13 +123,25 @@ export const BaseViewMixin = {
          * @private
          */
         _getRedirectUrlFromResponse(responseData) {
-            if (typeof responseData !== 'object') return;
-            const redirectField = Object.keys(responseData).find((key) => key.endsWith('_id'));
-            if (!redirectField) return;
+            if (!responseData || typeof responseData !== 'object') return;
 
-            const operationId = redirectField.replace(/_id$/, '') + '_get';
+            const field = iterFind(this.view.params.responseModel.fields.values(), (field) => field.redirect);
+            if (!field) return;
 
-            const matcher = (view) => view.operationId.endsWith(operationId) && view;
+            const redirect = field.redirect;
+
+            let operationId = redirect.operation_name || '';
+
+            if (redirect.depend_field) {
+                operationId += responseData[redirect.depend_field];
+            }
+            if (!operationId || redirect.concat_field_name) {
+                operationId = field.name;
+            }
+
+            operationId += '_get';
+
+            const matcher = (view) => view.operationId === operationId && view;
 
             const node = this.$app.viewsTree.root.get(pathToArray(this.view.path));
             const view =
@@ -137,7 +149,12 @@ export const BaseViewMixin = {
                 this.$app.viewsTree.findInParentsDeep(node, matcher) ||
                 this.$app.viewsTree.findInAllPaths(matcher);
 
-            return formatPath(view.path, { ...this.params, [view.pkParamName]: responseData[redirectField] });
+            if (!view) {
+                console.warn(`Can't find redirect view for operationId: ${operationId}`, field, responseData);
+                return;
+            }
+
+            return formatPath(view.path, { ...this.params, [view.pkParamName]: responseData[field.name] });
         },
 
         async executeEmptyAction(action, instance = undefined) {

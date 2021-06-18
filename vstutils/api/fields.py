@@ -510,7 +510,30 @@ class UptimeField(IntegerField):
     __slots__ = ()
 
 
-class RedirectIntegerField(IntegerField):
+class RedirectFieldMixin:
+    """
+    Field mixin which indicates that this field is used for instructing frontend where to redirect after some action.
+
+    :param operation_name: prefix for operation_id, for example if operation_id is `history_get`
+           then operation_name is `history`
+    :type operation_name: str
+    :param depend_field: name of the field that we depend on, its' value will be used for operation_id
+    :type depend_field: str
+    :param concat_field_name: if True then name of the field will be added at the end of operation_id
+    :type concat_field_name: bool
+    """
+    redirect: bool = True
+
+    __slots__ = ('operation_name', 'depend_field', 'concat_field_name')
+
+    def __init__(self, **kwargs):
+        self.operation_name = kwargs.pop('operation_name', None)
+        self.depend_field = kwargs.pop('depend_field', None)
+        self.concat_field_name = kwargs.pop('concat_field_name', False)
+        super().__init__(**kwargs)
+
+
+class RedirectIntegerField(RedirectFieldMixin, IntegerField):
     """
     Field for redirect by id. Often used in actions for redirect after execution.
 
@@ -520,10 +543,9 @@ class RedirectIntegerField(IntegerField):
     """
 
     __slots__ = ()
-    redirect: bool = True
 
 
-class RedirectCharField(CharField):
+class RedirectCharField(RedirectFieldMixin, CharField):
     """
     Field for redirect by string. Often used in actions for redirect after execution.
 
@@ -533,7 +555,6 @@ class RedirectCharField(CharField):
     """
 
     __slots__ = ()
-    redirect: bool = True
 
 
 class NamedBinaryFileInJsonField(VSTCharField):
@@ -559,11 +580,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     """
 
-    def __init__(self, **kwargs):
-        self.file = kwargs.pop('file', False)
-        super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
-
-    __slots__ = ()
+    __slots__ = ('file',)
 
     __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
@@ -571,6 +588,10 @@ class NamedBinaryFileInJsonField(VSTCharField):
         'missing key': 'key {missing_key} is missing',
         'invalid key': 'invalid key {invalid_key}',
     }
+
+    def __init__(self, **kwargs):
+        self.file = kwargs.pop('file', False)
+        super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
 
     def validate_value(self, data: _t.Dict):
         if not isinstance(data, dict):

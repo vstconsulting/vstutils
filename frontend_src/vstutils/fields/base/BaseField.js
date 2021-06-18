@@ -62,6 +62,8 @@ class BaseField {
         this.prependText = this.props.prependText || '';
         this.appendText = this.props.appendText || '';
 
+        this.redirect = this.props.redirect;
+
         this.component = {
             name: `${this.constructor.name || capitalize(this.name)}FieldComponent`,
             mixins: this.constructor.mixins,

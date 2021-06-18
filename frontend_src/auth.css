@@ -297,27 +297,22 @@ form > .row {
     padding: 10px;
 }
 
-.login-box,
-.register-box {
+.login-box {
+    max-width: 400px;
     margin: 0 auto;
     width: auto;
 }
 
-@media (max-width: 576px) {
-    .login-box,
-    .register-box {
-        margin: 0 auto;
-        max-width: 400px;
-        width: auto;
-    }
-}
-
-.login-box-body,
-.register-box-body {
+.login-box-body {
     background: #ffffff;
     padding: 20px;
     border-top: 0;
     color: #666;
+}
+
+body.register-page .login-box {
+    max-width: unset;
+    width: auto;
 }
 
 .logo-img {

@@ -1050,9 +1050,10 @@ export function parseResponseMessage(data) {
         return data.join('<br>');
     }
     if (typeof data === 'object') {
-        return Object.entries(data)
-            .filter((entry) => !entry[0].endsWith('_id'))
-            .reduce((result, [name, value]) => result + `<b>${name}:</b> ${value}<br>`, '');
+        return Object.entries(data).reduce(
+            (result, [name, value]) => result + `<b>${name}:</b> ${value}<br>`,
+            '',
+        );
     }
     return '';
 }
@@ -1116,5 +1117,20 @@ export function registerHook(signalName, func) {
         func();
     } else if (!isEmitted) {
         signals.once(signalName, func);
+    }
+}
+
+/**
+ * Function that returns first item from iterator for which callbackFn will return true
+ * @param {Iterable<T>} iterable
+ * @param {Function} callbackFn
+ * @returns {T|undefined}
+ * @template T
+ */
+export function iterFind(iterable, callbackFn) {
+    for (const item of iterable) {
+        if (callbackFn(item)) {
+            return item;
+        }
     }
 }

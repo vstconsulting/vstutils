@@ -96,7 +96,11 @@ def field_have_redirect(field, **kwargs):
 
     if kwargs.get('additionalProperties', None) is None:
         kwargs['additionalProperties'] = {}
-    kwargs['additionalProperties']['redirect'] = field.field_name.rsplit('_', 1)[0]
+    kwargs['additionalProperties']['redirect'] = {
+        'operation_name': getattr(field, 'operation_name', None) or field.field_name,
+        'depend_field': getattr(field, 'depend_field', None),
+        'concat_field_name': getattr(field, 'concat_field_name', False),
+    }
 
     return kwargs
 

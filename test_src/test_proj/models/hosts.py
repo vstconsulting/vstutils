@@ -48,7 +48,7 @@ class Host(BModel):
             'string_filter_applied'
         )
         _override_list_fields = {
-            'id': fields.RedirectIntegerField(read_only=True),
+            'id': fields.RedirectIntegerField(read_only=True, operation_name='files'),
             'name': fields.DependEnumField(field='id', choices={3: 'hello', 1: 'NOO!'}),
             'local_filter_applied': fields.IntegerField(default=0, read_only=True),
             'filter_applied': fields.IntegerField(default=0, read_only=True),
