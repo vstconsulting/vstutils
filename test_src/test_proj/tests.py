@@ -1431,6 +1431,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
         for field_name in fields_in_filterset_list:
             self.assertNotIn(field_name, fields_of_model_list)
 
+        # Check RedirectFieldMixin's schema
+        self.assertDictEqual(api['definitions']['Host']['properties']['id']['additionalProperties']['redirect'], {
+            'operation_name': 'files',
+            'depend_field': None,
+            'concat_field_name': False,
+        })
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')
