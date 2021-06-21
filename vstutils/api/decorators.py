@@ -248,7 +248,11 @@ class NestedViewMixin:
 
     def perform_destroy(self, instance):
         if self.master_view.nested_allow_append:  # type: ignore
+            # pylint: disable=import-outside-toplevel
+            from vstutils.models import notify_clients
+
             self.nested_manager.remove(instance)
+            notify_clients(instance.__class__, instance.pk)
         else:
             instance.delete()
 
@@ -316,11 +320,6 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
 
         label = objects.model._meta.label
 
-        bulk_notify_clients(objects=(
-            (label, pk)
-            for pk in id_list
-        ))
-
         handler = self.get_serializer_class()().get_fields()[nested_append_arg].to_representation
 
         def is_not_created(data):
@@ -329,9 +328,15 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
             except:
                 return True
 
+        notif_objects = tuple(
+            (label, pk)
+            for pk in id_list
+        )
         id_list += super()._data_create(
             filter(is_not_created, request_data), nested_append_arg
         )
+
+        bulk_notify_clients(objects=notif_objects)
         return id_list
 
 
