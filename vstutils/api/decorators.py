@@ -290,6 +290,7 @@ class NestedWithoutAppendMixin(NestedViewMixin):
         )
         qs_filter = {nested_append_arg + '__in': id_list}
         queryset = self.get_queryset().filter(**qs_filter)
+
         if not many:
             queryset = queryset.get()
 
@@ -301,6 +302,9 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
     __slots__ = ()
 
     def _data_create(self, request_data, nested_append_arg):
+        # pylint: disable=import-outside-toplevel
+        from vstutils.models import bulk_notify_clients
+
         filter_arg = f'{nested_append_arg}__in'
         request_data = [ensure_is_object(d) for d in request_data]
         objects = self.get_queryset().model.objects.filter(**{
@@ -308,7 +312,15 @@ class NestedWithAppendMixin(NestedWithoutAppendMixin):
         })
         self._check_permission_obj(objects)
         self.nested_manager.add(*objects)
-        id_list = list(objects.values_list(nested_append_arg, flat=True))
+        id_list = [o.pk for o in objects]
+
+        label = objects.model._meta.label
+
+        bulk_notify_clients(objects=(
+            (label, pk)
+            for pk in id_list
+        ))
+
         handler = self.get_serializer_class()().get_fields()[nested_append_arg].to_representation
 
         def is_not_created(data):
