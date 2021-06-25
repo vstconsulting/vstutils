@@ -418,6 +418,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'cache': CacheSection,
         'locks': CacheSection,
         'session': CacheSection,
+        'etag': CacheSection,
         'mail': MailSection,
         'uwsgi': UWSGISection,
         'rpc': RPCSection,

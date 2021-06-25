@@ -236,7 +236,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
     def get_etag_value(cls):
         # pylint: disable=no-value-for-parameter
-        return str(django_caches['etag'].get(cls.get_api_cache_name(), str(uuid.uuid4())))
+        return str(django_caches['etag'].get_or_set(cls.get_api_cache_name(), str(uuid.uuid4())))
 
     def set_etag_value(cls):
         # pylint: disable=no-value-for-parameter
