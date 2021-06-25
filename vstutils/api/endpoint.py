@@ -283,14 +283,17 @@ class OperationSerializer(serializers.Serializer):
 
     def create(self, validated_data: _t.Dict[_t.Text, _t.Union[_t.Text, _t.Mapping]]) -> ParseResponseDict:
         # pylint: disable=protected-access
-        method = self.get_operation_method(str(validated_data['method']))
+        method_name = str(validated_data['method']).lower()
+        method = self.get_operation_method(method_name)
         url = _join_paths(API_URL, validated_data['version'], validated_data['path'])
         query = validated_data['query']
         if query:
             url += '?' + str(query)
+        if method_name != 'get':
+            method = transaction.atomic()(method)
         return ParseResponseDict(
             path=url,
-            method=str(validated_data['method']),
+            method=method_name,
             response=method(  # type: ignore
                 url,
                 content_type='application/json',
@@ -391,7 +394,6 @@ class EndpointViewSet(views.APIView):
             **context
         }
 
-    @transaction.atomic()
     def operate(self, operation_data: _t.Dict, context: _t.Dict) -> _t.Tuple[_t.Dict, _t.SupportsFloat]:
         """Method used to handle one operation and return result of it"""
         serializer = self.get_serializer(data=operation_data, context=context)

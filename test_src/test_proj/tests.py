@@ -1651,7 +1651,7 @@ class EndpointTestCase(BaseTestCase):
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
 
         self.assertEqual(len(request), len(response))
-        self.assertEqual('GET', response[0]['method'])
+        self.assertEqual('get', response[0]['method'])
         self.assertEqual('/api/v1/user/1/', response[0]['path'])
         self.assertEqual(200, response[0]['status'])
         # self.assertEqual('v1', response[0]['version'])
@@ -1690,10 +1690,9 @@ class EndpointTestCase(BaseTestCase):
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
 
         self.assertEqual(len(request), len(response))
-        self.assertEqual('GET', response[0]['method'])
+        self.assertEqual('get', response[0]['method'])
         self.assertEqual('/api/v1/user/?limit=5', response[0]['path'])
         self.assertEqual(200, response[0]['status'])
-        # self.assertEqual('v1', response[0]['version'])
 
         response_users = response[0]['data']['results']
 
