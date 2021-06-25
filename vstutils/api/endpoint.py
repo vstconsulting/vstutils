@@ -11,7 +11,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpRequest
 from django.contrib.auth.models import AbstractUser
 from django.test.client import Client, ClientHandler
-from django.test.utils import modify_settings, override_settings
+from django.test.utils import modify_settings
 from drf_yasg.views import SPEC_RENDERERS
 from rest_framework import serializers, views, versioning, request as drf_request
 from rest_framework.authentication import (
@@ -438,7 +438,8 @@ class EndpointViewSet(views.APIView):
             logger.debug(traceback.format_exc())
             return responses.HTTP_502_BAD_GATEWAY(self.results)
 
-    def _put(self, request: BulkRequestType, allow_fail=True) -> responses.BaseResponseClass:
+    def put(self, request: BulkRequestType, allow_fail=True) -> responses.BaseResponseClass:
+        """Execute non transaction bulk request"""
         context: _t.Dict[_t.Text, _t.Union[_t.List, BulkClient]] = {
             'client': self.get_client(request),
             'results': self.results
@@ -454,15 +455,6 @@ class EndpointViewSet(views.APIView):
             if cookie_value.value != request.COOKIES.get(cookie_name, None):
                 response.cookies[cookie_name] = cookie_value
         return response
-
-    def put(self, request: BulkRequestType, allow_fail=True) -> responses.BaseResponseClass:
-        """Execute non transaction bulk request"""
-        method = self._put
-        if request.user.is_anonymous and settings.SESSION_ENABLE_CACHED_FOR_ANONYMOUS:
-            method = override_settings(
-                SESSION_ENGINE='django.contrib.sessions.backends.cache'
-            )(method)
-        return method(request, allow_fail)
 
     def patch(self, request: BulkRequestType) -> responses.BaseResponseClass:
         return self.put(request)
