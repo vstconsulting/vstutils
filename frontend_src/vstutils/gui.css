@@ -1483,23 +1483,23 @@ th,
     color: var(--text-header-color);
 }
 
-.text-data,
-td,
-.dropdown-item a.sublink-btn,
-.iziModal-content,
-.modal-content,
-.request-info prettyprint span.nocode,
-.response-info .prettyprint span.nocode,
-.swagger-ui .topbar-wrapper a span,
-.swagger-ui .scheme-container .schemes > label,
-.swagger-ui .expand-operation span.arrow,
-.swagger-ui .opblock .opblock-summary-operation-id,
-.swagger-ui .opblock-description-wrapper,
-.swagger-ui .responses-table,
-.swagger-ui .info .base-url,
-.swagger-ui section.models h4 {
-    color: var(--text-color);
-}
+/*.text-data,*/
+/*td,*/
+/*.dropdown-item a.sublink-btn,*/
+/*.iziModal-content,*/
+/*.modal-content,*/
+/*.request-info prettyprint span.nocode,*/
+/*.response-info .prettyprint span.nocode,*/
+/*.swagger-ui .topbar-wrapper a span,*/
+/*.swagger-ui .scheme-container .schemes > label,*/
+/*.swagger-ui .expand-operation span.arrow,*/
+/*.swagger-ui .opblock .opblock-summary-operation-id,*/
+/*.swagger-ui .opblock-description-wrapper,*/
+/*.swagger-ui .responses-table,*/
+/*.swagger-ui .info .base-url,*/
+/*.swagger-ui section.models h4 {*/
+/*    color: var(--text-color);*/
+/*}*/
 
 .help-text-data {
     color: var(--help-text-color);

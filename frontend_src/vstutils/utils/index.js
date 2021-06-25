@@ -1122,13 +1122,13 @@ export function registerHook(signalName, func) {
 
 /**
  * Function that returns first item from iterator for which callbackFn will return true
- * @param {Iterable<T>} iterable
+ * @param {Iterator<T>} iterator
  * @param {Function} callbackFn
  * @returns {T|undefined}
  * @template T
  */
-export function iterFind(iterable, callbackFn) {
-    for (const item of iterable) {
+export function iterFind(iterator, callbackFn) {
+    for (const item of iterator) {
         if (callbackFn(item)) {
             return item;
         }

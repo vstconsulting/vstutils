@@ -225,4 +225,6 @@ TRANSLATION = {
     'later': 'một lát sau',
     'i accept the ': 'Tôi chấp nhận ',
     'terms of agreement': 'các điều khoản của thỏa thuận',
+    'Zoom': 'Thu phóng',
+    'Scale': 'Tỉ lệ',
 }

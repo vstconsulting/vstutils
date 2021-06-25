@@ -226,4 +226,6 @@ TRANSLATION = {
     'later': '之后',
     'i accept the ': '我接受 ',
     'terms of agreement': '协议条款',
+    'Zoom': '飛漲',
+    'Scale': '規模',
 }

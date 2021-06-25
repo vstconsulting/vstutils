@@ -130,13 +130,13 @@ export const BaseViewMixin = {
 
             const redirect = field.redirect;
 
-            let operationId = redirect.operation_name || '';
+            let operationId = '';
 
             if (redirect.depend_field) {
                 operationId += responseData[redirect.depend_field];
             }
             if (!operationId || redirect.concat_field_name) {
-                operationId = field.name;
+                operationId = operationId + redirect.operation_name;
             }
 
             operationId += '_get';
