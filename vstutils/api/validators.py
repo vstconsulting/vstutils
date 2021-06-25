@@ -47,7 +47,7 @@ class ImageValidator:
     """
     Base Image Validation class
     Validates image format
-    Wont work if Pillow isn't installed
+    Won't work if Pillow isn't installed
     :param extensions: Tuple or List of file extensions, that should pass the validation
     Raises rest_framework.exceptions.ValidationError: in case file extension are not in the list
     """
@@ -90,7 +90,7 @@ class ImageOpenValidator(ImageValidator):
     """
     Image validator that checks if image can be unpacked from b64 to PIL Image obj
 
-    Raises rest_framework.exceptions.ValidationError: in case PIL throws error when trying to open given file
+    Raises rest_framework.exceptions.ValidationError if PIL throws error when trying to open image
     """
     error_msg = 'for some reason, this image file cannot be opened'
 
@@ -107,7 +107,8 @@ class ImageOpenValidator(ImageValidator):
 
 class ImageBaseSizeValidator(ImageOpenValidator):
     """
-    If you want you want to use this class for validating image width/height, you should rewrite
+    Validates image size
+    To use this class for validating image width/height, rewrite
     self.orientation to ('height',) or ('width',) or ('height', 'width')
 
     Raises rest_framework.exceptions.ValidationError: if not(min <= (height or width) <= max)
@@ -133,7 +134,7 @@ class ImageBaseSizeValidator(ImageOpenValidator):
 
 class ImageHeightValidator(ImageBaseSizeValidator):
     """
-    Wrapper for _ImageBaseSizeValidator that validates only height
+    Wrapper for ImageBaseSizeValidator that validates only height
 
     :param min_height: minimal height of an image being validated
     :param max_height: maximal height of an image being validated
@@ -143,7 +144,7 @@ class ImageHeightValidator(ImageBaseSizeValidator):
 
 class ImageWidthValidator(ImageBaseSizeValidator):
     """
-    Wrapper for _ImageBaseSizeValidator that validates only width
+    Wrapper for ImageBaseSizeValidator that validates only width
 
     :param min_width: minimal width of an image being validated
     :param max_width: maximal width of an image being validated
@@ -153,7 +154,7 @@ class ImageWidthValidator(ImageBaseSizeValidator):
 
 class ImageResolutionValidator(ImageBaseSizeValidator):
     """
-    Wrapper for _ImageBaseSizeValidator that validates both height and width
+    Wrapper for ImageBaseSizeValidator that validates both height and width
 
     :param min_height: minimal height of an image being validated
     :param max_height: maximal height of an image being validated

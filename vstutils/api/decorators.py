@@ -134,7 +134,7 @@ def subaction(*args, **kwargs):
 
     :param methods: List of allowed HTTP-request methods. Default is ``["post"]``.
     :type methods: list
-    :param detail: Flag which signalizing that this method is over one instance.
+    :param detail: Flag to set method execution to one instance.
     :type detail: bool
     :param serializer_class: Serializer for this action.
     :type serializer_class: vstutils.api.serializers.VSTSerializer
@@ -385,7 +385,7 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     This decorator solves this problem.
 
     You need two or more models with nested relationship (Many-to-Many or Many-to-One)
-    and two viewsets. Decorator setups nested viewset to parent viesetclass and
+    and two viewsets. Decorator nests viewset to parent viewset class and
     generate paths in API.
 
     :param name: -- Name of nested path. Also used as default name for related queryset (see `manager_name`).

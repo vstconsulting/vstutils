@@ -27,7 +27,7 @@ DEFAULT_NAMED_FILE_DATA = {"name": None, "content": None, 'mediaType': None}
 
 class VSTCharField(CharField):
     """
-    Simple CharField (extends :class:`rest_framework.fields.CharField`).
+    CharField (extends :class:`rest_framework.fields.CharField`).
     This field translate any json type to string for model.
     """
 
@@ -76,7 +76,7 @@ class BinFileInStringField(FileInStringField):
     Field extends :class:`.FileInStringField`, but work with binary(base64) files.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
 
     __slots__ = ()
@@ -86,7 +86,7 @@ class AutoCompletionField(VSTCharField):
     """
     Field that provides autocompletion on frontend, using specified list of objects.
 
-    :param autocomplete: Autocompletion reference. You can set simple list/tuple with
+    :param autocomplete: Autocompletion reference. You can set list/tuple with
                          values or set OpenApi schema definition name.
                          For definition name GUI will find optimal link and
                          will show values based on ``autocomplete_property`` and
@@ -101,7 +101,7 @@ class AutoCompletionField(VSTCharField):
     :type use_prefetch: bool
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
     __slots__ = 'autocomplete', 'autocomplete_property', 'autocomplete_represent', 'use_prefetch'
 
@@ -143,7 +143,7 @@ class CommaMultiSelect(VSTCharField):
 
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
 
     __slots__ = (
@@ -202,8 +202,7 @@ class DynamicJsonTypeField(VSTCharField):
 
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`
-        but without value modifications.
+        Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modifications.
     """
     __slots__ = 'field', 'choices', 'types'
 
@@ -230,7 +229,7 @@ class DynamicJsonTypeField(VSTCharField):
 
 class DependEnumField(DynamicJsonTypeField):
     """
-    Field extends :class:`DynamicJsonTypeField` but data won't be transformed to json and would be given as is.
+    Field extends :class:`DynamicJsonTypeField` but its value is not transformed to json and would be given as is.
     Useful for :class:`property` in models or for actions.
 
     :param field: field in model which value change will change type of current value.
@@ -245,8 +244,7 @@ class DependEnumField(DynamicJsonTypeField):
 
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`
-        but without value modifications.
+        Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modification.
     """
     __slots__ = ()
     to_json = False
@@ -256,13 +254,13 @@ class DependFromFkField(DynamicJsonTypeField):
     """
     Field extends :class:`DynamicJsonTypeField`. Validates field data by :attr:`.field_attribute`
     chosen in related model. By default, any value of :attr:`.field_attribute` validates as :class:`.VSTCharField`.
-    To override this behavior you should set dict-attribute in related model  named
-    ``{field_attribute value}_fields_mapping`` where:
+    To override this behavior set dict attribute ``{field_attribute value}_fields_mapping`` in related model
+     where:
 
     - **key** - string representation of value type which is received from related instance :attr:`.field_attribute`.
     - **value** - :class:`rest_framework.Field` instance for validation.
 
-    :param field: field in model which value change will change type of current value.
+    :param field: field in model which value change changes type of current value.
                   Field must be :class:`.FkModelField`.
     :type field: str
     :param field_attribute: attribute of model related model instance with name of type.
@@ -324,7 +322,7 @@ class TextareaField(VSTCharField):
     Field containing multiline string.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
 
     __slots__ = ()
@@ -335,11 +333,10 @@ class HtmlField(VSTCharField):
     Field contains html text and marked as format:html. The field does not validate whether its content is HTML.
 
     .. warning::
-        Do not allow for users to modify this data because they can set some scripts to value and
-        it would be vulnerability.
+        To avoid vulnerability, do not allow users to modify this data because users ate able to execute their scripts.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
+        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
     """
 
     __slots__ = ()
@@ -375,7 +372,7 @@ class FkField(IntegerField):
     .. note::
         Intersection of `dependence.values()` and `filters.keys()` will throw error to prevent ambiguous filtering.
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
+        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
     """
     __slots__ = (
         'select_model',
@@ -429,10 +426,10 @@ class FkModelField(FkField):
 
 
     .. warning::
-        Model class on call `.to_internal_value` get object from database. Be careful on mass save executions.
+        Model class get object from database during `.to_internal_value` execution. Be careful on mass save executions.
 
     .. warning::
-        Permissions to model which is referred by this field, will not be checked.
+        Permissions to model which is referred by this field, are not to be checked.
         You should check it manually in signals or validators.
 
     """
@@ -503,7 +500,7 @@ class UptimeField(IntegerField):
     Field for some uptime(time duration), in seconds, for example.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
+        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
 
     """
 
@@ -512,7 +509,7 @@ class UptimeField(IntegerField):
 
 class RedirectFieldMixin:
     """
-    Field mixin which indicates that this field is used for instructing frontend where to redirect after some action.
+    Field mixin indicates that this field is used to send redirect address to frontend after some action.
 
     :param operation_name: prefix for operation_id, for example if operation_id is `history_get`
            then operation_name is `history`
@@ -538,7 +535,7 @@ class RedirectIntegerField(RedirectFieldMixin, IntegerField):
     Field for redirect by id. Often used in actions for redirect after execution.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
+        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
 
     """
 
@@ -550,7 +547,7 @@ class RedirectCharField(RedirectFieldMixin, CharField):
     Field for redirect by string. Often used in actions for redirect after execution.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`rest_framework.IntegerField`.
+        Effective only in GUI. Works similar to :class:`rest_framework.IntegerField` in API.
 
     """
 
@@ -576,7 +573,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
     input. Default: False.
 
     .. note::
-        Take effect only in GUI. In API it would behave as :class:`.VSTCharField` with structure of data.
+        Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
 
     """
 
@@ -639,8 +636,8 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
 class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
     """
-    Extends :class:`.NamedBinaryFileInJsonField` but in GUI has a different view
-    which shows an image(if inputed binary image is valid).Validation of this field can be done with
+    Extends :class:`.NamedBinaryFileInJsonField` to represent image on frontend
+    (if binary image is valid).Validate this field with
     :class:`vstutils.api.validators.ImageValidator`.
     """
 
@@ -649,8 +646,8 @@ class NamedBinaryImageInJsonField(NamedBinaryFileInJsonField):
 
 class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     """
-    Extends :class:`.NamedBinaryFileInJsonField` but uses list of structures.
-    Used for operating with multiple files.
+    Extends :class:`.NamedBinaryFileInJsonField` but uses list of JSONs.
+    Allows to operate with multiple files as list of :class:`NamedBinaryFileInJsonField`.
 
     Attrs:
     :attr:`NamedBinaryInJsonField.file`: if True, accept only subclasses of File as input. If False, accept only string
@@ -705,7 +702,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
 
 class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
     """
-    Extends :class:`.MultipleNamedBinaryFileInJsonField` but uses list of structures.
+    Extends :class:`.MultipleNamedBinaryFileInJsonField` but uses list of JSONs.
     Used for operating with multiple images and works as list of :class:`NamedBinaryImageInJsonField`.
     """
 
@@ -715,8 +712,8 @@ class MultipleNamedBinaryImageInJsonField(MultipleNamedBinaryFileInJsonField):
 class PasswordField(CharField):
     """
     Extends `CharField <https://www.django-rest-framework.org/api-guide/fields/#charfield>`_
-    but in schema overload format to `password`.
-    Used for making fields with asterisks instead of data in GUI.
+    but in schema set format to `password`.
+    Show all characters as asterisks instead of real value in GUI.
     """
 
     def __init__(self, *args, **kwargs):
@@ -742,14 +739,14 @@ class RelatedListField(VSTCharField):
     """
     Extends class 'vstutils.api.fields.VSTCharField'. With this field you can output reverse ForeignKey relation
     as a list of related instances.
-    To use it, you need to specify 'related_name' kwarg(related_manager for reverse ForeignKey)
+    To use it, you specify 'related_name' kwarg(related_manager for reverse ForeignKey)
     and 'fields' kwarg(list or tuple of fields from related model, which needs to be included)
 
     :param related_name: name of a related manager for reverse foreign key
     :type related_name: str
     :param fields: list of related model fields.
     :type fields: list[str], tuple[str]
-    :param view_type: Determines how field should be shown on frontend. Must be either 'list' or 'table'.
+    :param view_type: determines how field are represented on frontend. Must be either 'list' or 'table'.
     :type view_type: str
     :param fields_custom_handlers_mapping: includes custom handlers, where key: field_name, value: callable_obj that
                                            takes params: instance[dict], fields_mapping[dict], model, field_name[str]

@@ -28,13 +28,13 @@ class register_view_decorator:  # pylint: disable=invalid-name
 
 class register_view_action(register_view_decorator):  # pylint: disable=invalid-name
     """
-    Simple decorator for marking model methods as generated view
+    Decorator for turning model methods to generated view
     `actions <https://www.django-rest-framework.org/api-guide/viewsets/#marking-extra-actions-for-routing>`_.
-    The decorated method becomes a method of generated view and `self` will be view object.
+    The decorated method becomes a method of generated view and `self` is an view object.
     See supported args in :func:`vstutils.api.decorators.subaction`
 
     .. note::
-        Often, the action does not transfer any parameters and requires only sending an empty query.
+        Often, an action does not transfer any parameters and requires only sending an empty query.
         To speed up development, we set the default serializer to :class:`vstutils.api.serializers.EmptySerializer`.
 
     """

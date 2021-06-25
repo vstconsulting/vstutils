@@ -59,7 +59,7 @@ class TranslationSerializer(serializers.VSTSerializer):
 
 class SettingsViewSet(base.ListNonModelViewSet):
     """
-    API endpoint thats returns application usefull settings.
+    API endpoint that returns application settings.
     """
     base_name = "settings"
 

@@ -36,7 +36,7 @@ VALID_FK_KWARGS = (
 
 class BaseSerializer(serializers.Serializer):
     """
-    Default and simple serializer with default logic to work with objects.
+    Default serializer with logic to work with objects.
     Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#serializers>`_
     how to create Serializers and work with them.
     """
@@ -106,7 +106,7 @@ class VSTSerializer(serializers.ModelSerializer):
 class EmptySerializer(BaseSerializer):
     """
     Default serializer for empty responses.
-    In generated GUI this means simple action button which will not show additional view before execution.
+    In generated GUI this means that action button which will not show additional view before execution.
     """
 
 
