@@ -603,6 +603,7 @@ SESSION_COOKIE_DOMAIN: _t.Optional[_t.Text] = os.getenv(
     _t.cast(_t.Any, web.get('session_cookie_domain', fallback=None))
 )
 SESSION_SERIALIZER = 'vstutils.session.YamlSessionSerializer'
+SESSION_ENABLE_CACHED_FOR_ANONYMOUS = web.getboolean('session_enable_cached_for_anonymous', fallback=False)
 
 CSRF_COOKIE_AGE: int = SESSION_COOKIE_AGE
 CSRF_COOKIE_DOMAIN: _t.Optional[_t.Text] = SESSION_COOKIE_DOMAIN

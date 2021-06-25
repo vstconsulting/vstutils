@@ -284,6 +284,8 @@ session_timeout, static_files_url and pagination limit.
   Read :django_docs:`more <settings/#csrf-trusted-origins>`. Default: from **session_cookie_domain**.
 * **case_sensitive_api_filter** - Enables/disables case sensitive search for name filtering.
   Default: True.
+* **session_enable_cached_for_anonymous** - Enables/disables disabling database sessions for anonymous users in bulk requests.
+  Default: False.
 
 |
 

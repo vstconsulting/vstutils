@@ -1,7 +1,7 @@
 import datetime
-import io
 import os
 from django.db import models
+from rest_framework import permissions
 from vstutils.custom_model import ListModel, FileModel
 from vstutils.api import fields, base
 
@@ -38,6 +38,8 @@ class File(FileModel):
             'for_order2',
             'origin_pos',
         )
+        _permission_classes = [permissions.AllowAny]
+        _override_permission_classes = True
 
     @classmethod
     def __prepare_model__(cls):
@@ -65,6 +67,8 @@ class ListOfFiles(ListModel):
     class Meta:
         _view_class = (FileViewMixin, 'read_only')
         _list_fields = _detail_fields = ('id', 'filename',)
+        _permission_classes = [permissions.AllowAny]
+        _override_permission_classes = True
 
     @property
     def filename(self):

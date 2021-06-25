@@ -3313,12 +3313,13 @@ class CustomModelTestCase(BaseTestCase):
         self.assertTrue(File.objects.all()[1:2].query['high_mark'], 2)
 
     def test_custom(self):
+        self.client.logout()
         results = self.bulk([
             dict(method='get', path='files'),
             dict(method='get', path=['files', 1]),
             dict(method='get', path='files', query='name=ToFilter'),
             dict(method='get', path='listoffiles'),
-        ])
+        ], relogin=False)
 
         for result in results:
             self.assertEqual(result['status'], 200, result)
