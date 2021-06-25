@@ -185,8 +185,8 @@ class CustomQuerySet(BQuerySet):
 
 class ListModel(BaseModel):
     """
-    Simple custom model which uses attribute `ListModel.data`
-    with dicts of models data. Usefull when you have simple list of data.
+    Custom model which uses a list of dicts with data (attribute `ListModel.data`) instead of database records.
+    Useful when you have a simple list of data.
 
     Examples:
         .. sourcecode:: python
@@ -218,7 +218,7 @@ class ListModel(BaseModel):
 
 class FileModel(ListModel):
     """
-    Simple custom model which load data from YAML-file.
+    Custom model which loads data from YAML-file instead of database.
     Path to the file stored in `FileModel.file_path` attribute.
 
 
@@ -230,7 +230,7 @@ class FileModel(ListModel):
             - name: "Sergey Klyuykov"
             - name: "Michael Taran"
 
-        Correct usage will be:
+        Example:
 
         .. sourcecode:: python
 

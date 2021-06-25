@@ -1,16 +1,14 @@
 Backend API manual
 ==================
 
-VST Utils framework consolidates such frameworks as Django, Django Rest Framework, drf-yasg and Celery.
-Below are descriptions of some features used in the development of projects based on vstutils.
-
+VST Utils framework uses Django, Django Rest Framework, drf-yasg and Celery.
 
 Models
 ------
 
-A model is the single, definitive source of truth about your data. It contains the essential fields and behaviors of the data you’re storing.
+A model is the single, definitive source of truth about your data. It contains essential fields and behavior for the data you’re storing.
 Usually best practice is to avoid writing views and serializers manually,
-BModel provides plenty of Meta attributes to autogenerate serializers and views for almost any usecase.
+as BModel provides plenty of Meta attributes to autogenerate serializers and views for many use cases.
 
 .. automodule:: vstutils.models
     :members:
@@ -22,7 +20,7 @@ BModel provides plenty of Meta attributes to autogenerate serializers and views 
     :members: register_view_action
 
 
-Also you can use custom models without using database:
+You can also use custom models without using database:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: vstutils.custom_model
@@ -38,7 +36,7 @@ Model Fields
 Web API
 -------
 
-Web API is based on Django Rest Framework with some nested functions.
+Web API is based on Django Rest Framework with additional nested functions.
 
 Fields
 ~~~~~~
@@ -51,7 +49,7 @@ The Framework includes a list of convenient serializer fields. Some of them take
 Validators
 ~~~~~~~~~~
 
-There is useful validation classes for fields.
+There are validation classes for fields.
 
 .. automodule:: vstutils.api.validators
     :members:
@@ -87,12 +85,12 @@ Responses
 
 DRF provides a standard set of variables whose names correspond to
 the human-readable name of the HTTP code.
-For convenience, we have dynamically wrapped this in a set of classes
-that have appropriate names and additionally provide the following capabilities:
+For convenience, we have dynamically wrapped it in a set of classes
+that have appropriate names and additionally provides following capabilities:
 
 - String responses are wrapped in json like ``{ "detail": "string response" }``.
-- Keep attribute timings for further processing in middlewares.
-- Set status code from class name (e.g. ``HTTP_200_OK`` or ``Response200`` got code 200).
+- Attribute timings are kept for further processing in middlewares.
+- Status code is set by class name (e.g. ``HTTP_200_OK`` or ``Response200`` has code 200).
 
 All classes inherit from:
 
@@ -103,10 +101,10 @@ All classes inherit from:
 Middlewares
 ~~~~~~~~~~~
 
-By default, the Django `assumes <https://docs.djangoproject.com/en/2.2/topics/http/middleware/#writing-your-own-middleware>`_
-that the developer will develop itself Middleware class, but it is not always convenient.
+By default, Django `supposes <https://docs.djangoproject.com/en/2.2/topics/http/middleware/#writing-your-own-middleware>`_
+that a developer creates Middleware class manually, but it's often a routine.
 The vstutils library offers a convenient request handler class for elegant OOP development.
-Middlewares is needed to process incoming requests and sent responses before they reach the final destination.
+Middleware is used to process incoming requests and send responses before they reach final destination.
 
 .. automodule:: vstutils.middleware
     :members: BaseMiddleware
@@ -114,8 +112,7 @@ Middlewares is needed to process incoming requests and sent responses before the
 Filter Backends
 ~~~~~~~~~~~~~~~
 `Filter Backends <https://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend>`_ are used to modify model queryset.
-If you want to create custom filter backend to, for example, annotate
-something to a model queryset, you should inherit from :class:vstutils.api.filter_backends.VSTFilterBackend
+To create custom filter backend to, (i.g. annotate model queryset), you should inherit from :class:vstutils.api.filter_backends.VSTFilterBackend
 and override :meth:vstutils.api.filter_backends.VSTFilterBackend.filter_queryset and in some cases
 :meth:vstutils.api.filter_backends.VSTFilterBackend.get_schema_fields.
 
@@ -152,7 +149,7 @@ Endpoint url is ``/{API_URL}/endpoint/``, for example value with default setting
 Bulk requests
 ~~~~~~~~~~~~~
 
-Bulk request allows you send multiple request to api at once, it accepts json list of operations.
+Bulk request allows you send multiple reques`t to api at once, it accepts json list of operations.
 
 +-----------------------------------+--------------------+--------------------------+
 | Method                            | Transactional      | Synchronous              |
@@ -166,11 +163,11 @@ Bulk request allows you send multiple request to api at once, it accepts json li
 | ``PATCH /{API_URL}/endpoint/``    | NO                 | NO                       |
 +-----------------------------------+--------------------+--------------------------+
 
-Parameters of one operation (:superscript:`*` means that parameter is required):
+Parameters of one operation (required parameter marked by :superscript:`*`):
 
 * ``method``:superscript:`*` - http method of request
 * ``path``:superscript:`*` - path of request, can be ``str`` or ``list``
-* ``data`` - data that needs to be sent
+* ``data`` - data to send
 * ``query`` - query parameters as ``str``
 * ``headers`` - ``dict`` with headers which will be sent, names of headers must
   follow `CGI specification <https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``).
@@ -193,7 +190,7 @@ Result of bulk request is json list of objects for operation:
 * ``data`` - data that needs to be sent
 * ``status`` - response status code
 
-Transactional bulk request returns ``502 BAG GATEWAY`` and make rollback if one of requests is failed.
+Transactional bulk request returns ``502 BAG GATEWAY`` and does rollback after first failed request.
 
 .. warning::
     If you send non-transactional bulk request, you will get ``200`` status and must
@@ -204,23 +201,20 @@ Openapi schema
 
 Request on ``GET /{API_URL}/endpoint/`` returns Swagger UI.
 
-Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns json openapi schema. Also you can specify required
+Request on ``GET /{API_URL}/endpoint/?format=openapi`` returns openapi schema in json format. Also you can specify required
 version of schema using ``version`` query parameter (e.g., ``GET /{API_URL}/endpoint/?format=openapi&version=v2``).
 
-Applying hooks to the schema can also be helpful.
-This functionality will help to change certain data in the schema before it will be sended to user.
-In order to set some hooks, it is enough to specify in ``settings.py`` the ``OPENAPI_HOOKS``
-which is an array with lines for importing functions.
-Each function will take 2 named arguments:
+To change the schema after generating and before sending to user use hooks.
+Define one or more function, each taking 2 named arguments:
 
 * ``request`` - user request object.
 * ``schema`` - ordered dict with openapi schema.
 
 .. note::
-    Sometimes hooks may raise an exception,
-    and in order not to break the chain of data modification,
+    Sometimes hooks may raise an exception;
+    in order to keep a chain of data modification,
     such exceptions are handled.
-    However, the changes made to the schema before the raised exception will be saved.
+    The changes made to the schema before the exception however, are saved.
 
 Example hook:
     .. sourcecode:: python
@@ -228,13 +222,20 @@ Example hook:
         def hook_add_username_to_guiname(request, schema):
             schema['info']['title'] = f"{request.username} - {schema['info']['title']}"
 
+To connect hook(s) to your app add function import name to the ``OPENAPI_HOOKS`` list in ``settings.py``
+
+.. code-block::
+
+    OPENAPI_HOOKS = [
+        '{{appName}}.openapi.hook_add_username_to_guiname',
+    ]
 
 
 Testing Framework
 -----------------
 
-VST Utils Framework includes a few helper in base testcase class and
-improve support for making API requests. That means if you want make bulk request
+VST Utils Framework includes a helper in base testcase class and
+improves support for making API requests. That means if you want make bulk request
 to endpoint you dont need create and init test client, but just need to call:
 
 .. sourcecode:: python
@@ -245,12 +246,10 @@ to endpoint you dont need create and init test client, but just need to call:
 
 Creating test case
 ~~~~~~~~~~~~~~~~~~
-
-After creating new project via ``vstutils`` you can found ``test.py`` module,
-where you see testcase classes based on :class:`vstutils.tests.BaseTestCase`.
+``test.py`` module contains testcase classes based on :class:`vstutils.tests.BaseTestCase`.
 At the moment, we officially support two styles of writing tests:
-through classic and simple query wrappers with run check and
-through runtime optimized bulk queries with manual value checking.
+classic and simple query wrappers with run check and
+runtime optimized bulk queries with manual value checking.
 
 
 Simple example with classic tests
@@ -276,7 +275,7 @@ you can write testcase like this:
             self.initial_project.delete()
 
         def test_project_endpoint(self):
-            # Test checks that api return valid values
+            # Test checks that api returns valid values
             self.list_test('/api/v1/project/', 1)
             self.details_test(
                 ["project", self.initial_project.id],
@@ -291,9 +290,9 @@ you can write testcase like this:
             self.list_test('/api/v1/project/', 1 + len(id_list))
 
 
-This simple example demonstrate functionality of default test case class.
-Default projects are initialized in such a way that for the fastest and most efficient result
-it is best to distribute testing of various entities into different classes.
+This example demonstrates functionality of default test case class.
+Default projects are initialized for the fastest and most efficient result.
+We recommend to divide tests for different entities into different classes.
 This example demonstrate classic style of testing,
 but you can use bulks in your test cases.
 
@@ -301,9 +300,8 @@ but you can use bulks in your test cases.
 Bulk requests in tests
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The bulk query system and its capabilities are very well suited for testing and
-executing valid queries.
-Returning to the previous example, it could be rewritten as follows:
+Bulk query system is well suited for testing and executing valid queries.
+Previous example could be rewritten as follows:
 
 .. sourcecode:: python
 
@@ -352,10 +350,10 @@ Returning to the previous example, it could be rewritten as follows:
             self.assertEqual(results[-1]['data']['count'], 1 + len(test_data))
 
 
-In this case, you have more code rows, but your tests will be closer to GUI workflow,
+In this case, you have more code, but your tests are closer to GUI workflow,
 because vstutils-projects uses ``/api/endpoint/`` for requests.
-Either way, bulk queries are much faster due to some optimizations,
-so you can reduce testcase execution time.
+Either way, bulk queries are much faster due to optimization;
+Testcase execution time is less comparing to non-bulk requests.
 
 
 Test case API
@@ -368,10 +366,10 @@ Test case API
 Utils
 -----
 
-This is some tested set of development utilities.
-Utilities include a collection of some code that will be useful
-in one way or another to develop the application.
-Most of the functions are used by vstutils itself.
+This is tested set of development utilities.
+Utilities include a collection of code that will be useful
+in one way or another for developing the application.
+Vstutils uses mosts of these functions under the hood.
 
 .. automodule:: vstutils.utils
     :members:

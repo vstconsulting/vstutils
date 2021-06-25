@@ -1,7 +1,7 @@
 Quick Start
 ===========
 Starting of new project, based on VST Utils Framework, is rather simple.
-We recommend creating a virtual environment for each project to avoid conflicts in the system.
+We recommend to create a virtual environment for each project to avoid conflicts in the system.
 
 Let’s learn by example.
 All you need to do is run several commands.
@@ -15,7 +15,7 @@ This manual consist of two parts:
 New application creation
 ------------------------
 
-Throughout this tutorial, we’ll walk you through the creation of a basic poll application.
+Throughout this tutorial, we’ll go through a creation of a basic poll application.
 
 1. **Install VST Utils**
 
@@ -29,7 +29,7 @@ Throughout this tutorial, we’ll walk you through the creation of a basic poll 
     Namely, you’ll need to auto-generate some code that establishes a vstutils application –
     a collection of settings for an instance of vstutils, including database configuration,
     Django-specific and vstutils-specific options and application-specific settings.
-    You can execute base command for new project creation.
+    To create new project execute following command:
 
     .. sourcecode:: bash
 
@@ -50,9 +50,7 @@ Throughout this tutorial, we’ll walk you through the creation of a basic poll 
     This command creates new project without confirming any data.
 
 
-    Both these commands create several files in ``project directory``,
-    that was mentioned in the new project creation command.
-
+    These commands create several files in ``project directory``.
     .. sourcecode::
 
        /{{app_dir}}/{{app_name}}
@@ -99,11 +97,11 @@ Throughout this tutorial, we’ll walk you through the creation of a basic poll 
     * **tox.ini** - this file is used for tests execution;
     * **webpack.config.js.default** - this file contain minimal script for webpack (replace '.default' if write smthg in 'app.js').
 
-    All following commands you should execute from the ``/{{app_dir}}/{{app_name}}/`` directory.
+    You should execute below commands  from the ``/{{app_dir}}/{{app_name}}/`` directory.
 
 3. **Apply migrations**
 
-    Let’s verify your vstutils project works.
+    Let’s verify a newly created vstutils project does work.
     Change into the outer ``/{{app_dir}}/{{app_name}}`` directory, if you haven’t already,
     and run the following command:
 
@@ -126,24 +124,24 @@ Throughout this tutorial, we’ll walk you through the creation of a basic poll 
 
         python -m {{app_name}} web
 
-    Web-interface of your application will be started on the port 8080.
+    Web-interface of your application has been started on the port 8080.
     You’ve started the vstutils production server based on `uWSGI <https://uwsgi-docs.readthedocs.io/>`_.
 
     .. warning::
-        Now’s a good time to note: if you want to run the web-server under the debugger, then you should run
+        Now’s a good time to note: if you want to run the web-server with a debugger, then you should run
         `the standard Django's dev-server <https://docs.djangoproject.com/en/2.2/intro/tutorial01/#the-development-server>`_.
 
     .. image:: img/app_example_login_page.png
 
-    If you need to stop your application, use following command:
+    If you need to stop the server, use following command:
 
     .. sourcecode:: bash
 
         python -m {{app_name}} web stop=/tmp/{{app_name}}_web.pid
 
 
-Current algorithm of new project Quick Start allows you to create the simplest application, based on VST Utils framework.
-This application will contain only User Model. If you want to create your own models look following section.
+You've created the simplest application, based on VST Utils framework.
+This application only contains User Model. If you want to create your own models look at the section below.
 
 
 Adding new models to application
@@ -158,7 +156,7 @@ If you want to add some new entities to your application, you need to do followi
  6. Apply migrations;
  7. Restart your application.
 
-Let't look how you can do it on the AppExample - application, that has 2 custom models:
+Let's look how you can do it on the AppExample - application, that has 2 custom models:
 
 * Task (abstraction for some tasks/activities, that user should do);
 * Stage (abstraction for some stages, that user should do to complete the task. This model is nested into the Task Model).
@@ -177,7 +175,7 @@ Let make out an example from **`BModel**:
 
 More information about Models you can find in `Django Models documentation <https://docs.djangoproject.com/en/2.2/topics/db/models/>`_.
 
-If you don't need to create custom :ref:`serializers<SerializerCreateTag>` or :ref:`view sets<ViewSetCreateTag>`, you can go to this :ref:`sstage<AddModelsToApiTag>`.
+If you don't need to create custom :ref:`serializers<SerializerCreateTag>` or :ref:`view sets<ViewSetCreateTag>`, you can go to this :ref:`stage<AddModelsToApiTag>`.
 
 .. _SerializerCreateTag:
 
@@ -269,10 +267,10 @@ To add created Models to the API you need to write something like this at the en
     '''
 
     '''
-    Adds Task view set to the API
+    Add Task view set to the API
     Only 'root' (parent) views should be added there.
-    Nested views will be added automatically, that's why we add there only Task view.
-    Stage view will be added automatically, because it is nested to the Task view.
+    Nested views added automatically, that's why there is only Task view.
+    Stage view is added altogether with Task as nested view.
     '''
     API[VST_API_VERSION][r'task'] = {
         'view': 'newapp2.views.TaskViewSet'
@@ -280,7 +278,7 @@ To add created Models to the API you need to write something like this at the en
 
     '''
     You can add model too.
-    All model generate base ViewSet with data that they have, if dont create custom ViewSet or Serializer
+    All model generate base ViewSet with data that they have, if you don't create custom ViewSet or Serializer
     '''
     API[VST_API_VERSION][r'task'] = dict(
         model='newapp2.models.Task'
@@ -297,7 +295,7 @@ To add created Models to the API you need to write something like this at the en
 
 Migrations creation
 ~~~~~~~~~~~~~~~~~~~
-To make migrations you need to open ``/{{app_dir}}/{{app_name}}/`` directory and execute following command:
+To make migrations open ``/{{app_dir}}/{{app_name}}/`` directory and execute following command:
 
 .. sourcecode:: bash
 
@@ -333,15 +331,15 @@ After cache reloading you will see following page:
 
 .. image:: img/app_example_home_page.png
 
-As you can see, link to new Task View was added to the sidebar menu. Let't click on it.
+As you can see, link to new Task View has been added to the sidebar menu. Let's click on it.
 
 .. image:: img/app_example_task_empty_list_page.png
 
-As you can see, there is no task instance in your app. Let's click on 'new' button.
+There is no task instance in your app. Add it using 'new' button.
 
 .. image:: img/app_example_new_task_page.png
 
-After new task creation you will see following page:
+After creating a new task you'll see a following page:
 
 .. image:: img/app_example_created_task_page.png
 
@@ -349,7 +347,7 @@ As you can see, there is 'stages' button, that opens page with this task's stage
 
 .. image:: img/app_example_stage_empty_list_page.png
 
-As you can see, there is no stage instance in your app. Let's create 2 new stages.
+There is no stage instances in your app. Let's create 2 new stages.
 
 .. image:: img/app_example_new_stage2_page.png
 .. image:: img/app_example_new_stage1_page.png
@@ -358,7 +356,7 @@ After stages creation page with stages list will looks like this:
 
 .. image:: img/app_example_stage_list_page.png
 
-As you can see, sorting by 'order' field is working, as we mentioned in the our ``models.py`` file for Stage Model.
+Sorting by 'order' field works, as we mentioned in the our ``models.py`` file for Stage Model.
 
 Additional information about Django and Django REST Framework you can find in
 `Django documentation <https://docs.djangoproject.com/en/2.2/>`_ and `Django REST Framework documentation <https://www.django-rest-framework.org/>`_.

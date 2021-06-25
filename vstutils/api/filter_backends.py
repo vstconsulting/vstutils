@@ -24,7 +24,7 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
 # Call standart filtering
 class VSTFilterBackend(BaseFilterBackend):
     """
-    A base class from which all filter backend classes should inherit from.
+    A base filter backend class to be inherited from.
     Example:
 
         .. sourcecode:: python
@@ -38,7 +38,7 @@ class VSTFilterBackend(BaseFilterBackend):
                 def filter_queryset(self, request, queryset, view):
                     return queryset.annotate(current_time=Value(timezone.now(), output_field=DateTimeField())
 
-        In this example we created Filter Backend that will annotate current time in current timezone to any connected
+        In this example Filter Backend annotates time in current timezone to any connected
         model's queryset.
     """
     __slots__ = ()
@@ -57,7 +57,7 @@ class VSTFilterBackend(BaseFilterBackend):
 
 
 class HideHiddenFilterBackend(VSTFilterBackend):
-    """Filter Backend that will hide all objects with hidden=True from the queryset"""
+    """Filter Backend that hides all objects with hidden=True from the queryset"""
     __slots__ = ()
     required = True
 
@@ -71,7 +71,7 @@ class HideHiddenFilterBackend(VSTFilterBackend):
 
 class SelectRelatedFilterBackend(VSTFilterBackend):
     """
-    Filter Backend that will automatically call prefetch_related and select_realted on all relations in queryset.
+    Filter Backend that will automatically call prefetch_related and select_related on all relations in queryset.
     """
     __slots__ = ()
     required = True
@@ -123,7 +123,7 @@ class DeepViewFilterBackend(VSTFilterBackend):
     Backend that filters queryset by column from `deep_parent_field` property of the model.
     Value for filtering must be provided in query param `__deep_parent`.
 
-    If param is missing then no filtering will be applied.
+    If param is missing then no filtering is applied.
 
     If param is empty value (`/?__deep_parent=`) then objects with no parent (the value of the field whose name is
     stored in the property `deep_parent_field` of the model is None) returned.
@@ -149,7 +149,7 @@ class DeepViewFilterBackend(VSTFilterBackend):
     In example above if we add this model under path '`deep`', following views will be created: `/deep/` and
     `/deep/{id}/deepnested/`.
 
-    And filter backend can be used as `/deep/?__deep_parent=1` and will return all `DeepNestedModel` objects
+    Filter backend can be used as `/deep/?__deep_parent=1` and will return all `DeepNestedModel` objects
     whose parent's primary key is `1`.
 
     You can also use generic DRF views, for that you still must set `deep_parent_field`

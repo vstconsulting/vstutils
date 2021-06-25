@@ -43,14 +43,14 @@ class BQuerySet(models.QuerySet):
     def paged(self, *args, **kwargs):
         """
         Returns paginated data with custom Paginator-class.
-        By default, uses `PAGE_LIMIT` from global settings.
+        Uses `PAGE_LIMIT` from global settings by default.
         """
         return self.get_paginator(*args, **kwargs).items()
 
     def get_paginator(self, *args, **kwargs):
         """
         Returns initialized object of :class:`vstutils.utils.Paginator` over
-        current instance's QuerySet. All args and kwargs passthroughs to Paginator's constructor.
+        current instance's QuerySet. All args and kwargs go to to Paginator's constructor.
         """
         return Paginator(self.filter(), *args, **kwargs)
 

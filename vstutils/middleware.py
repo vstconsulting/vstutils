@@ -87,8 +87,7 @@ class BaseMiddleware(BaseVstObject):
         # pylint: disable=unused-argument
 
         """
-        The response handler. Here, all the magic of
-        processing the response sent, insertion of headers to response, etc.
+        The response handler. Method to process responses.
 
         :param request: HTTP-request object.
         :type request: django.http.HttpRequest
@@ -104,7 +103,7 @@ class BaseMiddleware(BaseVstObject):
         # pylint: disable=unused-argument
 
         """
-        The request handler. Called before request will be handled by any view.
+        The request handler. Called before request is handled by a view.
 
         :param request: HTTP-request object which is wrapped from client request.
         :type request: django.http.HttpRequest
@@ -117,7 +116,7 @@ class BaseMiddleware(BaseVstObject):
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         """
         Entrypoint for breaking or continuing request handling.
-        This function should return `django.http.HttpResponse` object
+        This function must return `django.http.HttpResponse` object
         or result of parent class calling.
 
         :param request: HTTP-request object which is wrapped from client request.
