@@ -794,8 +794,7 @@ class KVExchanger(BaseVstObject):
 
     def prolong(self, ttl=None):
         # pylint: disable=no-member
-        payload = self.cache.get(self.key)
-        self.cache.set(self.key, payload, ttl or self.timeout)
+        self.cache.touch(self.key, ttl or self.timeout)
 
     def get(self):
         # pylint: disable=no-member

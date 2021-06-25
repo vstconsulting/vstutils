@@ -30,7 +30,7 @@ window.Visibility = Visibility;
 import IMask from 'imask';
 window.IMask = IMask;
 
-import 'croppie/croppie.css';
+import 'cropperjs/dist/cropper.css';
 
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.css';

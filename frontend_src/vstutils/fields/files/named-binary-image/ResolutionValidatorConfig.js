@@ -9,7 +9,7 @@ export default class ResolutionValidatorConfig {
             max: maxHeight,
         };
     }
-    static createIfNeeded({ additionalProperties: { min_width, max_width, min_height, max_height } }) {
+    static createIfNeeded({ min_width, max_width, min_height, max_height }) {
         if ([min_width, max_width, min_height, max_height].includes(undefined)) {
             return null;
         }

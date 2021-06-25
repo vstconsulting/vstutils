@@ -1,10 +1,33 @@
 <template>
-    <Modal :opt="{ footer: false }" @close="$emit('cancel')">
-        <template #header>
-            <h3>{{ $t(field.title) }}</h3>
-        </template>
+    <Modal class="validator-modal" :opt="{ footer: false }" @close="$emit('cancel')">
         <template #body>
-            <div ref="croppie" />
+            <div class="mb-3" style="max-height: 60vh">
+                <img ref="image" :src="makeDataImageUrl(image)" />
+            </div>
+            <div class="mb-3">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" @click="zoom(0.1)">
+                        <span class="fa fa-search-plus" />
+                    </button>
+                    <button type="button" class="btn btn-primary btn-title" disabled>
+                        {{ $t('Zoom') }}
+                    </button>
+                    <button type="button" class="btn btn-primary" @click="zoom(-0.1)">
+                        <span class="fa fa-search-minus" />
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" @click="scale(0.1)">
+                        <span class="fa fa-search-plus" />
+                    </button>
+                    <button type="button" class="btn btn-primary btn-title" disabled>
+                        {{ $t('Scale') }}
+                    </button>
+                    <button type="button" class="btn btn-primary" @click="scale(-0.1)">
+                        <span class="fa fa-search-minus" />
+                    </button>
+                </div>
+            </div>
             <p v-for="param in checkParams" :key="param">
                 {{ $t(param) | capitalize }}: {{ $data[param] }}px.
                 <span v-if="!isValidSizeParam(param)" class="error">
@@ -19,16 +42,11 @@
 </template>
 
 <script>
-    import Croppie from 'croppie';
+    import Cropper from 'cropperjs/dist/cropper.js';
     import Modal from '../../../components/items/modal/Modal.vue';
     import { makeDataImageUrl } from '../../../utils';
 
     const allowedExtensions = ['jpeg', 'png', 'webp'];
-
-    const topLeftX = 0,
-        topLeftY = 1,
-        bottomRightX = 2,
-        bottomRightY = 3;
 
     export default {
         name: 'ImageResolutionValidatorModal',
@@ -38,6 +56,7 @@
             images: { type: Array, required: true },
         },
         data: () => ({
+            makeDataImageUrl,
             width: 0,
             height: 0,
             currentImageIdx: 0,
@@ -57,7 +76,7 @@
                 if (allowedExtensions.includes(ext)) {
                     return ext;
                 }
-                return 'jpg';
+                return 'jpeg';
             },
             isValid() {
                 return this.checkParams.filter((param) => !this.isValidSizeParam(param)).length === 0;
@@ -67,24 +86,37 @@
             image: 'updateCroppie',
         },
         mounted() {
-            this.croppie = new Croppie(this.$refs.croppie, {
-                viewport: { width: this.config.width.min, height: this.config.height.min },
-                boundary: { width: this.config.width.min + 100, height: this.config.height.min + 100 },
-                enforceBoundary: true,
-                enableResize: true,
-                enableZoom: true,
-            });
-            this.updateCroppie();
-            this.$refs.croppie.addEventListener('update', ({ detail }) => {
-                const { points, zoom } = detail;
-                this.width = Math.round((points[bottomRightX] - points[topLeftX]) * zoom);
-                this.height = Math.round((points[bottomRightY] - points[topLeftY]) * zoom);
+            this.cropper = new Cropper(this.$refs.image, {
+                crop: (event) => {
+                    this.scaleX = event.detail.scaleX;
+                    this.scaleY = event.detail.scaleY;
+
+                    let { width: w, height: h } = this.cropper.getData(true);
+                    this.width = w;
+                    this.height = h;
+
+                    const newData = ['width', 'height'].reduce((map, val) => {
+                        const { min, max } = this.config[val];
+                        const value = event.detail[val];
+                        if (value < min || value > max) {
+                            map.set(val, Math.max(min, Math.min(max, value)));
+                        }
+                        return map;
+                    }, new Map());
+                    if (newData.size) this.cropper.setData(Object.fromEntries(newData));
+                },
             });
         },
         beforeDestroy() {
-            this.croppie.destroy();
+            this.cropper.destroy();
         },
         methods: {
+            scale(change) {
+                this.cropper.scale((this.scaleX || 1) + change, (this.scaleY || 1) + change);
+            },
+            zoom(change) {
+                this.cropper.zoom(change);
+            },
             isValidSizeParam(param) {
                 return this.config[param].min <= this[param] && this[param] <= this.config[param].max;
             },
@@ -96,14 +128,11 @@
                     });
                 }
             },
-            updateCroppie() {
-                this.croppie.bind({
-                    url: makeDataImageUrl(this.image),
-                });
-            },
             async crop() {
-                let img = await this.croppie.result({ type: 'base64', format: this.format });
-                img = img.slice(img.search('base64,') + 7); // Remove data url info (data:image/png;base64,)
+                let img = this.cropper
+                    .getCroppedCanvas()
+                    .toDataURL(this.image.mediaType || `image/${this.format}`);
+                img = img.replace(/data:\w*\/?\w*;?(base64)?,/, ''); // Remove data url info (data:image/png;base64,)
                 this.resized.push({ ...this.image, content: img });
                 this.currentImageIdx += 1;
 
@@ -115,7 +144,20 @@
     };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+    .validator-modal::v-deep {
+        img {
+            display: block;
+            max-width: 100%;
+        }
+        .modal-container {
+            width: unset;
+            max-width: 85vw;
+        }
+        .btn-title {
+            cursor: default;
+        }
+    }
     .error {
         color: red;
     }

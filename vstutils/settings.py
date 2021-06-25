@@ -607,6 +607,7 @@ SESSION_SERIALIZER = 'vstutils.session.YamlSessionSerializer'
 CSRF_COOKIE_AGE: int = SESSION_COOKIE_AGE
 CSRF_COOKIE_DOMAIN: _t.Optional[_t.Text] = SESSION_COOKIE_DOMAIN
 CSRF_TRUSTED_ORIGINS: _t.List = web.getlist('csrf_trusted_origins', fallback=SESSION_COOKIE_DOMAIN)
+CSRF_COOKIE_SECURE: bool = web.getboolean('csrf_cookie_secure', fallback=False)
 
 SECURE_BROWSER_XSS_FILTER = web['secure_browser_xss_filter']
 SECURE_CONTENT_TYPE_NOSNIFF = web['secure_content_type_nosniff']

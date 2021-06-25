@@ -27,7 +27,7 @@
     "bootstrap": "4.6.0",
     "centrifuge": "^2.6.4",
     "core-js": "3",
-    "croppie": "^2.6.5",
+    "cropperjs": "^1.5.12",
     "dotenv": "^8.2.0",
     "imask": "4.1.1",
     "izitoast": "1.4.0",

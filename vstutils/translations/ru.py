@@ -262,4 +262,6 @@ TRANSLATION = {
     'later': 'позже',
     'i accept the ': 'Я принимаю ',
     'terms of agreement': 'лицензионное соглашение',
+    'Zoom': 'Зум',
+    'Scale': 'Масштаб',
 }

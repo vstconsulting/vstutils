@@ -102,11 +102,9 @@ class FKField extends BaseField {
     }
 
     prefetchValues(instances, path) {
-        const executor = new AggregatedQueriesExecutor(
-            this.getAppropriateQuerySet({ path }),
-            this.filterName,
-            this.filterFieldName,
-        );
+        const qs = this.getAppropriateQuerySet({ path });
+        if (!qs) return;
+        const executor = new AggregatedQueriesExecutor(qs, this.filterName, this.filterFieldName);
         const promises = [];
         for (const instance of instances) {
             const pk = instance._data[this.name];
@@ -164,11 +162,14 @@ class FKField extends BaseField {
      * @param {object} data Object with instance data.
      * @param {array=} querysets Array with field QuerySets.
      * @param {string} path
+     * @return {QuerySet|undefined}
      */
     // eslint-disable-next-line no-unused-vars
     getAppropriateQuerySet({ data, querysets, path } = {}) {
-        const qss = querysets || this.querysets.get(path);
-        return this._formatQuerysetPath(qss[0]);
+        const [qs] = querysets || this.querysets.get(path) || [];
+        if (qs) {
+            return this._formatQuerysetPath(qs);
+        }
     }
 
     getFirstLevelQs() {
