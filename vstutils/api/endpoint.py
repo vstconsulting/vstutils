@@ -458,7 +458,7 @@ class EndpointViewSet(views.APIView):
     def put(self, request: BulkRequestType, allow_fail=True) -> responses.BaseResponseClass:
         """Execute non transaction bulk request"""
         method = self._put
-        if request.user.is_anonymous:
+        if request.user.is_anonymous and settings.SESSION_ENABLE_CACHED_FOR_ANONYMOUS:
             method = override_settings(
                 SESSION_ENGINE='django.contrib.sessions.backends.cache'
             )(method)
