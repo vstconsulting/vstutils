@@ -166,6 +166,9 @@ class MultipleFileMixin:
             return orjson.loads(value)
         return value  # nocv
 
+    def get_internal_type(self):
+        return "TextField"
+
 
 class MultipleFileField(MultipleFileMixin, FileField):
     """
