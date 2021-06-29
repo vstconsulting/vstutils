@@ -2663,6 +2663,16 @@ class ProjectTestCase(BaseTestCase):
         results = self.bulk([
             {'method': 'post', 'path': ['testbinarymodelschema'], 'data': post_data},
             {'method': 'get', 'path': ['testbinarymodelschema']},
+            {
+                'method': 'patch',
+                'path': ['testbinarymodelschema', '<<0[data][id]>>'],
+                'data': {
+                    'some_multiplefile': [
+                        {'content': '/media/cat.jpeg', 'name': 'cat.jpeg', 'mediaType': ''},
+                        {'content': '/media/same_cat.jpeg', 'name': 'same_cat.jpeg', 'mediaType': ''}
+                    ]
+                }
+            },
         ])
         created_model_field = OverridenModelWithBinaryFiles.objects.get(id=results[0]['data']['id']).some_multiplefile
         # check if if we have a list of valid files
@@ -2975,9 +2985,21 @@ class ProjectTestCase(BaseTestCase):
                 'method': 'get',
                 'path': ['testbinaryfiles', '<<0[data][id]>>']
             },
+            {
+                'method': 'patch',
+                'path': ['testbinaryfiles', '<<0[data][id]>>'],
+                'data': {
+                    'some_filefield': {
+                        "name": valid_image_content_dict['name'],
+                        "content": "<<1[data][some_filefield][content]>>",
+                        "mediaType": "",
+                    }
+                }
+            },
         ])
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[2]['status'], 200)
         model_qs = self.get_model_filter('test_proj.models.ModelWithBinaryFiles')
         instance = model_qs.get(id=results[0]['data']['id'])
         self.assertDictEqual({

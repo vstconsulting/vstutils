@@ -287,12 +287,15 @@ export class Model {
      */
     getViewFieldString() {
         if (this._viewField) {
-            const value = this[this._viewField.name];
+            let value = this[this._viewField.name];
             if (value instanceof Model) {
                 return value.getViewFieldString();
             }
             if (value === null || value === undefined) {
                 return;
+            }
+            if (typeof value === 'object') {
+                value = value.name || value.title;
             }
             return escapeHtml(String(value));
         }

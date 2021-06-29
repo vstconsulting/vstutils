@@ -1,5 +1,5 @@
 import orjson
-from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.images import ImageFile
 from django.db.models import TextField, ForeignKey, FileField, ImageField, Field
 from django.db.models.fields.files import FileDescriptor, FieldFile
@@ -101,19 +101,16 @@ class MultipleFileDescriptor(FileDescriptor):
             attr = self.field.attr_class(instance, self.field, file)
             file = attr
 
-        elif isinstance(file, File) and not isinstance(file, MultipleFieldFile):
+        elif isinstance(file, SimpleUploadedFile):
             file_copy = self.field.attr_class(instance, self.field, file.name)
             file_copy.file = file
             file_copy._committed = False  # pylint: disable=W0212 protected-access
             file = file_copy
 
-        elif isinstance(file, MultipleFieldFile) and not hasattr(file, 'field'):  # nocv
+        elif isinstance(file, MultipleFieldFile) and instance != file.instance:  # nocv
             file.instance = instance
             file.field = self.field
             file.storage = self.field.storage
-
-        elif isinstance(file, MultipleFieldFile) and instance is not file.instance:
-            file.instance = instance
 
         return file
 
@@ -137,6 +134,10 @@ class MultipleFileMixin:
     Mixin suited to use with :class:`django.db.models.fields.files.FieldFile` to transform it to
     a Field with list of files.
     """
+    def __init__(self, **kwargs):
+        kwargs['max_length'] = None
+        super().__init__(**kwargs)
+
     def pre_save(self, model_instance, add):
         """
         Call .save() method on every file in list

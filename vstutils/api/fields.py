@@ -17,6 +17,7 @@ from django.db import models
 from django.utils.functional import SimpleLazyObject, lazy
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.fields.files import FieldFile
 
 from ..models import fields as vst_model_fields
 from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
@@ -585,6 +586,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
         'missing key': 'key {missing_key} is missing',
         'invalid key': 'invalid key {invalid_key}',
     }
+    file_field = FieldFile
 
     def __init__(self, **kwargs):
         self.file = kwargs.pop('file', False)
@@ -624,13 +626,25 @@ class NamedBinaryFileInJsonField(VSTCharField):
         self.run_validators(data)
         return self.to_internal_value(data)
 
+    def _handle_file(self, file):
+        if not file['mediaType'] \
+           and (file['content'].startswith('/') or file['content'].startswith('http')) \
+           and file['content'].endswith(file['name']) \
+           and self.root.instance:
+            return self.file_field(
+                self.root.instance,
+                self.root.instance._meta.get_field(self.field_name),
+                file['name']
+            )
+        return SimpleUploadedFile(
+            name=file['name'],
+            content=base64.b64decode(file['content']),
+            content_type=file['mediaType']
+        )
+
     def to_internal_value(self, data) -> _t.Any:
         if self.file and data.get('content', None):
-            return SimpleUploadedFile(
-                name=data['name'],
-                content=base64.b64decode(data['content']),
-                content_type=data['mediaType']
-            )
+            return self._handle_file(data)
         return super().to_internal_value(data)
 
 
@@ -658,6 +672,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
     default_error_messages = {
         'not a list': 'value is not a valid list',
     }
+    file_field = vst_model_fields.MultipleFieldFile
 
     def run_validators(self, value: _t.Any) -> None:
         if isinstance(value, (list, tuple)):
@@ -674,11 +689,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
                 self.validate_value(file)
             if self.file:
                 return [
-                    SimpleUploadedFile(
-                        name=file['name'],
-                        content=base64.b64decode(file['content']),
-                        content_type=file['mediaType']
-                    )
+                    self._handle_file(file)
                     for file in data
                 ]
         return VSTCharField.to_internal_value(self, data)
