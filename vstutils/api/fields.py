@@ -490,7 +490,7 @@ class FkModelField(FkField):
 
     def to_representation(self, value: _t.Union[int, models.Model]) -> _t.Any:
         self.model_class = get_if_lazy(self.model_class)
-        if isinstance(value, self.model_class):
+        if self.model_class is not None and isinstance(value, self.model_class._meta.pk.model):  # type: ignore
             return getattr(value, self.autocomplete_property)
         else:
             return value  # type: ignore
