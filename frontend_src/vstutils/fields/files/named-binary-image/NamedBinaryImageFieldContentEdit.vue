@@ -9,7 +9,7 @@
             @validated="onImageValidated"
         />
 
-        <div class="input-group">
+        <div ref="dragZone" style="transition: all 300ms" class="input-group">
             <p
                 class="p-as-input"
                 :class="classes"
@@ -61,6 +61,9 @@
             onImageValidated([validatedImage]) {
                 this.$emit('set-value', validatedImage);
                 this.cancelValidation();
+            },
+            dragFinished(e) {
+                this.readFiles(e.dataTransfer.files);
             },
         },
     };

@@ -156,7 +156,7 @@ class MultipleFileMixin:
         if value is None:
             return value
 
-        return orjson.dumps(list(map(str, value)))
+        return orjson.dumps(list(map(str, value))).decode('utf-8')
 
     @raise_context_decorator_with_default(default=[])
     def from_db_value(self, value, expression, connection):

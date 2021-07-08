@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="input-group">
+        <div ref="dragZone" style="transition: all 300ms" class="input-group">
             <p
                 class="p-as-input"
                 :class="classes"
@@ -65,8 +65,9 @@
                 v.splice(index, 1);
                 this.$emit('set-value', v);
             },
+            dragFinished(e) {
+                this.$parent.readFile(e.dataTransfer.files);
+            },
         },
     };
 </script>
-
-<style scoped></style>

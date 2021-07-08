@@ -1,5 +1,5 @@
 <template>
-    <div class="input-group">
+    <div ref="dragZone" style="transition: all 300ms" class="input-group">
         <p
             id="file_path_input"
             class="p-as-input"
@@ -19,21 +19,20 @@
     import BinaryFileFieldReadFileButton from './BinaryFileFieldReadFileButton.vue';
     import { arrayBufferToBase64 } from '../../../utils';
     import { FileFieldContentEdit } from '../file';
+    import DragAndDropMixin from '../DragAndDropMixin.js';
 
     export default {
         components: {
-            /**
-             * Component for 'open file' button.
-             */
             ReadFileButton: BinaryFileFieldReadFileButton,
         },
-        mixins: [FileFieldContentEdit],
+        mixins: [FileFieldContentEdit, DragAndDropMixin],
+        data: () => ({ isDragOver: false }),
         created() {
             this.styles_dict.minHeight = '38px';
         },
         methods: {
-            readFile(event) {
-                const file = event.target.files[0];
+            readFile(files) {
+                const file = files[0];
                 if (!file || !this.$parent.validateFileSize(file.size)) return;
 
                 const reader = new FileReader();
@@ -43,6 +42,22 @@
 
                 reader.readAsArrayBuffer(file);
             },
+            dragOver() {
+                this.$refs.dragZone.classList.add('is-dragover');
+            },
+            dragLeave() {
+                this.$refs.dragZone.classList.remove('is-dragover');
+            },
+            dragFinished(e) {
+                this.readFile(e.dataTransfer.files);
+            },
         },
     };
 </script>
+
+<style>
+    .is-dragover {
+        box-shadow: 0 0 0 0.2rem #007bff40;
+        border-radius: 0.25rem;
+    }
+</style>

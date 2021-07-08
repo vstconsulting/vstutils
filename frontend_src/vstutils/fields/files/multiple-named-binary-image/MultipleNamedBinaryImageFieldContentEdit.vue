@@ -8,7 +8,7 @@
             @validated="onImageValidated"
         />
 
-        <div class="input-group">
+        <div ref="dragZone" style="transition: all 300ms" class="input-group">
             <p
                 class="p-as-input"
                 :class="classes"
@@ -59,6 +59,11 @@
             MultipleNamedBinaryFileFieldContentEdit,
             ResolutionValidatorMixin,
         ],
+        methods: {
+            dragFinished(e) {
+                this.readFiles(e.dataTransfer.files);
+            },
+        },
     };
 </script>
 

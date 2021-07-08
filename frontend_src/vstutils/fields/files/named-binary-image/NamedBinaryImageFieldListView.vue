@@ -1,11 +1,10 @@
 <template>
-    <div style="display: contents;">
-        <div
-            v-if="src"
-            class="named-bin-image"
-            :style="{ backgroundImage: cssUrl }"
-            @click.stop="isModalOpen = true"
-        />
+    <div
+        v-if="src"
+        class="named-bin-image"
+        :style="{ backgroundImage: cssUrl }"
+        @click.stop="isModalOpen = true"
+    >
         <Modal v-show="isModalOpen" :opt="{ footer: false }" @close="isModalOpen = false">
             <template #body>
                 <img v-if="src" :src="src" alt="" class="image-field-content" />
@@ -17,7 +16,7 @@
 <script>
     import { BaseFieldListView } from '../../base';
     import Modal from '../../../components/items/modal/Modal.vue';
-    import {makeDataImageUrl} from "../../../utils";
+    import { makeDataImageUrl } from '../../../utils';
 
     export default {
         name: 'NamedBinaryImageFieldListView',
@@ -30,9 +29,7 @@
         },
         computed: {
             src() {
-                return this.value && this.value.content
-                    ? makeDataImageUrl(this.value)
-                    : null;
+                return this.value?.content ? makeDataImageUrl(this.value) : null;
             },
             cssUrl() {
                 return `url("${this.src}")`;
@@ -48,12 +45,13 @@
         background-repeat: no-repeat;
         background-size: contain;
         background-position: center;
+        min-height: 47px;
     }
 </style>
 
 <style>
     tr td.column-format-namedbinimage {
         height: inherit;
-        padding: 1px;
+        padding: 1px !important;
     }
 </style>

@@ -9,9 +9,7 @@ export default {
         imagesForValidation: null,
     }),
     methods: {
-        async readFiles(event) {
-            const files = event.target.files;
-
+        async readFiles(files) {
             const results = [];
 
             for (let index = 0; index < files.length; index++) {
@@ -25,13 +23,26 @@ export default {
             event.target.value = '';
 
             if (this.field.resolutionConfig) {
-                for (const { content, mediaType } of results) {
-                    const img = await loadImage(makeDataImageUrl({ content, mediaType }));
+                for (const { content, mediaType, name } of results) {
+                    let img = null;
+                    try {
+                        img = await loadImage(makeDataImageUrl({ content, mediaType }));
+                        // eslint-disable-next-line no-empty
+                    } catch (e) {}
+
                     const errors = [];
-                    if (img.naturalHeight < this.field.resolutionConfig.minHeight)
-                        errors.push(`Height should be more then ${this.field.resolutionConfig.minHeight}px.`);
-                    if (img.naturalWidth < this.field.resolutionConfig.minWidth)
-                        errors.push(`Width should be more then ${this.field.resolutionConfig.minWidth}px.`);
+                    if (img) {
+                        if (img.naturalHeight < this.field.resolutionConfig.minHeight)
+                            errors.push(
+                                `Height should be more then ${this.field.resolutionConfig.minHeight}px.`,
+                            );
+                        if (img.naturalWidth < this.field.resolutionConfig.minWidth)
+                            errors.push(
+                                `Width should be more then ${this.field.resolutionConfig.minWidth}px.`,
+                            );
+                    } else {
+                        errors.push(this.$t('Invalid file {0}', [name]));
+                    }
                     if (errors.length) {
                         guiPopUp.error(errors.join('<br/>'));
                         return;
@@ -46,7 +57,7 @@ export default {
             this.imagesForValidation = null;
         },
         onImageValidated(validatedImages) {
-            this.$emit('set-value', [...this.value, ...validatedImages]);
+            this.$emit('set-value', [...(this.value || []), ...validatedImages]);
             this.cancelValidation();
         },
     },

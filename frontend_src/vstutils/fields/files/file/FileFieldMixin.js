@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { guiPopUp } from '../../../popUp';
 import FileFieldContentEdit from './FileFieldContentEdit.vue';
 
@@ -50,9 +49,7 @@ const FileFieldMixin = {
          */
         readFileOnLoadCallback(event) {
             this.$emit('set-value', { field: this.field.name, value: event.target.result });
-
-            let el = $(this.$el).find('#file_reader_input');
-            $(el).val('');
+            this.$el.querySelector('input').value = '';
         },
     },
     components: {
