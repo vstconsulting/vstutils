@@ -12,8 +12,7 @@ const MultipleNamedBinaryFileFieldMixin = {
         handleValue(data = {}) {
             return data[this.field.options.name];
         },
-        async readFile(event) {
-            let files = event.target.files;
+        async readFile(files) {
             const filesObj = [];
 
             for (let index = 0; index < files.length; index++) {

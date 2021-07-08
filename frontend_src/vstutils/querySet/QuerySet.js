@@ -449,7 +449,7 @@ export default class QuerySet {
         if (req.data !== undefined) {
             const rawData = dataIsModel ? req.data._getInnerData() : req.data;
             if (req.useBulk) {
-                req.data = JSON.stringify(rawData);
+                req.data = rawData;
             } else {
                 req.data = objectToFormData(rawData);
             }

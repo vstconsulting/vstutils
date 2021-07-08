@@ -10,7 +10,7 @@ const DateTimeFieldContent = {
     },
     computed: {
         preparedValue() {
-            return this.value ? this.value.format(this.format) : this.value;
+            return this.value ? this.value.format(this.format) : '';
         },
     },
 };

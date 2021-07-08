@@ -18,6 +18,14 @@ class MultipleNamedBinFileField extends NamedBinaryFileField {
         return super.mixins.concat(MultipleNamedBinaryFileFieldMixin);
     }
 
+    getInitialValue() {
+        const value = super.getInitialValue();
+        if (value === undefined) {
+            return this.getEmptyValue();
+        }
+        return value;
+    }
+
     getEmptyValue() {
         return [];
     }

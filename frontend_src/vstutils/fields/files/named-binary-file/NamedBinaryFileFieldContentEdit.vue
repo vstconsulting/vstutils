@@ -1,5 +1,5 @@
 <template>
-    <div class="input-group">
+    <div ref="dragZone" style="transition: all 300ms" class="input-group">
         <p
             class="p-as-input"
             :class="classes"
@@ -24,13 +24,11 @@
     export default {
         mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContent],
         methods: {
-            async readFile(event) {
-                const file = event.target.files[0];
+            async readFile(files) {
+                const file = files[0];
                 if (!file || !this.$parent.validateFileSize(file.size)) return;
                 this.$emit('set-value', await readFileAsObject(file));
             },
         },
     };
 </script>
-
-<style scoped></style>

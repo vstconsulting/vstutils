@@ -18,6 +18,9 @@
                 return this.field.prependText + this.preparedValue + this.field.appendText;
             },
             preparedValue() {
+                if (this.value === undefined || this.value === null) {
+                    return '';
+                }
                 return this.value;
             },
         },
