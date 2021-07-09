@@ -2,7 +2,7 @@
 """
 Default serializer classes for web-api.
 Read more in Django REST Framework documentation for
-`Serializers <https://www.django-rest-framework.org/api-guide/serializers/#modelserializer>`_.
+`Serializers <https://www.django-rest-framework.org/api-guide/serializers/>`_.
 """
 
 
@@ -37,7 +37,8 @@ VALID_FK_KWARGS = (
 class BaseSerializer(serializers.Serializer):
     """
     Default serializer with logic to work with objects.
-    Read more in `DRF documentation <https://www.django-rest-framework.org/api-guide/serializers/#serializers>`_
+    Read more in `DRF serializer's documentation
+    <https://www.django-rest-framework.org/api-guide/serializers/#serializers>`_
     how to create Serializers and work with them.
     """
 

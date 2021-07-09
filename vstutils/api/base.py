@@ -469,7 +469,7 @@ class FileResponseRetrieveMixin(GenericViewSet):
     Example:
 
         .. literalinclude:: ../test_src/test_proj/models/files.py
-           :lines: 1-20,54-76
+           :lines: 1-20,57-75
     """
     __slots__ = ()
 

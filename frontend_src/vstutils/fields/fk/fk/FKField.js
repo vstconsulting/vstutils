@@ -9,6 +9,10 @@ import {
     RequestTypes,
 } from '../../../utils';
 
+
+/**
+ * Foreign key GUI field class for nested models.
+ */
 class FKField extends BaseField {
     constructor(options) {
         super(options);

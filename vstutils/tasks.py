@@ -16,6 +16,7 @@ class TaskClass(BaseTask):
     """
     Wrapper for Celery BaseTask class. Usage is same as Celery standard class, but you can execute task without
     creating instance with :meth:`TaskClass.do` method.
+
     Example:
 
         .. sourcecode:: python
@@ -31,11 +32,11 @@ class TaskClass(BaseTask):
 
             app.tasks.register(Foo())
 
-        Now you can call your task with various methods:
-            - by executing Foo.do(*args, **kwargs)
-            - get registered task instance like that - app.tasks['full_path.to.task.class.Foo']
+    Now you can call your task with various methods:
+        - by executing ``Foo.do(*args, **kwargs)``
+        - get registered task instance like that - app.tasks['full_path.to.task.class.Foo']
 
-        Also you can make you registered task periodic, by adding it to CELERY_BEAT_SCHEDULE in settings.py:
+    Also you can make you registered task periodic, by adding it to CELERY_BEAT_SCHEDULE in settings.py:
 
         .. sourcecode:: python
 
@@ -45,6 +46,7 @@ class TaskClass(BaseTask):
                     'schedule': crontab(day_of_month=1),
                 },
             }
+
     """
 
     # pylint: disable=abstract-method

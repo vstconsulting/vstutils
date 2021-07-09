@@ -255,8 +255,7 @@ class DependFromFkField(DynamicJsonTypeField):
     """
     Field extends :class:`DynamicJsonTypeField`. Validates field data by :attr:`.field_attribute`
     chosen in related model. By default, any value of :attr:`.field_attribute` validates as :class:`.VSTCharField`.
-    To override this behavior set dict attribute ``{field_attribute value}_fields_mapping`` in related model
-     where:
+    To override this behavior set dict attribute ``{field_attribute value}_fields_mapping`` in related model where:
 
     - **key** - string representation of value type which is received from related instance :attr:`.field_attribute`.
     - **value** - :class:`rest_framework.Field` instance for validation.
