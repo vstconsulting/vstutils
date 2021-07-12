@@ -178,3 +178,5 @@ class ReadonlyDeepNestedModel(BModel):
         default_related_name = 'readonly_deepnested'
         _filter_backends = (EmptyFilterBackend,)
         _view_class = 'read_only'
+        _list_fields = ('name', 'parent')
+        _detail_fields = '__all__'

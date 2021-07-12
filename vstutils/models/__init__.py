@@ -190,6 +190,7 @@ class BModel(BaseModel):
     id = models.AutoField(primary_key=True, max_length=20)
     #: If hidden is set to True, entry will be excluded from query in BQuerySet.
     hidden = models.BooleanField(default=False)
+    hidden._hide = True  # pylint: disable=protected-access
 
     class Meta:
         abstract = True

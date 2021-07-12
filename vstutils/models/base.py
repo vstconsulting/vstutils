@@ -115,7 +115,7 @@ def _get_unicode(obj):
 
 
 def _ensure_pk_in_fields(model_class, fields):
-    if fields is None:
+    if fields is None or fields == '__all__':
         return
     fields = list(fields)
     primary_key_name = model_class._meta.pk.attname
@@ -261,6 +261,13 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             if filter_handler(f)
         }
 
+    def get_all_view_fields_lazy(cls):
+        return SimpleLazyObject(
+            lambda: tuple(cls.get_model_fields_mapping(
+                lambda f: not isinstance(f, (ManyToManyField, OneToOneField)) and not getattr(f, '_hide', False)
+            ).keys())
+        )
+
     def get_serializer_class(  # noqa: CFQ002
             cls,
             serializer_class,
@@ -283,14 +290,10 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
         serializer_class_name = cls.__name__ + 'Serializer' if serializer_class_name is None else serializer_class_name
 
-        if fields:
+        if fields and fields != '__all__':
             fields = list(fields)
         else:
-            fields = SimpleLazyObject(
-                lambda: tuple(cls.get_model_fields_mapping(
-                    lambda f: not isinstance(f, (ManyToManyField, OneToOneField))
-                ).keys())
-            )
+            fields = cls.get_all_view_fields_lazy()
 
         meta = type('Meta', (), {
             'model': cls,
