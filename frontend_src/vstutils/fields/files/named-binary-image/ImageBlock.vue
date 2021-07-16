@@ -6,7 +6,7 @@
                 <h3>{{ $t(img_alt.toLowerCase()) | capitalize | split }}</h3>
             </template>
             <template #body>
-                <img :src="img_src" :alt="img_alt" class="image-field-content" />
+                <img style="max-height: 80vh" :src="img_src" :alt="img_alt" class="image-field-content" />
             </template>
         </Modal>
     </div>
