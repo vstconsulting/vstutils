@@ -4,14 +4,6 @@ import TFAPage from './TFAPage.vue';
 
 export { Gravatar };
 
-// Set view field to username
-signals.once('allModels.created', ({ models }) => {
-    for (const modelName of ['OneUser', 'User']) {
-        const model = models.get(modelName);
-        model.viewField = model.fields.get('username');
-    }
-});
-
 // Redirect all /profile/... requests to /user/{currentUser.id}/...
 signals.once('app.afterInit', ({ app }) => {
     const currentUserViewPath = `/user/${app.api.getUserId()}`;
