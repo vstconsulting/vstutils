@@ -176,7 +176,7 @@ Now when we create new post on `/post/` endpoint Author FkField makes get reques
 useful to get different set of authors (that may have been previously filtered on backend).
 
 CSS Styling
--------------------
+-----------
 
 1. Like scripts, css files may be added to SPA_STATIC in setting.py
 
@@ -209,6 +209,20 @@ Other page elements are also available for styling: for example, to hide certain
     .column-format-customField {
         display: none;
     }
+
+Show primary key column on list
+-------------------------------
+
+Every pk column has `pk-column` CSS class and hidden by default (using `display: none;`).
+
+For example this style will show pk column on all list views of `Order` model:
+
+.. sourcecode:: css
+
+    .list-Order .pk-column {
+        display: table-cell;
+    }
+
 
 View customization
 -------------------

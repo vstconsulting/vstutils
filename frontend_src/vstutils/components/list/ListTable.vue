@@ -11,7 +11,7 @@
                     <SelectToggleButton :is-selected="allSelected" />
                 </th>
 
-                <th v-for="(field, idx) in fields" :key="idx" :class="tableColumnClasses(field)">
+                <th v-for="(field, idx) in fields" :key="idx" :class="tableColumnClasses(field, model)">
                     {{ $t(field.title) }}
                     <Popover :content="field.description" />
                 </th>
@@ -60,6 +60,7 @@
             instances: { type: Array, required: true },
             selection: { type: Array, required: true },
             fields: { type: Array, required: true },
+            model: { type: Function, required: true },
             hasMultiActions: { type: Boolean, required: false, default: false },
             instanceActions: { type: Array, required: false, default: () => [] },
             instanceSublinks: { type: Array, required: false, default: () => [] },
@@ -76,5 +77,3 @@
         },
     };
 </script>
-
-<style scoped></style>
