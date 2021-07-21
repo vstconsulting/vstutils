@@ -15,7 +15,7 @@
         <td
             v-for="field in fields"
             :key="field.name"
-            :class="tableColumnClasses(field)"
+            :class="tableColumnClasses(field, instance.constructor)"
             @click="$emit('row-clicked', instance)"
         >
             <component :is="field.component" :field="field" :data="data" type="list" />
@@ -142,5 +142,11 @@
     }
     td.column-actions {
         padding: 5px;
+    }
+</style>
+
+<style>
+    .pk-column {
+        display: none;
     }
 </style>

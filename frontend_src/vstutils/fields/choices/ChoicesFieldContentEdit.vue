@@ -22,6 +22,7 @@
                 s2: undefined,
                 class_list: ['form-control', 'select2', 'select2-field-select'],
                 enum: [],
+                validIds: [],
             };
         },
         computed: {
@@ -41,24 +42,24 @@
             this.s2 = $(this.$el);
 
             if (this.field.fieldForEnum) {
-                this.enum = this.prepareFieldData(this.data[this.field.fieldForEnum]);
+                this.setEnum(this.data[this.field.fieldForEnum]);
                 this.$watch(
                     function () {
                         return this.data[this.field.fieldForEnum];
                     },
                     function (newVal) {
-                        this.enum = this.prepareFieldData(newVal);
+                        this.setEnum(newVal);
                         this.initSelect2();
                     },
                 );
             } else {
-                this.enum = this.field.enum;
+                this.setEnum(this.field.enum);
                 this.$watch(
                     function () {
                         return this.field.enum;
                     },
                     function (newVal) {
-                        this.enum = newVal || [];
+                        this.setEnum(newVal);
                         this.initSelect2();
                     },
                 );
@@ -70,15 +71,9 @@
             $(this.$el).off().select2('destroy');
         },
         methods: {
-            prepareFieldData(data) {
-                if (typeof data === 'string' && data.length > 0) {
-                    return data.split(',');
-                } else if (Array.isArray(data)) {
-                    return data.map((v) => (typeof v === 'object' ? v.value || v.prefetch_value : v));
-                } else if (typeof data === 'object') {
-                    return [data.value || data.prefetch_value];
-                }
-                return [];
+            setEnum(newEnum) {
+                this.enum = this.field.prepareEnumData(newEnum);
+                this.validIds = this.enum.map((value) => value.id);
             },
             /**
              * Method, that mounts select2 to current field's select.
@@ -106,8 +101,9 @@
                             value = event.target.value || null;
                         }
 
-                        if (!this.enum.includes(value)) {
-                            value = this.enum[0] || null;
+                        if (!this.validIds.includes(value) && value) {
+                            this.setValue(this.validIds[0] || null);
+                            return;
                         }
                         if (this.value !== value) {
                             this.$emit('set-value', value);
@@ -133,5 +129,3 @@
         },
     };
 </script>
-
-<style scoped></style>

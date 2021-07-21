@@ -27,6 +27,7 @@
                     :instances="instances"
                     :selection="selection"
                     :fields="fields"
+                    :model="model"
                     :has-multi-actions="view.multiActions.size > 0"
                     :instance-actions="instanceActions"
                     :instance-sublinks="instanceSublinks"
@@ -86,9 +87,7 @@
                 return count === undefined ? -1 : count;
             },
             fields() {
-                return Array.from(this.model.fields.values()).filter(
-                    (field) => !field.hidden && field !== this.model.pkField,
-                );
+                return Array.from(this.model.fields.values()).filter((field) => !field.hidden);
             },
             filters() {
                 return this.$store.getters[this.storeName + '/filters'];
