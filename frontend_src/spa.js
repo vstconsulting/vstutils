@@ -130,6 +130,13 @@ export class App extends BaseApp {
                     }
                 }
             }
+
+            // Call hook for filter fields
+            if (view.filters) {
+                for (const field of Object.values(view.filters)) {
+                    field.prepareFieldForView(path);
+                }
+            }
         }
     }
 

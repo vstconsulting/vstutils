@@ -1032,9 +1032,9 @@ export const BulkType = {
     ASYNC: 'patch',
 };
 
-export function tableColumnClasses(field, model) {
+export function tableColumnClasses(field) {
     const classes = ['column', `column-${field.name}`, `column-format-${field.format}`];
-    if (model.pkField === field) {
+    if (field.model?.pkField === field) {
         classes.push('pk-column');
     }
     return classes;

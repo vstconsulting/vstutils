@@ -51,6 +51,9 @@
 </script>
 
 <style scoped>
+    .selected-filters {
+        margin-bottom: 0.5rem;
+    }
     .selected-filters span {
         padding: 5px;
         margin-left: 5px;

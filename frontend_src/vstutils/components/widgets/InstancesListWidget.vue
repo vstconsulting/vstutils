@@ -6,11 +6,7 @@
         <table v-else class="table table-sm">
             <thead>
                 <tr>
-                    <th
-                        v-for="field in fieldsInstances"
-                        :key="field.name"
-                        :class="tableColumnClasses(field, model)"
-                    >
+                    <th v-for="field in fieldsInstances" :key="field.name" :class="tableColumnClasses(field)">
                         {{ field.title }}
                         <Popover :content="field.description" />
                     </th>
@@ -44,11 +40,9 @@
             return h(
                 'tr',
                 parent.fieldsInstances.map((field) =>
-                    h(
-                        'td',
-                        { key: field.name, class: tableColumnClasses(field, props.instance.constructor) },
-                        [h(field.component, { props: { type: 'list', field, data } })],
-                    ),
+                    h('td', { key: field.name, class: tableColumnClasses(field) }, [
+                        h(field.component, { props: { type: 'list', field, data } }),
+                    ]),
                 ),
             );
         },

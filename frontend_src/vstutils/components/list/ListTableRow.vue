@@ -15,7 +15,7 @@
         <td
             v-for="field in fields"
             :key="field.name"
-            :class="tableColumnClasses(field, instance.constructor)"
+            :class="tableColumnClasses(field)"
             @click="$emit('row-clicked', instance)"
         >
             <component :is="field.component" :field="field" :data="data" type="list" />
