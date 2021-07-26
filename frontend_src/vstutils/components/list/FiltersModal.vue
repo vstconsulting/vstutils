@@ -85,7 +85,11 @@
                 Vue.set(this.filtersData, field, value);
             },
             filter() {
-                this.$root.$refs.currentViewComponent.applyFilters(this.filtersData);
+                this.$root.$refs.currentViewComponent.applyFilters(
+                    Object.fromEntries(
+                        this.fields.map((field) => [field.name, field.toInner(this.filtersData)]),
+                    ),
+                );
                 this.close();
             },
         },

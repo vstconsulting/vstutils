@@ -7,7 +7,7 @@
         <div v-if="props.iconClass" class="icon">
             <i :class="props.iconClass" />
         </div>
-        <a :href="props.href || '#'" class="small-box-footer">
+        <a :href="props.href" class="small-box-footer">
             <template v-if="props.href">
                 {{ parent.$t('More info') }}
                 <i class="fas fa-arrow-circle-right" />

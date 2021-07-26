@@ -27,7 +27,6 @@
                     :instances="instances"
                     :selection="selection"
                     :fields="fields"
-                    :model="model"
                     :has-multi-actions="view.multiActions.size > 0"
                     :instance-actions="instanceActions"
                     :instance-sublinks="instanceSublinks"
