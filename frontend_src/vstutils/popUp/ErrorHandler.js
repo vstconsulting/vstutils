@@ -1,6 +1,8 @@
 import { guiPopUp } from './PopUp';
 import { ModelValidationError } from '../models/Model.js';
 
+const SPECIAL_ERRORS_KEYS = ['non_field_errors'];
+
 /**
  * Class, that handles errors.
  * Class can transform error to string add show error message to user.
@@ -23,7 +25,11 @@ export default class ErrorHandler {
                 if (Array.isArray(detail_msg)) {
                     detail_msg = detail_msg.join('<br>');
                 }
-                error_msg += `<br><b>${key}</b>: ${detail_msg}`;
+                if (SPECIAL_ERRORS_KEYS.includes(key)) {
+                    error_msg += `<br>${detail_msg}`;
+                } else {
+                    error_msg += `<br><b>${key}</b>: ${detail_msg}`;
+                }
             }
         }
         return error_msg;
