@@ -198,6 +198,7 @@ export default class QuerySet {
             const response = await this.execute({
                 method: HttpMethods.GET,
                 path: this._getDetailPath(id),
+                query: this.query,
                 useBulk: model.shouldUseBulk(HttpMethods.GET),
             });
             instance = new model(response.data, this);
