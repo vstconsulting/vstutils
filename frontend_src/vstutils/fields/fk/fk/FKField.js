@@ -9,7 +9,6 @@ import {
     RequestTypes,
 } from '../../../utils';
 
-
 /**
  * Foreign key GUI field class for nested models.
  */

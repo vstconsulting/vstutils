@@ -1,5 +1,5 @@
 <template>
-    <footer class="main-footer elevation-3">
+    <footer class="main-footer elevation-3 d-print-none">
         <!-- Empty span used to maintain height of the footer -->
         <span class="whitespace">&nbsp;</span>
 

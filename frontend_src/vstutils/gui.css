@@ -1254,10 +1254,17 @@ td .boolean-false {
 
 .content-wrapper,
 .right-side {
-    background-color: #ecf0f5;
     z-index: 800;
     min-height: calc(100vh - 112px);
 }
+
+@media not print {
+    .content-wrapper,
+    .right-side {
+        background-color: #ecf0f5;
+    }
+}
+
 
 .well {
     min-height: 20px;
@@ -1572,9 +1579,11 @@ pre {
     background-color: var(--left-sidebar-bg-color) !important;
 }
 
-.content-wrapper,
-.swagger-ui {
-    background-color: var(--content-wrapper);
+@media not print {
+    .content-wrapper,
+    .swagger-ui {
+        background-color: var(--content-wrapper);
+    }
 }
 
 .iziModal-content,

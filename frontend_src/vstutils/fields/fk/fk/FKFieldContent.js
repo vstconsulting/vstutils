@@ -55,6 +55,13 @@ export default {
         }
     },
     methods: {
+        translateValue(value) {
+            const key = `:model:${this.field.fkModel.name}:${this.field.viewField}:${value}`;
+            if (this.$te(key)) {
+                return this.$t(key);
+            }
+            return value;
+        },
         /**
          * Method, that loads prefetch_value.
          * @param {string|number} value.
