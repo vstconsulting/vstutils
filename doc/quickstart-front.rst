@@ -348,3 +348,19 @@ Example of customizing sidebar component:
     spa.signals.once('app.beforeInit', ({ app }) => {
         app.appRootComponent = CustomAppRoot;
     });
+
+
+Translating values of fields
+----------------------------
+Values tha displayed by `FKField` of `ChoicesField` can be translated using standard translations files.
+
+Translation key must be defined as `:model:<ModelName>:<fieldName>:<value>`. For example:
+
+.. sourcecode:: python
+
+    TRANSLATION = {
+        ':model:Category:name:Category 1': 'Категория 1',
+    }
+
+
+For `FKField` name of the related model is used. And `fieldName` should be equal to `viewField`.

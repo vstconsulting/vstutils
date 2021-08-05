@@ -2,15 +2,16 @@ import ChoicesFieldContentEdit from './ChoicesFieldContentEdit.vue';
 import { BaseFieldContentReadonlyMixin, BaseFieldListView, BaseFieldMixin } from '../base';
 
 function preparedValue() {
-    const val = BaseFieldContentReadonlyMixin.computed.preparedValue.call(this);
+    let val = BaseFieldContentReadonlyMixin.computed.preparedValue.call(this);
     if (val && this.field.enum) {
         for (const enumVal of this.field.prepareEnumData(this.field.enum)) {
             if (enumVal && enumVal.id === val) {
-                return enumVal.text;
+                val = enumVal.text;
+                break;
             }
         }
     }
-    return val;
+    return this.$parent.translateValue(val);
 }
 
 const ChoicesFieldMixin = {
@@ -41,6 +42,15 @@ const ChoicesFieldMixin = {
                 classes.push(`value-${this.value}`);
             }
             return classes;
+        },
+    },
+    methods: {
+        translateValue(value) {
+            const key = `:model:${this.field.model?.name}:${this.field.name}:${value}`;
+            if (this.$te(key)) {
+                return this.$t(key);
+            }
+            return value;
         },
     },
 };

@@ -228,7 +228,7 @@ export class App extends BaseApp {
         signals.emit('app.beforeInitRouter', { routerConstructor });
         this.router = routerConstructor.getRouter();
 
-        let i18n = new VueI18n({
+        this.i18n = new VueI18n({
             locale: this.initLanguage,
             messages: this.translations,
             silentTranslationWarn: true,
@@ -249,7 +249,7 @@ export class App extends BaseApp {
             },
             router: this.router,
             store: storeConstructor.getStore(),
-            i18n: i18n,
+            i18n: this.i18n,
         });
 
         signals.emit('app.afterInit', { app: this });

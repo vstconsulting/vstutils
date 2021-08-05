@@ -73,6 +73,9 @@
         methods: {
             setEnum(newEnum) {
                 this.enum = this.field.prepareEnumData(newEnum);
+                for (const item of this.enum) {
+                    item.text = this.$parent.translateValue(item.text);
+                }
                 this.validIds = this.enum.map((value) => value.id);
             },
             /**

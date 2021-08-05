@@ -6,7 +6,7 @@
         :type="type"
         :hideable="hideable"
         @toggleHidden="$emit('toggleHidden')"
-        @set-value="$emit('set-value', $event)"
+        @set-value="setValue($event.value)"
     />
 </template>
 
@@ -19,6 +19,7 @@
         data() {
             return {
                 realField: this.field.getRealField(this.data),
+                savedValues: new WeakMap(),
             };
         },
         computed: {
@@ -30,11 +31,22 @@
             parentValues(newValues, oldValues) {
                 if (!deepEqual(newValues, oldValues)) {
                     this.realField = this.field.getRealField(newValues);
+                    this.setValue(
+                        this.savedValues.has(this.realField)
+                            ? this.savedValues.get(this.realField)
+                            : this.realField.getInitialValue(),
+                    );
                 }
             },
         },
         created() {
             this.realField = this.field.getRealField(this.data);
+        },
+        methods: {
+            setValue(value) {
+                this.savedValues.set(this.realField, value);
+                this._emitSetValueSignal(value);
+            },
         },
     };
 </script>

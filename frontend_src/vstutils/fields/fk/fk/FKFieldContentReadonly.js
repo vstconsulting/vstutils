@@ -37,7 +37,7 @@ const FKFieldContentReadonly = {
          */
         text() {
             if (this.fetchedValue && typeof this.fetchedValue === 'object') {
-                return this.fetchedValue[this.field.viewField];
+                return this.translateValue(this.fetchedValue[this.field.viewField]);
             }
             return this.fetchedValue;
         },

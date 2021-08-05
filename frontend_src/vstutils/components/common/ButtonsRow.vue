@@ -1,5 +1,5 @@
 <template>
-    <div class="buttons-row-wrapper">
+    <div class="buttons-row-wrapper d-print-none">
         <!-- Not grouped -->
         <OperationButton
             v-for="sublink in notGroupedSublinks"

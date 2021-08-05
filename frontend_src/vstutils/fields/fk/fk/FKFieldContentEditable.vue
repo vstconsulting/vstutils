@@ -85,7 +85,7 @@
                 this.instancesCache.set(String(this.field.getValueFieldValue(value)), value);
 
                 const newOption = new Option(
-                    value[this.field.viewField] || value,
+                    this.translateValue(value[this.field.viewField]) || value,
                     value[this.field.valueField] || value,
                     false,
                     true,
@@ -169,7 +169,7 @@
 
                 const items = instances.map((instance) => ({
                     id: instance[this.field.valueField],
-                    text: instance[this.field.viewField],
+                    text: this.translateValue(instance[this.field.viewField]),
                     instance,
                 }));
 
@@ -177,7 +177,7 @@
                     if (typeof this.field.default !== 'object') {
                         items.push({
                             id: this.field.default,
-                            text: this.field.default,
+                            text: this.translateValue(this.field.default),
                         });
                     } else {
                         items.push(this.field.default);

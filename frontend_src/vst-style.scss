@@ -401,8 +401,10 @@ $nested_body_components:
     }
 }
 
-body {
-    background-color: var(--content-wrapper);
+@media not print {
+    body {
+        background-color: var(--content-wrapper);
+    }
 }
 
 @media (min-width: 992px) {
