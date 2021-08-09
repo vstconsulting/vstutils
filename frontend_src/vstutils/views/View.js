@@ -124,7 +124,12 @@ export class View {
         const thisView = this;
         return {
             mixins: this.mixins,
-            provide: { view: thisView },
+            provide() {
+                return {
+                    view: thisView,
+                    pageComponent: this,
+                };
+            },
             data() {
                 return { view: thisView };
             },

@@ -128,7 +128,6 @@
              * @param {string} obj.field
              * @param {any} obj.value
              */
-            // eslint-disable-next-line no-unused-vars
             setFieldValue(obj) {
                 this.commitMutation('setFieldValue', obj);
             },

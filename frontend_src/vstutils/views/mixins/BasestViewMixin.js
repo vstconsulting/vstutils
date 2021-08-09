@@ -33,6 +33,10 @@ const BasestViewMixin = {
              * Boolean property means that fetchData() execution was successful.
              */
             response: null,
+            /**
+             * If true then this component will be changing title of the page.
+             */
+            controlTitle: true,
         };
     },
     watch: {
@@ -47,8 +51,10 @@ const BasestViewMixin = {
             this.$store.commit('setBreadcrumbs', this.breadcrumbs);
         },
         setDocumentTitle() {
-            this.$store.commit('setPageTitle', this.title);
-            document.title = this.title;
+            if (this.controlTitle) {
+                this.$store.commit('setPageTitle', this.title);
+                document.title = this.title;
+            }
         },
         /**
          * Method, that goes to n's Browser History record.

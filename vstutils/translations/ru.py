@@ -249,6 +249,7 @@ TRANSLATION = {
     'width': 'ширина',
     'More info': 'Подробнее',
     'Dark mode': 'Темная тема',
+    'Execute': 'Выполнить',
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',
