@@ -228,4 +228,5 @@ TRANSLATION = {
     'terms of agreement': '协议条款',
     'Zoom': '飛漲',
     'Scale': '規模',
+    'Execute': '施行',
 }

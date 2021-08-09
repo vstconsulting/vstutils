@@ -175,8 +175,7 @@ def subaction(*args, **kwargs):
         else:
             override_kw['operation_description'] = str(func.__doc__ or '').strip()  # type: ignore
 
-        if response_serializer is not None and response_serializer.__name__ == 'EmptySerializer':
-            override_kw['x-multiaction'] = bool(is_mul)
+        override_kw['x-multiaction'] = bool(is_mul)
 
         return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 

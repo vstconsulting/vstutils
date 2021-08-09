@@ -207,14 +207,10 @@ export const ActionViewComponent = {
             this.setLoadingSuccessful();
         },
         getActionRequestPath() {
-            if (this.view?.parent?.parent?.deepNestedParentView) {
-                const rootNestedView = this.view.parent.parent.deepNestedParentView;
-                return joinPaths(
-                    rootNestedView.path,
-                    pathToArray(this.$route.path).slice(-4)[0],
-                    rootNestedView.deepNestedViewFragment,
-                    this.params[this.view.parent.pkParamName],
-                );
+            const rootNestedView = this.view.parent.parent.deepNestedParentView;
+            if (rootNestedView) {
+                const [pk, actionName] = pathToArray(this.$route.path).slice(-2);
+                return joinPaths(formatPath(rootNestedView.path, this.params), pk, actionName);
             }
             return formatPath(this.view.path, this.$route.params);
         },

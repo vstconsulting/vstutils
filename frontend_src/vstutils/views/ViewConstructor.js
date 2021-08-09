@@ -14,6 +14,7 @@ import { NoModel } from '../models';
 import { getFieldFormatFactory } from '../fields';
 import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.js';
 import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
+import NotEmptyMultiactionModal from '../components/list/NotEmptyMultiactionModal.vue';
 
 /**
  * Function that checks if status code if OK
@@ -73,9 +74,10 @@ export default class ViewConstructor {
      */
     getOperationOptions(operationId, path, method) {
         const opt = { operationId };
-        let operationOptions = this.dictionary.schema_types[
-            Object.keys(this.dictionary.schema_types).find((suffix) => operationId.endsWith(suffix))
-        ];
+        let operationOptions =
+            this.dictionary.schema_types[
+                Object.keys(this.dictionary.schema_types).find((suffix) => operationId.endsWith(suffix))
+            ];
 
         if (!operationOptions && method === HttpMethods.GET) {
             operationOptions = this.dictionary.schema_types['_get'];
@@ -361,7 +363,14 @@ export default class ViewConstructor {
                     [ViewTypes.PAGE, ViewTypes.PAGE_EDIT].includes(parent.type) &&
                     parent.listView
                 ) {
-                    parent.listView.multiActions.set(action.name, action);
+                    if (action.isEmpty) {
+                        parent.listView.multiActions.set(action.name, action);
+                    } else {
+                        parent.listView.multiActions.set(action.name, {
+                            ...action,
+                            component: NotEmptyMultiactionModal,
+                        });
+                    }
                 }
             }
 

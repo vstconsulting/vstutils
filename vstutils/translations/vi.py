@@ -227,4 +227,5 @@ TRANSLATION = {
     'terms of agreement': 'các điều khoản của thỏa thuận',
     'Zoom': 'Thu phóng',
     'Scale': 'Tỉ lệ',
+    'Execute': 'Hành hình',
 }

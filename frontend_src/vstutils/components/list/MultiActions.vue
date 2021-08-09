@@ -11,14 +11,22 @@
             Execute action on {{ numberOfSelected }} {{ $tc('instance', numberOfSelected) }}
         </button>
         <div class="dropdown-menu" aria-labelledby="multi-actions-button">
-            <button
-                v-for="action in multiActions"
-                :key="action.name"
-                class="dropdown-item"
-                type="button"
-                @click="$emit('execute-multi-action', action)"
-                v-text="action.title"
-            />
+            <template v-for="action in multiActions">
+                <component
+                    :is="action.component"
+                    v-if="action.component"
+                    :key="action.name"
+                    :action="action"
+                />
+                <button
+                    v-else
+                    :key="action.name"
+                    class="dropdown-item"
+                    type="button"
+                    @click="$emit('execute-multi-action', action)"
+                    v-text="action.title"
+                />
+            </template>
         </div>
     </div>
 </template>

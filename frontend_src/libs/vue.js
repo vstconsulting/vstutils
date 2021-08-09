@@ -16,3 +16,9 @@ Vue.use(VueI18n);
 import PortalVue from 'portal-vue';
 window.PortalVue = PortalVue;
 Vue.use(PortalVue);
+
+Vue.directive('element-bound', {
+    bind(el, { value: callback }) {
+        callback(el);
+    },
+});
