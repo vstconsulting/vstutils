@@ -625,11 +625,19 @@ class NamedBinaryFileInJsonField(VSTCharField):
         self.run_validators(data)
         return self.to_internal_value(data)
 
+    def run_validators(self, value: _t.Dict) -> None:
+        if not raise_context_decorator_with_default(default=False)(self.should_not_handle)(value):
+            super().run_validators(value)
+
+    def should_not_handle(self, file):
+        return (
+            not file['mediaType'] and
+            (file['content'].startswith('/') or file['content'].startswith('http')) and
+            file['content'].endswith(file['name'])
+        )
+
     def _handle_file(self, file):
-        if not file['mediaType'] \
-           and (file['content'].startswith('/') or file['content'].startswith('http')) \
-           and file['content'].endswith(file['name']) \
-           and self.root.instance:
+        if self.should_not_handle(file) and self.root.instance:
             return self.file_field(
                 self.root.instance,
                 self.root.instance._meta.get_field(self.field_name),
