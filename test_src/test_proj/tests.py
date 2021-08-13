@@ -1874,6 +1874,8 @@ class EndpointTestCase(BaseTestCase):
             'ordered': {'a': 1, 'b': 2},
             'list': [1, 2.0, '3']
         })
+        self.assertIn('request_info_cookie', self.client.cookies)
+        self.assertEqual(self.client.cookies['request_info_cookie'].value, 'request_info_cookie_value')
 
     def test_threaded_bulk(self):
         request_data = [

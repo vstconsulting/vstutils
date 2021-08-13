@@ -134,8 +134,9 @@ class RequestInfoTestView(NonModelsViewSet):
 
     def put(self, request):
         data = request.data
-
-        return responses.HTTP_200_OK(data)
+        response = responses.HTTP_200_OK(data)
+        response.set_cookie('request_info_cookie', 'request_info_cookie_value')
+        return response
 
 
 class TestUserViewSet(UserViewSet):

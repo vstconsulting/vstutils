@@ -142,6 +142,8 @@ class BulkMiddleware(BaseMiddleware):
             request._cached_user = request.user  # type: ignore
         if 'language' in request.META:
             request.language = request.META.pop('language')  # type: ignore
+        if 'session' in request.META:
+            request.session = request.META.pop('session')  # type: ignore
         return request
 
 
@@ -156,7 +158,7 @@ class BulkClientHandler(ClientHandler):
 
 
 class BulkClient(Client):
-    __slots__ = ('user', 'language', 'exc_info')
+    __slots__ = ('user', 'language', 'session', 'exc_info')
     handler: BulkClientHandler = BulkClientHandler()
     user: _t.Optional[AbstractUser]
 
@@ -164,6 +166,7 @@ class BulkClient(Client):
         # pylint: disable=bad-super-call
         self.user = defaults.pop('user', None)
         self.language = defaults.pop('language', None)
+        self.session = defaults.pop('session', None)
         super(Client, self).__init__(**defaults)
         self.exc_info = None
 
@@ -172,6 +175,8 @@ class BulkClient(Client):
             request['user'] = self.user
         if self.language:
             request['language'] = self.language
+        if self.session:
+            request['session'] = self.session
         response = self.handler(self._base_environ(**request))
         if response.cookies:
             self.cookies.update(response.cookies)
@@ -351,6 +356,7 @@ class EndpointViewSet(views.APIView):
                 kwargs['HTTP_AUTHORIZATION'] = str(request.META.get('HTTP_AUTHORIZATION'))
             kwargs['user'] = request.user  # type: ignore
         kwargs['language'] = getattr(request, 'language', None)
+        kwargs['session'] = getattr(request, 'session', None)
         return kwargs
 
     def get_serializer(self, *args, **kwargs) -> OperationSerializer:

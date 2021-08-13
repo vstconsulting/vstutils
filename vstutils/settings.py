@@ -542,6 +542,7 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'vstutils.middleware.LangMiddleware',
         'vstutils.middleware.TwoFaMiddleware',
