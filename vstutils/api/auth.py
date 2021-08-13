@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import AbstractUser
-from django.db import transaction, models
+from django.db import transaction
 from django.conf import settings
 from django.utils.functional import SimpleLazyObject, cached_property
 from django_filters import BooleanFilter, CharFilter
@@ -13,16 +13,10 @@ from rest_framework import serializers, exceptions, request as drf_request
 from vstutils.api import fields, base, permissions, responses, decorators as deco
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer, BaseSerializer
-from vstutils.api.models import TwoFactor, RecoveryCode
-from vstutils.models import BModel
+from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
 from vstutils.utils import raise_context_decorator_with_default
 
 User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
-
-
-class UserSettings(BModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='_settings')
-    value = models.JSONField(default=dict)
 
 
 class ChangePasswordPermission(permissions.IsAuthenticatedOpenApiRequest):
