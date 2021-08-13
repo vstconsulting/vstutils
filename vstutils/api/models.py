@@ -100,3 +100,11 @@ class RecoveryCode(BaseModel):
         indexes = [
             models.Index(fields=('id', 'key', 'tfa'), name='%(app_label)s_recov_fullidx')
         ]
+
+
+class UserSettings(BaseModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    value = models.JSONField(default=dict)
+
+    class Meta:
+        default_related_name = '_settings'
