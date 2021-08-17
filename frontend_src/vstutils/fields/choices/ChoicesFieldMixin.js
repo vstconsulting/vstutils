@@ -46,7 +46,7 @@ const ChoicesFieldMixin = {
     },
     methods: {
         translateValue(value) {
-            const key = `:model:${this.field.model?.name}:${this.field.name}:${value}`;
+            const key = `:model:${this.field.model?.translateModel || this.field.model?.name}:${this.field.name}:${value}`;
             if (this.$te(key)) {
                 return this.$t(key);
             }

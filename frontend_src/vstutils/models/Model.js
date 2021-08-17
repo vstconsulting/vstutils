@@ -176,6 +176,8 @@ export class Model {
     static viewFieldName = null;
     /** @type {Array<string>|null} */
     static nonBulkMethods = null;
+    /** @type {string|null} */
+    static translateModel = null
 
     /**
      * @param {InnerData=} data

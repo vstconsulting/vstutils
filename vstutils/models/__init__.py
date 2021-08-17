@@ -74,6 +74,7 @@ class BModel(BaseModel):
             class Task(BModel):
                 name = models.CharField(max_length=256)
                 stages = models.ManyToManyField(Stage)
+                _translate_model = 'Task'
 
                 class Meta:
                     # fields which would be showed.
@@ -107,6 +108,8 @@ class BModel(BaseModel):
             }
 
         For primary access to generated view inherit from `Task.generated_view` property.
+
+        To make translation on frontend easier use ``_translate_model`` attribute with model_name
 
         List of meta-attributes for generating a view:
 

@@ -362,5 +362,20 @@ Translation key must be defined as `:model:<ModelName>:<fieldName>:<value>`. For
         ':model:Category:name:Category 1': 'Категория 1',
     }
 
+Translation of values can be taxing as every model on backend usually generates more than one model on frontend,
+To avoid this, add `_translate_model = 'Category'` attribute to model on backend. It shortens
+
+.. sourcecode:: python
+
+        ':model:Category:name:Category 1': 'Категория 1',
+        ':model:OneCategory:name:Category 1': 'Категория 1',
+        ':model:CategoryCreate:name:Category 1': 'Категория 1',
+
+
+to
+
+.. sourcecode:: python
+
+        ':model:Category:name:Category 1': 'Категория 1',
 
 For `FKField` name of the related model is used. And `fieldName` should be equal to `viewField`.
