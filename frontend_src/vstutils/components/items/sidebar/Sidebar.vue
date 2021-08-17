@@ -18,8 +18,8 @@
     export default {
         name: 'Sidebar',
         props: {
-            menu: Array,
-            docs: Object,
+            menu: { type: Array, required: true },
+            docs: { type: Object, required: true },
         },
         computed: {
             /**
@@ -82,5 +82,3 @@
         },
     };
 </script>
-
-<style scoped></style>

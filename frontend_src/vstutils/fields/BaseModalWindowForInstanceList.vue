@@ -129,5 +129,3 @@
         },
     };
 </script>
-
-<style></style>

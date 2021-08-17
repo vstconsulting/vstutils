@@ -2,7 +2,6 @@ import { jest, expect, test, describe, beforeAll } from '@jest/globals';
 import { apiConnector, APIResponse } from '../../../api';
 import { FKField } from '../fk';
 import { createApp } from '../../../../unittests/create-app.js';
-import { QuerySet } from '../../../querySet';
 
 jest.mock('../../../api');
 

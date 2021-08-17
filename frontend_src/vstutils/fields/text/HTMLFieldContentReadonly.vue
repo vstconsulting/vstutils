@@ -1,16 +1,17 @@
 <template>
+    <!-- eslint-disable vue/no-v-html -->
     <div
         :class="classes"
         :style="styles"
-        v-html="value"
         :aria-labelledby="label_id"
         :aria-label="aria_label"
-    ></div>
+        v-html="value"
+    />
+    <!--eslint-enable-->
 </template>
 
 <script>
     import { BaseFieldContentReadonlyMixin } from '../base';
-
     export default {
         mixins: [BaseFieldContentReadonlyMixin],
         data() {
@@ -32,5 +33,3 @@
         },
     };
 </script>
-
-<style scoped></style>

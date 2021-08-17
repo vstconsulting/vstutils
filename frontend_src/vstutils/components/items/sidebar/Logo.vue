@@ -1,7 +1,7 @@
 <template>
     <router-link :to="{ name: 'home' }" class="logo-link nav-link brand-link logo">
         <span @click="hideSidebar">
-            <i class="nav-icon fa fa-globe mr-2" style="margin-left: 20px;"></i>
+            <i class="nav-icon fa fa-globe mr-2" style="margin-left: 20px" />
             <span class="brand-text font-weight-light">{{ $t(title.toLowerCase()) | capitalize }}</span>
         </span>
     </router-link>

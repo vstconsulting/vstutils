@@ -37,5 +37,3 @@
         mixins: [BaseFieldContentReadonlyMixin, InnerAPIObjectFieldContent],
     };
 </script>
-
-<style scoped></style>

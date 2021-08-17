@@ -22,9 +22,9 @@
         name: 'OperationButton',
         props: {
             title: { type: String, required: true },
-            classes: { type: [Array, String], required: false, default: () => ['btn', 'btn-default'] },
-            iconClasses: { type: [Array, String], required: false, default: () => null },
-            styles: { type: Object, required: false, default: () => ({}) },
+            classes: { type: [Array, String], default: () => ['btn', 'btn-default'] },
+            iconClasses: { type: [Array, String], default: () => null },
+            styles: { type: Object, default: () => ({}) },
         },
     };
 </script>

@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { APIDataField } from './api-data';
 import { APIObjectField } from './api-object';
 import { AutocompleteField } from './autocomplete';
@@ -9,7 +10,6 @@ import { DependFromFkField, DynamicField } from './dynamic';
 import { EmailField } from './email';
 import { FormField } from './form';
 import { HiddenField } from './hidden';
-import { InnerAPIObjectField } from './inner-api-object';
 import { JSONField } from './json';
 import { MultiselectField } from './multiselect';
 import { PasswordField } from './password';
@@ -49,7 +49,6 @@ const globalFields = new Map([
     ['form', FormField], // CANT_CREATE_ON_BACKEND
     ['hidden', HiddenField], // CANT_CREATE_ON_BACKEND
     ['html', text.HTMLField],
-    // ['inner_api_object', InnerAPIObjectField],
     ['integer', numbers.integer.IntegerField],
     ['json', JSONField],
     ['multiplenamedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],

@@ -1,5 +1,4 @@
 import { addCssClassesToElement } from '../../utils';
-import { BaseFieldContentReadonlyMixin } from '../base';
 import JsonFieldContentReadonly from './JsonFieldContentReadonly.vue';
 import { TextAreaFieldContentEdit } from '../text';
 

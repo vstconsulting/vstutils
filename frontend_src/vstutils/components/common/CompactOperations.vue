@@ -33,7 +33,7 @@
         props: {
             title: { type: String, required: true },
             view: { type: Object, required: true },
-            operations: { type: Array, required: false, default: () => [] },
+            operations: { type: Array, default: () => [] },
         },
         computed: {
             buttonId() {

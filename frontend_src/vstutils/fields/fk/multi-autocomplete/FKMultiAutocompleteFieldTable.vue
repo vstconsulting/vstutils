@@ -2,7 +2,7 @@
     <table class="table table-bordered multiple-select">
         <thead>
             <tr>
-                <th style="width: 50px;"></th>
+                <th style="width: 50px" />
 
                 <th v-for="(field, idx) in fields" :key="idx">
                     {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
@@ -16,10 +16,10 @@
                 :qs="qs"
                 :instance="instance"
                 :fields="fields"
-                :field_props="field_props"
-                :field_value="field_value"
+                :field_props="fieldProps"
+                :field_value="fieldValue"
                 @change-value="changeValue"
-            ></fma_table_row>
+            />
         </tbody>
     </table>
 </template>
@@ -31,7 +31,15 @@
      * Mixin for table, that is used in fk_multi_autocomplete modal.
      */
     export default {
-        props: ['instances', 'qs', 'field_props', 'field_value'],
+        components: {
+            fma_table_row: FKMultiAutocompleteFieldTableRow,
+        },
+        props: {
+            instances: { type: Object, required: true },
+            qs: { type: Object, required: true },
+            fieldProps: { type: Object, required: true },
+            fieldValue: { type: Object, required: true },
+        },
         computed: {
             fields() {
                 return this.qs.model.fields;
@@ -42,10 +50,5 @@
                 this.$emit('change-value', opt);
             },
         },
-        components: {
-            fma_table_row: FKMultiAutocompleteFieldTableRow,
-        },
     };
 </script>
-
-<style scoped></style>

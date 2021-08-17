@@ -1,6 +1,8 @@
 <template>
     <div :class="classes" :style="styles">
-        <p :aria-labelledby="label_id" :aria-label="aria_label">{{ value }}</p>
+        <p :aria-labelledby="label_id" :aria-label="aria_label">
+            {{ value }}
+        </p>
     </div>
 </template>
 
@@ -17,5 +19,3 @@
         },
     };
 </script>
-
-<style scoped></style>

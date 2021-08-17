@@ -1,13 +1,13 @@
 <template>
     <button
+        v-if="!options.hidden"
         class="btn gui-btn"
         :class="classes"
-        @click="onClickHandler"
-        v-if="!options.hidden"
         :aria-label="title"
+        @click="onClickHandler"
     >
         <template v-if="icon_classes">
-            <span :class="icon_classes"></span>
+            <span :class="icon_classes" />
             <span :class="title_classes">{{ title | capitalize | split }}</span>
         </template>
         <template v-else>
@@ -22,11 +22,14 @@
      * Mixin for buttons, that are not link_buttons.
      */
     export default {
-        name: 'base_button_mixin',
-        props: ['type', 'options', 'look'],
+        name: 'BaseButtonMixin',
+        props: {
+            type: { type: String, required: true },
+            options: { type: Array, required: true },
+            look: { type: Object, required: true },
+        },
         computed: {
             title() {
-                // return this.options.title || this.options.name;
                 return this.$t(this.options.title || this.options.name);
             },
             classes() {
@@ -129,5 +132,3 @@
         },
     };
 </script>
-
-<style scoped></style>

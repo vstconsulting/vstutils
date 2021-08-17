@@ -6,17 +6,17 @@
             onselectstart="return false"
             onmousedown="return false"
             :aria-labelledby="label_id"
-            @click="$emit('set-value', !value)"
             :aria-label="aria_label"
+            @click="$emit('set-value', !value)"
         >
-            <div class="ico-on fa fa-toggle-on"></div>
-            <div class="ico-off fa fa-toggle-off"></div>
+            <div class="ico-on fa fa-toggle-on" />
+            <div class="ico-off fa fa-toggle-off" />
         </div>
         <field_hidden_button
             v-if="hasHideButton"
             :field="field"
             @hideField="$emit('proxyEvent', 'hideField')"
-        ></field_hidden_button>
+        />
     </div>
 </template>
 

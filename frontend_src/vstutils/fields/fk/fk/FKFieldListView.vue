@@ -1,7 +1,9 @@
 <template>
     <div :class="classes" :style="styles">
         <template v-if="with_link">
-            <router-link :to="href">{{ text }}</router-link>
+            <router-link :to="href">
+                {{ text }}
+            </router-link>
         </template>
         <template v-else>
             {{ text }}
@@ -17,5 +19,3 @@
         mixins: [BaseFieldListView, FKFieldContentReadonly],
     };
 </script>
-
-<style scoped></style>

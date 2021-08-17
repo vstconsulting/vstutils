@@ -3,7 +3,6 @@
         <textarea
             :value="value"
             :required="attrs['required']"
-            @input="$emit('set-value', $event.target.value)"
             rows="3"
             cols="50"
             :class="classes"
@@ -12,6 +11,7 @@
             :maxlength="attrs['maxlength']"
             :aria-labelledby="label_id"
             :aria-label="aria_label"
+            @input="$emit('set-value', $event.target.value)"
         />
     </div>
 </template>
@@ -27,5 +27,3 @@
         },
     };
 </script>
-
-<style scoped></style>

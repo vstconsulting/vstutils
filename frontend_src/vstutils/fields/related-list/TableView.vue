@@ -2,12 +2,16 @@
     <table class="table table-sm">
         <thead>
             <tr>
-                <th v-for="field in fields" :key="field">{{ field }}</th>
+                <th v-for="field in fields" :key="field">
+                    {{ field }}
+                </th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="(obj, idx) in value" :key="idx">
-                <td v-for="field in fields" :key="`${field}-${idx}`">{{ obj[field] }}</td>
+                <td v-for="field in fields" :key="`${field}-${idx}`">
+                    {{ obj[field] }}
+                </td>
             </tr>
         </tbody>
     </table>

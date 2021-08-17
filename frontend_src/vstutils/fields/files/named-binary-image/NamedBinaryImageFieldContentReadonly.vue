@@ -18,5 +18,3 @@
         mixins: [BaseFieldContentReadonlyMixin, NamedBinaryFileFieldContent, NamedBinaryImageFieldContent],
     };
 </script>
-
-<style scoped></style>

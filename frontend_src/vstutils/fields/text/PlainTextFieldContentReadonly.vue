@@ -1,11 +1,13 @@
 <template>
+    <!-- eslint-disable vue/no-v-html -->
     <div
         :class="classes"
         :style="styles"
-        v-html="value"
         :aria-labelledby="label_id"
         :aria-label="aria_label"
-    ></div>
+        v-html="value"
+    />
+    <!--eslint-enable-->
 </template>
 
 <script>
@@ -20,5 +22,3 @@
         },
     };
 </script>
-
-<style scoped></style>

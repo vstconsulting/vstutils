@@ -1,6 +1,7 @@
 <template>
     <div class="json-string">
-        <b>{{ title }}</b>: {{ value }}
+        <b>{{ title }}</b>
+        : {{ value }}
     </div>
 </template>
 <script>

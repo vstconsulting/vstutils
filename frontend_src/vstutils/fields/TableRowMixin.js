@@ -27,7 +27,6 @@ const TableRowMixin = {
          * @param {boolean=} blank If true, function opens link in new window.
          */
         goToTrLink(event, blank = false) {
-            debugger;
             if (
                 typeof this.customRowClickHandler === 'function' &&
                 !this.customRowClickHandler({ event, blank, link: this.rowLink })

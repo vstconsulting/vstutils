@@ -13,5 +13,3 @@
         mixins: [BaseFieldListView],
     };
 </script>
-
-<style scoped></style>

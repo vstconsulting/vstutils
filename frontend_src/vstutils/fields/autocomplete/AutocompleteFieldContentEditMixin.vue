@@ -76,7 +76,7 @@
              * @param {string} search.
              * @private
              */
-            _renderItem(item, search) {
+            _renderItem(item) {
                 item = escapeHtml(item);
                 return `<div class="autocomplete-suggestion" data-value="${item}">${item}</div>`;
             },
@@ -161,5 +161,3 @@
         },
     };
 </script>
-
-<style scoped></style>

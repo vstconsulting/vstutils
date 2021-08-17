@@ -26,8 +26,8 @@
     export default {
         name: 'BootstrapModal',
         props: {
-            wrapperClasses: { type: [Array, String], required: false, default: null },
-            classes: { type: [Array, String], required: false, default: null },
+            wrapperClasses: { type: [Array, String], default: null },
+            classes: { type: [Array, String], default: null },
         },
         data: () => ({ isOpen: false }),
         beforeDestroy() {

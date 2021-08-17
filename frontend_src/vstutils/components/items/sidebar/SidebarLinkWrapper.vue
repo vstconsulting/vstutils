@@ -17,9 +17,10 @@
     import { SidebarLinkMixin } from '../../mixins';
 
     export default {
+        // eslint-disable-next-line vue/component-definition-name-casing
         name: 'sidebar_link_wrapper',
         mixins: [SidebarLinkMixin],
-        props: ['item'],
+        props: { item: { type: Object, required: true } },
         data() {
             return {
                 /**
@@ -27,24 +28,6 @@
                  */
                 menu_open: false,
             };
-        },
-        watch: {
-            page_url: function (path) {
-                if (!this.are_sublinks_active && this.menu_open) {
-                    this.menu_open = false;
-                }
-            },
-            are_sublinks_active: function (val) {
-                this.menu_open = val;
-            },
-            is_item_active: function (val) {
-                if (!this.are_sublinks_active) {
-                    this.menu_open = val;
-                }
-            },
-        },
-        created() {
-            this.menu_open = this.are_sublinks_active || this.is_item_active;
         },
         computed: {
             /**
@@ -88,6 +71,24 @@
                 return this.is_link_active(this.item, this.page_url);
             },
         },
+        watch: {
+            page_url: function () {
+                if (!this.are_sublinks_active && this.menu_open) {
+                    this.menu_open = false;
+                }
+            },
+            are_sublinks_active: function (val) {
+                this.menu_open = val;
+            },
+            is_item_active: function (val) {
+                if (!this.are_sublinks_active) {
+                    this.menu_open = val;
+                }
+            },
+        },
+        created() {
+            this.menu_open = this.are_sublinks_active || this.is_item_active;
+        },
         methods: {
             /**
              * Method, that shows/hides submenu.
@@ -104,5 +105,3 @@
         },
     };
 </script>
-
-<style scoped></style>

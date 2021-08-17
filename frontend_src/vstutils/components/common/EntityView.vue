@@ -18,6 +18,7 @@
             <div v-if="error" class="row">
                 <section class="col-lg-12">
                     <div class="error-text-wrapper">
+                        <!-- eslint-disable-next-line vue/no-v-html -->
                         <p class="text-center error-p" v-html="errorData" />
                     </div>
                 </section>
@@ -38,13 +39,13 @@
         props: {
             view: { type: Object, required: true },
             loading: { type: Boolean, required: true },
-            error: { required: true },
-            response: { required: true },
-            showTopButtons: { type: Boolean, required: false, default: true },
-            showUsedFilters: { type: Boolean, required: false, default: true },
-            isContainerFluid: { type: Boolean, required: false, default: true },
-            actions: { type: Array, required: false, default: () => [] },
-            sublinks: { type: Array, required: false, default: () => [] },
+            error: { type: Object, default: () => {} },
+            response: { type: Boolean, default: false },
+            showTopButtons: { type: Boolean, default: true },
+            showUsedFilters: { type: Boolean, default: true },
+            isContainerFluid: { type: Boolean, default: true },
+            actions: { type: Array, default: () => [] },
+            sublinks: { type: Array, default: () => [] },
         },
         computed: {
             errorData() {

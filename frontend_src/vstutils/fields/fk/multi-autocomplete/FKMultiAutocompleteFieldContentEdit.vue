@@ -106,7 +106,7 @@
             /**
              * Property that contains names of value_field and view_field.
              */
-            field_props() {
+            fieldProps() {
                 return {
                     value_field: this.field.valueField,
                     view_field: this.field.viewField,
@@ -144,8 +144,8 @@
             modal_options() {
                 return {
                     qs: this.qs,
-                    field_props: this.field_props,
-                    field_value: this.field_value,
+                    fieldProps: this.fieldProps,
+                    fieldValue: this.fieldValue,
                 };
             },
         },
@@ -255,5 +255,3 @@
         },
     };
 </script>
-
-<style scoped></style>

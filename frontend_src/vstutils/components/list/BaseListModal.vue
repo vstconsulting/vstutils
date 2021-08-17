@@ -61,6 +61,7 @@
             applyButtonText: { type: String, required: true },
             rowClickHandler: { type: Function, default: () => {} },
             model: {
+                type: Function,
                 default: function () {
                     return this.qs.getResponseModelClass(RequestTypes.LIST);
                 },

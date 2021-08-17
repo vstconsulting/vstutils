@@ -26,10 +26,10 @@
         name: 'MainFooter',
         components: { Breadcrumbs },
         props: {
-            showBackButton: { type: Boolean, required: false, default: true },
-            showTitle: { type: Boolean, required: false, default: true },
-            hideTitleOnMobile: { type: Boolean, required: false, default: true },
-            showBreadcrumbs: { type: Boolean, required: false, default: true },
+            showBackButton: { type: Boolean, default: true },
+            showTitle: { type: Boolean, default: true },
+            hideTitleOnMobile: { type: Boolean, default: true },
+            showBreadcrumbs: { type: Boolean, default: true },
         },
         computed: {
             title() {
