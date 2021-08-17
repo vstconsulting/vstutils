@@ -31,6 +31,8 @@
             img_src() {
                 if (this.value && this.value.content) {
                     return makeDataImageUrl(this.value);
+                } else {
+                    return undefined;
                 }
             },
             img_alt() {
@@ -47,5 +49,3 @@
         },
     };
 </script>
-
-<style scoped></style>

@@ -1,5 +1,5 @@
 <template>
-    <i :class="classes" :style="styles"></i>
+    <i :class="classes" :style="styles" />
 </template>
 
 <script>
@@ -18,5 +18,3 @@
         },
     };
 </script>
-
-<style scoped></style>

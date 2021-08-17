@@ -1,7 +1,9 @@
 <template>
     <div>
         <template v-if="with_link">
-            <router-link :to="href">{{ text }}</router-link>
+            <router-link :to="href">
+                {{ text }}
+            </router-link>
         </template>
         <template v-else>
             {{ text }}

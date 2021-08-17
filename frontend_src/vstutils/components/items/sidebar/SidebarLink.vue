@@ -25,9 +25,10 @@
     import { SidebarLinkMixin } from '../../mixins';
 
     export default {
+        // eslint-disable-next-line vue/component-definition-name-casing
         name: 'sidebar_link',
         mixins: [SidebarLinkMixin],
-        props: ['item'],
+        props: { item: { type: Object, required: true } },
         computed: {
             /**
              * Property, that returns icon classes for current sidebar_link.
@@ -94,5 +95,3 @@
         },
     };
 </script>
-
-<style scoped></style>

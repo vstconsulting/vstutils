@@ -6,7 +6,7 @@
             </h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
+                    <i class="fas fa-minus" />
                 </button>
             </div>
         </div>
@@ -17,7 +17,10 @@
 </template>
 <script>
     export default {
-        props: ['title', 'cardStyle'],
+        props: {
+            title: { type: Object, default: () => {} },
+            cardStyle: { type: Object, default: () => {} },
+        },
     };
 </script>
 <style scoped>

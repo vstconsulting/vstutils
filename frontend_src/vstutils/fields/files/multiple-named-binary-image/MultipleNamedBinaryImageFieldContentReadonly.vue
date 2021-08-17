@@ -23,5 +23,3 @@
         mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentEdit],
     };
 </script>
-
-<style scoped></style>

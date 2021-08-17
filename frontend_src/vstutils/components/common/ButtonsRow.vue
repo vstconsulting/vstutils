@@ -69,8 +69,8 @@
         components: { CompactOperations, OperationButton },
         props: {
             view: { type: Object, required: true },
-            actions: { type: Array, required: false, default: () => [] },
-            sublinks: { type: Array, required: false, default: () => [] },
+            actions: { type: Array, default: () => [] },
+            sublinks: { type: Array, default: () => [] },
         },
         computed: {
             totalOperations() {

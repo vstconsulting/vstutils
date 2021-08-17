@@ -1,5 +1,5 @@
 <template>
-    <div style="display: contents;">
+    <div style="display: contents">
         <preloader :show="loading" />
 
         <div v-if="error" class="content-wrapper-2">

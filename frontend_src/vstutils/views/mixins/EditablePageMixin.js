@@ -24,8 +24,6 @@ const EditablePageMixin = {
         updateFieldValue(obj) {
             this.commitMutation('setFieldValue', obj);
         },
-
-
     },
 };
 

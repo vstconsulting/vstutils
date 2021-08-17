@@ -128,10 +128,9 @@ class BaseField {
      * @param {*} value - Value to validate.
      * @param {RepresentData} data - Object with all values.
      */
-    validateValue(value, data) {
+    validateValue(value) {
         let value_length = 0;
         let samples = pop_up_msg.field.error;
-        let title = (this.options.title || this.options.name).toLowerCase();
         let $t = _translate;
 
         if (value) {

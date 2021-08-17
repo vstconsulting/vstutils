@@ -38,7 +38,11 @@
         name: 'BaseFieldContentEdit',
         components: { ClearButton, SetDefaultButton, HideButton },
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
-        props: ['field', 'value', 'data'],
+        props: {
+            field: { type: Object, required: true },
+            value: { type: [Number, String, Array, Boolean, Object], default: null },
+            data: { type: Object, required: true },
+        },
         data() {
             return {
                 class_list: ['form-control'],

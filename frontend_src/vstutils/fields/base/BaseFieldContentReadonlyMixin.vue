@@ -12,7 +12,11 @@
     export default {
         name: 'BaseFieldContentReadonlyMixin',
         mixins: [BaseFieldContentMixin, BaseFieldInnerComponentMixin, FieldLabelIdMixin],
-        props: ['field', 'value', 'data'],
+        props: {
+            field: { type: Object, required: true },
+            value: { type: [Number, String, Array, Boolean, Object], default: null },
+            data: { type: Object, required: true },
+        },
         computed: {
             valueWithAdditionalText() {
                 return this.field.prependText + this.preparedValue + this.field.appendText;

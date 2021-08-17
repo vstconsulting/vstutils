@@ -2,16 +2,16 @@
     <tr
         class="item-row item-row-id highlight-tr"
         :class="is_selected"
-        @click="goToTrLink($event, true)"
         :data-id="instance.getPkValue()"
         :data-href="rowLink"
+        @click="goToTrLink($event, true)"
     >
         <td
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
             @click="selectCurrentInstance"
         >
-            <div class="ico-on fa fa-toggle-on"></div>
-            <div class="ico-off fa fa-toggle-off"></div>
+            <div class="ico-on fa fa-toggle-on" />
+            <div class="ico-off fa fa-toggle-off" />
         </td>
         <td v-for="(field, idx) in fieldsToShow" :key="idx">
             <component
@@ -19,7 +19,7 @@
                 :prop_data="data_to_represent"
                 :field="field"
                 :wrapper_opt="{ list_view: true, use_prop_data: true }"
-            ></component>
+            />
         </td>
     </tr>
 </template>
@@ -32,24 +32,25 @@
      */
     export default {
         mixins: [TableRowMixin],
-        props: ['qs', 'instance', 'fields', 'field_props', 'field_value'],
+        props: {
+            qs: { type: Object, required: true },
+            instance: { type: Object, required: true },
+            fields: { type: Object, required: true },
+            fieldProps: { type: Object, required: true },
+            fieldValue: { type: Object, required: true },
+        },
         computed: {
             data_to_represent: function () {
-                // return this.instance.toRepresent();
                 return this.instance.data;
             },
             selected() {
-                if (!this.field_value.value) {
+                if (!this.fieldValue.value) {
                     return false;
                 }
 
                 let data = this.data_to_represent;
 
-                if (data[this.field_props.value_field] == this.field_value.value) {
-                    return true;
-                }
-
-                return false;
+                return data[this.fieldProps.value_field] === this.fieldValue.value;
             },
             rowLink() {
                 return this.base_url + '/' + this.instance.getPkValue();
@@ -70,13 +71,11 @@
              * that should change value of field.
              */
             selectCurrentInstance() {
-                let view_val = this.data_to_represent[this.field_props.view_field];
-                let value_val = this.data_to_represent[this.field_props.value_field];
+                let view_val = this.data_to_represent[this.fieldProps.view_field];
+                let value_val = this.data_to_represent[this.fieldProps.value_field];
 
                 this.$emit('change-value', { view_val: view_val, value_val: value_val });
             },
         },
     };
 </script>
-
-<style scoped></style>

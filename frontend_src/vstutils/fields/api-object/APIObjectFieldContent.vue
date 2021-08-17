@@ -1,6 +1,8 @@
 <template>
     <div :class="classes" :style="styles" readonly disabled>
-        <router-link :to="href" :aria-labelledby="label_id" :aria-label="aria_label">{{ text }}</router-link>
+        <router-link :to="href" :aria-labelledby="label_id" :aria-label="aria_label">
+            {{ text }}
+        </router-link>
     </div>
 </template>
 
@@ -25,6 +27,28 @@
                 class_list: ['form-control', 'revers-color'],
             };
         },
+        computed: {
+            /**
+             * Link to the page of current instance, to which this field is linked.
+             */
+            href() {
+                if (this.queryset && this.instance) {
+                    return this.queryset.url + this.instance.getPkValue();
+                } else {
+                    return undefined;
+                }
+            },
+            /**
+             * Text of link.
+             */
+            text() {
+                if (this.instance) {
+                    return this.instance.getViewFieldValue();
+                } else {
+                    return undefined;
+                }
+            },
+        },
         watch: {
             value: function (value) {
                 if (value && this.queryset) {
@@ -38,24 +62,6 @@
             if (this.queryset && this.value) {
                 this.instance = this.getInstance(this.value);
             }
-        },
-        computed: {
-            /**
-             * Link to the page of current instance, to which this field is linked.
-             */
-            href() {
-                if (this.queryset && this.instance) {
-                    return this.queryset.url + this.instance.getPkValue();
-                }
-            },
-            /**
-             * Text of link.
-             */
-            text() {
-                if (this.instance) {
-                    return this.instance.getViewFieldValue();
-                }
-            },
         },
         methods: {
             /**
@@ -74,5 +80,3 @@
         },
     };
 </script>
-
-<style scoped></style>

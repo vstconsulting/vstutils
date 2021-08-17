@@ -13,11 +13,7 @@
                 </tr>
             </thead>
             <tbody>
-                <InstanceRow
-                    v-for="instance in instances"
-                    :key="instance.getPkValue()"
-                    :instance="instance"
-                />
+                <InstanceRow v-for="inst in instances" :key="inst.getPkValue()" :instance="inst" />
             </tbody>
         </table>
     </Card>

@@ -20,7 +20,10 @@
                     <div v-if="withFooter" class="modal-footer text-data">
                         <slot name="footer">
                             default footer
-                            <button class="modal-default-button" aria-label="OK" @click="close">OK</button>
+                            <button class="modal-default-button" aria-label="OK" @click="close">
+                                <!--eslint-disable-next-line -->
+                                OK
+                            </button>
                         </slot>
                     </div>
                 </div>
@@ -32,7 +35,9 @@
 <script>
     export default {
         name: 'Modal',
-        props: ['opt'],
+        props: {
+            opt: { type: Object, default: () => {} },
+        },
         computed: {
             withHeader() {
                 return !(this.opt && this.opt.header === false);

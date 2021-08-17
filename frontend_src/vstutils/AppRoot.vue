@@ -33,7 +33,13 @@
         name: 'AppRoot',
         components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo },
         mixins: [AutoUpdateController],
-        props: ['info', 'x_menu', 'x_docs'],
+        props: {
+            info: { type: Object, required: true },
+            // eslint-disable-next-line vue/prop-name-casing
+            x_menu: { type: Array, required: true },
+            // eslint-disable-next-line vue/prop-name-casing
+            x_docs: { type: Object, required: true },
+        },
         data: () => ({
             layoutClasses: ['sidebar-mini', 'layout-fixed', 'layout-footer-fixed'],
         }),

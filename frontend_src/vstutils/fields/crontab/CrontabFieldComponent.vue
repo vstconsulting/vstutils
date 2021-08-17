@@ -10,7 +10,7 @@
                 aria-expanded="true"
             >
                 {{ options.title | capitalize }}
-                <span class="caret"></span>
+                <span class="caret" />
             </button>
             <ul class="dropdown-menu dropdown-menu-left">
                 <li v-for="(item, idx) in options.samples" :key="idx">
@@ -27,15 +27,15 @@
             </ul>
         </div>
 
-        <div class="control-label" style="margin-top: 15px;">
+        <div class="control-label" style="margin-top: 15px">
             <button
-                class="btn btn-default"
                 v-for="(el, idx) in values"
                 :key="idx"
+                class="btn btn-default"
                 :class="is_selected(el)"
                 :style="styles"
-                @click="toggleModelValue(options.name, el.number)"
                 :aria-label="getLabel(options, el)"
+                @click="toggleModelValue(options.name, el.number)"
             >
                 {{ getLabel(options, el) }}
             </button>
@@ -48,7 +48,10 @@
      * Vue component for crontab element.
      */
     export default {
-        props: ['options', 'model'],
+        props: {
+            options: { type: Object, required: true },
+            model: { type: Object, required: true },
+        },
         computed: {
             /**
              * Property, that forms values array for template.
@@ -129,5 +132,3 @@
         },
     };
 </script>
-
-<style scoped></style>

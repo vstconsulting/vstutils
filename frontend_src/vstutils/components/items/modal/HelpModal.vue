@@ -21,7 +21,7 @@
                         </h4>
                         <ul :key="`list-${idx}`">
                             <template v-if="isArray(item)">
-                                <li v-for="(prop, idx) in item" :key="idx">
+                                <li v-for="(prop, liIdx) in item" :key="liIdx">
                                     <a :href="prop.url" target="_blank" rel="noreferrer">
                                         {{ $t(prop.name.toLowerCase()) | capitalize }}
                                     </a>

@@ -13,7 +13,7 @@
     export default {
         components: { ImageBlock },
         mixins: [BaseFieldInnerComponentMixin],
-        props: ['file'],
+        props: { file: { type: Object, required: true } },
     };
 </script>
 

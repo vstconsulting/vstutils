@@ -17,6 +17,7 @@
                 if (this.value && this.value.content) {
                     return makeDataImageUrl(this.value);
                 }
+                return undefined;
             },
             name() {
                 return this.value?.name || '';
@@ -24,5 +25,3 @@
         },
     };
 </script>
-
-<style scoped></style>

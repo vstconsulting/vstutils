@@ -539,5 +539,3 @@
         },
     };
 </script>
-
-<style scoped></style>
