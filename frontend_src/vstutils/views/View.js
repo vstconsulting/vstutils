@@ -80,7 +80,7 @@ export class View {
         this.path = params.path;
         this.title = params.title || params.name;
 
-        this.hidden = false;
+        this.hidden = params['x-hidden'];
 
         /**
          * @type {Array<string>|null}

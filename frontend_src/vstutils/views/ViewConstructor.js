@@ -284,7 +284,7 @@ export default class ViewConstructor {
             }
 
             // Set nested list view
-            if (isNested && isListPath)
+            if (isNested && isListPath && !listView.hidden)
                 parent.sublinks.set(listView.params.name, {
                     name: listView.params.name,
                     title: listView.params.title,
@@ -301,7 +301,7 @@ export default class ViewConstructor {
             }
 
             // Set nested page view
-            if (isNested && isDetailWithoutList) {
+            if (isNested && isDetailWithoutList && !pageView.hidden) {
                 parent.sublinks.set(pageView.params.name, {
                     name: pageView.params.name,
                     title: pageView.params.title,
@@ -325,7 +325,7 @@ export default class ViewConstructor {
             }
 
             // Set edit sublink
-            if (editView && !editStyleView) {
+            if (editView && !editStyleView && !editView.hidden) {
                 const pageEditSublink = mergeDeep(
                     { view: editView },
                     this.dictionary.paths.operations.page.edit,
@@ -341,7 +341,7 @@ export default class ViewConstructor {
             }
 
             // Set new sublink/action
-            if (newView) {
+            if (newView && !newView.hidden) {
                 const saveAction = this.dictionary.paths.operations.page_new.save_new;
                 newView.actions.set(saveAction.name, saveAction);
 
