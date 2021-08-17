@@ -369,6 +369,8 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
         schema_properties_groups = OrderedDict(
             getattr(serializer_class, '_schema_properties_groups', None) or {'': schema_properties}
         )
+        translate_model = getattr(serializer_class, '_translate_model', None)
+
         view_field_name = getattr(serializer_class, '_view_field_name', None)
 
         if view_field_name is None and schema_properties:
@@ -383,12 +385,14 @@ class VSTReferencingSerializerInspector(ReferencingSerializerInspector):
                     for prop in schema['properties']
                     if prop in not_handled
                 ]
-
         schema['x-properties-groups'] = schema_properties_groups
         schema['x-view-field-name'] = view_field_name
 
         if non_bulk_methods:
             schema['x-non-bulk-methods'] = non_bulk_methods
+
+        if translate_model:
+            schema['x-translate-model'] = translate_model
 
         schema._handled = True  # pylint: disable=protected-access
 

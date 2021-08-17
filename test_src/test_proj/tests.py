@@ -1438,6 +1438,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
             'concat_field_name': False,
         })
 
+        # Check translate model
+        self.assertEqual(api['definitions']['Author']['x-translate-model'], 'Author')
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')

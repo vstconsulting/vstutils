@@ -15,6 +15,7 @@ class UpdateAuthorSerializer(VSTSerializer):
 
 
 class Author(BModel):
+    _translate_model = 'Author'
     name = models.CharField(max_length=256)
     registerDate = models.DateTimeField(default=timezone.now)
     image = models.ImageField(null=True, blank=True)

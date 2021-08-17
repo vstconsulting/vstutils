@@ -56,7 +56,7 @@ export default {
     },
     methods: {
         translateValue(value) {
-            const key = `:model:${this.field.fkModel.name}:${this.field.viewField}:${value}`;
+            const key = `:model:${this.field.fkModel?.translateModel || this.field.fkModel.name}:${this.field.viewField}:${value}`;
             if (this.$te(key)) {
                 return this.$t(key);
             }

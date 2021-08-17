@@ -303,12 +303,16 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
         serializer_class = get_if_lazy(serializer_class)
         properties_groups = cls.get_extra_metadata()['properties_groups']
+        translate_model = getattr(cls, '_translate_model', None)
 
         if properties_groups:
             attributes['_schema_properties_groups'] = dict(**properties_groups)
 
         if non_bulk_methods:
             attributes['_non_bulk_methods'] = non_bulk_methods
+
+        if translate_model:
+            attributes['_translate_model'] = translate_model
 
         return type(serializer_class)(
             serializer_class_name,
