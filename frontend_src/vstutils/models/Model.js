@@ -125,6 +125,11 @@ export function makeModel(cls, name) {
         },
     });
 
+    // Set translate model name
+    if (!cls.translateModel) {
+        cls.translateModel = name;
+    }
+
     // Set fields descriptors
     for (let [fieldName, field] of fields) {
         Object.defineProperty(cls.prototype, fieldName, field.toDescriptor());
@@ -177,7 +182,7 @@ export class Model {
     /** @type {Array<string>|null} */
     static nonBulkMethods = null;
     /** @type {string|null} */
-    static translateModel = null
+    static translateModel = null;
 
     /**
      * @param {InnerData=} data

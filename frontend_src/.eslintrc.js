@@ -12,12 +12,12 @@ module.exports = {
         node: true,
     },
     rules: {
-        'no-debugger': 'warn',
-        'prettier/prettier': 'warn',
+        'no-debugger': 'error',
+        'prettier/prettier': 'error',
         'vue/html-indent': ['error', 4],
         'vue/html-self-closing': ['error', { html: { void: 'any' } }],
         'vue/max-attributes-per-line': 'off',
-        'vue/no-empty-component-block': 'warn',
+        'vue/no-empty-component-block': 'error',
     },
     globals: {
         app: 'readonly',
