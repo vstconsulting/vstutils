@@ -126,9 +126,9 @@ export const PageNewViewComponent = {
                 this.loading = false;
                 let str = window.app.error_handler.errorToString(error);
 
-                let srt_to_show = this.$t(pop_up_msg.instance.error.save).format([
+                let srt_to_show = this.$t(pop_up_msg.instance.error.save, [
                     name,
-                    this.$t(this.view.name),
+                    this.$t(this.view.title),
                     str,
                 ]);
 
@@ -207,7 +207,7 @@ export const ActionViewComponent = {
             this.setLoadingSuccessful();
         },
         getActionRequestPath() {
-            const rootNestedView = this.view.parent.parent.deepNestedParentView;
+            const rootNestedView = this.view.parent?.parent?.deepNestedParentView;
             if (rootNestedView) {
                 const [pk, actionName] = pathToArray(this.$route.path).slice(-2);
                 return joinPaths(formatPath(rootNestedView.path, this.params), pk, actionName);

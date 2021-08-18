@@ -64,9 +64,6 @@ Fields
 .. js:autoclass:: FKMultiAutocompleteField
    :members:
 
-.. js:autoclass:: InnerAPIObjectField
-   :members:
-
 .. js:autoclass:: JSONField
    :members:
 

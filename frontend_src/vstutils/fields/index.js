@@ -13,7 +13,6 @@ import * as dynamic from './dynamic';
 import * as files from './files';
 import * as fk from './fk';
 import * as form from './form';
-import * as innerApiObject from './inner-api-object';
 import * as json from './json';
 import * as multiselect from './multiselect';
 import * as nestedObject from './nested-object.js';
@@ -32,7 +31,6 @@ export {
     files,
     fk,
     form,
-    innerApiObject,
     json,
     multiselect,
     nestedObject,
