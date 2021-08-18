@@ -1,7 +1,7 @@
 import { guiPopUp } from './PopUp';
 import { ModelValidationError } from '../models/Model.js';
 
-const SPECIAL_ERRORS_KEYS = ['non_field_errors'];
+const SPECIAL_ERRORS_KEYS = ['non_field_errors', 'other_errors'];
 
 /**
  * Class, that handles errors.
