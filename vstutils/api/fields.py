@@ -906,3 +906,38 @@ class RatingField(FloatField):
         self.step = step
         assert not (step != 1 and front_style != 'slider'), 'custom step can be used only with front_style "slider"'
         super(RatingField, self).__init__(min_value=min_value, max_value=max_value, **kwargs)
+
+
+def is_all_digits_validator(value):
+    if not value.isdigit():
+        raise ValidationError('This field must contain only digits')
+
+
+class PhoneField(CharField):
+    """
+    Extends class 'rest_framework.serializers.CharField'.
+    Field for for phone in international format
+    """
+
+    def __init__(self, **kwargs):
+        kwargs['min_length'] = 8
+        kwargs['max_length'] = 16
+        super().__init__(**kwargs)
+
+        self.validators.append(is_all_digits_validator)
+
+
+class MaskedField(CharField):
+    """
+    Extends class 'rest_framework.serializers.CharField'.
+    Field that apply mask to value
+
+    :param mask: `IMask <https://imask.js.org/guide.html>`_
+    :type mask: dict, str
+
+    .. note::
+        Effective only on frontend.
+    """
+    def __init__(self, mask, **kwargs):
+        super().__init__(**kwargs)
+        self.mask = mask

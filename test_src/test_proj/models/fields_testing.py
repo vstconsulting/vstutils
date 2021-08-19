@@ -2,7 +2,7 @@ from django.db import models
 
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer
-from vstutils.api.fields import FkModelField, RelatedListField, RatingField
+from vstutils.api.fields import FkModelField, RelatedListField, RatingField, PhoneField, MaskedField
 from django.utils import timezone
 
 
@@ -19,6 +19,8 @@ class Author(BModel):
     name = models.CharField(max_length=256)
     registerDate = models.DateTimeField(default=timezone.now)
     image = models.ImageField(null=True, blank=True)
+    phone = models.CharField(max_length=16, null=True)
+    masked = models.CharField(max_length=255, null=True)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )
@@ -26,7 +28,7 @@ class Author(BModel):
         default_related_name = 'author'
         _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
-        _detail_fields = ['name', 'registerDate', 'posts']
+        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked']
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,
             'serializer_class_partial_update': UpdateAuthorSerializer,
@@ -35,7 +37,9 @@ class Author(BModel):
             "Main": ["id", "name"]
         }
         _override_detail_fields = {
-            'posts': RelatedListField(fields=['title'], related_name='post', view_type='table')
+            'posts': RelatedListField(fields=['title'], related_name='post', view_type='table'),
+            'phone': PhoneField(allow_null=True, required=False),
+            'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'})
         }
         _nested = {
             'post': {
