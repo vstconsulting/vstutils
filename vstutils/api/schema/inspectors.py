@@ -34,6 +34,8 @@ FORMAT_FK = 'fk'
 FORMAT_UPTIME = 'uptime'
 FORMAT_RELATED_LIST = 'related_list'
 FORMAT_RATING = 'rating'
+FORMAT_PHONE = 'phone'
+FORMAT_MASKED = 'masked'
 
 
 # Base types
@@ -87,6 +89,10 @@ basic_type_info[fields.RedirectCharField] = {
 basic_type_info[fields.PasswordField] = {
     'type': openapi.TYPE_STRING,
     'format': openapi.FORMAT_PASSWORD
+}
+basic_type_info[fields.PhoneField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_PHONE,
 }
 
 
@@ -322,6 +328,25 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
                     }
                 )
 
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class MaskedFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, fields.MaskedField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': FORMAT_MASKED,
+            'additionalProperties': {
+                'mask': field.mask
+            }
+        }
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 

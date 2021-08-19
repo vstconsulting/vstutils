@@ -1212,7 +1212,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -1440,6 +1440,17 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
         # Check translate model
         self.assertEqual(api['definitions']['Author']['x-translate-model'], 'Author')
+
+        # Check phone field
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['phone']['format'], 'phone')
+
+        # Check masked field
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['masked']['format'], 'masked')
+        self.assertDictEqual(
+            api['definitions']['OneAuthor']['properties']['masked']['additionalProperties'],
+            {'mask': {'mask': '000-000'}}
+        )
+
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -2592,6 +2603,8 @@ class ProjectTestCase(BaseTestCase):
         test_data = {
             'id': author_1.id,
             'name': author_1.name,
+            'phone': None,
+            'masked': None,
             'registerDate': date,
             'posts': [
                 {
@@ -2698,6 +2711,33 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(result_data, results[0]['data']['some_multiplefile'])
         # test GET response
         self.assertEqual(result_data, results[1]['data']['results'][0]['some_multiplefile'])
+
+    def test_phone_field(self):
+        def create_author(phone):
+            return {'method': 'post', 'path': 'author', 'data': {'name': 'author', 'phone': phone}}
+
+        results = self.bulk([
+            create_author('sdfdsgdfg'),
+            create_author(''),
+            create_author('123'),
+            create_author(123),
+            create_author('131232132132132131223'),
+            create_author('+1234567890'),
+            create_author(' 12345 67890 '),
+        ])
+
+        for invalid in results:
+            self.assertEqual(invalid['status'], 400)
+
+        results = self.bulk([
+            create_author(None),
+            create_author('12345678900'),
+        ])
+
+        for valid in results:
+             self.assertEqual(valid['status'], 201)
+
+        print(results)
 
     def test_multipleimagefield(self):
         post_data = {

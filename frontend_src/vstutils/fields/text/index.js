@@ -16,6 +16,8 @@ import TextAreaFieldMixin from './TextAreaFieldMixin.js';
 import TextParagraphField from './TextParagraphField.js';
 import TextParagraphFieldContentReadonly from './TextParagraphFieldContentReadonly.vue';
 import TextParagraphFieldMixin from './TextParagraphFieldMixin.js';
+import * as masked from './masked';
+import * as phone from './phone';
 
 export {
     HTMLField,
@@ -36,4 +38,6 @@ export {
     TextParagraphField,
     TextParagraphFieldContentReadonly,
     TextParagraphFieldMixin,
+    masked,
+    phone,
 };

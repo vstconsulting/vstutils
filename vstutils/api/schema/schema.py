@@ -18,7 +18,7 @@ from .inspectors import (
     VSTReferencingSerializerInspector,
     RelatedListFieldInspector,
     RatingFieldInspector,
-    NamedBinaryImageInJsonFieldInspector,
+    NamedBinaryImageInJsonFieldInspector, MaskedFieldInspector,
 )
 
 
@@ -34,6 +34,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         RatingFieldInspector,
         RelatedListFieldInspector,
         NamedBinaryImageInJsonFieldInspector,
+        MaskedFieldInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [

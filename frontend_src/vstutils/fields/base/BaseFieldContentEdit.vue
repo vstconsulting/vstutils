@@ -14,8 +14,8 @@
             :required="attrs['required']"
             :style="styles"
             :type="inputType"
-            :value="preparedValue"
-            @input="$emit('set-value', $event.target.value)"
+            :[inputValueName]="preparedValue"
+            @[inputEventName]="setValue"
         />
         <div v-if="field.appendText" class="input-group-append">
             <div class="input-group-text" v-text="field.appendText" />
@@ -45,6 +45,8 @@
         },
         data() {
             return {
+                inputValueName: 'value',
+                inputEventName: 'input',
                 class_list: ['form-control'],
             };
         },
@@ -57,6 +59,11 @@
             },
             preparedValue() {
                 return this.value;
+            },
+        },
+        methods: {
+            setValue(event) {
+                this.$emit('set-value', event.target.value);
             },
         },
     };

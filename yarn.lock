@@ -5604,10 +5604,10 @@ imagesloaded@^4.1.4:
   dependencies:
     ev-emitter "^1.0.0"
 
-imask@4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/imask/-/imask-4.1.1.tgz#0b7a832f27c921bec441f4b11a6ad6855b174abb"
-  integrity sha512-d/wdi43ftfUYe+FqFlsQ7HXXWdXP7iRyZCWyJJpiLMEwMDTTsPh/EBhKIB2AFtsNkvO1Igvpr6cNvpJdR9AmUQ==
+imask@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/imask/-/imask-6.1.0.tgz#8dcf4c44c51c4297f691349b925b7d5b21edff1c"
+  integrity sha512-IuElVZpc7iuGw+CXfwoUZYpGdoD5H7cGo3S93gZPgjTTWfY5XAXCFL3g3b/ZJBZ18RG2dFF2kxAuuFlXMjq7oQ==
 
 immediate@~3.0.5:
   version "3.0.6"
