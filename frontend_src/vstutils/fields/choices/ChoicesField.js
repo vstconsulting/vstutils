@@ -31,6 +31,9 @@ class ChoicesField extends StringField {
             if (Array.isArray(data[0])) {
                 // [['val1', 'Val 1'], ['val2', 'Val 2']]
                 return data.map(([id, text]) => ({ id, text }));
+            } else if (typeof data[0] === 'object') {
+                // Legacy object format (value and prefetchValue properties)
+                return data.map((item) => ({ id: item.value, text: item.prefetch_value }));
             } else {
                 // ['val1', 'val2']
                 return data.map((val) => ({ id: val, text: val }));
