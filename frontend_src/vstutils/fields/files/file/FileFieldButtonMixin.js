@@ -7,7 +7,7 @@ const FileFieldButtonMixin = {
             wrapperClasses: [],
             wrapperStyles: {},
             spanClasses: ['btn', 'btn-default', 'btn-right', 'textfile'],
-            spanStyles: { float: 'right', marginLeft: '10px', marginBottom: '10px' },
+            spanStyles: { float: 'right', margin: '0 0 10px 10px' },
             iconStyles: {},
         };
     },
