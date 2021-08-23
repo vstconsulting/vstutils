@@ -16,7 +16,7 @@
 </template>
 
 <script>
-    import BinaryFileFieldReadFileButton from './BinaryFileFieldReadFileButton.vue';
+    import BinaryFileFieldReadFileButton from './BinaryFileFieldReadFileButton.js';
     import { arrayBufferToBase64 } from '../../../utils';
     import { FileFieldContentEdit } from '../file';
     import DragAndDropMixin from '../DragAndDropMixin.js';

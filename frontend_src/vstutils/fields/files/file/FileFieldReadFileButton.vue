@@ -1,10 +1,16 @@
 <template>
-    <div :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="helpText">
-        <span :class="spanClasses" :style="spanStyles" @change="$emit('read-file', $event)">
-            <input type="file" class="input-file" :accept="accept" :multiple="multiple" />
+    <label :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="helpText">
+        <span :class="spanClasses" :style="spanStyles" @change="onChange">
+            <input
+                type="file"
+                class="input-file"
+                :accept="accept"
+                :multiple="multiple"
+                style="pointer-events: none"
+            />
             <span :class="iconClasses" :style="iconStyles" />
         </span>
-    </div>
+    </label>
 </template>
 
 <script>
@@ -23,6 +29,11 @@
                 accept: '*',
                 multiple: false,
             };
+        },
+        methods: {
+            onChange(event) {
+                this.$emit('read-file', event);
+            },
         },
     };
 </script>

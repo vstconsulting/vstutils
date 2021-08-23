@@ -11,11 +11,11 @@
         @execute-action="executeAction"
         @open-sublink="openSublink"
     >
-        <template #additionalTitleInfo>
-            <span v-if="!error && totalNumberOfInstances > -1" class="badge bg-info">
+        <portal v-if="isInstanceCounterActive && !error && totalNumberOfInstances >= 0" to="titleAppend">
+            <span class="badge bg-info">
                 {{ totalNumberOfInstances }}
             </span>
-        </template>
+        </portal>
         <div class="list-content-component" :class="`list-${model.name}`">
             <template v-if="isEmpty">
                 <p class="text-center empty-list-p">
@@ -66,6 +66,11 @@
     export default {
         components: { Pagination, MultiActions, ListTable, EntityView },
         mixins: [BaseViewMixin, ViewWithAutoUpdateMixin],
+        data() {
+            return {
+                isInstanceCounterActive: true,
+            };
+        },
         computed: {
             isEmpty() {
                 return !this.instances || (this.instances && !this.instances.length);
