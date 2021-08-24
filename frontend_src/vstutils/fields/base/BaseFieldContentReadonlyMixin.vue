@@ -1,6 +1,8 @@
 <template>
     <p :aria-label="aria_label" :aria-labelledby="label_id">
-        {{ valueWithAdditionalText }}
+        <span v-if="prependText" v-text="$t(prependText) + ' '" />
+        {{ preparedValue }}
+        <span v-if="appendText" v-text="' ' + $t(appendText)" />
     </p>
 </template>
 
@@ -18,9 +20,6 @@
             data: { type: Object, required: true },
         },
         computed: {
-            valueWithAdditionalText() {
-                return this.field.prependText + this.preparedValue + this.field.appendText;
-            },
             preparedValue() {
                 if (this.value === undefined || this.value === null) {
                     return '';

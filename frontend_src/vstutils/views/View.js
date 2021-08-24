@@ -157,6 +157,9 @@ export class View {
             path: this.getRoutePath(),
             component: this.getComponent(),
             props: this._propsFunc,
+            meta: {
+                view: this,
+            },
         };
     }
 }

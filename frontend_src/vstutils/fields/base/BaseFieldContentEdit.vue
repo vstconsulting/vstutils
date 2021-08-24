@@ -1,7 +1,7 @@
 <template>
     <div class="input-group">
-        <div v-if="field.prependText" class="input-group-prepend">
-            <div class="input-group-text" v-text="field.prependText" />
+        <div v-if="prependText" class="input-group-prepend">
+            <div class="input-group-text" v-text="$t(prependText)" />
         </div>
         <input
             :aria-label="aria_label"
@@ -17,8 +17,8 @@
             :[inputValueName]="preparedValue"
             @[inputEventName]="setValue"
         />
-        <div v-if="field.appendText" class="input-group-append">
-            <div class="input-group-text" v-text="field.appendText" />
+        <div v-if="appendText" class="input-group-append">
+            <div class="input-group-text" v-text="$t(appendText)" />
         </div>
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
         <SetDefaultButton v-if="hasDefaultValue" @click.native="$emit('set-value', field.default)" />

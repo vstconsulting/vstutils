@@ -60,8 +60,8 @@
             qs: { type: Object, required: true },
             applyButtonText: { type: String, required: true },
             rowClickHandler: { type: Function, default: () => {} },
+            // eslint-disable-next-line vue/require-prop-types
             model: {
-                type: Function,
                 default: function () {
                     return this.qs.getResponseModelClass(RequestTypes.LIST);
                 },
