@@ -407,7 +407,7 @@ kwargs = dict(
         'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
         'stubs': load_requirements('requirements-stubs.txt'),
-        'pil': ['Pillow~=8.0.1'],
+        'pil': ['Pillow~=8.3.1'],
         'boto3': [
             i.replace('libcloud', 'libcloud,boto3')
             for i in load_requirements('requirements.txt')
