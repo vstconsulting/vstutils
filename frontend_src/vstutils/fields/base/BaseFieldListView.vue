@@ -1,5 +1,9 @@
 <template>
-    <span v-text="valueWithAdditionalText" />
+    <span>
+        <span v-if="prependText" v-text="$t(prependText) + ' '" />
+        {{ preparedValue }}
+        <span v-if="appendText" v-text="' ' + $t(appendText)" />
+    </span>
 </template>
 
 <script>
@@ -12,9 +16,6 @@
         name: 'BaseFieldListView',
         mixins: [BaseFieldInnerComponentMixin],
         computed: {
-            valueWithAdditionalText() {
-                return this.field.prependText + this.preparedValue + this.field.appendText;
-            },
             preparedValue() {
                 if (this.value === undefined || this.value === null) {
                     return '';

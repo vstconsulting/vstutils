@@ -14,6 +14,8 @@ const BaseFieldInnerComponentMixin = {
              * Dict with CSS style properties (key, value), that should be added to the component.
              */
             styles_dict: {},
+            prependText: this.field.prependText,
+            appendText: this.field.appendText,
         };
     },
     computed: {

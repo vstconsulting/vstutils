@@ -41,7 +41,7 @@ export const BaseViewMixin = {
             const crumbs = [{ iconClasses: 'fas fa-home', link: '/' }];
             for (let i = 0; i < dt.length; i++) {
                 const { route } = this.$router.resolve(joinPaths(...dt.slice(0, i + 1)));
-                const view = route.matched[0].components.default?.provide?.view;
+                const view = route?.meta?.view;
                 if (view) {
                     crumbs.push({ link: route.path, ...this.getViewNameForBreadcrumbs(view, dt[i]) });
                 }
