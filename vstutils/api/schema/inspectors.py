@@ -3,10 +3,10 @@ from collections import OrderedDict
 
 from django.http import FileResponse
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
-from drf_yasg.inspectors.field import ReferencingSerializerInspector
+from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector
-from rest_framework.fields import Field, JSONField
+from rest_framework.fields import Field, JSONField, DecimalField
 
 from .. import fields, serializers, validators
 from ...models.base import get_first_match_name
@@ -36,6 +36,7 @@ FORMAT_RELATED_LIST = 'related_list'
 FORMAT_RATING = 'rating'
 FORMAT_PHONE = 'phone'
 FORMAT_MASKED = 'masked'
+FORMAT_DECIMAL = 'decimal'
 
 
 # Base types
@@ -345,6 +346,26 @@ class MaskedFieldInspector(FieldInspector):
             'format': FORMAT_MASKED,
             'additionalProperties': {
                 'mask': field.mask
+            }
+        }
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
+class DecimalFieldInspector(FieldInspector):
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        # pylint: disable=unused-variable,invalid-name
+        if not isinstance(field, DecimalField):
+            return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = {
+            'type': decimal_field_type(field),
+            'format': FORMAT_DECIMAL,
+            'additionalProperties': {
+                'decimal_places': field.decimal_places,
+                'max_digits': field.max_digits
             }
         }
         return SwaggerType(**field_extra_handler(field, **kwargs))

@@ -1,15 +1,12 @@
-import { BaseField, BaseFieldContentEdit, BaseFieldMixin } from '../base';
+import { BaseFieldContentEdit } from '../base';
+import { NumberField, NumberFieldContentMixin, NumberFieldMixin } from './number';
 
 export const IntegerFieldContentMixin = {
-    data() {
-        return {
-            inputType: 'number',
-        };
-    },
+    mixins: [NumberFieldContentMixin],
 };
 
 export const IntegerFieldMixin = {
-    mixins: [BaseFieldMixin],
+    mixins: [NumberFieldMixin],
     components: {
         field_content_edit: {
             mixins: [BaseFieldContentEdit, IntegerFieldContentMixin],
@@ -20,32 +17,7 @@ export const IntegerFieldMixin = {
 /**
  * Field to store integers
  */
-export class IntegerField extends BaseField {
-    /**
-     * Redefinition of base guiField method toInner.
-     * @param {object} data
-     */
-    toInner(data = {}) {
-        let value = data[this.options.name];
-
-        if (value === undefined) {
-            return;
-        }
-
-        let val = Number(value);
-
-        if (isNaN(val)) {
-            console.error('Error in integer.toInner()');
-            return;
-        }
-
-        return val;
-    }
-
-    getEmptyValue() {
-        return null;
-    }
-
+export class IntegerField extends NumberField {
     /**
      * Redefinition of base guiField static property 'mixins'.
      */

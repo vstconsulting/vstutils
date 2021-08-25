@@ -1212,7 +1212,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -1451,6 +1451,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
             {'mask': {'mask': '000-000'}}
         )
 
+        # Check decimal field
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['format'], 'decimal')
+        self.assertDictEqual(api['definitions']['OneAuthor']['properties']['decimal']['additionalProperties'], {'decimal_places': 2, 'max_digits': 5})
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -2605,6 +2608,7 @@ class ProjectTestCase(BaseTestCase):
             'name': author_1.name,
             'phone': None,
             'masked': None,
+            'decimal': '13.37',
             'registerDate': date,
             'posts': [
                 {
