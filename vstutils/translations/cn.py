@@ -230,4 +230,5 @@ TRANSLATION = {
     'Zoom': '飛漲',
     'Scale': '規模',
     'Execute': '施行',
+    'This file format is not supported': '不支持此文件格式',
 }

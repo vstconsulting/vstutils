@@ -266,4 +266,6 @@ TRANSLATION = {
     'terms of agreement': 'лицензионное соглашение',
     'Zoom': 'Зум',
     'Scale': 'Масштаб',
+    'This file format is not supported': 'Данный формат файла не поддерживается',
+
 }

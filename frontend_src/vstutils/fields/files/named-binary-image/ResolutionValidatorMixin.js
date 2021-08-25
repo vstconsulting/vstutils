@@ -19,8 +19,15 @@ export default {
                 }
                 results.push(await readFileAsObject(file));
             }
-
-            event.target.value = '';
+            // split extensions list and remove leading dot
+            const extensions = this.$parent.field.extensions.split(',').map((e) => e.slice(1));
+            for (const { mediaType, name } of results) {
+                const type = mediaType.split('/')[1];
+                if (!extensions.includes(type)) {
+                    guiPopUp.error(this.$t('This file format is not supported') + ': ' + name);
+                    return;
+                }
+            }
 
             if (this.field.resolutionConfig) {
                 for (const { content, mediaType, name } of results) {

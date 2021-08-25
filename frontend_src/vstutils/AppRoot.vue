@@ -24,7 +24,6 @@
     </div>
 </template>
 <script>
-    import { formatPath } from './utils';
     import AutoUpdateController from './autoupdate/AutoUpdateController.js';
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
@@ -86,11 +85,7 @@
         },
         methods: {
             goBack() {
-                const parentPath = this.$refs.currentViewComponent?.view?.parent?.path;
-                if (parentPath) {
-                    return this.$router.push({ path: formatPath(parentPath, this.$route.params) });
-                }
-                return this.$router.push({ name: 'home' });
+                return this.$router.back();
             },
             updateBodyClass(newClass, oldClass) {
                 if (oldClass) {

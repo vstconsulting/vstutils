@@ -229,4 +229,6 @@ TRANSLATION = {
     'Zoom': 'Thu phóng',
     'Scale': 'Tỉ lệ',
     'Execute': 'Hành hình',
+    'This file format is not supported': 'Định dạng tệp này không được hỗ trợ',
+
 }
