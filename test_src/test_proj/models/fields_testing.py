@@ -4,7 +4,7 @@ from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer
 from vstutils.api.fields import FkModelField, RelatedListField, RatingField, PhoneField, MaskedField
 from django.utils import timezone
-
+from rest_framework.fields import DecimalField
 
 class UpdateAuthorSerializer(VSTSerializer):
     _view_field_name = 'id'
@@ -21,6 +21,7 @@ class Author(BModel):
     image = models.ImageField(null=True, blank=True)
     phone = models.CharField(max_length=16, null=True)
     masked = models.CharField(max_length=255, null=True)
+    decimal = models.DecimalField(default='13.37', decimal_places=2, max_digits=5)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )
@@ -28,7 +29,7 @@ class Author(BModel):
         default_related_name = 'author'
         _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
-        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked']
+        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal']
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,
             'serializer_class_partial_update': UpdateAuthorSerializer,
@@ -39,7 +40,7 @@ class Author(BModel):
         _override_detail_fields = {
             'posts': RelatedListField(fields=['title'], related_name='post', view_type='table'),
             'phone': PhoneField(allow_null=True, required=False),
-            'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'})
+            'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'}),
         }
         _nested = {
             'post': {

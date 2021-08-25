@@ -1,8 +1,7 @@
 import * as integer from './integer.js';
 import * as rating from './rating';
 import { FloatField } from './float.js';
-
-class NumberField extends integer.IntegerField {}
-class DecimalField extends FloatField {}
+import { NumberField } from './number';
+import { DecimalField } from './decimal/index.js';
 
 export { integer, rating, NumberField, FloatField, DecimalField };
