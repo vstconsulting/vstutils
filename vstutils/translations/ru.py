@@ -77,18 +77,17 @@ TRANSLATION = {
     'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Изменения в объекте {1} "<b>{0}</b>" были успешно сохранены.',
     # execute
     'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Действие "<b>{0}</b>" было успешно запущено на объекте "<b>{1}</b>".',
-
     # instance operation error
     # add:
     'Some error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Во время добавления дочернего объекта "<b>{0}</b>" к родительскому списку произошла ошибка.<br> Подробнее: {1}',
     # create:
-    'Some error occurred during new "<b>{0}</b>" instance creation.<br> Error details: {1}': 'Во время создания нового объекта "<b>{0}</b>" произошла ошибка.<br> Подробнее: {1}',
+    'Some error occurred during new instance creation.<br>Error details:<br>{0}': 'Во время создания нового объекта произошла ошибка.<br>Подробнее:<br>{0}',
     # remove:
     'Some error occurred during remove process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка.<br> Подробнее: {2}',
     # save:
-    'Some error occurred during saving process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Во время сохранения {1} "<b>{0}</b>" произошла ошибка.<br> Подробнее: {2}',
+    'Some error occurred during saving process.<br>Error details:<br>{0}': 'Во время сохранения произошла ошибка.<br>Подробнее:<br>{0}',
     # execute:
-    'Some error occurred during "<b>{0}</b>" action execution on {1}.<br> Error details: {2}': 'Во время запуска действия "<b>{0}</b>" на {1} произошла ошибка.<br> Подробнее: {2}',
+    'Some error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
 
     # guiCustomizer translations
     'customize application styles': 'настройка цветовых стилей приложения',

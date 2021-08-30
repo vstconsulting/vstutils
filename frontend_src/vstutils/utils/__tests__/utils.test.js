@@ -5,10 +5,12 @@ import {
     hexToRgbA,
     isEmptyObject,
     mergeDeep,
+    ModelValidationError,
     randomSleep,
     sliceLongString,
     stringToBoolean,
 } from '../index.js';
+import { StringField } from '../../fields/text';
 
 describe('utils', () => {
     test('stringToBoolean', () => {
@@ -165,5 +167,11 @@ describe('utils', () => {
         jest.advanceTimersByTime(600);
         await promise;
         expect(callback).toBeCalledTimes(1);
+    });
+
+    test('ModelValidationError', () => {
+        const field = new StringField({ name: 'name' });
+        const err = new ModelValidationError([{ field, message: 'Err 1' }]);
+        expect(err.toFieldsErrors()).toStrictEqual({ name: 'Err 1' });
     });
 });

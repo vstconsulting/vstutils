@@ -1,6 +1,13 @@
 /* eslint-disable vue/one-component-per-file */
 import OneEntity from './OneEntity.vue';
-import { formatPath, joinPaths, parseResponseMessage, pathToArray, RequestTypes } from '../../utils';
+import {
+    formatPath,
+    joinPaths,
+    ModelValidationError,
+    parseResponseMessage,
+    pathToArray,
+    RequestTypes,
+} from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { ViewTypes } from '../../views';
@@ -83,13 +90,14 @@ export const PageNewViewComponent = {
         async fetchData() {
             this.initLoading();
             await this.dispatchAction('fetchData', { data: this.query });
+            this.fieldsErrors = {};
             this.changedFields = [];
             this.setLoadingSuccessful();
         },
         setFieldValue(obj) {
             this.isPageChanged = true;
             if (!this.changedFields.includes(obj.field)) this.changedFields.push(obj.field);
-            this.commitMutation('setFieldValue', obj);
+            OneEntity.methods.setFieldValue.call(this, obj);
         },
         /**
          * Method, that saves existing Model instance.
@@ -99,7 +107,10 @@ export const PageNewViewComponent = {
             try {
                 this.commitMutation('validateAndSetInstanceData');
             } catch (e) {
-                window.app.error_handler.defineErrorAndShow(e);
+                this.$app.error_handler.defineErrorAndShow(e);
+                if (e instanceof ModelValidationError) {
+                    this.fieldsErrors = e.toFieldsErrors();
+                }
                 return;
             }
             this.loading = true;
@@ -113,26 +124,27 @@ export const PageNewViewComponent = {
                     ? await instance.update(method, this.view.isPartial ? this.changedFields : null)
                     : await instance.create(method);
 
-                this.loading = false;
                 this.isPageChanged = false;
                 this.changedFields = [];
+                this.fieldsErrors = {};
 
-                guiPopUp.success(this.$t(pop_up_msg.instance.success.save).format([name, this.view.name]));
+                guiPopUp.success(this.$t(pop_up_msg.instance.success.save, [name, this.view.name]));
                 if (this.isDeepNested) {
                     return this.openPage(this.getRedirectUrl({ instance }));
                 }
                 this.openPage({ path: this.getRedirectUrl({ instance }), params: { providedInstance } });
             } catch (error) {
+                const modelValidationError = instance.constructor.parseModelValidationError(error.data);
+                if (modelValidationError) {
+                    this.fieldsErrors = modelValidationError.toFieldsErrors();
+                }
+                this.$app.error_handler.showError(
+                    this.$t(isUpdate ? pop_up_msg.instance.error.save : pop_up_msg.instance.error.create, [
+                        modelValidationError.toHtmlString() || this.$app.error_handler.errorToString(error),
+                    ]),
+                );
+            } finally {
                 this.loading = false;
-                let str = window.app.error_handler.errorToString(error);
-
-                let srt_to_show = this.$t(pop_up_msg.instance.error.save, [
-                    name,
-                    this.$t(this.view.title),
-                    str,
-                ]);
-
-                window.app.error_handler.showError(srt_to_show, str);
             }
         },
     },
@@ -219,6 +231,9 @@ export const ActionViewComponent = {
                 this.commitMutation('validateAndSetInstanceData', { instance });
             } catch (e) {
                 this.$app.error_handler.defineErrorAndShow(e);
+                if (e instanceof ModelValidationError) {
+                    this.fieldsErrors = e.toFieldsErrors();
+                }
                 return;
             }
             this.loading = true;
@@ -231,6 +246,7 @@ export const ActionViewComponent = {
                     useBulk: instance.constructor.shouldUseBulk(this.view.method),
                 });
                 this.changedFields = [];
+                this.fieldsErrors = {};
                 guiPopUp.success(
                     this.$t(pop_up_msg.instance.success.execute, [
                         this.$t(this.view.title),
@@ -239,12 +255,16 @@ export const ActionViewComponent = {
                 );
                 this.openPage(this._getRedirectUrlFromResponse(response.data) || this.getRedirectUrl());
             } catch (error) {
-                const str = this.$app.error_handler.errorToString(error);
-                const srt_to_show = this.$t(pop_up_msg.instance.error.execute, [
-                    this.$t(this.view.title),
-                    str,
-                ]);
-                this.$app.error_handler.showError(srt_to_show, str);
+                const modelValidationError = instance.constructor.parseModelValidationError(error.data);
+                if (modelValidationError) {
+                    this.fieldsErrors = modelValidationError.toFieldsErrors();
+                }
+                this.$app.error_handler.showError(
+                    this.$t(pop_up_msg.instance.error.execute, [
+                        this.$t(this.view.title),
+                        modelValidationError.toHtmlString() || this.$app.error_handler.errorToString(error),
+                    ]),
+                );
             } finally {
                 this.loading = false;
             }

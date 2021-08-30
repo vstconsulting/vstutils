@@ -2,7 +2,14 @@
     <div class="field-component" :class="wrapperClasses">
         <field_list_view v-if="type === 'list'" :value="value" :field="field" :data="data" />
         <template v-else>
-            <FieldLabel v-if="!hideTitle" :type="type" :value="value" :field="field" :data="data" />
+            <FieldLabel
+                v-if="!hideTitle"
+                :type="type"
+                :value="value"
+                :field="field"
+                :data="data"
+                :error="error"
+            />
             <field_content_readonly
                 v-if="field.readOnly || type === 'readonly'"
                 :value="value"
@@ -55,6 +62,7 @@
             type: { type: String, required: true },
             hideable: { type: Boolean, default: false },
             hideTitle: { type: Boolean, default: false },
+            error: { type: String, default: null },
         },
         data() {
             return {

@@ -1,5 +1,5 @@
 import { guiPopUp } from './PopUp';
-import { ModelValidationError } from '../models/Model.js';
+import { ModelValidationError } from '../utils';
 
 const SPECIAL_ERRORS_KEYS = ['non_field_errors', 'other_errors'];
 
@@ -45,9 +45,7 @@ export default class ErrorHandler {
         if (!error) return result;
 
         if (error instanceof ModelValidationError) {
-            return error.errors
-                .map(({ field, message }) => `<b>${field.title}</b>: ${message}`)
-                .join('<br />');
+            return error.toHtmlString();
         }
 
         if (typeof error == 'string') return error;

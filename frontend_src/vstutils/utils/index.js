@@ -2,8 +2,18 @@ import $ from 'jquery';
 import moment from 'moment';
 import { LocalSettings } from './localSettings';
 import signals from '../signals.js';
+import { i18n } from '../translation.js';
 
 export const guiLocalSettings = new LocalSettings('guiLocalSettings');
+
+/**
+ * @param {Object} obj
+ * @param {string} prop
+ * @return {boolean}
+ */
+export function hasOwnProp(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+}
 
 /**
  * Function to replace {.+?} in string to variables sended to this function,
@@ -640,13 +650,10 @@ export function findClosestPath(paths, current_path) {
  * @param {string} str - String to translate.
  * @return {string}
  * @private
+ * @deprecated
  */
-export function _translate(str) {
-    if (window.app && window.app.application && window.app.application.$t) {
-        return window.app.application.$t(str);
-    }
-
-    return str;
+export function _translate() {
+    return i18n.t(...arguments);
 }
 
 /**
@@ -1017,15 +1024,6 @@ export function generateBase32String(length = 32) {
     return generateRandomString(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567');
 }
 
-/**
- * @param {Object} obj
- * @param {string} prop
- * @return {boolean}
- */
-export function hasOwnProp(obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
 export const BulkType = {
     SIMPLE: 'put',
     TRANSACTIONAL: 'post',
@@ -1097,7 +1095,7 @@ export function isInstancesEqual(a, b) {
 export function mapObjectValues(obj, f) {
     const newObj = {};
     for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (hasOwnProp(obj, key)) {
             newObj[key] = f(obj[key], key);
         }
     }
@@ -1136,5 +1134,46 @@ export function iterFind(iterator, callbackFn) {
         if (callbackFn(item)) {
             return item;
         }
+    }
+}
+
+/**
+ * @typedef {Object} FieldValidationErrorInfo
+ * @property {BaseField} field
+ * @property {string} message
+ */
+
+/**
+ * Class that stores errors related to model's fields
+ */
+export class ModelValidationError extends Error {
+    /**
+     * @param {FieldValidationErrorInfo[]} errors
+     */
+    constructor(errors = []) {
+        super();
+        this.errors = errors;
+    }
+
+    /**
+     * @return {Object}
+     */
+    toFieldsErrors() {
+        const fieldsErrors = {};
+        for (const error of this.errors) {
+            fieldsErrors[error.field.name] = i18n.t(error.message);
+        }
+        return fieldsErrors;
+    }
+
+    /**
+     * @return {string}
+     */
+    toHtmlString() {
+        const lines = [];
+        for (const { field, message } of this.errors) {
+            lines.push(`<b>${i18n.t(escapeHtml(field.title))}</b>: ${i18n.t(escapeHtml(message))}`);
+        }
+        return lines.join('<br />');
     }
 }

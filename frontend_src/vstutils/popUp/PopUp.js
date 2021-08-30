@@ -172,20 +172,17 @@ export let pop_up_msg = {
                 'Some error occurred during adding of child "<b>{0}</b>" instance' +
                 ' to parent list.' +
                 '<br> Error details: {1}',
-            create:
-                'Some error occurred during new "<b>{0}</b>" instance creation.' + '<br> Error details: {1}',
+            create: 'Some error occurred during new instance creation.<br>Error details:<br>{0}',
             remove:
                 'Some error occurred during remove process of <b>{1}</b>  "<b>{0}</b>".' +
                 '<br> Error details: {2}',
             removeMany: 'Some error occurred during remove process of <b>{0}</b><br> Error details: {1}',
-            save:
-                'Some error occurred during saving process of <b>{1}</b> "<b>{0}</b>".' +
-                '<br> Error details: {2}',
+            save: 'Some error occurred during saving process.<br>Error details:<br>{0}',
             executeEmpty:
                 'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>.' +
                 '<br> Error details: {2}' +
                 '<br>{3}',
-            execute: 'Some error occurred during <b>{0}</b><br> Error details: {1}',
+            execute: 'Some error occurred during <b>{0}</b>. Error details:<br>{1}',
         },
     },
     field: {

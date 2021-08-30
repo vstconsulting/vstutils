@@ -1,4 +1,5 @@
-import { escapeHtml, hasOwnProp, mergeDeep } from '../utils';
+import { escapeHtml, hasOwnProp, mergeDeep, ModelValidationError } from '../utils';
+import { i18n } from '../translation.js';
 
 class ModelUtils {
     static pkFields = ['id', 'pk'];
@@ -136,22 +137,6 @@ export function makeModel(cls, name) {
     }
 
     return cls;
-}
-
-/**
- * @typedef {Object} FieldValidationErrorInfo
- * @property {BaseField} field
- * @property {string} message
- */
-
-export class ModelValidationError extends Error {
-    /**
-     * @param {FieldValidationErrorInfo[]} errors
-     */
-    constructor(errors = []) {
-        super();
-        this.errors = errors;
-    }
 }
 
 /**
@@ -375,5 +360,30 @@ export class Model {
             if (!field.isSameValues(this._data, data)) return false;
         }
         return true;
+    }
+
+    /**
+     * @param {Object} data
+     * @return {ModelValidationError|undefined}
+     */
+    static parseModelValidationError(data) {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            return;
+        }
+        const errors = [];
+        for (let [fieldName, message] of Object.entries(data)) {
+            const field = this.fields.get(fieldName);
+            if (field) {
+                if (Array.isArray(message)) {
+                    message = message.map((str) => i18n.t(str)).join(' ');
+                } else {
+                    message = i18n.t(message);
+                }
+                errors.push({ field, message });
+            }
+        }
+        if (errors.length > 0) {
+            return new ModelValidationError(errors);
+        }
     }
 }

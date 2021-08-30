@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import VueI18n from 'vue-i18n';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings, RequestTypes } from './vstutils/utils';
@@ -12,27 +11,6 @@ import { signals } from './app.common.js';
 import { getFieldFactory, getFieldFormatFactory } from './vstutils/fields';
 
 export * from './app.common.js';
-
-const RUPluralizationRule = (choice, choicesLength) => {
-    if (choice === 0) {
-        return 0;
-    }
-
-    const teen = choice > 10 && choice < 20;
-    const endsWithOne = choice % 10 === 1;
-
-    if (choicesLength < 4) {
-        return !teen && endsWithOne ? 1 : 2;
-    }
-    if (!teen && endsWithOne) {
-        return 1;
-    }
-    if (!teen && choice % 10 >= 2 && choice % 10 <= 4) {
-        return 2;
-    }
-
-    return choicesLength < 4 ? 2 : 3;
-};
 
 /**
  * Class for a App object.
@@ -163,8 +141,8 @@ export class App extends BaseApp {
      * @return {Promise}
      */
     setLanguage(lang) {
-        return this._prefetchTranslation(lang).then((lang) => {
-            this.application.$i18n.locale = lang;
+        return this._prefetchTranslation(lang).then(() => {
+            this.i18n.locale = lang;
             guiLocalSettings.set('lang', lang);
             signals.emit('app.language.changed', { lang: lang });
             document.documentElement.setAttribute('lang', lang);
@@ -180,32 +158,13 @@ export class App extends BaseApp {
      * @return {Promise}
      */
     _prefetchTranslation(lang) {
-        if (
-            !Object.values(this.languages)
-                .map((item) => item.code)
-                .includes(lang)
-        ) {
+        if (!this.languages.find((item) => item.code === lang)) {
             return Promise.reject(false);
-        }
-
-        if (this.translations[lang]) {
-            return Promise.resolve(lang);
         }
 
         return this.translationsManager
             .getTranslations(lang)
-            .then((transitions) => {
-                this.translations = {
-                    ...this.translations,
-                    [lang]: transitions,
-                };
-
-                this.application.$i18n.setLocaleMessage(lang, transitions);
-                return lang;
-            })
-            .catch((error) => {
-                throw error;
-            });
+            .then((transitions) => this.i18n.setLocaleMessage(lang, transitions));
     }
 
     /**
@@ -227,16 +186,6 @@ export class App extends BaseApp {
         );
         signals.emit('app.beforeInitRouter', { routerConstructor });
         this.router = routerConstructor.getRouter();
-
-        this.i18n = new VueI18n({
-            locale: this.initLanguage,
-            messages: this.translations,
-            silentTranslationWarn: true,
-            formatFallbackMessages: true,
-            pluralizationRules: {
-                ru: RUPluralizationRule,
-            },
-        });
 
         Vue.prototype.$app = this;
 

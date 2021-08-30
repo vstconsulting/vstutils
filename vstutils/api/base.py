@@ -89,6 +89,7 @@ def apply_translation(obj: _t.Any, trans_function: _t.Callable):
 
 
 def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestResponse]:
+    # pylint: disable=too-many-branches
     traceback_str: _t.Text = traceback.format_exc()
     default_exc = (exceptions.APIException, djexcs.PermissionDenied)
     serializer_class = ErrorSerializer
@@ -98,7 +99,11 @@ def exception_handler(exc: Exception, context: _t.Any) -> _t.Optional[RestRespon
     translate = getattr(lang, 'translate', lambda text: text)
 
     if isinstance(exc, exceptions.APIException):
-        exc.detail = apply_translation(exc.detail, translate)
+        if isinstance(exc.detail, ReturnDict):
+            for key, value in exc.detail.items():
+                exc.detail[key] = apply_translation(value, translate)
+        else:
+            exc.detail = apply_translation(exc.detail, translate)
 
     elif isinstance(exc, djexcs.PermissionDenied):  # pragma: no cover
         data = {"detail": translate(str(exc))}

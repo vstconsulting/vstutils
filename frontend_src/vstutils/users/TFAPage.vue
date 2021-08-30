@@ -141,7 +141,7 @@
                 } catch (error) {
                     this.loading = false;
                     let str = this.$app.error_handler.errorToString(error);
-                    let srt_to_show = this.$t(pop_up_msg.instance.error.save, ['TFA', '', str]);
+                    let srt_to_show = this.$t(pop_up_msg.instance.error.save, [str]);
                     this.$app.error_handler.showError(srt_to_show, str);
                 }
             },
