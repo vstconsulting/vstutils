@@ -1,10 +1,15 @@
 import { BaseField, BaseFieldContentEdit, BaseFieldMixin } from '../base';
+import { hasOwnProp } from '../../utils';
 
 export const NumberFieldContentMixin = {
-    data() {
-        return {
-            inputType: 'number',
-        };
+    methods: {
+        setValue(value) {
+            if (this.field.isValueValid(value)) {
+                this.$emit('set-value', value);
+            } else {
+                this.$refs.input.value = this.value;
+            }
+        },
     },
 };
 
@@ -18,9 +23,13 @@ export const NumberFieldMixin = {
 };
 
 /**
- * Field to store integers
+ * Field to store numbers
  */
 export class NumberField extends BaseField {
+    constructor(options) {
+        super(options);
+        this.signed = hasOwnProp(this.props, 'signed') ? this.props.signed : true;
+    }
     /**
      * Redefinition of base guiField method toInner.
      * @param {object} data
@@ -31,15 +40,22 @@ export class NumberField extends BaseField {
         if (value === undefined) {
             return;
         }
+        if (value === null || value === '') return null;
 
-        let val = Number(value);
-
-        if (isNaN(val)) {
+        const strValue = String(value);
+        if (!this.isValueValid(strValue)) {
             console.error('Error in number.toInner()');
             return;
         }
 
-        return val;
+        return Number(value);
+    }
+
+    isNumber(value) {
+        return (!isNaN(Number(value)) && value.slice(-1) !== ' ') || (this.signed && value === '-');
+    }
+    isValueValid(value) {
+        return this.isNumber(value);
     }
 
     getEmptyValue() {

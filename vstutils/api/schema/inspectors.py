@@ -6,7 +6,7 @@ from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
 from drf_yasg.inspectors.query import CoreAPICompatInspector
-from rest_framework.fields import Field, JSONField, DecimalField
+from rest_framework.fields import Field, JSONField, DecimalField, empty
 
 from .. import fields, serializers, validators
 from ...models.base import get_first_match_name
@@ -368,6 +368,10 @@ class DecimalFieldInspector(FieldInspector):
                 'max_digits': field.max_digits
             }
         }
+
+        if field.default != empty:
+            kwargs['default'] = str(field.default)
+
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 

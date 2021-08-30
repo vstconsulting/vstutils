@@ -1453,6 +1453,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
         # Check decimal field
         self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['format'], 'decimal')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['default'], '13.37')
         self.assertDictEqual(api['definitions']['OneAuthor']['properties']['decimal']['additionalProperties'], {'decimal_places': 2, 'max_digits': 5})
 
     def test_api_version_request(self):

@@ -18,6 +18,9 @@ export const IntegerFieldMixin = {
  * Field to store integers
  */
 export class IntegerField extends NumberField {
+    isValueValid(value) {
+        return this.isNumber(value) && !value.includes('.');
+    }
     /**
      * Redefinition of base guiField static property 'mixins'.
      */
