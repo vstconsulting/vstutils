@@ -4,6 +4,7 @@
             <div class="input-group-text" v-text="$t(prependText)" />
         </div>
         <input
+            ref="input"
             :aria-label="aria_label"
             :aria-labelledby="label_id"
             :class="classes"
@@ -15,7 +16,7 @@
             :style="styles"
             :type="inputType"
             :[inputValueName]="preparedValue"
-            @[inputEventName]="setValue"
+            @[inputEventName]="setValue($event.target.value)"
         />
         <div v-if="appendText" class="input-group-append">
             <div class="input-group-text" v-text="$t(appendText)" />
@@ -62,8 +63,8 @@
             },
         },
         methods: {
-            setValue(event) {
-                this.$emit('set-value', event.target.value);
+            setValue(value) {
+                this.$emit('set-value', value);
             },
         },
     };

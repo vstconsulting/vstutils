@@ -16,12 +16,31 @@ export class DecimalField extends MaskedField {
             mask: maskRegExp,
         };
     }
+    toInner(data = {}) {
+        let value = data[this.options.name];
+
+        if (value === undefined) {
+            return;
+        }
+        if (value === '') return null;
+
+        let val = Number(value);
+
+        if (isNaN(val)) {
+            console.error('Error in decimal.toInner()');
+            return;
+        }
+
+        return val;
+    }
+
+    toRepresent(data) {
+        let value = data[this.name];
+        if (value === null) return '';
+        return value;
+    }
 
     static get mixins() {
         return [DecimalFieldMixin];
-    }
-
-    getInitialValue() {
-        return null;
     }
 }

@@ -22,7 +22,6 @@
 
 <script>
     import { Breadcrumbs } from '../../common';
-
     export default {
         name: 'MainFooter',
         components: { Breadcrumbs },

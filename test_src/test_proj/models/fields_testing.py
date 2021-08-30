@@ -41,6 +41,7 @@ class Author(BModel):
             'posts': RelatedListField(fields=['title'], related_name='post', view_type='table'),
             'phone': PhoneField(allow_null=True, required=False),
             'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'}),
+            'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5)
         }
         _nested = {
             'post': {
