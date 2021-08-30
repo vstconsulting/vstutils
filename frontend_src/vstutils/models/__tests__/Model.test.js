@@ -218,4 +218,27 @@ describe('Model', () => {
         expect(user1.isEqual({ email: 'user1@users.com' })).toBeTruthy();
         expect(user1.isEqual({ email: 'otheruser@users.com' })).toBeFalsy();
     });
+
+    test('parseModelValidationError', () => {
+        expect(User.parseModelValidationError(undefined)).toBeUndefined();
+        expect(User.parseModelValidationError(null)).toBeUndefined();
+        expect(User.parseModelValidationError([])).toBeUndefined();
+        expect(User.parseModelValidationError({})).toBeUndefined();
+
+        const modelError = User.parseModelValidationError({
+            age: 'err 1',
+            firstName: ['err 2', 'err 3'],
+            non_existing_field: 'asd',
+        });
+        expect(modelError).toBeDefined();
+        expect(modelError.errors.length).toBe(2);
+        expect(modelError.errors).toContainEqual({
+            field: User.fields.get('age'),
+            message: 'err 1',
+        });
+        expect(modelError.errors).toContainEqual({
+            field: User.fields.get('firstName'),
+            message: 'err 2 err 3',
+        });
+    });
 });

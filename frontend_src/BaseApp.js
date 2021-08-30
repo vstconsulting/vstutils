@@ -2,9 +2,10 @@ import Centrifuge from 'centrifuge';
 import { apiConnector } from './vstutils/api';
 import { globalComponentsRegistrator } from './vstutils/ComponentsRegistrator.js';
 import { ErrorHandler } from './vstutils/popUp';
-import { getCookie, RequestTypes } from './vstutils/utils';
+import { RequestTypes } from './vstutils/utils';
 import AppRoot from './vstutils/AppRoot.vue';
 import { TranslationsManager } from './vstutils/api/TranslationsManager.js';
+import { i18n } from './vstutils/translation.js';
 
 /**
  * @param {string} address
@@ -38,6 +39,9 @@ export default class BaseApp {
          */
         this.router = null;
         this.cache = cache;
+
+        this.i18n = i18n;
+
         /**
          * Object, that manages connection with API (sends API requests).
          */
@@ -59,10 +63,6 @@ export default class BaseApp {
          */
         this.languages = null;
         /**
-         * Dict, that stores translations for each language.
-         */
-        this.translations = null;
-        /**
          * Property that stores raw user response
          * @type {Object|null}
          */
@@ -79,8 +79,6 @@ export default class BaseApp {
          * Root Vue component
          */
         this.appRootComponent = AppRoot;
-
-        this.initLanguage = document.documentElement.lang || getCookie('lang') || 'en';
     }
 
     /**
@@ -100,14 +98,14 @@ export default class BaseApp {
 
         const [languages, translations, rawUser] = await Promise.all([
             this.translationsManager.getLanguages(),
-            this.translationsManager.getTranslations(this.initLanguage),
+            this.translationsManager.getTranslations(this.i18n.locale),
             this.api.loadUser(),
         ]);
         this.languages = languages;
-        this.translations = { [this.initLanguage]: translations };
+        this.i18n.messages[this.i18n.locale] = translations;
         this.rawUser = rawUser;
 
-        this.setLanguage(this.initLanguage);
+        this.setLanguage(this.i18n.locale);
 
         this.afterInitialDataBeforeMount();
 

@@ -1,8 +1,8 @@
 import { expect, jest, test, describe } from '@jest/globals';
 import ErrorHandler from '../ErrorHandler.js';
-import { ModelValidationError } from '../../models/Model';
 import { StringField } from '../../fields/text';
 import { guiPopUp } from '../PopUp';
+import { ModelValidationError } from '../../utils';
 
 jest.mock('../PopUp');
 

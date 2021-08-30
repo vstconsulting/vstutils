@@ -37,6 +37,7 @@
                             :field="field"
                             :data="data"
                             :type="fieldsType"
+                            :error="fieldsErrors[field.name]"
                             :hideable="hideNotRequired && !field.required"
                             @hide-field="hiddenFields.push(field)"
                             @set-value="setFieldValue"
@@ -67,6 +68,7 @@
                 hideReadOnly: false,
                 hideNotRequired: false,
                 hiddenFields: [],
+                fieldsErrors: {},
             };
         },
         computed: {
@@ -129,6 +131,7 @@
              * @param {any} obj.value
              */
             setFieldValue(obj) {
+                this.$delete(this.fieldsErrors, obj.field);
                 this.commitMutation('setFieldValue', obj);
             },
             fieldsGroupClasses(name) {
