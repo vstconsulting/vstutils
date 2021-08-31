@@ -41,6 +41,7 @@ const BasestViewMixin = {
     },
     watch: {
         title: 'setDocumentTitle',
+        params: 'initStoreModuleComponent',
     },
     created() {
         this.setBreadcrumbs();

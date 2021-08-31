@@ -26,16 +26,22 @@ export const StoreModuleComponent = {
         },
     },
     created() {
-        const qs = this.getQuerySet();
-        if (qs) {
-            this.registerStoreModule();
-            this.commitMutation('setQuerySet', qs);
-        }
+        this.initStoreModuleComponent();
     },
     destroyed() {
-        this.unregisterStoreModule();
+        this.destroyStoreModuleComponent();
     },
     methods: {
+        initStoreModuleComponent() {
+            const qs = this.getQuerySet();
+            if (qs) {
+                this.registerStoreModule();
+                this.commitMutation('setQuerySet', qs);
+            }
+        },
+        destroyStoreModuleComponent() {
+            this.unregisterStoreModule();
+        },
         getQuerySet() {
             if (!this.view || !this.view.objects) {
                 return null;
