@@ -1,10 +1,11 @@
 import typing as _t
 
-from rest_framework.filters import BaseFilterBackend
+from django.utils.encoding import force_str
+from django.db import models
+from rest_framework.filters import BaseFilterBackend, OrderingFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
 from django_filters.rest_framework import filters
 from django_filters import compat
-from django.db import models
 from vstutils.utils import raise_context
 
 from .filters import extra_filter
@@ -32,7 +33,34 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
         return result
 
 
-# Call standart filtering
+class OrderingFilterBackend(OrderingFilter):
+    def _get_fields_for_schema(self, view):
+        for field in self.get_valid_fields(view.get_queryset(), view, {'request': view.request}):
+            yield field[0]
+            yield f'-{field[0]}'
+
+    def get_schema_fields(self, view):
+        try:
+            fields = tuple(self._get_fields_for_schema(view))
+        except:
+            return super().get_schema_fields(view)
+        return [
+            compat.coreapi.Field(
+                name=self.ordering_param,
+                required=False,
+                location='query',
+                schema=compat.coreschema.Array(
+                    title=force_str(self.ordering_title),
+                    description=force_str(self.ordering_description),
+                    items=compat.coreschema.Enum(enum=fields),
+                    min_items=1,
+                    unique_items=True,
+                )
+            )
+        ]
+
+
+# Call standard filtering
 class VSTFilterBackend(BaseFilterBackend):
     """
     A base filter backend class to be inherited from.
