@@ -5,7 +5,7 @@ from django.http import FileResponse
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
-from drf_yasg.inspectors.query import CoreAPICompatInspector
+from drf_yasg.inspectors.query import CoreAPICompatInspector, force_real_str, coreschema  # type: ignore
 from rest_framework.fields import Field, JSONField, DecimalField, empty
 
 from .. import fields, serializers, validators
@@ -392,6 +392,50 @@ class NestedFilterInspector(CoreAPICompatInspector):
         result = super().get_filter_parameters(filter_backend)
         self.view.filter_class = filter_class
         return result
+
+
+class ArrayFilterQueryInspector(CoreAPICompatInspector):
+    def coreapi_field_to_parameter(self, field, schema=None):
+        """
+        Convert an instance of `coreapi.Field` to a swagger :class:`.Parameter` object.
+
+        :param coreapi.Field field:
+        :param coreschema..Schema schema:
+        :rtype: openapi.Parameter
+        """
+        location_to_in = {
+            'query': openapi.IN_QUERY,
+            'path': openapi.IN_PATH,
+            'form': openapi.IN_FORM,
+            'body': openapi.IN_FORM,
+        }
+        coreapi_types = {
+            coreschema.Integer: openapi.TYPE_INTEGER,
+            coreschema.Number: openapi.TYPE_NUMBER,
+            coreschema.String: openapi.TYPE_STRING,
+            coreschema.Boolean: openapi.TYPE_BOOLEAN,
+            coreschema.Array: openapi.TYPE_ARRAY,
+        }
+
+        coreschema_attrs = ['format', 'pattern', 'enum', 'min_length', 'max_length']
+        schema = schema or field.schema
+        attributes = {}
+        if isinstance(schema, coreschema.Array):
+            coreschema_attrs = ()
+            attributes['collectionFormat'] = 'csv'
+            attributes['items'] = self.coreapi_field_to_parameter(field, schema.items)
+            attributes['minItems'] = schema.min_items
+            attributes['maxItems'] = schema.max_items
+            attributes['uniqueItems'] = schema.unique_items
+        return openapi.Parameter(
+            name=field.name,
+            in_=location_to_in[field.location],
+            required=field.required,
+            description=force_real_str(schema.description) if schema else None,
+            type=coreapi_types.get(type(schema), openapi.TYPE_STRING),
+            **OrderedDict((attr, getattr(schema, attr, None)) for attr in coreschema_attrs),
+            **attributes
+        )
 
 
 class VSTReferencingSerializerInspector(ReferencingSerializerInspector):

@@ -7,6 +7,8 @@ from django_filters import compat
 from django.db import models
 from vstutils.utils import raise_context
 
+from .filters import extra_filter
+
 
 class DjangoFilterBackend(BaseDjangoFilterBackend):
     def get_coreschema_field(self, field):
@@ -16,9 +18,18 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
             field_cls = compat.coreschema.Boolean
         else:
             field_cls = compat.coreschema.String
-        return field_cls(
-            description=str(field.extra.get('help_text', ''))
-        )
+        if field.method == extra_filter:  # pylint: disable=comparison-with-callable
+            result = compat.coreschema.Array(
+                items=field_cls(),
+                min_items=1,
+                unique_items=True,
+                description=str(field.extra.get('help_text', ''))
+            )
+        else:
+            result = field_cls(
+                description=str(field.extra.get('help_text', ''))
+            )
+        return result
 
 
 # Call standart filtering

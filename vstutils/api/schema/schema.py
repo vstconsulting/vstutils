@@ -15,6 +15,7 @@ from .inspectors import (
     AutoCompletionFieldInspector,
     VSTFieldInspector,
     NestedFilterInspector,
+    ArrayFilterQueryInspector,
     VSTReferencingSerializerInspector,
     RelatedListFieldInspector,
     RatingFieldInspector,
@@ -41,7 +42,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [
-        NestedFilterInspector
+        NestedFilterInspector,
+        ArrayFilterQueryInspector,
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     default_status_messages: dict = {
