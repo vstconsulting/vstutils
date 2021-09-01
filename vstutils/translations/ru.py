@@ -206,7 +206,9 @@ TRANSLATION = {
     'a unique integer value (or comma separated list) identifying this instance.': 'уникальное числовое значение (или их последовательность разделенная запятой) идентифицирующая данный объект.',
     'a name string value (or comma separated list) of instance.': 'имя объекта - строковое значение (или их последовательность разделенная запятой).',
 
-    'page matching current url was not found': 'страница, соответствующая данному url, не была найдена',
+    'Page matching current url was not found': 'Cтраница, соответствующая данному url, не была найдена',
+    'Unknown error': 'Неизвестная ошибка',
+    'Error': 'Ошибка',
 
     'sign in to start your session': 'Войдите, чтобы начать сеанс',
     'sign in': 'войти',
@@ -266,5 +268,5 @@ TRANSLATION = {
     'Zoom': 'Зум',
     'Scale': 'Масштаб',
     'This file format is not supported': 'Данный формат файла не поддерживается',
-
+    'Oops! Something went wrong.': 'Упс! Что-то пошло не так',
 }

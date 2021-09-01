@@ -15,14 +15,7 @@
 
             <SelectedFilters v-if="!error && showUsedFilters" :view="view" />
 
-            <div v-if="error" class="row">
-                <section class="col-lg-12">
-                    <div class="error-text-wrapper">
-                        <!-- eslint-disable-next-line vue/no-v-html -->
-                        <p class="text-center error-p" v-html="errorData" />
-                    </div>
-                </section>
-            </div>
+            <ErrorPage v-if="error" :error-data="errorData" :error="error" />
             <slot v-else-if="response" />
         </div>
     </div>
@@ -32,10 +25,11 @@
     import Preloader from './Preloader.vue';
     import ButtonsRow from './ButtonsRow.vue';
     import SelectedFilters from './SelectedFilters.vue';
+    import ErrorPage from '../ErrorPage';
 
     export default {
         name: 'EntityView',
-        components: { ButtonsRow, Preloader, SelectedFilters },
+        components: { ErrorPage, ButtonsRow, Preloader, SelectedFilters },
         props: {
             view: { type: Object, required: true },
             loading: { type: Boolean, required: true },

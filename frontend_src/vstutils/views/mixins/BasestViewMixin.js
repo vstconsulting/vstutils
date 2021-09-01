@@ -51,10 +51,10 @@ const BasestViewMixin = {
         setBreadcrumbs() {
             this.$store.commit('setBreadcrumbs', this.breadcrumbs);
         },
-        setDocumentTitle() {
+        setDocumentTitle(value = this.title) {
             if (this.controlTitle) {
-                this.$store.commit('setPageTitle', this.title);
-                document.title = this.title;
+                this.$store.commit('setPageTitle', value);
+                document.title = value;
             }
         },
         /**
@@ -84,6 +84,7 @@ const BasestViewMixin = {
         setLoadingError(error) {
             this.loading = false;
             this.error = error;
+            this.setDocumentTitle(`${this.$t('Error')} ${error?.status || ''}`);
         },
     },
 };

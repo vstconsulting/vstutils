@@ -172,7 +172,9 @@ TRANSLATION = {
     'which field to use when ordering the results.': 'trường để sắp xếp kết quả.',
     'a unique integer value (or comma separated list) identifying this instance.': 'giá trị số duy nhất',
     'a name string value (or comma separated list) of instance.': 'tên đối tượng',
-    'page matching current url was not found': 'trang web theo URL này không thể tìm được',
+    'Page matching current url was not found': 'Trang web theo URL này không thể tìm được',
+    'Unknown error': 'Lỗi không rõ',
+    'Error': 'Lỗi',
     'sign in to start your session': 'đăng nhập để bắt đầu',
     'sign in': 'đăng nhập',
     'sign up': 'đăng ký',
@@ -230,5 +232,5 @@ TRANSLATION = {
     'Scale': 'Tỉ lệ',
     'Execute': 'Hành hình',
     'This file format is not supported': 'Định dạng tệp này không được hỗ trợ',
-
+    'Oops! Something went wrong.': 'Một cái gì đó đã đi sai.',
 }
