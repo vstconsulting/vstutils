@@ -176,7 +176,9 @@ TRANSLATION = {
     'which field to use when ordering the results.': '结果排序依据的字段',
     'a unique integer value (or comma separated list) identifying this instance.': '标识此对象的唯一数值（或用逗号分隔的序列）识别此对象',
     'a name string value (or comma separated list) of instance.': '对象名称-字符串值（或它们的顺序，用逗号分隔）',
-    'page matching current url was not found': '找不到与指定网址匹配的页面',
+    'Page matching current url was not found': '找不到与指定网址匹配的页面',
+    'Unknown error': '未知错误',
+    'Error': '错误',
     'sign in to start your session': '登录开始会议',
     'sign in': '进入',
     'sign up': '请注册',
@@ -231,4 +233,5 @@ TRANSLATION = {
     'Scale': '規模',
     'Execute': '施行',
     'This file format is not supported': '不支持此文件格式',
+    'Oops! Something went wrong.': '哎呀！ 出了些问题。',
 }

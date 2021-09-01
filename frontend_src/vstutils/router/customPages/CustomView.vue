@@ -4,7 +4,7 @@
             <div class="col-lg-12">
                 <div class="error-text-wrapper">
                     <p class="text-center error-p">
-                        {{ $t(message.toLowerCase()) | capitalize }}
+                        {{ $t(message) }}
                     </p>
                 </div>
             </div>
