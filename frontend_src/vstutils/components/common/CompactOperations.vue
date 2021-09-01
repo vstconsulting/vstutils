@@ -19,7 +19,7 @@
                 @click.prevent="$emit('clicked', op)"
             >
                 <i v-if="op.iconClasses" :key="`op-${componentId}-i-${op.name}`" :class="op.iconClasses" />
-                {{ $t(op.title) | capitalize }}
+                {{ $t(op.title) }}
             </a>
         </div>
     </div>

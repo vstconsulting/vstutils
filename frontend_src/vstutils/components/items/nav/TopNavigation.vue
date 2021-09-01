@@ -23,8 +23,8 @@
                         <i class="fa fa-user mr-2 ico-data-default" />
                     </template>
                     <span class="text-data hidden-480">
-                        {{ user.first_name | capitalize }}
-                        {{ user.last_name | capitalize }}
+                        {{ $u.capitalize(user.first_name) }}
+                        {{ $u.capitalize(user.last_name) }}
                     </span>
                 </a>
 
@@ -33,7 +33,7 @@
                 >
                     <router-link :to="profile_url" class="dropdown-item text-data">
                         <i class="fa fa-id-card-o mr-2 ico-data-default" />
-                        {{ $t('profile') | capitalize }}
+                        {{ $u.capitalize($t('profile')) }}
                     </router-link>
 
                     <div class="dropdown-divider" />
@@ -44,21 +44,21 @@
                         class="dropdown-item text-data"
                     >
                         <i class="fa fa-cogs mr-2 ico-data-default" />
-                        {{ $t('settings') | capitalize }}
+                        {{ $u.capitalize($t('settings')) }}
                     </router-link>
 
                     <div class="dropdown-divider for-web" />
 
                     <a :href="logout_url" class="dropdown-item for-web text-data">
                         <i class="fas fa-sign-out-alt mr-2 ico-data-default" />
-                        {{ $t('logout') | capitalize }}
+                        {{ $u.capitalize($t('logout')) }}
                     </a>
                 </div>
             </li>
             <li v-else class="nav-item">
                 <a class="nav-link" :href="login_url">
                     <i class="fas fa-sign-out-alt text-data" />
-                    <span>{{ $t('login') | capitalize }}</span>
+                    <span>{{ $u.capitalize($t('login')) }}</span>
                 </a>
             </li>
             <li class="nav-item">

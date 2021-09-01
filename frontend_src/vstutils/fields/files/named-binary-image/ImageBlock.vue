@@ -3,7 +3,7 @@
         <img :src="img_src" :alt="img_alt" class="image-field-content" @click="openImage" />
         <Modal v-show="show_modal" :opt="modal_opt" @close="closeImage">
             <template #header>
-                <h3>{{ $t(img_alt.toLowerCase()) | capitalize | split }}</h3>
+                <h3>{{ $t(img_alt) }}</h3>
             </template>
             <template #body>
                 <img style="max-height: 80vh" :src="img_src" :alt="img_alt" class="image-field-content" />
@@ -36,7 +36,7 @@
                 }
             },
             img_alt() {
-                return this.field.options.title || this.field.options.name;
+                return this.field.title;
             },
         },
         methods: {

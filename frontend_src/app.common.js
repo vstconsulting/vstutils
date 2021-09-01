@@ -51,7 +51,6 @@ export { colors };
 import AppRoot from './vstutils/AppRoot.vue';
 import * as utils from './vstutils/utils';
 import * as guiCustomizer from './vstutils/guiCustomizer';
-import * as setupVue from './vstutils/setupVue.js';
 import * as popUp from './vstutils/popUp';
 import * as fields from './vstutils/fields';
 import * as components from './vstutils/components';
@@ -69,7 +68,6 @@ export {
     AppRoot,
     utils,
     guiCustomizer,
-    setupVue,
     popUp,
     fields,
     components,

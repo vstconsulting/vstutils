@@ -9,6 +9,7 @@ import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 import { QuerySetsResolver } from './vstutils/querySet';
 import { signals } from './app.common.js';
 import { getFieldFactory, getFieldFormatFactory } from './vstutils/fields';
+import * as utils from './vstutils/utils';
 
 export * from './app.common.js';
 
@@ -188,6 +189,7 @@ export class App extends BaseApp {
         this.router = routerConstructor.getRouter();
 
         Vue.prototype.$app = this;
+        Vue.prototype.$u = utils;
 
         this.application = new Vue({
             mixins: [this.appRootComponent],

@@ -15,7 +15,7 @@
                 />
                 <template v-if="!instances.length">
                     <p class="text-center">
-                        {{ $t('list is empty') | capitalize }}
+                        {{ $t('List is empty') }}
                     </p>
                 </template>
                 <template v-else>

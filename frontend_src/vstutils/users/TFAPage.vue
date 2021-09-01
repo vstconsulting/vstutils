@@ -21,7 +21,7 @@
                 <img :src="qrcode" />
             </div>
             <p>
-                {{ $t('code') | capitalize }}:
+                {{ $u.capitalize($t('code')) }}:
                 <code>{{ secret }}</code>
             </p>
             <component
@@ -41,11 +41,11 @@
             <div class="card recovery-codes">
                 <div class="card-header">
                     <h3 class="card-title">
-                        {{ $t('recovery codes') | capitalize }}
+                        {{ $u.capitalize($t('recovery codes')) }}
                     </h3>
                     <div class="card-tools">
                         <button class="btn btn-secondary" @click="copyRecoveryCodes">
-                            {{ $t('copy') | capitalize }}
+                            {{ $u.capitalize($t('copy')) }}
                         </button>
                     </div>
                 </div>

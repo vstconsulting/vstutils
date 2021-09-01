@@ -8,7 +8,7 @@ export const MultipleNamedBinaryFileFieldContent = {
     computed: {
         val() {
             if (this.value && Array.isArray(this.value) && this.value.length > 0) {
-                return this.$options.filters.capitalize(this.$tc(this.translate_string, this.value.length));
+                return this.$u.capitalize(this.$tc(this.translate_string, this.value.length));
             }
 
             return this.title_for_empty_value;

@@ -7,7 +7,7 @@
             ref="input"
             type="text"
             class="form-control rounded-360 modal-list-search-input"
-            :placeholder="`${$t('search by')} ${$t(title)}` | capitalize"
+            :placeholder="$u.capitalize(`${$t('search by')} ${$t(title)}`)"
             @keypress.enter="applyFilter"
         />
         <div class="input-group-append modal-list-search-apply cursor-pointer" @click="applyFilter">

@@ -7,7 +7,7 @@
         </div>
         <textarea
             :value="value"
-            :placeholder="$t('enter value') | capitalize"
+            :placeholder="$u.capitalize($t('enter value'))"
             :class="classes"
             :style="styles"
             :required="attrs['required']"

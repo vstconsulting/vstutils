@@ -32,7 +32,7 @@
                         <ul class="list-group list-group-flush">
                             <template v-if="actions.length">
                                 <li class="list-group-item disabled">
-                                    <b>{{ $t('actions') | capitalize }}</b>
+                                    <b>{{ $u.capitalize($t('actions')) }}</b>
                                 </li>
                                 <li v-for="action in actions" :key="action.name" class="list-group-item">
                                     <a href="#" @click.prevent="createActionClickHandler(closeModal, action)">
@@ -40,13 +40,13 @@
                                             v-if="action.iconClasses && action.iconClasses.length"
                                             :class="action.iconClasses"
                                         />
-                                        {{ $t(action.title) | capitalize }}
+                                        {{ $u.capitalize($t(action.title)) }}
                                     </a>
                                 </li>
                             </template>
                             <template v-if="sublinks.length">
                                 <li class="list-group-item disabled">
-                                    <b>{{ $t('sublinks') | capitalize }}</b>
+                                    <b>{{ $u.capitalize($t('sublinks')) }}</b>
                                 </li>
                                 <li v-for="sublink in sublinks" :key="sublink.name" class="list-group-item">
                                     <router-link
@@ -57,7 +57,7 @@
                                             v-if="sublink.iconClasses && sublink.iconClasses.length"
                                             :class="sublink.iconClasses"
                                         />
-                                        {{ $t(sublink.title) | capitalize }}
+                                        {{ $u.capitalize($t(sublink.title)) }}
                                     </router-link>
                                 </li>
                             </template>

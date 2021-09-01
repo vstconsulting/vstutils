@@ -1,7 +1,7 @@
 <template>
     <Card card-body-classes="p-0" v-bind="$props">
         <p v-if="isEmpty" class="m-3">
-            {{ $t('list is empty') | capitalize }}
+            {{ $t('List is empty') }}
         </p>
         <table v-else class="table table-sm">
             <thead>

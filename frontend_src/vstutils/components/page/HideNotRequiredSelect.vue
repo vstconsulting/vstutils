@@ -1,6 +1,6 @@
 <template>
     <div class="form-group">
-        <label for="hideNotRequiredSelector">{{ ($t('add') + ' ' + $t('field')) | capitalize }}</label>
+        <label for="hideNotRequiredSelector">{{ $u.capitalize($t('add') + ' ' + $t('field')) }}</label>
         <select
             id="hideNotRequiredSelector"
             ref="select"
@@ -9,7 +9,7 @@
             @change.prevent="handleSelect"
         >
             <option value="__default" disabled selected>
-                {{ ($t('select') + ' ' + $t('field')) | capitalize }}
+                {{ $u.capitalize($t('select') + ' ' + $t('field')) }}
             </option>
             <option v-for="field in fields" :key="field.name" :value="field.name">
                 {{ $t(field.title) }}
