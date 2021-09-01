@@ -3,11 +3,11 @@
         <portal to="root-bottom">
             <Modal v-show="showModal" :opt="{ footer: false }" @close="close">
                 <template #header>
-                    <h3>{{ $t(info.title.toLowerCase()) | capitalize }}</h3>
+                    <h3>{{ $t(info.title) }}</h3>
                 </template>
                 <template #body>
                     <h4 class="with_bottom_border">
-                        {{ $tc('version', 2) | capitalize }}
+                        {{ $u.capitalize($tc('version', 2)) }}
                     </h4>
                     <ul>
                         <li v-for="(item, idx) in info['x-versions']" :key="idx">
@@ -15,22 +15,22 @@
                             {{ item }}
                         </li>
                     </ul>
-                    <template v-for="(item, idx) in info['x-links']">
-                        <h4 :key="`header-${idx}`" class="with_bottom_border" style="margin-top: 20px">
-                            {{ $t(idx.toLowerCase()) | capitalize }}
+                    <template v-for="(item, key) in info['x-links']">
+                        <h4 :key="`header-${key}`" class="with_bottom_border" style="margin-top: 20px">
+                            {{ $u.capitalize($t(key.toLowerCase())) }}
                         </h4>
-                        <ul :key="`list-${idx}`">
+                        <ul :key="`list-${key}`">
                             <template v-if="isArray(item)">
                                 <li v-for="(prop, liIdx) in item" :key="liIdx">
                                     <a :href="prop.url" target="_blank" rel="noreferrer">
-                                        {{ $t(prop.name.toLowerCase()) | capitalize }}
+                                        {{ $u.capitalize($t(prop.name.toLowerCase())) }}
                                     </a>
                                 </li>
                             </template>
                             <template v-else>
                                 <li>
                                     <a :href="item.url" target="_blank" rel="noreferrer">
-                                        {{ $t(item.name.toLowerCase()) | capitalize }}
+                                        {{ $u.capitalize($t(item.name.toLowerCase())) }}
                                     </a>
                                 </li>
                             </template>
@@ -41,7 +41,7 @@
         </portal>
         <button class="btn btn-secondary btn-block" style="margin-bottom: 10px" @click.stop.prevent="open">
             <span class="fa fa-question-circle" />
-            {{ $t('app info') | capitalize }}
+            {{ $u.capitalize($t('app info')) }}
         </button>
     </div>
 </template>

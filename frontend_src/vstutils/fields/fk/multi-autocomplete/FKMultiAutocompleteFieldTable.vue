@@ -5,7 +5,7 @@
                 <th style="width: 50px" />
 
                 <th v-for="(field, idx) in fields" :key="idx">
-                    {{ $t((field.options.title || field.options.name).toLowerCase()) | capitalize | split }}
+                    {{ $t(field.title) }}
                 </th>
             </tr>
         </thead>

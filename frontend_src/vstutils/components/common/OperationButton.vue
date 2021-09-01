@@ -12,7 +12,7 @@
             class="title-for-btn"
             :class="{ 'd-none d-lg-inline-block': props.iconClasses }"
         >
-            {{ parent.$t(props.title) | capitalize }}
+            {{ parent.$t(props.title) }}
         </span>
     </button>
 </template>

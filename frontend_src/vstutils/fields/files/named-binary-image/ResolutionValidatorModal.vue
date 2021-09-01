@@ -29,7 +29,7 @@
                 </div>
             </div>
             <p v-for="param in checkParams" :key="param">
-                {{ $t(param) | capitalize }}: {{ $data[param] }}px.
+                {{ $u.capitalize($t(param)) }}: {{ $data[param] }}px.
                 <span v-if="!isValidSizeParam(param)" class="error">
                     {{ getErrorMessage(param) }}
                 </span>

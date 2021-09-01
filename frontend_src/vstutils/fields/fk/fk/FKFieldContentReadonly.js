@@ -36,10 +36,15 @@ const FKFieldContentReadonly = {
          * Text of link.
          */
         text() {
-            if (this.fetchedValue && typeof this.fetchedValue === 'object') {
-                return this.translateValue(this.fetchedValue[this.field.viewField]);
+            let val = this.value;
+            if (this.fetchedValue) {
+                if (typeof this.fetchedValue === 'object' && this.fetchedValue[this.field.viewField]) {
+                    val = this.fetchedValue[this.field.viewField];
+                } else {
+                    val = this.fetchedValue;
+                }
             }
-            return this.fetchedValue;
+            return this.translateValue(val);
         },
     },
     methods: {

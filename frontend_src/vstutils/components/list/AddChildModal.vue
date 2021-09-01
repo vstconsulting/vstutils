@@ -2,13 +2,13 @@
     <BaseListModal
         class="add-child-modal"
         :qs="queryset"
-        :title="($t('add') + ' ' + $t('child instances')) | capitalize"
+        :title="$u.capitalize($t('add') + ' ' + $t('child instances'))"
         apply-button-text="Add"
         @apply="addSelected"
     >
         <template #activator="{ openModal }">
             <OperationButton
-                :title="$t('add') | capitalize"
+                :title="$u.capitalize($t('add'))"
                 classes="btn btn-primary btn-operation-add"
                 icon-classes="fa fa-folder-open"
                 @clicked="openModal"

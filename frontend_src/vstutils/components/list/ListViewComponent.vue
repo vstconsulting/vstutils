@@ -19,7 +19,7 @@
         <div class="list-content-component" :class="`list-${model.name}`">
             <template v-if="isEmpty">
                 <p class="text-center empty-list-p">
-                    {{ $t('list is empty') | capitalize }}
+                    {{ $t('List is empty') }}
                 </p>
             </template>
             <template v-else>

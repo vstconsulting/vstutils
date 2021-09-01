@@ -15,9 +15,9 @@ const BinaryFileFieldMixin = {
                 if (file && file.name) {
                     $(el).text(file.name);
                 } else if (file) {
-                    $(el).text(this.$options.filters.capitalize(this.$tc('file n selected', 1)));
+                    $(el).text(this.$u.capitalize(this.$tc('file n selected', 1)));
                 } else {
-                    $(el).text(this.$options.filters.capitalize(this.$tc('file n selected', 0)));
+                    $(el).text(this.$u.capitalize(this.$tc('file n selected', 0)));
                 }
             },
             immediate: true,

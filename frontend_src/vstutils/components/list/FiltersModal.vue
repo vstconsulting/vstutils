@@ -2,7 +2,7 @@
     <div v-if="fields.length" style="display: inline-block">
         <Modal v-show="showModal" @apply="filter" @close="close">
             <template #header>
-                <h3>{{ $t('filters') | capitalize }}</h3>
+                <h3>{{ $u.capitalize($t('filters')) }}</h3>
             </template>
             <template #body>
                 <div class="row">
@@ -19,15 +19,15 @@
             </template>
             <template #footer>
                 <button class="btn btn-default btn-close-filters-modal" aria-label="Cancel" @click="close">
-                    {{ $t('cancel') | capitalize }}
+                    {{ $u.capitalize($t('cancel')) }}
                 </button>
                 <button class="btn btn-primary btn-apply-filters" aria-label="Filter" @click="filter">
-                    {{ $t('apply') | capitalize }}
+                    {{ $u.capitalize($t('apply')) }}
                 </button>
             </template>
         </Modal>
         <OperationButton
-            :title="$t('filters') | capitalize"
+            :title="$u.capitalize($t('filters'))"
             classes="btn gui-btn btn-default btn-open-filters-modal"
             icon-classes="fas fa-filter"
             @clicked="open"

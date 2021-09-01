@@ -9,7 +9,7 @@
                 aria-haspopup="true"
                 aria-expanded="true"
             >
-                {{ options.title | capitalize }}
+                {{ options.title }}
                 <span class="caret" />
             </button>
             <ul class="dropdown-menu dropdown-menu-left">

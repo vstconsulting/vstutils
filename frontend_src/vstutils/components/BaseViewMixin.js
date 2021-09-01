@@ -1,4 +1,12 @@
-import { formatPath, iterFind, joinPaths, parseResponseMessage, pathToArray, ViewTypes } from '../utils';
+import {
+    capitalize,
+    formatPath,
+    iterFind,
+    joinPaths,
+    parseResponseMessage,
+    pathToArray,
+    ViewTypes,
+} from '../utils';
 import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
@@ -83,7 +91,7 @@ export const BaseViewMixin = {
                 return { iconClasses: 'fas fa-pen' };
             }
 
-            return { name: view.pkParamName ? fragment : view.title };
+            return { name: view.pkParamName ? capitalize(fragment) : view.title };
         },
         /**
          * Method, that opens some page.

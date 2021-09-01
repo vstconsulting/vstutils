@@ -9,7 +9,7 @@ export const NamedBinaryFileFieldContent = {
     },
     computed: {
         title_for_empty_value() {
-            return this.$options.filters.capitalize(this.$tc(this.translate_string, 0));
+            return this.$u.capitalize(this.$tc(this.translate_string, 0));
         },
 
         val() {

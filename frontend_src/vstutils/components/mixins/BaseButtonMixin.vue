@@ -8,10 +8,10 @@
     >
         <template v-if="icon_classes">
             <span :class="icon_classes" />
-            <span :class="title_classes">{{ title | capitalize | split }}</span>
+            <span :class="title_classes">{{ $u.capitalize($u.split(title)) }}</span>
         </template>
         <template v-else>
-            {{ title | capitalize | split }}
+            {{ $u.capitalize($u.split(title)) }}
         </template>
     </button>
 </template>

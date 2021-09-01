@@ -35,7 +35,7 @@ TRANSLATION = {
     "repository": '复位器',
     "app info": '信息',
     "status": '状态',
-    "list is empty": '空白表格',
+    "List is empty": '空白表格',
     "child instances": '输入对象',
     "enter value": '输入意义',
     "More info": '输入价值',

@@ -21,7 +21,7 @@
         <template v-if="totalOperations > 2 && shouldGroupSublinks">
             <CompactOperations
                 v-if="groupedSublinks.length"
-                :title="$t('sublinks') | capitalize"
+                :title="$u.capitalize($t('sublinks'))"
                 :view="view"
                 :operations="groupedSublinks"
                 @clicked="$emit('open-sublink', $event)"
@@ -40,7 +40,7 @@
         <template v-if="totalOperations > 2 && shouldGroupActions">
             <CompactOperations
                 v-if="groupedActions"
-                :title="$t('actions') | capitalize"
+                :title="$u.capitalize($t('actions'))"
                 :view="view"
                 :operations="groupedActions"
                 @clicked="$emit('execute-action', $event)"

@@ -81,6 +81,21 @@ export function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
+export function lower(value) {
+    if (!value) {
+        return '';
+    }
+    value = value.toString();
+    return value.toLowerCase();
+}
+export function upper(value) {
+    if (!value) {
+        return '';
+    }
+    value = value.toString();
+    return value.toUpperCase();
+}
+
 /**
  * Function returns shorten version of string.
  * @param {string} string String, that should be shorten.

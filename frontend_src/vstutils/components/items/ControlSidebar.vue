@@ -2,7 +2,7 @@
     <aside class="control-sidebar control-sidebar-dark">
         <div class="p-3 control-sidebar-content">
             <div>
-                <b>{{ $tc('version', 1) | capitalize }}:</b>
+                <b>{{ $u.capitalize($tc('version', 1)) }}:</b>
                 <code>{{ $app.config.projectVersion }}</code>
             </div>
 
@@ -15,7 +15,7 @@
 
             <template v-for="(section, idx) in sections">
                 <h6 :key="`section-${idx}`">
-                    {{ section.title }}
+                    {{ $t(section.title) }}
                 </h6>
                 <component
                     :is="field.component"
@@ -42,10 +42,10 @@
                             {{ $t('Changes in settings are successfully saved. Please refresh the page.') }}
                         </p>
                         <button class="btn btn-success" @click="reloadPage">
-                            {{ `${$t('Reload')} ${$t('now')}` | capitalize }}
+                            {{ `${$t('Reload')} ${$t('now')}` }}
                         </button>
                         <button class="btn btn-secondary" style="float: right" @click="closeModal">
-                            {{ $t('later') | capitalize }}
+                            {{ $u.capitalize($t('later')) }}
                         </button>
                     </div>
                 </template>
@@ -53,7 +53,7 @@
 
             <button class="btn btn-secondary btn-block" @click="cleanAllCache">
                 <i class="fas fa-sync-alt" />
-                {{ ($t('Reload') + ' ' + $t('cache')) | capitalize }}
+                {{ `${$t('Reload')} ${$t('cache')}` }}
             </button>
         </div>
     </aside>
