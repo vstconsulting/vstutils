@@ -1804,6 +1804,32 @@ class EndpointTestCase(BaseTestCase):
             self.get_model_class('SomeNotFound')
         self.assertEqual(self.get_model_class(File), File)
 
+    def test_searching(self):
+        Host.objects.all().delete()
+
+        iterations = 10
+        for i in range(iterations):
+            Host.objects.create(name=f'test_{i}')
+            Host.objects.create(name=f'other_{i}')
+            Host.objects.create(name=f'another_{i}')
+
+        results = self.bulk([
+            {
+                'path': 'subhosts',
+                'method': 'get',
+                'query': '__search=test'
+            },
+            {
+                'path': 'subhosts',
+                'method': 'get',
+                'query': '__search=other'
+            },
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], iterations)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['count'], iterations * 2)
+
     def test_param_templates(self):
         Host.objects.all().delete()
 

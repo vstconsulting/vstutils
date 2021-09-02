@@ -239,6 +239,15 @@ class UserViewSet(base.ModelViewSet):
     permission_classes = (permissions.SuperUserPermission,)
     optimize_get_by_values = False
 
+    @property
+    def search_fields(self):
+        return tuple(
+            filter(
+                self.filterset_class.Meta.fields.__contains__,
+                ('username', 'email', 'phone', 'first_name', 'last_name')
+            )
+        )
+
     def get_object(self) -> AbstractUser:
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         if self.kwargs.get(lookup_url_kwarg, None) == 'profile':

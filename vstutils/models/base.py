@@ -11,7 +11,7 @@ from django.db.models.fields.related import ManyToManyField, OneToOneField, Fore
 from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from rest_framework.fields import ModelField, JSONField
+from rest_framework.fields import ModelField, JSONField, CharField as drfCharField
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 
 from ..api.fields import (
@@ -19,6 +19,9 @@ from ..api.fields import (
     NamedBinaryImageInJsonField,
     MultipleNamedBinaryFileInJsonField,
     MultipleNamedBinaryImageInJsonField,
+    FkField,
+    PasswordField,
+    RelatedListField,
 )
 from ..utils import (
     import_class,
@@ -49,6 +52,8 @@ EXCLUDED_FIELDS = (
     MultipleNamedBinaryImageInJsonField,
     ModelField,
     JSONField,
+    PasswordField,
+    RelatedListField,
 )
 CHANGE_MIXINS = (
     CreateModelMixin,
@@ -81,6 +86,8 @@ default_extra_metadata: dict = {
     "extra_serializer_classes": None,
     # tuple or list of filters on list
     "filterset_fields": 'serializer',
+    # tuple or list of fields using for search requests
+    "search_fields": None,
     # tuple or list of filter backends for queryset
     "filter_backends": None,
     "pre_filter_backends": None,
@@ -426,6 +433,27 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 {'Meta': Meta, **filterset_fields_types}
             )
 
+    def _get_search_fields(cls, serializer, fields=None):
+        if fields is not None:
+            return fields
+
+        model_fields = cls.get_model_fields_mapping()  # pylint: disable=no-value-for-parameter
+        serializer_fields = serializer().fields
+        avail_fields = filter(
+            tuple(model_fields.keys()).__contains__,
+            tuple(
+                k if v.source is None or '*' else v.source
+                for k, v in serializer_fields.items()
+                if not isinstance(v, EXCLUDED_FIELDS)
+            )
+        )
+        for field in avail_fields:
+            serializer_field = serializer_fields[field]
+            if isinstance(serializer_field, FkField):
+                yield f'{field}__{serializer_field.autocomplete_represent}'
+            elif isinstance(serializer_field, drfCharField):
+                yield field
+
     def _get_view_class(cls, view_base_class):
         """
         Get one item of view base class for inheritance.
@@ -502,6 +530,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         )
         for value, name in filter(_bool_first, map(get_setting_for_view, ('permission_classes', 'filter_backends'))):
             view_attributes[name] = SimpleLazyObject(lambda obj=value: list(map(get_if_lazy, obj)))
+
+        view_attributes['search_fields'] = SimpleLazyObject(lambda: tuple(cls._get_search_fields(
+            serializers['serializer_class_one'],
+            metadata['search_fields']
+        )))
 
         generated_view = type(
             f'{cls.__name__}ViewSet',

@@ -150,6 +150,8 @@ class BModel(BaseModel):
           Possible values include `list` of fields to filter or `dict` where key is a field name and value is
           a Filter class. Dict extends attribute functionality and provides ability to override filter field class
           (None value disables overriding).
+        - ``_search_fields`` - tuple or list of fields using for search requests.
+          By default (or `None`) get all filterable fields in detail view.
         - ``_filter_backends`` - list of `vstutils.api.filter_backends.VSTFilterBackend` classes.
           Values can be string for import.
         - ``_override_filter_backends`` - boolean flag indicates that ``_filter_backends`` override default viewset

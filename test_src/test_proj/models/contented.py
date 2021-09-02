@@ -43,6 +43,7 @@ class Variable(BModel):
             'value': DependFromFkField(field='key', field_attribute='val_type'),
         }
         _view_class = 'vstutils.api.base.ModelViewSet'
+        _search_fields = _list_fields
 
 
 class SubVariablesSerializer(BaseSerializer):
