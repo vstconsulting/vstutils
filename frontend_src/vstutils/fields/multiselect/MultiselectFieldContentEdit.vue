@@ -9,6 +9,11 @@
 
     export default {
         mixins: [FKFieldContentEditable],
+        beforeMount() {
+            if (this.value && !this.field.fetchData) {
+                this.fetchedValue = this.value;
+            }
+        },
         methods: {
             /**
              * Method, that mounts select2 to current field's select.

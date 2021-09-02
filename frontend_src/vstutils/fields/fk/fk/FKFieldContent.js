@@ -44,12 +44,8 @@ export default {
         },
     },
     beforeMount() {
-        if (this.value && typeof this.value != 'object') {
-            if (this.field.usePrefetch) {
-                this.fetchedValue = null;
-            } else if (this.field.fetchData) {
-                this.fetchValue(this.value);
-            }
+        if (this.value && typeof this.value != 'object' && this.field.fetchData) {
+            this.fetchValue(this.value);
         } else {
             this.fetchedValue = this.value;
         }
