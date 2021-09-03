@@ -108,7 +108,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
         if not getattr(request, 'version', ''):
             request.version = self.version  # type: ignore
         result = super().get_schema(request, *args, **kwargs)
-        if request:
+        if request and getattr(request, 'accepted_media_type', None) == 'application/openapi+json':
             result['info']['x-user-id'] = request.user.pk
             if settings.CENTRIFUGO_CLIENT_KWARGS and request.user.is_authenticated:
                 secret = settings.CENTRIFUGO_CLIENT_KWARGS.get('token_hmac_secret_key', '')
@@ -125,7 +125,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                         algorithm="HS256"
                     )
                     result['info']['x-centrifugo-address'] = settings.CENTRIFUGO_PUBLIC_HOST.replace('http', 'ws', 1)
-        for hook in self._get_hooks():
-            result = copy.deepcopy(result)
-            hook(request=request, schema=result)
+            for hook in self._get_hooks():
+                result = copy.deepcopy(result)
+                hook(request=request, schema=result)
         return result
