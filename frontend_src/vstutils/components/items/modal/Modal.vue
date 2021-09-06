@@ -3,7 +3,7 @@
         <!--Empty click handler required to stop event propagation -->
         <div class="modal-mask" @click.stop="() => {}">
             <div class="modal-wrapper">
-                <div class="modal-container">
+                <div ref="modalContainer" class="modal-container">
                     <div v-if="withHeader" class="modal-header text-data">
                         <slot name="header">
                             <span />
@@ -50,13 +50,13 @@
          * Adds event callback for keyup.
          */
         mounted() {
-            window.addEventListener('keyup', this.keyHandler);
+            this.$refs.modalContainer.addEventListener('keyup', this.keyHandler);
         },
         /**
          * Removes event callback for keyup.
          */
         beforeDestroy() {
-            window.removeEventListener('keyup', this.keyHandler);
+            this.$refs.modalContainer.removeEventListener('keyup', this.keyHandler);
         },
         methods: {
             close() {

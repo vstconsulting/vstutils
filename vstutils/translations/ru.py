@@ -40,6 +40,7 @@ TRANSLATION = {
     'enter value': 'введите значение',
     'more info': 'подробнее',
     'search by': 'поиск по полю',
+    'Search': 'Поиск',
 
     # x-menu generic
     'system': 'Система',

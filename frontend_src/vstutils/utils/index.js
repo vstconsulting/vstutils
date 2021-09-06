@@ -81,6 +81,23 @@ export function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
+/**
+ * Converts name to title
+ * @param {string} name
+ * @returns {string}
+ */
+export function nameToTitle(name) {
+    return String(name)
+        .replace(/_/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+/**
+ * Lowercase value
+ * @param {string} value
+ * @returns {string|*}
+ */
 export function lower(value) {
     if (!value) {
         return '';
@@ -88,6 +105,12 @@ export function lower(value) {
     value = value.toString();
     return value.toLowerCase();
 }
+
+/**
+ * Uppercase value
+ * @param {string} value
+ * @returns {string|*}
+ */
 export function upper(value) {
     if (!value) {
         return '';

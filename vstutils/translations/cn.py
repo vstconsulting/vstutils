@@ -41,6 +41,7 @@ TRANSLATION = {
     "More info": '输入价值',
     "more info": '输入价值',
     "search by": '更详尽',
+    'Search': '搜索 ',
     'system': '范围查找',
     'users': '系统',
     'Is active': '活跃度',
