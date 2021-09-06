@@ -11,10 +11,27 @@
         @execute-action="executeAction"
         @open-sublink="openSublink"
     >
+        <portal v-if="showSearch && searchField" to="topNavigation">
+            <form class="search-form" @submit.prevent="applySearchFilter">
+                <input
+                    v-model="searchFieldValue"
+                    class="search-input"
+                    type="text"
+                    :placeholder="$t('Search')"
+                />
+                <button class="search-button" type="submit">
+                    <i class="fas fa-search" />
+                </button>
+            </form>
+        </portal>
+
         <portal v-if="isInstanceCounterActive && !error && totalNumberOfInstances >= 0" to="titleAppend">
             <span class="badge bg-info">
                 {{ totalNumberOfInstances }}
             </span>
+        </portal>
+        <portal to="appendButtonsRow">
+            <Pagination v-bind="pagination" style="float: right" @open-page="goToPage" />
         </portal>
         <div class="list-content-component" :class="`list-${model.name}`">
             <template v-if="isEmpty">
@@ -69,9 +86,14 @@
         data() {
             return {
                 isInstanceCounterActive: true,
+                showSearch: true,
+                searchFieldValue: '',
             };
         },
         computed: {
+            searchField() {
+                return this.view?.filters?.['__search'];
+            },
             isEmpty() {
                 return !this.instances || (this.instances && !this.instances.length);
             },
@@ -338,6 +360,25 @@
             afterMultiAction(action, instances) {
                 this.dispatchAction('updateData');
             },
+
+            setSearchFieldValue({ value }) {
+                this.searchFieldValue = value;
+            },
+
+            applyFieldsFilters(filters) {
+                this.applyFilters({
+                    ...filters,
+                    [this.searchField.name]: this.filters[this.searchField.name],
+                });
+            },
+
+            applySearchFilter() {
+                this.applyFilters({
+                    ...this.filters,
+                    [this.searchField.name]: this.searchFieldValue,
+                });
+                this.searchFieldValue = '';
+            },
         },
     };
 </script>
@@ -348,6 +389,34 @@
         justify-content: space-between;
         margin-bottom: 5px;
     }
+    .search-form {
+        display: flex;
+        position: relative;
+    }
+
+    .search-input {
+        font-size: 15px;
+        border: none;
+        border-bottom: solid 1px var(--gray);
+        outline: none;
+        transition: 0.3s ease;
+        padding: 0 30px 0 8px;
+    }
+    .search-input:focus {
+        border-bottom: solid 1px var(--info);
+        outline: none;
+    }
+    .search-input:hover {
+        border-bottom: solid 1px var(--info);
+    }
+    .search-button {
+        position: relative;
+        right: 30px;
+        top: auto;
+        border: none;
+        background-color: transparent;
+    }
+
     .slide-from-left-leave-active,
     .slide-from-left-enter-active {
         transition: all 0.5s ease;

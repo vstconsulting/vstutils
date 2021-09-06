@@ -444,9 +444,11 @@ export default class ViewConstructor {
         for (const parameterObject of parametersCopy) {
             const format = this.getFieldFormat(parameterObject);
             const fieldConstructor = this.fieldsClasses.get(format);
-            filters[parameterObject.name] = new fieldConstructor(
-                $.extend(true, { format }, parameterObject, { readOnly: false }),
-            );
+            const options = $.extend(true, parameterObject, { format, readOnly: false });
+            if (parameterObject.name.startsWith('__')) {
+                options.hidden = true;
+            }
+            filters[parameterObject.name] = new fieldConstructor(options);
         }
 
         signals.emit(`views[${path}].filters.afterInit`, parametersCopy);

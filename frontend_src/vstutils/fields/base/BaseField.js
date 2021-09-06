@@ -1,4 +1,4 @@
-import { _translate, capitalize, deepEqual } from '../../utils';
+import { _translate, capitalize, deepEqual, nameToTitle } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 
@@ -39,7 +39,7 @@ class BaseField {
         this.name = options.name;
 
         /** @type {string} */
-        this.title = options.title || capitalize(this.name.replace(/_/g, ' ').replace(/\s{2,}/g, ' '));
+        this.title = options.title || capitalize(nameToTitle(this.name));
 
         /** @type {string|null} */
         this.description = options.description || null;

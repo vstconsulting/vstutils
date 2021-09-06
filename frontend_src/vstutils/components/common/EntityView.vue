@@ -11,6 +11,7 @@
                     @execute-action="$emit('execute-action', $event)"
                     @open-sublink="$emit('open-sublink', $event)"
                 />
+                <portal-target name="appendButtonsRow" />
             </div>
 
             <SelectedFilters v-if="!error && showUsedFilters" :view="view" />

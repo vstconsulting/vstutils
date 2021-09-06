@@ -41,6 +41,7 @@ TRANSLATION = {
     'More info': 'thêm thông tin',
     'more info': 'thêm thông tin',
     'search by': 'tìm kiếm theo',
+    'Search': 'Tìm kiếm ',
     'system': 'Hệ thống',
     'users': 'Người dùng',
     'Is active': 'Hoạt động',

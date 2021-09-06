@@ -7,7 +7,11 @@
                 </a>
             </li>
         </ul>
-
+        <ul class="navbar-nav">
+            <li class="ml-2">
+                <portal-target name="topNavigation" />
+            </li>
+        </ul>
         <ul class="navbar-nav ml-auto">
             <li v-if="is_authenticated" class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">

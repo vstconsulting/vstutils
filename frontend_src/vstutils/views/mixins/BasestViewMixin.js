@@ -1,4 +1,5 @@
 import { StoreModuleComponent } from '../../components/mixins';
+import { deepEqual } from '../../utils';
 
 /**
  * Mixin for all types of views(list, page, page_new, page_edit, action)
@@ -41,7 +42,11 @@ const BasestViewMixin = {
     },
     watch: {
         title: 'setDocumentTitle',
-        params: 'initStoreModuleComponent',
+        params(newValue, oldValue) {
+            if (!deepEqual(newValue, oldValue)) {
+                this.initStoreModuleComponent();
+            }
+        },
     },
     created() {
         this.setBreadcrumbs();
