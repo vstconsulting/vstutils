@@ -84,3 +84,5 @@ export {
 
 // vstutils styles
 import './vstutils/gui.css';
+
+import './vstutils/dark.scss';

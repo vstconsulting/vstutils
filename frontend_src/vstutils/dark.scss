@@ -1,0 +1,59 @@
+.dark-mode {
+    /* Change the white to any color */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #343a40 inset !important;
+    }
+
+    /* Change text in autofill textbox*/
+    input:-webkit-autofill {
+        -webkit-text-fill-color: white;
+    }
+
+    .select2-selection {
+        background-color: #343a40;
+        border-color: #6c757d;
+    }
+
+    .select2-container--disabled .select2-selection--single {
+        background-color: lighten(#343a40, 7.5%);
+    }
+
+    .select2-selection--single {
+        background-color: #343a40;
+        border-color: #6c757d;
+
+        .select2-selection__rendered {
+          color: #fff;
+        }
+    }
+
+    .select2-dropdown .select2-search__field,
+    .select2-search--inline .select2-search__field {
+        background-color: #343a40;
+        border-color: #6c757d;
+        color: white;
+    }
+
+    .select2-dropdown {
+        background-color: #343a40;
+        border-color: #80bdff;
+        color: white;
+    }
+
+    .select2-results__option[aria-selected="true"] {
+        background-color: lighten(#343a40, 5%) !important;
+        color: #dee2e6;
+    }
+
+    .select2-container .select2-search--inline .select2-search__field {
+        background-color: transparent;
+        color: #fff;
+    }
+
+    .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+        color: #fff;
+    }
+}
