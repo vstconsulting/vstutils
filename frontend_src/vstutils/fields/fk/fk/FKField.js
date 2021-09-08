@@ -9,6 +9,29 @@ import {
     RequestTypes,
 } from '../../../utils';
 
+const dependenceTemplateRegexp = /<<\w+>>/g;
+
+function getPk(component) {
+    if (typeof component.getInstancePk === 'function') {
+        const pk = component.getInstancePk();
+        if (pk !== undefined) {
+            return pk;
+        }
+    }
+    return component.params[component.view.parent?.pkParamName];
+}
+
+const dependenceTemplates = new Map([
+    ['pk', getPk],
+    ['view_name', (component) => component.view.name],
+    ['parent_view_name', (component) => component.view.parent.name],
+    ['view_level', (component) => component.view.level],
+    ['operation_id', (component) => component.view.operation_id],
+    ['parent_operation_id', (component) => component.view.parent.operation_id],
+]);
+
+const validAttrs = Array.from(dependenceTemplates.keys());
+
 /**
  * Foreign key GUI field class for nested models.
  */
@@ -123,6 +146,31 @@ class FKField extends BaseField {
         return Promise.allSettled(promises);
     }
 
+    _resolveDependenceValue(key) {
+        const foundTemplates = new Set(
+            Array.from(key.matchAll(dependenceTemplateRegexp), (arr) => arr[0].slice(2, -2)).filter((el) =>
+                validAttrs.includes(el),
+            ),
+        );
+        if (foundTemplates.size === 0) {
+            return;
+        }
+
+        for (const template of foundTemplates) {
+            const handler = dependenceTemplates.get(template);
+            try {
+                key = template.replace(
+                    template,
+                    handler(this.constructor.app.application.$refs.currentViewComponent),
+                );
+            } catch (error) {
+                console.warn(error.message);
+                return;
+            }
+        }
+        return key;
+    }
+
     /**
      * Method that returns dependence filters. If null is returned it means that at least one of required
      * and non nullable fields is empty and field should be disabled.
@@ -132,8 +180,13 @@ class FKField extends BaseField {
     getDependenceFilters(data) {
         const filters = {};
         for (const [fieldName, filter] of Object.entries(this.dependence)) {
+            let dependenceValue = this._resolveDependenceValue(fieldName);
+            if (dependenceValue !== undefined) {
+                filters[filter] = dependenceValue;
+                continue;
+            }
             const field = this.model.fields.get(fieldName);
-            const dependenceValue = getDependenceValueAsString(field.toInner(data));
+            dependenceValue = getDependenceValueAsString(field.toInner(data));
             if (dependenceValue) {
                 filters[filter] = dependenceValue;
             } else if (!field.nullable && field.required) {

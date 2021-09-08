@@ -358,14 +358,39 @@ class FkField(IntegerField):
                                    Default is ``name``.
     :param use_prefetch: prefetch values on frontend at list-view. Default is ``True``.
     :type use_prefetch: bool
-    :param make_link: Show value as link to model. Default is ``True``.
+    :param make_link: show value as link to model. Default is ``True``.
     :type make_link: bool
-    :param dependence: Dictionary, where keys are names of a field from the same model,
+    :param dependence: dictionary, where keys are names of a field from the same model,
                        and keys are name of query filter.
                        If at least one of the fields that we depend on is non nullable, required and set to null,
                        autocompletion list will be empty and field will be disabled.
+
+                       There are some special keys for dependence dictionary to get data that is stored
+                       on frontend without additional database query:
+
+                       ``'<<pk>>'``, - get primary key of current instance
+
+                       ``'<<view_name>>'`` get view name from Vue component,
+
+                       ``'<<parent_view_name>>'`` get view name from Vue component,
+
+                       ``'<<view_level>>'`` get view level,
+
+                       ``'<<operation_id>>'`` get operation_id,
+
+                       ``'<<parent_operation_id'>>`` get parent_operation_id
     :type dependence: dict
-    :param filters: Dictionary, where keys are names of a field from a related (by this FkField) model,
+
+    Examples:
+        .. sourcecode:: python
+
+            field = FkField(select=Category, dependence={'<<pk>>': 'my_filter'})
+
+    This filter  will get pk of current object and make query on frontend '/category?my_filter=3'
+    where '3' is primary key of current instance.
+
+
+    :param filters: dictionary, where keys are names of a field from a related (by this FkField) model,
                     and values are values of that field.
     :type filters: dict
 
