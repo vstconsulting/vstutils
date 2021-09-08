@@ -421,12 +421,16 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
         schema = schema or field.schema
         attributes = {}
         if isinstance(schema, coreschema.Array):
-            coreschema_attrs = ()
             attributes['collectionFormat'] = 'csv'
-            attributes['items'] = self.coreapi_field_to_parameter(field, schema.items)
+            param = self.coreapi_field_to_parameter(field, schema.items)
+            attributes['items'] = openapi.Schema(**OrderedDict(
+                (attr, getattr(param, attr, None))
+                for attr in coreschema_attrs + ['type']
+            ))
             attributes['minItems'] = schema.min_items
             attributes['maxItems'] = schema.max_items
             attributes['uniqueItems'] = schema.unique_items
+            coreschema_attrs = ()
         return openapi.Parameter(
             name=field.name,
             in_=location_to_in[field.location],
