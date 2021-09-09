@@ -11,6 +11,8 @@ class FileViewMixin(base.FileResponseRetrieveMixin):
     instance_field_data = 'value'
     # required for response caching in browser
     instance_field_timestamp = 'updated'
+    # this is not required, but allow to understand file response mime type in schema
+    produces_for_retrieve = ['application/octet-stream', 'application/pdf']
     # search this field in instance for response filename
     # instance_field_filename = 'filename'  # as default
     # headers for response caching (default works with user auth)

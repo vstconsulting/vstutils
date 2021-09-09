@@ -1,6 +1,7 @@
 from copy import copy
 from warnings import warn
 
+from django.http import FileResponse
 from rest_framework import status
 from drf_yasg.inspectors.view import SwaggerAutoSchema
 from drf_yasg.app_settings import swagger_settings
@@ -173,6 +174,14 @@ class VSTAutoSchema(SwaggerAutoSchema):
 
     def get_responses(self, *args, **kwargs):
         return self.__perform_with_nested('get_responses', *args, **kwargs)
+
+    def get_produces(self):
+        serializer = self.get_view_serializer()
+        if isinstance(serializer, FileResponse):
+            produces = getattr(self.view, f'produces_for_{self.view.action}', []) + ['application/octet-stream']
+        else:
+            produces = []
+        return produces + super().get_produces()
 
     def get_operation(self, operation_keys=None):
         result: Operation = self.__perform_with_nested('get_operation', operation_keys)
