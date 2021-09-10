@@ -15,13 +15,13 @@ _default_settings = {
 
 def prepare_environment(default_settings=None, **kwargs):
     # pylint: disable=unused-argument
-    '''
+    """
     Prepare ENV for web-application
     :param default_settings: minimal needed settings for run app
     :type default_settings: dict
     :param kwargs: other overrided settings
     :rtype: None
-    '''
+    """
     default_settings = _default_settings if default_settings is None else default_settings
     for key, value in default_settings.items():
         os.environ.setdefault(key, value)
@@ -44,12 +44,12 @@ def cmd_execution(*args, **kwargs):
 
 def get_celery_app(name=None, **kwargs):  # nocv
     # pylint: disable=import-error
-    '''
+    """
     Function to return celery-app. Works only if celery installed.
     :param name: Application name
     :param kwargs: overrided env-settings
     :return: Celery-app object
-    '''
+    """
     from celery import Celery
     prepare_environment(**kwargs)
     name = name or os.getenv("VST_PROJECT")

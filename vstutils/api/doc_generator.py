@@ -58,11 +58,11 @@ class VSTOpenApiBase(Directive):
         self.current_path = None
 
     def load_yaml(self):
-        '''
+        """
         Load OpenAPI specification from yaml file. Path to file taking from command
         `vst_openapi`.
         :return:
-        '''
+        """
         env = self.state.document.settings.env
         relpath, abspath = env.relfn2path(directives.path(self.arguments[0]))
 
@@ -89,10 +89,10 @@ class VSTOpenApiBase(Directive):
         self.__view_list.append(self.indent * indent_depth + value, '<openapi>')
 
     def run(self):
-        '''
+        """
         Main function for prepare and render OpenAPI specification
         :return:
-        '''
+        """
         # Loading yaml
         self.load_yaml()
 
@@ -115,10 +115,10 @@ class VSTOpenApiBase(Directive):
         return node.children
 
     def print_paths(self):
-        '''
+        """
         Cycle for prepare information about paths
         :return:
-        '''
+        """
         for path_key, path_value in self.paths.items():
             # Handler for request in path
             self.current_path = path_key
@@ -132,10 +132,10 @@ class VSTOpenApiBase(Directive):
                 self.get_params(request_value['parameters'], 'query')
 
     def print_schemas(self):
-        '''
+        """
         Print all schemas, one by one
         :return:
-        '''
+        """
         self.indent_depth += 1
         for i in self.definitions:
             def_name = i.split('/')[-1]
@@ -154,7 +154,7 @@ class VSTOpenApiBase(Directive):
         self.indent_depth -= 1
 
     def get_main_title(self, path_name, request_name):
-        '''
+        """
         Get title, from request type and path
 
         :param path_name: --path for create title
@@ -162,19 +162,19 @@ class VSTOpenApiBase(Directive):
         :param request_name: --name of request
         :type request_name: str, unicode
         :return:
-        '''
+        """
         main_title = f'.. http:{request_name}:: {path_name}'
         self.write(main_title)
         self.write('')
 
     def get_status_code_and_schema_rst(self, responses):
-        '''
+        """
         Function for prepare information about responses with example, prepare only
         responses with status code from `101` to `299`
         :param responses: -- dictionary that contains responses, with status code as key
         :type responses: dict
         :return:
-        '''
+        """
         for status_code, response_schema in responses.items():
             status_code = int(status_code)
             schema = response_schema.get('schema', None)
@@ -196,14 +196,14 @@ class VSTOpenApiBase(Directive):
                 self.write('{}', self.indent_depth)
 
     def schema_handler(self, schema):
-        '''
+        """
         Function prepare body of response with examples and create detailed information
         about response fields
 
         :param schema: --dictionary with information about answer
         :type schema: dict
         :return:
-        '''
+        """
         dict_for_render = schema.get('properties', {}).items()
         if schema.get('$ref', None):
             def_name = schema.get('$ref').split('/')[-1]
@@ -232,7 +232,7 @@ class VSTOpenApiBase(Directive):
             self.write(json_param_name + ' ' + desc)
 
     def get_json_props_for_response(self, var_type, option_value):
-        '''
+        """
         Prepare JSON section with detailed information about response
 
         :param var_type: --contains variable type
@@ -241,7 +241,7 @@ class VSTOpenApiBase(Directive):
         :type option_value: dict
         :return: dictionary that contains, title and all properties of field
         :rtype: dict
-        '''
+        """
         props = []
         for name, value in option_value.items():
             if var_type in ['dynamic', 'select2']:  # pylint: disable=no-else-break
@@ -264,7 +264,7 @@ class VSTOpenApiBase(Directive):
         return {'props_str': props_str, 'title': option_value.get('title', '')}
 
     def get_response_example(self, opt_name, var_type, opt_values):
-        '''
+        """
         Depends on type of variable, return string with example
         :param opt_name: --option name
         :type opt_name: str,unicode
@@ -274,7 +274,7 @@ class VSTOpenApiBase(Directive):
         :type opt_values: dict
         :return: example for `var_type` variable
         :rtype: str, unicode
-        '''
+        """
         if opt_name == 'previous' and var_type == 'uri':
             result = None
         elif var_type == 'uri':
@@ -308,14 +308,14 @@ class VSTOpenApiBase(Directive):
         return result
 
     def get_object_example(self, def_name):
-        '''
+        """
         Create example for response, from object structure
 
         :param def_name: --deffinition name of structure
         :type def_name: str, unicode
         :return: example of object
         :rtype: dict
-        '''
+        """
         def_model = self.definitions.get(def_name, {})
         example = {}
         for opt_name, opt_value in def_model.get('properties', {}).items():
@@ -326,14 +326,14 @@ class VSTOpenApiBase(Directive):
         return example
 
     def definition_rst(self, definition, spec_path=None):
-        '''
+        """
         Prepare and write information about definition
         :param definition: --name of definition that would be prepared for render
         :type definition: str, unicode
         :param spec_path: --path to definitions
         :type spec_path: str, unicode
         :return:
-        '''
+        """
         spec_path = spec_path or self.models_path
         definitions = self.spec[spec_path]
         definition_property = definitions[definition]['properties'].copy()
@@ -348,7 +348,7 @@ class VSTOpenApiBase(Directive):
         self.indent_depth -= 1
 
     def find_nested_models(self, model, definitions):
-        '''
+        """
         Prepare dictionary with reference to another definitions, create one dictionary
         that contains full information about model, with all nested reference
         :param model: --dictionary that contains information about model
@@ -357,7 +357,7 @@ class VSTOpenApiBase(Directive):
         :type definitions: dict
         :return: dictionary with all nested reference
         :rtype: dict
-        '''
+        """
         for key, value in model.items():
             if isinstance(value, dict):
                 model[key] = self.find_nested_models(value, definitions)
@@ -368,14 +368,14 @@ class VSTOpenApiBase(Directive):
         return model
 
     def get_params(self, params, name_request):
-        '''
+        """
         Prepare and add for further render parameters.
         :param params: --dictionary with parameters
         :type params: dict
         :param name_request: --type of the parameters
         :type name_request: str, unicode
         :return:
-        '''
+        """
         self.write('')
         for elem in params:
             request_type = elem['type'] if elem.get('type', None) else 'schema'
@@ -395,12 +395,12 @@ class VSTOpenApiBase(Directive):
         self.write('')
 
     def get_description(self, request_value):
-        '''
+        """
         Add description about this path and type
         :param request_value: --dictionary with information about this path
         :type request_value: dict
         :return:
-        '''
+        """
         self.write(request_value['description'], 1)
         self.write('')
 

@@ -222,6 +222,8 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
             mock_obj.side_effect = check_call_error
             with self.assertRaises(SystemExit):
+                call_command('dockermigrate', attempts=1, attempts_timeout=0.0001)
+            with self.assertRaises(SystemExit):
                 call_command('dockerrun', attempts=1, attempts_timeout=0.0001)
 
 

@@ -40,7 +40,7 @@ class LDAP:
         pass
 
     def __init__(self, connection_string: Text, username: Text = '', password: Text = None, domain: Text = None):
-        '''
+        """
         LDAP constructor
 
         :param connection_string: LDAP connection string ('ldap://server')
@@ -48,7 +48,7 @@ class LDAP:
                          or without but domain arg should be set.
         :param password: auth password
         :param domain: domain for easy use users
-        '''
+        """
         self.settings = settings
         self.user_format = settings.LDAP_FORMAT.replace('<', "{").replace('>', '}')
         self.logger = logging.getLogger(settings.VST_PROJECT_LIB)
@@ -91,14 +91,14 @@ class LDAP:
         return user
 
     def __authenticate(self, ad: Text, username: Text, password: Text) -> ldap.functions.LDAPObject:
-        '''
+        """
         Active Directory auth function
 
         :param ad: LDAP connection string ('ldap://server')
         :param username: username with domain ('user@domain.name')
         :param password: auth password
         :return: ldap connection or None if error
-        '''
+        """
         result = None
         conn = ldap.initialize(ad)
         conn.protocol_version = 3
@@ -135,10 +135,10 @@ class LDAP:
         return self.__get_user_data()[1]
 
     def isAuth(self) -> bool:
-        '''
+        """
         Indicates that object auth worked
         :return: True or False
-        '''
+        """
         if isinstance(self.__conn, ldap.ldapobject.LDAPObject) or self.__conn:
             return True
         return False

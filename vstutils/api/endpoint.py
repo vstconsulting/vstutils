@@ -78,11 +78,11 @@ def _iter_request(request, operation_handler, context):
 
 
 def _join_paths(*args) -> _t.Text:
-    '''Join multiple path fragments into one
+    """Join multiple path fragments into one
 
     :param *args: List of items that can be anything like '/a/b/c', 'b/c/', 1, 'v1'
     :returns: Path that starts and ends with
-    '''
+    """
     return f"/{'/'.join(str(arg).strip('/') for arg in args)}/"
 
 

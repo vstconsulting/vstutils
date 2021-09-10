@@ -240,9 +240,9 @@ class _Compile(_sdist):
 
 
 class GithubRelease(Command):
-    '''
+    """
     Make release on github via githubrelease
-    '''
+    """
     description = 'Make release on github via githubrelease'
 
     user_options = [
