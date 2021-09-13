@@ -180,10 +180,10 @@ class CommaMultiSelect(VSTCharField):
     def to_internal_value(self, data: _t.Union[_t.Text, _t.Sequence]) -> _t.Text:
         return self.to_representation(data)  # nocv
 
-    def to_representation(self, data: _t.Union[_t.Text, _t.Sequence, _t.Iterator]) -> _t.Text:
-        if isinstance(data, str):
-            data = map(str, filter(bool, data.split(self.select_separator)))
-        return self.select_separator.join(data)
+    def to_representation(self, value: _t.Union[_t.Text, _t.Sequence, _t.Iterator]) -> _t.Text:
+        if isinstance(value, str):
+            value = map(str, filter(bool, value.split(self.select_separator)))
+        return self.select_separator.join(value)
 
 
 class DynamicJsonTypeField(VSTCharField):

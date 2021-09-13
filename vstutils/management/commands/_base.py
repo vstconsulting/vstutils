@@ -130,7 +130,7 @@ class DockerCommand(BaseCommand):
             'UWSGI_PROCESSES': 'UWSGI_WORKERS',
             'UWSGI_THREADS': 'UWSGI_THREADS'
         }
-        for key in default_envs:
+        for key in default_envs:  # pylint: disable=consider-using-dict-items
             value = os.environ.get(f"{self.prefix}_{key}", '')
             if value:
                 self.env[default_envs[key]] = value  # nocv
@@ -218,8 +218,8 @@ class DockerCommand(BaseCommand):
                 }
                 if pm_type == 'mysql':
                     config['database.options']['init_command'] = os.getenv('DB_INIT_CMD', '')
-            except KeyError:  # nocv
-                raise Exception('Not enough variables for connect to  SQL server.')
+            except KeyError as err:  # nocv
+                raise Exception('Not enough variables for connect to  SQL server.') from err
         else:  # nocv
             config['database'] = {
                 'engine': 'django.db.backends.sqlite3',
@@ -400,7 +400,7 @@ class DockerCommand(BaseCommand):
         # Set secret key
         os.environ.setdefault('SECRET_KEY', 'DISABLE')
         if os.environ['SECRET_KEY'] != 'DISABLE':  # nocv
-            with open(f'/etc/{prefix.lower()}/secret', 'w') as secretfile:
+            with open(f'/etc/{prefix.lower()}/secret', 'w', encoding='utf-8') as secretfile:
                 secretfile.write(os.environ['SECRET_KEY'])
 
         return config

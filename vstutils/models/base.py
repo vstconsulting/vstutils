@@ -442,7 +442,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         avail_fields = filter(
             tuple(model_fields.keys()).__contains__,
             tuple(
-                k if v.source is None or '*' else v.source
+                k if v.source is None or v.source == '*' else v.source
                 for k, v in serializer_fields.items()
                 if not isinstance(v, EXCLUDED_FIELDS)
             )

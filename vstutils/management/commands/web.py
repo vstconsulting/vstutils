@@ -185,16 +185,16 @@ class Command(BaseCommand):
         # Run web server
         try:
             self._print('Execute: ' + ' '.join(cmd))
-            proc = subprocess.Popen(cmd, env=env, stdin=read)
-            try:
-                wait(proc)
-            except BaseException as exc:
-                proc.send_signal(signal.SIGTERM)
-                wait(proc, 10)
-                with raise_context():
-                    proc.kill()
-                wait(proc)
-                raise exc
+            with subprocess.Popen(cmd, env=env, stdin=read) as proc:
+                try:
+                    wait(proc)
+                except BaseException as exc:
+                    proc.send_signal(signal.SIGTERM)
+                    wait(proc, 10)
+                    with raise_context():
+                        proc.kill()
+                    wait(proc)
+                    raise exc
         except KeyboardInterrupt:
             self._print('Exit by user...', 'WARNING')
         except CalledProcessError as err:

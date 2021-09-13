@@ -203,14 +203,14 @@ class MainRouter(_AbstractRouter):
                     'description': self_inner.view_name,
                     'current_version': links[settings.VST_API_VERSION],
                     'available_versions': {
-                        name: links[name]
-                        for name in links
+                        name: value
+                        for name, value in links.items()
                         if name in settings.API
                     }
                 }
-                for link in links:
+                for link, link_value in links.items():
                     if link not in data['available_versions']:
-                        data[link] = links[link]
+                        data[link] = link_value
                 return responses.HTTP_200_OK(data)
 
         return API.as_view(api_root_dict=self._get_api_root_dict())

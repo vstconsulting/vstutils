@@ -403,6 +403,7 @@ class tmp_file:
     __slots__ = ('fd', 'path')
 
     def __init__(self, data: tp.Text = "", mode: tp.Text = "w", bufsize: int = -1, **kwargs):
+        # pylint: disable=consider-using-with
         self.fd = tempfile.NamedTemporaryFile(mode, buffering=bufsize, **kwargs)
         self.path = Path(self.fd.name)
         if data:
@@ -738,20 +739,20 @@ class Executor(BaseVstObject):
         self.output = ""
         env = os.environ.copy()
         env.update(self.env)
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             cmd, stdout=self.__stdout__, stderr=self.__stderr__,
             bufsize=0, universal_newlines=True,
             cwd=str(cwd), env=env,
             close_fds=ON_POSIX
-        )
-        for line in self._unbuffered(proc):
-            self.line_handler(line)
-        return_code = proc.poll()
-        if return_code:
-            logger.error(self.output)
-            raise subprocess.CalledProcessError(
-                return_code, cmd, output=str(self.output)
-            )
+        ) as proc:
+            for line in self._unbuffered(proc):
+                self.line_handler(line)
+            return_code = proc.poll()
+            if return_code:
+                logger.error(self.output)
+                raise subprocess.CalledProcessError(
+                    return_code, cmd, output=str(self.output)
+                )
         return self.output
 
 
@@ -1075,9 +1076,9 @@ class ObjectHandlers(BaseVstObject):
             if backend is None:
                 raise ex.VSTUtilsException("Backend is 'None'.")  # pragma: no cover
             return self._get_backend(backend)
-        except KeyError or ImportError:
+        except KeyError or ImportError as err:
             msg = f"{name} ({self.err_message})" if self.err_message else name
-            raise ex.UnknownTypeException(msg)
+            raise ex.UnknownTypeException(msg) from err
 
     def opts(self, name: tp.Text):
         return self.get_backend_data(name).get('OPTIONS', {})

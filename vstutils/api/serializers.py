@@ -127,13 +127,13 @@ class DataSerializer(EmptySerializer):
             return data.dict()  # nocv
         return data if isinstance(data, self.allowed_data_types) else self.fail("Unknown type.")
 
-    def to_representation(self, value):
-        if not isinstance(value, (dict, list)):
-            result = json.loads(value)
+    def to_representation(self, instance):
+        if not isinstance(instance, (dict, list)):
+            result = json.loads(instance)
             if isinstance(result, dict):
                 result = utils.Dict(result)
             return result
-        return value
+        return instance
 
 
 class JsonObjectSerializer(DataSerializer):
@@ -146,8 +146,8 @@ class ErrorSerializer(DataSerializer):
     def to_internal_value(self, data):
         return data
 
-    def to_representation(self, value):
-        return value
+    def to_representation(self, instance):
+        return instance
 
 
 class ValidationErrorSerializer(ErrorSerializer):

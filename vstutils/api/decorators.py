@@ -203,7 +203,7 @@ def get_action_name(master_view: MasterViewType, method: _t.Text = '') -> _t.Tex
 
 
 class NestedViewMixin:
-    __slots__ = ('action',)
+    __slots__ = ('action', 'headers')
     get_serializer: _t.Callable
     check_object_permissions: _t.Callable
     check_permissions: _t.Callable
@@ -226,6 +226,10 @@ class NestedViewMixin:
     master_view: MasterViewType
     kwargs: _t.Dict
     get_view_methods: _t.ClassVar[_t.Callable]
+    headers: _t.Dict
+    default_response_headers: _t.Dict
+    finalize_response: _t.ClassVar[_t.Callable]
+    check_etag: _t.ClassVar[_t.Callable]
 
     def _check_permission_obj(self, objects: _t.Iterable):
         for obj in objects:
@@ -264,9 +268,15 @@ class NestedViewMixin:
             self.action = self.get_nested_action_name()
         if self.action != 'list':
             kwargs[self.nested_append_arg] = self.nested_id
+        self.headers = self.default_response_headers
         self.check_permissions(self.request)
         self.check_throttles(self.request)
-        return getattr(self, self.action)(self.request, **kwargs)
+        getattr(self, 'check_etag', lambda r: None)(self.request)
+        return self.finalize_response(
+            self.request,
+            getattr(self, self.action)(self.request, **kwargs),
+            **kwargs
+        )
 
 
 class NestedWithoutAppendMixin(NestedViewMixin):

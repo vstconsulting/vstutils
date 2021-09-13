@@ -14,8 +14,8 @@ def json_default(obj):  # nocv
         if isinstance(obj, bytes):
             return obj.decode("utf-8")
         raise error_obj
-    except:
-        raise error_obj
+    except Exception as err:
+        raise error_obj from err
 
 
 class LDAP:
@@ -79,10 +79,10 @@ class LDAP:
         )
 
     def __prepare_user_with_domain(self, username: Text) -> Text:
-        user = str(username).split('@')[0]
+        user = str(username).split('@', maxsplit=1)[0]
         domain = str(self.domain)
         if len(str(username).split('@')) > 1:
-            domain = str(username).split('@')[-1]
+            domain = str(username).split('@', maxsplit=1)[-1]
         domain = domain.lower()
         if domain != user:
             domain = ','.join([f'dc={d}' for d in domain.split('.') if d])

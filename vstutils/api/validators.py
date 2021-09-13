@@ -101,8 +101,8 @@ class ImageOpenValidator(ImageValidator):
         super().__call__(value)
         try:
             self.img = Image.open(BytesIO(base64.b64decode(value['content'])))
-        except UnidentifiedImageError:
-            raise serializers.ValidationError(self.error_msg)
+        except UnidentifiedImageError as err:
+            raise serializers.ValidationError(self.error_msg) from err
 
 
 class ImageBaseSizeValidator(ImageOpenValidator):

@@ -55,14 +55,14 @@ class UserSerializer(VSTSerializer):
     def is_staff_or_super(self):
         return self.context['request'].user.is_staff or self.context['request'].user.is_superuser
 
-    def create(self, credentials):
+    def create(self, validated_data):
         """ Create user from validated data. """
 
         if not self.is_staff_or_super:
             raise exceptions.PermissionDenied  # nocv
 
-        credentials['password'] = make_password(credentials['password'])
-        return super().create(credentials)
+        validated_data['password'] = make_password(validated_data['password'])
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
         if not self.is_staff_or_super and instance.id != self.context['request'].user.id:
@@ -128,7 +128,7 @@ class ChangePasswordSerializer(DataSerializer):
         instance.save()
         return instance
 
-    def to_representation(self, value):
+    def to_representation(self, instance):
         return {
             'old_password': '***',
             'password': '***',

@@ -417,15 +417,20 @@ class CachableHeadMixin(GenericViewSet):
         default_detail = ''
         default_code = 'cached'
 
+    def check_etag(self, request):
+        etag_data = self.queryset.model.get_etag_value()  # type: ignore
+        if 'Etag' not in self.headers:
+            self.headers['ETag'] = etag_data
+
+            if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
+                raise self.NotModifiedException("")
+            # TODO: Workflow with ETag on PUT/PATCH
+
     def initial(self, request: Request, *args: _t.Any, **kwargs: _t.Any) -> None:
         super().initial(request, *args, **kwargs)
 
-        etag_data = self.queryset.model.get_etag_value()  # type: ignore
-        self.headers['ETag'] = etag_data
-
-        if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
-            raise self.NotModifiedException("")
-        # TODO: Workflow with ETag on PUT/PATCH
+        if self.action in main_actions:
+            self.check_etag(request)
 
 
 class CopyMixin(GenericViewSet):
