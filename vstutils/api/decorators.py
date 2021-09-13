@@ -268,7 +268,6 @@ class NestedViewMixin:
             self.action = self.get_nested_action_name()
         if self.action != 'list':
             kwargs[self.nested_append_arg] = self.nested_id
-        self.headers = self.default_response_headers
         self.check_permissions(self.request)
         self.check_throttles(self.request)
         getattr(self, 'check_etag', lambda r: None)(self.request)
@@ -356,9 +355,11 @@ def nested_view_function(
         *args, **kw) -> base.RestResponse:
     # pylint: disable=unused-argument,unnecessary-lambda
     nested_sub = kw.get('nested_sub', None)
-    view_obj: _t.Union[NestedViewMixin, base.GenericViewSet, views.APIView] = view()
-    view_obj.request = view_request
-    view_obj.kwargs = view_request.parser_context['kwargs']  # type: ignore
+    view_obj: _t.Union[NestedViewMixin, base.GenericViewSet, views.APIView] = view(  # type: ignore
+        request=view_request,
+        kwargs=view_request.parser_context['kwargs'],  # type: ignore
+        headers=master_view.headers,
+    )
     master_view.nested_view_object = view_obj  # type: ignore
     master_view.nested_detail = view_obj.nested_detail  # type: ignore
     return view_obj.dispatch_route(nested_sub)  # type: ignore
@@ -415,6 +416,12 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
     :param subs: -- List of allowed subviews or actions to nested view endpoints.
     :type subs: list,None
 
+
+    .. note::
+        Some view methods will not calling for performance reasons.
+        This also applies to some of the class attributes that are usually initialized in the methods.
+        For example, ``.initial()`` will never called.
+        Each viewset wrapped by nested class with additional logic.
 
     Example:
 
