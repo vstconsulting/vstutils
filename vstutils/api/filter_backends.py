@@ -73,12 +73,50 @@ class VSTFilterBackend(BaseFilterBackend):
 
             from vstutils.api.filter_backends import VSTFilterBackend
 
-            CurrentTimeFilterBackend(VSTFilterBackend):
+            class CurrentTimeFilterBackend(VSTFilterBackend):
                 def filter_queryset(self, request, queryset, view):
-                    return queryset.annotate(current_time=Value(timezone.now(), output_field=DateTimeField())
+                    return queryset.annotate(current_time=Value(timezone.now(), output_field=DateTimeField()))
 
         In this example Filter Backend annotates time in current timezone to any connected
         model's queryset.
+
+    In some cases it may be necessary to provide a parameter from a query of request.
+    To define this parameter in the schema, you must overload the get_schema_fields
+    function and specify a list of parameters to use.
+
+    Example:
+
+        .. sourcecode:: python
+
+            from django.utils import timezone
+            from django.db.models import Value, DateTimeField
+
+            from vstutils.api.filter_backends import VSTFilterBackend
+
+            class ConstantCurrentTimeForQueryFilterBackend(VSTFilterBackend):
+                query_param = 'constant'
+
+                def filter_queryset(self, request, queryset, view):
+                    if self.query_param in request.query_params and request.query_params[self.query_param]:
+                        queryset = queryset.annotate(**{
+                            request.query_params[self.query_param]: Value(timezone.now(), output_field=DateTimeField())
+                        })
+                    return queryset
+
+                    def get_schema_fields(self, view):
+                        return [
+                            compat.coreapi.Field(
+                                name=self.query_param,
+                                required=False,
+                                location='query',
+                                schema=compat.coreschema.String(
+                                    description='Annotate value to queryset'
+                                ),
+                            )
+                        ]
+
+        In this example Filter Backend annotates time in current timezone to any connected
+        model's queryset with field name from query `constant`.
     """
     __slots__ = ()
     required = False

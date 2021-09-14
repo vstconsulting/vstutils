@@ -149,6 +149,7 @@ class DockerCommand(BaseCommand):
                         1,
                         self._settings('DOCKERRUN_MIGRATE_LOCK_TIMEOUT'),
                         'Migration process still locked by another application process.',
+                        int(os.getenv("DOCKER_MIGRATE_LOCK_KEY_TIMEOUT", '0')) or None
                 ) as lock:  # noqa: F841, pylint:disable=unused-variable
                     logger.info(f'Migration locked by key: `{lock.id}`')
                     check_call(

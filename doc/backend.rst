@@ -64,7 +64,7 @@ Views
 ~~~~~
 
 .. automodule:: vstutils.api.base
-    :members: ModelViewSet,ReadOnlyModelViewSet,HistoryModelViewSet,CopyMixin,FileResponseRetrieveMixin
+    :members: GenericViewSet,ModelViewSet,ReadOnlyModelViewSet,HistoryModelViewSet,CopyMixin,FileResponseRetrieveMixin
 
 .. automodule:: vstutils.api.decorators
     :members: nested_view,subaction

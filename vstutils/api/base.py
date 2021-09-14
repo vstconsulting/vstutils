@@ -271,6 +271,17 @@ class GenericViewSetMeta(type(vsets.GenericViewSet)):  # type: ignore
 
 
 class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewSetMeta):
+    """
+    The base class for all views. Extends the standard features of the DRF class.
+    Here are some of the possibilities:
+
+    - Provides ``model`` attribute instead of ``queryset``.
+    - Provides to set serializers for each action separately through a dictionary ``action_serializers`` or
+      attributes starting with ``serializer_class_[action name]``.
+    - Provides to specify a serializer for lists and detail views separately.
+    - Optimizes the database query for GET requests, if possible,
+      by selecting only the fields necessary for the serializer.
+    """
     __slots__ = ()
     optimize_get_by_values = settings.OPTIMIZE_GET_BY_VALUES
     select_related = False
@@ -321,6 +332,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         return qs
 
     def get_serializer_class(self):
+        """
+        Provides to setup serializer class for each action.
+        """
         lookup_field = self.lookup_url_kwarg or self.lookup_field or 'pk'
         action_name = getattr(self, 'action', None)
 
@@ -370,8 +384,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
 
     def nested_allow_check(self):
         """
-        Just raise or pass
-        :return:
+        Just raise or pass. Used for nested views for easier access checking.
         """
 
     @classmethod
@@ -528,8 +541,7 @@ class ModelViewSet(GenericViewSet, vsets.ModelViewSet):
     # pylint: disable=useless-super-delegation
 
     """
-    A viewset that provides default `create()`, `retrieve()`, `update()`,
-    `partial_update()`, `destroy()` and `list()` actions under model.
+    A viewset that provides CRUD actions under model. Inherited from :class:`.GenericViewSet`.
 
     :var model: DB model with data.
     :vartype model: vstutils.models.BModel
@@ -602,18 +614,25 @@ class ListNonModelViewSet(NonModelsViewSet, vsets.mixins.ListModelMixin):
 
 
 class ReadOnlyModelViewSet(GenericViewSet, vsets.ReadOnlyModelViewSet):
-    """ Default viewset like vstutils.api.base.ModelViewSet for readonly models. """
+    """
+    Default viewset like vstutils.api.base.ModelViewSet for readonly models.
+    Inherited from :class:`.GenericViewSet`.
+    """
     __slots__ = ()
 
 
 class ListOnlyModelViewSet(GenericViewSet, vsets.mixins.ListModelMixin):
-    """ Default viewset like vstutils.api.base.ModelViewSet for list only models. """
+    """
+    Default viewset like vstutils.api.base.ModelViewSet for list only models.
+    Inherited from :class:`.GenericViewSet`.
+    """
     __slots__ = ()
 
 
 class HistoryModelViewSet(ReadOnlyModelViewSet, vsets.mixins.DestroyModelMixin):
     """
     Default viewset like ReadOnlyModelViewSet but for historical data
-    (allow to delete, but cannt create and update).
+    (allow to delete, but can't create and update).
+    Inherited from :class:`.GenericViewSet`.
     """
     __slots__ = ()
