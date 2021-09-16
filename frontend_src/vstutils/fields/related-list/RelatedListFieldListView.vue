@@ -8,7 +8,7 @@
                 <h3>{{ field.title }}</h3>
             </template>
             <template #body>
-                <component :is="fieldComponent" :value="value" :fields="field.fields" />
+                <component :is="fieldComponent" :value="value" :model="field.itemsModel" />
             </template>
         </Modal>
     </div>

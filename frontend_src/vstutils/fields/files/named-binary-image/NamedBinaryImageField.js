@@ -12,7 +12,7 @@ import ResolutionValidatorConfig from './ResolutionValidatorConfig.js';
 class NamedBinaryImageField extends NamedBinaryFileField {
     constructor(options) {
         super(options);
-        this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(this.props);
+        this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(this.options);
     }
 
     /**

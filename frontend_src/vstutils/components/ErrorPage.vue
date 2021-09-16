@@ -26,7 +26,7 @@
                 required: true,
             },
             error: {
-                type: Object,
+                type: [Object, Error],
                 default: () => ({}),
             },
         },

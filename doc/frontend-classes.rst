@@ -3,11 +3,11 @@ Frontend Classes
 
 Fields
 --------------
+.. js:autoclass:: FieldsResolver
+   :members:
+
 .. js:autoclass:: BaseField
    :members: prepareFieldForView, afterInstancesFetched, getInitialValue, toInner, toRepresent, validateValue, toDescriptor
-
-.. js:autoclass:: APIObjectField
-   :members:
 
 .. js:autoclass:: AutocompleteField
    :members: mixins
@@ -67,9 +67,6 @@ Fields
 .. js:autoclass:: JSONField
    :members:
 
-.. js:autoclass:: MultiselectField
-   :members:
-
 .. js:autoclass:: IntegerField
    :members:
 
@@ -109,9 +106,6 @@ QuerySets
 Models
 ------
 .. js:autoclass:: Model
-   :members:
-
-.. js:autoclass:: ModelConstructor
    :members:
 
 .. js:autoclass:: ModelsResolver

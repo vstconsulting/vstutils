@@ -28,22 +28,23 @@ export default class DependFromFkField extends BaseField {
         return this.getRealField(data).toRepresent(data);
     }
 
-    validateValue(value, data) {
-        return this.getRealField(data).validateValue(value, data);
+    validateValue(data) {
+        return this.getRealField(data).validateValue(data);
     }
 
     getFieldByFormat(format, data) {
-        const fieldClass = window.app.fieldsClasses.get(format || 'string');
-
         let callback_opt = {};
         if (this.callback) {
             callback_opt = this.callback(data);
         }
 
-        const realField = new fieldClass(mergeDeep({ format, name: this.name }, callback_opt));
+        const realField = this.constructor.app.fieldsResolver.resolveField(
+            mergeDeep({ format, callback_opt }),
+            this.name,
+        );
 
-        // TODO cannot prepare field because have no app and path
-        // realField.prepareFieldForView(path);
+        // TODO prepareFieldForView
+        // realField.prepareFieldForView()
 
         return realField;
     }

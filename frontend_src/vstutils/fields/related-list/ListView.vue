@@ -1,21 +1,27 @@
 <template>
     <div>
-        <ul v-for="(obj, idx) in value" :key="idx">
-            <li v-for="field in fields" :key="field">
-                <b>{{ field }}:</b>
-                {{ obj[field] }}
+        <ul v-for="(item, idx) in value" :key="idx">
+            <li v-for="field in fields" :key="`${field.name}-${idx}`">
+                <b>{{ field.title }}:</b>
+                <component
+                    :is="field.component"
+                    :field="field"
+                    :data="item"
+                    hide-title
+                    type="list"
+                    style="display: inline"
+                />
             </li>
         </ul>
     </div>
 </template>
 
 <script>
+    import { RelatedListInnerComponentMixin } from './RelatedListInnerComponentMixin.js';
+
     export default {
         name: 'ListView',
-        props: {
-            value: { type: Array, default: () => [] },
-            fields: { type: Array, default: () => [] },
-        },
+        mixins: [RelatedListInnerComponentMixin],
     };
 </script>
 

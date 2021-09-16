@@ -5,6 +5,7 @@
         :data="data"
         :type="type"
         :hideable="hideable"
+        :error="error"
         @toggleHidden="$emit('toggleHidden')"
         @set-value="setValue($event.value)"
     />

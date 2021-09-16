@@ -15,7 +15,7 @@ describe('NamedBinFile test', () => {
             name: 'file',
             mediaType: 'text/txt',
         };
-        expect(binFileField.validateValue(data)).toBe(data);
+        expect(binFileField.validateValue({ [binFileField.name]: data })).toBe(data);
         const bin_data = {
             namedbinfile: {
                 content: 'iVBORw0KGgoAAAANSUhEUgAAASkAAADcCAIAAACj08DLAAAACX',

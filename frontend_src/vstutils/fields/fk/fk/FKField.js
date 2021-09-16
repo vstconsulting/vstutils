@@ -133,7 +133,7 @@ class FKField extends BaseField {
         const executor = new AggregatedQueriesExecutor(qs, this.filterName, this.filterFieldName);
         const promises = [];
         for (const instance of instances) {
-            const pk = instance._data[this.name];
+            const pk = this._getValueFromData(instance._data);
             if (pk) {
                 promises.push(
                     executor

@@ -1188,14 +1188,14 @@ class OpenapiEndpointTestCase(BaseTestCase):
     def test_openapi_schema_content(self):
         api = self.endpoint_schema()
         img_res_validator_data = {
-                    'min_width': 200,
-                    'max_width': 600,
-                    'min_height': 200,
-                    'max_height': 600,
-                    'extensions': [
-                        'jpg'
-                    ],
-                }
+            'min_width': 202,
+            'max_width': 400,
+            'min_height': 201,
+            'max_height': 550,
+            'extensions': [
+                'image/jpeg',
+            ],
+        }
         # Checking versions list
         self.assertIn('application', api['info']['x-versions'])
         self.assertIn('library', api['info']['x-versions'])
@@ -1240,9 +1240,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
             '#/definitions/Author'
         )
         # Check properly format for RelatedListField
-        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['type'], 'string')
-        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['format'], 'related_list')
-        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['additionalProperties']['viewType'], 'table')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['type'], 'array')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['x-format'], 'table')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['items']['type'], 'object')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['posts']['items']['properties']['title']['description'], 'Some description')
+
+
         # Check properly format for RatingField
         self.assertEqual(
                 api['definitions']['OneExtraPost']['properties']['rating'],
@@ -1280,19 +1283,53 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertDictEqual(
             api['definitions']['ModelWithBinaryFiles']['properties']['some_namedbinimage'],
             {
+                'properties': {
+                    'content': {
+                        'type': 'string'
+                    },
+                    'mediaType': {
+                        'type': 'string'
+                    },
+                    'name': {
+                        'type': 'string'
+                    }
+                },
                 'title': 'Some namedbinimage',
-                'type': 'string',
-                'format': 'namedbinimage',
-                'additionalProperties': {},
+                'type': 'object',
+                'x-format': 'namedbinimage',
+                'x-validators': {}
             }
         )
         self.assertDictEqual(
-                api['definitions']['ModelWithBinaryFiles']['properties']['some_validatednamedbinimage']['additionalProperties'],
+                api['definitions']['ModelWithBinaryFiles']['properties']['some_validatednamedbinimage']['x-validators'],
                 img_res_validator_data
             )
         # Check properly format for MultipleNamedBinaryImageInJsonField
         self.assertDictEqual(
-            api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['additionalProperties'],
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_multiplenamedbinimage'],
+            {
+                'items': {
+                    'properties': {
+                        'content': {
+                            'type': 'string'
+                        },
+                        'mediaType': {
+                            'type': 'string'
+                        },
+                        'name': {
+                            'type': 'string'
+                        }
+                    },
+                    'type': 'object',
+                    'x-format': 'namedbinimage',
+                    'x-validators': {}
+                },
+                'title': 'Some multiplenamedbinimage',
+                'type': 'array',
+            }
+        )
+        self.assertDictEqual(
+            api['definitions']['ModelWithBinaryFiles']['properties']['some_validatedmultiplenamedbinimage']['items']['x-validators'],
             img_res_validator_data
         )
         # Check default fields grouping
@@ -1393,10 +1430,6 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['paths']['/listoffiles/{id}/']['get']['responses']['200']['schema'],
             {'type': 'file'}
         )
-
-        # Check MultipleFileField and MultipleImageField serializer mapping in schema
-        self.assertEqual('multiplenamedbinfile', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multiplefile']['format'])
-        self.assertEqual('multiplenamedbinimage', api['definitions']['OverridenModelWithBinaryFiles']['properties']['some_multipleimage']['format'])
 
         # Check deep nested view
         def has_deep_parent_filter(params):
@@ -2009,8 +2042,8 @@ class ValidatorsTestCase(BaseTestCase):
         img_validator = ImageValidator(extensions=['jpg', ])
 
         # check wrong image extension
-        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format,'
-                                                       ' expected (jpg), got bmp\', code=\'invalid\')]'):
+        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format, expected '
+                                                       '(image/jpeg), got image/x-ms-bmp\', code=\'invalid\')]'):
             img_validator({
                 'name': 'cat.bmp',
                 'content': 'cdef',
@@ -2018,7 +2051,7 @@ class ValidatorsTestCase(BaseTestCase):
 
         # check file with no extension
         with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format,'
-                                                       ' expected (jpg), got \', code=\'invalid\')]'):
+                                                       ' expected (image/jpeg), got \', code=\'invalid\')]'):
             img_validator({
                 'name': 'qwerty123',
                 'content': 'abcd',
@@ -2606,7 +2639,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], False)
 
-        properties = definitions['OneModelWithFK']['properties']['multiselect']['additionalProperties']
+        properties = definitions['OneModelWithFK']['properties']['multiselect']['items']['additionalProperties']
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], True)
 
@@ -2683,7 +2716,6 @@ class ProjectTestCase(BaseTestCase):
             self.assertEqual(results[pos]['status'], 200)
             self.assertEqual(results[pos]['data']['count'], count)
 
-    # find me
     def test_model_rating_field(self):
         date = '2021-01-20T00:26:38Z'
         author = Author.objects.create(name='author_1', registerDate=date)

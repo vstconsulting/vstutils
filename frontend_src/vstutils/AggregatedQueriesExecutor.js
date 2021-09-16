@@ -22,6 +22,8 @@ export class AggregatedQueriesExecutor {
         let callbacks;
         const promise = new Promise((resolve, reject) => (callbacks = { resolve, reject }));
 
+        filterFieldValue = String(filterFieldValue);
+
         if (!this._queries.has(filterFieldValue)) {
             this._queries.set(filterFieldValue, []);
         }
@@ -54,7 +56,7 @@ export class AggregatedQueriesExecutor {
 
         // Resolve promises for found instances
         for (const instance of instances) {
-            const filterFieldValue = instance._data[this.filterFieldName];
+            const filterFieldValue = String(instance._data[this.filterFieldName]);
             if (!queries.has(filterFieldValue)) {
                 continue;
             }

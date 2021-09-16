@@ -23,21 +23,35 @@ class ChoicesField extends StringField {
         return null;
     }
 
-    prepareEnumData(data) {
-        if (typeof data === 'string' && data.length > 0) {
-            // 'val1,val2'
-            return data.split(',').map((val) => ({ id: val, text: val }));
-        } else if (Array.isArray(data) && data.length > 0) {
-            if (Array.isArray(data[0])) {
-                // [['val1', 'Val 1'], ['val2', 'Val 2']]
-                return data.map(([id, text]) => ({ id, text }));
-            } else if (typeof data[0] === 'object') {
-                // Legacy object format (value and prefetchValue properties)
-                return data.map((item) => ({ id: item.value, text: item.prefetch_value }));
-            } else {
-                // ['val1', 'val2']
-                return data.map((val) => ({ id: val, text: val }));
+    prepareEnumItem(item) {
+        if (typeof item === 'string') {
+            return { id: item, text: item };
+        }
+        if (Array.isArray(item)) {
+            // Example: [['val1', 'Val 1'], ['val2', 'Val 2']]
+            return { id: item[0], text: item[1] };
+        }
+        if (typeof item === 'object') {
+            if (typeof item.getViewFieldString === 'function') {
+                const val = item.getViewFieldString();
+                return { id: val, text: val };
             }
+            if (item.value && item.prefetch_value) {
+                // Legacy object format (value and prefetchValue properties)
+                return { id: item.value, text: item.prefetch_value };
+            }
+        }
+
+        this._error(`Can not handle option "${item}"`);
+    }
+
+    prepareEnumData(data = this.enum) {
+        if (typeof data === 'string' && data.length > 0) {
+            // Example: 'val1,val2'
+            return data.split(',').map((val) => ({ id: val, text: val }));
+        }
+        if (Array.isArray(data)) {
+            return data.map((item) => this.prepareEnumItem(item)).filter(Boolean);
         }
         return [];
     }

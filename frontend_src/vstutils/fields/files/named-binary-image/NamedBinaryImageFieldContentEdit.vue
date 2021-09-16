@@ -20,7 +20,7 @@
                 {{ val }}
             </p>
 
-            <ReadFileButton :extensions="field.extensions" @read-file="readFiles" />
+            <ReadFileButton @read-file="readFiles" />
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
             <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
@@ -37,7 +37,7 @@
     const ReadFileButton = {
         data() {
             return {
-                accept: this.$parent.field.extensions || 'image/*',
+                accept: this.$parent.field.allowedMediaTypes?.join(','),
                 helpText: 'Open image',
             };
         },

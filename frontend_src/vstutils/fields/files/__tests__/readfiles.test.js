@@ -7,7 +7,7 @@ describe('File fields', () => {
         const field = new NamedBinaryImageField({
             name: 'field',
             additionalProperties: {
-                extensions: ['jpg'],
+                extensions: ['image/jpeg'],
             },
         });
 

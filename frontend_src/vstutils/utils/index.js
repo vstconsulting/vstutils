@@ -6,6 +6,8 @@ import { i18n } from '../translation.js';
 
 export const guiLocalSettings = new LocalSettings('guiLocalSettings');
 
+export const EMPTY = Symbol('EMPTY');
+
 /**
  * @param {Object} obj
  * @param {string} prop
@@ -13,6 +15,20 @@ export const guiLocalSettings = new LocalSettings('guiLocalSettings');
  */
 export function hasOwnProp(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+/**
+ * Return property's value of the object or fallback if property is missing
+ * @param {Object} obj
+ * @param {string} prop
+ * @param {any} [fallback]
+ * @return {any}
+ */
+export function getProp(obj, prop, fallback = undefined) {
+    if (hasOwnProp(obj, prop)) {
+        return obj[prop];
+    }
+    return fallback;
 }
 
 /**
@@ -1215,3 +1231,61 @@ export class ModelValidationError extends Error {
         return lines.join('<br />');
     }
 }
+
+/**
+ * Function that wraps object in Proxy
+ * @param {object} target
+ * @param {string|symbol} propertyToProxy
+ * @param {*} newValue
+ * @return {any|boolean|symbol}
+ */
+export function createPropertyProxy(target, propertyToProxy, newValue = EMPTY) {
+    let value = newValue === EMPTY ? Reflect.get(target, propertyToProxy) : newValue;
+
+    return new Proxy(target, {
+        get(target, property, receiver) {
+            if (property === propertyToProxy) {
+                return value;
+            }
+            return Reflect.get(target, property, receiver);
+        },
+        set(target, property, updatedValue, receiver) {
+            if (property === propertyToProxy) {
+                value = updatedValue;
+                return true;
+            }
+            return Reflect.set(target, property, updatedValue, receiver);
+        },
+    });
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+export function stopEnterPropagationCallback(event) {
+    if (event.code === 'Enter') {
+        event.stopPropagation();
+    }
+}
+
+export function stopEnterPropagation(element) {
+    element.addEventListener('keyup', stopEnterPropagationCallback);
+}
+
+export function resumeEnterPropagation(element) {
+    element.removeEventListener('keyup', stopEnterPropagationCallback);
+}
+
+export const SCHEMA_DATA_TYPE = {
+    string: 'string',
+    number: 'number',
+    integer: 'integer',
+    boolean: 'boolean',
+    array: 'array',
+    object: 'object',
+    file: 'file',
+};
+
+export const SCHEMA_DATA_TYPE_VALUES = Object.values(SCHEMA_DATA_TYPE);
+
+export const ENUM_TYPES = [SCHEMA_DATA_TYPE.string, SCHEMA_DATA_TYPE.integer, SCHEMA_DATA_TYPE.number];

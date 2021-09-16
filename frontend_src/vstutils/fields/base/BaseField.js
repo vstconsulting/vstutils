@@ -24,7 +24,10 @@ class BaseField {
         this.props = options.additionalProperties || {};
 
         /** @type {string} */
-        this.format = options.format;
+        this.type = options.type;
+
+        /** @type {string} */
+        this.format = options.format || this.type;
 
         /** @type {FieldValidator[]} */
         this.validators = [];
@@ -70,6 +73,18 @@ class BaseField {
         };
     }
 
+    _getValueFromData(data) {
+        return data[this.name];
+    }
+
+    /**
+     * Prints error message
+     * @param {string} msg
+     */
+    _error(msg) {
+        console.error(`${this.constructor.name}:${this.name}: ${msg}`);
+    }
+
     /**
      * Method, that prepares instance of field for usage. Method is called after models and views are
      * created, for every field instance that is part of view.
@@ -111,7 +126,7 @@ class BaseField {
      * @return {TInner}
      */
     toInner(data) {
-        return data[this.name];
+        return this._getValueFromData(data);
     }
 
     /**
@@ -120,15 +135,16 @@ class BaseField {
      * @return {TRepresent}
      */
     toRepresent(data) {
-        return data[this.name];
+        return this._getValueFromData(data);
     }
 
     /**
      * Method that validates value.
-     * @param {*} value - Value to validate.
      * @param {RepresentData} data - Object with all values.
      */
-    validateValue(value) {
+    // eslint-disable-next-line no-unused-vars
+    validateValue(data) {
+        const value = this._getValueFromData(data);
         let value_length = 0;
         let samples = pop_up_msg.field.error;
         let $t = _translate;

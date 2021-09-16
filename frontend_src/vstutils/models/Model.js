@@ -239,9 +239,8 @@ export class Model {
         /** @type {FieldValidationErrorInfo[]} */
         const errors = [];
         for (const field of this._fields.values()) {
-            const value = data[field.name];
             try {
-                field.validateValue(value, data);
+                field.validateValue(data);
             } catch (e) {
                 errors.push({ field, message: e.message });
             }
