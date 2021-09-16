@@ -349,7 +349,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
 
         if action_name not in main_actions:
             view_func = getattr(self, action_name)
-            serializer_class = view_func.kwargs.get('serializer_class', None)
+            serializer_class = getattr(view_func, 'kwargs', {}).get('serializer_class', None)
             if serializer_class:
                 return serializer_class
 

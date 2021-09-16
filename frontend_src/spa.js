@@ -4,12 +4,13 @@ import { openapi_dictionary } from './vstutils/api';
 import { guiLocalSettings, RequestTypes } from './vstutils/utils';
 import { PageNewView, ViewConstructor, ViewsTree } from './vstutils/views';
 import { StoreConstructor } from './vstutils/store';
-import { ModelConstructor, ModelsResolver } from './vstutils/models';
+import { ModelsResolver } from './vstutils/models';
 import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 import { QuerySetsResolver } from './vstutils/querySet';
 import { signals } from './app.common.js';
-import { getFieldFactory, getFieldFormatFactory } from './vstutils/fields';
 import * as utils from './vstutils/utils';
+import { FieldsResolver, addDefaultField } from './vstutils/fields';
+import { APP_CREATED } from './vstutils/signals.js';
 
 export * from './app.common.js';
 
@@ -22,23 +23,15 @@ export class App extends BaseApp {
      * Constructor of App class.
      * @param {AppConfiguration} config Object with OpenAPI schema.
      * @param {FakeCache} cache Cache instance (is supposed to be instance of FilesCache class).
-     * @param {Map<string, BaseField>} fields
-     * @param {Map<string, Function>} models
      */
-    constructor(config, cache, fields, models) {
+    constructor(config, cache) {
         super(config, cache);
-
-        this.fieldsClasses = fields;
-        this.getFieldFormat = getFieldFormatFactory(fields);
-        this.getField = getFieldFactory(fields);
-
-        this.modelsClasses = models;
+        this.fieldsResolver = new FieldsResolver(this.config.schema);
+        addDefaultField(this.fieldsResolver);
+        this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.config.schema);
 
         /** @type {Map<string, View>} */
         this.views = null;
-
-        /** @type {ModelsResolver} */
-        this.modelsResolver = null;
 
         /** @type {QuerySetsResolver} */
         this.qsResolver = null;
@@ -47,28 +40,23 @@ export class App extends BaseApp {
          * Main(root) Vue instance for current application, that has access to the app store and app router.
          */
         this.application = null;
+
+        signals.emit(APP_CREATED, this);
     }
 
     getCurrentViewPath() {
-        return this.application.$refs.currentViewComponent?.view?.path;
+        return this.application?.$refs?.currentViewComponent?.view?.path;
     }
 
     afterInitialDataBeforeMount() {
         this.prepareFieldsClasses();
 
-        new ModelConstructor(
-            openapi_dictionary,
-            this.config.schema,
-            this.fieldsClasses,
-            this.modelsClasses,
-        ).generateModels();
-
-        this.modelsResolver = new ModelsResolver(this.modelsClasses, this.fieldsClasses, this.config.schema);
+        this.generateDefinitionsModels();
 
         this.views = new ViewConstructor(
             openapi_dictionary,
-            this.modelsClasses,
-            this.fieldsClasses,
+            this.modelsResolver,
+            this.fieldsResolver,
         ).generateViews(this.config.schema);
 
         this.viewsTree = new ViewsTree(this.views);
@@ -77,8 +65,15 @@ export class App extends BaseApp {
         this.setNestedViewsQuerysets();
     }
 
+    generateDefinitionsModels() {
+        for (const name of Object.keys(this.config.schema.definitions)) {
+            this.modelsResolver.byReferencePath(`#/definitions/${name}`);
+        }
+        signals.emit('allModels.created', { models: this.modelsResolver._definitionsModels });
+    }
+
     prepareFieldsClasses() {
-        for (const fieldClass of this.fieldsClasses.values()) {
+        for (const fieldClass of this.fieldsResolver.allFieldsClasses()) {
             fieldClass.app = this;
         }
     }

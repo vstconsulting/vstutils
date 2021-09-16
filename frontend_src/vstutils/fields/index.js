@@ -1,8 +1,7 @@
-import { globalFields, guiFields } from './fields.js';
+import { FieldsResolver } from './FieldsResolver.js';
+export { FieldsResolver };
 
-export { globalFields, guiFields };
-
-import * as apiObject from './api-object';
+import * as array from './array';
 import * as autocomplete from './autocomplete';
 import * as base from './base';
 import * as boolean from './boolean';
@@ -12,15 +11,18 @@ import * as datetime from './datetime';
 import * as dynamic from './dynamic';
 import * as files from './files';
 import * as fk from './fk';
-import * as form from './form';
 import * as json from './json';
-import * as multiselect from './multiselect';
 import * as nestedObject from './nested-object.js';
 import * as numbers from './numbers';
 import * as password from './password';
 import * as text from './text';
+import * as color from './color.js';
+import * as email from './email.js';
+import * as hidden from './hidden.js';
+import * as staticValue from './static-value.js';
+
 export {
-    apiObject,
+    array,
     autocomplete,
     base,
     boolean,
@@ -30,86 +32,125 @@ export {
     dynamic,
     files,
     fk,
-    form,
     json,
-    multiselect,
     nestedObject,
     numbers,
     password,
     text,
+    color,
+    email,
+    hidden,
+    staticValue,
 };
 
-import * as apiData from './api-data.js';
-import * as color from './color.js';
-import * as email from './email.js';
-import * as hidden from './hidden.js';
-import * as staticValue from './static-value.js';
-export { apiData, color, email, hidden, staticValue };
+import { PasswordField } from './password';
+import { QRCodeField } from './qr.js';
+import { EmailField } from './email.js';
+import { ColorField } from './color.js';
+import { CrontabField } from './crontab';
+import { ChoicesField } from './choices';
+import { AutocompleteField } from './autocomplete';
+import { DependFromFkField, DynamicField } from './dynamic';
+import { HiddenField } from './hidden.js';
+import { StaticValueField } from './static-value.js';
+import { JSONField } from './json';
+import { RelatedListField } from './related-list';
 
 import FieldLabelIdMixin from './FieldLabelIdMixin.js';
 import ModalWindowAndButtonMixin from './ModalWindowAndButtonMixin.js';
 import TableRowMixin from './TableRowMixin.js';
-import $ from 'jquery';
+import { SCHEMA_DATA_TYPE } from '../utils';
 export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
 /**
- * Method, that creates new getFieldFormat function for given fields map.
- * @param {Map<string, BaseField>} fields
+ * @param {FieldsResolver} fieldsResolver
  */
-export function getFieldFormatFactory(fields) {
-    /**
-     * Function, that returns format for field options.
-     * @param {object} fieldOptions - Object with field options.
-     */
-    return function getFieldFormat(fieldOptions) {
-        if (fields.has(fieldOptions.format)) {
-            return fieldOptions.format;
-        }
+export function addDefaultField(fieldsResolver) {
+    // Set STRING fields
+    for (const [format, field] of [
+        [FieldsResolver.DEFAULT_FIELD_KEY, text.StringField],
+        ['autocomplete', AutocompleteField],
+        ['binfile', files.binaryFile.BinaryFileField],
+        ['choices', ChoicesField],
+        ['color', ColorField], // CANT_CREATE_ON_BACKEND
+        ['crontab', CrontabField], // CANT_CREATE_ON_BACKEND
+        ['date', datetime.DateField],
+        ['date-time', datetime.DateTimeField],
+        ['decimal', numbers.DecimalField],
+        ['email', EmailField],
+        ['file', files.file.FileField],
+        ['fk', fk.fk.FKField],
+        ['fk_autocomplete', fk.autocomolete.FKAutocompleteField],
+        ['html', text.HTMLField],
+        ['json', JSONField],
+        ['masked', text.masked.MaskedField],
+        ['password', PasswordField],
+        ['phone', text.phone.PhoneField],
+        ['plain_text', text.PlainTextField],
+        ['qrcode', QRCodeField],
+        ['secretfile', files.secretFile.SecretFileField],
+        ['text_paragraph', text.TextParagraphField],
+        ['textarea', text.TextAreaField],
+        ['time_interval', datetime.TimeIntervalField], // CANT_CREATE_ON_BACKEND
+    ]) {
+        fieldsResolver.registerField(SCHEMA_DATA_TYPE.string, format, field);
+    }
 
-        if (fieldOptions.enum) {
-            return 'choices';
-        }
+    // Set NUMBER fields
+    for (const [format, field] of [
+        [FieldsResolver.DEFAULT_FIELD_KEY, numbers.NumberField],
+        ['float', numbers.FloatField],
+        ['rating', numbers.rating.RatingField],
+    ]) {
+        fieldsResolver.registerField(SCHEMA_DATA_TYPE.number, format, field);
+    }
 
-        if (Object.keys(fieldOptions).includes('$ref')) {
-            return 'nested-object';
-        }
+    // Set INTEGER fields
+    for (const [format, field] of [
+        [FieldsResolver.DEFAULT_FIELD_KEY, numbers.integer.IntegerField],
+        ['choices', ChoicesField],
+        ['fk', fk.fk.FKField],
+        ['uptime', datetime.UptimeField],
+    ]) {
+        fieldsResolver.registerField(SCHEMA_DATA_TYPE.integer, format, field);
+    }
 
-        if (fields.has(fieldOptions.type)) {
-            return fieldOptions.type;
-        }
+    // Set BOOLEAN fields
+    fieldsResolver.registerDefaultForType(SCHEMA_DATA_TYPE.boolean, boolean.BooleanField);
 
-        console.warn('Default field format is used', fieldOptions);
-        return 'string';
-    };
+    // Set ARRAY fields
+    for (const [format, field] of [
+        [FieldsResolver.DEFAULT_FIELD_KEY, array.ArrayField],
+        ['fk_multi_autocomplete', fk.multiAutocomplete.FKMultiAutocompleteField], // DOES_NOTHING_ON_FRONTEND
+        ['list', RelatedListField],
+        ['namedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],
+        ['namedbinimage', files.multipleNamedBinaryImage.MultipleNamedBinaryImageField],
+        ['string_array', text.StringArrayField], // CANT_CREATE_ON_BACKEND
+        ['table', RelatedListField],
+    ]) {
+        fieldsResolver.registerField(SCHEMA_DATA_TYPE.array, format, field);
+    }
+
+    // Set OBJECT fields
+    for (const [format, field] of [
+        [FieldsResolver.DEFAULT_FIELD_KEY, nestedObject.NestedObjectField],
+        ['json', JSONField],
+        ['namedbinfile', files.namedBinaryFile.NamedBinaryFileField],
+        ['namedbinimage', files.namedBinaryImage.NamedBinaryImageField],
+    ]) {
+        fieldsResolver.registerField(SCHEMA_DATA_TYPE.object, format, field);
+    }
+
+    // Set universal fields
+    const allTypes = Object.values(SCHEMA_DATA_TYPE);
+    for (const [format, field] of [
+        ['dynamic', DynamicField],
+        ['dynamic_fk', DependFromFkField],
+        ['hidden', HiddenField],
+        ['static_value', StaticValueField],
+    ]) {
+        for (const type of allTypes) {
+            fieldsResolver.registerField(type, format, field);
+        }
+    }
 }
-
-/**
- * @param {Map<string, BaseField>} fields
- */
-export function getFieldFactory(fields) {
-    const getFieldFormat = getFieldFormatFactory(fields);
-
-    /**
-     * @param {string} [fieldName]
-     * @param {string|Object} options
-     */
-    return function getField(fieldName, options) {
-        if (options instanceof base.BaseField) return options;
-        if (!fieldName) fieldName = options.name;
-        if (typeof options === 'string') options = { format: options };
-        const FieldClass = fields.get(getFieldFormat(options));
-
-        return new FieldClass(
-            $.extend(true, {}, options, {
-                name: fieldName,
-                format: this.getFieldFormat(options),
-            }),
-        );
-    };
-}
-
-/**
- * Function, that returns format for field options.
- * @param {object} fieldOptions - Object with field options.
- */
-export const getFieldFormat = getFieldFormatFactory(globalFields);

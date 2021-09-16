@@ -1,6 +1,7 @@
 // Global libraries
 import TabSignal from '@vstconsulting/tabsignal';
 import signals from './vstutils/signals.js';
+export * from './vstutils/signals.js';
 
 import './libs/jquery.js';
 
@@ -50,7 +51,6 @@ export { colors };
 // vstutils code
 import AppRoot from './vstutils/AppRoot.vue';
 import * as utils from './vstutils/utils';
-import * as guiCustomizer from './vstutils/guiCustomizer';
 import * as setupVue from './vstutils/setupVue.js';
 import * as popUp from './vstutils/popUp';
 import * as fields from './vstutils/fields';
@@ -68,7 +68,6 @@ export * from './vstutils/ComponentsRegistrator.js';
 export {
     AppRoot,
     utils,
-    guiCustomizer,
     setupVue,
     popUp,
     fields,

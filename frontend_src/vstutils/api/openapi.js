@@ -8,17 +8,6 @@ import AddChildModal from '../components/list/AddChildModal.vue';
  * that can contain another attributes names.
  */
 const openapi_dictionary = {
-    models: {
-        name: 'definitions',
-        fields: {
-            name: 'properties',
-        },
-        required_fields: {
-            name: 'required',
-        },
-        ref_names: ['$ref', 'definition_ref'],
-        filters_to_delete: ['limit', 'offset'],
-    },
     paths: {
         name: 'paths',
         operation_id: {

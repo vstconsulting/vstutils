@@ -7,16 +7,19 @@ jest.mock('../../../api');
 
 describe('FKfield', () => {
     /** @type {App} */
-    let app;
+    let app, modelsClasses;
 
     beforeAll(() => {
-        return createApp().then((a) => (app = a));
+        return createApp().then((a) => {
+            app = a;
+            modelsClasses = app.modelsResolver._definitionsModels;
+        });
     });
 
     test('Test Fk model', async () => {
-        const authorFkField = app.modelsClasses.get('Post').fields.get('author');
-        const Post = app.modelsClasses.get('Post');
-        const filteredFk = app.modelsClasses.get('OneAllFields').fields.get('fk_with_filters');
+        const authorFkField = modelsClasses.get('Post').fields.get('author');
+        const Post = modelsClasses.get('Post');
+        const filteredFk = modelsClasses.get('OneAllFields').fields.get('fk_with_filters');
         expect(authorFkField.format).toBe('fk');
         expect(authorFkField.fkModel.name).toBe('Author');
         expect(authorFkField).toBeInstanceOf(FKField);
@@ -48,7 +51,7 @@ describe('FKfield', () => {
     });
 
     test('querysets selection', () => {
-        const OnePost = app.modelsClasses.get('OnePost');
+        const OnePost = modelsClasses.get('OnePost');
         const category = OnePost.fields.get('category');
 
         expect(category).toBeInstanceOf(FKField);

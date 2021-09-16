@@ -19,7 +19,7 @@ There are several stages in vstutils app:
     * loads translations;
     * `api.loadUser()` returns user data;
     * `prepareFieldsClasses()` used to customize field class;
-    * `ModelConstructor.generateModels()` creates models from schema, fieldClasses and modelClasses. Emits signal `models[${modelName}].created` for each created model and `allModels.created` when all models created;
+    * `ModelsResolver` creates models from schema, emits signal `models[${modelName}].created` for each created model and `allModels.created` when all models created;
     * `ViewConstructor.generateViews()` inits `View` fieldClasses and modelClasses;
     * `QuerySetsResolver` finds appropriate queryset by model name and view path;
     * `global_components.registerAll()`  registers Vue `global_components`;
@@ -46,13 +46,13 @@ There is a flowchart representing application initialization process(signal name
       Centrifugo-->LoadTranslation
       LoadTranslation-->api.LoadUser-->GetCurrentUser
       GetCurrentUser-->PrepareFieldClasses
-      PrepareFieldClasses-->ModelConstructor.generateModels
-      subgraph ModelsConstructor
-      ModelConstructor.generateModels--All Models Created-->B('allModels.created'):::classSignal
-      ModelConstructor.generateModels--Not All Models Created-->CreateModel
+      PrepareFieldClasses-->ModelsResolver
+      subgraph Models generation
+      ModelsResolver--All Models Created-->B('allModels.created'):::classSignal
+      ModelsResolver--Not All Models Created-->CreateModel
       CreateModel(CreateModel)-->SignalBeforeInit("'models#91;modelName#93;.fields.beforeInit'"):::classSignal-->CreateFields
       CreateFields-->SignalAfterInit("'models#91;modelName#93;.fields.afterInit'"):::classSignal-->modelsmodelName.created:::classSignal
-      modelsmodelName.created-->ModelConstructor.generateModels
+      modelsmodelName.created-->ModelsResolver
       end
       ViewConstructor.generateViews--'allViewsCreated'-->QuerySetResolver
       QuerySetResolver--finds approppriate querySet-->global_components.registerAll
@@ -119,12 +119,12 @@ Or render person's name with some prefix
     }
 
 
-2. Register this field to `app.fieldsClasses` to provide appropriate field format to a new field
+2. Register this field to `app.fieldsResolver` to provide appropriate field format and type to a new field
 
 .. sourcecode:: javascript
 
     const customFieldFormat = 'customField';
-    app.fieldsClasses.set(customFieldFormat, CustomField);
+    app.fieldsResolver.registerField('string', customFieldFormat, CustomField);
 
 3. Listen for a appropriate `models[ModelWithFieldToChange].fields.beforeInit` signal to change field Format
 
@@ -153,7 +153,7 @@ and `toRepresent` methods.
     }
 
     const milliSecondsFieldFormat = 'milliSeconds'
-    app.fieldsClasses.set(milliSecondsFieldFormat, MilliSecondsField);
+    app.fieldsResolver.registerField('integer', milliSecondsFieldFormat, MilliSecondsField);
     spa.signals.connect(`models[OneAllFields].fields.beforeInit`, (fields) => {
       fields.integer.format = milliSecondsFieldFormat;
     });
@@ -169,7 +169,7 @@ Listen for `app.beforeInit` signal.
 .. sourcecode:: javascript
 
     spa.signals.connect('app.beforeInit', ({ app }) => {
-      app.modelsClasses.get('OnePost').fields.get('author').querysets.get('/post/new/')[0].url = '/famous_author/'
+      app.modelsResolver.get('OnePost').fields.get('author').querysets.get('/post/new/')[0].url = '/famous_author/'
     });
 
 Now when we create new post on `/post/` endpoint Author FkField makes get request to `/famous_author/` instead of `/author/`. It's

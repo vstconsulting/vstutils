@@ -71,7 +71,7 @@
         data: () => ({ isSaving: false }),
         computed: {
             sections() {
-                const UserSettings = this.$app.modelsClasses.get('_UserSettings');
+                const UserSettings = this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings');
                 const sectionsFields = Array.from(UserSettings.fields.values()).filter((f) => f.nestedModel);
 
                 return sectionsFields

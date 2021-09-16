@@ -140,7 +140,7 @@ export const PageNewViewComponent = {
                 }
                 this.$app.error_handler.showError(
                     this.$t(isUpdate ? pop_up_msg.instance.error.save : pop_up_msg.instance.error.create, [
-                        modelValidationError.toHtmlString() || this.$app.error_handler.errorToString(error),
+                        this.$app.error_handler.errorToString(modelValidationError || error),
                     ]),
                 );
             } finally {
@@ -262,7 +262,7 @@ export const ActionViewComponent = {
                 this.$app.error_handler.showError(
                     this.$t(pop_up_msg.instance.error.execute, [
                         this.$t(this.view.title),
-                        modelValidationError.toHtmlString() || this.$app.error_handler.errorToString(error),
+                        this.$app.error_handler.errorToString(modelValidationError || error),
                     ]),
                 );
             } finally {

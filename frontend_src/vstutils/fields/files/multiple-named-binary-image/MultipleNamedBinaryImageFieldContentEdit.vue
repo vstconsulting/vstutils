@@ -43,7 +43,7 @@
     const ReadFileButton = {
         data() {
             return {
-                accept: this.$parent.field.extensions || 'image/*',
+                accept: this.$parent.field.allowedMediaTypes?.join(','),
                 helpText: 'Open images',
                 multiple: true,
             };

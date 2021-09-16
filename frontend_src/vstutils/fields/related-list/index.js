@@ -2,7 +2,7 @@ import { BaseField } from '../base';
 import BaseFieldMixin from '../base/BaseFieldMixin.vue';
 import RelatedListFieldListView from './RelatedListFieldListView.vue';
 import RelatedListFieldReadonlyView from './RelatedListFieldReadonlyView.vue';
-import { addCssClassesToElement } from '../../utils';
+import { addCssClassesToElement, registerHook } from '../../utils';
 
 /**
  * @vue/component
@@ -32,11 +32,20 @@ export const RelatedListFieldMixin = {
 export class RelatedListField extends BaseField {
     constructor(options) {
         super(options);
-        this.fields = options.additionalProperties.fields;
-        this.viewType = options.additionalProperties.viewType;
+        this.viewType = this.format;
+        this.format = 'related_list';
+        registerHook('allModels.created', () => {
+            this.itemsModel = this.constructor.app.modelsResolver.bySchemaObject(this.options.items);
+        });
     }
 
     static get mixins() {
         return [RelatedListFieldMixin];
+    }
+
+    prepareFieldForView(path) {
+        for (const field of this.itemsModel.fields.values()) {
+            field.prepareFieldForView(path);
+        }
     }
 }

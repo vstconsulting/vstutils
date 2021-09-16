@@ -11,7 +11,6 @@ import {
 import signals from '../signals.js';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
-import { getFieldFormatFactory } from '../fields';
 import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.js';
 import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
 import NotEmptyMultiactionModal from '../components/list/NotEmptyMultiactionModal.vue';
@@ -37,23 +36,20 @@ const ACTION_NAME = 'x-action-name';
 const IS_MULTI_ACTION_PROPERTY_NAME = 'x-multiaction';
 
 /**
- * ModelConstructor is a class, that have methods to parse of OpenAPI schema
- * and to generate Views objects based on the result of parsing.
-
+ * Class used to create views objects from schema
  */
 export default class ViewConstructor {
     /**
      * Constructor of ViewConstructor class.
      * @param {object} openapi_dictionary Dict, that has info about properties names in OpenApi Schema
      * and some settings for views of different types.
-     * @param {Map<string, Function>} modelsClasses
-     * @param {Map<string, Function>} fieldsClasses
+     * @param {ModelsResolver} modelsResolver
+     * @param {FieldsResolver} fieldsResolver
      */
-    constructor(openapi_dictionary, modelsClasses, fieldsClasses) {
+    constructor(openapi_dictionary, modelsResolver, fieldsResolver) {
         this.dictionary = openapi_dictionary;
-        this.modelsClasses = modelsClasses;
-        this.fieldsClasses = fieldsClasses;
-        this.getFieldFormat = getFieldFormatFactory(fieldsClasses);
+        this.modelsResolver = modelsResolver;
+        this.fieldsResolver = fieldsResolver;
     }
 
     /**
@@ -99,12 +95,11 @@ export default class ViewConstructor {
      * @return {Function}
      */
     _getOperationModel(response) {
-        const responseModelRef =
-            response.schema?.$ref || // Detail view
-            response.schema?.properties?.results?.items?.$ref || // List view
-            NoModel.name; // Default model
-
-        return this.modelsClasses.get(responseModelRef.split('/').pop());
+        const schema = response?.schema?.properties?.results?.items || response?.schema;
+        if (!schema) {
+            return NoModel;
+        }
+        return this.modelsResolver.bySchemaObject(schema) || NoModel;
     }
 
     /**
@@ -442,13 +437,12 @@ export default class ViewConstructor {
         signals.emit(`views[${path}].filters.beforeInit`, parametersCopy);
 
         for (const parameterObject of parametersCopy) {
-            const format = this.getFieldFormat(parameterObject);
-            const fieldConstructor = this.fieldsClasses.get(format);
-            const options = $.extend(true, parameterObject, { format, readOnly: false });
-            if (parameterObject.name.startsWith('__')) {
-                options.hidden = true;
-            }
-            filters[parameterObject.name] = new fieldConstructor(options);
+            const name = parameterObject.name;
+            filters[name] = this.fieldsResolver.resolveField({
+                ...parameterObject,
+                readOnly: false,
+                ...(name.startsWith('__') ? { hidden: true } : null),
+            });
         }
 
         signals.emit(`views[${path}].filters.afterInit`, parametersCopy);

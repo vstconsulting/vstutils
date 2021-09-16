@@ -1,18 +1,18 @@
 import { describe, expect, test } from '@jest/globals';
 import { HttpMethods, RequestTypes } from '../../utils';
-import { globalFields } from '../../fields';
 import openapi_dictionary from '../../api/openapi.js';
-import { ModelConstructor } from '../../models';
 import ViewConstructor from '../ViewConstructor.js';
 import testSchema from './../../../__mocks__/testSchema.json';
 import { PageEditView, ViewTypes } from '../View.js';
+import { FieldsResolver } from '../../fields';
+import { ModelsResolver } from '../../models';
 
 describe('ViewConstructor', () => {
-    const modelsClasses = new Map();
-    new ModelConstructor(openapi_dictionary, testSchema, globalFields, modelsClasses).generateModels();
-
-    const viewConstructor = new ViewConstructor(openapi_dictionary, modelsClasses, globalFields);
+    const fieldsResolver = new FieldsResolver(testSchema);
+    const modelsResolver = new ModelsResolver(fieldsResolver, testSchema);
+    const viewConstructor = new ViewConstructor(openapi_dictionary, modelsResolver, fieldsResolver);
     const views = viewConstructor.generateViews(testSchema);
+    const modelsClasses = modelsResolver._definitionsModels;
 
     test.each(['/fragment1/fragment2/fragment3/fragment4/author/', '/author/'])(
         'authors view (%s)',

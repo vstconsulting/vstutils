@@ -9,7 +9,7 @@ class FileField extends TextAreaField {
         super(options);
 
         this.maxSize = options.max_size;
-        this.extensions = options.additionalProperties?.extensions?.map((ext) => '.' + ext).join(',');
+        this.allowedMediaTypes = this.options['x-validators']?.extensions;
     }
 
     /**

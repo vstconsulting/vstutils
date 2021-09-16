@@ -3,7 +3,7 @@ import typing as _t
 import re
 import warnings
 from io import BytesIO
-from pathlib import PurePosixPath
+from mimetypes import guess_type
 
 from rest_framework import serializers
 
@@ -62,9 +62,17 @@ class ImageValidator:
     def __init__(self, extensions: _t.Optional[_t.Union[_t.Tuple, _t.List]] = None, **kwargs):
         if extensions is not None:
             assert isinstance(extensions, (tuple, list)), "extensions must be list or tuple"
-            self.extensions = extensions
         else:
-            self.extensions = self.default_extensions
+            extensions = self.default_extensions
+        self.extensions = tuple(
+            filter(
+                bool,
+                {
+                    guess_type(f'name.{e}')[0]
+                    for e in extensions
+                }
+            )
+        )
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -72,11 +80,11 @@ class ImageValidator:
         if not self.has_pillow:
             warnings.warn(self.warning_msg, ImportWarning)
             return
-        file_extension = PurePosixPath(value['name']).suffix
-        if value and file_extension[1:] not in self.extensions:
+        file_media_type = guess_type(value['name'])[0]
+        if value and self.extensions and file_media_type not in self.extensions:
             raise serializers.ValidationError(f'unsupported image file format,'
                                               f' expected ({",".join(self.extensions)}),'
-                                              f' got {file_extension[1:]}')
+                                              f' got {file_media_type or ""}')
 
     @property
     def has_pillow(self):

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Dict, Type, Text, Any
 from collections import OrderedDict
 
@@ -20,8 +21,6 @@ FORMAT_SECRET_FILE = 'secretfile'  # nosec
 FORMAT_BIN_FILE = 'binfile'
 FORMAT_NAMED_BIN_FILE = 'namedbinfile'
 FORMAT_NAMED_BIN_IMAGE = 'namedbinimage'
-FORMAT_MULTIPLE_NAMED_BIN_FILE = 'multiplenamedbinfile'
-FORMAT_MULTIPLE_NAMED_BIN_IMAGE = 'multiplenamedbinimage'
 FORMAT_AUTOCOMPLETE = 'autocomplete'
 FORMAT_FK_AUTOCOMPLETE = 'fk_autocomplete'
 FORMAT_MULTISELECT = 'multiselect'
@@ -54,12 +53,21 @@ basic_type_info[fields.BinFileInStringField] = {
     'format': FORMAT_BIN_FILE
 }
 basic_type_info[fields.NamedBinaryFileInJsonField] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_NAMED_BIN_FILE
+    'type': openapi.TYPE_OBJECT,
+    'x-format': FORMAT_NAMED_BIN_FILE,
+    'properties': {
+        k: openapi.Schema(
+            type=openapi.TYPE_STRING,
+            default=v,
+        )
+        for k, v in fields.DEFAULT_NAMED_FILE_DATA.items()
+    }
 }
 basic_type_info[fields.MultipleNamedBinaryFileInJsonField] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_MULTIPLE_NAMED_BIN_FILE
+    'type': openapi.TYPE_ARRAY,
+    'items': openapi.Items(
+        **basic_type_info[fields.NamedBinaryFileInJsonField]
+    )
 }
 basic_type_info[fields.HtmlField] = {
     'type': openapi.TYPE_STRING,
@@ -114,6 +122,8 @@ def field_have_redirect(field, **kwargs):
 
 def field_extra_handler(field, **kwargs):
     kwargs = field_have_redirect(field, **kwargs)
+    if kwargs['type'] in (openapi.TYPE_ARRAY, openapi.TYPE_OBJECT):
+        kwargs['title'] = force_real_str(field.label) if field.label else None
     return kwargs
 
 
@@ -134,7 +144,7 @@ class VSTFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        return SwaggerType(**field_extra_handler(field, **type_info))
+        return SwaggerType(**field_extra_handler(field, **deepcopy(type_info)))
 
 
 class AutoCompletionFieldInspector(FieldInspector):
@@ -235,19 +245,26 @@ class CommaMultiSelectFieldInspector(FieldInspector):
             field, swagger_object_type, use_references, **kw
         )
         kwargs = {
-            'type': openapi.TYPE_STRING,
-            'format': FORMAT_MULTISELECT,
+            'type': 'array',
+            'collectionFormat': 'csv',
             'additionalProperties': {
-                'model': openapi.SchemaRef(
-                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                    field.select_model, ignore_unresolved=True
-                ),
-                'value_field': field.select_property,
-                'view_field': field.select_represent,
-                'view_separator': field.select_separator,
-                'usePrefetch': field.use_prefetch,
-                'makeLink': field.make_link,
-                'dependence': field.dependence,
+                'viewSeparator': field.select_separator,
+            },
+            'items': {
+                "type": openapi.TYPE_INTEGER,
+                "format": FORMAT_FK,
+                "additionalProperties": {
+                    'model': openapi.SchemaRef(
+                        self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                        field.select_model,
+                        ignore_unresolved=True,
+                    ),
+                    "value_field": field.select_property,
+                    "view_field": field.select_represent,
+                    'usePrefetch': field.use_prefetch,
+                    'makeLink': field.make_link,
+                    'dependence': field.dependence,
+                },
             }
         }
 
@@ -263,13 +280,19 @@ class RelatedListFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
+        serializer_schema = VSTReferencingSerializerInspector(
+            self.view,
+            self.path,
+            self.method,
+            self.components,
+            self.request,
+            self.field_inspectors
+        ).field_to_swagger_object(field.serializer_class(), swagger_object_type, False, **kw)
+
         kwargs = {
-            'type': openapi.TYPE_STRING,
-            'format': FORMAT_RELATED_LIST,
-            'additionalProperties': {
-                'fields': field.fields,
-                'viewType': field.view_type,
-            }
+            'type': openapi.TYPE_ARRAY,
+            'x-format': field.view_type,
+            'items': serializer_schema,
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -303,31 +326,40 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
         if isinstance(field, fields.NamedBinaryImageInJsonField):
-            img_format = FORMAT_NAMED_BIN_IMAGE
+            kwargs = items = deepcopy(basic_type_info[fields.NamedBinaryFileInJsonField])
         elif isinstance(field, fields.MultipleNamedBinaryImageInJsonField):
-            img_format = FORMAT_MULTIPLE_NAMED_BIN_IMAGE
+            kwargs = deepcopy(basic_type_info[fields.MultipleNamedBinaryFileInJsonField])
+            items = kwargs['items']
         else:
             return NotHandled
 
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        kwargs = {
-            'type': openapi.TYPE_STRING,
-            'format': img_format,
-            'additionalProperties': {},
+
+        items['x-format'] = FORMAT_NAMED_BIN_IMAGE
+        x_validators = items['x-validators'] = {
+            'extensions': set()
         }
-        for validator in field.validators:
-            if isinstance(validator, validators.ImageResolutionValidator):
-                kwargs['additionalProperties'].update(
-                    {
-                        'min_width': validator.min_width,
-                        'max_width': validator.max_width,
-                        'min_height': validator.min_height,
-                        'max_height': validator.max_height,
-                        'extensions': validator.extensions
-                    }
-                )
+        for validator in filter(lambda x: isinstance(x, validators.ImageBaseSizeValidator), field.validators):
+            for orientation in validator.orientation:
+                for size_type, default_size in (('min', 1), ('max', float('inf'))):
+                    size_name = f'{size_type}_{orientation}'
+                    img_size = getattr(validator, size_name, default_size)
+                    if size_name in x_validators:
+                        if size_type == 'min' and x_validators[size_name] > img_size:
+                            continue
+                        elif size_type == 'max' and x_validators[size_name] < img_size:
+                            continue
+                    x_validators[size_name] = img_size
+            if x_validators['extensions']:
+                x_validators['extensions'] = x_validators['extensions'].intersection(validator.extensions)
+            else:
+                x_validators['extensions'] = set(validator.extensions)
+
+        x_validators['extensions'] = tuple(x_validators['extensions'])
+        if not x_validators['extensions']:
+            del x_validators['extensions']
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
@@ -423,7 +455,7 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
         if isinstance(schema, coreschema.Array):
             attributes['collectionFormat'] = 'csv'
             param = self.coreapi_field_to_parameter(field, schema.items)
-            attributes['items'] = openapi.Schema(**OrderedDict(
+            attributes['items'] = openapi.Items(**OrderedDict(
                 (attr, getattr(param, attr, None))
                 for attr in coreschema_attrs + ['type']
             ))

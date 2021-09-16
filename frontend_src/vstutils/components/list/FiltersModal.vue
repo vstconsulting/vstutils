@@ -6,15 +6,17 @@
             </template>
             <template #body>
                 <div class="row">
-                    <component
-                        :is="field.component"
-                        v-for="field in fields"
-                        :key="field.name"
-                        :field="field"
-                        :data="filtersData"
-                        type="edit"
-                        @set-value="setFilterValue"
-                    />
+                    <div class="col">
+                        <component
+                            :is="field.component"
+                            v-for="field in fields"
+                            :key="field.name"
+                            :field="field"
+                            :data="filtersData"
+                            type="edit"
+                            @set-value="setFilterValue"
+                        />
+                    </div>
                 </div>
             </template>
             <template #footer>

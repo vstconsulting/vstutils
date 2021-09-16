@@ -8,7 +8,6 @@ import StringArrayField from './StringArrayField.js';
 import StringArrayFieldListView from './StringArrayFieldListView.vue';
 import StringArrayFieldMixin from './StringArrayFieldMixin.js';
 import StringField from './StringField.js';
-import StringIDField from './StringIDField.js';
 import TextAreaField from './TextAreaField.js';
 import TextAreaFieldContentEdit from './TextAreaFieldContentEdit.vue';
 import TextAreaFieldContentReadonly from './TextAreaFieldContentReadonly.vue';
@@ -30,7 +29,6 @@ export {
     StringArrayFieldListView,
     StringArrayFieldMixin,
     StringField,
-    StringIDField,
     TextAreaField,
     TextAreaFieldContentEdit,
     TextAreaFieldContentReadonly,

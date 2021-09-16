@@ -1,5 +1,5 @@
 <template>
-    <component :is="fieldComponent" :value="value" :fields="field.fields" />
+    <component :is="fieldComponent" :value="value" :model="field.itemsModel" />
 </template>
 
 <script>

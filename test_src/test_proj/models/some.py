@@ -12,7 +12,7 @@ from vstutils.models.fields import (
     FkModelField, MultipleFileField, MultipleImageField
 )
 from .hosts import Host
-from ..validators import image_res_validator
+from ..validators import image_res_validator, image_res_max_validator, image_height_validator, image_width_validator
 
 
 def bin_file_handler(self, instance, fields_mapping, model, field_name):
@@ -51,6 +51,10 @@ class ModelWithFK(BModel):
         }
 
 
+
+validators = [image_res_validator, image_res_max_validator, image_height_validator, image_width_validator]
+
+
 class ModelWithBinaryFiles(BModel):
     some_binfile = models.TextField(default='')
     some_namedbinfile = NamedBinaryFileInJSONField(default='')
@@ -72,13 +76,10 @@ class ModelWithBinaryFiles(BModel):
         default_related_name = 'rel_model'
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
-            some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(
-                required=False,
-                validators=[image_res_validator]
-            ),
+            some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
             some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(
                 required=False,
-                validators=[image_res_validator]
+                validators=validators
             ),
         )
         _filterset_fields = {
@@ -134,18 +135,13 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
             some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False),
-            some_validatednamedbinimage=fields.NamedBinaryImageInJsonField
-            (
-                required=False,
-                validators=[image_res_validator]
-            ),
+            some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
             some_namedbinimage=fields.NamedBinaryImageInJsonField(required=False),
             some_multiplenamedbinfile=fields.MultipleNamedBinaryFileInJsonField(required=False),
             some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False),
-            some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField
-            (
+            some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(
                 required=False,
-                validators=[image_res_validator]
+                validators=validators
             ),
             some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True),
             some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True)

@@ -2,15 +2,22 @@
     <table class="table table-sm">
         <thead>
             <tr>
-                <th v-for="field in fields" :key="field">
-                    {{ field }}
+                <th v-for="field in fields" :key="field.name">
+                    {{ $t(field.title) }}
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(obj, idx) in value" :key="idx">
-                <td v-for="field in fields" :key="`${field}-${idx}`">
-                    {{ obj[field] }}
+            <tr v-for="(item, idx) in value" :key="idx">
+                <td v-for="field in fields" :key="`${field.name}-${idx}`">
+                    <component
+                        :is="field.component"
+                        :field="field"
+                        :data="item"
+                        hide-title
+                        type="list"
+                        style="display: inline"
+                    />
                 </td>
             </tr>
         </tbody>
@@ -18,12 +25,11 @@
 </template>
 
 <script>
+    import { RelatedListInnerComponentMixin } from './RelatedListInnerComponentMixin.js';
+
     export default {
         name: 'TableView',
-        props: {
-            value: { type: Array, default: () => [] },
-            fields: { type: Array, default: () => [] },
-        },
+        mixins: [RelatedListInnerComponentMixin],
     };
 </script>
 

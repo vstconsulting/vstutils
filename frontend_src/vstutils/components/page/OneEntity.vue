@@ -39,6 +39,7 @@
                             :type="fieldsType"
                             :error="fieldsErrors[field.name]"
                             :hideable="hideNotRequired && !field.required"
+                            style="margin-bottom: 1rem"
                             @hide-field="hiddenFields.push(field)"
                             @set-value="setFieldValue"
                         />

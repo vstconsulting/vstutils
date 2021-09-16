@@ -15,7 +15,9 @@ class DynamicField extends BaseField {
     resolveTypes() {
         /** @type {Object<string, BaseField>} */
         this.types = this.props.types
-            ? mapObjectValues(this.props.types, (field) => this.constructor.app.getField(this.name, field))
+            ? mapObjectValues(this.props.types, (field) =>
+                  this.constructor.app.fieldsResolver.resolveField(field, this.name),
+              )
             : null;
         if (this.types)
             for (const path of this.usedOnViews)
@@ -46,11 +48,7 @@ class DynamicField extends BaseField {
     toRepresent(data = {}) {
         return this.getRealField(data).toRepresent(data);
     }
-    /**
-     * Redefinition of 'validateValue' method of base guiField.
-     * @param {object} data
-     */
-    validateValue(data = {}) {
+    validateValue(data) {
         return this.getRealField(data).validateValue(data);
     }
     afterInstancesFetched(instances, queryset) {
@@ -151,9 +149,9 @@ class DynamicField extends BaseField {
                 const item = parentChoices[parentValues[key]];
                 if (Array.isArray(item)) {
                     const isBoolean = item.some((val) => typeof val === 'boolean');
-                    return this.constructor.app.getField(
-                        this.name,
+                    return this.constructor.app.fieldsResolver.resolveField(
                         isBoolean ? 'boolean' : { format: 'choices', enum: item },
+                        this.name,
                     );
                 }
             }
@@ -166,13 +164,13 @@ class DynamicField extends BaseField {
             if (callbackResult instanceof BaseField) {
                 return callbackResult;
             } else if (typeof callbackResult === 'object') {
-                return this.constructor.app.getField(this.name, callbackResult);
+                return this.constructor.app.fieldsResolver.resolveField(callbackResult, this.name);
             }
         }
     }
 
     _getDefault() {
-        return this.constructor.app.getField(this.name, 'string');
+        return this.constructor.app.fieldsResolver.resolveField('string', this.name);
     }
 }
 

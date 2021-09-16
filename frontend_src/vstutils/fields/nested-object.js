@@ -33,8 +33,7 @@ export class NestedObjectField extends BaseField {
         registerHook('app.beforeInit', this.resolveNestedModel.bind(this));
     }
     resolveNestedModel() {
-        this.nestedModel = this.constructor.app.modelsResolver.byReferencePath(this.options.$ref);
-        if (!this.nestedModel) console.warn(`Cannot find model for ref ${this.options.$ref}`);
+        this.nestedModel = this.constructor.app.modelsResolver.bySchemaObject(this.options);
     }
     toRepresent(data) {
         return new this.nestedModel(super.toRepresent(data));

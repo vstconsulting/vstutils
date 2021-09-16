@@ -11,8 +11,10 @@ import { ResolutionValidatorConfig } from '../named-binary-image';
  */
 class MultipleNamedBinaryImageField extends MultipleNamedBinaryFileField {
     constructor(options) {
+        Object.assign(options, options.items);
+        delete options.items;
         super(options);
-        this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(this.props);
+        this.resolutionConfig = ResolutionValidatorConfig.createIfNeeded(this.options);
     }
     /**
      * Redefinition of base guiField static property 'mixins'.

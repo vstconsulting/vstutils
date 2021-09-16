@@ -11,6 +11,12 @@ import MultipleNamedBinaryFileFieldMixin from './MultipleNamedBinaryFileFieldMix
  * - content - base64 string - content of file.
  */
 class MultipleNamedBinFileField extends NamedBinaryFileField {
+    constructor(options) {
+        Object.assign(options, options.items);
+        delete options.items;
+        super(options);
+    }
+
     /**
      * Redefinition of base guiField static property 'mixins'.
      */

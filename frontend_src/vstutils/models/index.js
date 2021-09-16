@@ -1,14 +1,18 @@
 import { Model, ModelClass } from './Model.js';
-import ModelConstructor, { NoModel } from './ModelConstructor.js';
 import { ModelsResolver } from './ModelsResolver.js';
-import { mapToObjectProxy } from '../utils';
+import { StringField } from '../fields/text';
 
-const globalModels = new Map();
+@ModelClass('NoModel')
+class NoModel extends Model {
+    static declaredFields = [
+        new StringField({
+            format: 'string',
+            name: 'detail',
+            required: false,
+            title: 'Detail',
+            type: 'string',
+        }),
+    ];
+}
 
-/**
- * @deprecated
- * @type {Object<string, BaseField>}
- */
-const guiModels = mapToObjectProxy(globalModels);
-
-export { Model, ModelClass, ModelConstructor, ModelsResolver, NoModel, globalModels, guiModels };
+export { Model, ModelClass, ModelsResolver, NoModel };

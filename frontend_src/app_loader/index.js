@@ -79,13 +79,7 @@ async function startApp(cache) {
 
     const appConfig = new AppConfiguration({ schema: openapi });
 
-    window.app = new window.App(
-        appConfig,
-        cache,
-        window.spa.fields.globalFields,
-        window.spa.models.globalModels,
-        window.spa.querySet.globalQuerySets,
-    );
+    window.app = new window.App(appConfig, cache);
 
     // Starts app loading (OpenAPI schema parsing, creating models, views and so on).
     await window.app.start();

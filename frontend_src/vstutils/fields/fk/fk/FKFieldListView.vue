@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes" :style="styles">
+    <div :class="classes" :style="styles" style="display: contents">
         <template v-if="with_link">
             <router-link :to="href">
                 {{ text }}

@@ -1,3 +1,6 @@
+import signals from '../signals.js';
+import { makeModel, Model } from './Model.js';
+
 const REF_PROPERTY = '$ref';
 
 /**
@@ -6,14 +9,25 @@ const REF_PROPERTY = '$ref';
  */
 export class ModelsResolver {
     /**
-     * @param {Map<string, Function>} modelsClasses
-     * @param {Map<string, BaseField>} fieldsClasses
+     * @param {FieldsResolver} fieldsResolver
      * @param {Object} schema
      */
-    constructor(modelsClasses, fieldsClasses, schema) {
-        this.modelsClasses = modelsClasses;
-        this.fieldsClasses = fieldsClasses;
+    constructor(fieldsResolver, schema) {
+        this._definitionsModels = new Map();
+        this.fieldsResolver = fieldsResolver;
         this.schema = schema;
+        this._modelNameSeq = 1;
+    }
+
+    get(value) {
+        if (typeof value === 'string') {
+            if (this._definitionsModels.has(value)) {
+                return this._definitionsModels.get(value);
+            }
+        } else {
+            return this.byReferencePath(value);
+        }
+        return this.bySchemaObject(value);
     }
 
     /**
@@ -22,19 +36,69 @@ export class ModelsResolver {
      * @return {Function|undefined}
      */
     byReferencePath(reference) {
-        return this.modelsClasses.get(reference.split('/').pop());
+        const name = reference.split('/').pop();
+        let model = this._definitionsModels.get(name);
+        if (model) {
+            return model;
+        }
+        model = this.bySchemaObject(this.schema.definitions[name], name);
+        this._definitionsModels.set(name, model);
+        return model;
     }
 
     /**
      * Resolves model by schema object. Now $ref only is supported.
-     * @param {Object} object
-     * @return {Function|undefined}
+     * @param {Object} modelSchema
+     * @param {string} [modelName]
+     * @return {Function}
      * @see {@link https://swagger.io/specification/v2/#schemaObject}
      */
-    bySchemaObject(object) {
-        if (object[REF_PROPERTY]) {
-            return this.byReferencePath(object[REF_PROPERTY]);
+    bySchemaObject(modelSchema, modelName) {
+        if (modelSchema[REF_PROPERTY]) {
+            return this.byReferencePath(modelSchema[REF_PROPERTY]);
         }
-        throw Error('Only resolving by reference is supported');
+        return this._createModel(modelSchema, modelName || this._generateModelName());
+    }
+
+    _generateModelName() {
+        return `NoNameModel${this._modelNameSeq++}`;
+    }
+
+    /**
+     * @param {Object} modelSchema
+     * @param {string} modelName
+     * @return {Function}
+     * @private
+     */
+    _createModel(modelSchema, modelName) {
+        const properties = modelSchema.properties || {};
+
+        // Set required
+        const requiredProperties = modelSchema.required || [];
+
+        signals.emit('models[' + modelName + '].fields.beforeInit', properties);
+
+        const fields = Object.entries(properties).map(([fieldName, fieldSchema]) => {
+            const field = this.fieldsResolver.resolveField(fieldSchema, fieldName);
+            if (requiredProperties.includes(modelName)) {
+                field.required = true;
+            }
+            return field;
+        });
+
+        const model = makeModel(
+            class extends Model {
+                static declaredFields = fields;
+                static fieldsGroups = modelSchema['x-properties-groups'] || {};
+                static viewFieldName = modelSchema['x-view-field-name'] || null;
+                static nonBulkMethods = modelSchema['x-non-bulk-methods'] || null;
+                static translateModel = modelSchema['x-translate-model'] || null;
+            },
+            modelName,
+        );
+
+        signals.emit(`models[${modelName}].created`, { model });
+
+        return model;
     }
 }

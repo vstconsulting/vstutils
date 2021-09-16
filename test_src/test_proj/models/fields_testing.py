@@ -1,10 +1,18 @@
 from django.db import models
 
+from vstutils.api import fields
 from vstutils.models import BModel
-from vstutils.api.serializers import VSTSerializer
-from vstutils.api.fields import FkModelField, RelatedListField, RatingField, PhoneField, MaskedField
+from vstutils.api.serializers import VSTSerializer, BaseSerializer
+from vstutils.api.fields import (
+    FkModelField,
+    MaskedField,
+    PhoneField,
+    RatingField,
+    RelatedListField,
+)
 from django.utils import timezone
 from rest_framework.fields import DecimalField
+
 
 class UpdateAuthorSerializer(VSTSerializer):
     _view_field_name = 'id'
@@ -12,6 +20,10 @@ class UpdateAuthorSerializer(VSTSerializer):
 
     class Meta:
         __inject_from__ = 'list'
+
+
+class RelatedPostSerializer(BaseSerializer):
+    title = fields.CharField(default='Title', help_text='Some description')
 
 
 class Author(BModel):
@@ -38,7 +50,12 @@ class Author(BModel):
             "Main": ["id", "name"]
         }
         _override_detail_fields = {
-            'posts': RelatedListField(fields=['title'], related_name='post', view_type='table'),
+            'posts': RelatedListField(
+                fields=['title'],
+                related_name='post',
+                view_type='table',
+                serializer_class=RelatedPostSerializer
+            ),
             'phone': PhoneField(allow_null=True, required=False),
             'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'}),
             'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5)

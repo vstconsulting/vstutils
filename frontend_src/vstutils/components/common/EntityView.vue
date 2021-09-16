@@ -34,7 +34,7 @@
         props: {
             view: { type: Object, required: true },
             loading: { type: Boolean, required: true },
-            error: { type: Object, default: () => {} },
+            error: { type: [Object, Error], default: () => ({}) },
             response: { type: Boolean, default: false },
             showTopButtons: { type: Boolean, default: true },
             showUsedFilters: { type: Boolean, default: true },

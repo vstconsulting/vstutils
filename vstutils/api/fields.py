@@ -1,6 +1,7 @@
 """
 Additional serializer fields for generating OpenAPI and GUI.
 """
+# pylint: disable=too-many-lines
 import logging
 import typing as _t
 import copy
@@ -14,7 +15,7 @@ from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
 from django.db import models
-from django.utils.functional import SimpleLazyObject, lazy
+from django.utils.functional import SimpleLazyObject, lazy, cached_property
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
@@ -780,10 +781,15 @@ def _handle_related_value_decorator(func):
 
 class RelatedListField(VSTCharField):
     """
-    Extends class 'vstutils.api.fields.VSTCharField'. With this field you can output reverse ForeignKey relation
+    Extends class :class:`.VSTCharField`. With this field you can output reverse ForeignKey relation
     as a list of related instances.
-    To use it, you specify 'related_name' kwarg(related_manager for reverse ForeignKey)
-    and 'fields' kwarg(list or tuple of fields from related model, which needs to be included)
+
+    To use it, you specify 'related_name' kwarg (related_manager for reverse ForeignKey)
+    and 'fields' kwarg (list or tuple of fields from related model, which needs to be included).
+
+    By default :class:`.VSTCharField` used to serialize all field values and represent it on
+    frontend. You can specify `serializer_class` and override fields as you need. For example title, description
+    and other field properties can be set to customize frontend behaviour.
 
     :param related_name: name of a related manager for reverse foreign key
     :type related_name: str
@@ -794,9 +800,18 @@ class RelatedListField(VSTCharField):
     :param fields_custom_handlers_mapping: includes custom handlers, where key: field_name, value: callable_obj that
                                            takes params: instance[dict], fields_mapping[dict], model, field_name[str]
     :type fields_custom_handlers_mapping: dict
+    :param serializer_class: Serializer to customize types of fields, if no serializer provided :class:`.VSTCharField`
+                             will be used for every field in `fields` list
+    :type serializer_class: type
     """
 
-    def __init__(self, related_name: _t.Text, fields: _t.Union[_t.Tuple, _t.List], view_type: str = 'list', **kwargs):
+    def __init__(
+            self,
+            related_name: _t.Text,
+            fields: _t.Union[_t.Tuple, _t.List],
+            view_type: str = 'list',
+            serializer_class: _t.Optional[_t.Type] = None,
+            **kwargs):
         kwargs['read_only'] = True
         kwargs['source'] = "*"
         self.fields_custom_handlers_mapping = kwargs.pop('fields_custom_handlers', {})
@@ -805,9 +820,41 @@ class RelatedListField(VSTCharField):
         assert isinstance(fields, (tuple, list)), "fields must be list or tuple"
         assert fields, "fields must have one or more values"
         assert view_type in ('list', 'table')
+        self._serializer_class = serializer_class
         self.fields = fields
         self.related_name = related_name
         self.view_type = view_type
+
+    @cached_property
+    def has_serializer(self):
+        return self._serializer_class is not None
+
+    @cached_property
+    def serializer_class(self):
+        # pylint: disable=import-outside-toplevel
+        from .serializers import BaseSerializer
+
+        dependencies = []
+        if self.has_serializer:
+            dependencies.append(self._serializer_class)
+        dependencies.append(type(BaseSerializer)(
+            'DefaultRelatedListSerializer',
+            (BaseSerializer,),
+            {
+                f: VSTCharField(allow_null=True, allow_blank=True, default='')
+                for f in self.fields
+            }
+        ))
+        return type(dependencies[0])(
+            'RelatedListSerializer',
+            tuple(dependencies),
+            {}
+        )
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs = {**kwargs}
+        kwargs.setdefault('context', self.context)
+        return self.serializer_class(*args, **kwargs)
 
     @_handle_related_value_decorator
     def _handle_named_bin_text(self, value, default):
@@ -872,7 +919,10 @@ class RelatedListField(VSTCharField):
     def get_model_fields_mapping(self, model):
         return {f.name: f for f in model._meta.fields}
 
-    def to_representation(self, value: _t.Type[models.Model]) -> _t.Tuple[_t.Dict]:  # type: ignore[override]
+    def _prep_data(self, value):
+        data = getattr(value, self.related_name).values(*self.fields)
+        if self.has_serializer:
+            return self.get_serializer(data, many=True).data
         queryset = getattr(value, self.related_name).all()
 
         handler = functools.partial(
@@ -880,8 +930,11 @@ class RelatedListField(VSTCharField):
             fields_mapping=self.get_model_fields_mapping(queryset.model),
             model=value,
         )
+        return tuple(map(handler, data))
+
+    def to_representation(self, value: _t.Type[models.Model]) -> _t.Tuple[_t.Dict]:  # type: ignore[override]
         # get related mapping with id and name of instances
-        return lazy(lambda: tuple(map(handler, getattr(value, self.related_name).values(*self.fields))), tuple)()
+        return lazy(lambda: self._prep_data(value), tuple)()
 
 
 class RatingField(FloatField):

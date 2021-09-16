@@ -157,12 +157,3 @@
         },
     };
 </script>
-
-<style>
-    .field-component {
-        margin: 0.5rem;
-    }
-    .field-component.type-list {
-        margin: 0;
-    }
-</style>
