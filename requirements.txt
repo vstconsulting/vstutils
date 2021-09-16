@@ -13,7 +13,7 @@ drf_orjson_renderer~=1.1.5
 uWSGI==2.0.19.1
 
 # Notifications
-cent~=3.0.1
+cent~=4.0.1
 PyJWT~=2.1.0
 
 # Minificators

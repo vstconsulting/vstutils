@@ -25,7 +25,7 @@
     "admin-lte": "3.1.0",
     "ansi_up": "^5.0.0",
     "bootstrap": "4.6.0",
-    "centrifuge": "^2.6.4",
+    "centrifuge": "^2.8.0",
     "core-js": "3",
     "cropperjs": "^1.5.12",
     "dotenv": "^8.2.0",
