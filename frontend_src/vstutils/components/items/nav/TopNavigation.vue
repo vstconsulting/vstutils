@@ -1,5 +1,5 @@
 <template>
-    <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom">
+    <nav class="main-header navbar navbar-expand">
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a ref="sidebarControl" class="nav-link" data-widget="pushmenu" href="#" role="button">
@@ -39,21 +39,18 @@
                         <i class="fa fa-id-card-o mr-2 ico-data-default" />
                         {{ $u.capitalize($t('profile')) }}
                     </router-link>
-
                     <div class="dropdown-divider" />
 
-                    <router-link
-                        v-if="profile_settings_url"
-                        :to="profile_settings_url"
-                        class="dropdown-item text-data"
-                    >
-                        <i class="fa fa-cogs mr-2 ico-data-default" />
-                        {{ $u.capitalize($t('settings')) }}
-                    </router-link>
+                    <template v-if="profile_settings_url">
+                        <router-link :to="profile_settings_url" class="dropdown-item text-data">
+                            >
+                            <i class="fa fa-cogs mr-2 ico-data-default" />
+                            {{ $u.capitalize($t('settings')) }}
+                        </router-link>
+                        <div class="dropdown-divider" />
+                    </template>
 
-                    <div class="dropdown-divider for-web" />
-
-                    <a :href="logout_url" class="dropdown-item for-web text-data">
+                    <a :href="logout_url" class="dropdown-item">
                         <i class="fas fa-sign-out-alt mr-2 ico-data-default" />
                         {{ $u.capitalize($t('logout')) }}
                     </a>

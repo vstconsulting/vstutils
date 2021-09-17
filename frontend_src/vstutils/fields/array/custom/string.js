@@ -16,6 +16,11 @@ function createNumberTag(params) {
 export const StringArrayFieldEdit = {
     name: 'StringArrayFieldEdit',
     mixins: [BaseFieldContentEdit],
+    computed: {
+        selectClasses() {
+            return 'select2-hide-dropdown';
+        },
+    },
     mounted() {
         this.initSelect2();
         this.$watch('value', this.setSelect2Value, { immediate: true });
@@ -35,6 +40,7 @@ export const StringArrayFieldEdit = {
                 tags: true,
                 multiple: true,
                 templateResult: () => null,
+                dropdownCssClass: 'select2-hide-dropdown',
                 createTag,
             };
         },
@@ -79,7 +85,7 @@ export const StringArrayFieldEdit = {
         },
     },
     render(h) {
-        return h('select', { style: 'width: 100%' });
+        return h('select', { style: 'width: 100%', class: this.selectClasses });
     },
 };
 

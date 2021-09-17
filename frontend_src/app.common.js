@@ -5,7 +5,7 @@ export * from './vstutils/signals.js';
 
 import './libs/jquery.js';
 
-import 'select2';
+import 'select2/dist/js/select2.full.min.js';
 import 'select2/dist/css/select2.css';
 import 'select2-theme-bootstrap4/dist/select2-bootstrap.css';
 window.SELECT2_THEME = 'bootstrap';
