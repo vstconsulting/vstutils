@@ -1,55 +1,68 @@
 <template>
-    <div v-if="fields.length" style="display: inline-block">
-        <Modal v-show="showModal" @apply="filter" @close="close">
-            <template #header>
-                <h3>{{ $u.capitalize($t('filters')) }}</h3>
-            </template>
-            <template #body>
-                <div class="row">
-                    <div class="col">
-                        <component
-                            :is="field.component"
-                            v-for="field in fields"
-                            :key="field.name"
-                            :field="field"
-                            :data="filtersData"
-                            type="edit"
-                            @set-value="setFilterValue"
-                        />
+    <BootstrapModal v-if="fields.length" ref="modal">
+        <template #content="{ closeModal }">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{ $u.capitalize($t('filters')) }}
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <component
+                                :is="field.component"
+                                v-for="field in fields"
+                                :key="field.name"
+                                :field="field"
+                                :data="filtersData"
+                                type="edit"
+                                @set-value="setFilterValue"
+                            />
+                        </div>
                     </div>
                 </div>
-            </template>
-            <template #footer>
-                <button class="btn btn-default btn-close-filters-modal" aria-label="Cancel" @click="close">
+            </div>
+            <div class="modal-footer">
+                <button
+                    class="btn btn-default btn-close-filters-modal"
+                    aria-label="Cancel"
+                    @click="closeModal"
+                >
                     {{ $u.capitalize($t('cancel')) }}
                 </button>
                 <button class="btn btn-primary btn-apply-filters" aria-label="Filter" @click="filter">
                     {{ $u.capitalize($t('apply')) }}
                 </button>
-            </template>
-        </Modal>
-        <OperationButton
-            :title="$u.capitalize($t('filters'))"
-            classes="btn gui-btn btn-default btn-open-filters-modal"
-            icon-classes="fas fa-filter"
-            @clicked="open"
-        />
-    </div>
+            </div>
+        </template>
+        <template #activator>
+            <OperationButton
+                :title="$u.capitalize($t('filters'))"
+                classes="btn gui-btn btn-default btn-open-filters-modal"
+                icon-classes="fas fa-filter"
+                @clicked="openModal"
+            />
+        </template>
+    </BootstrapModal>
 </template>
 
 <script>
     import Vue from 'vue';
-    import Modal from '../items/modal/Modal.vue';
-    import { IGNORED_FILTERS, mergeDeep } from '../../utils';
+    import { IGNORED_FILTERS, mapObjectValues } from '../../utils';
     import ModalWindowAndButtonMixin from '../../fields/ModalWindowAndButtonMixin.js';
     import OperationButton from '../common/OperationButton.vue';
+    import BootstrapModal from '../BootstrapModal.vue';
 
     /**
      * Component for filter modal window and button, that opens it.
      */
     export default {
         name: 'FiltersModal',
-        components: { OperationButton, Modal },
+        components: { BootstrapModal, OperationButton },
         mixins: [ModalWindowAndButtonMixin],
         props: {
             view: { type: Object, required: true },
@@ -80,8 +93,11 @@
             this.isMounted = true;
         },
         methods: {
-            onOpen() {
-                this.filtersData = mergeDeep({}, this.filters);
+            openModal() {
+                this.$refs.modal.open();
+                this.filtersData = mapObjectValues(this.filters, (val, key) =>
+                    this.view.filters[key] ? this.view.filters[key].toRepresent(this.filters) : val,
+                );
             },
             setFilterValue({ field, value }) {
                 Vue.set(this.filtersData, field, value);
@@ -92,7 +108,7 @@
                         this.fields.map((field) => [field.name, field.toInner(this.filtersData)]),
                     ),
                 );
-                this.close();
+                this.$refs.modal.close();
             },
         },
     };

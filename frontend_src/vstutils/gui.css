@@ -1653,11 +1653,6 @@ a.revers-color:hover {
     background-color: var(--card-body-bg-color);
 }
 
-.card-footer,
-.modal-content .list-group-item {
-    background-color: var(--card-footer-bg-color);
-}
-
 .control-label {
     color: var(--control-label-color);
 }
@@ -1826,10 +1821,6 @@ input[type='color'] {
     opacity: 0;
 }
 
-.icon-for-btn {
-    margin-right: 5px;
-}
-
 .list-footer-btns-wrapper {
     display: inline-block;
     width: 100%;
@@ -1877,4 +1868,13 @@ input[type='color'] {
 [class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active,
 [class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active:focus {
     background-color: var(--background-active-color);
+}
+
+/* select2-hide-dropdown - helper class to completely hide dropdown */
+.select2-hide-dropdown {
+    display: none;
+}
+.select2-hide-dropdown + .select2-container.select2-container--open .select2-selection {
+    border-radius: 0.25rem;
+    border-bottom-color: #80bdff;
 }

@@ -6,6 +6,11 @@ import { StringArrayFieldEdit, StringArrayFieldMixin } from './string.js';
 export const ChoicesArrayFieldEdit = {
     name: 'ChoicesArrayFieldEdit',
     mixins: [StringArrayFieldEdit],
+    computed: {
+        selectClasses() {
+            return '';
+        },
+    },
     methods: {
         getSelect2Params() {
             return {

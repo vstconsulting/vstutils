@@ -15,7 +15,7 @@
             <form class="search-form" @submit.prevent="applySearchFilter">
                 <input
                     v-model="searchFieldValue"
-                    class="search-input"
+                    class="form-control form-control-sm form-control-border search-input"
                     type="text"
                     :placeholder="$t('Search')"
                 />
@@ -395,19 +395,7 @@
     }
 
     .search-input {
-        font-size: 15px;
-        border: none;
-        border-bottom: solid 1px var(--gray);
-        outline: none;
-        transition: 0.3s ease;
         padding: 0 30px 0 8px;
-    }
-    .search-input:focus {
-        border-bottom: solid 1px var(--info);
-        outline: none;
-    }
-    .search-input:hover {
-        border-bottom: solid 1px var(--info);
     }
     .search-button {
         position: relative;
