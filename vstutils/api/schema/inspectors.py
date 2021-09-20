@@ -3,6 +3,8 @@ from typing import Dict, Type, Text, Any
 from collections import OrderedDict
 
 from django.http import FileResponse
+from django.db import models
+from django.utils.functional import cached_property
 from drf_yasg.inspectors.base import FieldInspector, NotHandled
 from drf_yasg.inspectors.field import ReferencingSerializerInspector, decimal_field_type
 from drf_yasg import openapi
@@ -427,6 +429,13 @@ class NestedFilterInspector(CoreAPICompatInspector):
 
 
 class ArrayFilterQueryInspector(CoreAPICompatInspector):
+    @cached_property
+    def fields_map(self):
+        return {
+            f.name: f
+            for f in self.view.get_queryset().model._meta.fields
+        }
+
     def coreapi_field_to_parameter(self, field, schema=None):
         """
         Convert an instance of `coreapi.Field` to a swagger :class:`.Parameter` object.
@@ -450,26 +459,33 @@ class ArrayFilterQueryInspector(CoreAPICompatInspector):
         }
 
         coreschema_attrs = ['format', 'pattern', 'enum', 'min_length', 'max_length']
-        schema = schema or field.schema
+        schema_field = schema or field.schema
         attributes = {}
-        if isinstance(schema, coreschema.Array):
+        if isinstance(schema_field, coreschema.Array):
             attributes['collectionFormat'] = 'csv'
-            param = self.coreapi_field_to_parameter(field, schema.items)
+            param = self.coreapi_field_to_parameter(field, schema_field.items)
             attributes['items'] = openapi.Items(**OrderedDict(
                 (attr, getattr(param, attr, None))
                 for attr in coreschema_attrs + ['type']
             ))
-            attributes['minItems'] = schema.min_items
-            attributes['maxItems'] = schema.max_items
-            attributes['uniqueItems'] = schema.unique_items
+            attributes['minItems'] = schema_field.min_items
+            attributes['maxItems'] = schema_field.max_items
+            attributes['uniqueItems'] = schema_field.unique_items
             coreschema_attrs = ()
+
+        schema_type = coreapi_types.get(type(schema_field), openapi.TYPE_STRING)
+        if schema is not None and \
+           field.name in ('id', 'id__not') and \
+           isinstance(self.fields_map.get(field.name.split('__')[0]), (models.AutoField, models.IntegerField)):
+            schema_type = openapi.TYPE_INTEGER
+
         return openapi.Parameter(
             name=field.name,
             in_=location_to_in[field.location],
             required=field.required,
-            description=force_real_str(schema.description) if schema else None,
-            type=coreapi_types.get(type(schema), openapi.TYPE_STRING),
-            **OrderedDict((attr, getattr(schema, attr, None)) for attr in coreschema_attrs),
+            description=force_real_str(schema_field.description) if schema_field else None,
+            type=schema_type,
+            **OrderedDict((attr, getattr(schema_field, attr, None)) for attr in coreschema_attrs),
             **attributes
         )
 
