@@ -29,6 +29,10 @@ function isBodyParam(param) {
     return param.in === 'body';
 }
 
+function isPathParam(param) {
+    return param.in === 'path';
+}
+
 const FILTERS_TO_EXCLUDE = ['limit', 'offset'];
 
 const EDIT_STYLE_PROPERTY_NAME = 'x-edit-style';
@@ -154,6 +158,10 @@ export default class ViewConstructor {
                     ? pathSchema[EDIT_STYLE_PROPERTY_NAME]
                     : editStyleViewDefault;
 
+            const pathParameters = (pathSchema.parameters || [])
+                .filter(isPathParam)
+                .map((paramSchema) => this.fieldsResolver.resolveField(paramSchema));
+
             for (const httpMethod of HttpMethods.ALL) {
                 const operationSchema = pathSchema[httpMethod];
                 if (!operationSchema) continue;
@@ -178,7 +186,12 @@ export default class ViewConstructor {
 
                 if (operationOptions.type === ViewTypes.LIST) {
                     operationOptions.filters = this._generateFilters(path, operationOptions.parameters);
-                    const qs = new QuerySet(path, { [RequestTypes.LIST]: [null, responseModel] });
+                    const qs = new QuerySet(
+                        path,
+                        { [RequestTypes.LIST]: [null, responseModel] },
+                        {},
+                        pathParameters,
+                    );
                     listView = new ListView(operationOptions, qs);
                     views.set(path, listView);
                     const filterAction = this.dictionary.paths.operations.list.filters;
@@ -241,13 +254,13 @@ export default class ViewConstructor {
             // Set list path models
             if (isListDetail) {
                 parent.objects.models[RequestTypes.RETRIEVE] = pageView.modelsList;
-                pageView.objects = parent.objects;
+                pageView.objects = parent.objects.clone({ pathParams: pathParameters.slice() });
                 if (editView) {
                     const requestType = editView.isPartial
                         ? RequestTypes.PARTIAL_UPDATE
                         : RequestTypes.UPDATE;
                     parent.objects.models[requestType] = editView.modelsList;
-                    editView.objects = parent.objects;
+                    editView.objects = pageView.objects.clone();
                 }
             }
 
@@ -260,9 +273,12 @@ export default class ViewConstructor {
             // Set detail path models
             if (isDetailWithoutList) {
                 pageView.mixins.push(DetailWithoutListPageMixin);
-                pageView.objects = new SingleEntityQueryset(pageView.path, {
-                    [RequestTypes.RETRIEVE]: pageView.modelsList,
-                });
+                pageView.objects = new SingleEntityQueryset(
+                    pageView.path,
+                    { [RequestTypes.RETRIEVE]: pageView.modelsList },
+                    {},
+                    pathParameters,
+                );
                 if (newView) {
                     newView.mixins.push(DetailWithoutListPageMixin);
                     pageView.objects.models[RequestTypes.CREATE] = newView.modelsList;
@@ -438,14 +454,11 @@ export default class ViewConstructor {
 
         for (const parameterObject of parametersCopy) {
             const name = parameterObject.name;
-            filters[name] = this.fieldsResolver.resolveField({
-                ...parameterObject,
-                readOnly: false,
-                ...(name.startsWith('__') ? { hidden: true } : null),
-            });
+            if (name.startsWith('__')) {
+                parameterObject.hidden = true;
+            }
+            filters[name] = this.fieldsResolver.resolveField(parameterObject);
         }
-
-        signals.emit(`views[${path}].filters.afterInit`, parametersCopy);
 
         return filters;
     }

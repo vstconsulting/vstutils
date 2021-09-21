@@ -63,8 +63,11 @@ export default class ErrorHandler {
         if (typeof error == 'object' && error.data) {
             if (error.data.detail && typeof error.data.detail == 'string') {
                 return error.data.detail;
-            } else if (error.data.detail && typeof error.data.detail == 'object') {
-                return this.errorDetailHandler(error.data.detail);
+            } else if (error.data.detail !== undefined) {
+                if (typeof error.data.detail == 'object') {
+                    return this.errorDetailHandler(error.data.detail);
+                }
+                return error.data.detail;
             } else if (Array.isArray(error.data)) {
                 return error.data.join('<br>');
             } else if (typeof error.data == 'object') {
