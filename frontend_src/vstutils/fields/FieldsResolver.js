@@ -56,6 +56,10 @@ export class FieldsResolver {
      * @return {BaseField}
      */
     resolveField(obj, name = undefined) {
+        if (obj instanceof BaseField) {
+            return obj;
+        }
+
         if (!obj) {
             throw new Error('Obj is required');
         }

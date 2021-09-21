@@ -305,22 +305,6 @@ describe('QuerySet', () => {
         expect(users.query).toEqual({ name__not: 'vitya' });
     });
 
-    test('method "prefetch" returns new queryset with "use_prefetch" property', async () => {
-        fetchMock.mockResponse(
-            JSON.stringify({
-                count: 4,
-                next: null,
-                previous: null,
-                results: usersData,
-            }),
-        );
-        const users = qs.prefetch('test instance');
-        // Uses 'prefetch' with instance - null
-        const users1 = qs.prefetch(null);
-        expect(users.use_prefetch).toBe('test instance');
-        expect(users1.use_prefetch).toBeFalsy();
-    });
-
     describe('bulk requests', () => {
         @ModelClass()
         class User extends Model {
@@ -423,5 +407,27 @@ describe('QuerySet', () => {
             expect(responseWithObj.data).toEqual({ id: 5, name: 'User 1' });
             expect(responseWithObj).toBeInstanceOf(APIResponse);
         });
+    });
+
+    test('url formatting', async () => {
+        const qs = new QuerySet('/fragment1/{pk1}/fragment2/{pk2}/', { [RequestTypes.LIST]: User }, {}, [
+            new StringField({ name: 'pk1' }),
+            new StringField({ name: 'pk2' }),
+        ]);
+
+        const formatted = qs.clone({ pathParamsValues: { pk1: 2, pk2: 5 } });
+        expect(qs).not.toBe(formatted);
+        expect(formatted.url).toBe('/fragment1/2/fragment2/5/');
+        expect(formatted.pathParams[0]).toBeInstanceOf(StringField);
+
+        fetchMock.once(JSON.stringify({ count: 0, next: null, previous: null, results: [] }));
+        const itemsRequest = qs.items(true, { pk1: 12, pk2: 15 }).then((items) => items.length);
+        await expect(itemsRequest).resolves.toBe(0);
+        expect(fetchMock.mock.calls[0][0]).toBe('http://localhost/api/v1/fragment1/12/fragment2/15/');
+
+        fetchMock.once(JSON.stringify({ id: 1337 }));
+        const itemRequest = qs.get(1337, { pk1: 9, pk2: 8 }).then((instance) => instance.id);
+        await expect(itemRequest).resolves.toBe(1337);
+        expect(fetchMock.mock.calls[1][0]).toBe('http://localhost/api/v1/fragment1/9/fragment2/8/1337/');
     });
 });

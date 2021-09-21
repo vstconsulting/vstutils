@@ -28,13 +28,17 @@ const NOT_PUT_IN_EXTRA = ['results'];
  */
 export default class QuerySet {
     /**
-     * @param {string} url - Must be without leading and ending slashes
+     * @param {string} pattern - Must be without leading and ending slashes
      * @param {ModelsConfiguration} models - Models classes
      * @param {Object} query - Object with query parameters
+     * @param {Array<BaseField>} pathParams - Object that describes path parameters
      */
-    constructor(url, models, query = {}) {
-        this.url = url;
-        this.originalUrl = '/' + url.replace(/^\/|\/$/g, '') + '/';
+    constructor(pattern, models, query = {}, pathParams = []) {
+        this._url = null;
+        this.pattern = pattern;
+        this.pathParams = pathParams;
+        this.pathParamsValues = {};
+
         this.models = models;
         this.query = query;
 
@@ -42,6 +46,33 @@ export default class QuerySet {
         this.use_prefetch = true;
 
         this.listSubscriptionLabels = [];
+    }
+
+    get url() {
+        if (this._url) {
+            return this._url;
+        }
+        let url = this.pattern;
+        for (const param of this.pathParams) {
+            let value = param.toInner(this.pathParamsValues);
+            if (value !== undefined && value !== null) {
+                url = url.replace(`{${param.name}}`, param.toInner(this.pathParamsValues));
+            }
+        }
+        return url;
+    }
+
+    set url(url) {
+        if (url.includes('{')) {
+            this.pattern = url;
+            this._url = null;
+        } else {
+            this._url = url;
+        }
+    }
+
+    formatPath(pathParamsValues) {
+        return this.clone({ pathParamsValues });
     }
 
     /**
@@ -118,7 +149,7 @@ export default class QuerySet {
 
         if (!save_cache) clone.clearCache();
 
-        return clone;
+        return Object.freeze(clone);
     }
 
     /**
@@ -162,24 +193,6 @@ export default class QuerySet {
         return this.clone({ query: $.extend(true, {}, this.query, ecd_filters) });
     }
 
-    /**
-     * Method, that returns new QuerySet with new value of 'use_prefetch' property.
-     * @param {boolean | array} instances If boolean - means - Use prefetch or not,
-     * otherwise, means array with names of model fields,
-     * that should be used as prefetch field.
-     */
-    prefetch(instances = true) {
-        let qs = this.clone();
-
-        if (instances) {
-            qs.use_prefetch = instances;
-        } else {
-            qs.use_prefetch = false;
-        }
-
-        return qs;
-    }
-
     _getDetailPath(id) {
         return [...this.getDataType(), id];
     }
@@ -188,7 +201,10 @@ export default class QuerySet {
      * Method, that returns promise with Model instance.
      * @return {Promise.<Model>}
      */
-    async get(id = undefined) {
+    async get(id = undefined, pathParamsValues = null) {
+        if (pathParamsValues) {
+            return this.clone({ pathParamsValues }).get(id);
+        }
         const model = this.getResponseModelClass(RequestTypes.RETRIEVE);
 
         let instance;
@@ -213,7 +229,10 @@ export default class QuerySet {
      * Method returns one instance, if more than one instance found error is thrown
      * @return {Promise<Model>}
      */
-    async getOne() {
+    async getOne(pathParamsValues = null) {
+        if (pathParamsValues) {
+            return this.clone({ pathParamsValues }).getOne();
+        }
         const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
         const listModelSameAsRetrieve = retrieveModel === this.getResponseModelClass(RequestTypes.LIST);
         const useBulk = retrieveModel.shouldUseBulk(HttpMethods.GET);
@@ -258,7 +277,10 @@ export default class QuerySet {
      *
      * @returns {Promise<Model[]>}
      */
-    async items(invalidateCache = true) {
+    async items(invalidateCache = true, pathParamsValues = null) {
+        if (pathParamsValues) {
+            return this.clone({ pathParamsValues }).items(invalidateCache);
+        }
         if (!invalidateCache && this.cache) return this.cache;
 
         const model = this.getResponseModelClass(RequestTypes.LIST);

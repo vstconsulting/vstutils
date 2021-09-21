@@ -1,6 +1,6 @@
 import ComponentIDMixin from '../../ComponentIDMixin.js';
 import { COMPONENTS_MODULE_NAME } from '../../store';
-import { formatPath, mergeDeep } from '../../utils';
+import { mergeDeep } from '../../utils';
 import default_nested_module from '../../store/components_state/default_nested_module.js';
 
 export const StoreModuleComponent = {
@@ -46,8 +46,7 @@ export const StoreModuleComponent = {
             if (!this.view || !this.view.objects) {
                 return null;
             }
-            const url = formatPath(this.view.objects.url, this.$route.params);
-            return this.view.objects.clone({ url });
+            return this.view.objects.formatPath(this.params);
         },
         /**
          * Method that can be used to customize module for store

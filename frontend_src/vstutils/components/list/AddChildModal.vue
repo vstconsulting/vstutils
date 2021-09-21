@@ -18,7 +18,7 @@
 </template>
 
 <script>
-    import { formatPath, joinPaths } from '../../utils';
+    import { joinPaths } from '../../utils';
     import OperationButton from '../common/OperationButton.vue';
     import { guiPopUp, pop_up_msg } from '../../popUp';
     import { Model, ModelClass } from '../../models';
@@ -42,9 +42,7 @@
         },
         data() {
             return {
-                queryset: this.view.nestedQueryset.clone({
-                    url: formatPath(this.view.nestedQueryset.url, this.$route.params),
-                }),
+                queryset: this.view.nestedQueryset.formatPath(this.$route.params),
             };
         },
         methods: {
@@ -54,9 +52,7 @@
                 }
             },
             async addChildToParent(instanceId) {
-                const qs = this.view.objects.clone({
-                    url: formatPath(this.view.objects.url, this.$route.params),
-                });
+                const qs = this.view.objects.formatPath(this.$route.params);
                 const path = this.view.deepNestedParentView
                     ? joinPaths(
                           this.view.deepNestedParentView.path,
