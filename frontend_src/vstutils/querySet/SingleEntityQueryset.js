@@ -13,9 +13,9 @@ export class SingleEntityQueryset extends QuerySet {
     }
 
     // eslint-disable-next-line no-unused-vars
-    async get(id = undefined) {
+    async get(id = undefined, pathParamsValues = null) {
         // Parameter of get must be not undefined so getOne would not be used
-        return super.get('NOT_UNDEFINED');
+        return super.get('NOT_UNDEFINED', pathParamsValues);
     }
 
     // eslint-disable-next-line no-unused-vars

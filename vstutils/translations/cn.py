@@ -235,4 +235,5 @@ TRANSLATION = {
     'Execute': '施行',
     'This file format is not supported': '不支持此文件格式',
     'Oops! Something went wrong.': '哎呀！ 出了些问题。',
+    '[Object not found]': '[未找到对象]',
 }

@@ -234,4 +234,5 @@ TRANSLATION = {
     'Execute': 'Hành hình',
     'This file format is not supported': 'Định dạng tệp này không được hỗ trợ',
     'Oops! Something went wrong.': 'Một cái gì đó đã đi sai.',
+    '[Object not found]': '[Không tìm thấy đối tượng]',
 }

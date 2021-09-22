@@ -270,4 +270,5 @@ TRANSLATION = {
     'Scale': 'Масштаб',
     'This file format is not supported': 'Данный формат файла не поддерживается',
     'Oops! Something went wrong.': 'Упс! Что-то пошло не так',
+    '[Object not found]': '[Объект не найден]',
 }

@@ -7,6 +7,8 @@ import { StringField } from '../text';
 import { StringArrayFieldMixin } from './custom/string.js';
 import { ChoicesField } from '../choices';
 import { ChoicesArrayFieldMixin } from './custom/choices.js';
+import { NumberField, integer } from '../numbers';
+import { NumberArrayFieldMixin } from './custom/number.js';
 
 export default class ArrayField extends BaseField {
     static SEPARATORS = new Map([
@@ -20,6 +22,8 @@ export default class ArrayField extends BaseField {
         [ChoicesField, ChoicesArrayFieldMixin],
         [FKField, FKArrayFieldMixin],
         [StringField, StringArrayFieldMixin],
+        [NumberField, NumberArrayFieldMixin],
+        [integer.IntegerField, NumberArrayFieldMixin],
     ]);
 
     constructor(options) {

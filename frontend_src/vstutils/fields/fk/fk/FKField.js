@@ -1,5 +1,3 @@
-import { BaseField } from '../../base';
-import FKFieldMixin from './FKFieldMixin.js';
 import { AggregatedQueriesExecutor } from '../../../AggregatedQueriesExecutor.js';
 import {
     formatPath,
@@ -8,6 +6,9 @@ import {
     registerHook,
     RequestTypes,
 } from '../../../utils';
+import { i18n } from '../../../translation.js';
+import { BaseField } from '../../base';
+import FKFieldMixin from './FKFieldMixin.js';
 
 const dependenceTemplateRegexp = /<<\w+>>/g;
 
@@ -36,6 +37,8 @@ const validAttrs = Array.from(dependenceTemplates.keys());
  * Foreign key GUI field class for nested models.
  */
 class FKField extends BaseField {
+    static NOT_FOUND_TEXT = '[Object not found]';
+
     constructor(options) {
         super(options);
         this.valueField = this.props.value_field;
@@ -130,20 +133,37 @@ class FKField extends BaseField {
     prefetchValues(instances, path) {
         const qs = this.getAppropriateQuerySet({ path });
         if (!qs) return;
-        const executor = new AggregatedQueriesExecutor(qs, this.filterName, this.filterFieldName);
-        const promises = [];
-        for (const instance of instances) {
-            const pk = this._getValueFromData(instance._data);
-            if (pk) {
-                promises.push(
-                    executor
-                        .query(pk)
-                        .then((relatedInstance) => (instance._data[this.name] = relatedInstance)),
-                );
+        return this._fetchRelated(
+            instances.map((instance) => this._getValueFromData(instance._data)),
+            qs,
+        ).then((fetchedInstances) => {
+            for (let i = 0; i < fetchedInstances.length; i++) {
+                instances[i]._data[this.name] = fetchedInstances[i];
             }
-        }
+        });
+    }
+
+    /**
+     * @param {Array<Object|number>} pks
+     * @param {QuerySet} qs
+     * @return {Promise<Model[]>}
+     */
+    _fetchRelated(pks, qs) {
+        const executor = new AggregatedQueriesExecutor(qs, this.filterName, this.filterFieldName);
+        const promises = pks.map((pk) =>
+            pk
+                ? executor.query(pk).catch(() => {
+                      const notFound = new this.fkModel({
+                          [this.valueField]: pk,
+                          [this.viewField]: i18n.t(this.constructor.NOT_FOUND_TEXT),
+                      });
+                      notFound.__notFound = true;
+                      return notFound;
+                  })
+                : Promise.resolve(pk),
+        );
         executor.execute();
-        return Promise.allSettled(promises);
+        return Promise.all(promises);
     }
 
     _resolveDependenceValue(key) {
