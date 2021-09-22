@@ -2,15 +2,7 @@
 import $ from 'jquery';
 import { BaseFieldContentEdit } from '../../base';
 import { ArrayFieldMixin } from '../mixins.js';
-import { resumeEnterPropagation, SCHEMA_DATA_TYPE, stopEnterPropagation } from '../../../utils';
-
-function createNumberTag(params) {
-    const term = Number(params?.term?.trim() || '');
-    if (isNaN(term)) {
-        return null;
-    }
-    return { id: term, text: term, newTag: true };
-}
+import { resumeEnterPropagation, stopEnterPropagation } from '../../../utils';
 
 /** @vue/component */
 export const StringArrayFieldEdit = {
@@ -30,18 +22,12 @@ export const StringArrayFieldEdit = {
     },
     methods: {
         getSelect2Params() {
-            const type = this.field.itemField.type;
-            const createTag =
-                type === SCHEMA_DATA_TYPE.number || type === SCHEMA_DATA_TYPE.integer
-                    ? createNumberTag
-                    : undefined;
             return {
                 theme: window.SELECT2_THEME,
                 tags: true,
                 multiple: true,
                 templateResult: () => null,
                 dropdownCssClass: 'select2-hide-dropdown',
-                createTag,
             };
         },
         initSelect2() {

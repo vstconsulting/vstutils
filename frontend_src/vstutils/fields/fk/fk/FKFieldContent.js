@@ -66,16 +66,8 @@ export default {
             if (!this.field.fetchData) {
                 return;
             }
-            let filters = {
-                limit: 1,
-                [this.field.filterFieldName]: value,
-            };
-
-            const [instance] = await this.queryset.filter(filters).items();
-
-            if (instance) {
-                this.fetchedValue = instance;
-            }
+            const [instance] = await this.field._fetchRelated([value], this.queryset);
+            this.fetchedValue = instance;
         },
     },
 };

@@ -69,17 +69,9 @@ export const FKArrayEdit = {
             if (Array.isArray(value)) {
                 this.$el.innerHTML = '';
                 for (const item of value) {
-                    let id, text;
-                    if (typeof item === 'object') {
-                        id = this.field.getValueFieldValue(item);
-                        text = this.field.getViewFieldValue(item);
-                    } else {
-                        id = text = String(item);
-                    }
-                    if (!id) {
-                        continue;
-                    }
-                    this.instancesCache.set(String(id), item);
+                    const id = String(this.field.getValueFieldValue(item));
+                    const text = this.field.getViewFieldValue(item);
+                    this.instancesCache.set(id, item);
                     $(this.$el).append(new Option(text, id, false, true));
                 }
                 $(this.$el).trigger('change');
