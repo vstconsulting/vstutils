@@ -2163,6 +2163,19 @@ class LangTestCase(BaseTestCase):
         self.assertEqual(201, results[2]['status'])
         self.assertEqual("Успешно переведено", results[2]['data']['translated'])
 
+        # all translations equal
+        from vstutils.translations import ru, cn, vi
+        self.assertEqual(
+            ru.TRANSLATION.keys(),
+            cn.TRANSLATION.keys(),
+            'looks like Russian and Chinese translations are not equivalent'
+        )
+        self.assertEqual(
+            vi.TRANSLATION.keys(),
+            ru.TRANSLATION.keys(),
+            'looks like Russian and Vietnamese translations are not equivalent'
+        )
+
     def test_user_language_detection(self):
         client = self.client_class()
         languages = (

@@ -100,7 +100,7 @@ class ImageOpenValidator(ImageValidator):
 
     Raises rest_framework.exceptions.ValidationError if PIL throws error when trying to open image
     """
-    error_msg = 'for some reason, this image file cannot be opened'
+    error_msg = 'For some reason, this image file cannot be opened'
 
     def __call__(self, value):
         if not self.has_pillow:
