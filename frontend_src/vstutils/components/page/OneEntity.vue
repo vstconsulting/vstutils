@@ -136,7 +136,7 @@
                 this.commitMutation('setFieldValue', obj);
             },
             fieldsGroupClasses(name) {
-                return ['col-md-6', 'fields-group', `fields-group-${name}`];
+                return ['col-md-6', 'fields-group', `fields-group-${name.replace(/ /g, '_')}`];
             },
         },
     };

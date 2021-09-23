@@ -254,13 +254,13 @@ export default class ViewConstructor {
             // Set list path models
             if (isListDetail) {
                 parent.objects.models[RequestTypes.RETRIEVE] = pageView.modelsList;
-                pageView.objects = parent.objects.clone({ pathParams: pathParameters.slice() });
+                pageView.objects = parent.objects;
                 if (editView) {
                     const requestType = editView.isPartial
                         ? RequestTypes.PARTIAL_UPDATE
                         : RequestTypes.UPDATE;
                     parent.objects.models[requestType] = editView.modelsList;
-                    editView.objects = pageView.objects.clone();
+                    editView.objects = parent.objects;
                 }
             }
 

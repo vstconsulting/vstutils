@@ -133,8 +133,10 @@ export default class ArrayField extends BaseField {
 
         // Put processed items back into original instances
         for (const [instance, itemInstances] of itemInstancesMap) {
-            instance._data[this.name] = itemInstances.map((itemInstance) =>
-                this._getValueFromData(itemInstance._data),
+            instance._setFieldValue(
+                this.name,
+                itemInstances.map((itemInstance) => this._getValueFromData(itemInstance._data)),
+                true,
             );
         }
     }
