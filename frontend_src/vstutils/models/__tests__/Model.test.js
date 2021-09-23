@@ -105,6 +105,15 @@ describe('Model', () => {
         expect(user.email).toBe('test@mail.com');
         expect(user.age).toBe(30);
         expect(user.firstName).toBe('Alex');
+
+        // Check _setFieldValue
+        const emailSpy = jest.spyOn(user._fields.get('email'), 'toInner');
+        user._setFieldValue('email', 'name1@user.com');
+        user._setFieldValue('email', 'name2@user.com');
+        expect(emailSpy).toBeCalledTimes(2);
+        user._setFieldValue('email', 'test@mail.com', true);
+        expect(emailSpy).toBeCalledTimes(2);
+
         // Check invalid fields
         emailField.options.maxLength = 1;
         expect(() => user._validateAndSetData({ email: 'invalid@mail.com' })).toThrow();

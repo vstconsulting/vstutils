@@ -138,7 +138,7 @@ class FKField extends BaseField {
             qs,
         ).then((fetchedInstances) => {
             for (let i = 0; i < fetchedInstances.length; i++) {
-                instances[i]._data[this.name] = fetchedInstances[i];
+                instances[i]._setFieldValue(this.name, fetchedInstances[i], true);
             }
         });
     }

@@ -255,6 +255,14 @@ export class Model {
         this._data = newData;
     }
 
+    _setFieldValue(fieldName, value, isRaw = false) {
+        if (isRaw) {
+            this._data[fieldName] = value;
+        } else {
+            this[fieldName] = value;
+        }
+    }
+
     /**
      * Method, that returns instance's value of PK field.
      */
@@ -274,9 +282,10 @@ export class Model {
 
     /**
      * Returns value of view field as safe escaped string or undefined if model has no view field.
+     * @param {boolean} escapeResult
      * @return {string|undefined}
      */
-    getViewFieldString() {
+    getViewFieldString(escapeResult = true) {
         if (this._viewField) {
             let value = this[this._viewField.name];
             if (value instanceof Model) {
@@ -288,7 +297,9 @@ export class Model {
             if (typeof value === 'object') {
                 value = value.name || value.title;
             }
-            return escapeHtml(String(value));
+            const strValue = String(value);
+
+            return escapeResult ? escapeHtml(strValue) : strValue;
         }
     }
 

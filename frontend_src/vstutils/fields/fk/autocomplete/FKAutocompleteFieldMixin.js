@@ -25,8 +25,10 @@ const FKAutocompleteFieldMixin = {
                  */
                 // eslint-disable-next-line no-unused-vars
                 _renderItem({ value_field, view_field }, search) {
-                    return `<div class="autocomplete-suggestion" data-value="${escapeHtml(value_field)}">
-                                ${escapeHtml(view_field)}
+                    return `<div class="autocomplete-suggestion"
+                                 data-value="${escapeHtml(String(value_field))}"
+                            >
+                                ${escapeHtml(String(view_field))}
                             </div>`;
                 },
                 /**
