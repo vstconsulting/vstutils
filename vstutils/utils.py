@@ -170,7 +170,8 @@ def send_template_email_handler(
         recipient_list=recipient_list,
         html_message=loader.render_to_string(
             template_name,
-            context=context
+            context=context,
+            request=context.pop('request', None)
         ),
         **kwargs
     )
