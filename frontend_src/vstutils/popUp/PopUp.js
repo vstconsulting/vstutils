@@ -169,30 +169,30 @@ export let pop_up_msg = {
         },
         error: {
             add:
-                'Some error occurred during adding of child "<b>{0}</b>" instance' +
+                'An error occurred during adding of child "<b>{0}</b>" instance' +
                 ' to parent list.' +
                 '<br> Error details: {1}',
-            create: 'Some error occurred during new instance creation.<br>Error details:<br>{0}',
+            create: 'An error occurred during creation.<br>Error details:<br>{0}',
             remove:
-                'Some error occurred during remove process of <b>{1}</b>  "<b>{0}</b>".' +
+                'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>".' +
                 '<br> Error details: {2}',
-            removeMany: 'Some error occurred during remove process of <b>{0}</b><br> Error details: {1}',
-            save: 'Some error occurred during saving process.<br>Error details:<br>{0}',
+            removeMany: 'An error occurred during removal process of <b>{0}</b><br> Error details: {1}',
+            save: 'An error occurred during process.<br>Error details:<br>{0}',
             executeEmpty:
                 'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>.' +
                 '<br> Error details: {2}' +
                 '<br>{3}',
-            execute: 'Some error occurred during <b>{0}</b>. Error details:<br>{1}',
+            execute: 'An error occurred during <b>{0}</b>. Error details:<br>{1}',
         },
     },
     field: {
         error: {
             empty: 'Field is empty.',
             required: 'Field is required.',
-            minLength: 'Field is too short.' + '<br> Field length should not be shorter, than {0}.',
-            maxLength: 'Field is too long. ' + '<br> Field length should not be longer, than {0}.',
-            min: 'Field is too small.' + '<br> Field should not be smaller, than {0}.',
-            max: 'Field is too big.' + '<br> Field should not be bigger, than {0}.',
+            minLength: 'Field is too short.' + '<br> Field length should not be shorter, then {0}.',
+            maxLength: 'Field is too long. ' + '<br> Field length should not be longer, then {0}.',
+            min: 'Field is too small.' + '<br> Field should not be smaller, then {0}.',
+            max: 'Field is too big.' + '<br> Field should not be bigger, then {0}.',
             invalid: '<b>{0} </b> value is not valid for <b>{1}</b> field.',
         },
     },
