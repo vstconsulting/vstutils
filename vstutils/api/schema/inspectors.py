@@ -39,6 +39,8 @@ FORMAT_PHONE = 'phone'
 FORMAT_MASKED = 'masked'
 FORMAT_DECIMAL = 'decimal'
 
+X_OPTIONS = 'x-options'
+
 
 # Base types
 basic_type_info: Dict[Type[Field], Dict[Text, Any]] = OrderedDict()
@@ -111,9 +113,9 @@ def field_have_redirect(field, **kwargs):
     if not getattr(field, 'redirect', False):
         return kwargs
 
-    if kwargs.get('additionalProperties', None) is None:
-        kwargs['additionalProperties'] = {}
-    kwargs['additionalProperties']['redirect'] = {
+    if kwargs.get(X_OPTIONS, None) is None:
+        kwargs[X_OPTIONS] = {}
+    kwargs[X_OPTIONS]['redirect'] = {
         'operation_name': getattr(field, 'operation_name', None) or field.field_name,
         'depend_field': getattr(field, 'depend_field', None),
         'concat_field_name': getattr(field, 'concat_field_name', False),
@@ -166,7 +168,7 @@ class AutoCompletionFieldInspector(FieldInspector):
             kwargs['enum'] = list(field.autocomplete)
         else:
             kwargs['format'] = FORMAT_FK_AUTOCOMPLETE
-            kwargs['additionalProperties'] = {
+            kwargs[X_OPTIONS] = {
                 'model': openapi.SchemaRef(
                     self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                     field.autocomplete, ignore_unresolved=True
@@ -188,21 +190,21 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
-        additionalProperties = {'field': field.field}
+        options = {'field': field.field}
 
         if isinstance(field, fields.DependFromFkField):
             field_format = FORMAT_DYN_FK
-            additionalProperties['field_attribute'] = field.field_attribute
+            options['field_attribute'] = field.field_attribute
 
         else:
             field_format = FORMAT_DYN
-            additionalProperties['choices'] = field.choices
-            additionalProperties['types'] = field.types
+            options['choices'] = field.choices
+            options['types'] = field.types
 
         kwargs = {
             'type': openapi.TYPE_STRING,
             'format': field_format,
-            'additionalProperties': additionalProperties
+            X_OPTIONS: options
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -220,7 +222,7 @@ class FkFieldInspector(FieldInspector):
         kwargs = {
             'type': openapi.TYPE_INTEGER,
             'format': FORMAT_FK,
-            'additionalProperties': {
+            X_OPTIONS: {
                 'model': openapi.SchemaRef(
                     self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                     field.select_model, ignore_unresolved=True
@@ -248,14 +250,14 @@ class CommaMultiSelectFieldInspector(FieldInspector):
         )
         kwargs = {
             'type': 'array',
-            'collectionFormat': 'csv',
-            'additionalProperties': {
+            'x-collectionFormat': 'csv',
+            X_OPTIONS: {
                 'viewSeparator': field.select_separator,
             },
             'items': {
                 "type": openapi.TYPE_INTEGER,
                 "format": FORMAT_FK,
-                "additionalProperties": {
+                X_OPTIONS: {
                     'model': openapi.SchemaRef(
                         self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                         field.select_model,
@@ -312,7 +314,7 @@ class RatingFieldInspector(FieldInspector):
         kwargs = {
             'type': openapi.TYPE_NUMBER,
             'format': FORMAT_RATING,
-            'additionalProperties': {
+            X_OPTIONS: {
                 'min_value': field.min_value,
                 'max_value': field.max_value,
                 'step': field.step,
@@ -378,7 +380,7 @@ class MaskedFieldInspector(FieldInspector):
         kwargs = {
             'type': openapi.TYPE_STRING,
             'format': FORMAT_MASKED,
-            'additionalProperties': {
+            X_OPTIONS: {
                 'mask': field.mask
             }
         }
@@ -397,7 +399,7 @@ class DecimalFieldInspector(FieldInspector):
         kwargs = {
             'type': decimal_field_type(field),
             'format': FORMAT_DECIMAL,
-            'additionalProperties': {
+            X_OPTIONS: {
                 'decimal_places': field.decimal_places,
                 'max_digits': field.max_digits
             }

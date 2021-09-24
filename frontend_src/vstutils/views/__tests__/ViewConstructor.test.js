@@ -119,9 +119,15 @@ describe('ViewConstructor', () => {
             expect(archiveMultiAction.title).toBe('Archive');
             expect(archiveMultiAction.isEmpty).toBeTruthy();
 
+            const changeTitleMultiAction = view.multiActions.get('change_title');
+            expect(changeTitleMultiAction).toBeDefined();
+            expect(changeTitleMultiAction.name).toBe('change_title');
+            expect(changeTitleMultiAction.title).toBe('Change title');
+            expect(changeTitleMultiAction.isEmpty).toBeFalsy();
+
             expect(view.sublinks.size).toBe(1);
             expect(view.actions.size).toBe(3);
-            expect(view.multiActions.size).toBe(2);
+            expect(view.multiActions.size).toBe(3);
         },
     );
 

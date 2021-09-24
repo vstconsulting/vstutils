@@ -4,6 +4,7 @@ import { BooleanField } from '../../boolean';
 import { createApp } from '../../../../unittests/create-app';
 import { StringField } from '../../text';
 import { ChoicesField } from '../../choices';
+import { X_OPTIONS } from '../../../utils';
 
 describe('DynamicField', () => {
     beforeAll(() => {
@@ -13,7 +14,7 @@ describe('DynamicField', () => {
     test('getting real field using types', () => {
         const dynamicField = new DynamicField({
             name: 'value',
-            additionalProperties: {
+            [X_OPTIONS]: {
                 field: 'type',
                 types: { meta_title: 'string', some_boolean: 'boolean' },
             },
@@ -24,7 +25,7 @@ describe('DynamicField', () => {
     test('getting real field using callback', () => {
         const dynamicField = new DynamicField({
             name: 'value',
-            additionalProperties: {
+            [X_OPTIONS]: {
                 field: 'type',
                 callback: (value) => {
                     const types = { meta_title: 'string', some_boolean: 'boolean' };
@@ -41,7 +42,7 @@ describe('DynamicField', () => {
     test('getting real field using choices', () => {
         const dynamicField = new DynamicField({
             name: 'value',
-            additionalProperties: {
+            [X_OPTIONS]: {
                 field: 'type',
                 choices: {
                     some_boolean: [true],
@@ -54,7 +55,7 @@ describe('DynamicField', () => {
     });
 
     test('getting default real field', () => {
-        const dynamicField = new DynamicField({ name: 'value', additionalProperties: {} });
+        const dynamicField = new DynamicField({ name: 'value', [X_OPTIONS]: {} });
         expect(dynamicField.getRealField({})).toBeInstanceOf(StringField);
     });
 });

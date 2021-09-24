@@ -34,9 +34,8 @@ export default {
             }
         },
 
-        'field.options.additionalProperties.querysets': function (querysets) {
-            const props = this.field.options.additionalProperties;
-            const params = props.url_params || {};
+        'field.props.querysets': function (querysets) {
+            const params = this.field.props.url_params || {};
 
             this.querysets = querysets.map((qs) => qs.clone({ url: formatPath(qs.url, params) }));
 

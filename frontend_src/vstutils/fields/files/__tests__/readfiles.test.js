@@ -1,12 +1,13 @@
 import { expect, test, describe, jest } from '@jest/globals';
 import ResolutionValidatorMixin from '../named-binary-image/ResolutionValidatorMixin';
 import { NamedBinaryImageField } from '../named-binary-image';
+import { X_OPTIONS } from '../../../utils';
 
 describe('File fields', () => {
     test('Call read files', async () => {
         const field = new NamedBinaryImageField({
             name: 'field',
-            additionalProperties: {
+            [X_OPTIONS]: {
                 extensions: ['image/jpeg'],
             },
         });

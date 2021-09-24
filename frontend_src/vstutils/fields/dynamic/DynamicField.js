@@ -79,7 +79,7 @@ class DynamicField extends BaseField {
      * @return {array}
      */
     _getParentFields() {
-        let p_f = this.options.additionalProperties.field || [];
+        let p_f = this.props.field || [];
 
         if (Array.isArray(p_f)) {
             return p_f;
@@ -93,7 +93,7 @@ class DynamicField extends BaseField {
      * @return {object}
      */
     _getParentChoices() {
-        return this.options.additionalProperties.choices || {};
+        return this.props.choices || {};
     }
     /**
      * Method, that returns values of parent fields.
@@ -160,7 +160,7 @@ class DynamicField extends BaseField {
 
     _getFromCallback(parentValues) {
         if (this.props.callback) {
-            const callbackResult = this.options.additionalProperties.callback(parentValues);
+            const callbackResult = this.props.callback(parentValues);
             if (callbackResult instanceof BaseField) {
                 return callbackResult;
             } else if (typeof callbackResult === 'object') {

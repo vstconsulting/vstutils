@@ -48,7 +48,6 @@ const FKAutocompleteFieldMixin = {
                  * of autocomplete_field_content_edit_mixin.
                  */
                 async _filterAutocompleteData(search_input, response) {
-                    let props = this.field.options.additionalProperties;
                     let filters = {
                         limit: guiLocalSettings.get('page_size') || 20,
                         [this.field.viewField]: search_input,
@@ -56,7 +55,7 @@ const FKAutocompleteFieldMixin = {
 
                     let field_dependence_data = getDependenceValueAsString(
                         this.data,
-                        props.field_dependence_name,
+                        this.props.field_dependence_name,
                     );
                     // TODO Make dependence like in fk
                     let format_data = {
@@ -71,9 +70,9 @@ const FKAutocompleteFieldMixin = {
                             filters: filters,
                         };
                         if (field_dependence_data !== undefined) {
-                            signal_obj.field_dependence_name = props.field_dependence_name;
-                            signal_obj.filter_name = props.filter_name;
-                            signal_obj[props.field_dependence_name] = field_dependence_data;
+                            signal_obj.field_dependence_name = this.props.field_dependence_name;
+                            signal_obj.filter_name = this.props.filter_name;
+                            signal_obj[this.props.field_dependence_name] = field_dependence_data;
                         }
                         signals.emit(
                             'filter.{fieldType}.{modelName}.{fieldName}'.format(format_data),

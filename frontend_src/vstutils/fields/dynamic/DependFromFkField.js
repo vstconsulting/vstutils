@@ -6,14 +6,14 @@ export default class DependFromFkField extends BaseField {
     constructor(options) {
         super(options);
 
-        this.dependField = options.additionalProperties.field;
-        this.dependFieldAttribute = options.additionalProperties.field_attribute;
+        this.dependField = this.props.field;
+        this.dependFieldAttribute = this.props.field_attribute;
 
         /**
          * Function that is used to customize real field options
          * @type {Function}
          */
-        this.callback = options.additionalProperties.callback;
+        this.callback = this.props.callback;
     }
 
     static get mixins() {

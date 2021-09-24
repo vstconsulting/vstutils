@@ -28,7 +28,7 @@ export default class ArrayField extends BaseField {
 
     constructor(options) {
         super(options);
-        this.collectionFormat = options.collectionFormat;
+        this.collectionFormat = options.collectionFormat || options['x-collectionFormat'];
         this.separator = this.constructor.SEPARATORS.get(this.collectionFormat);
         this.minItems = getProp(options, 'minItems', 0);
         this.maxItems = getProp(options, 'maxItems', Number.POSITIVE_INFINITY);
