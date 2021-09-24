@@ -36,6 +36,7 @@ from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 
 from vstutils import utils
+from vstutils.api.schema.inspectors import X_OPTIONS
 from vstutils.api.validators import (
     RegularExpressionValidator,
     ImageValidator,
@@ -1236,7 +1237,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check propery format for FkModelField
         self.assertEqual(api['definitions']['ExtraPost']['properties']['author']['format'], 'fk')
         self.assertEqual(
-            api['definitions']['ExtraPost']['properties']['author']['additionalProperties']['model']['$ref'],
+            api['definitions']['ExtraPost']['properties']['author'][X_OPTIONS]['model']['$ref'],
             '#/definitions/Author'
         )
         # Check properly format for RelatedListField
@@ -1253,7 +1254,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'title': 'Rating',
                     'type': 'number',
                     'format': 'rating',
-                    'additionalProperties': {
+                    X_OPTIONS: {
                         'min_value': 0,
                         'max_value': 10,
                         'step': 1,
@@ -1269,7 +1270,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'title': 'Fa icon rating',
                 'type': 'number',
                 'format': 'rating',
-                'additionalProperties': {
+                X_OPTIONS: {
                     'min_value': 0,
                     'max_value': 5,
                     'step': 1,
@@ -1371,7 +1372,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check depend fields
         self.assertEqual(api['definitions']['Variable']['properties']['key']['format'], 'fk')
         self.assertEqual(
-            api['definitions']['Variable']['properties']['key']['additionalProperties'],
+            api['definitions']['Variable']['properties']['key'][X_OPTIONS],
             {
                 'makeLink': True,
                 'model': {'$ref': '#/definitions/VariableType'},
@@ -1383,12 +1384,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
             }
         )
         self.assertEqual(
-            api['definitions']['OneModelWithFK']['properties']['fk_with_filters']['additionalProperties']['filters'],
+            api['definitions']['OneModelWithFK']['properties']['fk_with_filters'][X_OPTIONS]['filters'],
             {'rating': 5}
         )
         self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic_fk')
         self.assertEqual(
-            api['definitions']['Variable']['properties']['value']['additionalProperties'],
+            api['definitions']['Variable']['properties']['value'][X_OPTIONS],
             {"field": 'key', 'field_attribute': 'val_type'}
         )
 
@@ -1467,7 +1468,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
             self.assertNotIn(field_name, fields_of_model_list)
 
         # Check RedirectFieldMixin's schema
-        self.assertDictEqual(api['definitions']['Host']['properties']['id']['additionalProperties']['redirect'], {
+        self.assertDictEqual(api['definitions']['Host']['properties']['id'][X_OPTIONS]['redirect'], {
             'operation_name': 'files',
             'depend_field': None,
             'concat_field_name': False,
@@ -1482,14 +1483,14 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check masked field
         self.assertEqual(api['definitions']['OneAuthor']['properties']['masked']['format'], 'masked')
         self.assertDictEqual(
-            api['definitions']['OneAuthor']['properties']['masked']['additionalProperties'],
+            api['definitions']['OneAuthor']['properties']['masked'][X_OPTIONS],
             {'mask': {'mask': '000-000'}}
         )
 
         # Check decimal field
         self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['format'], 'decimal')
         self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['default'], '13.37')
-        self.assertDictEqual(api['definitions']['OneAuthor']['properties']['decimal']['additionalProperties'], {'decimal_places': 2, 'max_digits': 5})
+        self.assertDictEqual(api['definitions']['OneAuthor']['properties']['decimal'][X_OPTIONS], {'decimal_places': 2, 'max_digits': 5})
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -2540,14 +2541,14 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(api_model_hostgroup['properties']['parent']['type'], 'string')
         self.assertEqual(hostgroup_props['parent']['format'], 'fk_autocomplete')
         self.assertEqual(
-            hostgroup_props['parent']['additionalProperties']['model']['$ref'],
+            hostgroup_props['parent'][X_OPTIONS]['model']['$ref'],
             '#/definitions/Host'
         )
         self.assertEqual(
-            hostgroup_props['parent']['additionalProperties']['value_field'], 'id'
+            hostgroup_props['parent'][X_OPTIONS]['value_field'], 'id'
         )
         self.assertEqual(
-            hostgroup_props['parent']['additionalProperties']['view_field'], 'name'
+            hostgroup_props['parent'][X_OPTIONS]['view_field'], 'name'
         )
         # Check file and secret_file fields
         self.assertEqual(hostgroup_props['file']['type'], 'string')
@@ -2644,15 +2645,15 @@ class ProjectTestCase(BaseTestCase):
         # Check useFetch and makeLink properties
         definitions = data['definitions']
 
-        properties = definitions['OneModelWithFK']['properties']['some_fk']['additionalProperties']
+        properties = definitions['OneModelWithFK']['properties']['some_fk'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], True)
         self.assertEqual(properties['makeLink'], True)
 
-        properties = definitions['OneModelWithFK']['properties']['no_prefetch_and_link_fk']['additionalProperties']
+        properties = definitions['OneModelWithFK']['properties']['no_prefetch_and_link_fk'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], False)
 
-        properties = definitions['OneModelWithFK']['properties']['multiselect']['items']['additionalProperties']
+        properties = definitions['OneModelWithFK']['properties']['multiselect']['items'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], True)
 

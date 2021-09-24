@@ -11,6 +11,8 @@ from docutils import nodes
 from sphinx.util.nodes import nested_parse_with_titles  # type: ignore
 from sphinxcontrib.httpdomain import HTTP_STATUS_CODES  # type: ignore
 
+from .schema.inspectors import X_OPTIONS
+
 
 class _YamlOrderedLoader(yaml.SafeLoader):
     pass
@@ -296,8 +298,8 @@ class VSTOpenApiBase(Directive):
             def_name = (opt_values.get('$ref') or '').split('/')[-1]
             result = self.get_object_example(def_name)
         elif var_type == 'select2':
-            def_name = opt_values['additionalProperties']['model']['$ref'].split('/')[-1]
-            value_field_name = opt_values['additionalProperties']['value_field']
+            def_name = opt_values[X_OPTIONS]['model']['$ref'].split('/')[-1]
+            value_field_name = opt_values[X_OPTIONS]['value_field']
             def_model = self.definitions[def_name].get('properties')
             value_field = def_model.get(value_field_name, None)
             var_type = value_field.get('format', None) or value_field.get('type', None)

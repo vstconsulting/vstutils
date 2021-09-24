@@ -3,6 +3,7 @@ import PhoneFieldContentEdit from './PhoneFieldContentEdit';
 import { ChoicesField } from '../choices';
 import { BaseFieldContentReadonlyMixin, BaseFieldListView } from '../base';
 import IMask from 'imask';
+import { X_OPTIONS } from '../../utils';
 
 const FormattedPhoneMixin = {
     data() {
@@ -66,7 +67,7 @@ const countryCodeField = new ChoicesField({
 
 export class PhoneField extends MaskedField {
     constructor(options) {
-        options.additionalProperties = {
+        options[X_OPTIONS] = {
             mask: {
                 mask: [
                     { mask: '(000) 000-000' },

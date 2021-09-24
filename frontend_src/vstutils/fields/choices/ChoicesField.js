@@ -7,13 +7,11 @@ import ChoicesFieldMixin from './ChoicesFieldMixin.js';
 class ChoicesField extends StringField {
     constructor(options) {
         super(options);
-        const props = options.additionalProperties || {};
-
         this.enum = options.enum || null;
-        this.fieldForEnum = props.fieldForEnum;
+        this.fieldForEnum = this.props.fieldForEnum;
 
-        this.templateResult = props.templateResult;
-        this.templateSelection = props.templateSelection;
+        this.templateResult = this.props.templateResult;
+        this.templateSelection = this.props.templateSelection;
     }
 
     getEmptyValue() {

@@ -35,3 +35,10 @@
         },
     };
 </script>
+
+<style scoped>
+    .card-tools {
+        display: flex;
+        align-items: center;
+    }
+</style>

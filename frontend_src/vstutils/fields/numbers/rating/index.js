@@ -59,14 +59,12 @@ export class RatingField extends FloatField {
     constructor(options) {
         super(options);
 
-        const props = options.additionalProperties;
-
-        this.min = props.min_value;
-        this.max = props.max_value;
-        this.step = props.step;
-        this.style = props.style;
-        this.color = props.color || '#ffb100';
-        this.faClass = props.fa_class;
+        this.min = this.props.min_value;
+        this.max = this.props.max_value;
+        this.step = this.props.step;
+        this.style = this.props.style;
+        this.color = this.props.color || '#ffb100';
+        this.faClass = this.props.fa_class;
     }
 
     static get mixins() {

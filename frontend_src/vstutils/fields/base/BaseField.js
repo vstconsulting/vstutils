@@ -1,4 +1,4 @@
-import { _translate, capitalize, deepEqual, nameToTitle } from '../../utils';
+import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import BaseFieldMixin from './BaseFieldMixin.vue';
 
@@ -21,7 +21,7 @@ class BaseField {
         this.options = options;
 
         /** @type {Object} */
-        this.props = options.additionalProperties || {};
+        this.props = options[X_OPTIONS] || {};
 
         /** @type {string} */
         this.type = options.type;
