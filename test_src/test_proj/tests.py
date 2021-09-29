@@ -20,6 +20,7 @@ from collections import OrderedDict
 from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -30,12 +31,14 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.test import Client
 from django.http import FileResponse, HttpResponseNotModified
+from django.test.client import RequestFactory
 from django.urls import reverse
 from fakeldap import MockLDAP
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import CoreAPIClient
 
 from vstutils import utils
+from vstutils.api.models import Language
 from vstutils.api.schema.inspectors import X_OPTIONS
 from vstutils.api.validators import (
     RegularExpressionValidator,
@@ -56,7 +59,7 @@ from vstutils.urls import router
 from vstutils.models import get_centrifugo_client
 from vstutils import models
 from vstutils.api import serializers, fields
-from vstutils.utils import SecurePickling, BaseEnum
+from vstutils.utils import SecurePickling, BaseEnum, get_render
 
 from .models import (
     File,
@@ -2176,6 +2179,15 @@ class LangTestCase(BaseTestCase):
             ru.TRANSLATION.keys(),
             'looks like Russian and Vietnamese translations are not equivalent'
         )
+
+        # test translate tag for context variables
+        context_variable = 'Hello world!'
+        request = RequestFactory().get('/')
+        request.user = AnonymousUser()
+        request.language = Language.objects.get(code='ru')
+
+        result = get_render('test_lang_tmplt.html', {'context_variable': context_variable, 'request': request})
+        self.assertEqual(result, 'Привет мир!\n')
 
     def test_user_language_detection(self):
         client = self.client_class()
