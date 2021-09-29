@@ -458,7 +458,10 @@ LOCALRUN: bool = any([True for i in sys.argv if i not in ['collectstatic', 'runs
 TESTSERVER_RUN: bool = 'testserver' in sys.argv
 DEBUG: bool = ConfigBoolType(os.getenv('DJANGO_DEBUG', main["debug"]))
 ALLOWED_HOSTS: _t.Iterable = main["allowed_hosts"]
-SECURE_PROXY_SSL_HEADER: _t.Tuple[_t.Text, _t.Text] = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
+SECURE_PROXY_SSL_HEADER: _t.Tuple[_t.Text, _t.Text] = (
+    web.get('secure_proxy_ssl_header_name', fallback='HTTP_X_FORWARDED_PROTOCOL'),
+    web.get('secure_proxy_ssl_header_value', fallback='https')
+)
 
 # Include some addons if packages exists in env
 ##############################################################

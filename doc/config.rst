@@ -273,8 +273,8 @@ session_timeout, static_files_url and pagination limit.
 * **enable_gravatar** - Enable/disable gravatar service using for users. Default: ``True``.
 * **rest_swagger_description** - Help string in Swagger schema. Useful for dev-integrations.
 * **openapi_cache_timeout** - Cache timeout for storing schema data. Default: 120.
-* **health_throttle_rate** - Count of requests to `/api/health/` endpoint. Default: 60.
-* **bulk_threads** - Threads count for PATCH `/api/endpoint/` endpoint. Default: 3.
+* **health_throttle_rate** - Count of requests to ``/api/health/`` endpoint. Default: 60.
+* **bulk_threads** - Threads count for PATCH ``/api/endpoint/`` endpoint. Default: 3.
 * **session_timeout** - Session lifetime. Default: 2w (two weeks).
 * **etag_default_timeout** - Cache timeout for Etag headers to control models caching. Default: 1d (one day).
 * **rest_page_limit** and **page_limit** - Default limit of objects in API list. Default: 1000.
@@ -284,6 +284,10 @@ session_timeout, static_files_url and pagination limit.
   Read :django_docs:`more <settings/#csrf-trusted-origins>`. Default: from **session_cookie_domain**.
 * **case_sensitive_api_filter** - Enables/disables case sensitive search for name filtering.
   Default: True.
+* **secure_proxy_ssl_header_name** - Header name which activates SSL urls in responses.
+  Read :django_docs:`more <settings/#secure-proxy-ssl-header>`. Default: ``HTTP_X_FORWARDED_PROTOCOL``.
+* **secure_proxy_ssl_header_value** - Header value which activates SSL urls in responses.
+  Read :django_docs:`more <settings/#secure-proxy-ssl-header>`. Default: ``https``.
 
 |
 
