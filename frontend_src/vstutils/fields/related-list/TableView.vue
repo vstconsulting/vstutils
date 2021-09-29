@@ -2,14 +2,18 @@
     <table class="table table-sm">
         <thead>
             <tr>
-                <th v-for="field in fields" :key="field.name">
+                <th v-for="field in fields" :key="field.name" :class="$u.tableColumnClasses(field)">
                     {{ $t(field.title) }}
                 </th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="(item, idx) in value" :key="idx">
-                <td v-for="field in fields" :key="`${field.name}-${idx}`">
+                <td
+                    v-for="field in fields"
+                    :key="`${field.name}-${idx}`"
+                    :class="$u.tableColumnClasses(field)"
+                >
                     <component
                         :is="field.component"
                         :field="field"

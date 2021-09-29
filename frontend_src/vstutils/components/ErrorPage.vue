@@ -9,6 +9,7 @@
                 <h3 class="margin-0">
                     {{ $t('Oops! Something went wrong.') }}
                 </h3>
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <p class="margin-0" v-html="$t(errorData)" />
             </div>
         </div>

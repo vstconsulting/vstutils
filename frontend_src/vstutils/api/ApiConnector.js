@@ -1,6 +1,8 @@
 import $ from 'jquery';
-import StatusError from './StatusError.js';
 import { guiLocalSettings, getCookie, makeQueryString, BulkType } from '../utils';
+import StatusError from './StatusError.js';
+
+const isNativeCacheAvailable = 'caches' in window;
 
 class APIResponse {
     constructor(status = undefined, data = undefined) {
@@ -113,7 +115,21 @@ class ApiConnector {
         const path = this.openapi.basePath.replace(this.defaultVersion, '').replace(/\/$/, '');
         this.baseURL = `${this.openapi.schemes[0]}://${this.openapi.host}${path}`;
 
+        if (isNativeCacheAvailable) {
+            this._etagsCachePrefix = 'etags-cache';
+            this._etagsCacheName = `${this._etagsCachePrefix}-${this.appConfig.fullUserVersion}`;
+            this._removeOldEtagsCaches();
+        }
+
         return this;
+    }
+
+    async _removeOldEtagsCaches() {
+        for (const cacheName of await window.caches.keys()) {
+            if (cacheName.startsWith(this._etagsCachePrefix) && cacheName !== this._etagsCacheName) {
+                await window.caches.delete(cacheName);
+            }
+        }
     }
 
     get cache() {
@@ -176,6 +192,59 @@ class ApiConnector {
     }
 
     /**
+     * @param {BulkRequest} request
+     */
+    _bulkItemToRequest({ version = this.defaultVersion, method, path, query = '', headers }) {
+        path = Array.isArray(path) ? path.join('/') : path.replace(/^\/|\/$/g, '');
+        return new Request(`${this.baseURL}/${version}/${path}/${makeQueryString(query)}`, {
+            method,
+            headers,
+        });
+    }
+
+    _bulkResultItemToResponse({ data, status, headers }) {
+        return new Response(JSON.stringify(data), {
+            status,
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+            },
+        });
+    }
+
+    async sendCachedBulk(requests, type = BulkType.SIMPLE) {
+        const cachedValues = new Map();
+        const cache = await window.caches.open(this._etagsCacheName);
+        for (let i = 0; i < requests.length; i++) {
+            const item = requests[i];
+            const request = this._bulkItemToRequest(item);
+            const cached = await cache.match(request);
+            if (cached) {
+                cachedValues.set(
+                    i,
+                    cached.json().then((data) => ({ status: cached.status, data })),
+                );
+                if (!item.headers) item.headers = {};
+                item.headers.HTTP_IF_NONE_MATCH = cached.headers.get('ETag');
+            }
+        }
+
+        const responses = await this.sendBulk(requests, type);
+
+        for (let i = 0; i < responses.length; i++) {
+            const response = responses[i];
+            if (response.status === 304 && cachedValues.has(i)) {
+                responses[i] = await cachedValues.get(i);
+            }
+            if (response.status < 300 && response.headers?.ETag) {
+                cache.put(this._bulkItemToRequest(requests[i]), this._bulkResultItemToResponse(response));
+            }
+        }
+
+        return responses;
+    }
+
+    /**
      * @param {BulkRequest[]} requests
      * @param {string} type - bulk type
      * @return {Promise.<BulkResponse[]>}
@@ -224,7 +293,9 @@ class ApiConnector {
         const bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
 
         try {
-            const results = await this.sendBulk(bulk_data);
+            const results = await (this._etagsCacheName
+                ? this.sendCachedBulk(bulk_data)
+                : this.sendBulk(bulk_data));
             for (let [idx, item] of results.entries()) {
                 try {
                     APIResponse.checkStatus(item.status, item.data);

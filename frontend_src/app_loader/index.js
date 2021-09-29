@@ -85,8 +85,6 @@ async function startApp(cache) {
     await window.app.start();
     window.app.mount();
 
-    cache.close();
-
     window.spa.signals.connect('app.version.updated', () => {
         alert('Oops! It looks like version of current page has become outdated. Please, reload the page.');
     });

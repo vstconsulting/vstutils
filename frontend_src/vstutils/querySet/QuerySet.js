@@ -43,9 +43,10 @@ export default class QuerySet {
         this.query = query;
 
         this.cache = undefined;
-        this.use_prefetch = true;
 
         this.listSubscriptionLabels = [];
+
+        this.prefetchEnabled = true;
     }
 
     get url() {

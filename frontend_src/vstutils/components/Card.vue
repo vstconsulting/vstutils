@@ -37,6 +37,14 @@
 </script>
 
 <style scoped>
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .card-header::after {
+        display: none;
+    }
     .card-tools {
         display: flex;
         align-items: center;

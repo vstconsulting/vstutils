@@ -121,8 +121,8 @@ class FKField extends BaseField {
         return queryset.clone({ url: formatPath(queryset.url, params) });
     }
 
-    async afterInstancesFetched(instances) {
-        if (this.usePrefetch && this.fetchData) {
+    async afterInstancesFetched(instances, qs) {
+        if (qs.prefetchEnabled && this.usePrefetch && this.fetchData) {
             const path =
                 this.constructor.app.application.$refs.currentViewComponent?.view?.path ||
                 this.constructor.app.application.$route.name;
@@ -149,7 +149,11 @@ class FKField extends BaseField {
      * @return {Promise<Model[]>}
      */
     _fetchRelated(pks, qs) {
-        const executor = new AggregatedQueriesExecutor(qs, this.filterName, this.filterFieldName);
+        const executor = new AggregatedQueriesExecutor(
+            qs.clone({ prefetchEnabled: false }),
+            this.filterName,
+            this.filterFieldName,
+        );
         const promises = pks.map((pk) =>
             pk
                 ? executor.query(pk).catch(() => {
