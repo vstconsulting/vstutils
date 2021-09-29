@@ -48,4 +48,19 @@ export class RelatedListField extends BaseField {
             field.prepareFieldForView(path);
         }
     }
+
+    afterInstancesFetched(instances, queryset) {
+        for (const instance of instances) {
+            const value = this._getValueFromData(instance._data) || [];
+            instance._setFieldValue(
+                this.name,
+                value.map((item) => new this.itemsModel(item)),
+                true,
+            );
+        }
+        const allInstances = instances.flatMap((instance) => this._getValueFromData(instance._data));
+
+        const fields = Array.from(this.itemsModel.fields.values());
+        return Promise.all(fields.map((field) => field.afterInstancesFetched(allInstances, queryset)));
+    }
 }

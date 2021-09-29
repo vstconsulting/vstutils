@@ -10,6 +10,7 @@
         <a
             :href="props.href"
             class="small-box-footer"
+            :style="listeners.click ? { cursor: 'pointer' } : {}"
             v-on="listeners.click ? { click: listeners.click } : {}"
         >
             <template v-if="props.href || listeners.click">

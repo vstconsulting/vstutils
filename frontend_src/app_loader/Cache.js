@@ -114,21 +114,31 @@ class IndexedDBCache extends FakeCache {
 
     get(key) {
         return new Promise((resolve, reject) => {
-            let transaction = this.db.transaction([this.store_name], 'readonly');
-            let request = transaction.objectStore(this.store_name).get(key);
+            const get = () => {
+                let transaction = this.db.transaction([this.store_name], 'readonly');
+                let request = transaction.objectStore(this.store_name).get(key);
 
-            request.onerror = (err) => {
-                console.error('Error in FilesCache.getFile()', err);
-                reject(err);
+                request.onerror = (err) => {
+                    console.error('Error in FilesCache.getFile()', err);
+                    reject(err);
+                };
+
+                request.onsuccess = () => {
+                    if (!request.result) {
+                        reject();
+                    }
+
+                    resolve(request.result);
+                };
             };
 
-            request.onsuccess = () => {
-                if (!request.result) {
-                    reject();
-                }
-
-                resolve(request.result);
-            };
+            if (this.db) {
+                get();
+            } else {
+                this.connect()
+                    .then(get)
+                    .then(() => this.close());
+            }
         });
     }
 
@@ -227,9 +237,9 @@ class IndexedDBCache extends FakeCache {
 
 async function getGlobalCache() {
     try {
-        return await new IndexedDBCache().connect();
+        return new IndexedDBCache();
     } catch (e) {
-        return await new FakeCache().connect();
+        return new FakeCache();
     }
 }
 
