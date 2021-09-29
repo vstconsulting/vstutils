@@ -149,6 +149,12 @@ class WebSection(BaseAppendSection):
     __slots__ = ()
     types_map = {
         'allow_cors': ConfigBoolType,
+        'cors_allowed_origins': cconfig.ListType(),
+        'cors_allowed_origins_regexes': cconfig.ListType(),
+        'cors_expose_headers': cconfig.ListType(),
+        'cors_allow_methods': cconfig.ListType(),
+        'cors_allow_headers': cconfig.ListType(),
+        'cors_preflight_max_age': ConfigIntSecondsType,
         'session_timeout': ConfigIntSecondsType,
         'page_limit': ConfigIntType,
         'rest_page_limit': ConfigIntType,
@@ -321,6 +327,10 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'web': {
             'allow_cors': False,
+            'cors_allowed_origins': [],
+            'cors_allowed_origins_regexes': [],
+            'cors_expose_headers': [],
+            'cors_preflight_max_age': '1d',
             'session_timeout': '2w',
             'static_files_url': '/static/',
             'page_limit': 20,
@@ -560,6 +570,14 @@ MAX_TFA_ATTEMPTS: int = web['max_tfa_attempts']
 
 # Allow cross-domain access
 CORS_ORIGIN_ALLOW_ALL: bool = web['allow_cors']
+CORS_ALLOWED_ORIGINS: _t.Sequence[str] = web['cors_allowed_origins']
+CORS_ALLOWED_ORIGIN_REGEXES: _t.Sequence[_t.Union[str, _t.Pattern[str]]] = web['cors_allowed_origins_regexes']
+CORS_EXPOSE_HEADERS: _t.Sequence = web['cors_expose_headers']
+CORS_PREFLIGHT_MAX_AGE: int = web['cors_preflight_max_age']
+if 'cors_allow_methods' in web:
+    CORS_ALLOW_METHODS = web['cors_allow_methods']
+if 'cors_allow_headers' in web:
+    CORS_ALLOW_HEADERS = web['cors_allow_headers']
 
 LDAP_SERVER: _t.Optional[_t.Text] = main["ldap-server"]
 LDAP_DOMAIN: _t.Optional[_t.Text] = main["ldap-default-domain"]

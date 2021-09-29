@@ -270,6 +270,9 @@ These settings are related to web-server. Those settings includes:
 session_timeout, static_files_url and pagination limit.
 
 * **allow_cors** - enable cross-origin resource sharing. Default: ``False``.
+* **cors_allowed_origins**, **cors_allowed_origins_regexes**, **cors_expose_headers**, **cors_allow_methods**,
+  **cors_allow_headers**, **cors_preflight_max_age** - `Settings <https://github.com/adamchainz/django-cors-headers#configuration>`_
+  from ``django-cors-headers`` lib with their defaults.
 * **enable_gravatar** - Enable/disable gravatar service using for users. Default: ``True``.
 * **rest_swagger_description** - Help string in Swagger schema. Useful for dev-integrations.
 * **openapi_cache_timeout** - Cache timeout for storing schema data. Default: 120.
