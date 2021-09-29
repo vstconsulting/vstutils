@@ -9,12 +9,17 @@ class TranslateTag(template.Node):
         self.filters = filters
 
     def render(self, context):
+
+        if str(self.text.var).startswith("$"):
+            self.text.var = context[self.text.var[1:]]
+
         result = context.request.language.translate(self.text.var)
         if self.filters:
             tmpl = '{{ "' + result + '" |'
             tmpl += '|'.join(self.filters)
             tmpl += '}}'
             result = context.template.engine.from_string(tmpl).render(context=context)
+
         return result
 
     @classmethod
