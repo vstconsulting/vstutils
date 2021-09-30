@@ -79,7 +79,7 @@ class UserSerializer(VSTSerializer):
 class OneUserSerializer(UserSerializer):
     class Meta:
         model = User
-        fields: _t.Union[_t.List[_t.Text], _t.Tuple] = (
+        fields: _t.Union[_t.List[_t.Text], _t.Tuple] = (  # type: ignore
             'id',
             'username',
             'is_active',
@@ -152,11 +152,11 @@ class UserViewSet(base.ModelViewSet):
     '''
     # pylint: disable=invalid-name
 
-    model: _t.Type[AbstractUser] = User
-    serializer_class: _t.Type[UserSerializer] = UserSerializer
-    serializer_class_one: _t.Type[OneUserSerializer] = OneUserSerializer
-    serializer_class_create: _t.Type[CreateUserSerializer] = CreateUserSerializer
-    serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer
+    model: _t.Type[AbstractUser] = User  # type: ignore
+    serializer_class: _t.Type[UserSerializer] = UserSerializer  # type: ignore
+    serializer_class_one: _t.Type[OneUserSerializer] = OneUserSerializer  # type: ignore
+    serializer_class_create: _t.Type[CreateUserSerializer] = CreateUserSerializer  # type: ignore
+    serializer_class_change_password: _t.Type[DataSerializer] = ChangePasswordSerializer  # type: ignore
     filterset_class = UserFilter
     permission_classes = (permissions.SuperUserPermission,)
 
