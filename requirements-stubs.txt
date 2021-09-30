@@ -1,5 +1,5 @@
-django-stubs
-djangorestframework-stubs
-celery-stubs
-drf-yasg-stubs
-django-filter-stubs
+django-stubs==1.5.0
+djangorestframework-stubs==1.2.0
+celery-stubs==0.1.1
+drf-yasg-stubs==0.1.0
+django-filter-stubs==0.1.1

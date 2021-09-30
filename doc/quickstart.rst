@@ -147,7 +147,7 @@ Let make out an example from **`BModel**:
 
 .. autoclass:: vstutils.models.BModel
     :exclude-members:
-    
+
 
 
 More information about Models you can find in `Django Models documentation <https://docs.djangoproject.com/en/2.2/topics/db/models/>`_.
@@ -155,6 +155,7 @@ More information about Models you can find in `Django Models documentation <http
 If you don't need to create custom :ref:`serializers<SerializerCreateTag>` or :ref:`view sets<ViewSetCreateTag>`, you can go to this :ref:`sstage<AddModelsToApiTag>`.
 
 .. _SerializerCreateTag:
+
 Serializers creation
 ~~~~~~~~~~~~~~~~~~~~
 *Note - If you don't need custom serializer you can skip this section*
@@ -188,6 +189,7 @@ More information about Serializers you can find in `Django REST Framework docume
 
 
 .. _ViewSetCreateTag:
+
 Views creation
 ~~~~~~~~~~~~~~
 *Note - If you don't need custom view set you can skip this section*
@@ -202,11 +204,11 @@ Then you need to add some code like this to ``views.py``:
     from vstutils.api.base import ModelViewSet
     from . import serializers as sers
     from .models import Stage, Task
-    
-    
+
+
     class StageViewSet(Stage.generated_view):
         serializer_class_one = sers.StageSerializer
-    
+
 
     '''
     Decorator, that allows to put one view into another
@@ -227,6 +229,7 @@ More information about Views and ViewSets you can find in `Django REST Framework
 
 
 .. _AddModelsToApiTag:
+
 Adding Models to API
 ~~~~~~~~~~~~~~~~~~~~
 To add created Models to the API you need to write something like this at the end of your ``settings.py`` file:
@@ -246,7 +249,7 @@ To add created Models to the API you need to write something like this at the en
     API[VST_API_VERSION][r'task'] = {
         'view': 'newapp2.views.TaskViewSet'
     }
-    
+
     '''
     You can add model too.
     All model generate base ViewSet with data that they have, if dont create custom ViewSet or Serializer
