@@ -327,7 +327,7 @@ class EndpointViewSet(views.APIView):
         "SERVER_PROTOCOL",
         "SERVER_SOFTWARE",
         "REMOTE_ADDR",
-        "HTTP_X_FORWARDED_PROTOCOL",
+        settings.SECURE_PROXY_SSL_HEADER[0],
         "HTTP_HOST",
         "HTTP_USER_AGENT"
     ]
