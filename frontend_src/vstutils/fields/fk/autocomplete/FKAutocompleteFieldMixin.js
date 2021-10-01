@@ -55,7 +55,7 @@ const FKAutocompleteFieldMixin = {
 
                     let field_dependence_data = getDependenceValueAsString(
                         this.data,
-                        this.props.field_dependence_name,
+                        this.field.props.field_dependence_name,
                     );
                     // TODO Make dependence like in fk
                     let format_data = {
@@ -70,9 +70,9 @@ const FKAutocompleteFieldMixin = {
                             filters: filters,
                         };
                         if (field_dependence_data !== undefined) {
-                            signal_obj.field_dependence_name = this.props.field_dependence_name;
-                            signal_obj.filter_name = this.props.filter_name;
-                            signal_obj[this.props.field_dependence_name] = field_dependence_data;
+                            signal_obj.field_dependence_name = this.field.props.field_dependence_name;
+                            signal_obj.filter_name = this.field.props.filter_name;
+                            signal_obj[this.field.props.field_dependence_name] = field_dependence_data;
                         }
                         signals.emit(
                             'filter.{fieldType}.{modelName}.{fieldName}'.format(format_data),
