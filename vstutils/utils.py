@@ -21,16 +21,14 @@ from threading import Thread
 from enum import Enum
 
 from django.conf import settings
-from django.middleware.gzip import re_accepts_gzip
+from django.middleware.gzip import GZipMiddleware
 from django.urls import re_path, include
 from django.core.mail import send_mail
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation, functional
-from django.utils.cache import patch_vary_headers
 from django.utils.module_loading import import_string as import_class
-from django.utils.text import compress_string, compress_sequence
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
@@ -199,33 +197,9 @@ def send_template_email(sync: bool = False, **kwargs):
 
 
 def patch_gzip_response(response, request):
-    if not response.status_code == 200 \
-            or response.has_header('Content-Encoding') \
-            or (not response.streaming and len(response.content) < 200):
+    if not response.status_code == 200:
         return  # nocv
-
-    patch_vary_headers(response, ('Accept-Encoding',))
-
-    ae = request.META.get('HTTP_ACCEPT_ENCODING', '')
-
-    if not re_accepts_gzip.search(ae):
-        return response
-
-    if response.streaming:
-        response.streaming_content = compress_sequence(response.streaming_content)
-        del response.headers['Content-Length']
-    else:
-        compressed_content = compress_string(response.content)
-        if len(compressed_content) >= len(response.content):
-            return response  # nocv
-
-        response.content = compressed_content
-        response.headers['Content-Length'] = str(len(response.content))
-
-    etag = response.get('ETag')
-    if etag and etag.startswith('"'):
-        response.headers['ETag'] = 'W/' + etag  # nocv
-    response.headers['Content-Encoding'] = 'gzip'
+    GZipMiddleware.process_response(None, request, response)
 
 
 def patch_gzip_response_decorator(func):
