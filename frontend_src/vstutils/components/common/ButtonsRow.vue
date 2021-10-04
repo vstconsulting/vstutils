@@ -22,6 +22,7 @@
             <CompactOperations
                 v-if="groupedSublinks.length"
                 :title="$u.capitalize($t('sublinks'))"
+                icon="fas fa-link"
                 :view="view"
                 :operations="groupedSublinks"
                 @clicked="$emit('open-sublink', $event)"
@@ -41,6 +42,7 @@
             <CompactOperations
                 v-if="groupedActions"
                 :title="$u.capitalize($t('actions'))"
+                icon="fas fa-ellipsis-v"
                 :view="view"
                 :operations="groupedActions"
                 @clicked="$emit('execute-action', $event)"

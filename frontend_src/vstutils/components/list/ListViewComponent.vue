@@ -31,7 +31,12 @@
             </span>
         </portal>
         <portal to="appendButtonsRow">
-            <Pagination v-bind="pagination" style="float: right" @open-page="goToPage" />
+            <Pagination
+                v-bind="pagination"
+                style="float: right"
+                class="d-none d-sm-block"
+                @open-page="goToPage"
+            />
         </portal>
         <div class="list-content-component" :class="`list-${model.name}`">
             <template v-if="isEmpty">

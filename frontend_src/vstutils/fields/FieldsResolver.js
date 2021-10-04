@@ -31,9 +31,6 @@ export class FieldsResolver {
      * @param {Function} fieldClass
      */
     registerField(type, format, fieldClass) {
-        if (!type) {
-            console.warn('');
-        }
         const typeMap = this._types.get(type);
         if (!typeMap) {
             throw new Error(`Unknown data type: ${type}`);
@@ -74,10 +71,8 @@ export class FieldsResolver {
 
         if (name) {
             obj.name = name;
-        } else {
-            if (!hasOwnProp(obj, 'name')) {
-                throw new Error(`Name for field "${JSON.stringify(obj)}" is not provided`);
-            }
+        } else if (!hasOwnProp(obj, 'name')) {
+            throw new Error(`Name for field "${JSON.stringify(obj)}" is not provided`);
         }
 
         if (!obj.format) {

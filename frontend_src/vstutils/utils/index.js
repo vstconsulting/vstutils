@@ -1281,9 +1281,9 @@ export const SCHEMA_DATA_TYPE = {
     number: 'number',
     integer: 'integer',
     boolean: 'boolean',
-    array: 'array',
     object: 'object',
     file: 'file',
+    array: 'array',
 };
 
 export const SCHEMA_DATA_TYPE_VALUES = Object.values(SCHEMA_DATA_TYPE);

@@ -4,11 +4,12 @@ import openapi_dictionary from '../../api/openapi.js';
 import ViewConstructor from '../ViewConstructor.js';
 import testSchema from './../../../__mocks__/testSchema.json';
 import { PageEditView, ViewTypes } from '../View.js';
-import { FieldsResolver } from '../../fields';
+import { addDefaultFields, FieldsResolver } from '../../fields';
 import { ModelsResolver } from '../../models';
 
 describe('ViewConstructor', () => {
     const fieldsResolver = new FieldsResolver(testSchema);
+    addDefaultFields(fieldsResolver);
     const modelsResolver = new ModelsResolver(fieldsResolver, testSchema);
     const viewConstructor = new ViewConstructor(openapi_dictionary, modelsResolver, fieldsResolver);
     const views = viewConstructor.generateViews(testSchema);
