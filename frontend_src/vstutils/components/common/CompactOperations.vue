@@ -8,7 +8,8 @@
             aria-haspopup="true"
             aria-expanded="false"
         >
-            {{ title }}
+            <i :class="icon" class="d-sm-none" />
+            <span class="d-none d-sm-inline">{{ title }}</span>
         </button>
         <div class="dropdown-menu" :aria-labelledby="buttonId">
             <a
@@ -32,6 +33,7 @@
         mixins: [ComponentIDMixin],
         props: {
             title: { type: String, required: true },
+            icon: { type: String, required: true },
             view: { type: Object, required: true },
             operations: { type: Array, default: () => [] },
         },
@@ -42,3 +44,11 @@
         },
     };
 </script>
+
+<style scoped>
+    @media (max-width: 576px) {
+        .dropdown-toggle::after {
+            content: none;
+        }
+    }
+</style>

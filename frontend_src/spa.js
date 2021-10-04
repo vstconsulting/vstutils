@@ -9,7 +9,7 @@ import { RouterConstructor, mixins as routerMixins } from './vstutils/router';
 import { QuerySetsResolver } from './vstutils/querySet';
 import { signals } from './app.common.js';
 import * as utils from './vstutils/utils';
-import { FieldsResolver, addDefaultField } from './vstutils/fields';
+import { FieldsResolver, addDefaultFields } from './vstutils/fields';
 import { APP_CREATED } from './vstutils/signals.js';
 
 export * from './app.common.js';
@@ -27,7 +27,7 @@ export class App extends BaseApp {
     constructor(config, cache) {
         super(config, cache);
         this.fieldsResolver = new FieldsResolver(this.config.schema);
-        addDefaultField(this.fieldsResolver);
+        addDefaultFields(this.fieldsResolver);
         this.modelsResolver = new ModelsResolver(this.fieldsResolver, this.config.schema);
 
         /** @type {Map<string, View>} */

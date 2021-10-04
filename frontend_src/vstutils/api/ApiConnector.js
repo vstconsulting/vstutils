@@ -237,7 +237,11 @@ class ApiConnector {
                 responses[i] = await cachedValues.get(i);
             }
             if (response.method === 'get' && response.status < 300 && response.headers?.ETag) {
-                cache.put(this._bulkItemToRequest(requests[i]), this._bulkResultItemToResponse(response));
+                try {
+                    cache.put(this._bulkItemToRequest(requests[i]), this._bulkResultItemToResponse(response));
+                } catch (e) {
+                    console.warn(e);
+                }
             }
         }
 

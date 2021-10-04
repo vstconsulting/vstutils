@@ -65,7 +65,7 @@ export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 /**
  * @param {FieldsResolver} fieldsResolver
  */
-export function addDefaultField(fieldsResolver) {
+export function addDefaultFields(fieldsResolver) {
     // Set STRING fields
     for (const [format, field] of [
         [FieldsResolver.DEFAULT_FIELD_KEY, text.StringField],
@@ -92,6 +92,10 @@ export function addDefaultField(fieldsResolver) {
         ['text_paragraph', text.TextParagraphField],
         ['textarea', text.TextAreaField],
         ['time_interval', datetime.TimeIntervalField], // CANT_CREATE_ON_BACKEND
+
+        // Support legacy field resolving only by string
+        ['multiplenamedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],
+        ['multiplenamedbinimage', files.multipleNamedBinaryImage.MultipleNamedBinaryImageField],
     ]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.string, format, field);
     }
