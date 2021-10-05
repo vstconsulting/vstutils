@@ -107,7 +107,7 @@ default_extra_metadata: dict = {
 
 # Handlers
 def update_cache_for_model(instance, **kwargs):
-    instance.__class__.set_etag_value()
+    kwargs.get('cached_model_class', instance.__class__).set_etag_value()
 
 
 def get_first_match_name(field_names, default=None):
@@ -236,6 +236,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if getattr(model_class, '_cache_responses', False):
             receiver(post_save, sender=model_class)(update_cache_for_model)
             receiver(post_delete, sender=model_class)(update_cache_for_model)
+            cache_related_labels = getattr(model_class, '_cache_related_labels', ())
+            update_cache_for_model_related = partial(update_cache_for_model, cached_model_class=model_class)
+            for label in cache_related_labels:
+                receiver(post_save, sender=label)(update_cache_for_model_related)
+                receiver(post_delete, sender=label)(update_cache_for_model_related)
         return model_class
 
     def get_api_cache_name(cls):

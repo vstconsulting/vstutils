@@ -88,6 +88,9 @@ class ModelWithBinaryFiles(BModel):
 
 
 class ModelForCheckFileAndImageField(BModel):
+    _cache_responses = True
+    _cache_related_labels = (ModelWithBinaryFiles._meta.label,)
+
     some_image_field = models.ImageField(default='')
     some_file_field = models.FileField(default='')
     some_multiple_image_field = MultipleImageField(default='')

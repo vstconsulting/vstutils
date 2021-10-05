@@ -199,6 +199,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
                 proxy_model = queryset.model._meta.proxy_for_model
                 if proxy_model:
                     subscribe_labels.append(proxy_model._meta.label)
+                subscribe_labels += list(getattr(queryset.model, '_extra_subscribe_labels', []))
                 result['x-subscribe-labels'] = subscribe_labels
             deep_nested_subview = getattr(subscribe_view, 'deep_nested_subview', None)
             if deep_nested_subview:
