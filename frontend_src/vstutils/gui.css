@@ -804,11 +804,6 @@ table {
     padding-left: 0px;
 }
 
-.highlight-tr:hover {
-    background-color: #d8edf8;
-    cursor: pointer;
-}
-
 .start-time-td {
     width: 160px;
 }
@@ -1338,7 +1333,6 @@ body {
     --a-color-hover: #0056b3;
     --text-color: #1b2026;
     --ico-default-color: #141a21;
-    --text-header-color: #1f2d3d;
     --background-default-color: #fff;
 
     --card-header-bg-color: #17a2b8;
@@ -1402,7 +1396,6 @@ body {
 
     --text-color: #bebebe;
     --ico-default-color: #bebebe;
-    --text-header-color: #c2c7d0;
     --background-default-color: #838383;
 
     --card-header-bg-color: #17a2b8;
@@ -1476,18 +1469,6 @@ td .boolean-false {
 .gui-skin-dark .table-bordered td,
 .table-bordered th {
     border: 1px solid var(--table-border-color);
-}
-
-.highlight-tr:hover {
-    background-color: var(--highlight-tr-hover-color);
-}
-
-.h1-header,
-th,
-.dropdown-item a.sublink-btn-empty-action,
-.h1-header-api,
-.swagger-ui .info .title {
-    color: var(--text-header-color);
 }
 
 /*.text-data,*/
@@ -1571,10 +1552,6 @@ pre {
     color: var(--ico-default-color);
 }
 
-.text-header {
-    color: var(--text-header-color);
-}
-
 .main-sidebar {
     background-color: var(--left-sidebar-bg-color) !important;
 }
@@ -1627,18 +1604,6 @@ pre {
     background-color: var(--btn-warning-bg-color);
     color: var(--btn-warning-color);
     border-color: var(--btn-warning-border-color);
-}
-
-a,
-a .url,
-.swagger-ui .opblock-tag,
-.swagger-ui .opblock a span {
-    color: var(--a-color);
-}
-
-a:hover,
-a:hover .url {
-    color: var(--a-color-hover);
 }
 
 a.revers-color {
@@ -1848,12 +1813,6 @@ input[type='color'] {
     height: 40px;
     line-height: 30px;
     padding: 5px 0.5rem;
-}
-
-.list-content-component,
-.error-text-wrapper {
-    background-color: var(--card-body-bg-color);
-    color: var(--text-color);
 }
 
 .empty-list-p,

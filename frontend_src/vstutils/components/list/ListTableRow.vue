@@ -1,10 +1,5 @@
 <template>
-    <tr
-        class="item-row item-row-id highlight-tr"
-        :class="classes"
-        :data-id="pk"
-        @mousedown="onMouseDownHandler"
-    >
+    <tr class="item-row item-row-id" :class="classes" :data-id="pk" @mousedown="onMouseDownHandler">
         <td
             v-if="hasMultiActions"
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
@@ -132,6 +127,9 @@
 </script>
 
 <style scoped>
+    .item-row {
+        cursor: pointer;
+    }
     .item-row td {
         padding: 7px;
     }

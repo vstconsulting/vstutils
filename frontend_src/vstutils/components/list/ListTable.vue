@@ -1,5 +1,5 @@
 <template>
-    <table class="table table-bordered table-bordered-custom multiple-select">
+    <table class="table table-bordered table-bordered-custom table-hover multiple-select">
         <thead>
             <tr :class="classes">
                 <th
