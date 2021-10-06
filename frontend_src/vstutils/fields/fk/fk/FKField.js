@@ -5,6 +5,7 @@ import {
     hasOwnProp,
     registerHook,
     RequestTypes,
+    ViewTypes,
 } from '../../../utils';
 import { i18n } from '../../../translation.js';
 import { BaseField } from '../../base';
@@ -22,8 +23,19 @@ function getPk(component) {
     return component.params[component.view.parent?.pkParamName];
 }
 
+function getParentPk(component) {
+    let parentView = component.view?.parent?.parent;
+
+    if (component.view.type === ViewTypes.PAGE_EDIT && !component.view.isEditStyleOnly) {
+        parentView = parentView?.parent;
+    }
+
+    return component.params[parentView?.pkParamName] || '';
+}
+
 const dependenceTemplates = new Map([
     ['pk', getPk],
+    ['parent_pk', getParentPk],
     ['view_name', (component) => component.view.name],
     ['parent_view_name', (component) => component.view.parent.name],
     ['view_level', (component) => component.view.level],
