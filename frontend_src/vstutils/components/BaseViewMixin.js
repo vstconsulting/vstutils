@@ -213,7 +213,7 @@ export const BaseViewMixin = {
         afterEmptyAction(obj) {},
 
         executeAction(action, instance = undefined) {
-            if (typeof this[`${action.name}Instance`] === 'function' && instance) {
+            if (typeof this[`${action.name}Instance`] === 'function') {
                 return this[`${action.name}Instance`](action, instance);
             }
 

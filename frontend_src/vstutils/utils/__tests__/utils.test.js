@@ -1,6 +1,7 @@
 import { jest, expect, test, describe } from '@jest/globals';
 import {
     capitalize,
+    chunkArray,
     getRandomInt,
     hexToRgbA,
     isEmptyObject,
@@ -173,5 +174,9 @@ describe('utils', () => {
         const field = new StringField({ name: 'name' });
         const err = new ModelValidationError([{ field, message: 'Err 1' }]);
         expect(err.toFieldsErrors()).toStrictEqual({ name: 'Err 1' });
+    });
+
+    test('chunkArray', () => {
+        expect(chunkArray([1, 2, 3], 2)).toStrictEqual([[1, 2], [3]]);
     });
 });
