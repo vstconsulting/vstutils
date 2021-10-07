@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http.request import HttpRequest
 from django.utils.functional import lazy, SimpleLazyObject
 
-from ..utils import import_class
+from ..utils import import_class, raise_context_decorator_with_default
 from ..tools import multikeysort  # pylint: disable=import-error
 
 
@@ -17,10 +17,11 @@ gui_version = "_".join(map(str, [project_version, project_lib_version, vstutils_
 static_path = getattr(settings, 'STATIC_URL', '/static/')
 static_list = multikeysort(getattr(settings, 'SPA_STATIC', []), ['priority'])
 debug_enabled = getattr(settings, 'DEBUG', False)
+ignore_errors_decorator = raise_context_decorator_with_default(default={})
 
 
 def lazy_decorator(func):
-    return lazy(func, dict)
+    return lazy(ignore_errors_decorator(func), dict)
 
 
 def lazy_value(func):
