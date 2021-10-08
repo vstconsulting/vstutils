@@ -8,7 +8,7 @@
             aria-haspopup="true"
             aria-expanded="false"
         >
-            Execute action on {{ numberOfSelected }} {{ $tc('instance', numberOfSelected) }}
+            {{ $t('Execute action on {0}', [$tc('{n} instance', numberOfSelected)]) }}
         </button>
         <div class="dropdown-menu" aria-labelledby="multi-actions-button">
             <template v-for="action in multiActions">
@@ -24,7 +24,7 @@
                     class="dropdown-item"
                     type="button"
                     @click="$emit('execute-multi-action', action)"
-                    v-text="action.title"
+                    v-text="$st(action.title)"
                 />
             </template>
         </div>

@@ -28,7 +28,7 @@ export const BaseViewMixin = {
          * Title of View.
          */
         title() {
-            return this.$t(this.view.title);
+            return this.$st(this.view.title);
         },
         actions() {
             return Array.from(this.view.actions.values());

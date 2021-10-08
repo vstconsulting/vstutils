@@ -206,4 +206,6 @@ TRANSLATION = {
     'This file format is not supported': 'Định dạng tệp này không được hỗ trợ',
     'Oops! Something went wrong.': 'Một cái gì đó đã đi sai.',
     '[Object not found]': '[Không tìm thấy đối tượng]',
+    'Execute action on {0}': 'Thực hiện hành động trên {0}',
+    '{n} instance': '{n} trường hợp',
 }

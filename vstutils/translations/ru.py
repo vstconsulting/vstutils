@@ -206,4 +206,6 @@ TRANSLATION = {
     'This file format is not supported': 'Данный формат файла не поддерживается',
     'Oops! Something went wrong.': 'Упс! Что-то пошло не так',
     '[Object not found]': '[Объект не найден]',
+    'Execute action on {0}': 'Выполнить действие для {0}',
+    '{n} instance': '0 объектов | {n} объекта | {n} объектов',
 }

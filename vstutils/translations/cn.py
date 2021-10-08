@@ -207,4 +207,6 @@ TRANSLATION = {
     'This file format is not supported': '不支持此文件格式',
     'Oops! Something went wrong.': '哎呀！ 出了些问题。',
     '[Object not found]': '[未找到对象]',
+    'Execute action on {0}': '在 {0} 上执行操作',
+    '{n} instance': '{n} 个实例',
 }

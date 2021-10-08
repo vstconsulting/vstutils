@@ -11,7 +11,7 @@
         <p>
             <span class="li-header-span">
                 <i class="li-header-span-i-none menu-text-data">
-                    {{ $u.capitalize($t(item.name.toLowerCase())) }}
+                    {{ $st(item.name) }}
                 </i>
             </span>
             <template v-if="item.sublinks">
