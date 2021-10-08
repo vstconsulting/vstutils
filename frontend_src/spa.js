@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import BaseApp from './BaseApp.js';
 import { openapi_dictionary } from './vstutils/api';
-import { guiLocalSettings, RequestTypes } from './vstutils/utils';
+import { capitalize, guiLocalSettings, RequestTypes } from './vstutils/utils';
 import { PageNewView, ViewConstructor, ViewsTree } from './vstutils/views';
 import { StoreConstructor } from './vstutils/store';
 import { ModelsResolver } from './vstutils/models';
@@ -42,6 +42,25 @@ export class App extends BaseApp {
         this.application = null;
 
         signals.emit(APP_CREATED, this);
+    }
+
+    smartTranslate(text) {
+        if (text === undefined || text === null) {
+            return '';
+        }
+
+        text = String(text);
+
+        if (this.i18n.te(text)) {
+            return this.i18n.t(text);
+        }
+
+        const lower = text.toLowerCase();
+        if (this.i18n.te(lower)) {
+            return capitalize(this.i18n.t(lower));
+        }
+
+        return text;
     }
 
     getCurrentViewPath() {
@@ -185,6 +204,7 @@ export class App extends BaseApp {
 
         Vue.prototype.$app = this;
         Vue.prototype.$u = utils;
+        Vue.prototype.$st = this.smartTranslate.bind(this);
 
         this.application = new Vue({
             mixins: [this.appRootComponent],

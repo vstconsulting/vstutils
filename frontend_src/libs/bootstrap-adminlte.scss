@@ -16,3 +16,8 @@
 @import "~admin-lte/build/scss/parts/extra-components";
 @import "~admin-lte/build/scss/parts/pages";
 @import "~admin-lte/build/scss/parts/miscellaneous";
+
+// Override color of main header border oin dark mode
+.dark-mode .main-header {
+    border-bottom-color: #{$dark-main-bg};
+}

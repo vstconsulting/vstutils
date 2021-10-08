@@ -1,7 +1,7 @@
 <template>
     <BootstrapModal ref="modal">
         <template #activator="{ openModal }">
-            <button class="dropdown-item" type="button" @click="openModal" v-text="action.title" />
+            <button class="dropdown-item" type="button" @click="openModal" v-text="$st(action.title)" />
         </template>
         <template #content="{ closeModal }">
             <div class="modal-header">

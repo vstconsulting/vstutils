@@ -60,10 +60,6 @@
     border-top: none !important;
 }
 
-.multiple-select .selected {
-    background-color: rgba(35, 144, 0, 0.15);
-}
-
 .multiple-select .selected .ico-on {
     display: block;
 }
@@ -1346,7 +1342,7 @@ body {
 
     --highlight-tr-hover-color: #d8edf8;
     --table-border-color: #dfe3e7;
-    --selected-color: #dfeed9;
+    --selected-color: rgba(170,252,137,0.4);
     --background-active-color: #2d75be;
     --background-passiv-color: #3d434a;
     --text-hover-color: #16181b;
