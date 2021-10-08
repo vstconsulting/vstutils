@@ -10,11 +10,11 @@ drf-yasg==1.20.0
 django-filter==2.4.0
 django-crispy-forms~=1.11.2
 drf_orjson_renderer~=1.1.5
-uWSGI==2.0.19.1
+uWSGI==2.0.20
 
 # Notifications
 cent~=4.0.1
-PyJWT~=2.1.0
+PyJWT~=2.2.0
 
 # Minificators
 jsmin==3.0.0
@@ -24,4 +24,4 @@ django-htmlmin~=0.11.0
 pyotp~=2.6.0
 
 # Storage
-django-storages[libcloud]~=1.11.1
+django-storages[libcloud]==1.12
