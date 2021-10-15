@@ -16,27 +16,45 @@
             linkText: { type: String, default: '?' },
             customClass: { type: String, default: '' },
         },
+        data() {
+            return {
+                popoverCreated: false,
+            };
+        },
         computed: {
             showPopover() {
                 return this.title || this.content;
             },
         },
+        watch: {
+            showPopover: 'initPopover',
+        },
         mounted() {
-            if (this.showPopover) {
-                $(this.$el).popover({
-                    html: true,
-                    placement: 'auto',
-                    trigger: 'focus',
-                    customClass: this.customClass,
-                    title: this.title,
-                    content: this.content,
-                });
-            }
+            this.initPopover();
         },
         beforeDestroy() {
-            if (this.showPopover) {
-                $(this.$refs.popover).popover('dispose');
-            }
+            this.destroyPopover();
+        },
+        methods: {
+            initPopover() {
+                this.destroyPopover();
+                if (this.showPopover) {
+                    $(this.$el).popover({
+                        html: true,
+                        placement: 'auto',
+                        trigger: 'focus',
+                        customClass: this.customClass,
+                        title: this.title,
+                        content: this.content,
+                    });
+                    this.popoverCreated = true;
+                }
+            },
+            destroyPopover() {
+                if (this.popoverCreated) {
+                    $(this.$refs.popover).popover('dispose');
+                }
+            },
         },
     };
 </script>

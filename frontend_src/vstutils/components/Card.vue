@@ -23,6 +23,9 @@
         <div class="card-body" :class="cardBodyClasses" style="display: block">
             <slot />
         </div>
+        <div v-if="loading" class="overlay dark">
+            <i class="fas fa-2x fa-spin fa-sync-alt" />
+        </div>
     </div>
 </template>
 
@@ -32,6 +35,7 @@
             title: { type: String, default: '' },
             isCollapsable: { type: Boolean, default: true },
             cardBodyClasses: { type: [String, Array], default: '' },
+            loading: { type: Boolean, default: false },
         },
     };
 </script>

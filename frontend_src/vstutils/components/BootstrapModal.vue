@@ -12,7 +12,30 @@
             >
                 <div class="modal-dialog" :class="classes" role="document">
                     <div class="modal-content">
-                        <slot name="content" :closeModal="close" />
+                        <slot name="content" :closeModal="close">
+                            <div class="modal-header">
+                                <slot name="header">
+                                    <h5 class="modal-title">
+                                        {{ title }}
+                                    </h5>
+                                    <button
+                                        type="button"
+                                        class="close"
+                                        data-dismiss="modal"
+                                        aria-label="Close"
+                                    >
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </slot>
+                            </div>
+                            <div class="modal-body">
+                                <slot name="body" />
+                                <slot />
+                            </div>
+                            <div class="modal-footer">
+                                <slot name="footer" />
+                            </div>
+                        </slot>
                     </div>
                 </div>
             </div>
@@ -26,6 +49,7 @@
     export default {
         name: 'BootstrapModal',
         props: {
+            title: { type: String, default: '' },
             wrapperClasses: { type: [Array, String], default: null },
             classes: { type: [Array, String], default: null },
         },

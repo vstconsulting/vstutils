@@ -208,4 +208,5 @@ TRANSLATION = {
     '[Object not found]': '[Объект не найден]',
     'Execute action on {0}': 'Выполнить действие для {0}',
     '{n} instance': '0 объектов | {n} объекта | {n} объектов',
+    'Open image': 'Открыть изображение',
 }

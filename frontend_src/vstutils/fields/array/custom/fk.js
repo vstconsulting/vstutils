@@ -8,11 +8,19 @@ import { FKFieldContentEditable } from '../../fk/fk';
 export const FKArrayEdit = {
     mixins: [FKFieldContentEditable],
     beforeMount() {
-        if (this.value && !this.field.fetchData) {
+        if (this.field.fetchData && this.value?.some((item) => typeof item !== 'object')) {
+            this.fetchValue(this.value);
+        } else {
             this.fetchedValue = this.value;
         }
     },
     methods: {
+        async fetchValue(value) {
+            if (!this.field.fetchData) {
+                return;
+            }
+            this.fetchedValue = await this.field._fetchRelated(value, this.queryset);
+        },
         /**
          * Method, that mounts select2 to current field's select.
          */
