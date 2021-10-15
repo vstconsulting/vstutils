@@ -1,5 +1,5 @@
 <template>
-    <label :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="helpText">
+    <label :class="wrapperClasses" :style="wrapperStyles" data-toggle="tooltip" :title="$t(helpText)">
         <span :class="spanClasses" :style="spanStyles" @change="onChange">
             <input
                 type="file"

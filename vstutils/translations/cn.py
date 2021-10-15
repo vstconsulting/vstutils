@@ -209,4 +209,5 @@ TRANSLATION = {
     '[Object not found]': '[未找到对象]',
     'Execute action on {0}': '在 {0} 上执行操作',
     '{n} instance': '{n} 个实例',
+    'Open image': '打开图片',
 }
