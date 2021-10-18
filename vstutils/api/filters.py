@@ -92,19 +92,24 @@ class FkFilterHandler:
     def __get_q(self, kw, negate):
         query = Q(**kw)
         if negate:
-            query.negate()  # nocv
+            query.negate()
         return query
 
     def list_of_q(self, field, value):
+        field_split = field.rsplit("__", 1)
+        if len(field_split) > 1 and field_split[-1] == 'not':
+            field, suffix = field_split[0], '__not'
+        else:
+            suffix = ''
         if self.related_pk:
             pk_value = SimpleLazyObject(
                 utils.raise_context_decorator_with_default(default='0')(
                     lambda: str(self.pk_handler(value)) or "0"
                 )
             )
-            yield self.__get_q(*_extra_query_search(f'{field}__{self.related_pk}', pk_value, "in"))
+            yield self.__get_q(*_extra_query_search(f'{field}__{self.related_pk}{suffix}', pk_value, "in"))
         if self.related_name:
-            yield self.__get_q(*_extra_query_search(f'{field}__{self.related_name}', value, name_filter_method))
+            yield self.__get_q(*_extra_query_search(f'{field}__{self.related_name}{suffix}', value, name_filter_method))
 
     def __call__(self, queryset, field, value):
         return queryset.filter(

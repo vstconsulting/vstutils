@@ -1,6 +1,6 @@
 from django.db import models
 
-from vstutils.api import fields
+from vstutils.api import fields, filters
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.api.fields import (
@@ -80,12 +80,17 @@ class Post(BModel):
         default_related_name = 'post'
         _list_fields = ['author', 'title']
         _detail_fields = ['author', 'title', 'text', 'rating', 'fa_icon_rating']
-        _override_list_fields = _override_detail_fields = {
+        _override_list_fields = {
             'author': FkModelField(select=Author, read_only=True)
         }
         _override_detail_fields = {
             'author': FkModelField(select=Author, read_only=True),
             'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10)
+        }
+        _filterset_fields = {
+            'author': None,
+            'author__not': filters.CharFilter(method=filters.FkFilterHandler()),
+            'title': None,
         }
 
 

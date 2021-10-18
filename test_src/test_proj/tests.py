@@ -2730,6 +2730,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': "get", "path": ["post"], "query": f"author={author_1.id}"},
             {'method': "get", "path": ["post"], "query": f"author={author_2.name}"},
             {'method': "get", "path": ["post"], "query": f"author={author_2.id}"},
+            {'method': "get", "path": ["post"], "query": f"author__not={author_2.id}"},
         ])
 
         for pos, count in enumerate((
@@ -2741,6 +2742,8 @@ class ProjectTestCase(BaseTestCase):
         )):
             self.assertEqual(results[pos]['status'], 200)
             self.assertEqual(results[pos]['data']['count'], count)
+        self.assertEqual(results[-1]['status'], 200, results[-1]['data'])
+        self.assertEqual(results[-1]['data']['count'], author_1_post_count)
 
     def test_model_rating_field(self):
         date = '2021-01-20T00:26:38Z'
