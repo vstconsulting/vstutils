@@ -24,7 +24,7 @@
                     :field="field"
                     :data="$store.state.userSettings.settings[section.name]"
                     type="edit"
-                    @set-value="setUserSetting(section.name, field.name, $event.value)"
+                    @set-value="setUserSetting(section.name, field, $event.value)"
                 />
             </template>
             <button
@@ -68,11 +68,14 @@
     export default {
         name: 'ControlSidebar',
         components: { BootstrapModal, HelpModal },
-        data: () => ({ isSaving: false }),
+        data: () => ({
+            isSaving: false,
+        }),
         computed: {
             sections() {
-                const UserSettings = this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings');
-                const sectionsFields = Array.from(UserSettings.fields.values()).filter((f) => f.nestedModel);
+                const sectionsFields = Array.from(this.UserSettings.fields.values()).filter(
+                    (f) => f.nestedModel,
+                );
 
                 return sectionsFields
                     .filter((field) => this.$store.state.userSettings.settings[field.name])
@@ -91,7 +94,7 @@
             '$store.state.userSettings.settings.main.dark_mode': 'setDarkMode',
         },
         created() {
-            this.$store.dispatch('userSettings/load');
+            this.UserSettings = this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings');
         },
         methods: {
             async saveSettings() {
@@ -102,8 +105,12 @@
             reloadPage() {
                 window.location.reload();
             },
-            setUserSetting(section, key, value) {
-                this.$store.commit('userSettings/setValue', { section, key, value });
+            setUserSetting(section, field, value) {
+                this.$store.commit('userSettings/setValue', {
+                    section,
+                    key: field.name,
+                    value: field.toInner({ [field.name]: value }),
+                });
             },
             setDarkMode(value) {
                 const hasDarkMode = document.body.classList.contains(DARK_MODE_CLASS);

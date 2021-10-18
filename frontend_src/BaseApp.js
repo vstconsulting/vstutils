@@ -87,6 +87,9 @@ export default class BaseApp {
      * mounting of application.
      */
     afterInitialDataBeforeMount() {}
+    loadSettings() {
+        return this.store.dispatch('userSettings/load');
+    }
     /**
      * Method, that starts work of app.
      * Method gets openapi_schema, inits models, inits views and mounts application to DOM.
@@ -100,6 +103,7 @@ export default class BaseApp {
             this.translationsManager.getLanguages(),
             this.translationsManager.getTranslations(this.i18n.locale),
             this.api.loadUser(),
+            this.loadSettings(),
         ]);
         this.languages = languages;
         this.i18n.messages[this.i18n.locale] = translations;

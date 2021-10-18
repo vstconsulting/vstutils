@@ -41,10 +41,14 @@ export function createApp() {
             username: 'testUser',
         });
 
+    const loadSettings = app.loadSettings;
+    app.loadSettings = () => Promise.resolve({});
+
     return app.start().then(() => {
         app.translationsManager.loadLanguages = loadLanguages;
         app.translationsManager.loadTranslations = loadTranslations;
         app.api.loadUser = loadUser;
+        app.loadSettings = loadSettings;
         return app;
     });
 }

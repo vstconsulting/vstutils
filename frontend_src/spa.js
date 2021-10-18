@@ -36,6 +36,10 @@ export class App extends BaseApp {
         /** @type {QuerySetsResolver} */
         this.qsResolver = null;
 
+        let storeConstructor = new StoreConstructor(this, this.config.isDebug);
+        signals.emit('app.beforeInitStore', { storeConstructor });
+        this.store = storeConstructor.getStore();
+
         /**
          * Main(root) Vue instance for current application, that has access to the app store and app router.
          */
@@ -190,10 +194,6 @@ export class App extends BaseApp {
 
         this.prepareViewsModelsFields();
 
-        let storeConstructor = new StoreConstructor(this, this.config.isDebug);
-
-        signals.emit('app.beforeInitStore', { storeConstructor });
-
         let routerConstructor = new RouterConstructor(
             this.views,
             routerMixins.routesComponentsTemplates,
@@ -214,7 +214,7 @@ export class App extends BaseApp {
                 x_docs: this.config.schema.info['x-docs'],
             },
             router: this.router,
-            store: storeConstructor.getStore(),
+            store: this.store,
             i18n: this.i18n,
         });
 

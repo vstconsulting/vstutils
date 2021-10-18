@@ -37,6 +37,9 @@
                             </div>
                         </slot>
                     </div>
+                    <div v-if="loading" class="overlay dark">
+                        <i class="fas fa-2x fa-spin fa-sync-alt" />
+                    </div>
                 </div>
             </div>
         </portal>
@@ -52,6 +55,7 @@
             title: { type: String, default: '' },
             wrapperClasses: { type: [Array, String], default: null },
             classes: { type: [Array, String], default: null },
+            loading: { type: Boolean, default: false },
         },
         data: () => ({ isOpen: false }),
         beforeDestroy() {

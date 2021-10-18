@@ -264,19 +264,13 @@ class FKField extends BaseField {
         }
     }
 
-    getFirstLevelQs() {
-        for (const querysets of this.querysets.values()) {
-            for (const queryset of querysets) {
-                if (queryset.getDataType().length === 1) {
-                    return queryset;
-                }
-            }
-        }
+    getFallbackQs() {
+        return this.constructor.app.qsResolver.findQuerySet(this.fkModel.name);
     }
 
     getAllQuerysets(path) {
         return this._formatQuerysets(
-            this.querysets.get(path) || this.querysets.get(undefined) || [this.getFirstLevelQs()],
+            this.querysets.get(path) || this.querysets.get(undefined) || [this.getFallbackQs()],
         );
     }
 }

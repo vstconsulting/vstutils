@@ -25,7 +25,7 @@ export class QuerySetsResolver {
         const matcher = this._getMatcher(modelName);
 
         if (!path) {
-            return this.viewsTree.findInAllPaths(matcher);
+            return this.viewsTree.findInFirstLevel(matcher) || this.viewsTree.findInAllPaths(matcher);
         }
 
         const node = this.viewsTree.root.get(pathToArray(path));

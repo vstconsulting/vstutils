@@ -7,8 +7,8 @@ export const DecimalFieldMixin = {
 export class DecimalField extends MaskedField {
     constructor(options) {
         super(options);
-        this.decimalPlaces = this.props.decimal_places;
-        this.maxDigits = this.props.max_digits;
+        this.decimalPlaces = this.props.decimal_places || 2;
+        this.maxDigits = this.props.max_digits || 10;
         const maskRegExp = new RegExp(
             '^-?\\d{0,' + (this.maxDigits - this.decimalPlaces) + '}(\\.\\d{0,' + this.decimalPlaces + '})?$',
         );
