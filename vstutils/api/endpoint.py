@@ -275,6 +275,7 @@ class OperationSerializer(serializers.Serializer):
     status = serializers.IntegerField(read_only=True, default=500)
     info = serializers.CharField(read_only=True)
     query = TemplateStringField(required=False,
+                                allow_blank=True,
                                 validators=[UrlQueryStringValidator()],
                                 write_only=True)
     let = TemplateStringField(required=False,
@@ -294,7 +295,7 @@ class OperationSerializer(serializers.Serializer):
         method_name = str(validated_data['method']).lower()
         method = self.get_operation_method(method_name)
         url = _join_paths(API_URL, validated_data['version'], validated_data['path'])
-        if 'query' in validated_data:
+        if 'query' in validated_data and validated_data['query']:
             url += '?' + str(validated_data['query'])
         if method_name != 'get':
             method = transaction.atomic()(method)

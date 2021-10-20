@@ -19,6 +19,7 @@ from django.core import exceptions as djexcs
 from django.http.response import Http404, FileResponse, HttpResponseNotModified
 from django.db.models.query import QuerySet
 from django.db import transaction, models
+from django.utils.functional import cached_property, lazy
 from rest_framework.reverse import reverse
 from rest_framework import viewsets as vsets, views as rvs, exceptions, status
 from rest_framework.serializers import BaseSerializer
@@ -430,19 +431,31 @@ class CachableHeadMixin(GenericViewSet):
         default_detail = ''
         default_code = 'cached'
 
-    def check_etag(self, request):
-        etag_data = self.queryset.model.get_etag_value()  # type: ignore
-        if 'Etag' not in self.headers:
-            self.headers['ETag'] = etag_data
+    @cached_property
+    def model_class(self):
+        return getattr(self, 'model', None) or self.queryset.model
 
-            if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
-                raise self.NotModifiedException("")
-            # TODO: Workflow with ETag on PUT/PATCH
+    @cached_property
+    def is_main_action(self):
+        return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
+
+    def check_etag(self, request):
+        etag_data = self.model_class.get_etag_value()  # type: ignore
+
+        if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
+            raise self.NotModifiedException("")
+        # TODO: Workflow with ETag on PUT/PATCH
+
+    def finalize_response(self, request: Request, response: RestResponse, *args, **kwargs) -> RestResponse:
+        result_response = super().finalize_response(request, response, *args, **kwargs)
+        if self.is_main_action and 'ETag' not in result_response.headers:
+            result_response.headers['ETag'] = lazy(self.model_class.get_etag_value, str)()
+        return result_response
 
     def initial(self, request: Request, *args: _t.Any, **kwargs: _t.Any) -> None:
         super().initial(request, *args, **kwargs)
 
-        if self.action in main_actions:
+        if self.is_main_action:
             self.check_etag(request)
 
 
