@@ -1,5 +1,5 @@
 <template>
-    <div class="dropdown">
+    <div class="dropdown dropup">
         <button
             id="multi-actions-button"
             class="btn btn-secondary dropdown-toggle"
