@@ -169,12 +169,13 @@ Parameters of one operation (required parameter marked by :superscript:`*`):
 * ``path``:superscript:`*` - path of request, can be ``str`` or ``list``
 * ``data`` - data to send
 * ``query`` - query parameters as ``str``
+* ``let`` - string with name of variable (used for access to response result in templates)
 * ``headers`` - ``dict`` with headers which will be sent, names of headers must
   follow `CGI specification <https://www.w3.org/CGI/>`_ (e.g., ``CONTENT_TYPE``, ``GATEWAY_INTERFACE``, ``HTTP_*``).
 * ``version`` - ``str`` with specified version of api, if not provided then ``VST_API_VERSION`` will be used
 
 In any request parameter you can insert result value of previous operations
-(``<<{OPERATION_NUMBER}[path][to][value]>>``), for example:
+(``<<{OPERATION_NUMBER or LET_VALUE}[path][to][value]>>``), for example:
 
 .. code-block::
 

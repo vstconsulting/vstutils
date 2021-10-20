@@ -1,3 +1,5 @@
+import hashlib
+
 import pyotp
 from django.conf import settings
 from django.db import models
@@ -26,6 +28,13 @@ class Language(ListModel):
     ]
     code = CharField(primary_key=True, max_length=5)
     name = CharField(max_length=128)
+
+    @classmethod
+    def get_etag_value(cls):
+        hashable_str = '_'.join(c for c, _ in settings.LANGUAGES)
+        if settings.ENABLE_CUSTOM_TRANSLATIONS:
+            hashable_str += CustomTranslations.get_etag_value()
+        return hashlib.md5(hashable_str.encode('utf-8')).hexdigest()
 
     def _get_translation_data(self, module_path_string, code):
         try:
@@ -59,6 +68,8 @@ class Language(ListModel):
 
 
 class CustomTranslations(BaseModel):
+    _cache_responses = True
+
     original = CharField(primary_key=True, max_length=380)
     translated = CharField(max_length=380)
     code = CharField(max_length=5)

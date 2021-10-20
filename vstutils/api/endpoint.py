@@ -199,7 +199,10 @@ class FormatDataFieldMixin:
                 and '>>' in result \
                 and not ('{' in result and '}' in result) \
                 and 'results' in self.context:
-            result = result.replace('<<', '{').replace('>>', '}').format(*self.context['results'])
+            result = result.replace('<<', '{').replace('>>', '}').format(
+                *self.context['results'],
+                **self.context['variables'],
+            )
             with raise_context():
                 return json.loads(result)
 
@@ -272,10 +275,10 @@ class OperationSerializer(serializers.Serializer):
     status = serializers.IntegerField(read_only=True, default=500)
     info = serializers.CharField(read_only=True)
     query = TemplateStringField(required=False,
-                                allow_blank=True,
-                                default='',
                                 validators=[UrlQueryStringValidator()],
                                 write_only=True)
+    let = TemplateStringField(required=False,
+                              write_only=True)
     version = serializers.ChoiceField(choices=list(settings.API.keys()),
                                       default=settings.VST_API_VERSION,
                                       write_only=True)
@@ -291,12 +294,11 @@ class OperationSerializer(serializers.Serializer):
         method_name = str(validated_data['method']).lower()
         method = self.get_operation_method(method_name)
         url = _join_paths(API_URL, validated_data['version'], validated_data['path'])
-        query = validated_data['query']
-        if query:
-            url += '?' + str(query)
+        if 'query' in validated_data:
+            url += '?' + str(validated_data['query'])
         if method_name != 'get':
             method = transaction.atomic()(method)
-        return ParseResponseDict(
+        result = ParseResponseDict(
             path=url,
             method=method_name,
             response=method(  # type: ignore
@@ -307,6 +309,9 @@ class OperationSerializer(serializers.Serializer):
                 **validated_data['headers']
             )
         )
+        if 'let' in validated_data:
+            self.context['variables'][validated_data['let']] = result
+        return result
 
 
 class EndpointViewSet(views.APIView):
@@ -446,9 +451,10 @@ class EndpointViewSet(views.APIView):
 
     def put(self, request: BulkRequestType, allow_fail=True) -> responses.BaseResponseClass:
         """Execute non transaction bulk request"""
-        context: _t.Dict[_t.Text, _t.Union[_t.List, BulkClient]] = {
+        context: _t.Dict[_t.Text, _t.Union[_t.List, _t.Dict, BulkClient]] = {
             'client': self.get_client(request),
-            'results': self.results
+            'results': self.results,
+            'variables': {},
         }
         timings: _t.List = []
         for result, timing in _iter_request(request, self.operate, context):

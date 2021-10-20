@@ -1189,6 +1189,23 @@ class OpenapiEndpointTestCase(BaseTestCase):
         with self.assertRaises(ValueError):
             json.loads(response.content.decode('utf-8'))
 
+    def test_cookies_on_endpoint_calls(self):
+        self.client.force_login(self.user)
+        self.assertIn('sessionid', self.client.cookies)
+        session_id = self.client.cookies['sessionid'].value
+        results = self.bulk([
+            {"method": "get", "path": "_lang"},
+            {"method": "get", "path": "_openapi", "query": "format=openapi"}
+        ], relogin=False)
+        self.assertEqual(session_id, self.client.cookies['sessionid'].value)
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], len(settings.LANGUAGES))
+        self.assertIn('ETag', results[0]['headers'])
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(results[1]['data']['swagger'], '2.0')
+        self.assertEqual(results[1]['data']['info']['x-settings']['logout_url'], self.logout_url)
+        self.client.logout()
+
     def test_openapi_schema_content(self):
         api = self.endpoint_schema()
         img_res_validator_data = {
@@ -1544,126 +1561,6 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['info']['x-check-5'], 5)
         self.assertEqual(api1_user['info'].get('x-check-5'), None)
 
-    def test_sync_email_sending(self):
-        from vstutils.utils import send_template_email
-        with self.assertRaises(TypeError):
-            send_template_email(
-                sync=True,
-                template_name='registration/confirm_email.html',
-                subject='Test',
-            )
-        self.assertCount(mail.outbox, 0)
-
-        with self.assertRaises(TemplateDoesNotExist):
-            send_template_email(
-                sync=True,
-                template_name='yololo',
-                subject='qwe',
-                email='ctulhu@fhtagn.deep',
-                context_data=[(1, 2), (3, 4)]
-            )
-        self.assertCount(mail.outbox, 0)
-
-        subj = 'Test'
-        send_template_email(
-            sync=True,
-            template_name='test_tmplt.html',
-            subject=subj,
-            email='ctulhu@fhtagn.deep',
-            context_data=[('first', 2), ('second', 4)]
-        )
-        self.assertCount(mail.outbox, 1)
-        self.assertEqual(mail.outbox[-1].subject, subj)
-        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
-        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
-
-        send_template_email(
-            sync=True,
-            template_name='test_tmplt.html',
-            subject='',
-            email='ctulhu@fhtagn.deep',
-            context_data=[('first', 2), ('second', 4)]
-        )
-        self.assertCount(mail.outbox, 2)
-        self.assertEqual(mail.outbox[-1].subject, '')
-        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
-        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
-
-        send_template_email(
-            sync=True,
-            template_name='test_tmplt.html',
-            subject='',
-            email='ctulhu@fhtagn.deep',
-            context_data={'first': 2, 'second': 4}
-        )
-        self.assertCount(mail.outbox, 3)
-        self.assertEqual(mail.outbox[-1].subject, '')
-        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
-        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
-
-        send_template_email(
-            sync=True,
-            template_name='test_tmplt.html',
-            subject='',
-            email='ctulhu@fhtagn.deep',
-            context_data={}
-        )
-        self.assertCount(mail.outbox, 4)
-        self.assertEqual(mail.outbox[-1].subject, '')
-        self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
-        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
-
-        send_template_email(
-            sync=True,
-            template_name='test_tmplt.html',
-            subject=subj,
-            email='ctulhu@fhtagn.deep',
-            context_data=None
-        )
-        self.assertCount(mail.outbox, 5)
-        self.assertEqual(mail.outbox[-1].subject, 'Test')
-        self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
-        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
-
-    def test_async_mail_send_retries(self):
-        from vstutils.tasks import SendEmailMessage
-
-        def raise_smtp_exc(*args, **kwargs):
-            raise SMTPException()
-
-        def raise_and_success(*args, **kwargs):
-            if kwargs['additional']['count'] < 3:
-                kwargs['additional']['count'] += 1
-                raise SMTPException()
-            return 1
-
-        with patch('vstutils.utils.send_mail') as mock_send:
-            mock_send.side_effect = raise_and_success
-            SendEmailMessage.do(
-                email_from=settings.EMAIL_FROM_ADDRESS,
-                template_name='test_tmplt.html',
-                subject='',
-                email='ctulhu@fhtagn.deep',
-                context_data={},
-                additional={
-                    'count': 0,
-                },
-            )
-            self.assertEqual(mock_send.call_count, 4)
-            mock_send.reset_mock()
-            mock_send.side_effect = raise_smtp_exc
-            SendEmailMessage.do(
-                email_from=settings.EMAIL_FROM_ADDRESS,
-                template_name='test_tmplt.html',
-                subject='',
-                email='ctulhu@fhtagn.deep',
-                context_data={},
-                additional={
-                    'count': 0,
-                },
-            )
-            self.assertEqual(mock_send.call_count, 11)
-
 
 class EndpointTestCase(BaseTestCase):
 
@@ -1890,16 +1787,17 @@ class EndpointTestCase(BaseTestCase):
             },
             {
                 'path': 'subhosts',
-                'method': 'get'
+                'method': 'get',
+                'let': 'subhost_list'
             },
             # Template in path list
             {
-                'path': ['subhosts', '<<2[data][results][0][id]>>'],
+                'path': ['subhosts', '<<subhost_list[data][results][0][id]>>'],
                 'method': 'get'
             },
             # Template in data
             {
-                'path': ['subhosts', '<<2[data][results][1][id]>>'],
+                'path': ['subhosts', '<<subhost_list[data][results][1][id]>>'],
                 'method': 'patch',
                 'data': {
                     'name': '<<2[data][results][9][name]>>'
@@ -1938,8 +1836,7 @@ class EndpointTestCase(BaseTestCase):
         response = self.get_result('put', '/api/endpoint/', 200, data=json.dumps(request))
 
         self.assertEqual(response[1]['status'], 200)
-        self.assertEqual(response[3]['status'], 200)
-        self.assertEqual(response[3]['status'], 200)
+        self.assertEqual(response[3]['status'], 200, response[3]['data'])
         self.assertEqual(response[4]['status'], 200)
         self.assertEqual(response[4]['data'], {
             'filter_applied': 1,
@@ -2009,6 +1906,129 @@ class EndpointTestCase(BaseTestCase):
                 pk=response[0]['data']['id']
             ).exists()
         )
+
+
+class EmailSendingTestCase(BaseTestCase):
+
+    def test_sync_email_sending(self):
+        from vstutils.utils import send_template_email
+        with self.assertRaises(TypeError):
+            send_template_email(
+                sync=True,
+                template_name='registration/confirm_email.html',
+                subject='Test',
+            )
+        self.assertCount(mail.outbox, 0)
+
+        with self.assertRaises(TemplateDoesNotExist):
+            send_template_email(
+                sync=True,
+                template_name='yololo',
+                subject='qwe',
+                email='ctulhu@fhtagn.deep',
+                context_data=[(1, 2), (3, 4)]
+            )
+        self.assertCount(mail.outbox, 0)
+
+        subj = 'Test'
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject=subj,
+            email='ctulhu@fhtagn.deep',
+            context_data=[('first', 2), ('second', 4)]
+        )
+        self.assertCount(mail.outbox, 1)
+        self.assertEqual(mail.outbox[-1].subject, subj)
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject='',
+            email='ctulhu@fhtagn.deep',
+            context_data=[('first', 2), ('second', 4)]
+        )
+        self.assertCount(mail.outbox, 2)
+        self.assertEqual(mail.outbox[-1].subject, '')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject='',
+            email='ctulhu@fhtagn.deep',
+            context_data={'first': 2, 'second': 4}
+        )
+        self.assertCount(mail.outbox, 3)
+        self.assertEqual(mail.outbox[-1].subject, '')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], '2 4')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject='',
+            email='ctulhu@fhtagn.deep',
+            context_data={}
+        )
+        self.assertCount(mail.outbox, 4)
+        self.assertEqual(mail.outbox[-1].subject, '')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+        send_template_email(
+            sync=True,
+            template_name='test_tmplt.html',
+            subject=subj,
+            email='ctulhu@fhtagn.deep',
+            context_data=None
+        )
+        self.assertCount(mail.outbox, 5)
+        self.assertEqual(mail.outbox[-1].subject, 'Test')
+        self.assertEqual(mail.outbox[-1].alternatives[0][0], ' ')
+        self.assertEqual(mail.outbox[-1].alternatives[0][1], 'text/html')
+
+    def test_async_mail_send_retries(self):
+        from vstutils.tasks import SendEmailMessage
+
+        def raise_smtp_exc(*args, **kwargs):
+            raise SMTPException()
+
+        def raise_and_success(*args, **kwargs):
+            if kwargs['additional']['count'] < 3:
+                kwargs['additional']['count'] += 1
+                raise SMTPException()
+            return 1
+
+        with patch('vstutils.utils.send_mail') as mock_send:
+            mock_send.side_effect = raise_and_success
+            SendEmailMessage.do(
+                email_from=settings.EMAIL_FROM_ADDRESS,
+                template_name='test_tmplt.html',
+                subject='',
+                email='ctulhu@fhtagn.deep',
+                context_data={},
+                additional={
+                    'count': 0,
+                },
+            )
+            self.assertEqual(mock_send.call_count, 4)
+            mock_send.reset_mock()
+            mock_send.side_effect = raise_smtp_exc
+            SendEmailMessage.do(
+                email_from=settings.EMAIL_FROM_ADDRESS,
+                template_name='test_tmplt.html',
+                subject='',
+                email='ctulhu@fhtagn.deep',
+                context_data={},
+                additional={
+                    'count': 0,
+                },
+            )
+            self.assertEqual(mock_send.call_count, 11)
 
 
 class ValidatorsTestCase(BaseTestCase):
