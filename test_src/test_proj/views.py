@@ -1,6 +1,8 @@
 import time
 import json
 
+from django.utils.functional import SimpleLazyObject
+
 from vstutils.api import responses, filter_backends
 from vstutils.api.views import SettingsViewSet
 from vstutils.api.base import NonModelsViewSet
@@ -134,7 +136,7 @@ class RequestInfoTestView(NonModelsViewSet):
 
     def put(self, request):
         data = request.data
-        response = responses.HTTP_200_OK(data)
+        response = responses.HTTP_200_OK(SimpleLazyObject(lambda: data))
         response.set_cookie('request_info_cookie', 'request_info_cookie_value')
         return response
 

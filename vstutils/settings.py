@@ -882,7 +882,7 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        "drf_orjson_renderer.renderers.ORJSONRenderer",
+        "vstutils.api.renderers.ORJSONRenderer",
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),

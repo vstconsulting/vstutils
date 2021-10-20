@@ -125,7 +125,7 @@ def decode(key, enc):
 
 def get_if_lazy(obj):
     with raise_context():
-        if isinstance(obj, functional.SimpleLazyObject):
+        if isinstance(obj, functional.LazyObject):
             # pylint: disable=protected-access
             obj._setup() if obj._wrapped == functional.empty else None
             return obj._wrapped

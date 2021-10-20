@@ -111,7 +111,7 @@ class HealthView(base.ListNonModelViewSet):
         return responses.HTTP_200_OK(*self.health_backend.get())
 
 
-class LangViewSet(base.ReadOnlyModelViewSet):
+class LangViewSet(base.CachableHeadMixin, base.ReadOnlyModelViewSet):
     schema = None
     model: _t.Type[models.Language] = models.Language
     serializer_class: _t.Type[LanguageSerializer] = LanguageSerializer

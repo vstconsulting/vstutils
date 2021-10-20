@@ -191,7 +191,6 @@ class VSTAutoSchema(SwaggerAutoSchema):
             result['x-allow-append'] = issubclass(_nested_wrapped_view, NestedWithAppendMixin)
         if self.method.lower() == 'get':
             subscribe_view = self.__get_nested_view_and_subaction(self.view)[0]
-            # subscribe_view = getattr(getattr(self.view, self.view.action, None), '_nested_view', self.view)
             queryset = getattr(subscribe_view, 'queryset', None)
             if queryset is not None:
                 # pylint: disable=protected-access
