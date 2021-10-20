@@ -252,7 +252,9 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
     def set_etag_value(cls):
         # pylint: disable=no-value-for-parameter
-        django_caches['etag'].set(cls.get_api_cache_name(), str(uuid.uuid4()))
+        new_value = str(uuid.uuid4())
+        django_caches['etag'].set(cls.get_api_cache_name(), new_value)
+        return new_value
 
     @classproperty
     @lru_cache()

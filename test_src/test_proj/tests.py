@@ -3310,7 +3310,10 @@ class ProjectTestCase(BaseTestCase):
                     'value': 'test_val',
                 }
             },
-            {'method': 'get', 'path': ['testcontenttype', '<<1[data][id]>>', 'vars']},
+            {
+                'method': 'get',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+            },
             {
                 'method': 'post',
                 'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
@@ -3319,7 +3322,11 @@ class ProjectTestCase(BaseTestCase):
                     'value': ''.join(map(str, range(12))),
                 }
             },
-            {'method': 'post', 'path': ['vartype'], 'data': {'name': 'test_int', 'val_type': "integer"}},
+            {
+                'method': 'post',
+                'path': ['vartype'],
+                'data': {'name': 'test_int', 'val_type': "integer"}
+            },
             {
                 'method': 'post',
                 'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
@@ -3336,6 +3343,16 @@ class ProjectTestCase(BaseTestCase):
                     'value': 'qwerty',
                 }
             },
+            {
+                'method': 'get',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'headers': {"HTTP_IF_NONE_MATCH": '<<3[headers][ETag]>>'},
+            },
+            {
+                'method': 'get',
+                'path': ['testcontenttype', '<<1[data][id]>>', 'vars'],
+                'headers': {"HTTP_IF_NONE_MATCH": '<<6[headers][ETag]>>'},
+            },
         ]
         results = self.bulk(bulk_data)
         self.assertEqual(results[1]['status'], 201, results[1])
@@ -3348,6 +3365,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[6]['status'], 201, results[6])
         self.assertEqual(results[7]['status'], 400, results[7])
         self.assertEqual(results[7]['data'], {'value': ['A valid integer is required.']})
+        self.assertEqual(results[8]['status'], 200, results[8])
+        self.assertEqual(results[9]['status'], 304, results[9])
 
     @override_settings(CASE_SENSITIVE_API_FILTER=False)
     def test_filters_case_insensitive(self):

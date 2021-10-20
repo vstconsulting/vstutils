@@ -62,6 +62,7 @@ class VarBasedModel(BModel):
     retrieve:
         Return an variable-based instance.
     """
+    _cache_responses = True
     name = models.CharField(max_length=512, default=uuid.uuid1)
     variables = GenericRelation(Variable, related_query_name="variables",
                                 object_id_field="object_id")

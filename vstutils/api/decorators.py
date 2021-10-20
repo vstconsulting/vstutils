@@ -230,6 +230,7 @@ class NestedViewMixin:
     default_response_headers: _t.Dict
     finalize_response: _t.ClassVar[_t.Callable]
     check_etag: _t.ClassVar[_t.Callable]
+    is_main_action: bool
 
     def _check_permission_obj(self, objects: _t.Iterable):
         for obj in objects:
@@ -270,7 +271,8 @@ class NestedViewMixin:
             kwargs[self.nested_append_arg] = self.nested_id
         self.check_permissions(self.request)
         self.check_throttles(self.request)
-        getattr(self, 'check_etag', lambda r: None)(self.request)
+        if getattr(self, 'is_main_action', False):
+            getattr(self, 'check_etag', lambda r: None)(self.request)
         return self.finalize_response(
             self.request,
             getattr(self, self.action)(self.request, **kwargs),
