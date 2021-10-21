@@ -436,6 +436,7 @@ class CachableHeadMixin(GenericViewSet):
         return getattr(self, 'model', None) or self.queryset.model
 
     @cached_property
+    @raise_context_decorator_with_default(default=False)
     def is_main_action(self):
         return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
 
