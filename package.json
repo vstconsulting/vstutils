@@ -20,6 +20,7 @@
   "dependencies": {
     "@babel/runtime": "^7.12.0",
     "@fortawesome/fontawesome-free": "^5.12.1",
+    "@splidejs/vue-splide": "^0.3.5",
     "@vstconsulting/tabsignal": "^1.1.1",
     "JavaScript-autoComplete": "https://github.com/Pixabay/JavaScript-autoComplete#1.0.4",
     "admin-lte": "3.1.0",

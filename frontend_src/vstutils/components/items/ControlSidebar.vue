@@ -90,8 +90,8 @@
             '$store.state.userSettings.changed': function () {
                 this.isSaving = false;
             },
-            '$store.state.userSettings.settings.main.language': 'setLanguage',
-            '$store.state.userSettings.settings.main.dark_mode': 'setDarkMode',
+            '$store.state.userSettings.settings.main.language': { handler: 'setLanguage', immediate: true },
+            '$store.state.userSettings.settings.main.dark_mode': { handler: 'setDarkMode', immediate: true },
         },
         created() {
             this.UserSettings = this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings');

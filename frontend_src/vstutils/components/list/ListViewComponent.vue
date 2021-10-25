@@ -135,14 +135,16 @@
             instanceActions() {
                 if (this.view.pageView) {
                     return Array.from(this.view.pageView.actions.values()).filter(
-                        (action) => !action.doNotShowOnList,
+                        (action) => !action.hidden && !action.doNotShowOnList,
                     );
                 }
                 return [];
             },
             instanceSublinks() {
                 if (this.view.pageView) {
-                    return Array.from(this.view.pageView.sublinks.values());
+                    return Array.from(this.view.pageView.sublinks.values()).filter(
+                        (sublink) => !sublink.hidden,
+                    );
                 }
                 return [];
             },

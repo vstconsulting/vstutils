@@ -31,10 +31,10 @@ export const BaseViewMixin = {
             return this.$st(this.view.title);
         },
         actions() {
-            return Array.from(this.view.actions.values());
+            return Array.from(this.view.actions.values()).filter((action) => !action.hidden);
         },
         sublinks() {
-            return Array.from(this.view.sublinks.values());
+            return Array.from(this.view.sublinks.values()).filter((sublink) => !sublink.hidden);
         },
 
         /**

@@ -3,7 +3,7 @@
         <!--Empty click handler required to stop event propagation -->
         <div class="modal-mask" @click.stop="() => {}">
             <div class="modal-wrapper">
-                <div ref="modalContainer" class="modal-container">
+                <div ref="modalContainer" class="modal-container" :style="styles">
                     <div v-if="withHeader" class="modal-header text-data">
                         <slot name="header">
                             <span />
@@ -37,6 +37,7 @@
         name: 'Modal',
         props: {
             opt: { type: Object, default: () => {} },
+            styles: { type: [Object, String], default: '' },
         },
         computed: {
             withHeader() {
@@ -80,7 +81,7 @@
     .modal-mask {
         color: #333;
         position: fixed;
-        z-index: 1059;
+        z-index: 1040;
         top: 0;
         left: 0;
         width: 100%;

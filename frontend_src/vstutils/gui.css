@@ -1343,7 +1343,6 @@ body {
     --highlight-tr-hover-color: #d8edf8;
     --table-border-color: #dfe3e7;
     --selected-color: rgba(170,252,137,0.4);
-    --background-active-color: #2d75be;
     --background-passiv-color: #3d434a;
     --text-hover-color: #16181b;
 
@@ -1406,7 +1405,6 @@ body {
     --highlight-tr-hover-color: #474747;
     --table-border-color: #979797;
     --selected-color: #0a2a00;
-    --background-active-color: #6c6c6c;
     --text-hover-color: #ffffff;
 
     --boolean-true-color: #21d703;
@@ -1516,18 +1514,6 @@ pre {
 
 .sidebar-dark-primary .nav-treeview > .nav-item > .nav-link {
     background-color: var(--background-passiv-color);
-}
-
-.sidebar-dark-primary .nav-treeview > .nav-item > .nav-link.active,
-.sidebar-dark-primary .nav-treeview > .nav-item > .nav-link.active:hover {
-    background-color: var(--background-active-color);
-}
-
-.btn-default.hover,
-.btn-default:active,
-.btn-default:hover {
-    background-color: var(--background-active-color);
-    color: var(--text-hover-color);
 }
 
 .dropdown-menu {
@@ -1812,11 +1798,6 @@ input[type='color'] {
 
 .card-header_widget {
     height: auto;
-}
-
-[class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active,
-[class*='sidebar-dark-'] .nav-treeview > .nav-item > a.nav-link.active:focus {
-    background-color: var(--background-active-color);
 }
 
 /* select2-hide-dropdown - helper class to completely hide dropdown */

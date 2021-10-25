@@ -1468,6 +1468,27 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@splidejs/splide-extension-video@^0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@splidejs/splide-extension-video/-/splide-extension-video-0.4.6.tgz#fe832e0a2f87a56896e800aead73e6ef78f2cb96"
+  integrity sha512-UEqxkuYClYDhV+DsX9384wKj6FWwWN3HUvUXcNPVKZiHvh0Zn0t1M2w/hcDRJ3VtCxFhx92Kgzlkf22HqdyF+g==
+  dependencies:
+    "@vimeo/player" "^2.10.0"
+
+"@splidejs/splide@^2.4.13":
+  version "2.4.21"
+  resolved "https://registry.yarnpkg.com/@splidejs/splide/-/splide-2.4.21.tgz#ad1954d8d8822c9bfea0d3dc6a119358b88581ad"
+  integrity sha512-LdIwSnmNsGybCCnA3QG2dOeRv/rQl46jf7FflXxMGX0ADYWyL6UJHWJbMZvHBi5I67uRJY1ga/W+CvJ39nH26A==
+
+"@splidejs/vue-splide@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@splidejs/vue-splide/-/vue-splide-0.3.5.tgz#375d3c615fd88c612f46b8029b4ad2007ad6991b"
+  integrity sha512-eI4Kl2v+yAGKMVa9MtfIIPPZtplTfKPx4rCJlZqfethl3tCOGQwL9MxSyLk6bUhl31aOuClxmXQv8O5ubU8fNQ==
+  dependencies:
+    "@splidejs/splide" "^2.4.13"
+    "@splidejs/splide-extension-video" "^0.4.6"
+    vue "^2.6.12"
+
 "@sweetalert2/theme-bootstrap-4@^4.0.3":
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/@sweetalert2/theme-bootstrap-4/-/theme-bootstrap-4-4.0.3.tgz#7a9e7a99f5ecfb353e4ba9a16de918736162370c"
@@ -1660,6 +1681,14 @@
   integrity sha512-kQ5JNTrbDv3Rp5X2n/iUu37IJBDU2gsZ5R/g1/KHOOEc5IKfUFjXT6DENPGduh08I/pamwtEq4oul7gUqKTQDQ==
   dependencies:
     "@types/yargs-parser" "*"
+
+"@vimeo/player@^2.10.0":
+  version "2.16.1"
+  resolved "https://registry.yarnpkg.com/@vimeo/player/-/player-2.16.1.tgz#ed2237b8224dd764419b16ec4e6c3ede5bb2224e"
+  integrity sha512-47pUwVFAYBKbmOpxF6CzQc0VwbVi7LCv8i1H44XgRRoMoI7jwAOSi4CDGinjEMoKOKxsn5/p8ze50XZYwgTVWA==
+  dependencies:
+    native-promise-only "0.8.1"
+    weakmap-polyfill "2.0.1"
 
 "@vstconsulting/tabsignal@^1.1.1":
   version "1.1.1"
@@ -7605,6 +7634,11 @@ nanomatch@^1.2.9:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
+native-promise-only@0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/native-promise-only/-/native-promise-only-0.8.1.tgz#20a318c30cb45f71fe7adfbf7b21c99c1472ef11"
+  integrity sha1-IKMYwwy0X3H+et+/eyHJnBRy7xE=
+
 natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
@@ -10800,7 +10834,7 @@ vue-template-es2015-compiler@^1.6.0, vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
-vue@^2.6.11:
+vue@^2.6.11, vue@^2.6.12:
   version "2.6.14"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.14.tgz#e51aa5250250d569a3fbad3a8a5a687d6036e235"
   integrity sha512-x2284lgYvjOMj3Za7kqzRcUSxBboHqtgRE2zlos1qWaOye5yUmHn42LB1250NJBLRwEcdrB0JRwyPTEPhfQjiQ==
@@ -10848,6 +10882,11 @@ watchpack@^1.7.4:
   optionalDependencies:
     chokidar "^3.4.1"
     watchpack-chokidar2 "^2.0.1"
+
+weakmap-polyfill@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/weakmap-polyfill/-/weakmap-polyfill-2.0.1.tgz#ff0278c7f75bb0c492fc3343257f3e87114d709a"
+  integrity sha512-Jy177Lvb1LCrPQDWJsXyyqf4eOhcdvQHFGoCqSv921kVF5i42MVbr4e2WEwetuTLBn1NX0IhPzTmMu0N3cURqQ==
 
 webidl-conversions@^5.0.0:
   version "5.0.0"

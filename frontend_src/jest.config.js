@@ -29,6 +29,7 @@ module.exports = {
 
         '^(admin-lte|bootstrap).*(\\.js)?': '<rootDir>/__mocks__/fileMock.js',
         '^(admin-lte|bootstrap).*(\\.(js|scss))?': '<rootDir>/__mocks__/styleMock.js',
+        '^(@splidejs/vue-splide).*': '<rootDir>/__mocks__/fileMock.js',
     },
 
     // A list of paths to directories that Jest should use to search for files in
@@ -41,7 +42,7 @@ module.exports = {
 
     // A map from regular expressions to paths to transformers
     transform: {
-        '^.+\\.[t|j]sx?$': 'babel-jest',
+        '^.+\\.(js|jsx)$': 'babel-jest',
         '.*\\.(vue)$': 'vue-jest',
     },
 };
