@@ -3,23 +3,19 @@
         <div class="input-group">
             {{ val }}
         </div>
-        <div>
-            <template v-for="(file, idx) in value">
-                <MultipleImagesListItem :key="idx" :field="field" :data="data" :file="file" />
-            </template>
-        </div>
+        <Carousel v-if="value.length" :items="value" :name="$t(field.title)" />
     </div>
 </template>
 
 <script>
     import { BaseFieldContentReadonlyMixin } from '../../base';
-    import { MultipleNamedBinaryFileFieldContentEdit } from '../multiple-named-binary-file';
-    import MultipleImagesListItem from './MultipleImagesListItem.vue';
+    import { MultipleNamedBinaryFileFieldContentReadonly } from '../multiple-named-binary-file';
+    import Carousel from './Carousel';
 
     export default {
         components: {
-            MultipleImagesListItem,
+            Carousel,
         },
-        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentEdit],
+        mixins: [BaseFieldContentReadonlyMixin, MultipleNamedBinaryFileFieldContentReadonly],
     };
 </script>

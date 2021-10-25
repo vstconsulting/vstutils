@@ -21,6 +21,7 @@ export { ViewTypes };
  * @property {Object} [styles] - Styles for button (https://vuejs.org/v2/guide/class-and-style.html#Object-Syntax-1)
  * @property {string[]} [classes]
  * @property {string[]} [iconClasses]
+ * @property {boolean} [hidden]
  */
 
 /**

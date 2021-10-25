@@ -228,6 +228,7 @@ export default class ViewConstructor {
                         responseModel,
                         isMultiAction,
                         isEmpty,
+                        hidden: operationOptions['x-hidden'],
                     };
                     if (!isEmpty) {
                         const view = new ActionView(operationOptions, null);
