@@ -4,8 +4,7 @@ from django.utils.encoding import force_str
 from django.db import models
 from rest_framework.filters import BaseFilterBackend, OrderingFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
-from django_filters.rest_framework import filters
-from django_filters import compat
+from django_filters import compat, filters
 from vstutils.utils import raise_context
 
 from .filters import extra_filter

@@ -7,6 +7,7 @@ from copy import deepcopy
 from django_filters import rest_framework as filters, filterset
 from django.core.cache import caches as django_caches
 from django.db.models.base import ModelBase
+from django.db.models import fields as django_model_fields
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
 from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
@@ -433,6 +434,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                         ),
                         help_text=f"Search by {field_name}'s primary key or {related_name}"
                     )
+                elif isinstance(field, django_model_fields.BooleanField):
+                    filterset_fields_types[field_name] = filters.BooleanFilter()
 
             return filterset.FilterSetMetaclass(
                 f'{cls.__name__}FilterSetClass',
