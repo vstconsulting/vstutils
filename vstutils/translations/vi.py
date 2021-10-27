@@ -194,6 +194,8 @@ TRANSLATION = {
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Hình ảnh {0} không chính xác. Dự kiến ​​từ {1} đến {2}, đã nhận {3}',
     'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
     'This field must contain only digits': 'Trường này phải chứa chỉ chữ số',
+    'Invalid image size orientations': 'Kích thước hình ảnh không đúng',
+    'Current image size': 'Kích thước hình ảnh hiện tại',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',

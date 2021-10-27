@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 from django.db import models
 
-from vstutils.api.fields import RelatedListField
+from vstutils.api.fields import RelatedListField, NamedBinaryImageInJsonField
 from vstutils.models import BModel
 from vstutils.api import fields, filter_backends
 from vstutils.models.fields import (
@@ -9,10 +9,14 @@ from vstutils.models.fields import (
     NamedBinaryImageInJSONField,
     MultipleNamedBinaryFileInJSONField,
     MultipleNamedBinaryImageInJSONField,
-    FkModelField, MultipleFileField, MultipleImageField
+    FkModelField, MultipleFileField, MultipleImageField,
 )
 from .hosts import Host
-from ..validators import image_res_validator, image_res_max_validator, image_height_validator, image_width_validator
+from ..validators import (
+    image_res_validator, image_res_max_validator, image_height_validator,
+    image_width_validator, invalid_image_validator_resizer, valid_image_validator_resizer,
+    image_validator_resizer_with_margin
+)
 
 
 def bin_file_handler(self, instance, fields_mapping, model, field_name):
@@ -179,3 +183,36 @@ class ReadonlyDeepNestedModel(BModel):
         _view_class = 'read_only'
         _list_fields = ('name', 'parent')
         _detail_fields = '__all__'
+
+
+class SomethingWithImage(BModel):
+    name = models.CharField(max_length=100)
+    validimage = NamedBinaryImageInJSONField(default='')
+    invalidimage = NamedBinaryImageInJSONField(default='')
+    imagewithmarginapplying = NamedBinaryImageInJSONField(default='')
+    class Meta:
+        _list_fields = [
+            'id',
+            'name',
+        ]
+        _detail_fields = [
+            'id',
+            'name',
+            'validimage',
+            'invalidimage',
+            'imagewithmarginapplying',
+        ]
+        _override_detail_fields = {
+            'validimage': fields.NamedBinaryImageInJsonField(
+                required=False,
+                validators=[valid_image_validator_resizer],
+            ),
+            'invalidimage': fields.NamedBinaryImageInJsonField(
+                required=False,
+                validators=[invalid_image_validator_resizer],
+            ),
+            'imagewithmarginapplying': fields.NamedBinaryImageInJsonField(
+                required=False,
+                validators=[image_validator_resizer_with_margin],
+            ),
+        }

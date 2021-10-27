@@ -194,6 +194,8 @@ TRANSLATION = {
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
     'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
     'This field must contain only digits': 'Это поле должно содержать только цифры',
+    'Invalid image size orientations': 'Неправильные размеры изображения',
+    'Current image size': 'Текущий размер изображения',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста обновите страницу.',
