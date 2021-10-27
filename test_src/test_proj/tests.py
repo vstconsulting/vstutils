@@ -3940,7 +3940,7 @@ class WebSocketTestCase(BaseTestCase):
             mock_args.append(args)
             mock_kwargs.append(kwargs)
 
-        Host = self.get_model_class('test_proj.models.Host')
+        Host = self.get_model_class('test_proj.models.HostList')
         Group = self.get_model_class('auth.Group')
         models.cent_client = get_centrifugo_client()
         models.cent_client._send = publish

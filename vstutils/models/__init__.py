@@ -219,11 +219,21 @@ def bulk_notify_clients(channel="subscriptions_update", objects=()):
         return cent_client.send()
 
 
+def get_proxy_labels(model):
+    labels = []
+    if model._meta.proxy:
+        labels.append(model._meta.proxy_for_model._meta.label)
+        labels += get_proxy_labels(model._meta.proxy_for_model)
+    return labels
+
+
 @raise_context()
 def notify_clients(model, pk=None):
     logger.debug(f'Notify clients about model update: {model._meta.label}')
     if not settings.CENTRIFUGO_CLIENT_KWARGS:
         return  # nocv
+    message = [(model._meta.label, pk)]
+    message += [(label, pk) for label in get_proxy_labels(model)]
     bulk_notify_clients(
         "subscriptions_update",
         ((model._meta.label, pk),)
