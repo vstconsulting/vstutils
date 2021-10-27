@@ -3,7 +3,7 @@
         <div class="input-group">
             {{ val }}
         </div>
-        <Carousel v-if="value.length" :items="value" :name="$t(field.title)" />
+        <Carousel v-if="value && value.length" :items="value" :name="$t(field.title)" />
     </div>
 </template>
 

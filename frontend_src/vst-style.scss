@@ -146,21 +146,9 @@ $highlights:
     margin: 0;
 }
 
-.sidebar-menu .nav-item.current a.current {
-    background-color: var(--menu-active-bg-color);
-    color: var(--menu-active-color) !important;
-}
-
 .sidebar-menu .nav-item.current .nav-treeview .toctree-l2 a{
     background-color: var(--background-passiv-color);
 }
-
-.sidebar-menu .nav-item.current .nav-treeview .toctree-l2 a:hover {
-     background-color: rgba(255,255,255,.1);
-     color: var(--menu-active-color) !important;
-}
-
-
 
 .sidebar-menu ul li ul li a
 {

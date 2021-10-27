@@ -1293,7 +1293,6 @@ a.multiaction-button {
 
 body {
     --menu-active-bg-color: #007bff;
-    --menu-active-color: #ffffff;
     --content-wrapper: #ecf0f5;
 
     --main-header-bg-color: #fff;
@@ -1364,7 +1363,6 @@ body {
 
 .gui-skin-dark {
     --menu-active-bg-color: #005a67;
-    --menu-active-color: #ffffff;
     --content-wrapper: #515151;
 
     --main-header-bg-color: #828282;
@@ -1543,15 +1541,6 @@ pre {
 .modal-content,
 .iziModal {
     background-color: var(--modal-bg-color);
-}
-
-.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
-    background-color: var(--menu-active-bg-color);
-    color: var(--menu-active-color) !important;
-}
-
-.main-sidebar a.nav-link {
-    color: var(--menu-active-color) !important;
 }
 
 .card-info:not(.card-outline) .card-header {
