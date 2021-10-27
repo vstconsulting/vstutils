@@ -75,6 +75,8 @@ from .models import (
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
+from PIL import Image
+from io import BytesIO
 from vstutils.api.fields import FkField
 
 DIR_PATH = os.path.abspath('test_proj')
@@ -2106,16 +2108,226 @@ class ValidatorsTestCase(BaseTestCase):
         img_height_validator(self.valid_image_content_dict)
 
     def test_image_resolution_validator(self):
-        img_resolution_validator = ImageResolutionValidator(min_width=1280, max_height=404)
-
         img_resolution_validator = ImageResolutionValidator(max_width=666, max_height=720)
 
-        with self.assertRaisesMessage(ValidationError, 'Invalid image width. Expected from 1 to 666, got 1280'):
+        with self.assertRaises(ValidationError):
             img_resolution_validator(self.valid_image_content_dict)
 
         img_resolution_validator = ImageResolutionValidator(max_width=1280, max_height=720)
 
         img_resolution_validator(self.valid_image_content_dict)
+
+    def test_image_auto_resize(self):
+        base_path = Path(DIR_PATH, '1280_720_jpeg.jpeg')
+        jpeg_b64 = base64.b64encode(base_path.read_bytes()).decode('utf-8')
+        png_b64 = base64.b64encode(base_path.with_name('1280_720_png.png').read_bytes()).decode('utf-8')
+        tall_img_b64 = base64.b64encode(base_path.with_name('tall_image.jpg').read_bytes()).decode('utf-8')
+        small_img_b64 = base64.b64encode(base_path.with_name('small_image.png').read_bytes()).decode('utf-8')
+        resize_jpeg_image_content_dict = {
+            'name': '1280_720_jpeg.jpeg',
+            'content': jpeg_b64,
+            'mediaType': 'images/jpeg'
+        }
+        resize_png_image_content_dict = {
+            'name': '1280_720_png.png',
+            'content': png_b64,
+            'mediaType': 'images/png'
+        }
+        tall_image_content_dict = {
+            'name': 'tall.jpg',
+            'content': tall_img_b64,
+            'mediaType': 'images/jpg'
+        }
+        small_image_content_dict = {
+            'name': 'small.png',
+            'content': small_img_b64,
+            'mediaType': 'images/png'
+        }
+
+        valid_image_hash = hash(resize_png_image_content_dict['content'])
+        expected_new_image_size = 600, int(600/1280 * 720)
+        results = self.bulk([
+            # 0
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Resized img', 'invalidimage': resize_png_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            # 1
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Unresized invalid img 1', 'invalidimage': resize_png_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'tqwt'},
+            },
+            # 2
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Unresized invalid img 2', 'invalidimage': resize_png_image_content_dict},
+            },
+            # 3
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Unresized valid img 1', 'validimage': resize_png_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'tqwt'},
+            },
+            # 4
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Unresized valid img 2', 'validimage': resize_png_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            # 5
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'JPEG checking format saving', 'invalidimage': resize_jpeg_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            # 6
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<0[data][id]>>'],
+            },
+            # 7
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<3[data][id]>>'],
+            },
+            # 8
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<4[data][id]>>'],
+            },
+            # 9
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<5[data][id]>>'],
+            },
+            # 10
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Resized img with horizontal margin', 'imagewithmarginapplying': resize_png_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            # 11
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<10[data][id]>>'],
+            },
+            # 12
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Resized img with vertical margin', 'imagewithmarginapplying': tall_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            # 13
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<12[data][id]>>'],
+            },
+            # 14
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Resized small img', 'imagewithmarginapplying': small_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            # 15
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<14[data][id]>>'],
+            },
+        ])
+        # invalid image with correct AUTO_RESIZE_IMAGE header
+        self.assertEqual(results[0]['status'], 201)
+        # invalid image without correct AUTO_RESIZE_IMAGE header
+        for i in range(1, 3):
+            self.assertEqual(results[i]['status'], 400)
+            self.assertEqual(''.join(results[i]['data']['invalidimage']),
+                             'Invalid image size orientations: height, width. Current image size: 720x1280')
+        # valid image
+        for i in range(3, 5):
+            self.assertEqual(results[i]['status'], 201)
+        # getting correct images
+        for i in range(6, 9):
+            self.assertEqual(results[6]['status'], 200)
+        # if satisfied, image must not be changed
+        self.assertEqual(hash(results[7]['data']['validimage']['content']), valid_image_hash)
+        self.assertEqual(hash(results[8]['data']['validimage']['content']), valid_image_hash)
+
+        img_png = Image.open(BytesIO(base64.b64decode(results[0]['data']['invalidimage']['content'])))
+        img_jpeg = Image.open(BytesIO(base64.b64decode(results[9]['data']['invalidimage']['content'])))
+        self.assertEqual(img_png.format, "PNG")
+        self.assertEqual(img_jpeg.format, "JPEG")
+        self.assertEqual(img_png.size, expected_new_image_size)
+        self.assertEqual(img_jpeg.size, expected_new_image_size)
+
+        # horizontal margin
+        self.assertEqual(results[10]['status'], 201)
+        self.assertEqual(results[11]['status'], 200)
+        img_with_horizontal_margin = Image.open(
+            BytesIO(base64.b64decode(results[11]['data']['imagewithmarginapplying']['content'])))
+        self.assertEqual(img_with_horizontal_margin.format, 'PNG')
+        self.assertEqual(img_with_horizontal_margin.size, (600, 600))
+        # vertical margin
+        self.assertEqual(results[12]['status'], 201)
+        self.assertEqual(results[13]['status'], 200)
+        img_with_vertical_margin = Image.open(
+            BytesIO(base64.b64decode(results[13]['data']['imagewithmarginapplying']['content'])))
+        self.assertEqual(img_with_vertical_margin.format, 'JPEG')
+        self.assertEqual(img_with_vertical_margin.size, (600, 600))
+        # small image resize
+        self.assertEqual(results[14]['status'], 201)
+        self.assertEqual(results[15]['status'], 200)
+        small_img = Image.open(
+            BytesIO(base64.b64decode(results[15]['data']['imagewithmarginapplying']['content'])))
+        self.assertEqual(small_img.format, 'PNG')
+        self.assertEqual(small_img.size, (600, 600))
+
+        # skipping file handling when file name needs to encode/decode
+        image_with_letters_to_encode = {
+            'name': 'супер пупер картинка.png',
+            'content': png_b64,
+            'mediaType': 'images/png'
+        }
+        image_from_media_with_encoded_letters = {
+            'name': 'супер пупер картинка.png',
+            'content': '/media/%D1%81%D1%83%D0%BF%D0%B5%D1%80%20%D0%BF%D1%83%D0%BF%D0%B5%D1%80%20%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B0.png',
+            'mediaType': ''
+        }
+        results = self.bulk([
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Картинка с русскими буквами', 'invalidimage': image_with_letters_to_encode},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Картинка которая не должна валидироваться', 'invalidimage': image_from_media_with_encoded_letters},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            },
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<0[data][id]>>'],
+            },
+            {
+                'method': 'get',
+                'path': ['somethingwithimage', '<<1[data][id]>>'],
+            },
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[3]['status'], 200)
 
 
 class LangTestCase(BaseTestCase):
@@ -3123,7 +3335,10 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[34]['status'], 200)
         self.assertEqual(results[34]['data']['some_namedbinfile'], dict(**missing_mediaType, mediaType=None))
         self.assertEqual(results[35]['status'], 400)
-        self.assertEqual(results[35]['data']['some_validatedmultiplenamedbinimage'][0], 'Invalid image height. Expected from 200 to 600, got 720')
+        self.assertEqual(
+            ''.join(results[35]['data']['some_validatedmultiplenamedbinimage'][0]),
+            'Invalid image size orientations'
+        )
 
     def test_file_field(self):
         with open(os.path.join(DIR_PATH, 'cat.jpeg'), 'rb') as cat1:

@@ -194,6 +194,8 @@ TRANSLATION = {
     'Invalid image {0}. Expected from {1} to {2}, got {3}': "{0}图片不正确。 预期从{1}到{2}，收到{3}",
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
     'This field must contain only digits': '此字段必须仅包含数字',
+    'Invalid image size orientations': '图片尺寸不正确',
+    'Current image size': '当前图像大小',
 
 
     # Проверить

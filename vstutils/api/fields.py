@@ -8,6 +8,7 @@ import copy
 import json
 import functools
 import base64
+from urllib.parse import quote
 
 import orjson
 from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer
@@ -659,7 +660,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
         return (
             not file['mediaType'] and
             (file['content'].startswith('/') or file['content'].startswith('http')) and
-            file['content'].endswith(file['name'])
+            file['content'].endswith(quote(file['name']))
         )
 
     def _handle_file(self, file):

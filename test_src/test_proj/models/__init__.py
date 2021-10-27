@@ -6,6 +6,7 @@ from .some import (
     ModelForCheckFileAndImageField,
     DeepNestedModel,
     ReadonlyDeepNestedModel,
+    SomethingWithImage,
 )
 from .files import File, List, ListOfFiles
 from .contented import VarBasedModel, Variable, VariableType
