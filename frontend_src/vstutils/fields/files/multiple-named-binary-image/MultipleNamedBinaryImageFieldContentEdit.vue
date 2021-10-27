@@ -23,7 +23,12 @@
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
             <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
         </div>
-        <Carousel v-if="value.length" :items="value" :name="$t(field.title)" @remove-file="removeFile" />
+        <Carousel
+            v-if="value && value.length"
+            :items="value"
+            :name="$t(field.title)"
+            @remove-file="removeFile"
+        />
     </div>
 </template>
 

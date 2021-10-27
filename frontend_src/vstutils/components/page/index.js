@@ -1,5 +1,4 @@
 /* eslint-disable vue/one-component-per-file */
-import OneEntity from './OneEntity.vue';
 import {
     formatPath,
     joinPaths,
@@ -11,9 +10,12 @@ import {
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { ViewTypes } from '../../views';
+
+import OneEntity from './OneEntity.vue';
+import ModelFields from './ModelFields.vue';
 import { LeaveConfirmationMixin } from './LeaveConfirmationMixin.js';
 
-export { OneEntity, LeaveConfirmationMixin };
+export { OneEntity, LeaveConfirmationMixin, ModelFields };
 
 /**
  * @vue/component
