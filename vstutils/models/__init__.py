@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 
 from cent import Client as CentrifugoClient
 
-from .base import ModelBaseClass
+from .base import ModelBaseClass, get_proxy_labels
 from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
@@ -206,12 +206,12 @@ class BModel(BaseModel):
 
 @raise_context()
 def bulk_notify_clients(channel="subscriptions_update", objects=()):
-    for label, pk in objects:
+    for labels, pk in objects:
         with raise_context():
             cent_client.add("publish", cent_client.get_publish_params(
                 channel,
                 {
-                    "subscribe-label": label,
+                    "subscribe-label": labels,
                     "pk": pk
                 }
             ))
@@ -219,25 +219,15 @@ def bulk_notify_clients(channel="subscriptions_update", objects=()):
         return cent_client.send()
 
 
-def get_proxy_labels(model):
-    labels = []
-    if model._meta.proxy:
-        labels.append(model._meta.proxy_for_model._meta.label)
-        labels += get_proxy_labels(model._meta.proxy_for_model)
-    return labels
-
 
 @raise_context()
 def notify_clients(model, pk=None):
     logger.debug(f'Notify clients about model update: {model._meta.label}')
     if not settings.CENTRIFUGO_CLIENT_KWARGS:
-        return  # nocv
-    message = [(model._meta.label, pk)]
-    message += [(label, pk) for label in get_proxy_labels(model)]
-    bulk_notify_clients(
-        "subscriptions_update",
-        ((model._meta.label, pk),)
-    )
+        return
+    bulk_notify_clients("subscriptions_update", [
+        ((model._meta.label, *get_proxy_labels(model)), pk)
+    ])
 
 
 def get_centrifugo_client():

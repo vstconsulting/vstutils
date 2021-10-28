@@ -8,6 +8,7 @@ from drf_yasg.app_settings import swagger_settings
 from drf_yasg.openapi import Operation
 
 from ... import utils
+from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
 from .inspectors import (
     CommaMultiSelectFieldInspector,
@@ -194,10 +195,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
             queryset = getattr(subscribe_view, 'queryset', None)
             if queryset is not None:
                 # pylint: disable=protected-access
-                subscribe_labels = [queryset.model._meta.label]
-                proxy_model = queryset.model._meta.proxy_for_model
-                if proxy_model:
-                    subscribe_labels.append(proxy_model._meta.label)
+                subscribe_labels = [queryset.model._meta.label, *get_proxy_labels(queryset.model)]
                 subscribe_labels += list(getattr(queryset.model, '_extra_subscribe_labels', []))
                 result['x-subscribe-labels'] = subscribe_labels
             deep_nested_subview = getattr(subscribe_view, 'deep_nested_subview', None)

@@ -197,6 +197,14 @@ def _set_deep_filter_or_not(backends):
     return backends
 
 
+def get_proxy_labels(model):
+    labels = []
+    if model._meta.proxy:
+        labels.append(model._meta.proxy_for_model._meta.label)
+        labels += get_proxy_labels(model._meta.proxy_for_model)
+    return labels
+
+
 # Classes
 class ApplyNestedDecorators(apply_decorators):
     def __init__(self, nested: dict):
@@ -243,6 +251,9 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 receiver(post_save, sender=label)(update_cache_for_model_related)
                 receiver(post_delete, sender=label)(update_cache_for_model_related)
         return model_class
+
+    def get_proxy_labels(cls):
+        return get_proxy_labels(cls)  # nocv
 
     def get_api_cache_name(cls):
         return f'api_caching_table_{cls._meta.db_table}'

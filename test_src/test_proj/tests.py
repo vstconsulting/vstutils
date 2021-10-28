@@ -3963,30 +3963,34 @@ class WebSocketTestCase(BaseTestCase):
             mock_args.append(args)
             mock_kwargs.append(kwargs)
 
-        Host = self.get_model_class('test_proj.models.HostList')
+        Host = self.get_model_class('test_proj.models.Host')
+        HostList = self.get_model_class('test_proj.models.HostList')
         Group = self.get_model_class('auth.Group')
         models.cent_client = get_centrifugo_client()
         models.cent_client._send = publish
 
         host_obj = Host.objects.create(name="centrifuga")
-        host_obj2 = Host.objects.create(name="centrifuga")
-        Host.objects.filter(id__in=[host_obj.id, host_obj2.id]).delete()
+        host_list_obj = HostList.objects.create(name="centrifuga")
+        host_list_obj2 = HostList.objects.create(name="centrifuga")
+        HostList.objects.filter(id__in=[host_list_obj.id, host_list_obj2.id]).delete()
         Group.objects.create(name='TestUsersGroup').delete()
-        self.assertEqual(mock_call_count, 4)
+        self.assertEqual(mock_call_count, 5)
         mock_data = []
         for arg in mock_args:
             cent_host = arg[0]
             arg = json.loads(arg[-1])
             self.assertEqual(arg['method'], 'publish')
             mock_data.append((cent_host, arg['params']['channel'], arg['params']['data']))
-        self.assertEqual(mock_data[0][1], 'subscriptions_update')
-        self.assertEqual(mock_data[1][1], 'subscriptions_update')
-        self.assertEqual(mock_data[2][1], 'subscriptions_update')
-        self.assertEqual(mock_data[3][1], 'subscriptions_update')
-        self.assertDictEqual(mock_data[0][2], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
-        self.assertDictEqual(mock_data[1][2], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
-        self.assertDictEqual(mock_data[2][2], {"subscribe-label": Host._meta.label, "pk": host_obj2.id})
-        self.assertDictEqual(mock_data[3][2], {"subscribe-label": Host._meta.label, "pk": host_obj.id})
+
+        for item in mock_data:
+            self.assertEqual(item[1], 'subscriptions_update')
+
+        self.assertDictEqual(mock_data[0][2], {"subscribe-label": [Host._meta.label], "pk": host_obj.id})
+        host_list_labels = [HostList._meta.label, Host._meta.label]
+        self.assertDictEqual(mock_data[1][2], {"subscribe-label": host_list_labels, "pk": host_list_obj.id})
+        self.assertDictEqual(mock_data[2][2], {"subscribe-label": host_list_labels, "pk": host_list_obj2.id})
+        self.assertDictEqual(mock_data[3][2], {"subscribe-label": host_list_labels, "pk": host_list_obj2.id})
+        self.assertDictEqual(mock_data[4][2], {"subscribe-label": host_list_labels, "pk": host_list_obj.id})
 
 
 class ThrottleTestCase(BaseTestCase):

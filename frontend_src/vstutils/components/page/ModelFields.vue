@@ -16,7 +16,7 @@
             :key="idx"
             :class="fieldsGroupClasses(group.title)"
         >
-            <div class="card">
+            <div class="card" :class="groupsClasses">
                 <h5 v-if="group.title" class="card-header">
                     {{ $t(group.title) }}
                 </h5>
@@ -65,6 +65,8 @@
             hideNotRequired: { type: Boolean, default: false },
 
             fieldsErrors: { type: Object, default: () => ({}) },
+
+            groupsClasses: { type: [String, Object, Array], default: '' },
         },
         data() {
             return {

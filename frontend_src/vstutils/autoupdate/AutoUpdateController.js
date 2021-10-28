@@ -117,14 +117,16 @@ export default {
 
         // Centrifugo updates
 
-        onCentrifugoUpdate({ pk, 'subscribe-label': label }) {
-            if (!this.$store.state.autoupdate.centrifugoSubscriptions.has(label)) {
-                return;
-            }
-            return this.$store.state.autoupdate.centrifugoSubscriptions
-                .get(label)
-                .filter((action) => !action.pk || String(action.pk) === String(pk))
-                .map((action) => this.bulkInvoke(action));
+        onCentrifugoUpdate({ pk, 'subscribe-label': labels }) {
+            return Array.from(
+                new Set(
+                    labels
+                        .map((label) => this.$store.state.autoupdate.centrifugoSubscriptions.get(label))
+                        .filter((actions) => actions !== undefined)
+                        .flat()
+                        .filter((action) => !action.pk || String(action.pk) === String(pk)),
+                ),
+            ).map((action) => this.bulkInvoke(action));
         },
     },
 };
