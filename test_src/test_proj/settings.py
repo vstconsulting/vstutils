@@ -95,6 +95,10 @@ API['v4'][r'user'] = dict(
     view='test_proj.views.TestUserViewSet'
 )
 
+API[VST_API_VERSION][r'test_changed_fk'] = dict(
+    model='test_proj.models.ModelWithChangedFk'
+)
+
 GUI_VIEWS[r'^gui/$'] = r'^$'
 GUI_VIEWS[r'^csrf_disable_gui/$'] = {
     'BACKEND': 'vstutils.gui.views.GUIView',

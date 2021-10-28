@@ -2918,6 +2918,29 @@ class ProjectTestCase(BaseTestCase):
         with self.assertRaises(ValidationError):
             FkField(select=Post, dependence={'author': 'name'}, filters={'name': 'Lee'})
 
+        # test FkModelField autocomplete_property
+        changed_fk_model = self.get_model_class('test_proj.ModelWithChangedFk')
+        changed_pk = self.get_model_class('test_proj.ChangedPkField')
+        value = changed_pk.objects.create(reg_number='TW23', name='test')
+        value2 = changed_pk.objects.create(reg_number='TW24', name='test')
+        field = fields.FkModelField(select=changed_pk, autocomplete_property='reg_number')
+        self.assertEqual(field.to_representation(value), value.reg_number)
+        results = self.bulk([
+            {
+                'method': 'post',
+                'path': 'test_changed_fk',
+                'data': {'name': 'test', 'relation': value.reg_number}
+            },
+            {
+                'method': 'patch',
+                'path': ['test_changed_fk', '<<0[data][id]>>'],
+                'data': {'relation': value2.reg_number}
+            }
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 200)
+        self.assertEqual(changed_fk_model.objects.get(id=results[0]['data']['id']).relation, value2)
+
     def test_model_related_list_field(self):
         date = '2021-01-20T00:26:38Z'
         author_1 = Author.objects.create(name='author_1', registerDate=date)

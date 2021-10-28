@@ -1,5 +1,6 @@
 from django.db import models
 
+import vstutils.api.models
 from vstutils.api import fields, filters
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
@@ -113,3 +114,23 @@ class ExtraPost(Post):
         }
         _filterset_fields = None
         _serializer_class_name = 'ExtraPost'
+
+
+class ChangedPkField(BModel):
+    id = models.TextField(primary_key=False, blank=True, null=True)
+    reg_number = models.CharField(primary_key=True, max_length=10)
+    name = models.CharField(max_length=10, null=True, blank=True)
+
+    class Meta:
+        _list_fields = _detail_fields = ['reg_number', 'name']
+
+
+class ModelWithChangedFk(BModel):
+    name = models.CharField(max_length=10)
+    relation = models.ForeignKey(ChangedPkField, on_delete=models.CASCADE,)
+
+    class Meta:
+        _list_fields = _detail_fields = ['name', 'relation']
+        _override_detail_fields = _override_list_fields = {
+            'relation': FkModelField(select=ChangedPkField, autocomplete_property='reg_number')
+        }
