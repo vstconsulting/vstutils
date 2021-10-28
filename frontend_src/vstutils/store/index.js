@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
-import AutoUpdateStoreModule from '../autoupdate/AutoUpdateStoreModule.js';
+import { AutoUpdateStoreModule } from '../autoupdate';
 import ComponentStoreModule from './components_state';
 import * as modules from './components_state/commonStoreModules.js';
 import { HttpMethods } from '../utils';

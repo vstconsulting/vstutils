@@ -1,7 +1,7 @@
 import SidebarLinkMixin from './SidebarLinkMixin.js';
 import BaseButtonMixin from './BaseButtonMixin.vue';
 import { LIST_STORE_MODULE, PAGE_STORE_MODULE } from '../../store/components_state/commonStoreModules.js';
-import ComponentWithAutoUpdate from '../../autoupdate/ComponentWithAutoUpdate.js';
+import { ComponentWithAutoUpdate } from '../../autoupdate';
 import { StoreModuleComponent } from './StoreModuleComponent.js';
 
 export { BaseButtonMixin, SidebarLinkMixin, StoreModuleComponent };

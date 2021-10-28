@@ -24,7 +24,7 @@
     </div>
 </template>
 <script>
-    import AutoUpdateController from './autoupdate/AutoUpdateController.js';
+    import { AutoUpdateController } from './autoupdate';
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
 

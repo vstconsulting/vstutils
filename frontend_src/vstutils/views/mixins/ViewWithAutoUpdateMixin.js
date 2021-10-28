@@ -1,4 +1,4 @@
-import ComponentWithAutoUpdate from '../../autoupdate/ComponentWithAutoUpdate.js';
+import { ComponentWithAutoUpdate } from '../../autoupdate';
 
 /**
  * Mixin for views, that are able to send autoupdate requests.

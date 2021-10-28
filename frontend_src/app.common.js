@@ -50,6 +50,7 @@ export { colors };
 
 // vstutils code
 import AppRoot from './vstutils/AppRoot.vue';
+import * as autoupdate from './vstutils/autoupdate';
 import * as utils from './vstutils/utils';
 import * as setupVue from './vstutils/setupVue.js';
 import * as popUp from './vstutils/popUp';
@@ -69,6 +70,7 @@ export {
     AppRoot,
     utils,
     setupVue,
+    autoupdate,
     popUp,
     fields,
     components,

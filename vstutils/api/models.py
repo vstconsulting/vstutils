@@ -3,15 +3,11 @@ import hashlib
 import pyotp
 from django.conf import settings
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.utils.module_loading import import_string as import_class
 from django.utils.functional import cached_property
 
 from ..models import BaseModel
 from ..custom_model import ListModel, CharField
-
-
-User = get_user_model()
 
 
 lib_names = []
@@ -82,7 +78,7 @@ class CustomTranslations(BaseModel):
 
 
 class TwoFactor(BaseModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     secret = models.CharField(max_length=256, blank=False, null=False)
 
     class Meta:
@@ -114,7 +110,7 @@ class RecoveryCode(BaseModel):
 
 
 class UserSettings(BaseModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     value = models.JSONField(default=dict)
 
     class Meta:
