@@ -119,6 +119,14 @@ class FloatType(cconfig.BaseType):
         return float(value)
 
 
+class LocationsType(cconfig.ListType):
+    def convert(self, value: _t.Any) -> _t.Union[_t.List, _t.Text]:
+        result = super().convert(value)
+        if any(filter(lambda x: x.startswith('redis'), result)):
+            return result
+        return value
+
+
 class BackendSection(cconfig.Section):
     __slots__ = ()
 
@@ -211,6 +219,62 @@ class CacheSection(BackendSection):
     __slots__ = ()
     types_map = {
         'timeout': ConfigIntSecondsType,
+        'location': LocationsType(),
+    }
+
+
+class CacheOptionsSection(BackendSection):
+    types_map = {
+        'binary': ConfigBoolType,
+        'no_delay': ConfigBoolType,
+        'ignore_exc': ConfigBoolType,
+        'ignore_exceptions': ConfigBoolType,
+        'use_pooling': ConfigBoolType,
+        'close_connection': ConfigBoolType,
+        'max_entries': ConfigIntType,
+        'cull_frequency': ConfigIntType,
+        'max_pool_size': ConfigIntType,
+        'pickle_version': ConfigIntType,
+        'socket_connect_timeout': ConfigIntSecondsType,
+        'socket_timeout': ConfigIntSecondsType,
+    }
+
+    def key_handler_to_all(self, key):
+        backend = self.parent['backend']
+        if backend.split('.')[-1] in ('PyLibMCCache', 'PyMemcacheCache'):
+            return key
+        return super(CacheOptionsSection, self).key_handler_to_all(key)
+
+
+class SentinelsSection(cconfig.Section):
+    def all(self) -> _t.List[_t.Tuple[_t.Text, _t.SupportsInt]]:
+        return list((k, int(v)) for k, v in super().all().items())
+
+
+class CachePoolKwargsSection(cconfig.Section):
+    types_map = {
+        'max_connections': ConfigIntType,
+        'retry_on_timeout': ConfigBoolType,
+        'skip_full_coverage_check': ConfigBoolType,
+        'socket_keepalive': ConfigBoolType,
+        'socket_connect_timeout': ConfigIntSecondsType,
+        'socket_timeout': ConfigIntSecondsType,
+    }
+
+
+class CacheBehaviorsSection(cconfig.Section):
+    types_map = {
+        'ketama': ConfigBoolType,
+        'no_block': ConfigBoolType,
+        'tcp_nodelay': ConfigBoolType,
+        'tcp_keepalive': ConfigBoolType,
+        'connect_timeout': ConfigIntType,
+        'send_timeout': ConfigIntType,
+        'receive_timeout': ConfigIntType,
+        '_poll_timeout': ConfigIntType,
+        'remove_failed': ConfigIntType,
+        'retry_timeout': ConfigIntType,
+        'dead_timeout': ConfigIntType,
     }
 
 
@@ -426,9 +490,25 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'database.test': DBTestSection,
         'worker': WorkerSection,
         'cache': CacheSection,
+        'cache.options': CacheOptionsSection,
+        'cache.options.sentinels': SentinelsSection,
+        'cache.options.connection_pool_kwargs': CachePoolKwargsSection,
+        'cache.options.behaviors': CacheBehaviorsSection,
         'locks': CacheSection,
+        'locks.options': CacheOptionsSection,
+        'locks.options.sentinels': SentinelsSection,
+        'locks.options.connection_pool_kwargs': CachePoolKwargsSection,
+        'locks.options.behaviors': CacheBehaviorsSection,
         'session': CacheSection,
+        'session.options': CacheOptionsSection,
+        'session.options.sentinels': SentinelsSection,
+        'session.options.connection_pool_kwargs': CachePoolKwargsSection,
+        'session.options.behaviors': CacheBehaviorsSection,
         'etag': CacheSection,
+        'etag.options': CacheOptionsSection,
+        'etag.options.sentinels': SentinelsSection,
+        'etag.options.connection_pool_kwargs': CachePoolKwargsSection,
+        'etag.options.behaviors': CacheBehaviorsSection,
         'mail': MailSection,
         'uwsgi': UWSGISection,
         'rpc': RPCSection,
@@ -617,7 +697,7 @@ AUTHENTICATION_BACKENDS: _t.List[_t.Text] = [
 CACHE_AUTH_USER = main.getboolean('auth-cache-user', fallback=False)
 
 # Sessions settings
-# https://docs.djangoproject.com/en/2.2/ref/settings/#sessions
+# https://docs.djangoproject.com/en/3.2/ref/settings/#sessions
 SESSION_COOKIE_AGE: int = web["session_timeout"]
 SESSION_ENGINE: _t.Text = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS: _t.Text = 'session'
@@ -640,7 +720,7 @@ SECURE_HSTS_SECONDS = web['secure_hsts_seconds']
 
 
 # Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS: _t.List[_t.Dict] = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -716,7 +796,7 @@ TEMPLATES: _t.List[_t.Dict] = [
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
 ##############################################################
 STATIC_URL: _t.Text = web["static_files_url"]
 STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
@@ -752,7 +832,7 @@ if HAS_DOCS:
 
 
 # Database settings.
-# Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+# Read more: https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 ##############################################################
 DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE
 
@@ -785,7 +865,7 @@ for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Cache settings.
-# Read more: https://docs.djangoproject.com/en/2.2/ref/settings/#caches
+# Read more: https://docs.djangoproject.com/en/3.2/ref/settings/#caches
 ##############################################################
 default_cache = config['cache'].all()
 session_cache = config['session'].all() or config['cache'].all()
@@ -800,9 +880,12 @@ CACHES: SIMPLE_OBJECT_SETTINGS_TYPE = {
     "etag": etag_cache,
 }
 
+if any([True for c in CACHES.values() if 'OPTIONS' in c and c['OPTIONS'].get('SENTINELS')]):
+    DJANGO_REDIS_CONNECTION_FACTORY = 'django_redis.pool.SentinelConnectionFactory'
+
 
 # E-Mail settings
-# https://docs.djangoproject.com/en/2.2/ref/settings/#email-host
+# https://docs.djangoproject.com/en/3.2/ref/settings/#email-host
 ##############################################################
 mail = config['mail']
 EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
@@ -932,7 +1015,7 @@ OPTIMIZE_GET_BY_VALUES = True
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
+# https://docs.djangoproject.com/en/3.2/topics/i18n/
 ##############################################################
 LANGUAGE_CODE: _t.Text = 'en'
 

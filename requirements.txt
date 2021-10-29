@@ -1,6 +1,6 @@
 # Main packages
 configparser~=5.0.2
-configparserc~=1.2.4
+configparserc~=1.2.5
 django-cors-headers==3.7.0
 Markdown==3.3.4
 
