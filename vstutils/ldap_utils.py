@@ -7,6 +7,8 @@ import json
 import ldap
 from django.conf import settings
 
+from .utils import translate
+
 
 def json_default(obj):  # nocv
     error_obj = TypeError(f"{type(obj)} is not JSON serializable")
@@ -63,11 +65,15 @@ class LDAP:
         if not self.domain:
             if r'@' not in username:
                 raise self.InvalidDomainName(
-                    "Domain should be setuped or username should be with @domain.name"
+                    translate(
+                        "Domain should be setuped or username should be with @domain.name"
+                    )
                 )
         if len(self.domain.split('.')) <= 1:
             raise self.InvalidDomainName(
-                f"Invalid name {domain}. Should be [full.domain.name]"
+                translate("Invalid name") +
+                f" {domain}. " +
+                translate("Should be [full.domain.name].")
             )
         self.auth(self.username, self.password)
 

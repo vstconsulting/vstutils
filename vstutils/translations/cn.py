@@ -49,6 +49,10 @@ TRANSLATION = {
     'Is staff': '减速装置',
 
     # field's validation
+    "value is not a valid list": "值不是有效列表",
+    "value is not a valid JSON": "值不是有效的 JSON",
+    "key {missing_key} is missing": "缺少密钥 {missing_key}",
+    "invalid key {invalid_key}": "无效密钥 {invalid_key}",
     # empty
     'Field "<b>{0}</b>" is empty.': '范围"<b>{0}</b>" 是空的',
     # required
@@ -180,6 +184,8 @@ TRANSLATION = {
     'Password is not correct.': '密码不正确',
     'New passwords values are not equal.': '新密码值不相同',
     'This password is entirely numeric.': '该密码应使用完全数字',
+    'Passwords do not match.': '密码不匹配。',
+    "The two password fields didn't match.": '两个密码字段不匹配。',
     'Dark theme': '黑色主题',
     'Language': '语言',
     'height': '高度',
@@ -187,13 +193,20 @@ TRANSLATION = {
     'More info': '更多信息',
     'Dark mode': '黑暗主题',
     'Execute': '施行',
+    'Domain should be setuped or username should be with @domain.name': "应设置域或用户名应为@domain.name",
+    'Invalid name': '无效名称',
+    'Should be [full.domain.name]': '应该是 [full.domain.name].',
+    'Invalid registration email send.': '无效的注册电子邮件发送。',
+    'To continue, need to accept the terms agreement.': '要继续，需要接受条款协议。',
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': '不支持的图像格式，支持（{0}），已收到{1}',
     'For some reason, this image file cannot be opened': '无法打开图像文件',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': "{0}图片不正确。 预期从{1}到{2}，收到{3}",
     'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
-    'This field must contain only digits': '此字段必须仅包含数字',
+    'This field must contain only digits but input: ': '此字段必须仅包含数字但输入：',
+    'Unsupported image file format': '不支持的图像文件格式',
+    'is not in listed supported types': '不在列出的受支持类型中',
     'Invalid image size orientations': '图片尺寸不正确',
     'Current image size': '当前图像大小',
 

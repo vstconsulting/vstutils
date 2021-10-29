@@ -14,7 +14,7 @@ from vstutils.api import fields, base, permissions, responses, decorators as dec
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer, BaseSerializer
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
-from vstutils.utils import raise_context_decorator_with_default
+from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate
 
 User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
 
@@ -108,7 +108,7 @@ class CreateUserSerializer(OneUserSerializer):
         validated_data = super().run_validation(data)
         if validated_data['password'] != validated_data.pop('password2', None):
             raise exceptions.ValidationError({
-                "password": ['Passwords do not match.'],
+                "password": [translate('Passwords do not match.')],
             })
         return validated_data
 
@@ -122,7 +122,9 @@ class ChangePasswordSerializer(DataSerializer):
         if not instance.check_password(validated_data['old_password']):
             raise exceptions.AuthenticationFailed()
         if validated_data['password'] != validated_data['password2']:
-            raise exceptions.ValidationError("New passwords values are not equal.")
+            raise exceptions.ValidationError(
+                translate("New passwords values are not equal.")
+            )
         validate_password(validated_data['password'])
         instance.set_password(validated_data['password'])
         instance.save()
@@ -143,8 +145,8 @@ class TwoFASerializer(VSTSerializer):
     recovery = serializers.CharField(write_only=True, required=False)
 
     default_error_messages = {
-        'invalid_pin': 'Invalid authentication code',
-        'no_secret_provided': 'Secret string must be provided',
+        'invalid_pin': lazy_translate('Invalid authentication code'),  # type: ignore
+        'no_secret_provided': lazy_translate('Secret string must be provided'),  # type: ignore
     }
 
     class Meta:

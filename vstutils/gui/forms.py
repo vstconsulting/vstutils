@@ -8,8 +8,7 @@ from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth.hashers import make_password, check_password
 
-from ..utils import SecurePickling, send_template_email
-
+from ..utils import SecurePickling, send_template_email, translate, lazy_translate
 
 UserModel = get_user_model()
 secure_pickle = SecurePickling()
@@ -21,7 +20,7 @@ check_data = override_setting_decorator(check_password)
 
 class RegistrationForm(UserCreationForm):
     error_messages = {
-        'password_mismatch': "The two password fields didn't match.",
+        'password_mismatch': lazy_translate("The two password fields didn't match."),
     }
 
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
@@ -73,7 +72,9 @@ class RegistrationForm(UserCreationForm):
             return super().save(commit=False)
 
         if not check_data(self.cleaned_data['email'], cache_key):
-            raise SuspiciousOperation('Invalid registration email send.')
+            raise SuspiciousOperation(
+                translate('Invalid registration email send.')
+            )
 
         return super().save(commit)
 
@@ -96,7 +97,10 @@ class RegistrationForm(UserCreationForm):
         if settings.ENABLE_AGREEMENT_TERMS:
             agreement = self.cleaned_data.get('agreement', None)
             if not agreement:
-                self.add_error('agreement', 'To continue, need to accept the terms agreement.')
+                self.add_error(
+                    'agreement',
+                    translate('To continue, need to accept the terms agreement.')
+                )
 
 
 class TwoFaForm(forms.Form):

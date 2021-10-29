@@ -120,9 +120,9 @@ class FloatType(cconfig.BaseType):
 
 
 class LocationsType(cconfig.ListType):
-    def convert(self, value: _t.Any) -> _t.Union[_t.List, _t.Text]:
-        result = super().convert(value)
-        if any(filter(lambda x: x.startswith('redis'), result)):
+    def convert(self, value: _t.Any) -> _t.Union[_t.Iterable, _t.Text]:  # type: ignore
+        result: _t.Iterable[_t.Text] = super().convert(value)
+        if any(filter(lambda x: x.startswith('redis'), result)):  # type: ignore
             return result
         return value
 
@@ -247,7 +247,7 @@ class CacheOptionsSection(BackendSection):
 
 
 class SentinelsSection(cconfig.Section):
-    def all(self) -> _t.List[_t.Tuple[_t.Text, _t.SupportsInt]]:
+    def all(self) -> _t.List[_t.Tuple[_t.Text, _t.SupportsInt]]:  # type: ignore
         return list((k, int(v)) for k, v in super().all().items())
 
 

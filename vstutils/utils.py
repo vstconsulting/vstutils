@@ -28,6 +28,7 @@ from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
 from django.utils import translation, functional
+from django.utils.translation import get_language
 from django.utils.module_loading import import_string as import_class
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
@@ -210,6 +211,35 @@ def patch_gzip_response_decorator(func):
         return response
 
     return gzip_response_wrapper
+
+
+def translate(text: tp.Text) -> tp.Text:
+    """
+    The ``translate`` function supports translation message dynamically
+    with standard i18n vstutils'es mechanisms usage.
+
+    Uses :func:`django.utils.translation.get_language` to get the language code and
+    tries to get the translation from the list of available ones.
+
+    :param text: Text message which should be translated.
+    """
+    from vstutils.api.models import Language
+    try:
+        return Language.objects.get(code=get_language()).translate(text)
+    except Exception:  # nocv
+        return text
+
+
+def lazy_translate(text: tp.Text) -> functional.Promise:
+    """
+    The ``lazy_translate`` function has the same behavior as :func:`.translate`, but wraps it in a lazy promise.
+
+    This is very useful, for example, for translating error messages in
+    class attributes before the language code is known.
+
+    :param text: Text message which should be translated.
+    """
+    return functional.lazy(translate, str)(text)
 
 
 class apply_decorators:

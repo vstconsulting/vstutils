@@ -22,7 +22,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
 
 from ..models import fields as vst_model_fields
-from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default
+from ..utils import raise_context, get_if_lazy, raise_context_decorator_with_default, translate, lazy_translate
 
 DependenceType = _t.Optional[_t.Dict[_t.Text, _t.Text]]
 DEFAULT_NAMED_FILE_DATA = {"name": None, "content": None, 'mediaType': None}
@@ -608,9 +608,9 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
-        'not a JSON': 'value is not a valid JSON',
-        'missing key': 'key {missing_key} is missing',
-        'invalid key': 'invalid key {invalid_key}',
+        'not a JSON': lazy_translate('value is not a valid JSON'),  # type: ignore
+        'missing key': lazy_translate('key {missing_key} is missing'),  # type: ignore
+        'invalid key': lazy_translate('invalid key {invalid_key}'),  # type: ignore
     }
     file_field = FieldFile
 
@@ -704,7 +704,7 @@ class MultipleNamedBinaryFileInJsonField(NamedBinaryFileInJsonField):
 
     __slots__ = ()
     default_error_messages = {
-        'not a list': 'value is not a valid list',
+        'not a list': lazy_translate('value is not a valid list'),
     }
     file_field = vst_model_fields.MultipleFieldFile
 
@@ -989,7 +989,9 @@ class RatingField(FloatField):
 
 def is_all_digits_validator(value):
     if not value.isdigit():
-        raise ValidationError('This field must contain only digits')
+        raise ValidationError(
+            translate('This field must contain only digits but input: ') + f'{value}.'
+        )
 
 
 class PhoneField(CharField):

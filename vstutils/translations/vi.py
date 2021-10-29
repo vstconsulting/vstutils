@@ -49,6 +49,10 @@ TRANSLATION = {
     'Is staff': 'Người điều hành',
 
     # field's validation
+    "value is not a valid list": "giá trị không phải là một danh sách hợp lệ",
+    "value is not a valid JSON": "giá trị không phải là JSON hợp lệ",
+    "key {missing_key} is missing": "khóa {missing_key} bị thiếu",
+    "invalid key {invalid_key}": "khóa không hợp lệ {invalid_key}",
     # empty
     'Field "<b>{0}</b>" is empty.': 'Trường "<b> {0} </b>" trống không',
     # required
@@ -180,6 +184,8 @@ TRANSLATION = {
     'Password is not correct.': 'Sai mật khẩu',
     'New passwords values are not equal.': 'Mật khẩu mới không chính xác',
     'This password is entirely numeric.': 'Mật khẩu này chỉ có chữ số.',
+    'Passwords do not match.': 'Mật khẩu không phù hợp.',
+    "The two password fields didn't match.": 'Hai trường mật khẩu không khớp với nhau.',
     'Dark theme': 'Màn hình tối',
     'Language': 'Ngôn ngữ',
     'height': 'chiều cao',
@@ -187,13 +193,20 @@ TRANSLATION = {
     'More info': 'thêm thông tin',
     'Dark mode': 'Chủ đề tối',
     'Execute': 'Hành hình',
+    'Domain should be setuped or username should be with @domain.name': "Tên miền phải được thiết lập hoặc tên người dùng phải bằng @ domain.name",
+    'Invalid name': 'Tên không hợp lệ',
+    'Should be [full.domain.name]': 'Phải là [full.domain.name].',
+    'Invalid registration email send.': 'Email đăng ký không hợp lệ gửi.',
+    'To continue, need to accept the terms agreement.': 'Để tiếp tục, cần chấp nhận thỏa thuận điều khoản.',
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Định dạng hình ảnh không được hỗ trợ, Được hỗ trợ ({0}), đã nhận {1}',
     'For some reason, this image file cannot be opened': 'Không thể mở file hình ảnh',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Hình ảnh {0} không chính xác. Dự kiến ​​từ {1} đến {2}, đã nhận {3}',
     'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
-    'This field must contain only digits': 'Trường này phải chứa chỉ chữ số',
+    'This field must contain only digits but input: ': 'Trường này chỉ được chứa các chữ số nhưng nhập: ',
+    'Unsupported image file format': 'Định dạng tệp hình ảnh không được hỗ trợ',
+    'is not in listed supported types': 'không có trong các loại được hỗ trợ được liệt kê',
     'Invalid image size orientations': 'Kích thước hình ảnh không đúng',
     'Current image size': 'Kích thước hình ảnh hiện tại',
 

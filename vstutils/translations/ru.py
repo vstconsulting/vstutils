@@ -49,6 +49,10 @@ TRANSLATION = {
     'Is staff': 'Модератор',
 
     # field's validation
+    "value is not a valid list": "значение не является допустимым списком",
+    "value is not a valid JSON": "значение не является допустимым JSON",
+    "key {missing_key} is missing": "ключ {missing_key} отсутствует",
+    "invalid key {invalid_key}": "неверный ключ {invalid_key}",
     # empty
     'Field "<b>{0}</b>" is empty.': 'Поле "<b>{0}</b>" пустое.',
     # required
@@ -180,6 +184,8 @@ TRANSLATION = {
     'Password is not correct.': 'Неверный пароль.',
     'New passwords values are not equal.': 'Значения нового пароля не эквивалентны.',
     'This password is entirely numeric.': 'Этот пароль полностью числовой.',
+    'Passwords do not match.': 'Пароли не совпадают.',
+    "The two password fields didn't match.": 'Два поля пароля не совпадают.',
     'Dark theme': 'Темная тема',
     'Language': 'Язык',
     'height': 'высота',
@@ -187,13 +193,20 @@ TRANSLATION = {
     'More info': 'Подробнее',
     'Dark mode': 'Темная тема',
     'Execute': 'Выполнить',
+    'Domain should be setuped or username should be with @domain.name': "Домен должен быть настроен или логин должен содержать в конце @имя.домена",
+    'Invalid name': 'Неправильное имя',
+    'Should be [full.domain.name]': 'Должно быть в формате [полное.доменное.имя].',
+    'Invalid registration email send.': 'Отправлена неверная регистрационная почта.',
+    'To continue, need to accept the terms agreement.': 'Чтобы продолжить, необходимо принять условия соглашения.',
 
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',
     'For some reason, this image file cannot be opened': 'Не удалось открыть файл изображения',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
     'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
-    'This field must contain only digits': 'Это поле должно содержать только цифры',
+    'This field must contain only digits but input: ': 'Это поле должно содержать только цифры, но введено: ',
+    'Unsupported image file format': 'Не поддерживаемый: формат файла',
+    'is not in listed supported types': 'не представлен в списке поддерживаемых типов',
     'Invalid image size orientations': 'Неправильные размеры изображения',
     'Current image size': 'Текущий размер изображения',
 

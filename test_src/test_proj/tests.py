@@ -2068,16 +2068,20 @@ class ValidatorsTestCase(BaseTestCase):
         img_validator = ImageValidator(extensions=['jpg', ])
 
         # check wrong image extension
-        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format, expected '
-                                                       '(image/jpeg), got image/x-ms-bmp\', code=\'invalid\')]'):
+        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'Unsupported image file format '
+                                                       '"cat.bmp" (image/x-ms-bmp) '
+                                                       'is not in listed supported types (image/jpeg).\', '
+                                                       'code=\'invalid\')]'):
             img_validator({
                 'name': 'cat.bmp',
                 'content': 'cdef',
             })
 
         # check file with no extension
-        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'unsupported image file format,'
-                                                       ' expected (image/jpeg), got \', code=\'invalid\')]'):
+        with self.assertRaisesMessage(ValidationError, '[ErrorDetail(string=\'Unsupported image file format '
+                                                       '"qwerty123" () '
+                                                       'is not in listed supported types (image/jpeg).\', '
+                                                       'code=\'invalid\')]'):
             img_validator({
                 'name': 'qwerty123',
                 'content': 'abcd',

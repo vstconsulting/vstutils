@@ -6,7 +6,7 @@ from io import BytesIO
 from mimetypes import guess_type
 
 from rest_framework import serializers
-from vstutils.utils import raise_context
+from vstutils.utils import raise_context, translate
 
 try:
     from PIL import Image, UnidentifiedImageError
@@ -35,7 +35,7 @@ class RegularExpressionValidator:
             raise serializers.ValidationError(self._error_msg())
 
     def _error_msg(self):
-        return f'This field must match pattern {self._regexp.pattern}'
+        return translate('This field must match pattern ') + f'{self._regexp.pattern}'
 
 
 class UrlQueryStringValidator(RegularExpressionValidator):
@@ -83,9 +83,12 @@ class ImageValidator:
             return
         file_media_type = guess_type(value['name'])[0]
         if value and self.extensions and file_media_type not in self.extensions:
-            raise serializers.ValidationError(f'unsupported image file format,'
-                                              f' expected ({",".join(self.extensions)}),'
-                                              f' got {file_media_type or ""}')
+            raise serializers.ValidationError(
+                translate('Unsupported image file format') +
+                f' "{value["name"]}" ({file_media_type or ""}) ' +
+                translate('is not in listed supported types') +
+                f' ({",".join(self.extensions)}).'
+            )
         self.media_type = file_media_type.split(sep='/')[1].upper()
 
     @property
