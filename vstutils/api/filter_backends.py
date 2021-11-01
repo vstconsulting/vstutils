@@ -12,10 +12,16 @@ from .filters import extra_filter
 
 class DjangoFilterBackend(BaseDjangoFilterBackend):
     def get_coreschema_field(self, field):
+        kwargs = {
+            'description': str(field.extra.get('help_text', '')),
+        }
         if isinstance(field, filters.NumberFilter):
             field_cls = compat.coreschema.Number
         elif isinstance(field, filters.BooleanFilter):
             field_cls = compat.coreschema.Boolean
+        elif isinstance(field, filters.ChoiceFilter):
+            field_cls = compat.coreschema.Enum
+            kwargs['enum'] = tuple(dict(field.field.choices).keys())
         else:
             field_cls = compat.coreschema.String
         if field.method == extra_filter:  # pylint: disable=comparison-with-callable
@@ -23,12 +29,10 @@ class DjangoFilterBackend(BaseDjangoFilterBackend):
                 items=field_cls(),
                 min_items=1,
                 unique_items=True,
-                description=str(field.extra.get('help_text', ''))
+                **kwargs
             )
         else:
-            result = field_cls(
-                description=str(field.extra.get('help_text', ''))
-            )
+            result = field_cls(**kwargs)
         return result
 
 

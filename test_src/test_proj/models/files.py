@@ -1,6 +1,7 @@
 import datetime
 import os
 from django.db import models
+from django_filters import ChoiceFilter
 from rest_framework import permissions
 from vstutils.custom_model import ListModel, FileModel
 from vstutils.api import fields, base
@@ -71,6 +72,10 @@ class ListOfFiles(ListModel):
         _list_fields = _detail_fields = ('id', 'filename',)
         _permission_classes = [permissions.AllowAny]
         _override_permission_classes = True
+        _filterset_fields = {
+            'id': None,
+            'test': ChoiceFilter(choices=tuple((i, i) for i in range(3))),
+        }
 
     @property
     def filename(self):

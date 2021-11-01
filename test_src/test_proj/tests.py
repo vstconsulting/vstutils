@@ -1453,6 +1453,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
             api['paths']['/listoffiles/{id}/']['get']['responses']['200']['schema'],
             {'type': 'file'}
         )
+        self.assertEqual(
+            api['paths']['/listoffiles/']['get']['parameters'][1]['enum'],
+            [""]+list(range(3))
+        )
 
         # Check deep nested view
         def has_deep_parent_filter(params):
