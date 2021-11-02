@@ -80,7 +80,7 @@ export class ModelsResolver {
 
         const fields = Object.entries(properties).map(([fieldName, fieldSchema]) => {
             const field = this.fieldsResolver.resolveField(fieldSchema, fieldName);
-            if (requiredProperties.includes(modelName)) {
+            if (requiredProperties.includes(fieldName)) {
                 field.required = true;
             }
             return field;

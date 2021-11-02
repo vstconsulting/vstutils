@@ -65,7 +65,7 @@ class ImageValidator:
             assert isinstance(extensions, (tuple, list)), "extensions must be list or tuple"
         else:
             extensions = self.default_extensions
-        self.extensions = tuple(
+        self.extensions = tuple(sorted(  # type: ignore
             filter(
                 bool,
                 {
@@ -73,7 +73,7 @@ class ImageValidator:
                     for e in extensions
                 }
             )
-        )
+        ))
         for key, value in kwargs.items():
             setattr(self, key, value)
 

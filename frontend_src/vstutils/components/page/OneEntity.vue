@@ -9,18 +9,22 @@
         @execute-action="executeAction($event, instance)"
         @open-sublink="openSublink($event, instance)"
     >
-        <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
-        <ModelFields
-            :data="data"
-            :model="model"
-            :editable="!readOnly"
-            :fields-groups="fieldsGroups"
-            :fields-errors="fieldsErrors"
-            :hide-read-only="hideReadOnly"
-            :hide-not-required="hideNotRequired"
-            @set-value="setFieldValue"
-        />
-        <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" :page="self" />
+        <div class="row">
+            <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
+            <div :class="modelsFieldsWrapperClasses">
+                <ModelFields
+                    :data="data"
+                    :model="model"
+                    :editable="!readOnly"
+                    :fields-groups="fieldsGroups"
+                    :fields-errors="fieldsErrors"
+                    :hide-read-only="hideReadOnly"
+                    :hide-not-required="hideNotRequired"
+                    @set-value="setFieldValue"
+                />
+            </div>
+            <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" :page="self" />
+        </div>
     </EntityView>
 </template>
 
@@ -55,6 +59,9 @@
             },
             afterFieldsGroupsComponent() {
                 return null;
+            },
+            modelsFieldsWrapperClasses() {
+                return 'col-12';
             },
             showBackButton() {
                 return true;

@@ -29,6 +29,7 @@ export const NestedObjectFieldMixin = {
 export class NestedObjectField extends BaseField {
     constructor(options) {
         super(options);
+        this.readOnly = true;
         this.nestedModel = null;
         registerHook('app.beforeInit', this.resolveNestedModel.bind(this));
     }

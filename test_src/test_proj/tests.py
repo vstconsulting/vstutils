@@ -1499,6 +1499,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
             'depend_field': None,
             'concat_field_name': False,
         })
+        self.assertDictEqual(api['definitions']['FieldsTesting']['properties']['hosts_id'][X_OPTIONS]['redirect'], {
+            'operation_name': 'hosts',
+            'depend_field': None,
+            'concat_field_name': False,
+        })
 
         # Check translate model
         self.assertEqual(api['definitions']['Author']['x-translate-model'], 'Author')
@@ -3711,6 +3716,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<2[data][id]>>'},
             # [8] Check that DeepViewFilterBackend has no effect on detail view
             {'method': 'get', 'path': ['deep_nested_model', '<<0[data][id]>>'], 'query': '__deep_parent='},
+            {'method': 'post', 'path': ['deep_nested_model', '<<0[data][id]>>', 'test_action'], 'data': {}},
         ])
         self.assertEqual(results[3]['data']['count'], 3)
         self.assertEqual(results[4]['data']['results'], [results[0]['data']])
@@ -3718,6 +3724,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[6]['data']['results'], [results[2]['data']])
         self.assertEqual(results[7]['data']['results'], [])
         self.assertEqual(results[8]['data'], results[0]['data'])
+        self.assertEqual(results[9]['status'], 200)
 
 
 class CustomModelTestCase(BaseTestCase):

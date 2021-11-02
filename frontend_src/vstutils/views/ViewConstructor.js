@@ -185,7 +185,11 @@ export default class ViewConstructor {
                 if (operationOptions['x-label']) operationOptions.title = operationOptions['x-label'];
 
                 if (operationOptions.type === ViewTypes.LIST) {
-                    operationOptions.filters = this._generateFilters(path, operationOptions.parameters);
+                    operationOptions.filters = this._generateFilters(
+                        path,
+                        operationOptions.parameters,
+                        responseModel,
+                    );
                     const qs = new QuerySet(
                         path,
                         { [RequestTypes.LIST]: [null, responseModel] },
@@ -444,7 +448,7 @@ export default class ViewConstructor {
      * Method, that generates new guiField objects for View filters.
      * @return {Object<string, BaseField>}
      */
-    _generateFilters(path, parameters) {
+    _generateFilters(path, parameters, listModel) {
         const filters = {};
 
         const parametersCopy = Object.values($.extend(true, {}, parameters)).filter(
@@ -459,6 +463,7 @@ export default class ViewConstructor {
                 parameterObject.hidden = true;
             }
             filters[name] = this.fieldsResolver.resolveField(parameterObject);
+            filters[name].model = listModel;
         }
 
         return filters;
