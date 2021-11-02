@@ -71,6 +71,8 @@ class BaseField {
             name: `${this.constructor.name || capitalize(this.name)}FieldComponent`,
             mixins: this.constructor.mixins,
         };
+
+        this.translateFieldName = this.props.translateFieldName || this.name;
     }
 
     _getValueFromData(data) {

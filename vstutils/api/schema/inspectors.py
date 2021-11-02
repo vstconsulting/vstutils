@@ -119,7 +119,7 @@ def field_have_redirect(field, **kwargs):
     if operation_name is None:
         operation_name = field.field_name
         splitted_operation_name = operation_name.split('_')
-        if len(splitted_operation_name) > 1:
+        if len(tuple(filter(bool, splitted_operation_name))) > 1:
             operation_name = '_'.join(splitted_operation_name[:-1])
     kwargs[X_OPTIONS]['redirect'] = {
         'operation_name': operation_name,
