@@ -3013,6 +3013,35 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[-1]['status'], 200, results[-1]['data'])
         self.assertEqual(results[-1]['data']['count'], author_1_post_count)
 
+    def test_pagination_identifiers(self):
+        author_1 = Author.objects.create(name='author_1', registerDate='2021-01-20T00:26:38Z')
+        author_2 = Author.objects.create(name='author_2', registerDate='2021-01-20T00:26:38Z')
+        author_3 = Author.objects.create(name='author_3', registerDate='2021-01-20T00:26:38Z')
+        for author in (author_1, author_3):
+            for i in range(3):
+                author.post.create(title=f'post_{i}')
+
+        expected_authors_identifiers = f"{author_1.id},{author_3.id}"
+        results = self.bulk([
+            {"method": "get", "path": ['author']},
+            {"method": "get", "path": ['post'], "query": "__authors=<<0[headers][Pagination-Identifiers]>>"},
+            {"method": "get", "path": ['author'], "headers": {"HTTP_IDENTIFIERS_LIST-NAME": "id"}, "query": f"id={expected_authors_identifiers}"},
+            {"method": "get", "path": ['post'], "query": "__authors=<<2[headers][Pagination-Identifiers]>>"},
+            {"method": "get", "path": ['author'], "headers": {"HTTP_IDENTIFIERS_LIST-NAME": "id"}, "query": f"id={author_2.id}"},
+            {"method": "get", "path": ['post'], "query": "__authors=<<4[headers][Pagination-Identifiers]>>"},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertTrue('Pagination-Identifiers' not in results[0]['headers'])
+        self.assertEqual(results[1]['status'], 500)
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['headers']['Pagination-Identifiers'], expected_authors_identifiers)
+        self.assertEqual(results[3]['status'], 200, results[3])
+        self.assertEqual(results[3]['data']['count'], 6)
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data']['count'], 1)
+        self.assertEqual(results[5]['status'], 200, results[5])
+        self.assertEqual(results[5]['data']['count'], 0)
+
     def test_model_rating_field(self):
         date = '2021-01-20T00:26:38Z'
         author = Author.objects.create(name='author_1', registerDate=date)

@@ -47,7 +47,8 @@ default_authentication_classes = (
 append_to_list = list.append
 response_headers_to_pass = (
     "ETag",
-    "Location"
+    "Location",
+    "Pagination-Identifiers",
 )
 
 

@@ -89,6 +89,7 @@ class Post(BModel):
             'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10)
         }
         _filterset_fields = {
+            '__authors': filters.CharFilter(method=filters.extra_filter, field_name='author'),
             'author': None,
             'author__not': filters.CharFilter(method=filters.FkFilterHandler()),
             'title': None,

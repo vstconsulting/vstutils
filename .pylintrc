@@ -23,7 +23,7 @@ ignore=CVS,migrations,unittests,tests,settings.py,settings_production.py
 load-plugins=pylint_django
 
 # Use multiple processes to speed up Pylint.
-jobs=2
+jobs=4
 
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
@@ -102,7 +102,7 @@ msg-template='{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}'
 good-names=si,so,se,i,j,k,ex,Run,_,e,z,id,qs,kw,pk,CASE_SQL,NS_SERVERS,tmp_file,fd,logger
 
 # Bad variable names which should always be refused, separated by a comma
-bad-names=foo,bar,baz,toto,tutu,tata
+bad-names=foo,bar,baz,toto,tutu,tata,kek,lol
 
 # Colon-delimited sets of names that determine each other's naming style when
 # the name regexes allow several styles.

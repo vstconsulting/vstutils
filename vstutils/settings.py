@@ -992,7 +992,7 @@ REST_FRAMEWORK: _t.Dict = {
         'rest_framework.filters.SearchFilter',
     ],
     'SEARCH_PARAM': '__search',
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'vstutils.api.pagination.LimitOffsetPagination',
     'PAGE_SIZE': web["rest_page_limit"],
     'DEFAULT_SCHEMA_CLASS': 'vstutils.api.base.AutoSchema',
     'DEFAULT_METADATA_CLASS': 'vstutils.api.meta.VSTMetadata',
