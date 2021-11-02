@@ -39,7 +39,10 @@ export class StaticValueField extends BaseField {
         if (this.props.realField instanceof BaseField) {
             this.realField = this.props.realField;
         } else {
-            this.realField = this.constructor.app.fieldsResolver.resolveField(this.props.realField);
+            this.realField = this.constructor.app.fieldsResolver.resolveField(
+                this.props.realField,
+                this.name,
+            );
         }
     }
 

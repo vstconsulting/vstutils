@@ -876,12 +876,6 @@ table {
 }
 
 @media (max-width: 767px) {
-    .app-logo {
-        display: none !important;
-    }
-}
-
-@media (max-width: 767px) {
     .sidebar-menu ul.menu-treeview-menu {
         /*position: relative;
         display: block;*/

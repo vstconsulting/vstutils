@@ -1,5 +1,8 @@
 <template>
-    <select :class="classes" :style="styles" :value="value" />
+    <div class="input-group" style="flex-wrap: nowrap">
+        <select ref="select" class="form-control" />
+        <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+    </div>
 </template>
 
 <script>
@@ -35,14 +38,14 @@
             this.currentQuerysetOffset = 0;
         },
         destroyed() {
-            $(this.$el).off().select2('destroy');
+            $(this.$refs.select).off().select2('destroy');
         },
         methods: {
             /**
              * Method, that mounts select2 to current field's select.
              */
             initSelect2() {
-                $(this.$el)
+                $(this.$refs.select)
                     .select2({
                         theme: window.SELECT2_THEME,
                         width: '100%',
@@ -56,7 +59,7 @@
                         placeholder: { id: undefined, text: '' },
                     })
                     .on('change', () => {
-                        const selected = $(this.$el).select2('data')[0] || {};
+                        const selected = $(this.$refs.select).select2('data')[0] || {};
                         const newValue =
                             selected.instance || this.instancesCache.get(String(selected.id)) || null;
 
@@ -72,10 +75,10 @@
 
             setValue(value) {
                 if (!value) {
-                    return $(this.$el).val(null).trigger('change');
+                    return $(this.$refs.select).val(null).trigger('change');
                 }
 
-                const selected = $(this.$el).select2('data')[0] || {};
+                const selected = $(this.$refs.select).select2('data')[0] || {};
                 const currentValue =
                     selected.instance || this.instancesCache.get(String(selected.id)) || null;
 
@@ -91,7 +94,7 @@
                     true,
                 );
 
-                $(this.$el).empty().append(newOption).trigger('change');
+                $(this.$refs.select).empty().append(newOption).trigger('change');
             },
 
             transport(params, success, failure) {
@@ -189,3 +192,9 @@
         },
     };
 </script>
+
+<style scoped>
+    .input-group::v-deep .select2-selection {
+        width: 100%;
+    }
+</style>

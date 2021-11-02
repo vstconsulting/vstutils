@@ -1,8 +1,10 @@
 from django_filters import CharFilter
 from django.db import models
 
-from vstutils.api.fields import RelatedListField, NamedBinaryImageInJsonField
-from vstutils.models import BModel
+from vstutils.api.fields import RelatedListField, RedirectIntegerField
+from vstutils.api.responses import HTTP_400_BAD_REQUEST, HTTP_200_OK
+from vstutils.api.serializers import BaseSerializer
+from vstutils.models import BModel, register_view_action
 from vstutils.api import fields, filter_backends
 from vstutils.models.fields import (
     NamedBinaryFileInJSONField,
@@ -26,6 +28,10 @@ def bin_file_handler(self, instance, fields_mapping, model, field_name):
 class EmptyFilterBackend(filter_backends.VSTFilterBackend):
     def filter_queryset(self, request, queryset, view):
         return queryset
+
+
+class FieldsTestingSerializer(BaseSerializer):
+    hosts_id = RedirectIntegerField(read_only=True)
 
 
 class ModelWithFK(BModel):
@@ -169,6 +175,12 @@ class DeepNestedModel(BModel):
         default_related_name = 'deepnested'
         _detail_fields = _list_fields = ('id', 'name', 'parent')
         _filter_backends = (EmptyFilterBackend,)
+
+    @register_view_action(detail=True, serializer_class=FieldsTestingSerializer)
+    def test_action(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return HTTP_200_OK(request.data)
 
 
 class ReadonlyDeepNestedModel(BModel):

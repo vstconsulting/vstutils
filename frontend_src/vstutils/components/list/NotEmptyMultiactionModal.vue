@@ -1,52 +1,26 @@
 <template>
-    <BootstrapModal ref="modal">
+    <BootstrapModal ref="modal" :title="title">
         <template #activator="{ openModal }">
             <button class="dropdown-item" type="button" @click="openModal" v-text="$st(action.title)" />
         </template>
-        <template #content="{ closeModal }">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    {{ title }}
-                </h5>
-                <button type="button" class="close" aria-label="Close" @click="closeModal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <div class="row">
-                        <div
-                            v-for="(fields, groupName) in fieldsGroups"
-                            :key="groupName"
-                            :class="fieldsGroupClasses(groupName)"
-                        >
-                            <div class="card">
-                                <h5 v-if="groupName" class="card-header">
-                                    {{ $t(groupName) }}
-                                </h5>
-                                <div class="card-body">
-                                    <component
-                                        :is="field.component"
-                                        v-for="field in fields"
-                                        :key="field.name"
-                                        :field="field"
-                                        :data="data"
-                                        :type="fieldsType"
-                                        :hideable="hideNotRequired && !field.required"
-                                        @hide-field="hiddenFields.push(field)"
-                                        @set-value="setFieldValue"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @click="execute">
-                    {{ $t('Execute') }}
-                </button>
-            </div>
+
+        <div class="container">
+            <ModelFields
+                :data="data"
+                :model="model"
+                :editable="true"
+                :fields-groups="fieldsGroups"
+                :fields-errors="fieldsErrors"
+                :hide-read-only="hideReadOnly"
+                :hide-not-required="hideNotRequired"
+                @set-value="setFieldValue"
+            />
+        </div>
+
+        <template #footer>
+            <button type="button" class="btn btn-primary" @click="execute">
+                {{ $t('Execute') }}
+            </button>
         </template>
     </BootstrapModal>
 </template>

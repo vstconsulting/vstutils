@@ -115,8 +115,14 @@ def field_have_redirect(field, **kwargs):
 
     if kwargs.get(X_OPTIONS, None) is None:
         kwargs[X_OPTIONS] = {}
+    operation_name = getattr(field, 'operation_name', None)
+    if operation_name is None:
+        operation_name = field.field_name
+        splitted_operation_name = operation_name.split('_')
+        if len(splitted_operation_name) > 1:
+            operation_name = '_'.join(splitted_operation_name[:-1])
     kwargs[X_OPTIONS]['redirect'] = {
-        'operation_name': getattr(field, 'operation_name', None) or field.field_name,
+        'operation_name': operation_name,
         'depend_field': getattr(field, 'depend_field', None),
         'concat_field_name': getattr(field, 'concat_field_name', False),
     }
