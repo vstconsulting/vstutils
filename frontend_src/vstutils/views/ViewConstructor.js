@@ -457,13 +457,25 @@ export default class ViewConstructor {
 
         signals.emit(`views[${path}].filters.beforeInit`, parametersCopy);
 
+        const fieldsNames = parametersCopy.map((filter) => filter.name);
+
         for (const parameterObject of parametersCopy) {
             const name = parameterObject.name;
             if (name.startsWith('__')) {
                 parameterObject.hidden = true;
             }
-            filters[name] = this.fieldsResolver.resolveField(parameterObject);
-            filters[name].model = listModel;
+            const field = this.fieldsResolver.resolveField(parameterObject);
+
+            field.model = listModel;
+
+            if (name.endsWith('__not')) {
+                const withoutNot = name.slice(0, -5);
+                if (fieldsNames.includes(withoutNot)) {
+                    field.translateFieldName = withoutNot;
+                }
+            }
+
+            filters[name] = field;
         }
 
         return filters;
