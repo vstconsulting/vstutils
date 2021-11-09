@@ -128,12 +128,13 @@ export const BaseViewMixin = {
         /**
          * Method, that tries to get redirect URL from response data.
          * @param {object} responseData response.data object.
+         * @param {Function} [modelClass]
          * @private
          */
-        _getRedirectUrlFromResponse(responseData) {
+        _getRedirectUrlFromResponse(responseData, modelClass = this.view.params.responseModel) {
             if (!responseData || typeof responseData !== 'object') return;
 
-            const field = iterFind(this.view.params.responseModel.fields.values(), (field) => field.redirect);
+            const field = iterFind(modelClass.fields.values(), (field) => field.redirect);
             if (!field) return;
 
             const redirect = field.redirect;
@@ -150,12 +151,7 @@ export const BaseViewMixin = {
             operationId += '_get';
 
             const matcher = (view) => view.operationId === operationId && view;
-
-            const node = this.$app.viewsTree.root.get(pathToArray(this.view.path));
-            const view =
-                this.$app.viewsTree.findInNeighbourPaths(node, matcher) ||
-                this.$app.viewsTree.findInParentsDeep(node, matcher) ||
-                this.$app.viewsTree.findInAllPaths(matcher);
+            const view = this.$app.viewsTree.findInAllPaths(matcher);
 
             if (!view) {
                 console.warn(`Can't find redirect view for operationId: ${operationId}`, field, responseData);

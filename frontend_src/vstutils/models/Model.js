@@ -161,7 +161,7 @@ export class Model {
     /** @type {Array<BaseField>} */
     static declaredFields = [];
     /** @type {Object<string, string[]>} */
-    static fieldsGroups = {};
+    static fieldsGroups = null;
     /** @type {string|null} */
     static viewFieldName = null;
     /** @type {Array<string>|null} */

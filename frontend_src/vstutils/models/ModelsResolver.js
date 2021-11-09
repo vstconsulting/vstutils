@@ -47,7 +47,7 @@ export class ModelsResolver {
     }
 
     /**
-     * Resolves model by schema object. Now $ref only is supported.
+     * Resolves model by schema object. Schema object or $ref is supported.
      * @param {Object} modelSchema
      * @param {string} [modelName]
      * @return {Function}
@@ -79,7 +79,7 @@ export class ModelsResolver {
         signals.emit('models[' + modelName + '].fields.beforeInit', properties);
 
         const fields = Object.entries(properties).map(([fieldName, fieldSchema]) => {
-            const field = this.fieldsResolver.resolveField(fieldSchema, fieldName);
+            const field = this.fieldsResolver.resolveField({ ...fieldSchema }, fieldName);
             if (requiredProperties.includes(fieldName)) {
                 field.required = true;
             }
@@ -89,7 +89,7 @@ export class ModelsResolver {
         const model = makeModel(
             class extends Model {
                 static declaredFields = fields;
-                static fieldsGroups = modelSchema['x-properties-groups'] || {};
+                static fieldsGroups = modelSchema['x-properties-groups'] || null;
                 static viewFieldName = modelSchema['x-view-field-name'] || null;
                 static nonBulkMethods = modelSchema['x-non-bulk-methods'] || null;
                 static translateModel = modelSchema['x-translate-model'] || null;

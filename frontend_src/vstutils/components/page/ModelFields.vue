@@ -53,10 +53,14 @@
             fieldsGroups: {
                 type: Array,
                 default() {
-                    return Object.entries(this.model.fieldsGroups).map(([groupName, fieldsNames]) => ({
-                        title: groupName,
-                        fields: fieldsNames,
-                    }));
+                    if (this.model.fieldsGroups) {
+                        return Object.entries(this.model.fieldsGroups).map(([groupName, fieldsNames]) => ({
+                            title: groupName,
+                            fields: fieldsNames,
+                        }));
+                    } else {
+                        return [{ title: '', fields: Array.from(this.model.fields.values()) }];
+                    }
                 },
             },
 
@@ -83,7 +87,8 @@
                     const fields = [];
                     for (const fieldName of group.fields) {
                         if (typeof fieldName === 'object') {
-                            return fieldName;
+                            fields.push(fieldName);
+                            continue;
                         }
                         const field = this.model.fields.get(fieldName);
                         if (field) {

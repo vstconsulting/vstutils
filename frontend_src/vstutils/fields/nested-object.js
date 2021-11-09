@@ -41,9 +41,10 @@ export class NestedObjectField extends BaseField {
     }
     toInner(data) {
         const value = super.toInner(data);
-        if (value) {
+        if (value?._getInnerData) {
             return value._getInnerData();
         }
+        return value;
     }
     static get mixins() {
         return [NestedObjectFieldMixin];
