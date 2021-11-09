@@ -683,8 +683,7 @@ def get_plugins():
             name = plugin_name
         else:
             data = {"BACKEND": plugin_name}
-            name = list(filter(bool, plugin_name.split('.')))[-1].lower().replace(
-                'backend', '')
+            name = list(filter(bool, plugin_name.split('.')))[-1].lower().replace('backend', '')
         plugins[name] = data
     return plugins
 
@@ -1076,7 +1075,6 @@ LOGGING: _t.Dict = {
         VST_PROJECT: default_logger_data,
         'vstutils': default_logger_data,
         'drf_yasg.generators': default_logger_data,
-        'daphne': default_logger_data,
     }
 }
 
