@@ -118,8 +118,12 @@ export const PAGE_STORE_MODULE = mergeDeep({}, PAGE_WITH_INSTANCE, {
         },
 
         async updateData({ commit, getters }, instanceId = undefined) {
-            const instance = await getters.queryset.get(instanceId || getters.instance?.getPkValue());
-            commit('setInstance', instance);
+            const instance = getters.instance;
+            const newInstance = await getters.queryset.get(instanceId || instance?.getPkValue());
+
+            if (!instance || !newInstance.isEqual(instance)) {
+                commit('setInstance', newInstance);
+            }
         },
     },
 });
