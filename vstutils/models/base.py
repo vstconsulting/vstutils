@@ -12,7 +12,7 @@ from django.db.models.fields.related import ManyToManyField, OneToOneField, Fore
 from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from rest_framework.fields import ModelField, JSONField, CharField as drfCharField
+from rest_framework.fields import ModelField, JSONField, CharField as drfCharField, ChoiceField
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 
 from ..api.fields import (
@@ -435,6 +435,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             iteration_filter_handler = (
                 lambda f: f.name not in filterset_fields_types and f.name in filterset_fields_list
             )
+            serializer = serializers['serializer_class']()
             for field_name, field in cls.get_model_fields_mapping(iteration_filter_handler).items():
                 if isinstance(field, ForeignKey):
                     related_name = get_first_match_name([f.name for f in field.related_model._meta.fields])
@@ -447,6 +448,10 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                     )
                 elif isinstance(field, django_model_fields.BooleanField):
                     filterset_fields_types[field_name] = filters.BooleanFilter()
+                elif isinstance(serializer.fields.get(field_name), ChoiceField):
+                    filterset_fields_types[field_name] = filters.ChoiceFilter(
+                        choices=tuple(serializer.fields.get(field_name).choices.items())
+                    )
 
             return filterset.FilterSetMetaclass(
                 f'{cls.__name__}FilterSetClass',

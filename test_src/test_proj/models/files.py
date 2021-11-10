@@ -60,21 +60,22 @@ class List(ListModel):
 
 class ListOfFiles(ListModel):
     data = [
-        dict(id=i, value='File data', updated=datetime.datetime(2021, 3, 1, 16, 15, 51, 801564))
+        {'id': i, 'value': 'File data', 'updated': datetime.datetime(2021, 3, 1, 16, 15, 51, 801564), 'test': 1}
         for i in range(1)
     ]
     id = models.IntegerField(primary_key=True)
     value = models.TextField()
+    test = models.CharField(choices=tuple((i, i) for i in range(3)), max_length=3)
     updated = models.DateTimeField()
 
     class Meta:
         _view_class = (FileViewMixin, 'read_only')
-        _list_fields = _detail_fields = ('id', 'filename',)
+        _list_fields = _detail_fields = ('id', 'filename', 'test',)
         _permission_classes = [permissions.AllowAny]
         _override_permission_classes = True
         _filterset_fields = {
             'id': None,
-            'test': ChoiceFilter(choices=tuple((i, i) for i in range(3))),
+            'test': None,
         }
 
     @property
