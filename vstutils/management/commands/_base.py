@@ -139,6 +139,13 @@ class DockerCommand(BaseCommand):
             logger.debug(f'Env:\n{json.dumps(self.env, indent=4)}')
             logger.debug(f'Config:\n{self.env[self._settings("CONFIG_ENV_DATA_NAME")]}')
 
+    @property
+    def databases_to_migrate(self):
+        allowed_databases = ('default',) + tuple(set(getattr(settings, 'DOCKER_DATABASES_TO_MIGRATE', ())))
+        for db in settings.DATABASES.keys():
+            if db in allowed_databases:
+                yield db
+
     def migrate(self, options, *args):
         success = False
         error = 'Unknown error.'
@@ -152,10 +159,14 @@ class DockerCommand(BaseCommand):
                         int(os.getenv("DOCKER_MIGRATE_LOCK_KEY_TIMEOUT", '0')) or None
                 ) as lock:  # noqa: F841, pylint:disable=unused-variable
                     logger.info(f'Migration locked by key: `{lock.id}`')
-                    check_call(
-                        [sys.executable, '-m', self.project_name, 'migrate', *args],
-                        env=self.env, bufsize=0, universal_newlines=True,
-                    )
+                    for db_name in self.databases_to_migrate:
+                        logger.info(f'Migrating db "{db_name}".')
+                        check_call(
+                            [sys.executable, '-m', self.project_name, 'migrate', '--database', db_name, *args],
+                            env=self.env,
+                            bufsize=0,
+                            universal_newlines=True,
+                        )
                     logger.info(f'Unlocking migration by key: `{lock.id}`')
             except:
                 error = traceback.format_exc()

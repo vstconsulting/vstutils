@@ -216,7 +216,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
             call_command('dockerrun', attempts=4, attempts_timeout=0.01)
             self.maxDiff = 1024 * 100
-            self.assertEqual(mock_obj.call_count, 2)
+            self.assertEqual(mock_obj.call_count, 3)
             self.assertEqual(
                 mock_obj.call_args[0][0],
                 [sys.executable, '-m', 'test_proj', 'web']
