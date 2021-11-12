@@ -2431,6 +2431,10 @@ class LangTestCase(BaseTestCase):
 
         result = get_render('test_lang_tmplt.html', {'context_variable': context_variable, 'request': request})
         self.assertEqual(result, 'Привет мир!\n')
+        result = get_render('test_lang_tmplt.html', {'context_variable': context_variable}, trans='ru')
+        self.assertEqual(result, 'Привет мир!\n')
+        result = get_render('test_lang_tmplt.html', {'context_variable': context_variable, '__lang__': request.language}, trans='ru')
+        self.assertEqual(result, 'Привет мир!\n')
 
     def test_user_language_detection(self):
         client = self.client_class()

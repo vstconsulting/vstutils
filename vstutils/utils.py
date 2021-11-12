@@ -85,11 +85,13 @@ def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
     """
     cur_language = translation.get_language()
     try:
-        translation.activate(trans)
+        if trans != cur_language:
+            translation.activate(trans)
         config = loader.get_template(name)
         result = config.render(data, data.pop('request', None)).replace('\r', '')
     finally:
-        translation.activate(cur_language)
+        if trans != cur_language:
+            translation.activate(cur_language)
     return result
 
 
