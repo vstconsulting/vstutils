@@ -16,6 +16,7 @@ import types
 import typing as tp
 import uuid
 import warnings
+from functools import lru_cache
 from pathlib import Path
 from threading import Thread
 from enum import Enum
@@ -58,6 +59,15 @@ def is_member_descriptor(obj):
         return type(obj).__name__ == 'member_descriptor'
     except:  # nocv
         return False
+
+
+@lru_cache()
+def current_lang(lang=None):
+    from vstutils.api.models import Language
+    try:
+        return Language.objects.get(code=lang or get_language())
+    except Exception:  # nocv
+        return Language.objects.all().first()
 
 
 def get_render(name: tp.Text, data: tp.Dict, trans: tp.Text = 'en') -> tp.Text:
@@ -223,9 +233,8 @@ def translate(text: tp.Text) -> tp.Text:
 
     :param text: Text message which should be translated.
     """
-    from vstutils.api.models import Language
     try:
-        return Language.objects.get(code=get_language()).translate(text)
+        return current_lang(lang=get_language()).translate(text)
     except Exception:  # nocv
         return text
 
