@@ -1,20 +1,20 @@
 # Main packages
-configparser~=5.0.2
-configparserc~=1.2.5
-django-cors-headers==3.7.0
+configparser~=5.1.0
+configparserc~=1.2.7
+django-cors-headers==3.10.0
 Markdown==3.3.4
 
 # REST API packages
 djangorestframework~=3.12.4
 drf-yasg==1.20.0
-django-filter==2.4.0
-django-crispy-forms~=1.11.2
+django-filter==21.1
+django-crispy-forms~=1.13.0
 drf_orjson_renderer~=1.1.5
 uWSGI==2.0.20
 
 # Notifications
 cent~=4.0.1
-PyJWT~=2.2.0
+PyJWT~=2.3.0
 
 # Minificators
 jsmin==3.0.0
@@ -24,4 +24,4 @@ django-htmlmin~=0.11.0
 pyotp~=2.6.0
 
 # Storage
-django-storages[libcloud]==1.12
+django-storages[libcloud]==1.12.3
