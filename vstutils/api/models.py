@@ -32,22 +32,24 @@ class Language(ListModel):
             hashable_str += CustomTranslations.get_etag_value()
         return hashlib.md5(hashable_str.encode('utf-8')).hexdigest()
 
-    def _get_translation_data(self, module_path_string, code):
-        try:
-            translation_data = import_class(module_path_string + '.translations.' + code + '.TRANSLATION')
-            if not isinstance(translation_data, dict):
-                raise Exception
-            return translation_data.copy()
-        except:
-            return {}
+    def _get_translation_data(self, module_path_string, code, for_server=False):
+        data = {}
+        for dict_name in filter(bool, ['TRANSLATION'] + ['SERVER_TRANSLATION' if for_server else None]):
+            try:
+                translation_data = import_class(module_path_string + '.translations.' + code + f'.{dict_name}')
+                if not isinstance(translation_data, dict):
+                    continue
+                data.update(translation_data.copy())
+            except:
+                pass
+        return data
 
-    @cached_property
-    def translations(self):
+    def get_translations(self, for_server=False):
         code = self.code.replace('-', '_')
-        translation_data = self._get_translation_data('vstutils', code)
+        translation_data = self._get_translation_data('vstutils', code, for_server)
         for attr_name in lib_names:
             translation_data.update(
-                self._get_translation_data(attr_name, code)
+                self._get_translation_data(attr_name, code, for_server)
             )
         if settings.ENABLE_CUSTOM_TRANSLATIONS:
             translation_data.update(
@@ -55,8 +57,16 @@ class Language(ListModel):
             )
         return translation_data
 
+    @cached_property
+    def translations(self):
+        return self.get_translations(for_server=False)
+
+    @cached_property
+    def server_translations(self):
+        return self.get_translations(for_server=True)
+
     def translate(self, text):
-        translated = self.translations.get(text, None)
+        translated = self.server_translations.get(text, None)
         if translated is None:
             # place for additional translation methods
             return text

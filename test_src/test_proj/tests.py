@@ -1,5 +1,4 @@
 # pylint: disable=import-error,invalid-name,no-member,function-redefined,unused-import
-from pathlib import Path
 
 import gzip
 import os
@@ -71,7 +70,6 @@ from .models import (
     OverridenModelWithBinaryFiles,
     ModelWithBinaryFiles,
     ModelForCheckFileAndImageField,
-    DeepNestedModel
 )
 from rest_framework.exceptions import ValidationError
 from base64 import b64encode
@@ -2462,6 +2460,21 @@ class LangTestCase(BaseTestCase):
 
         response = self.client_class().get(self.login_url, HTTP_ACCEPT_LANGUAGE='de,es;q=0.9')
         self.assertEqual(to_soup(response.content).html['lang'], 'en')
+
+    def test_server_translation(self):
+        bulk_data = [
+            dict(path=['_lang', 'ru'], method='get'),
+        ]
+        results = self.bulk(bulk_data)
+        ru_lang_obj = Language.objects.get(code='ru')
+
+        self.assertEqual(results[0]['status'], 200)
+        self.assertNotIn('Server translation', results[0]['data']['translations'].keys())
+        self.assertEqual(ru_lang_obj.translate('Server translation'), 'Серверный перевод')
+
+        self.assertEqual(results[0]['data']['translations']['Some shared translation'],
+                         'Перевод, который может быть перезаписан серверным переводом')
+        self.assertEqual(ru_lang_obj.translate('Some shared translation'), 'Серверный перевод имеет более высокий приоритет')
 
 
 class CoreApiTestCase(BaseTestCase):

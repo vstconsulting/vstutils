@@ -48,52 +48,6 @@ TRANSLATION = {
     'Is active': 'Активен',
     'Is staff': 'Модератор',
 
-    # field's validation
-    "value is not a valid list": "значение не является допустимым списком",
-    "value is not a valid JSON": "значение не является допустимым JSON",
-    "key {missing_key} is missing": "ключ {missing_key} отсутствует",
-    "invalid key {invalid_key}": "неверный ключ {invalid_key}",
-    # empty
-    'Field "<b>{0}</b>" is empty.': 'Поле "<b>{0}</b>" пустое.',
-    # required
-    'Field "<b>{0}</b>" is required.': 'Поле "<b>{0}</b>" обязательно для заполнения.',
-    # minLength
-    'Field "<b>{0}</b>" is too short.<br> Field length should not be shorter, then {1}.': 'Длина поля "<b>{0}</b>" слишком мала.<br>Длина поля должна быть не меньше, чем {1}.',
-    # maxLength
-    'Field "<b>{0}</b>" is too long. <br> Field length should not be longer, then {1}.': 'Длина поля "<b>{0}</b>" слишком велика.<br>Длина поля должна быть не больше, чем {1}.',
-    # min
-    'Field "<b>{0}</b>" is too small.<br> Field should not be smaller, then {1}.': 'Значение поля "<b>{0}</b>" слишком мало.<br> Значение поля должно быть не меньше, чем {1}.',
-    # max
-    'Field "<b>{0}</b>" is too big.<br> Field should not be bigger, then {1}.': 'Значение поля "<b>{0}</b>" слишком велико.<br> Значение поля должно быть не больше, чем {1}.',
-    # invalid
-    '<b>{0} </b> value is not valid for <b>{1}</b> field.': 'Значение <b>{0}</b> не допустимо для поля <b>{1}</b>.',
-    # email
-    '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': 'Поле <b>"{0}"</b> должно быть заполнено в формате <b>"example@mail.com"</b>.',
-
-
-    # instance operation success
-    # add
-    'Child "<b>{0}</b>" instance was successfully added to parent list.': 'Дочерний объект "<b>{0}</b>" был успешно добавлен в родительский список.',
-    # create
-    'New "<b>{0}</b>" instance was successfully created.': 'Новый объект "<b>{0}</b>" был успешно создан.',
-    # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} был(а) успешно удален.',
-    # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Изменения в объекте {1} "<b>{0}</b>" были успешно сохранены.',
-    # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Действие "<b>{0}</b>" было успешно запущено на объекте "<b>{1}</b>".',
-    # instance operation error
-    # add:
-    'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Во время добавления дочернего объекта "<b>{0}</b>" к родительскому списку произошла ошибка.<br> Подробнее: {1}',
-    # create:
-    'An error occurred during creation.<br>Error details:<br>{0}': 'Во время создания нового объекта произошла ошибка.<br>Подробнее:<br>{0}',
-    # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка.<br> Подробнее: {2}',
-    # save:
-    'An error occurred during process.<br>Error details:<br>{0}': 'Во время сохранения произошла ошибка.<br>Подробнее:<br>{0}',
-    # execute:
-    'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
-
     # multiactions button
     'actions on': 'действия над',
     'on item': 'элементов | элементом | элементами | элементами',
@@ -199,17 +153,6 @@ TRANSLATION = {
     'Invalid registration email send.': 'Отправлена неверная регистрационная почта.',
     'To continue, need to accept the terms agreement.': 'Чтобы продолжить, необходимо принять условия соглашения.',
 
-    # validators
-    'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображение, Поддерживается ({0}), получен {1}',
-    'For some reason, this image file cannot be opened': 'Не удалось открыть файл изображения',
-    'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
-    'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
-    'This field must contain only digits but input: ': 'Это поле должно содержать только цифры, но введено: ',
-    'Unsupported image file format': 'Не поддерживаемый: формат файла',
-    'is not in listed supported types': 'не представлен в списке поддерживаемых типов',
-    'Invalid image size orientations': 'Неправильные размеры изображения',
-    'Current image size': 'Текущий размер изображения',
-
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста обновите страницу.',
     'now': 'сейчас',
@@ -224,4 +167,65 @@ TRANSLATION = {
     'Execute action on {0}': 'Выполнить действие для {0}',
     '{n} instance': '0 объектов | {n} объекта | {n} объектов',
     'Open image': 'Открыть изображение',
+
+    # field's validation
+    # empty
+    'Field "<b>{0}</b>" is empty.': 'Поле "<b>{0}</b>" пустое.',
+    # required
+    'Field "<b>{0}</b>" is required.': 'Поле "<b>{0}</b>" обязательно для заполнения.',
+    # minLength
+    'Field "<b>{0}</b>" is too short.<br> Field length should not be shorter, then {1}.': 'Длина поля "<b>{0}</b>" слишком мала.<br>Длина поля должна быть не меньше, чем {1}.',
+    # maxLength
+    'Field "<b>{0}</b>" is too long. <br> Field length should not be longer, then {1}.': 'Длина поля "<b>{0}</b>" слишком велика.<br>Длина поля должна быть не больше, чем {1}.',
+    # min
+    'Field "<b>{0}</b>" is too small.<br> Field should not be smaller, then {1}.': 'Значение поля "<b>{0}</b>" слишком мало.<br> Значение поля должно быть не меньше, чем {1}.',
+    # max
+    'Field "<b>{0}</b>" is too big.<br> Field should not be bigger, then {1}.': 'Значение поля "<b>{0}</b>" слишком велико.<br> Значение поля должно быть не больше, чем {1}.',
+    # invalid
+    '<b>{0} </b> value is not valid for <b>{1}</b> field.': 'Значение <b>{0}</b> не допустимо для поля <b>{1}</b>.',
+    # email
+    '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': 'Поле <b>"{0}"</b> должно быть заполнено в формате <b>"example@mail.com"</b>.',
+
+    # instance operation success
+    # add
+    'Child "<b>{0}</b>" instance was successfully added to parent list.': 'Дочерний объект "<b>{0}</b>" был успешно добавлен в родительский список.',
+    # create
+    'New "<b>{0}</b>" instance was successfully created.': 'Новый объект "<b>{0}</b>" был успешно создан.',
+    # remove
+    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} был(а) успешно удален.',
+    # save
+    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Изменения в объекте {1} "<b>{0}</b>" были успешно сохранены.',
+    # execute
+    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Действие "<b>{0}</b>" было успешно запущено на объекте "<b>{1}</b>".',
+    # instance operation error
+    # add:
+    'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Во время добавления дочернего объекта "<b>{0}</b>" к родительскому списку произошла ошибка.<br> Подробнее: {1}',
+    # create:
+    'An error occurred during creation.<br>Error details:<br>{0}': 'Во время создания нового объекта произошла ошибка.<br>Подробнее:<br>{0}',
+    # remove:
+    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Во время удаления {1} "<b>{0}</b>" произошла ошибка.<br> Подробнее: {2}',
+    # save:
+    'An error occurred during process.<br>Error details:<br>{0}': 'Во время сохранения произошла ошибка.<br>Подробнее:<br>{0}',
+    # execute:
+    'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
+}
+
+SERVER_TRANSLATION = {
+    # field's validation
+    "value is not a valid list": "значение не является допустимым списком",
+    "value is not a valid JSON": "значение не является допустимым JSON",
+    "key {missing_key} is missing": "ключ {missing_key} отсутствует",
+    "invalid key {invalid_key}": "неверный ключ {invalid_key}",
+
+
+    # validators
+    'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображения. Поддерживается ({0}), получен {1}',
+    'For some reason, this image file cannot be opened': 'Не удалось открыть изображение',
+    'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
+    'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
+    'This field must contain only digits but input: ': 'Это поле должно содержать только цифры, но введено: ',
+    'Unsupported image file format': 'Не поддерживаемый: формат файла',
+    'is not in listed supported types': 'не представлен в списке поддерживаемых типов',
+    'Invalid image size orientations': 'Неправильные размеры изображения',
+    'Current image size': 'Текущий размер изображения',
 }
