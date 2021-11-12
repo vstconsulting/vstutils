@@ -48,52 +48,6 @@ TRANSLATION = {
     'Is active': '活跃度',
     'Is staff': '减速装置',
 
-    # field's validation
-    "value is not a valid list": "值不是有效列表",
-    "value is not a valid JSON": "值不是有效的 JSON",
-    "key {missing_key} is missing": "缺少密钥 {missing_key}",
-    "invalid key {invalid_key}": "无效密钥 {invalid_key}",
-    # empty
-    'Field "<b>{0}</b>" is empty.': '范围"<b>{0}</b>" 是空的',
-    # required
-    'Field "<b>{0}</b>" is required.': '范围"<b>{0}</b>" 必须完成',
-    # minLength
-    'Field "<b>{0}</b>" is too short.<br> Field length should not be shorter, then {1}.': '长度范围 "<b>{0}</b>" 太少.<br>长度范围应不少于{1}.',
-    # maxLength
-    'Field "<b>{0}</b>" is too long. <br> Field length should not be longer, then {1}.': '长度单位"<b>{0}</b>" 太大<br>长度单位 应不大于{1}.',
-    # min
-    'Field "<b>{0}</b>" is too small.<br> Field should not be smaller, then {1}.': '取值范围 "<b>{0}</b>" 太少.<br> 取值范围应不少于 {1}.',
-    # max
-    'Field "<b>{0}</b>" is too big.<br> Field should not be bigger, then {1}.': '取值范围 "<b>{0}</b>" 太大.<br> 取值范围应不大于{1}.',
-    # invalid
-    '<b>{0} </b> value is not valid for <b>{1}</b> field.': '不能在 <b>{1}</b>取值为<b>{0}</b> .',
-    # email
-    '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': '应在 <b>"example@mail.com"</b>.范围内完成<b>"{0}"</b>',
-
-
-    # instance operation success
-    # add
-    'Child "<b>{0}</b>" instance was successfully added to parent list.': '子对象“ <b> {0} </ b>”已成功添加到母列表中.',
-    # create
-    'New "<b>{0}</b>" instance was successfully created.': '新对象“ <b> {0} </ b>”已成功创建.',
-    # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} 已成功删除."',
-    # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': '对象变化{1}“ <b> {0} </ b>”的更改已成功保存.',
-    # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': '在对象“ <b> {1} </ b>”上成功启动了操作“ <b> {0} </ b>”。',
-    # instance operation error
-    # add:
-    'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': '将对象“ <b> {0} </ b>”添加到目级列表时发生错误。<br>更多详细信息：{1}',
-    # create:
-    'An error occurred during creation.<br>Error details:<br>{0}': '创建新对象时发生错误<br>更多详细信息：{0}',
-    # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': '删除{1}“ <b> {0} </ b>”时发生错误<br>更多详细信息：{2}',
-    # save:
-    'An error occurred during process.<br>Error details:<br>{0}': '保存时发生错误。<br>更多详细信息：{0}',
-    # execute:
-    'An error occurred during <b>{0}</b>. Error details:<br>{1}': '<b>{0}</b> 期间发生了一些错误。 错误详情：<br>{1}',
-
     # multiactions button
     'actions on': '行动结束',
     'on item': '元素| 元素| 元素| 元素',
@@ -199,17 +153,6 @@ TRANSLATION = {
     'Invalid registration email send.': '无效的注册电子邮件发送。',
     'To continue, need to accept the terms agreement.': '要继续，需要接受条款协议。',
 
-    # validators
-    'unsupported image file format, expected ({0}), got {1}': '不支持的图像格式，支持（{0}），已收到{1}',
-    'For some reason, this image file cannot be opened': '无法打开图像文件',
-    'Invalid image {0}. Expected from {1} to {2}, got {3}': "{0}图片不正确。 预期从{1}到{2}，收到{3}",
-    'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
-    'This field must contain only digits but input: ': '此字段必须仅包含数字但输入：',
-    'Unsupported image file format': '不支持的图像文件格式',
-    'is not in listed supported types': '不在列出的受支持类型中',
-    'Invalid image size orientations': '图片尺寸不正确',
-    'Current image size': '当前图像大小',
-
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': '设置更改已成功保存。 请刷新页面。',
@@ -225,4 +168,64 @@ TRANSLATION = {
     'Execute action on {0}': '在 {0} 上执行操作',
     '{n} instance': '{n} 个实例',
     'Open image': '打开图片',
+
+    # field's validation
+    # empty
+    'Field "<b>{0}</b>" is empty.': '范围"<b>{0}</b>" 是空的',
+    # required
+    'Field "<b>{0}</b>" is required.': '范围"<b>{0}</b>" 必须完成',
+    # minLength
+    'Field "<b>{0}</b>" is too short.<br> Field length should not be shorter, then {1}.': '长度范围 "<b>{0}</b>" 太少.<br>长度范围应不少于{1}.',
+    # maxLength
+    'Field "<b>{0}</b>" is too long. <br> Field length should not be longer, then {1}.': '长度单位"<b>{0}</b>" 太大<br>长度单位 应不大于{1}.',
+    # min
+    'Field "<b>{0}</b>" is too small.<br> Field should not be smaller, then {1}.': '取值范围 "<b>{0}</b>" 太少.<br> 取值范围应不少于 {1}.',
+    # max
+    'Field "<b>{0}</b>" is too big.<br> Field should not be bigger, then {1}.': '取值范围 "<b>{0}</b>" 太大.<br> 取值范围应不大于{1}.',
+    # invalid
+    '<b>{0} </b> value is not valid for <b>{1}</b> field.': '不能在 <b>{1}</b>取值为<b>{0}</b> .',
+    # email
+    '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': '应在 <b>"example@mail.com"</b>.范围内完成<b>"{0}"</b>',
+
+    # instance operation success
+    # add
+    'Child "<b>{0}</b>" instance was successfully added to parent list.': '子对象“ <b> {0} </ b>”已成功添加到母列表中.',
+    # create
+    'New "<b>{0}</b>" instance was successfully created.': '新对象“ <b> {0} </ b>”已成功创建.',
+    # remove
+    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} 已成功删除."',
+    # save
+    'Changes in "<b>{0}</b>" {1} were successfully saved.': '对象变化{1}“ <b> {0} </ b>”的更改已成功保存.',
+    # execute
+    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': '在对象“ <b> {1} </ b>”上成功启动了操作“ <b> {0} </ b>”。',
+    # instance operation error
+    # add:
+    'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': '将对象“ <b> {0} </ b>”添加到目级列表时发生错误。<br>更多详细信息：{1}',
+    # create:
+    'An error occurred during creation.<br>Error details:<br>{0}': '创建新对象时发生错误<br>更多详细信息：{0}',
+    # remove:
+    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': '删除{1}“ <b> {0} </ b>”时发生错误<br>更多详细信息：{2}',
+    # save:
+    'An error occurred during process.<br>Error details:<br>{0}': '保存时发生错误。<br>更多详细信息：{0}',
+    # execute:
+    'An error occurred during <b>{0}</b>. Error details:<br>{1}': '<b>{0}</b> 期间发生了一些错误。 错误详情：<br>{1}',
+}
+
+SERVER_TRANSLATION = {
+    # field's validation
+    "value is not a valid list": "值不是有效列表",
+    "value is not a valid JSON": "值不是有效的 JSON",
+    "key {missing_key} is missing": "缺少密钥 {missing_key}",
+    "invalid key {invalid_key}": "无效密钥 {invalid_key}",
+
+    # validators
+    'unsupported image file format, expected ({0}), got {1}': '不支持的图像格式，支持（{0}），已收到{1}',
+    'For some reason, this image file cannot be opened': '无法打开图像文件',
+    'Invalid image {0}. Expected from {1} to {2}, got {3}': "{0}图片不正确。 预期从{1}到{2}，收到{3}",
+    'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
+    'This field must contain only digits but input: ': '此字段必须仅包含数字但输入：',
+    'Unsupported image file format': '不支持的图像文件格式',
+    'is not in listed supported types': '不在列出的受支持类型中',
+    'Invalid image size orientations': '图片尺寸不正确',
+    'Current image size': '当前图像大小',
 }

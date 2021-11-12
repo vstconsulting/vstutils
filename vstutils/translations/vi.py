@@ -48,52 +48,6 @@ TRANSLATION = {
     'Is active': 'Hoạt động',
     'Is staff': 'Người điều hành',
 
-    # field's validation
-    "value is not a valid list": "giá trị không phải là một danh sách hợp lệ",
-    "value is not a valid JSON": "giá trị không phải là JSON hợp lệ",
-    "key {missing_key} is missing": "khóa {missing_key} bị thiếu",
-    "invalid key {invalid_key}": "khóa không hợp lệ {invalid_key}",
-    # empty
-    'Field "<b>{0}</b>" is empty.': 'Trường "<b> {0} </b>" trống không',
-    # required
-    'Field "<b>{0}</b>" is required.': 'Trường "<b> {0} </b>"  bắt buộc.',
-    # minLength
-    'Field "<b>{0}</b>" is too short.<br> Field length should not be shorter, then {1}.': 'Độ dài của trường "<b> {0} </b>" quá ngắn. <br> Độ dài của trường không được nhỏ hơn {1}.',
-    # maxLength
-    'Field "<b>{0}</b>" is too long. <br> Field length should not be longer, then {1}.': 'Độ dài của trường "<b> {0} </b>" quá dài. <br> Trường không được dài hơn {1}.',
-    # min
-    'Field "<b>{0}</b>" is too small.<br> Field should not be smaller, then {1}.': 'Giá trị của trường "<b> {0} </b>" quá nhỏ. <br> Giá trị của trường không được nhỏ hơn {1}.',
-    # max
-    'Field "<b>{0}</b>" is too big.<br> Field should not be bigger, then {1}.': 'Giá trị của trường "<b> {0} </b>" quá lớn. <br> Giá trị của trường không được lớn hơn {1}.',
-    # invalid
-    '<b>{0} </b> value is not valid for <b>{1}</b> field.': 'Giá trị <b> {0} </b> không hợp lệ cho trường <b> {1} </b>.',
-    # email
-    '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': 'Trường <b> "{0}" </b> phải làm như <b> "example@mail.com" </b>.',
-
-
-    # instance operation success
-    # add
-    'Child "<b>{0}</b>" instance was successfully added to parent list.': 'Đối tượng con "<b> {0} </b>" đã được thêm thành công vào danh sách mẹ.',
-    # create
-    'New "<b>{0}</b>" instance was successfully created.': 'Đối tượng mới "<b> {0} </b>" đã được tạo thành công.',
-    # remove
-    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} đã được xóa thành công."',
-    # save
-    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Thay đổi đối tượng {1} "<b> {0} </ b>" đã được lưu thành công.',
-    # execute
-    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Thao tác "<b> {0} </b>" đã được thực hiện thành công trên đối tượng "<b> {1} </b>".',
-    # instance operation error
-    # add:
-    'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Khi thêm đối tượng con "<b> {0} </b>" vào danh sách mẹ đã xảy ra lỗi <br> thêm chi tiết: {1}',
-    # create:
-    'An error occurred during creation.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi khi tạo phiên bản mới. <br> Chi tiết lỗi: <br> {0}',
-    # remove:
-    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Khi xóa {1} "<b> {0} </b>". đã xảy ra lỗi <br> thêm chi tiết: {2}',
-    # save:
-    'An error occurred during process.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi trong quá trình lưu. <br> Chi tiết lỗi: <br> {0}',
-    # execute:
-    'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Đã xảy ra một số lỗi trong <b> {0} </b>. Chi tiết lỗi: <br> {1}',
-
     # multiactions button
     'actions on': 'thao tác trên',
     'on item': 'thành phần',
@@ -199,17 +153,6 @@ TRANSLATION = {
     'Invalid registration email send.': 'Email đăng ký không hợp lệ gửi.',
     'To continue, need to accept the terms agreement.': 'Để tiếp tục, cần chấp nhận thỏa thuận điều khoản.',
 
-    # validators
-    'unsupported image file format, expected ({0}), got {1}': 'Định dạng hình ảnh không được hỗ trợ, Được hỗ trợ ({0}), đã nhận {1}',
-    'For some reason, this image file cannot be opened': 'Không thể mở file hình ảnh',
-    'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Hình ảnh {0} không chính xác. Dự kiến ​​từ {1} đến {2}, đã nhận {3}',
-    'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
-    'This field must contain only digits but input: ': 'Trường này chỉ được chứa các chữ số nhưng nhập: ',
-    'Unsupported image file format': 'Định dạng tệp hình ảnh không được hỗ trợ',
-    'is not in listed supported types': 'không có trong các loại được hỗ trợ được liệt kê',
-    'Invalid image size orientations': 'Kích thước hình ảnh không đúng',
-    'Current image size': 'Kích thước hình ảnh hiện tại',
-
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',
     'now': 'hiện nay',
@@ -224,4 +167,65 @@ TRANSLATION = {
     'Execute action on {0}': 'Thực hiện hành động trên {0}',
     '{n} instance': '{n} trường hợp',
     'Open image': 'Mở hình ảnh',
+
+    # field's validation
+    # empty
+    'Field "<b>{0}</b>" is empty.': 'Trường "<b> {0} </b>" trống không',
+    # required
+    'Field "<b>{0}</b>" is required.': 'Trường "<b> {0} </b>"  bắt buộc.',
+    # minLength
+    'Field "<b>{0}</b>" is too short.<br> Field length should not be shorter, then {1}.': 'Độ dài của trường "<b> {0} </b>" quá ngắn. <br> Độ dài của trường không được nhỏ hơn {1}.',
+    # maxLength
+    'Field "<b>{0}</b>" is too long. <br> Field length should not be longer, then {1}.': 'Độ dài của trường "<b> {0} </b>" quá dài. <br> Trường không được dài hơn {1}.',
+    # min
+    'Field "<b>{0}</b>" is too small.<br> Field should not be smaller, then {1}.': 'Giá trị của trường "<b> {0} </b>" quá nhỏ. <br> Giá trị của trường không được nhỏ hơn {1}.',
+    # max
+    'Field "<b>{0}</b>" is too big.<br> Field should not be bigger, then {1}.': 'Giá trị của trường "<b> {0} </b>" quá lớn. <br> Giá trị của trường không được lớn hơn {1}.',
+    # invalid
+    '<b>{0} </b> value is not valid for <b>{1}</b> field.': 'Giá trị <b> {0} </b> không hợp lệ cho trường <b> {1} </b>.',
+    # email
+    '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': 'Trường <b> "{0}" </b> phải làm như <b> "example@mail.com" </b>.',
+
+
+    # instance operation success
+    # add
+    'Child "<b>{0}</b>" instance was successfully added to parent list.': 'Đối tượng con "<b> {0} </b>" đã được thêm thành công vào danh sách mẹ.',
+    # create
+    'New "<b>{0}</b>" instance was successfully created.': 'Đối tượng mới "<b> {0} </b>" đã được tạo thành công.',
+    # remove
+    '"<b>{0}</b>" {1} was successfully removed.': '"<b>{0}</b>" {1} đã được xóa thành công."',
+    # save
+    'Changes in "<b>{0}</b>" {1} were successfully saved.': 'Thay đổi đối tượng {1} "<b> {0} </ b>" đã được lưu thành công.',
+    # execute
+    'Action "<b>{0}</b>" was successfully executed on "<b>{1}</b>" instance.': 'Thao tác "<b> {0} </b>" đã được thực hiện thành công trên đối tượng "<b> {1} </b>".',
+    # instance operation error
+    # add:
+    'An error occurred during adding of child "<b>{0}</b>" instance to parent list.<br> Error details: {1}': 'Khi thêm đối tượng con "<b> {0} </b>" vào danh sách mẹ đã xảy ra lỗi <br> thêm chi tiết: {1}',
+    # create:
+    'An error occurred during creation.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi khi tạo phiên bản mới. <br> Chi tiết lỗi: <br> {0}',
+    # remove:
+    'An error occurred during removal process of "<b>{0}</b>" {1}.<br> Error details: {2}': 'Khi xóa {1} "<b> {0} </b>". đã xảy ra lỗi <br> thêm chi tiết: {2}',
+    # save:
+    'An error occurred during process.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi trong quá trình lưu. <br> Chi tiết lỗi: <br> {0}',
+    # execute:
+    'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Đã xảy ra một số lỗi trong <b> {0} </b>. Chi tiết lỗi: <br> {1}',
+}
+
+SERVER_TRANSLATION = {
+    # field's validation
+    "value is not a valid list": "giá trị không phải là một danh sách hợp lệ",
+    "value is not a valid JSON": "giá trị không phải là JSON hợp lệ",
+    "key {missing_key} is missing": "khóa {missing_key} bị thiếu",
+    "invalid key {invalid_key}": "khóa không hợp lệ {invalid_key}",
+
+    # validators
+    'unsupported image file format, expected ({0}), got {1}': 'Định dạng hình ảnh không được hỗ trợ, Được hỗ trợ ({0}), đã nhận {1}',
+    'For some reason, this image file cannot be opened': 'Không thể mở file hình ảnh',
+    'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Hình ảnh {0} không chính xác. Dự kiến ​​từ {1} đến {2}, đã nhận {3}',
+    'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
+    'This field must contain only digits but input: ': 'Trường này chỉ được chứa các chữ số nhưng nhập: ',
+    'Unsupported image file format': 'Định dạng tệp hình ảnh không được hỗ trợ',
+    'is not in listed supported types': 'không có trong các loại được hỗ trợ được liệt kê',
+    'Invalid image size orientations': 'Kích thước hình ảnh không đúng',
+    'Current image size': 'Kích thước hình ảnh hiện tại',
 }
