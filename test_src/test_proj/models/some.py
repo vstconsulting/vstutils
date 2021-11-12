@@ -2,9 +2,9 @@ from django_filters import CharFilter
 from django.db import models
 
 from vstutils.api.fields import RelatedListField, RedirectIntegerField
-from vstutils.api.responses import HTTP_400_BAD_REQUEST, HTTP_200_OK
-from vstutils.api.serializers import BaseSerializer
-from vstutils.models import BModel, register_view_action
+from vstutils.api.responses import HTTP_200_OK
+from vstutils.api.serializers import BaseSerializer, VSTSerializer
+from vstutils.models import BModel, register_view_action, LAZY_MODEL
 from vstutils.api import fields, filter_backends
 from vstutils.models.fields import (
     NamedBinaryFileInJSONField,
@@ -183,6 +183,16 @@ class DeepNestedModel(BModel):
         return HTTP_200_OK(request.data)
 
 
+class ReadonlyDeepNestedSerializer(VSTSerializer):
+    class Meta:
+        model = LAZY_MODEL
+        fields = (
+            'id',
+            'name',
+            'parent',
+        )
+
+
 class ReadonlyDeepNestedModel(BModel):
     name = models.CharField(max_length=10)
     parent = models.ForeignKey('self', null=True, default=None, on_delete=models.CASCADE)
@@ -192,6 +202,9 @@ class ReadonlyDeepNestedModel(BModel):
     class Meta:
         default_related_name = 'readonly_deepnested'
         _filter_backends = (EmptyFilterBackend,)
+        _extra_serializer_classes = {
+            'serializer_class_list': ReadonlyDeepNestedSerializer,
+        }
         _view_class = 'read_only'
         _list_fields = ('name', 'parent')
         _detail_fields = '__all__'

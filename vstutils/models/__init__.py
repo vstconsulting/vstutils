@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 
 from cent import Client as CentrifugoClient
 
-from .base import ModelBaseClass, get_proxy_labels
+from .base import ModelBaseClass, get_proxy_labels, LAZY_MODEL
 from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
@@ -140,7 +140,9 @@ class BModel(BaseModel):
           which will compute smth in action (mapping name). Value can be string for import.
           Important note: setting `model` attribute to None allows to use standard serializer generation mechanism
           and get fields from a list or detail serializer (set `__inject_from__` serializer's meta attribute to
-          `list` or `detail` accordingly).
+          `list` or `detail` accordingly). In some cases, it is required to pass the model to the serializer.
+          For these purposes, the constant `LAZY_MODEL` can be used as a meta attribute. Each time the serializer is used,
+          the exact model where this serializer was declared will be set.
         - ``_filterset_fields`` - list/dict of filterset names for API-filtering. Default is list of fields in list view.
           During processing a list of fields checks for the presence of special field names and inherit additional
           parent classes. If the list contains ``id``, class will inherit from

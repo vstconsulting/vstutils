@@ -4,6 +4,7 @@ from ..api import base as api_base
 from .queryset import BQuerySet as _BQuerySet
 from .decorators import register_view_action as view_action, register_view_method as view_method
 from .model import BaseModel as _BaseModel
+from .base import LAZY_MODEL
 
 
 class register_view_action(view_action):

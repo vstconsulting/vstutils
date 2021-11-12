@@ -39,6 +39,7 @@ from ..api import (
 )
 
 # Constants
+LAZY_MODEL = object()
 DEFAULT_VIEW_FIELD_NAMES = (
     'name',
     'title',
@@ -382,6 +383,18 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                         if inject_from is not None and metadata['non_bulk_methods']
                         else getattr(extra_serializer_class, '_non_bulk_methods', None)
                     )
+                )
+            elif issubclass(extra_serializer_class, api_serializers.VSTSerializer) and \
+                    getattr(extra_serializer_class.Meta, 'model', None) is LAZY_MODEL:
+                meta_class = type(extra_serializer_class.Meta)(
+                    'Meta',
+                    (extra_serializer_class.Meta,),
+                    {'model': cls}
+                )
+                extra_serializer_class = type(extra_serializer_class)(
+                    extra_serializer_class.__name__,
+                    (extra_serializer_class,),
+                    {'Meta': meta_class}
                 )
             serializers[serializer_name] = extra_serializer_class
 

@@ -4,6 +4,7 @@ from django.db.models.base import ModelBase
 
 
 DEFAULT_VIEW_FIELD_NAMES: Tuple[Text,Text,Text,Text,Text]
+LAZY_MODEL: object
 
 
 def get_proxy_labels(model: ModelBase) -> Tuple:
