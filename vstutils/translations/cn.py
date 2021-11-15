@@ -159,7 +159,6 @@ TRANSLATION = {
     'now': '眼下',
     'later': '之后',
     'i accept the ': '我接受 ',
-    'terms of agreement': '协议条款',
     'Zoom': '飛漲',
     'Scale': '規模',
     'This file format is not supported': '不支持此文件格式',
@@ -228,4 +227,11 @@ SERVER_TRANSLATION = {
     'is not in listed supported types': '不在列出的受支持类型中',
     'Invalid image size orientations': '图片尺寸不正确',
     'Current image size': '当前图像大小',
+
+    # agreements
+    'personal data processing policy': '个人资料处理政策.',
+    'i agree with ': '我同意 ',
+    'the personal data processing policy.': '个人资料处理政策',
+    'To continue, need to agree to the personal data processing policy.': '要继续，需要同意个人数据处理政策。',
+    'terms of agreement.': '协议条款.',
 }

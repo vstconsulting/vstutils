@@ -30,6 +30,8 @@ class RegistrationForm(UserCreationForm):
         uid = forms.CharField(max_length=256, required=False)
     if settings.ENABLE_AGREEMENT_TERMS:
         agreement = forms.BooleanField(required=False)
+    if settings.ENABLE_CONSENT_TO_PROCESSING:
+        consent_to_processing = forms.BooleanField(required=False)
 
     class Meta(UserCreationForm.Meta):
         model = UserModel
@@ -91,7 +93,6 @@ class RegistrationForm(UserCreationForm):
                 self.cleaned_data.update(secure_pickle.loads(cache.get(uid)))
                 self._errors = ErrorDict()
 
-    # method clean is not needed?
     def clean(self):
         super().clean()
         if settings.ENABLE_AGREEMENT_TERMS:
@@ -100,6 +101,13 @@ class RegistrationForm(UserCreationForm):
                 self.add_error(
                     'agreement',
                     translate('To continue, need to accept the terms agreement.')
+                )
+        if settings.ENABLE_CONSENT_TO_PROCESSING:
+            consent_to_processing = self.cleaned_data.get('consent_to_processing', None)
+            if not consent_to_processing:
+                self.add_error(
+                    'consent_to_processing',
+                    translate('To continue, need to agree to the personal data processing policy.')
                 )
 
 

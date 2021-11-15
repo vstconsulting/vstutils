@@ -158,7 +158,6 @@ TRANSLATION = {
     'now': 'сейчас',
     'later': 'позже',
     'i accept the ': 'Я принимаю ',
-    'terms of agreement': 'лицензионное соглашение',
     'Zoom': 'Зум',
     'Scale': 'Масштаб',
     'This file format is not supported': 'Данный формат файла не поддерживается',
@@ -228,4 +227,12 @@ SERVER_TRANSLATION = {
     'is not in listed supported types': 'не представлен в списке поддерживаемых типов',
     'Invalid image size orientations': 'Неправильные размеры изображения',
     'Current image size': 'Текущий размер изображения',
+
+    # agreements
+    'personal data processing policy.': 'Политика обработки персональных данных.',
+    'i agree with ': 'я согласен с ',
+    'the personal data processing policy.': 'политикой обработки персональных данных',
+    'To continue, need to agree to the personal data processing policy.': 'Чтобы продолжить, необходимо согласиться '
+                                                                          'с политикой обработки персональных данных.',
+    'terms of agreement.': 'лицензионное соглашение.',
 }

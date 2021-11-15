@@ -747,8 +747,22 @@ class ViewsTestCase(BaseTestCase):
 
     def test_register_new_user(self):
         # create user data and init client class
-        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com', agreement=True)
-        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com', agreement=True)
+        user = dict(
+            username='newuser',
+            password1='pass',
+            password2='pass',
+            email='new@user.com',
+            agreement=True,
+            consent_to_processing=True,
+        )
+        user_fail = dict(
+            username='newuser',
+            password1='pass',
+            password2='pss',
+            email='new@user.com',
+            agreement=True,
+            consent_to_processing=True,
+        )
         client = self.client_class()
 
         self.assertIsNone(get_user_model().objects.filter(email=user['email']).last())
@@ -766,7 +780,7 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(
             list(response.context_data['form'].errors.keys()),
-            ['username', 'email', 'password1', 'password2', 'agreement']
+            ['username', 'email', 'password1', 'password2', 'agreement', 'consent_to_processing']
         )
 
         # Correct registration request
@@ -811,8 +825,21 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_terms_agreement(self):
-        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com', agreement=True)
-        user_fail = dict(username='newuser', password1='pass', password2='pass', email='new@user.com')
+        user = dict(
+            username='newuser',
+            password1='pass',
+            password2='pass',
+            email='new@user.com',
+            agreement=True,
+            consent_to_processing=True,
+        )
+        user_fail = dict(
+            username='newuser',
+            password1='pass',
+            password2='pass',
+            email='new@user.com',
+            consent_to_processing=True,
+        )
         client = self.client_class()
 
         lang_text_data = {
@@ -844,7 +871,7 @@ class ViewsTestCase(BaseTestCase):
                 response = self.client.get(reverse('terms') + f'?lang=en')
 
                 self.assertEqual(response.status_code, 200)
-                self.assertTemplateUsed(response, 'registration/terms.html')
+                self.assertTemplateUsed(response, 'registration/base_agreements.html')
                 self.assertContains(response, '<h2>test_header</h2>')
 
         # Response with different languages returns different terms
@@ -856,10 +883,87 @@ class ViewsTestCase(BaseTestCase):
                     self.assertEqual(response_with_en_lang.status_code, 200)
                     self.assertContains(response_with_en_lang, f'<h2>{item[1]}</h2>')
 
+    def test_personal_data_processing(self):
+        user = dict(
+            username='newuser',
+            password1='pass',
+            password2='pass',
+            email='new@user.com',
+            agreement=True,
+            consent_to_processing=True,
+        )
+        user_fail = dict(
+            username='newuser',
+            password1='pass',
+            password2='pass',
+            email='new@user.com',
+            agreement=True,
+        )
+        client = self.client_class()
+
+        lang_text_data = {
+            'ru': 'политика обработки персональных данных',
+            'en': 'personal data processing policy',
+            'cn': '个人资料处理政策',
+            'vi': 'chính sách xử lý dữ liệu cá nhân'
+        }
+        # Correct registration request returns redirect
+        response = self.call_registration(user)
+        self.assertRedirects(response, self.login_url)
+
+        # Try registration without consent_to_processing returns error
+        response = self.call_registration(user_fail)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context_data['form'].errors['consent_to_processing'][0],
+            'To continue, need to agree to the personal data processing policy.'
+        )
+
+        # If ENABLE_CONSENT_TO_PROCESSING=False, registration without `consent_to_processing` returns redirect
+        with override_settings(ENABLE_CONSENT_TO_PROCESSING=False):
+            response = self.call_registration(user_fail)
+            self.assertRedirects(response, self.login_url)
+
+        # Response with 'lang=en' returns default 'consent_to_processing.md' with correct html
+        with utils.tmp_file(data='## test_header', encoding='utf8') as md_file:
+            with override_settings(CONSENT_TO_PROCESSING_PATH=md_file.path):
+                response = self.client.get(reverse('consent_to_processing') + '?lang=en')
+
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(response, 'registration/base_agreements.html')
+                self.assertContains(response, '<h2>test_header</h2>')
+
+        # Response with different languages returns different personal_data_processing_policy
+        for item in lang_text_data.items():
+            with utils.tmp_file(data=f'## {item[1]}', encoding='utf8', suffix=f'.{item[0]}') as md_file:
+                with override_settings(CONSENT_TO_PROCESSING_PATH=f'/tmp/{Path(md_file.path).stem}'):
+
+                    response_with_different_lang = self.client.get(reverse('consent_to_processing') + f'?lang={item[0]}')
+                    self.assertEqual(response_with_different_lang.status_code, 200)
+                    self.assertContains(response_with_different_lang, f'<h2>{item[1]}</h2>')
+
+        # If file not found - returns 404 status
+        response_without_file = self.client.get(reverse('consent_to_processing'))
+        self.assertEqual(response_without_file.status_code, 404)
+
     @override_settings(SEND_CONFIRMATION_EMAIL=False, AUTHENTICATE_AFTER_REGISTRATION=False)
     def test_register_new_user_without_confirmation(self):
-        user = dict(username='newuser', password1='pass', password2='pass', email='new@user.com', agreement=True)
-        user_fail = dict(username='newuser', password1='pass', password2='pss', email='new@user.com', agreement=True)
+        user = dict(
+            username='newuser',
+            password1='pass',
+            password2='pass',
+            email='new@user.com',
+            agreement=True,
+            consent_to_processing = True,
+        )
+        user_fail = dict(
+            username='newuser',
+            password1='pass',
+            password2='pss',
+            email='new@user.com',
+            agreement=True,
+            consent_to_processing=True,
+        )
         client = self.client_class()
         response = client.post(self.login_url, {'username': user['username'], 'password': user['password1']})
         self.assertEqual(response.status_code, 200)

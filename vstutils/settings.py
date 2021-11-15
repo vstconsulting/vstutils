@@ -150,6 +150,8 @@ class MainSection(BaseAppendSection):
         'first_day_of_week': ConfigIntType,
         'enable_agreement_terms': ConfigBoolType,
         'agreement_terms_path': ConfigStringType,
+        'enable_consent_to_processing': ConfigBoolType,
+        'consent_to_processing_path': ConfigStringType,
     }
 
 
@@ -388,6 +390,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'ldap-auth_format': 'cn=<username>,<domain>',
             'language_cookie_name': 'lang',
             'agreement_terms_path': f'/etc/{VST_PROJECT_LIB}/terms.md',
+            'consent_to_processing_path': f'/etc/{VST_PROJECT_LIB}/consent_to_processing.md',
         },
         'web': {
             'allow_cors': False,
@@ -1212,6 +1215,12 @@ VIEWS: SIMPLE_OBJECT_SETTINGS_TYPE = {
         "OPTIONS": {
             'name': 'terms'
         }
+    },
+    "CONSENT_TO_PROCESSING": {
+        "BACKEND": 'vstutils.gui.views.ConsentToProcessingView',
+        "OPTIONS": {
+            'name': 'consent_to_processing'
+        }
     }
 }
 
@@ -1236,8 +1245,14 @@ def get_accounts_views_mapping():
     mapping = {**ACCOUNT_VIEWS}
     if REGISTRATION_URL not in mapping and REGISTRATION_URL not in ACCOUNT_VIEWS and REGISTRATION_ENABLED:
         mapping[REGISTRATION_URL] = 'USER_REGISTRATION'
-    if REGISTRATION_URL in mapping and ENABLE_AGREEMENT_TERMS and AGREEMENT_TEMRS_URL:
-        mapping[AGREEMENT_TEMRS_URL] = 'TERMS'
+
+    if REGISTRATION_URL in mapping:
+        if ENABLE_AGREEMENT_TERMS and AGREEMENT_TEMRS_URL:
+            mapping[AGREEMENT_TEMRS_URL] = 'TERMS'
+
+        if ENABLE_CONSENT_TO_PROCESSING and CONSENT_TO_PROCESSING_URL:
+            mapping[CONSENT_TO_PROCESSING_URL] = 'CONSENT_TO_PROCESSING'
+
     return mapping
 
 
@@ -1251,6 +1266,11 @@ REGISTRATION_ENABLED = main['enable_registration']
 AGREEMENT_TEMRS_URL = r'^terms/$'
 ENABLE_AGREEMENT_TERMS: bool = main.getboolean('enable_agreement_terms', fallback=REGISTRATION_ENABLED)
 AGREEMENT_TERMS_PATH: str = main['agreement_terms_path']
+
+CONSENT_TO_PROCESSING_URL = r'^consent_to_processing/$'
+ENABLE_CONSENT_TO_PROCESSING: bool = main.getboolean('enable_consent_to_processing', fallback=REGISTRATION_ENABLED)
+CONSENT_TO_PROCESSING_PATH: str = main['consent_to_processing_path']
+
 
 PROJECT_GUI_MENU: _t.List[_t.Dict] = [
     {

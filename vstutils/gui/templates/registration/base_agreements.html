@@ -8,11 +8,14 @@
         }
     </style>
 
-    <h3 style="text-align: center">{% translate_text "terms of agreement" capfirst %}</h3>
+    {% block header %}
+        <h3 style="text-align: center">{% translate_text "$header_message" capfirst %}</h3>
+    {% endblock %}
 
-    {% block terms %}
-        <div class="terms-area">
+    {% block content %}
+        <div class="agreement-area">
             {{ terms | safe }}
         </div>
     {% endblock %}
+
 {% endblock %}

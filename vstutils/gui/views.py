@@ -2,6 +2,7 @@
 from pathlib import Path
 
 from markdown import markdown
+from django.http.response import Http404
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
@@ -13,6 +14,7 @@ from django.urls import reverse_lazy
 from jsmin import jsmin
 
 from .forms import RegistrationForm, TwoFaForm
+from ..utils import lazy_translate as __
 
 
 UserModel = get_user_model()
@@ -105,17 +107,33 @@ class Registration(FormView, BaseView):
         return super().form_valid(form)
 
 
-class TermsView(TemplateView):
-    template_name = 'registration/terms.html'
+class BaseAgreementsView(TemplateView):
+    template_name = 'registration/base_agreements.html'
+    title_message = __('Terms')
+    path_in_settings: str
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        path = Path(settings.AGREEMENT_TERMS_PATH)
-        # return path with lang code. Example: /tmp/proj_name/terms.md.en
+        context['header_message'] = self.title_message
+        path = Path(getattr(settings, self.path_in_settings, None))
         translated_file_path = path.with_name(path.name + f'.{self.request.language.code}')
 
         if translated_file_path.exists():
             path = translated_file_path
 
-        context['terms'] = markdown(path.read_text(encoding='utf8'))
+        try:
+            context['terms'] = markdown(path.read_text(encoding='utf8'))
+        except FileNotFoundError as e:
+            raise Http404 from e
+
         return context
+
+
+class ConsentToProcessingView(BaseAgreementsView):
+    path_in_settings = 'CONSENT_TO_PROCESSING_PATH'
+    title_message = __('personal data processing policy.')
+
+
+class TermsView(BaseAgreementsView):
+    path_in_settings = 'AGREEMENT_TERMS_PATH'
+    title_message = __('terms of agreement.')
