@@ -7,7 +7,6 @@
                 v-element-bound="onModalCreated"
                 class="modal fade"
                 :class="wrapperClasses"
-                tabindex="-1"
                 role="dialog"
             >
                 <div class="modal-dialog" :class="classes" role="document">
