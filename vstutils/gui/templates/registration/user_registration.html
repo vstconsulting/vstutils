@@ -30,6 +30,20 @@
                     </style>`;
             });
         }
+        function openPersonalDataModal() {
+            $('#modal-personal-data').modal('show');
+            const personalDataIframe = document.getElementById('personal-data-iframe');
+
+            personalDataIframe.setAttribute('src', '{% url 'consent_to_processing' %}');
+            personalDataIframe.addEventListener('load', () => {
+                let doc = personalDataIframe.contentDocument;
+                doc.body.innerHTML = doc.body.innerHTML +
+                    `<style>
+                        #lang-form, .login-logo {display: none;}
+                        body {background-color: #fff !important; justify-content: start !important;}
+                    </style>`;
+            });
+        }
 
     </script>
     <div class="login-box password-reset">
@@ -70,10 +84,22 @@
                                 <label for="id_agreement" class="registration-label">
                                     *{% translate_text "i accept the " capfirst %}
                                     <a href="#" onclick="openTermsModal()">
-                                        {% translate_text "terms of agreement" %}
+                                        {% translate_text "terms of agreement." %}
                                     </a>
                                 </label>
                                 {{ form.agreement }}
+                            </div>
+                        {% endif %}
+                        {% if form.consent_to_processing %}
+                            <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
+                                {{ form.consent_to_processing.errors }}
+                                <label for="id_consent_to_processing" class="registration-label">
+                                    *{% translate_text "i agree with " capfirst %}
+                                    <a href="#" onclick="openPersonalDataModal()">
+                                        {% translate_text "the personal data processing policy." %}
+                                    </a>
+                                </label>
+                                {{ form.consent_to_processing }}
                             </div>
                         {% endif %}
                     {% endblock %}
@@ -102,6 +128,22 @@
           </div>
         </div>
       </div>
+        <div class="modal fade" id="modal-personal-data" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+              </div>
+              <div class="modal-body" style="height: 80vh; padding: 0">
+                  <div class="embed-responsive" style="height: 100%">
+                      <iframe id="personal-data-iframe"></iframe>
+                  </div>
+              </div>
+          </div>
+        </div>
+        </div>
 {% endblock %}
 
 {% block after_content %}
