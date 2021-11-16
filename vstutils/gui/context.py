@@ -57,6 +57,7 @@ def project_args(request: HttpRequest) -> Dict:
     return {
         "host_url": host_url,
         "gui_version": gui_version,
+        "gui_named_version": f'{settings.VST_PROJECT}_{gui_version}',
         "gui_user_version": request_gui_version,
         "vstutils_version": settings.VSTUTILS_VERSION,
         "project_lib_version": project_lib_version,

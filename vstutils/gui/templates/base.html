@@ -51,7 +51,7 @@
 
        {% block pwa_icons %}
             <!-- Icons for PWA -->
-            {% cache block_timeout pwa_icons_block gui_version %}
+            {% cache block_timeout pwa_icons_block gui_named_version %}
             {% for icon in manifest_object.icons %}
                 <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
                 <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">

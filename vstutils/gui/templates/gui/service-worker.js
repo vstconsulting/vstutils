@@ -1,6 +1,6 @@
 //{% load request_static %}
 //{% load cache %}
-//{% cache block_timeout service_worker_block gui_version %}
+//{% cache block_timeout service_worker_block gui_named_version %}
 //{% autoescape off %}
 
 //{% block offline_page %}

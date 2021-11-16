@@ -1,2 +1,2 @@
 {% load cache %}
-{% cache block_timeout manifest_block gui_version %}{% autoescape off %}{{ manifest_object.json }}{% endautoescape %}{% endcache %}
+{% cache block_timeout manifest_block gui_named_version %}{% autoescape off %}{{ manifest_object.json }}{% endautoescape %}{% endcache %}
