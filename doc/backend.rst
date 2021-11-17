@@ -101,7 +101,7 @@ All classes inherit from:
 Middlewares
 ~~~~~~~~~~~
 
-By default, Django `supposes <https://docs.djangoproject.com/en/2.2/topics/http/middleware/#writing-your-own-middleware>`_
+By default, Django `supposes <https://docs.djangoproject.com/en/3.2/topics/http/middleware/#writing-your-own-middleware>`_
 that a developer creates Middleware class manually, but it's often a routine.
 The vstutils library offers a convenient request handler class for elegant OOP development.
 Middleware is used to process incoming requests and send responses before they reach final destination.

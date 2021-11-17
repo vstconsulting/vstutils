@@ -23,6 +23,34 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
 
         pip install vstutils
 
+    In this case, we install a package with the minimum required set of dependencies for creating new projects.
+    However, inside the project, the extra argument `prod` is used, which additionally installs the packages necessary
+    for working in the production environment.
+    There is also a set of dependencies test, which contains everything you need for testing and analyzing code coverage.
+
+    It is also worth noting extra dependencies as:
+
+    * **rpc** - install dependencies for asynchronous tasks working
+    * **ldap** - a set of dependencies for ldap authorization support
+    * **doc** - everything which needed to build documentation and to implement the delivery of documentation inside a running server
+    * **pil** - library for correct work of image validators
+    * **boto3** - an additional set of packages for working with S3 storage outside of AWS
+    * **sqs** - a set of dependencies for connecting asynchronous tasks to SQS queues (can be used instead of the **rpc**).
+
+    You can combine multiple dependencies at the same time to assemble your set of functionality into a project.
+    For example, to work an application with asynchronous tasks and media storage in MinIO, you will need the following command:
+
+    .. sourcecode:: bash
+
+        pip install vstutils[prod,rpc,boto3]
+
+    To install the most complete set of dependencies, you can use the common parameter **all**.
+
+    .. sourcecode:: bash
+
+        pip install vstutils[all]
+
+
 2. **Create new project, based on VST Utils**
 
     If this is your first time using vstutils, you’ll have to take care of some initial setup.
@@ -98,6 +126,9 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
     * **webpack.config.js.default** - this file contain minimal script for webpack (replace '.default' if write smthg in 'app.js').
 
     You should execute below commands  from the ``/{{app_dir}}/{{app_name}}/`` directory.
+    It is good practice to use tox (should be installed before use) to create a debugging environment for your application.
+    For these purposes, it is recommended to use ``tox -e contrib`` in the project directory,
+    which will automatically create a new environment with the required dependencies.
 
 3. **Apply migrations**
 
@@ -110,7 +141,7 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
         python -m {{app_name}} migrate
 
     This command create SQLite (by default) database with default SQL-schema.
-    VSTUTILS supports all databases `Django does <https://docs.djangoproject.com/en/2.2/ref/databases/#databases>`_.
+    VSTUTILS supports all databases `Django does <https://docs.djangoproject.com/en/3.2/ref/databases/#databases>`_.
 
 4. **Create superuser**
 
@@ -129,7 +160,7 @@ Throughout this tutorial, we’ll go through a creation of a basic poll applicat
 
     .. warning::
         Now’s a good time to note: if you want to run the web-server with a debugger, then you should run
-        `the standard Django's dev-server <https://docs.djangoproject.com/en/2.2/intro/tutorial01/#the-development-server>`_.
+        `the standard Django's dev-server <https://docs.djangoproject.com/en/3.2/intro/tutorial01/#the-development-server>`_.
 
     .. image:: img/app_example_login_page.png
 
@@ -173,7 +204,7 @@ Let make out an example from **`BModel**:
     :noindex:
 
 
-More information about Models you can find in `Django Models documentation <https://docs.djangoproject.com/en/2.2/topics/db/models/>`_.
+More information about Models you can find in `Django Models documentation <https://docs.djangoproject.com/en/3.2/topics/db/models/>`_.
 
 If you don't need to create custom :ref:`serializers<SerializerCreateTag>` or :ref:`view sets<ViewSetCreateTag>`, you can go to this :ref:`stage<AddModelsToApiTag>`.
 
@@ -301,7 +332,7 @@ To make migrations open ``/{{app_dir}}/{{app_name}}/`` directory and execute fol
 
     python -m {{app_name}} makemigrations {{app_name}}
 
-More information about Migrations you can find in `Django Migrations documentation <https://docs.djangoproject.com/en/2.2/topics/migrations/>`_.
+More information about Migrations you can find in `Django Migrations documentation <https://docs.djangoproject.com/en/3.2/topics/migrations/>`_.
 
 
 Migrations applying
@@ -359,4 +390,4 @@ After stages creation page with stages list will looks like this:
 Sorting by 'order' field works, as we mentioned in the our ``models.py`` file for Stage Model.
 
 Additional information about Django and Django REST Framework you can find in
-`Django documentation <https://docs.djangoproject.com/en/2.2/>`_ and `Django REST Framework documentation <https://www.django-rest-framework.org/>`_.
+`Django documentation <https://docs.djangoproject.com/en/3.2/>`_ and `Django REST Framework documentation <https://www.django-rest-framework.org/>`_.

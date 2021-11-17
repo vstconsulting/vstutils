@@ -118,6 +118,7 @@ class Command(BaseCommand):
         return cmd
 
     def handle(self, *uwsgi_args, **opts):
+        # pylint: disable=too-many-branches
         super().handle(*uwsgi_args, **opts)
 
         # Environment
@@ -153,6 +154,9 @@ class Command(BaseCommand):
 
         if settings.MEDIA_URL.startswith('/') and settings.MEDIA_ROOT:
             cmd += ['--static-map', f"{settings.MEDIA_URL}={settings.MEDIA_ROOT}"]
+
+        if 'docs' in settings.INSTALLED_APPS and getattr(settings, 'DOCS_ACCESS', 'public') == 'public':
+            cmd += ['--static-map', f"{settings.DOC_URL}={settings.DOCS_ROOT}"]
 
         # Append uwsgi configs.
         for config_file in map(Path, settings.CONFIG_FILES):
