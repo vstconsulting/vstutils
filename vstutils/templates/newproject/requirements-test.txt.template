@@ -1,5 +1,3 @@
-# {{project_name}} requirements
-###############################
-coverage<=4.5.3
-mock<=2.0.1
-tblib==1.3.2
+# {{project_name}} test requirements
+####################################
+

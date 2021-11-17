@@ -22,7 +22,6 @@ whitelist_externals =
 commands =
   pip install -U pip
   pip uninstall {{project_name}} -y
-  install: pip install cython
   install: rm -rfv {envdir}/dist/
   install: python setup.py compile --dist-dir {envdir}/dist/
   install: bash -c "pip install {envdir}/dist/{{project_name}}-$(python -c 'import {{project_name}}; print({{project_name}}.__version__)').tar.gz"
@@ -31,7 +30,7 @@ commands =
   install: rm -f {envdir}/test.py {envdir}/test.pyc
   install: bash -c "cd {envdir} && ln -s {toxinidir}/test.py && python -m {{project_name}} test -v 2 --failfast --parallel 8"
   coverage: python setup.py install_egg_info
-  coverage: pip install -U -e .
+  coverage: pip install -U -e .[test]
   coverage: coverage debug sys
   coverage: coverage erase
   coverage: coverage run -m {{project_name}} test -v 2 --failfast --parallel 8 {posargs}
@@ -40,7 +39,6 @@ commands =
   rm -rf .eggs build {{project_name}}.egg-info {envdir}/dist
   pip uninstall {{project_name}} -y
 deps =
-    vstutils=={{vstutils_version}}
     -rrequirements.txt
     -rrequirements-test.txt
 
@@ -50,9 +48,9 @@ deps =
     flake8
     flake8-bugbear
     flake8-import-order
-    flake8-functions
+    flake8-functions==0.0.4
     flake8-executable
-    flake8-django
+    flake8-django~=1.1.2
     flake8-comprehensions
     flake8-commas
 commands =
@@ -68,11 +66,23 @@ whitelist_externals = *
 commands =
     pip install -U -r requirements-test.txt -r requirements.txt
     python setup.py install_egg_info
-    pip install -U -e .
+    pip install -U -e .[test]
 deps =
-   cython>0.29,<0.30
-   tox==3.8.4
-   -e .
+   tox==3.24.4
+
+[testenv:build_for_docker]
+basepython = python3.8
+skipsdist = True
+setenv =
+    CCACHE_DIR = {envdir}/.ccache
+    BUILD_COMPILE = true
+    PIP_USE_FEATURE = 2020-resolver
+passenv = *
+whitelist_externals = *
+commands =
+    python setup.py bdist_wheel -v
+deps =
+  pip>=20.2
 
 [testenv:build]
 passenv = *

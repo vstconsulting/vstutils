@@ -1,2 +1,3 @@
 # {{project_name}} requirements
 ###############################
+vstutils[prod]=={{vstutils_version}}
