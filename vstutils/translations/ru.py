@@ -229,10 +229,10 @@ SERVER_TRANSLATION = {
     'Current image size': 'Текущий размер изображения',
 
     # agreements
-    'personal data processing policy.': 'Политика обработки персональных данных.',
+    'personal data processing policy': 'Политика обработки персональных данных',
     'i agree with ': 'я согласен с ',
-    'the personal data processing policy.': 'политикой обработки персональных данных',
+    'the personal data processing policy': 'политикой обработки персональных данных',
     'To continue, need to agree to the personal data processing policy.': 'Чтобы продолжить, необходимо согласиться '
                                                                           'с политикой обработки персональных данных.',
-    'terms of agreement.': 'лицензионное соглашение.',
+    'terms of agreement': 'лицензионное соглашение',
 }

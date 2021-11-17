@@ -229,9 +229,9 @@ SERVER_TRANSLATION = {
     'Current image size': '当前图像大小',
 
     # agreements
-    'personal data processing policy': '个人资料处理政策.',
+    'personal data processing policy': '个人资料处理政策',
     'i agree with ': '我同意 ',
-    'the personal data processing policy.': '个人资料处理政策',
+    'the personal data processing policy': '个人资料处理政策',
     'To continue, need to agree to the personal data processing policy.': '要继续，需要同意个人数据处理政策。',
-    'terms of agreement.': '协议条款.',
+    'terms of agreement': '协议条款',
 }

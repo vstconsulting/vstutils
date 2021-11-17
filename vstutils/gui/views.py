@@ -131,9 +131,9 @@ class BaseAgreementsView(TemplateView):
 
 class ConsentToProcessingView(BaseAgreementsView):
     path_in_settings = 'CONSENT_TO_PROCESSING_PATH'
-    title_message = __('personal data processing policy.')
+    title_message = __('personal data processing policy')
 
 
 class TermsView(BaseAgreementsView):
     path_in_settings = 'AGREEMENT_TERMS_PATH'
-    title_message = __('terms of agreement.')
+    title_message = __('terms of agreement')

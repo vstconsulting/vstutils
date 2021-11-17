@@ -2515,17 +2515,28 @@ class LangTestCase(BaseTestCase):
         self.assertEqual("Успешно переведено", results[2]['data']['translated'])
 
         # all translations equal
-        from vstutils.translations import ru, cn, vi
-        self.assertEqual(
-            ru.TRANSLATION.keys(),
-            cn.TRANSLATION.keys(),
-            'looks like Russian and Chinese translations are not equivalent'
+        ru: Language = Language.objects.get(code='ru')
+        ru_server_translations_keys = list(
+            filter(
+                lambda x: x not in (
+                    'Hello world!',
+                    'Some shared translation',
+                    'Server translation',
+                    'Some shared translation',
+                    'проверка перевода',
+                ),
+                ru.server_translations.keys()
+            )
         )
-        self.assertEqual(
-            vi.TRANSLATION.keys(),
-            ru.TRANSLATION.keys(),
-            'looks like Russian and Vietnamese translations are not equivalent'
-        )
+        for check_lang in Language.objects.exclude(code__in=['ru', 'uk', 'en']):
+            self.assertEqual(
+                ru_server_translations_keys,
+                list(check_lang.server_translations.keys()),
+                (
+                    f'Looks like Russian and {check_lang.code} ({check_lang.name}) translations are not equivalent:'
+                    f'{set(ru_server_translations_keys).symmetric_difference(check_lang.server_translations.keys())}'
+                )
+            )
 
         # test translate tag for context variables
         context_variable = 'Hello world!'
