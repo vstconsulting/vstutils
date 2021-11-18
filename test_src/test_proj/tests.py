@@ -1493,6 +1493,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertNotIn('patch', hosts_list)
         self.assertNotIn('put', hosts_list)
 
+        # Test inherit actions or methods
+        self.assertIn('/cachable/empty_action/', api['paths'])
+
         # Check depend fields
         self.assertEqual(api['definitions']['Variable']['properties']['key']['format'], 'fk')
         self.assertEqual(

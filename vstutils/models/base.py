@@ -108,6 +108,25 @@ default_extra_metadata: dict = {
 
 
 # Handlers
+def is_append_to_view(item):
+    return bool(getattr(item[1], '_append_to_view', False))
+
+
+def is_inherit_append_to_view(item):
+    return bool(getattr(item[1], '_inherit', False)) and is_append_to_view(item)
+
+
+def get_append_to_view(items, handler=is_append_to_view):
+    return dict(filter(handler, items))
+
+
+def get_parents_append_to_view(mro_items):
+    result = {}
+    for items in reversed(list(mro_items)):
+        result.update(get_append_to_view(items, is_inherit_append_to_view))
+    return result
+
+
 def update_cache_for_model(instance, **kwargs):
     kwargs.get('cached_model_class', instance.__class__).set_etag_value()
 
@@ -581,7 +600,8 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             {
                 **view_attributes,
                 **serializers,
-                **dict(filter(lambda x: hasattr(x[1], '_append_to_view'), vars(cls).items()))
+                **get_append_to_view(vars(cls).items()),
+                **get_parents_append_to_view([vars(c).items() for c in cls.mro()]),
             }
         )
 
