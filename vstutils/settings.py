@@ -1134,6 +1134,8 @@ if RPC_ENABLED:
     if RUN_WORKER:
         WORKER_OPTIONS = config['worker'].all()
 
+    RPC_APP_OBJECT: str = f'{VST_PROJECT}.wapp:app'
+
 # View settings
 ##############################################################
 ENABLE_ADMIN_PANEL = main['enable_admin_panel']

@@ -92,7 +92,7 @@ class Command(BaseCommand):
 
         # Format args string.
         options = ''
-        app_option = f'--app={settings.VST_PROJECT}.wapp:app'
+        app_option = f'--app={settings.RPC_APP_OBJECT}'
         for key, value in worker_options.items():
             if key == 'app':
                 app_option = "--app={}".format(value.replace(',', r'\,'))
