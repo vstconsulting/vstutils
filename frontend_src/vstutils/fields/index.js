@@ -80,10 +80,11 @@ export function addDefaultFields(fieldsResolver) {
         ['email', EmailField],
         ['file', files.file.FileField],
         ['fk', fk.fk.FKField],
-        ['fk_autocomplete', fk.autocomolete.FKAutocompleteField],
+        ['fk_autocomplete', fk.autocomplete.FKAutocompleteField],
         ['html', text.HTMLField],
         ['json', JSONField],
         ['masked', text.masked.MaskedField],
+        ['deep_fk', fk.deepFk.DeepFKField],
         ['password', PasswordField],
         ['phone', text.phone.PhoneField],
         ['plain_text', text.PlainTextField],
@@ -114,6 +115,7 @@ export function addDefaultFields(fieldsResolver) {
         [FieldsResolver.DEFAULT_FIELD_KEY, numbers.integer.IntegerField],
         ['choices', ChoicesField],
         ['fk', fk.fk.FKField],
+        ['deep_fk', fk.deepFk.DeepFKField],
         ['uptime', datetime.UptimeField],
     ]) {
         fieldsResolver.registerField(SCHEMA_DATA_TYPE.integer, format, field);

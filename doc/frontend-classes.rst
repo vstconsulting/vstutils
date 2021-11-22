@@ -55,6 +55,9 @@ Fields
 .. js:autoclass:: MultipleNamedBinaryImageField
    :members:
 
+.. js:autoclass:: DeepFKField
+   :members:
+
 .. js:autoclass:: FKAutocompleteField
    :members:
 

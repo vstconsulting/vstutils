@@ -41,6 +41,8 @@ TRANSLATION = {
     'more info': 'thêm thông tin',
     'search by': 'tìm kiếm theo',
     'Search': 'Tìm kiếm ',
+    'Selected': 'Đã chọn',
+    'Nothing found!': 'Không tìm thấy gì!',
 
     # x-menu generic
     'system': 'Hệ thống',

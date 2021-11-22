@@ -1,5 +1,6 @@
-import * as autocomolete from './autocomplete';
+import * as autocomplete from './autocomplete';
 import * as fk from './fk';
 import * as multiAutocomplete from './multi-autocomplete';
+import * as deepFk from './deep-fk';
 
-export { autocomolete, fk, multiAutocomplete };
+export { autocomplete, fk, multiAutocomplete, deepFk };

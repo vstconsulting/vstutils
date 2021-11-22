@@ -7,6 +7,7 @@ from vstutils.api.serializers import VSTSerializer, BaseSerializer
 from vstutils.api.fields import (
     FkModelField,
     MaskedField,
+    DeepFkField,
     PhoneField,
     RatingField,
     RelatedListField,
@@ -70,23 +71,37 @@ class Author(BModel):
         }
 
 
+class Category(BModel):
+    name = models.CharField(max_length=256)
+    parent = models.ForeignKey('self', null=True, default=None, on_delete=models.CASCADE)
+
+    deep_parent_field = 'parent'
+    deep_parent_allow_append = True
+
+    class Meta:
+        default_related_name = 'categories'
+        _list_fields = _detail_fields = ('id', 'name', 'parent')
+
+
 class Post(BModel):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     text = models.TextField()
     rating = models.FloatField(default=0)
     fa_icon_rating = models.FloatField(default=0)
+    category = models.ForeignKey(Category, null=True, on_delete=models.CASCADE)
 
     class Meta:
         default_related_name = 'post'
         _list_fields = ['author', 'title']
-        _detail_fields = ['author', 'title', 'text', 'rating', 'fa_icon_rating']
+        _detail_fields = ['author', 'title', 'text', 'rating', 'fa_icon_rating', 'category']
         _override_list_fields = {
             'author': FkModelField(select=Author, read_only=True)
         }
         _override_detail_fields = {
             'author': FkModelField(select=Author, read_only=True),
-            'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10)
+            'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10),
+            'category': DeepFkField(select='test_proj.Category', allow_null=True, required=False, only_last_child=True),
         }
         _filterset_fields = {
             '__authors': filters.CharFilter(method=filters.extra_filter, field_name='author'),

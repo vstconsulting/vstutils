@@ -1628,6 +1628,23 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['default'], '13.37')
         self.assertDictEqual(api['definitions']['OneAuthor']['properties']['decimal'][X_OPTIONS], {'decimal_places': 2, 'max_digits': 5})
 
+        # Check DeepFk field
+        self.assertEqual(api['definitions']['OnePost']['properties']['category']['format'], 'deep_fk')
+        self.assertDictEqual(
+            api['definitions']['OnePost']['properties']['category'][X_OPTIONS],
+            {
+                 'makeLink': True,
+                 'model': {'$ref': '#/definitions/Category'},
+                 'usePrefetch': True,
+                 'value_field': 'id',
+                 'view_field': 'name',
+                 'dependence': None,
+                 'filters': None,
+                 'parent_field_name': 'parent',
+                 'only_last_child': True,
+            }
+        )
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')
@@ -3185,7 +3202,8 @@ class ProjectTestCase(BaseTestCase):
             'title': 'exm_post',
             'rating': 8.0,
             'fa_icon_rating': 0.0,
-            'text': 'lorem'
+            'text': 'lorem',
+            'category': None,
         }
         post = Post.objects.create(**post_data)
         post_data['rating'] = 25
@@ -3196,7 +3214,7 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'get', 'path': ['author', author.id, 'post']},
             {'method': 'get', 'path': ['author', author.id, 'post', '<<1[data][results][0][id]>>']},
         ])
-        post_data['rating'] = 8
+        post_data['rating'] = 8.0
         self.assertEqual(['Ensure this value is less than or equal to 10.'], results[0]['data']['rating'])
         self.assertDictEqual(post_data, results[2]['data'])
 
