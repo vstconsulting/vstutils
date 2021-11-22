@@ -465,7 +465,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'broker_transport_options': {}
         },
         'worker': {
-            'app': '{PROG_NAME}.wapp:app',
+            'app': os.getenv('VST_CELERY_APP', '{PROG_NAME}.wapp:app'),
             'loglevel': '{this[main][log_level]}',
             'pidfile': '/run/{PROG_NAME}_worker.pid',
             'autoscale': '{this[rpc][concurrency]},1',
@@ -1133,8 +1133,6 @@ if RPC_ENABLED:
 
     if RUN_WORKER:
         WORKER_OPTIONS = config['worker'].all()
-
-    RPC_APP_OBJECT: str = f'{VST_PROJECT}.wapp:app'
 
 # View settings
 ##############################################################
