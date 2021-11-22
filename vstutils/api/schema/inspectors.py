@@ -220,22 +220,26 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
 class FkFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
-        if isinstance(field, fields.FkField):
-            field_format = FORMAT_FK
-            options = {
-                'model': openapi.SchemaRef(
-                    self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
-                    field.select_model, ignore_unresolved=True
-                ),
-                'value_field': field.autocomplete_property,
-                'view_field': field.autocomplete_represent,
-                'usePrefetch': field.use_prefetch,
-                'makeLink': field.make_link,
-                'dependence': field.dependence,
-                'filters': field.filters,
-            }
-        else:
+        if not isinstance(field, fields.FkField):
             return NotHandled
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+
+        field_format = FORMAT_FK
+        options = {
+            'model': openapi.SchemaRef(
+                self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
+                field.select_model, ignore_unresolved=True
+            ),
+            'value_field': field.autocomplete_property,
+            'view_field': field.autocomplete_represent,
+            'usePrefetch': field.use_prefetch,
+            'makeLink': field.make_link,
+            'dependence': field.dependence,
+            'filters': field.filters,
+        }
 
         if isinstance(field, fields.DeepFkField):
             field_format = FORMAT_DEEP_FK
@@ -245,9 +249,6 @@ class FkFieldInspector(FieldInspector):
                 'parent_field_name': field.parent_field_name,
             }
 
-        SwaggerType, ChildSwaggerType = self._get_partial_types(
-            field, swagger_object_type, use_references, **kw
-        )
         kwargs = {
             'type': openapi.TYPE_INTEGER,
             'format': field_format,
