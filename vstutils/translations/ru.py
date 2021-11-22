@@ -41,6 +41,8 @@ TRANSLATION = {
     'more info': 'подробнее',
     'search by': 'поиск по полю',
     'Search': 'Поиск',
+    'Selected': 'Выбрано',
+    'Nothing found!': 'Ничего не найдено!',
 
     # x-menu generic
     'system': 'Система',

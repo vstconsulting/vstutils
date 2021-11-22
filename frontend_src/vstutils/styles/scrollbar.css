@@ -1,0 +1,31 @@
+:root {
+    --scroll-base: var(--white);
+    --scrollThumb-base: #8f8f8f;
+    --scrollThumb-hover: #616161;
+}
+
+.dark-mode {
+    --scroll-base: var(--dark);
+    --scrollThumb-base: #616161;
+    --scrollThumb-hover: #424242;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--scroll-base);
+}
+::-webkit-scrollbar-corner {
+    background: var(--scroll-base);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollThumb-base);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollThumb-hover);
+}
+::-webkit-scrollbar-thumb:active {
+    background: var(--scrollThumb-hover);
+}

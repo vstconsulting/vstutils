@@ -41,6 +41,8 @@ TRANSLATION = {
     "more info": '输入价值',
     "search by": '更详尽',
     'Search': '搜索 ',
+    'Selected': '选中',
+    'Nothing found!': '没有发现！',
 
     # x-menu generic
     'system': '范围查找',

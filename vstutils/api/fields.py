@@ -522,6 +522,20 @@ class FkModelField(FkField):
             return value  # type: ignore
 
 
+class DeepFkField(FkModelField):
+    """
+    Extends :class:`.FkModelField`, but displays as tree on frontend
+    :param only_last_child: if True then only allows a value to be selected if it has no children
+    :type only_last_child: bool
+    :param parent_field_name: name of parent field in model
+    :type parent_field_name: str
+    """
+    def __init__(self, only_last_child: bool = False, parent_field_name='parent', **kwargs):
+        super().__init__(**kwargs)
+        self.only_last_child = only_last_child
+        self.parent_field_name = parent_field_name
+
+
 class UptimeField(IntegerField):
     """
     Field for some uptime(time duration), in seconds, for example.

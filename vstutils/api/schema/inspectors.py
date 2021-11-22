@@ -37,6 +37,7 @@ FORMAT_RELATED_LIST = 'related_list'
 FORMAT_RATING = 'rating'
 FORMAT_PHONE = 'phone'
 FORMAT_MASKED = 'masked'
+FORMAT_DEEP_FK = 'deep_fk'
 FORMAT_DECIMAL = 'decimal'
 
 X_OPTIONS = 'x-options'
@@ -219,16 +220,9 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
 class FkFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         # pylint: disable=unused-variable,invalid-name
-        if not isinstance(field, fields.FkField):
-            return NotHandled
-
-        SwaggerType, ChildSwaggerType = self._get_partial_types(
-            field, swagger_object_type, use_references, **kw
-        )
-        kwargs = {
-            'type': openapi.TYPE_INTEGER,
-            'format': FORMAT_FK,
-            X_OPTIONS: {
+        if isinstance(field, fields.FkField):
+            field_format = FORMAT_FK
+            options = {
                 'model': openapi.SchemaRef(
                     self.components.with_scope(openapi.SCHEMA_DEFINITIONS),
                     field.select_model, ignore_unresolved=True
@@ -238,8 +232,26 @@ class FkFieldInspector(FieldInspector):
                 'usePrefetch': field.use_prefetch,
                 'makeLink': field.make_link,
                 'dependence': field.dependence,
-                'filters': field.filters
+                'filters': field.filters,
             }
+        else:
+            return NotHandled
+
+        if isinstance(field, fields.DeepFkField):
+            field_format = FORMAT_DEEP_FK
+            options = {
+                **options,
+                'only_last_child': field.only_last_child,
+                'parent_field_name': field.parent_field_name,
+            }
+
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+        kwargs = {
+            'type': openapi.TYPE_INTEGER,
+            'format': field_format,
+            X_OPTIONS: options,
         }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
