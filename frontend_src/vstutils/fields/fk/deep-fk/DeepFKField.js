@@ -17,6 +17,7 @@ class DeepFKField extends FKField {
             querysets: this.getAllQuerysets(this.constructor.app.getCurrentViewPath()),
         });
         return queryset
+            .clone({ prefetchEnabled: false })
             .filter({ offset, limit: this.limit })
             .items()
             .then((instances) => {
