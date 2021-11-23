@@ -524,10 +524,11 @@ class FkModelField(FkField):
 
 class DeepFkField(FkModelField):
     """
-    Extends :class:`.FkModelField`, but displays as tree on frontend
-    :param only_last_child: if True then only allows a value to be selected if it has no children
+    Extends :class:`.FkModelField`, but displays as tree on frontend.
+
+    :param only_last_child: if True then only allows a value to be selected if it has no children. Default is `False`
     :type only_last_child: bool
-    :param parent_field_name: name of parent field in model
+    :param parent_field_name: name of parent field in model. Default is `parent`
     :type parent_field_name: str
     """
     def __init__(self, only_last_child: bool = False, parent_field_name='parent', **kwargs):

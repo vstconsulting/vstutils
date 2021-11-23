@@ -27,7 +27,7 @@
         </h5>
         <LiquorTree
             v-if="loaded"
-            class="tree1"
+            ref="tree"
             :options="treeOptions"
             :filter="treeFilter"
             :data="treeData"
@@ -66,9 +66,30 @@
             this.field.makeRequest().then((results) => {
                 this.treeData = this.field.createTreeData(results);
                 this.loaded = true;
+
+                if (this.value) {
+                    this.setValue(
+                        results.find((instance) => this.field.getValueFieldValue(instance) === this.value),
+                    );
+                }
+                this.$nextTick().then(() => {
+                    this.selectOnLoad();
+                });
             });
         },
         methods: {
+            selectOnLoad() {
+                if (!this.value) return;
+                this.selectedNode = this.$refs.tree
+                    .findAll(this.field.getViewFieldValue(this.value))
+                    .find((node) => node.id === this.field.getValueFieldValue(this.value));
+                this.selectedNode.select();
+                let node = this.selectedNode;
+                while (node.parent) {
+                    node = node.parent;
+                    node.expand();
+                }
+            },
             selected(node) {
                 if (!this.onlyLastChild || !node.children.length) {
                     this.setValue(node.data.instance);
