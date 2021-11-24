@@ -61,7 +61,7 @@ class DeepFKField extends FKField {
                 children: data[i].children,
             };
 
-            if (![null, node.id].includes(node.parent)) {
+            if (![null, node.id].includes(node.parent) && idsByIndex.has(node.parent)) {
                 data[idsByIndex.get(node.parent)].children.push(node);
             } else {
                 roots.push(node);

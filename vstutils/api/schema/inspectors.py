@@ -206,7 +206,11 @@ class DynamicJsonTypeFieldInspector(FieldInspector):
         else:
             field_format = FORMAT_DYN
             options['choices'] = field.choices
-            options['types'] = field.types
+            options['types'] = {}
+            for name, field_type in field.types.items():
+                if isinstance(field_type, Field):
+                    field_type = self.probe_field_inspectors(field_type, swagger_object_type, False)
+                options['types'][name] = field_type
 
         kwargs = {
             'type': openapi.TYPE_STRING,
@@ -248,6 +252,7 @@ class FkFieldInspector(FieldInspector):
                 'only_last_child': field.only_last_child,
                 'parent_field_name': field.parent_field_name,
             }
+            del options['dependence']
 
         kwargs = {
             'type': openapi.TYPE_INTEGER,

@@ -1638,12 +1638,43 @@ class OpenapiEndpointTestCase(BaseTestCase):
                  'usePrefetch': True,
                  'value_field': 'id',
                  'view_field': 'name',
-                 'dependence': None,
                  'filters': None,
                  'parent_field_name': 'parent',
                  'only_last_child': True,
             }
         )
+
+        # Check dynamic field with complex types
+        nested_model = {
+            'type': 'object',
+            'properties': {
+                'field1': {'title': 'Field1', 'type': 'string', 'minLength': 1},
+                'field2': {'title': 'Field2', 'type': 'integer'}
+            },
+            'required': ['field1', 'field2']
+        }
+
+        self.assertDictEqual(api['definitions']['DynamicFields']['properties']['dynamic_with_types'], {
+            'title': 'Dynamic with types',
+            'type': 'string',
+            'format': 'dynamic',
+            'x-options': {
+                'choices': {},
+                'field': 'field_type',
+                'types': {
+                    'boolean': 'boolean',
+                    'many_serializers': {
+                        'type': 'array',
+                        'items': nested_model,
+                    },
+                    'integer': {
+                        'type': 'integer',
+                        'maximum': 1337,
+                    },
+                    'serializer': nested_model,
+                },
+            },
+        })
 
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
@@ -3336,6 +3367,59 @@ class ProjectTestCase(BaseTestCase):
         self.assertIsInstance(test_create.some_multiplefile_none[0], MultipleFieldFile)
         self.assertEqual([], test_obj.some_multiplefile)
         self.assertEqual([], test_obj.some_multiplefile_none)
+
+    def test_dynamic_field_types(self):
+        results = self.bulk([
+            # [0] Create with field_type that is not in types
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'unknown',
+                'dynamic_with_types': {},
+            }},
+            # [1] Invalid data (not integer)
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'integer',
+                'dynamic_with_types': {},
+            }},
+            # [2] Invalid data (empty dict)
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'serializer',
+                'dynamic_with_types': {},
+            }},
+            # [3] Valid data
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'integer',
+                'dynamic_with_types': 5,
+            }},
+            # [4]
+            {'method': 'get', 'path': ['dynamic_fields', '<<3[data][id]>>']},
+            # [5] Valid data
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'serializer',
+                'dynamic_with_types': {'field1': 'testValue', 'field2': -1},
+            }},
+            # [6]
+            {'method': 'get', 'path': ['dynamic_fields', '<<5[data][id]>>']},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+
+        self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(results[1]['data'], {'dynamic_with_types': ['A valid integer is required.']})
+
+        self.assertEqual(results[2]['status'], 400)
+        self.assertEqual(results[2]['data'], {'dynamic_with_types': {
+            'field1': ['This field is required.'],
+            'field2': ['This field is required.'],
+        }})
+
+        self.assertEqual(results[3]['status'], 201)
+        self.assertEqual(results[3]['data']['dynamic_with_types'], 5)
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data']['dynamic_with_types'], 5)
+
+        self.assertEqual(results[5]['status'], 201)
+        self.assertEqual(results[5]['data']['dynamic_with_types'], {'field1': 'testValue', 'field2': -1})
+        self.assertEqual(results[6]['status'], 200)
+        self.assertEqual(results[6]['data']['dynamic_with_types'], {'field1': 'testValue', 'field2': -1})
 
     def test_model_namedbinfile_field(self):
         file = get_file_value(os.path.join(DIR_PATH, 'image_b64_valid'))

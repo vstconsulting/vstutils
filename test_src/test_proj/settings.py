@@ -77,6 +77,9 @@ API[VST_API_VERSION][r'vartype'] = dict(
 API[VST_API_VERSION][r'cachable'] = dict(
     model='test_proj.models.CachableProxyModel'
 )
+API[VST_API_VERSION][r'dynamic_fields'] = dict(
+    model='test_proj.models.dynamic_fields.DynamicFields'
+)
 API['v2'][r'testbinaryfiles2'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'
 )

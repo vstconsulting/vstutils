@@ -221,12 +221,32 @@ class DynamicJsonTypeField(VSTCharField):
         self.types = kwargs.pop('types', {})
         super().__init__(**kwargs)
 
+    @raise_context_decorator_with_default(default=None)
+    def get_real_field(self, data) -> _t.Optional[Field]:
+        if isinstance(data, dict):
+            depend_value = data.get(self.field, None)
+        else:
+            depend_value = getattr(data, self.field, None)
+        field = self.types.get(depend_value)
+        if isinstance(field, Field):
+            return field
+        return None
+
     def to_internal_value(self, data):
-        return super().to_internal_value(data) if self.to_json else data
+        real_field = self.get_real_field(self.parent.initial_data)
+        if real_field:
+            data = real_field.to_internal_value(data)
+        if self.to_json:
+            return super().to_internal_value(data)
+        return data
 
     def to_representation(self, value):
-        with raise_context():
-            value = json.loads(value) if self.to_json else value
+        if self.to_json:
+            with raise_context():
+                value = json.loads(value)
+        real_field = self.get_real_field(self.parent.instance)
+        if real_field:
+            return real_field.to_representation(value)
         return value
 
 
@@ -317,6 +337,9 @@ class DependFromFkField(DynamicJsonTypeField):
             raise ValidationError(errors)
 
         return value
+
+    def get_real_field(self, data) -> _t.Optional[Field]:
+        return None
 
 
 class TextareaField(VSTCharField):
@@ -525,6 +548,10 @@ class FkModelField(FkField):
 class DeepFkField(FkModelField):
     """
     Extends :class:`.FkModelField`, but displays as tree on frontend.
+
+    .. warning::
+        This field does not support ``dependence``.
+        Use ``filters`` at your own risk, as it would rather break the tree structure.
 
     :param only_last_child: if True then only allows a value to be selected if it has no children. Default is `False`
     :type only_last_child: bool

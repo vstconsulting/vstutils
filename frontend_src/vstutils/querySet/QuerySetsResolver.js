@@ -1,4 +1,4 @@
-import { pathToArray, RequestTypes } from '../utils';
+import { pathToArray, RequestTypes, ViewTypes } from '../utils';
 
 /**
  * @class QuerySetsResolver chooses appropriate queryset for path.
@@ -52,9 +52,16 @@ export class QuerySetsResolver {
      */
     _getMatcher(modelName) {
         return (view) => {
+            if (view.type !== ViewTypes.LIST) {
+                return;
+            }
             const listModel = view?.objects?.getResponseModelClass(RequestTypes.LIST);
 
             if (listModel && listModel.name === modelName) {
+                if (view.deepNestedParentView) {
+                    // For deep nested views use root view
+                    view = view.deepNestedParentView;
+                }
                 return view.objects.clone();
             }
 

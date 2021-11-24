@@ -123,6 +123,8 @@ export default class ViewConstructor {
 
         const editStyleViewDefault = schema.info[EDIT_STYLE_PROPERTY_NAME];
 
+        const deepNestedParents = [];
+
         for (const path of paths) {
             const pathSchema = viewsSchema[path];
             const dataType = pathToArray(path);
@@ -162,6 +164,10 @@ export default class ViewConstructor {
                 .filter(isPathParam)
                 .map((paramSchema) => this.fieldsResolver.resolveField(paramSchema));
 
+            const deepNestedOn = deepNestedParents.find((deepParentView) =>
+                path.startsWith(deepParentView.path),
+            );
+
             for (const httpMethod of HttpMethods.ALL) {
                 const operationSchema = pathSchema[httpMethod];
                 if (!operationSchema) continue;
@@ -176,7 +182,7 @@ export default class ViewConstructor {
                 const responseModel = this._getOperationModel(response);
 
                 const operationOptions = mergeDeep(
-                    { method: httpMethod, requestModel, responseModel },
+                    { method: httpMethod, requestModel, responseModel, isDeepNested: Boolean(deepNestedOn) },
                     commonOptions,
                     operationSchema,
                     this.getOperationOptions(operationId, path, httpMethod),
@@ -190,8 +196,15 @@ export default class ViewConstructor {
                         operationOptions.parameters,
                         responseModel,
                     );
+                    const qsPath = deepNestedOn
+                        ? joinPaths(
+                              deepNestedOn.deepNestedParentView.path,
+                              `{${deepNestedOn.pageView.pkParamName}}`,
+                              dataType.last,
+                          )
+                        : path;
                     const qs = new QuerySet(
-                        path,
+                        qsPath,
                         { [RequestTypes.LIST]: [null, responseModel] },
                         {},
                         pathParameters,
@@ -304,7 +317,7 @@ export default class ViewConstructor {
                 parent.sublinks.set(listView.params.name, {
                     name: listView.params.name,
                     title: listView.params.title,
-                    href: listView.path,
+                    appendFragment: listView.params.name,
                 });
 
             // Edit style views
@@ -423,6 +436,8 @@ export default class ViewConstructor {
 
                     delete listView.filters.__deep_parent;
                     delete deepRoot.filters.__deep_parent;
+
+                    deepNestedParents.push(listView);
                 }
             }
 
