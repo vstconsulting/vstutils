@@ -260,7 +260,7 @@ class FKField extends BaseField {
     getAppropriateQuerySet({ data, querysets, path } = {}) {
         const [qs] = querysets || this.querysets.get(path) || [];
         if (qs) {
-            return this._formatQuerysetPath(qs);
+            return this._formatQuerysetPath(qs).filter(this.filters || {});
         }
     }
 

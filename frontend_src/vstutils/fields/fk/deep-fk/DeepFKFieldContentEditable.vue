@@ -66,11 +66,9 @@
             this.field.makeRequest().then((results) => {
                 this.treeData = this.field.createTreeData(results);
                 this.loaded = true;
-
                 if (this.value) {
-                    this.setValue(
-                        results.find((instance) => this.field.getValueFieldValue(instance) === this.value),
-                    );
+                    const pk = this.field.getValueFieldValue(this.value);
+                    this.setValue(results.find((instance) => this.field.getValueFieldValue(instance) === pk));
                 }
                 this.$nextTick().then(() => {
                     this.selectOnLoad();

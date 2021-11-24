@@ -51,6 +51,8 @@ export { ViewTypes };
  * View class - constructor, that returns view object.
  */
 export class View {
+    static viewType = null;
+
     /**
      * @type {Map<string, Sublink>}
      */
@@ -73,13 +75,14 @@ export class View {
     constructor(params, objects, mixins = []) {
         this.params = params;
         this.objects = objects;
-        this.type = params.type;
+        this.type = params.type || this.constructor.viewType;
         this.operationId = params.operationId;
         this.level = params.level;
         this.name = params.name;
         /** @type {string} */
         this.path = params.path;
         this.title = params.title || params.name;
+        this.isDeepNested = params.isDeepNested;
 
         this.hidden = params['x-hidden'];
 
@@ -166,6 +169,8 @@ export class View {
 }
 
 export class ListView extends View {
+    static viewType = ViewTypes.LIST;
+
     /**
      * @type {Map<string, Action>}
      */
@@ -202,6 +207,9 @@ export class ListView extends View {
                 this.deepNestedParentView.pageView.pkParamName,
             ]);
         }
+        if (this.isDeepNested) {
+            return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
+        }
         return super.getRoutePath();
     }
 
@@ -211,6 +219,8 @@ export class ListView extends View {
 }
 
 export class PageView extends View {
+    static viewType = ViewTypes.PAGE;
+
     /**
      * @type {ListView}
      */
@@ -246,6 +256,8 @@ export class PageView extends View {
 }
 
 export class PageNewView extends View {
+    static viewType = ViewTypes.PAGE_NEW;
+
     /**
      * @type {Map<string, Action>}
      */
@@ -277,6 +289,8 @@ export class PageNewView extends View {
 }
 
 export class PageEditView extends PageView {
+    static viewType = ViewTypes.PAGE_EDIT;
+
     isEditStyleOnly = false;
 
     constructor(params, objects, mixins = [PageEditViewComponent]) {
@@ -299,6 +313,8 @@ export class PageEditView extends PageView {
 }
 
 export class ActionView extends View {
+    static viewType = ViewTypes.ACTION;
+
     constructor(params, objects, mixins = [ActionViewComponent]) {
         super(params, objects, mixins);
 
