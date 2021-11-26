@@ -7,10 +7,11 @@ from vstutils.api import responses, filter_backends
 from vstutils.api.views import SettingsViewSet
 from vstutils.api.base import NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
-from vstutils.api.serializers import EmptySerializer, DataSerializer
+from vstutils.api.serializers import DataSerializer
 from vstutils.api.auth import UserViewSet
+from vstutils.utils import create_view
 
-from .models import Host, HostGroup, ModelWithBinaryFiles
+from .models import Host, HostList, HostGroup, ModelWithBinaryFiles
 
 
 class TestFilterBackend(filter_backends.VSTFilterBackend):
@@ -160,3 +161,9 @@ class SettingsViewSetV2(SettingsViewSet):
         return responses.HTTP_200_OK('OK')  # nocv
 
     localization = None
+
+
+HostListViewSet = create_view(
+    HostList,
+    view_class='list_only'
+)

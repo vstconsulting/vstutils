@@ -88,7 +88,6 @@ class Host(BModel):
 class HostList(Host):
     class Meta:
         proxy = True
-        _view_class = 'list_only'
 
 
 class HostGroup(BModel):

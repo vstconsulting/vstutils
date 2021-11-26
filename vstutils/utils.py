@@ -253,6 +253,37 @@ def lazy_translate(text: tp.Text) -> functional.Promise:
     return functional.lazy(translate, str)(text)
 
 
+def create_view(model, **meta_options):
+    """
+    A simple function for getting the generated view by standard means, but with overloaded meta-parameters.
+    This method can completely get rid of the creation of proxy models.
+
+    Example:
+        .. sourcecode:: python
+
+            from vstutils.utils import create_view
+
+            from .models import Host
+
+            # Host model has full :class:`vstutils.api.base.ModelViewSet` view.
+            # For overriding and create simple list view just setup this:
+            HostListViewSet = create_view(
+                HostList,
+                view_class='list_only'
+            )
+
+
+    .. note::
+        This method is also recommended in cases where there is a problem of recursive imports.
+
+
+    :type model: Type[vstutils.models.BaseModel]
+    :param model: Model class with `.get_view_class` method. This method also has :class:`vstutils.models.BModel`.
+    :rtype: vstutils.api.base.GenericViewSet
+    """
+    return model.get_view_class(**meta_options)
+
+
 class apply_decorators:
     """
     Decorator which apply list of decorators on method or class.
