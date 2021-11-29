@@ -112,6 +112,7 @@ class TestBinaryFilesViewSet(ModelWithBinaryFiles.generated_view):
 
 class RequestInfoTestView(NonModelsViewSet):
     base_name = 'request_info'
+    serializer_class = DataSerializer
 
     def list(self, request):
         start_time = time.time()

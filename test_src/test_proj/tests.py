@@ -2837,6 +2837,10 @@ class ProjectTestCase(BaseTestCase):
             [('FIRST', 'FIRST',), ('SECOND', 'SECOND'), ('THIRD', 'THIRD')]
         )
 
+        self.assertTrue({"FIRST": True}.get(FieldChoices.FIRST))
+        self.assertTrue({"FIRST": True}[FieldChoices.FIRST])
+
+        self.assertEqual(repr(FieldChoices.FIRST.name), repr(FieldChoices.FIRST))
 
     @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_hierarchy(self):

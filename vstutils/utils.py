@@ -1270,7 +1270,7 @@ def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = list) 
     return response_type(map(lambda x: (x, x), items_list))
 
 
-class BaseEnum(Enum):
+class BaseEnum(str, Enum):
     """
     BaseEnum extends `Enum` class and used to create enum-like objects that can be used in django serializers or
     django models.
@@ -1297,11 +1297,17 @@ class BaseEnum(Enum):
 
     """
 
+    def __new__(cls, name):
+        return str.__new__(cls, name)
+
     def __repr__(self):
-        return str(self.name)
+        return repr(self.__str__())
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.name)
+
+    def __hash__(self):
+        return hash(str(self))
 
     @classmethod
     def get_names(cls):
