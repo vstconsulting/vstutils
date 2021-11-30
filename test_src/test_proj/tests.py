@@ -4035,6 +4035,9 @@ class CustomModelTestCase(BaseTestCase):
         self.assertTrue(File.objects.all()[1:2].query['low_mark'], 1)
         self.assertTrue(File.objects.all()[1:2].query['high_mark'], 2)
 
+        list_qs = List.objects.setup_custom_queryset_kwargs(data_source=[])
+        self.assertEqual(list_qs.count(), 0)
+
     def test_custom(self):
         self.client.logout()
         results = self.bulk([

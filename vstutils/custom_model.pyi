@@ -47,7 +47,7 @@ class CustomModelIterable(ModelIterable):
 class ListModel(BaseModel):
     data: _t.ClassVar[_t.List[_t.Dict]]
 
-    def _get_data(self, chunked_fetch: bool = False) -> _t.List[_t.Dict]:
+    def _get_data(self, chunked_fetch: bool = False, data_source: _t.Iterable = None) -> _t.List[_t.Dict]:
         ...
 
 

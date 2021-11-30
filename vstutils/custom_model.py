@@ -39,7 +39,7 @@ class Query(dict):
     def standard_ordering(self, value):
         self['standard_ordering'] = bool(value)
 
-    def chain(self):  # nocv
+    def chain(self):
         return self.clone()
 
     def clone(self):
@@ -124,7 +124,10 @@ class CustomModelIterable(ModelIterable):
         queryset = self.queryset
         model = queryset.model
         query = queryset.query
-        model_data = model._get_data(chunked_fetch=self.chunked_fetch)
+        model_data = model._get_data(
+            chunked_fetch=self.chunked_fetch,
+            **query.get('custom_queryset_kwargs', {})
+        )
         model_data = list(filter(query.check_in_query, model_data))
         ordering = query.order_by
         if ordering:
@@ -153,7 +156,7 @@ class CustomQuerySet(BQuerySet):
     custom_query_class = Query
 
     def _filter_or_exclude(self, negate, *args, **kwargs):
-        clone = self._clone()
+        clone = self._chain()
         if negate:
             filter_type = 'exclude'
         else:
@@ -182,6 +185,11 @@ class CustomQuerySet(BQuerySet):
         clone.__iterable_class__ = type('CustomModelIterableValues', (object,), {'fields': fields})
         return clone
 
+    def setup_custom_queryset_kwargs(self, **kwargs):
+        qs = self._chain()
+        qs.query['custom_queryset_kwargs'] = deepcopy(kwargs)
+        return qs
+
 
 class ListModel(BaseModel):
     """
@@ -201,6 +209,28 @@ class ListModel(BaseModel):
                     {"name": "Sergey Klyuykov"},
                     {"name": "Michael Taran"},
                 ]
+
+    Sometimes, it may be necessary to switch the data source. For these purposes,
+    you should use the `setup_custom_queryset_kwargs` function, which takes various named arguments,
+    which are also passed to the data initialization function.
+    One such argument for :class:`ListModel` is date_source, which takes any iterable object.
+
+    Examples:
+        .. sourcecode:: python
+
+            from vstutils.custom_model import ListModel, CharField
+
+
+            class Authors(ListModel):
+                name = CharField(max_length=512)
+
+            qs = Authors.objects.setup_custom_queryset_kwargs(data_source=[
+                {"name": "Sergey Klyuykov"},
+                {"name": "Michael Taran"},
+            ])
+
+    In this case, we setup source list via `setup_custom_queryset_kwargs` function, and any other chained call
+    is going to work with this data.
     """
 
     #: List with data dicts. Empty by default.
@@ -211,9 +241,9 @@ class ListModel(BaseModel):
         abstract = True
 
     @classmethod
-    def _get_data(cls, chunked_fetch=False):
+    def _get_data(cls, chunked_fetch=False, data_source=None):
         # pylint: disable=unused-argument
-        return deepcopy(cls.data)
+        return deepcopy(cls.data if data_source is None else data_source)
 
 
 class FileModel(ListModel):
