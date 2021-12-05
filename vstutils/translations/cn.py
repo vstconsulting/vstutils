@@ -188,6 +188,9 @@ TRANSLATION = {
     # email
     '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': '应在 <b>"example@mail.com"</b>.范围内完成<b>"{0}"</b>',
 
+    # validators
+    'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
+
     # instance operation success
     # add
     'Child "<b>{0}</b>" instance was successfully added to parent list.': '子对象“ <b> {0} </ b>”已成功添加到母列表中.',
@@ -223,7 +226,6 @@ SERVER_TRANSLATION = {
     'unsupported image file format, expected ({0}), got {1}': '不支持的图像格式，支持（{0}），已收到{1}',
     'For some reason, this image file cannot be opened': '无法打开图像文件',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': "{0}图片不正确。 预期从{1}到{2}，收到{3}",
-    'imageValidationResolutionError': "必须至少为{min}且不超过{max}个像素",
     'This field must contain only digits but input: ': '此字段必须仅包含数字但输入：',
     'Unsupported image file format': '不支持的图像文件格式',
     'is not in listed supported types': '不在列出的受支持类型中',

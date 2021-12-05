@@ -83,7 +83,9 @@
             },
         },
         watch: {
-            image: 'updateCroppie',
+            image() {
+                this.cropper.replace(makeDataImageUrl(this.image));
+            },
         },
         mounted() {
             this.cropper = new Cropper(this.$refs.image, {

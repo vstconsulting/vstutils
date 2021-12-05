@@ -10,10 +10,9 @@ export default {
     }),
     methods: {
         async readFiles(files) {
+            files = Array.from(files);
             const results = [];
-
-            for (let index = 0; index < files.length; index++) {
-                const file = files[index];
+            for (const file of files) {
                 if (!file || !this.$parent.validateFileSize(file.size)) {
                     return;
                 }
