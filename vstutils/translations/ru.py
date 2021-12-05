@@ -187,6 +187,9 @@ TRANSLATION = {
     # email
     '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': 'Поле <b>"{0}"</b> должно быть заполнено в формате <b>"example@mail.com"</b>.',
 
+    # validators
+    'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
+
     # instance operation success
     # add
     'Child "<b>{0}</b>" instance was successfully added to parent list.': 'Дочерний объект "<b>{0}</b>" был успешно добавлен в родительский список.',
@@ -223,7 +226,6 @@ SERVER_TRANSLATION = {
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображения. Поддерживается ({0}), получен {1}',
     'For some reason, this image file cannot be opened': 'Не удалось открыть изображение',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Некорректная {0} изображения. Ожидалось от {1} до {2}, получено {3}',
-    'imageValidationResolutionError': 'Должно быть не меньше {min} и не больше {max} px.',
     'This field must contain only digits but input: ': 'Это поле должно содержать только цифры, но введено: ',
     'Unsupported image file format': 'Не поддерживаемый: формат файла',
     'is not in listed supported types': 'не представлен в списке поддерживаемых типов',

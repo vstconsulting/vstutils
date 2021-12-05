@@ -18,6 +18,7 @@ export default {
     methods: {
         onChange(event) {
             this.$emit('read-file', event.target.files);
+            event.target.value = null;
         },
     },
 };

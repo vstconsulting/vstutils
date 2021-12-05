@@ -187,6 +187,8 @@ TRANSLATION = {
     # email
     '<b>"{0}"</b> field should be written in <b>"example@mail.com"</b> format.': 'Trường <b> "{0}" </b> phải làm như <b> "example@mail.com" </b>.',
 
+    # validators
+    'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
 
     # instance operation success
     # add
@@ -223,7 +225,6 @@ SERVER_TRANSLATION = {
     'unsupported image file format, expected ({0}), got {1}': 'Định dạng hình ảnh không được hỗ trợ, Được hỗ trợ ({0}), đã nhận {1}',
     'For some reason, this image file cannot be opened': 'Không thể mở file hình ảnh',
     'Invalid image {0}. Expected from {1} to {2}, got {3}': 'Hình ảnh {0} không chính xác. Dự kiến ​​từ {1} đến {2}, đã nhận {3}',
-    'imageValidationResolutionError': 'Phải có ít nhất {min} và không nhiều hơn {max} pixel.',
     'This field must contain only digits but input: ': 'Trường này chỉ được chứa các chữ số nhưng nhập: ',
     'Unsupported image file format': 'Định dạng tệp hình ảnh không được hỗ trợ',
     'is not in listed supported types': 'không có trong các loại được hỗ trợ được liệt kê',
