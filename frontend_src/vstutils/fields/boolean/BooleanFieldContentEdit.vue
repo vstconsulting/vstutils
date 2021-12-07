@@ -13,6 +13,7 @@
             <div class="ico-off fa fa-toggle-off" />
         </div>
         <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
+        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
     </div>
 </template>
 

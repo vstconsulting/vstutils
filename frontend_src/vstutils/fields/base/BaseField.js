@@ -1,6 +1,7 @@
 import { _translate, capitalize, deepEqual, nameToTitle, X_OPTIONS } from '../../utils';
 import { pop_up_msg } from '../../popUp';
 import BaseFieldMixin from './BaseFieldMixin.vue';
+import { i18n } from '../../translation.js';
 
 /**
  * @template TInner, TRepresent
@@ -36,7 +37,7 @@ class BaseField {
         this.model = null;
 
         /** @type {Boolean} */
-        this.hidden = options.hidden;
+        this.hidden = options['x-hidden'] || options.hidden;
 
         /** @type {string} */
         this.name = options.name;
@@ -244,6 +245,21 @@ class BaseField {
     }
     isSameValues(data1, data2) {
         return deepEqual(this.toInner(data1), this.toInner(data2));
+    }
+    parseFieldError(data, instanceData) {
+        if (!data) {
+            return '';
+        }
+        if (typeof data === 'string') {
+            return i18n.t(data);
+        }
+        if (Array.isArray(data)) {
+            return data
+                .map((item) => this.parseFieldError(item, instanceData))
+                .filter((item) => Boolean(item))
+                .join(' ');
+        }
+        return data;
     }
 }
 

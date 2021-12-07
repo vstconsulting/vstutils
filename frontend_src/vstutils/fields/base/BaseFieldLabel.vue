@@ -17,7 +17,7 @@
         mixins: [BaseFieldInnerComponentMixin, FieldLabelIdMixin],
         props: {
             type: { type: String, required: true },
-            error: { type: String, default: null },
+            error: { type: [String, Object], default: null },
         },
         computed: {
             label() {

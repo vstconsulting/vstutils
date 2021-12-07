@@ -1,5 +1,4 @@
 import { escapeHtml, hasOwnProp, mergeDeep, ModelValidationError } from '../utils';
-import { i18n } from '../translation.js';
 
 class ModelUtils {
     static pkFields = ['id', 'pk'];
@@ -376,20 +375,18 @@ export class Model {
      * @param {Object} data
      * @return {ModelValidationError|undefined}
      */
-    static parseModelValidationError(data) {
+    parseModelError(data) {
         if (!data || typeof data !== 'object' || Array.isArray(data)) {
             return;
         }
         const errors = [];
-        for (let [fieldName, message] of Object.entries(data)) {
-            const field = this.fields.get(fieldName);
+        for (let [fieldName, item] of Object.entries(data)) {
+            const field = this._fields.get(fieldName);
             if (field) {
-                if (Array.isArray(message)) {
-                    message = message.map((str) => i18n.t(str)).join(' ');
-                } else {
-                    message = i18n.t(message);
+                const message = field.parseFieldError(item, this._data);
+                if (message) {
+                    errors.push({ field, message });
                 }
-                errors.push({ field, message });
             }
         }
         if (errors.length > 0) {

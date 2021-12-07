@@ -28,7 +28,7 @@
                         :field="field"
                         :data="data"
                         :type="fieldsType"
-                        :error="fieldsErrors[field.name]"
+                        :error="fieldsErrors && fieldsErrors[field.name]"
                         :hideable="hideNotRequired && !field.required"
                         style="margin-bottom: 1rem"
                         @hide-field="hiddenFields.push(field)"
@@ -116,7 +116,7 @@
             if (this.hideNotRequired) {
                 this.hiddenFields = this.filteredFieldsInstancesGroups
                     .flatMap((group) => group.fields)
-                    .filter((field) => !field.required);
+                    .filter((field) => !field.required && this.data[field.name] === undefined);
             }
         },
         methods: {

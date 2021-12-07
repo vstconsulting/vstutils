@@ -228,13 +228,14 @@ describe('Model', () => {
         expect(user1.isEqual({ email: 'otheruser@users.com' })).toBeFalsy();
     });
 
-    test('parseModelValidationError', () => {
-        expect(User.parseModelValidationError(undefined)).toBeUndefined();
-        expect(User.parseModelValidationError(null)).toBeUndefined();
-        expect(User.parseModelValidationError([])).toBeUndefined();
-        expect(User.parseModelValidationError({})).toBeUndefined();
+    test('parseModelError', () => {
+        const user = new User({});
+        expect(user.parseModelError(undefined)).toBeUndefined();
+        expect(user.parseModelError(null)).toBeUndefined();
+        expect(user.parseModelError([])).toBeUndefined();
+        expect(user.parseModelError({})).toBeUndefined();
 
-        const modelError = User.parseModelValidationError({
+        const modelError = user.parseModelError({
             age: 'err 1',
             firstName: ['err 2', 'err 3'],
             non_existing_field: 'asd',

@@ -133,6 +133,10 @@ class DynamicField extends BaseField {
         return field;
     }
 
+    parseFieldError(data, instanceData = {}) {
+        return this.getRealField(instanceData).parseFieldError(data, instanceData);
+    }
+
     _getFromTypes(parentValues) {
         if (this.types) {
             for (const key of Object.values(parentValues)) {

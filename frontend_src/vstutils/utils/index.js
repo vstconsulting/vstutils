@@ -1194,7 +1194,7 @@ export function iterFind(iterator, callbackFn) {
 /**
  * @typedef {Object} FieldValidationErrorInfo
  * @property {BaseField} field
- * @property {string} message
+ * @property {string|Object} message
  */
 
 /**
@@ -1214,8 +1214,15 @@ export class ModelValidationError extends Error {
      */
     toFieldsErrors() {
         const fieldsErrors = {};
-        for (const error of this.errors) {
-            fieldsErrors[error.field.name] = i18n.t(error.message);
+        for (const { field, message } of this.errors) {
+            if (!message) {
+                continue;
+            }
+            if (typeof message === 'object') {
+                fieldsErrors[field.name] = message;
+            } else {
+                fieldsErrors[field.name] = i18n.t(message);
+            }
         }
         return fieldsErrors;
     }
