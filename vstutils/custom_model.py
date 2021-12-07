@@ -8,9 +8,10 @@ try:
 except ImportError:  # nocv
     from yaml import SafeLoader as Loader
 from django.db.models.query import ModelIterable
-from django.db.models.fields import CharField, TextField, IntegerField, BooleanField    # noqa: F401
+from django.db.models.fields import CharField, TextField, IntegerField, BooleanField, AutoField    # noqa: F401
 
 from .models import BQuerySet, BaseModel
+from .models.base import ModelBaseClass
 from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 
 
@@ -43,7 +44,10 @@ class Query(dict):
         return self.clone()
 
     def clone(self):
-        return deepcopy(self)
+        query = deepcopy(self)
+        if 'custom_queryset_kwargs' in self:
+            query['custom_queryset_kwargs'] = self['custom_queryset_kwargs']
+        return query
 
     def _check_data(self, check_type, data):
         # pylint: disable=protected-access
@@ -128,6 +132,9 @@ class CustomModelIterable(ModelIterable):
             chunked_fetch=self.chunked_fetch,
             **query.get('custom_queryset_kwargs', {})
         )
+        if isinstance(model._meta.pk, AutoField):
+            for idx, item in enumerate(model_data, 1):
+                item[model._meta.pk.attname] = idx
         model_data = list(filter(query.check_in_query, model_data))
         ordering = query.order_by
         if ordering:
@@ -187,11 +194,23 @@ class CustomQuerySet(BQuerySet):
 
     def setup_custom_queryset_kwargs(self, **kwargs):
         qs = self._chain()
-        qs.query['custom_queryset_kwargs'] = deepcopy(kwargs)
+        qs.query['custom_queryset_kwargs'] = kwargs
         return qs
 
 
-class ListModel(BaseModel):
+class CustomModelBase(ModelBaseClass):
+    def __new__(mcs, name, bases, attrs, **kwargs):
+        new_class = super(CustomModelBase, mcs).__new__(mcs, name, bases, attrs, **kwargs)
+        if not new_class._meta.abstract:
+            pk_name = new_class._meta.pk.attname
+            new_class.add_to_class(
+                pk_name,
+                property(new_class.get_pk_value, new_class.set_pk_value)
+            )
+        return new_class
+
+
+class ListModel(BaseModel, metaclass=CustomModelBase):
     """
     Custom model which uses a list of dicts with data (attribute `ListModel.data`) instead of database records.
     Useful when you have a simple list of data.
@@ -239,6 +258,20 @@ class ListModel(BaseModel):
 
     class Meta:
         abstract = True
+
+    def get_pk_value(self):
+        return getattr(
+            self,
+            f'_{self.__class__._meta.pk.attname}',
+            None
+        )
+
+    def set_pk_value(self, value):
+        setattr(
+            self,
+            f'_{self.__class__._meta.pk.attname}',
+            value
+        )
 
     @classmethod
     def _get_data(cls, chunked_fetch=False, data_source=None):

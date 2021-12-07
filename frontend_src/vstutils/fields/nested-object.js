@@ -1,6 +1,6 @@
 /* eslint-disable vue/one-component-per-file */
 import { BaseField, BaseFieldContentEdit, BaseFieldContentReadonlyMixin, BaseFieldMixin } from './base';
-import { registerHook } from '../utils';
+import { mapObjectValues, registerHook } from '../utils';
 import { ModelFields } from '../components/page';
 
 /**
@@ -48,8 +48,10 @@ export const NestedObjectFieldMixin = {
             return this.$createElement(ModelFields, {
                 props: {
                     editable: this.type === 'edit' && !this.field.readOnly,
-                    data: this.value,
+                    data: this.value || {},
                     model: this.field.nestedModel,
+                    fieldsErrors: this.error,
+                    hideNotRequired: this.field.hideNotRequired,
                 },
                 on: {
                     'set-value': ({ field, value }) => this.setValue({ ...this.value, [field]: value }),
@@ -69,6 +71,7 @@ export class NestedObjectField extends BaseField {
     constructor(options) {
         super(options);
         this.nestedModel = null;
+        this.hideNotRequired = Boolean(this.props.hideNotRequired);
         registerHook('app.beforeInit', this.resolveNestedModel.bind(this));
     }
     getEmptyValue() {
@@ -78,7 +81,7 @@ export class NestedObjectField extends BaseField {
         this.nestedModel = this.constructor.app.modelsResolver.bySchemaObject(this.options);
     }
     toRepresent(data) {
-        return new this.nestedModel(super.toRepresent(data));
+        return new this.nestedModel(super.toRepresent(data))._getRepresentData();
     }
     toInner(data) {
         const value = super.toInner(data);
@@ -89,5 +92,11 @@ export class NestedObjectField extends BaseField {
     }
     static get mixins() {
         return [NestedObjectFieldMixin];
+    }
+    parseFieldError(data, instanceData) {
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            return mapObjectValues(data, (item) => super.parseFieldError(item, instanceData));
+        }
+        return super.parseFieldError(data, instanceData);
     }
 }

@@ -23,13 +23,19 @@ class BooleanField(bf):
 
 
 class CustomQuerySet(BQuerySet):
-    def _filter_or_exclude(self, is_exclude, *args, **kwargs) -> BQuerySet:
+    custom_iterable_class: _t.ClassVar[_t.Type['CustomModelIterable']]
+    custom_query_class: _t.ClassVar[_t.Type['Query']]
+
+    def _filter_or_exclude(self, is_exclude, *args, **kwargs) -> 'CustomQuerySet':
         ...
 
-    def last(self) -> _t.Union[BaseModel, _t.NoReturn]:
+    def last(self) -> _t.Union[BaseModel, None]:
         ...
 
-    def first(self) -> _t.Union[BaseModel, _t.NoReturn]:
+    def first(self) -> _t.Union[BaseModel, None]:
+        ...
+
+    def setup_custom_queryset_kwargs(self, **kwargs: _t.Any) -> 'CustomQuerySet':
         ...
 
 
@@ -47,7 +53,14 @@ class CustomModelIterable(ModelIterable):
 class ListModel(BaseModel):
     data: _t.ClassVar[_t.List[_t.Dict]]
 
+    @classmethod
     def _get_data(self, chunked_fetch: bool = False, data_source: _t.Iterable = None) -> _t.List[_t.Dict]:
+        ...
+
+    def get_pk_value(self) -> _t.Any:
+        ...
+
+    def set_pk_value(self, value: _t.Any) -> None:
         ...
 
 
@@ -95,8 +108,8 @@ class Query(_t.Dict):
     def can_filter(self) -> bool:
         ...
 
-    def clear_ordering(self, *args, **kwargs) -> _t.NoReturn:
+    def clear_ordering(self, *args, **kwargs) -> None:
         ...
 
-    def add_ordering(self, *ordering) -> _t.NoReturn:
+    def add_ordering(self, *ordering) -> None:
         ...

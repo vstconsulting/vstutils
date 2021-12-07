@@ -62,7 +62,7 @@
             type: { type: String, required: true },
             hideable: { type: Boolean, default: false },
             hideTitle: { type: Boolean, default: false },
-            error: { type: String, default: null },
+            error: { type: [String, Object], default: null },
         },
         data() {
             return {
@@ -83,6 +83,7 @@
         computed: {
             wrapperClasses() {
                 const classes = [
+                    'field-component',
                     `name-${this.field.name}`,
                     `format-${this.field.format}`,
                     `type-${this.type}`,

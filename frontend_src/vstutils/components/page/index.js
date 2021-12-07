@@ -136,7 +136,7 @@ export const PageNewViewComponent = {
                 }
                 this.openPage({ path: this.getRedirectUrl({ instance }), params: { providedInstance } });
             } catch (error) {
-                const modelValidationError = instance.constructor.parseModelValidationError(error.data);
+                const modelValidationError = instance.parseModelError(error.data);
                 if (modelValidationError) {
                     this.fieldsErrors = modelValidationError.toFieldsErrors();
                 }
@@ -257,7 +257,7 @@ export const ActionViewComponent = {
                 );
                 this.openPage(this._getRedirectUrlFromResponse(response.data) || this.getRedirectUrl());
             } catch (error) {
-                const modelValidationError = instance.constructor.parseModelValidationError(error.data);
+                const modelValidationError = instance.parseModelError(error.data);
                 if (modelValidationError) {
                     this.fieldsErrors = modelValidationError.toFieldsErrors();
                 }
