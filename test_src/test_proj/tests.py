@@ -4199,7 +4199,7 @@ class ConfigParserCTestCase(BaseTestCase):
 
         worker_options = {
             'app': 'test_proj.wapp:app',
-            'loglevel': 'WARNING',
+            'loglevel': os.environ.get('DJANGO_LOG_LEVEL', 'WARNING'),
             'logfile': '/var/log/test_proj2/worker.log',
             'pidfile': '/run/test_proj_worker.pid',
             'autoscale': '4,1',

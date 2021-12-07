@@ -5,6 +5,7 @@ import pwd
 import sys
 from tempfile import gettempdir, tempdir
 
+import environ
 from django.contrib import admin
 from django.utils.functional import lazy
 from drf_yasg import errors
@@ -373,15 +374,22 @@ class Boto3Subsection(BackendSection):
         return key_uppercase
 
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False),
+    DJANGO_LOG_LEVEL=(str, 'WARNING'),
+    TIMEZONE=(str, 'UTC'),
+)
+
 config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     format_kwargs=KWARGS,
     section_defaults={
         'main': {
-            'debug': False,
+            'debug': env('DEBUG'),
             'allowed_hosts': ('*',),
-            'timezone': 'UTC',
+            'timezone': env('TIMEZONE'),
             'first_day_of_week': 0,
-            'log_level': 'WARNING',
+            'log_level': env('DJANGO_LOG_LEVEL'),
             'enable_admin_panel': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_ADMIN_PANEL', 'false')),
             'enable_registration': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_REGISTRATION', 'false')),
             'enable_custom_translations': False,
@@ -422,8 +430,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'etag_default_timeout': ConfigIntSecondsType(os.getenv(f'{ENV_NAME}_ETAG_TIMEOUT', '1d')),
         },
         'database': {
-            'engine': 'django.db.backends.sqlite3',
-            'name': '{PROG}/db.{PROG_NAME}.sqlite3',
+            **env.db(default=f'sqlite:///{KWARGS["PROG"]}/db.{KWARGS["PROG_NAME"]}.sqlite3'),
             'test': {
                 'serialize': 'false'
             }
@@ -433,9 +440,21 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'default': {}
         },
         'cache': {
-            "backend": 'django.core.cache.backends.filebased.FileBasedCache',
-            'location': TMP_DIR + '/{PROG_NAME}_django_cache_{__section}_{PY_VER}',
+            **env.cache(
+                default=f'filecache://{TMP_DIR}/{KWARGS["PROG_NAME"]}_django_cache_default_{KWARGS["PY_VER"]}'
+            ),
             'timeout': '10m'
+        },
+        **{
+            cache_name: {
+                **env.cache(
+                    var=f'{cache_name.upper()}_CACHE_URL',
+                    default=f'filecache://{TMP_DIR}/{KWARGS["PROG_NAME"]}_django_cache_{cache_name}_{KWARGS["PY_VER"]}'
+                ),
+                'timeout': '10m'
+            }
+            for cache_name in ('locks', 'session', 'etag')
+            if f'{cache_name.upper()}_CACHE_URL' in os.environ
         },
         'mail': {
             'port': 25,
@@ -889,19 +908,24 @@ if any([True for c in CACHES.values() if 'OPTIONS' in c and c['OPTIONS'].get('SE
 # E-Mail settings
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-host
 ##############################################################
-mail = config['mail']
-EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = mail["port"]
-EMAIL_HOST_USER = mail["user"]
+if 'EMAIL_URL' in os.environ:
+    vars().update(env.email('EMAIL_URL'))  # nocv
+else:
+    mail = config['mail']
+    EMAIL_BACKEND: _t.Text = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_PORT = mail["port"]
+    EMAIL_HOST_USER = mail["user"]
+    EMAIL_HOST_PASSWORD = mail["password"]
+    if mail.get('tls', None) is not None:
+        EMAIL_USE_TLS = mail['tls']  # nocv
+    if mail.get('ssl', None) is not None:
+        EMAIL_USE_SSL = mail['ssl']  # nocv
+    EMAIL_HOST = mail["host"]
+    if EMAIL_HOST is None:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 EMAIL_FROM_ADDRESS = mail.get("from_address", EMAIL_HOST_USER)
-EMAIL_HOST_PASSWORD = mail["password"]
-if mail.get('tls', None) is not None:
-    EMAIL_USE_TLS = mail['tls']  # nocv
-if mail.get('ssl', None) is not None:
-    EMAIL_USE_SSL = mail['ssl']  # nocv
-EMAIL_HOST = mail["host"]
-if EMAIL_HOST is None:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 SEND_CONFIRMATION_EMAIL: bool = mail["send_confirmation"]
 SEND_EMAIL_RETRIES: int = mail['send_email_retries']
 SEND_MESSAGE_RETRY_DELAY: int = mail['send_email_retry_delay']

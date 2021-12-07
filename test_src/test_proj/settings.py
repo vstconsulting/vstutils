@@ -60,7 +60,7 @@ API[VST_API_VERSION][r'files'] = dict(
     model='test_proj.models.File'
 )
 API[VST_API_VERSION][r'testfk'] = dict(
-    model='test_proj.models.ModelWithFK'
+    view='test_proj.views.ModelWithFKViewSet'
 )
 API[VST_API_VERSION][r'testbinaryfiles'] = dict(
     view='test_proj.views.TestBinaryFilesViewSet'

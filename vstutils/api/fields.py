@@ -500,7 +500,7 @@ class FkModelField(FkField):
             kwargs['select'] = self._get_lazy_select_name_from_model()
         elif issubclass(select, ModelSerializer):
             self.model_class = select.Meta.model
-            kwargs['select'] = select.__name__.replace('Serializer', '')
+            kwargs['select'] = getattr(select.Meta, 'ref_name', '') or select.__name__.replace('Serializer', '')
         else:  # nocv
             raise Exception(
                 'Argument "select" must be '

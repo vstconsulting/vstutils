@@ -3,7 +3,7 @@ import json
 
 from django.utils.functional import SimpleLazyObject
 
-from vstutils.api import responses, filter_backends
+from vstutils.api import responses, filter_backends, fields
 from vstutils.api.views import SettingsViewSet
 from vstutils.api.base import NonModelsViewSet
 from vstutils.api.decorators import action, nested_view, subaction, extend_filterbackends
@@ -11,7 +11,7 @@ from vstutils.api.serializers import DataSerializer
 from vstutils.api.auth import UserViewSet
 from vstutils.utils import create_view
 
-from .models import Host, HostList, HostGroup, ModelWithBinaryFiles
+from .models import Host, HostList, HostGroup, ModelWithBinaryFiles, ModelWithFK
 
 
 class TestFilterBackend(filter_backends.VSTFilterBackend):
@@ -167,4 +167,16 @@ class SettingsViewSetV2(SettingsViewSet):
 HostListViewSet = create_view(
     HostList,
     view_class='list_only'
+)
+
+ModelWithFKViewSet = create_view(
+    ModelWithFK,
+    override_detail_fields={
+        'some_fk': fields.FkModelField(select=Host),
+        'no_prefetch_and_link_fk': fields.FkModelField(select=HostViewSet.serializer_class,
+                                                       use_prefetch=False, make_link=False, required=False),
+        'multiselect': fields.CommaMultiSelect(select='test_proj.Host', required=False),
+        'fk_with_filters': fields.FkModelField(select='test_proj.Post', filters={'rating': 5}, required=False,
+                                               allow_null=True)
+    }
 )

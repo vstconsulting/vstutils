@@ -20,6 +20,8 @@ from ..validators import (
     image_validator_resizer_with_margin
 )
 
+validators = [image_res_validator, image_res_max_validator, image_height_validator, image_width_validator]
+
 
 def bin_file_handler(self, instance, fields_mapping, model, field_name):
     instance[field_name] = 'bin file handled'
@@ -52,17 +54,6 @@ class ModelWithFK(BModel):
         _override_list_fields = {
             'some_fk': fields.FkModelField(select=Host)
         }
-        _override_detail_fields = {
-            'some_fk': fields.FkModelField(select=Host),
-            'no_prefetch_and_link_fk': fields.FkModelField(select=Host.generated_view.serializer_class,
-                                                           use_prefetch=False, make_link=False, required=False),
-            'multiselect': fields.CommaMultiSelect(select='test_proj.Host', required=False),
-            'fk_with_filters': fields.FkModelField(select='test_proj.Post', filters={'rating': 5}, required=False, allow_null=True)
-        }
-
-
-
-validators = [image_res_validator, image_res_max_validator, image_height_validator, image_width_validator]
 
 
 class ModelWithBinaryFiles(BModel):
