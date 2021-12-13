@@ -246,7 +246,7 @@
                     this.commitMutation('unselectIds', [instance.getPkValue()]);
                 } catch (error) {
                     const str = window.app.error_handler.errorToString(error);
-                    const strToShow = this.$t(pop_up_msg.instance.error.removeMany).format([
+                    const strToShow = this.$t(pop_up_msg.instance.error.remove).format([
                         instance.getViewFieldValue(),
                         this.$t(this.view.name),
                         str,
