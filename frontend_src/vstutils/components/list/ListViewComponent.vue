@@ -260,17 +260,20 @@
              * @returns {Promise}
              */
             async removeInstances(action, instances) {
+                const removedInstancesIds = [];
                 try {
-                    await Promise.all(instances.map((instance) => instance.delete()));
+                    await Promise.all(
+                        instances.map((instance) =>
+                            instance.delete().then(() => {
+                                removedInstancesIds.push(instance.getPkValue());
+                            }),
+                        ),
+                    );
                     guiPopUp.success(
                         this.$t(pop_up_msg.instance.success.removeMany).format([
                             instances.length,
                             instances[0]?.getViewFieldString(),
                         ]),
-                    );
-                    this.commitMutation(
-                        'unselectIds',
-                        instances.map((instance) => instance.getPkValue()),
                     );
                 } catch (error) {
                     const str = window.app.error_handler.errorToString(error);
@@ -280,6 +283,7 @@
                     ]);
                     window.app.error_handler.showError(strToShow, str);
                 }
+                this.commitMutation('unselectIds', removedInstancesIds);
             },
             executeEmptyActionOnInstances(action) {
                 const selected = this.instances.filter((instance) =>
