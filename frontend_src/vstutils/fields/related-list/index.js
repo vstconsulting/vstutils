@@ -30,6 +30,8 @@ export const RelatedListFieldMixin = {
  * Field shows selected fields values of related objects. On list view shows modal window.
  */
 export class RelatedListField extends BaseField {
+    static fkLinkable = false;
+
     constructor(options) {
         super(options);
         this.viewType = this.format;

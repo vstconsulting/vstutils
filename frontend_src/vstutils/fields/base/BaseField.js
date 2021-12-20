@@ -10,6 +10,8 @@ class BaseField {
     /** @type {App} */
     static app;
 
+    static fkLinkable = true;
+
     /**
      * Constructor of base field class.
      * @param {Object} options - Object with field options.

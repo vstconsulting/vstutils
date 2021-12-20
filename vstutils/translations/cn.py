@@ -213,6 +213,7 @@ TRANSLATION = {
     'An error occurred during process.<br>Error details:<br>{0}': '保存时发生错误。<br>更多详细信息：{0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': '<b>{0}</b> 期间发生了一些错误。 错误详情：<br>{1}',
+    'Link': '链接',
 }
 
 SERVER_TRANSLATION = {

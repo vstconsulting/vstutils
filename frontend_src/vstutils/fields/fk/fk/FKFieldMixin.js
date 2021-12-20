@@ -1,6 +1,5 @@
 import FKFieldContentEditable from './FKFieldContentEditable.vue';
 import FKFieldContentReadonlyComponent from './FKFieldContentReadonlyComponent.vue';
-import FKFieldListView from './FKFieldListView.vue';
 import { BaseFieldMixin } from '../../base';
 
 const FKFieldMixin = {
@@ -8,7 +7,7 @@ const FKFieldMixin = {
     components: {
         field_content_edit: FKFieldContentEditable,
         field_content_readonly: FKFieldContentReadonlyComponent,
-        field_list_view: FKFieldListView,
+        field_list_view: FKFieldContentReadonlyComponent,
     },
 };
 

@@ -24,10 +24,10 @@ export class ModelsResolver {
             if (this._definitionsModels.has(value)) {
                 return this._definitionsModels.get(value);
             }
-        } else {
-            return this.byReferencePath(value);
+        } else if (typeof value === 'object') {
+            return this.bySchemaObject(value);
         }
-        return this.bySchemaObject(value);
+        return this.byReferencePath(value);
     }
 
     /**
@@ -41,9 +41,12 @@ export class ModelsResolver {
         if (model) {
             return model;
         }
-        model = this.bySchemaObject(this.schema.definitions[name], name);
-        this._definitionsModels.set(name, model);
-        return model;
+        const schema = this.schema.definitions[name];
+        if (schema) {
+            model = this.bySchemaObject(this.schema.definitions[name], name);
+            this._definitionsModels.set(name, model);
+            return model;
+        }
     }
 
     /**

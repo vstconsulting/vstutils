@@ -6,6 +6,8 @@ import JsonMapper from './JsonMapper.js';
  * JSON guiField class.
  */
 class JSONField extends BaseField {
+    static fkLinkable = false;
+
     constructor(options = {}, jsonMapper = undefined) {
         super(options);
         this.jsonMapper = jsonMapper || new JsonMapper();
