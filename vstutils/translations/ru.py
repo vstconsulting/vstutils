@@ -212,6 +212,7 @@ TRANSLATION = {
     'An error occurred during process.<br>Error details:<br>{0}': 'Во время сохранения произошла ошибка.<br>Подробнее:<br>{0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
+    'Link': 'Ссылка',
 }
 
 SERVER_TRANSLATION = {

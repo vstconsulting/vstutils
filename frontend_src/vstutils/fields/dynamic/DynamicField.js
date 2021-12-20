@@ -15,9 +15,13 @@ class DynamicField extends BaseField {
     resolveTypes() {
         /** @type {Object<string, BaseField>} */
         this.types = this.props.types
-            ? mapObjectValues(this.props.types, (field) =>
-                  this.constructor.app.fieldsResolver.resolveField(field, this.name),
-              )
+            ? mapObjectValues(this.props.types, (field) => {
+                  const fieldInstance = this.constructor.app.fieldsResolver.resolveField(field, this.name);
+                  if (!field.title) {
+                      fieldInstance.title = this.title;
+                  }
+                  return fieldInstance;
+              })
             : null;
         if (this.types)
             for (const path of this.usedOnViews)

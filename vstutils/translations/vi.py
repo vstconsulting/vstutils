@@ -212,6 +212,7 @@ TRANSLATION = {
     'An error occurred during process.<br>Error details:<br>{0}': 'Đã xảy ra một số lỗi trong quá trình lưu. <br> Chi tiết lỗi: <br> {0}',
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Đã xảy ra một số lỗi trong <b> {0} </b>. Chi tiết lỗi: <br> {1}',
+    'Link': 'Liên kết',
 }
 
 SERVER_TRANSLATION = {
