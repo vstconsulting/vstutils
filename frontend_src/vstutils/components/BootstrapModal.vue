@@ -56,7 +56,11 @@
             classes: { type: [Array, String], default: null },
             loading: { type: Boolean, default: false },
         },
-        data: () => ({ isOpen: false }),
+        data() {
+            return {
+                isOpen: false,
+            };
+        },
         beforeDestroy() {
             if (this.$refs.modal) {
                 for (const el of Array.from(document.getElementsByClassName('modal-backdrop'))) el.remove();

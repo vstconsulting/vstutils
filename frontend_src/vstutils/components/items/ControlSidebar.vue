@@ -68,9 +68,11 @@
     export default {
         name: 'ControlSidebar',
         components: { BootstrapModal, HelpModal },
-        data: () => ({
-            isSaving: false,
-        }),
+        data() {
+            return {
+                isSaving: false,
+            };
+        },
         computed: {
             sections() {
                 const sectionsFields = Array.from(this.UserSettings.fields.values()).filter(

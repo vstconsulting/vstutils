@@ -3,7 +3,7 @@ import JsonFieldContentReadonly from './JsonFieldContentReadonly.vue';
 import { TextAreaFieldContentEdit } from '../text';
 
 const JSONFieldMixin = {
-    data: function () {
+    data() {
         return {
             wrapper_classes_list: {
                 base:

@@ -1,7 +1,7 @@
 <template>
     <div class="selected-filters">
         <span v-for="pill in pills" :key="pill.name" class="badge rounded-pill pill">
-            <span class="pill__text">{{ $t(pill.title) }}: {{ pill.value }}</span>
+            <span class="pill__text">{{ $t(pill.title) }}: {{ $t(pill.value) }}</span>
             <i class="fa fa-times" @click="clearFilter(pill.name)" />
         </span>
     </div>

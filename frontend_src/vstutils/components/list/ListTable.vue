@@ -65,7 +65,11 @@
             instanceSublinks: { type: Array, required: false, default: () => [] },
             opt: { type: Object, required: false, default: () => {} },
         },
-        data: () => ({ tableColumnClasses }),
+        data() {
+            return {
+                tableColumnClasses,
+            };
+        },
         computed: {
             allSelected() {
                 return this.instances.every((instance) => this.selection.includes(instance.getPkValue()));

@@ -51,7 +51,11 @@
             fields: { type: Array, required: true },
             instances: { type: Array, default: null },
         },
-        data: () => ({ tableColumnClasses }),
+        data() {
+            return {
+                tableColumnClasses,
+            };
+        },
         computed: {
             isEmpty() {
                 return !this.instances || this.instances.length === 0;

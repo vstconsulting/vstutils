@@ -20,9 +20,11 @@ const dragLeaveEvents = ['dragleave', 'dragend', 'drop'];
  * @vue/component
  */
 export default {
-    data: () => ({
-        isAdvancedUploadAvailable,
-    }),
+    data() {
+        return {
+            isAdvancedUploadAvailable,
+        };
+    },
     mounted() {
         this.setupListeners('addEventListener');
     },

@@ -14,7 +14,7 @@ export const RelatedListFieldMixin = {
         field_list_view: RelatedListFieldListView,
     },
     mixins: [BaseFieldMixin],
-    data: function () {
+    data() {
         return {
             wrapper_classes_list: {
                 base:

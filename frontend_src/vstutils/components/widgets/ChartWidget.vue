@@ -16,9 +16,11 @@
             data: { type: Object, required: true },
             options: { type: Object, default: () => ({}) },
         },
-        data: () => ({
-            chart: null,
-        }),
+        data() {
+            return {
+                chart: null,
+            };
+        },
         created() {
             if (!window.Chart) {
                 throw new Error('Chart.js not found');

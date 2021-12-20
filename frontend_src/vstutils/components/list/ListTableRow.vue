@@ -87,7 +87,12 @@
             actions: { type: Array, required: false, default: () => [] },
             sublinks: { type: Array, required: false, default: () => [] },
         },
-        data: () => ({ formatPath, tableColumnClasses }),
+        data() {
+            return {
+                formatPath,
+                tableColumnClasses,
+            };
+        },
         computed: {
             hasOperations() {
                 return this.actions.length || this.sublinks.length;

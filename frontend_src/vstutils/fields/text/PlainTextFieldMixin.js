@@ -2,7 +2,7 @@ import { addCssClassesToElement } from '../../utils';
 import PlainTextFieldContentReadonly from './PlainTextFieldContentReadonly.vue';
 
 const PlainTextFieldMixin = {
-    data: function () {
+    data() {
         return {
             wrapper_classes_list: {
                 base:

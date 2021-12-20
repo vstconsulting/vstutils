@@ -3,7 +3,7 @@ import TextParagraphFieldContentReadonly from './TextParagraphFieldContentReadon
 import TextAreaFieldContentEdit from './TextAreaFieldContentEdit.vue';
 
 const TextParagraphFieldMixin = {
-    data: function () {
+    data() {
         return {
             wrapper_classes_list: {
                 base:

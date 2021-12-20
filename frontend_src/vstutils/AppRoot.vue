@@ -39,9 +39,11 @@
             // eslint-disable-next-line vue/prop-name-casing
             x_docs: { type: Object, required: true },
         },
-        data: () => ({
-            layoutClasses: ['sidebar-mini', 'layout-fixed', 'layout-footer-fixed'],
-        }),
+        data() {
+            return {
+                layoutClasses: ['sidebar-mini', 'layout-fixed', 'layout-footer-fixed'],
+            };
+        },
         computed: {
             showBackButton() {
                 return this.$route.name !== 'home';
