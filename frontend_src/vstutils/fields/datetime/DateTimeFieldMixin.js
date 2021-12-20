@@ -14,7 +14,11 @@ const DateTimeFieldMixin = {
         },
         field_content_edit: {
             mixins: [BaseFieldContentEdit, DateTimeFieldContent],
-            data: () => ({ format: 'YYYY-MM-DDTHH:mm' }),
+            data() {
+                return {
+                    format: 'YYYY-MM-DDTHH:mm',
+                };
+            },
         },
         field_list_view: {
             mixins: [BaseFieldListView, DateTimeFieldContent],

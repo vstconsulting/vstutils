@@ -26,7 +26,11 @@
             ReadFileButton: BinaryFileFieldReadFileButton,
         },
         mixins: [FileFieldContentEdit, DragAndDropMixin],
-        data: () => ({ isDragOver: false }),
+        data() {
+            return {
+                isDragOver: false,
+            };
+        },
         created() {
             this.styles_dict.minHeight = '38px';
         },

@@ -88,17 +88,19 @@
                 },
             },
         },
-        data: () => ({
-            isLoading: false,
-            instances: [],
-            selection: [],
-            searchTerm: null,
-            pagination: {
-                count: 0,
-                pageSize: 20,
-                pageNumber: 1,
-            },
-        }),
+        data() {
+            return {
+                isLoading: false,
+                instances: [],
+                selection: [],
+                searchTerm: null,
+                pagination: {
+                    count: 0,
+                    pageSize: 20,
+                    pageNumber: 1,
+                },
+            };
+        },
         computed: {
             queryset() {
                 return this.qs.filter({

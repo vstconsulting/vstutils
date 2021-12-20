@@ -2,7 +2,7 @@ import $ from 'jquery';
 import HTMLFieldContentReadonly from './HTMLFieldContentReadonly.vue';
 
 const HTMLFieldMixin = {
-    data: function () {
+    data() {
         return {
             link_path: '',
         };

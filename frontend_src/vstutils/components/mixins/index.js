@@ -8,7 +8,11 @@ export { BaseButtonMixin, SidebarLinkMixin, StoreModuleComponent };
 
 export const InstanceComponent = {
     mixins: [StoreModuleComponent, ComponentWithAutoUpdate],
-    data: () => ({ startAutoupdateAfterFetch: true }),
+    data() {
+        return {
+            startAutoupdateAfterFetch: true,
+        };
+    },
     computed: {
         instance() {
             return this.datastore?.data?.instance;

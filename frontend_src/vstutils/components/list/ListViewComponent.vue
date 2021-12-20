@@ -34,7 +34,7 @@
             <Pagination
                 v-bind="pagination"
                 style="float: right"
-                class="d-none d-sm-block"
+                class="d-none d-md-block"
                 @open-page="goToPage"
             />
         </portal>

@@ -71,7 +71,11 @@
     export default {
         name: 'TFAPage',
         mixins: [PageEditViewComponent],
-        data: () => ({ qrcode: '' }),
+        data() {
+            return {
+                qrcode: '',
+            };
+        },
         computed: {
             isEnabled() {
                 return this.instance?.enabled;
