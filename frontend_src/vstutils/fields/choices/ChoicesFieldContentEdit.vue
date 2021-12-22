@@ -93,6 +93,7 @@
                         placeholder: { id: undefined, text: '' },
                         templateResult: this.field.templateResult,
                         templateSelection: this.field.templateSelection,
+                        matcher: this.field.customMatcher,
                     })
                     .on('change', (event) => {
                         let value;
