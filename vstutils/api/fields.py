@@ -454,6 +454,8 @@ class FkField(IntegerField):
         super().__init__(**kwargs)
         if self.filters and self.dependence and set(self.dependence.values()) & set(self.filters.keys()):
             self.fail('ambiguous_filter')
+        # Remove min/max validators from integer field.
+        self.validators = self.validators[:-((self.max_value is not None) + (self.min_value is not None)) or None]
 
 
 class FkModelField(FkField):
@@ -509,8 +511,6 @@ class FkModelField(FkField):
                 'string matched "app_name.model_name" pattern.'
             )
         super().__init__(**kwargs)
-        # Remove min/max validators from integer field.
-        self.validators = self.validators[:-2]
 
     def _get_lazy_select_name_from_model(self):
         # pylint: disable=invalid-name
