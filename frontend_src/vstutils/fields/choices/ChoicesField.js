@@ -12,6 +12,7 @@ class ChoicesField extends StringField {
 
         this.templateResult = this.props.templateResult;
         this.templateSelection = this.props.templateSelection;
+        this.customMatcher = this.props.customMatcher;
     }
 
     getEmptyValue() {
