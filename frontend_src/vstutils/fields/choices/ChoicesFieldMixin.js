@@ -1,5 +1,6 @@
 import ChoicesFieldContentEdit from './ChoicesFieldContentEdit.vue';
 import { BaseFieldContentReadonlyMixin, BaseFieldListView, BaseFieldMixin } from '../base';
+import { stringToCssClass } from '../../utils';
 
 function preparedValue() {
     let val = BaseFieldContentReadonlyMixin.computed.preparedValue.call(this);
@@ -39,7 +40,7 @@ const ChoicesFieldMixin = {
         wrapperClasses() {
             const classes = BaseFieldMixin.computed.wrapperClasses.call(this);
             if (this.value) {
-                classes.push(`value-${this.value}`);
+                classes.push(`value-${stringToCssClass(this.value)}`);
             }
             return classes;
         },

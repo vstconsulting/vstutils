@@ -1309,3 +1309,7 @@ export function chunkArray(array, chunkSize) {
         return resultArray;
     }, []);
 }
+
+export function stringToCssClass(str) {
+    return str.replaceAll(' ', '');
+}
