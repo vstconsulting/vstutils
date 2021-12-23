@@ -1311,5 +1311,6 @@ export function chunkArray(array, chunkSize) {
 }
 
 export function stringToCssClass(str) {
+    if (typeof str !== 'string') str = String(str);
     return str.replaceAll(' ', '');
 }
