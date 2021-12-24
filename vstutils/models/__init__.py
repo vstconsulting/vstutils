@@ -165,6 +165,8 @@ class BModel(BaseModel):
         - ``_nested`` - key-value mapping with nested views (key - nested name,
           kwargs for :class:`vstutils.api.decorators.nested_view` decorator but supports
           ``model`` attribute as nested). ``model`` can be string for import.
+        - ``_extra_view_attributes`` - key-value mapping with additional view attributes,
+          but has less priority over generated attributes.
 
         .. note::
             You may need to create an

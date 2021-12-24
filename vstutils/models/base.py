@@ -536,7 +536,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         list_fields = _ensure_pk_in_fields(cls, metadata['list_fields'])
         detail_fields = _ensure_pk_in_fields(cls, metadata['detail_fields'] or list_fields)
 
-        view_attributes = {'model': cls}
+        view_attributes = {'model': cls, **metadata.get('extra_view_attributes', {})}
 
         serializer_class = metadata['serializer_class']
         serializers = {
