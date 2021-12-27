@@ -168,10 +168,8 @@ class DeepNestedModel(BModel):
         _filter_backends = (EmptyFilterBackend,)
 
     @register_view_action(detail=True, serializer_class=FieldsTestingSerializer)
-    def test_action(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return HTTP_200_OK(request.data)
+    def test_action(self: 'vstutils.api.base.GenericViewSet', request, *args, **kwargs):
+        return HTTP_200_OK(self.create_action_serializer(data=request.data).data)
 
 
 class ReadonlyDeepNestedSerializer(VSTSerializer):

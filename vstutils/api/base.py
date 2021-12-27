@@ -294,6 +294,37 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     _nested_view: _t.ClassVar[_t.Union[QuerySetMixin, vsets.GenericViewSet]]
     nested_detail: bool
 
+    def create_action_serializer(self, *args, **kwargs):
+        """
+        A method that implements the standard logic for actions.
+        It relies on the passed arguments to build logic.
+        So, if the named argument data was passed, then the serializer will be validated and saved.
+
+        :param autosave: Enables / disables the execution of saving by the serializer if named argument `data` passed.
+                         Enabled by default.
+        :type autosave: bool
+        :param: data: Default serializer class argument with serializable data. Enables validation and saving.
+        :type data: dict
+        :param: instance: Default serializer class argument with serializable instance.
+        :type instance: typing.Any
+        :param custom_data: Dict with data which will passed to `validated_data` without validation.
+        :type custom_data: dict
+        :param serializer_class: Serializer class for this execution.
+                                 May be usefull when request and response serializers is different.
+        :type serializer_class: None,type[rest_framework.serializers.Serializer]
+        :return: Ready serializer with default logic performed.
+        :rtype: rest_framework.serializers.Serializer
+        """
+        self.serializer_class = kwargs.pop('serializer_class', None) or self.get_serializer_class()
+        save_kwargs = kwargs.pop('custom_data', {})
+        should_save = kwargs.pop('autosave', True) or save_kwargs
+        serializer = self.get_serializer(*args, **kwargs)
+        if 'data' in kwargs:
+            serializer.is_valid(raise_exception=True)
+            if should_save:
+                serializer.save(**save_kwargs)
+        return serializer
+
     def filter_for_filter_backends(self, backend):
         return getattr(backend, 'required', False)
 

@@ -3994,7 +3994,7 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[6]['data']['results'], [results[2]['data']])
         self.assertEqual(results[7]['data']['results'], [])
         self.assertEqual(results[8]['data'], results[0]['data'])
-        self.assertEqual(results[9]['status'], 200)
+        self.assertEqual(results[9]['status'], 200, results[9]['data'])
 
 
 class CustomModelTestCase(BaseTestCase):
