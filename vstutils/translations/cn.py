@@ -43,6 +43,13 @@ TRANSLATION = {
     'Search': '搜索 ',
     'Selected': '选中',
     'Nothing found!': '没有发现！',
+    'Main settings': '主要设置',
+    'Custom settings': '自定义设置',
+
+
+    # fields
+    'Id': '标识符',
+    'ID': '标识符',
 
     # x-menu generic
     'system': '范围查找',

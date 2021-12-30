@@ -43,6 +43,12 @@ TRANSLATION = {
     'Search': 'Tìm kiếm ',
     'Selected': 'Đã chọn',
     'Nothing found!': 'Không tìm thấy gì!',
+    'Main settings': 'cài đặt chính',
+    'Custom settings': 'Cài đặt tùy chỉnh',
+
+    # fields
+    'Id': 'định danh',
+    'ID': 'định danh',
 
     # x-menu generic
     'system': 'Hệ thống',

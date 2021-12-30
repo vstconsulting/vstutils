@@ -43,6 +43,12 @@ TRANSLATION = {
     'Search': 'Поиск',
     'Selected': 'Выбрано',
     'Nothing found!': 'Ничего не найдено!',
+    'Main settings': 'Основные настройки',
+    'Custom settings': 'Другие настройки',
+
+    # fields
+    'Id': 'Идентификатор',
+    'ID': 'Идентификатор',
 
     # x-menu generic
     'system': 'Система',

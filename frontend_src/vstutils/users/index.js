@@ -2,6 +2,7 @@ import signals from '../signals.js';
 import Gravatar from './Gravatar.js';
 import TFAPage from './TFAPage.vue';
 import { IntegerField } from '../fields/numbers/integer.js';
+import './settings.js';
 export { Gravatar };
 
 const usersPath = '/user/';
