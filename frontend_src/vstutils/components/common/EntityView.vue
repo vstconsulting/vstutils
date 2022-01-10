@@ -2,7 +2,7 @@
     <div class="entity-view">
         <Preloader v-if="loading" />
         <div :class="containerClass">
-            <div class="top-row">
+            <div class="top-row d-print-none">
                 <ButtonsRow
                     v-if="!error && showTopButtons"
                     :view="view"
