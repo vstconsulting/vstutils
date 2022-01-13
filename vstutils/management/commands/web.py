@@ -130,6 +130,7 @@ class Command(BaseCommand):
             f'--set-ph=program_name={settings.VST_PROJECT}',
             f'--set-ph=lib_name={settings.VST_PROJECT_LIB}',
             f'--set-ph=api_path={settings.API_URL}',
+            f'--set-ph=vstutils_version={settings.VSTUTILS_VERSION}',
             f'--module={settings.UWSGI_APPLICATION}',
         ]
         #  Setup http addr:port.
