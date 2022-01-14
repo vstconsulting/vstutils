@@ -1,3 +1,47 @@
 #indices-and-tables > h1 {
     font-size: 140%;
 }
+
+blockquote {
+    border-left: none !important;
+}
+
+.sidebar-menu ul li {
+    list-style: none !important;
+}
+
+.menu-text-data {
+    text-decoration: none;
+}
+
+code.sig-name {
+    color: #1e347b !important;
+    padding-right: 0;
+}
+
+.sig-prename {
+    color: #1e347b !important;
+    border-right-width: 0;
+    padding-right: 0;
+}
+
+.toctree-l1 {
+    list-style: none !important;
+    font-size: 1.7rem;
+    margin-bottom: 20px;
+}
+
+.toctree-l2 {
+    list-style-type: none !important;
+}
+
+li li a.reference.internal {
+    list-style-type: none;
+    font-size: 1rem;
+}
+
+.docutils.literal.notranslate {
+    background-color: #f7f7f9;
+    color: darkblue;
+    font-weight: bolder;
+}
