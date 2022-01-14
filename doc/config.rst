@@ -228,7 +228,7 @@ Celery worker options:
 * **loglevel** - Celery worker log level. Default: from main_ section ``log_level``.
 * **pidfile** - Celery worker pidfile. Default: ``/run/{app_name}_worker.pid``
 * **autoscale** - Options for autoscaling. Two comma separated numbers: max,min.
-* **beat** - Enable or disable celery beat scheduler. Default: true.
+* **beat** - Enable or disable celery beat scheduler. Default: ``true``.
 
 See other settings via ``celery worker --help`` command.
 
@@ -275,18 +275,18 @@ session_timeout, static_files_url and pagination limit.
   from ``django-cors-headers`` lib with their defaults.
 * **enable_gravatar** - Enable/disable gravatar service using for users. Default: ``True``.
 * **rest_swagger_description** - Help string in Swagger schema. Useful for dev-integrations.
-* **openapi_cache_timeout** - Cache timeout for storing schema data. Default: 120.
-* **health_throttle_rate** - Count of requests to ``/api/health/`` endpoint. Default: 60.
-* **bulk_threads** - Threads count for PATCH ``/api/endpoint/`` endpoint. Default: 3.
-* **session_timeout** - Session lifetime. Default: 2w (two weeks).
-* **etag_default_timeout** - Cache timeout for Etag headers to control models caching. Default: 1d (one day).
-* **rest_page_limit** and **page_limit** - Default limit of objects in API list. Default: 1000.
+* **openapi_cache_timeout** - Cache timeout for storing schema data. Default: ``120``.
+* **health_throttle_rate** - Count of requests to ``/api/health/`` endpoint. Default: ``60``.
+* **bulk_threads** - Threads count for PATCH ``/api/endpoint/`` endpoint. Default: ``3``.
+* **session_timeout** - Session lifetime. Default: ``2w`` (two weeks).
+* **etag_default_timeout** - Cache timeout for Etag headers to control models caching. Default: ``1d`` (one day).
+* **rest_page_limit** and **page_limit** - Default limit of objects in API list. Default: ``1000``.
 * **session_cookie_domain** - The domain to use for session cookies.
-  Read :django_docs:`more <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. Default: None.
+  Read :django_docs:`more <settings/#std:setting-SESSION_COOKIE_DOMAIN>`. Default: ``None``.
 * **csrf_trusted_origins** - A list of hosts which are trusted origins for unsafe requests.
   Read :django_docs:`more <settings/#csrf-trusted-origins>`. Default: from **session_cookie_domain**.
 * **case_sensitive_api_filter** - Enables/disables case sensitive search for name filtering.
-  Default: True.
+  Default: ``True``.
 * **secure_proxy_ssl_header_name** - Header name which activates SSL urls in responses.
   Read :django_docs:`more <settings/#secure-proxy-ssl-header>`. Default: ``HTTP_X_FORWARDED_PROTOCOL``.
 * **secure_proxy_ssl_header_value** - Header value which activates SSL urls in responses.
@@ -404,11 +404,11 @@ child section.
 
 For example, if you want to apply throttle to ``api/v1/author``:
 
-    .. sourcecode:: ini
+.. sourcecode:: ini
 
-        [throttle.views.author]
-        rate=50/day
-        actions=create,update
+    [throttle.views.author]
+    rate=50/day
+    actions=create,update
 
 * **rate** - Throttle rate in format number_of_requests/time_period. Expected time_periods: second/minute/hour/day.
 * **actions** - Comma separated list of drf actions. Throttle will be applied only on specified here actions. Default: update, partial_update.
@@ -440,10 +440,10 @@ This section contains additional information for configure additional elements.
 #. If you need set ``https`` for your web settings, you can do it using HAProxy, Nginx, Traefik
    or configure it in ``settings.ini``.
 
-    .. sourcecode:: ini
+.. sourcecode:: ini
 
-        [uwsgi]
-        addrport = 0.0.0.0:8443,foobar.crt,foobar.key
+    [uwsgi]
+    addrport = 0.0.0.0:8443,foobar.crt,foobar.key
 
 #. We strictly do not recommend running the web server from root. Use HTTP proxy to run on privileged ports.
 

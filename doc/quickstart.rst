@@ -179,13 +179,13 @@ Adding new models to application
 --------------------------------
 If you want to add some new entities to your application, you need to do following on the back-end:
 
- 1. Create Model;
- 2. Create Serializer (optional);
- 3. Create View (optional);
- 4. Add created Model or View to the API;
- 5. Make migrations;
- 6. Apply migrations;
- 7. Restart your application.
+1. Create Model;
+2. Create Serializer (optional);
+3. Create View (optional);
+4. Add created Model or View to the API;
+5. Make migrations;
+6. Apply migrations;
+7. Restart your application.
 
 Let's look how you can do it on the AppExample - application, that has 2 custom models:
 
