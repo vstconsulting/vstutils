@@ -1,5 +1,5 @@
 import { expect, jest, test, describe, it } from '@jest/globals';
-import { Model, ModelClass } from '../Model.js';
+import { makeModel, Model } from '../Model.js';
 import StringField from '../../fields/text/StringField.js';
 import { IntegerField } from '../../fields/numbers/integer.js';
 import JSONField from '../../fields/json/JSONField.js';
@@ -10,15 +10,19 @@ const ageField = new IntegerField({ name: 'age' });
 const settingsField = new JSONField({ name: 'settings' });
 
 describe('Model', () => {
-    @ModelClass('AbstractUser')
-    class AbstractUser extends Model {
-        static declaredFields = [emailField];
-    }
+    const AbstractUser = makeModel(
+        class extends Model {
+            static declaredFields = [emailField];
+        },
+        'AbstractUser',
+    );
 
-    @ModelClass()
-    class User extends AbstractUser {
-        static declaredFields = [firstNameField, ageField, settingsField];
-    }
+    const User = makeModel(
+        class extends AbstractUser {
+            static declaredFields = [firstNameField, ageField, settingsField];
+        },
+        'User',
+    );
 
     it('should have name', () => {
         const abstractUser = new AbstractUser();
@@ -30,8 +34,7 @@ describe('Model', () => {
         expect(abstractUser._name).toBe('AbstractUser');
         expect(user._name).toBe('User');
 
-        @ModelClass()
-        class Nameless extends Model {}
+        const Nameless = makeModel(class Nameless extends Model {});
         const nameless = new Nameless();
         expect(Nameless.name).toBe('Nameless');
         expect(nameless._name).toBe('Nameless');
@@ -125,31 +128,35 @@ describe('Model', () => {
         const field1 = new StringField({ name: 'field1' });
         const field2 = new StringField({ name: 'field2' });
 
-        @ModelClass()
-        class Model1 extends Model {
-            static declaredFields = [field2];
-        }
+        const Model1 = makeModel(
+            class Model1 extends Model {
+                static declaredFields = [field2];
+            },
+        );
         expect(Model1.pkField).toBe(field2);
 
-        @ModelClass()
-        class Model2 extends Model1 {
-            static pkFieldName = 'field1';
-            static declaredFields = [field1];
-        }
+        const Model2 = makeModel(
+            class Model2 extends Model1 {
+                static pkFieldName = 'field1';
+                static declaredFields = [field1];
+            },
+        );
         expect(Model2.pkField).toBe(field1);
 
-        @ModelClass()
-        class Model3 extends Model1 {
-            static declaredFields = [field1];
-        }
+        const Model3 = makeModel(
+            class Model3 extends Model1 {
+                static declaredFields = [field1];
+            },
+        );
         expect(Model3.pkField).toBe(field2);
         expect(new Model3({ id: 1, field2: 'value' }).getPkValue()).toBe('value');
 
-        @ModelClass()
-        class Model4 extends Model1 {
-            static declaredFields = [id];
-            static pkFieldName = 'id';
-        }
+        const Model4 = makeModel(
+            class Model4 extends Model1 {
+                static declaredFields = [id];
+                static pkFieldName = 'id';
+            },
+        );
         expect(Model4.pkField).toBe(id);
         expect(new Model4({ id: 1, field2: 'value' }).getPkValue()).toBe(1);
 
@@ -163,10 +170,11 @@ describe('Model', () => {
         const name = new StringField({ name: 'name', required: true });
         const field1 = new StringField({ name: 'field1' });
 
-        @ModelClass()
-        class Model1 extends Model {
-            static declaredFields = [name];
-        }
+        const Model1 = makeModel(
+            class Model1 extends Model {
+                static declaredFields = [name];
+            },
+        );
         expect(Model1.viewField).toBe(name);
         expect(new Model1({ name: 'name value', field1: 'value' }).getViewFieldValue()).toBe('name value');
         expect(new Model1({ name: 'name value', field1: 'value' }).getViewFieldString()).toBe('name value');
@@ -174,25 +182,26 @@ describe('Model', () => {
             '&lt;script&gt;alert()&lt;/script&gt;',
         );
 
-        @ModelClass()
-        class Model2 extends Model1 {
-            static viewFieldName = 'field1';
-            static declaredFields = [field1];
-        }
+        const Model2 = makeModel(
+            class Model2 extends Model1 {
+                static viewFieldName = 'field1';
+                static declaredFields = [field1];
+            },
+        );
         expect(Model2.viewField).toBe(field1);
         expect(new Model2({ name: 'name value', field1: 'value' }).getViewFieldValue('default')).toBe(
             'value',
         );
 
-        @ModelClass()
-        class NoViewField extends Model {}
+        const NoViewField = makeModel(class NoViewField extends Model {});
         expect(NoViewField.viewField).toBeNull();
         expect(new NoViewField().getViewFieldValue('default')).toBe('default');
 
-        @ModelClass()
-        class Model3 extends Model {
-            static declaredFields = [name];
-        }
+        const Model3 = makeModel(
+            class Model3 extends Model {
+                static declaredFields = [name];
+            },
+        );
         const ModelInst = new Model1();
         expect(new Model3({ name: ModelInst }).getViewFieldString()).toBe('');
         // Check value field is null
@@ -203,15 +212,17 @@ describe('Model', () => {
         const id = new StringField({ name: 'id' });
         const name = new StringField({ name: 'name' });
 
-        @ModelClass()
-        class RetrieveModel extends Model {
-            static declaredFields = [id, name];
-        }
+        const RetrieveModel = makeModel(
+            class RetrieveModel extends Model {
+                static declaredFields = [id, name];
+            },
+        );
 
-        @ModelClass()
-        class UpdateModel extends Model {
-            static declaredFields = [name];
-        }
+        const UpdateModel = makeModel(
+            class UpdateModel extends Model {
+                static declaredFields = [name];
+            },
+        );
 
         const retrieveInstance = new RetrieveModel({ id: 1, name: 'Eugene' });
         const updateModel = new UpdateModel({ name: 'Eugene' }, null, retrieveInstance);

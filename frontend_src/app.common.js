@@ -84,7 +84,7 @@ export {
 };
 
 // vstutils styles
-import './vstutils/gui.css';
+import './gui.css';
 
 import './vstutils/styles/scrollbar.css';
 import './vstutils/dark.scss';

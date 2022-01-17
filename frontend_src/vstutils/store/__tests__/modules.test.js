@@ -5,7 +5,7 @@ import { mergeDeep, RequestTypes } from '../../utils';
 import default_nested_module from '../components_state/default_nested_module.js';
 import { createLocalVue } from '@vue/test-utils';
 import { QuerySet } from '../../querySet';
-import { Model, ModelClass } from '../../models';
+import { Model, makeModel } from '../../models';
 import { IntegerField } from '../../fields/numbers/integer';
 import { StringField } from '../../fields/text';
 
@@ -21,10 +21,11 @@ describe('List store module', () => {
         },
     });
 
-    @ModelClass()
-    class User extends Model {
-        static declaredFields = [new IntegerField({ name: 'id' }), new StringField({ name: 'username' })];
-    }
+    const User = makeModel(
+        class extends Model {
+            static declaredFields = [new IntegerField({ name: 'id' }), new StringField({ name: 'username' })];
+        },
+    );
 
     const qs = new QuerySet('user', { [RequestTypes.LIST]: User });
 

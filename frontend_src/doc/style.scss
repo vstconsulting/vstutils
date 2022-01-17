@@ -1,0 +1,80 @@
+$enable-dark-mode: false;
+
+// Bootstrap
+// ---------------------------------------------------
+@import "~bootstrap/scss/functions";
+@import "~admin-lte/build/scss/bootstrap-variables";
+@import "../vstutils/variables-overrides";
+@import "~bootstrap/scss/bootstrap";
+
+// Variables and Mixins
+// ---------------------------------------------------
+@import "~admin-lte/build/scss/variables";
+@import "~admin-lte/build/scss/variables-alt";
+@import "~admin-lte/build/scss/mixins";
+
+@import "~admin-lte/build/scss/parts/core";
+
+//@import "~admin-lte/build/scss/parts/components";
+@import "~admin-lte/build/scss/buttons";
+@import "~admin-lte/build/scss/callout";
+@import "~admin-lte/build/scss/close";
+
+//@import "~admin-lte/build/scss/parts/extra-components";
+//@import "~admin-lte/build/scss/parts/pages";
+//@import "~admin-lte/build/scss/parts/plugins";
+@import "~admin-lte/build/scss/parts/miscellaneous";
+
+@import "../vst-style";
+
+ol , ul {
+    margin-left: 0.5rem;
+}
+
+#indices-and-tables > h1 {
+    font-size: 140%;
+}
+
+blockquote {
+    border-left: none !important;
+}
+
+.sidebar-menu ul li {
+    list-style: none !important;
+}
+
+.menu-text-data {
+    text-decoration: none;
+}
+
+code.sig-name {
+    color: #1e347b !important;
+    padding-right: 0;
+}
+
+.sig-prename {
+    color: #1e347b !important;
+    border-right-width: 0;
+    padding-right: 0;
+}
+
+.toctree-l1 {
+    list-style: none !important;
+    font-size: 1.7rem;
+    margin-bottom: 20px;
+}
+
+.toctree-l2 {
+    list-style-type: none !important;
+}
+
+li li a.reference.internal {
+    list-style-type: none;
+    font-size: 1rem;
+}
+
+.docutils.literal.notranslate {
+    background-color: #f7f7f9;
+    color: darkblue;
+    font-weight: bolder;
+}

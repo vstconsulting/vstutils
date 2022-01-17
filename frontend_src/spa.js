@@ -196,7 +196,6 @@ export class App extends BaseApp {
 
         let routerConstructor = new RouterConstructor(
             this.views,
-            routerMixins.routesComponentsTemplates,
             routerMixins.customRoutesComponentsTemplates,
         );
         signals.emit('app.beforeInitRouter', { routerConstructor });

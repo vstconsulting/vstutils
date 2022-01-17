@@ -1,0 +1,34 @@
+$enable-dark-mode: false;
+
+// Bootstrap
+// ---------------------------------------------------
+@import "~bootstrap/scss/functions";
+@import "~admin-lte/build/scss/bootstrap-variables";
+@import "~bootstrap/scss/bootstrap";
+
+// Variables and Mixins
+// ---------------------------------------------------
+@import "~admin-lte/build/scss/variables";
+@import "~admin-lte/build/scss/variables-alt";
+@import "~admin-lte/build/scss/mixins";
+
+//@import "~admin-lte/build/scss/parts/core";
+@import "~admin-lte/build/scss/root";
+@import "~admin-lte/build/scss/animation-effects";
+@import "~admin-lte/build/scss/layout";
+@import "~admin-lte/build/scss/dropdown";
+
+//@import "~admin-lte/build/scss/parts/components";
+@import "~admin-lte/build/scss/forms";
+@import "~admin-lte/build/scss/modals";
+@import "~admin-lte/build/scss/buttons";
+@import "~admin-lte/build/scss/callout";
+@import "~admin-lte/build/scss/alerts";
+@import "~admin-lte/build/scss/close";
+
+//@import "~admin-lte/build/scss/parts/extra-components";
+
+//@import "~admin-lte/build/scss/parts/pages";
+@import "~admin-lte/build/scss/pages/login_and_register";
+
+//@import "~admin-lte/build/scss/parts/miscellaneous";
