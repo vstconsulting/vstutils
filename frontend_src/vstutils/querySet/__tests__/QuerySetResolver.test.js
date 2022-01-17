@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import { IntegerField } from '../../fields/numbers/integer.js';
-import { Model, ModelClass } from '../../models';
+import { Model, makeModel } from '../../models';
 import { RequestTypes } from '../../utils';
 import QuerySet from '../QuerySet.js';
 import { ListView, PageView, ViewsTree } from '../../views';
@@ -8,18 +8,24 @@ import { QuerySetsResolver } from '../QuerySetsResolver.js';
 
 describe('QuerySetResolver test', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });
-    @ModelClass()
-    class Model1 extends Model {
-        static declaredFields = [idField];
-    }
-    @ModelClass()
-    class Model2 extends Model {
-        static declaredFields = [idField];
-    }
-    @ModelClass()
-    class Model3 extends Model {
-        static declaredFields = [idField];
-    }
+    const Model1 = makeModel(
+        class extends Model {
+            static declaredFields = [idField];
+        },
+        'Model1',
+    );
+    const Model2 = makeModel(
+        class extends Model {
+            static declaredFields = [idField];
+        },
+        'Model2',
+    );
+    const Model3 = makeModel(
+        class extends Model {
+            static declaredFields = [idField];
+        },
+        'Model3',
+    );
 
     const models1 = { [RequestTypes.LIST]: Model1, [RequestTypes.RETRIEVE]: Model1 };
     const models2 = { [RequestTypes.LIST]: Model2, [RequestTypes.RETRIEVE]: Model2 };

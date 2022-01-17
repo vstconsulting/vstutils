@@ -35,6 +35,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
 from . import exceptions as ex
+from .tools import multikeysort
+
 
 logger: logging.Logger = logging.getLogger('vstutils')
 ON_POSIX = 'posix' in sys.builtin_module_names
@@ -1134,6 +1136,21 @@ class ObjectHandlers(BaseVstObject):
         opts = self.opts(name)
         opts.update(kwargs)
         return self[name](*args, **opts)
+
+
+class StaticFilesHandlers(ObjectHandlers):
+    def opts(self, name):
+        opts = super().opts(name)
+        opts['name'] = name
+        return opts
+
+    def get_static_objects(self):
+        for name in self.keys():
+            for result in self.get_object(name).spa_static_list:
+                yield result
+
+    def get_sorted_list(self):
+        return tuple(multikeysort(self.get_static_objects(), ['priority']))
 
 
 class ModelHandlers(ObjectHandlers):

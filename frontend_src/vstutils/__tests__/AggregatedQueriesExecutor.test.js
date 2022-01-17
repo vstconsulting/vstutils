@@ -1,5 +1,5 @@
 import { expect, jest, test, describe } from '@jest/globals';
-import { Model, ModelClass } from '../models/Model.js';
+import { makeModel, Model } from '../models/Model.js';
 import QuerySet from '../querySet/QuerySet.js';
 import StringField from '../fields/text/StringField.js';
 import { IntegerField } from '../fields/numbers/integer.js';
@@ -14,10 +14,12 @@ describe('AggregatedQueriesExecutor', () => {
     const idField = new IntegerField({ name: 'id', readOnly: true });
     const nameField = new StringField({ name: 'name' });
 
-    @ModelClass()
-    class User extends Model {
-        static declaredFields = [idField, nameField];
-    }
+    const User = makeModel(
+        class extends Model {
+            static declaredFields = [idField, nameField];
+        },
+        'User',
+    );
 
     const usersQueryset = new QuerySet('users', { [RequestTypes.LIST]: User });
 

@@ -21,14 +21,16 @@
     import { joinPaths } from '../../utils';
     import OperationButton from '../common/OperationButton.vue';
     import { guiPopUp, pop_up_msg } from '../../popUp';
-    import { Model, ModelClass } from '../../models';
+    import { Model, makeModel } from '../../models';
     import StringField from '../../fields/text/StringField.js';
     import BaseListModal from './BaseListModal';
 
-    @ModelClass()
-    class AppendNestedModel extends Model {
-        static declaredFields = [new StringField({ name: 'id' })];
-    }
+    const AppendNestedModel = makeModel(
+        class AppendNestedModel extends Model {
+            static declaredFields = [new StringField({ name: 'id' })];
+        },
+        'AppendNestedModel',
+    );
 
     /**
      * Component for modal window with list of child instances,

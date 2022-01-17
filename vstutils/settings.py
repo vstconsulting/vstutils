@@ -820,10 +820,14 @@ TEMPLATES: _t.List[_t.Dict] = [
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 ##############################################################
 STATIC_URL: _t.Text = web["static_files_url"]
-STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
+
+PROJECT_STATIC_DIRS = lazy(lambda: list(filter(bool, (
     os.path.join(VST_PROJECT_DIR, 'static'),
     os.path.join(BASE_DIR, 'static') if BASE_DIR != VST_PROJECT_DIR else None,
     os.path.join(VSTUTILS_DIR, 'static'),
+))), tuple)()
+STATIC_FILES_FOLDERS = lazy(lambda: list(filter(bool, (
+    *PROJECT_STATIC_DIRS,
     os.path.join(os.path.dirname(admin.__file__), 'static'),
     os.path.join(os.path.dirname(errors.__file__), 'static'),
     os.path.join(os.path.dirname(rest_framework.__file__), 'static')
@@ -1310,16 +1314,20 @@ PROJECT_GUI_MENU: _t.List[_t.Dict] = [
     },
 ]
 
-SPA_STATIC: _t.List[_t.Dict] = [
-    # Load common chunks
-    {'priority': 1, 'type': 'js', 'name': 'bundle/vstutils.chunk.js', 'source': 'vstutils'},
-    {'priority': 1, 'type': 'js', 'name': 'bundle/base~doc~spa.chunk.js', 'source': 'vstutils'},
-    {'priority': 1, 'type': 'js', 'name': 'bundle/base~spa.chunk.js', 'source': 'vstutils'},
-    {'priority': 1, 'type': 'js', 'name': 'bundle/vendors~spa.chunk.js', 'source': 'vstutils'},
+SPA_STATIC: _t.List[_t.Dict] = []
 
-    # Load app
-    {'priority': 2, 'type': 'js', 'name': 'bundle/spa.js', 'source': 'vstutils'},
-]
+SPA_STATIC_FILES_PROVIDERS = {
+    'vstutils': {
+        'BACKEND': 'vstutils.static_files.WebpackJsonStaticObjectHandler',
+        'OPTIONS': {
+            'priority': 1,
+            'entrypoint_name': 'spa',
+        }
+    },
+    'oldstyle': {
+        'BACKEND': 'vstutils.static_files.SPAStaticObjectHandler',
+    }
+}
 
 # Centrifugo settings
 CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()

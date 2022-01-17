@@ -17,6 +17,7 @@ module.exports = {
         'vue/html-indent': ['error', 4],
         'vue/html-self-closing': ['error', { html: { void: 'any' } }],
         'vue/max-attributes-per-line': 'off',
+        'vue/multi-word-component-names': 'off',
         'vue/no-empty-component-block': 'error',
     },
     globals: {

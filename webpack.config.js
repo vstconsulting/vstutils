@@ -1,132 +1,130 @@
-const webpack = require("webpack");
-const TerserPlugin = require("terser-webpack-plugin");
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const path = require('path');
+const webpack = require('webpack');
+const {VueLoaderPlugin} = require('vue-loader');
 
 require("dotenv").config();
-const ENV = process.env.APP_ENV;
-const isProd = ENV === "prod";
-
-const enableAnalyzer = process.env.BUNDLE_ANALYZER === "true";
+const isProd = process.env.APP_ENV === 'prod';
+const showWarnings = process.env.SHOW_WARNINGS === 'true';
 
 const KB = 1024;
-const entrypoints_dir = __dirname + "/frontend_src";
+const frontendSrc = path.resolve(__dirname, 'frontend_src');
 
-function setMode() {
-  if (isProd) {
-    return "production";
-  } else {
-    return "development";
-  }
-}
+const excludeFromSplitNames= ['app_loader', 'doc', 'base'];
 
-const config = {
-  mode: setMode(),
-  entry: {
-    'app_loader': entrypoints_dir + "/app_loader/index.js",
-    'spa': entrypoints_dir + "/spa.js",
-    'doc': entrypoints_dir + "/doc.js",
-    'base': entrypoints_dir + "/base.js",
-  },
-  output: {
-    path: __dirname + "/vstutils/static/bundle",
-    filename: "[name].js",
-    chunkFilename: "[name].chunk.js",
-    publicPath: "/static/bundle/",
-    library: "[name]",
-    libraryTarget: 'window'
-  },
-  plugins: [
-      new webpack.ProvidePlugin({
-        $: 'jquery',
-        jQuery: 'jquery'
-      }),
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-    new CleanWebpackPlugin(),
-    new VueLoaderPlugin(),
-  ],
-  resolve: {
-    alias: {
-      vue$: "vue/dist/vue.esm.js",
+module.exports = {
+    mode: isProd ? 'production' : 'development',
+    entry: {
+        'app_loader': path.resolve(frontendSrc, 'app_loader/index.js'),
+        'spa': path.resolve(frontendSrc, 'spa.js'),
+        'doc': path.resolve(frontendSrc, 'doc/index.js'),
+        'base': path.resolve(frontendSrc, 'base/index.js'),
     },
-    extensions: [".tsx", ".ts", ".js", ".vue"]
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        loader: "babel-loader",
-        exclude: [/node_modules/]
-      },
-      {
-        test: /\.((css)|(scss))$/i,
-        use: ["style-loader", "css-loader", "sass-loader"]
-      },
-      {
-        test: /.woff2$/,
-        use: {
-          loader: "url-loader",
-          options: {
-            limit: 100 * KB
-          }
-        }
-      },
-      {
-        test: /.(png|jpg|jpeg|gif|svg|woff|ttf|eot)$/,
-        use: {
-          loader: "url-loader",
-          options: {
-            limit: 10 * KB
-          }
-        }
-      },
-      {
-        test: /\.vue$/,
-        loader: "vue-loader"
-      }
-    ]
-  },
-  optimization: {
-    chunkIds: "natural",
-    splitChunks: {
-      // Do not split app_loader and tests
-      chunks: function(chunk) {
-        return !['app_loader', 'tests'].includes(chunk.name);
-      },
-      maxInitialRequests: 10,
-      // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups
-      cacheGroups: {
-        // Disable default vendors cache group
-        defaultVendors: false,
-        // Setup default cache group for everything
-        default: {
-          automaticNamePrefix: "",
-          priority: 0
+    output: {
+        path: path.resolve(__dirname, 'vstutils/static/bundle'),
+        clean: true,
+        filename: '[name].js',
+        chunkFilename: '[name].chunk.js',
+        library: {
+            name: 'spa',
+            type: 'window',
         },
-        // Setup cache group 'vstutils' with higher priority then 'default' group so
-        // everything under /frontend_src/vstutils/ will go in one 'vstutils.chunk.js' chunk.
-        vstutils: {
-          name: "vstutils",
-          test: /frontend_src\/vstutils\//,
-          priority: 10,
-          enforce: true
-        }
-      }
     },
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        parallel: true
-      }),
-      new OptimizeCSSAssetsPlugin()
-    ]
-  }
+    plugins: [
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery'
+        }),
+        new webpack.IgnorePlugin({resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/}),
+        new VueLoaderPlugin(),
+    ],
+    resolve: {
+        alias: {
+            vue$: 'vue/dist/vue.esm.js',
+        },
+        extensions: ['.tsx', '.ts', '.js', '.vue']
+    },
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                loader: 'babel-loader',
+                exclude: [/node_modules/]
+            },
+            {
+                test: /\.((css)|(scss))$/i,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            url: {
+                                filter: (url) => !url.startsWith('/static/')
+                            }
+                        }
+                    },
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sassOptions: {
+                                quietDeps: true
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                test: /.woff2$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {maxSize: 100 * KB},
+                },
+
+            },
+            {
+                test: /.(png|jpg|jpeg|gif|svg|woff|ttf|eot)$/,
+                type: 'asset',
+                parser: {
+                    dataUrlCondition: {maxSize: 10 * KB},
+                },
+
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            }
+        ]
+    },
+    stats: {
+        all: false,
+        entrypoints: true,
+        errors: true,
+        warnings: showWarnings,
+    },
+    optimization: {
+        chunkIds: 'deterministic',
+        splitChunks: {
+            // Do not split app_loader
+            chunks: function (chunk) {
+                return !excludeFromSplitNames.includes(chunk.name);
+            },
+            maxInitialRequests: 10,
+            // https://webpack.js.org/plugins/split-chunks-plugin/#splitchunkscachegroups
+            cacheGroups: {
+                // Disable default vendors cache group
+                defaultVendors: false,
+                // Setup default cache group for everything
+                default: {
+                    priority: 0
+                },
+                // Setup cache group 'vstutils' with higher priority then 'default' group so
+                // everything under /frontend_src/vstutils/ will go in one 'vstutils.chunk.js' chunk.
+                vstutils: {
+                    name: 'vstutils',
+                    test: /frontend_src\/vstutils\//,
+                    priority: 10,
+                    enforce: true
+                }
+            }
+        }
+    },
 };
-
-if (enableAnalyzer) {
-  config.plugins.push(new BundleAnalyzerPlugin());
-}
-
-module.exports = config;
