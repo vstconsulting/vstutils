@@ -1,6 +1,7 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
+import operator
 import uuid
-from functools import lru_cache, partial
+from functools import lru_cache, partial, reduce
 from itertools import chain
 from copy import deepcopy
 
@@ -63,6 +64,15 @@ CHANGE_MIXINS = (
     DestroyModelMixin
 )
 
+view_settings = (
+    'filter_backends',
+    'permission_classes',
+    'authentication_classes',
+    'throttle_classes',
+    'renderer_classes',
+    'parser_classes',
+)
+
 default_extra_metadata: dict = {
     # list or class which is base for view
     "view_class": None,
@@ -90,20 +100,12 @@ default_extra_metadata: dict = {
     "filterset_fields": 'serializer',
     # tuple or list of fields using for search requests
     "search_fields": None,
-    # tuple or list of filter backends for queryset
-    "filter_backends": None,
-    "pre_filter_backends": None,
-    # allow to full override of the filter backends default list
-    "override_filter_backends": False,
-    # tuple or list of permission_classes for the view
-    "permission_classes": None,
-    "pre_permission_classes": None,
-    # allow to override the default permission_classes
-    "override_permission_classes": False,
     # additional attrs which means that this view allowed to copy elements
     "copy_attrs": None,
     # key-value mapping with nested views (key - nested name, kwargs for nested decorator)
-    "nested": None
+    "nested": None,
+    # additional view's settings
+    **dict(reduce(operator.add, [((f'pre_{i}', None), (i, None), (f'override_{i}', False)) for i in view_settings]))
 }
 
 
@@ -585,7 +587,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             metadata=metadata,
             views=view_class
         )
-        for value, name in filter(_bool_first, map(get_setting_for_view, ('permission_classes', 'filter_backends'))):
+        for value, name in filter(_bool_first, map(get_setting_for_view, view_settings)):
             view_attributes[name] = SimpleLazyObject(lambda obj=value: list(map(get_if_lazy, obj)))
 
         view_attributes['search_fields'] = SimpleLazyObject(lambda: tuple(cls._get_search_fields(

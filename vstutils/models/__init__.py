@@ -154,19 +154,23 @@ class BModel(BaseModel):
           (None value disables overriding).
         - ``_search_fields`` - tuple or list of fields using for search requests.
           By default (or `None`) get all filterable fields in detail view.
-        - ``_filter_backends`` - list of `vstutils.api.filter_backends.VSTFilterBackend` classes.
-          Values can be string for import.
-        - ``_override_filter_backends`` - boolean flag indicates that ``_filter_backends`` override default viewset
-          filter_backends (otherwise appends). Default is ``False``.
-        - ``_permission_classes`` - list of DRF permission classes. Values can be string for import.
-        - ``_override_permission_classes`` - boolean flag indicates that ``_permission_classes`` override default
-          viewset (otherwise appends). Default is ``False``.
         - ``_copy_attrs`` - list of model-instance attributes indicates that object is copiable with this attrs.
         - ``_nested`` - key-value mapping with nested views (key - nested name,
           kwargs for :class:`vstutils.api.decorators.nested_view` decorator but supports
           ``model`` attribute as nested). ``model`` can be string for import.
         - ``_extra_view_attributes`` - key-value mapping with additional view attributes,
           but has less priority over generated attributes.
+
+
+        In common, you can also add custom attributes to override or extend the default list of processing classes.
+        Supported view attributes are ``filter_backends``, ``permission_classes``, ``authentication_classes``,
+        ``throttle_classes``, ``renderer_classes`` and ``parser_classes``.
+        List of meta-attributes for settings of view is looks like:
+
+        - ``_pre_{attribute}`` - List of classes included before defaults.
+        - ``_{attribute}`` - List of classes included after defaults.
+        - ``_override_{attribute}`` - boolean flag indicates that attribute override default
+          viewset (otherwise appends). Default is ``False``.
 
         .. note::
             You may need to create an
