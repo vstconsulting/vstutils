@@ -24,7 +24,7 @@ from enum import Enum
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
 from django.urls import re_path, include
-from django.core.mail import send_mail
+from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.cache import caches, InvalidCacheBackendError
 from django.core.paginator import Paginator as BasePaginator
 from django.template import loader
@@ -145,6 +145,32 @@ def get_if_lazy(obj):
             obj._setup() if obj._wrapped == functional.empty else None
             return obj._wrapped
     return obj
+
+
+def send_mail(subject, message, from_email, recipient_list,  # noqa: CFQ002
+              fail_silently=False, auth_user=None, auth_password=None,
+              connection=None, html_message=None, **kwargs):
+    """
+    Wrapper over :func:`django.core.mail.send_mail` which provide additional named arguments.
+    """
+    # pylint: disable=too-many-arguments
+    connection = connection or get_connection(
+        username=auth_user,
+        password=auth_password,
+        fail_silently=fail_silently,
+    )
+    mail = EmailMultiAlternatives(
+        subject,
+        message,
+        from_email,
+        recipient_list,
+        connection=connection,
+        **kwargs,
+    )
+    if html_message:
+        mail.attach_alternative(html_message, 'text/html')
+
+    return mail.send()
 
 
 def send_template_email_handler(
