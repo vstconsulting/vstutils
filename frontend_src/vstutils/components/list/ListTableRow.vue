@@ -69,7 +69,7 @@
     import SelectToggleButton from './SelectToggleButton.vue';
     import Modal from '../items/modal/Modal.vue';
     import BootstrapModal from '../BootstrapModal.vue';
-    import { formatPath, joinPaths, tableColumnClasses, stringToCssClass } from '../../utils';
+    import { formatPath, joinPaths, tableColumnClasses, classesFromFields } from '../../utils';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -100,13 +100,8 @@
             pk() {
                 return this.instance.getPkValue();
             },
-            classesFromFields() {
-                return this.fields
-                    .filter((f) => ['choices', 'boolean'].includes(f.format))
-                    .map((f) => `field-${f.name}-${stringToCssClass(f._getValueFromData(this.data))}`);
-            },
             classes() {
-                const classes = [...this.classesFromFields];
+                const classes = classesFromFields(this.fields, this.data);
                 if (this.isSelected) classes.push('selected');
                 return classes;
             },

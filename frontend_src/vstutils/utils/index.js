@@ -1092,6 +1092,12 @@ export function tableColumnClasses(field) {
     return classes;
 }
 
+export function classesFromFields(fields, data) {
+    return fields
+        .filter((f) => ['choices', 'boolean'].includes(f.format))
+        .map((f) => `field-${f.name}-${stringToCssClass(f._getValueFromData(data))}`);
+}
+
 export function parseResponseMessage(data) {
     if (!data) {
         return '';

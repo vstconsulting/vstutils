@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div class="row" :class="rootClasses">
         <div v-if="hideNotRequired" class="col-12">
             <div class="card">
                 <div class="card-body">
@@ -42,6 +42,7 @@
 
 <script>
     import HideNotRequiredSelect from './HideNotRequiredSelect.vue';
+    import { classesFromFields } from '../../utils';
 
     export default {
         name: 'ModelFields',
@@ -110,6 +111,12 @@
                         fields: group.fields.filter((field) => this.shouldShowField(field)),
                     }))
                     .filter((group) => group.fields.length > 0);
+            },
+            flatFields() {
+                return this.filteredFieldsInstancesGroups.flatMap((group) => group.fields);
+            },
+            rootClasses() {
+                return classesFromFields(this.flatFields, this.data);
             },
         },
         created() {
