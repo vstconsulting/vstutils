@@ -1674,6 +1674,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
             },
         })
 
+    def test_search_fields(self):
+        self.assertEqual(
+            self.get_model_class('test_proj.Variable').generated_view.search_fields,
+            ('key', 'value')
+        )
+        self.assertEqual(
+            self.get_model_class('test_proj.Author').generated_view.search_fields,
+            ('name', 'phone', 'masked')
+        )
+
     def test_api_version_request(self):
         api = self.get_result('get', '/api/endpoint/?format=openapi&version=v2', 200)
         paths_which_is_tech = (r'settings', r'_lang')

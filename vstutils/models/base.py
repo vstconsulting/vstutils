@@ -418,7 +418,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializers[serializer_name] = extra_serializer_class
 
     def get_extra_metadata(cls):
-        return cls.__extra_metadata__
+        return cls.__extra_metadata__.copy()
 
     def get_list_serializer_name(cls):
         # pylint: disable=no-value-for-parameter
@@ -493,24 +493,24 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
 
     def _get_search_fields(cls, serializer, fields=None):
         if fields is not None:
-            return fields
-
-        model_fields = cls.get_model_fields_mapping()  # pylint: disable=no-value-for-parameter
-        serializer_fields = serializer().fields
-        avail_fields = filter(
-            tuple(model_fields.keys()).__contains__,
-            tuple(
-                k if v.source is None or v.source == '*' else v.source
-                for k, v in serializer_fields.items()
-                if not isinstance(v, EXCLUDED_FIELDS)
+            yield from fields
+        else:
+            model_fields = cls.get_model_fields_mapping()  # pylint: disable=no-value-for-parameter
+            serializer_fields = serializer().fields
+            avail_fields = filter(
+                tuple(model_fields.keys()).__contains__,
+                tuple(
+                    k if v.source is None or v.source == '*' else v.source
+                    for k, v in serializer_fields.items()
+                    if not isinstance(v, EXCLUDED_FIELDS)
+                )
             )
-        )
-        for field in avail_fields:
-            serializer_field = serializer_fields[field]
-            if isinstance(serializer_field, FkField):
-                yield f'{field}__{serializer_field.autocomplete_represent}'
-            elif isinstance(serializer_field, drfCharField):
-                yield field
+            for field in avail_fields:
+                serializer_field = serializer_fields[field]
+                if isinstance(serializer_field, FkField):
+                    yield f'{field}__{serializer_field.autocomplete_represent}'
+                elif isinstance(serializer_field, drfCharField):
+                    yield field
 
     def _get_view_class(cls, view_base_class):
         """
