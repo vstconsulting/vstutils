@@ -1,5 +1,5 @@
 default:
-  image: vstconsulting/images:build
+  image: vstconsulting/images:ubuntu
   cache: &global_cache
     paths:
       - node_modules/
@@ -23,13 +23,14 @@ stages:
 
 .branch_tests_template: &branch_tests
   stage: test
-  image: vstconsulting/images:build
+  image: vstconsulting/images:ubuntu
   variables:
-    TOX_ENVS: "flake,pylint,py36-django-install,py37-django-install"
+    TOX_ENVS: ""
   before_script:
     - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}"; fi
+    - if [ "${TOX_ENVS}" ]; then export TOX_ARGS="${TOX_ARGS} -e ${TOX_ENVS}"; fi
   script:
-   - tox -e $TOX_ENVS $TOX_ARGS
+   - tox $TOX_ARGS
   rules:
     - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^release_/'
       when: on_success
@@ -60,7 +61,7 @@ functional_test:
     matrix:
       - TOX_ENVS:
           - py36-django32-install
-          - py39-django32-coverage
+          - py310-django32-coverage
 
 js_tests:
   <<: *branch_tests
@@ -105,7 +106,7 @@ release:
 
 release_pypi:
   stage: release
-  image: vstconsulting/images:build
+  image: vstconsulting/images:ubuntu
   rules:
     - if: '$CI_COMMIT_TAG && $PYPI_UPLOAD_PASSWORD && $PYPI_UPLOAD_NAME'
       when: on_success
