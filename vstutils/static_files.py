@@ -1,10 +1,15 @@
+import traceback
 from pathlib import Path
+from logging import getLogger
 
 from orjson import loads
 from configparserc.tools import File
 from django.conf import settings
 from django.utils.functional import cached_property
 from vstutils.utils import StaticFilesHandlers
+
+
+logger = getLogger('vstutils')
 
 
 class BaseStaticObjectHandler:
@@ -51,7 +56,10 @@ class WebpackJsonStaticObjectHandler(BaseStaticObjectHandler):
 
     def get_static_files(self):
         with File(self.json_file) as fd:
-            return loads(fd.read())['entrypoints'][self.entrypoint_name]['assets']
+            try:
+                return loads(fd.read())['entrypoints'][self.entrypoint_name]['assets']
+            except:  # nocv
+                logger.exception(traceback.format_exc())
 
 
 SPA_STATIC_FILES_PROVIDERS = StaticFilesHandlers('SPA_STATIC_FILES_PROVIDERS')
