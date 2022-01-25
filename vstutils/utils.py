@@ -538,7 +538,7 @@ class tmp_file_context:
 
 
 class assertRaises:
-    __slots__ = ('_kwargs', '_verbose', '_exclude', '_excepts', '_log')
+    __slots__ = ('_kwargs', '_verbose', '_exclude', '_excepts', '_log', '__failed')
 
     def __init__(self, *args, **kwargs):
         """
@@ -553,6 +553,17 @@ class assertRaises:
         self._verbose = kwargs.pop("verbose", settings.DEBUG)
         self._exclude = kwargs.pop("exclude", False)
         self._excepts = tuple(args)
+        self.__failed = False
+
+    def mark_as_failed(self):
+        self.__failed = True
+
+    def cleanup_fails(self):
+        self.__failed = False
+
+    @property
+    def is_failed(self):
+        return self.__failed
 
     def __enter__(self):
         return self  # pragma: no cover
@@ -573,10 +584,12 @@ class raise_context(assertRaises):
     __slots__ = ()
 
     def execute(self, func: tp.Callable, *args, **kwargs):
+        self.cleanup_fails()
         with self.__class__(self._excepts, **self._kwargs):
             try:
                 return func(*args, **kwargs)
             except:
+                self.mark_as_failed()
                 type, value, traceback_obj = sys.exc_info()
                 if self._verbose:
                     logger.debug(traceback.format_exc())
@@ -624,7 +637,7 @@ class raise_context_decorator_with_default(raise_context):
 
     def execute(self, func: tp.Callable, *args, **kwargs):
         result = super().execute(func, *args, **kwargs)
-        if isinstance(result, tuple) and result and issubclass(result[0], BaseException):
+        if self.is_failed:
             return self.default_value
         return result
 
