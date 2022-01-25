@@ -16,6 +16,7 @@ from unittest.mock import patch, PropertyMock
 
 from collections import OrderedDict
 
+import ormsgpack
 from bs4 import BeautifulSoup
 from django import VERSION as django_version
 from django.conf import settings
@@ -230,6 +231,7 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
 
 
 class VSTUtilsTestCase(BaseTestCase):
+    use_msgpack = True
 
     def _get_test_ldap(self, client, data):
         self.client.post(self.login_url, data=data, HTTP_X_AUTH_PLUGIN='DJANGO')
@@ -489,6 +491,7 @@ class VSTUtilsTestCase(BaseTestCase):
 
 
 class ViewsTestCase(BaseTestCase):
+    use_msgpack = True
 
     def test_main_views(self):
         # Main
@@ -1152,6 +1155,7 @@ class ViewsTestCase(BaseTestCase):
 
 
 class DefaultBulkTestCase(BaseTestCase):
+    use_msgpack = True
 
     def test_bulk(self):
         self.get_model_filter(
@@ -1238,6 +1242,7 @@ class DefaultBulkTestCase(BaseTestCase):
 
 
 class OpenapiEndpointTestCase(BaseTestCase):
+    use_msgpack = False
 
     @override_settings(CENTRIFUGO_CLIENT_KWARGS={
         'address': 'https://localhost:8000',
@@ -1735,6 +1740,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
 
 class EndpointTestCase(BaseTestCase):
+    use_msgpack = True
 
     def test_auth(self):
         # Check public schema access
@@ -1747,11 +1753,11 @@ class EndpointTestCase(BaseTestCase):
         response = basic_client.put('/api/endpoint/')
         self.assertEqual(response.status_code, 200)
 
-        response = basic_client.put('/api/endpoint/', json.dumps({
+        response = basic_client.put('/api/endpoint/', ormsgpack.packb({
             'path': '/request_info/',
             'version': 'v2',
             'method': 'get'
-        }), content_type='application/json')
+        }), content_type='application/msgpack', HTTP_ACCEPT='application/msgpack')
         self.assertEqual(response.status_code, 200)
         result = self.render_api_response(response)
         self.assertEqual(result[0]['data']['user_id'], user.id, result)
@@ -2204,6 +2210,7 @@ class EmailSendingTestCase(BaseTestCase):
 
 
 class ValidatorsTestCase(BaseTestCase):
+    use_msgpack = True
     valid_image_content_dict = {
         'name': 'cat.jpg',
         'content': get_file_value(os.path.join(DIR_PATH, 'image_b64_valid')),
@@ -2505,6 +2512,7 @@ class ValidatorsTestCase(BaseTestCase):
 
 
 class LangTestCase(BaseTestCase):
+    use_msgpack = True
 
     def test_lang(self):
         bulk_data = [
@@ -2674,6 +2682,8 @@ class CoreApiTestCase(BaseTestCase):
 
 
 class ProjectTestCase(BaseTestCase):
+    use_msgpack = True
+
     def setUp(self):
         super(ProjectTestCase, self).setUp()
         self.predefined_hosts_cnt = 10

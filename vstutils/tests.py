@@ -7,6 +7,7 @@ import uuid
 from unittest.mock import patch, Mock
 import json  # noqa: F401
 
+import ormsgpack
 from django.apps import apps
 from django.db import transaction
 from django.urls import reverse
@@ -17,7 +18,7 @@ from .utils import import_class, raise_context_decorator_with_default
 
 User = get_user_model()
 
-BulkDataType = _t.Union[_t.List[_t.Dict[_t.Text, _t.Any]], str]
+BulkDataType = _t.Union[_t.List[_t.Dict[_t.Text, _t.Any]], str, bytes, bytearray]
 ApiResultType = _t.Union[BulkDataType, _t.Dict, _t.Sequence[BulkDataType]]
 
 
@@ -37,6 +38,7 @@ class BaseTestCase(TestCase):
         'patch': 200,
         'delete': 204
     }
+    use_msgpack = False
 
     class user_as:
         # pylint: disable=invalid-name
@@ -103,14 +105,21 @@ class BaseTestCase(TestCase):
             self.assertEqual(result[field], value)
 
     def __get_rendered(self, response):
+        # pylint: disable=protected-access
         try:
+            media_type = f'{getattr(response, "accepted_media_type", "")}' or \
+                         response._content_type_for_repr.split(";")[0].replace('"', '').replace(',', '').strip()
             rendered_content = (
                 getattr(response, "rendered_content", False) or response.content
             )
+            if media_type == 'application/msgpack':
+                return ormsgpack.unpackb(rendered_content)
             if getattr(rendered_content, 'decode', False):
                 rendered_content = str(rendered_content.decode('utf-8'))
             try:
-                return json.loads(rendered_content)
+                if media_type in ('application/json', 'application/openapi+json'):
+                    return json.loads(rendered_content)
+                raise Exception
             except:
                 return str(rendered_content)
         except ValueError:  # nocv
@@ -327,6 +336,11 @@ class BaseTestCase(TestCase):
         if kwargs.get("data", False):
             if isinstance(kwargs["data"], str):
                 kwargs["content_type"] = "application/json"
+            elif isinstance(kwargs["data"], (bytes, bytearray)):
+                kwargs["content_type"] = "application/msgpack"
+
+        if 'content_type' in kwargs and kwargs["content_type"].startswith('application/'):
+            kwargs['HTTP_ACCEPT'] = kwargs["content_type"]
 
         kwargs['code'] = code or self.std_codes.get(rtype, 200)
 
@@ -414,7 +428,10 @@ class BaseTestCase(TestCase):
         """
 
         if data is not None:
-            data = json.dumps(data)
+            if self.use_msgpack:
+                data = ormsgpack.packb(data)
+            else:
+                data = json.dumps(data)
 
         if method == 'get' and 'query' in kwargs and kwargs['query']:
             query = f'?{"&".join(map("=".join, kwargs.pop("query").items()))}'

@@ -11,6 +11,7 @@ from django.utils.functional import lazy
 from drf_yasg import errors
 import rest_framework
 import orjson
+import ormsgpack
 
 from configparserc import config as cconfig
 from .tools import get_file_value
@@ -996,11 +997,13 @@ REST_FRAMEWORK: _t.Dict = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         "vstutils.api.renderers.ORJSONRenderer",
+        "vstutils.api.renderers.MsgpackRenderer",
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.MultiPartRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
         "drf_orjson_renderer.parsers.ORJSONParser",
+        "vstutils.api.parsers.MsgpackParser",
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),
@@ -1012,6 +1015,11 @@ REST_FRAMEWORK: _t.Dict = {
         orjson.OPT_SERIALIZE_DATACLASS,
         orjson.OPT_SERIALIZE_NUMPY,
         orjson.OPT_SERIALIZE_UUID,
+    ),
+    "MSGPACK_RENDERER_OPTIONS": (
+        ormsgpack.OPT_NON_STR_KEYS,
+        ormsgpack.OPT_SERIALIZE_NUMPY,
+        ormsgpack.OPT_NAIVE_UTC,
     ),
     'EXCEPTION_HANDLER': 'vstutils.api.base.exception_handler',
     'DEFAULT_FILTER_BACKENDS': [
