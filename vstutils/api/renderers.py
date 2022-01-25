@@ -16,9 +16,14 @@ class ORJSONRenderer(BaseORJSONRenderer):
         # pylint: disable=protected-access
         if isinstance(obj, Promise):
             obj = obj._proxy____cast()
-        elif isinstance(obj, LazyObject):
+        elif isinstance(obj, LazyObject):  # nocv
             obj = get_if_lazy(obj)
         return BaseORJSONRenderer.default(obj)
+
+    def render(self, data, media_type=None, renderer_context=None):
+        if getattr(renderer_context['request'], 'is_bulk', False):
+            return data
+        return super().render(data, media_type, renderer_context)
 
 
 class MsgpackRenderer(BaseRenderer):

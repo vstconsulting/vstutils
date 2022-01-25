@@ -25,6 +25,7 @@ from . import responses
 from .decorators import cache_method_result
 from .serializers import DataSerializer
 from .validators import UrlQueryStringValidator
+from .renderers import ORJSONRenderer
 from ..utils import Dict, raise_context, patch_gzip_response
 from ..middleware import BaseMiddleware
 
@@ -120,6 +121,9 @@ class ParseResponseDict(dict):
             result = response.data  # type: ignore
             if isinstance(result, dict):
                 return Dict(result)
+        with raise_context():
+            if isinstance(response.accepted_renderer, ORJSONRenderer) and response.is_rendered:  # type: ignore
+                return response.rendered_content  # type: ignore
         if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
             return json.loads(response.rendered_content.decode())  # type: ignore
         return Dict(detail=str(response.content.decode('utf-8')))
