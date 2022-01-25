@@ -50,6 +50,7 @@ class ManifestView(BaseView):
     minify_response = False
     login_required = False
     template_name = "gui/manifest.json"
+    content_type = 'application/json'
 
 
 class JSMinTemplateResponse(TemplateResponse):
