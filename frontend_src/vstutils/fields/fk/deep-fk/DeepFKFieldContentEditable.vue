@@ -96,7 +96,7 @@
                 }
             },
             removeValue() {
-                this.setValue(this.field.getInitialValue());
+                this.setValue(this.field.getEmptyValue());
                 this.selectedNode.unselect();
                 this.selectedNode = null;
                 this.selectedText = '';
