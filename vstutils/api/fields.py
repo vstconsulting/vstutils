@@ -646,7 +646,7 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     """
 
-    __slots__ = ('file',)
+    __slots__ = ('file', 'post_handlers', 'pre_handlers')
 
     __valid_keys = ('name', 'content', 'mediaType')
     default_error_messages = {
@@ -658,6 +658,8 @@ class NamedBinaryFileInJsonField(VSTCharField):
 
     def __init__(self, **kwargs):
         self.file = kwargs.pop('file', False)
+        self.post_handlers = kwargs.pop('post_handlers', ())
+        self.pre_handlers = kwargs.pop('pre_handlers', ())
         super(NamedBinaryFileInJsonField, self).__init__(**kwargs)
 
     def validate_value(self, data: _t.Dict):
@@ -691,6 +693,12 @@ class NamedBinaryFileInJsonField(VSTCharField):
         if is_empty_value:
             return data  # nocv
         self.validate_value(data)
+        if not self.should_not_handle(data):
+            data['content'] = base64.b64encode(functools.reduce(
+                lambda binary, func: func(binary, original_data=data),
+                self.pre_handlers,
+                base64.b64decode(data['content'])
+            )).decode('utf-8')
         self.run_validators(data)
         return self.to_internal_value(data)
 
@@ -712,9 +720,14 @@ class NamedBinaryFileInJsonField(VSTCharField):
                 self.root.instance._meta.get_field(self.field_name),
                 file['name']
             )
+        content = functools.reduce(
+            lambda binary, func: func(binary, original_data=file),
+            self.post_handlers,
+            base64.b64decode(file['content'])
+        )
         return SimpleUploadedFile(
             name=file['name'],
-            content=base64.b64decode(file['content']),
+            content=content,
             content_type=file['mediaType']
         )
 

@@ -2441,6 +2441,8 @@ class ValidatorsTestCase(BaseTestCase):
             self.assertEqual(results[6]['status'], 200)
         # if satisfied, image must not be changed
         self.assertEqual(hash(results[7]['data']['validimage']['content']), valid_image_hash)
+        # Check name which changed in handler
+        self.assertEqual(results[7]['data']['validimage']['name'], '1280_720.png')
         self.assertEqual(hash(results[8]['data']['validimage']['content']), valid_image_hash)
 
         img_png = Image.open(BytesIO(base64.b64decode(results[0]['data']['invalidimage']['content'])))
@@ -3450,7 +3452,7 @@ class ProjectTestCase(BaseTestCase):
             'content': file,
             'mediaType': 'image/jpeg'
         }
-        value = {'name': 'abc.png', 'content': '/4sdfsdf/', 'mediaType': 'text/txt'}
+        value = {'name': 'abc.png', 'content': 'c29tZSB0ZXh0IHZhbHVl', 'mediaType': 'text/txt'}
         missing_mediaType = {'name': '123', 'content': 'qwedsf'}
         instance_without_mediaType = self.get_model_filter('test_proj.models.ModelWithBinaryFiles').create(some_namedbinfile=json.dumps(missing_mediaType))
         bulk_data = [
