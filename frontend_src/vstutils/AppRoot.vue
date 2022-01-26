@@ -1,5 +1,5 @@
 <template>
-    <div id="RealBody" style="display: none" class="wrapper" :class="classes">
+    <div id="RealBody" class="wrapper" :class="classes">
         <TopNavigation :show-back-button="showBackButton" />
 
         <aside class="main-sidebar sidebar-dark-primary elevation-4">

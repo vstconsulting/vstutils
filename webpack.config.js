@@ -2,14 +2,14 @@ const path = require('path');
 const webpack = require('webpack');
 const {VueLoaderPlugin} = require('vue-loader');
 
-require("dotenv").config();
+require('dotenv').config();
 const isProd = process.env.APP_ENV === 'prod';
 const showWarnings = process.env.SHOW_WARNINGS === 'true';
 
 const KB = 1024;
 const frontendSrc = path.resolve(__dirname, 'frontend_src');
 
-const excludeFromSplitNames= ['app_loader', 'doc', 'base'];
+const excludeFromSplitNames = ['app_loader', 'doc', 'base'];
 
 module.exports = {
     mode: isProd ? 'production' : 'development',
@@ -25,30 +25,30 @@ module.exports = {
         filename: '[name].js',
         chunkFilename: '[name].chunk.js',
         library: {
-            name: 'spa',
+            name: '[name]',
             type: 'window',
         },
     },
     plugins: [
         new webpack.ProvidePlugin({
             $: 'jquery',
-            jQuery: 'jquery'
+            jQuery: 'jquery',
         }),
-        new webpack.IgnorePlugin({resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/}),
+        new webpack.IgnorePlugin({ resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/ }),
         new VueLoaderPlugin(),
     ],
     resolve: {
         alias: {
             vue$: 'vue/dist/vue.esm.js',
         },
-        extensions: ['.tsx', '.ts', '.js', '.vue']
+        extensions: ['.tsx', '.ts', '.js', '.vue'],
     },
     module: {
         rules: [
             {
                 test: /\.js$/,
                 loader: 'babel-loader',
-                exclude: [/node_modules/]
+                exclude: [/node_modules/],
             },
             {
                 test: /\.((css)|(scss))$/i,
@@ -58,41 +58,39 @@ module.exports = {
                         loader: 'css-loader',
                         options: {
                             url: {
-                                filter: (url) => !url.startsWith('/static/')
-                            }
-                        }
+                                filter: (url) => !url.startsWith('/static/'),
+                            },
+                        },
                     },
                     {
                         loader: 'sass-loader',
                         options: {
                             sassOptions: {
-                                quietDeps: true
-                            }
-                        }
-                    }
-                ]
+                                quietDeps: true,
+                            },
+                        },
+                    },
+                ],
             },
             {
                 test: /.woff2$/,
                 type: 'asset',
                 parser: {
-                    dataUrlCondition: {maxSize: 100 * KB},
+                    dataUrlCondition: { maxSize: 100 * KB },
                 },
-
             },
             {
                 test: /.(png|jpg|jpeg|gif|svg|woff|ttf|eot)$/,
                 type: 'asset',
                 parser: {
-                    dataUrlCondition: {maxSize: 10 * KB},
+                    dataUrlCondition: { maxSize: 10 * KB },
                 },
-
             },
             {
                 test: /\.vue$/,
-                loader: 'vue-loader'
-            }
-        ]
+                loader: 'vue-loader',
+            },
+        ],
     },
     stats: {
         all: false,
@@ -114,7 +112,7 @@ module.exports = {
                 defaultVendors: false,
                 // Setup default cache group for everything
                 default: {
-                    priority: 0
+                    priority: 0,
                 },
                 // Setup cache group 'vstutils' with higher priority then 'default' group so
                 // everything under /frontend_src/vstutils/ will go in one 'vstutils.chunk.js' chunk.
@@ -122,9 +120,9 @@ module.exports = {
                     name: 'vstutils',
                     test: /frontend_src\/vstutils\//,
                     priority: 10,
-                    enforce: true
-                }
-            }
-        }
+                    enforce: true,
+                },
+            },
+        },
     },
 };

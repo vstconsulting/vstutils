@@ -13,6 +13,8 @@ import { FieldsResolver, addDefaultFields } from './vstutils/fields';
 import { APP_CREATED } from './vstutils/signals.js';
 
 export * from './app.common.js';
+import * as spa from './app.common.js';
+window.spa = spa;
 
 /**
  * Class for a App object.
@@ -206,7 +208,7 @@ export class App extends BaseApp {
         Vue.prototype.$st = this.smartTranslate.bind(this);
 
         this.application = new Vue({
-            mixins: [this.appRootComponent],
+            mixins: [this.appRootComponent, ...this.additionalRootMixins],
             propsData: {
                 info: this.config.schema.info,
                 x_menu: this.config.schema.info['x-menu'],
@@ -220,8 +222,8 @@ export class App extends BaseApp {
         signals.emit('app.afterInit', { app: this });
     }
 
-    mount() {
-        this.application.$mount('#RealBody');
+    mount(target = '#RealBody') {
+        this.application.$mount(target);
     }
 }
 

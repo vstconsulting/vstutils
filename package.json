@@ -1,8 +1,13 @@
 {
-  "name": "vstutils-frontend",
+  "name": "@vstconsulting/vstutils",
   "version": "0.1.0",
   "author": "VST Consulting",
   "license": "Apache-2.0",
+  "homepage": "https://gitlab.com/vstconsulting/vstutils",
+  "bugs": {
+    "url": "https://gitlab.com/vstconsulting/vstutils/-/issues"
+  },
+  "repository": "gitlab:vstconsulting/vstutils",
   "browserslist": [
     "> 0.25% and not dead and not IE 11"
   ],
