@@ -1,3 +1,5 @@
+from io import BytesIO
+from PIL import Image
 from django_filters import CharFilter
 from django.db import models
 
@@ -25,6 +27,15 @@ validators = [image_res_validator, image_res_max_validator, image_height_validat
 
 def bin_file_handler(self, instance, fields_mapping, model, field_name):
     instance[field_name] = 'bin file handled'
+
+
+def pre_handler(binary_data, original_data):
+    with Image.open(BytesIO(binary_data)) as img:
+        assert img.mode == 'RGB'
+        assert original_data['name'] == '1280_720_png.png' and \
+               img.size == tuple(map(int, original_data['name'].split('_')[:2]))
+        original_data['name'] = '1280_720.png'
+        return binary_data
 
 
 class EmptyFilterBackend(filter_backends.VSTFilterBackend):
@@ -80,7 +91,7 @@ class ModelWithBinaryFiles(BModel):
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
             some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(
                 required=False,
-                validators=validators
+                validators=validators,
             ),
         )
         _filterset_fields = {
@@ -145,7 +156,7 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
             some_multiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(required=False),
             some_validatedmultiplenamedbinimage=fields.MultipleNamedBinaryImageInJsonField(
                 required=False,
-                validators=validators
+                validators=validators,
             ),
             some_filefield=fields.NamedBinaryFileInJsonField(required=False, file=True, allow_null=True),
             some_imagefield=fields.NamedBinaryImageInJsonField(required=False, file=True, allow_null=True)
@@ -220,6 +231,7 @@ class SomethingWithImage(BModel):
             'validimage': fields.NamedBinaryImageInJsonField(
                 required=False,
                 validators=[valid_image_validator_resizer],
+                pre_handlers=(pre_handler,),
             ),
             'invalidimage': fields.NamedBinaryImageInJsonField(
                 required=False,
