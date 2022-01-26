@@ -20,7 +20,7 @@
     {% endblock %}
 
     {% block gui_init_scripts %}
-        <script src="{% static_path 'bundle/base.js' %}?v={{ vstutils_version }}"></script>
+        <script defer src="{% static_path 'bundle/base.js' %}?v={{ vstutils_version }}"></script>
     {% endblock %}
 
     {% block style %}

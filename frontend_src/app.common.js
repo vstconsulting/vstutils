@@ -65,6 +65,8 @@ import * as api from './vstutils/api';
 import * as users from './vstutils/users';
 
 export * from './vstutils/ComponentsRegistrator.js';
+export * from './vstutils/AppConfiguration.js';
+export * from './app_loader/Cache.js';
 
 export {
     AppRoot,

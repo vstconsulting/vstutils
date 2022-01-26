@@ -79,6 +79,7 @@ export default class BaseApp {
          * Root Vue component
          */
         this.appRootComponent = AppRoot;
+        this.additionalRootMixins = [];
     }
 
     /**

@@ -33,7 +33,7 @@ class SPAStaticObjectHandler(BaseStaticObjectHandler):
 class WebpackJsonStaticObjectHandler(BaseStaticObjectHandler):
     def __init__(self, *args, **kwargs):
         self.json_file = kwargs.pop('json_file', str(Path(settings.VSTUTILS_DIR)/'static/bundle/output.json'))
-        self.prefix = str(Path(self.json_file.split('/static/')[-1]).parent)
+        self.prefix = kwargs.pop('prefix', str(Path(self.json_file.split('/static/')[-1]).parent))
         self.entrypoint_name = kwargs.pop('entrypoint_name', kwargs.get('name'))
         super().__init__(*args, **kwargs)
 

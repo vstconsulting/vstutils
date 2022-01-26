@@ -22,3 +22,5 @@ Vue.directive('element-bound', {
         callback(el);
     },
 });
+
+export { Vue, VueRouter, Vuex, VueI18n, PortalVue };
