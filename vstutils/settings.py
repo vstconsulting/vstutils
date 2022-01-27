@@ -188,6 +188,7 @@ class WebSection(BaseAppendSection):
         'bulk_threads': ConfigIntType,
         'max_tfa_attempts': ConfigIntType,
         'etag_default_timeout': ConfigIntSecondsType,
+        'allow_auto_image_resize': ConfigBoolType,
     }
 
 
@@ -429,6 +430,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'bulk_threads': 3,
             'max_tfa_attempts': ConfigIntType(os.getenv(f'{ENV_NAME}_MAX_TFA_ATTEMPTS', 5)),
             'etag_default_timeout': ConfigIntSecondsType(os.getenv(f'{ENV_NAME}_ETAG_TIMEOUT', '1d')),
+            'allow_auto_image_resize': True,
         },
         'database': {
             **env.db(default=f'sqlite:///{KWARGS["PROG"]}/db.{KWARGS["PROG_NAME"]}.sqlite3'),
@@ -1408,3 +1410,7 @@ if not TESTSERVER_RUN and TESTS_RUN:
 # User settings
 ##############################################################
 ENABLE_GRAVATAR: bool = web["enable_gravatar"]
+
+# Auto resize image settings
+##############################################################
+ALLOW_AUTO_IMAGE_RESIZE = web['allow_auto_image_resize']
