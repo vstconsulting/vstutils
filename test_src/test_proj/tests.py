@@ -60,6 +60,7 @@ from vstutils.models import get_centrifugo_client
 from vstutils import models
 from vstutils.api import serializers, fields
 from vstutils.utils import SecurePickling, BaseEnum, get_render
+from vstutils.api.validators import resize_image
 
 from .models import (
     File,
@@ -2298,6 +2299,7 @@ class ValidatorsTestCase(BaseTestCase):
 
         img_resolution_validator(self.valid_image_content_dict)
 
+    @override_settings(ALLOW_AUTO_IMAGE_RESIZE=True)
     def test_image_auto_resize(self):
         base_path = Path(DIR_PATH, '1280_720_jpeg.jpeg')
         jpeg_b64 = base64.b64encode(base_path.read_bytes()).decode('utf-8')
@@ -2326,7 +2328,7 @@ class ValidatorsTestCase(BaseTestCase):
         }
 
         valid_image_hash = hash(resize_png_image_content_dict['content'])
-        expected_new_image_size = 600, int(600/1280 * 720)
+        expected_new_image_size = 600, round(600/1280 * 720)
         results = self.bulk([
             # 0
             {
@@ -2432,7 +2434,7 @@ class ValidatorsTestCase(BaseTestCase):
         for i in range(1, 3):
             self.assertEqual(results[i]['status'], 400)
             self.assertEqual(''.join(results[i]['data']['invalidimage']),
-                             'Invalid image size orientations: height, width. Current image size: 720x1280')
+                             'Invalid image size orientations: height,width. Current image size: 720x1280')
         # valid image
         for i in range(3, 5):
             self.assertEqual(results[i]['status'], 201)
@@ -2447,8 +2449,8 @@ class ValidatorsTestCase(BaseTestCase):
 
         img_png = Image.open(BytesIO(base64.b64decode(results[0]['data']['invalidimage']['content'])))
         img_jpeg = Image.open(BytesIO(base64.b64decode(results[9]['data']['invalidimage']['content'])))
-        self.assertEqual(img_png.format, "PNG")
-        self.assertEqual(img_jpeg.format, "JPEG")
+        self.assertEqual(img_png.format, "WEBP")
+        self.assertEqual(img_jpeg.format, "WEBP")
         self.assertEqual(img_png.size, expected_new_image_size)
         self.assertEqual(img_jpeg.size, expected_new_image_size)
 
@@ -2457,21 +2459,21 @@ class ValidatorsTestCase(BaseTestCase):
         self.assertEqual(results[11]['status'], 200)
         img_with_horizontal_margin = Image.open(
             BytesIO(base64.b64decode(results[11]['data']['imagewithmarginapplying']['content'])))
-        self.assertEqual(img_with_horizontal_margin.format, 'PNG')
+        self.assertEqual(img_with_horizontal_margin.format, 'WEBP')
         self.assertEqual(img_with_horizontal_margin.size, (600, 600))
         # vertical margin
         self.assertEqual(results[12]['status'], 201)
         self.assertEqual(results[13]['status'], 200)
         img_with_vertical_margin = Image.open(
             BytesIO(base64.b64decode(results[13]['data']['imagewithmarginapplying']['content'])))
-        self.assertEqual(img_with_vertical_margin.format, 'JPEG')
+        self.assertEqual(img_with_vertical_margin.format, 'WEBP')
         self.assertEqual(img_with_vertical_margin.size, (600, 600))
         # small image resize
         self.assertEqual(results[14]['status'], 201)
         self.assertEqual(results[15]['status'], 200)
         small_img = Image.open(
             BytesIO(base64.b64decode(results[15]['data']['imagewithmarginapplying']['content'])))
-        self.assertEqual(small_img.format, 'PNG')
+        self.assertEqual(small_img.format, 'WEBP')
         self.assertEqual(small_img.size, (600, 600))
 
         # skipping file handling when file name needs to encode/decode
@@ -2511,6 +2513,29 @@ class ValidatorsTestCase(BaseTestCase):
         self.assertEqual(results[1]['status'], 201)
         self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[3]['status'], 200)
+
+        self.assertEqual(resize_image(small_img, 300, 300).size, (300, 300))
+
+    @override_settings(ALLOW_AUTO_IMAGE_RESIZE=False)
+    def test_resize_settings_constraint(self):
+        base_path = Path(DIR_PATH, '1280_720_jpeg.jpeg')
+        png_b64 = base64.b64encode(base_path.with_name('1280_720_png.png').read_bytes()).decode('utf-8')
+        resize_png_image_content_dict = {
+            'name': '1280_720_png.png',
+            'content': png_b64,
+            'mediaType': 'images/png'
+        }
+        results = self.bulk([
+            # 0
+            {
+                'method': 'post',
+                'path': ['somethingwithimage'],
+                'data': {'name': 'Resized img', 'invalidimage': resize_png_image_content_dict},
+                'headers': {"HTTP_AUTO_RESIZE_IMAGE": 'true'},
+            }
+        ])
+        self.assertEqual(''.join(results[0]['data']['invalidimage']),
+                         'Invalid image size orientations: height,width. Current image size: 720x1280')
 
 
 class LangTestCase(BaseTestCase):

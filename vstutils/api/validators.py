@@ -5,6 +5,7 @@ import warnings
 from io import BytesIO
 from mimetypes import guess_type
 
+from django.conf import settings
 from rest_framework import serializers
 from vstutils.utils import raise_context, translate
 
@@ -14,6 +15,93 @@ try:
     has_pillow = True
 except ImportError:  # nocv
     has_pillow = False
+
+
+def get_orientations_with_comma(*args):
+    for arg in '.,;'.join(args).split(';'):
+        yield from arg.split('.')
+
+
+def apply_ratio(apply_to, ratio=1, rounded=False):
+    return {
+        side: rounded and round(side_size * ratio) or side_size * ratio
+        for side, side_size in apply_to.items()
+    }
+
+
+def find_broken_orientation(size, limits) -> _t.Tuple:
+    return tuple(
+        str(orient)
+        for orient, orient_limits in limits.items()
+        if not (orient_limits['min'] <= size[orient] <= orient_limits['max'])
+    )
+
+
+def resize_image_from_to(img, limits):
+    """
+    Utility function to resize image proportional to values between min and max values for each side.
+    Can create white margins if it's needed to satisfy restrictions
+
+    :param img: Pillow Image object
+    :type img: PIL.Image
+    :param limits: Dict with min/max side restrictions like:
+                   ``{'width': {'min': 300, 'max: 600'}, 'height':  {'min': 400, 'max: 800'}}``
+    :type limits: dict
+    :return: Pillow Image object
+    :rtype: PIL.Image
+    """
+    size = {'width': img.size[0], 'height': img.size[1]}
+    limits_list = [{'orient': k, **v} for k, v in limits.items()]
+
+    best_size = apply_ratio(
+        size,
+        ratio=limits_list[0]['max'] / size[limits_list[0]['orient']]
+    )
+    # decrease next side if needed
+    if len(limits_list) == 2:
+        ratio = limits_list[1]['max'] / best_size[limits_list[1]['orient']]
+        if ratio <= 1:
+            best_size = apply_ratio(best_size, ratio=ratio)
+
+    best_size = apply_ratio(best_size, rounded=True)
+
+    resized_image = img.resize((best_size['width'], best_size['height']), Image.NEAREST)
+    broken_orientation = next(iter(find_broken_orientation(best_size, limits)), None)
+    if not broken_orientation:
+        return resized_image
+    # add margin to image
+    summary_margin_size = limits[broken_orientation]['min'] - best_size[broken_orientation]
+    margin_parts = [int(summary_margin_size / 2), summary_margin_size - int(summary_margin_size / 2)]
+    margin_sides = broken_orientation == "width" and ['left', 'right'] or ['top', 'bottom']
+    margin = {margin_sides[i]: margin_parts[i] for i in range(2)}
+    margined_image = Image.new(
+        resized_image.mode,
+        (resized_image.size[0] + margin.get('left', 0) + margin.get('right', 0),
+         resized_image.size[1] + margin.get('top', 0) + margin.get('bottom', 0)),
+        (255, 255, 255)
+    )
+    margined_image.paste(resized_image, (margin.get('left', 0), margin.get('top', 0)))
+    return margined_image
+
+
+def resize_image(img, width, height):
+    """
+    Utility function to resize image proportional to specific values.
+    Can create white margins if it's needed to satisfy required size
+
+    :param img: Pillow Image object
+    :type img: PIL.Image
+    :param width: Required width
+    :type width: int
+    :param height: Required height
+    :type height: int
+    :return: Pillow Image object
+    :rtype: PIL.Image
+    """
+    return resize_image_from_to(img, {
+        'width': {'min': width, 'max': width},
+        'height': {'min': height, 'max': height},
+    })
 
 
 class RegularExpressionValidator:
@@ -89,7 +177,6 @@ class ImageValidator:
                 translate('is not in listed supported types') +
                 f' ({",".join(self.extensions)}).'
             )
-        self.media_type = file_media_type.split(sep='/')[1].upper()
 
     @property
     def has_pillow(self):
@@ -150,80 +237,21 @@ class ImageBaseSizeValidator(ImageOpenValidator):
             limits[orientation] = {'min': min_value, 'max': max_value}
             size[orientation] = value
 
-        broken_orientations = self.find_broken_orientation(size, limits)
+        broken_orientations = find_broken_orientation(size, limits)
         if broken_orientations:
-            if should_resize_image:
-                self.auto_resize_image(img_data, size, limits)
+            if should_resize_image and settings.ALLOW_AUTO_IMAGE_RESIZE:
+                buffered = BytesIO()
+                resize_image_from_to(self.img, limits).save(buffered, format='WebP')
+                img_data['name'] = img_data['name'].replace(img_data['name'].split('.')[-1], 'webp')
+                img_data['content'] = base64.b64encode(buffered.getvalue()).decode('utf-8')
             else:
                 raise serializers.ValidationError([
                     'Invalid image size orientations', ': ',
-                    *';, '.join(broken_orientations).split(';'),
+                    *tuple(get_orientations_with_comma(*broken_orientations)),
                     '. ',
                     'Current image size', ': ',
                     'x'.join([str(size[x]) for x in broken_orientations]),
                 ])
-
-    def auto_resize_image(self, img_data, size, limits):
-        buffered = BytesIO()
-        self.get_resized_image(size, limits).save(buffered, format=self.media_type)
-        img_data['content'] = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-    def get_resized_image(self, size, limits):
-        best_size = size
-        # satisfying min limits
-        for orient, orient_limits in limits.items():
-            if orient_limits['min'] <= best_size[orient]:
-                continue
-            ratio = orient_limits['min'] / best_size[orient]
-            best_size = {
-                side: side_size * ratio
-                for side, side_size in best_size.items()
-            }
-        # then satisfying max limits
-        for orient, orient_limits in limits.items():
-            if orient_limits['max'] > best_size[orient]:
-                continue
-            ratio = orient_limits['max'] / best_size[orient]
-            best_size = {
-                side: side_size * ratio
-                for side, side_size in best_size.items()
-            }
-        # applying our new size
-        best_size = {
-            side: int(side_size)
-            for side, side_size in best_size.items()
-        }
-        resized_img = self.img.resize((best_size['width'], best_size['height']), Image.ANTIALIAS)
-        broken_orientation = self.find_broken_orientation(best_size, limits)
-        if not broken_orientation:
-            return resized_img
-        broken_orientation = broken_orientation[0]
-        # add margin to image if its needed
-        summary_margins_size = limits[broken_orientation]['min'] - best_size[broken_orientation]
-        basic_margin_size = int(summary_margins_size / 2)
-        margin = {'left': 0, 'top': 0, 'right': 0, 'bottom': 0}
-        if broken_orientation == "width":
-            margin['left'] = basic_margin_size
-            margin['right'] = summary_margins_size - basic_margin_size
-        else:
-            margin['top'] = basic_margin_size
-            margin['bottom'] = summary_margins_size - basic_margin_size
-        margined_image = Image.new(
-            resized_img.mode,
-            (resized_img.size[0] + margin['left'] + margin['right'],
-             resized_img.size[1] + margin['top'] + margin['bottom']),
-            (255, 255, 255)
-        )
-        margined_image.paste(resized_img, (margin['left'], margin['top']))
-        return margined_image
-
-    @staticmethod
-    def find_broken_orientation(size, limits) -> _t.Tuple:
-        return tuple(
-            str(orient)
-            for orient, orient_limits in limits.items()
-            if not (orient_limits['min'] <= size[orient] <= orient_limits['max'])
-        )
 
 
 class ImageHeightValidator(ImageBaseSizeValidator):
