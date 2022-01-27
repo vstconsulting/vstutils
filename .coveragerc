@@ -11,6 +11,7 @@ omit =
     *.tox/*
     */management/commands/web.py
     */management/commands/_base.py
+    */management/commands/runrpc.py
     *ihsctl
     *setup.py
     test.py

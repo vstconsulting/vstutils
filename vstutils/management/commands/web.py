@@ -35,6 +35,29 @@ def wait(proc, timeout=None, delay=0.01):
     return proc.poll()
 
 
+def get_celery_command(celery_path='celery'):
+    # Format args string.
+    options = ''
+    app_option = f'--app={settings.VST_PROJECT}.wapp:app'
+    for key, value in settings.WORKER_OPTIONS.items():
+        if key == 'app':
+            app_option = "--app={}".format(value.replace(',', r'\,'))
+            continue
+        is_boolean = isinstance(value, bool)
+        if (is_boolean and value) or value:
+            options += f' --{key}'
+        if is_boolean:
+            continue
+        options += "={}".format(value.replace(',', r'\,'))
+
+    # Add queues list to celery args
+    if '--queues' not in options:
+        options += ' --queues={}'.format(r'\,'.join(settings.WORKER_QUEUES))
+
+    # Add arguments to uwsgi cmd list.
+    return f'{celery_path} {app_option} worker {options}'
+
+
 class Command(BaseCommand):
     help = "Backend web-server."
     _uwsgi_default_path = _uwsgi_default_path
@@ -87,33 +110,9 @@ class Command(BaseCommand):
         if not getattr(settings, 'RUN_WORKER', False):
             return cmd
 
-        # Get celery args from settings.
-        worker_options = settings.WORKER_OPTIONS
-
-        # Format args string.
-        options = ''
-        app_option = f'--app={settings.VST_PROJECT}.wapp:app'
-        for key, value in worker_options.items():
-            if key == 'app':
-                app_option = "--app={}".format(value.replace(',', r'\,'))
-                continue
-            is_boolean = isinstance(value, bool)
-            if (is_boolean and value) or value:
-                options += f' --{key}'
-            if is_boolean:
-                continue
-            options += "={}".format(value.replace(',', r'\,'))
-
-        # Add queues list to celery args
-        if '--queues' not in options:
-            options += ' --queues={}'.format(r'\,'.join(settings.WORKER_QUEUES))
-
         # Add arguments to uwsgi cmd list.
         cmd.append('--attach-daemon2')
-        run = 'stopsignal=15,reloadsignal=1,'
-        run += f'exec=celery {app_option} worker'
-        run += options
-        cmd.append(run)
+        cmd.append(f'stopsignal=15,reloadsignal=1,exec={get_celery_command()}')
 
         return cmd
 
