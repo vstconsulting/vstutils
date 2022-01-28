@@ -65,7 +65,7 @@ TRANSLATION = {
     'new owner': 'новый владелец',
     'detail': 'детали',
     'description': 'описание',
-    'username': 'имя пользователя',
+    'username': 'никнейм',
     'is active': 'активен',
     'user': 'пользователь',
     'yes': 'да',
