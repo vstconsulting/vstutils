@@ -177,6 +177,7 @@ class ImageValidator:
                 translate('is not in listed supported types') +
                 f' ({",".join(self.extensions)}).'
             )
+        self.media_type = file_media_type.split(sep='/')[1].upper()
 
     @property
     def has_pillow(self):
@@ -241,8 +242,7 @@ class ImageBaseSizeValidator(ImageOpenValidator):
         if broken_orientations:
             if should_resize_image and settings.ALLOW_AUTO_IMAGE_RESIZE:
                 buffered = BytesIO()
-                resize_image_from_to(self.img, limits).save(buffered, format='WebP')
-                img_data['name'] = img_data['name'].replace(img_data['name'].split('.')[-1], 'webp')
+                resize_image_from_to(self.img, limits).save(buffered, format=self.media_type)
                 img_data['content'] = base64.b64encode(buffered.getvalue()).decode('utf-8')
             else:
                 raise serializers.ValidationError([

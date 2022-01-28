@@ -2449,8 +2449,8 @@ class ValidatorsTestCase(BaseTestCase):
 
         img_png = Image.open(BytesIO(base64.b64decode(results[0]['data']['invalidimage']['content'])))
         img_jpeg = Image.open(BytesIO(base64.b64decode(results[9]['data']['invalidimage']['content'])))
-        self.assertEqual(img_png.format, "WEBP")
-        self.assertEqual(img_jpeg.format, "WEBP")
+        self.assertEqual(img_png.format, "PNG")
+        self.assertEqual(img_jpeg.format, "JPEG")
         self.assertEqual(img_png.size, expected_new_image_size)
         self.assertEqual(img_jpeg.size, expected_new_image_size)
 
@@ -2459,21 +2459,21 @@ class ValidatorsTestCase(BaseTestCase):
         self.assertEqual(results[11]['status'], 200)
         img_with_horizontal_margin = Image.open(
             BytesIO(base64.b64decode(results[11]['data']['imagewithmarginapplying']['content'])))
-        self.assertEqual(img_with_horizontal_margin.format, 'WEBP')
+        self.assertEqual(img_with_horizontal_margin.format, 'PNG')
         self.assertEqual(img_with_horizontal_margin.size, (600, 600))
         # vertical margin
         self.assertEqual(results[12]['status'], 201)
         self.assertEqual(results[13]['status'], 200)
         img_with_vertical_margin = Image.open(
             BytesIO(base64.b64decode(results[13]['data']['imagewithmarginapplying']['content'])))
-        self.assertEqual(img_with_vertical_margin.format, 'WEBP')
+        self.assertEqual(img_with_vertical_margin.format, 'JPEG')
         self.assertEqual(img_with_vertical_margin.size, (600, 600))
         # small image resize
         self.assertEqual(results[14]['status'], 201)
         self.assertEqual(results[15]['status'], 200)
         small_img = Image.open(
             BytesIO(base64.b64decode(results[15]['data']['imagewithmarginapplying']['content'])))
-        self.assertEqual(small_img.format, 'WEBP')
+        self.assertEqual(small_img.format, 'PNG')
         self.assertEqual(small_img.size, (600, 600))
 
         # skipping file handling when file name needs to encode/decode
