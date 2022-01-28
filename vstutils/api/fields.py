@@ -694,11 +694,12 @@ class NamedBinaryFileInJsonField(VSTCharField):
             return data  # nocv
         self.validate_value(data)
         if not self.should_not_handle(data):
-            data['content'] = base64.b64encode(functools.reduce(
-                lambda binary, func: func(binary, original_data=data),
-                self.pre_handlers,
-                base64.b64decode(data['content'])
-            )).decode('utf-8')
+            with raise_context(verbose=True):
+                data['content'] = base64.b64encode(functools.reduce(
+                    lambda binary, func: func(binary, original_data=data),
+                    self.pre_handlers,
+                    base64.b64decode(data['content'])
+                )).decode('utf-8')
         self.run_validators(data)
         return self.to_internal_value(data)
 
