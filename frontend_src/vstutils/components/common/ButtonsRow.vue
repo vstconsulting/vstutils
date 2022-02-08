@@ -25,7 +25,7 @@
                 icon="fas fa-link"
                 :view="view"
                 :operations="groupedSublinks"
-                @click.native="$emit('open-sublink', $event)"
+                @clicked="$emit('open-sublink', $event)"
             />
         </template>
         <template v-else>
@@ -45,7 +45,7 @@
                 icon="fas fa-ellipsis-v"
                 :view="view"
                 :operations="groupedActions"
-                @click.native="$emit('execute-action', $event)"
+                @clicked="$emit('execute-action', $event)"
             />
         </template>
         <template v-else>
