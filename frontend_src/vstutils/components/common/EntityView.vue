@@ -1,5 +1,5 @@
 <template>
-    <div class="entity-view">
+    <div class="entity-view" :class="rootClasses">
         <Preloader v-if="loading" />
         <div :class="containerClass">
             <div class="top-row d-print-none">
@@ -31,6 +31,11 @@
     export default {
         name: 'EntityView',
         components: { ErrorPage, ButtonsRow, Preloader, SelectedFilters },
+        provide() {
+            return {
+                addEntityViewClasses: this.addClasses,
+            };
+        },
         props: {
             view: { type: Object, required: true },
             loading: { type: Boolean, required: true },
@@ -42,6 +47,11 @@
             actions: { type: Array, default: () => [] },
             sublinks: { type: Array, default: () => [] },
         },
+        data() {
+            return {
+                rootClasses: [],
+            };
+        },
         computed: {
             errorData() {
                 if (this.error) {
@@ -51,6 +61,14 @@
             },
             containerClass() {
                 return this.isContainerFluid ? 'container-fluid' : 'container';
+            },
+        },
+        methods: {
+            addClasses(classes) {
+                if (typeof cls === 'string') classes = [classes];
+                this.rootClasses = this.rootClasses.concat(
+                    classes.filter((cls) => !this.rootClasses.includes(cls)),
+                );
             },
         },
     };

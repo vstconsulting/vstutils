@@ -11,7 +11,7 @@
                 :title="$u.capitalize($t('add'))"
                 classes="btn btn-primary btn-operation-add"
                 icon-classes="fa fa-folder-open"
-                @clicked="openModal"
+                @click.native="openModal"
             />
         </template>
     </BaseListModal>

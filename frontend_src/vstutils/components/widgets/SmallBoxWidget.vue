@@ -1,5 +1,8 @@
 <template functional>
     <div class="small-box" :class="props.boxVariantClass">
+        <div v-if="props.loading" class="overlay dark">
+            <i class="fas fa-3x fa-sync-alt fa-spin" />
+        </div>
         <div class="inner">
             <h3>{{ props.value }}</h3>
             <p>{{ parent.$tc(props.label, props.value) }}</p>
@@ -17,6 +20,7 @@
                 {{ parent.$t('More info') }}
                 <i class="fas fa-arrow-circle-right" />
             </template>
+            &nbsp;
         </a>
     </div>
 </template>
@@ -30,6 +34,7 @@
             boxVariantClass: { type: [String, Array, Object], default: 'bg-info' },
             iconClass: { type: [String, Array, Object], default: null },
             href: { type: String, default: null },
+            loading: { type: Boolean, default: false },
         },
     };
 </script>

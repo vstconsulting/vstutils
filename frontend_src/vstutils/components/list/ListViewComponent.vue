@@ -63,6 +63,7 @@
                         <MultiActions
                             v-if="multiActions.length && selection.length"
                             :multi-actions="multiActions"
+                            :class="uniqMultiActionsClasses"
                             :number-of-selected="selection.length"
                             @execute-multi-action="executeMultiAction"
                         />
@@ -88,11 +89,20 @@
     export default {
         components: { Pagination, MultiActions, ListTable, EntityView },
         mixins: [BaseViewMixin, ViewWithAutoUpdateMixin],
+        provide() {
+            return {
+                multiActionsClasses: {
+                    add: this.addMultiActionsClasses,
+                    remove: this.removeMultiActionsClasses,
+                },
+            };
+        },
         data() {
             return {
                 isInstanceCounterActive: true,
                 showSearch: true,
                 searchFieldValue: '',
+                multiActionsClasses: [],
             };
         },
         computed: {
@@ -150,6 +160,9 @@
             },
             multiActions() {
                 return Array.from(this.view.multiActions.values());
+            },
+            uniqMultiActionsClasses() {
+                return Array.from(new Set(this.multiActionsClasses));
             },
         },
         methods: {
@@ -371,24 +384,34 @@
             afterMultiAction(action, instances) {
                 this.dispatchAction('updateData');
             },
-
             setSearchFieldValue({ value }) {
                 this.searchFieldValue = value;
             },
-
             applyFieldsFilters(filters) {
                 this.applyFilters({
                     ...filters,
                     [this.searchField.name]: this.filters[this.searchField.name],
                 });
             },
-
             applySearchFilter() {
                 this.applyFilters({
                     ...this.filters,
                     [this.searchField.name]: this.searchFieldValue,
                 });
                 this.searchFieldValue = '';
+            },
+            addMultiActionsClasses(classes) {
+                if (typeof classes === 'string') classes = [classes];
+                classes.forEach((cls) => {
+                    this.multiActionsClasses.push(`selected__${cls}`);
+                });
+            },
+            removeMultiActionsClasses(classes) {
+                if (typeof classes === 'string') classes = [classes];
+                classes.forEach((c) => {
+                    const idx = this.multiActionsClasses.indexOf(`selected__${c}`);
+                    if (idx !== -1) this.multiActionsClasses.splice(idx, 1);
+                });
             },
         },
     };

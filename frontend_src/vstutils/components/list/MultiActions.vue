@@ -22,6 +22,7 @@
                     v-else
                     :key="action.name"
                     class="dropdown-item"
+                    :class="`operation__${action.name}`"
                     type="button"
                     @click="$emit('execute-multi-action', action)"
                     v-text="$st(action.title)"

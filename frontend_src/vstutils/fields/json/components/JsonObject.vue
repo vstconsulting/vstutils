@@ -1,5 +1,6 @@
 <template>
-    <Card :title="title">
+    <div v-if="isEmpty" />
+    <Card v-else :title="title">
         <component
             :is="jsonMapper.getComponent(subValue, name)"
             v-for="(subValue, name, idx) in value"
@@ -19,5 +20,10 @@
         components: { Card },
         mixins: [JsonMixin],
         inject: ['jsonMapper'],
+        computed: {
+            isEmpty() {
+                return !this.value || Object.keys(this.value).length === 0;
+            },
+        },
     };
 </script>
