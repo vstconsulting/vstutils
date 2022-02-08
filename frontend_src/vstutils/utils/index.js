@@ -1095,7 +1095,14 @@ export function tableColumnClasses(field) {
 export function classesFromFields(fields, data) {
     return fields
         .filter((f) => ['choices', 'boolean'].includes(f.format))
-        .map((f) => `field-${f.name}-${stringToCssClass(f._getValueFromData(data))}`);
+        .map((f) => {
+            let cls = `field-${f.name}`;
+            const value = f._getValueFromData(data);
+            if (value !== undefined) {
+                cls += `-${stringToCssClass(value)}`;
+            }
+            return cls;
+        });
 }
 
 export function parseResponseMessage(data) {

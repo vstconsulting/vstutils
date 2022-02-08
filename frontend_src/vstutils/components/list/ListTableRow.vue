@@ -23,13 +23,18 @@
                     </button>
                 </template>
                 <template #content="{ closeModal }">
-                    <div class="modal-body">
+                    <div class="modal-body" :class="classesFromFields">
                         <ul class="list-group list-group-flush">
                             <template v-if="actions.length">
                                 <li class="list-group-item disabled">
                                     <b>{{ $u.capitalize($t('actions')) }}</b>
                                 </li>
-                                <li v-for="action in actions" :key="action.name" class="list-group-item">
+                                <li
+                                    v-for="action in actions"
+                                    :key="action.name"
+                                    class="list-group-item"
+                                    :class="`operation__${action.name}`"
+                                >
                                     <a href="#" @click.prevent="createActionClickHandler(closeModal, action)">
                                         <i
                                             v-if="action.iconClasses && action.iconClasses.length"
@@ -43,7 +48,12 @@
                                 <li class="list-group-item disabled">
                                     <b>{{ $u.capitalize($t('sublinks')) }}</b>
                                 </li>
-                                <li v-for="sublink in sublinks" :key="sublink.name" class="list-group-item">
+                                <li
+                                    v-for="sublink in sublinks"
+                                    :key="sublink.name"
+                                    class="list-group-item"
+                                    :class="`operation__${sublink.name}`"
+                                >
                                     <router-link
                                         :to="getSublinkPath(sublink, instance)"
                                         @click.native.capture="closeModal"
@@ -79,6 +89,7 @@
         name: 'ListTableRow',
         components: { BootstrapModal, Modal, SelectToggleButton },
         mixins: [TableRowMixin],
+        inject: { multiActionsClasses: { default: null } },
         props: {
             isSelected: { type: Boolean, required: true },
             instance: { type: Object, required: true },
@@ -100,10 +111,12 @@
             pk() {
                 return this.instance.getPkValue();
             },
+            classesFromFields() {
+                return classesFromFields(this.fields, this.data);
+            },
             classes() {
-                const classes = classesFromFields(this.fields, this.data);
-                if (this.isSelected) classes.push('selected');
-                return classes;
+                const classes = this.isSelected ? ['selected'] : [];
+                return classes.concat(this.classesFromFields);
             },
             base_url() {
                 return this.$route.path.replace(/\/$/g, '');
@@ -116,6 +129,16 @@
             },
             actionButtonsText() {
                 return '';
+            },
+        },
+        watch: {
+            isSelected: {
+                handler(val) {
+                    if (!this.multiActionsClasses) return;
+                    if (val) this.multiActionsClasses.add(this.classesFromFields);
+                    else this.multiActionsClasses.remove(this.classesFromFields);
+                },
+                immediate: true,
             },
         },
         methods: {

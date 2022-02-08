@@ -16,6 +16,7 @@
                 v-for="op in operations"
                 :key="op.name"
                 class="dropdown-item"
+                :class="`operation__${op.name}`"
                 href="#"
                 @click.prevent="$emit('clicked', op)"
             >

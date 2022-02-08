@@ -47,6 +47,9 @@
     export default {
         name: 'ModelFields',
         components: { HideNotRequiredSelect },
+        inject: {
+            addEntityViewClasses: { default: null },
+        },
         props: {
             data: { type: Object, required: true },
             model: { type: Function, required: true },
@@ -117,6 +120,15 @@
             },
             rootClasses() {
                 return classesFromFields(this.flatFields, this.data);
+            },
+        },
+        watch: {
+            rootClasses: {
+                handler(val) {
+                    if (!this.addEntityViewClasses) return;
+                    this.addEntityViewClasses(val);
+                },
+                immediate: true,
             },
         },
         created() {

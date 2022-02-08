@@ -5,7 +5,7 @@
             v-for="sublink in notGroupedSublinks"
             :key="sublink.name"
             v-bind="sublink"
-            @clicked="$emit('open-sublink', sublink)"
+            @click.native="$emit('open-sublink', sublink)"
         />
         <template v-for="action in notGroupedActions">
             <component :is="action.component" v-if="action.component" :key="action.name" :view="view" />
@@ -13,7 +13,7 @@
                 v-else
                 :key="action.name"
                 v-bind="action"
-                @clicked="$emit('execute-action', action)"
+                @click.native="$emit('execute-action', action)"
             />
         </template>
 
@@ -25,7 +25,7 @@
                 icon="fas fa-link"
                 :view="view"
                 :operations="groupedSublinks"
-                @clicked="$emit('open-sublink', $event)"
+                @click.native="$emit('open-sublink', $event)"
             />
         </template>
         <template v-else>
@@ -33,7 +33,7 @@
                 v-for="sublink in groupedSublinks"
                 :key="sublink.name"
                 v-bind="sublink"
-                @clicked="$emit('open-sublink', sublink)"
+                @click.native="$emit('open-sublink', sublink)"
             />
         </template>
 
@@ -45,7 +45,7 @@
                 icon="fas fa-ellipsis-v"
                 :view="view"
                 :operations="groupedActions"
-                @clicked="$emit('execute-action', $event)"
+                @click.native="$emit('execute-action', $event)"
             />
         </template>
         <template v-else>
@@ -55,7 +55,7 @@
                     v-else
                     :key="action.name"
                     v-bind="action"
-                    @clicked="$emit('execute-action', action)"
+                    @click.native="$emit('execute-action', action)"
                 />
             </template>
         </template>

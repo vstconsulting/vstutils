@@ -346,3 +346,53 @@ All available fields classes are stored in the ``guiFields`` variable. There are
 * **string_array** - field, that converts array with strings into one string;
 * **string_id** - string field, that is supposed to be used in URLs as 'id' key. It has additional validation,
   that checks, that field's value is not equal to some other URL keys (new/ edit/ remove).
+
+Layout customization with CSS
+-----------------------------
+If you need to customize elements with css we have some functionality for it.
+There are classes applied to root elements of ``EntityView`` (if it contains `ModelField`), ``ModelField`` , ``ListTableRow`` and ``MultiActions`` depending on the fields they contain.
+Classes are formed for the fields with "boolean" and "choices" types.
+Also classes apply to operations buttons and links.
+
+:Classes generation rules:
+* ``EntityView, ModelField and ListTableRow`` - *field-[field_name]-[field-value]*
+   **Example:**
+    * *"field-active-true"* for model that contains "boolean" field with name "active" and value "true"
+    * *"field-tariff_type-WAREHOUSE"* for model that contains "choices" field with name "tariff_type" and value "WAREHOUSE"
+
+
+* ``MultiActions`` - *selected__field-[field_name]-[field-value]*
+   **Example:**
+    *"selected__field-tariff_type-WAREHOUSE"* and *"selected__field-tariff_type-SLIDE"* if selected 2 ``ListTableRow`` that contains "choices" field with name "tariff_type" and values "WAREHOUSE" and "SLIDE" respectively.
+
+* ``Operation`` - *operation__[operation_name]*
+   **Example:**
+    *operation__pickup_point* if operation button or link has name *pickup_point*
+
+Based on these classes, you can change the styles of various elements.
+
+A few use cases:
+ * If you need to hide the button for the "change_category" action on a product detail view when product is not "active", you can do so by adding a CSS selector:
+
+   .. code-block:: css
+
+       .field-status-true .operation__change_category {
+           display: none;
+       }
+
+ * Hide the button for the "remove" action in ``MultiActions`` menu if selected at least one product with status "active":
+
+   .. code-block:: css
+
+     .selected__field-status-true .operation__remove {
+         display: none;
+     }
+
+ * If you need to change *background-color* to red for order with status "CANCELLED" on ``ListView`` component do this:
+
+   .. code-block:: css
+
+       .item-row.field-status-CANCELLED {
+           background-color: red;
+       }
+   In this case, you need to use the extra class "item-row" (Used for example, you can choose another one) for specify the element to be selected in the selector, because the class "field-status-CANCELLED" is added in different places on the page.

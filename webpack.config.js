@@ -125,4 +125,5 @@ module.exports = {
             },
         },
     },
+    cache: isProd ? false : { name: 'vstutils-dev', type: 'filesystem' },
 };
