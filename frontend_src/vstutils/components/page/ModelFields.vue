@@ -48,7 +48,7 @@
         name: 'ModelFields',
         components: { HideNotRequiredSelect },
         inject: {
-            addEntityViewClasses: { default: null },
+            entityViewClasses: { default: null },
         },
         props: {
             data: { type: Object, required: true },
@@ -124,9 +124,10 @@
         },
         watch: {
             rootClasses: {
-                handler(val) {
-                    if (!this.addEntityViewClasses) return;
-                    this.addEntityViewClasses(val);
+                handler(val, oldVal) {
+                    if (!this.entityViewClasses) return;
+                    if (oldVal) this.entityViewClasses.remove(oldVal);
+                    this.entityViewClasses.add(val);
                 },
                 immediate: true,
             },
