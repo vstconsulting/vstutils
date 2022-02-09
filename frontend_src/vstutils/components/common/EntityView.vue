@@ -33,7 +33,10 @@
         components: { ErrorPage, ButtonsRow, Preloader, SelectedFilters },
         provide() {
             return {
-                addEntityViewClasses: this.addClasses,
+                entityViewClasses: {
+                    add: this.addClasses,
+                    remove: this.removeClasses,
+                },
             };
         },
         props: {
@@ -65,10 +68,15 @@
         },
         methods: {
             addClasses(classes) {
-                if (typeof cls === 'string') classes = [classes];
-                this.rootClasses = this.rootClasses.concat(
-                    classes.filter((cls) => !this.rootClasses.includes(cls)),
-                );
+                if (typeof classes === 'string') classes = [classes];
+                this.rootClasses = this.rootClasses.concat(classes);
+            },
+            removeClasses(classes) {
+                if (typeof classes === 'string') classes = [classes];
+                classes.forEach((c) => {
+                    const idx = this.rootClasses.indexOf(c);
+                    if (idx !== -1) this.rootClasses.splice(idx, 1);
+                });
             },
         },
     };
