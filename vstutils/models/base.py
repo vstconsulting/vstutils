@@ -300,10 +300,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         # pylint: disable=unnecessary-lambda,no-value-for-parameter
         return SimpleLazyObject(lambda: cls.get_view_class(**extra_metadata))
 
-    def get_model_fields_mapping(cls, filter_handler=lambda f: True):
+    def get_model_fields_mapping(cls, filter_handler=lambda f: True, fields_getter=None):
+        fields_getter = fields_getter if fields_getter is not None else lambda: cls._meta.fields
         return {
             f.name: f
-            for f in cls._meta.fields
+            for f in fields_getter()
             if filter_handler(f)
         }
 
@@ -611,7 +612,10 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         )(ApplyNestedDecorators(metadata['nested'] or {})(generated_view))
 
         if hasattr(cls, 'deep_parent_field') and issubclass(generated_view, CHANGE_MIXINS):
-            remote_name: str = cls.get_model_fields_mapping()[cls.deep_parent_field].remote_field.related_name
+            remote_name: str = cls.get_model_fields_mapping(
+                fields_getter=cls._meta.get_fields
+            )[cls.deep_parent_field].remote_field.related_name
+
             parent_view = type(
                 f'Parent{cls.__name__}ViewSet',
                 (generated_view,),

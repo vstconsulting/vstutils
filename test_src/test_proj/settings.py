@@ -51,6 +51,9 @@ API[VST_API_VERSION][r'hosts_list'] = dict(
 API[VST_API_VERSION][r'deephosts'] = dict(
     view='test_proj.views.DeepHostGroupViewSet'
 )
+API[VST_API_VERSION][r'group'] = dict(
+    model='test_proj.models.Group'
+)
 # ![test_settings]
 
 API[VST_API_VERSION][r'subhosts'] = dict(

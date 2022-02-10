@@ -4041,6 +4041,23 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[8]['data'], results[0]['data'])
         self.assertEqual(results[9]['status'], 200, results[9]['data'])
 
+    def test_m2m_deep_nested(self):
+        Group = self.get_model_class('test_proj.Group')
+        results = self.bulk([
+            {'method': 'post', 'path': 'group', 'data': {'name': '1'}},
+            {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'groups'], 'data': {'name': '1.1'}},
+            # [2] Query root objects
+            {'method': 'get', 'path': 'group', 'query': '__deep_parent='},
+            # [3] Query nested objects
+            {'method': 'get', 'path': 'group', 'query': '__deep_parent=<<0[data][id]>>'},
+        ])
+
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[1]['status'], 201, results[1]['data'])
+        self.assertEqual(results[2]['status'], 200)
+        self.assertEqual(results[2]['data']['count'], 1)
+        self.assertEqual(results[3]['data']['count'], 1)
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):
