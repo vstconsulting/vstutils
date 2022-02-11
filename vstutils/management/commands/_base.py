@@ -396,8 +396,8 @@ class DockerCommand(BaseCommand):
             },
             section_overload={
                 'docker': DockerSection
-            }
-
+            },
+            format_exclude_sections=('uwsgi',)
         )
         config = self.config
         config.parse_files(self._settings('CONFIG_FILES'))

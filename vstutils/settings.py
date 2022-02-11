@@ -541,7 +541,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         'centrifugo': CentrifugoSection,
         'throttle': ThrottleSection,
         'storages.boto3': Boto3Subsection,
-    }
+    },
+    format_exclude_sections=('uwsgi',)
 )
 
 config.parse_files(CONFIG_FILES)
