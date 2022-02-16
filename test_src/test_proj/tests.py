@@ -787,7 +787,7 @@ class ViewsTestCase(BaseTestCase):
 
         # Correct registration request
         response = self.call_registration(user)
-        self.assertRedirects(response, self.login_url)
+        self.assertRedirects(response, self.confirmation_redirect_url)
 
         self.assertCount(mail.outbox, 1)
         regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
@@ -798,7 +798,8 @@ class ViewsTestCase(BaseTestCase):
         user['uid'] = 'wrong'
 
         response = client.post(href_base, user)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Confirmation link is invalid or expired, please register again', str(response.content))
 
         # Check email and uid in create method
         secure_pickle = SecurePickling(settings.SECRET_KEY)
@@ -826,6 +827,42 @@ class ViewsTestCase(BaseTestCase):
         response = client.post(href, user)
         self.assertEqual(response.status_code, 200)
 
+    def test_registration_with_confirmation(self):
+        user = dict(
+            first_name='alex',
+            last_name='mercer',
+            password1='New@password22',
+            password2='New@password22',
+            email='new@user.com',
+            username='trop',
+            agreement=True,
+            consent_to_processing=True
+        )
+
+        client = self.client_class()
+        response = self.call_registration(data=user)
+        self.assertRedirects(response, self.confirmation_redirect_url)
+        response = client.get(self.confirmation_redirect_url)
+        self.assertIn('Confirm your email before logging in', str(response.content))
+        self.assertCount(mail.outbox, 1)
+        regex = r"http(s)?:\/\/.*\/registration\/(\?.*?(?=\")){0,1}"
+        match = re.search(regex, mail.outbox[-1].alternatives[-1][0], re.MULTILINE)
+        href = match.group(0)
+        correct_uid = href.split('uid=')[-1]
+        response = client.post(self.login_url, data={'username': user['username'], 'password': user['password1']})
+        # login failed
+        self.assertIn('Please enter a correct username and password', str(response.context_data['form'].errors))
+        response = client.get('/')
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        # confirm email (different client)
+        client2 = self.client_class()
+        response = client2.post(href, {'uid': correct_uid})
+        self.assertRedirects(response, self.login_url, target_status_code=302)
+        response = client2.post(self.login_url, data={'username': user['username'], 'password': user['password1']})
+        # successful login
+        response = client2.get('/')
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
     def test_terms_agreement(self):
         user = dict(
             username='newuser',
@@ -852,7 +889,7 @@ class ViewsTestCase(BaseTestCase):
         }
         # Correct registration request returns redirect
         response = self.call_registration(user)
-        self.assertRedirects(response, self.login_url)
+        self.assertRedirects(response, self.confirmation_redirect_url)
 
         # Try registration without agreement returns error
         response = self.call_registration(user_fail)
@@ -865,7 +902,7 @@ class ViewsTestCase(BaseTestCase):
         # If ENABLE_AGREEMENT_TERMS=False, registration without agreement returns redirect
         with override_settings(ENABLE_AGREEMENT_TERMS=False):
             response = self.call_registration(user_fail)
-            self.assertRedirects(response, self.login_url)
+            self.assertRedirects(response, self.confirmation_redirect_url)
 
         # Response with 'lang=en' returns default 'terms.md' with correct html
         with utils.tmp_file(data='## test_header', encoding='utf8') as md_file:
@@ -911,7 +948,7 @@ class ViewsTestCase(BaseTestCase):
         }
         # Correct registration request returns redirect
         response = self.call_registration(user)
-        self.assertRedirects(response, self.login_url)
+        self.assertRedirects(response, self.confirmation_redirect_url)
 
         # Try registration without consent_to_processing returns error
         response = self.call_registration(user_fail)
@@ -924,7 +961,7 @@ class ViewsTestCase(BaseTestCase):
         # If ENABLE_CONSENT_TO_PROCESSING=False, registration without `consent_to_processing` returns redirect
         with override_settings(ENABLE_CONSENT_TO_PROCESSING=False):
             response = self.call_registration(user_fail)
-            self.assertRedirects(response, self.login_url)
+            self.assertRedirects(response, self.confirmation_redirect_url)
 
         # Response with 'lang=en' returns default 'consent_to_processing.md' with correct html
         with utils.tmp_file(data='## test_header', encoding='utf8') as md_file:

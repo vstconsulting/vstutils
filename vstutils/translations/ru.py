@@ -112,15 +112,6 @@ TRANSLATION = {
     'Unknown error': 'Неизвестная ошибка',
     'Error': 'Ошибка',
 
-    'sign in to start your session': 'Войдите, чтобы начать сеанс',
-    'sign in': 'войти',
-    'sign up': 'зарегистрируйтесь',
-    'forgot password': 'забыли пароль',
-    'confirm password': 'подтвердите пароль',
-    'register': 'регистрация',
-    'fields with * is required': 'поля отмеченые * обязательны для заполнения',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес и мы отправим вам инструкцию для восстановления.',
-    'reset my Password': 'сбросить пароль',
     'We\'ve emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly.': 'Мы отправили вам письмо с инструкцией для сброса пароля.',
     'If you don\'t receive an email, please make sure you\'ve entered the address you registered with, and check your spam folder.': 'Если вы не получили письмо, пожалуйста убедитесь что введен верный адрес и проверьте папку со спамом.',
     'The password reset link was invalid, possibly because it has already been used. Please request a new Password reset.': 'Неверная ссылка для восстановления пароля, возможно она уже была использована. Пожалуйста попробуйте заново.',
@@ -228,7 +219,9 @@ SERVER_TRANSLATION = {
     "key {missing_key} is missing": "ключ {missing_key} отсутствует",
     "invalid key {invalid_key}": "неверный ключ {invalid_key}",
 
-
+    # field help_text
+   'A confirmation will be sent to your e-mail': 'На эту почту будет отправлено письмо для подтверждения регистрации',
+    'Required. Inform a valid email address': 'Напишите вашу электронную почту',
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображения. Поддерживается ({0}), получен {1}',
     'For some reason, this image file cannot be opened': 'Не удалось открыть изображение',
@@ -246,4 +239,17 @@ SERVER_TRANSLATION = {
     'To continue, need to agree to the personal data processing policy.': 'Чтобы продолжить, необходимо согласиться '
                                                                           'с политикой обработки персональных данных.',
     'terms of agreement': 'лицензионное соглашение',
+
+    # auth/reg
+    'sign in to start your session': 'Войдите, чтобы начать сеанс',
+    'confirm your email before logging in': 'подтвердите свою электронную почту перед входом',
+    'Confirmation link is invalid or expired, please register again': 'Ссылка для подтверждения неверна или устарела, пожалуйста зарегистрируйтесь повторно',
+    'sign in': 'войти',
+    'sign up': 'зарегистрируйтесь',
+    'forgot password': 'забыли пароль',
+    'confirm password': 'подтвердите пароль',
+    'register': 'регистрация',
+    'fields with * is required': 'поля отмеченые * обязательны для заполнения',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес и мы отправим вам инструкцию для восстановления.',
+    'reset my Password': 'сбросить пароль',
 }

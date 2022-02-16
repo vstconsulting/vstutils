@@ -112,15 +112,6 @@ TRANSLATION = {
     'Unknown error': 'Lỗi không thể nhận biết',
     'Error': 'Lỗi',
 
-    'sign in to start your session': 'đăng nhập để bắt đầu',
-    'sign in': 'đăng nhập',
-    'sign up': 'đăng ký',
-    'forgot password': 'quên mật khẩu',
-    'confirm password': 'xác nhận mật khẩu',
-    'register': 'đăng ký',
-    'fields with * is required': 'các mục có dấu * là bắt buộc',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Quên mật khẩu? Nhập E-mail để nhận hướng dẫn khôi phục mật khẩu',
-    'reset my Password': '重置我的密码',
     'We\'ve emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly.': 'Hướng dẫn hủy mật khẩu đã được gửi vào e-mail của bạn.',
     'If you don\'t receive an email, please make sure you\'ve entered the address you registered with, and check your spam folder.': '"Nếu bạn chưa nhận được thư, hãy kiểm tra lại địa chỉ e-mail và mục Spam."',
     'The password reset link was invalid, possibly because it has already been used. Please request a new Password reset.': '"Đường dẫn không đúng, có thể đã được sử dụng. Xin hãy thử lại lần nữa."',
@@ -228,6 +219,10 @@ SERVER_TRANSLATION = {
     "key {missing_key} is missing": "khóa {missing_key} bị thiếu",
     "invalid key {invalid_key}": "khóa không hợp lệ {invalid_key}",
 
+    # field help_text
+    'A confirmation will be sent to your e-mail': 'Một xác nhận sẽ được gửi đến e-mail của bạn',
+    'Required. Inform a valid email address': 'Yêu cầu. Thông báo một địa chỉ email hợp lệ',
+
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Định dạng hình ảnh không được hỗ trợ, Được hỗ trợ ({0}), đã nhận {1}',
     'For some reason, this image file cannot be opened': 'Không thể mở file hình ảnh',
@@ -245,4 +240,17 @@ SERVER_TRANSLATION = {
     'To continue, need to agree to the personal data processing policy.': 'Để tiếp tục, cần đồng ý với chính '
                                                                           'sách xử lý dữ liệu cá nhân.',
     'terms of agreement': 'các điều khoản của thỏa thuận',
+
+    # auth/reg
+    'sign in to start your session': 'đăng nhập để bắt đầu',
+    'confirm your email before logging in': 'xác nhận email của bạn trước khi đăng nhập',
+    'Confirmation link is invalid or expired, please register again': 'Liên kết xác nhận không hợp lệ hoặc hết hạn, vui lòng đăng ký lại',
+    'sign in': 'đăng nhập',
+    'sign up': 'đăng ký',
+    'forgot password': 'quên mật khẩu',
+    'confirm password': 'xác nhận mật khẩu',
+    'register': 'đăng ký',
+    'fields with * is required': 'các mục có dấu * là bắt buộc',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Quên mật khẩu? Nhập E-mail để nhận hướng dẫn khôi phục mật khẩu',
+    'reset my Password': '重置我的密码',
 }

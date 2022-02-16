@@ -9,6 +9,10 @@
         {% endif %}
         {% endblock %}</p>
 
+        {% if wait_confirmation %}
+            <div class="warning">{% translate_text "confirm your email before logging in" capfirst %}</div>
+            <br>
+        {% endif %}
     <form method="post" action="{% url 'login' %}" class="app-form-signin form-signin" id="login_form">
         {% csrf_token %}
         {% block auth_key %}
@@ -53,5 +57,6 @@
         if (match && match.groups.next) {
             document.getElementById('next').value = match.groups.next
         }
+
     </script>
 {% endblock %}

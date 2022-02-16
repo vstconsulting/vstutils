@@ -90,6 +90,11 @@ class Login(auth.LoginView):
             return ['auth/tfa.html']
         return super().get_template_names()
 
+    def get_context_data(self, **kwargs):
+        context = super(Login, self).get_context_data(**kwargs)
+        context['wait_confirmation'] = self.request.GET.get('confirmation', '') == 'true'
+        return context
+
 
 class Logout(auth.LogoutView):
     next_page = reverse_lazy('login')
@@ -106,6 +111,19 @@ class Registration(FormView, BaseView):
         if settings.AUTHENTICATE_AFTER_REGISTRATION and user.id is not None:
             login(self.request, user)
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not settings.SEND_CONFIRMATION_EMAIL or 'uid' in context['form'].errors:
+            return context
+        context['uid'] = self.request.GET.get('uid', '')
+        return context
+
+    def get_success_url(self):
+        url = super().get_success_url()
+        if settings.SEND_CONFIRMATION_EMAIL and not self.request.POST.get('uid', False):
+            url += '?confirmation=true'
+        return url
 
 
 class BaseAgreementsView(TemplateView):
