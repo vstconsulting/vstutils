@@ -136,6 +136,7 @@ class BaseTestCase(TestCase):
         self.client = self.client_class(**self.client_kwargs)
         self.user = self._create_user()
         self.login_url = reverse('login')
+        self.confirmation_redirect_url = self.login_url + '?confirmation=true'
         self.logout_url = reverse('logout')
         self.last_response = None
 

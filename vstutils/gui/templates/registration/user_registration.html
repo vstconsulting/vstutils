@@ -1,7 +1,6 @@
 {% extends "registration/base.html" %}
 
 {% block bodyclass %}register-page{% endblock %}
-
 {% block style %}
     {{ block.super }}
     <style>
@@ -13,7 +12,6 @@
         }
     </style>
 {% endblock %}
-
 {% block login_body_content %}
     <script>
         function openTermsModal() {
@@ -44,9 +42,31 @@
                     </style>`;
             });
         }
-
     </script>
+
+{% if uid %}
+    <script>
+            const uid = '{{uid | safe}}';
+            const form = document.createElement("form");
+            const uidInput = document.createElement("input");
+            const csrfInput = document.createElement("input")
+            form.method = "POST";
+            form.action = document.location.href;
+            uidInput.value = uid;
+            uidInput.name = "uid";
+            csrfInput.value = document.cookie.match(/csrftoken=(.+?)(;|$)/)[1];
+            csrfInput.name = "csrfmiddlewaretoken";
+            csrfInput.type = "hidden";
+            form.appendChild(uidInput);
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+</script>
+{% endif %}
     <div class="login-box password-reset">
+        {% if form.errors %}
+            {% translate_errors form.uid.errors %}
+        {% endif %}
     <p>{% translate_text "fields with * is required" capfirst %}</p>
     <form method="post">
         {% csrf_token %}
@@ -65,6 +85,7 @@
                             {{ form.email.errors }}
                             <label for="id_email" class="registration-label">*{% translate_text "email" capfirst %}:</label>
                             {{ form.email }}
+
                         </div>
                     {% endblock %}
                     {% block registration_password_fields %}
@@ -72,6 +93,7 @@
                             {{ form.password1.errors }}
                             <label for="id_password1" class="registration-label">*{% translate_text "password" capfirst %}:</label>
                             {{ form.password1 }}
+
                         </div>
                         <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
                             {{ form.password2.errors }}
@@ -148,27 +170,5 @@
 
 {% block after_content %}
     {% block registration_confirmation_script %}
-    <script type='text/javascript'>
-        $(document).ready(function () {
-          const params = new URLSearchParams(document.location.search);
-          const uid = params.get("uid");
-          if (Array.from(params.keys()).length === 1 && uid !== null) {
-            const form = document.createElement("form");
-            const uidInput = document.createElement("input");
-
-            form.method = "POST";
-            form.action = document.location.href;
-
-            uidInput.value = uid;
-            uidInput.name = "uid";
-            form.appendChild(uidInput);
-            form.appendChild(document.getElementsByName('csrfmiddlewaretoken')[0]);
-
-            document.body.appendChild(form);
-
-            form.submit();
-          }
-        });
-    </script>
     {% endblock %}
 {% endblock %}

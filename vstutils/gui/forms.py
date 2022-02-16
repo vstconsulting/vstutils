@@ -7,8 +7,10 @@ from django.test import override_settings
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils.html import strip_tags
 
-from ..utils import SecurePickling, send_template_email, translate, lazy_translate
+
+from ..utils import SecurePickling, send_template_email, translate, lazy_translate as __
 
 UserModel = get_user_model()
 secure_pickle = SecurePickling()
@@ -19,15 +21,31 @@ check_data = override_setting_decorator(check_password)
 
 
 class RegistrationForm(UserCreationForm):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'data-toggle': "tooltip",
+                'data-placement': "right",
+                'title': strip_tags(field.help_text)
+            })
+        self.fields['username'].widget.attrs.update({
+            'title': self.fields['username'].widget.attrs['title'].replace('/', '')
+        })
+
     error_messages = {
-        'password_mismatch': lazy_translate("The two password fields didn't match."),
+        'password_mismatch': __("The two password fields didn't match."),
     }
 
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
-    email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
+    email = forms.EmailField(
+        max_length=254,
+        help_text=__('Required. Inform a valid email address.')  # type: ignore
+    )
     if settings.SEND_CONFIRMATION_EMAIL:
         uid = forms.CharField(max_length=256, required=False)
+        email.help_text = __('A confirmation will be sent to your e-mail')  # type: ignore
     if settings.ENABLE_AGREEMENT_TERMS:
         agreement = forms.BooleanField(required=False)
     if settings.ENABLE_CONSENT_TO_PROCESSING:
@@ -77,7 +95,6 @@ class RegistrationForm(UserCreationForm):
             raise SuspiciousOperation(
                 translate('Invalid registration email send.')
             )
-
         return super().save(commit)
 
     def save(self, commit=True):
@@ -90,8 +107,11 @@ class RegistrationForm(UserCreationForm):
         if settings.SEND_CONFIRMATION_EMAIL:
             uid = self.cleaned_data.get('uid', None)
             if self.errors and uid not in (None, ''):
-                self.cleaned_data.update(secure_pickle.loads(cache.get(uid)))
-                self._errors = ErrorDict()
+                try:
+                    self.cleaned_data.update(secure_pickle.loads(cache.get(uid)))
+                    self._errors = ErrorDict()
+                except TypeError:  # nocv
+                    self._errors = ErrorDict()
 
     def clean(self):
         super().clean()
@@ -109,6 +129,11 @@ class RegistrationForm(UserCreationForm):
                     'consent_to_processing',
                     translate('To continue, need to agree to the personal data processing policy.')
                 )
+        if settings.SEND_CONFIRMATION_EMAIL:
+            uid = self.cleaned_data.get('uid', False)
+            if uid and not cache.get(uid, False):
+                self._errors = ErrorDict()
+                self.add_error('uid', translate('Confirmation link is invalid or expired, please register again'))
 
 
 class TwoFaForm(forms.Form):

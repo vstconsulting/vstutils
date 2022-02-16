@@ -113,15 +113,6 @@ TRANSLATION = {
     'Unknown error': '未知错误',
     'Error': '错误',
 
-    'sign in to start your session': '登录开始会议',
-    'sign in': '进入',
-    'sign up': '请注册',
-    'forgot password': '忘记密码',
-    'confirm password': '确认密码',
-    'register': '注册',
-    'fields with * is required': '标有*为必填项',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': '忘记密码了吗？ 输入您的地址，我们将向您发送恢复指示',
-    'reset my Password': '问密码',
     'We\'ve emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly.': '我们已向您发送了一封电子邮件，其中包含有关重设密码的说明',
     'If you don\'t receive an email, please make sure you\'ve entered the address you registered with, and check your spam folder.': '如果您尚未收到电子邮件，请确认输入正确的地址并检查垃圾邮件文',
     'The password reset link was invalid, possibly because it has already been used. Please request a new Password reset.': '无效的密码恢复链接，可能已被使用。 请再试一次。',
@@ -230,6 +221,10 @@ SERVER_TRANSLATION = {
     "key {missing_key} is missing": "缺少密钥 {missing_key}",
     "invalid key {invalid_key}": "无效密钥 {invalid_key}",
 
+    # field help_text
+    'A confirmation will be sent to your e-mail': '确认将发送到您的电子邮箱',
+    'Required. Inform a valid email address': '必需的。 通知一个有效的电子邮件地址',
+
     # validators
     'unsupported image file format, expected ({0}), got {1}': '不支持的图像格式，支持（{0}），已收到{1}',
     'For some reason, this image file cannot be opened': '无法打开图像文件',
@@ -246,4 +241,17 @@ SERVER_TRANSLATION = {
     'the personal data processing policy': '个人资料处理政策',
     'To continue, need to agree to the personal data processing policy.': '要继续，需要同意个人数据处理政策。',
     'terms of agreement': '协议条款',
+
+    #auth/reg
+    'sign in to start your session': '登录开始会议',
+    'confirm your email before logging in': '登录前确认您的电子邮件',
+    'Confirmation link is invalid or expired, please register again': '确认链接无效或过期，请重新注册',
+    'sign in': '进入',
+    'sign up': '请注册',
+    'forgot password': '忘记密码',
+    'confirm password': '确认密码',
+    'register': '注册',
+    'fields with * is required': '标有*为必填项',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': '忘记密码了吗？ 输入您的地址，我们将向您发送恢复指示',
+    'reset my Password': '问密码',
 }
