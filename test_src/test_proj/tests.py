@@ -801,6 +801,12 @@ class ViewsTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Confirmation link is invalid or expired, please register again', str(response.content))
 
+        response = client.post(href_base, {'uid': 'wrong'})
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.context_data['form'].errors.get_json_data(), {
+            'uid': [{'message': 'Confirmation link is invalid or expired, please register again', 'code': ''}],
+        })
+
         # Check email and uid in create method
         secure_pickle = SecurePickling(settings.SECRET_KEY)
         fail_check_email_user = user.copy()
