@@ -1,3 +1,5 @@
+import os
+import sys
 from vstutils.environment import prepare_environment, cmd_execution
 
 __version__ = '1.0.0'
@@ -11,5 +13,8 @@ settings = {
     "TEST_PROJ_UWSGI_HARAKIRI": "120",
     "TEST_PROJ_UWSGI_VACUUM": "true",
 }
+
+if 'test' in sys.argv:
+    settings["VST_DEV_SETTINGS"] = os.path.join(os.path.dirname(__file__), 'test_settings.ini')
 
 prepare_environment(**settings)
