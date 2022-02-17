@@ -1,10 +1,10 @@
 from django.db.models import CharField
 from vstutils.api.responses import HTTP_200_OK
-from vstutils.models import BModel
+from vstutils.models import BaseModel
 from vstutils.models.decorators import register_view_action
 
 
-class CachableModel(BModel):
+class CachableModel(BaseModel):
     _cache_responses = True
     name = CharField(max_length=128)
 
