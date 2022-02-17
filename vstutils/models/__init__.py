@@ -254,7 +254,7 @@ def get_centrifugo_client():
     @receiver(signals.post_save)
     @receiver(signals.post_delete)
     def centrifugo_signal_for_notificate_users_about_updates(instance, *args, **kwargs):
-        if isinstance(instance, (BModel, User)):
+        if isinstance(instance, (BaseModel, User)):
             notify_clients(instance.__class__, instance.pk)
 
     client._signal = centrifugo_signal_for_notificate_users_about_updates
