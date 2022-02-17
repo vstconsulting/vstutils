@@ -64,7 +64,7 @@
 </script>
 {% endif %}
     <div class="login-box password-reset">
-        {% if form.errors %}
+        {% if form.errors.uid %}
             {% translate_errors form.uid.errors %}
         {% endif %}
     <p>{% translate_text "fields with * is required" capfirst %}</p>

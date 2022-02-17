@@ -113,6 +113,13 @@ class RegistrationForm(UserCreationForm):
                 except TypeError:  # nocv
                     self._errors = ErrorDict()
 
+    def _post_clean(self):
+        super()._post_clean()
+        if settings.SEND_CONFIRMATION_EMAIL and 'uid' in self._errors:
+            for err in tuple(self._errors.keys()):
+                if err != 'uid':
+                    del self._errors[err]
+
     def clean(self):
         super().clean()
         if settings.ENABLE_AGREEMENT_TERMS:
