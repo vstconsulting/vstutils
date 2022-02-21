@@ -355,7 +355,9 @@ Classes are formed for the fields with "boolean" and "choices" types.
 Also classes apply to operations buttons and links.
 
 :Classes generation rules:
+
 * ``EntityView, ModelField and ListTableRow`` - *field-[field_name]-[field-value]*
+
    **Example:**
     * *"field-active-true"* for model that contains "boolean" field with name "active" and value "true"
     * *"field-tariff_type-WAREHOUSE"* for model that contains "choices" field with name "tariff_type" and value "WAREHOUSE"
@@ -395,4 +397,5 @@ A few use cases:
        .item-row.field-status-CANCELLED {
            background-color: red;
        }
+
    In this case, you need to use the extra class "item-row" (Used for example, you can choose another one) for specify the element to be selected in the selector, because the class "field-status-CANCELLED" is added in different places on the page.
