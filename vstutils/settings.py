@@ -440,6 +440,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
         },
         'databases': {
             "default_db": "default",
+            "default_tablespace": "",
+            "default_index_tablespace": "",
             'default': {}
         },
         'cache': {
@@ -892,6 +894,8 @@ for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3'
         pass
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_TABLESPACE = config['databases'].get('default_tablespace', fallback='')
+DEFAULT_INDEX_TABLESPACE = config['databases'].get('default_index_tablespace', fallback='')
 
 # Cache settings.
 # Read more: https://docs.djangoproject.com/en/3.2/ref/settings/#caches
