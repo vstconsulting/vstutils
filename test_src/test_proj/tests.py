@@ -4084,22 +4084,123 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[8]['data'], results[0]['data'])
         self.assertEqual(results[9]['status'], 200, results[9]['data'])
 
-    def test_m2m_deep_nested(self):
+    def test_m2m_fk_deep_nested(self):
         Group = self.get_model_class('test_proj.Group')
         results = self.bulk([
             {'method': 'post', 'path': 'group', 'data': {'name': '1'}},
-            {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'groups'], 'data': {'name': '1.1'}},
-            # [2] Query root objects
-            {'method': 'get', 'path': 'group', 'query': '__deep_parent='},
-            # [3] Query nested objects
+            {'method': 'post', 'path': ['group', '<<0[data][id]>>', 'childrens'], 'data': {'name': '1.1'}},
+            # [2] Query nested objects
             {'method': 'get', 'path': 'group', 'query': '__deep_parent=<<0[data][id]>>'},
+            # [3] Create nested in nested
+            {
+                'method': 'post',
+                'path': ['group', '<<1[data][id]>>', 'childrens'],
+                'data': {'name': '1.1.1'}
+            },
+            # [4] Query nested in nested objects
+            {'method': 'get', 'path': 'group', 'query': '__deep_parent=<<1[data][id]>>'},
+            # [5] Query root objects
+            {'method': 'get', 'path': 'group', 'query': '__deep_parent='},
         ])
 
         self.assertEqual(results[0]['status'], 201)
         self.assertEqual(results[1]['status'], 201, results[1]['data'])
-        self.assertEqual(results[2]['status'], 200)
         self.assertEqual(results[2]['data']['count'], 1)
-        self.assertEqual(results[3]['data']['count'], 1)
+        self.assertEqual(results[3]['status'], 201, results[3]['data'])
+        self.assertEqual(results[4]['status'], 200)
+        self.assertEqual(results[4]['data']['count'], 1)
+        self.assertEqual(results[5]['status'], 200)
+        self.assertEqual(results[5]['data']['count'], 1)
+
+        # Check if deep nested (doesn't matter if it fk or m2m) works in nested view correctly.
+        deep_results = self.bulk([
+            # 0 create model with nested
+            {'method': 'post', 'path': 'modelwithnested', 'data': {'name': 'somegroup'}},
+            # 1 Create nested group
+            {'method': 'post', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups'], 'data': {'name': '2'}},
+            # 2 Create deep nested group (2rd deep level)
+            {
+                'method': 'post',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<1[data][id]>>', 'childrens'],
+                'data': {'name': '2.2'}
+            },
+            # 3 Query deep nested
+            {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups'],
+             'query': '__deep_parent=<<1[data][id]>>'},
+            # m2m
+            # 4 Create nested fk group
+            {'method': 'post', 'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk'], 'data': {'name': '3'}},
+            # 5 Create deep nested fk group (2nd deep level)
+            {
+                'method': 'post',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk', '<<4[data][id]>>', 'child'],
+                'data': {'name': '3.3'}
+            },
+            # 6 Query deep nested fk
+            {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk'],
+             'query': '__deep_parent=<<4[data][id]>>'},
+
+            # 7 create deeper fk (3rd deep level)
+            {
+                'method': 'post',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk', '<<5[data][id]>>', 'child'],
+                'data': {'name': '3.3.3'}
+            },
+            # 8 create deeper m2m (3rd deep level)
+            {
+                'method': 'post',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<2[data][id]>>', 'childrens'],
+                'data': {'name': '2.2.2'}
+            },
+
+            # Check if detail deep nested in nested views works correctly in any deep level
+            # We should have access to lower deep nested tree elements
+            # fk
+            # 9 Query detail 2nd deep nested level in nested view
+            {
+                'method': 'get',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk', '<<4[data][id]>>', 'child',
+                         '<<5[data][id]>>'],
+            },
+            # 10 Query 3rd deep nested as second deep child
+            {
+                'method': 'get',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk', '<<4[data][id]>>', 'child',
+                         '<<7[data][id]>>'],
+            },
+            # 11 Query 3rd deep nested as nested
+            {
+                'method': 'get',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk', '<<7[data][id]>>'],
+            },
+            # m2m
+            # 12 Query detail 2nd deep nested level in nested view
+            {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<1[data][id]>>', 'childrens',
+                                       '<<2[data][id]>>']},
+            # 13 Query detail 3rd deep nested level in nested view
+            {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<1[data][id]>>', 'childrens',
+                                       '<<8[data][id]>>']},
+            # 14 Query 3rd deep nested as first deep child
+            {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<8[data][id]>>']},
+        ])
+        self.assertEqual(deep_results[1]['status'], 201, deep_results[1]['data'])
+        self.assertEqual(deep_results[2]['status'], 201, deep_results[2]['data'])
+        self.assertEqual(deep_results[3]['status'], 200)
+        self.assertEqual(deep_results[3]['data']['count'], 1)
+
+        self.assertEqual(deep_results[4]['status'], 201, deep_results[4]['data'])
+        self.assertEqual(deep_results[5]['status'], 201, deep_results[5]['data'])
+        self.assertEqual(deep_results[6]['status'], 200)
+        self.assertEqual(deep_results[6]['data']['count'], 1)
+
+        self.assertIn('3.3', str(deep_results[9]['data']))
+        self.assertNotIn('3.3.3', str(deep_results[9]['data']))
+        self.assertIn('3.3.3', str(deep_results[10]['data']))
+        self.assertIn('3.3.3', str(deep_results[11]['data']))
+        self.assertIn('2.2', str(deep_results[12]['data']))
+        self.assertNotIn('2.2.2', str(deep_results[12]['data']))
+        self.assertIn('2.2.2', str(deep_results[13]['data']))
+        self.assertIn('2.2.2', str(deep_results[14]['data']))
 
 
 class CustomModelTestCase(BaseTestCase):

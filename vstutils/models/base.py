@@ -36,8 +36,9 @@ from ..api import (
     base as api_base,
     filters as api_filters,
     serializers as api_serializers,
-    decorators as api_decorators
+    decorators as api_decorators,
 )
+from ..api.filter_backends import DeepViewFilterBackend
 
 # Constants
 LAZY_MODEL = object()
@@ -210,12 +211,13 @@ def _get_decorator(data):
     return api_decorators.nested_view(path, **deco_kwargs)
 
 
-def _set_deep_filter_or_not(backends):
-    if backends is None:  # nocv
+def _set_deep_filter(backends):
+    if backends is None:
         backends = []
-    elif not isinstance(backends, list):
+    elif not isinstance(backends, list):  # nocv
         backends = list(backends)
-    backends.append('vstutils.api.filter_backends.DeepViewFilterBackend')
+    if DeepViewFilterBackend not in backends:
+        backends = [DeepViewFilterBackend, *backends]
     return backends
 
 
@@ -258,10 +260,6 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         model_class.OriginalMeta = meta if meta is not None else model_class.Meta
         if hasattr(model_class, '__prepare_model__'):
             model_class.__prepare_model__()
-        if hasattr(model_class, 'deep_parent_field'):
-            model_class.__extra_metadata__['filter_backends'] = lazy(_set_deep_filter_or_not, list)(
-                model_class.__extra_metadata__['filter_backends']
-            )
         if getattr(model_class, '_cache_responses', False):
             receiver(post_save, sender=model_class)(update_cache_for_model)
             receiver(post_delete, sender=model_class)(update_cache_for_model)
@@ -595,6 +593,9 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializers['serializer_class_one'],
             metadata['search_fields']
         )))
+
+        if hasattr(cls, 'deep_parent_field'):
+            view_attributes['filter_backends'] = lazy(_set_deep_filter, list)(view_attributes.get('filter_backends'))
 
         generated_view = type(
             f'{cls.__name__}ViewSet',
