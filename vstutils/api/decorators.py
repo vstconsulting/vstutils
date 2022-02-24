@@ -10,6 +10,7 @@ from rest_framework import response, request as drf_request, status, views, seri
 from drf_yasg.utils import swagger_auto_schema
 
 from . import base
+from .filter_backends import DeepViewFilterBackend
 from ..exceptions import VSTUtilsException
 from .. import utils
 
@@ -238,6 +239,8 @@ class NestedViewMixin:
 
     def get_queryset(self) -> models.QuerySet:
         qs = self.nested_manager.all()
+        if DeepViewFilterBackend in getattr(self, 'filter_backends', []):
+            qs = DeepViewFilterBackend().filter_queryset(self.request, qs, self)
         for qs_filter in self.queryset_filters:
             if callable(qs_filter):
                 qs = qs_filter(self.nested_parent_object, qs)

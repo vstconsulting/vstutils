@@ -242,11 +242,50 @@ class DeepViewFilterBackend(VSTFilterBackend):
         compat.coreschema.String: filters.CharFilter,  # type: ignore
     }
 
+    def get_nested_detail_qs(self, qs, model, parent_name, view):
+        model_to_sql = model
+        field = getattr(model, parent_name)
+        field_to_get = view.lookup_field
+        m2m_model = getattr(field, 'through', None)
+        if m2m_model:
+            field_to_get, parent_name = getattr(
+                model._meta.get_field(parent_name),
+                'through_fields',
+                [f'from_{model.__name__.lower()}_id', f'to_{model.__name__.lower()}_id']
+            )
+            model_to_sql = m2m_model
+
+        sql_table = model_to_sql._meta.db_table
+        sql_column_to_get = getattr(model_to_sql, field_to_get).field.column
+        sql_parent_column = getattr(model_to_sql, parent_name).field.column
+        sql_pk = model_to_sql._meta.pk.column
+
+        raw_qs = f'''
+            WITH RECURSIVE nested as (
+                    SELECT {sql_table}.{sql_pk}, {sql_table}.{sql_column_to_get}, {sql_table}.{sql_parent_column}
+                    FROM {sql_table}
+                    WHERE {sql_table}.{sql_parent_column}
+                        IN ({str(qs.values(sql_pk).order_by().query)})
+                UNION
+                    SELECT {sql_table}.id, {sql_table}.{sql_column_to_get}, {sql_table}.{sql_parent_column}
+                    FROM {sql_table}
+                        JOIN nested
+                            ON {sql_table}.{sql_parent_column} = nested.{sql_column_to_get}
+            )
+            SELECT {sql_column_to_get} from nested
+            UNION
+            {str(qs.values(sql_pk).order_by().query)}
+        '''
+        return model.objects.extra(where=[f'id in ({raw_qs})'])  # nosec
+
     def filter_queryset(self, request, queryset, view):
-        if view.action != 'list':
-            return queryset
         model = queryset.model
         parent_name: _t.Optional[_t.Text] = getattr(model, 'deep_parent_field', None)
+        nested = getattr(view, 'nested_id', False) or getattr(getattr(view, 'nested_parent_object', None), 'id', None)
+        if view.action != 'list':
+            if parent_name and nested:
+                return self.get_nested_detail_qs(queryset, model, parent_name, view)
+            return queryset
         if not parent_name or self.field_name not in request.query_params:
             return queryset
         filter_type_class = self.field_types[type(self.get_coreschema_field(model))]
@@ -256,6 +295,8 @@ class DeepViewFilterBackend(VSTFilterBackend):
         pk_name = model._meta.pk.attname
         parent_qs = model.objects.filter(**{pk_name: filter_data})
         parent_qs = getattr(parent_qs, 'cleared', parent_qs.all)()
+        if nested:
+            queryset = model.objects.all()
         return filter_type_class(field_name=parent_name, lookup_expr='in').filter(
             queryset,
             value=parent_qs.values(pk_name)
