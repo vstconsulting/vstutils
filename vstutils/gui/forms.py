@@ -4,6 +4,7 @@ from django.conf import settings
 from django import forms
 from django.forms.utils import ErrorDict
 from django.test import override_settings
+from django.urls import reverse
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth.hashers import make_password, check_password
@@ -24,14 +25,8 @@ class RegistrationForm(UserCreationForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         for field in self.fields.values():
-            field.widget.attrs.update({
-                'data-toggle': "tooltip",
-                'data-placement': "right",
-                'title': strip_tags(field.help_text)
-            })
-        self.fields['username'].widget.attrs.update({
-            'title': self.fields['username'].widget.attrs['title'].replace('/', '')
-        })
+            if field.help_text:
+                field.widget.attrs['title'] = strip_tags(field.help_text)
 
     error_messages = {
         'password_mismatch': __("The two password fields didn't match."),
@@ -64,7 +59,7 @@ class RegistrationForm(UserCreationForm):
 
     def build_confirmation_url(self, uid):
         # pylint: disable=no-member
-        return self.request.build_absolute_uri(f'?uid={uid}')
+        return self.request.build_absolute_uri(f'{reverse("user_registration")}?uid={uid}')
 
     def get_email_context(self):
         return {}
