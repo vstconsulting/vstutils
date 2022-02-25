@@ -521,6 +521,8 @@ class FkModelField(FkField):
     @functools.lru_cache()
     def _get_data_from_model(self, value):
         self.model_class = get_if_lazy(self.model_class)
+        if isinstance(value, self.model_class):
+            return value  # nocv
         return self.model_class.objects.get(**{self.autocomplete_property: value})
 
     def get_value(self, dictionary: _t.Any) -> _t.Any:
