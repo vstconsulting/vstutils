@@ -9,6 +9,8 @@ import io
 import pwd
 import base64
 import datetime
+from functools import partial
+from copy import deepcopy
 from pathlib import Path
 from smtplib import SMTPException
 
@@ -489,6 +491,80 @@ class VSTUtilsTestCase(BaseTestCase):
             utils.get_render('testproj.template', {"content_data": '{"extra_content": "dGVzdAo="}'}),
             '\n<img class="photo" src="data:image/png;base64,dGVzdAo=">\n'
         )
+
+    def test_deep_nested_qs(self):
+        # foreign key
+        GroupWithFK = self.get_model_class('test_proj.GroupWithFK')
+        Group = self.get_model_class('test_proj.Group')
+        groups_structure = [
+            ['1', None],
+            ['1.1', 0],
+            ['1.1.1', 1],
+            ['1.1.1.1', 2],
+            ['1.1.1.1.1', 3],
+            ['1.2', 0],
+            ['1.2.1', 5],
+        ]
+        fk_structure = deepcopy(groups_structure)
+        m2m_structure = deepcopy(groups_structure)
+        for i in range(len(groups_structure)):
+            parent_key = groups_structure[i][1]
+            fk_parent = None
+            m2m_parent = None
+            if parent_key is not None:
+                fk_parent = fk_structure[parent_key]
+                m2m_parent = m2m_structure[parent_key]
+            name = groups_structure[i][0]
+            fk_structure[i] = GroupWithFK.objects.create(name=name, parent=fk_parent)
+
+            group = Group.objects.create(name=name)
+            m2m_structure[i] = group
+            if m2m_parent:
+                group.parents.add(m2m_parent)
+
+        def get_deep_nested_result():
+            # fk
+            fk_first_qs = GroupWithFK.objects.filter(id=fk_structure[0].id)
+            fk_last_qs = GroupWithFK.objects.filter(id=fk_structure[-1].id)
+            get_fk_nested = [
+                # parents for one group
+                fk_last_qs.get_parents(),
+                # parents for one group with current qs(with child)
+                fk_last_qs.get_parents(with_current=True),
+                # parents for one group
+                fk_first_qs.get_children(),
+                # parents for one group with current qs(with child)
+                fk_first_qs.get_children(with_current=True),
+            ]
+
+            # m2m
+            m2m_first_qs = Group.objects.filter(id=m2m_structure[0].id)
+            m2m_last_qs = Group.objects.filter(id=m2m_structure[-1].id)
+            get_m2m_nested = [
+                # parents for one group
+                m2m_last_qs.get_parents(),
+                # parents for one group with current qs(with child)
+                m2m_last_qs.get_parents(with_current=True),
+                # parents for one group
+                m2m_first_qs.get_children(),
+                # parents for one group with current qs(with child)
+                m2m_first_qs.get_children(with_current=True),
+            ]
+            return get_fk_nested, get_m2m_nested
+
+        for result in get_deep_nested_result():
+            self.assertEqual(
+                list(map(lambda x: x.count(), result)),
+                [2, 3, 6, 7]
+            )
+            
+        # use without cte old logic if db doesn't support cte
+        with override_settings(DATABASES_WITHOUT_CTE_SUPPORT=['default']):
+            for result in get_deep_nested_result():
+                self.assertEqual(
+                    list(map(lambda x: x.count(), result)),
+                    [2, 3, 6, 7]
+                )
 
 
 class ViewsTestCase(BaseTestCase):

@@ -192,6 +192,14 @@ class WebSection(BaseAppendSection):
     }
 
 
+class DatabasesSection(BaseAppendSection):
+    __slots__ = ()
+
+    types_map = {
+        'databases_without_cte_support': cconfig.ListType(),
+    }
+
+
 class DBSection(BackendSection):
     __slots__ = ()
     types_map = {
@@ -442,6 +450,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             "default_db": "default",
             "default_tablespace": "",
             "default_index_tablespace": "",
+            "databases_without_cte_support": [],
             'default': {}
         },
         'cache': {
@@ -511,7 +520,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
     section_overload={
         'main': MainSection,
         'web': WebSection,
-        'databases': BaseAppendSection,
+        'databases': DatabasesSection,
         'database': DBSection,
         'database.options': DBOptionsSection,
         'database.test': DBTestSection,
@@ -896,7 +905,7 @@ for db in filter(lambda x: x.get('ENGINE', None) == 'django.db.backends.sqlite3'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 DEFAULT_TABLESPACE = config['databases'].get('default_tablespace', fallback='')
 DEFAULT_INDEX_TABLESPACE = config['databases'].get('default_index_tablespace', fallback='')
-
+DATABASES_WITHOUT_CTE_SUPPORT = config['databases'].get('databases_without_cte_support', fallback='')
 # Cache settings.
 # Read more: https://docs.djangoproject.com/en/3.2/ref/settings/#caches
 ##############################################################
