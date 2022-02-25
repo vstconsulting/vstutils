@@ -1558,7 +1558,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
             }
         )
         self.assertEqual(
-            api['definitions']['OneModelWithFK']['properties']['fk_with_filters'][X_OPTIONS]['filters'],
+            api['definitions']['OneSuperModelWithFK']['properties']['fk_with_filters'][X_OPTIONS]['filters'],
             {'rating': 5}
         )
         self.assertEqual(api['definitions']['Variable']['properties']['value']['format'], 'dynamic_fk')
@@ -3177,15 +3177,15 @@ class ProjectTestCase(BaseTestCase):
         # Check useFetch and makeLink properties
         definitions = data['definitions']
 
-        properties = definitions['OneModelWithFK']['properties']['some_fk'][X_OPTIONS]
+        properties = definitions['OneSuperModelWithFK']['properties']['some_fk'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], True)
         self.assertEqual(properties['makeLink'], True)
 
-        properties = definitions['OneModelWithFK']['properties']['no_prefetch_and_link_fk'][X_OPTIONS]
+        properties = definitions['OneSuperModelWithFK']['properties']['no_prefetch_and_link_fk'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], False)
 
-        properties = definitions['OneModelWithFK']['properties']['multiselect']['items'][X_OPTIONS]
+        properties = definitions['OneSuperModelWithFK']['properties']['multiselect']['items'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], True)
 

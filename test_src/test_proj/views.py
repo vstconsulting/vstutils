@@ -171,6 +171,7 @@ HostListViewSet = create_view(
 
 ModelWithFKViewSet = create_view(
     ModelWithFK,
+    serializer_class_name='SuperModelWithFK',
     override_detail_fields={
         'some_fk': fields.FkModelField(select=Host),
         'no_prefetch_and_link_fk': fields.FkModelField(select=HostViewSet.serializer_class,
