@@ -1,3 +1,4 @@
+import uuid
 from io import BytesIO
 from PIL import Image
 from django_filters import CharFilter
@@ -242,3 +243,11 @@ class SomethingWithImage(BModel):
                 validators=[image_validator_resizer_with_margin],
             ),
         }
+
+
+class ModelWithUuid(BModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid1)
+    data = models.CharField(max_length=256)
+
+    class Meta:
+        default_related_name = 'model_with_uuid'

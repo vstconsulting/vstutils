@@ -3,6 +3,7 @@ Default Django model classes overrides in `vstutils.models` module.
 """
 
 import logging
+import uuid
 
 from django.db import models
 from django.db.models import signals
@@ -215,6 +216,8 @@ class BModel(BaseModel):
 @raise_context()
 def bulk_notify_clients(channel="subscriptions_update", objects=()):
     for labels, pk in objects:
+        if isinstance(pk, uuid.UUID):
+            pk = str(pk)
         with raise_context():
             cent_client.add("publish", cent_client.get_publish_params(
                 channel,
@@ -254,7 +257,7 @@ def get_centrifugo_client():
     @receiver(signals.post_save)
     @receiver(signals.post_delete)
     def centrifugo_signal_for_notificate_users_about_updates(instance, *args, **kwargs):
-        if isinstance(instance, (BaseModel, User)):
+        if isinstance(instance, (BaseModel, User)) and getattr(instance, '_notify_update', True):
             notify_clients(instance.__class__, instance.pk)
 
     client._signal = centrifugo_signal_for_notificate_users_about_updates

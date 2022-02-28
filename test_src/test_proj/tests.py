@@ -557,7 +557,7 @@ class VSTUtilsTestCase(BaseTestCase):
                 list(map(lambda x: x.count(), result)),
                 [2, 3, 6, 7]
             )
-            
+
         # use without cte old logic if db doesn't support cte
         with override_settings(DATABASES_WITHOUT_CTE_SUPPORT=['default']):
             for result in get_deep_nested_result():
@@ -4533,6 +4533,7 @@ class WebSocketTestCase(BaseTestCase):
             mock_args.append(args)
             mock_kwargs.append(kwargs)
 
+        ModelWithUuid = self.get_model_class('test_proj.models.ModelWithUuid')
         Host = self.get_model_class('test_proj.models.Host')
         HostList = self.get_model_class('test_proj.models.HostList')
         Group = self.get_model_class('auth.Group')
@@ -4544,7 +4545,8 @@ class WebSocketTestCase(BaseTestCase):
         host_list_obj2 = HostList.objects.create(name="centrifuga")
         HostList.objects.filter(id__in=[host_list_obj.id, host_list_obj2.id]).delete()
         Group.objects.create(name='TestUsersGroup').delete()
-        self.assertEqual(mock_call_count, 5)
+        mwu = ModelWithUuid.objects.create(data='123')
+        self.assertEqual(mock_call_count, 6)
         mock_data = []
         for arg in mock_args:
             cent_host = arg[0]
@@ -4561,6 +4563,7 @@ class WebSocketTestCase(BaseTestCase):
         self.assertDictEqual(mock_data[2][2], {"subscribe-label": host_list_labels, "pk": host_list_obj2.id})
         self.assertDictEqual(mock_data[3][2], {"subscribe-label": host_list_labels, "pk": host_list_obj2.id})
         self.assertDictEqual(mock_data[4][2], {"subscribe-label": host_list_labels, "pk": host_list_obj.id})
+        self.assertDictEqual(mock_data[5][2], {"subscribe-label": [ModelWithUuid._meta.label], "pk": str(mwu.id)})
 
 
 class ThrottleTestCase(BaseTestCase):
