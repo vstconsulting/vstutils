@@ -142,7 +142,7 @@ export const BaseViewMixin = {
             let operationId = '';
 
             if (redirect.depend_field) {
-                operationId += responseData[redirect.depend_field];
+                operationId += responseData[redirect.depend_field].toLowerCase();
             }
             if (!operationId || redirect.concat_field_name) {
                 operationId = operationId + redirect.operation_name;
