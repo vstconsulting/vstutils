@@ -76,6 +76,7 @@ class SendEmailMessage(TaskClass):
     Task for sending bulk emails, all args and kwargs are passed to :func:`vstutils.utils.send_template_email_handler`.
     Usually you don't need to call this manually, this is called by :func:`vstutils.utils.send_template_email`.
     """
+    ignore_result = True
 
     def run(self, *args, **kwargs):
         try:

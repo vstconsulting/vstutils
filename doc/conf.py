@@ -235,6 +235,7 @@ intersphinx_mapping = {
 extlinks = {
     'wiki': ('https://en.wikipedia.org/wiki/%s', None),
     'django_docs': (django_version_docs + 'ref/%s', None),
+    'django_topics': (django_version_docs + 'topics/%s', None),
     'celery_docs': ('http://docs.celeryproject.org/en/latest/%s', None),
 }
 

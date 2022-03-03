@@ -83,10 +83,25 @@ In the example above authorization logic will be the following:
 
 .. _database:
 
-Database settings
------------------
+Databases settings
+------------------
 
-Section ``[database]``.
+Section ``[databases]``.
+
+The main section that is designed to manage multiple databases connected
+to the project.
+
+These settings are for all databases and are vendor-independent,
+with the exception of tablespace management.
+
+* **default_tablespace** - Default tablespace to use for models that don’t specify one, if the backend supports it.
+                           Read more at :django_topics:`Declaring tablespaces for tables <db/tablespaces/#declaring-tablespaces-for-tables>`.
+* **default_index_tablespace** - Default tablespace to use for indexes on fields that don’t specify one, if the backend supports it.
+                                 Read more at :django_topics:`Declaring tablespaces for indexes <db/tablespaces/#declaring-tablespaces-for-indexes>`.
+* **databases_without_cte_support** - A comma-separated list of database section names that do not support CTEs (Common Table Experssions).
+
+Also, all subsections of this section are available connections to the DBMS.
+So the ``databases.default`` section will be used by django as the default connection.
 
 Here you can change settings related to database, which vstutils-based application will
 use. vstutils-based application supports all databases supported by ``django``. List of
@@ -95,6 +110,19 @@ PostgreSQL. Configuration details available at
 :django_docs:`Django database documentation <settings/#databases>`.
 To run vstutils-based application at multiple nodes (cluster),
 use client-server database (SQLite not suitable) shared for all nodes.
+
+You can also set the base template for connecting to the database in the ``database`` section.
+
+
+|
+|
+
+Section ``[database]``.
+
+This section is designed to define the basic template for connections to various databases.
+This can be useful to reduce the list of settings in the ``databases.*`` subsections
+by setting the same connection for a different set of databases in the project.
+For more details read the django docs about :django_topics:`Multiple databases <db/multi-db/#multiple-databases>`
 
 There is a list of settings, required for MySQL database.
 
@@ -388,6 +416,31 @@ is used as default.
 To override it set ``default=storages.backends.apache_libcloud.LibCloudStorage``
 in ``[storages]`` section and use Libcloud provider as default.
 
+Here is example for boto3 connection to minio cluster with public read permissions,
+external proxy domain and internal connection support:
+
+.. sourcecode:: ini
+
+    [storages.boto3]
+    access_key_id = EXAMPLE_KEY
+    secret_access_key = EXAMPLEKEY_SECRET
+    # connection to internal service behind proxy
+    s3_endpoint_url = http://127.0.0.1:9000/
+    # external domain to bucket 'media'
+    storage_bucket_name = media
+    s3_custom_domain = media-api.example.com/media
+    # external domain works behind tls
+    s3_url_protocol = https:
+    s3_secure_urls = true
+    # settings to connect as plain http for uploading
+    s3_verify = false
+    s3_use_ssl = false
+    # allow to save files with similar names by adding prefix
+    s3_file_overwrite = false
+    # disables query string auth and setup default acl as RO for public users
+    querystring_auth = false
+    default_acl = public-read
+
 |
 |
 
@@ -449,3 +502,17 @@ This section contains additional information for configure additional elements.
 
 #. You can use `{ENV[HOME:-value]}` (where `HOME` is environment variable, `value` is default value)
    in configuration values.
+
+#. You can use environment variables for setup important settings. But config variables has more priority then env.
+   Available settings are: ``DEBUG``, ``DJANGO_LOG_LEVEL``, ``TIMEZONE`` and some settings with ``[ENV_NAME]`` prefix.
+
+   For project without special settings and project levels named ``project`` this variables will stars with ``PROJECT_`` prefix.
+   There list of this variables: ``{ENV_NAME}_ENABLE_ADMIN_PANEL``, ``{ENV_NAME}_ENABLE_REGISTRATION``, ``{ENV_NAME}_MAX_TFA_ATTEMPTS``,
+   ``{ENV_NAME}_ETAG_TIMEOUT``, ``{ENV_NAME}_SEND_CONFIRMATION_EMAIL``, ``{ENV_NAME}_SEND_EMAIL_RETRIES``,
+   ``{ENV_NAME}_SEND_EMAIL_RETRY_DELAY``, ``{ENV_NAME}_AUTHENTICATE_AFTER_REGISTRATION``,
+   ``{ENV_NAME}_MEDIA_ROOT`` (dir with uploads), ``{ENV_NAME}_GLOBAL_THROTTLE_RATE``,
+   and ``{ENV_NAME}_GLOBAL_THROTTLE_ACTIONS``.
+
+   There are also URI-specific variables for connecting to various services such as databases and caches.
+   There are ``DATABASE_URL``, ``CACHE_URL``, ``LOCKS_CACHE_URL``, ``SESSIONS_CACHE_URL`` and ``ETAG_CACHE_URL``.
+   As you can see from the names, they are closely related to the keys and names of the corresponding config sections.
