@@ -808,8 +808,6 @@ TEMPLATES: _t.List[_t.Dict] = [
             os.path.join(BASE_DIR, 'gui/templates'),
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(VSTUTILS_DIR, 'templates'),
-            os.path.join(VSTUTILS_DIR, 'api/templates'),
-            os.path.join(VSTUTILS_DIR, 'gui/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

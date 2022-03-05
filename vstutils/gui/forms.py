@@ -9,9 +9,10 @@ from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
 
 
-from ..utils import SecurePickling, send_template_email, translate, lazy_translate as __
+from ..utils import SecurePickling, send_template_email, translate as _, lazy_translate as __
 
 UserModel = get_user_model()
 secure_pickle = SecurePickling()
@@ -19,6 +20,37 @@ secure_pickle = SecurePickling()
 override_setting_decorator = override_settings(PASSWORD_HASHERS=settings.REGISTRATION_HASHERS)
 hash_data = override_setting_decorator(make_password)
 check_data = override_setting_decorator(check_password)
+
+
+class AgreementWidget(forms.widgets.CheckboxInput):
+    template_name = 'widgets/agreement_widget.html'
+
+    def __init__(self, *args, **kwargs):
+        kwargs['attrs'] = attrs = kwargs.get('attrs', {}) or {}
+        attrs['class'] = 'form-check-input'
+        super().__init__(*args, **kwargs)
+
+
+class AgreementField(forms.BooleanField):
+    widget = AgreementWidget
+
+    def __init__(self,
+                 before_link_text: str = '',
+                 after_link_text: str = '',
+                 url: str = None,
+                 *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.url_name = url
+        self.before_link_text = before_link_text
+        self.after_link_text = after_link_text
+
+    def get_bootstrap_label(self, field):
+        return mark_safe(  # nosec
+            f'{_(self.before_link_text)}'
+            f'<a href="#" onclick=open{field.name}Modal("{reverse(self.url_name)}")>'
+            f'{_(self.label)}'
+            f'</a>{_(self.after_link_text)}'
+        )
 
 
 class RegistrationForm(UserCreationForm):
@@ -32,9 +64,10 @@ class RegistrationForm(UserCreationForm):
         'password_mismatch': __("The two password fields didn't match."),
     }
 
-    first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
-    last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
+    first_name = forms.CharField(label=__('First name'), max_length=30, required=False, help_text='Optional.')
+    last_name = forms.CharField(label=__('Last name'), max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(
+        label=__('Email'),
         max_length=254,
         help_text=__('Required. Inform a valid email address.')  # type: ignore
     )
@@ -42,9 +75,19 @@ class RegistrationForm(UserCreationForm):
         uid = forms.CharField(max_length=256, required=False)
         email.help_text = __('A confirmation will be sent to your e-mail')  # type: ignore
     if settings.ENABLE_AGREEMENT_TERMS:
-        agreement = forms.BooleanField(required=False)
+        agreement = AgreementField(
+            before_link_text='I accept the ',
+            after_link_text='terms of agreement',
+            url='terms',
+            required=False,
+        )
     if settings.ENABLE_CONSENT_TO_PROCESSING:
-        consent_to_processing = forms.BooleanField(required=False)
+        consent_to_processing = AgreementField(
+            before_link_text='I agree with ',
+            after_link_text='the personal data processing policy',
+            url='terms',
+            required=False
+        )
 
     class Meta(UserCreationForm.Meta):
         model = UserModel
@@ -88,7 +131,7 @@ class RegistrationForm(UserCreationForm):
 
         if not check_data(self.cleaned_data['email'], cache_key):
             raise SuspiciousOperation(
-                translate('Invalid registration email send.')
+                _('Invalid registration email send.')
             )
         return super().save(commit)
 
@@ -122,20 +165,20 @@ class RegistrationForm(UserCreationForm):
             if not agreement:
                 self.add_error(
                     'agreement',
-                    translate('To continue, need to accept the terms agreement.')
+                    _('To continue, need to accept the terms agreement.')
                 )
         if settings.ENABLE_CONSENT_TO_PROCESSING:
             consent_to_processing = self.cleaned_data.get('consent_to_processing', None)
             if not consent_to_processing:
                 self.add_error(
                     'consent_to_processing',
-                    translate('To continue, need to agree to the personal data processing policy.')
+                    _('To continue, need to agree to the personal data processing policy.')
                 )
         if settings.SEND_CONFIRMATION_EMAIL:
             uid = self.cleaned_data.get('uid', False)
             if uid and not cache.get(uid, False):
                 self._errors = ErrorDict()
-                self.add_error('uid', translate('Confirmation link is invalid or expired, please register again'))
+                self.add_error('uid', _('Confirmation link is invalid or expired, please register again'))
 
 
 class TwoFaForm(forms.Form):

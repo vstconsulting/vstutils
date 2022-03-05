@@ -1,0 +1,21 @@
+{% for name, label, errors, field, classes, label_classes, label_first, label_last in fields %}
+<div class="form-group {{ classes }}">
+    {% if label_first %}<label for="{{ field.id_for_label }}" class="{{ label_classes }}">{{ label }}</label>{% endif %}
+
+    {% if errors %}
+        <div class="alert alert-danger" role="alert">
+            {{ errors }}
+        </div>
+    {% endif %}
+
+
+    {{ field }}
+    {% if label_last %}<label for="{{ field.id_for_label }}" class="{{ label_classes }}">{{ label }}</label>{% endif %}
+</div>
+{% endfor %}
+
+{% if form_errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ form_errors }}
+    </div>
+{% endif %}
