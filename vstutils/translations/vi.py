@@ -156,7 +156,7 @@ TRANSLATION = {
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',
     'now': 'hiện nay',
     'later': 'một lát sau',
-    'i accept the ': 'Tôi chấp nhận ',
+    'I accept the ': 'Tôi chấp nhận ',
     'Zoom': 'Thu phóng',
     'Scale': 'Tỉ lệ',
     'This file format is not supported': 'Định dạng tệp này không được hỗ trợ',
@@ -235,7 +235,7 @@ SERVER_TRANSLATION = {
 
     # agreements
     'personal data processing policy': 'Chính sách xử lý dữ liệu cá nhân',
-    'i agree with ': 'Tôi đồng ý với ',
+    'I agree with ': 'Tôi đồng ý với ',
     'the personal data processing policy': 'chính sách xử lý dữ liệu cá nhân',
     'To continue, need to agree to the personal data processing policy.': 'Để tiếp tục, cần đồng ý với chính '
                                                                           'sách xử lý dữ liệu cá nhân.',

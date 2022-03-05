@@ -156,7 +156,7 @@ TRANSLATION = {
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста обновите страницу.',
     'now': 'сейчас',
     'later': 'позже',
-    'i accept the ': 'Я принимаю ',
+    'I accept the ': 'Я принимаю ',
     'Zoom': 'Зум',
     'Scale': 'Масштаб',
     'This file format is not supported': 'Данный формат файла не поддерживается',
@@ -220,7 +220,7 @@ SERVER_TRANSLATION = {
     "invalid key {invalid_key}": "неверный ключ {invalid_key}",
 
     # field help_text
-   'A confirmation will be sent to your e-mail': 'На эту почту будет отправлено письмо для подтверждения регистрации',
+    'A confirmation will be sent to your e-mail': 'На эту почту будет отправлено письмо для подтверждения регистрации',
     'Required. Inform a valid email address': 'Напишите вашу электронную почту',
     # validators
     'unsupported image file format, expected ({0}), got {1}': 'Неподдерживаемый формат изображения. Поддерживается ({0}), получен {1}',
@@ -234,7 +234,7 @@ SERVER_TRANSLATION = {
 
     # agreements
     'personal data processing policy': 'Политика обработки персональных данных',
-    'i agree with ': 'я согласен с ',
+    'I agree with ': 'Я согласен с ',
     'the personal data processing policy': 'политикой обработки персональных данных',
     'To continue, need to agree to the personal data processing policy.': 'Чтобы продолжить, необходимо согласиться '
                                                                           'с политикой обработки персональных данных.',

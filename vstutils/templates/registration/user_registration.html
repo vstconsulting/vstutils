@@ -1,4 +1,5 @@
 {% extends "registration/base.html" %}
+{% load vst_html_tags %}
 
 {% block bodyclass %}register-page{% endblock %}
 {% block style %}
@@ -70,69 +71,16 @@
     <p>{% translate_text "fields with * is required" capfirst %}</p>
     <form method="post">
         {% csrf_token %}
-        <fieldset class="module aligned">
-            <div style="float: left">
-                {% block base_registration_fields %}
-                    {% block auth_key_field %}
-                        <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
-                            {{ form.username.errors }}
-                            <label for="id_username" class="registration-label">*{% translate_text "username" capfirst %}:</label>
-                            {{ form.username }}
-                        </div>
-                    {% endblock %}
-                    {% block auth_email %}
-                        <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
-                            {{ form.email.errors }}
-                            <label for="id_email" class="registration-label">*{% translate_text "email" capfirst %}:</label>
-                            {{ form.email }}
 
-                        </div>
-                    {% endblock %}
-                    {% block registration_password_fields %}
-                        <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
-                            {{ form.password1.errors }}
-                            <label for="id_password1" class="registration-label">*{% translate_text "password" capfirst %}:</label>
-                            {{ form.password1 }}
+        {% block base_registration_fields %}
+            {% bootstrap_form form %}
+        {% endblock %}
 
-                        </div>
-                        <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
-                            {{ form.password2.errors }}
-                            <label for="id_password2" class="registration-label">*{% translate_text "confirm password" title %}:</label>
-                            {{ form.password2 }}
-                        </div>
-                        {% if form.agreement %}
-                            <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
-                                {{ form.agreement.errors }}
-                                <label for="id_agreement" class="registration-label">
-                                    *{% translate_text "i accept the " capfirst %}
-                                    <a href="#" onclick="openTermsModal()">
-                                        {% translate_text "terms of agreement" %}
-                                    </a>
-                                </label>
-                                {{ form.agreement }}
-                            </div>
-                        {% endif %}
-                        {% if form.consent_to_processing %}
-                            <div style="margin-bottom: 10px; clear:both; text-align:right; line-height:25px;">
-                                {{ form.consent_to_processing.errors }}
-                                <label for="id_consent_to_processing" class="registration-label">
-                                    *{% translate_text "i agree with " capfirst %}
-                                    <a href="#" onclick="openPersonalDataModal()">
-                                        {% translate_text "the personal data processing policy" %}
-                                    </a>
-                                </label>
-                                {{ form.consent_to_processing }}
-                            </div>
-                        {% endif %}
-                    {% endblock %}
-                {% endblock %}
-                {% block additional_registration_fields %}
-                {% endblock %}
-            </div>
-            <div style="text-align: center; clear: both">
-                <input type="submit" value="{% translate_text "register" capfirst %}" class="btn btn-primary">
-            </div>
-        </fieldset>
+        {% block additional_registration_fields %}
+        {% endblock %}
+        <div style="text-align: center; clear: both">
+            <input type="submit" value="{% translate_text "register" capfirst %}" class="btn btn-primary">
+        </div>
     </form>
         <div class="modal fade" id="modal-terms" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">

@@ -158,7 +158,7 @@ TRANSLATION = {
     'Changes in settings are successfully saved. Please refresh the page.': '设置更改已成功保存。 请刷新页面。',
     'now': '眼下',
     'later': '之后',
-    'i accept the ': '我接受 ',
+    'I accept the ': '我接受 ',
     'Zoom': '飛漲',
     'Scale': '規模',
     'This file format is not supported': '不支持此文件格式',
@@ -237,7 +237,7 @@ SERVER_TRANSLATION = {
 
     # agreements
     'personal data processing policy': '个人资料处理政策',
-    'i agree with ': '我同意 ',
+    'I agree with ': '我同意 ',
     'the personal data processing policy': '个人资料处理政策',
     'To continue, need to agree to the personal data processing policy.': '要继续，需要同意个人数据处理政策。',
     'terms of agreement': '协议条款',
