@@ -1,5 +1,5 @@
 <template>
-    <table class="table table-sm">
+    <table class="table table-sm table-responsive">
         <thead>
             <tr>
                 <th v-for="field in fields" :key="field.name" :class="$u.tableColumnClasses(field)">
