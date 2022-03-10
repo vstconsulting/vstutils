@@ -27,12 +27,13 @@ def img_from_json(json_string, **kwargs):
 
 def _handle_form_fields(form):
     for name, field in form.fields.items():
-        errors = getattr(field, 'errors', form.errors.get(name, ''))
         field = form[name]
+        errors = field.errors
         label = field.label
         classes = []
         label_classes = []
         label_first = True
+        hidden = False
         if hasattr(field.field, 'get_bootstrap_label'):
             label = field.field.get_bootstrap_label(field)
         else:
@@ -41,17 +42,20 @@ def _handle_form_fields(form):
             classes.append('form-check')
             label_classes.append('form-check-label')
             label_first = False
+        if isinstance(field.field.widget, forms.widgets.HiddenInput):
+            hidden = True
         field.field.widget.attrs['class'] = 'form-control' + (field.field.widget.attrs.get('class', '') or '')
-        yield (
-            name,
-            label,
-            errors,
-            field,
-            ' '.join(classes),
-            ' '.join(label_classes),
-            label_first,
-            not label_first,
-        )
+        yield {
+            'name': name,
+            'label': label,
+            'bound': field,
+            'errors': errors,
+            'classes': ' '.join(classes),
+            'label_classes': ' '.join(label_classes),
+            'label_first': label_first,
+            'label_last': not label_first,
+            'hidden': hidden,
+        }
 
 
 @register.inclusion_tag('vst_inclusion_tags/bootstrap_form.html')

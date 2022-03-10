@@ -56,6 +56,22 @@ class AgreementField(forms.BooleanField):
 class RegistrationForm(UserCreationForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        if settings.ENABLE_AGREEMENT_TERMS:
+            self.fields['agreement'] = AgreementField(
+                before_link_text='I accept the ',
+                label='terms of agreement',
+                url='terms',
+                error_messages={'required': __('To continue, need to accept the terms agreement.')},
+            )
+        if settings.ENABLE_CONSENT_TO_PROCESSING:
+            self.fields['consent_to_processing'] = AgreementField(
+                before_link_text='I agree with ',
+                label='the personal data processing policy',
+                url='terms',
+                error_messages={'required': __('To continue, need to agree to the personal data processing policy.')},
+            )
+
         for field in self.fields.values():
             if field.help_text:
                 field.widget.attrs['title'] = strip_tags(field.help_text)
@@ -72,22 +88,8 @@ class RegistrationForm(UserCreationForm):
         help_text=__('Required. Inform a valid email address.')  # type: ignore
     )
     if settings.SEND_CONFIRMATION_EMAIL:
-        uid = forms.CharField(max_length=256, required=False)
+        uid = forms.CharField(max_length=256, required=False, widget=forms.HiddenInput(), label='')
         email.help_text = __('A confirmation will be sent to your e-mail')  # type: ignore
-    if settings.ENABLE_AGREEMENT_TERMS:
-        agreement = AgreementField(
-            before_link_text='I accept the ',
-            after_link_text='terms of agreement',
-            url='terms',
-            required=False,
-        )
-    if settings.ENABLE_CONSENT_TO_PROCESSING:
-        consent_to_processing = AgreementField(
-            before_link_text='I agree with ',
-            after_link_text='the personal data processing policy',
-            url='terms',
-            required=False
-        )
 
     class Meta(UserCreationForm.Meta):
         model = UserModel
@@ -160,20 +162,6 @@ class RegistrationForm(UserCreationForm):
 
     def clean(self):
         super().clean()
-        if settings.ENABLE_AGREEMENT_TERMS:
-            agreement = self.cleaned_data.get('agreement', None)
-            if not agreement:
-                self.add_error(
-                    'agreement',
-                    _('To continue, need to accept the terms agreement.')
-                )
-        if settings.ENABLE_CONSENT_TO_PROCESSING:
-            consent_to_processing = self.cleaned_data.get('consent_to_processing', None)
-            if not consent_to_processing:
-                self.add_error(
-                    'consent_to_processing',
-                    _('To continue, need to agree to the personal data processing policy.')
-                )
         if settings.SEND_CONFIRMATION_EMAIL:
             uid = self.cleaned_data.get('uid', False)
             if uid and not cache.get(uid, False):
