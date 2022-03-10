@@ -18,18 +18,18 @@
 </div>
 
 <script>
-        function open{{ widget.name }}Modal(url_value) {
-            $('#modal-{{ widget.name }}').modal('show');
-            const dataIframe = document.getElementById('{{ widget.name }}-iframe');
+    function open{{ widget.name }}Modal(url_value) {
+        $('#modal-{{ widget.name }}').modal('show');
+        const dataIframe = document.getElementById('{{ widget.name }}-iframe');
 
-            dataIframe.setAttribute('src', url_value);
-            dataIframe.addEventListener('load', () => {
-                let doc = dataIframe.contentDocument;
-                doc.body.innerHTML = doc.body.innerHTML +
-                    `<style>
-                        #lang-form, .login-logo {display: none;}
-                        body {background-color: #fff !important; justify-content: start !important;}
-                    </style>`;
-            });
-        }
+        dataIframe.setAttribute('src', url_value);
+        dataIframe.addEventListener('load', () => {
+            let doc = dataIframe.contentDocument;
+            doc.body.innerHTML = doc.body.innerHTML +
+                `<style>
+                    #lang-form, .login-logo {display: none;}
+                    body {background-color: #fff !important; justify-content: start !important;}
+                </style>`;
+        });
+    }
 </script>
