@@ -11,7 +11,7 @@ import base64
 from urllib.parse import quote
 
 import orjson
-from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer
+from rest_framework.serializers import CharField, IntegerField, FloatField, ModelSerializer, Serializer
 from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
@@ -213,13 +213,17 @@ class DynamicJsonTypeField(VSTCharField):
     choices: _t.Dict
     types: _t.Dict
 
-    to_json = True
+    def is_json(self, real_field):
+        return isinstance(real_field, Serializer)
 
     def __init__(self, **kwargs):
         self.field = kwargs.pop('field')
         self.choices = kwargs.pop('choices', {})
         self.types = kwargs.pop('types', {})
         super().__init__(**kwargs)
+
+    def get_attribute(self, instance):
+        return instance
 
     @raise_context_decorator_with_default(default=None)
     def get_real_field(self, data) -> _t.Optional[Field]:
@@ -233,18 +237,22 @@ class DynamicJsonTypeField(VSTCharField):
         return None
 
     def to_internal_value(self, data):
-        real_field = self.get_real_field(self.parent.initial_data)
+        real_field = self.get_real_field({
+            self.field: getattr(self.parent.instance, self.field, None),
+            **self.parent.initial_data,
+        })
         if real_field:
             data = real_field.to_internal_value(data)
-        if self.to_json:
+        if self.is_json(real_field):
             return super().to_internal_value(data)
         return data
 
     def to_representation(self, value):
-        if self.to_json:
+        real_field = self.get_real_field(value)
+        value = super().get_attribute(value)
+        if self.is_json(real_field):
             with raise_context():
                 value = json.loads(value)
-        real_field = self.get_real_field(self.parent.instance)
         if real_field:
             return real_field.to_representation(value)
         return value
@@ -270,7 +278,9 @@ class DependEnumField(DynamicJsonTypeField):
         Effective only in GUI. In API works similar to :class:`.VSTCharField` without value modification.
     """
     __slots__ = ()
-    to_json = False
+
+    def is_json(self, real_field):
+        return False
 
 
 class DependFromFkField(DynamicJsonTypeField):

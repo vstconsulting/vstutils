@@ -22,5 +22,6 @@ class DynamicFields(BModel):
                 'many_serializers': SomeSerializer(many=True),
                 'integer': IntegerField(max_value=1337),
                 'boolean': 'boolean',
+                'image':  fields.NamedBinaryImageInJsonField(),
             }),
         }

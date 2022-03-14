@@ -42,6 +42,7 @@ from rest_framework.test import CoreAPIClient
 from vstutils import utils
 from vstutils.api.models import Language
 from vstutils.api.schema.inspectors import X_OPTIONS
+from vstutils.api.serializers import BaseSerializer
 from vstutils.api.validators import (
     RegularExpressionValidator,
     ImageValidator,
@@ -1795,6 +1796,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
                         'maximum': 1337,
                     },
                     'serializer': nested_model,
+                    'image': {
+                        'type': 'object',
+                        'properties': {
+                            'name': {'type': 'string'},
+                            'content': {'type': 'string'},
+                            'mediaType': {'type': 'string'}
+                        },
+                        'x-format': 'namedbinimage',
+                        'x-validators': {}
+                    }
                 },
             },
         })
@@ -3537,6 +3548,12 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual([], test_obj.some_multiplefile_none)
 
     def test_dynamic_field_types(self):
+        file = get_file_value(os.path.join(DIR_PATH, 'image_b64_valid'))
+        valid_image_content_dict = {
+            'name': 'cat.jpg',
+            'content': file,
+            'mediaType': 'image/jpeg'
+        }
         results = self.bulk([
             # [0] Create with field_type that is not in types
             {'method': 'post', 'path': 'dynamic_fields', 'data': {
@@ -3567,6 +3584,13 @@ class ProjectTestCase(BaseTestCase):
             }},
             # [6]
             {'method': 'get', 'path': ['dynamic_fields', '<<5[data][id]>>']},
+            # [7]
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'image',
+                'dynamic_with_types': valid_image_content_dict,
+            }},
+            # [8]
+            {'method': 'get', 'path': ['dynamic_fields', '<<7[data][id]>>']},
         ])
         self.assertEqual(results[0]['status'], 201)
 
@@ -3587,7 +3611,14 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[5]['status'], 201)
         self.assertEqual(results[5]['data']['dynamic_with_types'], {'field1': 'testValue', 'field2': -1})
         self.assertEqual(results[6]['status'], 200)
-        self.assertEqual(results[6]['data']['dynamic_with_types'], {'field1': 'testValue', 'field2': -1})
+        self.assertEqual(results[7]['status'], 201)
+        self.assertEqual(results[7]['data']['dynamic_with_types'], valid_image_content_dict)
+        self.assertEqual(results[8]['data']['dynamic_with_types'], valid_image_content_dict)
+
+        # Check if 'field' is invalid then error should not be raised
+        class SomeSerializer(BaseSerializer):
+            unknown_field = fields.DynamicJsonTypeField(field='unknown')
+        self.assertDictEqual(SomeSerializer({'unknown_field': 'data'}).data, {'unknown_field': 'data'})
 
     def test_model_namedbinfile_field(self):
         file = get_file_value(os.path.join(DIR_PATH, 'image_b64_valid'))
