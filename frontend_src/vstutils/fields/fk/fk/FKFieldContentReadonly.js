@@ -33,7 +33,7 @@ const FKFieldContentReadonly = {
          * Text of link.
          */
         text() {
-            return this.translateValue(this.field.getViewFieldValue(this.fetchedValue));
+            return this.field.translateValue(this.fetchedValue);
         },
     },
     methods: {

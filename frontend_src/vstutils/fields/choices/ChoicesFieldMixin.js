@@ -12,7 +12,7 @@ function preparedValue() {
             }
         }
     }
-    return this.$parent.translateValue(val);
+    return this.field.translateValue(val);
 }
 
 const ChoicesFieldMixin = {
@@ -43,17 +43,6 @@ const ChoicesFieldMixin = {
                 classes.push(`value-${stringToCssClass(this.value)}`);
             }
             return classes;
-        },
-    },
-    methods: {
-        translateValue(value) {
-            const key = `:model:${this.field.model?.translateModel || ''}:${
-                this.field.translateFieldName
-            }:${value}`;
-            if (this.$te(key)) {
-                return this.$t(key);
-            }
-            return value;
         },
     },
 };
