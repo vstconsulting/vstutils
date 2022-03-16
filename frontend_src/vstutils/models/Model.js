@@ -328,8 +328,8 @@ export class Model {
      *
      * @returns {Promise}
      */
-    async delete() {
-        return (await this._queryset.delete([this]))[0];
+    async delete(purge = false) {
+        return (await this._queryset.delete([this], purge))[0];
     }
 
     /**

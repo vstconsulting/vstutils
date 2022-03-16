@@ -1,6 +1,7 @@
 import { ViewTypes } from '../utils';
 import FiltersModal from '../components/list/FiltersModal.vue';
 import AddChildModal from '../components/list/AddChildModal.vue';
+import NestedDeletionModal from '../components/common/NestedDeletionModal.vue';
 
 /**
  * Dictionary, that contains names of openapi schema attributes.
@@ -20,10 +21,19 @@ const openapi_dictionary = {
                     title: 'Remove',
                     iconClasses: ['fas', 'fa-trash-alt'],
                     classes: ['btn', 'btn-danger'],
-                    isEmpty: true,
                     isMultiAction: true,
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
+                },
+                nested_remove: {
+                    name: 'remove',
+                    title: 'Remove',
+                    iconClasses: ['fas', 'fa-trash-alt'],
+                    classes: ['btn', 'btn-danger'],
+                    isMultiAction: true,
+                    style: { order: 100, marginLeft: 'auto' },
+                    doNotGroup: true,
+                    component: NestedDeletionModal,
                 },
             },
             list: {
@@ -47,7 +57,7 @@ const openapi_dictionary = {
                     title: '',
                     iconClasses: ['fas', 'fa-filter'],
                     component: FiltersModal,
-                    style: { order: -20 },
+                    style: { order: -5 },
                     doNotGroup: true,
                 },
             },

@@ -25,10 +25,10 @@ const PageWithDataMixin = {
          * - QuerySet of current view from sandbox QS Store.
          * @return {promise}
          */
-        removeInstance() {
+        removeInstance(purge = false) {
             let instance = this.instance;
             instance
-                .delete()
+                .delete(purge)
                 // eslint-disable-next-line no-unused-vars
                 .then((response) => {
                     guiPopUp.success(

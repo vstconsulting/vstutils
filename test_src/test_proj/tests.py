@@ -4179,9 +4179,12 @@ class ProjectTestCase(BaseTestCase):
             {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<0[data][id]>>'},
             {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<1[data][id]>>'},
             {'method': 'get', 'path': 'deep_nested_model', 'query': '__deep_parent=<<2[data][id]>>'},
-            # [8] Check that DeepViewFilterBackend has no effect on detail view
+            # [8-9] Check that DeepViewFilterBackend has no effect on detail view
             {'method': 'get', 'path': ['deep_nested_model', '<<0[data][id]>>'], 'query': '__deep_parent='},
             {'method': 'post', 'path': ['deep_nested_model', '<<0[data][id]>>', 'test_action'], 'data': {}},
+            # [10-11] Check that standard filters works correctly even we dont set any filter backends
+            {'method': 'get', 'path': ['deep_nested_model', '<<1[data][id]>>', 'deepnested'], 'query': 'id=<<2[data][id]>>'},
+            {'method': 'get', 'path': ['deep_nested_model', '<<1[data][id]>>', 'deepnested'], 'query': 'id=<<0[data][id]>>'},
         ])
         self.assertEqual(results[3]['data']['count'], 3)
         self.assertEqual(results[4]['data']['results'], [results[0]['data']])
@@ -4190,6 +4193,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[7]['data']['results'], [])
         self.assertEqual(results[8]['data'], results[0]['data'])
         self.assertEqual(results[9]['status'], 200, results[9]['data'])
+        self.assertEqual(results[10]['data']['count'], 1)
+        self.assertEqual(results[11]['data']['count'], 0)
 
     def test_m2m_fk_deep_nested(self):
         Group = self.get_model_class('test_proj.Group')
@@ -4289,6 +4294,75 @@ class ProjectTestCase(BaseTestCase):
                                        '<<8[data][id]>>']},
             # 14 Query 3rd deep nested as first deep child
             {'method': 'get', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<8[data][id]>>']},
+
+            # Check if X-Purge-Nested header logic works correctly
+            # If header == 'true' nested object should be deleted.
+            # Otherwise it should be removed from nested, not deleted.
+            # Header should work only with nested/deep_nested with `allow_append=True` property.
+
+            # Nesteds and deep_nesteds with `allow_append=True`
+            # [15-16] Deep: Header not equal `true` removes from nested
+            {
+                'method': 'delete',
+                'path': ['group', '<<2[data][id]>>', 'childrens', '<<8[data][id]>>'],
+                'headers': {"HTTP_X_Purge_Nested": '123'}
+            },
+            {
+                'method': 'get',
+                'path': ['group', '<<8[data][id]>>'],
+            },
+            # [17-18] Nested: Header not equal `true` removes from nested(even if we dont have header at all)
+            {
+                'method': 'delete',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<1[data][id]>>'],
+            },
+            {
+                'method': 'get',
+                'path': ['group', '<<1[data][id]>>'],
+            },
+            # [19-20] Deep: with correct header deletes instance
+            {
+                'method': 'delete',
+                'path': ['groupwithfk', '<<5[data][id]>>', 'child', '<<7[data][id]>>'],
+                'headers': {"HTTP_X_Purge_Nested": 'true'}
+            },
+            {
+                'method': 'get',
+                'path': ['groupwithfk', '<<7[data][id]>>'],
+            },
+            # [21-23] Nested: with correct header deletes instance
+            {'method': 'post', 'path': ['modelwithnested', '<<0[data][id]>>', 'groups'], 'data': {'name': '4'}},
+            {
+                'method': 'delete',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groups', '<<21[data][id]>>'],
+                'headers': {"HTTP_X_Purge_Nested": 'true'}
+            },
+            {
+                'method': 'get',
+                'path': ['group', '<<21[data][id]>>'],
+            },
+            # Nested and deep_nested with `allow_append=False`
+            # [24-26] Nested: without header deletes instance
+            {'method': 'post', 'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk'], 'data': {'name': '5'}},
+            {
+                'method': 'delete',
+                'path': ['modelwithnested', '<<0[data][id]>>', 'groupswithfk', '<<24[data][id]>>'],
+            },
+            {
+                'method': 'get',
+                'path': ['groupwithfk', '<<24[data][id]>>'],
+            },
+            # [27-30] Deep: without header deletes instance
+            {'method': 'post', 'path': ['anotherdeep'], 'data': {'name': '6'}},
+            {'method': 'post', 'path': ['anotherdeep', '<<27[data][id]>>', 'child'], 'data': {'name': '6.6'}},
+            {
+                'method': 'delete',
+                'path': ['anotherdeep', '<<27[data][id]>>', 'child', '<<28[data][id]>>'],
+            },
+            {
+                'method': 'get',
+                'path': ['anotherdeep', '<<28[data][id]>>'],
+            },
         ])
         self.assertEqual(deep_results[1]['status'], 201, deep_results[1]['data'])
         self.assertEqual(deep_results[2]['status'], 201, deep_results[2]['data'])
@@ -4308,6 +4382,29 @@ class ProjectTestCase(BaseTestCase):
         self.assertNotIn('2.2.2', str(deep_results[12]['data']))
         self.assertIn('2.2.2', str(deep_results[13]['data']))
         self.assertIn('2.2.2', str(deep_results[14]['data']))
+
+        # Nested header tests
+        self.assertEqual(deep_results[15]['status'], 204)
+        self.assertEqual(deep_results[16]['status'], 200)
+
+        self.assertEqual(deep_results[17]['status'], 204)
+        self.assertEqual(deep_results[18]['status'], 200)
+
+        self.assertEqual(deep_results[19]['status'], 204)
+        self.assertEqual(deep_results[20]['status'], 404)
+
+        self.assertEqual(deep_results[21]['status'], 201)
+        self.assertEqual(deep_results[22]['status'], 204)
+        self.assertEqual(deep_results[23]['status'], 404)
+
+        self.assertEqual(deep_results[24]['status'], 201)
+        self.assertEqual(deep_results[25]['status'], 204)
+        self.assertEqual(deep_results[26]['status'], 404)
+
+        self.assertEqual(deep_results[27]['status'], 201)
+        self.assertEqual(deep_results[28]['status'], 201)
+        self.assertEqual(deep_results[29]['status'], 204)
+        self.assertEqual(deep_results[30]['status'], 404)
 
 
 class CustomModelTestCase(BaseTestCase):

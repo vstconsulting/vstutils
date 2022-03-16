@@ -45,7 +45,6 @@ describe('ViewConstructor', () => {
             expect(removeAction).toBeDefined();
             expect(removeAction.name).toBe('remove');
             expect(removeAction.title).toBe('Remove');
-            expect(removeAction.isEmpty).toBeTruthy();
 
             expect(authorsView.sublinks.size).toBe(2);
             expect(authorsView.actions.size).toBe(1);
@@ -112,7 +111,7 @@ describe('ViewConstructor', () => {
             expect(removeMultiAction).toBeDefined();
             expect(removeMultiAction.name).toBe('remove');
             expect(removeMultiAction.title).toBe('Remove');
-            expect(removeMultiAction.isEmpty).toBeTruthy();
+            expect(removeMultiAction.isEmpty).toBeUndefined();
 
             const archiveMultiAction = view.multiActions.get('archive');
             expect(archiveMultiAction).toBeDefined();

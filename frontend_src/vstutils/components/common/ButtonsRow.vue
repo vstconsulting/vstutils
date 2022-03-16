@@ -8,7 +8,21 @@
             @click.native="$emit('open-sublink', sublink)"
         />
         <template v-for="action in notGroupedActions">
-            <component :is="action.component" v-if="action.component" :key="action.name" :view="view" />
+            <component
+                :is="action.component"
+                v-if="action.component"
+                :key="action.name"
+                :view="view"
+                :style="action.style"
+            >
+                <template #default="{ execute }">
+                    <OperationButton
+                        :key="action.name"
+                        v-bind="action"
+                        @click.native="execute({ instances, action })"
+                    />
+                </template>
+            </component>
             <OperationButton
                 v-else
                 :key="action.name"
@@ -50,7 +64,15 @@
         </template>
         <template v-else>
             <template v-for="action in groupedActions">
-                <component :is="action.component" v-if="action.component" :key="action.name" :view="view" />
+                <component :is="action.component" v-if="action.component" :key="action.name" :view="view">
+                    <template #default="{ execute }">
+                        <OperationButton
+                            :key="action.name"
+                            v-bind="action"
+                            @click.native="execute({ instances, action })"
+                        />
+                    </template>
+                </component>
                 <OperationButton
                     v-else
                     :key="action.name"
@@ -73,6 +95,7 @@
             view: { type: Object, required: true },
             actions: { type: Array, default: () => [] },
             sublinks: { type: Array, default: () => [] },
+            instances: { type: Array, default: () => [] },
         },
         computed: {
             totalOperations() {

@@ -16,14 +16,14 @@
             <component :is="field.component" :field="field" :data="data" type="list" />
         </td>
         <td v-if="hasOperations" class="column column-actions" style="text-align: center">
-            <BootstrapModal classes="modal-sm">
+            <BootstrapModal :classes="'modal-sm list-instance-operations ' + classesFromFields.join(' ')">
                 <template #activator="{ openModal }">
                     <button class="btn btn-outline-secondary" @click="openModal">
                         <i class="fas fa-cog" />
                     </button>
                 </template>
                 <template #content="{ closeModal }">
-                    <div class="modal-body" :class="classesFromFields">
+                    <div class="modal-body">
                         <ul class="list-group list-group-flush">
                             <template v-if="actions.length">
                                 <li class="list-group-item disabled">
@@ -35,7 +35,27 @@
                                     class="list-group-item"
                                     :class="`operation__${action.name}`"
                                 >
-                                    <a href="#" @click.prevent="createActionClickHandler(closeModal, action)">
+                                    <component
+                                        :is="action.component"
+                                        v-if="action.component"
+                                        :key="action.name"
+                                        :action="action"
+                                    >
+                                        <template #default="{ execute }">
+                                            <a href="" @click.prevent="execute({ instances: [instance] })">
+                                                <i
+                                                    v-if="action.iconClasses && action.iconClasses.length"
+                                                    :class="action.iconClasses"
+                                                />
+                                                {{ $u.capitalize($t(action.title)) }}
+                                            </a>
+                                        </template>
+                                    </component>
+                                    <a
+                                        v-else
+                                        href="#"
+                                        @click.prevent="createActionClickHandler(closeModal, action)"
+                                    >
                                         <i
                                             v-if="action.iconClasses && action.iconClasses.length"
                                             :class="action.iconClasses"

@@ -45,6 +45,9 @@ TRANSLATION = {
     'Nothing found!': '没有发现！',
     'Main settings': '主要设置',
     'Custom settings': '自定义设置',
+    'Remove from list': '從列表中刪除',
+    'Purge': '刪除',
+    'Select an action for this instances': '為此實例選擇一個操作',
 
 
     # fields

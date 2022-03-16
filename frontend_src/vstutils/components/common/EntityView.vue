@@ -8,6 +8,7 @@
                     :view="view"
                     :actions="actions"
                     :sublinks="sublinks"
+                    :instances="instances"
                     @execute-action="$emit('execute-action', $event)"
                     @open-sublink="$emit('open-sublink', $event)"
                 />
@@ -49,6 +50,7 @@
             isContainerFluid: { type: Boolean, default: true },
             actions: { type: Array, default: () => [] },
             sublinks: { type: Array, default: () => [] },
+            instances: { type: Array, default: () => [] },
         },
         data() {
             return {

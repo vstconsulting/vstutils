@@ -6,6 +6,7 @@
         :view="view"
         :actions="actions"
         :sublinks="sublinks"
+        :instances="[instance]"
         @execute-action="executeAction($event, instance)"
         @open-sublink="openSublink($event, instance)"
     >

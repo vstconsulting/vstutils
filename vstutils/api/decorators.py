@@ -14,7 +14,6 @@ from .filter_backends import DeepViewFilterBackend
 from ..exceptions import VSTUtilsException
 from .. import utils
 
-
 MasterViewType = _t.Type[base.GenericViewSet]
 
 
@@ -239,7 +238,10 @@ class NestedViewMixin:
 
     def get_queryset(self) -> models.QuerySet:
         qs = self.nested_manager.all()
-        if DeepViewFilterBackend in getattr(self, 'filter_backends', []):
+        if any(
+            DeepViewFilterBackend in getattr(self, attr, [])
+            for attr in ['pre_filter_backends', 'filter_backends']
+        ):
             qs = DeepViewFilterBackend().filter_queryset(self.request, qs, self)
         for qs_filter in self.queryset_filters:
             if callable(qs_filter):
@@ -254,12 +256,15 @@ class NestedViewMixin:
         return context
 
     def perform_destroy(self, instance):
-        if self.master_view.nested_allow_append:  # type: ignore
+        purge_nested = self.master_view.request.headers.get('X-Purge-Nested', 'false') == 'true'
+
+        if self.master_view.nested_allow_append and not purge_nested:  # type: ignore
             # pylint: disable=import-outside-toplevel
             from vstutils.models import notify_clients
 
             self.nested_manager.remove(instance)
             notify_clients(instance.__class__, instance.pk)
+            notify_clients(self.nested_parent_object.__class__, self.nested_parent_object.pk)
         else:
             instance.delete()
 
@@ -694,7 +699,6 @@ class nested_view(BaseClassDecorator):  # pylint: disable=invalid-name
 
 
 def extend_viewset_attribute(name: _t.Text, override: bool = False, data: _t.Optional[_t.Any] = None) -> _t.Callable:
-
     def wrapper(view_class: _t.Type[base.GenericViewSet]):
         if not override:
             attr_data = tuple(list(getattr(view_class, name, ())) + list(data or ()))

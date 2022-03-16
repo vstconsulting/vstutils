@@ -40,13 +40,7 @@
             </div>
         </template>
         <template #activator>
-            <OperationButton
-                :title="$u.capitalize($t('filters'))"
-                name="filters"
-                classes="btn gui-btn btn-default btn-open-filters-modal"
-                icon-classes="fas fa-filter"
-                @click.native="openModal"
-            />
+            <slot :execute="openModal" />
         </template>
     </BootstrapModal>
 </template>

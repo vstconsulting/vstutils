@@ -60,6 +60,9 @@ API[VST_API_VERSION][r'modelwithnested'] = dict(
 API[VST_API_VERSION][r'groupwithfk'] = dict(
     model='test_proj.models.GroupWithFK'
 )
+API[VST_API_VERSION][r'anotherdeep'] = dict(
+    model='test_proj.models.AnotherDeepNested'
+)
 # ![test_settings]
 
 API[VST_API_VERSION][r'subhosts'] = dict(
