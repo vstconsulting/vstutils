@@ -78,6 +78,10 @@ class BaseField {
         this.translateFieldName = this.props.translateFieldName || this.name;
     }
 
+    translateValue(value) {
+        return value;
+    }
+
     _getValueFromData(data) {
         return data[this.name];
     }

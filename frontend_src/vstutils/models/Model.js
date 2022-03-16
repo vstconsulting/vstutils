@@ -296,7 +296,7 @@ export class Model {
             if (typeof value === 'object') {
                 value = value.name || value.title;
             }
-            const strValue = String(value);
+            const strValue = this._viewField.translateValue(String(value));
 
             return escapeResult ? escapeHtml(strValue) : strValue;
         }

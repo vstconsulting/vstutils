@@ -15,6 +15,14 @@ class ChoicesField extends StringField {
         this.customMatcher = this.props.customMatcher;
     }
 
+    translateValue(value) {
+        const key = `:model:${this.model?.translateModel || ''}:${this.translateFieldName}:${value}`;
+        if (this.constructor.app.i18n.te(key)) {
+            return this.constructor.app.i18n.t(key);
+        }
+        return value;
+    }
+
     getEmptyValue() {
         if (this.enum) {
             return this.enum[0];

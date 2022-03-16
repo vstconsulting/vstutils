@@ -79,6 +79,15 @@ class FKField extends BaseField {
         }
     }
 
+    translateValue(value) {
+        value = this.getViewFieldValue(value);
+        const key = `:model:${this.fkModel?.translateModel || ''}:${this.viewField}:${value}`;
+        if (this.constructor.app.i18n.te(key)) {
+            return this.constructor.app.i18n.t(key);
+        }
+        return value;
+    }
+
     resolveModel() {
         this.fkModel = this.constructor.app.modelsResolver.bySchemaObject(this.props.model);
     }

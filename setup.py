@@ -392,7 +392,7 @@ kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
     static_exclude_min=[
-        'vstutils/gui/templates/.*\.js$',
+        'vstutils/templates/.*\.js$',
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
