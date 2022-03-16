@@ -10,7 +10,7 @@ from django.core.cache import caches as django_caches
 from django.db.models.base import ModelBase
 from django.db.models import fields as django_model_fields
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
-from django.utils.functional import SimpleLazyObject, lazy
+from django.utils.functional import SimpleLazyObject
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from rest_framework.fields import ModelField, JSONField, CharField as drfCharField, ChoiceField
@@ -209,16 +209,6 @@ def _get_decorator(data):
     else:
         deco_kwargs['view'] = _import_class_if_string(deco_kwargs.pop('view'))
     return api_decorators.nested_view(path, **deco_kwargs)
-
-
-def _set_deep_filter(backends):
-    if backends is None:
-        backends = []
-    elif not isinstance(backends, list):  # nocv
-        backends = list(backends)
-    if DeepViewFilterBackend not in backends:
-        backends = [DeepViewFilterBackend, *backends]
-    return backends
 
 
 def get_proxy_labels(model):
@@ -581,6 +571,10 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if filterset_class is not None:
             view_attributes['filterset_class'] = filterset_class
 
+        if hasattr(cls, 'deep_parent_field'):
+            metadata['pre_filter_backends'] = metadata['pre_filter_backends'] or []
+            metadata['pre_filter_backends'].insert(0, DeepViewFilterBackend)
+
         get_setting_for_view = partial(
             _result_with_arg_decorator(_get_setting_for_view),
             metadata=metadata,
@@ -593,9 +587,6 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializers['serializer_class_one'],
             metadata['search_fields']
         )))
-
-        if hasattr(cls, 'deep_parent_field'):
-            view_attributes['filter_backends'] = lazy(_set_deep_filter, list)(view_attributes.get('filter_backends'))
 
         generated_view = type(
             f'{cls.__name__}ViewSet',

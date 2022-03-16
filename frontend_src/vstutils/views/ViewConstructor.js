@@ -29,10 +29,6 @@ function isBodyParam(param) {
     return param.in === 'body';
 }
 
-function isPathParam(param) {
-    return param.in === 'path';
-}
-
 const FILTERS_TO_EXCLUDE = ['limit', 'offset'];
 
 const EDIT_STYLE_PROPERTY_NAME = 'x-edit-style';
@@ -159,10 +155,13 @@ export default class ViewConstructor {
                 pathSchema[EDIT_STYLE_PROPERTY_NAME] !== undefined
                     ? pathSchema[EDIT_STYLE_PROPERTY_NAME]
                     : editStyleViewDefault;
-
-            const pathParameters = (pathSchema.parameters || [])
-                .filter(isPathParam)
-                .map((paramSchema) => this.fieldsResolver.resolveField(paramSchema));
+            const pathParameters = path
+                .format_keys()
+                .map((paramName) =>
+                    this.fieldsResolver.resolveField(
+                        pathSchema.parameters.find((param) => param.name === paramName),
+                    ),
+                );
 
             const deepNestedOn = deepNestedParents.find((deepParentView) =>
                 path.startsWith(deepParentView.path),
@@ -364,7 +363,11 @@ export default class ViewConstructor {
 
             // Set remove action
             if (hasRemoveAction) {
-                const pageRemoveAction = mergeDeep({}, this.dictionary.paths.operations.base.remove);
+                const baseOperations = this.dictionary.paths.operations.base;
+                let pageRemoveAction = mergeDeep(
+                    {},
+                    parent.actions.get('add') ? baseOperations.nested_remove : baseOperations.remove,
+                );
                 if (pageView) pageView.actions.set(pageRemoveAction.name, pageRemoveAction);
                 if (parentIsList) parent.multiActions.set(pageRemoveAction.name, pageRemoveAction);
             }
@@ -432,7 +435,6 @@ export default class ViewConstructor {
                 if (deepRoot instanceof ListView && deepRoot.deepNestedViewFragment === dataType.last) {
                     listView.deepNestedParentView = deepRoot;
                     deepRoot.deepNestedView = listView;
-                    listView.objects = deepRoot.objects;
 
                     delete listView.filters.__deep_parent;
                     delete deepRoot.filters.__deep_parent;

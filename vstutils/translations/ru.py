@@ -45,6 +45,9 @@ TRANSLATION = {
     'Nothing found!': 'Ничего не найдено!',
     'Main settings': 'Основные настройки',
     'Custom settings': 'Другие настройки',
+    'Remove from list': 'Убрать из списка',
+    'Purge': 'Удалить',
+    'Select an action for this instances': 'Выберите действие для объектов',
 
     # fields
     'Id': 'Идентификатор',

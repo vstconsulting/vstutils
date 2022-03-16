@@ -162,7 +162,7 @@ export let pop_up_msg = {
             add: 'Child "<b>{0}</b>" instance was successfully added to parent list.',
             create: 'New "<b>{0}</b>" instance was successfully created.',
             remove: '<b>{1}</b> "<b>{0}</b>" was successfully removed.',
-            removeMany: '<b>{0}</b> of "<b>{1}</b>" were successfully removed.',
+            removeMany: 'Selected instances were successfully removed',
             save: 'Changes in <b>{1}</b> <b>{0}</b> were successfully saved.',
             executeEmpty: 'Action <b>{0}</b> was successfully executed' + ' on <b>{1}</b>.<br>{2}',
             execute: 'Action <b>{0}</b> was successfully executed.<br>{1}',
@@ -176,7 +176,7 @@ export let pop_up_msg = {
             remove:
                 'An error occurred during removal process of <b>{1}</b>  "<b>{0}</b>".' +
                 '<br> Error details: {2}',
-            removeMany: 'An error occurred during removal process of <b>{0}</b><br> Error details: {1}',
+            removeMany: 'An error occurred during removal process. Error details: {0}',
             save: 'An error occurred during process.<br>Error details:<br>{0}',
             executeEmpty:
                 'Some error occurred during <b>{0}</b> action execution on <b>{1}</b>.' +

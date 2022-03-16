@@ -45,6 +45,9 @@ TRANSLATION = {
     'Nothing found!': 'Không tìm thấy gì!',
     'Main settings': 'cài đặt chính',
     'Custom settings': 'Cài đặt tùy chỉnh',
+    'Remove from list': 'Xóa từ danh sách',
+    'Purge': 'Xóa',
+    'Select an action for this instances': 'Chọn một hành động cho trường hợp này',
 
     # fields
     'Id': 'định danh',

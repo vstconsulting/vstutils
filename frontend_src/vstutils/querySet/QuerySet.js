@@ -422,22 +422,29 @@ export default class QuerySet {
      * This method is expected to be called after instance filtering.
      *
      * @param {Model[]} instances
+     * @param {boolean} purge
      * @returns {Promise}
      */
-    async delete(instances = undefined) {
+    async delete(instances = undefined, purge = false) {
         if (instances === undefined) instances = await this.items();
 
         const retrieveModel = this.getResponseModelClass(RequestTypes.RETRIEVE);
         const useBulk = retrieveModel ? retrieveModel.shouldUseBulk(HttpMethods.DELETE) : true;
 
+        const headers = {};
+        if (purge) {
+            headers['HTTP_X_Purge_Nested'] = String(purge);
+        }
+
         return Promise.all(
-            instances.map((instance) =>
-                this.execute({
+            instances.map((instance) => {
+                return this.execute({
                     method: HttpMethods.DELETE,
                     path: this._getDetailPath(instance.getPkValue()),
+                    headers,
                     useBulk,
-                }),
-            ),
+                });
+            }),
         );
     }
 

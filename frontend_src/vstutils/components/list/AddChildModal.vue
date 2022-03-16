@@ -18,7 +18,7 @@
 </template>
 
 <script>
-    import { joinPaths } from '../../utils';
+    import { formatPath } from '../../utils';
     import OperationButton from '../common/OperationButton.vue';
     import { guiPopUp, pop_up_msg } from '../../popUp';
     import { Model, makeModel } from '../../models';
@@ -55,14 +55,7 @@
             },
             async addChildToParent(instanceId) {
                 const qs = this.view.objects.formatPath(this.$route.params);
-                const path = this.view.deepNestedParentView
-                    ? joinPaths(
-                          this.view.deepNestedParentView.path,
-                          instanceId,
-                          this.view.deepNestedParentView.deepNestedViewFragment,
-                      )
-                    : qs.getDataType();
-
+                const path = formatPath(this.view.path, this.queryset.pathParamsValues);
                 try {
                     await qs.execute({
                         method: 'post',

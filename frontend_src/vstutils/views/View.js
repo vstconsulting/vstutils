@@ -145,10 +145,14 @@ export class View {
      * @returns {Object} component properties
      */
     _propsFunc(route) {
-        return {
+        const props = {
             query: { ...route.query },
             params: { ...route.params },
         };
+        if (this.isDeepNested && this.type === ViewTypes.PAGE) {
+            props.params[this.objects.pathParams.at(-1).name] = route.params.pathMatch.split('/').at(-2);
+        }
+        return props;
     }
 
     /**
@@ -160,7 +164,7 @@ export class View {
             name: this.path,
             path: this.getRoutePath(),
             component: this.getComponent(),
-            props: this._propsFunc,
+            props: this._propsFunc.bind(this),
             meta: {
                 view: this,
             },

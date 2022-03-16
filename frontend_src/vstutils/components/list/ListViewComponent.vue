@@ -8,6 +8,7 @@
         :actions="actions"
         :sublinks="sublinks"
         :show-back-button="showBackButton"
+        :instances="instances"
         @execute-action="executeAction"
         @open-sublink="openSublink"
     >
@@ -64,7 +65,8 @@
                             v-if="multiActions.length && selection.length"
                             :multi-actions="multiActions"
                             :class="uniqMultiActionsClasses"
-                            :number-of-selected="selection.length"
+                            :selected="selection"
+                            :instances="instances"
                             @execute-multi-action="executeMultiAction"
                         />
                     </transition>
@@ -244,12 +246,13 @@
              * Removes one instance
              * @param action
              * @param {Model} instance
+             * @param purge
              * @returns {Promise<void>}
              * @private
              */
-            async removeInstance(action, instance) {
+            async removeInstance(action, instance, purge = false) {
                 try {
-                    await instance.delete();
+                    await instance.delete(purge);
                     guiPopUp.success(
                         this.$t(pop_up_msg.instance.success.remove).format([
                             instance.getViewFieldString() || instance.getPkValue(),
@@ -272,28 +275,20 @@
              * Method, that removes instances from list.
              * @returns {Promise}
              */
-            async removeInstances(action, instances) {
+            async removeInstances(action, instances, purge = false) {
                 const removedInstancesIds = [];
                 try {
                     await Promise.all(
                         instances.map((instance) =>
-                            instance.delete().then(() => {
+                            instance.delete(purge).then(() => {
                                 removedInstancesIds.push(instance.getPkValue());
                             }),
                         ),
                     );
-                    guiPopUp.success(
-                        this.$t(pop_up_msg.instance.success.removeMany).format([
-                            instances.length,
-                            instances[0]?.getViewFieldString(),
-                        ]),
-                    );
+                    guiPopUp.success(this.$t(pop_up_msg.instance.success.removeMany));
                 } catch (error) {
                     const str = window.app.error_handler.errorToString(error);
-                    const strToShow = this.$t(pop_up_msg.instance.error.removeMany).format([
-                        instances[0]._name,
-                        str,
-                    ]);
+                    const strToShow = this.$t(pop_up_msg.instance.error.removeMany, [str]);
                     window.app.error_handler.showError(strToShow, str);
                 }
                 this.commitMutation('unselectIds', removedInstancesIds);

@@ -13,4 +13,4 @@ from .files import File, List, ListOfFiles
 from .contented import VarBasedModel, Variable, VariableType
 from .fields_testing import Post, ExtraPost, Author, ModelWithChangedFk
 from .cacheable import CachableModel, CachableProxyModel
-from .deep import Group, ModelWithNestedModels, GroupWithFK
+from .deep import Group, ModelWithNestedModels, GroupWithFK, AnotherDeepNested
