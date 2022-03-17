@@ -366,7 +366,7 @@ export default class ViewConstructor {
                 const baseOperations = this.dictionary.paths.operations.base;
                 let pageRemoveAction = mergeDeep(
                     {},
-                    parent.actions.get('add') ? baseOperations.nested_remove : baseOperations.remove,
+                    parent?.actions.get('add') ? baseOperations.nested_remove : baseOperations.remove,
                 );
                 if (pageView) pageView.actions.set(pageRemoveAction.name, pageRemoveAction);
                 if (parentIsList) parent.multiActions.set(pageRemoveAction.name, pageRemoveAction);
