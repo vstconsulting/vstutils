@@ -30,7 +30,7 @@ class TaskClass(BaseTask):
                 def run(*args, **kwargs):
                     return 'Foo task has been executed'
 
-            app.tasks.register(Foo())
+            app.register_task(Foo())
 
     Now you can call your task with various methods:
         - by executing ``Foo.do(*args, **kwargs)``
@@ -89,4 +89,4 @@ class SendEmailMessage(TaskClass):
             )
 
 
-celery_app.tasks.register(SendEmailMessage())  # type: ignore
+celery_app.register_task(SendEmailMessage())  # type: ignore

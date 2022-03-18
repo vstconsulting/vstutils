@@ -10,12 +10,12 @@
                 <template v-if="item.link">
                     <router-link :to="item.link">
                         <i v-if="item.iconClasses" :class="item.iconClasses" />
-                        <span v-if="item.name">{{ $t(item.name) }}</span>
+                        <span v-if="item.name">{{ $st(item.name) }}</span>
                     </router-link>
                 </template>
                 <template v-else>
                     <i v-if="item.iconClasses" :class="item.iconClasses" />
-                    <span v-if="item.name">{{ $t(item.name) }}</span>
+                    <span v-if="item.name">{{ $st(item.name) }}</span>
                 </template>
             </li>
         </ol>
