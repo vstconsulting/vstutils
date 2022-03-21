@@ -149,7 +149,7 @@ export class View {
             query: { ...route.query },
             params: { ...route.params },
         };
-        if (this.isDeepNested && this.type === ViewTypes.PAGE) {
+        if (this.isDeepNested && (this.type === ViewTypes.PAGE || this.type === ViewTypes.PAGE_EDIT)) {
             props.params[this.objects.pathParams.at(-1).name] = route.params.pathMatch.split('/').at(-2);
         }
         return props;
