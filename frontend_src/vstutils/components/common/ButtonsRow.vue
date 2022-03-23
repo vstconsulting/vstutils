@@ -137,7 +137,6 @@
         flex-grow: 1;
         margin-bottom: 0;
         padding-bottom: 0;
-        padding-right: 15px;
     }
     .buttons-row-wrapper::v-deep button {
         margin-top: 5px;

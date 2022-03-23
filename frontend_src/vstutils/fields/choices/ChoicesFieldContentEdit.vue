@@ -67,7 +67,7 @@
 
             this.initSelect2();
         },
-        destroyed() {
+        beforeDestroy() {
             $(this.$el).off().select2('destroy');
         },
         methods: {

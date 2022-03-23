@@ -37,7 +37,7 @@
             this.currentQuerysetIdx = 0;
             this.currentQuerysetOffset = 0;
         },
-        destroyed() {
+        beforeDestroy() {
             $(this.$refs.select).off().select2('destroy');
         },
         methods: {
