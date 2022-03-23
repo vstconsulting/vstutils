@@ -13,7 +13,7 @@
 
                 <th v-for="(field, idx) in fields" :key="idx" :class="tableColumnClasses(field)">
                     {{ $t(field.title) }}
-                    <Popover :content="field.description" />
+                    <Popover v-if="field.description" :content="field.description" />
                 </th>
 
                 <th

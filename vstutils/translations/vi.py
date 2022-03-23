@@ -168,6 +168,9 @@ TRANSLATION = {
     'Execute action on {0}': 'Thực hiện hành động trên {0}',
     '{n} instance': '{n} trường hợp',
     'Open image': 'Mở hình ảnh',
+    'Confirm action': 'Xác nhận hành động',
+    'Confirm': 'Xác nhận',
+    'Cancel': 'Hủy bỏ',
 
     # field's validation
     # empty

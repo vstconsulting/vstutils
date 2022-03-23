@@ -146,6 +146,8 @@ def subaction(*args, **kwargs):
     :param multiaction: Allow to use this action in multiactions.
                         Works only with :class:`vstutils.api.serializers.EmptySerializer` as response.
     :type multiaction: bool
+    :param require_confirmation: Sets whether the action must be confirmed before being executed.
+    :type require_confirmation: bool
     """
 
     operation_description = kwargs.pop('description', None)
@@ -159,6 +161,7 @@ def subaction(*args, **kwargs):
     ), "If `response_code` was setted, `response_serializer` should be setted too."
 
     is_mul = kwargs.pop('multiaction', False)
+    require_confirmation = kwargs.pop('require_confirmation', False)
     kwargs['methods'] = kwargs.pop('methods', ['post'])
 
     def decorator(func: _t.Callable):
@@ -176,6 +179,8 @@ def subaction(*args, **kwargs):
             override_kw['operation_description'] = str(func.__doc__ or '').strip()  # type: ignore
 
         override_kw['x-multiaction'] = bool(is_mul)
+
+        override_kw['x-require-confirmation'] = bool(require_confirmation)
 
         return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 

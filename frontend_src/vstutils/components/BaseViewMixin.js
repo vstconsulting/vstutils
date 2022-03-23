@@ -16,6 +16,7 @@ import CollapsibleCardMixin from './CollapsibleCardMixin.js';
  */
 export const BaseViewMixin = {
     mixins: [BasestViewMixin, CollapsibleCardMixin],
+    inject: ['requestConfirmation'],
     props: {
         query: { type: Object, default: () => ({}) },
         params: { type: Object, default: () => ({}) },
@@ -208,7 +209,12 @@ export const BaseViewMixin = {
         // eslint-disable-next-line no-unused-vars
         afterEmptyAction(obj) {},
 
-        executeAction(action, instance = undefined) {
+        executeAction(action, instance = undefined, skipConfirmation = false) {
+            if (action.confirmationRequired && !skipConfirmation) {
+                this.requestConfirmation(() => this.executeAction(action, instance, true), action.title);
+                return;
+            }
+
             if (typeof this[`${action.name}Instance`] === 'function') {
                 return this[`${action.name}Instance`](action, instance);
             }

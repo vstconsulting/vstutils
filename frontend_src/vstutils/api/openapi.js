@@ -24,6 +24,7 @@ const openapi_dictionary = {
                     isMultiAction: true,
                     style: { order: 100, marginLeft: 'auto' },
                     doNotGroup: true,
+                    confirmationRequired: true,
                 },
                 nested_remove: {
                     name: 'remove',

@@ -235,6 +235,8 @@ export default class ViewConstructor {
                             operationOptions[IS_MULTI_ACTION_PROPERTY_NAME]) ||
                         isEmpty;
 
+                    const confirmationRequired = operationOptions['x-require-confirmation'];
+
                     const params = {
                         name: operationOptions.name,
                         title: operationOptions.title,
@@ -251,11 +253,14 @@ export default class ViewConstructor {
                         const executeAction = {
                             ...this.dictionary.paths.operations.action.execute,
                             title: operationOptions[ACTION_NAME] || operationOptions.title,
+                            confirmationRequired,
                         };
                         view.actions.set(executeAction.name, executeAction);
                         params.appendFragment = pathToArray(view.path).last;
                         params.view = view;
                         views.set(view.path, view);
+                    } else {
+                        params.confirmationRequired = confirmationRequired;
                     }
                     action = params;
                 }

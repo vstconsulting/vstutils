@@ -168,6 +168,9 @@ TRANSLATION = {
     'Execute action on {0}': 'Выполнить действие для {0}',
     '{n} instance': '0 объектов | {n} объекта | {n} объектов',
     'Open image': 'Открыть изображение',
+    'Confirm action': 'Подтвердить действие',
+    'Confirm': 'Подтвердить',
+    'Cancel': 'Отменить',
 
     # field's validation
     # empty
