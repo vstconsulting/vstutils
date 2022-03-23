@@ -65,7 +65,8 @@ class Host(BModel):
         response_serializer=serializers.EmptySerializer,
         detail=True,
         description='Some desc',
-        multiaction=True
+        multiaction=True,
+        require_confirmation=True,
     )
     def test(self, request, *args, **kwargs):
         assert issubclass(self.get_serializer_class(), serializers.EmptySerializer)

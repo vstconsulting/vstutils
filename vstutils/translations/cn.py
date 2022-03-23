@@ -170,6 +170,9 @@ TRANSLATION = {
     'Execute action on {0}': '在 {0} 上执行操作',
     '{n} instance': '{n} 个实例',
     'Open image': '打开图片',
+    'Confirm action': '确认操作',
+    'Confirm': '确认',
+    'Cancel': '取消',
 
     # field's validation
     # empty

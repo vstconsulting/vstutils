@@ -20,6 +20,24 @@
 
         <ControlSidebar />
 
+        <transition name="fade">
+            <div v-if="confirmation.isOpen" class="overlay" @click.stop="reject">
+                <div class="card confirmation-modal" @click.stop>
+                    <h5 class="card-title" style="text-align: center">
+                        {{ $t('Confirm action') }}{{ confirmation.actionName }}
+                    </h5>
+                    <div class="mt-2">
+                        <button class="btn btn btn-outline-success mr-1" @click="confirm">
+                            {{ $t('Confirm') }}
+                        </button>
+                        <button class="btn btn btn-outline-danger" @click="reject">
+                            {{ $t('Cancel') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
         <portal-target name="root-bottom" multiple />
     </div>
 </template>
@@ -32,6 +50,11 @@
         name: 'AppRoot',
         components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo },
         mixins: [AutoUpdateController],
+        provide() {
+            return {
+                requestConfirmation: this.initConfirmation,
+            };
+        },
         props: {
             info: { type: Object, required: true },
             // eslint-disable-next-line vue/prop-name-casing
@@ -42,6 +65,11 @@
         data() {
             return {
                 layoutClasses: ['sidebar-mini', 'layout-fixed', 'layout-footer-fixed'],
+                confirmation: {
+                    callback: null,
+                    actionName: '',
+                    isOpen: false,
+                },
             };
         },
         computed: {
@@ -81,6 +109,9 @@
         },
         watch: {
             currentRouteClassName: { handler: 'updateBodyClass', immediate: true },
+            $route() {
+                this.reject();
+            },
         },
         created() {
             document.body.classList.add(...this.bodyClasses);
@@ -96,7 +127,44 @@
                 if (newClass) {
                     document.body.classList.add(newClass);
                 }
+                this.reject();
+            },
+            initConfirmation(callback, actionName) {
+                this.confirmation.callback = callback;
+                this.confirmation.actionName = ` "${this.$t(actionName)}"?`;
+
+                this.confirmation.isOpen = true;
+            },
+            confirm() {
+                this.confirmation.isOpen = false;
+                this.confirmation.callback();
+                this.confirmation.callback = null;
+            },
+            reject() {
+                this.confirmation.isOpen = false;
+                this.confirmation.callback = null;
             },
         },
     };
 </script>
+<style scoped>
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2000;
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    .confirmation-modal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        margin: 30px auto 0;
+        width: 300px;
+        min-height: 100px;
+    }
+</style>

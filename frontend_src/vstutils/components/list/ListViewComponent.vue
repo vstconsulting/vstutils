@@ -99,6 +99,7 @@
                 },
             };
         },
+        inject: ['requestConfirmation'],
         data() {
             return {
                 isInstanceCounterActive: true,
@@ -361,7 +362,11 @@
 
             // Multi actions
 
-            async executeMultiAction(action) {
+            async executeMultiAction(action, skipConfirmation = false) {
+                if (action.confirmationRequired && !skipConfirmation) {
+                    this.requestConfirmation(() => this.executeMultiAction(action, true), action.title);
+                    return;
+                }
                 const instances = this.instances.filter((instance) =>
                     this.selection.includes(instance.getPkValue()),
                 );
