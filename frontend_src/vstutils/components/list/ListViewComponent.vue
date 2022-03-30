@@ -327,9 +327,8 @@
 
             goToPage(pageNumber) {
                 this.$router.push({
-                    name: this.$route.name,
-                    params: this.$route.params,
-                    query: $.extend(true, {}, this.$route.query, { page: pageNumber }),
+                    path: this.$route.path,
+                    query: { ...this.$route.query, page: pageNumber },
                 });
             },
 
