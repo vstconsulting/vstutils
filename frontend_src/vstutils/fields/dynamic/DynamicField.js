@@ -134,6 +134,10 @@ class DynamicField extends BaseField {
 
         field.prepareFieldForView(this.constructor.app.getCurrentViewPath());
 
+        if (!field.model && this.model) {
+            field.model = this.model;
+        }
+
         return field;
     }
 
