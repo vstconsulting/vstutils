@@ -396,7 +396,7 @@ kwargs = dict(
         'vstutils/static/bundle/.*\.js$'
     ],
     install_requires=[
-        "django~=" + (os.environ.get('DJANGO_DEP', "") or "3.2.11"),
+        "django~=" + (os.environ.get('DJANGO_DEP', "") or "3.2.12"),
     ]
     + load_requirements('requirements.txt')
     + load_requirements('requirements-doc.txt'),
