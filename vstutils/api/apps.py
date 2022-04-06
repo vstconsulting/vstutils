@@ -1,4 +1,7 @@
+from django.conf import settings
 from django.apps import AppConfig
+
+from ..utils import import_class
 
 
 class VSTUtilsAppConfig(AppConfig):
@@ -9,3 +12,6 @@ class VSTUtilsAppConfig(AppConfig):
     def ready(self):
         super().ready()
         self.module.autodiscover()
+        self.module.notificator_class = import_class(
+            settings.NOTIFICATOR_CLIENT_CLASS
+        )

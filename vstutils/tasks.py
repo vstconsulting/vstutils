@@ -4,6 +4,7 @@ from celery import Celery
 from celery.app.task import BaseTask
 from celery.result import AsyncResult
 from django.conf import settings
+from django.apps import apps
 
 from .utils import import_class, send_template_email_handler
 
@@ -50,6 +51,19 @@ class TaskClass(BaseTask):
     """
 
     # pylint: disable=abstract-method
+
+    def push_request(self, *args, **kwargs):  # nocv
+        self.notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
+        return super().push_request(*args, **kwargs)
+
+    def pop_request(self):  # nocv
+        self.notificator.send()
+        del self.notificator
+        return super().pop_request()
+
+    def apply(self, *args, **kwargs):
+        with apps.get_app_config('vstutils_api').module.notificator_class([]):
+            return super().apply(*args, **kwargs)
 
     @property
     def name(self):

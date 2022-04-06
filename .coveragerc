@@ -20,7 +20,6 @@ omit =
     */vstutils/celery_beat_scheduler.py
     */vstutils/wsgi.py
     */vstutils/compile.py
-    */vstutils/tasks.py
     */vstutils/api/admin.py
     */vstutils/api/doc_generator.py
     # */test_proj/*

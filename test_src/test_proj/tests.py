@@ -9,7 +9,6 @@ import io
 import pwd
 import base64
 import datetime
-from functools import partial
 from copy import deepcopy
 from pathlib import Path
 from smtplib import SMTPException
@@ -54,13 +53,12 @@ from vstutils.api.validators import (
 from vstutils.api.auth import UserViewSet
 from vstutils.exceptions import UnknownTypeException
 from vstutils.ldap_utils import LDAP
+from vstutils.models import notify_clients, bulk_notify_clients
 from vstutils.models.fields import MultipleFieldFile
 from vstutils.templatetags.vst_gravatar import get_user_gravatar
 from vstutils.tests import BaseTestCase, json, override_settings
 from vstutils.tools import get_file_value
 from vstutils.urls import router
-from vstutils.models import get_centrifugo_client
-from vstutils import models
 from vstutils.api import serializers, fields
 from vstutils.utils import SecurePickling, BaseEnum, get_render
 from vstutils.api.validators import resize_image
@@ -4652,47 +4650,40 @@ class WebSocketTestCase(BaseTestCase):
             'sec-websocket-extensions': 'permessage-deflate; client_max_window_bits'
         }
 
-    def test_centrifugo_notification(self):
-        global cent_client
-        mock_args, mock_kwargs, mock_call_count = [], [], 0
-
-        def publish(*args, **kwargs):
-            nonlocal mock_args, mock_kwargs, mock_call_count
-            mock_call_count += 1
-            mock_args.append(args)
-            mock_kwargs.append(kwargs)
-
-        ModelWithUuid = self.get_model_class('test_proj.models.ModelWithUuid')
+    def test_notifications(self):
         Host = self.get_model_class('test_proj.models.Host')
-        HostList = self.get_model_class('test_proj.models.HostList')
-        Group = self.get_model_class('auth.Group')
-        models.cent_client = get_centrifugo_client()
-        models.cent_client._send = publish
+        ModelWithUuid = self.get_model_class('test_proj.models.ModelWithUuid')
 
         host_obj = Host.objects.create(name="centrifuga")
-        host_list_obj = HostList.objects.create(name="centrifuga")
-        host_list_obj2 = HostList.objects.create(name="centrifuga")
-        HostList.objects.filter(id__in=[host_list_obj.id, host_list_obj2.id]).delete()
-        Group.objects.create(name='TestUsersGroup').delete()
+        host_obj2 = Host.objects.create(name="centrifuga2")
         mwu = ModelWithUuid.objects.create(data='123')
-        self.assertEqual(mock_call_count, 6)
-        mock_data = []
-        for arg in mock_args:
-            cent_host = arg[0]
-            arg = json.loads(arg[-1])
-            self.assertEqual(arg['method'], 'publish')
-            mock_data.append((cent_host, arg['params']['channel'], arg['params']['data']))
 
-        for item in mock_data:
-            self.assertEqual(item[1], 'subscriptions_update')
+        with self.patch('test_proj.test_notificator.Client.send') as send_callback:
+            send_callback.side_effect = None
 
-        self.assertDictEqual(mock_data[0][2], {"subscribe-label": [Host._meta.label], "pk": host_obj.id})
-        host_list_labels = [HostList._meta.label, Host._meta.label]
-        self.assertDictEqual(mock_data[1][2], {"subscribe-label": host_list_labels, "pk": host_list_obj.id})
-        self.assertDictEqual(mock_data[2][2], {"subscribe-label": host_list_labels, "pk": host_list_obj2.id})
-        self.assertDictEqual(mock_data[3][2], {"subscribe-label": host_list_labels, "pk": host_list_obj2.id})
-        self.assertDictEqual(mock_data[4][2], {"subscribe-label": host_list_labels, "pk": host_list_obj.id})
-        self.assertDictEqual(mock_data[5][2], {"subscribe-label": [ModelWithUuid._meta.label], "pk": str(mwu.id)})
+            # default complex call
+            notify_clients(Host, host_obj.id)
+            # call with single label
+            bulk_notify_clients(objects=(
+                (Host._meta.label, host_obj.id),
+            ))
+            # call on model with uuid as pk
+            notify_clients(ModelWithUuid, mwu.id)
+
+            # call via api
+            results = self.bulk([
+                {"method": "get", "path": ['subhosts', host_obj.id]},
+                {"method": "delete", "path": ['subhosts', host_obj.id]},
+                {"method": "delete", "path": ['subhosts', host_obj2.id]},
+            ])
+            for result in results:
+                self.assertIn(result['status'], (200, 201, 204))
+
+            # call via celery task
+            from .tasks import CreateHostTask
+            CreateHostTask.do(name='centrifugafromtask')
+
+            self.assertEqual(send_callback.call_count, 5)
 
 
 class ThrottleTestCase(BaseTestCase):

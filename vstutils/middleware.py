@@ -3,6 +3,7 @@ import logging
 import typing as _t
 
 from django.db import connection
+from django.apps import apps
 from django.conf import settings
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
@@ -245,4 +246,16 @@ class TwoFaMiddleware(BaseMiddleware):
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         if request.user.need_twofa and self.check_url_name(request):  # type: ignore
             return redirect('login')
+        return super().get_response_handler(request)
+
+
+class FrontendChangesNotifications(BaseMiddleware):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
+
+    def get_response_handler(self, request: HttpRequest) -> HttpResponse:
+        if settings.CENTRIFUGO_CLIENT_KWARGS:
+            with self.notificator_class([]):
+                return super().get_response_handler(request)
         return super().get_response_handler(request)

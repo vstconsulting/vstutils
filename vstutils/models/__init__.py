@@ -1,23 +1,16 @@
 """
 Default Django model classes overrides in `vstutils.models` module.
 """
-
 import logging
-import uuid
 
+from django.apps import apps
 from django.db import models
-from django.db.models import signals
-from django.dispatch import receiver
 from django.conf import settings
-from django.contrib.auth import get_user_model
-
-from cent import Client as CentrifugoClient
 
 from .base import ModelBaseClass, get_proxy_labels, LAZY_MODEL
 from .queryset import BQuerySet
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
-from ..utils import raise_context
 from .fields import (
     NamedBinaryFileInJSONField,
     NamedBinaryImageInJSONField,
@@ -25,6 +18,8 @@ from .fields import (
     MultipleNamedBinaryImageInJSONField,
     FkModelField
 )
+from ..utils import raise_context
+
 
 logger = logging.getLogger('vstutils')
 
@@ -214,54 +209,19 @@ class BModel(BaseModel):
 
 
 @raise_context()
-def bulk_notify_clients(channel="subscriptions_update", objects=()):
+def bulk_notify_clients(channel=None, objects=()):
+    if not settings.CENTRIFUGO_CLIENT_KWARGS:
+        return
+    notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
+    notificator = notificator_class([], channel=channel)
     for labels, pk in objects:
-        if isinstance(pk, uuid.UUID):
-            pk = str(pk)
-        with raise_context():
-            cent_client.add("publish", cent_client.get_publish_params(
-                channel,
-                {
-                    "subscribe-label": labels,
-                    "pk": pk
-                }
-            ))
-    if objects:  # pragma: no branch
-        return cent_client.send()
-
+        notificator.create_notification(labels, pk)
+    return notificator.send()
 
 
 @raise_context()
 def notify_clients(model, pk=None):
     logger.debug(f'Notify clients about model update: {model._meta.label}')
-    if not settings.CENTRIFUGO_CLIENT_KWARGS:
-        return
-    bulk_notify_clients("subscriptions_update", [
-        ((model._meta.label, *get_proxy_labels(model)), pk)
-    ])
-
-
-def get_centrifugo_client():
-    # pylint: disable=invalid-name,protected-access
-
-    if not settings.CENTRIFUGO_CLIENT_KWARGS:
-        return None
-
-    centrifugo_client_kwargs = {**settings.CENTRIFUGO_CLIENT_KWARGS}
-    centrifugo_client_kwargs.pop('token_hmac_secret_key', None)
-    logger.debug(f"Getting Centrifugo client with kwargs: {centrifugo_client_kwargs}")
-    client = CentrifugoClient(**centrifugo_client_kwargs)
-
-    User = get_user_model()
-
-    @receiver(signals.post_save)
-    @receiver(signals.post_delete)
-    def centrifugo_signal_for_notificate_users_about_updates(instance, *args, **kwargs):
-        if isinstance(instance, (BaseModel, User)) and getattr(instance, '_notify_update', True):
-            notify_clients(instance.__class__, instance.pk)
-
-    client._signal = centrifugo_signal_for_notificate_users_about_updates
-    return client
-
-
-cent_client = get_centrifugo_client()
+    bulk_notify_clients(objects=(
+        ((model._meta.label, *get_proxy_labels(model)), pk),
+    ))
