@@ -647,6 +647,7 @@ INSTALLED_APPS += ADDONS
 # Additional middleware and auth
 ##############################################################
 MIDDLEWARE: _t.List[_t.Text] = [
+    'vstutils.middleware.FrontendChangesNotifications',
     'vstutils.middleware.ExecuteTimeHeadersMiddleware',
     'htmlmin.middleware.HtmlMinifyMiddleware',
     'htmlmin.middleware.MarkRequestMiddleware',
@@ -676,6 +677,7 @@ MIDDLEWARE_ENDPOINT_CONTROL = {
         'django.contrib.messages.middleware.MessageMiddleware',
         'vstutils.middleware.LangMiddleware',
         'vstutils.middleware.TwoFaMiddleware',
+        'vstutils.middleware.FrontendChangesNotifications',
     ],
     'prepend': [
         'vstutils.api.endpoint.BulkMiddleware'
@@ -1354,7 +1356,10 @@ SPA_STATIC_FILES_PROVIDERS = {
 # Centrifugo settings
 CENTRIFUGO_CLIENT_KWARGS = config['centrifugo'].all()
 CENTRIFUGO_PUBLIC_HOST = CENTRIFUGO_CLIENT_KWARGS.pop('public_address', None) or CENTRIFUGO_CLIENT_KWARGS.get('address')
-
+NOTIFICATOR_CLIENT_CLASS = web.get(
+    'notificator_client_class',
+    fallback='vstutils.models.cent_notify.Notificator'
+)
 
 THROTTLE = config['throttle'].all()
 
