@@ -14,7 +14,7 @@
         <div
             v-for="(group, idx) in filteredFieldsInstancesGroups"
             :key="idx"
-            :class="fieldsGroupClasses(group.title)"
+            :class="fieldsGroupClasses(group)"
         >
             <div class="card" :class="groupsClasses">
                 <h5 v-if="group.title" class="card-header">
@@ -163,8 +163,12 @@
                 this.$delete(this.fieldsErrors, obj.field);
                 this.commitMutation('setFieldValue', obj);
             },
-            fieldsGroupClasses(name) {
-                return ['col-md-6', 'fields-group', `fields-group-${name.replace(/ /g, '_')}`];
+            fieldsGroupClasses({ title, wrapperClasses }) {
+                return [
+                    wrapperClasses || 'col-md-6',
+                    'fields-group',
+                    `fields-group-${title.replace(/ /g, '_')}`,
+                ];
             },
         },
     };
