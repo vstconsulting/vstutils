@@ -4784,3 +4784,33 @@ class ThrottleTestCase(BaseTestCase):
             }
         )
         self.assertEqual(429, response.status_code)
+
+
+class TasksTestCase(BaseTestCase):
+    def test_uniq_task_decorator(self):
+        from celery.exceptions import Reject
+        from .tasks import (
+            CreateHostTask,
+            InheritCreateHostTask,
+            Inherit2CreateHostTask,
+            InheritNonUniqCreateHostTask,
+        )
+
+        CreateHostTask.do(name='testlock')
+        CreateHostTask.do(name='testlock2')
+        InheritCreateHostTask.do(name='testlock3')
+
+        with utils.Lock(f'uniq-celery-task-{CreateHostTask().name}'):
+            with self.assertRaises(Reject):
+                CreateHostTask.do(name='testlock')
+
+        with utils.Lock(f'uniq-celery-task-{InheritCreateHostTask().name}'):
+            with self.assertRaises(Reject):
+                InheritCreateHostTask.do(name='testlock')
+
+        with utils.Lock(f'uniq-celery-task-{Inherit2CreateHostTask().name}'):
+            with self.assertRaises(Reject):
+                Inherit2CreateHostTask.do(name='testlock')
+
+        with utils.Lock(f'uniq-celery-task-{InheritNonUniqCreateHostTask().name}'):
+            InheritNonUniqCreateHostTask.do(name='testlock123')

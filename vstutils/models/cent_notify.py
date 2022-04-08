@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from cent import Client as CentrifugoClient  # type: ignore
 
 from .base import get_proxy_labels
-from ..utils import raise_context
+from ..utils import raise_context_decorator_with_default, raise_context
 from .model import BaseModel
 
 
@@ -31,6 +31,7 @@ class Notificator:
         if self.cent_client is not None:
             self.connect_signal(signals.post_save)
             self.connect_signal(signals.post_delete)
+        logger.debug(f'Notificator for channel {self.channel} initialized.')
 
     def connect_signal(self, signal: signals.ModelSignal):
         if signal not in self._signals:
@@ -45,7 +46,7 @@ class Notificator:
         if isinstance(instance, (BaseModel, get_user_model())) and getattr(instance, '_notify_update', True):
             self.create_notification_from_instance(instance)
 
-    @raise_context(verbose=False)
+    @raise_context_decorator_with_default(verbose=False)
     def get_client(self):
         centrifugo_client_kwargs = {**settings.CENTRIFUGO_CLIENT_KWARGS}
         centrifugo_client_kwargs.pop('token_hmac_secret_key', None)
@@ -65,7 +66,7 @@ class Notificator:
             (label, pk)
         )
 
-    @raise_context()
+    @raise_context_decorator_with_default()
     def send(self):
         self.queue, objects = [], set(self.queue)
         logger.debug(f'Send notifications about {len(objects)} updates.')
@@ -97,5 +98,3 @@ class Notificator:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.send()
         self.disconnect_all()
-        if exc_val:
-            raise  # nocv

@@ -1,19 +1,76 @@
+from functools import wraps, WRAPPER_ASSIGNMENTS
 from smtplib import SMTPException
 
 from celery import Celery
+from celery.exceptions import Reject
 from celery.app.task import BaseTask
 from celery.result import AsyncResult
 from django.conf import settings
 from django.apps import apps
 
-from .utils import import_class, send_template_email_handler
+from .utils import import_class, send_template_email_handler, Lock, translate as _
 
 celery_app: Celery = import_class(
     settings.WORKER_OPTIONS['app'].replace(':', '.')  # type: ignore
 )
 
 
-class TaskClass(BaseTask):
+class TaskMeta(type):
+    def __new__(mcs, name, bases, attrs, uniq=None):
+        task_class = super(TaskMeta, mcs).__new__(mcs, name, bases, attrs)
+        task_class.run = mcs.get_notificator_decorator(task_class.run)
+
+        if uniq:
+            task_class.run = mcs.get_unique_decorator(task_class.run)
+            task_class.apply_async = mcs.get_unique_decorator(task_class.apply_async, is_apply=True)
+        elif hasattr(task_class.run, '__uniq_wrapped__') and uniq is not None:
+            task_class.run = task_class.run.__uniq_wrapped__
+            task_class.apply_async = task_class.apply_async.__uniq_wrapped__
+
+        return task_class
+
+    @staticmethod
+    def get_notificator_decorator(func):
+        if getattr(func, '__notify_wrapped__', False):
+            return func
+
+        @wraps(func, assigned=WRAPPER_ASSIGNMENTS+('__notify_wrapped__',))
+        def wrapper(self, *args, **kwargs):
+            notifier = (
+                getattr(self, '__notifier__', None) or
+                apps.get_app_config('vstutils_api').module.notificator_class([])
+            )
+            with notifier:
+                self.__notifier__ = notifier
+                return func(self, *args, **kwargs)
+
+        wrapper.__notify_wrapped__ = True
+        return wrapper
+
+    @staticmethod
+    def get_unique_decorator(func, is_apply=False):
+        if getattr(func, '__uniq_wrapped__', False):
+            return func
+
+        @wraps(func, assigned=WRAPPER_ASSIGNMENTS+('__uniq_wrapped__',))
+        def wrapper(self, *args, **kwargs):
+            # pylint: disable=protected-access
+            if not is_apply and self._get_app().conf.task_always_eager:
+                return func(self, *args, **kwargs)
+            try:
+                with Lock(
+                    f'uniq-celery-task-{self.name}',
+                    err_msg=_("This task is currently performed by another worker.")
+                ):
+                    return func(self, *args, **kwargs)
+            except Lock.AcquireLockException as err:
+                raise Reject(str(err), requeue=False) from err
+
+        wrapper.__uniq_wrapped__ = func
+        return wrapper
+
+
+class TaskClass(BaseTask, metaclass=TaskMeta):
     """
     Wrapper for Celery BaseTask class. Usage is same as Celery standard class, but you can execute task without
     creating instance with :meth:`TaskClass.do` method.
@@ -51,19 +108,6 @@ class TaskClass(BaseTask):
     """
 
     # pylint: disable=abstract-method
-
-    def push_request(self, *args, **kwargs):  # nocv
-        self.notificator = apps.get_app_config('vstutils_api').module.notificator_class([])
-        return super().push_request(*args, **kwargs)
-
-    def pop_request(self):  # nocv
-        self.notificator.send()
-        del self.notificator
-        return super().pop_request()
-
-    def apply(self, *args, **kwargs):
-        with apps.get_app_config('vstutils_api').module.notificator_class([]):
-            return super().apply(*args, **kwargs)
 
     @property
     def name(self):

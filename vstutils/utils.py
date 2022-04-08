@@ -16,7 +16,7 @@ import types
 import typing as tp
 import uuid
 import warnings
-from functools import lru_cache
+from functools import lru_cache, wraps
 from pathlib import Path
 from threading import Thread
 from enum import Enum
@@ -899,7 +899,7 @@ class KVExchanger(BaseVstObject):
 class Lock(KVExchanger):
     """
     Lock class for multi-jobs workflow. Based on :class:`.KVExchanger`.
-    The Lock allows ony one thread to enter the part that's locked and shared
+    The Lock allows only one thread to enter the part that's locked and shared
     between apps using one locks cache (see also `[locks] <config.html#locks-settings>`_).
 
 
@@ -1002,6 +1002,7 @@ class __LockAbstractDecorator:
         return func(*args, **kwargs)
 
     def __call__(self, original_function):
+        @wraps(original_function)
         def wrapper(*args, **kwargs):
             return self.execute(original_function, *args, **kwargs)
 
