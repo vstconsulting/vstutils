@@ -41,7 +41,7 @@
     "jsdoc-export-default-interop": "^0.3.1",
     "liquor-tree": "^0.2.70",
     "md5": "^2.2.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.28",
     "portal-vue": "^2.1.7",
     "qrcode": "^1.4.4",
