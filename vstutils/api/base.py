@@ -471,8 +471,15 @@ class CachableHeadMixin(GenericViewSet):
     def is_main_action(self):
         return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
 
+    def get_etag_value(self, model_class, request):
+        return (
+            f'{model_class.get_etag_value()}'
+            f'_'
+            f'{request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)}'
+        )
+
     def check_etag(self, request):
-        etag_data = self.model_class.get_etag_value()  # type: ignore
+        etag_data = self.get_etag_value(self.model_class, request)  # type: ignore
 
         if request.method == "GET" and etag_data == str(request.headers.get("If-None-Match", None)):
             raise self.NotModifiedException("")
@@ -481,7 +488,7 @@ class CachableHeadMixin(GenericViewSet):
     def finalize_response(self, request: Request, response: RestResponse, *args, **kwargs) -> RestResponse:
         result_response = super().finalize_response(request, response, *args, **kwargs)
         if self.is_main_action and 'ETag' not in result_response.headers:
-            result_response.headers['ETag'] = lazy(self.model_class.get_etag_value, str)()
+            result_response.headers['ETag'] = lazy(self.get_etag_value, str)(self.model_class, request)
         return result_response
 
     def initial(self, request: Request, *args: _t.Any, **kwargs: _t.Any) -> None:

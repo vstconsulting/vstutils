@@ -2896,6 +2896,15 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[0]['status'], 200)
         self.assertEqual(results[1]['status'], 304)
 
+        self.client.cookies['lang'] = 'ru'
+        results_ru = self.bulk([
+            {'method': 'get', 'path': ['cachable'], 'headers': {'HTTP_IF_NONE_MATCH': results[0]['headers']['ETag']}},
+            {'method': 'get', 'path': ['cachable'], 'headers': {'HTTP_IF_NONE_MATCH': '<<0[headers][ETag]>>'}},
+        ])
+        self.assertEqual(results_ru[0]['status'], 200)
+        self.assertEqual(results_ru[1]['status'], 304)
+        self.assertNotEqual(results[0]['headers']['ETag'], results_ru[0]['headers']['ETag'])
+
     def test_env_vars(self):
         self.assertIn(settings.TEST_VAR_FROM_ENV, (os.environ['HOME'], 'default'))
         self.assertEqual(settings.TEST_VAR_FROM_ENV_DEFAULT, 'default')
