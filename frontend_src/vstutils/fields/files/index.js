@@ -5,6 +5,7 @@ import * as multipleNamedBinaryImage from './multiple-named-binary-image';
 import * as namedBinaryFile from './named-binary-file';
 import * as namedBinaryImage from './named-binary-image';
 import * as secretFile from './SecretFileField.js';
+import * as csvFile from './csv-file';
 
 export {
     binaryFile,
@@ -14,4 +15,5 @@ export {
     namedBinaryFile,
     namedBinaryImage,
     secretFile,
+    csvFile,
 };

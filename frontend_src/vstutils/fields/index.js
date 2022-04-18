@@ -71,6 +71,7 @@ export function addDefaultFields(fieldsResolver) {
         [FieldsResolver.DEFAULT_FIELD_KEY, text.StringField],
         ['autocomplete', AutocompleteField],
         ['binfile', files.binaryFile.BinaryFileField],
+        ['csvfile', files.csvFile.CsvFileField],
         ['choices', ChoicesField],
         ['color', ColorField], // CANT_CREATE_ON_BACKEND
         ['crontab', CrontabField], // CANT_CREATE_ON_BACKEND
@@ -127,6 +128,7 @@ export function addDefaultFields(fieldsResolver) {
     // Set ARRAY fields
     for (const [format, field] of [
         [FieldsResolver.DEFAULT_FIELD_KEY, array.ArrayField],
+        ['csvfile', files.csvFile.CsvFileField],
         ['fk_multi_autocomplete', fk.multiAutocomplete.FKMultiAutocompleteField], // DOES_NOTHING_ON_FRONTEND
         ['list', RelatedListField],
         ['namedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],
