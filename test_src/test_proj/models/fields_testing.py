@@ -1,6 +1,5 @@
 from django.db import models
 
-import vstutils.api.models
 from vstutils.api import fields, filters
 from vstutils.models import BModel
 from vstutils.api.serializers import VSTSerializer, BaseSerializer
@@ -11,9 +10,10 @@ from vstutils.api.fields import (
     PhoneField,
     RatingField,
     RelatedListField,
+    CSVFileField,
 )
 from django.utils import timezone
-from rest_framework.fields import DecimalField
+from rest_framework.fields import DecimalField, CharField
 
 
 class UpdateAuthorSerializer(VSTSerializer):
@@ -28,6 +28,10 @@ class RelatedPostSerializer(BaseSerializer):
     title = fields.CharField(default='Title', help_text='Some description')
 
 
+class AuthorDetailInformationSerializer(BaseSerializer):
+    detail_information = CharField(max_length=100, required=False)
+
+
 class Author(BModel):
     _translate_model = 'Author'
     name = models.CharField(max_length=256)
@@ -36,6 +40,7 @@ class Author(BModel):
     phone = models.CharField(max_length=16, null=True)
     masked = models.CharField(max_length=255, null=True)
     decimal = models.DecimalField(default='13.37', decimal_places=2, max_digits=5)
+    detail_information = models.JSONField(null=True)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )
@@ -43,7 +48,7 @@ class Author(BModel):
         default_related_name = 'author'
         _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
-        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal']
+        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal', 'detail_information']
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,
             'serializer_class_partial_update': UpdateAuthorSerializer,
@@ -60,7 +65,14 @@ class Author(BModel):
             ),
             'phone': PhoneField(allow_null=True, required=False),
             'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'}),
-            'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5)
+            'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5),
+            'detail_information': CSVFileField(
+                delimiter=';',
+                items=AuthorDetailInformationSerializer(),
+                min_column_width=100,
+                inner_as_array=True,
+                required=False
+            )
         }
         _nested = {
             'post': {
@@ -83,18 +95,23 @@ class Category(BModel):
         _list_fields = _detail_fields = ('id', 'name', 'parent')
 
 
+class SomeDataCsvSerializer(BaseSerializer):
+    some_data = CharField(max_length=300, required=True)
+
+
 class Post(BModel):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True)
     title = models.CharField(max_length=255)
     text = models.TextField()
     rating = models.FloatField(default=0)
     fa_icon_rating = models.FloatField(default=0)
     category = models.ForeignKey(Category, null=True, on_delete=models.CASCADE)
+    some_data = models.CharField(max_length=300, null=True, blank=True)
 
     class Meta:
         default_related_name = 'post'
         _list_fields = ['author', 'title']
-        _detail_fields = ['author', 'title', 'text', 'rating', 'fa_icon_rating', 'category']
+        _detail_fields = ['author', 'title', 'text', 'rating', 'fa_icon_rating', 'category', 'some_data']
         _override_list_fields = {
             'author': FkModelField(select=Author, read_only=True)
         }
@@ -102,6 +119,7 @@ class Post(BModel):
             'author': FkModelField(select=Author, read_only=True),
             'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10),
             'category': DeepFkField(select='test_proj.Category', allow_null=True, required=False, only_last_child=True),
+            'some_data': CSVFileField(delimiter=';', items=SomeDataCsvSerializer(), min_column_width=300)
         }
         _filterset_fields = {
             '__authors': filters.CharFilter(method=filters.extra_filter, field_name='author'),

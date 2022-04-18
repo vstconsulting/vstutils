@@ -85,6 +85,61 @@ class BinFileInStringField(FileInStringField):
     __slots__ = ()
 
 
+class CSVFileField(FileInStringField):
+    """
+    Field extends :class:`.FileInStringField`, using for works with csv files.
+    This field provides the display of the loaded data in the form of a table.
+
+    :param items: The config of the table. This is a drf or vst serializer which includes char fields
+                       which are the keys in the dictionaries into which the data from csv is serialized
+                       and the  names for columns in a table.
+                       The fields must be in the order you want them to appear in the table.
+                       Following options may be included:
+                            - label: human readable column name
+                            - required: Defines whether the field should be required. False by default.
+    :type items: Serializer
+
+    :param min_column_width: Minimum cell width. Default is 200 px.
+    :type min_column_width: int
+
+    :param inner_as_array: Defines in what format data should be posted and returned.
+                           If True data -  is the list of dicts where the keys -
+                           the names of your serializer fields.
+                           If False data is a string.
+                           False by default.
+    :type inner_as_array: bool
+    """
+    __slots__ = ('min_column_width', 'items', 'delimiter', 'inner_as_array')
+
+    items: Serializer
+    min_column_width: int
+    delimiter: _t.Text
+    inner_as_array: bool
+
+    default_error_messages = {
+        'not_a_list': 'Incoming data is not a list.',
+    }
+
+    def __init__(self, items=None, min_column_width=200, delimiter=',', inner_as_array=False, **kwargs):
+        self.items = items
+        self.min_column_width = min_column_width
+        self.delimiter = delimiter
+        self.inner_as_array = inner_as_array
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data):
+        if self.inner_as_array:
+            if not isinstance(data, (list, tuple)):
+                self.fail('not_a_list')
+            return data
+        return super().to_internal_value(data)
+
+    def to_representation(self, value):
+        if self.inner_as_array:
+            return value
+        return super().to_representation(value)
+
+
 class AutoCompletionField(VSTCharField):
     """
     Field that provides autocompletion on frontend, using specified list of objects.

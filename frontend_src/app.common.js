@@ -18,7 +18,7 @@ require('jquery-touchswipe/jquery.touchSwipe.js');
 
 import './libs/vue.js';
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 window.moment = moment;
 import 'moment-timezone/builds/moment-timezone-with-data-2012-2022.js';
 

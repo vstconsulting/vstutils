@@ -1,6 +1,6 @@
 <template>
     <div style="display: contents">
-        <slot name="activator" :openModal="open" :closeModal="close" />
+        <slot name="activator" :open-modal="open" :close-modal="close" />
         <portal v-if="isOpen" to="root-bottom">
             <div
                 ref="modal"
@@ -11,7 +11,7 @@
             >
                 <div class="modal-dialog" :class="classes" role="document">
                     <div class="modal-content">
-                        <slot name="content" :closeModal="close">
+                        <slot name="content" :close-modal="close">
                             <div class="modal-header">
                                 <slot name="header">
                                     <h5 class="modal-title">

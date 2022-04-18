@@ -1468,7 +1468,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'detail_information']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -1654,7 +1654,11 @@ class OpenapiEndpointTestCase(BaseTestCase):
         host_obj = self.get_model_class('test_proj.HostList').objects.create(name='123')
         results = self.bulk([
             {'method': 'post', 'path': ['author'], 'data': dict(name="Some author")},
-            {'method': 'post', 'path': ['author', '<<0[data][id]>>', 'post'], 'data': dict(title="title", text='txt')},
+            {
+                'method': 'post',
+                 'path': ['author', '<<0[data][id]>>', 'post'],
+                 'data': dict(title="title", text='txt', some_data='some data some data')
+             },
             {'method': 'get', 'path': ['author', '<<0[data][id]>>', 'post']},
             {'method': 'get', 'path': ['hosts_list']},
             {'method': 'get', 'path': ['hosts_list', host_obj.id]},
@@ -1819,6 +1823,56 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
 
+        # Check csvfile shema
+        self.assertDictEqual(
+            api['definitions']['OnePost']['properties']['some_data'],
+            {
+                'type': 'string',
+                'format': 'csvfile',
+                'title': 'Some data',
+                X_OPTIONS: {
+                    'delimiter': ';',
+                    'minColumnWidth': 300,
+                    'items': {
+                        'type': 'object',
+                        'required': ['some_data'],
+                        'properties': {
+                            'some_data': {
+                                'type': 'string',
+                                'title': 'Some data',
+                                'maxLength': 300,
+                                'minLength': 1,
+                            },
+                        },
+                    },
+                }
+            }
+
+        )
+
+        self.assertDictEqual(
+            api['definitions']['OneAuthor']['properties']['detail_information'],
+            {
+                'title': 'Detail information',
+                'x-format': 'csvfile',
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'detail_information': {
+                            'title': 'Detail information',
+                            'type': 'string',
+                            'maxLength': 100,
+                            'minLength': 1}
+                    }
+                },
+                X_OPTIONS: {
+                    'delimiter': ';',
+                    'minColumnWidth': 100
+                }
+            }
+        )
+
     def test_search_fields(self):
         self.assertEqual(
             self.get_model_class('test_proj.Variable').generated_view.search_fields,
@@ -1826,7 +1880,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.get_model_class('test_proj.Author').generated_view.search_fields,
-            ('name', 'phone', 'masked')
+            ('name', 'phone', 'masked', 'detail_information')
         )
 
     def test_api_version_request(self):
@@ -3346,6 +3400,7 @@ class ProjectTestCase(BaseTestCase):
             'masked': None,
             'decimal': '13.37',
             'registerDate': date,
+            'detail_information': None,
             'posts': [
                 {
                     'title': post_1.title
@@ -3353,7 +3408,7 @@ class ProjectTestCase(BaseTestCase):
                 {
                     'title': post_2.title
                 }
-            ]
+            ],
         }
         results = self.bulk([
             {'method': 'get', 'path': ['author']},
@@ -3368,9 +3423,9 @@ class ProjectTestCase(BaseTestCase):
         author_2_post_count = 6
         authors_post_count = author_1_post_count + author_2_post_count
         for i in range(author_1_post_count):
-            author_1.post.create(title=f'post_{i}')
+            author_1.post.create(title=f'post_{i}', some_data=f'some_data{i}')
         for i in range(author_2_post_count):
-            author_2.post.create(title=f'post_{i}')
+            author_2.post.create(title=f'post_{i}', some_data=f'some_data{i}')
 
         results = self.bulk([
             {'method': "get", "path": ["post"]},
@@ -3432,6 +3487,7 @@ class ProjectTestCase(BaseTestCase):
             'fa_icon_rating': 0.0,
             'text': 'lorem',
             'category': None,
+            'some_data': None,
         }
         post = Post.objects.create(**post_data)
         post_data['rating'] = 25
@@ -4424,6 +4480,36 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(deep_results[29]['status'], 204)
         self.assertEqual(deep_results[30]['status'], 404)
 
+    def test_csv_field_data(self):
+        results = self.bulk([
+            {
+                'method': 'post',
+                'path': ['author'],
+                'data': {'name': 'author', 'detail_information': 'some detail data' }
+            },
+            {
+                'method': 'post',
+                'path': ['author'],
+                'data': {'name': 'author', 'detail_information': [{'detail_information': 'some detail data'}]}
+            },
+            {
+                'method': 'post',
+                'path': ['post'],
+                'data': {
+                    'title': "title",
+                    'text': 'txt',
+                    'some_data': 'some data some data',
+                    'author': '<<1[data][id]>>'
+                }
+            },
+        ])
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(results[0]['data']['detail_information'], ['Incoming data is not a list.'])
+        self.assertEqual(results[1]['status'], 201)
+        self.assertEqual(results[1]['data']['detail_information'], [{'detail_information': 'some detail data'}])
+        self.assertEqual(results[2]['status'], 201, results[2]['data'])
+        self.assertEqual(results[2]['data']['some_data'], 'some data some data')
+
 
 class CustomModelTestCase(BaseTestCase):
     def test_custom_models(self):
@@ -4682,12 +4768,15 @@ class WebSocketTestCase(BaseTestCase):
 
             # default complex call
             notify_clients(Host, host_obj.id)
+            self.assertEqual(send_callback.call_count, 1)
             # call with single label
             bulk_notify_clients(objects=(
                 (Host._meta.label, host_obj.id),
             ))
+            self.assertEqual(send_callback.call_count, 2)
             # call on model with uuid as pk
             notify_clients(ModelWithUuid, mwu.id)
+            self.assertEqual(send_callback.call_count, 3)
 
             # call via api
             results = self.bulk([
@@ -4697,6 +4786,8 @@ class WebSocketTestCase(BaseTestCase):
             ])
             for result in results:
                 self.assertIn(result['status'], (200, 201, 204))
+
+            self.assertEqual(send_callback.call_count, 4)
 
             # call via celery task
             from .tasks import CreateHostTask
@@ -4761,7 +4852,7 @@ class ThrottleTestCase(BaseTestCase):
         # test post to an outer viewset(1/1)
         self.assertEqual(201, results[0]['status'])
         # test post to inner viewset(1/3)
-        self.assertEqual(201, results[1]['status'])
+        self.assertEqual(201, results[1]['status'], results[1]['data'])
         # test put to inner viewset(2/3)
         self.assertEqual(200, results[2]['status'])
         # test put to inner viewset(3/3)

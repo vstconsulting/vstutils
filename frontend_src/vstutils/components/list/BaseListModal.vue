@@ -1,7 +1,7 @@
 <template>
     <BootstrapModal ref="modal">
         <template #activator="{ openModal, closeModal }">
-            <slot name="activator" :openModal="openModal" :closeModal="closeModal" />
+            <slot name="activator" :open-modal="openModal" :close-modal="closeModal" />
         </template>
         <template #content>
             <div class="modal-header">

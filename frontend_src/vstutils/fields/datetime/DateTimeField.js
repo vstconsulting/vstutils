@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { BaseField } from '../base';
 import DateTimeFieldMixin from './DateTimeFieldMixin.js';
 
