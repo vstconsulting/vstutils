@@ -1367,7 +1367,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         'address': 'https://localhost:8000',
         'api_key': "XXX",
         'token_hmac_secret_key': "YYY"
-    }, CENTRIFUGO_PUBLIC_HOST='https://public:8000')
+    }, CENTRIFUGO_PUBLIC_HOST='https://public:8000/api')
     def test_get_openapi(self):
         api = self.endpoint_schema()
 
@@ -1375,7 +1375,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(api['info']['title'], 'Example Project')
 
         # Check Centrifugo settings
-        self.assertEqual(api['info']['x-centrifugo-address'], "wss://public:8000")
+        self.assertEqual(api['info']['x-centrifugo-address'], "wss://public:8000/connection/websocket")
         self.assertIn('x-centrifugo-token', api['info'])
 
         # Check docs info
@@ -1432,6 +1432,13 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertEqual(results[1]['data']['info']['x-settings']['logout_url'], self.logout_url)
         self.client.logout()
 
+    @override_settings(
+        CENTRIFUGO_PUBLIC_HOST='/notify',
+        CENTRIFUGO_CLIENT_KWARGS={
+            'address': 'https://localhost:8000',
+            'api_key': 'XXX',
+            'token_hmac_secret_key': 'YYY',
+        })
     def test_openapi_schema_content(self):
         api = self.endpoint_schema()
         img_res_validator_data = {
@@ -1808,6 +1815,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 },
             },
         })
+
+        # Check public centrifugo address when absolute path is provided
+        self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
 
     def test_search_fields(self):
         self.assertEqual(

@@ -16,7 +16,7 @@ export function getCentrifugoClient(address, token) {
     if (!address) {
         return null;
     }
-    const client = new Centrifuge(new URL('connection/websocket', address).toString());
+    const client = new Centrifuge(address);
     if (token) {
         client.setToken(token);
     }

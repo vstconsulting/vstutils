@@ -42,7 +42,9 @@ class TaskMeta(type):
             )
             with notifier:
                 self.__notifier__ = notifier
-                return func(self, *args, **kwargs)
+                result = func(self, *args, **kwargs)
+            self.__notifier__ = None
+            return result
 
         wrapper.__notify_wrapped__ = True
         return wrapper

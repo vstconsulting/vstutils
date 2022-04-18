@@ -1,3 +1,4 @@
+import os
 import time
 import copy
 
@@ -7,6 +8,15 @@ from django.conf import settings
 from drf_yasg import generators
 from drf_yasg.inspectors import field as field_insp
 from vstutils.utils import import_class, raise_context_decorator_with_default
+
+
+def get_centrifugo_public_address(request: drf_request.Request):
+    address = settings.CENTRIFUGO_PUBLIC_HOST
+    if address.startswith('/'):
+        address = request.build_absolute_uri(address)
+    elif 'api' in address.rsplit('/', 2):
+        address = address[:address.rfind('api')]
+    return os.path.join(address.replace('http', 'ws', 1), 'connection/websocket')
 
 
 class EndpointEnumerator(generators.EndpointEnumerator):
@@ -124,7 +134,7 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                         secret,
                         algorithm="HS256"
                     )
-                    result['info']['x-centrifugo-address'] = settings.CENTRIFUGO_PUBLIC_HOST.replace('http', 'ws', 1)
+                    result['info']['x-centrifugo-address'] = get_centrifugo_public_address(request)
             for hook in self._get_hooks():
                 result = copy.deepcopy(result)
                 hook(request=request, schema=result)
