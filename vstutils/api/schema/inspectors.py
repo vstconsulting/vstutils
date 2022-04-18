@@ -418,7 +418,7 @@ class CSVFileFieldInspector(FieldInspector):
         if not isinstance(field, fields.CSVFileField):
             return NotHandled
 
-        format = FORMAT_CSV_FILE
+        x_format = FORMAT_CSV_FILE
         items = self.probe_field_inspectors(field.items, swagger_object_type, False)
         x_options = {
             'delimiter': field.delimiter,
@@ -432,7 +432,7 @@ class CSVFileFieldInspector(FieldInspector):
         if field.inner_as_array:
             kwargs = {
                 'type': openapi.TYPE_ARRAY,
-                'x-format': format,
+                'x-format': x_format,
                 'items': items,
                 X_OPTIONS: x_options
             }
@@ -440,7 +440,7 @@ class CSVFileFieldInspector(FieldInspector):
             x_options['items'] = items
             kwargs = {
                 'type': openapi.TYPE_STRING,
-                'format': format,
+                'format': x_format,
                 X_OPTIONS: x_options
             }
 
