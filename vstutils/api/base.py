@@ -380,10 +380,11 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
                 return serializer_class
 
         if action_name not in main_actions:
-            view_func = getattr(self, action_name)
-            serializer_class = getattr(view_func, 'kwargs', {}).get('serializer_class', None)
-            if serializer_class:
-                return serializer_class
+            view_func = getattr(self, action_name, None)
+            if view_func is not None:
+                serializer_class = getattr(view_func, 'kwargs', {}).get('serializer_class', None)
+                if serializer_class:
+                    return serializer_class
 
         is_detail = (
             hasattr(self, 'serializer_class_one') and
