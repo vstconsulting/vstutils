@@ -27,19 +27,7 @@ export class CsvFileField extends FileField {
     constructor(options) {
         super(options);
         this.delimiter = this.props.delimiter;
-        this.tableConfig = this.schemaObjectToTableConfig(this.getItems());
         this.minColumnWidth = this.props.minColumnWidth;
-        this.innerAsArray = this.props.innerAsArray;
-    }
-
-    getItems() {
-        if (this.type === 'string') {
-            return this.props.items;
-        }
-        if (this.type === 'array') {
-            return this.options.items;
-        }
-        throw new Error('Unknown field type');
     }
 
     static get mixins() {
@@ -48,13 +36,11 @@ export class CsvFileField extends FileField {
 
     toInner(data) {
         const value = super.toInner(data);
-        if (this.type === 'string') {
-            return Papa.unparse(value, { delimiter: this.delimiter, header: false, skipEmptyLines: true });
-        }
-        return value;
+        return Papa.unparse(value, { delimiter: this.delimiter, header: false, skipEmptyLines: true });
     }
 
-    schemaObjectToTableConfig(obj) {
+    get tableConfig() {
+        const obj = this.props.items;
         const tableConfig = [
             { prop: '_index', name: i18n.t('Index') },
             { prop: '_action', name: i18n.t('Actions'), actionName: 'actionCommon', width: 200 },

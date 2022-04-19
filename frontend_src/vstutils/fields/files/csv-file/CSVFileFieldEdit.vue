@@ -15,6 +15,7 @@
                 :item-height="55"
                 :selectable="false"
                 :min-width="tableConfig.length * minColumnWidth"
+                language="en"
             >
                 <template #actionCommon="{ index, row }">
                     <button class="btn btn-outline-secondary" @click="edit(index, row)">

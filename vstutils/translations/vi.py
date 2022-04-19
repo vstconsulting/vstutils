@@ -259,4 +259,6 @@ SERVER_TRANSLATION = {
     'fields with * is required': 'các mục có dấu * là bắt buộc',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Quên mật khẩu? Nhập E-mail để nhận hướng dẫn khôi phục mật khẩu',
     'reset my Password': '重置我的密码',
+    'Actions': 'Hành động',
+    'Index': 'Mục lục',
 }

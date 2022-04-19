@@ -28,10 +28,6 @@ class RelatedPostSerializer(BaseSerializer):
     title = fields.CharField(default='Title', help_text='Some description')
 
 
-class AuthorDetailInformationSerializer(BaseSerializer):
-    detail_information = CharField(max_length=100, required=False)
-
-
 class Author(BModel):
     _translate_model = 'Author'
     name = models.CharField(max_length=256)
@@ -40,7 +36,6 @@ class Author(BModel):
     phone = models.CharField(max_length=16, null=True)
     masked = models.CharField(max_length=255, null=True)
     decimal = models.DecimalField(default='13.37', decimal_places=2, max_digits=5)
-    detail_information = models.JSONField(null=True)
 
     class Meta:
         _permission_classes = ('rest_framework.permissions.AllowAny', )
@@ -48,7 +43,7 @@ class Author(BModel):
         default_related_name = 'author'
         _non_bulk_methods = ('post',)
         _list_fields = ['name', 'hidden']
-        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal', 'detail_information']
+        _detail_fields = ['name', 'registerDate', 'posts', 'phone', 'masked', 'decimal']
         _extra_serializer_classes = {
             'serializer_class_update': UpdateAuthorSerializer,
             'serializer_class_partial_update': UpdateAuthorSerializer,
@@ -66,13 +61,6 @@ class Author(BModel):
             'phone': PhoneField(allow_null=True, required=False),
             'masked': MaskedField(allow_null=True, required=False, mask={'mask': '000-000'}),
             'decimal': DecimalField(default='13.37', decimal_places=2, max_digits=5),
-            'detail_information': CSVFileField(
-                delimiter=';',
-                items=AuthorDetailInformationSerializer(),
-                min_column_width=100,
-                inner_as_array=True,
-                required=False
-            )
         }
         _nested = {
             'post': {

@@ -43,28 +43,5 @@ describe('CSVFileFieldEdit', () => {
 
         expect(field.tableConfig).toMatchObject(tableConfig);
         expect(field.toInner(data_to_return)).toBe('Row 1;desc 1\r\nRow 2;desc 2');
-
-        const inerAsArrayField = new CsvFileField({
-            title: 'File',
-            type: 'array',
-            name: 'some_file',
-            'x-format': 'csvfile',
-            items: {
-                required: ['name'],
-                properties: {
-                    name: {
-                        title: 'Some name',
-                        type: 'string',
-                    },
-                    description: {
-                        type: 'string',
-                    },
-                },
-            },
-        });
-        expect(inerAsArrayField.tableConfig).toMatchObject(tableConfig);
-        expect(JSON.stringify(inerAsArrayField.toInner(data_to_return))).toBe(
-            JSON.stringify(data_to_return['some_file']),
-        );
     });
 });

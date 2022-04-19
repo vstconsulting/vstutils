@@ -1,6 +1,6 @@
 <template>
     <div class="row" :class="rootClasses">
-        <div v-if="hideNotRequired" class="col-12">
+        <div v-if="hideNotRequired && editable" class="col-12">
             <div class="card">
                 <div class="card-body">
                     <HideNotRequiredSelect

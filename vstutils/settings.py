@@ -1419,6 +1419,7 @@ if TESTS_RUN:
     BULK_THREADS = 10
     SEND_EMAIL_RETRIES = 10
     DEFAULT_FILE_STORAGE = lazy(lambda: 'inmemorystorage.InMemoryStorage', str)()
+    CENTRIFUGO_CLIENT_KWARGS = {}
 
 
 if not TESTSERVER_RUN and TESTS_RUN:

@@ -258,4 +258,8 @@ SERVER_TRANSLATION = {
     'fields with * is required': 'поля отмеченые * обязательны для заполнения',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес и мы отправим вам инструкцию для восстановления.',
     'reset my Password': 'сбросить пароль',
+
+    # csv
+    'Actions': 'Действия',
+    'Index': 'Индекс',
 }
