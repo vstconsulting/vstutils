@@ -21,13 +21,18 @@ class Command(DockerCommand):
             help="Do NOT run docker command for migration of databases.",
         )
 
-    def handle(self, *uwsgi_args, **opts):
-        super().handle(*uwsgi_args, **opts)
+    def handle(self, *args, **opts):
+        super().handle(*args, **opts)
 
         if opts['migrate']:
             self.migrate(opts)
 
-        cmd = f'{sys.executable} -m {get_celery_command()}'
+        cmd_args = dict(
+            arg.split('=')
+            for arg in args
+        )
+
+        cmd = f'{sys.executable} -m {get_celery_command(**cmd_args)}'
         self._print(f'Execute: {cmd}')
         sys.exit(check_call(
             cmd,

@@ -35,20 +35,24 @@ def wait(proc, timeout=None, delay=0.01):
     return proc.poll()
 
 
-def get_celery_command(celery_path='celery'):
+def get_celery_command(celery_path='celery', **kwargs):
     # Format args string.
     options = ''
     app_option = f'--app={settings.VST_PROJECT}.wapp:app'
-    for key, value in settings.WORKER_OPTIONS.items():
+    worker_options_dict = {
+        **settings.WORKER_OPTIONS,
+        **kwargs
+    }
+    for key, value in worker_options_dict.items():
         if key == 'app':
             app_option = "--app={}".format(value.replace(',', r'\,'))
             continue
         is_boolean = isinstance(value, bool)
         if (is_boolean and value) or value:
-            options += f' --{key}'
+            options += f' -{"-" if key != "O" else ""}{key}'
         if is_boolean:
             continue
-        options += "={}".format(value.replace(',', r'\,'))
+        options += "{}{}".format('=' if key != 'O' else '', value.replace(',', r'\,'))
 
     # Add queues list to celery args
     if '--queues' not in options:

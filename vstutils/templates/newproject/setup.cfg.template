@@ -9,7 +9,7 @@ keywords = web, app
 classifiers =
     Environment :: Web Environment
     Framework :: Django
-    Framework :: Django :: 2.2
+    Framework :: Django :: 3.2
     Operating System :: POSIX
     Programming Language :: Cython
     Programming Language :: Python
@@ -18,6 +18,8 @@ classifiers =
     Programming Language :: Python :: 3.6
     Programming Language :: Python :: 3.7
     Programming Language :: Python :: 3.8
+    Programming Language :: Python :: 3.9
+    Programming Language :: Python :: 3.10
     Topic :: Software Development :: Libraries
     Topic :: Internet :: WWW/HTTP
     Topic :: Internet :: WWW/HTTP :: Dynamic Content
