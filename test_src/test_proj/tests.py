@@ -1468,7 +1468,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Grouping model properties for GUI
         self.assertEqual(
             api['definitions']['OneAuthor']['x-properties-groups'],
-            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal', 'detail_information']}
+            {'Main': ['id', 'name'], '': ['registerDate', 'posts', 'phone', 'masked', 'decimal']}
         )
         # Check view field name
         self.assertEqual(api['definitions']['OneExtraPost']['x-view-field-name'], 'title')
@@ -1850,29 +1850,6 @@ class OpenapiEndpointTestCase(BaseTestCase):
 
         )
 
-        self.assertDictEqual(
-            api['definitions']['OneAuthor']['properties']['detail_information'],
-            {
-                'title': 'Detail information',
-                'x-format': 'csvfile',
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'detail_information': {
-                            'title': 'Detail information',
-                            'type': 'string',
-                            'maxLength': 100,
-                            'minLength': 1}
-                    }
-                },
-                X_OPTIONS: {
-                    'delimiter': ';',
-                    'minColumnWidth': 100
-                }
-            }
-        )
-
     def test_search_fields(self):
         self.assertEqual(
             self.get_model_class('test_proj.Variable').generated_view.search_fields,
@@ -1880,7 +1857,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.get_model_class('test_proj.Author').generated_view.search_fields,
-            ('name', 'phone', 'masked', 'detail_information')
+            ('name', 'phone', 'masked')
         )
 
     def test_api_version_request(self):
@@ -3400,7 +3377,6 @@ class ProjectTestCase(BaseTestCase):
             'masked': None,
             'decimal': '13.37',
             'registerDate': date,
-            'detail_information': None,
             'posts': [
                 {
                     'title': post_1.title
@@ -4481,17 +4457,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(deep_results[30]['status'], 404)
 
     def test_csv_field_data(self):
+        author = Author.objects.create(name='author_1')
         results = self.bulk([
-            {
-                'method': 'post',
-                'path': ['author'],
-                'data': {'name': 'author', 'detail_information': 'some detail data' }
-            },
-            {
-                'method': 'post',
-                'path': ['author'],
-                'data': {'name': 'author', 'detail_information': [{'detail_information': 'some detail data'}]}
-            },
             {
                 'method': 'post',
                 'path': ['post'],
@@ -4499,16 +4466,12 @@ class ProjectTestCase(BaseTestCase):
                     'title': "title",
                     'text': 'txt',
                     'some_data': 'some data some data',
-                    'author': '<<1[data][id]>>'
+                    'author': author.id
                 }
             },
         ])
-        self.assertEqual(results[0]['status'], 400)
-        self.assertEqual(results[0]['data']['detail_information'], ['Incoming data is not a list.'])
-        self.assertEqual(results[1]['status'], 201)
-        self.assertEqual(results[1]['data']['detail_information'], [{'detail_information': 'some detail data'}])
-        self.assertEqual(results[2]['status'], 201, results[2]['data'])
-        self.assertEqual(results[2]['data']['some_data'], 'some data some data')
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[0]['data']['some_data'], 'some data some data')
 
 
 class CustomModelTestCase(BaseTestCase):

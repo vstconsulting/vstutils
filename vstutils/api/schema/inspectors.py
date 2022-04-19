@@ -417,32 +417,20 @@ class CSVFileFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         if not isinstance(field, fields.CSVFileField):
             return NotHandled
-
-        x_format = FORMAT_CSV_FILE
-        items = self.probe_field_inspectors(field.items, swagger_object_type, False)
-        x_options = {
-            'delimiter': field.delimiter,
-            'minColumnWidth': field.min_column_width,
-        }
         # pylint: disable=unused-variable,invalid-name
         SwaggerType, ChildSwaggerType = self._get_partial_types(
             field, swagger_object_type, use_references, **kw
         )
 
-        if field.inner_as_array:
-            kwargs = {
-                'type': openapi.TYPE_ARRAY,
-                'x-format': x_format,
-                'items': items,
-                X_OPTIONS: x_options
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': FORMAT_CSV_FILE,
+            X_OPTIONS: {
+                'delimiter': field.delimiter,
+                'minColumnWidth': field.min_column_width,
+                'items': self.probe_field_inspectors(field.items, swagger_object_type, False)
             }
-        else:
-            x_options['items'] = items
-            kwargs = {
-                'type': openapi.TYPE_STRING,
-                'format': x_format,
-                X_OPTIONS: x_options
-            }
+        }
 
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
