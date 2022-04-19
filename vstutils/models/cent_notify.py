@@ -69,7 +69,6 @@ class Notificator:
     @raise_context_decorator_with_default()
     def send(self):
         self.queue, objects = [], set(self.queue)
-        logger.debug(f'Send notifications about {len(objects)} updates.')
 
         for labels, pk in objects:
             if isinstance(pk, uuid.UUID):
@@ -83,6 +82,7 @@ class Notificator:
                     }
                 ))
         if objects:
+            logger.debug(f'Send notifications about {len(objects)} updates.')
             return self.cent_client.send()
 
     def disconnect_all(self):
