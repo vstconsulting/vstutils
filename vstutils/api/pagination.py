@@ -6,6 +6,9 @@ from .responses import BaseResponseClass
 
 
 class LimitOffsetPagination(DRFLimitOffsetPagination):
+    def get_count(self, queryset):
+        return super().get_count(queryset.values(queryset.model._meta.pk.name))
+
     def paginate_queryset(self, queryset, request, view=None):
         self.identifier = request.headers.get('Identifiers-List-Name')
         return super().paginate_queryset(queryset, request, view)
