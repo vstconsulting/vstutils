@@ -285,6 +285,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     """
     __slots__ = ()
     optimize_get_by_values = settings.OPTIMIZE_GET_BY_VALUES
+    optimize_get_by_values_subactions = ()
     select_related = False
     serializer_class: _t.Type[serializers.Serializer]
     _serializer_class_one: _t.Optional[_t.Type[serializers.Serializer]] = None
@@ -345,7 +346,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             )
         qs = super().filter_queryset(queryset)
 
-        if self.action in ('list', 'retrieve') and self.optimize_get_by_values:
+        if self.action in ('list', 'retrieve') + self.optimize_get_by_values_subactions and self.optimize_get_by_values:
             # pylint: disable=protected-access
 
             serializer_class = self.get_serializer_class()
