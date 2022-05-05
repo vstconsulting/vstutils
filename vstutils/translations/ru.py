@@ -216,6 +216,9 @@ TRANSLATION = {
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': 'Во время запуска действия <b>{0}</b> произошла ошибка. Подробнее:<br>{1}',
     'Link': 'Ссылка',
+    # csv
+    'Actions': 'Действия',
+    'Index': 'Индекс',
 }
 
 SERVER_TRANSLATION = {
@@ -258,8 +261,4 @@ SERVER_TRANSLATION = {
     'fields with * is required': 'поля отмеченые * обязательны для заполнения',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес, и мы отправим вам инструкцию для восстановления.',
     'reset my Password': 'сбросить пароль',
-
-    # csv
-    'Actions': 'Действия',
-    'Index': 'Индекс',
 }

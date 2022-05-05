@@ -218,6 +218,10 @@ TRANSLATION = {
     # execute:
     'An error occurred during <b>{0}</b>. Error details:<br>{1}': '<b>{0}</b> 期间发生了一些错误。 错误详情：<br>{1}',
     'Link': '链接',
+
+    # csv
+    'Actions': '行動',
+    'Index': '指數',
 }
 
 SERVER_TRANSLATION = {
@@ -260,7 +264,4 @@ SERVER_TRANSLATION = {
     'fields with * is required': '标有*为必填项',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': '忘记密码了吗？ 输入您的地址，我们将向您发送恢复指示',
     'reset my Password': '问密码',
-    # csv
-    'Actions': '行動',
-    'Index': '指數',
 }
