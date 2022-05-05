@@ -2,13 +2,15 @@ import Papa from 'papaparse';
 import { FileField } from '../file';
 import { i18n } from '../../../translation';
 import CsvFileFieldEdit from './CSVFileFieldEdit.vue';
+import CsvFileFieldReadonly from './CsvFileFieldReadonly';
 
-export { CsvFileFieldEdit };
+export { CsvFileFieldEdit, CsvFileFieldReadonly };
 
 /** @vue/component */
 export const CsvFileFieldMixin = {
     components: {
         field_content_edit: CsvFileFieldEdit,
+        field_content_readonly: CsvFileFieldReadonly,
     },
     data() {
         return {
@@ -39,24 +41,28 @@ export class CsvFileField extends FileField {
         return Papa.unparse(value, { delimiter: this.delimiter, header: false, skipEmptyLines: true });
     }
 
-    get tableConfig() {
+    getTableConfig() {
         const obj = this.props.items;
-        const tableConfig = [
-            { prop: '_index', name: i18n.t('Index') },
-            { prop: '_action', name: i18n.t('Actions'), actionName: 'actionCommon', width: 200 },
-        ];
+        const tableConfig = [{ prop: '_index', name: i18n.t('Index') }];
         for (const [name, property] of Object.entries(obj.properties)) {
             const column = {
                 prop: name,
                 name: property.title || name,
             };
-            if (obj.required.includes(name)) {
+            if (!this.readOnly && obj.required.includes(name)) {
                 // this statement is forced by the peculiarity of the library
                 column.eClass = { missedValue: `"\${${name}}" === "0"` };
             }
             tableConfig.push(column);
         }
-
         return tableConfig;
+    }
+
+    parseFile(text) {
+        return Papa.parse(text, {
+            delimiter: this.delimiter,
+            header: false,
+            skipEmptyLines: true,
+        });
     }
 }

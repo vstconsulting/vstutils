@@ -2,13 +2,13 @@ import { describe, test, expect } from '@jest/globals';
 import { CsvFileField } from '../index';
 import { i18n } from '../../../../translation';
 
+const tableConfig = [
+    { prop: '_index', name: i18n.t('Index') },
+    { prop: 'name', name: 'Some name', eClass: { missedValue: '"${name}" === "0"' } },
+    { prop: 'description', name: 'description' },
+];
+
 describe('CSVFileFieldEdit', () => {
-    const tableConfig = [
-        { prop: '_index', name: i18n.t('Index') },
-        { prop: '_action', name: i18n.t('Actions'), actionName: 'actionCommon', width: 200 },
-        { prop: 'name', name: 'Some name', eClass: { missedValue: '"${name}" === "0"' } },
-        { prop: 'description', name: 'description' },
-    ];
     const data_to_return = {
         some_file: [
             { name: 'Row 1', description: 'desc 1' },
@@ -41,7 +41,7 @@ describe('CSVFileFieldEdit', () => {
             },
         });
 
-        expect(field.tableConfig).toMatchObject(tableConfig);
+        expect(field.getTableConfig()).toMatchObject(tableConfig);
         expect(field.toInner(data_to_return)).toBe('Row 1;desc 1\r\nRow 2;desc 2');
     });
 });
