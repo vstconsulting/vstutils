@@ -116,12 +116,12 @@ TRANSLATION = {
     'Error': 'Ошибка',
 
     'We\'ve emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly.': 'Мы отправили вам письмо с инструкцией для сброса пароля.',
-    'If you don\'t receive an email, please make sure you\'ve entered the address you registered with, and check your spam folder.': 'Если вы не получили письмо, пожалуйста убедитесь что введен верный адрес и проверьте папку со спамом.',
-    'The password reset link was invalid, possibly because it has already been used. Please request a new Password reset.': 'Неверная ссылка для восстановления пароля, возможно она уже была использована. Пожалуйста попробуйте заново.',
-    'Please enter your new password twice so we can verify you typed it in correctly.': 'Пожалуйста введите новый пароль.',
+    'If you don\'t receive an email, please make sure you\'ve entered the address you registered with, and check your spam folder.': 'Если вы не получили письмо, пожалуйста, убедитесь, что введен верный адрес, и проверьте папку со спамом.',
+    'The password reset link was invalid, possibly because it has already been used. Please request a new Password reset.': 'Неверная ссылка для восстановления пароля, возможно она уже была использована. Пожалуйста, попробуйте заново.',
+    'Please enter your new password twice so we can verify you typed it in correctly.': 'Пожалуйста, введите новый пароль.',
     'change my password': 'изменить пароль',
     'Your password has been set.  You may go ahead and log in now.': 'Ваш пароль был успешно установлен. Теперь вы можете войти.',
-    'Please enter a correct %(username)s and password. Note that both fields may be case-sensitive.': 'Пожалуйста введите корректные %(username)s и пароль. Внимание, поля могуь быть регистрозвисимыми.',
+    'Please enter a correct %(username)s and password. Note that both fields may be case-sensitive.': 'Пожалуйста, введите корректные %(username)s и пароль. Внимание, поля могуь быть регистрозависимыми.',
     'or': 'или',
     'two-factor authentication code': 'код двухфакторной авторизации',
     'verify code': 'подтвердить код',
@@ -156,7 +156,7 @@ TRANSLATION = {
     'To continue, need to accept the terms agreement.': 'Чтобы продолжить, необходимо принять условия соглашения.',
 
     # Проверить
-    'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста обновите страницу.',
+    'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',
     'now': 'сейчас',
     'later': 'позже',
     'I accept the ': 'Я принимаю ',
@@ -249,14 +249,14 @@ SERVER_TRANSLATION = {
     # auth/reg
     'sign in to start your session': 'Войдите, чтобы начать сеанс',
     'confirm your email before logging in': 'подтвердите свою электронную почту перед входом',
-    'Confirmation link is invalid or expired, please register again': 'Ссылка для подтверждения неверна или устарела, пожалуйста зарегистрируйтесь повторно',
+    'Confirmation link is invalid or expired, please register again': 'Ссылка для подтверждения неверна или устарела, пожалуйста, зарегистрируйтесь повторно',
     'sign in': 'войти',
     'sign up': 'зарегистрируйтесь',
     'forgot password': 'забыли пароль',
     'confirm password': 'подтвердите пароль',
     'register': 'регистрация',
     'fields with * is required': 'поля отмеченые * обязательны для заполнения',
-    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес и мы отправим вам инструкцию для восстановления.',
+    'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес, и мы отправим вам инструкцию для восстановления.',
     'reset my Password': 'сбросить пароль',
 
     # csv
