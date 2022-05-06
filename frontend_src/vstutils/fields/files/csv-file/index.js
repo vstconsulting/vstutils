@@ -38,6 +38,9 @@ export class CsvFileField extends FileField {
 
     toInner(data) {
         const value = super.toInner(data);
+        if (typeof value == 'string') {
+            return value;
+        }
         return Papa.unparse(value, { delimiter: this.delimiter, header: false, skipEmptyLines: true });
     }
 
