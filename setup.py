@@ -388,6 +388,9 @@ ext_list = []
 if 'develop' in sys.argv:
     ext_list = []
 
+requirements = load_requirements('requirements.txt')
+requirements_rpc = load_requirements('requirements-rpc.txt')
+
 kwargs = dict(
     packages=find_packages(exclude=['tests', 'test_proj']+ext_list),
     ext_modules_list=ext_list,
@@ -398,11 +401,11 @@ kwargs = dict(
     install_requires=[
         "django~=" + (os.environ.get('DJANGO_DEP', "") or "3.2.12"),
     ]
-    + load_requirements('requirements.txt')
+    + requirements
     + load_requirements('requirements-doc.txt'),
     extras_require={
         'test': load_requirements('requirements-test.txt'),
-        'rpc': load_requirements('requirements-rpc.txt'),
+        'rpc': requirements_rpc,
         'ldap': load_requirements('requirements-ldap.txt'),
         'doc': ['django-docs==0.3.1'] + load_requirements('requirements-doc.txt'),
         'prod': load_requirements('requirements-prod.txt'),
@@ -410,14 +413,20 @@ kwargs = dict(
         'pil': ['Pillow~=8.4.0;python_version<"3.7"', 'Pillow~=9.0.0;python_version>"3.6"'],
         'boto3': [
             i.replace('libcloud', 'libcloud,boto3')
-            for i in load_requirements('requirements.txt')
+            for i in requirements
             if isinstance(i, str) and 'django-storages' in i
         ],
         'sqs': [
             i.replace('redis', 'sqs,redis')
             if isinstance(i, str) and 'celery' in i
             else i
-            for i in load_requirements('requirements-rpc.txt')
+            for i in requirements_rpc
+        ],
+        'librabbitmq': [
+            i.replace('redis', 'librabbitmq,redis')
+            if isinstance(i, str) and 'celery' in i
+            else i
+            for i in requirements_rpc
         ],
     },
     dependency_links=[
@@ -435,7 +444,7 @@ kwargs = dict(
 
 all_deps = []
 for key, deps in kwargs['extras_require'].items():
-    if key not in ('sqs',):
+    if key not in ('sqs', 'librabbitmq'):
         all_deps += deps
 
 kwargs['extras_require']['all'] = all_deps
