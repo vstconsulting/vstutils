@@ -220,6 +220,7 @@ TRANSLATION = {
     # csv
     'Actions': 'Hành động',
     'Index': 'Mục lục',
+    'Download with headers': 'Tải xuống với tiêu đề',
 }
 
 SERVER_TRANSLATION = {

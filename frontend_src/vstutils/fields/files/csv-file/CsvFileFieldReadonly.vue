@@ -1,5 +1,14 @@
 <template>
     <div v-if="rows.length > 0" style="margin: 0">
+        <div class="table-header">
+            <button id="download-button" class="btn btn-outline-secondary" @click="download">
+                <i class="fa fa-download" aria-hidden="true" />
+            </button>
+            <div>
+                <input id="checkbox" v-model="withHeader" type="checkbox" />
+                <label for="checkbox">{{ $t('Download with headers') }}</label>
+            </div>
+        </div>
         <DataTable :config="tableConfig" :min-column-width="field.minColumnWidth" :rows="rows" readonly />
     </div>
 </template>
@@ -19,6 +28,7 @@
                     errors: [],
                     meta: null,
                 },
+                withHeader: false,
             };
         },
         computed: {
@@ -31,6 +41,24 @@
                 return value;
             },
         },
+        methods: {
+            download() {
+                let data = this.value;
+
+                if (this.withHeader) {
+                    const header = this.tableConfig
+                        .slice(1)
+                        .map((el) => el.name)
+                        .join(this.field.delimiter);
+                    data = `${header}\n${data}`;
+                }
+
+                const blob = new Blob([data], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                window.open(url);
+                window.URL.revokeObjectURL(url);
+            },
+        },
     };
 </script>
 
@@ -41,5 +69,22 @@
 
     .csv-table::v-deep span.missedValue::before {
         content: var(--required-error-text);
+    }
+
+    .table-header {
+        color: #6c757d;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #fff;
+        background-clip: border-box;
+        border: 0 solid rgba(0, 0, 0, 0.125);
+        border-radius: 0.25rem;
+    }
+
+    #download-button {
+        width: fit-content;
     }
 </style>

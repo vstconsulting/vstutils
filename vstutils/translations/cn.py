@@ -222,6 +222,7 @@ TRANSLATION = {
     # csv
     'Actions': '行動',
     'Index': '指數',
+    'Download with headers': '帶標題下載',
 }
 
 SERVER_TRANSLATION = {
