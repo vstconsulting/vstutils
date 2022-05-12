@@ -9,12 +9,13 @@ const tableConfig = [
 ];
 
 describe('CSVFileFieldEdit', () => {
-    const data_to_return = {
+    const listDataToReturn = {
         some_file: [
             { name: 'Row 1', description: 'desc 1' },
             { name: 'Row 2', description: 'desc 2' },
         ],
     };
+    const strDataToReturn = 'Row 1;desc 1\r\nRow 2;desc 2';
 
     test('config table props', () => {
         const field = new CsvFileField({
@@ -42,6 +43,7 @@ describe('CSVFileFieldEdit', () => {
         });
 
         expect(field.getTableConfig()).toMatchObject(tableConfig);
-        expect(field.toInner(data_to_return)).toBe('Row 1;desc 1\r\nRow 2;desc 2');
+        expect(field.toInner(listDataToReturn)).toBe(strDataToReturn);
+        expect(field.toInner({ some_file: 'Row 1;desc 1\r\nRow 2;desc 2' })).toBe(strDataToReturn);
     });
 });

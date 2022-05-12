@@ -219,6 +219,7 @@ TRANSLATION = {
     # csv
     'Actions': 'Действия',
     'Index': 'Индекс',
+    'Download with headers': 'Скачать с заголовками столбцов',
 }
 
 SERVER_TRANSLATION = {
