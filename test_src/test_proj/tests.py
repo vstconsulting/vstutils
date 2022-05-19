@@ -2946,6 +2946,12 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results_ru[1]['status'], 304)
         self.assertNotEqual(results[0]['headers']['ETag'], results_ru[0]['headers']['ETag'])
 
+        results = self.bulk([
+            {'method': 'get', 'path': ['cachable', 'non_cached']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertNotIn('ETag', results[0]['headers'])
+
     def test_env_vars(self):
         self.assertIn(settings.TEST_VAR_FROM_ENV, (os.environ['HOME'], 'default'))
         self.assertEqual(settings.TEST_VAR_FROM_ENV_DEFAULT, 'default')
