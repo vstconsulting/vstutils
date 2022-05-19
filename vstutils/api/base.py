@@ -471,6 +471,8 @@ class CachableHeadMixin(GenericViewSet):
     @cached_property
     @raise_context_decorator_with_default(default=False)
     def is_main_action(self):
+        if hasattr(self, 'should_cache') and not self.should_cache():
+            return False
         return self.action in main_actions or getattr(getattr(self, self.action, None), '_nested_view', None) is None
 
     def get_etag_value(self, model_class, request):
