@@ -60,6 +60,7 @@ import FieldLabelIdMixin from './FieldLabelIdMixin.js';
 import ModalWindowAndButtonMixin from './ModalWindowAndButtonMixin.js';
 import TableRowMixin from './TableRowMixin.js';
 import { SCHEMA_DATA_TYPE } from '../utils';
+import { WYSIWYGField } from './text/WYSIWYGField.js';
 export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
 /**
@@ -71,13 +72,14 @@ export function addDefaultFields(fieldsResolver) {
         [FieldsResolver.DEFAULT_FIELD_KEY, text.StringField],
         ['autocomplete', AutocompleteField],
         ['binfile', files.binaryFile.BinaryFileField],
-        ['csvfile', files.csvFile.CsvFileField],
         ['choices', ChoicesField],
         ['color', ColorField], // CANT_CREATE_ON_BACKEND
         ['crontab', CrontabField], // CANT_CREATE_ON_BACKEND
+        ['csvfile', files.csvFile.CsvFileField],
         ['date', datetime.DateField],
         ['date-time', datetime.DateTimeField],
         ['decimal', numbers.DecimalField],
+        ['deep_fk', fk.deepFk.DeepFKField],
         ['email', EmailField],
         ['file', files.file.FileField],
         ['fk', fk.fk.FKField],
@@ -85,7 +87,6 @@ export function addDefaultFields(fieldsResolver) {
         ['html', text.HTMLField],
         ['json', JSONField],
         ['masked', text.masked.MaskedField],
-        ['deep_fk', fk.deepFk.DeepFKField],
         ['password', PasswordField],
         ['phone', text.phone.PhoneField],
         ['plain_text', text.PlainTextField],
@@ -94,6 +95,7 @@ export function addDefaultFields(fieldsResolver) {
         ['text_paragraph', text.TextParagraphField],
         ['textarea', text.TextAreaField],
         ['time_interval', datetime.TimeIntervalField], // CANT_CREATE_ON_BACKEND
+        ['wysiwyg', WYSIWYGField],
 
         // Support legacy field resolving only by string
         ['multiplenamedbinfile', files.multipleNamedBinaryFile.MultipleNamedBinaryFileField],

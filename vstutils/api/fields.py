@@ -16,6 +16,7 @@ from rest_framework.fields import empty, SkipField, get_error_detail, Field
 from rest_framework.exceptions import ValidationError
 from django.apps import apps
 from django.db import models
+from django.utils.html import escape, strip_tags
 from django.utils.functional import SimpleLazyObject, lazy, cached_property
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -1120,3 +1121,13 @@ class MaskedField(CharField):
     def __init__(self, mask, **kwargs):
         super().__init__(**kwargs)
         self.mask = mask
+
+
+class WYSIWYGField(TextareaField):
+    """
+    On frontend renders https://ui.toast.com/tui-editor.
+    Saves data as markdown and escapes all html tags.
+    """
+
+    def to_internal_value(self, data):
+        return escape(strip_tags(super().to_internal_value(data)))

@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import { BaseFieldContentEdit, BaseFieldMixin } from '../../base';
 import { FloatField } from '../float.js';
 import Stars from './Stars.vue';

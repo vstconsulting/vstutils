@@ -11,6 +11,7 @@ from vstutils.api.fields import (
     RatingField,
     RelatedListField,
     CSVFileField,
+    WYSIWYGField,
 )
 from django.utils import timezone
 from rest_framework.fields import DecimalField, CharField
@@ -107,7 +108,8 @@ class Post(BModel):
             'author': FkModelField(select=Author, read_only=True),
             'rating': RatingField(required=False, front_style='slider', min_value=0, max_value=10),
             'category': DeepFkField(select='test_proj.Category', allow_null=True, required=False, only_last_child=True),
-            'some_data': CSVFileField(delimiter=';', items=SomeDataCsvSerializer(), min_column_width=300)
+            'some_data': CSVFileField(delimiter=';', items=SomeDataCsvSerializer(), min_column_width=300),
+            'text': WYSIWYGField(),
         }
         _filterset_fields = {
             '__authors': filters.CharFilter(method=filters.extra_filter, field_name='author'),

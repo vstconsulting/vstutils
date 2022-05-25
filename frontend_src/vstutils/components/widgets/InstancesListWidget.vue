@@ -20,7 +20,6 @@
 </template>
 
 <script>
-    /* eslint-disable vue/one-component-per-file */
     import { tableColumnClasses } from '../../utils';
     import Popover from '../Popover.vue';
     import Card from '../Card.vue';

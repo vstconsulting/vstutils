@@ -19,6 +19,7 @@ module.exports = {
         'vue/max-attributes-per-line': 'off',
         'vue/multi-word-component-names': 'off',
         'vue/no-empty-component-block': 'error',
+        'vue/one-component-per-file': 'off',
     },
     globals: {
         app: 'readonly',
