@@ -92,12 +92,13 @@ class CSVFileField(FileInStringField):
     This field provides the display of the loaded data in the form of a table.
 
     :param items: The config of the table. This is a drf or vst serializer which includes char fields
-                       which are the keys in the dictionaries into which the data from csv is serialized
-                       and the  names for columns in a table.
-                       The fields must be in the order you want them to appear in the table.
-                       Following options may be included:
-                            - label: human readable column name
-                            - required: Defines whether the field should be required. False by default.
+                  which are the keys in the dictionaries into which the data from csv is serialized
+                  and the  names for columns in a table.
+                  The fields must be in the order you want them to appear in the table.
+                  Following options may be included:
+
+                  - ``label``: human readable column name
+                  - ``required``: Defines whether the field should be required. False by default.
     :type items: Serializer
 
     :param min_column_width: Minimum cell width. Default is 200 px.
