@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import { StringArrayFieldEdit, StringArrayFieldMixin } from './string.js';
 
 function createNumberTag(params) {

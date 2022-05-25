@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import { BaseFieldContentReadonlyMixin, BaseFieldListView, BaseFieldMixin } from '../base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
 

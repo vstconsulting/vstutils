@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import StringField from './StringField';
 import {
     BaseFieldContentEdit,

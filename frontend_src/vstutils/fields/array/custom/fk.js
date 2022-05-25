@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import $ from 'jquery';
 import { ArrayFieldMixin } from '../mixins.js';
 import { BaseFieldContentEdit } from '../../base';

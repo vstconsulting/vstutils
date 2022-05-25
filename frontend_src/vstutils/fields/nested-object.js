@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import { BaseField, BaseFieldContentEdit, BaseFieldContentReadonlyMixin, BaseFieldMixin } from './base';
 import { mapObjectValues, registerHook } from '../utils';
 import { ModelFields } from '../components/page';

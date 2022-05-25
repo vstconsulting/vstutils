@@ -40,6 +40,7 @@ FORMAT_PHONE = 'phone'
 FORMAT_MASKED = 'masked'
 FORMAT_DEEP_FK = 'deep_fk'
 FORMAT_DECIMAL = 'decimal'
+FORMAT_WYSIWYG = 'wysiwyg'
 
 X_OPTIONS = 'x-options'
 
@@ -109,6 +110,10 @@ basic_type_info[fields.PasswordField] = {
 basic_type_info[fields.PhoneField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_PHONE,
+}
+basic_type_info[fields.WYSIWYGField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_WYSIWYG,
 }
 
 

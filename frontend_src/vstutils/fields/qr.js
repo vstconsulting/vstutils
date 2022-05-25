@@ -1,4 +1,3 @@
-/* eslint-disable vue/one-component-per-file */
 import QRCode from 'qrcode';
 import { BaseField, BaseFieldMixin } from './base';
 import BaseFieldContentReadonlyMixin from './base/BaseFieldContentReadonlyMixin.vue';

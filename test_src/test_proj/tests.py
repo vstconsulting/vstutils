@@ -1823,7 +1823,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
         # Check public centrifugo address when absolute path is provided
         self.assertEqual(api['info']['x-centrifugo-address'], 'wss://vstutilstestserver/notify/connection/websocket')
 
-        # Check csvfile shema
+        # Check csvfile schema
         self.assertDictEqual(
             api['definitions']['OnePost']['properties']['some_data'],
             {
@@ -1847,7 +1847,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     },
                 }
             }
+        )
 
+        # Check WYSIWYGField schema
+        self.assertDictEqual(
+            api['definitions']['OnePost']['properties']['text'],
+            {
+                'type': 'string',
+                'format': 'wysiwyg',
+                'title': 'Text',
+            }
         )
 
     def test_search_fields(self):
@@ -3521,6 +3530,22 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(result_data, results[0]['data']['some_multiplefile'])
         # test GET response
         self.assertEqual(result_data, results[1]['data']['results'][0]['some_multiplefile'])
+
+    def test_wysiwyg_field(self):
+        author = Author.objects.create(name='Some author')
+        results = self.bulk([
+            {
+                'method': 'post',
+                'path': ['post'],
+                'data': {
+                    'title': 'Test Post',
+                    'author': author.id,
+                    'some_data': 'data',
+                    'text': '# Test data\n<script>alert("test")</script> <img src="http://test">',
+                }},
+        ])
+        self.assertEqual(results[0]['status'], 201)
+        self.assertEqual(results[0]['data']['text'], '# Test data\nalert(&quot;test&quot;) ')
 
     def test_phone_field(self):
         def create_author(phone):
