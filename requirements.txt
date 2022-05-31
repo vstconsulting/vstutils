@@ -19,7 +19,7 @@ ormsgpack~=1.2.2;python_version>"3.6"
 
 # Notifications
 cent~=4.1.0
-PyJWT~=2.3.0
+PyJWT~=2.4.0
 
 # Minificators
 jsmin~=3.0.1
