@@ -61,6 +61,8 @@ import ModalWindowAndButtonMixin from './ModalWindowAndButtonMixin.js';
 import TableRowMixin from './TableRowMixin.js';
 import { SCHEMA_DATA_TYPE } from '../utils';
 import { WYSIWYGField } from './text/WYSIWYGField.js';
+import { UUIDField } from './text/UUIDField';
+import { URIField } from './text/URIField';
 export { FieldLabelIdMixin, ModalWindowAndButtonMixin, TableRowMixin };
 
 /**
@@ -95,6 +97,8 @@ export function addDefaultFields(fieldsResolver) {
         ['text_paragraph', text.TextParagraphField],
         ['textarea', text.TextAreaField],
         ['time_interval', datetime.TimeIntervalField], // CANT_CREATE_ON_BACKEND
+        ['uri', URIField],
+        ['uuid', UUIDField],
         ['wysiwyg', WYSIWYGField],
 
         // Support legacy field resolving only by string
