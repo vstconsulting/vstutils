@@ -5,7 +5,7 @@ from django.db import models
 from rest_framework.filters import BaseFilterBackend, OrderingFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
 from django_filters import compat, filters
-from vstutils.utils import raise_context
+from vstutils.utils import raise_context, translate as _
 
 from .filters import extra_filter
 
@@ -53,8 +53,8 @@ class OrderingFilterBackend(OrderingFilter):
                 required=False,
                 location='query',
                 schema=compat.coreschema.Array(
-                    title=force_str(self.ordering_title),
-                    description=force_str(self.ordering_description),
+                    title=_(force_str(self.ordering_title)),
+                    description=_(force_str(self.ordering_description)),
                     items=compat.coreschema.Enum(enum=fields),
                     min_items=1,
                     unique_items=True,

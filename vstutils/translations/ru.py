@@ -48,6 +48,7 @@ TRANSLATION = {
     'Remove from list': 'Убрать из списка',
     'Purge': 'Удалить',
     'Select an action for this instances': 'Выберите действие для объектов',
+    'Username not': 'Имя пользователя не',
 
     # fields
     'Id': 'Идентификатор',
@@ -102,15 +103,6 @@ TRANSLATION = {
     'First name': 'Имя',
     'Last name': 'Фамилия',
 
-    # filters description
-    'boolean value meaning status of user.': 'булево значение обозначающее статус пользователя.',
-    'users first name.': 'имя пользователя',
-    'users last name.': 'фамилия пользователя',
-    'users e-mail value.': 'email пользователя',
-    'which field to use when ordering the results.': 'поле по которому производить сортировку результатов.',
-    'a unique integer value (or comma separated list) identifying this instance.': 'уникальное числовое значение (или их последовательность разделенная запятой) идентифицирующая данный объект.',
-    'a name string value (or comma separated list) of instance.': 'имя объекта - строковое значение (или их последовательность разделенная запятой).',
-
     'Page matching current url was not found': 'Cтраница, соответствующая данному url, не была найдена',
     'Unknown error': 'Неизвестная ошибка',
     'Error': 'Ошибка',
@@ -126,7 +118,6 @@ TRANSLATION = {
     'two-factor authentication code': 'код двухфакторной авторизации',
     'verify code': 'подтвердить код',
     'Enter the code from the two-factor app on your mobile device. If you\'ve lost your device, you may enter one of your recovery codes.': 'Введите код из двухфакторного приложения на мобильном устройстве. Если вы потеряли свое устройство, вы можете ввести один из кодов восстановления.',
-    'Invalid authentication code': 'Неверный код авторизации',
     'Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.': 'Отсканируйте изображение с помощью приложения для двухфакторной аутентификации на вашем телефоне. Если вы не можете использовать штрих-код, введите вместо него текстовый код.',
     'Enter the six-digit code from the application': 'Введите шестисимвольный код из приложения',
     'code': 'код',
@@ -262,4 +253,17 @@ SERVER_TRANSLATION = {
     'fields with * is required': 'поля отмеченые * обязательны для заполнения',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Забыли пароль? Введите свой адрес, и мы отправим вам инструкцию для восстановления.',
     'reset my Password': 'сбросить пароль',
+    'Invalid authentication code': 'Неверный код авторизации',
+    'Secret string must be provided': 'Секретная строка должна быть заполнена',
+
+    # filters help text
+    'A unique integer value (or comma separated list) identifying this instance.': 'Уникальное числовое значение (или их последовательность разделенная запятой) идентифицирующая данный объект.',
+    'A name string value (or comma separated list) of instance.': 'Имя объекта - строковое значение (или их последовательность разделенная запятой).',
+    'Which field to use when ordering the results.': 'Поле, по которому производить сортировку результатов.',
+    "Search by {}'s primary key or {}": 'Искать по ключу {} или {}',
+    '_name': 'наименование',
+    'Boolean value meaning status of user.': 'Значение, обозначающее статус пользователя.',
+    'Users first name.': 'Имя пользователя',
+    'Users last name.': 'Фамилия пользователя',
+    'Users e-mail value.': 'Email пользователя',
 }
