@@ -1,7 +1,7 @@
 import { BaseFieldContentReadonlyMixin, BaseFieldListView, BaseFieldMixin } from '../base';
 import ArrayFieldEdit from './ArrayFieldEdit.vue';
 
-const NOT_INLINE_FIELDS = ['array', 'nested-object', 'textarea'];
+const NOT_INLINE_FIELDS = ['array', 'nested-object', 'textarea', 'uri'];
 
 /** @vue/component */
 const ReadonlyMixin = {
