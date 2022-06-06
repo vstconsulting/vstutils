@@ -140,7 +140,6 @@ def update_cache_for_model(instance, **kwargs):
 
 
 def get_first_match_name(field_names, default=None):
-    field_names = tuple(i for i in field_names if i != 'hidden')
     return next(
         (i for i in field_names if i in DEFAULT_VIEW_FIELD_NAMES),
         next(iter(field_names[1:]), default)
@@ -467,7 +466,11 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
             serializer = serializers['serializer_class']()
             for field_name, field in cls.get_model_fields_mapping(iteration_filter_handler).items():
                 if isinstance(field, ForeignKey):
-                    related_name = get_first_match_name([f.name for f in field.related_model._meta.fields])
+                    related_name = get_first_match_name([
+                        f.name
+                        for f in field.related_model._meta.fields
+                        if isinstance(f, django_model_fields.CharField)
+                    ])
                     filterset_fields_types[field_name] = api_filters.CharFilter(
                         method=api_filters.FkFilterHandler(
                             related_pk=field.target_field.attname,
