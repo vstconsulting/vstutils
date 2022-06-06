@@ -7,11 +7,12 @@ from django.db.models import Q
 from django.utils.functional import SimpleLazyObject
 from django_filters import rest_framework as filters
 from django_filters import CharFilter
+from vstutils.utils import lazy_translate as __
 
 from .. import utils
 
-id_help = 'A unique integer value (or comma separated list) identifying this instance.'
-name_help = 'A name string value (or comma separated list) of instance.'
+id_help = __('A unique integer value (or comma separated list) identifying this instance.')
+name_help = __('A name string value (or comma separated list) of instance.')
 name_filter_method = "contains" if settings.CASE_SENSITIVE_API_FILTER else 'icontains'
 
 

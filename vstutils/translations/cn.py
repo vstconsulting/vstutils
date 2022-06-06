@@ -48,6 +48,7 @@ TRANSLATION = {
     'Remove from list': '從列表中刪除',
     'Purge': '刪除',
     'Select an action for this instances': '為此實例選擇一個操作',
+    'Username not': '用户名不是',
 
 
     # fields
@@ -103,15 +104,6 @@ TRANSLATION = {
     'First name': '名字',
     'Last name': '姓',
 
-    # filters description
-    'boolean value meaning status of user.': '指示用户状态的布尔值。',
-    'users first name.': '用户名',
-    'users last name.': '用户姓',
-    'users e-mail value.': '用户邮箱',
-    'which field to use when ordering the results.': '结果排序依据的字段',
-    'a unique integer value (or comma separated list) identifying this instance.': '标识此对象的唯一数值（或用逗号分隔的序列）识别此对象',
-    'a name string value (or comma separated list) of instance.': '对象名称-字符串值（或它们的顺序，用逗号分隔）',
-
     'Page matching current url was not found': '找不到与指定网址匹配的页面',
     'Unknown error': '未知错误',
     'Error': '错误',
@@ -127,7 +119,6 @@ TRANSLATION = {
     'two-factor authentication code': '两因素授权码',
     'verify code': '确认密码',
     'Enter the code from the two-factor app on your mobile device. If you\'ve lost your device, you may enter one of your recovery codes.': '从您的移动设备上的两个应用程序中输入代码。 如果您丢失了设备，则可以输入恢复其中一个代码',
-    'Invalid authentication code': '无效的授权码',
     'Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.': '使用手机上的两个身份验证应用程序扫描图像。 如果您不能使用条形码，请输入文本代码。',
     'Enter the six-digit code from the application': '从应用程序中输入六个字符的代码',
     'code': '代码',
@@ -265,4 +256,17 @@ SERVER_TRANSLATION = {
     'fields with * is required': '标有*为必填项',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': '忘记密码了吗？ 输入您的地址，我们将向您发送恢复指示',
     'reset my Password': '问密码',
+    'Invalid authentication code': '无效的授权码',
+    'Secret string must be provided': '必须提供秘密字符串',
+
+    # filters help text
+    'A unique integer value (or comma separated list) identifying this instance.': '标识此对象的唯一数值（或用逗号分隔的序列）识别此对象',
+    'A name string value (or comma separated list) of instance.': '对象名称-字符串值（或它们的顺序，用逗号分隔）',
+    'Which field to use when ordering the results.': '结果排序依据的字段',
+    "Search by {}'s primary key or {}": '按 {} 的主键或 {} 搜索',
+    '_name': '种类',
+    'Boolean value meaning status of user.': '指示用户状态的布尔值。',
+    'Users first name.': '用户名',
+    'Users last name.': '用户姓',
+    'Users e-mail value.': '用户邮箱',
 }

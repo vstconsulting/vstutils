@@ -6,4 +6,5 @@ TRANSLATION = {
     'image n selected': 'no images | 1 image selected | {n} images selected',
     'imageValidationResolutionError': 'Must be between {min} and {max} px.',
     'instance': 'instance | instances',
+    '_name': 'name',
 }

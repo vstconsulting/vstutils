@@ -10,11 +10,12 @@ from django.core.cache import caches as django_caches
 from django.db.models.base import ModelBase
 from django.db.models import fields as django_model_fields
 from django.db.models.fields.related import ManyToManyField, OneToOneField, ForeignKey
-from django.utils.functional import SimpleLazyObject
+from django.utils.functional import SimpleLazyObject, lazy
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from rest_framework.fields import ModelField, JSONField, CharField as drfCharField, ChoiceField
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
+from vstutils.utils import translate as _
 
 from ..api.fields import (
     NamedBinaryFileInJsonField,
@@ -30,7 +31,7 @@ from ..utils import (
     apply_decorators,
     classproperty,
     get_if_lazy,
-    raise_context_decorator_with_default
+    raise_context_decorator_with_default,
 )
 from ..api import (
     base as api_base,
@@ -111,6 +112,10 @@ default_extra_metadata: dict = {
 
 
 # Handlers
+def _translate_search_help_text(field_name, related_name):
+    return _("Search by {}'s primary key or {}").format(_(field_name), _(related_name))
+
+
 def is_append_to_view(item):
     return bool(getattr(item[1], '_append_to_view', False))
 
@@ -135,6 +140,7 @@ def update_cache_for_model(instance, **kwargs):
 
 
 def get_first_match_name(field_names, default=None):
+    field_names = tuple(i for i in field_names if i != 'hidden')
     return next(
         (i for i in field_names if i in DEFAULT_VIEW_FIELD_NAMES),
         next(iter(field_names[1:]), default)
@@ -467,7 +473,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                             related_pk=field.target_field.attname,
                             related_name=related_name
                         ),
-                        help_text=f"Search by {field_name}'s primary key or {related_name}"
+                        help_text=lazy(_translate_search_help_text)(field_name, related_name)
                     )
                 elif isinstance(field, django_model_fields.BooleanField):
                     filterset_fields_types[field_name] = filters.BooleanFilter()

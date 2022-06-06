@@ -14,7 +14,7 @@ from vstutils.api import fields, base, permissions, responses, decorators as dec
 from vstutils.api.filters import DefaultIDFilter, name_filter, name_help
 from vstutils.api.serializers import VSTSerializer, DataSerializer, BaseSerializer
 from vstutils.api.models import TwoFactor, RecoveryCode, UserSettings
-from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate
+from vstutils.utils import raise_context_decorator_with_default, translate, lazy_translate as __
 
 User: _t.Type[AbstractUser] = get_user_model()  # type: ignore[override]
 
@@ -145,8 +145,8 @@ class TwoFASerializer(VSTSerializer):
     recovery = serializers.CharField(write_only=True, required=False)
 
     default_error_messages = {
-        'invalid_pin': lazy_translate('Invalid authentication code'),  # type: ignore
-        'no_secret_provided': lazy_translate('Secret string must be provided'),  # type: ignore
+        'invalid_pin': __('Invalid authentication code'),  # type: ignore
+        'no_secret_provided': __('Secret string must be provided'),  # type: ignore
     }
 
     class Meta:
@@ -205,11 +205,11 @@ class UserSettingsSerializer(BaseSerializer):
 
 
 class UserFilter(DefaultIDFilter):
-    is_active = BooleanFilter(help_text='Boolean value meaning status of user.')
-    first_name = CharFilter(help_text='Users first name.')
-    last_name = CharFilter(help_text='Users last name.')
-    email = CharFilter(help_text="Users e-mail value.")
-    username__not = CharFilter(method=name_filter, help_text=name_help)
+    is_active = BooleanFilter(help_text=__('Boolean value meaning status of user.'))
+    first_name = CharFilter(help_text=__('Users first name.'))
+    last_name = CharFilter(help_text=__('Users last name.'))
+    email = CharFilter(help_text=__("Users e-mail value."))
+    username__not = CharFilter(method=name_filter, help_text=name_help, label=__('Username not'))
     username = CharFilter(method=name_filter, help_text=name_help)
 
     class Meta:

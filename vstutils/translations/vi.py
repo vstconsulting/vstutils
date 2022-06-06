@@ -48,6 +48,7 @@ TRANSLATION = {
     'Remove from list': 'Xóa từ danh sách',
     'Purge': 'Xóa',
     'Select an action for this instances': 'Chọn một hành động cho trường hợp này',
+    'Username not': 'Tên người dùng không phải',
 
     # fields
     'Id': 'định danh',
@@ -102,15 +103,6 @@ TRANSLATION = {
     'First name': 'Tên',
     'Last name': 'Họ',
 
-    # filters description
-    'boolean value meaning status of user.': 'giá trị boolean cho biết trạng thái của người dùng.',
-    'users first name.': 'Tên người dùng',
-    'users last name.': 'Họ người dùng',
-    'users e-mail value.': 'E-mail người dùng',
-    'which field to use when ordering the results.': 'trường để sắp xếp kết quả.',
-    'a unique integer value (or comma separated list) identifying this instance.': 'giá trị số duy nhất',
-    'a name string value (or comma separated list) of instance.': 'tên đối tượng',
-
     'Page matching current url was not found': 'Không tìm thấy url hiện tại phù hợp với trang',
     'Unknown error': 'Lỗi không thể nhận biết',
     'Error': 'Lỗi',
@@ -126,7 +118,6 @@ TRANSLATION = {
     'two-factor authentication code': 'hai bước xác thực (2FA)',
     'verify code': 'xác nhận mã',
     'Enter the code from the two-factor app on your mobile device. If you\'ve lost your device, you may enter one of your recovery codes.': '"Nhập mã từ ứng dụng sử dụng hai bước xác thực trên thiết bị di động của bạn.Nếu bạn mất thiết bị của mình, bạn có thể nhập một trong các mã khôi phục."',
-    'Invalid authentication code': 'Mã xác thực không hợp lệ',
     'Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.': '"Quét hình ảnh bằng ứng dụng xác thực hai bước trên điện thoại của bạn. Nếu bạn không thể quét hình ảnh, hãy nhập mã văn bản."',
     'Enter the six-digit code from the application': 'Điền mã xác thực từ ứng dụng',
     'code': 'Mã',
@@ -263,5 +254,18 @@ SERVER_TRANSLATION = {
     'register': 'đăng ký',
     'fields with * is required': 'các mục có dấu * là bắt buộc',
     'Forgot your password? Enter your email address below, and an email with instructions for setting a new one will be sent.': 'Quên mật khẩu? Nhập E-mail để nhận hướng dẫn khôi phục mật khẩu',
-    'reset my Password': '重置我的密码',
+    'reset my Password': 'đặt lại mật khẩu của tôi',
+    'Invalid authentication code': 'Mã xác thực không hợp lệ',
+    'Secret string must be provided': 'Chuỗi bí mật phải được cung cấp',
+
+    # filters help text
+    'A unique integer value (or comma separated list) identifying this instance.': 'Giá trị số duy nhất',
+    'A name string value (or comma separated list) of instance.': 'Tên đối tượng',
+    'Which field to use when ordering the results.': 'Trường để sắp xếp kết quả',
+    "Search by {}'s primary key or {}": 'Tìm kiếm theo khóa chính của {} hoặc {}',
+    '_name': 'tên',
+    'Boolean value meaning status of user.': 'Giá trị boolean cho biết trạng thái của người dùng',
+    'Users first name.': 'Tên người dùng',
+    'Users last name.': 'Họ người dùng',
+    'Users e-mail value.': 'E-mail người dùng',
 }
