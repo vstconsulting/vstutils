@@ -585,7 +585,8 @@ class FkModelField(FkField):
         self.model_class = get_if_lazy(self.model_class)
         if self.model_class is not None and isinstance(value, self.model_class._meta.pk.model):  # type: ignore
             return getattr(value, self.autocomplete_property)
-        else:
+        else:  # nocv
+            # Uses only if value got from `.values()`
             return value  # type: ignore
 
 

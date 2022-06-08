@@ -118,9 +118,11 @@ class CustomModelIterable(ModelIterable):
 
     def values_handler(self, unit):
         # pylint: disable=no-member
-        return {f: unit.get(f) for f in self.fields}  # nocv
+        return {f: unit.get(f) for f in self.fields}
 
-    def construct_instance(self, data, model):
+    def construct_instance(self, data, model, only_fields):
+        if only_fields is not None:
+            data = {k: v for k, v in data.items() if k in only_fields}
         return model(**data)
 
     def __iter__(self):
@@ -152,7 +154,10 @@ class CustomModelIterable(ModelIterable):
         low = query.get('low_mark', 0)
         high = query.get('high_mark', len(model_data))
         fields = getattr(self, 'fields', None)
-        handler = partial(self.construct_instance, model=model) if not fields else self.values_handler
+        if fields is None:
+            handler = partial(self.construct_instance, model=model, only_fields=getattr(self, 'only_fields', None))
+        else:
+            handler = self.values_handler
         for data in model_data[low:high]:
             yield handler(data)
 
@@ -177,25 +182,26 @@ class CustomQuerySet(BQuerySet):
     _filter_or_exclude_inplace = _filter_or_exclude
 
     def last(self):
-        data = list(self)[-1:]
-        if data:
-            return data[0]
+        return self.reverse().first()
 
     def first(self):
-        data = list(self[:1])
-        if data:
-            return data[0]
+        return next(iter(self), None)
 
     def values(self, *fields, **expressions):
         assert not expressions, 'Expressions is not supported on custom non-database models.'
         clone = self._clone()
-        clone.__iterable_class__ = type('CustomModelIterableValues', (object,), {'fields': fields})
+        clone.__iterable_class__ = type('CustomModelIterableValues', (CustomModelIterable,), {'fields': fields})
         return clone
 
     def setup_custom_queryset_kwargs(self, **kwargs):
         qs = self._chain()
         qs.query['custom_queryset_kwargs'] = kwargs
         return qs
+
+    def only(self, *fields):
+        clone = self._clone()
+        clone.__iterable_class__ = type('CustomModelIterable', (CustomModelIterable,), {'only_fields': fields})
+        return clone
 
 
 class CustomModelBase(ModelBaseClass):

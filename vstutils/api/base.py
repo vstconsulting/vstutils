@@ -329,15 +329,6 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     def filter_for_filter_backends(self, backend):
         return getattr(backend, 'required', False)
 
-    @raise_context_decorator_with_default(default=set())
-    def _get_selectable_fields(self, qs):
-        result = {f.name for f in qs.model._meta.fields}
-
-        for extra in filter(bool, map(lambda x: getattr(qs.query, x, None), query_check_params)):
-            result.update(extra.keys())
-
-        return result
-
     def filter_queryset(self, queryset: QuerySet):
         if hasattr(self, 'nested_name'):
             self.filter_backends = filter(  # type: ignore
@@ -350,17 +341,21 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             # pylint: disable=protected-access
 
             serializer_class = self.get_serializer_class()
-            if issubclass(serializer_class, BaseSerializer):
+            if issubclass(serializer_class, BaseSerializer) and not qs.query.select_related:
                 serializer = serializer_class()
                 read_fields = {f.field_name for f in serializer._readable_fields}
                 model_fields = {
-                    f.field_name  # type: ignore
-                    for f in serializer._readable_fields
-                    if isinstance(f, non_optimizeable_fields)
+                    f.name
+                    for f in queryset.model._meta.get_fields()
                 }
-
-                if read_fields.issubset(self._get_selectable_fields(qs)) and not (read_fields & model_fields):
-                    qs = qs.values(*read_fields)
+                related_fields = {
+                    f.name
+                    for f in queryset.model._meta.get_fields()
+                    if isinstance(f, models.ForeignObjectRel)
+                }
+                selectable_fields = tuple(read_fields.intersection(model_fields))
+                if not related_fields.intersection(selectable_fields):
+                    qs = qs.only(*selectable_fields)
 
         return qs
 

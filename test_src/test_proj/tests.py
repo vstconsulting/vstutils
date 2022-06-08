@@ -4546,6 +4546,12 @@ class CustomModelTestCase(BaseTestCase):
         list_qs = List.objects.setup_custom_queryset_kwargs(data_source=[])
         self.assertEqual(list_qs.count(), 0)
 
+    def test_custom_model_values_and_only(self):
+        list_qs = List.objects.setup_custom_queryset_kwargs(data_source=[{'value': f'{i}'} for i in range(100)])
+        self.assertEqual(list_qs.count(), 100)
+        self.assertEqual(list_qs.values('value').first(), {'value': "0"})
+        self.assertEqual(list_qs.only('value').first().value, "0")
+
     def test_custom(self):
         self.client.logout()
         results = self.bulk([
