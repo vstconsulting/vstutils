@@ -244,7 +244,7 @@ SERVER_TRANSLATION = {
     # auth/reg
     'sign in to start your session': 'Войдите, чтобы начать сеанс',
     'confirm your email before logging in': 'подтвердите свою электронную почту перед входом',
-    'Confirmation link is invalid or expired, please register again': 'Ссылка для подтверждения неверна или устарела, пожалуйста, зарегистрируйтесь повторно',
+    'Confirmation link is invalid or expired': 'Ссылка для подтверждения неверна или устарела',
     'sign in': 'войти',
     'sign up': 'зарегистрируйтесь',
     'forgot password': 'забыли пароль',

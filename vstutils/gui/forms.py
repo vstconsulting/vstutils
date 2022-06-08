@@ -22,6 +22,11 @@ hash_data = override_setting_decorator(make_password)
 check_data = override_setting_decorator(check_password)
 
 
+class EmptyWidget(forms.widgets.HiddenInput):
+    def render(self, *args, **kwargs):
+        return ''
+
+
 class AgreementWidget(forms.widgets.CheckboxInput):
     template_name = 'widgets/agreement_widget.html'
 
@@ -88,7 +93,7 @@ class RegistrationForm(UserCreationForm):
         help_text=__('Required. Inform a valid email address.')  # type: ignore
     )
     if settings.SEND_CONFIRMATION_EMAIL:
-        uid = forms.CharField(max_length=256, required=False, widget=forms.HiddenInput(), label='')
+        uid = forms.CharField(max_length=256, required=False, widget=EmptyWidget(), label='')
         email.help_text = __('A confirmation will be sent to your e-mail')  # type: ignore
 
     class Meta(UserCreationForm.Meta):
@@ -149,9 +154,11 @@ class RegistrationForm(UserCreationForm):
             if self.errors and uid not in (None, ''):
                 try:
                     self.cleaned_data.update(secure_pickle.loads(cache.get(uid)))
+                    cache.delete(uid)
                     self._errors = ErrorDict()
                 except TypeError:  # nocv
                     self._errors = ErrorDict()
+                    self.add_error('uid', _('Confirmation link is invalid or expired'))
 
     def _post_clean(self):
         super()._post_clean()
@@ -159,14 +166,6 @@ class RegistrationForm(UserCreationForm):
             for err in tuple(self._errors.keys()):
                 if err != 'uid':
                     del self._errors[err]
-
-    def clean(self):
-        super().clean()
-        if settings.SEND_CONFIRMATION_EMAIL:
-            uid = self.cleaned_data.get('uid', False)
-            if uid and not cache.get(uid, False):
-                self._errors = ErrorDict()
-                self.add_error('uid', _('Confirmation link is invalid or expired, please register again'))
 
 
 class TwoFaForm(forms.Form):

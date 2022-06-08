@@ -246,7 +246,7 @@ SERVER_TRANSLATION = {
     # auth/reg
     'sign in to start your session': 'đăng nhập để bắt đầu',
     'confirm your email before logging in': 'xác nhận email của bạn trước khi đăng nhập',
-    'Confirmation link is invalid or expired, please register again': 'Liên kết xác nhận không hợp lệ hoặc hết hạn, vui lòng đăng ký lại',
+    'Confirmation link is invalid or expired': 'Liên kết xác nhận không hợp lệ hoặc hết hạn',
     'sign in': 'đăng nhập',
     'sign up': 'đăng ký',
     'forgot password': 'quên mật khẩu',

@@ -870,16 +870,11 @@ class ViewsTestCase(BaseTestCase):
         href = match.group(0)
 
         href_base, correct_uid = href.split('uid=')
-        user['uid'] = 'wrong'
-
-        response = client.post(href_base, user)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Confirmation link is invalid or expired, please register again', str(response.content))
 
         response = client.post(href_base, {'uid': 'wrong'})
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.context_data['form'].errors.get_json_data(), {
-            'uid': [{'message': 'Confirmation link is invalid or expired, please register again', 'code': ''}],
+            'uid': [{'message': 'Confirmation link is invalid or expired', 'code': ''}],
         })
 
         # Check email and uid in create method
@@ -899,14 +894,21 @@ class ViewsTestCase(BaseTestCase):
         response = client.post(href, user)
         self.assertRedirects(response, self.login_url, target_status_code=302)
 
+        client.post(href_base, {'uid': correct_uid})
+        response = client.post(href_base, {'uid': correct_uid})
+        self.assertEqual(len(response.context['form'].errors), 1)
+        self.assertEqual(response.context['form'].errors['uid'][0], 'Confirmation link is invalid or expired')
+
         get_user_model().objects.filter(email=user['email']).delete()
         response = client.post(href, {'uid': user['uid']})
-        self.assertRedirects(response, self.login_url, target_status_code=302)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['form'].errors), 1)
+        self.assertEqual(response.context['form'].errors['uid'][0], 'Confirmation link is invalid or expired')
 
         client.post(self.logout_url)
         client.get(href)
         response = client.post(href, user)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
     def test_registration_with_confirmation(self):
         user = dict(

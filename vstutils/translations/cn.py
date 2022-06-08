@@ -247,7 +247,7 @@ SERVER_TRANSLATION = {
     #auth/reg
     'sign in to start your session': '登录开始会议',
     'confirm your email before logging in': '登录前确认您的电子邮件',
-    'Confirmation link is invalid or expired, please register again': '确认链接无效或过期，请重新注册',
+    'Confirmation link is invalid or expired': '确认链接无效或过期',
     'sign in': '进入',
     'sign up': '请注册',
     'forgot password': '忘记密码',
