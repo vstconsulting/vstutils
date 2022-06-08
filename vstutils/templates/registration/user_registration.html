@@ -10,9 +10,10 @@
             const uidInput = document.createElement("input");
             const csrfInput = document.createElement("input")
             form.method = "POST";
-            form.action = document.location.href;
+            form.action = document.location.href.replace(document.location.search, '');
             uidInput.value = uid;
             uidInput.name = "uid";
+            uidInput.type = "hidden";
             csrfInput.value = document.cookie.match(/csrftoken=(.+?)(;|$)/)[1];
             csrfInput.name = "csrfmiddlewaretoken";
             csrfInput.type = "hidden";
