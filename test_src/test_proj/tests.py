@@ -23,6 +23,7 @@ from django import VERSION as django_version
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
+from django.db.models import F
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.template.exceptions import TemplateDoesNotExist
@@ -564,6 +565,67 @@ class VSTUtilsTestCase(BaseTestCase):
                     list(map(lambda x: x.count(), result)),
                     [2, 3, 6, 7]
                 )
+
+    def test_deep_nested_with_filters(self):
+        GroupWithFK = self.get_model_class('test_proj.GroupWithFK')
+        ModelWithNestedModels = self.get_model_class('test_proj.ModelWithNestedModels')
+
+        related1 = ModelWithNestedModels.objects.create(name='related1')
+        related1_1 = ModelWithNestedModels.objects.create(name='related1_1')
+        related2_2 = ModelWithNestedModels.objects.create(name='related2_2')
+
+        group1 = GroupWithFK.objects.create(name='Group 1', fkmodel=related1)
+        group1_1 = GroupWithFK.objects.create(name='Group 1_1', parent=group1, fkmodel=related1_1)
+        group1_1_1 = GroupWithFK.objects.create(name='Group 1_1_1', parent=group1_1)
+
+        group2 = GroupWithFK.objects.create(name='Group 2')
+        group2_2 = GroupWithFK.objects.create(name='Group 2_2', parent=group2, fkmodel=related2_2)
+
+        related_models = [None, related1_1, related1]
+        group_names = ['Group 1_1_1', 'Group 1_1', 'Group 1']
+
+        with self.assertNumQueries(1):
+            groups = list(
+                GroupWithFK.objects
+                    .filter(id=group1_1_1.id)
+                    .get_parents(with_current=True)
+                    .select_related('fkmodel')
+                    .annotate(parent_name=F('parent__name'))
+                    .order_by('-id')
+            )
+
+            self.assertEqual(len(groups), 3)
+            self.assertListEqual(
+                [group.name for group in groups],
+                group_names,
+            )
+            self.assertListEqual(
+                [group.fkmodel for group in groups],
+                related_models
+            )
+            self.assertListEqual(
+                [group.parent_name for group in groups],
+                ['Group 1_1', 'Group 1', None],
+            )
+
+        with self.assertNumQueries(1):
+            groups = list(
+                GroupWithFK.objects
+                    .filter(id=group1.id)
+                    .get_children(with_current=True)
+                    .select_related('fkmodel')
+                    .order_by('-id')
+            )
+
+            self.assertEqual(len(groups), 3)
+            self.assertListEqual(
+                [group.name for group in groups],
+                group_names,
+            )
+            self.assertListEqual(
+                [group.fkmodel for group in groups],
+                related_models,
+            )
 
 
 class ViewsTestCase(BaseTestCase):
