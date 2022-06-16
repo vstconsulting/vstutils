@@ -1,6 +1,6 @@
 import typing as _t
 import logging
-from django.db.models import Model
+from django.db.models import Model, QuerySet
 from django.http.request import HttpRequest
 from .utils import ObjectHandlers
 from .ldap_utils import LDAP as __LDAP
@@ -23,6 +23,9 @@ class UserModel(Model):
 class BaseAuthBackend:
     def authenticate(self, request: HttpRequest, username=None, password=None):
         raise NotImplementedError  # nocv
+
+    def patch_user_queryset(self, queryset: QuerySet) -> QuerySet:
+        return queryset
 
     def user_can_authenticate(self, user: UserModel) -> bool:
         ...

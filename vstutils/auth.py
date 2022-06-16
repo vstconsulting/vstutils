@@ -4,7 +4,7 @@ import traceback
 
 from django.core.cache import cache
 from django.contrib.auth import get_user_model, backends
-from django.db.models import signals
+from django.db.models import signals, QuerySet
 from django.dispatch import receiver
 from django.conf import settings
 from django.http.request import HttpRequest
@@ -67,11 +67,14 @@ class BaseAuthBackend(backends.ModelBackend):
     def authenticate(self, request: HttpRequest, username=None, password=None, **kwargs):
         raise NotImplementedError  # nocv
 
+    def patch_user_queryset(self, queryset: QuerySet) -> QuerySet:
+        return queryset
+
     @cache_user_decorator
     def get_user(self, user_id: int) -> AuthRes:
         # pylint: disable=protected-access
         try:
-            user = UserModel._default_manager.select_related('twofa').get(pk=user_id)
+            user = self.patch_user_queryset(UserModel._default_manager.select_related('twofa')).get(pk=user_id)
         except UserModel.DoesNotExist:  # nocv
             return None
         return user if self.user_can_authenticate(user) else None
@@ -100,7 +103,8 @@ class LdapBackend(BaseAuthBackend):  # nocv
             backend = LDAP(self.server, username, password, self.domain)
             if not backend.isAuth():
                 return
-            user = UserModel._default_manager.select_related('twofa').get_by_natural_key(backend.domain_user)
+            user = self.patch_user_queryset(UserModel._default_manager.select_related('twofa'))\
+                .get_by_natural_key(backend.domain_user)
             if self.user_can_authenticate(user) and backend.isAuth():
                 return user
         except:
