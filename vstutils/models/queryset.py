@@ -1,5 +1,6 @@
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 from django.db import models
+from django.db.models.expressions import RawSQL
 from django.utils.functional import cached_property
 from django.conf import settings
 
@@ -101,7 +102,7 @@ class BQuerySet(models.QuerySet):
 
         with_current_sql = f'''
             UNION
-            {str(self.values(origin_model_pk).order_by().query)}
+            {self.values(origin_model_pk).order_by().query}
         '''
 
         sql = f'''
@@ -120,7 +121,7 @@ class BQuerySet(models.QuerySet):
         '''
         if with_current:
             sql += with_current_sql
-        return self.model.objects.extra(where=[f'id IN ({sql})'])  # nosec
+        return self.model.objects.filter(id__in=RawSQL(sql, []))  # nosec
 
     def _deep_nested_ids_without_cte(self, accumulated=None, deep_children=True):
         deep_parent_field = self.model.deep_parent_field
