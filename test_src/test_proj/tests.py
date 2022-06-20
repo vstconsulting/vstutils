@@ -69,6 +69,7 @@ from .models import (
     Host,
     HostGroup,
     List,
+    ListOfFiles,
     Author,
     Post,
     OverridenModelWithBinaryFiles,
@@ -3498,7 +3499,7 @@ class ProjectTestCase(BaseTestCase):
                 author_2_post_count,
                 author_2_post_count,
         )):
-            self.assertEqual(results[pos]['status'], 200)
+            self.assertEqual(results[pos]['status'], 200, results[pos]['data'])
             self.assertEqual(results[pos]['data']['count'], count)
         self.assertEqual(results[-1]['status'], 200, results[-1]['data'])
         self.assertEqual(results[-1]['data']['count'], author_1_post_count)
@@ -4615,6 +4616,13 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(list_qs.count(), 100)
         self.assertEqual(list_qs.values('value').first(), {'value': "0"})
         self.assertEqual(list_qs.only('value').first().value, "0")
+
+        lf_qs = ListOfFiles.objects.all()
+        first = lf_qs.defer('updated', 'value').first()
+        self.assertEqual(first.id, 0)
+        self.assertEqual(first.test, '1')
+        self.assertEqual(first.value, '')
+        self.assertEqual(lf_qs.first().value, 'File data')
 
     def test_custom(self):
         self.client.logout()

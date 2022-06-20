@@ -348,14 +348,9 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
                     f.name
                     for f in queryset.model._meta.get_fields()
                 }
-                related_fields = {
-                    f.name
-                    for f in queryset.model._meta.get_fields()
-                    if isinstance(f, models.ForeignObjectRel)
-                }
-                selectable_fields = tuple(read_fields.intersection(model_fields))
-                if not related_fields.intersection(selectable_fields):
-                    qs = qs.only(*selectable_fields)
+                deferable_fields = model_fields - read_fields
+                if deferable_fields:
+                    return qs.defer(*deferable_fields)
 
         return qs
 

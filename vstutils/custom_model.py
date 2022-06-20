@@ -12,6 +12,7 @@ from django.db.models.fields import CharField, TextField, IntegerField, BooleanF
 
 from .models import BQuerySet, BaseModel
 from .models.base import ModelBaseClass
+from .utils import raise_context
 from .tools import get_file_value, multikeysort  # pylint: disable=import-error
 
 
@@ -120,9 +121,15 @@ class CustomModelIterable(ModelIterable):
         # pylint: disable=no-member
         return {f: unit.get(f) for f in self.fields}
 
-    def construct_instance(self, data, model, only_fields):
+    def construct_instance(self, data, model, only_fields, defer_fields):
         if only_fields is not None:
             data = {k: v for k, v in data.items() if k in only_fields}
+        elif defer_fields is not None:
+            data = {k: v for k, v in data.items() if k not in defer_fields}
+        for field in model._meta.get_fields():
+            if field.attname in data:
+                with raise_context():
+                    data[field.attname] = field.to_python(data[field.attname])
         return model(**data)
 
     def __iter__(self):
@@ -155,7 +162,12 @@ class CustomModelIterable(ModelIterable):
         high = query.get('high_mark', len(model_data))
         fields = getattr(self, 'fields', None)
         if fields is None:
-            handler = partial(self.construct_instance, model=model, only_fields=getattr(self, 'only_fields', None))
+            handler = partial(
+                self.construct_instance,
+                model=model,
+                only_fields=getattr(self, 'only_fields', None),
+                defer_fields=getattr(self, 'defer_fields', None),
+            )
         else:
             handler = self.values_handler
         for data in model_data[low:high]:
@@ -201,6 +213,11 @@ class CustomQuerySet(BQuerySet):
     def only(self, *fields):
         clone = self._clone()
         clone.__iterable_class__ = type('CustomModelIterable', (CustomModelIterable,), {'only_fields': fields})
+        return clone
+
+    def defer(self, *fields):
+        clone = self._clone()
+        clone.__iterable_class__ = type('CustomModelIterable', (CustomModelIterable,), {'defer_fields': fields})
         return clone
 
 
