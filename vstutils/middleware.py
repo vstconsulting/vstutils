@@ -256,6 +256,7 @@ class FrontendChangesNotifications(BaseMiddleware):
 
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
         if settings.CENTRIFUGO_CLIENT_KWARGS:
-            with self.notificator_class([]):
+            with self.notificator_class([]) as notificator:
+                request.notificator = notificator  # type: ignore
                 return super().get_response_handler(request)
         return super().get_response_handler(request)

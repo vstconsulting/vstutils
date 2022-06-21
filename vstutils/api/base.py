@@ -341,7 +341,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             # pylint: disable=protected-access
 
             serializer_class = self.get_serializer_class()
-            if issubclass(serializer_class, BaseSerializer) and not qs.query.select_related:
+            if issubclass(serializer_class, BaseSerializer):
                 serializer = serializer_class()
                 read_fields = {
                     f.field_name
