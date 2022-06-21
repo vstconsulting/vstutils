@@ -343,12 +343,20 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             serializer_class = self.get_serializer_class()
             if issubclass(serializer_class, BaseSerializer) and not qs.query.select_related:
                 serializer = serializer_class()
-                read_fields = {f.field_name for f in serializer._readable_fields}
+                read_fields = {
+                    f.field_name
+                    for f in serializer._readable_fields
+                }
                 model_fields = {
                     f.name
                     for f in queryset.model._meta.get_fields()
                 }
-                deferable_fields = model_fields - read_fields
+                fk_related_fields = {
+                    f.name
+                    for f in queryset.model._meta.get_fields()
+                    if isinstance(f, models.ForeignKey)
+                }
+                deferable_fields = model_fields - read_fields - fk_related_fields
                 if deferable_fields:
                     return qs.defer(*deferable_fields)
 
