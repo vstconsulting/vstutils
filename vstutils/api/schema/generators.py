@@ -135,7 +135,9 @@ class VSTSchemaGenerator(generators.OpenAPISchemaGenerator):
                         algorithm="HS256"
                     )
                     result['info']['x-centrifugo-address'] = get_centrifugo_public_address(request)
-            for hook in self._get_hooks():
-                result = copy.deepcopy(result)
-                hook(request=request, schema=result)
+
+        for hook in self._get_hooks():
+            result = copy.deepcopy(result)
+            hook(request=request, schema=result)
+
         return result
