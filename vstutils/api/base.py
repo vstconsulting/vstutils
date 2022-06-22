@@ -344,7 +344,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
             if issubclass(serializer_class, BaseSerializer):
                 serializer = serializer_class()
                 read_fields = {
-                    f.field_name
+                    f.source if f.source and '.' not in f.source else f.field_name
                     for f in serializer._readable_fields
                 }
                 model_fields = {
@@ -356,7 +356,12 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
                     for f in queryset.model._meta.get_fields()
                     if isinstance(f, models.ForeignKey)
                 }
-                deferable_fields = model_fields - read_fields - fk_related_fields
+                deferable_fields = (
+                        model_fields -
+                        read_fields -
+                        fk_related_fields -
+                        set(getattr(queryset.model, '_required_fields', None) or set())
+                )
                 if deferable_fields:
                     return qs.defer(*deferable_fields)
 

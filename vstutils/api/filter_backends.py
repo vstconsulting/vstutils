@@ -156,19 +156,15 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
     __slots__ = ()
     required = True
     fields_fetch_map = {
-        'select': (models.ForeignKey, models.OneToOneField),
+        'select': (models.ForeignKey,),
         'prefetch': (models.ManyToManyField, models.ManyToManyField.rel_class)
     }
 
     def filter_model_fields(self, view, field_types):
         return tuple(
-            map(
-                lambda f: f.name,
-                filter(
-                    lambda f: isinstance(f, field_types),
-                    view.get_serializer_class().Meta.model()._meta.fields
-                )
-            )
+            f.name
+            for f in view.get_serializer_class().Meta.model()._meta.fields
+            if isinstance(f, field_types)
         )
 
     def filter_by_func(self, queryset, queryset_func_name, related):
@@ -187,15 +183,18 @@ class SelectRelatedFilterBackend(VSTFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         """
-        Select related in queryset.
+        Select+prefetch related in queryset.
         """
-        if queryset.query.select_related:
-            return queryset
-        if not getattr(view, 'select_related', True):
-            return queryset
         if request.method != 'GET':
             return queryset
-        return self.prefetch('prefetch', view, self.prefetch('select', view, queryset))
+
+        if not queryset.query.select_related and getattr(view, 'select_related', True):
+            queryset = self.prefetch('select', view, queryset)
+
+        # pylint: disable=protected-access
+        if not queryset._prefetch_related_lookups and getattr(view, 'prefetch_related', True):
+            queryset = self.prefetch('prefetch', view, queryset)
+        return queryset
 
 
 class DeepViewFilterBackend(VSTFilterBackend):
