@@ -3,7 +3,7 @@ import os
 import gc
 import pwd
 import sys
-from tempfile import gettempdir, tempdir
+from tempfile import gettempdir
 
 import environ
 from django.contrib import admin
@@ -215,6 +215,7 @@ class DBTestSection(DBSection):
     type_serialize = ConfigBoolType
     type_create_db = ConfigBoolType
     type_create_user = ConfigBoolType
+    type_dependencies = cconfig.ListType()
 
 
 class DBOptionsSection(cconfig.Section):
@@ -451,7 +452,7 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             "default_tablespace": "",
             "default_index_tablespace": "",
             "databases_without_cte_support": [],
-            'default': {}
+            'default': {},
         },
         'cache': {
             **env.cache(
@@ -880,11 +881,13 @@ DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE
 def parse_db(params):
     data: DBSection = config.get_section_instance('database')
     data.update({**config['database'].all(), **params[1].all()})
-    return params[0], data.all()
+    data_all = data.all()
+    USED_ENGINES.add(data_all.get('ENGINE'))
+    return params[0], data_all
 
 
+USED_ENGINES: _t.Set[_t.Text] = set()
 DATABASES = dict(map(parse_db, filter(lambda x: isinstance(x[1], cconfig.Section), config['databases'].items())))
-USED_ENGINES = set(filter(bool, (i.get('ENGINE', None) for i in DATABASES.values())))
 
 if 'django.db.backends.mysql' in USED_ENGINES:  # nocv
     try:
@@ -1372,6 +1375,7 @@ def get_default_storage_class():
         return 'storages.backends.s3boto3.S3Boto3Storage'
 
     return 'django.core.files.storage.FileSystemStorage'  # nocv
+
 
 storages = config['storages']
 LIBCLOUD_PROVIDERS: _t.Dict[_t.Text, _t.Dict] = {}
