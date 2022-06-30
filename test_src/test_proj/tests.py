@@ -2843,7 +2843,7 @@ class LangTestCase(BaseTestCase):
         ]
         results = self.bulk(bulk_data)
         # test successful translation
-        self.assertEqual(201, results[0]['status'])
+        self.assertEqual(201, results[0]['status'], results[0]['data'])
         self.assertEqual(test_results[0], results[0]['data'])
         # test not translated
         self.assertEqual(201, results[1]['status'])
@@ -3052,7 +3052,7 @@ class ProjectTestCase(BaseTestCase):
         results = self.bulk(bulk_data)
         for result in results[:-2]:
             self.assertEqual(result['status'], 201, f'Current result number is `{result}`')
-        self.assertEqual(results[-2]['status'], 200)
+        self.assertEqual(results[-2]['status'], 200, results[-2]['data'])
         self.assertEqual(results[-2]['data']['name'], 'level4')
         self.assertEqual(results[-1]['status'], 200)
         self.assertEqual(results[-1]['data']['count'], 1)

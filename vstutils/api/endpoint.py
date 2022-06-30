@@ -4,8 +4,8 @@ import traceback
 import functools
 from concurrent.futures import ThreadPoolExecutor, Executor
 from collections import OrderedDict
-import json
 
+import orjson
 from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, HttpRequest
@@ -66,7 +66,7 @@ def _get_request_data_dict(request_data):
 
 @_get_request_data.register(str)
 def _get_request_data_str(request_data):
-    return _get_request_data(json.loads(request_data))  # nocv
+    return _get_request_data(orjson.loads(request_data))  # nocv
 
 
 def _iter_request(request, operation_handler, context):
@@ -125,7 +125,7 @@ class ParseResponseDict(dict):
             if isinstance(response.accepted_renderer, ORJSONRenderer) and response.is_rendered:  # type: ignore
                 return response.rendered_content  # type: ignore
         if response.status_code != 404 and getattr(response, "rendered_content", False):  # nocv
-            return json.loads(response.rendered_content.decode())  # type: ignore
+            return orjson.loads(response.rendered_content.decode())  # type: ignore
         return Dict(detail=str(response.content.decode('utf-8')))
 
 
@@ -209,7 +209,7 @@ class FormatDataFieldMixin:
                 **self.context['variables'],
             )
             with raise_context():
-                return json.loads(result)
+                return orjson.loads(result)
 
         return result
 
@@ -272,6 +272,7 @@ class PathField(TemplateStringField):
 class OperationSerializer(serializers.Serializer):
     # pylint: disable=abstract-method
     __slots__ = ()
+    renderer = ORJSONRenderer()
 
     path = PathField(required=True)
     method = MethodChoicesField(required=True)
@@ -304,6 +305,9 @@ class OperationSerializer(serializers.Serializer):
             url += '?' + str(validated_data['query'])
         if method_name != 'get':
             method = transaction.atomic()(method)
+        data = validated_data['data']
+        if data and method_name != 'get':
+            data = self.renderer.render(data, media_type=self.renderer.media_type)
         result = ParseResponseDict(
             path=url,
             method=method_name,
@@ -311,7 +315,7 @@ class OperationSerializer(serializers.Serializer):
                 url,
                 content_type='application/json',
                 secure=self.context['request']._request.is_secure(),
-                data=validated_data['data'],
+                data=data,
                 **validated_data['headers']
             )
         )

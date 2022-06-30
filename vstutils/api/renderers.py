@@ -21,7 +21,7 @@ class ORJSONRenderer(BaseORJSONRenderer):
         return BaseORJSONRenderer.default(obj)
 
     def render(self, data, media_type=None, renderer_context=None):
-        if getattr(renderer_context['request'], 'is_bulk', False):
+        if renderer_context and getattr(renderer_context['request'], 'is_bulk', False):
             return data
         return super().render(data, media_type, renderer_context)
 
