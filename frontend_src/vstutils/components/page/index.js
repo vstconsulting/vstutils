@@ -243,7 +243,7 @@ export const ActionViewComponent = {
                     method: this.view.method,
                     headers: { 'content-type': 'application/json' },
                     path: this.getActionRequestPath(),
-                    data: JSON.stringify(instance._getInnerData()),
+                    data: instance._getInnerData(),
                     useBulk: instance.constructor.shouldUseBulk(this.view.method),
                 });
                 this.changedFields = [];
