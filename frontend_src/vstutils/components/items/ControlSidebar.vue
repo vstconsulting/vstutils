@@ -63,8 +63,6 @@
     import { HelpModal } from './modal';
     import BootstrapModal from '../BootstrapModal.vue';
 
-    const DARK_MODE_CLASS = 'dark-mode';
-
     export default {
         name: 'ControlSidebar',
         components: { BootstrapModal, HelpModal },
@@ -92,11 +90,19 @@
             '$store.state.userSettings.changed': function () {
                 this.isSaving = false;
             },
-            '$store.state.userSettings.settings.main.language': { handler: 'setLanguage', immediate: true },
-            '$store.state.userSettings.settings.main.dark_mode': { handler: 'setDarkMode', immediate: true },
         },
         created() {
             this.UserSettings = this.$app.modelsResolver.byReferencePath('#/definitions/_UserSettings');
+        },
+        mounted() {
+            document.addEventListener('keydown', this.closeControlSidebar);
+            document.addEventListener('click', this.closeControlSidebar);
+            document.addEventListener('scroll', this.closeControlSidebar);
+        },
+        beforeDestroy() {
+            document.removeEventListener('keydown', this.closeControlSidebar);
+            document.removeEventListener('click', this.closeControlSidebar);
+            document.removeEventListener('scroll', this.closeControlSidebar);
         },
         methods: {
             async saveSettings() {
@@ -114,23 +120,18 @@
                     value: field.toInner({ [field.name]: value }),
                 });
             },
-            setDarkMode(value) {
-                const hasDarkMode = document.body.classList.contains(DARK_MODE_CLASS);
-                if (value && !hasDarkMode) {
-                    document.body.classList.add(DARK_MODE_CLASS);
-                } else if (!value && hasDarkMode) {
-                    document.body.classList.remove(DARK_MODE_CLASS);
-                }
-            },
-            async setLanguage(value) {
-                if (this.$i18n.locale !== value) {
-                    await this.$app.setLanguage(value);
-                    await this.$app.cache.delete(window.schemaLoader.cacheKey);
-                    await window.schemaLoader.loadSchema();
-                }
-            },
             cleanAllCache() {
                 window.cleanAllCacheAndReloadPage();
+            },
+            closeControlSidebar(ev) {
+                if (ev.key === 'Escape') {
+                    this.$root.closeControlSidebar();
+                } else if (ev.type === 'click' && !this.$el.contains(ev.target)) {
+                    console.log(ev.target);
+                    this.$root.closeControlSidebar();
+                } else if (ev.type === 'scroll' && document.body.getBoundingClientRect().top >= 0) {
+                    this.$root.closeControlSidebar();
+                }
             },
         },
     };

@@ -18,7 +18,7 @@
             :show-breadcrumbs="showBreadcrumbs"
         />
 
-        <ControlSidebar />
+        <ControlSidebar v-if="isControlSidebarOpen" />
 
         <transition name="fade">
             <div v-if="confirmation.isOpen" class="overlay" @click.stop="reject">
@@ -46,6 +46,8 @@
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
 
+    const DARK_MODE_CLASS = 'dark-mode';
+
     export default {
         name: 'AppRoot',
         components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo },
@@ -70,6 +72,7 @@
                     actionName: '',
                     isOpen: false,
                 },
+                isControlSidebarOpen: false,
             };
         },
         computed: {
@@ -112,6 +115,8 @@
             $route() {
                 this.reject();
             },
+            '$store.state.userSettings.settings.main.language': { handler: 'setLanguage', immediate: true },
+            '$store.state.userSettings.settings.main.dark_mode': { handler: 'setDarkMode', immediate: true },
         },
         created() {
             document.body.classList.add(...this.bodyClasses);
@@ -143,6 +148,39 @@
             reject() {
                 this.confirmation.isOpen = false;
                 this.confirmation.callback = null;
+            },
+            openControlSidebar() {
+                this.isControlSidebarOpen = true;
+                document.body.classList.add('control-sidebar-slide-open');
+            },
+            closeControlSidebar() {
+                document.body.classList.remove('control-sidebar-slide-open');
+                if (this.$store.state.userSettings.changed) {
+                    this.$store.dispatch('userSettings/save');
+                }
+                this.isControlSidebarOpen = false;
+            },
+            toggleUserSettings() {
+                if (this.isControlSidebarOpen) {
+                    this.closeControlSidebar();
+                } else {
+                    this.openControlSidebar();
+                }
+            },
+            setDarkMode(value) {
+                const hasDarkMode = document.body.classList.contains(DARK_MODE_CLASS);
+                if (value && !hasDarkMode) {
+                    document.body.classList.add(DARK_MODE_CLASS);
+                } else if (!value && hasDarkMode) {
+                    document.body.classList.remove(DARK_MODE_CLASS);
+                }
+            },
+            async setLanguage(value) {
+                if (this.$i18n.locale !== value) {
+                    await this.$app.setLanguage(value);
+                    await this.$app.cache.delete(window.schemaLoader.cacheKey);
+                    await window.schemaLoader.loadSchema();
+                }
             },
         },
     };

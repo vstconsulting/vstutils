@@ -63,14 +63,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a
-                    class="nav-link"
-                    data-widget="control-sidebar"
-                    data-slide="true"
-                    href="#"
-                    role="button"
-                    @click="toggleUserSettings"
-                >
+                <a class="nav-link" href="#" role="button" @click.stop="$root.toggleUserSettings()">
                     <i class="fas fa-th-large" />
                 </a>
             </li>
@@ -175,14 +168,6 @@
             setDefaultGravatar(el) {
                 el.src = this.getDefaultGravatarImg();
                 return false;
-            },
-            toggleUserSettings() {
-                if (
-                    document.body.classList.contains('control-sidebar-slide-open') &&
-                    this.$store.state.userSettings.changed
-                ) {
-                    this.$store.dispatch('userSettings/save');
-                }
             },
         },
     };
