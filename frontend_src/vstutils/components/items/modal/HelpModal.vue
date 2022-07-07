@@ -39,20 +39,20 @@
                 </template>
             </Modal>
         </portal>
-        <button class="btn btn-secondary btn-block" style="margin-bottom: 10px" @click.stop.prevent="open">
-            <span class="fa fa-question-circle" />
+        <ControlSidebarButton icon-class="fa fa-question-circle" @click.native.stop.prevent="open">
             {{ $u.capitalize($t('app info')) }}
-        </button>
+        </ControlSidebarButton>
     </div>
 </template>
 
 <script>
     import ModalWindowAndButtonMixin from '../../../fields/ModalWindowAndButtonMixin.js';
     import Modal from './Modal.vue';
+    import ControlSidebarButton from '../ControlSidebarButton';
 
     export default {
         name: 'HelpModal',
-        components: { Modal },
+        components: { ControlSidebarButton, Modal },
         mixins: [ModalWindowAndButtonMixin],
         data() {
             return {

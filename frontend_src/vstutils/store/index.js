@@ -3,7 +3,7 @@ import Vue from 'vue';
 import { AutoUpdateStoreModule } from '../autoupdate';
 import ComponentStoreModule from './components_state';
 import * as modules from './components_state/commonStoreModules.js';
-import { HttpMethods } from '../utils';
+import { HttpMethods, mergeDeep } from '../utils';
 
 export { modules };
 
@@ -15,6 +15,7 @@ const userSettingsModule = (api) => ({
     namespaced: true,
     state: () => ({
         settings: {},
+        originalSettings: {},
         changed: false,
     }),
     mutations: {
@@ -26,11 +27,18 @@ const userSettingsModule = (api) => ({
             state.settings[section][key] = value;
             state.changed = true;
         },
+        setOriginalSettings(state, settings) {
+            state.originalSettings = mergeDeep({}, settings);
+        },
+        rollback(state) {
+            state.settings = mergeDeep({}, state.originalSettings);
+        },
     },
     actions: {
         async load({ commit }) {
             const { data } = await api.bulkQuery({ method: HttpMethods.GET, path: USER_SETTINGS_PATH });
             commit('setSettings', data);
+            commit('setOriginalSettings', data);
         },
         async save({ commit, state }) {
             const { data } = await api.bulkQuery({

@@ -150,6 +150,8 @@ TRANSLATION = {
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': '设置更改已成功保存。 请刷新页面。',
+    'Do you want to save your changes? The page will be reloaded.': '是否要保存更改？ 该页面将重新加载。',
+    'Yes, reload now': '是的，现在重新加载',
     'now': '眼下',
     'later': '之后',
     'I accept the ': '我接受 ',

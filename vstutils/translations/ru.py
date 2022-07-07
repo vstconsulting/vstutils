@@ -148,6 +148,8 @@ TRANSLATION = {
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',
+    'Do you want to save your changes? The page will be reloaded.': 'Вы хотите сохранить изменения? Страница будет перезагружена.',
+    'Yes, reload now': 'Да, перезагрузить сейчас',
     'now': 'сейчас',
     'later': 'позже',
     'I accept the ': 'Я принимаю ',
@@ -266,4 +268,7 @@ SERVER_TRANSLATION = {
     'Users first name.': 'Имя пользователя',
     'Users last name.': 'Фамилия пользователя',
     'Users e-mail value.': 'Email пользователя',
+
+    #settings
+    'Do you want to save your changes? The page will be reloaded.': 'Вы хотите сохранить изменения? Страница будет перезагружена.',
 }
