@@ -148,6 +148,8 @@ TRANSLATION = {
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',
+    'Do you want to save your changes? The page will be reloaded.': 'Bạn có muốn lưu các thay đổi của bạn? Trang này sẽ được tải lại.',
+    'Yes, reload now': 'Có, tải lại ngay bây giờ',
     'now': 'hiện nay',
     'later': 'một lát sau',
     'I accept the ': 'Tôi chấp nhận ',

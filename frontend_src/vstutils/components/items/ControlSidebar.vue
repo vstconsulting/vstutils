@@ -1,17 +1,18 @@
 <template>
-    <aside class="control-sidebar control-sidebar-dark">
+    <aside class="control-sidebar">
         <div class="p-3 control-sidebar-content">
             <div>
                 <b>{{ $u.capitalize($tc('version', 1)) }}:</b>
                 <code>{{ $app.config.projectVersion }}</code>
             </div>
 
-            <HelpModal />
-
-            <a class="btn btn-secondary btn-block" :href="$app.config.endpointUrl.href" role="button">
-                <i class="fa fa-toolbox" />
-                API
-            </a>
+            <component
+                :is="btn.component"
+                v-for="(btn, idx) in buttons"
+                v-bind="btn.props"
+                :key="idx"
+                class="mt-2"
+            />
 
             <template v-for="(section, idx) in sections">
                 <h6 :key="`section-${idx}`">
@@ -50,7 +51,6 @@
                     </div>
                 </template>
             </BootstrapModal>
-
             <button class="btn btn-secondary btn-block" @click="cleanAllCache">
                 <i class="fas fa-sync-alt" />
                 {{ `${$t('Reload')} ${$t('cache')}` }}
@@ -62,6 +62,7 @@
 <script>
     import { HelpModal } from './modal';
     import BootstrapModal from '../BootstrapModal.vue';
+    import ControlSidebarButton from './ControlSidebarButton';
 
     export default {
         name: 'ControlSidebar',
@@ -84,6 +85,23 @@
                         title: field.title,
                         fields: Array.from(field.nestedModel.fields.values()),
                     }));
+            },
+            buttons() {
+                return [
+                    { component: HelpModal },
+                    {
+                        component: ControlSidebarButton,
+                        props: {
+                            href: this.$app.config.endpointUrl.href,
+                            iconClass: 'fa fa-toolbox',
+                            text: 'API',
+                        },
+                    },
+                    ...this.additionalButtons,
+                ];
+            },
+            additionalButtons() {
+                return [];
             },
         },
         watch: {
@@ -127,9 +145,8 @@
                 if (ev.key === 'Escape') {
                     this.$root.closeControlSidebar();
                 } else if (ev.type === 'click' && !this.$el.contains(ev.target)) {
-                    console.log(ev.target);
                     this.$root.closeControlSidebar();
-                } else if (ev.type === 'scroll' && document.body.getBoundingClientRect().top >= 0) {
+                } else if (ev.type === 'scroll' && document.body.getBoundingClientRect().top <= 0) {
                     this.$root.closeControlSidebar();
                 }
             },
@@ -138,14 +155,30 @@
 </script>
 
 <style scoped>
+    .control-sidebar {
+        width: 300px;
+        color: #ffffff;
+        background-color: #343a40;
+        right: 0;
+        z-index: 100;
+    }
+    .control-sidebar-content > * {
+        margin-bottom: 10px;
+    }
     .control-sidebar .field-component {
         max-width: 100%;
         flex: 0 0 100%;
     }
-    .control-sidebar-content::v-deep > * {
-        margin-bottom: 10px;
-    }
     ul.nav {
         margin-bottom: 1rem;
+    }
+    .control-sidebar {
+        transition: right 0.3s ease-in-out;
+    }
+</style>
+
+<style>
+    .layout-fixed .control-sidebar {
+        top: 47px !important;
     }
 </style>

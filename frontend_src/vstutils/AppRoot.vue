@@ -18,7 +18,25 @@
             :show-breadcrumbs="showBreadcrumbs"
         />
 
-        <ControlSidebar v-if="isControlSidebarOpen" />
+        <transition name="control-sidebar">
+            <ControlSidebar v-if="isControlSidebarOpen" />
+        </transition>
+
+        <BootstrapModal ref="saveSettingsModal">
+            <template #content>
+                <div style="padding: 1rem">
+                    <p>
+                        {{ $t('Do you want to save your changes? The page will be reloaded.') }}
+                    </p>
+                    <button class="btn btn-success" @click="saveSettings">
+                        {{ $t('Yes, reload now') }}
+                    </button>
+                    <button class="btn btn-secondary" style="float: right" @click="rollbackSettings">
+                        {{ $u.capitalize($t('no')) }}
+                    </button>
+                </div>
+            </template>
+        </BootstrapModal>
 
         <transition name="fade">
             <div v-if="confirmation.isOpen" class="overlay" @click.stop="reject">
@@ -45,12 +63,13 @@
     import { AutoUpdateController } from './autoupdate';
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
+    import BootstrapModal from './components/BootstrapModal.vue';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
     export default {
         name: 'AppRoot',
-        components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo },
+        components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo, BootstrapModal },
         mixins: [AutoUpdateController],
         provide() {
             return {
@@ -156,7 +175,7 @@
             closeControlSidebar() {
                 document.body.classList.remove('control-sidebar-slide-open');
                 if (this.$store.state.userSettings.changed) {
-                    this.$store.dispatch('userSettings/save');
+                    this.$refs.saveSettingsModal.open();
                 }
                 this.isControlSidebarOpen = false;
             },
@@ -182,6 +201,14 @@
                     await window.schemaLoader.loadSchema();
                 }
             },
+            async saveSettings() {
+                await this.$store.dispatch('userSettings/save');
+                window.location.reload();
+            },
+            rollbackSettings() {
+                this.$refs.saveSettingsModal.close();
+                this.$store.commit('userSettings/rollback');
+            },
         },
     };
 </script>
@@ -204,5 +231,16 @@
         margin: 30px auto 0;
         width: 300px;
         min-height: 100px;
+    }
+</style>
+
+<style>
+    .control-sidebar-enter,
+    .control-sidebar-leave-to {
+        right: -300px !important;
+    }
+    .control-sidebar-enter-to,
+    .control-sidebar-leave {
+        right: 0 !important;
     }
 </style>
