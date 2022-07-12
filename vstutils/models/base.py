@@ -238,8 +238,6 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
     """
 
     def __new__(mcs, name, bases, attrs, **kwargs):
-        if "__slots__" not in attrs:
-            attrs['__slots__'] = ()
         if "__unicode__" in attrs and '__str__' not in attrs:
             attrs['__str__'] = _get_unicode
         extra_metadata: dict = {**default_extra_metadata}
