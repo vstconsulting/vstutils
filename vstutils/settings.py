@@ -1326,6 +1326,8 @@ CONSENT_TO_PROCESSING_URL = r'^consent_to_processing/$'
 ENABLE_CONSENT_TO_PROCESSING: bool = main.getboolean('enable_consent_to_processing', fallback=REGISTRATION_ENABLED)
 CONSENT_TO_PROCESSING_PATH: str = main['consent_to_processing_path']
 
+ENABLE_USER_SELF_REMOVE: bool = main.getboolean('enable_user_self_remove', fallback=False)
+
 
 PROJECT_GUI_MENU: _t.List[_t.Dict] = [
     {

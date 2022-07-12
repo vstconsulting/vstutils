@@ -258,7 +258,7 @@ class UserViewSet(base.ModelViewSet):
 
     def destroy(self, request: drf_request.Request, *args, **kwargs):
         user = self.get_object()
-        if user == request.user:
+        if user == request.user and not settings.ENABLE_USER_SELF_REMOVE:
             return responses.HTTP_409_CONFLICT("Could not remove youself.")
         return super().destroy(request, *args, **kwargs)  # pylint: disable=no-member
 
