@@ -59,7 +59,8 @@
   "resolutions": {
     "izimodal/jquery": "^3.4.1",
     "jquery-slimscroll/jquery": "^3.4.1",
-    "jquery.scrollto/jquery": "^3.4.1"
+    "jquery.scrollto/jquery": "^3.4.1",
+    "admin-lte/jquery-validation": "^1.19.5"
   },
   "devDependencies": {
     "@babel/core": "^7.16.7",
