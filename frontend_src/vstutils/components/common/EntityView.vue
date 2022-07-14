@@ -9,6 +9,7 @@
                     :actions="actions"
                     :sublinks="sublinks"
                     :instances="instances"
+                    :style="loading ? 'visibility: hidden' : ''"
                     @execute-action="$emit('execute-action', $event)"
                     @open-sublink="$emit('open-sublink', $event)"
                 />
