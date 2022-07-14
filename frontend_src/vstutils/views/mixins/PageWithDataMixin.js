@@ -1,3 +1,4 @@
+import signals from '../../signals.js';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import { formatPath } from '../../utils';
 
@@ -15,6 +16,11 @@ const PageWithDataMixin = {
         },
         title() {
             return this.instance?.getViewFieldString(false) || this.$t(this.view.title);
+        },
+    },
+    watch: {
+        sandbox(value) {
+            signals.emit('pageDataUpdated', { data: value });
         },
     },
     methods: {

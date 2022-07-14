@@ -379,3 +379,29 @@ to
         ':model:Category:name:Category 1': 'Категория 1',
 
 For `FKField` name of the related model is used. And `fieldName` should be equal to `viewField`.
+
+
+ .. _changing-actions-or-sublinks:
+
+Changing actions or sublinks
+----------------------------
+
+Sometimes using only schema for defining actions or sublinks is not enough. 
+
+For example we have an action to make user a superuser (`/user/{id}/make_superuser/`) and we want to hide that action if 
+user is already a superuser (`is_superuser` is `true`). `<${PATH}>filterActions` signal can be used to achieve such result.
+
+.. sourcecode:: javascript
+
+    spa.signals.connect('</user/{id}/make_superuser/>filterActions', (obj) => {
+        if (obj.data.is_superuser) {
+            obj.actions = obj.actions.filter((action) => action.name !== 'make_superuser');
+        }
+    });
+
+
+1. `<${PATH}>filterActions` recieves {actions, data}
+2. `<${PATH}>filterSublinks` recieves {sublinks, data}
+
+Data property will contain instance's data. Actions and sublinks properties will contain arrays with default 
+items (not hidden action or sublinks), it can be changed or replaced completely.

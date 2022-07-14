@@ -63,7 +63,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#" role="button" @click.stop="$root.toggleUserSettings()">
+                <a class="nav-link" role="button" @click.stop="$root.toggleUserSettings()">
                     <i class="fas fa-th-large" />
                 </a>
             </li>

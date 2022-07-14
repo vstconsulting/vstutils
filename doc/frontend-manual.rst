@@ -279,6 +279,22 @@ GuiCustomizer.skin.settings.changed
 
 **Description:** This signal will be executed after changing of current GuiCustomizer skin's settings.
 
+<${PATH}>filterActions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Signal name:** "<${PATH}>filterActions".
+
+**Context argument:** obj - {actions: Object[], data} - Actions is array of action objects. Data represents current instance's data.
+
+**Description:** This signal will be executed to filter actions.
+
+<${PATH}>filterSublinks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Signal name:** "<${PATH}>filterSublinks".
+
+**Context argument:** obj - {sublinks: Object[], data} - Actions is array of sublink objects. Data represents current instance's data.
+
+**Description:** This signal will be executed to filter sublinks.
+
 .. _fields-section:
 
 Field Format
@@ -368,6 +384,11 @@ Also classes apply to operations buttons and links.
     *"selected__field-tariff_type-WAREHOUSE"* and *"selected__field-tariff_type-SLIDE"* if selected 2 ``ListTableRow`` that contains "choices" field with name "tariff_type" and values "WAREHOUSE" and "SLIDE" respectively.
 
 * ``Operation`` - *operation__[operation_name]*
+   **Warning**
+    If you hide operations using CSS classes and for example all actions were hidden then Actions dropdown button will still be visible.
+
+    For better control over actions and sublinks see :ref:`changing-actions-or-sublinks`
+
    **Example:**
     *operation__pickup_point* if operation button or link has name *pickup_point*
 

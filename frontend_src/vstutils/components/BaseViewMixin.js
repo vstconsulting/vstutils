@@ -10,6 +10,7 @@ import {
 import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
+import signals from '../signals';
 
 /**
  * @vue/component
@@ -32,10 +33,20 @@ export const BaseViewMixin = {
             return this.$st(this.view.title);
         },
         actions() {
-            return Array.from(this.view.actions.values()).filter((action) => !action.hidden);
+            const obj = {
+                actions: Array.from(this.view.actions.values()).filter((action) => !action.hidden),
+                data: this.data,
+            };
+            signals.emit(`<${this.view.path}>filterActions`, obj);
+            return obj.actions;
         },
         sublinks() {
-            return Array.from(this.view.sublinks.values()).filter((sublink) => !sublink.hidden);
+            const obj = {
+                sublinks: Array.from(this.view.sublinks.values()).filter((sublink) => !sublink.hidden),
+                data: this.data,
+            };
+            signals.emit(`<${this.view.path}>filterSublinks`, obj);
+            return obj.sublinks;
         },
 
         /**
