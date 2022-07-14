@@ -51,7 +51,7 @@ class Query(dict):
         return query
 
     def _check_data(self, check_type, data):
-        # pylint: disable=protected-access
+        # pylint: disable=protected-access,too-many-return-statements
         if getattr(self, 'empty', False):
             return False
         check_data = self.get(check_type, {})
@@ -60,11 +60,8 @@ class Query(dict):
         meta = self.model._meta
         for filter_name, filter_data in check_data.items():
             filter_name = filter_name.replace('__exact', '')
-            filter_name__cleared = filter_name.split('__')[0]
+            filter_name__cleared, search_format = (filter_name.split('__', maxsplit=1) + [None])[:2]
             if filter_name__cleared == 'pk':
-                filter_name = '__'.join(
-                    [meta.pk.attname] + filter_name.split('__')[1:]
-                )
                 filter_name__cleared = meta.pk.attname
             try:
                 value = data[filter_name__cleared]
@@ -75,10 +72,18 @@ class Query(dict):
                 filter_data = map(field.to_python, filter_data)
             else:
                 filter_data = field.to_python(filter_data)
-            if '__in' in filter_name and value not in filter_data:
-                return False
-            elif '__in' not in filter_name and value != filter_data:
-                return False
+            if search_format == 'in':
+                if value not in filter_data:
+                    return False
+            elif search_format == 'contains' and isinstance(filter_data, str):
+                if filter_data not in value:
+                    return False
+            elif search_format == 'icontains' and isinstance(filter_data, str):
+                if filter_data.upper() not in value.upper():
+                    return False
+            elif search_format is None:
+                if filter_data != value:
+                    return False
         return True
 
     def check_in_query(self, data):
@@ -117,9 +122,9 @@ class Query(dict):
 class CustomModelIterable(ModelIterable):
     __slots__ = ()
 
-    def values_handler(self, unit):
+    def values_handler(self, unit, fields, pk_name):
         # pylint: disable=no-member
-        return {f: unit.get(f) for f in self.fields}
+        return {f: unit.get(f) if f != 'pk' else unit.get(pk_name) for f in fields}
 
     def construct_instance(self, data, model, only_fields, defer_fields):
         if only_fields is not None:
@@ -169,7 +174,11 @@ class CustomModelIterable(ModelIterable):
                 defer_fields=getattr(self, 'defer_fields', None),
             )
         else:
-            handler = self.values_handler
+            handler = partial(
+                self.values_handler,
+                fields=tuple(fields) or {f.name for f in model._meta.get_fields()},
+                pk_name=model._meta.pk.name,
+            )
         for data in model_data[low:high]:
             yield handler(data)
 

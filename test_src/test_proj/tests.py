@@ -4611,6 +4611,9 @@ class CustomModelTestCase(BaseTestCase):
         list_qs = List.objects.setup_custom_queryset_kwargs(data_source=[])
         self.assertEqual(list_qs.count(), 0)
 
+        self.assertEqual(File.objects.filter(name__icontains='ToExclude').count(), 3)
+        self.assertEqual(File.objects.filter(name__contains='oExcl').count(), 2)
+
     def test_custom_model_values_and_only(self):
         list_qs = List.objects.setup_custom_queryset_kwargs(data_source=[{'value': f'{i}'} for i in range(100)])
         self.assertEqual(list_qs.count(), 100)
