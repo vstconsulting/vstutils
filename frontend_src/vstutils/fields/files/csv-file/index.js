@@ -28,7 +28,10 @@ export const CsvFileFieldMixin = {
 export class CsvFileField extends FileField {
     constructor(options) {
         super(options);
-        this.delimiter = this.props.delimiter;
+        this.parserConfig = { header: false, skipEmptyLines: true };
+        if (this.props.parserConfig) {
+            Object.assign(this.parserConfig, this.props.parserConfig);
+        }
         this.minColumnWidth = this.props.minColumnWidth;
     }
 
@@ -41,7 +44,11 @@ export class CsvFileField extends FileField {
         if (typeof value == 'string') {
             return value;
         }
-        return Papa.unparse(value, { delimiter: this.delimiter, header: false, skipEmptyLines: true });
+        return Papa.unparse(value, this.parserConfig);
+    }
+
+    get delimiter() {
+        return this.parserConfig.delimiter || ',';
     }
 
     getTableConfig() {
@@ -53,8 +60,12 @@ export class CsvFileField extends FileField {
                 name: property.title || name,
             };
             if (!this.readOnly && obj.required.includes(name)) {
-                // this statement is forced by the peculiarity of the library
-                column.eClass = { missedValue: `"\${${name}}" === "0"` };
+                column.eClass = {
+                    missedValue: `
+                        const value = row["${name}"];
+                        return !value || value === '0';
+                    `,
+                };
             }
             tableConfig.push(column);
         }
@@ -62,10 +73,6 @@ export class CsvFileField extends FileField {
     }
 
     parseFile(text) {
-        return Papa.parse(text, {
-            delimiter: this.delimiter,
-            header: false,
-            skipEmptyLines: true,
-        });
+        return Papa.parse(text, this.parserConfig);
     }
 }

@@ -431,7 +431,11 @@ class CSVFileFieldInspector(FieldInspector):
             'type': openapi.TYPE_STRING,
             'format': FORMAT_CSV_FILE,
             X_OPTIONS: {
-                'delimiter': field.delimiter,
+                'parserConfig': {
+                    js_name: field.parser_config[py_name]
+                    for py_name, js_name in field.parser_options.items()
+                    if py_name in field.parser_config
+                },
                 'minColumnWidth': field.min_column_width,
                 'items': self.probe_field_inspectors(field.items, swagger_object_type, False)
             }

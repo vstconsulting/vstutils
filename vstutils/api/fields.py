@@ -103,17 +103,41 @@ class CSVFileField(FileInStringField):
 
     :param min_column_width: Minimum cell width. Default is 200 px.
     :type min_column_width: int
+
+    :param delimiter: The delimiting character.
+    :type delimiter: str
+
+    :param lineterminator: The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.
+    :type lineterminator: str
+
+    :param quotechar: The character used to quote fields.
+    :type quotechar: str
+
+    :param escapechar: The character used to escape the quote character within a field.
+    :type escapechar: str
     """
-    __slots__ = ('min_column_width', 'items', 'delimiter')
+    __slots__ = ('min_column_width', 'items', 'parser_config')
 
     items: Serializer
     min_column_width: int
-    delimiter: _t.Text
+    parser_config: _t.Mapping
 
-    def __init__(self, items=None, min_column_width=200, delimiter=',', **kwargs):
+    # Map python csv params names to papaparse js
+    parser_options = {
+        'delimiter': 'delimiter',
+        'lineterminator': 'newline',
+        'quotechar': 'quoteChar',
+        'escapechar': 'escapeChar',
+    }
+
+    def __init__(self, items=None, min_column_width=200, **kwargs):
         self.items = items
         self.min_column_width = min_column_width
-        self.delimiter = delimiter
+        self.parser_config = {
+            k: kwargs.pop(k)
+            for k in self.parser_options
+            if k in kwargs
+        }
         super().__init__(**kwargs)
 
 

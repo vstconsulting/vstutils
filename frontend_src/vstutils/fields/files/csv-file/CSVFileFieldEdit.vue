@@ -17,6 +17,7 @@
     </div>
 </template>
 <script>
+    import { guiPopUp } from '../../../popUp';
     import { FileFieldContentEdit } from '../file';
     import DataTable from './DataTable';
 
@@ -56,6 +57,11 @@
                 }
                 const columnsNames = this.tableConfig.slice(1).map((column) => column.prop);
                 const parsed = this.field.parseFile(file);
+                if (parsed.errors.length > 0) {
+                    guiPopUp.error();
+                    console.error(parsed);
+                    return;
+                }
                 const value = parsed.data.map((el) => {
                     return el.reduce((acc, n, i) => ((acc[columnsNames[i]] = n), acc), {});
                 });

@@ -1896,7 +1896,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'format': 'csvfile',
                 'title': 'Some data',
                 X_OPTIONS: {
-                    'delimiter': ';',
+                    'parserConfig': {
+                        'delimiter': ';',
+                    },
                     'minColumnWidth': 300,
                     'items': {
                         'type': 'object',

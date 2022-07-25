@@ -3,7 +3,7 @@
         <button v-if="!readonly" class="btn btn-outline-primary" @click="add">
             <i class="fa fa-plus" />
         </button>
-        <vue-virtual-table
+        <CustomVirtualTable
             :config="tableConfig"
             :data="rows"
             :height="600"
@@ -20,7 +20,7 @@
                     <i class="fa fa-times" />
                 </button>
             </template>
-        </vue-virtual-table>
+        </CustomVirtualTable>
         <BootstrapModal ref="editModal" body-classes="p-0">
             <form id="row-edit-form" @submit="saveRow">
                 <div v-for="column in editableColumns" :key="column.prop" class="form-group">
@@ -51,9 +51,22 @@
     import BootstrapModal from '../../../components/BootstrapModal';
     import VueVirtualTable from 'vue-virtual-table';
 
+    const CustomVirtualTable = {
+        mixins: [VueVirtualTable],
+        methods: {
+            parseClass(eClass, row) {
+                const result = {};
+                for (const cl in eClass) {
+                    result[cl] = new Function('row', eClass[cl])(row);
+                }
+                return result;
+            },
+        },
+    };
+
     export default {
         name: 'DataTable',
-        components: { BootstrapModal, VueVirtualTable },
+        components: { BootstrapModal, CustomVirtualTable },
         props: {
             config: { type: Array, required: true },
             rows: { type: Array, required: true },

@@ -255,7 +255,7 @@ class FrontendChangesNotifications(BaseMiddleware):
         self.notificator_class = apps.get_app_config('vstutils_api').module.notificator_class
 
     def get_response_handler(self, request: HttpRequest) -> HttpResponse:
-        if settings.CENTRIFUGO_CLIENT_KWARGS:
+        if settings.CENTRIFUGO_CLIENT_KWARGS and request.path != f'/{settings.API_URL}/health/':
             with self.notificator_class([]) as notificator:
                 request.notificator = notificator  # type: ignore
                 return super().get_response_handler(request)
