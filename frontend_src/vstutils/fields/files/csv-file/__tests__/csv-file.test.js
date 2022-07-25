@@ -4,7 +4,16 @@ import { i18n } from '../../../../translation';
 
 const tableConfig = [
     { prop: '_index', name: i18n.t('Index') },
-    { prop: 'name', name: 'Some name', eClass: { missedValue: '"${name}" === "0"' } },
+    {
+        prop: 'name',
+        name: 'Some name',
+        eClass: {
+            missedValue: `
+                        const value = row["name"];
+                        return !value || value === '0';
+                    `,
+        },
+    },
     { prop: 'description', name: 'description' },
 ];
 
@@ -24,8 +33,12 @@ describe('CSVFileFieldEdit', () => {
             type: 'string',
             format: 'csvfile',
             'x-options': {
-                delimiter: ';',
                 minColumnWidth: 600,
+                parserConfig: {
+                    delimiter: ';',
+                    header: false,
+                    skipEmptyLines: true,
+                },
                 items: {
                     required: ['name'],
                     type: 'object',
