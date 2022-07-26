@@ -11,7 +11,17 @@ class FileField extends TextAreaField {
         super(options);
 
         this.maxSize = options.max_size;
-        this.allowedMediaTypes = this.options['x-validators']?.extensions;
+        this.allowedMediaTypes = this._parseAllowedMediaTypes();
+    }
+
+    _parseAllowedMediaTypes() {
+        if (this.props.media_types) {
+            return this.props.media_types;
+        }
+        if (this.options['x-validators']?.extensions) {
+            return this.options['x-validators']?.extensions;
+        }
+        return null;
     }
 
     /**

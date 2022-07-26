@@ -22,13 +22,23 @@
      */
     export default {
         mixins: [BaseFieldButton, FileFieldButtonMixin],
+        props: {
+            mediaTypes: { type: Array, default: () => ['*'] },
+        },
         data() {
             return {
                 iconClasses: ['far', 'fa-file-alt'],
                 helpText: 'Open file',
-                accept: '*',
                 multiple: false,
             };
+        },
+        computed: {
+            accept() {
+                if (Array.isArray(this.mediaTypes)) {
+                    return this.mediaTypes.join(',');
+                }
+                return '*/*';
+            },
         },
         methods: {
             onChange(event) {

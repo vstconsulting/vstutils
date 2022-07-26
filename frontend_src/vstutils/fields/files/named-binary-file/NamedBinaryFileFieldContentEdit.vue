@@ -1,27 +1,23 @@
 <template>
-    <div ref="dragZone" style="transition: all 300ms" class="input-group">
-        <p
-            class="p-as-input"
-            :class="classes"
-            :style="styles"
-            :aria-labelledby="label_id"
-            :aria-label="aria_label"
-        >
-            {{ val }}
-        </p>
-
-        <ReadFileButton @read-file="readFile" />
-        <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
-    </div>
+    <FileSelector
+        :show-hide-button="hasHideButton"
+        :has-value="value"
+        :media-types="field.allowedMediaTypes"
+        :text="val"
+        @read-file="readFile"
+        @clear="$emit('set-value', field.getInitialValue())"
+        @hide="$emit('hide-field', field)"
+    />
 </template>
 
 <script>
     import { BinaryFileFieldContentEdit } from '../binary-file';
     import NamedBinaryFileFieldContent from './NamedBinaryFileFieldContent.js';
     import { readFileAsObject } from '../../../utils';
+    import FileSelector from '../FileSelector.vue';
 
     export default {
+        components: { FileSelector },
         mixins: [BinaryFileFieldContentEdit, NamedBinaryFileFieldContent],
         methods: {
             async readFile(files) {

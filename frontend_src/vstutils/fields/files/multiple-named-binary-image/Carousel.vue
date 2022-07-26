@@ -39,6 +39,7 @@
 
 <script>
     import { Splide, SplideSlide } from '@splidejs/vue-splide';
+    import '@splidejs/splide/dist/css/splide.min.css';
     import { makeDataImageUrl } from '../../../utils';
     import BootstrapModal from '../../../components/BootstrapModal';
 

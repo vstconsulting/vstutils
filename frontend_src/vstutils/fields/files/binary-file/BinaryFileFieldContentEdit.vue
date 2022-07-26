@@ -1,39 +1,23 @@
 <template>
-    <div ref="dragZone" style="transition: all 300ms" class="input-group">
-        <p
-            id="file_path_input"
-            class="p-as-input"
-            :class="classes"
-            :style="styles"
-            :aria-labelledby="label_id"
-            :aria-label="aria_label"
-        />
-
-        <ReadFileButton @read-file="readFile" />
-        <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-        <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
-    </div>
+    <FileSelector
+        :show-hide-button="hasHideButton"
+        :has-value="value"
+        :media-types="field.allowedMediaTypes"
+        :text="selectorText"
+        @read-file="readFile"
+        @clear="$emit('set-value', field.getInitialValue())"
+        @hide="$emit('hide-field', field)"
+    />
 </template>
 
 <script>
-    import BinaryFileFieldReadFileButton from './BinaryFileFieldReadFileButton.js';
     import { arrayBufferToBase64 } from '../../../utils';
     import { FileFieldContentEdit } from '../file';
-    import DragAndDropMixin from '../DragAndDropMixin.js';
+    import FileSelector from './../FileSelector.vue';
 
     export default {
-        components: {
-            ReadFileButton: BinaryFileFieldReadFileButton,
-        },
-        mixins: [FileFieldContentEdit, DragAndDropMixin],
-        data() {
-            return {
-                isDragOver: false,
-            };
-        },
-        created() {
-            this.styles_dict.minHeight = '38px';
-        },
+        components: { FileSelector },
+        mixins: [FileFieldContentEdit],
         methods: {
             readFile(files) {
                 const file = files[0];
@@ -58,10 +42,3 @@
         },
     };
 </script>
-
-<style>
-    .is-dragover {
-        box-shadow: 0 0 0 0.2rem #007bff40;
-        border-radius: 0.25rem;
-    }
-</style>

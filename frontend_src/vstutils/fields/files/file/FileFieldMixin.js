@@ -29,7 +29,7 @@ const FileFieldMixin = {
          * and sets field value equal to this content.
          */
         readFile(event) {
-            let file = event.target.files[0];
+            const file = event instanceof FileList ? event[0] : event.target.files[0];
 
             if (!file || !this.validateFileSize(file.size)) {
                 return;
