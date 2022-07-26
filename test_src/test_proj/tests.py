@@ -1896,6 +1896,7 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'format': 'csvfile',
                 'title': 'Some data',
                 X_OPTIONS: {
+                    'media_types': ['text/csv',],
                     'parserConfig': {
                         'delimiter': ';',
                     },
@@ -3257,7 +3258,7 @@ class ProjectTestCase(BaseTestCase):
         results = self.bulk(bulk_data)
         self.assertEqual(results[-1]['status'], 201, results)
 
-    def test_coreapi_schema(self):
+    def test_swagger_schema(self):
         stdout = io.StringIO()
         call_command(
             'generate_swagger',
@@ -3303,8 +3304,10 @@ class ProjectTestCase(BaseTestCase):
         # Check file and secret_file fields
         self.assertEqual(hostgroup_props['file']['type'], 'string')
         self.assertEqual(hostgroup_props['file']['format'], 'file')
+        self.assertEqual(hostgroup_props['file']['x-options']['media_types'], ['text/markdown',])
         self.assertEqual(hostgroup_props['secret_file']['type'], 'string')
         self.assertEqual(hostgroup_props['secret_file']['format'], 'secretfile')
+        self.assertEqual(hostgroup_props['secret_file']['x-options']['media_types'], ['*/*',])
 
         urls = [
             '/deephosts/',

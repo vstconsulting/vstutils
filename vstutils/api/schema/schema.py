@@ -24,6 +24,7 @@ from .inspectors import (
     NamedBinaryImageInJsonFieldInspector,
     MaskedFieldInspector,
     DecimalFieldInspector,
+    FileInStringInspector,
     CSVFileFieldInspector,
 )
 
@@ -43,6 +44,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
         MaskedFieldInspector,
         DecimalFieldInspector,
         CSVFileFieldInspector,
+        FileInStringInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [
