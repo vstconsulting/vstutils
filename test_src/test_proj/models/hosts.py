@@ -115,7 +115,7 @@ class HostGroup(BModel):
             name=fields.AutoCompletionField(autocomplete=['Some', 'Another']),
             parent=fields.AutoCompletionField(autocomplete='Host', required=False),
             secret_file=fields.SecretFileInString(read_only=True),
-            file=fields.FileInStringField(read_only=True),
+            file=fields.FileInStringField(read_only=True, media_types=('text/markdown',)),
             filter_applied=fields.IntegerField(default=0, read_only=True),
         )
         _filterset_fields = ('id',)

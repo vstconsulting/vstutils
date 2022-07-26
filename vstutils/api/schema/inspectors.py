@@ -47,18 +47,6 @@ X_OPTIONS = 'x-options'
 
 # Base types
 basic_type_info: Dict[Type[Field], Dict[Text, Any]] = OrderedDict()
-basic_type_info[fields.FileInStringField] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_FILE
-}
-basic_type_info[fields.SecretFileInString] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_SECRET_FILE
-}
-basic_type_info[fields.BinFileInStringField] = {
-    'type': openapi.TYPE_STRING,
-    'format': FORMAT_BIN_FILE
-}
 
 basic_type_info[fields.NamedBinaryFileInJsonField] = {
     'type': openapi.TYPE_OBJECT,
@@ -418,6 +406,35 @@ class MaskedFieldInspector(FieldInspector):
         return SwaggerType(**field_extra_handler(field, **kwargs))
 
 
+class FileInStringInspector(FieldInspector):
+    format_by_field = {
+        fields.SecretFileInString: FORMAT_SECRET_FILE,
+        fields.BinFileInStringField: FORMAT_BIN_FILE,
+    }
+
+    def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
+        if not isinstance(field, fields.FileInStringField) or isinstance(field, fields.CSVFileField):
+            return NotHandled
+        # pylint: disable=unused-variable,invalid-name
+        SwaggerType, ChildSwaggerType = self._get_partial_types(
+            field, swagger_object_type, use_references, **kw
+        )
+
+        kwargs = {
+            'type': openapi.TYPE_STRING,
+            'format': next((
+                format
+                for field_type, format in self.format_by_field.items()
+                if isinstance(field, field_type)
+            ), FORMAT_FILE),
+            X_OPTIONS: {
+                'media_types': tuple(set(field.media_types)),
+            }
+        }
+
+        return SwaggerType(**field_extra_handler(field, **kwargs))
+
+
 class CSVFileFieldInspector(FieldInspector):
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
         if not isinstance(field, fields.CSVFileField):
@@ -431,6 +448,7 @@ class CSVFileFieldInspector(FieldInspector):
             'type': openapi.TYPE_STRING,
             'format': FORMAT_CSV_FILE,
             X_OPTIONS: {
+                'media_types': tuple(set(field.media_types)),
                 'parserConfig': {
                     js_name: field.parser_config[py_name]
                     for py_name, js_name in field.parser_options.items()

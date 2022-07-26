@@ -51,11 +51,19 @@ class FileInStringField(VSTCharField):
 
     Value must be text (not binary) and saves in model as is.
 
+    :param media_types: List of MIME types to select on the user's side.
+                        Supported syntax using *. Default: ['*/*']
+    :type media_types: tuple,list
+
     .. note::
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
     """
 
-    __slots__ = ()
+    __slots__ = ('media_types',)
+
+    def __init__(self, **kwargs):
+        self.media_types = kwargs.pop('media_types', ('*/*',))
+        super().__init__(**kwargs)
 
 
 class SecretFileInString(FileInStringField):
@@ -63,6 +71,10 @@ class SecretFileInString(FileInStringField):
     Field extends :class:`.FileInStringField`, but hides it's value in admin interface.
 
     Value must be text (not binary) and saves in model as is.
+
+    :param media_types: List of MIME types to select on the user's side.
+                        Supported syntax using *. Default: ['*/*']
+    :type media_types: tuple,list
 
     .. note::
         Take effect only in GUI. In API it would behave as :class:`.VSTCharField`.
@@ -78,6 +90,10 @@ class SecretFileInString(FileInStringField):
 class BinFileInStringField(FileInStringField):
     """
     Field extends :class:`.FileInStringField`, but work with binary(base64) files.
+
+    :param media_types: List of MIME types to select on the user's side.
+                        Supported syntax using *. Default: ['*/*']
+    :type media_types: tuple,list
 
     .. note::
         Effective only in GUI. Works similar to :class:`.VSTCharField` in API.
@@ -115,6 +131,10 @@ class CSVFileField(FileInStringField):
 
     :param escapechar: The character used to escape the quote character within a field.
     :type escapechar: str
+
+    :param media_types: List of MIME types to select on the user's side.
+                        Supported syntax using *. Default: ['text/csv']
+    :type media_types: tuple,list
     """
     __slots__ = ('min_column_width', 'items', 'parser_config')
 
@@ -138,6 +158,8 @@ class CSVFileField(FileInStringField):
             for k in self.parser_options
             if k in kwargs
         }
+        if 'media_types' not in kwargs:
+            kwargs['media_types'] = ('text/csv',)
         super().__init__(**kwargs)
 
 
