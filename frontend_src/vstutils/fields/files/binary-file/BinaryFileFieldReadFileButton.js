@@ -11,7 +11,6 @@ export default {
             iconClasses: ['far', 'fa-file-alt'],
             iconStyles: {},
             helpText: 'Open file',
-            accept: '*',
             multiple: false,
         };
     },

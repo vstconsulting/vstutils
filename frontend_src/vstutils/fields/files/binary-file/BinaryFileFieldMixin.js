@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import BinaryFileFieldContentEdit from './BinaryFileFieldContentEdit.vue';
+import BinaryFileFieldReadonly from './BinaryFileFieldReadonly.vue';
 
 const BinaryFileFieldMixin = {
     data() {
@@ -25,6 +26,7 @@ const BinaryFileFieldMixin = {
     },
     components: {
         field_content_edit: BinaryFileFieldContentEdit,
+        field_content_readonly: BinaryFileFieldReadonly,
     },
 };
 

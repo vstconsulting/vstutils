@@ -1,10 +1,14 @@
 <template>
     <div class="csv-table" :style="requiredErrorTextVar">
-        <div class="file-buttons">
-            <ClearButton @click.native="clear" />
-            <ReadFileButton @read-file="$parent.readFile($event)" />
-            <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
-        </div>
+        <FileSelector
+            :show-hide-button="hasHideButton"
+            :has-value="value && value.length"
+            :media-types="field.allowedMediaTypes"
+            :text="selectorText"
+            @read-file="$parent.readFile($event)"
+            @clear="clear"
+            @hide="$emit('hide-field', field)"
+        />
 
         <div v-if="rows.length > 0" style="margin: 0">
             <DataTable
@@ -20,10 +24,12 @@
     import { guiPopUp } from '../../../popUp';
     import { FileFieldContentEdit } from '../file';
     import DataTable from './DataTable';
+    import FileSelector from '../FileSelector.vue';
 
     export default {
         components: {
             DataTable,
+            FileSelector,
         },
         mixins: [FileFieldContentEdit],
         data() {
@@ -52,7 +58,7 @@
             },
             updateFile(file) {
                 if (!file) {
-                    this.setValue([]);
+                    this.setValue(null);
                     return;
                 }
                 const columnsNames = this.tableConfig.slice(1).map((column) => column.prop);

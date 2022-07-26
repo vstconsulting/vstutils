@@ -2,7 +2,7 @@
     <div>
         <div class="file-buttons">
             <ClearButton @click.native="$emit('set-value', field.getInitialValue())" />
-            <ReadFileButton @read-file="$parent.readFile($event)" />
+            <ReadFileButton :media-types="field.allowedMediaTypes" @read-file="$parent.readFile($event)" />
             <HideButton v-if="hasHideButton" @click.native="$emit('hide-field', field)" />
         </div>
         <textarea
@@ -33,6 +33,11 @@
             return {
                 styles_dict: { resize: 'vertical' },
             };
+        },
+        computed: {
+            selectorText() {
+                return this.$u.capitalize(this.$tc('file n selected', this.value ? 1 : 0));
+            },
         },
     };
 </script>

@@ -1,6 +1,6 @@
 <template>
     <div class="csv-table">
-        <button v-if="!readonly" class="btn btn-outline-primary" @click="add">
+        <button v-if="!readonly" class="btn btn-outline-primary my-2" @click="add">
             <i class="fa fa-plus" />
         </button>
         <CustomVirtualTable
