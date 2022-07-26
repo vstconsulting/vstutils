@@ -387,6 +387,25 @@ ext_list = []
 
 if 'develop' in sys.argv:
     ext_list = []
+elif os.environ.get('BUILD_OPTIMIZATION', 'false') == 'true':
+    ext_list = [
+        'vstutils.api.schema.generators',
+        'vstutils.api.schema.inspectors',
+        'vstutils.api.base',
+        'vstutils.api.decorators',
+        'vstutils.api.endpoint',
+        'vstutils.api.validators',
+        'vstutils.models.base',
+        'vstutils.models.cent_notify',
+        'vstutils.models.fields',
+        'vstutils.auth',
+        'vstutils.celery_beat_scheduler',
+        'vstutils.environment',
+        'vstutils.middleware',
+        'vstutils.tasks',
+        'vstutils.tools',
+        'vstutils.utils',
+    ]
 
 requirements = load_requirements('requirements.txt')
 requirements_rpc = load_requirements('requirements-rpc.txt')

@@ -23,8 +23,7 @@ class BaseBackend(BaseVstObject):
         return attr_name.startswith('check_health_')
 
     def __get_health_methods_iterator(self) -> Iterable[Tuple[Text, Callable]]:
-        filter_method = self.__health_types_filter
-        for method_name in filter(filter_method, dir(self)):
+        for method_name in filter(self.__health_types_filter, dir(self)):
             method = getattr(self, method_name)
             if callable(method):
                 yield method_name.replace('check_health_', '', 1), method

@@ -28,7 +28,12 @@ stages:
   variables:
     TOX_ENVS: ""
   before_script:
-    - if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}"; fi
+    - >
+      if [ "${CI_BUILD_REF_NAME}" != "master" -a "${CI_BUILD_REF_NAME}" != "developer" ]; then
+        export TOX_ARGS="--workdir /tmp/.tox_vstutils_${CI_BUILD_REF_NAME}";
+      else
+        export BUILD_OPTIMIZATION=true
+      fi
     - if [ "${TOX_ENVS}" ]; then export TOX_ARGS="${TOX_ARGS} -e ${TOX_ENVS}"; fi
   script:
    - tox $TOX_ARGS
