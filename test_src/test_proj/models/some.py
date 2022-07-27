@@ -8,7 +8,7 @@ from vstutils.api.fields import RelatedListField, RedirectIntegerField
 from vstutils.api.responses import HTTP_200_OK
 from vstutils.api.serializers import BaseSerializer, VSTSerializer
 from vstutils.models import BModel, register_view_action, LAZY_MODEL
-from vstutils.api import fields, filter_backends
+from vstutils.api import fields, filter_backends, validators as vst_validators
 from vstutils.models.fields import (
     NamedBinaryFileInJSONField,
     NamedBinaryImageInJSONField,
@@ -23,6 +23,7 @@ from ..validators import (
     image_validator_resizer_with_margin
 )
 
+files_validators = [vst_validators.FileMediaTypeValidator(extensions=('txt', 'slk', 'application/json'))]
 validators = [image_res_validator, image_res_max_validator, image_height_validator, image_width_validator]
 
 
@@ -150,7 +151,7 @@ class OverridenModelWithBinaryFiles(ModelWithBinaryFiles):
         _view_field_name = 'some_namedbinfile'
         _override_list_fields = dict(
             some_binfile=fields.BinFileInStringField(required=False),
-            some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False),
+            some_namedbinfile=fields.NamedBinaryFileInJsonField(required=False, validators=files_validators),
             some_validatednamedbinimage=fields.NamedBinaryImageInJsonField(required=False, validators=validators),
             some_namedbinimage=fields.NamedBinaryImageInJsonField(required=False),
             some_multiplenamedbinfile=fields.MultipleNamedBinaryFileInJsonField(required=False),

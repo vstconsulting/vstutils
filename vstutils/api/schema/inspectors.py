@@ -48,23 +48,6 @@ X_OPTIONS = 'x-options'
 # Base types
 basic_type_info: Dict[Type[Field], Dict[Text, Any]] = OrderedDict()
 
-basic_type_info[fields.NamedBinaryFileInJsonField] = {
-    'type': openapi.TYPE_OBJECT,
-    'x-format': FORMAT_NAMED_BIN_FILE,
-    'properties': {
-        k: openapi.Schema(
-            type=openapi.TYPE_STRING,
-            default=v,
-        )
-        for k, v in fields.DEFAULT_NAMED_FILE_DATA.items()
-    }
-}
-basic_type_info[fields.MultipleNamedBinaryFileInJsonField] = {
-    'type': openapi.TYPE_ARRAY,
-    'items': openapi.Items(
-        **basic_type_info[fields.NamedBinaryFileInJsonField]
-    )
-}
 basic_type_info[fields.HtmlField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_HTML
@@ -346,13 +329,31 @@ class RatingFieldInspector(FieldInspector):
 
 
 class NamedBinaryImageInJsonFieldInspector(FieldInspector):
+    default_schema_data = {
+        'type': openapi.TYPE_OBJECT,
+        'x-format': FORMAT_NAMED_BIN_FILE,
+        'properties': {
+            k: openapi.Schema(
+                type=openapi.TYPE_STRING,
+                default=v,
+                x_nullable=v is None,
+            )
+            for k, v in fields.DEFAULT_NAMED_FILE_DATA.items()
+        }
+    }
+
+    default_multiple_schema_data = {
+        'type': openapi.TYPE_ARRAY,
+        'items': openapi.Items(**default_schema_data)  # type: ignore
+    }
+
     def field_to_swagger_object(self, field, swagger_object_type, use_references, **kw):
-        # pylint: disable=unused-variable,invalid-name
-        if isinstance(field, fields.NamedBinaryImageInJsonField):
-            kwargs = items = deepcopy(basic_type_info[fields.NamedBinaryFileInJsonField])
-        elif isinstance(field, fields.MultipleNamedBinaryImageInJsonField):
-            kwargs = deepcopy(basic_type_info[fields.MultipleNamedBinaryFileInJsonField])
+        # pylint: disable=unused-variable,invalid-name,too-many-nested-blocks
+        if isinstance(field, fields.MultipleNamedBinaryFileInJsonField):
+            kwargs = deepcopy(self.default_multiple_schema_data)
             items = kwargs['items']
+        elif isinstance(field, fields.NamedBinaryFileInJsonField):
+            kwargs = items = deepcopy(self.default_schema_data)
         else:
             return NotHandled
 
@@ -360,21 +361,24 @@ class NamedBinaryImageInJsonFieldInspector(FieldInspector):
             field, swagger_object_type, use_references, **kw
         )
 
-        items['x-format'] = FORMAT_NAMED_BIN_IMAGE
+        if isinstance(field, (fields.NamedBinaryImageInJsonField, fields.MultipleNamedBinaryImageInJsonField)):
+            items['x-format'] = FORMAT_NAMED_BIN_IMAGE
+
         x_validators = items['x-validators'] = {
             'extensions': set()
         }
-        for validator in filter(lambda x: isinstance(x, validators.ImageBaseSizeValidator), field.validators):
-            for orientation in validator.orientation:
-                for size_type, default_size in (('min', 1), ('max', float('inf'))):
-                    size_name = f'{size_type}_{orientation}'
-                    img_size = getattr(validator, size_name, default_size)
-                    if size_name in x_validators:
-                        if size_type == 'min' and x_validators[size_name] > img_size:
-                            continue
-                        elif size_type == 'max' and x_validators[size_name] < img_size:
-                            continue
-                    x_validators[size_name] = img_size
+        for validator in filter(lambda x: isinstance(x, validators.FileMediaTypeValidator), field.validators):
+            if isinstance(validator, validators.ImageBaseSizeValidator) and items['x-format'] == FORMAT_NAMED_BIN_IMAGE:
+                for orientation in validator.orientation:
+                    for size_type, default_size in (('min', 1), ('max', float('inf'))):
+                        size_name = f'{size_type}_{orientation}'
+                        img_size = getattr(validator, size_name, default_size)
+                        if size_name in x_validators:
+                            if size_type == 'min' and x_validators[size_name] > img_size:
+                                continue
+                            elif size_type == 'max' and x_validators[size_name] < img_size:
+                                continue
+                        x_validators[size_name] = img_size
             if x_validators['extensions']:
                 x_validators['extensions'] = x_validators['extensions'].intersection(validator.extensions)
             else:
