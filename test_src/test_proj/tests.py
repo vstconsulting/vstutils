@@ -1468,10 +1468,15 @@ class OpenapiEndpointTestCase(BaseTestCase):
         self.assertTrue('application/json' in api['produces'], api['produces'])
 
         # test generated fields produce same fields in schema as manually overriden
-        self.assertDictEqual(
-            api['definitions']['ModelWithBinaryFiles']['properties'],
-            api['definitions']['OverridenModelWithBinaryFiles']['properties']
+        expected = deepcopy(api['definitions']['ModelWithBinaryFiles']['properties'])
+        from_api = api['definitions']['OverridenModelWithBinaryFiles']['properties']
+        # need to be overrided because has validator on field
+        self.assertEqual(
+            set(from_api['some_namedbinfile']['x-validators']['extensions']),
+            set(['text/plain', 'application/json']),
         )
+        expected['some_namedbinfile']['x-validators']['extensions'] = from_api['some_namedbinfile']['x-validators']['extensions']
+        self.assertDictEqual(expected, from_api)
         # Test swagger ui
         client = self._login()
         response = client.get('/api/endpoint/')
@@ -1604,19 +1609,22 @@ class OpenapiEndpointTestCase(BaseTestCase):
             {
                 'properties': {
                     'content': {
-                        'type': 'string'
+                        'type': 'string',
+                        'x-nullable': True,
                     },
                     'mediaType': {
-                        'type': 'string'
+                        'type': 'string',
+                        'x-nullable': True,
                     },
                     'name': {
-                        'type': 'string'
+                        'type': 'string',
+                        'x-nullable': True,
                     }
                 },
                 'title': 'Some namedbinimage',
                 'type': 'object',
                 'x-format': 'namedbinimage',
-                'x-validators': {}
+                'x-validators': {},
             }
         )
         self.assertDictEqual(
@@ -1630,13 +1638,16 @@ class OpenapiEndpointTestCase(BaseTestCase):
                 'items': {
                     'properties': {
                         'content': {
-                            'type': 'string'
+                            'type': 'string',
+                            'x-nullable': True,
                         },
                         'mediaType': {
-                            'type': 'string'
+                            'type': 'string',
+                            'x-nullable': True,
                         },
                         'name': {
-                            'type': 'string'
+                            'type': 'string',
+                            'x-nullable': True,
                         }
                     },
                     'type': 'object',
@@ -1874,9 +1885,9 @@ class OpenapiEndpointTestCase(BaseTestCase):
                     'image': {
                         'type': 'object',
                         'properties': {
-                            'name': {'type': 'string'},
-                            'content': {'type': 'string'},
-                            'mediaType': {'type': 'string'}
+                            'name': {'type': 'string', 'x-nullable': True},
+                            'content': {'type': 'string', 'x-nullable': True},
+                            'mediaType': {'type': 'string', 'x-nullable': True}
                         },
                         'x-format': 'namedbinimage',
                         'x-validators': {}

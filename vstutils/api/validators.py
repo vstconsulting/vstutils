@@ -132,21 +132,17 @@ class UrlQueryStringValidator(RegularExpressionValidator):
     regexp = re.compile(r'^[^&?=].+=.*$')
 
 
-class ImageValidator:
+class FileMediaTypeValidator:
     """
-    Base Image Validation class
-    Validates image format
-    Won't work if Pillow isn't installed
+    Base Image Validation class.
+    Validates media types.
+
     :param extensions: Tuple or List of file extensions, that should pass the validation
+
     Raises rest_framework.exceptions.ValidationError: in case file extension are not in the list
     """
-    warning_msg = 'Warning! Pillow is not installed, validation has not been done'
-    default_extensions: _t.Union[_t.Tuple, _t.List] = [
-        'bmp',
-        'jpeg',
-        'jpg',
-        'png',
-    ]
+
+    default_extensions: _t.Union[_t.Tuple, _t.List] = ()
 
     def __init__(self, extensions: _t.Optional[_t.Union[_t.Tuple, _t.List]] = None, **kwargs):
         if extensions is not None:
@@ -158,6 +154,8 @@ class ImageValidator:
                 bool,
                 {
                     guess_type(f'name.{e}')[0]
+                    if not (e and '/' in e and len(e.split('/')) == 2) else
+                    e
                     for e in extensions
                 }
             )
@@ -166,9 +164,6 @@ class ImageValidator:
             setattr(self, key, value)
 
     def __call__(self, value):
-        if not self.has_pillow:
-            warnings.warn(self.warning_msg, ImportWarning)
-            return
         file_media_type = guess_type(value['name'])[0]
         if value and self.extensions and file_media_type not in self.extensions:
             raise serializers.ValidationError(
@@ -178,6 +173,34 @@ class ImageValidator:
                 f' ({",".join(self.extensions)}).'
             )
         self.media_type = file_media_type.split(sep='/')[1].upper()
+
+
+class ImageValidator(FileMediaTypeValidator):
+    """
+        Base Image Validation class
+        Validates image format
+        Won't work if Pillow isn't installed
+        Base Image Validation class.
+        Validates media types.
+
+        :param extensions: Tuple or List of file extensions, that should pass the validation
+
+        Raises rest_framework.exceptions.ValidationError: in case file extension are not in the list
+        """
+
+    warning_msg = 'Warning! Pillow is not installed, validation has not been done'
+    default_extensions = [
+        'bmp',
+        'jpeg',
+        'jpg',
+        'png',
+    ]
+
+    def __call__(self, value):
+        if not self.has_pillow:
+            warnings.warn(self.warning_msg, ImportWarning)
+            return
+        super().__call__(value)
 
     @property
     def has_pillow(self):
@@ -189,7 +212,8 @@ class ImageValidator:
 
 class ImageOpenValidator(ImageValidator):
     """
-    Image validator that checks if image can be unpacked from b64 to PIL Image obj
+    Image validator that checks if image can be unpacked from b64 to PIL Image obj.
+    Won't work if Pillow isn't installed.
 
     Raises rest_framework.exceptions.ValidationError if PIL throws error when trying to open image
     """
