@@ -36,6 +36,7 @@ export const BaseViewMixin = {
             const obj = {
                 actions: Array.from(this.view.actions.values()).filter((action) => !action.hidden),
                 data: this.data,
+                isListItem: false,
             };
             signals.emit(`<${this.view.path}>filterActions`, obj);
             return obj.actions;
@@ -44,6 +45,7 @@ export const BaseViewMixin = {
             const obj = {
                 sublinks: Array.from(this.view.sublinks.values()).filter((sublink) => !sublink.hidden),
                 data: this.data,
+                isListItem: false,
             };
             signals.emit(`<${this.view.path}>filterSublinks`, obj);
             return obj.sublinks;

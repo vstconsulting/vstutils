@@ -25,12 +25,12 @@
                 <template #content="{ closeModal }">
                     <div class="modal-body">
                         <ul class="list-group list-group-flush">
-                            <template v-if="actions.length">
+                            <template v-if="availableActions.length">
                                 <li class="list-group-item disabled">
                                     <b>{{ $u.capitalize($t('actions')) }}</b>
                                 </li>
                                 <li
-                                    v-for="action in actions"
+                                    v-for="action in availableActions"
                                     :key="action.name"
                                     class="list-group-item"
                                     :class="`operation__${action.name}`"
@@ -100,6 +100,7 @@
     import Modal from '../items/modal/Modal.vue';
     import BootstrapModal from '../BootstrapModal.vue';
     import { formatPath, joinPaths, tableColumnClasses, classesFromFields } from '../../utils';
+    import signals from '../../signals';
 
     /**
      * Child component of 'gui_list_table' component.
@@ -125,8 +126,26 @@
             };
         },
         computed: {
+            availableActions() {
+                const obj = {
+                    actions: this.actions,
+                    data: this.data,
+                    isListItem: true,
+                };
+                signals.emit(`<${this.$route.path}/>filterActions`, obj);
+                return obj.actions;
+            },
+            availableSublinks() {
+                const obj = {
+                    sublinks: this.sublinks,
+                    data: this.data,
+                    isListItem: true,
+                };
+                signals.emit(`<${this.$route.path}/>filterSublinks`, obj);
+                return obj.sublinks;
+            },
             hasOperations() {
-                return this.actions.length || this.sublinks.length;
+                return this.availableActions.length || this.availableSublinks.length;
             },
             pk() {
                 return this.instance.getPkValue();
