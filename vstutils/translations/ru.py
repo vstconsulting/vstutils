@@ -74,6 +74,8 @@ TRANSLATION = {
     'user': 'пользователь',
     'yes': 'да',
     'no': 'нет',
+    'Yes': 'Да',
+    'No': 'Нет',
     'is staff': 'админ',
     'first name': 'имя',
     'last name': 'фамилия',
@@ -92,6 +94,7 @@ TRANSLATION = {
     'options': 'опции',
     'information': 'информация',
     'date': 'дата',
+    'Your changes will be deleted. Are you sure?': 'Внесенные вами изменения будут удалены. Вы уверены?',
 
     'file n selected': 'нет файлов | 1 файл выбран | {n} файла выбрано | {n} файлов выбрано',
     'image n selected': 'нет изображений | 1 изображение выбрано | {n} изображения выбрано | {n} изображений выбрано',
@@ -149,9 +152,10 @@ TRANSLATION = {
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',
     'Do you want to save your changes? The page will be reloaded.': 'Вы хотите сохранить изменения? Страница будет перезагружена.',
-    'Yes, reload now': 'Да, перезагрузить сейчас',
+    'Reload now': 'Перезагрузить сейчас',
     'now': 'сейчас',
     'later': 'позже',
+    'Later': 'Позже',
     'I accept the ': 'Я принимаю ',
     'Zoom': 'Зум',
     'Scale': 'Масштаб',

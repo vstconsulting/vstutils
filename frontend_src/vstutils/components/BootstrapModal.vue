@@ -68,10 +68,16 @@
             }
         },
         methods: {
+            callCloseCallback() {
+                this.isOpen = false;
+                this.$emit('exit');
+            },
             onModalCreated(el) {
                 $(el)
                     .modal({ show: true })
-                    .on('hidden.bs.modal', () => (this.isOpen = false));
+                    .on('hide.bs.modal', () => {
+                        this.callCloseCallback();
+                    });
             },
             open() {
                 this.isOpen = true;
@@ -80,7 +86,9 @@
                 if (this.$refs.modal) {
                     $(this.$refs.modal)
                         .modal('hide')
-                        .on('hidden.bs.modal', () => (this.isOpen = false));
+                        .on('hide.bs.modal', () => {
+                            this.callCloseCallback();
+                        });
                 }
                 document.body.classList.remove('modal-open');
             },

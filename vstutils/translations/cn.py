@@ -75,6 +75,8 @@ TRANSLATION = {
     'user': '使用者',
     'yes': '是',
     'no': '否',
+    'Yes': '是',
+    'No': '否',
     'is staff': '管理',
     'first name': '名字',
     'last name': '姓',
@@ -93,6 +95,7 @@ TRANSLATION = {
     'options': '选项',
     'information': '信息',
     'date': '日期',
+    'Your changes will be deleted. Are you sure?': '您的更改将被删除。你确定吗？',
 
     'file n selected': '未选择文件| 已选择1个文件| 已选择{n}个文件| 已选择{n}个文件',
     'image n selected': '未选择图像 已选择1张图片| 已选择{n}张图片| 已选择{n}张图片',
@@ -151,9 +154,10 @@ TRANSLATION = {
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': '设置更改已成功保存。 请刷新页面。',
     'Do you want to save your changes? The page will be reloaded.': '是否要保存更改？ 该页面将重新加载。',
-    'Yes, reload now': '是的，现在重新加载',
+    'Reload now': '立即重新加载',
     'now': '眼下',
     'later': '之后',
+    'Later': '之后',
     'I accept the ': '我接受 ',
     'Zoom': '飛漲',
     'Scale': '規模',
