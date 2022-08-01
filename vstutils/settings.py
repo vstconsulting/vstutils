@@ -879,11 +879,22 @@ DATABASES: SIMPLE_OBJECT_SETTINGS_TYPE
 
 
 def parse_db(params):
+    db_name, param_data = params
     data: DBSection = config.get_section_instance('database')
-    data.update({**config['database'].all(), **params[1].all()})
+    db_url_env = f'{db_name.upper().replace("-", "_")}_{env.DEFAULT_DATABASE_ENV}'
+    default_data_from_env = (
+        env.db_url(db_url_env, default='')
+        if db_url_env in os.environ
+        else {}
+    )
+    data.update({
+        **config['database'].all(),
+        **default_data_from_env,
+        **param_data.all()
+    })
     data_all = data.all()
     USED_ENGINES.add(data_all.get('ENGINE'))
-    return params[0], data_all
+    return db_name, data_all
 
 
 USED_ENGINES: _t.Set[_t.Text] = set()
