@@ -1,8 +1,9 @@
 import time
 import logging
 import typing as _t
+from contextlib import contextmanager
 
-from django.db import connection
+from django.db import connections
 from django.apps import apps
 from django.conf import settings
 from django.http.request import HttpRequest
@@ -16,6 +17,17 @@ from .utils import BaseVstObject
 
 
 logger = logging.getLogger(settings.VST_PROJECT)
+
+
+@contextmanager
+def wrap_connections(wrapper):
+    for connection in connections.all():
+        connection.execute_wrappers.append(wrapper)
+    try:
+        yield wrapper
+    finally:
+        for connection in connections.all():
+            connection.execute_wrappers.remove(wrapper)
 
 
 class QueryTimingLogger:
@@ -168,7 +180,7 @@ class ExecuteTimeHeadersMiddleware(BaseMiddleware):
         ql = QueryTimingLogger()
 
         if not getattr(request, 'is_bulk', False):
-            with connection.execute_wrapper(ql):
+            with wrap_connections(ql):
                 response = get_response_handler(request)
         else:
             response = get_response_handler(request)
