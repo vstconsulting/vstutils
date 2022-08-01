@@ -22,39 +22,23 @@
             <ControlSidebar v-if="isControlSidebarOpen" />
         </transition>
 
-        <BootstrapModal ref="saveSettingsModal">
-            <template #content>
-                <div style="padding: 1rem">
-                    <p>
-                        {{ $t('Do you want to save your changes? The page will be reloaded.') }}
-                    </p>
-                    <button class="btn btn-success" @click="saveSettings">
-                        {{ $t('Yes, reload now') }}
-                    </button>
-                    <button class="btn btn-secondary" style="float: right" @click="rollbackSettings">
-                        {{ $u.capitalize($t('no')) }}
-                    </button>
-                </div>
-            </template>
-        </BootstrapModal>
+        <ConfirmModal
+            ref="saveSettingsModal"
+            :message="$t('Do you want to save your changes? The page will be reloaded.')"
+            :confirm-title="$t('Reload now')"
+            :reject-title="$t('Cancel')"
+            @confirm="saveSettings"
+            @reject="rollbackSettings"
+        />
 
-        <transition name="fade">
-            <div v-if="confirmation.isOpen" class="overlay" @click.stop="reject">
-                <div class="card confirmation-modal" @click.stop>
-                    <h5 class="card-title" style="text-align: center">
-                        {{ $t('Confirm action') }}{{ confirmation.actionName }}
-                    </h5>
-                    <div class="mt-2">
-                        <button class="btn btn btn-outline-success mr-1" @click="confirm">
-                            {{ $t('Confirm') }}
-                        </button>
-                        <button class="btn btn btn-outline-danger" @click="reject">
-                            {{ $t('Cancel') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </transition>
+        <ConfirmModal
+            ref="confirmationModal"
+            :message="`${$t('Confirm action')} ${confirmation.actionName}`"
+            :confirm-title="$t('Confirm')"
+            :reject-title="$t('Cancel')"
+            @confirm="confirm"
+            @reject="reject"
+        />
 
         <portal-target name="root-bottom" multiple />
     </div>
@@ -63,13 +47,20 @@
     import { AutoUpdateController } from './autoupdate';
     import ControlSidebar from './components/items/ControlSidebar.vue';
     import { Logo, MainFooter, Sidebar, TopNavigation } from './components/items';
-    import BootstrapModal from './components/BootstrapModal.vue';
+    import ConfirmModal from './components/common/ConfirmModal';
 
     const DARK_MODE_CLASS = 'dark-mode';
 
     export default {
         name: 'AppRoot',
-        components: { TopNavigation, ControlSidebar, MainFooter, Sidebar, Logo, BootstrapModal },
+        components: {
+            TopNavigation,
+            ControlSidebar,
+            MainFooter,
+            Sidebar,
+            Logo,
+            ConfirmModal,
+        },
         mixins: [AutoUpdateController],
         provide() {
             return {
@@ -89,7 +80,6 @@
                 confirmation: {
                     callback: null,
                     actionName: '',
-                    isOpen: false,
                 },
                 isControlSidebarOpen: false,
             };
@@ -131,9 +121,6 @@
         },
         watch: {
             currentRouteClassName: { handler: 'updateBodyClass', immediate: true },
-            $route() {
-                this.reject();
-            },
             '$store.state.userSettings.settings.main.language': { handler: 'setLanguage', immediate: true },
             '$store.state.userSettings.settings.main.dark_mode': { handler: 'setDarkMode', immediate: true },
         },
@@ -151,22 +138,21 @@
                 if (newClass) {
                     document.body.classList.add(newClass);
                 }
-                this.reject();
             },
             initConfirmation(callback, actionName) {
                 this.confirmation.callback = callback;
                 this.confirmation.actionName = ` "${this.$t(actionName)}"?`;
-
-                this.confirmation.isOpen = true;
+                this.$refs.confirmationModal.openModal();
             },
             confirm() {
-                this.confirmation.isOpen = false;
                 this.confirmation.callback();
                 this.confirmation.callback = null;
+                this.$refs.confirmationModal.closeModal();
             },
             reject() {
-                this.confirmation.isOpen = false;
                 this.confirmation.callback = null;
+                this.$refs.confirmationModal.closeModal();
+                this.$refs.confirmationModal.$emit('closeCallback');
             },
             openControlSidebar() {
                 this.isControlSidebarOpen = true;
@@ -175,7 +161,7 @@
             closeControlSidebar() {
                 document.body.classList.remove('control-sidebar-slide-open');
                 if (this.$store.state.userSettings.changed) {
-                    this.$refs.saveSettingsModal.open();
+                    this.$refs.saveSettingsModal.openModal();
                 }
                 this.isControlSidebarOpen = false;
             },
@@ -206,33 +192,12 @@
                 window.location.reload();
             },
             rollbackSettings() {
-                this.$refs.saveSettingsModal.close();
+                this.$refs.saveSettingsModal.closeModal();
                 this.$store.commit('userSettings/rollback');
             },
         },
     };
 </script>
-<style scoped>
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 2000;
-        background-color: rgba(0, 0, 0, 0.2);
-    }
-    .confirmation-modal {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px;
-        margin: 30px auto 0;
-        width: 300px;
-        min-height: 100px;
-    }
-</style>
 
 <style>
     .control-sidebar-enter,

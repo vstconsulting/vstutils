@@ -183,7 +183,9 @@
         methods: {
             createActionClickHandler(callback, action) {
                 callback();
-                this.$emit('execute-action', { action, instance: this.instance });
+                this.$nextTick(() => {
+                    this.$emit('execute-action', { action, instance: this.instance });
+                });
             },
             getSublinkPath(sublink, instance) {
                 if (sublink.appendFragment) {

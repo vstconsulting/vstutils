@@ -1,23 +1,30 @@
 <template>
-    <div class="csv-table" :style="requiredErrorTextVar">
-        <FileSelector
-            :show-hide-button="hasHideButton"
-            :has-value="value && value.length"
-            :media-types="field.allowedMediaTypes"
-            :text="selectorText"
-            @read-file="$parent.readFile($event)"
-            @clear="clear"
-            @hide="$emit('hide-field', field)"
-        />
-
-        <div v-if="rows.length > 0" style="margin: 0">
-            <DataTable
-                :config="tableConfig"
-                :min-column-width="field.minColumnWidth"
-                :rows="rows"
-                @change="setValue"
+    <div>
+        <div class="csv-table" :style="requiredErrorTextVar">
+            <FileSelector
+                :show-hide-button="hasHideButton"
+                :has-value="value && value.length"
+                :media-types="field.allowedMediaTypes"
+                :text="selectorText"
+                @read-file="$parent.readFile($event)"
+                @clear="clear"
+                @hide="$emit('hide-field', field)"
             />
+            <div class="m-0">
+                <DataTable
+                    :config="tableConfig"
+                    :min-column-width="field.minColumnWidth"
+                    :rows="rows"
+                    @change="setValue"
+                />
+            </div>
         </div>
+        <ConfirmModal
+            ref="modal"
+            :message="$t('Your changes will be deleted. Are you sure?')"
+            @confirm="clearModal"
+            @reject="close"
+        />
     </div>
 </template>
 <script>
@@ -25,11 +32,13 @@
     import { FileFieldContentEdit } from '../file';
     import DataTable from './DataTable';
     import FileSelector from '../FileSelector.vue';
+    import ConfirmModal from '../../../components/common/ConfirmModal';
 
     export default {
         components: {
             DataTable,
             FileSelector,
+            ConfirmModal,
         },
         mixins: [FileFieldContentEdit],
         data() {
@@ -53,8 +62,15 @@
         },
         methods: {
             clear() {
+                this.$refs.modal.openModal();
+            },
+            clearModal() {
                 this.$parent.fileData = null;
                 this.$emit('set-value', this.field.getInitialValue());
+                this.$refs.modal.closeModal();
+            },
+            close() {
+                this.$refs.modal.closeModal();
             },
             updateFile(file) {
                 if (!file) {

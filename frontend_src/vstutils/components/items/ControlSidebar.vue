@@ -36,21 +36,14 @@
                 <i class="fas fa-save" />
                 {{ $t('Save') }}
             </button>
-            <BootstrapModal ref="reloadPageModal">
-                <template #content="{ closeModal }">
-                    <div style="padding: 1rem">
-                        <p>
-                            {{ $t('Changes in settings are successfully saved. Please refresh the page.') }}
-                        </p>
-                        <button class="btn btn-success" @click="reloadPage">
-                            {{ `${$t('Reload')} ${$t('now')}` }}
-                        </button>
-                        <button class="btn btn-secondary" style="float: right" @click="closeModal">
-                            {{ $u.capitalize($t('later')) }}
-                        </button>
-                    </div>
-                </template>
-            </BootstrapModal>
+            <ConfirmModal
+                ref="reloadPageModal"
+                :message="'Changes in settings are successfully saved. Please refresh the page.'"
+                :confirm-title="'Reload now'"
+                :reject-title="'Later'"
+                @confirm="reloadPage"
+                @reject="close"
+            />
             <button class="btn btn-secondary btn-block" @click="cleanAllCache">
                 <i class="fas fa-sync-alt" />
                 {{ `${$t('Reload')} ${$t('cache')}` }}
@@ -61,12 +54,12 @@
 
 <script>
     import { HelpModal } from './modal';
-    import BootstrapModal from '../BootstrapModal.vue';
-    import ControlSidebarButton from './ControlSidebarButton';
+    import ControlSidebarButton from './ControlSidebarButton.vue';
+    import ConfirmModal from '../common/ConfirmModal';
 
     export default {
         name: 'ControlSidebar',
-        components: { BootstrapModal, HelpModal },
+        components: { HelpModal, ConfirmModal },
         data() {
             return {
                 isSaving: false,
@@ -126,7 +119,7 @@
             async saveSettings() {
                 this.isSaving = true;
                 await this.$store.dispatch('userSettings/save');
-                this.$refs.reloadPageModal.open();
+                this.$refs.reloadPageModal.openModal();
             },
             reloadPage() {
                 window.location.reload();
@@ -149,6 +142,9 @@
                 } else if (ev.type === 'scroll' && document.body.getBoundingClientRect().top <= 0) {
                     this.$root.closeControlSidebar();
                 }
+            },
+            close() {
+                this.$refs.reloadPageModal.closeModal();
             },
         },
     };
