@@ -400,7 +400,7 @@ class DockerCommand(BaseCommand):
             format_exclude_sections=('uwsgi',)
         )
         config = self.config
-        config.parse_files(self._settings('CONFIG_FILES'))
+        config.parse_text(settings.CONFIG.generate_config_string())
 
         # Set log level
         self.log_level = os.getenv(f'{prefix}_LOG_LEVEL', 'WARNING')

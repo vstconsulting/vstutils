@@ -563,6 +563,8 @@ config.parse_text(os.getenv(CONFIG_ENV_DATA_NAME, ''))
 main: MainSection = config['main']
 web: WebSection = config['web']
 
+CONFIG = config
+
 # Secret file with key for hashing passwords
 SECRET_FILE = os.getenv(
     f"{ENV_NAME}_SECRET_FILE",
