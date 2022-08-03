@@ -406,7 +406,7 @@ class DockerCommand(BaseCommand):
         self.log_level = os.getenv(f'{prefix}_LOG_LEVEL', 'WARNING')
 
         for section_name in sections:
-            if config['docker'][f'override_{section_name}']:
+            if config['docker'].getboolean(f'override_{section_name}', fallback=True):
                 getattr(self, f'prepare_section_{section_name}')(config)
 
         # Set secret key

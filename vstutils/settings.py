@@ -92,12 +92,12 @@ CONFIG_FILES = tuple(filter(bool, (
     PROJECT_DEFAULTS_CONFIG,
     '/etc/vstutils/settings.ini' if VST_PROJECT != 'test_proj' else None,
     '/etc/vstutils/settings.yml' if VST_PROJECT != 'test_proj' else None,
-    os.path.splitext(CONFIG_FILE)[0] + '.yml' if CONFIG_FILE else None,
     CONFIG_FILE,
-    os.path.splitext(PROJECT_CONFIG_FILE)[0] + '.yml' if PROJECT_CONFIG_FILE else None,
+    os.path.splitext(CONFIG_FILE)[0] + '.yml' if CONFIG_FILE else None,
     PROJECT_CONFIG_FILE,
-    os.path.splitext(DEV_SETTINGS_FILE)[0] + '.yml' if DEV_SETTINGS_FILE else None,
+    os.path.splitext(PROJECT_CONFIG_FILE)[0] + '.yml' if PROJECT_CONFIG_FILE else None,
     DEV_SETTINGS_FILE,
+    os.path.splitext(DEV_SETTINGS_FILE)[0] + '.yml' if DEV_SETTINGS_FILE else None,
 )))
 
 ConfigBoolType = cconfig.BoolType()

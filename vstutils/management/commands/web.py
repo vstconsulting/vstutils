@@ -164,9 +164,13 @@ class Command(BaseCommand):
 
         # Append uwsgi configs.
         for config_file in map(Path, settings.CONFIG_FILES):
-            option = f'--ini={str(config_file)}'
-            if config_file.exists() and config_file.suffix == '.ini' and option not in cmd:
+            option = f'--{"ini" if config_file.suffix == ".ini" else "yml"}={str(config_file)}'
+            if not (config_file.exists() and option not in cmd):
+                continue
+            if config_file.suffix == '.ini':
                 cmd.append(option)
+            elif config_file.suffix == '.yml':
+                cmd.append(f'--yml={str(config_file)}')
 
         if self.uwsgi_default_config.exists():
             cmd.append(str(self.uwsgi_default_config))
