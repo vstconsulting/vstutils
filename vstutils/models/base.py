@@ -1,3 +1,4 @@
+# cython: binding=True
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
 import operator
 import uuid

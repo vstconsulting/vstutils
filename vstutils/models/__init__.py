@@ -8,7 +8,7 @@ from django.db import models
 from django.conf import settings
 
 from .base import ModelBaseClass, get_proxy_labels, LAZY_MODEL
-from .queryset import BQuerySet
+from .queryset import BQuerySet, _Manager
 from .model import BaseModel
 from .decorators import register_view_action, register_view_method
 from .fields import (
@@ -24,7 +24,7 @@ from ..utils import raise_context
 logger = logging.getLogger('vstutils')
 
 
-class Manager(models.Manager.from_queryset(BQuerySet)):
+class Manager(_Manager.from_queryset(BQuerySet)):
     """
     Default VSTUtils manager. Used by `BaseModel` and `BModel`.
     Uses `BQuerySet` as base.

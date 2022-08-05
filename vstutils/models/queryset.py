@@ -1,10 +1,44 @@
+# cython: binding=True
 # pylint: disable=no-member,no-classmethod-decorator,protected-access
+import inspect
+
 from django.db import models
 from django.db.models.expressions import RawSQL
 from django.utils.functional import cached_property
 from django.conf import settings
 
 from ..utils import Paginator, raise_context_decorator_with_default, is_member_descriptor
+
+
+class _Manager(models.Manager):
+
+    @classmethod
+    def _get_queryset_methods(cls, queryset_class):  # nocv
+        def create_method(name, method):
+            def manager_method(self, *args, **kwargs):
+                return getattr(self.get_queryset(), name)(*args, **kwargs)
+
+            manager_method.__name__ = method.__name__
+            manager_method.__doc__ = method.__doc__
+            return manager_method
+
+        new_methods = super()._get_queryset_methods(queryset_class)
+
+        for name, method in inspect.getmembers(queryset_class, predicate=callable):
+            # Only copy missing methods.
+            if hasattr(cls, name) or name in new_methods or type(method).__name__ != 'cython_function_or_method':
+                continue
+            # Only copy public methods or methods with the attribute `queryset_only=False`.
+            queryset_only = getattr(method, 'queryset_only', None)
+            if queryset_only or (queryset_only is None and name.startswith('_')):
+                continue
+            # Copy the method onto the manager.
+            new_methods[name] = create_method(name, method)
+
+        # setup_custom_queryset_kwargs = getattr(queryset_class, 'setup_custom_queryset_kwargs', None)
+        # if setup_custom_queryset_kwargs is not None:
+        #     raise Exception(type(setup_custom_queryset_kwargs).__name__)
+        return new_methods
 
 
 class BQuerySet(models.QuerySet):
@@ -24,6 +58,14 @@ class BQuerySet(models.QuerySet):
         if query is None and self.custom_query_class is not None:
             query = self.custom_query_class(self)  # pylint: disable=not-callable
         super().__init__(model=model, query=query, using=using, hints=hints)
+
+    def as_manager(cls):
+        manager = _Manager.from_queryset(cls)()
+        manager._built_with_as_manager = True
+        return manager
+
+    as_manager.queryset_only = True
+    as_manager = classmethod(as_manager)
 
     @property
     def _iterable_class(self):

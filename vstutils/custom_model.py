@@ -1,3 +1,4 @@
+# cython: binding=True
 # pylint: disable=unused-import
 from copy import deepcopy
 from functools import partial

@@ -1,3 +1,4 @@
+# cython: binding=True
 import orjson
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.files.images import ImageFile

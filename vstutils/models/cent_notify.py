@@ -1,3 +1,4 @@
+# cython: binding=True
 import typing as _t
 import logging
 import uuid
