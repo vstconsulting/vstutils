@@ -4988,6 +4988,37 @@ class ThrottleTestCase(BaseTestCase):
 
 
 class TasksTestCase(BaseTestCase):
+    def test_task_class_executor(self):
+        call_command(
+            'run_task',
+            '--sync',
+            interactive=0,
+            kwargs=json.dumps({'name': "test host obj"}),
+            task='test_proj.tasks.CreateHostTask'
+        )
+        self.assertEqual(Host.objects.order_by('-id').first().name, 'test host obj')
+
+        invalid_host_task = 'test host obj 2'
+        # Try to load a non-existent task
+        with self.assertRaises(SystemExit):
+            call_command(
+                'run_task',
+                '--sync',
+                interactive=0,
+                kwargs=json.dumps({'name': invalid_host_task}),
+                task='test_proj.tasks.NonExistTask'
+            )
+        with self.assertRaises(SystemExit):
+            call_command(
+                'run_task',
+                '--sync',
+                interactive=0,
+                kwargs='{invalid json}',
+                task='test_proj.tasks.CreateHostTask'
+            )
+        self.assertEqual(Host.objects.order_by('-id').first().name, 'test host obj')
+        self.assertFalse(Host.objects.filter(name=invalid_host_task).exists())
+
     def test_uniq_task_decorator(self):
         from celery.exceptions import Reject
         from .tasks import (
