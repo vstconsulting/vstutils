@@ -3001,6 +3001,21 @@ class ProjectTestCase(BaseTestCase):
             }
         ]
 
+    def test_authentication_classes_none(self):
+        results = self.bulk([
+            {"method": 'get', "path": ['hosts_without_auth']},
+        ])
+        self.assertEqual(results[0]['status'], 200)
+        self.assertEqual(results[0]['data']['count'], Host.objects.count())
+
+        self.get_result(
+            'post',
+            self.get_url('hosts_without_auth'),
+            data={},
+            code=201,
+            HTTP_ACCEPT_ENCODING='gzip',
+        )
+
     def test_cachable_model(self):
         CachableModel = self.get_model_class('test_proj.CachableModel')
         results = self.bulk([

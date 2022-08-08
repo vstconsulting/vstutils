@@ -181,3 +181,15 @@ ModelWithFKViewSet = create_view(
                                                allow_null=True)
     }
 )
+
+
+class HostCreateDummyMixin:
+    def create(self, request, *args, **kwargs):
+        return responses.HTTP_201_CREATED("OK")
+
+
+HostWithoutAuthViewSet = create_view(
+    Host,
+    view_class=(HostCreateDummyMixin, 'read_only'),
+    override_authentication_classes=None,
+)

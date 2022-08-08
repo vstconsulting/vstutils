@@ -42,6 +42,9 @@ API[VST_API_VERSION][r'settings'] = dict(
     op_types=['get', 'mod'],
     name='settings'
 )
+API[VST_API_VERSION][r'hosts_without_auth'] = dict(
+    view='test_proj.views.HostWithoutAuthViewSet'
+)
 API[VST_API_VERSION][r'hosts'] = dict(
     view='test_proj.views.HostGroupViewSet'
 )
