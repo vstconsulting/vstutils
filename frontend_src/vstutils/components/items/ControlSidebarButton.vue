@@ -1,13 +1,13 @@
 <template>
-    <router-link v-if="to" :to="to" class="btn btn-block btn-secondary">
+    <router-link v-if="to" :to="to" class="btn btn-block btn-secondary mb-2">
         <i v-if="iconClass" :class="iconClass" />
         <slot>{{ text }}</slot>
     </router-link>
-    <a v-else-if="href" :href="href" class="btn btn-block btn-secondary">
+    <a v-else-if="href" :href="href" class="btn btn-block btn-secondary mb-2">
         <i v-if="iconClass" :class="iconClass" />
         <slot>{{ text }}</slot>
     </a>
-    <button v-else class="btn btn-block btn-secondary">
+    <button v-else class="btn btn-block btn-secondary mb-2">
         <i v-if="iconClass" :class="iconClass" />
         <slot>{{ text }}</slot>
     </button>

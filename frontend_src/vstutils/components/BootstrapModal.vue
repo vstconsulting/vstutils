@@ -8,6 +8,7 @@
                 class="modal fade"
                 :class="wrapperClasses"
                 role="dialog"
+                @click.stop
             >
                 <div class="modal-dialog" :class="classes" role="document">
                     <div class="modal-content">
@@ -31,7 +32,7 @@
                                 <slot name="body" />
                                 <slot />
                             </div>
-                            <div class="modal-footer">
+                            <div v-show="!hideFooter" class="modal-footer">
                                 <slot name="footer" />
                             </div>
                         </slot>
@@ -55,6 +56,7 @@
             wrapperClasses: { type: [Array, String], default: null },
             classes: { type: [Array, String], default: null },
             loading: { type: Boolean, default: false },
+            hideFooter: { type: Boolean, default: false },
         },
         data() {
             return {
