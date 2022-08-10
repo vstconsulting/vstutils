@@ -6,13 +6,7 @@
                 <code>{{ $app.config.projectVersion }}</code>
             </div>
 
-            <component
-                :is="btn.component"
-                v-for="(btn, idx) in buttons"
-                v-bind="btn.props"
-                :key="idx"
-                class="mt-2"
-            />
+            <component :is="btn.component" v-for="(btn, idx) in buttons" v-bind="btn.props" :key="idx" />
 
             <template v-for="(section, idx) in sections">
                 <h6 :key="`section-${idx}`">
@@ -159,7 +153,7 @@
         z-index: 100;
     }
     .control-sidebar-content > * {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
     .control-sidebar .field-component {
         max-width: 100%;
@@ -176,5 +170,6 @@
 <style>
     .layout-fixed .control-sidebar {
         top: 47px !important;
+        position: absolute !important;
     }
 </style>
