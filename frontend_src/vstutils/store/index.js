@@ -55,6 +55,43 @@ const userSettingsModule = (api) => ({
     },
 });
 
+export const localSettingsModule = (storage, itemName) => ({
+    namespaced: true,
+    state: () => ({
+        settings: {},
+        originalSettings: {},
+        changed: false,
+    }),
+    mutations: {
+        setSettings(state, settings) {
+            state.settings = settings;
+            state.changed = false;
+        },
+        setValue(state, { key, value }) {
+            state.settings[key] = value;
+            state.changed = true;
+        },
+        setOriginalSettings(state, settings) {
+            state.originalSettings = mergeDeep({}, settings);
+        },
+        rollback(state) {
+            state.settings = mergeDeep({}, state.originalSettings);
+        },
+    },
+    actions: {
+        load({ commit }) {
+            const data = JSON.parse(storage.getItem(itemName) || '{}');
+            commit('setSettings', data);
+            commit('setOriginalSettings', data);
+        },
+        save({ commit, state }) {
+            storage.setItem(itemName, JSON.stringify(state.settings));
+            commit('setSettings', state.settings);
+            commit('setOriginalSettings', state.settings);
+        },
+    },
+});
+
 /**
  * Class, that manages Store creation.
  * Store - object, that contains data of all App components.
@@ -80,6 +117,7 @@ export class StoreConstructor {
                 autoupdate: AutoUpdateStoreModule,
                 [COMPONENTS_MODULE_NAME]: ComponentStoreModule,
                 userSettings: userSettingsModule(app.api),
+                localSettings: localSettingsModule(window.localStorage, 'localSettings'),
             },
         };
     }

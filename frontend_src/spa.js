@@ -47,6 +47,8 @@ export class App extends BaseApp {
          */
         this.application = null;
 
+        this.localSettingsModel = null;
+
         signals.emit(APP_CREATED, this);
     }
 
@@ -188,6 +190,11 @@ export class App extends BaseApp {
             .then((transitions) => this.i18n.setLocaleMessage(lang, transitions));
     }
 
+    initLocalSettings() {
+        this.localSettingsModel = this.modelsResolver.bySchemaObject({}, '_LocalSettings');
+        this.store.dispatch('localSettings/load');
+    }
+
     /**
      * Method, that creates store and router for an application and mounts it to DOM.
      */
@@ -195,6 +202,7 @@ export class App extends BaseApp {
         signals.emit('app.beforeInit', { app: this });
 
         this.prepareViewsModelsFields();
+        this.initLocalSettings();
 
         let routerConstructor = new RouterConstructor(
             this.views,
