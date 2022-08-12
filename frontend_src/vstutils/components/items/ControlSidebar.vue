@@ -22,11 +22,16 @@
                     @set-value="setUserSetting(section.name, field, $event.value)"
                 />
             </template>
-            <button
-                class="btn btn-success btn-block"
-                :disabled="!$store.state.userSettings.changed || isSaving"
-                @click="saveSettings"
-            >
+            <component
+                :is="field.component"
+                v-for="field in localSettingsFields"
+                :key="field.name"
+                :field="field"
+                :data="$store.state.localSettings.settings"
+                type="edit"
+                @set-value="setLocalSetting(field, $event.value)"
+            />
+            <button class="btn btn-success btn-block" :disabled="disableSaveButton" @click="saveSettings">
                 <i class="fas fa-save" />
                 {{ $t('Save') }}
             </button>
@@ -60,6 +65,15 @@
             };
         },
         computed: {
+            disableSaveButton() {
+                return (
+                    (!this.$store.state.userSettings.changed && !this.$store.state.localSettings.changed) ||
+                    this.isSaving
+                );
+            },
+            localSettingsFields() {
+                return Array.from(this.$app.localSettingsModel.fields.values());
+            },
             sections() {
                 const sectionsFields = Array.from(this.UserSettings.fields.values()).filter(
                     (f) => f.nestedModel,
@@ -111,8 +125,13 @@
         },
         methods: {
             async saveSettings() {
-                this.isSaving = true;
-                await this.$store.dispatch('userSettings/save');
+                if (this.$store.state.userSettings.changed) {
+                    this.isSaving = true;
+                    await this.$store.dispatch('userSettings/save');
+                }
+                if (this.$store.state.localSettings.changed) {
+                    this.$store.dispatch('localSettings/save');
+                }
                 this.$refs.reloadPageModal.openModal();
             },
             reloadPage() {
@@ -121,6 +140,12 @@
             setUserSetting(section, field, value) {
                 this.$store.commit('userSettings/setValue', {
                     section,
+                    key: field.name,
+                    value: field.toInner({ [field.name]: value }),
+                });
+            },
+            setLocalSetting(field, value) {
+                this.$store.commit('localSettings/setValue', {
                     key: field.name,
                     value: field.toInner({ [field.name]: value }),
                 });

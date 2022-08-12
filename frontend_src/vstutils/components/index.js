@@ -14,5 +14,15 @@ import EmptyComponent from './EmptyComponent.js';
 import InstancesProvider from './InstancesProvider.vue';
 import Popover from './Popover.vue';
 import { BaseViewMixin } from './BaseViewMixin.js';
+import TagsSelector from './TagsSelector.vue';
 
-export { AddChildModal, BootstrapModal, Card, EmptyComponent, InstancesProvider, Popover, BaseViewMixin };
+export {
+    AddChildModal,
+    BootstrapModal,
+    Card,
+    EmptyComponent,
+    InstancesProvider,
+    Popover,
+    BaseViewMixin,
+    TagsSelector,
+};

@@ -1,4 +1,5 @@
 import signals from '../signals.js';
+import BaseField from '../fields/base/BaseField.js';
 import { makeModel, Model } from './Model.js';
 
 const REF_PROPERTY = '$ref';
@@ -82,7 +83,10 @@ export class ModelsResolver {
         signals.emit('models[' + modelName + '].fields.beforeInit', properties);
 
         const fields = Object.entries(properties).map(([fieldName, fieldSchema]) => {
-            const field = this.fieldsResolver.resolveField({ ...fieldSchema }, fieldName);
+            const field =
+                fieldSchema instanceof BaseField
+                    ? fieldSchema
+                    : this.fieldsResolver.resolveField({ ...fieldSchema }, fieldName);
             if (requiredProperties.includes(fieldName)) {
                 field.required = true;
             }
