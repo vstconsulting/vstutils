@@ -1327,3 +1327,36 @@ export function stringToCssClass(str) {
     if (typeof str !== 'string') str = String(str);
     return str.replace(/\s/g, '');
 }
+
+export function getRedirectUrlFromResponse(app, responseData, modelClass) {
+    if (!responseData || typeof responseData !== 'object' || !modelClass) return;
+
+    const field = iterFind(modelClass.fields.values(), (field) => field.redirect);
+    if (!field) return;
+
+    const redirect = field.redirect;
+
+    let operationId = '';
+
+    if (redirect.depend_field) {
+        operationId += responseData[redirect.depend_field].toLowerCase();
+    }
+    if (!operationId || redirect.concat_field_name) {
+        operationId = operationId + redirect.operation_name;
+    }
+
+    operationId += '_get';
+
+    const matcher = (view) => view.operationId === operationId && view;
+    const view = app.viewsTree.findInAllPaths(matcher);
+
+    if (!view) {
+        console.warn(`Can't find redirect view for operationId: ${operationId}`, field, responseData);
+        return;
+    }
+
+    return formatPath(view.path, {
+        ...app.router.currentRoute.params,
+        [view.pkParamName]: responseData[field.name],
+    });
+}

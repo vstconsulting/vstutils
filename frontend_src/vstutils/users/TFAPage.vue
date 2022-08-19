@@ -15,7 +15,7 @@
         <template v-if="!isEnabled">
             <p>
                 <!-- eslint-disable-next-line prettier/prettier -->
-                {{ $t('Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.') }}
+                {{ $t('Scan the image with the two-factor authentication app on your phone. If you can’t use a QR code, enter this text code instead.') }}
             </p>
             <div class="qr-code-container">
                 <img :src="qrcode" />

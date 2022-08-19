@@ -122,7 +122,7 @@ TRANSLATION = {
     'two-factor authentication code': '两因素授权码',
     'verify code': '确认密码',
     'Enter the code from the two-factor app on your mobile device. If you\'ve lost your device, you may enter one of your recovery codes.': '从您的移动设备上的两个应用程序中输入代码。 如果您丢失了设备，则可以输入恢复其中一个代码',
-    'Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.': '使用手机上的两个身份验证应用程序扫描图像。 如果您不能使用条形码，请输入文本代码。',
+    'Scan the image with the two-factor authentication app on your phone. If you can’t use a QR code, enter this text code instead.': '使用手机上的双重身份验证应用程序扫描图像。 如果您不能使用二维码，请输入此文本代码。',
     'Enter the six-digit code from the application': '从应用程序中输入六个字符的代码',
     'code': '代码',
     'recovery codes': '恢复代码',
