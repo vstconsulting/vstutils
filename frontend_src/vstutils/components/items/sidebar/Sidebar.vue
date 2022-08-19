@@ -34,7 +34,7 @@
                     },
                 ];
 
-                items = items.concat(this.menu || []);
+                items = items.concat(this.schemaItems);
 
                 if (this.docs && this.docs.has_docs && this.docs.docs_url) {
                     items.push({
@@ -46,6 +46,24 @@
                 }
 
                 return items;
+            },
+            schemaItems() {
+                return (this.menu || [])
+                    .map((item) => {
+                        if (!item.origin_link && item.url) {
+                            const fragments = item.url.split('/').filter(Boolean);
+                            if (fragments.length > 1) {
+                                const viewPath = `/${fragments.slice(0, -1).join('/')}/`;
+                                const actionName = fragments.at(-1);
+                                const action = this.$app.views.get(viewPath)?.actions.get(actionName);
+                                if (action?.isEmpty) {
+                                    return { ...item, emptyAction: action };
+                                }
+                            }
+                        }
+                        return item;
+                    })
+                    .filter(Boolean);
             },
         },
         mounted() {

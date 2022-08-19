@@ -1,13 +1,11 @@
 import {
     capitalize,
     formatPath,
-    iterFind,
     joinPaths,
-    parseResponseMessage,
     pathToArray,
     ViewTypes,
+    getRedirectUrlFromResponse,
 } from '../utils';
-import { guiPopUp, pop_up_msg } from '../popUp';
 import BasestViewMixin from '../views/mixins/BasestViewMixin.js';
 import CollapsibleCardMixin from './CollapsibleCardMixin.js';
 import signals from '../signals';
@@ -146,73 +144,12 @@ export const BaseViewMixin = {
          * @private
          */
         _getRedirectUrlFromResponse(responseData, modelClass = this.view.params.responseModel) {
-            if (!responseData || typeof responseData !== 'object') return;
-
-            const field = iterFind(modelClass.fields.values(), (field) => field.redirect);
-            if (!field) return;
-
-            const redirect = field.redirect;
-
-            let operationId = '';
-
-            if (redirect.depend_field) {
-                operationId += responseData[redirect.depend_field].toLowerCase();
-            }
-            if (!operationId || redirect.concat_field_name) {
-                operationId = operationId + redirect.operation_name;
-            }
-
-            operationId += '_get';
-
-            const matcher = (view) => view.operationId === operationId && view;
-            const view = this.$app.viewsTree.findInAllPaths(matcher);
-
-            if (!view) {
-                console.warn(`Can't find redirect view for operationId: ${operationId}`, field, responseData);
-                return;
-            }
-
-            return formatPath(view.path, { ...this.params, [view.pkParamName]: responseData[field.name] });
+            return getRedirectUrlFromResponse(this.$app, responseData, modelClass);
         },
 
         async executeEmptyAction(action, instance = undefined) {
-            const path = formatPath(action.path, this.$route.params, instance);
-
-            try {
-                const response = await this.queryset.execute({ method: action.method, path });
-
-                guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.executeEmpty, [
-                        this.$t(action.title),
-                        instance?.getViewFieldString() || this.$t(this.view.title),
-                        parseResponseMessage(response.data),
-                    ]),
-                );
-
-                if (response && response.data) {
-                    try {
-                        let redirect_path = this._getRedirectUrlFromResponse(response.data);
-
-                        if (redirect_path) {
-                            this.openPage(redirect_path);
-                        }
-                        this.afterEmptyAction({ action, instance });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                }
-            } catch (error) {
-                let str = this.$app.error_handler.errorToString(error);
-
-                let srt_to_show = this.$t(pop_up_msg.instance.error.executeEmpty, [
-                    this.$t(action.name),
-                    this.$t(this.view.name),
-                    str,
-                    parseResponseMessage(error.data),
-                ]);
-
-                this.$app.error_handler.showError(srt_to_show, str);
-            }
+            await this.$app.actions.executeEmpty(action, instance);
+            this.afterEmptyAction({ action, instance });
         },
 
         /**
@@ -223,34 +160,12 @@ export const BaseViewMixin = {
         afterEmptyAction(obj) {},
 
         executeAction(action, instance = undefined, skipConfirmation = false) {
-            if (action.confirmationRequired && !skipConfirmation) {
-                this.requestConfirmation(() => this.executeAction(action, instance, true), action.title);
-                return;
-            }
-
-            if (typeof this[`${action.name}Instance`] === 'function') {
-                return this[`${action.name}Instance`](action, instance);
-            }
-
-            if (action.isEmpty) {
-                return this.executeEmptyAction(action, instance, false);
-            }
-
-            if (action.appendFragment) {
-                if (this.view.type === ViewTypes.LIST && instance) {
-                    return this.$router.push(
-                        joinPaths(this.$route.path, instance.getPkValue(), action.appendFragment),
-                    );
-                }
-                return this.$router.push(joinPaths(this.$route.path, action.appendFragment));
-            }
-
-            const path = action.href || action.view?.path;
-            if (path) {
-                return this.$router.push(formatPath(path, this.$route.params, instance));
-            }
-
-            throw new Error(`Cannot execute action ${action.name} on instance ${instance}`);
+            return this.$app.actions.execute({
+                action,
+                instance,
+                skipConfirmation,
+                getCustomHandler: (action) => this[`${action.name}Instance`],
+            });
         },
         openSublink(sublink, instance = undefined) {
             const path = sublink.appendFragment

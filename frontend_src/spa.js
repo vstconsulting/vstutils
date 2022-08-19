@@ -11,6 +11,7 @@ import { signals } from './app.common.js';
 import * as utils from './vstutils/utils';
 import { FieldsResolver, addDefaultFields } from './vstutils/fields';
 import { APP_CREATED } from './vstutils/signals.js';
+import { ActionsManager } from './vstutils/actions.js';
 
 export * from './app.common.js';
 import * as spa from './app.common.js';
@@ -48,6 +49,8 @@ export class App extends BaseApp {
         this.application = null;
 
         this.localSettingsModel = null;
+
+        this.actions = new ActionsManager(this);
 
         signals.emit(APP_CREATED, this);
     }

@@ -121,7 +121,7 @@ TRANSLATION = {
     'two-factor authentication code': 'код двухфакторной авторизации',
     'verify code': 'подтвердить код',
     'Enter the code from the two-factor app on your mobile device. If you\'ve lost your device, you may enter one of your recovery codes.': 'Введите код из двухфакторного приложения на мобильном устройстве. Если вы потеряли свое устройство, вы можете ввести один из кодов восстановления.',
-    'Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.': 'Отсканируйте изображение с помощью приложения для двухфакторной аутентификации на вашем телефоне. Если вы не можете использовать штрих-код, введите вместо него текстовый код.',
+    'Scan the image with the two-factor authentication app on your phone. If you can’t use a QR code, enter this text code instead.': 'Отсканируйте изображение с помощью приложения для двухфакторной аутентификации на вашем телефоне. Если вы не можете использовать QR-код, введите вместо него текстовый код.',
     'Enter the six-digit code from the application': 'Введите шестисимвольный код из приложения',
     'code': 'код',
     'recovery codes': 'коды восстановления',

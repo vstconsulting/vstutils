@@ -1,10 +1,9 @@
 <template>
     <component
-        :is="link_type"
-        :[link_url_attr]="link_url"
+        :is="link.tag"
         class="nav-link"
-        :class="link_classes"
-        rel="noreferrer"
+        v-bind="link.props"
+        style="cursor: pointer"
         @click="onLinkClickHandler"
     >
         <i class="nav-icon ico-menu" :class="icon_classes" />
@@ -30,6 +29,26 @@
         mixins: [SidebarLinkMixin],
         props: { item: { type: Object, required: true } },
         computed: {
+            link() {
+                if (this.item.origin_link || !this.item.url) {
+                    const link = {
+                        tag: 'a',
+                        props: {},
+                    };
+                    if (this.link_url) {
+                        link.props.href = this.link_url;
+                    }
+                    return link;
+                }
+                if (this.item.emptyAction) {
+                    return { tag: 'a' };
+                }
+
+                return {
+                    tag: 'router-link',
+                    props: { to: this.link_url, exact: true, activeClass: 'active' },
+                };
+            },
             /**
              * Property, that returns icon classes for current sidebar_link.
              */
@@ -37,40 +56,10 @@
                 return this.item.span_class;
             },
             /**
-             * Property, that returns classes for current sidebar_link.
-             */
-            link_classes() {
-                if (this.is_link_active(this.item, this.page_url)) {
-                    return 'active';
-                }
-
-                return '';
-            },
-            /**
-             * Property, that returns type of current sidebar_link: <router-link></router-link> or <a></a>.
-             */
-            link_type() {
-                if (this.item.origin_link || !this.item.url) {
-                    return 'a';
-                }
-
-                return 'router-link';
-            },
-            /**
              * Property, that returns sidebar_link url to represent.
              */
             link_url() {
                 return this.item.url || '';
-            },
-            /**
-             * Property, that returns name of attribute for storing sidebar_link url.
-             */
-            link_url_attr() {
-                if (this.link_type == 'a' && this.item.url) {
-                    return 'href';
-                }
-
-                return 'to';
             },
         },
         methods: {
@@ -78,6 +67,9 @@
              * Method - handler for sidebar_link click event.
              */
             onLinkClickHandler() {
+                if (this.item.emptyAction) {
+                    this.$app.actions.executeEmpty({ action: this.item.emptyAction });
+                }
                 if (this.item.url) {
                     return this.$emit('hideSidebar');
                 } else {

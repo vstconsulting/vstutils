@@ -121,7 +121,7 @@ TRANSLATION = {
     'two-factor authentication code': 'hai bước xác thực (2FA)',
     'verify code': 'xác nhận mã',
     'Enter the code from the two-factor app on your mobile device. If you\'ve lost your device, you may enter one of your recovery codes.': '"Nhập mã từ ứng dụng sử dụng hai bước xác thực trên thiết bị di động của bạn.Nếu bạn mất thiết bị của mình, bạn có thể nhập một trong các mã khôi phục."',
-    'Scan the image with the two-factor authentication app on your phone. If you can’t use a barcode, enter this text code instead.': '"Quét hình ảnh bằng ứng dụng xác thực hai bước trên điện thoại của bạn. Nếu bạn không thể quét hình ảnh, hãy nhập mã văn bản."',
+    'Scan the image with the two-factor authentication app on your phone. If you can’t use a QR code, enter this text code instead.': 'Quét hình ảnh bằng ứng dụng xác thực hai yếu tố trên điện thoại của bạn. Nếu bạn không thể sử dụng mã QR, hãy nhập mã văn bản này để thay thế.',
     'Enter the six-digit code from the application': 'Điền mã xác thực từ ứng dụng',
     'code': 'Mã',
     'recovery codes': 'Mã khôi phục',

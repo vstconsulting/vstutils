@@ -29,6 +29,9 @@ export function createApp() {
     app.translationsManager.loadTranslations = () =>
         Promise.resolve({ version: 'versions | version | versions' });
 
+    app.translationsManager.getTranslations = () =>
+        Promise.resolve({ version: 'versions | version | versions' });
+
     const loadUser = app.api.loadUser;
     app.api.loadUser = () =>
         Promise.resolve({

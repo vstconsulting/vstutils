@@ -1,11 +1,4 @@
-import {
-    formatPath,
-    joinPaths,
-    ModelValidationError,
-    parseResponseMessage,
-    pathToArray,
-    RequestTypes,
-} from '../../utils';
+import { formatPath, joinPaths, ModelValidationError, pathToArray, RequestTypes } from '../../utils';
 import { guiPopUp, pop_up_msg } from '../../popUp';
 import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
 import { ViewTypes } from '../../views';
@@ -227,45 +220,26 @@ export const ActionViewComponent = {
             }
             return formatPath(this.view.path, this.$route.params);
         },
-        async executeInstance(action, instance) {
-            try {
-                this.commitMutation('validateAndSetInstanceData', { instance });
-            } catch (e) {
-                this.$app.error_handler.defineErrorAndShow(e);
-                if (e instanceof ModelValidationError) {
-                    this.fieldsErrors = e.toFieldsErrors();
-                }
-                return;
-            }
+        async executeInstance(action) {
             this.loading = true;
             try {
-                const response = await this.$app.api.makeRequest({
-                    method: this.view.method,
-                    headers: { 'content-type': 'application/json' },
-                    path: this.getActionRequestPath(),
-                    data: instance._getInnerData(),
-                    useBulk: instance.constructor.shouldUseBulk(this.view.method),
-                });
                 this.changedFields = [];
+                const response = await this.$app.actions.executeWithData({
+                    action,
+                    data: this.sandbox,
+                    model: this.model,
+                    method: this.view.method,
+                    path: this.getActionRequestPath(),
+                    throwError: true,
+                });
                 this.fieldsErrors = {};
-                guiPopUp.success(
-                    this.$t(pop_up_msg.instance.success.execute, [
-                        this.$t(this.view.title),
-                        parseResponseMessage(response.data),
-                    ]),
-                );
                 this.openPage(this._getRedirectUrlFromResponse(response.data) || this.getRedirectUrl());
-            } catch (error) {
-                const modelValidationError = instance.parseModelError(error.data);
-                if (modelValidationError) {
-                    this.fieldsErrors = modelValidationError.toFieldsErrors();
+            } catch (e) {
+                if (e instanceof ModelValidationError) {
+                    this.fieldsErrors = e.toFieldsErrors();
+                } else {
+                    console.warn(e);
                 }
-                this.$app.error_handler.showError(
-                    this.$t(pop_up_msg.instance.error.execute, [
-                        this.$t(this.view.title),
-                        this.$app.error_handler.errorToString(modelValidationError || error),
-                    ]),
-                );
             } finally {
                 this.loading = false;
             }
