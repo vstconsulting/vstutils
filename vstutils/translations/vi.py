@@ -148,6 +148,7 @@ TRANSLATION = {
     'Should be [full.domain.name]': 'Phải là [full.domain.name].',
     'Invalid registration email send.': 'Email đăng ký không hợp lệ gửi.',
     'To continue, need to accept the terms agreement.': 'Để tiếp tục, cần chấp nhận thỏa thuận điều khoản.',
+    'Clear all cache with settings': 'Xóa tất cả bộ nhớ cache với cài đặt',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Các thay đổi trong cài đặt đã được lưu thành công. Vui lòng làm mới trang.',
