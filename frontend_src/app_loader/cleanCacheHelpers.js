@@ -3,7 +3,7 @@ import { cachePromise } from './Cache.js';
 /**
  * Function, that cleans files cache, unregisters current Service Worker instance and reloads page.
  */
-async function cleanAllCacheAndReloadPage() {
+async function cleanAllCacheAndReloadPage({ resetAll = false } = {}) {
     async function cleanServiceWorkerCache() {
         if ('caches' in window) {
             try {
@@ -25,8 +25,11 @@ async function cleanAllCacheAndReloadPage() {
     try {
         await (await cachePromise).clearAllCache();
     } finally {
-        if (localStorage.gui_version) {
+        if (resetAll) {
             localStorage.clear();
+        } else {
+            localStorage.removeItem('gui_version');
+            localStorage.removeItem('gui_user_version');
         }
         await cleanServiceWorkerCache();
     }

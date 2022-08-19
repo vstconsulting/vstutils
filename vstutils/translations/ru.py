@@ -148,6 +148,7 @@ TRANSLATION = {
     'Should be [full.domain.name]': 'Должно быть в формате [полное.доменное.имя].',
     'Invalid registration email send.': 'Отправлена неверная регистрационная почта.',
     'To continue, need to accept the terms agreement.': 'Чтобы продолжить, необходимо принять условия соглашения.',
+    'Clear all cache with settings': 'Очистить весь кеш вместе с настройками',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',

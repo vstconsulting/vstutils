@@ -149,6 +149,7 @@ TRANSLATION = {
     'Should be [full.domain.name]': '应该是 [full.domain.name].',
     'Invalid registration email send.': '无效的注册电子邮件发送。',
     'To continue, need to accept the terms agreement.': '要继续，需要接受条款协议。',
+    'Clear all cache with settings': '使用设置清除所有缓存',
 
 
     # Проверить
