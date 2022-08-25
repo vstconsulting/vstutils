@@ -1158,7 +1158,7 @@ class PhoneField(CharField):
 class MaskedField(CharField):
     """
     Extends class 'rest_framework.serializers.CharField'.
-    Field that apply mask to value
+    Field that applies mask to value
 
     :param mask: `IMask <https://imask.js.org/guide.html>`_
     :type mask: dict, str

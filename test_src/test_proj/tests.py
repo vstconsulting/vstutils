@@ -1834,9 +1834,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
         )
 
         # Check decimal field
-        self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['format'], 'decimal')
+        self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['format'], 'masked')
         self.assertEqual(api['definitions']['OneAuthor']['properties']['decimal']['default'], '13.37')
-        self.assertDictEqual(api['definitions']['OneAuthor']['properties']['decimal'][X_OPTIONS], {'decimal_places': 2, 'max_digits': 5})
+        self.assertDictEqual(
+            api['definitions']['OneAuthor']['properties']['decimal'][X_OPTIONS],
+            {'mask': r"/^-?\d{0,3}(\.\d{0,2})?$/"}
+        )
 
         # Check DeepFk field
         self.assertEqual(api['definitions']['OnePost']['properties']['category']['format'], 'deep_fk')
