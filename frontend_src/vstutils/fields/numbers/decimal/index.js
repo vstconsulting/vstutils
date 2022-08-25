@@ -6,6 +6,10 @@ export const DecimalFieldMixin = {
 
 export class DecimalField extends MaskedField {
     constructor(options) {
+        console.warn(
+            'fields.numbers.decimal.DecimalField is deprecated and will be removed in the next ' +
+                'major release. Consider using fields.text.masked.MaskedField instead.',
+        );
         super(options);
         this.decimalPlaces = this.props.decimal_places || 2;
         this.maxDigits = this.props.max_digits || 10;

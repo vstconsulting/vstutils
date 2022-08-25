@@ -6972,8 +6972,7 @@
                     "format": "decimal",
                     "default": "13.37",
                     "x-options": {
-                        "decimal_places": 2,
-                        "max_digits": 5
+                        "mask": "/^-?\\d{0,3}(\\.\\d{0,2})?$/"
                     },
                     "x-nullable": true
                 },
@@ -7695,8 +7694,7 @@
                     "format": "decimal",
                     "default": "13.37",
                     "x-options": {
-                        "decimal_places": 2,
-                        "max_digits": 5
+                        "mask": "/^-?\\d{0,3}(\\.\\d{0,2})?$/"
                     },
                     "x-nullable": true
                 },

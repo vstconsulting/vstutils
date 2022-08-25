@@ -39,7 +39,6 @@ FORMAT_RATING = 'rating'
 FORMAT_PHONE = 'phone'
 FORMAT_MASKED = 'masked'
 FORMAT_DEEP_FK = 'deep_fk'
-FORMAT_DECIMAL = 'decimal'
 FORMAT_WYSIWYG = 'wysiwyg'
 
 X_OPTIONS = 'x-options'
@@ -404,7 +403,7 @@ class MaskedFieldInspector(FieldInspector):
             'type': openapi.TYPE_STRING,
             'format': FORMAT_MASKED,
             X_OPTIONS: {
-                'mask': field.mask
+                'mask': field.mask,
             }
         }
         return SwaggerType(**field_extra_handler(field, **kwargs))
@@ -477,10 +476,9 @@ class DecimalFieldInspector(FieldInspector):
         )
         kwargs = {
             'type': decimal_field_type(field),
-            'format': FORMAT_DECIMAL,
+            'format': FORMAT_MASKED,
             X_OPTIONS: {
-                'decimal_places': field.decimal_places,
-                'max_digits': field.max_digits
+                'mask': rf'/^-?\d{{0,{field.max_digits - field.decimal_places}}}(\.\d{{0,{field.decimal_places}}})?$/'
             }
         }
 
