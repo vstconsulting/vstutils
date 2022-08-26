@@ -1360,3 +1360,36 @@ export function getRedirectUrlFromResponse(app, responseData, modelClass) {
         [view.pkParamName]: responseData[field.name],
     });
 }
+
+/**
+ * Generates given number of random integers from 0 to 255
+ *
+ * @param {number} - Number of integers to generate
+ * @returns {number[]}
+ */
+export const getRandomValues = globalThis.crypto?.getRandomValues
+    ? (num) => crypto.getRandomValues(new Uint8Array(num))
+    : (num) => Array.from(new Array(num), () => Math.round(Math.random() * 255));
+
+/**
+ * Generates random password from 12 to 20 characters long.
+ * Password will contain capital and lower letters, numbers and special symbols.
+ *
+ * @returns {string}
+ */
+export function generatePassword() {
+    const result = [];
+
+    for (const symbols of [
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'abcdefghijklmnopqrstuvwxyz',
+        '~!@-#$',
+        '0123456789',
+    ]) {
+        for (const num of getRandomValues(getRandomInt(3, 5))) {
+            result.push(symbols[num % symbols.length]);
+        }
+    }
+
+    return result.sort(() => Math.random() - 0.5).join('');
+}

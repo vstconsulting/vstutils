@@ -10,6 +10,7 @@ import {
     randomSleep,
     sliceLongString,
     stringToBoolean,
+    generatePassword,
 } from '../index.js';
 import { StringField } from '../../fields/text';
 
@@ -178,5 +179,14 @@ describe('utils', () => {
 
     test('chunkArray', () => {
         expect(chunkArray([1, 2, 3], 2)).toStrictEqual([[1, 2], [3]]);
+    });
+
+    test('generatePassword', () => {
+        const password = generatePassword();
+        expect(password.length).toBeGreaterThanOrEqual(12);
+        expect(/[a-z]/.exec(password)).toBeTruthy();
+        expect(/[A-Z]/.exec(password)).toBeTruthy();
+        expect(/\d/.exec(password)).toBeTruthy();
+        expect(/[~!@\-#$]/.exec(password)).toBeTruthy();
     });
 });
