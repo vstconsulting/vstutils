@@ -1,3 +1,9 @@
+"""
+Very long description
+with new lines
+for check configs.
+"""
+
 import os
 import sys
 from vstutils.environment import prepare_environment, cmd_execution

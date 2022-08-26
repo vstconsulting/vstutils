@@ -421,7 +421,9 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'static_files_url': '/static/',
             'page_limit': 20,
             'rest_page_limit': 1000,
-            'rest_swagger_description': (vst_project_module.__doc__ or vst_lib_module.__doc__),
+            'rest_swagger_description': (
+                    vst_project_module.__doc__ or vst_lib_module.__doc__ or ''
+            ).replace('\n', '\\n').replace('\r', '\\r'),
             'public_openapi': False,
             'openapi_cache_timeout': 120,
             'enable_gravatar': True,
@@ -981,7 +983,7 @@ API_URL: _t.Text = VST_API_URL
 ENDPOINT_VIEW_CLASS: _t.Text = 'vstutils.api.endpoint.EndpointViewSet'
 HAS_COREAPI: bool = False
 API_CREATE_SWAGGER: bool = web.getboolean('rest_swagger', fallback=('drf_yasg' in INSTALLED_APPS))
-SWAGGER_API_DESCRIPTION: _t.Text = web['rest_swagger_description']
+SWAGGER_API_DESCRIPTION: _t.Text = web['rest_swagger_description'].replace('\\n', '\n').replace('\\r', '\r')
 TERMS_URL: _t.Text = ''
 CONTACT: _t.Dict = config['contact'].all()
 SCHEMA_CACHE_TIMEOUT = web['openapi_cache_timeout']
