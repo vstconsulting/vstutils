@@ -149,6 +149,7 @@ TRANSLATION = {
     'Invalid registration email send.': 'Отправлена неверная регистрационная почта.',
     'To continue, need to accept the terms agreement.': 'Чтобы продолжить, необходимо принять условия соглашения.',
     'Clear all cache with settings': 'Очистить весь кеш вместе с настройками',
+    'Generate password': 'Сгенерировать пароль',
 
     # Проверить
     'Changes in settings are successfully saved. Please refresh the page.': 'Изменения в настройках успешно сохранены. Пожалуйста, обновите страницу.',

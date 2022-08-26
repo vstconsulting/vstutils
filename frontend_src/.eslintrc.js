@@ -22,6 +22,7 @@ module.exports = {
         'vue/one-component-per-file': 'off',
     },
     globals: {
+        globalThis: 'readonly',
         app: 'readonly',
         Vue: 'readonly',
         jest: 'readonly',

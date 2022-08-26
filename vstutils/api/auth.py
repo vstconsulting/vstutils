@@ -98,8 +98,8 @@ class OneUserSerializer(UserSerializer):
 
 
 class CreateUserSerializer(OneUserSerializer):
-    password = fields.VSTCharField(write_only=True)
-    password2 = fields.VSTCharField(write_only=True, label='Repeat password')
+    password = fields.PasswordField(write_only=True)
+    password2 = fields.PasswordField(write_only=True, label='Repeat password')
 
     class Meta(OneUserSerializer.Meta):
         fields = list(OneUserSerializer.Meta.fields) + ['password', 'password2']

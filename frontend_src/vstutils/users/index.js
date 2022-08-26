@@ -2,11 +2,28 @@ import signals from '../signals.js';
 import Gravatar from './Gravatar.js';
 import TFAPage from './TFAPage.vue';
 import { IntegerField } from '../fields/numbers/integer.js';
+import { generatePassword } from '../utils';
 import './settings.js';
 export { Gravatar };
 
 const usersPath = '/user/';
 const usersDetailPath = `${usersPath}{id}/`;
+
+function addGeneratePasswordAction(view) {
+    view.actions.set('generate_password', {
+        name: 'generate_password',
+        title: 'Generate password',
+    });
+    view.mixins.push({
+        methods: {
+            generate_passwordInstance() {
+                const password = generatePassword();
+                this.setFieldValue({ field: 'password', value: password });
+                this.setFieldValue({ field: 'password2', value: password });
+            },
+        },
+    });
+}
 
 // Redirect all /profile/... requests to /user/{currentUser.id}/...
 signals.once('app.afterInit', ({ app }) => {
@@ -44,6 +61,16 @@ signals.once('allViews.created', ({ views }) => {
 
     // Hide settings view
     views.get(`${usersDetailPath}_settings/`).hidden = true;
+
+    // Add generate password actions
+    const changePasswordView = views.get('/user/{id}/change_password/');
+    if (changePasswordView) {
+        addGeneratePasswordAction(changePasswordView);
+    }
+    const newUserView = views.get('/user/new/');
+    if (newUserView) {
+        addGeneratePasswordAction(newUserView);
+    }
 });
 
 class UserIDField extends IntegerField {
