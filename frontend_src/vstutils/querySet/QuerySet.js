@@ -470,7 +470,7 @@ export default class QuerySet {
      * @param {boolean=} req.useBulk
      * @returns {Promise.<APIResponse>}
      */
-    execute(req) {
+    async execute(req) {
         const dataIsModel = this._isModelInstance(req.data);
 
         if (req.useBulk === undefined) {

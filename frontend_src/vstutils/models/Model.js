@@ -337,7 +337,7 @@ export class Model {
      * @param {string} method - Http method
      * @return {Promise<Model>}
      */
-    create(method = 'post') {
+    async create(method = 'post') {
         return this._queryset.create(this, method);
     }
 
@@ -346,7 +346,7 @@ export class Model {
      * @param {string=} method - Http method
      * @return {Promise<Model>}
      */
-    save(method) {
+    async save(method) {
         if (!this.getPkValue()) {
             return this.create(method);
         }

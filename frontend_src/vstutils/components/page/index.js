@@ -205,7 +205,7 @@ export const ActionViewComponent = {
         },
     },
     methods: {
-        fetchData() {
+        async fetchData() {
             this.registerStoreModule();
             this.initLoading();
             const instance = new this.model();

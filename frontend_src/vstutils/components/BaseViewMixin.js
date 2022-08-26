@@ -176,7 +176,7 @@ export const BaseViewMixin = {
         /**
          * Method, that gets data for a current view.
          */
-        fetchData() {
+        async fetchData() {
             this.setLoadingSuccessful();
         },
     },
