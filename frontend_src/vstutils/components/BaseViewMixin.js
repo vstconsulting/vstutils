@@ -148,7 +148,7 @@ export const BaseViewMixin = {
         },
 
         async executeEmptyAction(action, instance = undefined) {
-            await this.$app.actions.executeEmpty(action, instance);
+            await this.$app.actions.executeEmpty({ action, instance });
             this.afterEmptyAction({ action, instance });
         },
 
