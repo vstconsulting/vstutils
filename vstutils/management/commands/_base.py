@@ -6,9 +6,11 @@ import tempfile
 import sys
 import time
 import traceback
+from pathlib import Path
 from subprocess import check_call
 from collections import OrderedDict
 
+from environ import Env
 from django.conf import settings
 from django.core.management.base import (
     BaseCommand as _BaseCommand,
@@ -180,9 +182,9 @@ class DockerCommand(BaseCommand):
 
     def prepare_section_main(self, config):
         config['main'] = {
-            'debug': os.getenv(f'{self.prefix}_DEBUG', 'false'),
+            'debug': os.getenv(f'{self.prefix}_DEBUG', self._settings('DEBUG')),
             'log_level': self.log_level,
-            'timezone': os.getenv(f'{self.prefix}_TIMEZONE', 'UTC'),
+            'timezone': os.getenv(f'{self.prefix}_TIMEZONE', self._settings('TIME_ZONE')),
             'enable_admin_panel': os.getenv(f'{self.prefix}_ENABLE_ADMIN_PANEL', 'false'),
             'first_day_of_week': os.getenv(
                 f'{self.prefix}_FIRST_DAY_OF_WEEK',
@@ -198,14 +200,15 @@ class DockerCommand(BaseCommand):
             config['main']['ldap-default-domain'] = ldap_default_domain
 
     def prepare_section_db(self, config):
+        # Check if configured via default url
+        if Env.DEFAULT_DATABASE_ENV in os.environ:  # nocv
+            return  # Get data via standard settings mechanism
+
         # SQLite prepearing
-        sqlite_default_dir = os.environ.get(f'{self.prefix}_SQLITE_DIR', '/')
-        if sqlite_default_dir != '/' and not os.path.exists(sqlite_default_dir):  # nocv
+        sqlite_default_dir = os.path.join(os.environ.get(f'{self.prefix}_SQLITE_DIR', str(Path.home())), '')
+        if not os.path.exists(sqlite_default_dir):  # nocv
             os.makedirs(sqlite_default_dir)
-        if sqlite_default_dir[-1] != '/':  # nocv
-            sqlite_default_dir += '/'
-        sqlite_default_name = os.environ.get(f'{self.prefix}_SQLITE_DBNAME', 'db.sqlite3')
-        sqlite_db_path = f'{sqlite_default_dir}/{sqlite_default_name}'
+        sqlite_db_path = os.path.join(sqlite_default_dir, os.environ.get(f'{self.prefix}_SQLITE_DBNAME', 'db.sqlite3'))
 
         if os.getenv(f'{self.prefix}_DB_HOST') is not None:
             try:
@@ -231,7 +234,9 @@ class DockerCommand(BaseCommand):
                 if pm_type == 'mysql':
                     config['database.options']['init_command'] = os.getenv('DB_INIT_CMD', '')
             except KeyError as err:  # nocv
-                raise Exception('Not enough variables for connect to  SQL server.') from err
+                raise Exception(
+                    f'Not enough variables for connect to  SQL server. Variable {str(err)} is required.'
+                ) from err
         else:  # nocv
             config['database'] = {
                 'engine': 'django.db.backends.sqlite3',
@@ -239,7 +244,10 @@ class DockerCommand(BaseCommand):
             }
 
     def prepare_section_cache(self, config):
-        cache_loc = os.getenv('CACHE_LOCATION', f'{tmp}/{self.prefix}_django_cache')
+        # Check if configured via default url
+        if Env.DEFAULT_CACHE_ENV in os.environ:  # nocv
+            return  # Get data via standard settings mechanism
+
         cache_type = os.getenv(f'{self.prefix}_CACHE_TYPE', 'file')
         if cache_type == 'file':
             cache_engine = 'django.core.cache.backends.filebased.FileBasedCache'
@@ -250,9 +258,9 @@ class DockerCommand(BaseCommand):
         else:  # nocv
             raise Exception(f'Unknown cache type `{cache_type}`.')
 
-        config['cache'] = config['locks'] = {
+        config['cache'] = config['locks'] = config['session'] = config['etag'] = {
             'backend': cache_engine,
-            'location': cache_loc
+            'location': os.getenv('CACHE_LOCATION', f'{tmp}/{self.prefix}_django_cache')
         }
 
     def prepare_section_rpc(self, config):
@@ -331,10 +339,11 @@ class DockerCommand(BaseCommand):
         config['uwsgi'] = {
             'thread-stacksize': os.getenv(f'{self.prefix}_UWSGI_THREADSTACK', '40960'),
             'max-requests': os.getenv(f'{self.prefix}_UWSGI_MAXREQUESTS', '50000'),
-            'limit-as': os.getenv(f'{self.prefix}_UWSGI_LIMITS', '512'),
-            'pidfile': os.getenv(f'{self.prefix}_UWSGI_PIDFILE', '/run/web.pid'),
+            'limit-as': os.getenv(f'{self.prefix}_UWSGI_LIMITS', '1024'),
+            'pidfile': os.getenv(f'{self.prefix}_UWSGI_PIDFILE', f'{tmp}/{self.prefix.lower()}_web.pid'),
             'daemon': 'false'
         }
+
         current_addr, current_port = self._settings('WEB_ADDRPORT').split(',')[0].split(':')
         config['uwsgi']['addrport'] = (
             f"{os.getenv(f'{self.prefix}_WEB_HOST', current_addr)}:"
