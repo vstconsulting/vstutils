@@ -16,7 +16,6 @@ module.exports = {
     entry: {
         'app_loader': path.resolve(frontendSrc, 'app_loader/index.js'),
         'spa': path.resolve(frontendSrc, 'spa.js'),
-        'doc': path.resolve(frontendSrc, 'doc/index.js'),
         'base': path.resolve(frontendSrc, 'base/index.js'),
     },
     output: {
