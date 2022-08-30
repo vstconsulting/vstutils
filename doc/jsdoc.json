@@ -6,5 +6,5 @@
   "source": {
     "excludePattern": "node_modules"
   },
-  "plugins": ["../node_modules/jsdoc-export-default-interop/dist/index"]
+  "plugins": ["plugins/jsdoc-export-default-interop"]
 }
