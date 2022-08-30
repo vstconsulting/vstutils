@@ -52,7 +52,7 @@ class FileInStringField(VSTCharField):
     Value must be text (not binary) and saves in model as is.
 
     :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using *. Default: ['*/*']
+                        Supported syntax using ``*``. Default: ``['*/*']``
     :type media_types: tuple,list
 
     .. note::
@@ -73,7 +73,7 @@ class SecretFileInString(FileInStringField):
     Value must be text (not binary) and saves in model as is.
 
     :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using *. Default: ['*/*']
+                        Supported syntax using ``*``. Default: ``['*/*']``
     :type media_types: tuple,list
 
     .. note::
@@ -92,7 +92,7 @@ class BinFileInStringField(FileInStringField):
     Field extends :class:`.FileInStringField`, but work with binary(base64) files.
 
     :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using *. Default: ['*/*']
+                        Supported syntax using ``*``. Default: `['*/*']`
     :type media_types: tuple,list
 
     .. note::
@@ -115,6 +115,7 @@ class CSVFileField(FileInStringField):
 
                   - ``label``: human readable column name
                   - ``required``: Defines whether the field should be required. False by default.
+
     :type items: Serializer
 
     :param min_column_width: Minimum cell width. Default is 200 px.
@@ -123,7 +124,8 @@ class CSVFileField(FileInStringField):
     :param delimiter: The delimiting character.
     :type delimiter: str
 
-    :param lineterminator: The newline sequence. Leave blank to auto-detect. Must be one of \r, \n, or \r\n.
+    :param lineterminator: The newline sequence.
+                           Leave blank to auto-detect. Must be one of ``\\r``, ``\\n``, or ``\\r\\n``.
     :type lineterminator: str
 
     :param quotechar: The character used to quote fields.
@@ -133,7 +135,7 @@ class CSVFileField(FileInStringField):
     :type escapechar: str
 
     :param media_types: List of MIME types to select on the user's side.
-                        Supported syntax using *. Default: ['text/csv']
+                        Supported syntax using ``*``. Default: ``['text/csv']``
     :type media_types: tuple,list
     """
     __slots__ = ('min_column_width', 'items', 'parser_config')

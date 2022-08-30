@@ -1,0 +1,4 @@
+-rrequirements.txt
+-rrequirements-doc.txt
+-rrequirements-rpc.txt
+django~=3.2.15

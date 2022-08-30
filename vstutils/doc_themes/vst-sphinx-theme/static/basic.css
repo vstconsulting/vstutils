@@ -1,34 +1,13 @@
-/* Make content padding less */
-.content-wrapper > section.content {
-    padding: 0;
-}
-.card-body {
-    padding: 1rem;
+.highlight {
+    background: #efefef;
 }
 
-/* Add margin for different TOC levels */
-:root {
-    --toclevel-margin: 5px;
-}
-.toctree-l1 {
-    margin-left: calc(var(--toclevel-margin) * 1);
-}
-.toctree-l2 {
-    margin-left: calc(var(--toclevel-margin) * 2);
-}
-.toctree-l3 {
-    margin-left: calc(var(--toclevel-margin) * 3);
-}
-.toctree-l4 {
-    margin-left: calc(var(--toclevel-margin) * 4);
+.rst-content code.literal, .rst-content tt.literal {
+    color: #1d1a90;
 }
 
-/* Add padding for info cards */
-.admonition {
-    padding: 10px;
-}
-
-/* Change section's titles */
-.section > h2 {
-    text-decoration: underline;
+@media screen and (min-device-width: 1200px) {
+    .wy-nav-content {
+        max-width: 1100px;
+    }
 }

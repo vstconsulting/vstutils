@@ -102,9 +102,14 @@ html_theme = 'vst-sphinx-theme'
 html_theme_options = {
     'github_user': 'vstconsulting',
     'github_repo': 'vstutils',
-    'github_button': True,
-    'github_banner': True,
+    'style_nav_header_background': '#003658',
+    'logo_only': True
 }
+html_logo = 'img/html_logo.png'
+html_context = {}
+
+if 'READTHEDOCS' in os.environ:
+    html_context['READTHEDOCS'] = os.environ['READTHEDOCS']
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -134,7 +139,7 @@ htmlhelp_basename = 'VSTUtilsdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
-# latex_logo = './static/' + html_logo
+latex_logo = 'img/latex_logo.png'
 latex_show_urls = 'footnote'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
@@ -154,16 +159,23 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
+    'fncychap': '\\usepackage[Bjornstrup]{fncychap}',
+    # 'maketitle': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'VSTUtils.tex', 'VST Utils Documentation',
-     author, 'manual'),
+    (
+        master_doc,
+        'VSTUtils.tex',
+        'Developer documentation',
+        author,
+        'manual'
+    ),
 ]
-
+latex_engine = 'xelatex'
 
 # -- Options for manual page output ------------------------------------------
 
