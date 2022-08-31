@@ -37,9 +37,12 @@ const UptimeFieldMixin = {
         };
     },
     mounted() {
-        if (!this.field.readOnly) {
-            const element = this.$el.getElementsByTagName('input')[0];
-            if (element) {
+        const element = this.$el.getElementsByTagName('input')[0];
+        if (element) {
+            if (!this.value && this.field.hasDefault) {
+                this.setValue(this.field.toRepresent(this.field.default));
+            }
+            if (!this.field.readOnly) {
                 this.IMask = new IMask(element, this.maskObj);
             }
         }

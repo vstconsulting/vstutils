@@ -17,6 +17,9 @@ class DynamicField extends BaseField {
         this.types = this.props.types
             ? mapObjectValues(this.props.types, (field) => {
                   const fieldInstance = this.constructor.app.fieldsResolver.resolveField(field, this.name);
+                  if (this.required) {
+                      fieldInstance.required = this.required;
+                  }
                   if (!field.title) {
                       fieldInstance.title = this.title;
                   }

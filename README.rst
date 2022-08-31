@@ -20,6 +20,11 @@ Review a special section in the documentation for a QuickStart development - htt
 .. image:: https://img.shields.io/pypi/dm/vstutils
     :alt: PyPI - Downloads
 
+.. image:: https://readthedocs.org/projects/vstutils/badge/?version=latest
+    :target: https://vstutils.vstconsulting.net/en/latest/?badge=latest
+    :alt: Documentation Status
+
+
 Development Status
 ~~~~~~~~~~~~~~~~~~
 
