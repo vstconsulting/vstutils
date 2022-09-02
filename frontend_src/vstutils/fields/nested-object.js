@@ -83,11 +83,21 @@ export class NestedObjectField extends BaseField {
         return new this.nestedModel(super.toRepresent(data))._getRepresentData();
     }
     toInner(data) {
-        const value = super.toInner(data);
-        if (value?._getInnerData) {
-            return value._getInnerData();
+        data = super.toInner(data);
+        if (data?._getInnerData) {
+            return data._getInnerData();
         }
-        return value;
+        if (data && typeof data === 'object') {
+            const innerData = {};
+            for (const field of this.nestedModel.fields.values()) {
+                const value = field.toInner(data);
+                if (field.required || value !== undefined) {
+                    innerData[field.name] = value;
+                }
+            }
+            return innerData;
+        }
+        return data;
     }
     static get mixins() {
         return [NestedObjectFieldMixin];
