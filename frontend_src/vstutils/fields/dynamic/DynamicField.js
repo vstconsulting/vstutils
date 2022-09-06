@@ -26,13 +26,21 @@ class DynamicField extends BaseField {
                   return fieldInstance;
               })
             : null;
-        if (this.types)
-            for (const path of this.usedOnViews)
-                for (const field of Object.values(this.types)) field.prepareFieldForView(path);
+
+        if (this.types && this.usedOnViews) {
+            for (const path of this.usedOnViews) {
+                for (const field of Object.values(this.types)) {
+                    field.prepareFieldForView(path);
+                }
+            }
+            this.usedOnViews = null;
+        }
     }
 
     prepareFieldForView(path) {
-        this.usedOnViews.push(path);
+        if (this.usedOnViews) {
+            this.usedOnViews.push(path);
+        }
     }
 
     /**
