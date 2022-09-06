@@ -7,8 +7,9 @@ import { ChoicesField } from '../../choices';
 import { X_OPTIONS } from '../../../utils';
 
 describe('DynamicField', () => {
-    beforeAll(() => {
-        createApp();
+    let app;
+    beforeAll(async () => {
+        app = await createApp();
     });
 
     test('getting real field using types', () => {
@@ -57,5 +58,21 @@ describe('DynamicField', () => {
     test('getting default real field', () => {
         const dynamicField = new DynamicField({ name: 'value', [X_OPTIONS]: {} });
         expect(dynamicField.getRealField({})).toBeInstanceOf(StringField);
+    });
+
+    test('dynamic field inside dynamic field', () => {
+        const field = app.fieldsResolver.resolveField({
+            name: 'field',
+            format: 'dynamic',
+            'x-options': {
+                field: 'other_field',
+                types: {
+                    value1: { type: 'string' },
+                },
+            },
+        });
+        field.resolveTypes();
+        expect(field.usedOnViews).toBeNull();
+        field.prepareFieldForView('/some/path/');
     });
 });
