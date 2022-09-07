@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.test import TestCase, override_settings  # noqa: F401
 from django.contrib.auth import get_user_model
 
-from .utils import import_class, raise_context_decorator_with_default
+from .utils import import_class, raise_context_decorator_with_default, deprecated
 
 User = get_user_model()
 
@@ -355,6 +355,7 @@ class BaseTestCase(TestCase):
 
         return result
 
+    @deprecated
     def mass_create(self, url, data, *fields, **kwargs):
         """
         Mass creation objects in api-abstration. Uses :meth:`.get_result` method.

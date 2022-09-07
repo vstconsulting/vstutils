@@ -16,9 +16,6 @@ A shared file storage may be required in some cases, a but vstutils does not req
 
 Let's cover the main sections of the config and its parameters:
 
-|
-|
-
 .. _main:
 
 Main settings
@@ -79,9 +76,6 @@ In the example above authorization logic will be the following:
   and then encrypted with :wiki:`Vigenère cipher <Vigenère cipher>`.
   Read more in the :class:`vstutils.utils.SecurePickling` documentation. Default: false.
 
-|
-|
-
 .. _database:
 
 Databases settings
@@ -101,6 +95,13 @@ with the exception of tablespace management.
                                  Read more at :django_topics:`Declaring tablespaces for indexes <db/tablespaces/#declaring-tablespaces-for-indexes>`.
 * **databases_without_cte_support** - A comma-separated list of database section names that do not support CTEs (Common Table Experssions).
 
+
+.. warning::
+    Although MariaDB supports Common Table Expressions, but database connected to MariaDB still needs
+    to be added to ``databases_without_cte_support`` list.
+    The problem is that the implementation of recursive queries in the MariaDB does not allow using it in a standard form.
+    MySQL (since 8.0) works as expected.
+
 Also, all subsections of this section are available connections to the DBMS.
 So the ``databases.default`` section will be used by django as the default connection.
 
@@ -115,9 +116,6 @@ use client-server database (SQLite not suitable) shared for all nodes.
 You can also set the base template for connecting to the database in the ``database`` section.
 
 
-|
-|
-
 Section ``[database]``.
 
 This section is designed to define the basic template for connections to various databases.
@@ -125,16 +123,16 @@ This can be useful to reduce the list of settings in the ``databases.*`` subsect
 by setting the same connection for a different set of databases in the project.
 For more details read the django docs about :django_topics:`Multiple databases <db/multi-db/#multiple-databases>`
 
-There is a list of settings, required for MySQL database.
+There is a list of settings, required for MySQL/MariaDB database.
 
-Firstly, if you use MariaDB and you have set timezone different from "UTC" you should run
+Firstly, if you use MySQL/MariaDB and you have set timezone different from "UTC" you should run
 command below:
 
 .. sourcecode:: bash
 
       mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
 
-Secondly, to use MariaDB set following options in ``settings.ini`` file:
+Secondly, to use MySQL/MariaDB set following options in ``settings.ini`` file:
 
 .. sourcecode:: bash
 
@@ -142,7 +140,7 @@ Secondly, to use MariaDB set following options in ``settings.ini`` file:
       connect_timeout = 10
       init_command = SET sql_mode='STRICT_TRANS_TABLES', default_storage_engine=INNODB, NAMES 'utf8', CHARACTER SET 'utf8', SESSION collation_connection = 'utf8_unicode_ci'
 
-Finally, add some options to MariaDB configuration:
+Finally, add some options to MySQL/MariaDB configuration:
 
 .. sourcecode:: bash
 
@@ -153,9 +151,6 @@ Finally, add some options to MariaDB configuration:
       [mysqld]
       character-set-server=utf8
       collation-server=utf8_unicode_ci
-
-|
-|
 
 .. _cache:
 
@@ -173,9 +168,6 @@ additional plugins. You can find details about cache configusupported
 using client-server cache realizations.
 We recommend to use Redis in production environments.
 
-|
-|
-
 .. _locks:
 
 Locks settings
@@ -192,9 +184,6 @@ be shared for all vstutils-based application threads and nodes. So, for example,
 to use Redis or Memcached as backend for that purpose. Cache and locks backend
 can be the same, but don't forget about requirement we said above.
 
-|
-|
-
 .. _session:
 
 Session cache settings
@@ -206,9 +195,6 @@ vstutils-based application store sessions in database_, but for better performan
 we use a cache-based session backend. It is based on Django cache, so there is
 another bunch of same settings as cache_. By default,
 settings are got from cache_.
-
-|
-|
 
 .. _rpc:
 
@@ -232,8 +218,6 @@ This section require vstutils with `rpc` extra dependency.
 * **heartbeat** - Interval between sending heartbeat packages, which says that connection still alive. Default: 10.
 * **enable_worker** - Enable or disable worker with webserver. Default: true.
 
-|
-
 The following variables from :celery_docs:`Django settings <userguide/configuration.html#new-lowercase-settings>`
 are also supported (with the corresponding types):
 
@@ -242,8 +226,6 @@ are also supported (with the corresponding types):
 * **results_expiry_days** - :celery_docs:`CELERY_RESULT_EXPIRES <userguide/configuration.html#std-setting-result_expires>`
 * **default_delivery_mode** - :celery_docs:`CELERY_DEFAULT_DELIVERY_MODE <userguide/configuration.html#task-default-delivery-mode>`
 
-|
-|
 
 .. _worker:
 
@@ -261,9 +243,6 @@ Celery worker options:
 
 See other settings via ``celery worker --help`` command.
 
-
-|
-|
 
 .. _mail:
 
@@ -284,9 +263,6 @@ Applications based on vstutils uses only ``smtp`` and ``console`` backends.
 * **tls** - Enable/disable tls for smtp-server connection. Default: ``False``.
 * **send_confirmation** - Enable/disable confirmation message after registration. Default: ``False``.
 * **authenticate_after_registration** - Enable/disable autologin after registration confirmation. Default: ``False``.
-
-|
-|
 
 .. _web:
 
@@ -321,7 +297,6 @@ session_timeout, static_files_url and pagination limit.
 * **secure_proxy_ssl_header_value** - Header value which activates SSL urls in responses.
   Read :django_docs:`more <settings/#secure-proxy-ssl-header>`. Default: ``https``.
 
-|
 
 The following variables from Django settings are also supported (with the corresponding types):
 
@@ -336,8 +311,6 @@ The following variables from Django settings are also supported (with the corres
 * **use_x_forwarded_host** - :django_docs:`USE_X_FORWARDED_HOST <settings/#use-x-forwarded-host>`
 * **use_x_forwarded_port** - :django_docs:`USE_X_FORWARDED_PORT <settings/#use-x-forwarded-port>`
 
-|
-|
 
 .. _centrifugo:
 
@@ -362,9 +335,6 @@ every 5 seconds (by default).
     These settings also add parameters to the OpenApi schema and change how the auto-update system works in the GUI.
     ``token_hmac_secret_key`` is used for jwt-token generation (based on
     session expiration time). Token will be used for Centrifugo-JS client.
-
-|
-|
 
 .. _storages:
 
@@ -442,9 +412,6 @@ external proxy domain and internal connection support:
     querystring_auth = false
     default_acl = public-read
 
-|
-|
-
 .. _throttle:
 
 Throttle settings
@@ -469,9 +436,6 @@ For example, if you want to apply throttle to ``api/v1/author``:
 
 More on throttling at `DRF Throttle docs <https://www.django-rest-framework.org/api-guide/throttling/>`_.
 
-|
-|
-
 Production web settings
 -----------------------
 
@@ -483,8 +447,6 @@ Settings related to web-server used by vstutils-based application in production
 More settings in `uWSGI docs
 <http://uwsgi-docs.readthedocs.io/en/latest/Configuration.html>`_.
 
-|
-|
 
 Configuration options
 -----------------------------

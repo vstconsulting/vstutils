@@ -10,46 +10,30 @@ from drf_yasg.openapi import Operation
 from ... import utils
 from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
-from .inspectors import (
-    CommaMultiSelectFieldInspector,
-    FkFieldInspector,
-    DynamicJsonTypeFieldInspector,
-    AutoCompletionFieldInspector,
-    VSTFieldInspector,
-    NestedFilterInspector,
-    ArrayFilterQueryInspector,
-    VSTReferencingSerializerInspector,
-    RelatedListFieldInspector,
-    RatingFieldInspector,
-    NamedBinaryImageInJsonFieldInspector,
-    MaskedFieldInspector,
-    DecimalFieldInspector,
-    FileInStringInspector,
-    CSVFileFieldInspector,
-)
+from . import inspectors as vst_inspectors
 
 
 class VSTAutoSchema(SwaggerAutoSchema):
     field_inspectors = [
-        CommaMultiSelectFieldInspector,
-        FkFieldInspector,
-        DynamicJsonTypeFieldInspector,
-        AutoCompletionFieldInspector,
-        VSTFieldInspector,
-        VSTReferencingSerializerInspector,
-        RelatedListFieldInspector,
-        RatingFieldInspector,
-        RelatedListFieldInspector,
-        NamedBinaryImageInJsonFieldInspector,
-        MaskedFieldInspector,
-        DecimalFieldInspector,
-        CSVFileFieldInspector,
-        FileInStringInspector,
+        vst_inspectors.CommaMultiSelectFieldInspector,
+        vst_inspectors.FkFieldInspector,
+        vst_inspectors.DynamicJsonTypeFieldInspector,
+        vst_inspectors.AutoCompletionFieldInspector,
+        vst_inspectors.VSTFieldInspector,
+        vst_inspectors.VSTReferencingSerializerInspector,
+        vst_inspectors.RelatedListFieldInspector,
+        vst_inspectors.RatingFieldInspector,
+        vst_inspectors.RelatedListFieldInspector,
+        vst_inspectors.NamedBinaryImageInJsonFieldInspector,
+        vst_inspectors.MaskedFieldInspector,
+        vst_inspectors.DecimalFieldInspector,
+        vst_inspectors.CSVFileFieldInspector,
+        vst_inspectors.FileInStringInspector,
     ] + swagger_settings.DEFAULT_FIELD_INSPECTORS
 
     filter_inspectors = [
-        NestedFilterInspector,
-        ArrayFilterQueryInspector,
+        vst_inspectors.NestedFilterInspector,
+        vst_inspectors.ArrayFilterQueryInspector,
     ] + swagger_settings.DEFAULT_FILTER_INSPECTORS
 
     default_status_messages: dict = {

@@ -56,6 +56,17 @@ def deprecated(func: tp.Callable):
     return new_func
 
 
+def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = list) -> tp.Iterable[tp.Tuple[str, str]]:
+    """
+    Method to create django model choices from flat list of values.
+
+    :param items_list: list of flat values.
+    :param response_type: casting type of returned mapping
+    :return: list of tuples from `items_list` values
+    """
+    return response_type(map(lambda x: (x, x), items_list))
+
+
 def is_member_descriptor(obj):
     try:
         return type(obj).__name__ == 'member_descriptor'
@@ -1314,17 +1325,6 @@ class URLHandlers(ObjectHandlers):
 
     def __iter__(self):
         return self.urls()
-
-
-def list_to_choices(items_list: tp.Iterable, response_type: tp.Callable = list) -> tp.Iterable[tp.Tuple[str, str]]:
-    """
-    Method to create django model choices from flat list of values.
-
-    :param items_list: list of flat values.
-    :param response_type: casting type of returned mapping
-    :return: list of tuples from `items_list` values
-    """
-    return response_type(map(lambda x: (x, x), items_list))
 
 
 class BaseEnum(str, Enum):
