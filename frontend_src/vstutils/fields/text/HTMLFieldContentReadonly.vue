@@ -1,6 +1,7 @@
 <template>
     <!-- eslint-disable vue/no-v-html -->
     <div
+        class="scroll"
         :class="classes"
         :style="styles"
         :aria-labelledby="label_id"
@@ -33,3 +34,9 @@
         },
     };
 </script>
+
+<style scoped>
+    .scroll {
+        overflow-x: auto;
+    }
+</style>
