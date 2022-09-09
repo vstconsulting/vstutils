@@ -245,7 +245,7 @@ export const ActionViewComponent = {
             }
         },
         getRedirectUrl() {
-            if (this.view?.parent?.parent?.deepNestedParentView) {
+            if (this.view.isDeepNested) {
                 return this.$route.path.replace(/[^/]+\/$/, '');
             }
             const parentView = this.$app.views.get(this.view.path.replace(/[^/]+\/$/, ''));

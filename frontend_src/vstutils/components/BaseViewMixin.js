@@ -112,10 +112,10 @@ export const BaseViewMixin = {
         openPage(options) {
             if (typeof options === 'object') {
                 // Get name by path so additional params can be passed
-                if (options.path) {
-                    const name = this.$router.resolve(options)?.route?.name;
-                    if (name && name !== '404') {
-                        options.name = name;
+                if (options.path && options.params) {
+                    const route = this.$router.resolve(options)?.route;
+                    if (route.name !== '404' && !route.meta?.view?.isDeepNested) {
+                        options.name = route.name;
                         delete options['path'];
                     }
                 }
