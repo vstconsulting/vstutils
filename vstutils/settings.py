@@ -498,7 +498,8 @@ config: cconfig.ConfigParserC = cconfig.ConfigParserC(
             'results_expiry_days': 1,
             'create_instance_attempts': 10,
             'default_delivery_mode': "persistent",
-            'broker_transport_options': {}
+            'broker_transport_options': {},
+            'enable_worker': ConfigBoolType(os.getenv(f'{ENV_NAME}_ENABLE_WORKER', 'True'))
         },
         'worker': {
             'app': os.getenv('VST_CELERY_APP', '{PROG_NAME}.wapp:app'),
@@ -1199,7 +1200,7 @@ if RPC_ENABLED:
     CREATE_INSTANCE_ATTEMPTS = rpc.getint("create_instance_attempts", fallback=10)
     CONCURRENCY = rpc["concurrency"]
     WORKER_QUEUES = ['celery']
-    RUN_WORKER = rpc.getboolean('enable_worker', fallback=True)
+    RUN_WORKER = rpc['enable_worker']
 
     if RUN_WORKER:
         WORKER_OPTIONS = config['worker'].all()
