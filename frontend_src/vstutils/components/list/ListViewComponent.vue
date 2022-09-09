@@ -345,7 +345,7 @@
             // Page view
 
             openPageView(instance) {
-                if (this.view.deepNestedParentView) {
+                if (this.view.isDeepNested) {
                     return this.$router.push(joinPaths(this.$route.path, instance.getPkValue()));
                 }
                 const pageView = this.view.pageView;

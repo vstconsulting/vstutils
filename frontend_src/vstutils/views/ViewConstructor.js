@@ -444,6 +444,7 @@ export default class ViewConstructor {
                     delete listView.filters.__deep_parent;
                     delete deepRoot.filters.__deep_parent;
 
+                    listView.isDeepNested = listView;
                     deepNestedParents.push(listView);
                 }
             }

@@ -149,9 +149,6 @@ export class View {
             query: { ...route.query },
             params: { ...route.params },
         };
-        if (this.isDeepNested && (this.type === ViewTypes.PAGE || this.type === ViewTypes.PAGE_EDIT)) {
-            props.params[this.objects.pathParams.at(-1).name] = route.params.pathMatch.split('/').at(-2);
-        }
         return props;
     }
 
@@ -204,7 +201,6 @@ export class ListView extends View {
 
     getRoutePath() {
         if (this.deepNestedParentView) {
-            // Example: /category(/\\w+/categories)*/:id/categories/ | /category/1/categories/2/categories/
             return '{0}(/\\w+/{1})*/:{2}/{1}/'.format([
                 this.deepNestedParentView.getRoutePath().replace(/\/$/, ''),
                 this.deepNestedParentView.deepNestedViewFragment,
@@ -249,11 +245,15 @@ export class PageView extends View {
     getRoutePath() {
         const deepNestedParentView = this.listView?.deepNestedParentView;
         if (deepNestedParentView) {
-            return '{0}(/\\w+/{1})+/:{2}/'.format([
+            // Example: /group/(\w+/groups?)*/:id/groups/:groups_id/ | /group/6/groups/7/groups/8/groups/9/
+            return '{0}/(\\w+/{1})*/:{3}/{1}/:{2}/'.format([
                 deepNestedParentView.getRoutePath().replace(/\/$/, ''),
                 deepNestedParentView.deepNestedViewFragment,
                 this.pkParamName,
+                this.parent.parent.pkParamName,
             ]);
+        } else if (this.isDeepNested) {
+            return joinPaths(this.parent.getRoutePath(), ':' + this.pkParamName);
         }
         return super.getRoutePath();
     }
@@ -285,10 +285,7 @@ export class PageNewView extends View {
     }
 
     getRoutePath() {
-        if (this?.parent?.deepNestedParentView) {
-            return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
-        }
-        return super.getRoutePath();
+        return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
     }
 }
 
@@ -309,7 +306,7 @@ export class PageEditView extends PageView {
     }
 
     getRoutePath() {
-        if (this?.parent?.parent?.deepNestedParentView) {
+        if (this.isDeepNested) {
             return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
         }
         return super.getRoutePath();
@@ -330,9 +327,6 @@ export class ActionView extends View {
     }
 
     getRoutePath() {
-        if (this?.parent?.parent?.deepNestedParentView) {
-            return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
-        }
-        return super.getRoutePath();
+        return joinPaths(this.parent.getRoutePath(), pathToArray(this.path).last);
     }
 }
