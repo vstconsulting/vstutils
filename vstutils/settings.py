@@ -311,14 +311,14 @@ class UWSGISection(cconfig.Section):
 
 class RPCSection(BaseAppendSection):
     __slots__ = ()
-    type_map = {
-        'concurrency"': ConfigIntType,
-        'prefetch_multiplier"': ConfigIntType,
-        'max_tasks_per_child"': ConfigIntType,
-        'heartbeat"': ConfigIntType,
-        'results_expiry_days"': ConfigIntType,
-        'create_instance_attempts"': ConfigIntType,
-        'enable_worker"': ConfigBoolType
+    types_map = {
+        'concurrency': ConfigIntType,
+        'prefetch_multiplier': ConfigIntType,
+        'max_tasks_per_child': ConfigIntType,
+        'heartbeat': ConfigIntType,
+        'results_expiry_days': ConfigIntType,
+        'create_instance_attempts': ConfigIntType,
+        'enable_worker': ConfigBoolType
     }
 
 
