@@ -1202,8 +1202,7 @@ if RPC_ENABLED:
     WORKER_QUEUES = ['celery']
     RUN_WORKER = rpc['enable_worker']
 
-    if RUN_WORKER:
-        WORKER_OPTIONS = config['worker'].all()
+    WORKER_OPTIONS = config['worker'].all()
 
 # View settings
 ##############################################################
