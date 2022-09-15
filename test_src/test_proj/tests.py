@@ -1448,6 +1448,7 @@ class DefaultBulkTestCase(BaseTestCase):
 
 class OpenapiEndpointTestCase(BaseTestCase):
     use_msgpack = False
+    maxDiff = None
 
     @override_settings(CENTRIFUGO_CLIENT_KWARGS={
         'address': 'https://localhost:8000',
@@ -1915,6 +1916,10 @@ class OpenapiEndpointTestCase(BaseTestCase):
                         },
                         'x-format': 'namedbinimage',
                         'x-validators': {}
+                    },
+                    'context_depend': {
+                        'minLength': 1,
+                        'type': 'string',
                     }
                 },
             },
@@ -3792,6 +3797,11 @@ class ProjectTestCase(BaseTestCase):
             }},
             # [8]
             {'method': 'get', 'path': ['dynamic_fields', '<<7[data][id]>>']},
+            # [9]
+            {'method': 'post', 'path': 'dynamic_fields', 'data': {
+                'field_type': 'context_depend',
+                'dynamic_with_types': 'lol',
+            }},
         ])
         self.assertEqual(results[0]['status'], 201)
 
@@ -3815,6 +3825,8 @@ class ProjectTestCase(BaseTestCase):
         self.assertEqual(results[7]['status'], 201)
         self.assertEqual(results[7]['data']['dynamic_with_types'], valid_image_content_dict)
         self.assertEqual(results[8]['data']['dynamic_with_types'], valid_image_content_dict)
+        self.assertEqual(results[9]['status'], 201, results[9])
+        self.assertEqual(results[9]['data']['dynamic_with_types'], 'lol')
 
         # Check if 'field' is invalid then error should not be raised
         class SomeSerializer(BaseSerializer):

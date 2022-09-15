@@ -301,6 +301,10 @@ class DynamicJsonTypeField(VSTCharField):
         self.choices = kwargs.pop('choices', {})
         self.types = kwargs.pop('types', {})
         super().__init__(**kwargs)
+        for field in self.types.values():
+            if isinstance(field, Field):
+                field.source = None
+                field.bind(field_name='', parent=self)
 
     def get_attribute(self, instance):
         return instance
@@ -410,7 +414,7 @@ class DependFromFkField(DynamicJsonTypeField):
             {related_type: self.default_related_field}
         ).get(related_type, self.default_related_field)
         related_field: Field = copy.deepcopy(related_field)
-        related_field.field_name: _t.Text = self.field_name  # type: ignore
+        related_field.bind(field_name=self.field_name, parent=self)  # type: ignore
 
         errors: _t.Dict = {}
         primitive_value = related_field.get_value(dictionary)

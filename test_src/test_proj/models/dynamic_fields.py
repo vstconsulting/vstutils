@@ -1,12 +1,22 @@
 from django.db import models
 from rest_framework.fields import CharField, IntegerField
+from rest_framework.serializers import Serializer
 from vstutils.api import fields
 from vstutils.api.serializers import BaseSerializer
 from vstutils.models import BModel
 
 
+class SomeField(CharField):
+    def to_representation(self, value):
+        representation = super().to_representation(value)
+        assert isinstance(self.parent, (SomeSerializer, fields.DynamicJsonTypeField))
+        assert isinstance(self.root, Serializer)
+        assert self.context != {}
+        return representation
+
+
 class SomeSerializer(BaseSerializer):
-    field1 = CharField()
+    field1 = SomeField()
     field2 = IntegerField()
 
 
@@ -23,5 +33,6 @@ class DynamicFields(BModel):
                 'integer': IntegerField(max_value=1337),
                 'boolean': 'boolean',
                 'image':  fields.NamedBinaryImageInJsonField(),
+                'context_depend': SomeField()
             }),
         }
