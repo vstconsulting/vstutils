@@ -35,15 +35,20 @@ def wait(proc, timeout=None, delay=0.01):
     return proc.poll()
 
 
-def get_celery_command(celery_path='celery', **kwargs):
+def get_celery_command(celery_path='celery', command='worker', **kwargs):
     # Format args string.
     options = ''
     app_option = f'--app={settings.VST_PROJECT}.wapp:app'
-    worker_options_dict = {
-        **settings.WORKER_OPTIONS,
-        **kwargs
-    }
-    for key, value in worker_options_dict.items():
+    args = kwargs.pop('_args', ())
+    options += ' '.join(filter(bool, args))
+    options += ' '
+
+    if command == 'worker':
+        options_dict = {**settings.WORKER_OPTIONS, **kwargs}
+    else:
+        options_dict = kwargs
+
+    for key, value in options_dict.items():
         if key == 'app':
             app_option = "--app={}".format(value.replace(',', r'\,'))
             continue
@@ -55,11 +60,11 @@ def get_celery_command(celery_path='celery', **kwargs):
         options += "{}{}".format('=' if key != 'O' else '', value.replace(',', r'\,'))
 
     # Add queues list to celery args
-    if '--queues' not in options:
+    if '--queues' not in options and command == 'worker':
         options += ' --queues={}'.format(r'\,'.join(settings.WORKER_QUEUES))
 
     # Add arguments to uwsgi cmd list.
-    return f'{celery_path} {app_option} worker {options}'
+    return f'{celery_path} {app_option} {command} {options}'
 
 
 class Command(BaseCommand):

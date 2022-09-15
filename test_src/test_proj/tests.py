@@ -142,6 +142,7 @@ def to_soup(content):
 
 
 class VSTUtilsCommandsTestCase(BaseTestCase):
+    maxDiff = None
 
     def setUp(self):
         super(VSTUtilsCommandsTestCase, self).setUp()
@@ -216,7 +217,6 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
         with self.patch('subprocess.check_call') as mock_obj:
             mock_obj.side_effect = lambda *args, **kwargs: 'OK'
             call_command('dockerrun', attempts=4, attempts_timeout=0.01)
-            self.maxDiff = 1024 * 100
             self.assertEqual(mock_obj.call_count, 3)
             self.assertEqual(
                 mock_obj.call_args[0][0],
@@ -232,6 +232,27 @@ class VSTUtilsCommandsTestCase(BaseTestCase):
                 call_command('dockermigrate', attempts=1, attempts_timeout=0.0001)
             with self.assertRaises(SystemExit):
                 call_command('dockerrun', attempts=1, attempts_timeout=0.0001)
+
+        with self.patch('subprocess.check_call', return_value=0) as mock_obj:
+            with self.assertRaises(SystemExit) as cm:
+                call_command('celery_inspect', 'ping', json=True)
+            self.assertEqual(cm.exception.code, 0)
+            self.assertEqual(mock_obj.call_count, 1)
+            self.assertEqual(
+                mock_obj.call_args[0][0].strip(),
+                f'{sys.executable} -m celery --app=test_proj.wapp:app inspect ping --json',
+            )
+
+        with self.patch('subprocess.check_call', return_value=0) as mock_obj:
+            with self.assertRaises(SystemExit) as cm:
+                call_command('runrpc', migrate=False)
+            self.assertEqual(cm.exception.code, 0)
+            self.assertEqual(mock_obj.call_count, 1)
+            self.assertTrue(
+                mock_obj.call_args[0][0].strip().startswith(
+                    f'{sys.executable} -m celery --app=test_proj.wapp:app worker'
+                ),
+            )
 
 
 class VSTUtilsTestCase(BaseTestCase):
