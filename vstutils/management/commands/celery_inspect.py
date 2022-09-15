@@ -6,7 +6,8 @@ from .web import get_celery_command
 
 
 class Command(DockerCommand):
-    help = "Run Celery for web-application"
+    help = "Run Celery 'inspect' command"
+    with_migration = False
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -16,23 +17,29 @@ class Command(DockerCommand):
             help='Args "name=value" for the celery app.',
         )
         parser.add_argument(
-            '--nomigrate',
-            action='store_false', dest='migrate', default=True,
-            help="Do NOT run docker command for migration of databases.",
+            '-j', '--json',
+            action='store_true', dest='json', default=False,
+            help="Use json as output format for 'inspect' command.",
         )
 
     def handle(self, *args, **opts):
         super().handle(*args, **opts)
 
-        if opts['migrate']:
-            self.migrate(opts)  # nocv
-
-        cmd_args = dict(
+        cmd_kwargs = dict(
             arg.split('=')
             for arg in args
+            if '=' in arg
         )
 
-        cmd = f'{sys.executable} -m {get_celery_command(**cmd_args)}'
+        cmd_kwargs['_args'] = [
+            arg for arg in args
+            if '=' not in arg
+        ]
+
+        if opts['json']:
+            cmd_kwargs['_args'].append('--json')
+
+        cmd = f'{sys.executable} -m {get_celery_command(command="inspect", **cmd_kwargs)}'
         self._print(f'Execute: {cmd}')
         sys.exit(check_call(
             cmd,
