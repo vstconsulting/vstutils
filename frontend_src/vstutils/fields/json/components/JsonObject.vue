@@ -3,7 +3,7 @@
     <Card v-else :title="title">
         <component
             :is="jsonMapper.getComponent(subValue, name)"
-            v-for="(subValue, name, idx) in value"
+            v-for="(subValue, name, idx) in valueAsObj"
             :key="idx"
             :value="subValue"
             :title="name"
@@ -12,8 +12,8 @@
     </Card>
 </template>
 <script>
+    import Card from '../../../components/Card.vue';
     import JsonMixin from './JsonMixin.js';
-    import Card from './Card.vue';
 
     export default {
         name: 'JsonObject',
@@ -22,7 +22,14 @@
         inject: ['jsonMapper'],
         computed: {
             isEmpty() {
-                return !this.value || Object.keys(this.value).length === 0;
+                return !this.valueAsObj || Object.keys(this.valueAsObj).length === 0;
+            },
+            valueAsObj() {
+                if (this.value instanceof Map) {
+                    return Object.fromEntries(this.value.entries());
+                }
+
+                return this.value;
             },
         },
     };

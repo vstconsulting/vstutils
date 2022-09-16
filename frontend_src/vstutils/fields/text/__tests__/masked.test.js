@@ -78,6 +78,13 @@ describe('MaskedField', () => {
         expect(regexMask.mask).toMatchObject({ mask: /regex/ });
         expect(patternMask.mask).toMatchObject({ mask: 'pattern' });
     });
+    test('check initial value', () => {
+        expect(regexMask.getInitialValue()).toBe('');
+        expect(patternMask.getInitialValue()).toBe('');
+        expect(patternWithDefinitionsMask.getInitialValue()).toBe('');
+        expect(nestedMask.getInitialValue()).toBe('');
+        expect(dynamicMask.getInitialValue()).toBe('');
+    });
 
     test('complex masks', () => {
         expect(patternWithDefinitionsMask.mask).toMatchObject({
@@ -137,5 +144,14 @@ describe('MaskedField', () => {
                     },
                 }),
         ).toThrow(ValidationError);
+    });
+
+    test('regex masks from js', () => {
+        const jsRegexMaskField = new MaskedField({
+            name: 'regexMaskJs',
+            format: 'masked',
+            'x-options': { mask: /regex/ },
+        });
+        expect(jsRegexMaskField.mask).toMatchObject(regexMask.mask);
     });
 });
