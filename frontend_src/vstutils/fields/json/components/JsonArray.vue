@@ -11,8 +11,8 @@
     </Card>
 </template>
 <script>
+    import Card from '../../../components/Card.vue';
     import JsonMixin from './JsonMixin.js';
-    import Card from './Card.vue';
 
     export default {
         name: 'JsonArray',

@@ -1,7 +1,7 @@
 <template>
     <div class="json-string">
         <b>{{ title }}</b>
-        : {{ value }}
+        : {{ valueAsStr }}
     </div>
 </template>
 <script>
@@ -10,6 +10,14 @@
     export default {
         name: 'JsonString',
         mixins: [JsonMixin],
+        computed: {
+            valueAsStr() {
+                if (typeof this.value === 'symbol') {
+                    return this.value.description;
+                }
+                return this.value;
+            },
+        },
     };
 </script>
 <style scoped>
