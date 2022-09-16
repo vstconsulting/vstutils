@@ -1355,6 +1355,8 @@ export function getRedirectUrlFromResponse(app, responseData, modelClass) {
         return;
     }
 
+    if ([null, undefined].includes(responseData[field.name])) return;
+
     return formatPath(view.path, {
         ...app.router.currentRoute.params,
         [view.pkParamName]: responseData[field.name],
