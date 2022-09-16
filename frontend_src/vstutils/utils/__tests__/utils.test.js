@@ -1,4 +1,4 @@
-import { jest, expect, test, describe } from '@jest/globals';
+import { jest, expect, test, describe, beforeAll } from '@jest/globals';
 import {
     capitalize,
     chunkArray,
@@ -11,10 +11,17 @@ import {
     sliceLongString,
     stringToBoolean,
     generatePassword,
+    getRedirectUrlFromResponse,
 } from '../index.js';
 import { StringField } from '../../fields/text';
+import { createApp } from '../../../unittests/create-app';
 
 describe('utils', () => {
+    let app;
+    beforeAll(async () => {
+        app = await createApp();
+    });
+
     test('stringToBoolean', () => {
         expect(stringToBoolean('true')).toBeTruthy();
         expect(stringToBoolean('True')).toBeTruthy();
@@ -188,5 +195,60 @@ describe('utils', () => {
         expect(/[A-Z]/.exec(password)).toBeTruthy();
         expect(/\d/.exec(password)).toBeTruthy();
         expect(/[~!@\-#$]/.exec(password)).toBeTruthy();
+    });
+
+    test('getRedirectUrlFromResponse', () => {
+        const redirection_id = {
+            title: 'Id',
+            type: 'integer',
+            readOnly: true,
+            'x-options': {
+                redirect: {
+                    concat_field_name: true,
+                    depend_field: 'name',
+                    operation_name: '_redirection',
+                },
+            },
+        };
+        const name = {
+            title: 'Name',
+            type: 'string',
+            maxLength: 64,
+            minLength: 1,
+        };
+
+        const model = {
+            required: ['name'],
+            type: 'object',
+            properties: {},
+        };
+
+        const validModel = app.modelsResolver.bySchemaObject({
+            ...model,
+            properties: { redirection_id, name },
+        });
+
+        const modelWithoutRedirect = app.modelsResolver.bySchemaObject({
+            ...model,
+            properties: { name },
+        });
+
+        const responseData = {
+            redirection_id: 12,
+            name: 'test_response_data',
+        };
+
+        expect(getRedirectUrlFromResponse(app, undefined, validModel)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(app, responseData, undefined)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(app, 'not_object', validModel)).toBeUndefined();
+
+        expect(getRedirectUrlFromResponse(app, responseData, modelWithoutRedirect)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(app, responseData, validModel)).toBeUndefined();
+
+        const viewToBeFound = app.views.get(app.views.entries().next().value[1].path);
+        viewToBeFound.operationId = 'test_response_data_redirection_get';
+
+        expect(getRedirectUrlFromResponse(app, { name: 'test_response_data' }, validModel)).toBeUndefined();
+        expect(getRedirectUrlFromResponse(app, responseData, validModel)).toBe(viewToBeFound.path);
     });
 });
