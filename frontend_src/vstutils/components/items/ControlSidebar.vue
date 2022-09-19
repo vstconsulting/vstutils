@@ -37,9 +37,9 @@
             </button>
             <ConfirmModal
                 ref="reloadPageModal"
-                :message="'Changes in settings are successfully saved. Please refresh the page.'"
-                :confirm-title="'Reload now'"
-                :reject-title="'Later'"
+                message="Changes in settings are successfully saved. Please refresh the page."
+                confirm-title="Reload now"
+                reject-title="Later"
                 @confirm="reloadPage"
                 @reject="close"
             />

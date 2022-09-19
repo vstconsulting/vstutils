@@ -1,4 +1,5 @@
 module.exports = {
+    root: true,
     extends: ['eslint:recommended', 'plugin:vue/recommended', 'plugin:prettier/recommended'],
     parser: 'vue-eslint-parser',
     parserOptions: {
@@ -10,6 +11,7 @@ module.exports = {
         commonjs: true,
         es6: true,
         node: true,
+        'vue/setup-compiler-macros': true,
     },
     rules: {
         'no-debugger': 'error',
@@ -18,8 +20,13 @@ module.exports = {
         'vue/html-self-closing': ['error', { html: { void: 'any' } }],
         'vue/max-attributes-per-line': 'off',
         'vue/multi-word-component-names': 'off',
+        'vue/no-boolean-default': ['warn', 'default-false'],
         'vue/no-empty-component-block': 'error',
+        'vue/no-unsupported-features': ['error', { version: '^2.7.10' }],
+        'vue/no-useless-mustaches': 'error',
+        'vue/no-useless-v-bind': 'error',
         'vue/one-component-per-file': 'off',
+        'vue/v-on-function-call': 'error',
     },
     globals: {
         globalThis: 'readonly',

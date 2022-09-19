@@ -1,44 +1,40 @@
 <template>
     <ul class="tags-selector">
         <li v-for="(item, idx) in value" :key="`${idx}-${item}`" class="selected-item">
-            <span class="remove" :aria-label="removeLabel" @click="remove(idx)">×</span>
+            <span class="remove" :aria-label="$t('Remove')" @click="remove(idx)">×</span>
             {{ item }}
         </li>
         <input ref="input" class="field" type="text" @keyup.enter="add($refs.input.value)" />
     </ul>
 </template>
 
-<script>
-    export default {
-        name: 'TagsSelector',
-        props: {
-            value: { type: Array, default: () => [] },
-            unique: { type: Boolean, default: false },
-            validator: { type: Function, default: (value) => value || undefined },
-        },
-        computed: {
-            removeLabel() {
-                return this.$t('Remove');
-            },
-        },
-        methods: {
-            remove(idx) {
-                const newArr = [...this.value];
-                newArr.splice(idx, 1);
-                this.$emit('change', newArr);
-            },
-            add(text) {
-                const item = this.validator(text);
-                if (item !== undefined) {
-                    if (this.unique && this.value.includes(item)) {
-                        return;
-                    }
-                    this.$emit('change', [...this.value, item]);
-                    this.$refs.input.value = '';
-                }
-            },
-        },
-    };
+<script setup>
+    import { ref } from 'vue';
+
+    const props = defineProps({
+        value: { type: Array, default: () => [] },
+        unique: { type: Boolean, default: false },
+        validator: { type: Function, default: (value) => value || undefined },
+    });
+    const emit = defineEmits(['change']);
+
+    const input = ref(null);
+
+    function remove(idx) {
+        const newArr = [...props.value];
+        newArr.splice(idx, 1);
+        emit('change', newArr);
+    }
+    function add(text) {
+        const item = props.validator(text);
+        if (item !== undefined) {
+            if (props.unique && props.value.includes(item)) {
+                return;
+            }
+            emit('change', [...props.value, item]);
+            input.value.value = '';
+        }
+    }
 </script>
 
 <style scoped>

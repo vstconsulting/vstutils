@@ -15,7 +15,7 @@
             v-else
             class="btn btn-secondary"
             style="margin-bottom: 0"
-            :title="helpText"
+            :title="$t(helpText)"
             @change="changeHandler"
         >
             <input
@@ -30,48 +30,45 @@
         <span>{{ text }}</span>
     </div>
 </template>
-<script>
-    import DragAndDropMixin from './DragAndDropMixin.js';
-    export default {
-        mixins: [DragAndDropMixin],
-        props: {
-            mediaTypes: { type: Array, default: () => ['*'] },
-            multiple: { type: Boolean, default: false },
-            text: { type: String, default: '' },
-            // eslint-disable-next-line vue/require-prop-types
-            hasValue: { default: false },
-            showHideButton: { type: Boolean, default: false },
-        },
-        computed: {
-            accept() {
-                if (Array.isArray(this.mediaTypes)) {
-                    return this.mediaTypes.join(',');
-                }
-                return '*/*';
-            },
-            helpText() {
-                if (this.multiple) {
-                    return this.$t('Select files');
-                }
-                return this.$t('Select file');
-            },
-        },
-        methods: {
-            changeHandler(e) {
-                this.$emit('read-file', e.target.files);
-            },
-            dragOver() {
-                this.$refs.dragZone.classList.add('is-dragover');
-            },
-            dragLeave() {
-                this.$refs.dragZone.classList.remove('is-dragover');
-            },
-            dragFinished(e) {
-                this.$emit('read-file', e.dataTransfer.files);
-                console.log(arguments, e.dataTransfer, e.dataTransfer.files);
-            },
-        },
-    };
+<script setup>
+    import { ref, computed } from 'vue';
+    import { useDragAndDrop } from './useDragAndDrop.js';
+
+    const props = defineProps({
+        mediaTypes: { type: Array, default: () => ['*'] },
+        multiple: { type: Boolean, default: false },
+        text: { type: String, default: '' },
+        // eslint-disable-next-line vue/require-prop-types
+        hasValue: { default: false },
+        showHideButton: { type: Boolean, default: false },
+    });
+    const emit = defineEmits(['read-file', 'clear']);
+
+    const dragZone = ref(null);
+
+    const accept = computed(() => {
+        if (Array.isArray(props.mediaTypes)) {
+            return props.mediaTypes.join(',');
+        }
+        return '*/*';
+    });
+    const helpText = computed(() => {
+        if (props.multiple) {
+            return 'Select files';
+        }
+        return 'Select file';
+    });
+
+    function changeHandler(e) {
+        emit('read-file', e.target.files);
+    }
+
+    useDragAndDrop({
+        dragZoneRef: dragZone,
+        onDragOver: () => dragZone.value.classList.add('is-dragover'),
+        onDragLeave: () => dragZone.value.classList.remove('is-dragover'),
+        onDragFinished: (e) => emit('read-file', e.dataTransfer.files),
+    });
 </script>
 
 <style scoped>
