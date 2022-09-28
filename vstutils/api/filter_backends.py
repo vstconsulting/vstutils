@@ -4,7 +4,7 @@ from django.utils.encoding import force_str
 from django.db import models
 from rest_framework.filters import BaseFilterBackend, OrderingFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend as BaseDjangoFilterBackend
-from django_filters import compat, filters
+from django_filters import compat, filters, filterset
 from vstutils.utils import raise_context, translate as _
 
 from .filters import extra_filter
@@ -251,8 +251,7 @@ class DeepViewFilterBackend(VSTFilterBackend):
             return queryset
         if not parent_name or self.field_name not in request.query_params:
             return queryset
-        filter_type_class = self.field_types[type(self.get_coreschema_field(model))]
-        filter_data = request.query_params.get(self.field_name)
+        filter_data, filter_type_class = self.get_filter_class_with_data(model, request.query_params)
         if not filter_data:
             return queryset.filter(**{f'{parent_name}__isnull': True})
         pk_name = model._meta.pk.attname
@@ -265,7 +264,15 @@ class DeepViewFilterBackend(VSTFilterBackend):
             value=parent_qs.values(pk_name)
         )
 
-    def get_coreschema_field(self, model: models.Model):
+    def get_filter_class_with_data(self, model: _t.Type[models.Model], data: _t.Mapping):
+        # pylint: disable=protected-access
+        filterset_type = self.field_types[type(self.get_coreschema_field(model))]
+        filterset_class = type('FilterSet', (filterset.FilterSet,), {self.field_name: filterset_type()})
+        filterset_object = filterset_class(data, model._default_manager.all())
+        filterset_object.is_valid()
+        return filterset_object.form.cleaned_data[self.field_name], filterset_type
+
+    def get_coreschema_field(self, model: _t.Type[models.Model]):
         primary_key_field: _t.Optional[models.Field] = model._meta.pk
         if isinstance(primary_key_field, models.IntegerField):
             field_cls = compat.coreschema.Integer  # type: ignore

@@ -5,7 +5,7 @@ Read more in Django REST Framework documentation for
 `Serializers <https://www.django-rest-framework.org/api-guide/serializers/>`_.
 """
 
-
+import typing as _t
 import json
 
 from django.db import models
@@ -32,6 +32,15 @@ VALID_FK_KWARGS = (
     'allow_null',
     'required'
 )
+
+
+def update_declared_fields(
+        serializer_class: _t.Type[serializers.ModelSerializer]
+) -> _t.Type[serializers.ModelSerializer]:
+    with utils.raise_context(verbose=False):
+        # pylint: disable=protected-access
+        serializer_class._declared_fields = serializer_class().get_fields()
+    return serializer_class
 
 
 class BaseSerializer(serializers.Serializer):
