@@ -354,7 +354,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
         if translate_model:
             attributes['_translate_model'] = translate_model
 
-        return type(serializer_class)(
+        return api_serializers.update_declared_fields(type(serializer_class)(
             serializer_class_name,
             (serializer_class,),
             {
@@ -362,7 +362,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                 **attributes,
                 **(field_overrides or {})
             }
-        )
+        ))
 
     def _update_serializers(cls, metadata: dict, serializers: dict):
         """
@@ -410,7 +410,7 @@ class ModelBaseClass(ModelBase, metaclass=classproperty.meta):
                     (extra_serializer_class,),
                     {'Meta': meta_class}
                 )
-            serializers[serializer_name] = extra_serializer_class
+            serializers[serializer_name] = api_serializers.update_declared_fields(extra_serializer_class)
 
     def get_extra_metadata(cls):
         return cls.__extra_metadata__.copy()

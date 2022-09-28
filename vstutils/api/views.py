@@ -114,8 +114,8 @@ class HealthView(base.ListNonModelViewSet):
 class LangViewSet(base.CachableHeadMixin, base.ReadOnlyModelViewSet):
     schema = None
     model: _t.Type[models.Language] = models.Language
-    serializer_class: _t.Type[LanguageSerializer] = LanguageSerializer
-    serializer_class_one: _t.Type[OneLanguageSerializer] = OneLanguageSerializer
+    serializer_class: _t.Type[LanguageSerializer] = serializers.update_declared_fields(LanguageSerializer)
+    serializer_class_one: _t.Type[OneLanguageSerializer] = serializers.update_declared_fields(OneLanguageSerializer)
     permission_classes: _t.Tuple[object] = (rest_permissions.IsAuthenticatedOrReadOnly,)
 
     def get_object(self):
@@ -141,7 +141,7 @@ class LangViewSet(base.CachableHeadMixin, base.ReadOnlyModelViewSet):
     @subaction(
         methods=['post'],
         detail=True,
-        serializer_class=TranslationSerializer,
+        serializer_class=serializers.update_declared_fields(TranslationSerializer),
     )
     def translate(self, request, pk=None):
         """
