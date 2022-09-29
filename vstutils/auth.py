@@ -4,6 +4,7 @@ import traceback
 
 from django.core.cache import cache
 from django.contrib.auth import get_user_model, backends
+from django.contrib.auth.models import AbstractUser
 from django.db.models import signals, QuerySet
 from django.dispatch import receiver
 from django.conf import settings
@@ -17,7 +18,7 @@ except ImportError:  # nocv
     _LDAP = object
     HAS_LDAP = False
 
-UserModel = get_user_model()
+UserModel: AbstractUser = get_user_model()
 AuthRes = _t.Optional[UserModel]
 logger = logging.getLogger(settings.VST_PROJECT_LIB)
 user_cache_prefix = 'auth_user_id_val'
@@ -103,8 +104,9 @@ class LdapBackend(BaseAuthBackend):  # nocv
             backend = LDAP(self.server, username, password, self.domain)
             if not backend.isAuth():
                 return
-            user = self.patch_user_queryset(UserModel._default_manager.select_related('twofa'))\
-                .get_by_natural_key(backend.domain_user)
+            qs = UserModel._default_manager.select_related('twofa')
+            user = self.patch_user_queryset(qs)\
+                .get(**{UserModel.USERNAME_FIELD: backend.domain_user})
             if self.user_can_authenticate(user) and backend.isAuth():
                 return user
         except:
