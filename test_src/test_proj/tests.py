@@ -3190,19 +3190,42 @@ class ProjectTestCase(BaseTestCase):
             FIRST = 'FIRST'
             SECOND = 'SECOND'
             THIRD = 'THIRD'
+            LOWER_VALUE = BaseEnum.LOWER
+            upper_value = BaseEnum.UPPER
+            SAME_VALUE = BaseEnum.SAME
 
         self.assertFalse(FieldChoices.FIRST.not_equal('FIRST'))
         self.assertTrue(FieldChoices.SECOND.is_equal('SECOND'))
         self.assertFalse(FieldChoices.THIRD.not_equal('THIRD'))
+        self.assertFalse(FieldChoices.LOWER_VALUE.not_equal('lower_value'))
+        self.assertFalse(FieldChoices.upper_value.not_equal('UPPER_VALUE'))
+        self.assertFalse(FieldChoices.SAME_VALUE.not_equal('SAME_VALUE'))
+        self.assertListEqual(
+            list(FieldChoices.get_names()),
+            ['FIRST', 'SECOND', 'THIRD', 'LOWER_VALUE', 'upper_value', 'SAME_VALUE']
+        )
         self.assertListEqual(
             FieldChoices.to_choices(),
-            [('FIRST', 'FIRST',), ('SECOND', 'SECOND'), ('THIRD', 'THIRD')]
+            [
+                ('FIRST', 'FIRST',),
+                ('SECOND', 'SECOND'),
+                ('THIRD', 'THIRD'),
+                ('lower_value', 'lower_value'),
+                ('UPPER_VALUE', 'UPPER_VALUE'),
+                ('SAME_VALUE', 'SAME_VALUE'),
+            ]
         )
 
         self.assertTrue({"FIRST": True}.get(FieldChoices.FIRST))
         self.assertTrue({"FIRST": True}[FieldChoices.FIRST])
+        self.assertTrue({"lower_value": True}.get(FieldChoices.LOWER_VALUE))
+        self.assertTrue({"UPPER_VALUE": True}.get(FieldChoices.upper_value))
+        self.assertTrue({"SAME_VALUE": True}.get(FieldChoices.SAME_VALUE))
 
         self.assertEqual(repr(FieldChoices.FIRST.name), repr(FieldChoices.FIRST))
+        self.assertEqual(FieldChoices.LOWER_VALUE.value, 'lower_value')
+        self.assertEqual(FieldChoices.upper_value.value, 'UPPER_VALUE')
+        self.assertEqual(FieldChoices.SAME_VALUE.value, 'SAME_VALUE')
 
     @override_settings(SESSION_ENGINE='django.contrib.sessions.backends.db')
     def test_hierarchy(self):
