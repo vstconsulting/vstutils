@@ -19,7 +19,7 @@ import warnings
 from functools import lru_cache, wraps
 from pathlib import Path
 from threading import Thread
-from enum import Enum
+from enum import Enum, EnumMeta
 
 from django.conf import settings
 from django.middleware.gzip import GZipMiddleware
@@ -1327,7 +1327,33 @@ class URLHandlers(ObjectHandlers):
         return self.urls()
 
 
-class BaseEnum(str, Enum):
+class VstEnumMeta(EnumMeta):
+    LOWER = object()
+    UPPER = object()
+    SAME = object()
+
+    def __new__(metacls, cls, bases, classdict):
+        # pylint: disable=bad-mcs-classmethod-argument
+        mutated_types = {}
+        for key, value in classdict.items():
+            if value is metacls.LOWER:
+                dict.__setitem__(classdict, key, key.lower())
+                mutated_types[key] = str.lower
+            elif value is metacls.UPPER:
+                dict.__setitem__(classdict, key, key.upper())
+                mutated_types[key] = str.upper
+            elif value is metacls.SAME:
+                dict.__setitem__(classdict, key, key)
+                mutated_types[key] = str
+        classdict['__mutated_types__'] = mutated_types
+        return super().__new__(metacls, cls, bases, classdict)
+
+
+class VstEnum(Enum, metaclass=VstEnumMeta):
+    pass
+
+
+class BaseEnum(str, VstEnum):
     """
     BaseEnum extends `Enum` class and used to create enum-like objects that can be used in django serializers or
     django models.
@@ -1339,9 +1365,9 @@ class BaseEnum(str, Enum):
             from vstutils.models import BModel
 
             class ItemCLasses(BaseEnum):
-                FIRST='FIRST'
-                SECOND='SECOND'
-                THIRD='THIRD'
+                FIRST = BaseEnum.SAME
+                SECOND = BaseEnum.SAME
+                THIRD = BaseEnum.SAME
 
 
             class MyDjangoModel(BModel):
@@ -1352,6 +1378,9 @@ class BaseEnum(str, Enum):
                     # Function check is item has second class of instance
                     return ItemCLasses.SECOND.is_equal(self.item_class)
 
+    .. note::
+        For special cases, when value must be in lower or upper case, you can setup value as ``BaseEnum.LOWER` or
+        ``BaseEnum.UPPER``. But in default cases we recommend use ``BaseEnum.SAME`` for memory optimization.
     """
 
     def __new__(cls, name):
@@ -1361,7 +1390,7 @@ class BaseEnum(str, Enum):
         return repr(self.__str__())
 
     def __str__(self):
-        return str(self.name)
+        return self.__mutated_types__.get(self.name, str)(self.name)
 
     def __hash__(self):
         return hash(str(self))
@@ -1372,7 +1401,7 @@ class BaseEnum(str, Enum):
 
     @classmethod
     def to_choices(cls):
-        return list_to_choices(cls.get_names())
+        return list_to_choices(str(x) for x in cls)
 
     def is_equal(self, cmp_str):
         return str(cmp_str) == str(self)
