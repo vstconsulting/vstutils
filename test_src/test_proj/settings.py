@@ -60,6 +60,9 @@ API[VST_API_VERSION][r'group'] = dict(
 API[VST_API_VERSION][r'modelwithnested'] = dict(
     model='test_proj.models.ModelWithNestedModels'
 )
+API[VST_API_VERSION][r'modelwithcrontab'] = dict(
+    model='test_proj.models.ModelWithCrontabField'
+)
 API[VST_API_VERSION][r'groupwithfk'] = dict(
     model='test_proj.models.GroupWithFK'
 )

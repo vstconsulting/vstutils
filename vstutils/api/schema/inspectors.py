@@ -40,6 +40,7 @@ FORMAT_PHONE = 'phone'
 FORMAT_MASKED = 'masked'
 FORMAT_DEEP_FK = 'deep_fk'
 FORMAT_WYSIWYG = 'wysiwyg'
+FORMAT_CRONTAB = 'crontab'
 
 X_OPTIONS = 'x-options'
 
@@ -84,6 +85,10 @@ basic_type_info[fields.PhoneField] = {
 basic_type_info[fields.WYSIWYGField] = {
     'type': openapi.TYPE_STRING,
     'format': FORMAT_WYSIWYG,
+}
+basic_type_info[fields.CrontabField] = {
+    'type': openapi.TYPE_STRING,
+    'format': FORMAT_CRONTAB,
 }
 
 

@@ -227,6 +227,10 @@ SERVER_TRANSLATION = {
     "value is not a valid JSON": "значение не является допустимым JSON",
     "key {missing_key} is missing": "ключ {missing_key} отсутствует",
     "invalid key {invalid_key}": "неверный ключ {invalid_key}",
+    "Invalid {period} range. Valid choices in {valid} range.": "Неправильное значение для периода {period}. Допустимые значения в промежутке {valid}.",
+    "Invalid delimiter value in {interval}. Must be integer.": "Неверное значение делителя для периода {period}. Значение должно быть целым числом.",
+    "There are to many columns with crontab values.": "Слишком много колонок со значениями для крон таблицы.",
+    "Invalid crontab syntax.": "Неверный синтаксис строки cron.",
 
     # field help_text
     'A confirmation will be sent to your e-mail': 'На эту почту будет отправлено письмо для подтверждения регистрации',
