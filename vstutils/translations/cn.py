@@ -230,6 +230,10 @@ SERVER_TRANSLATION = {
     "value is not a valid JSON": "值不是有效的 JSON",
     "key {missing_key} is missing": "缺少密钥 {missing_key}",
     "invalid key {invalid_key}": "无效密钥 {invalid_key}",
+    "Invalid {period} range. Valid choices in {valid} range.": "{period} 范围无效。 {valid} 范围内的有效选择。",
+    "Invalid delimiter value in {interval}. Must be integer.": "{interval} 中的分隔符值无效。 必须是整数。",
+    "There are to many columns with crontab values.": "有很多列带有 crontab 值。",
+    "Invalid crontab syntax.": "无效的 crontab 语法。",
 
     # field help_text
     'A confirmation will be sent to your e-mail': '确认将发送到您的电子邮箱',

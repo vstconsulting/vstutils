@@ -3030,6 +3030,57 @@ class ProjectTestCase(BaseTestCase):
             }
         ]
 
+    def test_crontab_field(self):
+        results = self.bulk([
+            # With uncomplete args
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '0'}},
+            # With complete args
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '0 0 1 1 *'}},
+            # With slash, - and commas
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '*/10 8-9 1 1 *'}},
+            # With combo all of them
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '2-8/2,*/15'}},
+            # With too long string
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '0 0 1 1 0 0'}},
+            # With invalid data in minutes
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': 'inv'}},
+            # With invalid data in minutes
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '*/45.1'}},
+            # With invalid syntax
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '/'}},
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '//'}},
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '-'}},
+            {'method': 'post', 'path': 'modelwithcrontab', 'data': {'cron': '--'}},
+            # Check in list view
+            {'method': 'get', 'path': 'modelwithcrontab'},
+        ])
+
+        for response in results[:4]:
+            self.assertEqual(response['status'], 201)
+
+        self.assertEqual(results[4]['status'], 400)
+        self.assertEqual(results[4]['data']['cron'][0], 'There are to many columns with crontab values.')
+        self.assertEqual(results[5]['status'], 400)
+        self.assertEqual(results[5]['data']['cron'][0], 'Invalid minute range. Valid choices in 0-59 range.')
+        self.assertEqual(results[6]['status'], 400)
+        self.assertEqual(results[6]['data']['cron'][0], 'Invalid delimiter value in minute. Must be integer.')
+        self.assertEqual(results[7]['status'], 400)
+        self.assertEqual(results[7]['data']['cron'][0], 'Invalid crontab syntax.')
+        self.assertEqual(results[8]['status'], 400)
+        self.assertEqual(results[8]['data']['cron'][0], 'Invalid crontab syntax.')
+        self.assertEqual(results[9]['status'], 400)
+        self.assertEqual(results[9]['data']['cron'][0], 'Invalid crontab syntax.')
+        self.assertEqual(results[10]['status'], 400)
+        self.assertEqual(results[10]['data']['cron'][0], 'Invalid crontab syntax.')
+
+        self.assertEqual(results[-1]['status'], 200)
+
+        items = [r['cron'] for r in results[-1]['data']['results']]
+        self.assertEqual(items[0], '0 * * * *')
+        self.assertEqual(items[1], '0 0 1 1 *')
+        self.assertEqual(items[2], '*/10 8-9 1 1 *')
+        self.assertEqual(items[3], '2-8/2,*/15 * * * *')
+
     def test_authentication_classes_none(self):
         results = self.bulk([
             {"method": 'get', "path": ['hosts_without_auth']},
@@ -3487,6 +3538,11 @@ class ProjectTestCase(BaseTestCase):
         properties = definitions['OneSuperModelWithFK']['properties']['multiselect']['items'][X_OPTIONS]
         self.assertEqual(properties['usePrefetch'], False)
         self.assertEqual(properties['makeLink'], True)
+
+        self.assertEqual(
+            data['definitions']['ModelWithCrontabField']['properties']['cron']['format'],
+            'crontab'
+        )
 
     def test_manifest_json(self):
         result = self.get_result('get', '/manifest.json')

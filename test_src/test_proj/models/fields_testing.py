@@ -12,6 +12,7 @@ from vstutils.api.fields import (
     RelatedListField,
     CSVFileField,
     WYSIWYGField,
+    CrontabField,
 )
 from django.utils import timezone
 from rest_framework.fields import DecimalField, CharField
@@ -157,4 +158,14 @@ class ModelWithChangedFk(BModel):
         _list_fields = _detail_fields = ['name', 'relation']
         _override_detail_fields = _override_list_fields = {
             'relation': FkModelField(select=ChangedPkField, autocomplete_property='reg_number')
+        }
+
+
+class ModelWithCrontabField(BModel):
+    cron = models.CharField(max_length=64)
+
+    class Meta:
+        _list_fields = _detail_fields = ['cron']
+        _override_detail_fields = _override_list_fields = {
+            'cron': CrontabField()
         }

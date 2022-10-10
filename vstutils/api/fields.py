@@ -1185,3 +1185,100 @@ class WYSIWYGField(TextareaField):
 
     def to_internal_value(self, data):
         return escape(strip_tags(super().to_internal_value(data)))
+
+
+class CrontabField(CharField):
+    """
+    Simple crontab-like field which contains the schedule of cron entries to specify time.
+    A crontab field has five fields for specifying day, date and time.
+    ``*`` in the value field above means all legal values as in braces for that column.
+
+    The value column can have a ``*`` or a list of elements separated by commas.
+    An element is either a number in the ranges shown above or two numbers in the range
+    separated by a hyphen (meaning an inclusive range).
+
+    The time and date fields are:
+
+    ============   =====================================
+    field           allowed value
+    ============   =====================================
+    minute          0-59
+    hour            0-23
+    day of month    1-31
+    month           1-12
+    day of week     0-7 (0 or 7 is Sunday)
+    ============   =====================================
+
+    Default value of each field if not specified is ``*``.
+
+    .. sourcecode::
+
+        .---------------- minute (0 - 59)
+        | .-------------- hour (0 - 23)
+        | | .------------ day of month (1 - 31)
+        | | | .---------- month (1 - 12)
+        | | | | .-------- day of week (0 - 6) (Sunday=0 or 7)
+        | | | | |
+        * * * * *
+    """
+
+    default_error_messages = {
+        'invalid_time_range': lazy_translate('Invalid {period} range. Valid choices in {valid} range.'),  # type: ignore
+        'invalid_delimiter': lazy_translate('Invalid delimiter value in {interval}. Must be integer.'),  # type: ignore
+        'to_many_columns': lazy_translate('There are to many columns with crontab values.'),  # type: ignore
+        'invalid': lazy_translate('Invalid crontab syntax.'),  # type: ignore
+    }
+    intervals = {
+        'minute': tuple(map(str, range(60))),
+        'hour': tuple(map(str, range(24))),
+        'day': tuple(map(str, range(1, 32))),
+        'month': tuple(map(str, range(1, 13))),
+        'weekday': tuple(map(str, range(7))),
+    }
+
+    def make_validation(self, interval, value):
+        if value == '*':
+            return
+        elif value in {'', '-', '/', ','}:
+            self.fail('invalid')
+        elif ',' in value:
+            values_list = value.split(',')
+            for val in values_list:
+                self.make_validation(interval, val)
+            return
+        elif '/' in value:
+            value, delimeter = value.split('/')
+            if not delimeter.isdigit():
+                self.fail('invalid_delimiter', interval=interval)
+            return self.make_validation(interval, value)
+        elif '-' in value:
+            minimal, maximal = value.split('-')
+            return self.make_validation(interval, minimal) or self.make_validation(interval, maximal)
+
+        valid_choices = self.intervals[interval]
+        if value not in valid_choices:
+            self.fail(
+                'invalid_time_range',
+                period=interval,
+                valid='-'.join((valid_choices[0], valid_choices[-1]))
+            )
+
+    def to_internal_value(self, data: _t.Text) -> _t.Text:
+        if data.count(' ') > 4:
+            self.fail('to_many_columns')
+        intervals = dict(zip(
+            ('minute', 'hour', 'day', 'month', 'weekday'),
+            (data.split(' ') + ['*' for _ in range(4)])[:5]
+        ))
+        for interval, value in intervals.items():
+            try:
+                self.make_validation(interval, value)
+            except Exception as err:
+                if not isinstance(err, ValidationError):
+                    self.fail('invalid')
+                raise
+
+        return ' '.join(
+            intervals[interval]
+            for interval in self.intervals
+        )

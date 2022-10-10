@@ -228,6 +228,10 @@ SERVER_TRANSLATION = {
     "value is not a valid JSON": "giá trị không phải là JSON hợp lệ",
     "key {missing_key} is missing": "khóa {missing_key} bị thiếu",
     "invalid key {invalid_key}": "khóa không hợp lệ {invalid_key}",
+    "Invalid {period} range. Valid choices in {valid} range.": "Phạm vi {period} không hợp lệ. Các lựa chọn hợp lệ trong phạm vi {valid}.",
+    "Invalid delimiter value in {interval}. Must be integer.": "Giá trị dấu phân tách không hợp lệ trong {interval}. Phải là số nguyên.",
+    "There are to many columns with crontab values.": "Có nhiều cột có giá trị crontab.",
+    "Invalid crontab syntax.": "Cú pháp crontab không hợp lệ.",
 
     # field help_text
     'A confirmation will be sent to your e-mail': 'Một xác nhận sẽ được gửi đến e-mail của bạn',
