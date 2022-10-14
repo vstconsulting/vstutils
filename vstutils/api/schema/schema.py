@@ -152,6 +152,9 @@ class VSTAutoSchema(SwaggerAutoSchema):
     def get_view_serializer(self, *args, **kwargs):
         return self.__perform_with_nested('get_view_serializer', *args, **kwargs)
 
+    def get_query_serializer(self, *args, **kwargs):
+        return self.__perform_with_nested('get_query_serializer', *args, **kwargs)
+
     def get_pagination_parameters(self, *args, **kwargs):
         return self.__perform_with_nested('get_pagination_parameters', *args, **kwargs)
 

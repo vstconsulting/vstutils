@@ -181,6 +181,7 @@ def subaction(*args, **kwargs):
         override_kw['x-multiaction'] = bool(is_mul)
 
         override_kw['x-require-confirmation'] = bool(require_confirmation)
+        override_kw['query_serializer'] = kwargs.get('query_serializer')
 
         return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 

@@ -2,9 +2,15 @@ import datetime
 import os
 from django.db import models
 from django_filters import ChoiceFilter
-from rest_framework import permissions
+from rest_framework import permissions, fields as drf_fields
+from vstutils.api.serializers import BaseSerializer, DataSerializer
+from vstutils.models.decorators import register_view_action
 from vstutils.custom_model import ListModel, FileModel
-from vstutils.api import fields, base
+from vstutils.api import fields, base, responses
+
+
+class TestQuerySerializer(BaseSerializer):
+    test_value = drf_fields.ChoiceField(required=True, choices=("TEST1", "TEST2"))
 
 
 class FileViewMixin(base.FileResponseRetrieveMixin):
@@ -47,6 +53,16 @@ class File(FileModel):
     @classmethod
     def __prepare_model__(cls):
         pass
+
+    @register_view_action(
+        methods=['get'],
+        detail=False,
+        query_serializer=TestQuerySerializer,
+        serializer_class=DataSerializer,
+    )
+    def query_serializer_test(self, request):
+        query_validated_data = self.get_query_serialized_data(request)
+        return responses.HTTP_200_OK(query_validated_data)
 
 
 class List(ListModel):
