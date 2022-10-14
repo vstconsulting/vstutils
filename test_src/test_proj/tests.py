@@ -1967,6 +1967,12 @@ class OpenapiEndpointTestCase(BaseTestCase):
             }
         )
 
+        # Check query serializable params
+        self.assertIn(
+            {'name': 'test_value', 'in': 'query', 'required': True, 'type': 'string', 'enum': ['TEST1', 'TEST2']},
+            api['paths']['/files/query_serializer_test/']['get']['parameters']
+        )
+
     def test_search_fields(self):
         self.assertEqual(
             self.get_model_class('test_proj.Variable').generated_view.search_fields,
@@ -4806,6 +4812,24 @@ class CustomModelTestCase(BaseTestCase):
         response = self.client.get('/api/v1/listoffiles/0/', HTTP_IF_NONE_MATCH=str(last_update))
         self.assertEqual(response.status_code, 304)
         self.assertIsInstance(response, HttpResponseNotModified)
+
+    def test_query_serialized_data(self):
+        results = self.bulk([
+            dict(method='get', path='files/query_serializer_test'),
+            dict(method='get', path='files/query_serializer_test', query='test_value='),
+            dict(method='get', path='files/query_serializer_test', query='test_value=TEST'),
+            dict(method='get', path='files/query_serializer_test', query='test_value=TEST1&another_param=NoFail'),
+        ])
+
+        self.assertEqual(results[0]['status'], 400)
+        self.assertEqual(results[0]['data']['test_value'], ['This field is required.'])
+        self.assertEqual(results[1]['status'], 400)
+        self.assertEqual(results[1]['data']['test_value'], ['"" is not a valid choice.'])
+        self.assertEqual(results[2]['status'], 400)
+        self.assertEqual(results[2]['data']['test_value'], ['"TEST" is not a valid choice.'])
+
+        self.assertEqual(results[-1]['status'], 200)
+        self.assertEqual(results[-1]['data']['test_value'], 'TEST1')
 
     def test_additional_urls(self):
         response = self.client.get('/suburls/admin/login/')

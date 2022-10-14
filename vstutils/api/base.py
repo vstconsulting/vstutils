@@ -289,6 +289,7 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
     select_related = False
     serializer_class: _t.Type[serializers.Serializer]
     _serializer_class_one: _t.Optional[_t.Type[serializers.Serializer]] = None
+    query_serializer: _t.Optional[_t.Type[serializers.Serializer]] = None
     model: _t.Optional[_t.Type[models.Model]] = None
     action_serializers: _t.Dict[_t.Text, serializers.Serializer] = {}
     _nested_args: _t.Dict[_t.Text, _t.Any]
@@ -406,6 +407,25 @@ class GenericViewSet(QuerySetMixin, vsets.GenericViewSet, metaclass=GenericViewS
         if is_detail:
             return self.serializer_class_one  # pylint: disable=no-member
         return super().get_serializer_class()
+
+    def get_query_serialized_data(
+            self,
+            request: Request,
+            query_serializer: _t.Type[BaseSerializer] = None,
+            raise_exception: bool = True,
+    ) -> _t.Dict:
+        """
+        Get request query data and serialize values if `query_serializer_class` attribute exists
+        or attribute was send.
+        """
+        serializer_class: _t.Type[BaseSerializer] = (
+                query_serializer or getattr(self, 'query_serializer', None)
+        )
+        assert serializer_class is not None, "You must setup 'query_serializer_class' in arguments or view attribute."
+
+        serializer: BaseSerializer = serializer_class(data=request.query_params, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=raise_exception)
+        return serializer.validated_data
 
     def get_serializer(self, *args: _t.Any, **kwargs: _t.Any) -> BaseSerializer:
         """
