@@ -1968,10 +1968,29 @@ class OpenapiEndpointTestCase(BaseTestCase):
         )
 
         # Check query serializable params
+        self.assertEqual(
+            {'name': 'test_value', 'in': 'query', 'required': True, 'type': 'string', 'enum': ['TEST1', 'TEST2']},
+            api['paths']['/files/query_serializer_test/']['get']['parameters'][0]
+        )
+        self.assertCount(api['paths']['/files/query_serializer_test/']['get']['parameters'], 1)
+        self.assertFalse(api['paths']['/files/query_serializer_test/']['get']['x-list'])
         self.assertIn(
             {'name': 'test_value', 'in': 'query', 'required': True, 'type': 'string', 'enum': ['TEST1', 'TEST2']},
-            api['paths']['/files/query_serializer_test/']['get']['parameters']
+            api['paths']['/files/query_serializer_test_list/']['get']['parameters']
         )
+        self.assertTrue(len(api['paths']['/files/query_serializer_test_list/']['get']['parameters']) > 1)
+        self.assertTrue(api['paths']['/files/query_serializer_test_list/']['get']['x-list'])
+
+        # Check x-list param on get methods
+        self.assertFalse(api['paths']['/files/query_serializer_test/']['get']['x-list'])
+        self.assertTrue(api['paths']['/files/query_serializer_test_list/']['get']['x-list'])
+        self.assertTrue(api['paths']['/files/']['get']['x-list'])
+        self.assertTrue(api['paths']['/files/']['get']['x-list'])
+
+        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/hosts/'
+        self.assertTrue(api['paths'][sub_path]['get']['x-list'])
+        sub_path = '/deephosts/{id}/subsubhosts/{subsubhosts_id}/subdeephosts/{subdeephosts_id}/subgroups/'
+        self.assertTrue(api['paths'][sub_path]['get']['x-list'])
 
     def test_search_fields(self):
         self.assertEqual(
@@ -4818,6 +4837,7 @@ class CustomModelTestCase(BaseTestCase):
             dict(method='get', path='files/query_serializer_test'),
             dict(method='get', path='files/query_serializer_test', query='test_value='),
             dict(method='get', path='files/query_serializer_test', query='test_value=TEST'),
+            dict(method='get', path='files/query_serializer_test_list', query='limit=1'),
             dict(method='get', path='files/query_serializer_test', query='test_value=TEST1&another_param=NoFail'),
         ])
 
@@ -4827,6 +4847,9 @@ class CustomModelTestCase(BaseTestCase):
         self.assertEqual(results[1]['data']['test_value'], ['"" is not a valid choice.'])
         self.assertEqual(results[2]['status'], 400)
         self.assertEqual(results[2]['data']['test_value'], ['"TEST" is not a valid choice.'])
+        self.assertEqual(results[3]['status'], 200)
+        self.assertIn('results', results[3]['data'])
+        self.assertCount(results[3]['data']['results'], 1)
 
         self.assertEqual(results[-1]['status'], 200)
         self.assertEqual(results[-1]['data']['test_value'], 'TEST1')

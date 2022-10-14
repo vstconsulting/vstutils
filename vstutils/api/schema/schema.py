@@ -10,6 +10,7 @@ from drf_yasg.openapi import Operation
 from ... import utils
 from ...models.base import get_proxy_labels
 from ..decorators import NestedWithAppendMixin
+from ..base import detail_actions
 from . import inspectors as vst_inspectors
 
 
@@ -175,6 +176,18 @@ class VSTAutoSchema(SwaggerAutoSchema):
             produces = []
         return produces + super().get_produces()
 
+    def is_list_view(self):
+        if self.overrides.get('x-list', False):
+            return True
+
+        action = getattr(self.view, 'action', '')
+        method = getattr(self.view, action, None) or self.method
+        detail = getattr(method, 'detail', None)
+        suffix = getattr(self.view, 'suffix', None)
+        if action not in detail_actions + ('destroy',) and not detail and suffix == 'Instance':
+            return False
+        return self.__perform_with_nested('is_list_view')
+
     def get_operation(self, operation_keys=None):
         result: Operation = self.__perform_with_nested('get_operation', operation_keys)
         _nested_wrapped_view = getattr(self.view, '_nested_wrapped_view', None)
@@ -192,6 +205,7 @@ class VSTAutoSchema(SwaggerAutoSchema):
             deep_nested_subview = getattr(subscribe_view, 'deep_nested_subview', None)
             if deep_nested_subview:
                 result['x-deep-nested-view'] = deep_nested_subview
+            result['x-list'] = self.is_list_view()
         else:
             if 'x-multiaction' in self.overrides:
                 result['x-multiaction'] = self.overrides['x-multiaction']
