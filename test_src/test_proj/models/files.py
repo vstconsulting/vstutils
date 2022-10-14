@@ -59,10 +59,20 @@ class File(FileModel):
         detail=False,
         query_serializer=TestQuerySerializer,
         serializer_class=DataSerializer,
+        suffix='Instance'
     )
     def query_serializer_test(self, request):
         query_validated_data = self.get_query_serialized_data(request)
         return responses.HTTP_200_OK(query_validated_data)
+
+    @register_view_action(
+        methods=['get'],
+        detail=False,
+        query_serializer=TestQuerySerializer,
+        is_list=True
+    )
+    def query_serializer_test_list(self, request):
+        return self.list(request)
 
 
 class List(ListModel):

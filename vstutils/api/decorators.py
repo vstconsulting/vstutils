@@ -148,12 +148,15 @@ def subaction(*args, **kwargs):
     :type multiaction: bool
     :param require_confirmation: Sets whether the action must be confirmed before being executed.
     :type require_confirmation: bool
+    :param is_list: Mark this action as paginated list with all rules and parameters.
+    :type is_list: bool
     """
 
     operation_description = kwargs.pop('description', None)
     response_code = kwargs.pop('response_code', None)
     serializer_class = kwargs.get('serializer_class', None)
     response_serializer = kwargs.pop('response_serializer', serializer_class)
+    is_list = kwargs.pop('is_list', False)
 
     assert (
         (response_code is None) or
@@ -162,7 +165,7 @@ def subaction(*args, **kwargs):
 
     is_mul = kwargs.pop('multiaction', False)
     require_confirmation = kwargs.pop('require_confirmation', False)
-    kwargs['methods'] = kwargs.pop('methods', ['post'])
+    methods = kwargs['methods'] = kwargs.pop('methods', ['post'])
 
     def decorator(func: _t.Callable):
         func_object = action(*args, **kwargs)(func)
@@ -182,6 +185,9 @@ def subaction(*args, **kwargs):
 
         override_kw['x-require-confirmation'] = bool(require_confirmation)
         override_kw['query_serializer'] = kwargs.get('query_serializer')
+
+        if 'GET' in methods or 'get' in methods:
+            override_kw['x-list'] = is_list
 
         return swagger_auto_schema(**override_kw)(func_object)  # type: ignore
 
