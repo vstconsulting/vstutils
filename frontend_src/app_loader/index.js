@@ -3,7 +3,7 @@ import LoadingPageController from './LoadingPageController.js';
 import { cleanAllCacheAndReloadPage, cleanOpenApiCacheAndReloadPage } from './cleanCacheHelpers.js';
 import { StaticFilesLoader } from './StaticFilesLoader.js';
 import OpenAPILoader from './OpenAPILoader.js';
-import { AppConfiguration } from '../vstutils/AppConfiguration.js';
+import { AppConfiguration } from '../vstutils/AppConfiguration.ts';
 
 window.cleanAllCacheAndReloadPage = cleanAllCacheAndReloadPage;
 window.cleanOpenApiCacheAndReloadPage = cleanOpenApiCacheAndReloadPage;

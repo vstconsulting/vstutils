@@ -1,17 +1,17 @@
 <template>
-    <BootstrapModal ref="modal" :title="title">
+    <BootstrapModal ref="modal" :title="$t(action.title)">
         <template #activator="{ openModal }">
             <button class="dropdown-item" type="button" @click="openModal" v-text="$st(action.title)" />
         </template>
 
         <div class="container">
             <ModelFields
-                :data="data"
+                :data="sandbox"
                 :model="model"
                 :editable="true"
                 :fields-groups="fieldsGroups"
                 :fields-errors="fieldsErrors"
-                :hide-read-only="hideReadOnly"
+                :hide-read-only="true"
                 :hide-not-required="hideNotRequired"
                 @set-value="setFieldValue"
             />
@@ -26,39 +26,52 @@
 </template>
 
 <script>
+    import { defineComponent } from 'vue';
     import BootstrapModal from '../BootstrapModal.vue';
-    import { ActionViewComponent } from '../page';
+    import ModelFields from '../page/ModelFields.vue';
     import { guiPopUp, pop_up_msg } from '../../popUp';
-    import { formatPath, parseResponseMessage } from '../../utils';
-    export default {
+    import { formatPath, parseResponseMessage, getUniqueId } from '../../utils';
+    import { createActionStore } from './../../store/helpers';
+    import { defineStore } from 'pinia';
+
+    export default defineComponent({
         name: 'NotEmptyMultiactionModal',
-        components: { BootstrapModal },
-        mixins: [ActionViewComponent],
-        inject: ['pageComponent'],
+        components: { BootstrapModal, ModelFields },
         props: {
             action: { type: Object, required: true },
+        },
+        setup(props) {
+            const useStore = defineStore(`notEmptyMultiActionModal_${getUniqueId()}`, () =>
+                createActionStore(props.action.view),
+            );
+            const store = useStore();
+            return {
+                store,
+                model: store.model,
+                sandbox: store.sandbox,
+                fieldsGroups: store.fieldsGroups,
+                fieldsErrors: store.fieldsErrors,
+                changedFields: store.changedFields,
+                instance: store.instance,
+                setFieldValue: (...args) => store.setFieldValue(...args),
+            };
         },
         data() {
             return {
                 view: this.action.view,
-                controlTitle: false,
+                hideNotRequired: false,
             };
-        },
-        computed: {
-            model() {
-                return this.action.requestModel;
-            },
         },
         methods: {
             getRequestPaths() {
-                return this.pageComponent.instances
-                    .filter((instance) => this.pageComponent.selection.includes(instance.getPkValue()))
+                return this.$app.store.page.instances
+                    .filter((instance) => this.$app.store.page.selection.includes(instance.getPkValue()))
                     .map((instance) => formatPath(this.view.path, this.$route.params, instance));
             },
             async execute() {
                 const instance = this.instance;
                 try {
-                    this.commitMutation('validateAndSetInstanceData', { instance });
+                    this.store.validateAndSetInstanceData();
                 } catch (e) {
                     this.$app.error_handler.defineErrorAndShow(e);
                     return;
@@ -76,7 +89,7 @@
                         }),
                     ),
                 );
-                this.changedFields = [];
+                this.store.changedFields = [];
                 for (const response of responses) {
                     if (response.status === 'fulfilled') {
                         guiPopUp.success(
@@ -94,9 +107,9 @@
                         this.$app.error_handler.showError(srt_to_show, str);
                     }
                 }
-                this.pageComponent.fetchData();
+                this.$app.store.page.fetchData();
                 this.$refs.modal.close();
             },
         },
-    };
+    });
 </script>

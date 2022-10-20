@@ -74,6 +74,23 @@ class File(FileModel):
     def query_serializer_test_list(self, request):
         return self.list(request)
 
+    @register_view_action(
+        methods=['get'],
+        detail=False,
+        is_list=False,
+    )
+    def is_list_false_action_test(self, request):  # nocv
+        pass
+
+    @register_view_action(
+        methods=['get'],
+        detail=False,
+        suffix='List',
+        query_serializer=TestQuerySerializer,
+    )
+    def list_suffix_action_test(self, request):  # nocv
+        pass
+
 
 class List(ListModel):
     data = [

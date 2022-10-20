@@ -73,10 +73,7 @@
                 return Object.values(this.view.filters).filter((field) => !field.hidden);
             },
             filters() {
-                if (this.isMounted) {
-                    return this.$root.$refs.currentViewComponent.filters || {};
-                }
-                return {};
+                return this.$app.store.page.filters;
             },
             hasActiveFilters() {
                 return (
@@ -98,7 +95,7 @@
                 Vue.set(this.filtersData, field, value);
             },
             filter() {
-                this.$root.$refs.currentViewComponent.applyFieldsFilters(
+                this.$app.store.page.applyFieldsFilters(
                     Object.fromEntries(
                         this.fields.map((field) => [field.name, field.toInner(this.filtersData)]),
                     ),

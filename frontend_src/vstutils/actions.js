@@ -26,22 +26,43 @@ export class ActionsManager {
         return this.app.application?.$refs?.currentViewComponent?.view;
     }
 
-    execute({ action, instance = undefined, skipConfirmation = false, getCustomHandler = undefined }) {
+    execute(args) {
+        const {
+            action,
+            instance = undefined,
+            instances = undefined,
+            skipConfirmation = false,
+            fromList = false,
+            disablePopUp = false,
+        } = args;
+
         if (action.confirmationRequired && !skipConfirmation) {
             return this.requestConfirmation({ title: action.title }).then(() =>
-                this.execute({ action, instance, skipConfirmation: true, getCustomHandler }),
+                this.execute({ ...args, skipConfirmation: true }),
             );
         }
 
-        if (typeof getCustomHandler === 'function') {
-            const customHandler = getCustomHandler(action);
-            if (typeof customHandler === 'function') {
-                return customHandler(action, instance);
+        if (instances) {
+            if (action.handlerMany) {
+                return action.handlerMany({ action, instances, disablePopUp });
             }
+
+            if (action.isEmpty) {
+                for (const instance of instances) {
+                    this.executeEmpty({ action, instance, redirect: false, disablePopUp });
+                }
+                return;
+            }
+
+            throw new Error(`Cannot execute action ${action.name} on ${instances.length} instances`);
+        }
+
+        if (typeof action.handler === 'function') {
+            return action.handler({ action, instance, fromList, disablePopUp });
         }
 
         if (action.isEmpty) {
-            return this.executeEmpty({ action, instance });
+            return this.executeEmpty({ action, instance, disablePopUp });
         }
 
         if (action.appendFragment) {
@@ -65,36 +86,36 @@ export class ActionsManager {
         throw new Error(`Cannot execute action ${action.name} on instance ${instance}`);
     }
 
-    async executeEmpty({ action, instance = undefined }) {
+    async executeEmpty({ action, instance = undefined, redirect = true, disablePopUp = false }) {
         const path = formatPath(action.path, this.app.router.currentRoute.params, instance);
 
         try {
             const response = await this.app.api.makeRequest({ useBulk: true, method: action.method, path });
 
-            guiPopUp.success(
-                this._t(pop_up_msg.instance.success.executeEmpty, [
-                    this._t(action.title),
-                    instance?.getViewFieldString() || this._t(this.currentView?.title),
-                    parseResponseMessage(response.data),
-                ]),
-            );
+            if (!disablePopUp) {
+                guiPopUp.success(
+                    this._t(pop_up_msg.instance.success.executeEmpty, [
+                        this._t(action.title),
+                        instance?.getViewFieldString() || this._t(this.currentView?.title),
+                        parseResponseMessage(response.data),
+                    ]),
+                );
+            }
 
             if (action.onAfter) {
                 action.onAfter({ app: this.app, action, instance, response });
             }
 
-            if (response && response.data) {
-                try {
-                    const redirectPath = getRedirectUrlFromResponse(
-                        this.app,
-                        response.data,
-                        action.responseModel,
-                    );
-                    if (redirectPath) {
-                        this.app.router.push(redirectPath);
+            if (redirect) {
+                if (response && response.data) {
+                    try {
+                        const redirectPath = getRedirectUrlFromResponse(response.data, action.responseModel);
+                        if (redirectPath) {
+                            this.app.router.push(redirectPath);
+                        }
+                    } catch (e) {
+                        console.log(e);
                     }
-                } catch (e) {
-                    console.log(e);
                 }
             }
         } catch (error) {
@@ -111,14 +132,7 @@ export class ActionsManager {
         }
     }
 
-    async executeWithData({
-        action,
-        data,
-        model = undefined,
-        method = undefined,
-        path = undefined,
-        throwError = false,
-    }) {
+    async executeWithData({ action, data, model, method, path, throwError = false, disablePopUp = false }) {
         if (!model) {
             model = action.requestModel;
         }
@@ -143,12 +157,14 @@ export class ActionsManager {
                 data: instance._getInnerData(),
                 useBulk: model.shouldUseBulk(method),
             });
-            guiPopUp.success(
-                this._t(pop_up_msg.instance.success.execute, [
-                    this._t(this.currentView?.title),
-                    parseResponseMessage(response.data),
-                ]),
-            );
+            if (!disablePopUp) {
+                guiPopUp.success(
+                    this._t(pop_up_msg.instance.success.execute, [
+                        this._t(this.currentView?.title),
+                        parseResponseMessage(response.data),
+                    ]),
+                );
+            }
             if (action.onAfter) {
                 action.onAfter({ app: this.app, action, instance, response });
             }

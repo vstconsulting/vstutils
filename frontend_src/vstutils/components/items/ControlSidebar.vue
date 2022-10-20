@@ -17,7 +17,7 @@
                     v-for="field in section.fields"
                     :key="field.name"
                     :field="field"
-                    :data="$store.state.userSettings.settings[section.name]"
+                    :data="userSettings.settings[section.name]"
                     type="edit"
                     @set-value="setUserSetting(section.name, field, $event.value)"
                 />
@@ -27,7 +27,7 @@
                 v-for="field in localSettingsFields"
                 :key="field.name"
                 :field="field"
-                :data="$store.state.localSettings.settings"
+                :data="localSettings.settings"
                 type="edit"
                 @set-value="setLocalSetting(field, $event.value)"
             />
@@ -62,14 +62,13 @@
         data() {
             return {
                 isSaving: false,
+                localSettings: this.$app.localSettingsStore,
+                userSettings: this.$app.userSettingsStore,
             };
         },
         computed: {
             disableSaveButton() {
-                return (
-                    (!this.$store.state.userSettings.changed && !this.$store.state.localSettings.changed) ||
-                    this.isSaving
-                );
+                return (!this.userSettings.changed && !this.localSettings.changed) || this.isSaving;
             },
             localSettingsFields() {
                 return Array.from(this.$app.localSettingsModel.fields.values());
@@ -80,7 +79,7 @@
                 );
 
                 return sectionsFields
-                    .filter((field) => this.$store.state.userSettings.settings[field.name])
+                    .filter((field) => this.userSettings.settings[field.name])
                     .map((field) => ({
                         name: field.name,
                         title: field.title,
@@ -106,7 +105,7 @@
             },
         },
         watch: {
-            '$store.state.userSettings.changed': function () {
+            'userSettings.changed': function () {
                 this.isSaving = false;
             },
         },
@@ -125,12 +124,12 @@
         },
         methods: {
             async saveSettings() {
-                if (this.$store.state.userSettings.changed) {
+                if (this.userSettings.changed) {
                     this.isSaving = true;
-                    await this.$store.dispatch('userSettings/save');
+                    await this.userSettings.save();
                 }
-                if (this.$store.state.localSettings.changed) {
-                    this.$store.dispatch('localSettings/save');
+                if (this.localSettings.changed) {
+                    this.localSettings.save();
                 }
                 this.$refs.reloadPageModal.openModal();
             },
@@ -138,14 +137,14 @@
                 window.location.reload();
             },
             setUserSetting(section, field, value) {
-                this.$store.commit('userSettings/setValue', {
+                this.userSettings.setValue({
                     section,
                     key: field.name,
                     value: field.toInner({ [field.name]: value }),
                 });
             },
             setLocalSetting(field, value) {
-                this.$store.commit('localSettings/setValue', {
+                this.localSettings.setValue({
                     key: field.name,
                     value: field.toInner({ [field.name]: value }),
                 });

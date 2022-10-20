@@ -11,7 +11,7 @@ import {
 import signals from '../signals.js';
 import { QuerySet, SingleEntityQueryset } from '../querySet';
 import { NoModel } from '../models';
-import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.js';
+import { ActionView, ListView, PageEditView, PageNewView, PageView } from './View.ts';
 import DetailWithoutListPageMixin from '../components/page/DetailWithoutListPageMixin.js';
 import NotEmptyMultiactionModal from '../components/list/NotEmptyMultiactionModal.vue';
 
@@ -100,6 +100,25 @@ export default class ViewConstructor {
             return NoModel;
         }
         return this.modelsResolver.bySchemaObject(schema) || NoModel;
+    }
+
+    /**
+     * @param {import('@types/swagger-schema-official').Parameter[]} parameters
+     */
+    getDetailFiltersModelClass(parameters) {
+        if (!parameters) {
+            return null;
+        }
+        const properties = {};
+        for (const param of parameters) {
+            if (param.in === 'query') {
+                properties[param.name] = param;
+            }
+        }
+        if (Object.keys(properties).length > 0) {
+            return this.modelsResolver.bySchemaObject({ properties });
+        }
+        return null;
     }
 
     /**
@@ -218,6 +237,7 @@ export default class ViewConstructor {
                 if (operationOptions.type === ViewTypes.PAGE) {
                     operationOptions.isFileResponse = responseSchemaType === 'file';
                     pageView = new PageView(operationOptions, null);
+                    pageView.filtersModelClass = this.getDetailFiltersModelClass(operationOptions.parameters);
                     views.set(pageView.path, pageView);
                 } else if (operationOptions.type === ViewTypes.PAGE_NEW) {
                     newView = new PageNewView(operationOptions, null);
@@ -249,6 +269,7 @@ export default class ViewConstructor {
                         hidden: operationOptions['x-hidden'],
                     };
                     if (!isEmpty) {
+                        operationOptions.action = params;
                         const view = new ActionView(operationOptions, null);
                         const executeAction = {
                             ...this.dictionary.paths.operations.action.execute,

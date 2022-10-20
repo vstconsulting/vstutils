@@ -1,54 +1,59 @@
 <template>
-    <EntityView
-        :error="error"
-        :loading="loading"
-        :response="response"
-        :view="view"
-        :actions="actions"
-        :sublinks="sublinks"
-        :instances="[instance]"
-        @execute-action="executeAction($event, instance)"
-        @open-sublink="openSublink($event, instance)"
-    >
-        <div class="row">
-            <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
-            <div :class="modelsFieldsWrapperClasses">
+    <div class="row">
+        <div v-if="view.filtersModelClass" class="col-12">
+            <Card :title="$t('Filters')">
                 <ModelFields
-                    :data="data"
-                    :model="model"
-                    :editable="!readOnly"
-                    :fields-groups="fieldsGroups"
-                    :fields-errors="fieldsErrors"
-                    :hide-read-only="hideReadOnly"
-                    :hide-not-required="hideNotRequired"
-                    @set-value="setFieldValue"
+                    :data="filters"
+                    :model="view.filtersModelClass"
+                    editable
+                    flat-if-possible
+                    flat-fields-classes="col-12 col-md-6"
+                    @set-value="setFilterValue"
                 />
-            </div>
-            <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" :page="self" />
+                <button
+                    type="button"
+                    class="btn btn-block bg-gradient-primary"
+                    style="width: auto"
+                    @click="applyFilters"
+                >
+                    {{ $t('Apply filters') }}
+                </button>
+            </Card>
         </div>
-    </EntityView>
+        <component :is="beforeFieldsGroupsComponent" v-if="beforeFieldsGroupsComponent" :page="self" />
+        <div :class="modelsFieldsWrapperClasses">
+            <ModelFields
+                v-if="response"
+                :data="data"
+                :model="model"
+                :editable="!readOnly"
+                :fields-groups="fieldsGroups"
+                :fields-errors="fieldsErrors"
+                :hide-read-only="hideReadOnly"
+                :hide-not-required="hideNotRequired"
+                @set-value="setFieldValue"
+            />
+        </div>
+        <component :is="afterFieldsGroupsComponent" v-if="afterFieldsGroupsComponent" :page="self" />
+    </div>
 </template>
 
 <script>
-    import PageWithDataMixin from '../../views/mixins/PageWithDataMixin.js';
-    import ViewWithAutoUpdateMixin from '../../views/mixins/ViewWithAutoUpdateMixin.js';
-    import { RequestTypes } from '../../utils';
-    import EntityView from '../common/EntityView.vue';
-    import { BaseViewMixin } from '../BaseViewMixin.js';
+    import { BaseViewMixin } from '../BaseViewMixin.ts';
     import HideNotRequiredSelect from './HideNotRequiredSelect';
     import ModelFields from './ModelFields.vue';
+    import Card from '../Card.vue';
+    import { mapStoreActions, mapStoreState, ViewTypes } from '../../utils';
 
     export default {
         name: 'OneEntity',
-        components: { ModelFields, HideNotRequiredSelect, EntityView },
-        mixins: [BaseViewMixin, PageWithDataMixin, ViewWithAutoUpdateMixin],
+        components: { ModelFields, HideNotRequiredSelect, Card },
+        mixins: [BaseViewMixin],
         data() {
             return {
-                readOnly: false,
-                hideReadOnly: false,
+                readOnly: this.view.type === ViewTypes.PAGE,
+                hideReadOnly: this.view.hideReadonlyFields,
                 hideNotRequired: false,
-                hiddenFields: [],
-                fieldsErrors: {},
             };
         },
         computed: {
@@ -67,30 +72,19 @@
             showBackButton() {
                 return true;
             },
-            model() {
-                return this.view.objects.getResponseModelClass(RequestTypes.RETRIEVE);
-            },
-            data() {
-                return this.$store.getters[this.storeName + '/sandbox'];
-            },
             fieldsGroups() {
                 return undefined;
             },
+            data() {
+                return this.store.sandbox;
+            },
+            ...mapStoreState(['fieldsErrors', 'model', 'instance', 'filters']),
         },
         methods: {
-            /**
-             * Updates field value in store
-             * @param {Object} obj
-             * @param {string} obj.field
-             * @param {any} obj.value
-             */
-            setFieldValue(obj) {
-                this.$delete(this.fieldsErrors, obj.field);
-                this.commitMutation('setFieldValue', obj);
-            },
             fieldsGroupClasses(name) {
                 return ['col-md-6', 'fields-group', `fields-group-${name.replace(/ /g, '_')}`];
             },
+            ...mapStoreActions(['setFieldValue', 'setFilterValue', 'applyFilters']),
         },
     };
 </script>

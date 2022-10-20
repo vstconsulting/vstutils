@@ -3,7 +3,7 @@
         <td
             v-if="hasMultiActions"
             class="highlight-tr-none guiListSelections-toggle-btn td_select_btn"
-            @click.stop="$emit('toggle-selection', instance)"
+            @click.stop="$emit('toggle-selection', pk)"
         >
             <SelectToggleButton :is-selected="isSelected" />
         </td>

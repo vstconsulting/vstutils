@@ -16,11 +16,7 @@
                 :style="action.style"
             >
                 <template #default="{ execute }">
-                    <OperationButton
-                        :key="action.name"
-                        v-bind="action"
-                        @click.native="execute({ instances, action })"
-                    />
+                    <OperationButton :key="action.name" v-bind="action" @click.native="execute({ action })" />
                 </template>
             </component>
             <OperationButton
@@ -69,7 +65,7 @@
                         <OperationButton
                             :key="action.name"
                             v-bind="action"
-                            @click.native="execute({ instances, action })"
+                            @click.native="execute({ action })"
                         />
                     </template>
                 </component>
@@ -95,7 +91,6 @@
             view: { type: Object, required: true },
             actions: { type: Array, default: () => [] },
             sublinks: { type: Array, default: () => [] },
-            instances: { type: Array, default: () => [] },
         },
         computed: {
             totalOperations() {

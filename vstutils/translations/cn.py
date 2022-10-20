@@ -222,6 +222,7 @@ TRANSLATION = {
     'Actions': '行動',
     'Index': '指數',
     'Download with headers': '帶標題下載',
+    'Changes you made may not be saved.': '您所做的更改可能不会保存。',
 }
 
 SERVER_TRANSLATION = {

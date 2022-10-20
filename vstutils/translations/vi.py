@@ -220,6 +220,7 @@ TRANSLATION = {
     'Actions': 'Hành động',
     'Index': 'Mục lục',
     'Download with headers': 'Tải xuống với tiêu đề',
+    'Changes you made may not be saved.': 'Những thay đổi bạn đã thực hiện có thể không được lưu.',
 }
 
 SERVER_TRANSLATION = {

@@ -24,10 +24,9 @@ There are several stages in vstutils app:
     * `QuerySetsResolver` finds appropriate queryset by model name and view path;
     * `global_components.registerAll()`  registers Vue `global_components`;
     *  `prepare()` emits `app.beforeInit` with { app: this };
-    * creates StoreConstructor from `this.views` and emits 'app.beforeInitStore' with { storeConstructor };
     * creates routerConstructor from `this.views`, emits 'app.beforeInitRouter' with { routerConstructor } and gets new VueRouter({this.routes});
     * gets translations;
-    * inits application `Vue()` from schema.info, this.router, Vuex.Store args and emits 'app.afterInit' with {app: this};
+    * inits application `Vue()` from schema.info, this.router, pinia store and emits 'app.afterInit' with {app: this};
 
 3. Application mounted.
 
@@ -57,8 +56,7 @@ There is a flowchart representing application initialization process(signal name
       ViewConstructor.generateViews--'allViewsCreated'-->QuerySetResolver
       QuerySetResolver--finds approppriate querySet-->global_components.registerAll
       global_components.registerAll--registers Vue `global_components-->prepare
-      prepare--'app.beforeInit'-->StoreConstructor
-      StoreConstructor--'app.beforeInitStore'-->RouterConstuctor
+      prepare--'app.beforeInit'-->RouterConstuctor
       RouterConstuctor--'app.beforeInitRouter'-->D(new VueRouter)
       D-->E(Vue Internationalization plugin)
       E-->F(new Vue Application)
@@ -294,42 +292,33 @@ Add all of these files to `STATIC_SPA` in `settings.py`. During vstutils install
 frontend code are being build automatically, so you may need to add `bundle` directory to `gitignore`.
 
 
-Basic data components
----------------------
-If you want to add on page some component that gets data from API and displays it in some way, you can use
-`spa.components.mixins.InstanceComponent` and `spa.components.mixins.InstancesComponent`. Both mixins expect you
-to define at least `getQuerySet` method that will be called on component creation before data fetching.
+Page store
+----------
+Every page has store that can be accessed globally `app.store.page` or from page component using `this.store`.
 
-Components based on mixins will have computed property `instance` or `instances` respectively.
-It will be refreshed on every auto update.
+View method `extendStore` can be used to add custom logic to page's store.
 
-Example component:
+.. sourcecode:: javascript
 
-.. sourcecode:: HTML
+    import { computed } from 'vue';
 
-    <template>
-        <h1>Number of users: {{ count }}</h1>
-    </template>
-    <script>
-        export default {
-            mixins: [spa.components.mixins.InstancesComponent],
-            computed: {
-                uniqueName() {
-                    return 'usersCounter';
-                },
-                count() {
-                    return this.instances && this.instances.extra.count || 0;
-                },
-            },
-            methods: {
-                getQuerySet() {
-                    return this.$app.views.get('/user/').objects.filter({ limit: 1 });
-                },
-            },
-        };
-    </script>
+    spa.signals.once('allViews.created', ({ views }) => {
+        views.get('/user/{id}/').extendStore((store) => {
+            // Override title of current page using computed value
+            const title = computed(() => `Current page has ${store.instances.hength} instances`);
 
-In given example store module with name `usersCounter` will be registered so data can be accessed globally.
+            async function fetchData() {
+                await store.fetchData();  // Call original fetchData
+                await callSomeExternalApi(store.instances.value);
+            }
+
+            return {
+                ...store,
+                title,
+                fetchData,
+            };
+        });
+    });
 
 
 Overriding root component
@@ -386,9 +375,9 @@ For `FKField` name of the related model is used. And `fieldName` should be equal
 Changing actions or sublinks
 ----------------------------
 
-Sometimes using only schema for defining actions or sublinks is not enough. 
+Sometimes using only schema for defining actions or sublinks is not enough.
 
-For example we have an action to make user a superuser (`/user/{id}/make_superuser/`) and we want to hide that action if 
+For example we have an action to make user a superuser (`/user/{id}/make_superuser/`) and we want to hide that action if
 user is already a superuser (`is_superuser` is `true`). `<${PATH}>filterActions` signal can be used to achieve such result.
 
 .. sourcecode:: javascript
@@ -403,5 +392,5 @@ user is already a superuser (`is_superuser` is `true`). `<${PATH}>filterActions`
 1. `<${PATH}>filterActions` recieves {actions, data}
 2. `<${PATH}>filterSublinks` recieves {sublinks, data}
 
-Data property will contain instance's data. Actions and sublinks properties will contain arrays with default 
+Data property will contain instance's data. Actions and sublinks properties will contain arrays with default
 items (not hidden action or sublinks), it can be changed or replaced completely.

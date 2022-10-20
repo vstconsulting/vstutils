@@ -10,10 +10,10 @@ export { common, items, list, mixins, page, widgets };
 import AddChildModal from './list/AddChildModal.vue';
 import BootstrapModal from './BootstrapModal.vue';
 import Card from './Card.vue';
-import EmptyComponent from './EmptyComponent.js';
+import EmptyComponent from './EmptyComponent.ts';
 import InstancesProvider from './InstancesProvider.vue';
 import Popover from './Popover.vue';
-import { BaseViewMixin } from './BaseViewMixin.js';
+import { BaseViewMixin } from './BaseViewMixin.ts';
 import TagsSelector from './TagsSelector.vue';
 
 export {

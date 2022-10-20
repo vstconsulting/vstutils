@@ -1,6 +1,6 @@
 <template>
     <div v-if="isEmpty" />
-    <Card v-else :title="title">
+    <Card v-else :title="title" collapsable>
         <component
             :is="jsonMapper.getComponent(subValue, name)"
             v-for="(subValue, name, idx) in valueAsObj"

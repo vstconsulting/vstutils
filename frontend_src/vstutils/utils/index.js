@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import VueRouter from 'vue-router';
 import moment from 'moment';
 import { LocalSettings } from './localSettings';
 import signals from '../signals.js';
@@ -749,6 +750,7 @@ export function isObject(item) {
  * Deep merge two objects, for arrays inside source objects shallow copy will be created.
  * @param {Object} target
  * @param {...Object} sources
+ * @returns {Object}
  */
 export function mergeDeep(target, ...sources) {
     if (!sources.length) return target;
@@ -930,12 +932,12 @@ export function downloadBase64File(file) {
 }
 
 export const ViewTypes = {
-    LIST: 'list',
-    PAGE: 'page',
-    PAGE_NEW: 'page_new',
-    PAGE_EDIT: 'page_edit',
-    PAGE_REMOVE: 'page_remove',
-    ACTION: 'action',
+    LIST: 'LIST',
+    PAGE: 'PAGE',
+    PAGE_NEW: 'PAGE_NEW',
+    PAGE_EDIT: 'PAGE_EDIT',
+    PAGE_REMOVE: 'PAGE_REMOVE',
+    ACTION: 'ACTION',
 };
 
 /**
@@ -1169,25 +1171,29 @@ export function mapObjectValues(obj, f) {
     return newObj;
 }
 
-const emittedSignals = new Map();
-
 /**
  * Provided function will be guaranteed called after the given signal
  * @param {string} signalName
  * @param {Function} func
  */
-export function registerHook(signalName, func) {
-    const isEmitted = emittedSignals.get(signalName);
-    if (isEmitted === undefined) {
-        emittedSignals.set(signalName, false);
-        signals.once(signalName, () => emittedSignals.set(signalName, true));
-        signals.once(signalName, func);
-    } else if (isEmitted) {
-        func();
-    } else if (!isEmitted) {
-        signals.once(signalName, func);
-    }
-}
+export const registerHook = (() => {
+    const emittedSignals = new Map();
+
+    signals.connect('APP_CREATED', () => emittedSignals.clear());
+
+    return function (signalName, func) {
+        const isEmitted = emittedSignals.get(signalName);
+        if (isEmitted === undefined) {
+            emittedSignals.set(signalName, false);
+            signals.once(signalName, () => emittedSignals.set(signalName, true));
+            signals.once(signalName, func);
+        } else if (isEmitted) {
+            func();
+        } else if (!isEmitted) {
+            signals.once(signalName, func);
+        }
+    };
+})();
 
 /**
  * Function that returns first item from iterator for which callbackFn will return true
@@ -1328,8 +1334,10 @@ export function stringToCssClass(str) {
     return str.replace(/\s/g, '');
 }
 
-export function getRedirectUrlFromResponse(app, responseData, modelClass) {
+export function getRedirectUrlFromResponse(responseData, modelClass) {
     if (!responseData || typeof responseData !== 'object' || !modelClass) return;
+
+    const app = getApp();
 
     const field = iterFind(modelClass.fields.values(), (field) => field.redirect);
     if (!field) return;
@@ -1394,4 +1402,78 @@ export function generatePassword() {
     }
 
     return result.sort(() => Math.random() - 0.5).join('');
+}
+
+/**
+ * @param {Record<string,any>|string} options
+ */
+export function openPage(options) {
+    const router = getApp().router;
+
+    if (typeof options === 'object') {
+        // Get name by path so additional params can be passed
+        if (options.path && options.params) {
+            const route = router.resolve(options)?.route;
+            if (route.name !== '404' && !route.meta?.view?.isDeepNested) {
+                options.name = route.name;
+                delete options['path'];
+            }
+        }
+    } else {
+        options = { path: options };
+    }
+    return router.push(options).catch((error) => {
+        if (!VueRouter.isNavigationFailure(error)) {
+            throw error;
+        }
+    });
+}
+
+export function mapStoreState(names) {
+    const mapped = {};
+    for (const name of names) {
+        mapped[name] = function () {
+            return this.store[name];
+        };
+    }
+    return mapped;
+}
+
+export function mapStoreActions(names) {
+    const mapped = {};
+    for (const name of names) {
+        mapped[name] = function (...args) {
+            return this.store[name](...args);
+        };
+    }
+    return mapped;
+}
+
+let __appRef = null;
+
+/**
+ * @param {import('./../../spa.js').App} app
+ */
+export function __setApp(app) {
+    __appRef = app;
+}
+
+/**
+ * @returns {import('./../../spa.js').App}
+ */
+export function getApp() {
+    return __appRef;
+}
+
+export const getUniqueId = (() => {
+    let id = 0;
+    return () => String(++id);
+})();
+
+export function openSublink(sublink, instance = undefined) {
+    const router = getApp().router;
+    const path = sublink.appendFragment
+        ? joinPaths(router.currentRoute.path, sublink.appendFragment)
+        : sublink.href;
+    return router.push(formatPath(path, router.currentRoute.params, instance));
 }

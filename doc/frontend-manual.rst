@@ -135,13 +135,6 @@ app.version.updated
 **Description:** This signal is emitted during app loading if VST Utils detects,
 that version of your project was updated.
 
-app.beforeInitStore
-~~~~~~~~~~~~~~~~~~~
-**Signal name:** "app.beforeInitStore".
-
-**Context argument:** obj - {object} - Object with following structure: {storeConstructor: StoreConstructor}, where storeConstructor is an instance of StoreConstructor.
-
-**Description:** This signal is emitted after creation of StoreConstructor instance and before app creation
 
 app.beforeInitRouter
 ~~~~~~~~~~~~~~~~~~~~

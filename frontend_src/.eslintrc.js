@@ -34,4 +34,46 @@ module.exports = {
         Vue: 'readonly',
         jest: 'readonly',
     },
+    overrides: [
+        {
+            files: ['**/*.ts'],
+            parser: '@typescript-eslint/parser',
+            parserOptions: {
+                sourceType: 'module',
+                tsconfigRootDir: __dirname,
+                project: './tsconfig.json',
+                extraFileExtensions: ['.vue'],
+            },
+            extends: [
+                'eslint:recommended',
+                'plugin:@typescript-eslint/eslint-recommended',
+                'plugin:@typescript-eslint/recommended',
+                'plugin:@typescript-eslint/recommended-requiring-type-checking',
+                'plugin:@typescript-eslint/strict',
+                'plugin:prettier/recommended',
+            ],
+        },
+        {
+            files: ['**/*.vue'],
+            parser: 'vue-eslint-parser',
+            parserOptions: {
+                parser: {
+                    '<template>': '@babel/eslint-parser',
+                    js: '@babel/eslint-parser',
+                    ts: '@typescript-eslint/parser',
+                },
+                // parser: '@typescript-eslint/parser',
+                // sourceType: 'module',
+                tsconfigRootDir: __dirname,
+                project: ['./tsconfig.json'],
+                extraFileExtensions: ['.vue'],
+            },
+            extends: [
+                'eslint:recommended',
+                'plugin:@typescript-eslint/eslint-recommended',
+                // 'plugin:@typescript-eslint/recommended',
+                'plugin:prettier/recommended',
+            ],
+        },
+    ],
 };

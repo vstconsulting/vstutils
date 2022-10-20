@@ -177,8 +177,8 @@ class VSTAutoSchema(SwaggerAutoSchema):
         return produces + super().get_produces()
 
     def is_list_view(self):
-        if self.overrides.get('x-list', False):
-            return True
+        if 'x-list' in self.overrides:
+            return self.overrides['x-list']
 
         action = getattr(self.view, 'action', '')
         method = getattr(self.view, action, None) or self.method

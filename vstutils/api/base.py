@@ -559,7 +559,7 @@ class CopyMixin(GenericViewSet):
         """
         instance = self.copy_instance(self.get_object())
         serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return responses.HTTP_201_CREATED(serializer.data)
 

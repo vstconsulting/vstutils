@@ -4,4 +4,4 @@ import * as mixins from './mixins';
 
 export { ViewConstructor, ViewsTree, mixins };
 
-export * from './View.js';
+export * from './View';

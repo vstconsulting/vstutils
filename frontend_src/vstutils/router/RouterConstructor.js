@@ -1,5 +1,7 @@
 import VueRouter from 'vue-router';
 import signals from '../signals.js';
+import { View } from '../views';
+import Home from './customPages/Home.js';
 
 export default class RouterConstructor {
     /**
@@ -28,15 +30,7 @@ export default class RouterConstructor {
      * @return {array} Routes Array.
      */
     formAllRoutes() {
-        let routes = [
-            {
-                name: 'home',
-                path: '/',
-                component: this.custom_components_templates.home || {},
-            },
-        ];
-
-        this.emitSignalAboutRouteCreation(routes.last);
+        let routes = [];
 
         routes = routes.concat(this.formRoutesBasedOnViews(), this.formRoutesBasedOnCustomComponents(), {
             name: '404',
@@ -62,6 +56,14 @@ export default class RouterConstructor {
             routes.push(view.toRoute());
             this.emitSignalAboutRouteCreation(routes.last);
         }
+
+        if (!this.views.has('/')) {
+            const homeView = new View({ path: '/', routeName: 'home' }, null, [Home]);
+            this.views.set('/', homeView);
+            routes.push(homeView.toRoute());
+            this.emitSignalAboutRouteCreation(routes.last);
+        }
+
         return routes;
     }
 

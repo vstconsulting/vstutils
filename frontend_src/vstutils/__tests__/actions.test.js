@@ -47,17 +47,16 @@ describe('Actions', () => {
     });
 
     test('action with custom handler', () => {
-        const customHandler = jest.fn();
-        const getCustomHandler = jest.fn(() => customHandler);
+        const action = { name: 'test_action', handler: jest.fn() };
+        app.actions.execute({ action });
 
-        const action = { name: 'test_action' };
-        app.actions.execute({ action, getCustomHandler });
-
-        expect(getCustomHandler).toBeCalledTimes(1);
-        expect(getCustomHandler).lastCalledWith(action);
-
-        expect(customHandler).toBeCalledTimes(1);
-        expect(customHandler).lastCalledWith(action, undefined);
+        expect(action.handler).toBeCalledTimes(1);
+        expect(action.handler).lastCalledWith({
+            action,
+            instance: undefined,
+            fromList: false,
+            disablePopUp: false,
+        });
     });
 
     test('action with data', async () => {

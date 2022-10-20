@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "allowJs": true,
+        "target": "esnext",
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "module": "es2020",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "types": [
+            "jquery",
+            "bootstrap"
+        ]
+    },
+    "vueCompilerOptions": {
+        "target": 2.7
+    }
+}

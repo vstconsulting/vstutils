@@ -1,22 +1,21 @@
 import { App } from '../spa.js';
-import { AppConfiguration } from '../vstutils/AppConfiguration.js';
+import { AppConfiguration } from '../vstutils/AppConfiguration.ts';
 import { FakeCache } from '../app_loader/Cache.js';
-import { globalFields } from '../vstutils/fields';
-import { globalModels } from '../vstutils/models';
+import { createLocalVue } from '@vue/test-utils';
 
 import testSchema from '../__mocks__/testSchema.json';
 
-export function createApp() {
+export function createApp({ schema = testSchema } = {}) {
     const config = new AppConfiguration({
         isDebug: true,
         hostUrl: 'http://localhost',
         endpointUrl: 'http://localhost/api/endpoint/',
         isSuperuser: false,
         isStaff: false,
-        schema: testSchema,
+        schema,
     });
     const cache = new FakeCache();
-    const app = new App(config, cache, globalFields, globalModels);
+    const app = new App(config, cache, createLocalVue());
 
     const loadLanguages = app.translationsManager.loadLanguages;
     app.translationsManager.loadLanguages = () =>

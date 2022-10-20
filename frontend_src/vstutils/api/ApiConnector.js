@@ -297,9 +297,16 @@ class ApiConnector {
         const bulk_data = collector.bulk_parts.map((bulkPart) => bulkPart.data);
 
         try {
-            const results = await (this._etagsCacheName
-                ? this.sendCachedBulk(bulk_data)
-                : this.sendBulk(bulk_data));
+            let results;
+            if (this._etagsCacheName) {
+                try {
+                    results = await this.sendCachedBulk(bulk_data);
+                } catch {
+                    results = await this.sendBulk(bulk_data);
+                }
+            } else {
+                results = await this.sendBulk(bulk_data);
+            }
             for (let [idx, item] of results.entries()) {
                 try {
                     APIResponse.checkStatus(item.status, item.data);

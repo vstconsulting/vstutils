@@ -15,7 +15,7 @@ class DateTimeField extends BaseField {
     toRepresent(data) {
         const value = super.toRepresent(data);
         if (!value) return;
-        return moment.tz(value, moment.tz.guess());
+        return moment.tz(value, this.constructor.app.api.getTimeZone()).tz(moment.tz.guess());
     }
     /**
      * Redefinition of base guiField static property 'mixins'.

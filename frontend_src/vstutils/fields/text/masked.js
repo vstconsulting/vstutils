@@ -121,12 +121,11 @@ export class MaskedField extends StringField {
     getBlocks(blocks) {
         const parsedBlocks = {};
         for (const [key, value] of Object.entries(blocks)) {
-            console.log(key, value);
             parsedBlocks[key] = { mask: this.getMask(value.mask) };
         }
         return parsedBlocks;
     }
-    getInitialValue() {
+    getEmptyValue() {
         return '';
     }
     static get mixins() {
